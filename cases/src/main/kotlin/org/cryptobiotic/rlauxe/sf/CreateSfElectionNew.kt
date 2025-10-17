@@ -20,11 +20,12 @@ import kotlin.collections.forEach
 private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOA")
 
 // Compare CLCA, OneAudit with styles, and OneAudit without styles on the SanFrancisco 2024 General Election.
-class CreateSfElectionOAnew(
+class CreateSfElection(
     castVoteRecordZip: String,
     contestManifestFilename: String,
     candidateManifestFile: String,
     val cvrExportCsv: String,
+    val isClca: Boolean
 ): CreateElectionIF {
     val cardPoolsNotUnpooled: List<CardPoolIF>
     val contestsOA: List<ContestUnderAudit>
@@ -105,7 +106,7 @@ class CreateSfElectionOAnew(
     }
 
     override fun makeCardPools() = cardPoolsNotUnpooled
-    override fun makeContestsUA(hasStyles: Boolean) = contestsOA
+    override fun makeContestsUA() = contestsOA
 
     override fun allCvrs() = emptyList<Cvr>()
 
@@ -115,24 +116,33 @@ class CreateSfElectionOAnew(
     override fun testMvrs() = null // TODO
 }
 
-fun createSfElectionOAnew(
+fun createSfElection(
     topdir: String,
     castVoteRecordZip: String,
     contestManifestFilename: String,
     candidateManifestFile: String,
     cvrExportCsv: String,
     auditConfigIn: AuditConfig? = null,
+    isClca : Boolean,
 ) {
-    val auditConfig = auditConfigIn ?: AuditConfig(
-        AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 50,
-        oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = false)
-    )
+    val auditConfig = when {
+        (auditConfigIn != null) -> auditConfigIn
+        isClca -> AuditConfig(
+            AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst=10,
+            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
+        )
+        else -> AuditConfig(
+            AuditType.ONEAUDIT, hasStyles = true, riskLimit = .05, sampleLimit = 20000, nsimEst = 1,
+            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
+        )
+    }
 
-    val election = CreateSfElectionOAnew(
+    val election = CreateSfElection(
         castVoteRecordZip,
         contestManifestFilename,
         candidateManifestFile,
         cvrExportCsv,
+        isClca = isClca
     )
 
     CreateAudit("sf2024", topdir, auditConfig, election)

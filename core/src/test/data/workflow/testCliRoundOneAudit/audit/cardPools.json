@@ -1,0 +1,18 @@
+{
+    "cardsPools": [
+        {
+            "type": "CardPoolWithBallotStyle",
+            "cardPoolWithBallotStyleJson": {
+                "poolName": "noCvr",
+                "poolId": 1,
+                "voteTotals": {
+                    "0": {
+                        "0": 250,
+                        "1": 245
+                    }
+                },
+                "adjustCards": 5
+            }
+        }
+    ]
+}

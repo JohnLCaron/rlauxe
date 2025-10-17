@@ -32,8 +32,8 @@ fun makeTestContestOAIrv(): OAIrvContestUA {
         // val contestOA = OneAuditContest.make(contest, cvrVotes, cvrPercent = cvrPercent, undervotePercent = undervotePercent, phantomPercent = phantomPercent)
         //val cvrVotes = mapOf(0 to 100, 1 to 200, 2 to 42, 3 to 7, 4 to 0) // worthless?
         //val cvrNc = 200
-        val pool = BallotPool("swim", 42, 0, 11, mapOf(0 to 1, 1 to 2, 2 to 3, 3 to 4, 4 to 0))
-        val pools = listOf(pool)
+        // val pool = BallotPool("swim", 42, 0, 11, mapOf(0 to 1, 1 to 2, 2 to 3, 3 to 4, 4 to 0))
+        val pools = emptyList<CardPoolIF>()
 
     // TODO
         val cardPool = CardPoolFromCvrs(

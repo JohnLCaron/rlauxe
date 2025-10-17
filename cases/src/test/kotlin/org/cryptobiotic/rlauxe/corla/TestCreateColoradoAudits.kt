@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.*
@@ -18,63 +17,24 @@ class TestCreateColoradoAudits {
         println("  number of contests = ${electionResultXml.contests.size}")
     }
 
-    /* make data to test TreeReader
-    @Test
-    fun createColoradoClcaAuditOld() {
-        val topdir = "/home/stormy/rla/cases/corla/old"
-        val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
-        val detailXmlFile = "src/test/data/2024election/detail.xml"
-        val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
-
-        createColoradoClcaAuditOld(topdir, detailXmlFile, contestRoundFile, precinctFile, clear=false)
-
-        // create sorted cards, assumes auditDir/auditConfig already exists
-        createCorla2024sortedCards(topdir)
-
-        // other tests depend on this one
-        // testTreeReader()
-        // makeCountySampleLists()
-    } */
-
-    /*
-    @Test
-    fun testCreateColoradoOneAudit() {
-        val auditDir = "/home/stormy/rla/cases/corla/oneaudit"
-        val detailXmlFile = "src/test/data/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
-
-        createColoradoOneAudit(auditDir, detailXmlFile, contestRoundFile, precinctFile, isClca=false, clear=true)
-    }
-
-    @Test
-    fun testCreateColoradoClca() {
-        val auditDir = "/home/stormy/rla/cases/corla/clca"
-        val detailXmlFile = "src/test/data/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
-
-        createColoradoOneAudit(auditDir, detailXmlFile, contestRoundFile, precinctFile, isClca=true, clear=true)
-    } */
-
     @Test
     fun testCreateColoradoOneAuditNew() {
-        val auditDir = "/home/stormy/rla/cases/corla/oneauditnew"
+        val topdir = "/home/stormy/rla/cases/corla/oneauditnew"
         val detailXmlFile = "src/test/data/2024election/detail.xml"
         val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoOneAuditNew(auditDir, detailXmlFile, contestRoundFile, precinctFile, isClca=false, clear=true)
+        createColoradoOneAuditNew(topdir, detailXmlFile, contestRoundFile, precinctFile, isClca=false, clear=true)
     }
 
     @Test
     fun testCreateColoradoClcaNew() {
-        val auditDir = "/home/stormy/rla/cases/corla/clcanew"
+        val topdir = "/home/stormy/rla/cases/corla/clcanew"
         val detailXmlFile = "src/test/data/2024election/detail.xml"
         val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoOneAuditNew(auditDir, detailXmlFile, contestRoundFile, precinctFile, isClca=true, clear=true)
+        createColoradoOneAuditNew(topdir, detailXmlFile, contestRoundFile, precinctFile, isClca=true, clear=true)
     }
 
     @Test

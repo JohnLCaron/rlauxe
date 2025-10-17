@@ -31,9 +31,9 @@ import kotlin.io.path.Path
 
 interface CreateElectionIF {
     fun makeCardPools(): List<CardPoolIF>
-    fun makeContestsUA(hasStyles: Boolean): List<ContestUnderAudit>
+    fun makeContestsUA(): List<ContestUnderAudit>
     fun allCvrs(): List<Cvr>
-    fun cvrExport(): CloseableIterator<CvrExport>
+    fun cvrExport(): CloseableIterator<CvrExport>?
     fun hasCvrExport() : Boolean
     fun testMvrs(): List<Cvr>?
 }
@@ -59,12 +59,13 @@ class CreateAudit(val name: String, val topdir: String, auditConfig: AuditConfig
         } else null
         val poolNameToId = if (cardPools == null) null else cardPools.associate { it.poolName to it.poolId }
 
-        val contestsUA = election.makeContestsUA(auditConfig.hasStyles)
+        val contestsUA = election.makeContestsUA()
         if (auditConfig.isOA) {
             addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, cardPools!!)
         } else {
             contestsUA.forEach { it.addClcaAssertionsFromReportedMargin() }
         }
+        logger.info { "added ClcaAssertions from reported margin " }
 
         if (!election.hasCvrExport()) {
             val allCvrs = election.allCvrs()
@@ -88,7 +89,7 @@ class CreateAudit(val name: String, val topdir: String, auditConfig: AuditConfig
 
         } else {
             val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-            writeSortedCardsExternalSort(topdir=topdir, election.cvrExport(), phantoms, auditConfig.seed, poolNameToId)
+            writeSortedCardsExternalSort(topdir=topdir, election.cvrExport()!!, phantoms, auditConfig.seed, poolNameToId)
         }
 
         // corla

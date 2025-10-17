@@ -101,7 +101,7 @@ class TestRunCli {
 
     @Test
     fun testCliOneAudit() {
-        val topdir = "/home/stormy/rla/persist/testRlaOA"
+        val topdir = "/home/stormy/rla/persist/testCliRoundOneAudit"
 
         RunRlaCreateOneAudit.main(
             arrayOf(

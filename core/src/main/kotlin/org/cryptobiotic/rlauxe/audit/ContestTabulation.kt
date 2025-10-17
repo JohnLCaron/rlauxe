@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.audit
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.oneaudit.BallotPool
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.raire.VoteConsolidator
@@ -173,7 +172,7 @@ fun MutableMap<Int, ContestTabulation>.addJustVotes(other: Map<Int, ContestTabul
     }
 } */
 
-//return contestId -> ContestTabulation
+/* return contestId -> ContestTabulation
 fun tabulateBallotPools(ballotPools: Iterator<BallotPool>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val votes = mutableMapOf<Int, ContestTabulation>()
     ballotPools.forEach { ballotPool ->
@@ -185,7 +184,7 @@ fun tabulateBallotPools(ballotPools: Iterator<BallotPool>, infos: Map<Int, Conte
         }
     }
     return votes
-}
+} */
 
 fun tabulateCardPools(cardPools: Iterator<CardPoolIF>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val votes = mutableMapOf<Int, ContestTabulation>()

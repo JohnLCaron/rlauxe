@@ -79,11 +79,11 @@ fun createSfElectionFromCvrExportOANS(
     writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
     logger.info{"   writeAuditConfigJsonFile ${publisher.auditConfigFile()}"}
 
-    // we write the sortedCards here while we have the amended CvrExports in memory
+    /* we write the sortedCards here while we have the amended CvrExports in memory
     val poolNameToId = readBallotPoolCsvFile("$auditDir/$ballotPoolsFile").poolNameToId()
     val working = workingDir ?: "$topDir/sortChunks"
 
-    SortMerge(scratchDirectory = working, "$auditDir/$sortedCardsFile", seed = auditConfig.seed, poolNameToId = poolNameToId).run(cvrExportCsv)
+    SortMerge(scratchDirectory = working, "$auditDir/$sortedCardsFile", seed = auditConfig.seed, poolNameToId = poolNameToId).run(cvrExportCsv) */
 
     println("took = $stopwatch")
 }
@@ -165,9 +165,9 @@ fun createCardPoolsNS(
     val poolFilename = "$auditDir/$ballotPoolsFile"
     println(" writing to $poolFilename with ${cardPoolsM.size} pools")
     val poutputStream = FileOutputStream(poolFilename)
-    poutputStream.write(BallotPoolCsvHeader.toByteArray()) // UTF-8
+    // poutputStream.write(BallotPoolCsvHeader.toByteArray()) // UTF-8
 
-    var poolCount = 0
+    /* var poolCount = 0
     val sortedPools = cardPoolsM.filter { it.value.poolName != unpooled }.toSortedMap()
     sortedPools.forEach { (poolName, pool) ->
         val bpools = pool.toBallotPools() // one for each contest
@@ -175,7 +175,7 @@ fun createCardPoolsNS(
         poolCount += bpools.size
     }
     poutputStream.close()
-    println(" total ${sortedPools.size} pools")
+    println(" total ${sortedPools.size} pools") */
 
     return Pair(cardPoolsM.values.associateBy { it.poolId }, contestAmended)
 }

@@ -1,25 +1,21 @@
 package org.cryptobiotic.rlauxe.sf
 
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.audit.AuditConfig
-import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.ClcaConfig
-import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
-import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
-import java.nio.file.Path
+import org.cryptobiotic.rlauxe.dominion.DominionCvrSummary
+import org.cryptobiotic.rlauxe.dominion.convertCvrExportJsonToCsv
+import org.cryptobiotic.rlauxe.persist.csv.CvrExportCsvHeader
+import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.ZipReaderTour
+import java.io.FileOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class TestSfElection {
+class CreateSf2024CvrExport {
 
     // extract the cvrExport from zipFilename json, write to cvrExport.csv
     // only need to do this once, all the SF variants can use.
     @Test
-    fun createSF2024cvrs() {
+    fun createSf2024CvrExport() {
         val topDir = "/home/stormy/rla/cases/sf2024"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val manifestFile = "ContestManifest.json"
@@ -92,83 +88,34 @@ class TestSfElection {
     //  ContestSummary 52 ncards=409515 undervotes=45990 overvotes=93 isOvervote=0 isBlank = 46083
     //  ContestSummary 53 ncards=409515 undervotes=36175 overvotes=91 isOvervote=0 isBlank = 36266
 
-    // create the audit contests using the cvrExport records
-    @Test
-    fun createSF2024election() {
-        val topDir = "/home/stormy/rla/cases/sf2024"
-        val auditDir = "$topDir/audit"
-        clearDirectory(Path.of(auditDir))
-        val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
+    // read the CvrExport_* files out of the castVoteRecord JSON zip file, convert them to "CvrExport" CSV file.
+    // use the contestManifestFile to add the undervotes, and to identify the IRV contests
+    // write to "$topDir/$cvrExportCsvFile"
+    fun createCvrExportCsvFile(topDir: String, castVoteRecordZip: String, contestManifestFilename: String): DominionCvrSummary {
+        val stopwatch = Stopwatch()
+        val outputFilename = "$topDir/$cvrExportCsvFile"
+        val cvrExportCsvStream = FileOutputStream(outputFilename)
+        cvrExportCsvStream.write(CvrExportCsvHeader.toByteArray())
 
-        createSfElectionFromCvrExport(
-            auditDir,
-            zipFilename,
-            "ContestManifest.json",
-            "CandidateManifest.json",
-            "$topDir/$cvrExportCsvFile",
-            show = false,
+        val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
+        println("IRV contests = ${contestManifest.irvContests}")
+
+        var countFiles = 0
+        val summaryTotal = DominionCvrSummary()
+        val zipReader = ZipReaderTour(
+            castVoteRecordZip, silent = true, sortPaths = true,
+            filter = { path -> path.toString().contains("CvrExport_") },
+            visitor = { inputStream ->
+                val summary = convertCvrExportJsonToCsv(inputStream, cvrExportCsvStream, contestManifest)
+                summaryTotal.add(summary)
+                countFiles++
+            },
         )
-        createSF2024sortedCards()
-    }
+        zipReader.tourFiles()
+        cvrExportCsvStream.close()
 
-    // create sorted cards, assumes auditDir/auditConfig already exists
-    // @Test
-    fun createSF2024sortedCards() {
-        val topDir = "/home/stormy/rla/cases/sf2024"
-        val auditDir = "$topDir/audit"
-        val cvrCsv = "$topDir/cvrExport.csv"
-        createSortedCards(topDir, auditDir, cvrCsv, zip = true) // write to "$auditDir/sortedCards.csv"
-    }
-
-    // create the audit contests using the cvrExport records
-    @Test
-    fun createSF2024contestsRepeat() {
-        val topDir = "/home/stormy/rla/cases/sf2024"
-        val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
-        val cvrCsv = "$topDir/cvrExport.csv"
-
-        val auditConfig = AuditConfig(
-            AuditType.CLCA, hasStyles = true, sampleLimit = 20000, riskLimit = .05, nsimEst = 50,
-            minRecountMargin = 0.0,
-            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.noerror),
-            skipContests = listOf(14, 28)
-        )
-
-        repeat(10) { run ->
-            val auditDir = "$topDir/audit$run"
-            clearDirectory(Path.of(auditDir))
-
-            createSfElectionFromCvrExport(
-                auditDir,
-                castVoteRecordZip = zipFilename,
-                contestManifestFilename = "ContestManifest.json",
-                candidateManifestFile = "CandidateManifest.json",
-                cvrExportCsv = "$topDir/$cvrExportCsvFile",
-                auditConfigIn = auditConfig,
-                show = false,
-            )
-
-            val workingDir = "$topDir/sortChunks$run"
-            createSortedCards(
-                topDir,
-                auditDir,
-                cvrCsv,
-                zip = true,
-                workingDir = workingDir
-            ) // write to "$auditDir/sortedCards.csv"
-        }
-    }
-
-    @Test
-    fun showSfElectionContests() {
-        val publisher = Publisher("/home/stormy/rla/cases/sf2024/audit")
-        val contestsResults = readContestsJsonFile(publisher.contestsFile())
-        val contestsUA = if (contestsResults is Ok) contestsResults.unwrap()
-        else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()} err = $contestsResults")
-
-        contestsUA.forEach { contestUA ->
-            println("$contestUA ${contestUA.contest.choiceFunction}")
-            contestUA.contest.info().candidateNames.forEach { println("  $it") }
-        }
+        println("read ${summaryTotal.ncvrs} cvrs in $countFiles files; took $stopwatch")
+        println("took = $stopwatch")
+        return summaryTotal
     }
 }

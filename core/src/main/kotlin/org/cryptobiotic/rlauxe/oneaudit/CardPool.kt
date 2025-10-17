@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.ContestTabulation
 import org.cryptobiotic.rlauxe.audit.RegVotes
 import org.cryptobiotic.rlauxe.audit.RegVotesImpl
@@ -9,8 +8,7 @@ import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.Prng
-import org.cryptobiotic.rlauxe.util.cleanCsvString
+import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
@@ -41,29 +39,21 @@ class AssortAvg() {
 }
 
 interface CardPoolIF {
+    val poolName: String
     val poolId: Int
     val assortAvg: MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contestId -> assorter -> average in the pool
     fun regVotes() : Map<Int, RegVotes> // contestId -> RegVotes, regular contests only
     fun ncards() : Int // total number of cards in the pool, including undervotes
     fun contains(contestId: Int) : Boolean // does the pool contain this contest ?
-}
-
-// single contest, for testing
-class CardPoolImpl(override val poolId: Int, val contestId: Int, val regVotes: RegVotes) : CardPoolIF {
-    override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
-    override fun regVotes() = mapOf(contestId to regVotes)
-    override fun contains(contestId: Int) = contestId == this.contestId
-    override fun ncards() = regVotes.ncards()
-
-    fun toBallotPools(): List<BallotPool> {
-        return listOf(BallotPool("poolName", poolId, contestId, regVotes.ncards(), regVotes.votes))
-    }
+    fun toBallotPools(): List<BallotPool>
+    fun contests(): IntArray
+    fun votesAndUndervotes(contestId: Int): VotesAndUndervotes
 }
 
 // When the pools do not have CVRS, but just pool vote count totals.
 // Assumes that all cards have the same BallotStyle.
 class CardPoolWithBallotStyle(
-    val poolName: String,
+    override val poolName: String,
     override val poolId: Int,
     val voteTotals: Map<Int, Map<Int, Int>>, // contestId -> candidateId -> nvotes // TODO use ContestTabulation ??
     val infos: Map<Int, ContestInfo>, // all infos
@@ -71,7 +61,7 @@ class CardPoolWithBallotStyle(
 {
     val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
     val maxMinCardsNeeded: Int
-    private var adjustCards = 0
+    var adjustCards = 0 // TODO simply relationship with undervotes
 
     // a convenient place to keep this, used in addOAClcaAssortersFromCvrs()
     override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
@@ -97,7 +87,7 @@ class CardPoolWithBallotStyle(
         adjustCards = max( adjust, adjustCards)
     }
 
-    fun contests() = (voteTotals.map { it.key }).toSortedSet().toIntArray()
+    override fun contests() = (voteTotals.map { it.key }).toSortedSet().toIntArray()
 
     fun showVotes(contestIds: Collection<Int>, width: Int=4) = buildString {
         append("${trunc(poolName, 9)}:")
@@ -143,11 +133,22 @@ class CardPoolWithBallotStyle(
         return ncards() * info.voteForN - sum
     }
 
-    fun toBallotPools(): List<BallotPool> {
+    override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
+        val poolUndervotes = undervoteForContest(contestId)
+        val votesForContest = voteTotals[contestId]!!
+        return VotesAndUndervotes(votesForContest, poolUndervotes, infos[contestId]!!.voteForN)
+    }
+
+    override fun toBallotPools(): List<BallotPool> {
         return voteTotals.map { (contestId, candCount) ->
             BallotPool(poolName, poolId, contestId, ncards(), candCount)
         }
     }
+
+    override fun toString(): String {
+        return "CardPoolWithBallotStyle(poolName='$poolName', poolId=$poolId, voteTotals=$voteTotals, maxMinCardsNeeded=$maxMinCardsNeeded)"
+    }
+
 
     companion object {
         fun showVotes(contestIds: List<Int>, cardPools: List<CardPoolWithBallotStyle>, width:Int = 4) {
@@ -165,7 +166,7 @@ class CardPoolWithBallotStyle(
 
 // When the pools have complete CVRS.
 open class CardPoolFromCvrs(
-    val poolName: String,
+    override val poolName: String,
     override val poolId: Int,
     val infos: Map<Int, ContestInfo>) : CardPoolIF
 {
@@ -191,7 +192,9 @@ open class CardPoolFromCvrs(
         totalCards++
     }
 
-    fun toBallotPools(): List<BallotPool> {
+    override fun contests() = (contestTabs.map { it.key }).toSortedSet().toIntArray()
+
+    override fun toBallotPools(): List<BallotPool> {
         val bpools = mutableListOf<BallotPool>()
         contestTabs.forEach { contestId, contestCount ->
             if (contestCount.ncards > 0) {
@@ -199,6 +202,11 @@ open class CardPoolFromCvrs(
             }
         }
         return bpools
+    }
+
+    override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
+        val contestTab = contestTabs[contestId]!!
+        return contestTab.votesAndUndervotes() // good reason for carsPool to always have contestTabs?
     }
 
     // every cvr has to have every contest in the pool
@@ -250,7 +258,7 @@ open class CardPoolFromCvrs(
 // use reportedMargin to set the pool assorter averages. can only use for non-IRV contests
 fun addOAClcaAssortersFromMargin(
     oaContests: List<OAContestUnderAudit>,
-    cardPools: Map<Int, CardPoolIF>
+    cardPools: List<CardPoolIF> // poolId -> pool
 ) {
     // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
     // create the clcaAssertions and add then to the oaContests
@@ -258,7 +266,7 @@ fun addOAClcaAssortersFromMargin(
         val contestId = oaContest.id
         val clcaAssertions = oaContest.pollingAssertions.map { assertion ->
             val assortAverages = mutableMapOf<Int, Double>() // poolId -> average assort value
-            cardPools.values.forEach { cardPool ->
+            cardPools.forEach { cardPool ->
                 if (cardPool.contains(contestId)) {
                     val regVotes = cardPool.regVotes()[oaContest.id]!!
                     if (regVotes.ncards() > 0) {
@@ -331,34 +339,4 @@ fun distributeExpectedOvervotes(oaContest: OneAuditContestIF, cardPools: List<Ca
     allocDiffPool.forEach { (poolId, adjust) ->
         cardPoolMap[poolId]!!.adjustCards(adjust, contestId)
     }
-}
-
-// for a real audit, there are no votes
-fun createSortedCardsFromPools(cvrs: List<Cvr>, pools: List<CardPoolWithBallotStyle>, seed: Long) : List<AuditableCard> {
-    val prng = Prng(seed)
-    val cards = mutableListOf<AuditableCard>()
-    var idx = 0
-    cvrs.forEach { cards.add(AuditableCard.fromCvr(it, idx++, prng.next())) }
-
-    // add the pool votes
-    pools.forEach { pool ->
-        val ncards = pool.ncards()
-        val cleanName = cleanCsvString(pool.poolName)
-        repeat(ncards) { poolIndex ->
-            cards.add(
-                AuditableCard(
-                    location = "pool${cleanName} card ${poolIndex + 1}",
-                    index = idx++,
-                    prn = prng.next(),
-                    phantom = false,
-                    contests = pool.contests(),
-                    votes = null,
-                    poolId = pool.poolId
-                )
-            )
-        }
-    }
-
-    // or use external memory sort
-    return cards.sortedBy { it.prn }
 }

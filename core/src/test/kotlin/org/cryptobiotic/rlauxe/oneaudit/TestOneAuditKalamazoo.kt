@@ -1,10 +1,13 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.audit.RegVotes
 import org.cryptobiotic.rlauxe.audit.RegVotesImpl
+import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.verifier.verifyBAssortAvg
 import org.cryptobiotic.rlauxe.verifier.verifyCards
 import kotlin.Int
@@ -70,7 +73,7 @@ class TestOneAuditKalamazoo {
 }
 
 // from oa_polling.ipynb
-fun makeContestKalamazoo(nwinners:Int = 1): Triple<OAContestUnderAudit, List<BallotPool>, List<Cvr>> {
+fun makeContestKalamazoo(nwinners:Int = 1): Triple<OAContestUnderAudit, List<CardPoolIF>, List<Cvr>> {
 
     // the candidates
     val info = ContestInfo(
@@ -109,23 +112,35 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<OAContestUnderAudit, List<Bal
     val poolVotes = candidateVotes.map { (name, votes) ->
         Pair( info.candidateNames[name]!!, votes[1])}.toMap()
     val regVotes = RegVotesImpl(poolVotes, stratumSizes[1])
-    val cardPool = CardPoolImpl(1, info.id, regVotes)
+    val cardPool = CardPoolImpl("kali", 1, info.id, regVotes)
 
     val contestUA = OAContestUnderAudit(contest)
-    addOAClcaAssortersFromMargin(listOf(contestUA), mapOf(1 to cardPool))
+    addOAClcaAssortersFromMargin(listOf(contestUA), listOf(cardPool))
 
     // reported results for the two strata
     val cvrVotes = candidateVotes.map { (key, value) -> Pair(info.candidateNames[key]!!, value[0]) }.toMap()
     val cvrNcards = stratumSizes[0]
     val cvrUndervotes = cvrNcards - cvrVotes.values.sum()
 
-    // fun makeTestMvrs(
-    //    oaContestUA: OAContestUnderAudit,
-    //    cvrNcards: Int,
-    //    cvrVotes:Map<Int, Int>,
-    //    cvrUndervotes: Int,
-    //    pools: List<BallotPool>): List<Cvr> {
-    val ballotPools = cardPool.toBallotPools()
-    val cvrs = makeTestMvrs(contestUA, cvrNcards = cvrNcards, cvrVotes, cvrUndervotes, ballotPools)
-    return Triple(contestUA, ballotPools, cvrs)
+    val cvrs = makeTestMvrs(contestUA, cvrNcards = cvrNcards, cvrVotes, cvrUndervotes, listOf(cardPool))
+    return Triple(contestUA, listOf(cardPool), cvrs)
+}
+
+// single contest, for testing
+class CardPoolImpl(override val poolName: String, override val poolId: Int, val contestId: Int, val regVotes: RegVotes) : CardPoolIF {
+    override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+    override fun regVotes() = mapOf(contestId to regVotes)
+    override fun contains(contestId: Int) = contestId == this.contestId
+    override fun ncards() = regVotes.ncards()
+
+    override fun contests() = intArrayOf(contestId)
+
+    override fun toBallotPools(): List<BallotPool> {
+        return listOf(BallotPool("poolName", poolId, contestId, regVotes.ncards(), regVotes.votes))
+    }
+
+    override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
+        val poolUndervotes = ncards() - regVotes.votes.values.sum()
+        return VotesAndUndervotes(regVotes.votes, poolUndervotes, 1)
+    }
 }

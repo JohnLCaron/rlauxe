@@ -16,21 +16,25 @@ import org.cryptobiotic.rlauxe.persist.csv.writeBallotPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.CreateAudit
 import kotlin.io.path.Path
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger("BoulderElectionOAsim")
 
-// UseOneAudit, redacted ballots are in pools. simulate CVRS out of redacted votes for use as the MVRs.
-class BoulderElectionOAsim(
+// Use OneAudit, redacted ballots are in pools. simulate CVRS out of redacted votes for use as the MVRs.
+class BoulderElectionClcaNew(
     export: DominionCvrExportCsv,
     sovo: BoulderStatementOfVotes,
     val clca: Boolean = true,
     quiet: Boolean = true,
-): BoulderElectionOA(export, sovo, quiet)
-{
+): BoulderElectionOAnew(export, sovo, quiet) {
     val redactedCvrs = makeRedactedCvrs()
     val allCvrs = cvrs + redactedCvrs
+
+    // TODO phantoms etc
+    override fun allCvrs() = this.allCvrs
+    override fun testMvrs() = null // TODO
 
     fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<Cvr>()
@@ -119,32 +123,23 @@ class BoulderElectionOAsim(
 }
 
 ////////////////////////////////////////////////////////////////////
-// Create a OneAudit where pools are from the redacted cvrs
-fun createBoulderElectionOAsim(
+fun createBoulderElectionClcaNew(
     cvrExportFile: String,
     sovoFile: String,
-    auditDir: String,
-    clca: Boolean = false,
+    topdir: String,
     riskLimit: Double = 0.03,
     minRecountMargin: Double = .005,
     auditConfigIn: AuditConfig? = null,
-    clear: Boolean = true) {
-
-    if (clear) clearDirectory(Path(auditDir))
-    val stopwatch = Stopwatch()
-
+    clear: Boolean = true)
+{
     val variation = if (sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
-
     val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
-    val election = BoulderElectionOAsim(export, sovo, clca = clca)
 
-    val rcvrVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(election.redactedCvrs.iterator())
-    logger.info { "added ${election.redactedCvrs.size} redacted cvrs with ${rcvrVotes.values.sumOf { it.values.sum() }} total votes" }
+    val election = BoulderElectionClcaNew(export, sovo, clca = true)
 
-    val publisher = Publisher(auditDir)
     val auditConfig = if (auditConfigIn != null) auditConfigIn
-    else if (clca) {
+    else
         AuditConfig(
             AuditType.CLCA,
             hasStyles = true,
@@ -154,45 +149,5 @@ fun createBoulderElectionOAsim(
             nsimEst = 10,
             clcaConfig = ClcaConfig(ClcaStrategyType.optimalComparison)
         )
-    } else {
-        AuditConfig(
-            AuditType.ONEAUDIT,
-            hasStyles = true,
-            riskLimit = riskLimit,
-            sampleLimit = 20000,
-            minRecountMargin = minRecountMargin,
-            nsimEst = 10,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
-        )
-    }
-    writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
-
-    // write ballot pools
-    val ballotPools = election.cardPools.map { it.toBallotPools() }.flatten()
-    writeBallotPoolCsvFile(ballotPools, publisher.ballotPoolsFile())
-    logger.info{"write ${ballotPools.size} ballotPools to ${publisher.ballotPoolsFile()}"}
-
-    // form contests
-    val contestsUA = election.makeContestsUA(auditConfig.hasStyles)
-    if (clca) {
-        contestsUA.forEach { it.addClcaAssertionsFromReportedMargin() }
-    } else {
-        addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, election.cardPools.associateBy { it.poolId })
-    }
-
-    val phantoms = makePhantomCvrs(contestsUA.map { it.contest} )
-    val allCvrs =  election.allCvrs + phantoms
-
-    val cards = createSortedCards(allCvrs, auditConfig.seed)
-    writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
-    logger.info{"write ${cards.size} cvrs to ${publisher.cardsCsvFile()}"}
-
-
-    checkContestsCorrectlyFormed(auditConfig, contestsUA)
-    checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), show = false)
-    checkVotesVsSovo(contestsUA.map { it.contest as Contest}, sovo, mustAgree = false)
-
-    writeContestsJsonFile(contestsUA, publisher.contestsFile())
-    logger.info{"write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
-    println("took = $stopwatch\n")
+    CreateAudit("boulder", topdir, auditConfig, election, clear = clear)
 }

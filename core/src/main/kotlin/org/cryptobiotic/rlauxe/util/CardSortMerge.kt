@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.util
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.persist.clearDirectory
@@ -8,6 +10,7 @@ import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import java.nio.file.*
 
 private val maxChunkDefault = 100000
+private val logger = KotlinLogging.logger("SortMerge")
 
 // was
 // class SortMerge(
@@ -17,27 +20,26 @@ private val maxChunkDefault = 100000
 //    val outputFile: String,
 //    val pools: Map<String, Int>?) {
 
-// from Iterator<CvrExport>, convert to AuditableCard, assign prn, sort and write sortedCards.
+// from Iterator<CvrExport>, convert to AuditableCard, assign prn, external sort and write sortedCards.
 class SortMerge(
     val scratchDirectory: String,
     val outputFile: String,
     val seed: Long,
-    val pools: Map<String, Int>? = null,
+    val poolNameToId: Map<String, Int>? = null,
     val maxChunk: Int = maxChunkDefault) {
 
     // cvrExportCsv: open with cvrExportCsvIterator; contains CvrExport objects
     fun run(cvrExportCsv: String) {
         // out of memory sort by sampleNum()
-        sortCards(cvrExportCsv, scratchDirectory, seed, pools = pools)
+        sortCards(cvrExportCsv, scratchDirectory, seed, pools = poolNameToId)
         mergeCards(scratchDirectory, outputFile)
     }
 
-    fun run2(cardIter: CloseableIterator<CvrExport>) {
+    fun run2(cardIter: CloseableIterator<CvrExport>, cvrs: List<Cvr>) {
         // out of memory sort by sampleNum()
-        sortCards2(cardIter, scratchDirectory, seed, pools = pools)
+        sortCards2(cardIter, cvrs, scratchDirectory, seed, pools = poolNameToId)
         mergeCards(scratchDirectory, outputFile)
     }
-
 
     // out of memory sorting
     fun sortCards(
@@ -66,12 +68,11 @@ class SortMerge(
 
     fun sortCards2(
         cardIter: CloseableIterator<CvrExport>,
+        cvrs: List<Cvr>, // phantoms
         scratchDirectory: String,
         seed: Long,
         pools: Map<String, Int>?
     ) {
-        val stopwatch = Stopwatch()
-
         clearDirectory(Path.of(scratchDirectory))
         validateOutputDir(Path.of(scratchDirectory), ErrorMessages("sortCards"))
 
@@ -82,16 +83,15 @@ class SortMerge(
         while (cardIter.hasNext()) {
             cardSorter.add(cardIter.next())
         }
+        cvrs.forEach { cardSorter.add(it) }
+
         cardSorter.writeSortedChunk()
-        println("writeSortedChunk took $stopwatch")
     }
 
     fun mergeCards(
         workingDirectory: String,
         outputFile: String,
     ) {
-        val stopwatch = Stopwatch()
-
         //// the merging of the sorted chunks, and writing the completely sorted file
         val writer = AuditableCardCsvWriter(outputFile)
 
@@ -103,7 +103,7 @@ class SortMerge(
         }
         val merger = CardMerger(paths, writer, maxChunk)
         merger.merge()
-        println("mergeSortedChunk took $stopwatch")
+        logger.info{"SortMerge wrote ${writer.countCards} to $outputFile"}
     }
 }
 
@@ -114,9 +114,19 @@ class CardSorter(val workingDirectory: String, val prng: Prng, val max: Int, val
     var countChunks = 0
 
     fun add(card: CvrExport) {
-        // TODO phantoms
         val card = card.toAuditableCard(index=index, prn=prng.next(), false, pools = pools)
-        cards.add(card.copy(index=index, prn=prng.next()))
+        cards.add(card)
+        index++
+        count++
+
+        if (count > max) {
+            writeSortedChunk()
+        }
+    }
+
+    fun add(cvr: Cvr) {
+        val card = AuditableCard.fromCvr(cvr, index=index, sampleNum=prng.next())
+        cards.add(card)
         index++
         count++
 

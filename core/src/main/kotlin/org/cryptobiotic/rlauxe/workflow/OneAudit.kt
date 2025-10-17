@@ -18,9 +18,6 @@ class OneAudit(
 
     init {
         require (auditConfig.auditType == AuditType.ONEAUDIT)
-
-        // check contests well formed etc
-        // check(auditConfig, contests)
     }
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
@@ -93,6 +90,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         return testH0Result
     }
 
+    // TODO not needed?
      fun runAlpha(
         auditConfig: AuditConfig,
         Nc: Int,

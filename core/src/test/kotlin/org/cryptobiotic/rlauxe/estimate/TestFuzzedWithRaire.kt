@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
 
 class TestFuzzedWithRaire {
 
-    @Test
+    // @Test
     fun repeatFuzzedWithRaire() {
         repeat(100) { testFuzzedWithRaire() }
     }

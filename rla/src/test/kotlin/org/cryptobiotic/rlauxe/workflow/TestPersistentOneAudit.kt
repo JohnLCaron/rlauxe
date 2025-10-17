@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.json.*
@@ -15,7 +16,7 @@ class TestPersistentOneAudit {
     // val topdir = kotlin.io.path.createTempDirectory().toString()
 
     @Test
-    fun testPersistentWorkflowClca() {
+    fun testPersistentWorkflow() {
         clearDirectory(Path.of(auditDir))
 
         val fuzzMvrPct = .01
@@ -50,7 +51,8 @@ class TestPersistentOneAudit {
 
         // these checks may modify the contest status
         checkContestsCorrectlyFormed(auditConfig, oaWorkflow.contestsUA())
-        checkContestsWithCvrs(oaWorkflow.contestsUA(), CvrIteratorCloser(readCardsCsvIterator(publisher.cardsCsvFile())))
+        // TODO val cardPools = readCardPoolsJsonFile(publisher.cardPoolsFile(), infos).unwrap()
+        checkContestsWithCvrs(oaWorkflow.contestsUA(), CvrIteratorCloser(readCardsCsvIterator(publisher.cardsCsvFile())), cardPools = null)
 
         writeContestsJsonFile(oaWorkflow.contestsUA(), publisher.contestsFile())
         println("write writeContestsJsonFile to ${publisher.contestsFile()} ")

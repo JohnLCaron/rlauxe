@@ -4,9 +4,11 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.BallotPool
+import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.raire.VoteConsolidator
 import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.iterator
@@ -101,10 +103,9 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
         this.overvotes += other.overvotes
     }
 
-    /* fun undervotePct(): Double {
-        val nvotes = votes.map { it.value }.sum()
-        return undervotes.toDouble() / (undervotes + nvotes)
-    } */
+     fun votesAndUndervotes(): VotesAndUndervotes {
+        return VotesAndUndervotes(votes, undervotes, info.voteForN)
+    }
 
     fun nvotes() = votes.map { it.value}.sum()
 
@@ -132,7 +133,7 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
         if (isIrv != other.isIrv) return false
         if (voteForN != other.voteForN) return false
         if (ncards != other.ncards) return false
-        if (novote != other.novote) return false
+        // if (novote != other.novote) return false
         if (undervotes != other.undervotes) return false
         if (overvotes != other.overvotes) return false
         if (info != other.info) return false
@@ -146,7 +147,7 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
         var result = isIrv.hashCode()
         result = 31 * result + voteForN
         result = 31 * result + ncards
-        result = 31 * result + novote
+        // result = 31 * result + novote
         result = 31 * result + undervotes
         result = 31 * result + overvotes
         result = 31 * result + info.hashCode()
@@ -172,7 +173,7 @@ fun MutableMap<Int, ContestTabulation>.addJustVotes(other: Map<Int, ContestTabul
     }
 } */
 
-// return contestId -> ContestTabulation
+//return contestId -> ContestTabulation
 fun tabulateBallotPools(ballotPools: Iterator<BallotPool>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val votes = mutableMapOf<Int, ContestTabulation>()
     ballotPools.forEach { ballotPool ->
@@ -181,6 +182,21 @@ fun tabulateBallotPools(ballotPools: Iterator<BallotPool>, infos: Map<Int, Conte
             val contestTab = votes.getOrPut(ballotPool.contestId) { ContestTabulation(infos[ballotPool.contestId]!!) }
             ballotPool.votes.forEach { (cand, vote) -> contestTab.addVote(cand, vote) }
             contestTab.ncards += ballotPool.ncards
+        }
+    }
+    return votes
+}
+
+fun tabulateCardPools(cardPools: Iterator<CardPoolIF>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+    val votes = mutableMapOf<Int, ContestTabulation>()
+    cardPools.forEach { cardPool ->
+        cardPool.regVotes().forEach { (contestId, reg) ->
+            val info = infos[contestId]
+            if (info != null) {
+                val contestTab = votes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
+                reg.votes.forEach { (cand, vote) -> contestTab.addVote(cand, vote) }
+                contestTab.ncards += reg.ncards()
+            }
         }
     }
     return votes
@@ -206,4 +222,24 @@ fun tabulateCloseableCvrs(cvrs: CloseableIterator<Cvr>, infos: Map<Int, ContestI
         }
     }
     return votes
+}
+
+fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+    val tabs = mutableMapOf<Int, ContestTabulation>()
+    cards.use { cardIter ->
+        while (cardIter.hasNext()) {
+            val card = cardIter.next()
+            card.contests.forEachIndexed { idx, contestId ->
+            val info = infos[contestId]!!
+                val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
+                tab.ncards++
+                if (card.votes == null) tab.undervotes++ else {
+                    val cands = card.votes[idx]
+                    if (cands.isEmpty()) tab.undervotes++
+                    cands.forEach { cand -> tab.addVote(cand, 1) }
+                }
+            }
+        }
+    }
+    return tabs
 }

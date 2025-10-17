@@ -20,7 +20,9 @@ class TestCheckAudits {
 
         val publisher = Publisher(auditDir)
         val contestsUA = readContestsJsonFile(publisher.contestsFile()).unwrap()
-        val state = checkContestsWithCvrs(contestsUA, CvrExportAdapter(cvrExportCsvIterator(cvrExport)))
+        // fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: CloseableIterator<Cvr>,
+        //                          ballotPools: List<BallotPool>?, show: Boolean = false) = buildString {
+        val state = checkContestsWithCvrs(contestsUA, CvrExportAdapter(cvrExportCsvIterator(cvrExport)), cardPools = null)
         println(state)
         Assertions.assertTrue(!state.contains("***"))
     }
@@ -32,7 +34,7 @@ class TestCheckAudits {
 
         val publisher = Publisher(auditDir)
         val contestsUA = readContestsJsonFile(publisher.contestsFile()).unwrap()
-        val state = checkContestsWithCvrs(contestsUA, CvrIteratorCloser(cardIter))
+        val state = checkContestsWithCvrs(contestsUA, CvrIteratorCloser(cardIter), cardPools = null)
         println(state)
         Assertions.assertTrue(!state.contains("***"))
 

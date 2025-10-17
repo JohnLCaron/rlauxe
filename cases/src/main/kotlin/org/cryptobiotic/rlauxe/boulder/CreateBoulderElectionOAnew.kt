@@ -7,33 +7,27 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.ContestVotes
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
-import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
-import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.writeBallotPoolCsvFile
-import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
-import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.CreateAudit
+import org.cryptobiotic.rlauxe.workflow.CreateElectionIF
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
-import kotlin.collections.get
 import kotlin.collections.map
 import kotlin.collections.set
-import kotlin.io.path.Path
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger("BoulderElectionOA")
 
-// Use OneAudit, redacted ballots are in pools. use redacted vote counts for pools' assort averages.
+// Use OneAudit, redacted ballots are in pools.
 // No redacted CVRs. Cant do IRV.
-open class BoulderElectionOA(
+// specific to 2025 election. TODO: generalize
+open class BoulderElectionOAnew(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
     val quiet: Boolean = true,
-) {
+): CreateElectionIF {
     val cvrs: List<Cvr> = export.cvrs.map { it.convert() }
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infoMap = infoList.associateBy { it.id }
@@ -114,7 +108,11 @@ open class BoulderElectionOA(
         infoList.forEach { info ->
             val sovoContest = sovo.contests.find { it.contestTitle == info.name }
             if (sovoContest != null) {
-                oa2Contests.add( OneAuditContestBoulder(info, sovoContest, countCvrVotes[info.id]!!, countRedactedVotes[info.id]!!))
+                if (countCvrVotes[info.id] != null && countRedactedVotes[info.id] != null) {
+                    oa2Contests.add(
+                        OneAuditContestBoulder(info, sovoContest, countCvrVotes[info.id]!!, countRedactedVotes[info.id]!!)
+                    )
+                }
             }
             else logger.warn{"*** cant find contest '${info.name}' in BoulderStatementOfVotes"}
         }
@@ -159,10 +157,12 @@ open class BoulderElectionOA(
         return votes
     }
 
-    open fun makeContestsUA(hasStyles: Boolean): List<ContestUnderAudit> {
+    override fun makeCardPools() = cardPools
+
+    override fun makeContestsUA(hasStyles: Boolean): List<ContestUnderAudit> {
         if (!quiet) println("ncontests with info = ${infoList.size}")
 
-        val regContests = infoList.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
+        val regContests = infoList.filter { !it.isIrv }.map { info ->
             val oaContest = oaContests[info.id]!!
             val candVotes = oaContest.candVoteTotals().filter { info.candidateIds.contains(it.key) } // remove Write-Ins
             val ncards = oaContest.sumAllCards()
@@ -172,74 +172,65 @@ open class BoulderElectionOA(
             OAContestUnderAudit(contest, hasStyles)
         }
 
-        val checkContest = 20
-        println("^^^ $checkContest      countCvrVotes = ${countCvrVotes[checkContest]}")
-        println("^^^ $checkContest countRedactedVotes = ${countRedactedVotes[checkContest]}")
-        val poolSum = ContestTabulation(infoMap[checkContest]!!)
-        cardPools.filter { it.contains(checkContest)}.forEach {
-            val votes = it.voteTotals[checkContest]!!
-            votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
-            poolSum.ncards += it.ncards()
-            poolSum.undervotes += it.ncards() * (infoMap[checkContest]?.voteForN ?: 1) - votes.map { it.value }.sum()
-        }
-        println("^^^ $checkContest pooledtab = ${poolSum}")
-
         return regContests
     }
 
+    // TODO phantoms etc
+    override fun allCvrs() = this.cvrs
+    override fun cvrExport() = Closer(emptyList<CvrExport>().iterator())
+    override fun hasCvrExport() = false
+    override fun testMvrs() = null
 }
 
 ////////////////////////////////////////////////////////////////////
 // Create a OneAudit where pools are from the redacted cvrs, use pool vote totals for assort average
-fun createBoulderElectionOA(
+fun createBoulderElectionOAnew(
     cvrExportFile: String,
     sovoFile: String,
-    auditDir: String,
+    topdir: String,
+    auditDir: String? = null,
     riskLimit: Double = 0.03,
     minRecountMargin: Double = .005,
     auditConfigIn: AuditConfig? = null,
     clear: Boolean = true)
 {
-    if (clear) clearDirectory(Path(auditDir))
-    val stopwatch = Stopwatch()
-
     val variation = if (sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
-
-    println("readDominionCvrExport $cvrExportFile")
     val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
-    val election = BoulderElectionOA(export, sovo)
 
-    val publisher = Publisher(auditDir)
+    val election = BoulderElectionOAnew(export, sovo)
+
     val auditConfig = auditConfigIn ?: AuditConfig(
         AuditType.ONEAUDIT, hasStyles=true, riskLimit=riskLimit, sampleLimit=20000, minRecountMargin=minRecountMargin, nsimEst=10,
         oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
     )
-    writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
+    CreateAudit("boulder", topdir, auditConfig, election, auditdir = auditDir, clear = clear)
+}
 
-    // write ballot pools
-    val ballotPools = election.cardPools.map { it.toBallotPools() }.flatten()
-    writeBallotPoolCsvFile(ballotPools, publisher.ballotPoolsFile())
-    logger.info{"write ${ballotPools.size} ballotPools to ${publisher.ballotPoolsFile()}"}
-
-    val contestsUA= election.makeContestsUA(auditConfig.hasStyles)
-    addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, election.cardPools.associate { it.poolId to it })
-
-    val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-    val allCvrs =  election.cvrs + phantoms
-
-    val cards = createSortedCardsFromPools(allCvrs, election.cardPools, auditConfig.seed)
-    writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
-    logger.info{"write ${cards.size} cvrs to ${publisher.cardsCsvFile()}"}
-
-    checkContestsCorrectlyFormed(auditConfig, contestsUA)
-    checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), ballotPools=ballotPools, show = false)
-    checkVotesVsSovo(contestsUA.map { it.contest as Contest}, sovo, mustAgree = false)
-
-    // write contests
-    writeContestsJsonFile(contestsUA, publisher.contestsFile())
-    logger.info{"write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
-    logger.info{"took = $stopwatch\n"}
+fun checkVotesVsSovo(contests: List<Contest>, sovo: BoulderStatementOfVotes, mustAgree: Boolean = true) {
+    // we are making the contest votes from the cvrs. how does it compare with official tally ??
+    contests.forEach { contest ->
+        val sovoContest: BoulderContestVotes? = sovo.contests.find { it.contestTitle == contest.name }
+        if (sovoContest == null) {
+            print("*** ${contest.name} not found in BoulderStatementOfVotes")
+        } else {
+            //println("sovoContest = ${sovoContest!!.candidateVotes}")
+            //println("    contest = ${contest.votes}")
+            sovoContest.candidateVotes.forEach { (sovoCandidate, sovoVote) ->
+                val candidateId = contest.info.candidateNames[sovoCandidate]
+                if (candidateId == null) {
+                    print("*** $sovoCandidate not in ${contest.info.candidateNames}")
+                }
+                val contestVote = contest.votes[candidateId]!!
+                if (contestVote != sovoVote) {
+                    println("*** ${contest.name} '$sovoCandidate' $contestVote != $sovoVote")
+                }
+                // createBoulder23 doesnt agree on contest "City of Louisville City Council Ward 2 (4-year term)"
+                // see ColbertDiscrepency.csv, FaheyDiscrepency.csv
+                if (mustAgree) require(contestVote == sovoVote)
+            }
+        }
+    }
 }
 
 fun parseContestName(name: String) : Pair<String, Int> {

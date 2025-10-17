@@ -25,11 +25,11 @@ private val logger = KotlinLogging.logger("EstimateSampleSizes")
 ////////////////////////////////////////////////////////////////////////////////////////////
 //// Comparison, Polling, OneAudit.
 
-// 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function,
+// 1. _Estimation_: for each contest, estimate how many samples are needed for this AuditRound
 fun estimateSampleSizes(
     auditConfig: AuditConfig,
     auditRound: AuditRound,
-    cvrIterator: CloseableIterator<Cvr>?, // only for OneAudit
+    cvrIterator: CloseableIterator<Cvr>?, // only used for OneAudit
     showTasks: Boolean = false,
     nthreads: Int = 32,
 ): List<RunTestRepeatedResult> {
@@ -83,7 +83,7 @@ fun estimateSampleSizes(
     return estResults.map { it.repeatedResult }
 }
 
-// For one contest, generate a task for each assertion thats not been completed
+// For a contest, generate a task for each assertion thats not been completed
 // starts from where the last audit left off (prevAuditResult.pvalue)
 fun makeEstimationTasks(
     auditConfig: AuditConfig,
@@ -96,7 +96,7 @@ fun makeEstimationTasks(
 
     // logger.debug{ "makeEstimationTask for contest ${contestRound.contestUA.id} round $roundIdx"}
 
-    // make the cvrs once for all the assertions for this contest
+    // simulate the cvrs once for all the assertions for this contest
     val contest = contestRound.contestUA.contest
     val useList: List<Cvr>? = when (auditConfig.auditType) {
         AuditType.CLCA -> {

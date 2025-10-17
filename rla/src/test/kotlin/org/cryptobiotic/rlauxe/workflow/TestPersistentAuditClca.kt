@@ -55,7 +55,8 @@ class TestPersistentWorkflowClca {
 
         // these checks may modify the contest status
         checkContestsCorrectlyFormed(auditConfig, clcaWorkflow.contestsUA())
-        checkContestsWithCvrs(clcaWorkflow.contestsUA(), CvrIteratorCloser(readCardsCsvIterator(publisher.cardsCsvFile())))
+        checkContestsWithCvrs(clcaWorkflow.contestsUA(), CvrIteratorCloser(readCardsCsvIterator(publisher.cardsCsvFile())),
+            cardPools = null)
 
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
         println("write writeContestsJsonFile to ${publisher.contestsFile()} ")

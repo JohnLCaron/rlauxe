@@ -1,6 +1,11 @@
 package org.cryptobiotic.rlauxe.cli
 
+import org.cryptobiotic.rlauxe.persist.clearDirectory
+import java.nio.file.Path
+import kotlin.io.path.createTempDirectory
+import kotlin.io.path.deleteRecursively
 import kotlin.test.Test
+import kotlin.test.fail
 
 class TestRunCli {
 
@@ -10,9 +15,9 @@ class TestRunCli {
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
-                "-minMargin", "0.005",
+                "-minMargin", "0.01",
                 "-fuzzMvrs", ".0123",
-                "-ncards", "50000",
+                "-ncards", "10000",
                 "-ncontests", "25",
             )
         )
@@ -41,10 +46,10 @@ class TestRunCli {
                 "-isPolling",
                 "-fuzzMvrs", ".0023",
                 "-ncards", "20000",
+                "-ncontests", "2",
             )
         )
 
-        println("============================================================")
         var done = false
         while (!done) {
             val lastRound = runRound(inputDir = topdir, useTest = false, quiet = true)
@@ -52,8 +57,16 @@ class TestRunCli {
         }
 
         println("============================================================")
-        val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=topdir)
-        println(status)
+        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=topdir)
+        println(results)
+
+        println("============================================================")
+        val results2 = RunVerifyContests.runVerifyContests(topdir, null, false)
+        println()
+        print(results2)
+
+        if (results.fail()) fail()
+        if (results2.fail()) fail()
     }
 
     @Test
@@ -84,6 +97,43 @@ class TestRunCli {
         println("============================================================")
         val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=topdir)
         println(status)
+    }
+
+    @Test
+    fun testCliOneAudit() {
+        val topdir = "/home/stormy/rla/persist/testRlaOA"
+
+        RunRlaCreateOneAudit.main(
+            arrayOf(
+                "-in", topdir,
+                "-minMargin", "0.01",
+                "-fuzzMvrs", "0.001",
+                "-ncards", "10000",
+                "-ncontests", "10",
+                "--addRaireContest",
+                "--addRaireCandidates", "5",
+            )
+        )
+
+        val auditDir = "$topdir/audit"
+        println("============================================================")
+        val resultsvc = RunVerifyContests.runVerifyContests(auditDir, null, false)
+        println()
+        print(resultsvc)
+
+        println("============================================================")
+        var done = false
+        while (!done) {
+            val lastRound = runRound(inputDir = auditDir, useTest = false, quiet = true)
+            done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
+        }
+
+        println("============================================================")
+        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = auditDir)
+        println(results)
+
+        if (results.fail()) fail()
+        if (resultsvc.fail()) fail()
     }
 
 }

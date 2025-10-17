@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 
 private val logger = KotlinLogging.logger("MvrManager")
 
+// use MvrManager for audits, not create audit
 interface MvrManager {
     // either Cvrs (clca) or CardLocations (polling) or both (oneaudit)
     fun sortedCards(): CloseableIterable<AuditableCard>

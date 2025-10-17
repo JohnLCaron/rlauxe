@@ -16,10 +16,11 @@ fun makeTestContestOAIrv(): OAIrvContestUA {
             SocialChoiceFunction.IRV,
             voteForN = 6,
         )
-        val Nc = 212
-        val Np = 1
+        val Nc = 2120
+        val Np = 2
         val rcontest = RaireContest(info, winners = listOf(1), Nc = Nc, Ncast = Nc - Np, undervotes=0)
 
+        // where did these come from ??
         val assert1 = RaireAssertion(1, 0, 0.0, 42, RaireAssertionType.winner_only)
         val assert2 = RaireAssertion(1, 2, 0.0,422, RaireAssertionType.irv_elimination,
             listOf(2), mapOf(1 to 1, 2 to 2, 3 to 3))
@@ -33,6 +34,18 @@ fun makeTestContestOAIrv(): OAIrvContestUA {
         //val cvrNc = 200
         val pool = BallotPool("swim", 42, 0, 11, mapOf(0 to 1, 1 to 2, 2 to 3, 3 to 4, 4 to 0))
         val pools = listOf(pool)
+
+    // TODO
+        val cardPool = CardPoolFromCvrs(
+            "noCvr",
+            42, // poolId
+            infos = mapOf(info.id to info),
+        )
+
+    val votesNoCvr = mapOf(0 to 1, 1 to 2, 2 to 3, 3 to 4, 4 to 0)
+
+        //voteTotals = mapOf(info.id to votesNoCvr)
+        val cardPools = listOf(cardPool)
 
         val clcaAssertions = oaIrv.pollingAssertions.map { assertion ->
             val passort = assertion.assorter

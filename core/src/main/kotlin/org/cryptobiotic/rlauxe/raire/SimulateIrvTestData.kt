@@ -36,6 +36,7 @@ data class SimulateIrvTestData(
         return cvrs
     }
 
+    // make candidate choices where candidate 0 is the first choice
     private fun makeCvrWithLeading0(cvrIdx: Int): Cvr {
         // vote for a random number of candidates, including 0
         val nprefs = 1 + Random.nextInt(ncands - 1)
@@ -48,6 +49,7 @@ data class SimulateIrvTestData(
         return Cvr("cvr$cvrIdx", mapOf(contest.id to prefs.toIntArray()))
     }
 
+    // make candidate choices randomly
     private fun makeCvr(cvrIdx: Int): Cvr {
         // vote for a random number of candidates, including 0
         val nprefs = Random.nextInt(ncands)
@@ -60,6 +62,6 @@ data class SimulateIrvTestData(
     }
 
     override fun toString() = buildString {
-        append("SimulateRaireTestData(${contest.id}} phantomPct=${df(contest.phantomRate())} ncards=${ncards}")
+        append("SimulateIrvTestData(${contest.id}} phantomPct=${df(contest.phantomRate())} ncards=${ncards}")
     }
 }

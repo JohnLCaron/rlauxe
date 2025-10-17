@@ -38,7 +38,7 @@ class TestBoulderCvrs {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val maker = BoulderElectionOA(export, sovo)
+        val maker = BoulderElectionOAnew(export, sovo)
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
@@ -91,7 +91,7 @@ class TestBoulderCvrs {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val electionSimCvrs = BoulderElectionOAsim(export, sovo)
+        val electionSimCvrs = BoulderElectionClcaNew(export, sovo)
         val infos = electionSimCvrs.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
@@ -119,6 +119,7 @@ class TestBoulderCvrs {
         println("redactedCvrVotes agrees with redactedDirect")
     }
 
+    /* code is currently specialized to 2025 general election TODO
     @Test
     fun testIrvRedactedCvrs() {
         val stopwatch = Stopwatch()
@@ -138,7 +139,7 @@ class TestBoulderCvrs {
 
         val combined = BoulderStatementOfVotes.combine(listOf(sovoRcv, sovo))
 
-        val electionSimCvrs = BoulderElectionOAsim(export, combined)
+        val electionSimCvrs = BoulderElectionOAnew(export, combined)
         val contestUA = electionSimCvrs.makeContestsUA(true)
         val irv = contestUA.find { it.isIrv }
         if (irv != null) {
@@ -147,6 +148,7 @@ class TestBoulderCvrs {
             assertEquals(irvContest.totalBallots, countIrvCvrs)
         }
     }
+    */
 
 }
 

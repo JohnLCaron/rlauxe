@@ -72,7 +72,7 @@ fun createSortedCards(topDir: String, auditDir: String, cvrExportCsv: String, zi
     val auditConfig = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
     val seed = auditConfig.seed
 
-    SortMerge(scratchDirectory = working, "$auditDir/$sortedCardsFile", seed = seed, pools = pools).run(cvrExportCsv)
+    SortMerge(scratchDirectory = working, "$auditDir/$sortedCardsFile", seed = seed, poolNameToId = pools).run(cvrExportCsv)
     if (zip) {
         createZipFile("$auditDir/$sortedCardsFile", delete = false)
     }
@@ -112,7 +112,7 @@ fun createSfElectionFromCvrExport(
 
     // these checks may modify the contest status; dont call until clca assertions are created
     checkContestsCorrectlyFormed(auditConfig, contestsUA)
-    checkContestsWithCvrs(contestsUA, CvrExportAdapter(cvrExportCsvIterator(cvrExportCsv)), show = true)
+    checkContestsWithCvrs(contestsUA, CvrExportAdapter(cvrExportCsvIterator(cvrExportCsv)), cardPools = null)
 
     val publisher = Publisher(auditDir)
     writeContestsJsonFile(allContests, publisher.contestsFile())

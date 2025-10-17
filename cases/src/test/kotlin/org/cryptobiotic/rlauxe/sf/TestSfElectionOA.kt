@@ -50,6 +50,19 @@ class TestSfElectionOA {
         createSortedCards(topDir, auditDir, cvrExportCsv = cvrExportCsv, zip = true, ballotPoolFile = ballotPoolFile) // write to "$auditDir/sortedCards.csv"
     }
 
+    @Test
+    fun createSF2024OAnew() {
+        val topDir = "/home/stormy/rla/cases/sf2024oanew"
+
+        createSfElectionOAnew(
+            topDir,
+            zipFilename,
+            "ContestManifest.json",
+            "CandidateManifest.json",
+            cvrExportCsv = cvrExportCsv,
+        )
+    }
+
     // @Test
     fun createSF2024OArepeat() {
 

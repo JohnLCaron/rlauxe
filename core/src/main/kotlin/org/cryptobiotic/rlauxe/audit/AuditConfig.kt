@@ -25,6 +25,8 @@ data class AuditConfig(
     val skipContests: List<Int> = emptyList()
 ) {
     val isClca = auditType == AuditType.CLCA
+    val isOA = auditType == AuditType.ONEAUDIT
+    val isPolling = auditType == AuditType.POLLING
 
     override fun toString() = buildString {
         appendLine("AuditConfig(auditType=$auditType, hasStyles=$hasStyles, riskLimit=$riskLimit, seed=$seed")

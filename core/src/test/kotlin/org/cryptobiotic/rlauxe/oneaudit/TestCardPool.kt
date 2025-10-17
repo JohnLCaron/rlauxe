@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.audit.tabulateBallotPools
 import org.cryptobiotic.rlauxe.audit.tabulateCvrs
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -15,7 +14,7 @@ class TestCardPool {
 
     @Test
     fun testCardPoolFromCvrs() {
-        val (contestOA, pools, cvrs) = makeOneContestUA(
+        val (contestOA, cardPools, cvrs) = makeOneContestUA(
             margin = .02,
             Nc = 50000,
             cvrFraction = .80,
@@ -31,23 +30,8 @@ class TestCardPool {
         assertEquals(cvrTab.votes, contestOA.contest.votes())
         assertEquals(cvrTab.ncards, contestOA.contest.Nc())
 
-        val poolTabs = tabulateBallotPools(pools.iterator(), infos)
-        val cardPools = CardPoolFromCvrs.makeCardPools(cvrs.iterator(), infos)
-        val cardPool = cardPools.values.first()
-        // assertEquals(contestOA.contest.Nc(), cardPool.ncards())
-
         // only one pool, only one contest
-        val poolTab = poolTabs.values.first()
-        val cardPoolTab = cardPool.contestTabs.values.first()
-        assertEquals(poolTab.votes, cardPoolTab.votes)
-        assertEquals(poolTab.ncards, cardPoolTab.ncards)
-
-        val cardBallotPools = cardPool.toBallotPools()
-        val cardBallotPool = cardBallotPools.first()
-        val pool = pools.first()
-        assertEquals(pool.votes, cardBallotPool.votes)
-        assertEquals(pool.ncards, cardBallotPool.ncards)
-
+        val cardPool = cardPools.first()
         assertTrue(cardPool.contains(info.id))
         assertFalse(cardPool.contains(42))
         assertEquals(1, cardPool.regVotes().size)

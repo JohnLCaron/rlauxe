@@ -71,7 +71,7 @@ fun createSfElectionFromCvrExportOA(
     // make contests based on cardPool tabulations
     val unpooledPool = cardPools.values.find { it.poolName == unpooled }!!
 
-    /* println("^^^ contest1 allPool = ${contestTabSums[1]}")
+    println("^^^ contest1 allPool = ${contestTabSums[1]}")
     println("^^^ contest1 unpooledtab = ${unpooledPool.contestTabs[1]}")
     val poolSum = ContestTabulation(infos[1]!!)
     ballotPools.filter { it.contestId == 1}.forEach {
@@ -79,19 +79,19 @@ fun createSfElectionFromCvrExportOA(
         poolSum.ncards += it.ncards
         poolSum.undervotes += it.ncards - it.votes.map { it.value }.sum()
     }
-    println("^^^ contest1 pooledtab = ${poolSum}") */
+    println("^^^ contest1 pooledtab = ${poolSum}")
 
     val allContests =  makeAllOneAuditContests(contestTabSums, contestNcs, unpooledPool).sortedBy { it.id }
 
     // pass 2 through cvrs, create all the clca assertions in one go
     val auditableContests: List<OAContestUnderAudit> = allContests.filter { it.preAuditStatus == TestH0Status.InProgress }
     val poolsOnly = cardPools.filter { it.value.poolName != org.cryptobiotic.rlauxe.oneaudit.unpooled }
-    addOAClcaAssortersFromMargin(auditableContests, poolsOnly)
+    addOAClcaAssortersFromMargin(auditableContests, poolsOnly.values.toList())
 
     // these checks may modify the contest status; dont call until clca assertions are created
     checkContestsCorrectlyFormed(auditConfig, allContests)
     // leave out ballot pools since the cvrs have the votes in them
-    val state = checkContestsWithCvrs(allContests, CvrExportAdapter(cvrExportCsvIterator(cvrExportCsv)), ballotPools=emptyList(), show = true)
+    val state = checkContestsWithCvrs(allContests, CvrExportAdapter(cvrExportCsvIterator(cvrExportCsv)), cardPools=null, show = true)
     logger.info{state}
 
     writeContestsJsonFile(allContests, publisher.contestsFile())

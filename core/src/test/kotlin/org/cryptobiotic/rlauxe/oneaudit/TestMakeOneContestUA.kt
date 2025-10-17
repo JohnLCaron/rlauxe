@@ -16,7 +16,8 @@ class TestMakeOneContestUA {
     @Test
     fun testAllAreCvrs() {
         val margin = .02
-        val (contestOA, ballotPools, testCvrs) = makeOneContestUA(margin, Nc, cvrFraction = 1.0, undervoteFraction = 0.0, phantomFraction = 0.0)
+        val (contestOA, ballotPools, testCvrs) =
+            makeOneContestUA(margin, Nc, cvrFraction = 0.9, undervoteFraction = 0.0, phantomFraction = 0.0)
 
         assertEquals(Nc, contestOA.Nc)
         val contest = contestOA.contest as Contest
@@ -76,28 +77,29 @@ class TestMakeOneContestUA {
             cvrPercents.forEach { cvrPercent ->
                 println("======================================================================================================")
                 println("margin=$margin cvrPercent=$cvrPercent phantomPercent=$phantomPercent undervotePercent=$undervotePercent")
-                val (contestOA, ballotPools, testCvrs) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = undervotePercent, phantomFraction = phantomPercent)
-                checkBasics(contestOA, ballotPools, margin, cvrPercent)
-                checkAgainstCvrs(contestOA, ballotPools, testCvrs, cvrPercent, undervotePercent, phantomPercent)
+                val (contestOA, cardPools, testCvrs) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = undervotePercent, phantomFraction = phantomPercent)
+                checkBasics(contestOA, cardPools, margin, cvrPercent)
+                checkAgainstCvrs(contestOA, cardPools, testCvrs, cvrPercent, undervotePercent, phantomPercent)
             }
         }
     }
 
-    fun checkBasics(contestOA: OAContestUnderAudit, ballotPools: List<BallotPool>, margin: Double, cvrPercent: Double) {
+    fun checkBasics(contestOA: OAContestUnderAudit, cardPools: List<CardPoolIF>, margin: Double, cvrPercent: Double) {
         println(contestOA)
 
         //val nvotes = contestOA.cvrNcards + ballotPools.map{ it.ncards }.sum()
         //assertEquals(roundToClosest(nvotes*cvrPercent), contestOA.cvrNcards)
         //showPct("cvrs", contestOA.cvrVotes, contestOA.cvrNcards)
 
-        assertEquals(1, ballotPools.size)
-        val pool = ballotPools[0]
-        assertEquals("noCvr", pool.name)
-        println(pool)
-        showPct("pool", pool.votes, pool.ncards)
+        assertEquals(1, cardPools.size)
+        val cardPool = cardPools[0]
+        assertEquals("noCvr", cardPool.poolName)
+        println(cardPool)
+        val vunder = cardPool.votesAndUndervotes(contestOA.id)
+        showPct("pool", vunder.candVotesSorted, cardPool.ncards())
 
         val ncast = contestOA.contest.Ncast()
-        assertEquals(roundToClosest(ncast*(1.0 - cvrPercent)), pool.ncards)
+        assertEquals(roundToClosest(ncast*(1.0 - cvrPercent)), cardPool.ncards())
 
         assertEquals(Nc, contestOA.Nc)
         val contest = contestOA.contest as Contest
@@ -106,7 +108,7 @@ class TestMakeOneContestUA {
         println()
     }
 
-    fun checkAgainstCvrs(contestOA: OAContestUnderAudit, ballotPools: List<BallotPool>, testCvrs: List<Cvr>, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double) {
+    fun checkAgainstCvrs(contestOA: OAContestUnderAudit, cardPools: List<CardPoolIF>, testCvrs: List<Cvr>, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double) {
 
         val bassorter = contestOA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         println(bassorter)

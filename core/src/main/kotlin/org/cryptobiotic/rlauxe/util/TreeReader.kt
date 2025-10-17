@@ -107,12 +107,13 @@ class TreeReaderIterator <T> (
 
 // read all files in topdir (depth first). pass each file to the visitor.
 class TreeReaderTour(val topDir: String, val silent: Boolean = true, val visitor: (Path) -> Unit) {
-    var count = 0
+    var total = 0
 
     // depth first tour of all files in the directory tree
-    fun tourFiles() {
-        readDirectory(Indent(0), Path.of(topDir))
-        if (!silent) println("count = $count")
+    fun tourFiles(): Int {
+        total += readDirectory(Indent(0), Path.of(topDir))
+        if (!silent) println("total = $total")
+        return total
     }
 
     fun readDirectory(indent: Indent, dirPath: Path): Int {

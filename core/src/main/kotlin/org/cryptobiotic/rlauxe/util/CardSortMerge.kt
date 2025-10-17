@@ -12,62 +12,24 @@ import java.nio.file.*
 private val maxChunkDefault = 100000
 private val logger = KotlinLogging.logger("SortMerge")
 
-// was
-// class SortMerge(
-//    val auditDir: String,
-//    val cvrExportCsv: String, // open with cvrExportCsvIterator; contains CvrExport objects
-//    val workingDir: String,
-//    val outputFile: String,
-//    val pools: Map<String, Int>?) {
-
 // from Iterator<CvrExport>, convert to AuditableCard, assign prn, external sort and write sortedCards.
 class SortMerge(
     val scratchDirectory: String,
     val outputFile: String,
     val seed: Long,
     val poolNameToId: Map<String, Int>? = null,
+    val showPoolVotes: Boolean,
     val maxChunk: Int = maxChunkDefault) {
 
-    // cvrExportCsv: open with cvrExportCsvIterator; contains CvrExport objects
-    fun run(cvrExportCsv: String) {
+    fun run(cardIter: CloseableIterator<CvrExport>, cvrs: List<Cvr>) {
         // out of memory sort by sampleNum()
-        sortCards(cvrExportCsv, scratchDirectory, seed, pools = poolNameToId)
-        mergeCards(scratchDirectory, outputFile)
-    }
-
-    fun run2(cardIter: CloseableIterator<CvrExport>, cvrs: List<Cvr>) {
-        // out of memory sort by sampleNum()
-        sortCards2(cardIter, cvrs, scratchDirectory, seed, pools = poolNameToId)
+        sortCards(cardIter, cvrs, scratchDirectory, seed, pools = poolNameToId)
         mergeCards(scratchDirectory, outputFile)
     }
 
     // out of memory sorting
     fun sortCards(
-        cvrExportCsv: String, // may be zipped or not
-        scratchDirectory: String,
-        seed: Long,
-        pools: Map<String, Int>?
-    ) {
-        val stopwatch = Stopwatch()
-
-        clearDirectory(Path.of(scratchDirectory))
-        validateOutputDir(Path.of(scratchDirectory), ErrorMessages("sortCards"))
-
-        val prng = Prng(seed)
-        val cardSorter = CardSorter(scratchDirectory, prng, maxChunk, pools = pools)
-
-        //// reading CvrExport and sorted chunks
-        cvrExportCsvIterator(cvrExportCsv).use { cardIter ->
-            while (cardIter.hasNext()) {
-                cardSorter.add(cardIter.next())
-            }
-        }
-        cardSorter.writeSortedChunk()
-        println("writeSortedChunk took $stopwatch")
-    }
-
-    fun sortCards2(
-        cardIter: CloseableIterator<CvrExport>,
+        cardIterator: CloseableIterator<CvrExport>,
         cvrs: List<Cvr>, // phantoms
         scratchDirectory: String,
         seed: Long,
@@ -77,13 +39,14 @@ class SortMerge(
         validateOutputDir(Path.of(scratchDirectory), ErrorMessages("sortCards"))
 
         val prng = Prng(seed)
-        val cardSorter = CardSorter(scratchDirectory, prng, maxChunk, pools = pools)
+        val cardSorter = ChunkSorter(scratchDirectory, prng, maxChunk, pools = pools, showPoolVotes = showPoolVotes)
 
-        //// reading CvrExport and sorted chunks
-        while (cardIter.hasNext()) {
-            cardSorter.add(cardIter.next())
+        cardIterator.use { cardIter ->
+            while (cardIter.hasNext()) {
+                cardSorter.add(cardIter.next())
+            }
+            cvrs.forEach { cardSorter.add(it) }
         }
-        cvrs.forEach { cardSorter.add(it) }
 
         cardSorter.writeSortedChunk()
     }
@@ -107,14 +70,14 @@ class SortMerge(
     }
 }
 
-class CardSorter(val workingDirectory: String, val prng: Prng, val max: Int, val pools: Map<String, Int>?) {
+class ChunkSorter(val workingDirectory: String, val prng: Prng, val max: Int, val pools: Map<String, Int>?, val showPoolVotes: Boolean) {
     var index = 0
     var count = 0
     val cards = mutableListOf<AuditableCard>()
     var countChunks = 0
 
     fun add(card: CvrExport) {
-        val card = card.toAuditableCard(index=index, prn=prng.next(), false, pools = pools)
+        val card = card.toAuditableCard(index=index, prn=prng.next(), false, pools = pools, showPoolVotes)
         cards.add(card)
         index++
         count++

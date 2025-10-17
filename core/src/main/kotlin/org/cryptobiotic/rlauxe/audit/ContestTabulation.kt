@@ -75,8 +75,7 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
         if (mappedVotes.isNotEmpty()) irvVotes.addVote(mappedVotes.filterNotNull().toIntArray())
         ncards++
         if (candidateRanks.isEmpty()) novote++
-        if (candidateRanks.isEmpty())
-            undervotes++
+        if (candidateRanks.isEmpty()) undervotes++
     }
 
     /* fun addJustVotes(other: ContestTabulation) {
@@ -186,6 +185,7 @@ fun tabulateBallotPools(ballotPools: Iterator<BallotPool>, infos: Map<Int, Conte
     return votes
 } */
 
+// only accumulates regular votes, not IRV
 fun tabulateCardPools(cardPools: Iterator<CardPoolIF>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val votes = mutableMapOf<Int, ContestTabulation>()
     cardPools.forEach { cardPool ->

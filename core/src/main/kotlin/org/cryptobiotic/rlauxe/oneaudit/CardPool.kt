@@ -252,10 +252,10 @@ open class CardPoolFromCvrs(
         totalCards++
     }
 
-    fun sum(sumTab: MutableMap<Int, ContestTabulation>) {
-        this.contestTabs.forEach { (contestId, poolContestTab) ->
-            val contestSum = sumTab.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
-            contestSum.sum(poolContestTab)
+    fun addTo(sumTab: MutableMap<Int, ContestTabulation>) {
+        this.contestTabs.forEach { (contestId, contestTab) ->
+            val contestSumTab = sumTab.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
+            contestSumTab.sum(contestTab)
         }
     }
 

@@ -2,12 +2,11 @@ package org.cryptobiotic.rlauxe.audit
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.CvrExportAdapter
+import org.cryptobiotic.rlauxe.persist.csv.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.junit.jupiter.api.Assertions
-import kotlin.test.Test
 
 // TODO move to verifier
 class TestCheckAudits {
@@ -22,7 +21,7 @@ class TestCheckAudits {
         val contestsUA = readContestsJsonFile(publisher.contestsFile()).unwrap()
         // fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: CloseableIterator<Cvr>,
         //                          ballotPools: List<BallotPool>?, show: Boolean = false) = buildString {
-        val state = checkContestsWithCvrs(contestsUA, CvrExportAdapter(cvrExportCsvIterator(cvrExport)), cardPools = null)
+        val state = checkContestsWithCvrs(contestsUA, CvrExportToCvrAdapter(cvrExportCsvIterator(cvrExport)), cardPools = null)
         println(state)
         Assertions.assertTrue(!state.contains("***"))
     }

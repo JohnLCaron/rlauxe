@@ -1,17 +1,14 @@
 package org.cryptobiotic.rlauxe.sf
 
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.cli.RunRliRoundCli
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.MvrManagerCardsSingleRound
 import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
-import java.nio.file.Path
 import kotlin.test.Test
 
 class TestSfElectionOA {
@@ -73,6 +70,19 @@ class TestSfElectionOA {
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
             isClca = true,
+        )
+    }
+
+    @Test
+    fun createSFElectionOAnostyles() {
+        val topDir = "/home/stormy/rla/cases/sf2024/oans"
+
+        createSfElectionNoStyles(
+            topDir,
+            zipFilename,
+            "ContestManifest.json",
+            "CandidateManifest.json",
+            cvrExportCsv = cvrExportCsv,
         )
     }
 

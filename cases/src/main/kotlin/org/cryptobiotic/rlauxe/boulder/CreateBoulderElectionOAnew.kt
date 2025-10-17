@@ -236,7 +236,7 @@ open class BoulderElectionOAnew(
         return votes
     }
 
-    override fun makeCardPools() = cardPools
+    override fun cardPools() = cardPools
 
     fun makeUAContests(hasStyles: Boolean): List<ContestUnderAudit> {
         if (!quiet) println("ncontests with info = ${infoList.size}")
@@ -254,7 +254,7 @@ open class BoulderElectionOAnew(
         return regContests
     }
 
-    override fun makeContestsUA() = contestsUA
+    override fun contestsUA() = contestsUA
 
     override fun allCvrs(): List<Cvr> {
         val poolCvrs = if (isClca) redactedCvrs else createCvrsFromPools(cardPools)
@@ -263,8 +263,7 @@ open class BoulderElectionOAnew(
         return this.exportCvrs + poolCvrs + phantoms
     }
 
-    override fun cvrExport() = Closer(emptyList<CvrExport>().iterator())
-    override fun hasCvrExport() = false
+    override fun cvrExport() = null
 
     override fun testMvrs(): List<Cvr> {
         val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )

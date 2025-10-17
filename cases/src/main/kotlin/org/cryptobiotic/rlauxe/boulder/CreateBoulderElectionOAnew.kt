@@ -20,8 +20,9 @@ import kotlin.math.max
 
 private val logger = KotlinLogging.logger("BoulderElectionOA")
 
-// Use OneAudit, redacted ballots are in pools. use redacted vote counts for pools' assort averages.
+// Use OneAudit, redacted ballots are in pools.
 // No redacted CVRs. Cant do IRV.
+// specific to 2025 election. TODO: generalize
 open class BoulderElectionOAnew(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
@@ -107,7 +108,11 @@ open class BoulderElectionOAnew(
         infoList.forEach { info ->
             val sovoContest = sovo.contests.find { it.contestTitle == info.name }
             if (sovoContest != null) {
-                oa2Contests.add( OneAuditContestBoulder(info, sovoContest, countCvrVotes[info.id]!!, countRedactedVotes[info.id]!!))
+                if (countCvrVotes[info.id] != null && countRedactedVotes[info.id] != null) {
+                    oa2Contests.add(
+                        OneAuditContestBoulder(info, sovoContest, countCvrVotes[info.id]!!, countRedactedVotes[info.id]!!)
+                    )
+                }
             }
             else logger.warn{"*** cant find contest '${info.name}' in BoulderStatementOfVotes"}
         }
@@ -183,6 +188,7 @@ fun createBoulderElectionOAnew(
     cvrExportFile: String,
     sovoFile: String,
     topdir: String,
+    auditDir: String? = null,
     riskLimit: Double = 0.03,
     minRecountMargin: Double = .005,
     auditConfigIn: AuditConfig? = null,
@@ -198,5 +204,52 @@ fun createBoulderElectionOAnew(
         AuditType.ONEAUDIT, hasStyles=true, riskLimit=riskLimit, sampleLimit=20000, minRecountMargin=minRecountMargin, nsimEst=10,
         oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
     )
-    CreateAudit("boulder", topdir, auditConfig, election, clear = clear)
+    CreateAudit("boulder", topdir, auditConfig, election, auditdir = auditDir, clear = clear)
+}
+
+fun checkVotesVsSovo(contests: List<Contest>, sovo: BoulderStatementOfVotes, mustAgree: Boolean = true) {
+    // we are making the contest votes from the cvrs. how does it compare with official tally ??
+    contests.forEach { contest ->
+        val sovoContest: BoulderContestVotes? = sovo.contests.find { it.contestTitle == contest.name }
+        if (sovoContest == null) {
+            print("*** ${contest.name} not found in BoulderStatementOfVotes")
+        } else {
+            //println("sovoContest = ${sovoContest!!.candidateVotes}")
+            //println("    contest = ${contest.votes}")
+            sovoContest.candidateVotes.forEach { (sovoCandidate, sovoVote) ->
+                val candidateId = contest.info.candidateNames[sovoCandidate]
+                if (candidateId == null) {
+                    print("*** $sovoCandidate not in ${contest.info.candidateNames}")
+                }
+                val contestVote = contest.votes[candidateId]!!
+                if (contestVote != sovoVote) {
+                    println("*** ${contest.name} '$sovoCandidate' $contestVote != $sovoVote")
+                }
+                // createBoulder23 doesnt agree on contest "City of Louisville City Council Ward 2 (4-year term)"
+                // see ColbertDiscrepency.csv, FaheyDiscrepency.csv
+                if (mustAgree) require(contestVote == sovoVote)
+            }
+        }
+    }
+}
+
+fun parseContestName(name: String) : Pair<String, Int> {
+    if (!name.contains("(Vote For=")) return Pair(name.trim(), 1)
+
+    val tokens = name.split("(Vote For=")
+    require(tokens.size == 2) { "unexpected contest name $name" }
+    val namet = tokens[0].trim()
+    val ncand = tokens[1].substringBefore(")").toInt()
+    return Pair(namet, ncand)
+}
+
+// City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)
+fun parseIrvContestName(name: String) : Pair<String, Int> {
+    if (!name.contains("(Number of positions=")) return Pair(name.trim(), 1)
+
+    val tokens = name.split("(Number of positions=")
+    require(tokens.size == 2) { "unexpected contest name $name" }
+    val namet = tokens[0].trim()
+    val ncand = tokens[1].substringBefore(",").toInt()
+    return Pair(namet, ncand)
 }

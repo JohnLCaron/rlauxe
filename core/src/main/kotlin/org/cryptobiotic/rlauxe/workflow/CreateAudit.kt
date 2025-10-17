@@ -38,10 +38,10 @@ interface CreateElectionIF {
     fun testMvrs(): List<Cvr>?
 }
 
-class CreateAudit(val name: String, val topdir: String, auditConfig: AuditConfig, election: CreateElectionIF, clear: Boolean = true) {
+class CreateAudit(val name: String, val topdir: String, auditConfig: AuditConfig, election: CreateElectionIF, auditdir: String? = null, clear: Boolean = true) {
     private val logger = KotlinLogging.logger("CreateAudit-$name")
 
-    val auditDir = "$topdir/audit"
+    val auditDir = auditdir ?: "$topdir/audit"
     val stopwatch = Stopwatch()
     val isOA : Boolean
 

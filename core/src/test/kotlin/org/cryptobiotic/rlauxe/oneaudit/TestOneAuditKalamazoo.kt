@@ -122,12 +122,6 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<OAContestUnderAudit, List<Car
     val cvrNcards = stratumSizes[0]
     val cvrUndervotes = cvrNcards - cvrVotes.values.sum()
 
-    // fun makeTestMvrs(
-    //    oaContestUA: OAContestUnderAudit,
-    //    cvrNcards: Int,
-    //    cvrVotes:Map<Int, Int>,
-    //    cvrUndervotes: Int,
-    //    pools: List<BallotPool>): List<Cvr> {
     val cvrs = makeTestMvrs(contestUA, cvrNcards = cvrNcards, cvrVotes, cvrUndervotes, listOf(cardPool))
     return Triple(contestUA, listOf(cardPool), cvrs)
 }

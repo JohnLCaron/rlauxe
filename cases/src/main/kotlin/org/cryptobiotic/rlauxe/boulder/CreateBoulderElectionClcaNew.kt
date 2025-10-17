@@ -28,8 +28,7 @@ class BoulderElectionClcaNew(
     sovo: BoulderStatementOfVotes,
     val clca: Boolean = true,
     quiet: Boolean = true,
-): BoulderElectionOAnew(export, sovo, quiet)
-{
+): BoulderElectionOAnew(export, sovo, quiet) {
     val redactedCvrs = makeRedactedCvrs()
     val allCvrs = cvrs + redactedCvrs
 
@@ -151,81 +150,4 @@ fun createBoulderElectionClcaNew(
             clcaConfig = ClcaConfig(ClcaStrategyType.optimalComparison)
         )
     CreateAudit("boulder", topdir, auditConfig, election, clear = clear)
-}
-
-fun createBoulderElectionClcaOld(
-    cvrExportFile: String,
-    sovoFile: String,
-    auditDir: String,
-    clca: Boolean = false,
-    riskLimit: Double = 0.03,
-    minRecountMargin: Double = .005,
-    auditConfigIn: AuditConfig? = null,
-    clear: Boolean = true) {
-
-    if (clear) clearDirectory(Path(auditDir))
-    val stopwatch = Stopwatch()
-
-    val variation = if (sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
-    val sovo = readBoulderStatementOfVotes(sovoFile, variation)
-
-    val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
-    val election = BoulderElectionOAsim(export, sovo, clca = clca)
-
-    val rcvrVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(election.redactedCvrs.iterator())
-    logger.info { "added ${election.redactedCvrs.size} redacted cvrs with ${rcvrVotes.values.sumOf { it.values.sum() }} total votes" }
-
-    val publisher = Publisher(auditDir)
-    val auditConfig = if (auditConfigIn != null) auditConfigIn
-    else if (clca) {
-        AuditConfig(
-            AuditType.CLCA,
-            hasStyles = true,
-            riskLimit = riskLimit,
-            sampleLimit = 20000,
-            minRecountMargin = minRecountMargin,
-            nsimEst = 10,
-            clcaConfig = ClcaConfig(ClcaStrategyType.optimalComparison)
-        )
-    } else {
-        AuditConfig(
-            AuditType.ONEAUDIT,
-            hasStyles = true,
-            riskLimit = riskLimit,
-            sampleLimit = 20000,
-            minRecountMargin = minRecountMargin,
-            nsimEst = 10,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
-        )
-    }
-    writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
-
-    // write ballot pools
-    val ballotPools = election.cardPools.map { it.toBallotPools() }.flatten()
-    writeBallotPoolCsvFile(ballotPools, publisher.ballotPoolsFile())
-    logger.info{"write ${ballotPools.size} ballotPools to ${publisher.ballotPoolsFile()}"}
-
-    // form contests
-    val contestsUA = election.makeContestsUA(auditConfig.hasStyles)
-    if (clca) {
-        contestsUA.forEach { it.addClcaAssertionsFromReportedMargin() }
-    } else {
-        addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, election.cardPools)
-    }
-
-    val phantoms = makePhantomCvrs(contestsUA.map { it.contest} )
-    val allCvrs =  election.allCvrs + phantoms
-
-    val cards = createSortedCards(allCvrs, auditConfig.seed)
-    writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
-    logger.info{"write ${cards.size} cvrs to ${publisher.cardsCsvFile()}"}
-
-
-    checkContestsCorrectlyFormed(auditConfig, contestsUA)
-    checkContestsWithCvrs(contestsUA, CvrIteratorAdapter(cards.iterator()), cardPools = null)
-    checkVotesVsSovo(contestsUA.map { it.contest as Contest}, sovo, mustAgree = false)
-
-    writeContestsJsonFile(contestsUA, publisher.contestsFile())
-    logger.info{"write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
-    println("took = $stopwatch\n")
 }

@@ -173,7 +173,7 @@ fun MutableMap<Int, ContestTabulation>.addJustVotes(other: Map<Int, ContestTabul
     }
 } */
 
-// return contestId -> ContestTabulation
+//return contestId -> ContestTabulation
 fun tabulateBallotPools(ballotPools: Iterator<BallotPool>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val votes = mutableMapOf<Int, ContestTabulation>()
     ballotPools.forEach { ballotPool ->

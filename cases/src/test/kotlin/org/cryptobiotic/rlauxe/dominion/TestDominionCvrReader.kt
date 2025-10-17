@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.dominion
 
-import org.cryptobiotic.rlauxe.boulder.convert
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.junit.jupiter.api.Assertions.assertTrue

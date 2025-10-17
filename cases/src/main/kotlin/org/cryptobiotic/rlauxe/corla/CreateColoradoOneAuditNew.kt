@@ -4,8 +4,10 @@ package org.cryptobiotic.rlauxe.corla
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolWithBallotStyle
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestIF
 import org.cryptobiotic.rlauxe.oneaudit.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.CreateAudit
@@ -168,6 +170,74 @@ class ColoradoOneAuditNew (
     override fun testMvrs() = null // TODO
 }
 
+class OneAuditContestCorla(val info: ContestInfo, val detailContest: ElectionDetailContest, val contestRound: ContestRoundCsv): OneAuditContestIF {
+    override val contestId = info.id
+    val Nc: Int
+    val candidateVotes: Map<Int, Int>
+    var poolTotalCards: Int = 0
+
+    init {
+        val candidates = detailContest.choices
+        candidateVotes = candidates.mapIndexed { idx, choice -> Pair(idx, choice.totalVotes) }.toMap()
+
+        val totalVotes = candidateVotes.map { it.value }.sum() / info.voteForN
+        var useNc = contestRound.contestBallotCardCount
+        if (useNc < totalVotes) {
+            println("*** Contest ${info.name} has $totalVotes total votes, but contestBallotCardCount is ${contestRound.contestBallotCardCount} - using totalVotes")
+            useNc = totalVotes // contestRound.ballotCardCount
+        }
+        Nc = useNc
+    }
+
+    // total cards in all pools for this contest
+    override fun poolTotalCards(): Int  = poolTotalCards
+
+    override fun adjustPoolInfo(cardPools: List<CardPoolIF>){
+        poolTotalCards = cardPools.filter{ it.contains(info.id) }.sumOf { it.ncards() }
+    }
+
+    fun poolUndervote(cardPools: List<CardPoolWithBallotStyle>): Int {
+        return cardPools.sumOf { it.undervoteForContest(contestId) }
+    }
+
+    // expected total poolcards for this contest, making assumptions about missing undervotes
+    override fun expectedPoolNCards() = Nc
+}
+
+fun makeCvrsFromPool(cardPool: CardPoolWithBallotStyle, oaContestMap: Map<Int, OneAuditContestCorla>, isClca: Boolean) : List<Cvr> {
+
+    val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
+    cardPool.voteTotals.forEach { (contestId, candVotes) ->
+        val oaContest: OneAuditContestCorla = oaContestMap[contestId]!!
+        val sumVotes = candVotes.map { it.value }.sum()
+        val underVotes = cardPool.ncards() * oaContest.info.voteForN - sumVotes
+        contestVotes[contestId] = VotesAndUndervotes(candVotes, underVotes, oaContest.info.voteForN)
+    }
+
+    val cvrs = makeVunderCvrs(contestVotes, cardPool.poolName, poolId = if (isClca) null else cardPool.poolId) // TODO test
+
+    // check
+    val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
+    contestVotes.forEach { (contestId, vunders) ->
+        val tv = tabVotes[contestId] ?: emptyMap()
+        if (!checkEquivilentVotes(vunders.candVotesSorted, tv)) {
+            println("  contestId=${contestId}")
+            println("  tabVotes=${tv}")
+            println("  vunders= ${vunders.candVotesSorted}")
+            require(checkEquivilentVotes(vunders.candVotesSorted, tv))
+        }
+    }
+
+    val infos = oaContestMap.mapValues { it.value.info }
+    val cvrTab = tabulateCvrs(cvrs.iterator(), infos).toSortedMap()
+    cvrTab.forEach { contestId, contestTab ->
+        val oaContest: OneAuditContestCorla = oaContestMap[contestId]!!
+        require(checkEquivilentVotes(cardPool.voteTotals[contestId]!!, contestTab.votes))
+    }
+
+    return cvrs
+}
+
 ////////////////////////////////////////////////////////////////////
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
 fun createColoradoOneAuditNew(
@@ -195,4 +265,5 @@ fun createColoradoOneAuditNew(
 
     CreateAudit("corla", auditDir, auditConfig, election, clear = clear)
 }
+
 

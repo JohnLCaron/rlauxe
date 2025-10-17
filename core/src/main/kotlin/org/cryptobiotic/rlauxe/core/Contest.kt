@@ -47,6 +47,11 @@ data class ContestInfo(
     override fun toString() = buildString {
         append("'$name' ($id) candidates=${candidateIds} choiceFunction=$choiceFunction nwinners=$nwinners voteForN=${voteForN}")
     }
+
+    fun show() = buildString {
+        appendLine("$name ($id) choiceFunction=${choiceFunction} nwinners=$nwinners")
+        candidateNames.forEach { (name, id) -> appendLine("  $name -> $id") }
+    }
 }
 
 // Needed to allow RaireContest, which does not have votes: Map<Int, Int>

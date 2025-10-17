@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class TestCreateColoradoAudits {
 
@@ -17,7 +18,7 @@ class TestCreateColoradoAudits {
         println("  number of contests = ${electionResultXml.contests.size}")
     }
 
-    // make data to test TreeReader
+    /* make data to test TreeReader
     @Test
     fun createColoradoClcaAuditOld() {
         val topdir = "/home/stormy/rla/cases/corla/old"
@@ -33,8 +34,9 @@ class TestCreateColoradoAudits {
         // other tests depend on this one
         // testTreeReader()
         // makeCountySampleLists()
-    }
+    } */
 
+    /*
     @Test
     fun testCreateColoradoOneAudit() {
         val auditDir = "/home/stormy/rla/cases/corla/oneaudit"
@@ -53,7 +55,7 @@ class TestCreateColoradoAudits {
         val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
 
         createColoradoOneAudit(auditDir, detailXmlFile, contestRoundFile, precinctFile, isClca=true, clear=true)
-    }
+    } */
 
     @Test
     fun testCreateColoradoOneAuditNew() {
@@ -77,10 +79,11 @@ class TestCreateColoradoAudits {
 
     @Test
     fun testPrecinctTree() {
-        val cvrsDir = "/home/stormy/rla/cases/corla/$cvrExportDir"
-        val tour = TreeReaderTour(cvrsDir) { path -> precinctLine(path) }
+        val cvrsDir = "/home/stormy/rla/cases/corla/old/cvrexport"
+        val tour = TreeReaderTour(cvrsDir, silent = false) { path -> precinctLine(path) }
         println("county, precinct")
-        tour.tourFiles()
+        val total = tour.tourFiles()
+        assertEquals(3199, total)
     }
 
     fun precinctLine(path: Path, silent: Boolean = true): CountyAndPrecinct {
@@ -96,14 +99,8 @@ class TestCreateColoradoAudits {
     fun testCountySampleLists() {
         val countyPrecincts = mutableListOf<CountyAndPrecinct>()
 
-        val topDir = "/home/stormy/rla/cases/corla"
-        val precinctReader = TreeReaderIterator(
-            "$topDir/$cvrExportDir/",
-            fileFilter = { true },
-            reader = { path -> readCardsCsvIterator(path.toString()) }
-        )
-
-        val tour = TreeReaderTour("$topDir/$cvrExportDir") { path -> countyPrecincts.add(precinctLine(path)) }
+        val topDir = "/home/stormy/rla/cases/corla/old"
+        val tour = TreeReaderTour("$topDir/cvrexport") { path -> countyPrecincts.add(precinctLine(path)) }
         tour.tourFiles()
 
         val precinctMap = countyPrecincts.associate { it.precinct to it.county }

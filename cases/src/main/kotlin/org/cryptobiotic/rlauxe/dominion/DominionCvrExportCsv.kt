@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.dominion
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.ZipReader
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
@@ -122,6 +124,14 @@ data class CastVoteRecord(
         contestVotes.forEach {
             appendLine("    ${it.contestId} ${it.candVotes.joinToString(",")}")
         }
+    }
+
+    fun convert(): Cvr {
+        val cvrb = CvrBuilder2(this.cvrNumber.toString(),  false)
+        this.contestVotes.forEach{
+            cvrb.addContest(it.contestId, it.candVotes.toIntArray())
+        }
+        return cvrb.build()
     }
 }
 

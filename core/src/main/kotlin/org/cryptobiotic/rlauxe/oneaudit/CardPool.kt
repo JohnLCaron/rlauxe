@@ -45,7 +45,7 @@ interface CardPoolIF {
     fun regVotes() : Map<Int, RegVotes> // contestId -> RegVotes, regular contests only
     fun ncards() : Int // total number of cards in the pool, including undervotes
     fun contains(contestId: Int) : Boolean // does the pool contain this contest ?
-    fun toBallotPools(): List<BallotPool>
+    // fun toBallotPools(): List<BallotPool>
     fun contests(): IntArray
     fun votesAndUndervotes(contestId: Int): VotesAndUndervotes
 }
@@ -87,7 +87,7 @@ class CardPoolWithBallotStyle(
         adjustCards = max( adjust, adjustCards)
     }
 
-    override fun contests() = (voteTotals.map { it.key }).toSortedSet().toIntArray()
+    override fun contests() = voteTotals.map { it.key }.toSortedSet().toIntArray()
 
     fun showVotes(contestIds: Collection<Int>, width: Int=4) = buildString {
         append("${trunc(poolName, 9)}:")
@@ -139,16 +139,37 @@ class CardPoolWithBallotStyle(
         return VotesAndUndervotes(votesForContest, poolUndervotes, infos[contestId]!!.voteForN)
     }
 
-    override fun toBallotPools(): List<BallotPool> {
+    /* override fun toBallotPools(): List<BallotPool> {
         return voteTotals.map { (contestId, candCount) ->
             BallotPool(poolName, poolId, contestId, ncards(), candCount)
         }
-    }
+    } */
 
     override fun toString(): String {
         return "CardPoolWithBallotStyle(poolName='$poolName', poolId=$poolId, voteTotals=$voteTotals, maxMinCardsNeeded=$maxMinCardsNeeded)"
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CardPoolWithBallotStyle
+
+        if (poolId != other.poolId) return false
+        if (adjustCards != other.adjustCards) return false
+        if (poolName != other.poolName) return false
+        if (voteTotals != other.voteTotals) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = poolId
+        result = 31 * result + adjustCards
+        result = 31 * result + poolName.hashCode()
+        result = 31 * result + voteTotals.hashCode()
+        return result
+    }
 
     companion object {
         fun showVotes(contestIds: List<Int>, cardPools: List<CardPoolWithBallotStyle>, width:Int = 4) {
@@ -194,7 +215,7 @@ open class CardPoolFromCvrs(
 
     override fun contests() = (contestTabs.map { it.key }).toSortedSet().toIntArray()
 
-    override fun toBallotPools(): List<BallotPool> {
+    /* override fun toBallotPools(): List<BallotPool> {
         val bpools = mutableListOf<BallotPool>()
         contestTabs.forEach { contestId, contestCount ->
             if (contestCount.ncards > 0) {
@@ -202,7 +223,7 @@ open class CardPoolFromCvrs(
             }
         }
         return bpools
-    }
+    } */
 
     override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
         val contestTab = contestTabs[contestId]!!
@@ -236,6 +257,26 @@ open class CardPoolFromCvrs(
             val contestSum = sumTab.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
             contestSum.sum(poolContestTab)
         }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is CardPoolFromCvrs) return false
+
+        if (poolId != other.poolId) return false
+        if (totalCards != other.totalCards) return false
+        if (poolName != other.poolName) return false
+        if (contestTabs != other.contestTabs) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = poolId
+        result = 31 * result + totalCards
+        result = 31 * result + poolName.hashCode()
+        result = 31 * result + contestTabs.hashCode()
+        return result
     }
 
     companion object {

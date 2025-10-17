@@ -14,15 +14,13 @@ import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
 import java.nio.file.Path
 import kotlin.test.Test
 
-// This is to match https://github.com/spertus/UI-TS/blob/main/Code/SF_oneaudit_example.ipynb
-// can use the cvsExport file from sf2024. need to redo the sorted cards.
 class TestSfElectionOA {
     val sfDir = "/home/stormy/rla/cases/sf2024"
     val zipFilename = "$sfDir/CVR_Export_20241202143051.zip"
     val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
     val topDir = "/home/stormy/rla/cases/sf2024oa"
 
-    // create the audit contests using the cvrExport files
+    /* create the audit contests using the cvrExport files
     @Test
     fun createSF2024OA() {
         val auditDir = "$topDir/audit"
@@ -48,22 +46,37 @@ class TestSfElectionOA {
         val auditDir = "$topDir/audit"
         val ballotPoolFile = "$auditDir/$ballotPoolsFile"
         createSortedCards(topDir, auditDir, cvrExportCsv = cvrExportCsv, zip = true, ballotPoolFile = ballotPoolFile) // write to "$auditDir/sortedCards.csv"
-    }
+    } */
 
     @Test
-    fun createSF2024OAnew() {
-        val topDir = "/home/stormy/rla/cases/sf2024oanew"
+    fun createSFElectionOA() {
+        val topDir = "/home/stormy/rla/cases/sf2024/oa"
 
-        createSfElectionOAnew(
+        createSfElection(
             topDir,
             zipFilename,
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
+            isClca = false,
         )
     }
 
-    // @Test
+    @Test
+    fun createSFElectionClca() {
+        val topDir = "/home/stormy/rla/cases/sf2024/clca"
+
+        createSfElection(
+            topDir,
+            zipFilename,
+            "ContestManifest.json",
+            "CandidateManifest.json",
+            cvrExportCsv = cvrExportCsv,
+            isClca = true,
+        )
+    }
+
+    /*
     fun createSF2024OArepeat() {
 
         repeat(10) { run ->
@@ -119,7 +132,7 @@ class TestSfElectionOA {
                 )
             )
         }
-    }
+    } */
 
     @Test
     fun testCardContests() {

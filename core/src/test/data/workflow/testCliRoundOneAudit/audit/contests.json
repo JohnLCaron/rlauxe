@@ -1,0 +1,65 @@
+{
+    "contestsUnderAudit": [],
+    "rcontestsUnderAudit": [],
+    "oacontestsUnderAudit": [
+        {
+            "info": {
+                "name": "ContestOA",
+                "id": 0,
+                "candidateNames": {
+                    "winner": 0,
+                    "loser": 1
+                },
+                "choiceFunction": "PLURALITY",
+                "nwinners": 1,
+                "voteForN": 1,
+                "metadata": {
+                    "PoolPct": 5
+                }
+            },
+            "contest": {
+                "className": "Contest",
+                "votes": {
+                    "0": 5000,
+                    "1": 4900
+                },
+                "Nc": 10000,
+                "Ncast": 10000
+            },
+            "isComparison": true,
+            "hasStyle": true,
+            "pollingAssertions": [
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMargin": 0.01,
+                        "winner": 0,
+                        "loser": 1
+                    }
+                }
+            ],
+            "clcaAssertions": [
+                {
+                    "cassorter": {
+                        "className": "OAClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMargin": 0.01,
+                            "winner": 0,
+                            "loser": 1
+                        },
+                        "hasStyle": true,
+                        "poolAverages": {
+                            "assortAverage": {
+                                "1": 0.505
+                            }
+                        }
+                    }
+                }
+            ],
+            "status": "InProgress"
+        }
+    ],
+    "oarcontestsUnderAudit": []
+}

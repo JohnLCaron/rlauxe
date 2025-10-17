@@ -4,6 +4,7 @@ package org.cryptobiotic.rlauxe.corla
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolWithBallotStyle
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
@@ -12,6 +13,7 @@ import org.cryptobiotic.rlauxe.oneaudit.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.CreateAudit
 import org.cryptobiotic.rlauxe.workflow.CreateElectionIF
+import org.cryptobiotic.rlauxe.workflow.createCvrsFromPools
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.max
@@ -24,6 +26,7 @@ class ColoradoOneAuditNew (
     contestRoundFile: String,
     precinctFile: String,
     val isClca: Boolean,
+    val hasStyles: Boolean = true,
 ): CreateElectionIF {
     val roundContests: List<ContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
@@ -31,6 +34,9 @@ class ColoradoOneAuditNew (
     val oaContests = makeOneContestInfo(electionDetailXml, roundContests)
     val infoMap = oaContests.associate { it.info.id to it.info }
     val cardPools = convertPrecinctsToCardPools(precinctFile, infoMap)
+
+    val contestsUA: List<ContestUnderAudit>
+    val allCvrs: List<Cvr>
 
     init {
         // add pool counts into contests
@@ -49,6 +55,9 @@ class ColoradoOneAuditNew (
             val undervote = undervotes.getOrPut(it.info.id) { mutableListOf() }
             undervote.add(it.poolUndervote(cardPools))
         }
+
+        contestsUA = makeUAContests(hasStyles)
+        allCvrs = makeCvrs()
     }
 
     private fun makeOneContestInfo(electionDetailXml: ElectionDetailXml, roundContests: List<ContestRoundCsv>): List<OneAuditContestCorla> {
@@ -125,9 +134,8 @@ class ColoradoOneAuditNew (
         }
     }
 
-    override fun makeCardPools() = cardPools
 
-    override fun makeContestsUA(hasStyles: Boolean): List<OAContestUnderAudit> {
+    fun makeUAContests(hasStyles: Boolean): List<OAContestUnderAudit> {
         val infoList= oaContests.map { it.info }.sortedBy { it.id }
         val contestMap= oaContests.associateBy { it.info.id }
 
@@ -146,8 +154,11 @@ class ColoradoOneAuditNew (
         return regContests
     }
 
-    // TODO phantoms etc
-    override fun allCvrs(): List<Cvr> {
+    override fun makeCardPools() = cardPools
+    override fun makeContestsUA() = contestsUA
+
+        // TODO phantoms etc
+    fun makeCvrs(): List<Cvr> {
         val oaContestMap = oaContests.associateBy { it.info.id }
 
         val rcvrs = mutableListOf<Cvr>()
@@ -165,9 +176,21 @@ class ColoradoOneAuditNew (
         return rcvrs
     }
 
-    override fun cvrExport() = Closer(emptyList<CvrExport>().iterator())
+    override fun allCvrs(): List<Cvr> {
+        val poolCvrs = if (isClca) allCvrs else createCvrsFromPools(cardPools)
+        val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
+        // println("allCvrs ${this.exportCvrs.size} + ${poolCvrs.size} + ${phantoms.size}")
+        return poolCvrs + phantoms
+    }
+
+    override fun testMvrs(): List<Cvr> {
+        val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
+        // println("testMvrs ${this.exportCvrs.size} + ${redactedCvrs.size} + ${phantoms.size}")
+        return allCvrs + phantoms
+    }
+
+    override fun cvrExport() = null
     override fun hasCvrExport() = false
-    override fun testMvrs() = null // TODO
 }
 
 class OneAuditContestCorla(val info: ContestInfo, val detailContest: ElectionDetailContest, val contestRound: ContestRoundCsv): OneAuditContestIF {
@@ -241,7 +264,7 @@ fun makeCvrsFromPool(cardPool: CardPoolWithBallotStyle, oaContestMap: Map<Int, O
 ////////////////////////////////////////////////////////////////////
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
 fun createColoradoOneAuditNew(
-    auditDir: String,
+    topdir: String,
     electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
@@ -249,6 +272,7 @@ fun createColoradoOneAuditNew(
     isClca: Boolean,
     clear: Boolean = true)
 {
+    val stopwatch = Stopwatch()
     val election = ColoradoOneAuditNew(electionDetailXmlFile, contestRoundFile, precinctFile, isClca)
 
     val auditConfig = when {
@@ -263,7 +287,8 @@ fun createColoradoOneAuditNew(
         )
     }
 
-    CreateAudit("corla", auditDir, auditConfig, election, clear = clear)
+    CreateAudit("corla", topdir, auditConfig, election, clear = clear)
+    println("createColoradoOneAuditNew took $stopwatch")
 }
 
 

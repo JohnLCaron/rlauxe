@@ -212,11 +212,11 @@ object RunRlaCreateOneAudit {
         }
         override fun makeCardPools() = allCardPools
 
-        override fun makeContestsUA(hasStyles: Boolean) = contestsUA
+        override fun makeContestsUA() = contestsUA
 
         override fun allCvrs() = allCvrs
 
-        override fun cvrExport() = Closer(emptyList<CvrExport>().iterator())
+        override fun cvrExport() = null
 
         override fun hasCvrExport() = false
 

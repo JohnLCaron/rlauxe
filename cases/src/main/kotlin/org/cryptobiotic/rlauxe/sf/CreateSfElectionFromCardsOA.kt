@@ -64,12 +64,13 @@ fun createSfElectionFromCvrExportOA(
     // write ballot pools, but not unpooled
     val cardPoolsNotUnpooled = cardPools.values.filter{ it.poolName != unpooled }
     val poolCards = cardPoolsNotUnpooled.sumOf { it.totalCards }
-    val ballotPools = cardPoolsNotUnpooled.map { it.toBallotPools() }.flatten()
+    val unpooledPool = cardPools.values.find { it.poolName == unpooled }!!
+
+    /* val ballotPools = cardPoolsNotUnpooled.map { it.toBallotPools() }.flatten()
     writeBallotPoolCsvFile(ballotPools, publisher.ballotPoolsFile()) // dont write unpooled
     logger.info{" ${cardPools.size} cardPools, ${poolCards} cards to ${publisher.ballotPoolsFile()}"}
 
     // make contests based on cardPool tabulations
-    val unpooledPool = cardPools.values.find { it.poolName == unpooled }!!
 
     println("^^^ contest1 allPool = ${contestTabSums[1]}")
     println("^^^ contest1 unpooledtab = ${unpooledPool.contestTabs[1]}")
@@ -79,7 +80,7 @@ fun createSfElectionFromCvrExportOA(
         poolSum.ncards += it.ncards
         poolSum.undervotes += it.ncards - it.votes.map { it.value }.sum()
     }
-    println("^^^ contest1 pooledtab = ${poolSum}")
+    println("^^^ contest1 pooledtab = ${poolSum}") */
 
     val allContests =  makeAllOneAuditContests(contestTabSums, contestNcs, unpooledPool).sortedBy { it.id }
 
@@ -167,7 +168,7 @@ fun createCardPools(
     val poolFilename = "$auditDir/$ballotPoolsFile"
     logger.info{" writing to $poolFilename with ${cardPools.size} pools"}
     val poutputStream = FileOutputStream(poolFilename)
-    poutputStream.write(BallotPoolCsvHeader.toByteArray()) // UTF-8
+    // poutputStream.write(BallotPoolCsvHeader.toByteArray()) // UTF-8
 
     //// because the unpooled is in a pool, the sum of pools are all the votes
     val sortedPools = cardPools.toSortedMap()

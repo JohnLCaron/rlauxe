@@ -254,15 +254,12 @@ open class BoulderElectionOAnew(
         return regContests
     }
 
-    override fun makeContestsUA(hasStyles: Boolean) = contestsUA
+    override fun makeContestsUA() = contestsUA
 
     override fun allCvrs(): List<Cvr> {
         val poolCvrs = if (isClca) redactedCvrs else createCvrsFromPools(cardPools)
-
-        if (redactedCvrs.size != poolCvrs.size)
-            println("why")
         val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-        println("allCvrs ${this.exportCvrs.size} + ${poolCvrs.size} + ${phantoms.size}")
+        // println("allCvrs ${this.exportCvrs.size} + ${poolCvrs.size} + ${phantoms.size}")
         return this.exportCvrs + poolCvrs + phantoms
     }
 
@@ -271,7 +268,7 @@ open class BoulderElectionOAnew(
 
     override fun testMvrs(): List<Cvr> {
         val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-        println("testMvrs ${this.exportCvrs.size} + ${redactedCvrs.size} + ${phantoms.size}")
+        // println("testMvrs ${this.exportCvrs.size} + ${redactedCvrs.size} + ${phantoms.size}")
         return this.exportCvrs + redactedCvrs + phantoms
     }
 }

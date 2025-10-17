@@ -5,6 +5,7 @@ import kotlin.test.Test
 
 class TestSfPrimaryElection {
 
+    /*
     @Test
     fun createSfPrimaryElection() {
         val stopwatch = Stopwatch()
@@ -28,5 +29,5 @@ class TestSfPrimaryElection {
 
         createSortedCards(topDir, auditDir, cvrCsv, zip = true, ballotPoolFile = null) // write to "$auditDir/sortedCards.csv"
         println("that took $stopwatch")
-    }
+    } */
 }

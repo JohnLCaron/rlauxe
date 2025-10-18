@@ -52,10 +52,11 @@ interface CardPoolIF {
 
 // When the pools do not have CVRS, but just pool vote count totals.
 // Assumes that all cards have the same BallotStyle.
+// TODO cant do IRVs?
 class CardPoolWithBallotStyle(
     override val poolName: String,
     override val poolId: Int,
-    val voteTotals: Map<Int, Map<Int, Int>>, // contestId -> candidateId -> nvotes // TODO use ContestTabulation ??
+    val voteTotals: Map<Int, Map<Int, Int>>, // contestId -> candidateId -> nvotes // TODO use ContestTabulation
     val infos: Map<Int, ContestInfo>, // all infos
 ) : CardPoolIF
 {
@@ -78,7 +79,7 @@ class CardPoolWithBallotStyle(
 
     override fun contains(contestId: Int) = voteTotals.contains(contestId)
     override fun regVotes(): Map<Int, RegVotes> {
-        return voteTotals.mapValues { (_, votes) -> RegVotesImpl(votes, ncards()) }
+        return voteTotals.mapValues { (id, votes) -> RegVotesImpl(votes, ncards(), undervoteForContest(id)) }
     }
     override fun ncards() = maxMinCardsNeeded + adjustCards
 
@@ -139,12 +140,6 @@ class CardPoolWithBallotStyle(
         return VotesAndUndervotes(votesForContest, poolUndervotes, infos[contestId]!!.voteForN)
     }
 
-    /* override fun toBallotPools(): List<BallotPool> {
-        return voteTotals.map { (contestId, candCount) ->
-            BallotPool(poolName, poolId, contestId, ncards(), candCount)
-        }
-    } */
-
     override fun toString(): String {
         return "CardPoolWithBallotStyle(poolName='$poolName', poolId=$poolId, voteTotals=$voteTotals, maxMinCardsNeeded=$maxMinCardsNeeded)"
     }
@@ -197,7 +192,7 @@ open class CardPoolFromCvrs(
     // a convenient place to keep this, calculated in addOAClcaAssorters()
     override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
     override fun contains(contestId: Int) = contestTabs.contains(contestId)
-    override fun regVotes() = contestTabs.filter { !it.value.isIrv }
+    override fun regVotes() = contestTabs
     override fun ncards() = totalCards
 
     // this is when you have CVRs. (sfoa, sfoans)
@@ -215,22 +210,12 @@ open class CardPoolFromCvrs(
 
     override fun contests() = (contestTabs.map { it.key }).toSortedSet().toIntArray()
 
-    /* override fun toBallotPools(): List<BallotPool> {
-        val bpools = mutableListOf<BallotPool>()
-        contestTabs.forEach { contestId, contestCount ->
-            if (contestCount.ncards > 0) {
-                bpools.add(BallotPool(poolName, poolId, contestId, contestCount.ncards, contestCount.votes))
-            }
-        }
-        return bpools
-    } */
-
     override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
         val contestTab = contestTabs[contestId]!!
         return contestTab.votesAndUndervotes() // good reason for carsPool to always have contestTabs?
     }
 
-    // every cvr has to have every contest in the pool
+    // every cvr has to have every contest in the pool TODO not needed?
     fun addUndervotes(cvr: Cvr): Cvr {
         var wasAmended = false
         val votesM= cvr.votes.toMutableMap()
@@ -247,9 +232,9 @@ open class CardPoolFromCvrs(
 
     fun addUndervote(contestId: Int) {
         val contestTab = contestTabs[contestId]!!
-        contestTab.undervotes++
+        contestTab.undervotes += if (contestTab.isIrv) 1 else contestTab.voteForN
         contestTab.ncards++
-        totalCards++
+        contestTab.novote++
     }
 
     fun addTo(sumTab: MutableMap<Int, ContestTabulation>) {
@@ -277,6 +262,10 @@ open class CardPoolFromCvrs(
         result = 31 * result + poolName.hashCode()
         result = 31 * result + contestTabs.hashCode()
         return result
+    }
+
+    override fun toString(): String {
+        return "CardPoolFromCvrs(poolName='$poolName', poolId=$poolId, contestTabs=$contestTabs, totalCards=$totalCards)"
     }
 
     companion object {

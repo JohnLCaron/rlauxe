@@ -213,9 +213,7 @@ object RunRlaCreateOneAudit {
         override fun cardPools() = allCardPools
         override fun contestsUA() = contestsUA
 
-        override fun allCvrs() = allCvrs
-        override fun testMvrs() = testMvrs
-
+        override fun allCvrs() = Pair(allCvrs, testMvrs)
         override fun cvrExport() = null
     }
 }

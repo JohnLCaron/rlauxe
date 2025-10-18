@@ -169,6 +169,7 @@ fun ContestTabulation.publishJson() = ContestTabulationJson(
 
 fun ContestTabulationJson.import(info: ContestInfo): ContestTabulation {
     val cardPool = ContestTabulation(info)
+    cardPool.votes.putAll(this.votes)
     cardPool.ncards = this.ncards
     cardPool.novote = this.novote
     cardPool.undervotes = this.undervotes

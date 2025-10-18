@@ -18,8 +18,8 @@ class TestCreateColoradoAudits {
     }
 
     @Test
-    fun testCreateColoradoOneAuditNew() {
-        val topdir = "/home/stormy/rla/cases/corla/oneauditnew"
+    fun testCreateColoradoOneAudit() {
+        val topdir = "/home/stormy/rla/cases/corla/oneaudit"
         val detailXmlFile = "src/test/data/2024election/detail.xml"
         val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
@@ -28,8 +28,8 @@ class TestCreateColoradoAudits {
     }
 
     @Test
-    fun testCreateColoradoClcaNew() {
-        val topdir = "/home/stormy/rla/cases/corla/clcanew"
+    fun testCreateColoradoClca() {
+        val topdir = "/home/stormy/rla/cases/corla/clca"
         val detailXmlFile = "src/test/data/2024election/detail.xml"
         val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"

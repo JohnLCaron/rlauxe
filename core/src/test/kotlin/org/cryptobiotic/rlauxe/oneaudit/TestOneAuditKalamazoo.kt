@@ -109,7 +109,9 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<OAContestUnderAudit, List<Car
 
     val poolVotes = candidateVotes.map { (name, votes) ->
         Pair( info.candidateNames[name]!!, votes[1])}.toMap()
-    val regVotes = RegVotesImpl(poolVotes, stratumSizes[1])
+    val poolUndervotes = stratumSizes[1] - poolVotes.values.sum()
+
+    val regVotes = RegVotesImpl(poolVotes, stratumSizes[1], poolUndervotes)
     val cardPool = CardPoolImpl("kali", 1, info.id, regVotes)
 
     val contestUA = OAContestUnderAudit(contest)

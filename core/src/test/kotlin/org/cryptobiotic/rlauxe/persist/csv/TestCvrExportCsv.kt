@@ -72,4 +72,26 @@ class TestCvrExportCsv {
         assertEquals(target, card)
     }
 
+    @Test
+    fun testToAuditableCardNoshowPoolVotes() {
+        val cvr = CvrExport (
+            "test1-2-3",
+            1,
+            mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
+        )
+        val card = cvr.toAuditableCard(42, 43L, true, mapOf("test1-2" to 99), showPoolVotes=false)
+
+        val target = AuditableCard (
+            "test1-2-3",
+            42,
+            43L,
+            true,
+            intArrayOf(19, 23, 99, 123456),
+            null,
+            99,
+        )
+
+        assertEquals(target, card)
+    }
+
 }

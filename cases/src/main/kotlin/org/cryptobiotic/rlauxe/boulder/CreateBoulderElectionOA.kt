@@ -25,7 +25,7 @@ private val logger = KotlinLogging.logger("BoulderElectionOA")
 // Use OneAudit; redacted ballots are in pools.
 // No redacted CVRs. Cant do IRV.
 // specific to 2025 election. TODO: generalize
-open class BoulderElectionOAnew(
+open class BoulderElectionOA(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
     val isClca: Boolean,
@@ -244,7 +244,7 @@ open class BoulderElectionOAnew(
         val regContests = infoList.filter { !it.isIrv }.map { info ->
             val oaContest = oaContests[info.id]!!
             val candVotes = oaContest.candVoteTotals().filter { info.candidateIds.contains(it.key) } // remove Write-Ins
-            val ncards = oaContest.sumAllCards()
+            val ncards = oaContest.ncards()
             val useNc = max( ncards, oaContest.Nc())
             val contest = Contest(info, candVotes, useNc, ncards)
             info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
@@ -256,20 +256,17 @@ open class BoulderElectionOAnew(
 
     override fun contestsUA() = contestsUA
 
-    override fun allCvrs(): List<Cvr> {
+    override fun allCvrs(): Pair<List<Cvr>,List<Cvr>> {
         val poolCvrs = if (isClca) redactedCvrs else createCvrsFromPools(cardPools)
         val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-        // println("allCvrs ${this.exportCvrs.size} + ${poolCvrs.size} + ${phantoms.size}")
-        return this.exportCvrs + poolCvrs + phantoms
+        val cvrs =  this.exportCvrs + poolCvrs + phantoms
+        val mvrs =  this.exportCvrs + redactedCvrs + phantoms
+        require(cvrs.size == mvrs.size)
+        return Pair(cvrs, mvrs)
     }
 
     override fun cvrExport() = null
 
-    override fun testMvrs(): List<Cvr> {
-        val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-        // println("testMvrs ${this.exportCvrs.size} + ${redactedCvrs.size} + ${phantoms.size}")
-        return this.exportCvrs + redactedCvrs + phantoms
-    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -306,7 +303,7 @@ fun createBoulderElection(
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
 
-    val election = BoulderElectionOAnew(export, sovo, isClca = isClca)
+    val election = BoulderElectionOA(export, sovo, isClca = isClca)
 
     CreateAudit("boulder", topdir, auditConfig, election, auditdir = auditDir, clear = clear)
     println("createBoulderElectionOAnew took $stopwatch")

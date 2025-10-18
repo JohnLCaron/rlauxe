@@ -389,8 +389,9 @@ open class ContestUnderAudit(
 
     open fun show() = buildString {
         val votes = if (contest is Contest) contest.votesAndUndervotes() else emptyMap()
+        val sumVotes = if (contest is Contest) contest.votes()!!.map{ it.value }.sum() else 0
         appendLine("${contest.javaClass.simpleName} '$name' ($id) $choiceFunction voteForN=${contest.info().voteForN} votesAndUndervotes=${votes}")
-        appendLine(" winners=${contest.winners()} minMargin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np Nu=$Nu")
+        appendLine(" winners=${contest.winners()} minMargin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np Nu=$Nu, sumVotes=$sumVotes")
         append(showCandidates())
     }
 

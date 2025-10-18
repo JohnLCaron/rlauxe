@@ -6,31 +6,41 @@ import kotlin.test.fail
 
 class TestVerifyUseCases {
     val show = false
+
     @Test
     fun testRunVerifyCorlaOneAudit() {
-        val auditdir = "/home/stormy/rla/cases/corla/oneaudit"
+        val auditdir = "/home/stormy/rla/cases/corla/oneaudit/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
-        if (results.fail()) fail()
+        if (results.fail) fail()
     }
 
     @Test
-    fun testRunVerifyCorlaOneAuditNew() {
-        val auditdir = "/home/stormy/rla/cases/corla/oneauditnew"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+    fun testRunVerifyCorlaOneAuditContest() {
+        val auditdir = "/home/stormy/rla/cases/corla/oneaudit/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
         println()
         print(results)
-        if (results.fail()) fail()
+        if (results.fail) fail()
     }
 
     @Test
     fun testRunVerifyCorlaClca() {
-        val auditdir = "/home/stormy/rla/cases/corla/clca"
+        val auditdir = "/home/stormy/rla/cases/corla/clca/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
-        if (results.fail()) fail()
+        if (results.fail) fail()
+    }
+
+    @Test
+    fun testRunVerifyCorlaClcaContest() {
+        val auditdir = "/home/stormy/rla/cases/corla/clca/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
+        println()
+        print(results)
+        if (results.fail) fail()
     }
 
     @Test
@@ -39,7 +49,7 @@ class TestVerifyUseCases {
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
-        if (results.fail()) fail()
+        if (results.fail) fail()
     }
 
     @Test
@@ -48,44 +58,61 @@ class TestVerifyUseCases {
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
-        if (results.fail()) fail()
+        if (results.fail) fail()
     }
 
     @Test
-    fun testRunVerifySf2024oaContest1() {
-        val auditdir = "/home/stormy/rla/cases/sf2024oa/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
+    fun testRunVerifySf2024oaContest() {
+        val auditdir = "/home/stormy/rla/cases/sf2024/oa/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, 18, show = true)
         println()
         print(results)
-        if (results.fail()){
-            fail()
-        }
+        if (results.fail) fail()
     }
 
     @Test
-    fun testRunVerifyBoulder24oanew() {
-        val auditdir = "/home/stormy/rla/cases/boulder24oanew/audit"
+    fun testRunVerifySf2024oans() {
+        val auditdir = "/home/stormy/rla/cases/sf2024/oans/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
-        if (results.fail()) fail()
+        if (results.fail) fail()
     }
 
     @Test
-    fun testRunVerifyBoulderClcanew() {
-        val auditdir = "/home/stormy/rla/cases/boulder24clcanew/audit"
+    fun testRunVerifySf2024oansContest() {
+        val auditdir = "/home/stormy/rla/cases/sf2024/oans/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, 18, show = true)
+        println()
+        print(results)
+        if (results.fail) fail()
+    }
+
+    @Test
+    fun testRunVerifyBoulder24oa() {
+        val auditdir = "/home/stormy/rla/cases/boulder24/oa/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
-        if (results.fail()) fail()
+        if (results.fail) fail()
     }
 
     @Test
-    fun testRunVerifyBoulder24oaContest16() {
-        val auditdir = "/home/stormy/rla/cases/boulder24oa/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, 16, show = show)
+    fun testRunVerifyBoulder24oaContest() {
+        val auditdir = "/home/stormy/rla/cases/boulder24/oa/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, 20, show = true)
         println()
         print(results)
-        if (results.fail()) fail()
+        if (results.fail) fail()
     }
+
+    @Test
+    fun testRunVerifyBoulderClca() {
+        val auditdir = "/home/stormy/rla/cases/boulder24/clca/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        println()
+        print(results)
+        if (results.fail) fail()
+    }
+
 }

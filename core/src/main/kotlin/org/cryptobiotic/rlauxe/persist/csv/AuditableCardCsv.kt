@@ -133,12 +133,12 @@ fun readCardsCsvIterator(filename: String): CloseableIterator<AuditableCard> {
     else if (Files.exists(Path(filename))) filename
     else throw RuntimeException("CardsCsvFile $filename or $filename.zip does not exist")
 
-    return if (useFilename.endsWith("zip")) {
-        val reader = ZipReader(filename)
+    return if (useFilename.endsWith(".zip")) {
+        val reader = ZipReader(useFilename)
         val input = reader.inputStream()
         IteratorCardsCsvStream(input)
     } else {
-        IteratorCardsCsvFile(filename)
+        IteratorCardsCsvFile(useFilename)
     }
 }
 

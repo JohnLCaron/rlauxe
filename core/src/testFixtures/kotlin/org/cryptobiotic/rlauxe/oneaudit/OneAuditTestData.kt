@@ -102,7 +102,12 @@ fun makeOneContestUA(
     addOAClcaAssortersFromMargin(listOf(oaUA), pools)
 
     val cvrs = makeTestMvrs(oaUA, cvrNc, cvrVotes, cvrUndervotes, pools)
-    return Triple(oaUA, pools, cvrs)
+
+    // now that we have the cvrs, remake the pools
+    val poolFromCvr = CardPoolFromCvrs(pool.poolName, pool.poolId, mapOf(contestId to info))
+    cvrs.filter{ it.poolId != null }.forEach { poolFromCvr.accumulateVotes(it) }
+
+    return Triple(oaUA, listOf(poolFromCvr), cvrs)
 }
 
 fun makeTestMvrs(

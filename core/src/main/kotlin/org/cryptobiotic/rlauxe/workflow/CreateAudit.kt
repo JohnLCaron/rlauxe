@@ -20,7 +20,6 @@ import org.cryptobiotic.rlauxe.persist.json.writeCardPoolsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.SortMerge
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -33,10 +32,8 @@ interface CreateElectionIF {
     fun contestsUA(): List<ContestUnderAudit>
     fun cardPools(): List<CardPoolIF>? // only if OneAudit
 
-    fun allCvrs(): List<Cvr>?  // including phantoms
-    fun testMvrs(): List<Cvr>? // same order as the Cvrs
-
-    fun cvrExport(): CloseableIterable<CvrExport>?
+    fun allCvrs(): Pair<List<Cvr>, List<Cvr>>  // (cvrs, mvrs) including phantoms
+    fun cvrExport(): Pair<CloseableIterable<CvrExport>, List<Cvr>>? // (cvrs, extra) dont include phantoms
 }
 
 class CreateAudit(val name: String, val topdir: String, val auditConfig: AuditConfig, election: CreateElectionIF, auditdir: String? = null, clear: Boolean = true) {
@@ -68,18 +65,16 @@ class CreateAudit(val name: String, val topdir: String, val auditConfig: AuditCo
         }
         logger.info { "added ClcaAssertions from reported margin " }
 
-        val allCvrs = election.allCvrs()
-        if (allCvrs != null) {
+        val (allCvrs, testMvrs) = election.allCvrs()
+        if (allCvrs.isNotEmpty()) {
             val sortedCards = createSortedCardsAllCvrs(allCvrs, auditConfig.seed)
             writeAuditableCardCsvFile(sortedCards, publisher.cardsCsvFile())
             createZipFile(publisher.cardsCsvFile(), delete = false)
             logger.info{"write ${sortedCards.size} cvrs to ${publisher.cardsCsvFile()}"}
 
             // save the sorted testMvrs if they exist
-            val testMvrs = election.testMvrs()
-            if (testMvrs != null) {
-                if (testMvrs.size != sortedCards.size)
-                    println("why")
+            if (testMvrs.isNotEmpty()) {
+                require (testMvrs.size == sortedCards.size)
 
                 val mvrCards = sortedCards.map { AuditableCard.fromCvr(testMvrs[it.index], it.index, it.prn) }
                 val mvrFile = publisher.testMvrsFile()
@@ -89,9 +84,9 @@ class CreateAudit(val name: String, val topdir: String, val auditConfig: AuditCo
             }
 
         } else {
-            val cvrIter = election.cvrExport()!!
+            val (cvrIter, extra) = election.cvrExport()!!
             val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-            writeSortedCardsExternalSort(topdir=topdir, cvrIter, phantoms, auditConfig.seed, poolNameToId)
+            writeSortedCardsExternalSort(topdir=topdir, cvrIter, extra + phantoms, auditConfig.seed, poolNameToId)
         }
 
         // corla
@@ -112,7 +107,6 @@ class CreateAudit(val name: String, val topdir: String, val auditConfig: AuditCo
         writeContestsJsonFile(contestsUA, publisher.contestsFile())
         logger.info{"write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
     }
-
 
     fun writeSortedCardsExternalSort(topdir: String, cards: CloseableIterable<CvrExport>, phantoms: List<Cvr>, seed: Long, poolNameToId: Map<String, Int>?) {
         val publisher = Publisher("$topdir/audit")

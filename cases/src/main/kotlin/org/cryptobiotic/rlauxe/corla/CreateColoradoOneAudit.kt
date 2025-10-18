@@ -21,7 +21,7 @@ import kotlin.math.max
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
 // making OneAudit pools from the precinct results
-class ColoradoOneAuditNew (
+class ColoradoOneAudit (
     electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
@@ -36,7 +36,6 @@ class ColoradoOneAuditNew (
     val cardPools = convertPrecinctsToCardPools(precinctFile, infoMap)
 
     val contestsUA: List<ContestUnderAudit>
-    val allCvrs: List<Cvr>
 
     init {
         // add pool counts into contests
@@ -57,7 +56,6 @@ class ColoradoOneAuditNew (
         }
 
         contestsUA = makeUAContests(hasStyles)
-        allCvrs = makeCvrs()
     }
 
     private fun makeOneContestInfo(electionDetailXml: ElectionDetailXml, roundContests: List<ContestRoundCsv>): List<OneAuditContestCorla> {
@@ -157,7 +155,6 @@ class ColoradoOneAuditNew (
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
 
-        // TODO phantoms etc
     fun makeCvrs(): List<Cvr> {
         val oaContestMap = oaContests.associateBy { it.info.id }
 
@@ -176,17 +173,10 @@ class ColoradoOneAuditNew (
         return rcvrs
     }
 
-    override fun allCvrs(): List<Cvr> {
-        val poolCvrs = if (isClca) allCvrs else createCvrsFromPools(cardPools)
+    override fun allCvrs(): Pair<List<Cvr>, List<Cvr>> {
+        val poolCvrs = if (isClca) makeCvrs() else createCvrsFromPools(cardPools) // OOM error when both cvrs are made
         val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-        // println("allCvrs ${this.exportCvrs.size} + ${poolCvrs.size} + ${phantoms.size}")
-        return poolCvrs + phantoms
-    }
-
-    override fun testMvrs(): List<Cvr> {
-        val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-        // println("testMvrs ${this.exportCvrs.size} + ${redactedCvrs.size} + ${phantoms.size}")
-        return allCvrs + phantoms
+        return if (isClca) Pair(poolCvrs + phantoms, poolCvrs + phantoms) else Pair(poolCvrs + phantoms, emptyList())
     }
 
     override fun cvrExport() = null
@@ -272,7 +262,7 @@ fun createColoradoOneAuditNew(
     clear: Boolean = true)
 {
     val stopwatch = Stopwatch()
-    val election = ColoradoOneAuditNew(electionDetailXmlFile, contestRoundFile, precinctFile, isClca)
+    val election = ColoradoOneAudit(electionDetailXmlFile, contestRoundFile, precinctFile, isClca)
 
     val auditConfig = when {
         (auditConfigIn != null) -> auditConfigIn

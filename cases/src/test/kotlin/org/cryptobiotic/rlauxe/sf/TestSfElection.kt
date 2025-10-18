@@ -1,17 +1,19 @@
 package org.cryptobiotic.rlauxe.sf
 
+import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.MvrManagerCardsSingleRound
 import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
 import kotlin.test.Test
 
-class TestSfElectionOA {
+class TestSfElection {
     val sfDir = "/home/stormy/rla/cases/sf2024"
     val zipFilename = "$sfDir/CVR_Export_20241202143051.zip"
     val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
@@ -145,24 +147,21 @@ class TestSfElectionOA {
     } */
 
     @Test
-    fun testCardContests() {
-        val topDir = "/home/stormy/rla/cases/sf2024oa"
-        val sortedCards = "$topDir/audit/sortedCards.csv"
+    fun compareContestTabs() {
+        val oa = readContestTabs("/home/stormy/rla/cases/sf2024/oa/audit")
+        val clca = readContestTabs("/home/stormy/rla/cases/sf2024/clca/audit")
+        println("  oa[18] = ${oa[18]}")
+        println("clca[18] = ${clca[18]}")
+        println("clca[18] == oa18: ${clca[18] == oa[18]}")
+    }
 
-        val countingContestsFromSortedCards = mutableMapOf<Int, ContestCount>()
-        val scardIter = CvrIteratorCloser(readCardsCsvIterator(sortedCards))
-        while (scardIter.hasNext()) {
-            val cvr = scardIter.next()
-            cvr.votes.keys.forEach { contestId ->
-                val contestCount = countingContestsFromSortedCards.getOrPut(contestId) { ContestCount() }
-                contestCount.ncards++
-                val isPooled = if (cvr.poolId == null) 0 else 1
-                val groupCount = contestCount.counts.getOrPut(isPooled) { 0 }
-                contestCount.counts[isPooled] = groupCount + 1
-            }
-        }
-        println(" countingContestsFromSortedCards")
-        countingContestsFromSortedCards.toSortedMap().forEach { (key, value) -> println("   $key $value") }
+    fun readContestTabs(auditDir: String): Map<Int, ContestTabulation> {
+        val publisher = Publisher(auditDir)
+        val contests = readContestsJsonFile(publisher.contestsFile()).unwrap()
+        val infos = contests.map { it.contest.info() }.associateBy { it.id }
+
+        val scardIter = readCardsCsvIterator(publisher.cardsCsvFile())
+        return tabulateAuditableCards(scardIter, infos)
     }
 
     private val show = true
@@ -200,22 +199,5 @@ class TestSfElectionOA {
     }
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//// obsolete
-// TODO use ContestTabulation in CheckAudits
-data class ContestCount(var ncards: Int = 0, val counts: MutableMap<Int, Int> = mutableMapOf() ) {
-
-    fun reportedMargin(winner: Int, loser: Int): Double {
-        val winnerVotes = counts[winner] ?: 0
-        val loserVotes = counts[loser] ?: 0
-        return (winnerVotes - loserVotes) / ncards.toDouble()
-    }
-
-    override fun toString(): String {
-        return "total=$ncards, counts=${counts.toSortedMap()}"
-    }
-}
 
 

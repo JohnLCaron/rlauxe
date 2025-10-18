@@ -65,8 +65,8 @@ class TestRunCli {
         println()
         print(results2)
 
-        if (results.fail()) fail()
-        if (results2.fail()) fail()
+        if (results.fail) fail()
+        if (results2.fail) fail()
     }
 
     @Test
@@ -109,7 +109,7 @@ class TestRunCli {
                 "-minMargin", "0.01",
                 "-fuzzMvrs", "0.001",
                 "-ncards", "10000",
-                "-ncontests", "10",
+                "-ncontests", "10", // ignored
                 "--addRaireContest",
                 "--addRaireCandidates", "5",
             )
@@ -132,8 +132,8 @@ class TestRunCli {
         val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = auditDir)
         println(results)
 
-        if (results.fail()) fail()
-        if (resultsvc.fail()) fail()
+        if (results.fail) fail()
+        if (resultsvc.fail) fail()
     }
 
 }

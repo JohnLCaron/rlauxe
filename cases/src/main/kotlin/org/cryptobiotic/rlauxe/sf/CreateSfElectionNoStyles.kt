@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
@@ -20,6 +21,7 @@ import kotlin.collections.component2
 import kotlin.collections.forEach
 
 private val logger = KotlinLogging.logger("CreateSfElectionNS")
+private val show = false
 
 // no styles case
 class CreateSfElectionNS(
@@ -30,6 +32,8 @@ class CreateSfElectionNS(
 ): CreateElectionIF {
     val cardPoolsNotUnpooled: List<CardPoolIF>
     val contestsOA: List<ContestUnderAudit>
+    val extra = mutableListOf<Cvr>()
+    val cardPoolsNs: Map<String, CardPoolNs>
 
     init {
         val (contestNcs, contestInfos) = makeContestInfos(
@@ -41,7 +45,7 @@ class CreateSfElectionNS(
 
         // pass 1 through cvrs, make card pools, including unpooled
         // pass 1 through cvrs, make card pools and augment
-        val (cardPools: List<CardPoolFromCvrs>, contestAmended: Map<Int, Int>) = createCardPoolsNS(
+        val (cardPools: List<CardPoolNs>, contestAmended: Map<Int, Int>) = createCardPoolsNS(
             infos,
             castVoteRecordZip,
             contestManifestFilename,
@@ -61,6 +65,7 @@ class CreateSfElectionNS(
 
         // make contests based on cardPool tabulations
         contestsOA = makeAllOneAuditContests(contestTabSums, contestNcsAmended, unpooledPool).sortedBy { it.id }
+        cardPoolsNs = cardPools.associateBy { it.poolName }
     }
 
     // no styles case
@@ -69,34 +74,34 @@ class CreateSfElectionNS(
         castVoteRecordZip: String,
         contestManifestFilename: String,
         cvrExportCsv: String,
-    ): Pair<List<CardPoolFromCvrs>, Map<Int, Int>> { // return CardPools, contestId -> increaseNc
+    ): Pair<List<CardPoolNs>, Map<Int, Int>> { // return CardPools, contestId -> increaseNc
 
         val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
 
-        // create the unamended card Pools,
+        // create the card Pools,
         var count = 0
-        val cardPoolsU: MutableMap<String, CardPoolNs> = mutableMapOf()
+        val cardPools: MutableMap<String, CardPoolNs> = mutableMapOf()
         cvrExportCsvIterator(cvrExportCsv).use { cvrIter ->
             while (cvrIter.hasNext()) {
                 count++
                 val cvrExport: CvrExport = cvrIter.next()
-                val pool = cardPoolsU.getOrPut(cvrExport.poolKey()) {
-                    CardPoolNs(cvrExport.poolKey(), cardPoolsU.size + 1, infos)
+                val pool = cardPools.getOrPut(cvrExport.poolKey()) {
+                    CardPoolNs(cvrExport.poolKey(), cardPools.size + 1, infos)
                 }
                 pool.accumulateVotes(cvrExport.toCvr())
-                pool.cvrs.add(cvrExport)
+                pool.add(cvrExport)
             }
         }
-        println("unamended pools = ${cardPoolsU.size} from $count cvrs")
+        println("pools = ${cardPools.size} from $count cvrs")
 
         // for each pool, every cvr has to have every contest in the pool
         var cvrsAmended = 0
         val increaseNc = mutableMapOf<Int, Int>()  // contestId, nadded
-        cardPoolsU.filter { it.key != unpooled }.values.forEach { pool ->
+        cardPools.filter { it.key != unpooled }.values.forEach { pool ->
             val needContests = pool.contestTabs.keys
             val cvrsM = mutableListOf<CvrExport>()
 
-            pool.cvrs.forEach { cvr ->
+            pool.cvrMap.values.forEach { cvr ->
                 var wasAmended = false
                 val votesM = cvr.votes.toMutableMap()
                 needContests.forEach { contestId ->
@@ -111,19 +116,22 @@ class CreateSfElectionNS(
                 if (wasAmended) {
                     cvrsM.add(cvr.copy(votes = votesM))
                     cvrsAmended++
-                } else {
-                    cvrsM.add(cvr)
                 }
             }
-            pool.cvrs = cvrsM
+            // replace the modified cvrs
+            cvrsM.forEach { pool.cvrMap[it.id] = it }
         }
-        println("cvrsAmended = $cvrsAmended")
-        println("contestAmended")
-        increaseNc.toSortedMap().forEach { println("  $it") }
 
-        // create amended card Pools; dont need to hold onto the list of cvrs
+        if (show) {
+            println("cvrsAmended = $cvrsAmended")
+            println("contestAmended")
+            increaseNc.toSortedMap().forEach { println("  $it") }
+        }
+
+        /* not needed, but leave it in for now for sanity check
+        // create amended card Pools; TODO how to amend the cvrs persistently; add extra votes ??
         val cardPoolsM: MutableMap<String, CardPoolFromCvrs> = mutableMapOf()
-        val cvrIterM = CardPoolList(cardPoolsU.values).iterator()
+        val cvrIterM = CardPoolCvrIterator(cardPools.values).iterator()
         while (cvrIterM.hasNext()) {
             val cvrExport: CvrExport = cvrIterM.next()
             val pool = cardPoolsM.getOrPut(cvrExport.poolKey()) {
@@ -132,26 +140,60 @@ class CreateSfElectionNS(
             pool.accumulateVotes(cvrExport.toCvr())
         }
 
-        return Pair(cardPoolsM.values.toList(), increaseNc)
-    }
+        cardPools.forEach { (poolId, poolu) ->
+            poolu.contestTabs.keys.forEach { id ->
+                val poolu1 = poolu.contestTabs[id]
+                val poolm = cardPoolsM[poolId]!!
+                val poolm1 = poolm.contestTabs[id]
+                if (poolm1 != poolu1)
+                    println("why")
+            }
+        } */
 
+        return Pair(cardPools.values.toList(), increaseNc)
+    }
 
     override fun cardPools() = cardPoolsNotUnpooled
     override fun contestsUA() = contestsOA
 
-    override fun allCvrs() = null
-    override fun testMvrs() = null
+    override fun allCvrs() = Pair(emptyList<Cvr>(), emptyList<Cvr>())
 
-    override fun cvrExport() = CloseableIterable { cvrExportCsvIterator(cvrExportCsv) }
+    override fun cvrExport(): Pair<CloseableIterable<CvrExport>, List<Cvr>> {
+        val iterable = CardPoolModifiedCvrIterable(cardPoolsNs, CloseableIterable { cvrExportCsvIterator(cvrExportCsv) })
+        return Pair(iterable, extra)
+    }
 }
 
 // keep all the CVRS, which we can use to calculate average assort.
 class CardPoolNs( poolName: String, poolId: Int, contestInfos: Map<Int, ContestInfo>) : CardPoolFromCvrs(poolName, poolId, contestInfos) {
-    // TODO keeping all the CvrExport in memory here. better to write them back ??
-    var cvrs = mutableListOf<CvrExport>()
+    var cvrMap = mutableMapOf<String, CvrExport>()
+    fun add(cvr: CvrExport) {
+        cvrMap[cvr.id] = cvr
+    }
 }
 
-class CardPoolList(val cardPools: Collection<CardPoolNs>): Iterable<CvrExport> {
+// tricky bit of business, an iterator where we substitute the mofified
+class CardPoolModifiedCvrIterable(val poolMap: Map<String, CardPoolNs>, val org: CloseableIterable<CvrExport>): CloseableIterable<CvrExport> {
+
+    override fun iterator(): CloseableIterator<CvrExport> = CardPoolModifiedCvrIterator(org.iterator())
+
+    inner class CardPoolModifiedCvrIterator(val orgIter: CloseableIterator<CvrExport>): CloseableIterator<CvrExport> {
+
+        override fun hasNext() = orgIter.hasNext()
+
+        override fun next(): CvrExport {
+            val orgCvr = orgIter.next()
+            val poolId = orgCvr.poolKey()
+            val pool = poolMap[poolId] ?: return orgCvr
+            return pool.cvrMap[orgCvr.id] ?: orgCvr
+        }
+
+        override fun close() = orgIter.close()
+    }
+}
+
+/* TODO remove
+class CardPoolCvrIterator(val cardPools: Collection<CardPoolNs>): Iterable<CvrExport> {
 
     override fun iterator(): CloseableIterator<CvrExport> {
         return PoolIterator()
@@ -186,12 +228,12 @@ class CardPoolList(val cardPools: Collection<CardPoolNs>): Iterable<CvrExport> {
     }
 
     class BaseIterator(val pool: CardPoolNs) : CloseableIterator<CvrExport> {
-        val bitter = pool.cvrs.iterator()
+        val bitter = pool.cvrMap.values.iterator()
         override fun hasNext(): Boolean = bitter.hasNext()
         override fun next(): CvrExport = bitter.next()
         override fun close() {}
     }
-}
+} */
 
 //////////////////////////////////////////////////////////////////////////////////////
 

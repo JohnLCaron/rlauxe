@@ -59,7 +59,7 @@ class TestCardPool {
         val cardPools = CardPoolFromCvrs.makeCardPools(cvrs.iterator(), infos)
         val cardPool = cardPools.values.first()
 
-        // we need multi contest cvrs
+        // TODO we need multi contest cvrs
         var changed = 0
         cvrs.forEach { cvr ->
             val cvru = cardPool.addUndervotes(cvr)

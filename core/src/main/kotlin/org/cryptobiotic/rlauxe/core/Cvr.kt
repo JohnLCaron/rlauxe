@@ -69,11 +69,11 @@ data class Cvr(
     }
 }
 
-// intermediate CVR representation; originally for DominionCvrSummary
+// intermediate CVR representation for DominionCvrSummary
 data class CvrExport(val id: String, val group: Int, val votes: Map<Int, IntArray>) {
-    constructor(cvr: Cvr) : this(cvr.id, 0, cvr.votes)
+    // constructor(cvr: Cvr) : this(cvr.id, 0, cvr.votes) // TODO the group id is lost when converting to Cvr and back
 
-    // Calculate the pool name from the cvr id. Could be a function id -> pool name
+    // Calculate the pool name from the cvr id. Could pass in a function (CvrExport) -> pool name
     fun poolKey(): String {
         if (group == 2) return unpooled
         val lastIdx = id.lastIndexOf('-')

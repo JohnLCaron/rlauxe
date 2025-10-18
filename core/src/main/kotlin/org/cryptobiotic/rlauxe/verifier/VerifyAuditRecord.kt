@@ -12,18 +12,18 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
 
     fun verify(): VerifyResults {
         val result = VerifyResults()
-        result.messes.add("VerifyAuditRecord on $auditRecordLocation ")
+        result.addMessage("VerifyAuditRecord on $auditRecordLocation ")
         auditRecord.rounds.forEach { verify(it, result) }
         return result
     }
 
     fun verify(round: AuditRound, result: VerifyResults) {
-        result.messes.add(" verify round = ${round.roundIdx}")
+        result.addMessage(" verify round = ${round.roundIdx}")
         round.contestRounds.forEach { verify(it, result) }
     }
 
     fun verify(contest: ContestRound, result: VerifyResults) {
-        result.messes.add("  verify contest = ${contest.id}")
+        result.addMessage("  verify contest = ${contest.id}")
         val minAssertion = contest.minAssertion()
         requireNotNull(minAssertion) {"    minAssertion = $minAssertion"}
 

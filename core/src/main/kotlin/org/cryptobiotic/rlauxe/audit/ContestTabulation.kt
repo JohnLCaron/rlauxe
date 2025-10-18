@@ -14,14 +14,16 @@ import kotlin.collections.iterator
 
 private val logger = KotlinLogging.logger("ContestTabulation")
 
-// we need both the vote count and the ncards, to calculate margins; cant be used for IRV
+// IRV have empty votes
 interface RegVotes {
     val votes: Map<Int, Int>
     fun ncards(): Int // including undervotes
+    fun undervotes(): Int // including undervotes
 }
 
-data class RegVotesImpl(override val votes: Map<Int, Int>, val ncards: Int): RegVotes {
+data class RegVotesImpl(override val votes: Map<Int, Int>, val ncards: Int, val undervotes: Int): RegVotes {
     override fun ncards() = ncards
+    override fun undervotes() = undervotes
 }
 
 // tabulate contest votes from CVRS; can handle both regular and irv voting
@@ -45,6 +47,7 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
     }
 
     override fun ncards() = ncards
+    override fun undervotes() = undervotes
 
     fun addVotes(cands: IntArray) {
         if (!isIrv) addVotesReg(cands) else addVotesIrv(cands)
@@ -119,7 +122,8 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
 
 
     override fun toString(): String {
-        return "ContestTabulation(isIrv=$isIrv, voteForN=$voteForN, votes=$votes, nvotes=${nvotes()} ncards=$ncards, novote=$novote, undervotes=$undervotes, overvotes=$overvotes)"
+        val sortedVotes = votes.entries.sortedBy { it.key }
+        return "ContestTabulation(isIrv=$isIrv, voteForN=$voteForN, votes=$sortedVotes, nvotes=${nvotes()} ncards=$ncards, novote=$novote, undervotes=$undervotes, overvotes=$overvotes)"
     }
 
     override fun equals(other: Any?): Boolean {

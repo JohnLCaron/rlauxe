@@ -14,6 +14,16 @@ class TestRunVerifyContests {
         val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
         println()
         print(results)
-        if (results.fail()) fail()
+        if (results.fail) fail()
+    }
+
+    @Test
+    fun testRunVerifyOA() {
+        val auditdir = "../core/src/test/data/workflow/testCliRoundOneAudit/audit"
+        // val auditdir = "/home/stormy/rla/persist/testCliRoundClca"
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        println()
+        print(results)
+        if (results.fail) fail()
     }
 }

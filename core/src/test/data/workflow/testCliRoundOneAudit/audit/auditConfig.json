@@ -2,7 +2,7 @@
     "auditType": "ONEAUDIT",
     "hasStyles": true,
     "riskLimit": 0.05,
-    "seed": 6319849694155163070,
+    "seed": 5619627295468107082,
     "nsimEst": 10,
     "quantile": 0.8,
     "sampleLimit": 20000,

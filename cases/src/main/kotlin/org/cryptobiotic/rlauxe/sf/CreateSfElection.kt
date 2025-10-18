@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
@@ -36,6 +37,7 @@ class CreateSfElection(
 ): CreateElectionIF {
     val cardPoolsNotUnpooled: List<CardPoolIF>
     val contestsOA: List<ContestUnderAudit>
+    val extra = mutableListOf<Cvr>()
 
     init {
         val (contestNcs, contestInfos) = makeContestInfos(
@@ -115,10 +117,9 @@ class CreateSfElection(
     override fun cardPools() = cardPoolsNotUnpooled
     override fun contestsUA() = contestsOA
 
-    override fun allCvrs() = null
-    override fun testMvrs() = null
+    override fun allCvrs() = Pair(emptyList<Cvr>(), emptyList<Cvr>())
 
-    override fun cvrExport() = CloseableIterable { cvrExportCsvIterator(cvrExportCsv) }
+    override fun cvrExport() = Pair(CloseableIterable { cvrExportCsvIterator(cvrExportCsv) }, extra)
 }
 
 

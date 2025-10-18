@@ -12,7 +12,7 @@ class TestMakeTestContestOAIrv {
 
         assertEquals(oaIrv, oaIrv)
         assertEquals(oaIrv.hashCode(), oaIrv.hashCode())
-        assertEquals("TestOneAuditIrvContest (0) votes=N/A Nc=212 minMargin=0.1981", oaIrv.showShort(), )
+        assertEquals("TestOneAuditIrvContest (0) votes=N/A Nc=2120 minMargin=0.0198", oaIrv.showShort(), )
         assertEquals(-1.0, oaIrv.recountMargin(), doublePrecision)
 
         println(oaIrv.show())

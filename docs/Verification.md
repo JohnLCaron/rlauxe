@@ -1,7 +1,7 @@
 # Verification
 _last changed 10/19/2025_
 
-## ContestInfo verification
+## ContestInfo correctly formed
 
 ````
 enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
@@ -19,7 +19,7 @@ class ContestInfo(
 1. for each contest, verify that candidate names and candidate ids are unique.
 2. over all contests, verify that the names and ids are unique.
 
-## Contest verification
+## Contest correctly formed
 
 ````
 class Contest(
@@ -40,12 +40,13 @@ class RaireContest(
 
 ````
 
-1. verify that the candidateIds match whats in the ContestInfo 
-2. verify that the winners are unique
-3. verify that the winners have more votes than the losers (margins > 0 for all assertions)
-4. check that the top nwinners are in the list of winners
+1. verify that the candidateIds match whats in the ContestInfo
+2. verify that the candidateIds are unique
+3. verify that nwinners == min(ncandidates, info.nwinners)
+4. if non-IRV, verify that the winners have more votes than the losers (margins > 0 for all assertions)
+5. if non-IRV, check that the top nwinners are in the list of winners
 
-## AuditableCard verification
+## AuditableCard (aka Ballot manifest) verification
 
 ````
 data class AuditableCard (
@@ -59,10 +60,10 @@ data class AuditableCard (
 )
 ````
 
-1. Check that all locations, indices, and PRNs are unique.
-2. If hasStyle, check that the count of non-phantom cards containing a contest = Contest.Ncast.
-3. If hasStyle, check that the count of phantom cards containing a contest = Contest.Nc - Contest.Ncast.
-4. Given the seed and the PRG, check that the PRNs are correct and are assigned sequentially by index.
+1. Check that all card locations and indices are unique, and the card prns are in ascending order
+2. Given the seed and the PRNG, check that the PRNs are correct and are assigned sequentially by index.
+3. If hasStyle, check that the count of cards containing a contest = Contest.Nc.
+4. If hasStyle, check that the count of phantom cards containing a contest = Contest.Nc - Contest.Ncast.
 
 ## Cvr verification
 

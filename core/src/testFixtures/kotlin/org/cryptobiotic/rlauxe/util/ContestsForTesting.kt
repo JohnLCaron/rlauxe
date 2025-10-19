@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
-import org.cryptobiotic.rlauxe.verify.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import kotlin.random.Random
@@ -10,13 +9,12 @@ fun makeContestFromCvrs(
     info: ContestInfo,
     cvrs: List<Cvr>,
 ): Contest {
-    val votes = tabulateVotesFromCvrs(cvrs.iterator())
-    val ncards = cardsPerContest(cvrs)
+    val contestTab = tabulateCvrs(cvrs.iterator(), mapOf(info.id to info))[info.id]!!
     return Contest(
         info,
-        votes[info.id] ?: emptyMap(),
-        Nc=ncards[info.id] ?: 0,
-        Ncast=ncards[info.id] ?: 0,
+        contestTab.votes,
+        Nc=contestTab.ncards + contestTab.nphantoms,
+        Ncast=contestTab.ncards,
     )
 }
 
@@ -149,4 +147,40 @@ fun makeContestsWithUndervotesAndPhantoms(
     val phantoms =  makePhantomCvrs(contests)
 
     return Pair(contests, cvrs + phantoms)
+}
+
+//// use these when you dont have ContestInfo yet
+// Number of votes in each contest, return contestId -> candidateId -> nvotes
+fun tabulateVotesFromCvrs(cvrs: Iterator<Cvr>): Map<Int, Map<Int, Int>> {
+    val votes = mutableMapOf<Int, MutableMap<Int, Int>>()
+    for (cvr in cvrs) {
+        for ((con, conVotes) in cvr.votes) {
+            val accumVotes = votes.getOrPut(con) { mutableMapOf() }
+            for (cand in conVotes) {
+                val accum = accumVotes.getOrPut(cand) { 0 }
+                accumVotes[cand] = accum + 1
+            }
+        }
+    }
+    return votes
+}
+
+fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int, voteForN: Int = 1): Map<Int, Int> {
+    val result = mutableMapOf<Int, Int>()
+    cvrs.forEach{ cvr ->
+        if (cvr.hasContest(contestId) && !cvr.phantom) {
+            val candVotes = cvr.votes[contestId] // should always succeed
+            if (candVotes != null) {
+                if (candVotes.size < voteForN) {  // undervote
+                    val count = result[ncands] ?: 0
+                    result[ncands] = count + (voteForN - candVotes.size)
+                }
+                for (cand in candVotes) {
+                    val count = result[cand] ?: 0
+                    result[cand] = count + 1
+                }
+            }
+        }
+    }
+    return result
 }

@@ -87,7 +87,7 @@ class TestRunCli {
         println(results)
 
         topPath.deleteRecursively()
-        if (results.fail) fail()
+        if (results.hasErrors) fail()
         //if (resultsvc.fail) fail()
     }
 
@@ -125,8 +125,8 @@ class TestRunCli {
         println(results)
 
         topPath.deleteRecursively()
-        if (results.fail) fail()
-        if (resultsvc.fail) fail()
+        if (results.hasErrors) fail()
+        if (resultsvc.hasErrors) fail()
     }
 
     @Test
@@ -165,7 +165,7 @@ class TestRunCli {
         println(results)
 
         topPath.deleteRecursively()
-        if (results.fail) fail()
-        if (resultsvc.fail) fail()
+        if (results.hasErrors) fail()
+        if (resultsvc.hasErrors) fail()
     }
 }

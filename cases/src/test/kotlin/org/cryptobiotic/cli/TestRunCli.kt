@@ -61,8 +61,8 @@ class TestRunCli {
         println()
         print(results2)
 
-        if (results.fail) fail()
-        if (results2.fail) fail()
+        if (results.hasErrors) fail()
+        if (results2.hasErrors) fail()
     }
 
     @Test
@@ -128,8 +128,8 @@ class TestRunCli {
         val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = auditDir)
         println(results)
 
-        if (results.fail) fail()
-        if (resultsvc.fail) fail()
+        if (results.hasErrors) fail()
+        if (resultsvc.hasErrors) fail()
     }
 
 }

@@ -14,7 +14,7 @@ private val logger = KotlinLogging.logger("RaireContest")
 // this is the motivation for ContestIF
 data class RaireContest(
     val info: ContestInfo,
-    val winners: List<Int>,
+    val winners: List<Int>, // TODO only one
     val Nc: Int,
     val Ncast: Int,
     val undervotes: Int,

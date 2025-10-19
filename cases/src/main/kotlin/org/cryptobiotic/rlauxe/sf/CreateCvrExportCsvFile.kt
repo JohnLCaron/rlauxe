@@ -92,6 +92,7 @@ fun makeContestNcs(contestManifest: ContestManifest, contestInfos: List<ContestI
     return contestNcs
 }
 
+/*
 fun makeContestTabulations(cvrExportCsv: String, infoMap: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val contestTabs = mutableMapOf<Int, ContestTabulation>()
 
@@ -167,3 +168,5 @@ fun makeRaireContests(contestInfos: List<ContestInfo>, contestTabs: Map<Int, Con
     }
     return contests
 }
+
+*/

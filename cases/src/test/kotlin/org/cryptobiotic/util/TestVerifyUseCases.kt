@@ -13,7 +13,7 @@ class TestVerifyUseCases {
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
-        if (results.fail) fail()
+        if (results.hasErrors) fail()
     }
 
     @Test
@@ -22,7 +22,7 @@ class TestVerifyUseCases {
         val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
         println()
         print(results)
-        if (results.fail) fail()
+        if (results.hasErrors) fail()
     }
 
     @Test
@@ -31,7 +31,7 @@ class TestVerifyUseCases {
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
-        if (results.fail) fail()
+        if (results.hasErrors) fail()
     }
 
     @Test
@@ -40,7 +40,7 @@ class TestVerifyUseCases {
         val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
         println()
         print(results)
-        if (results.fail) fail()
+        if (results.hasErrors) fail()
     }
 
     @Test
@@ -49,7 +49,7 @@ class TestVerifyUseCases {
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
-        if (results.fail) fail()
+        if (results.hasErrors) fail()
     }
 
     @Test
@@ -58,7 +58,7 @@ class TestVerifyUseCases {
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
-        if (results.fail) fail()
+        if (results.hasErrors) fail()
     }
 
     @Test
@@ -67,7 +67,7 @@ class TestVerifyUseCases {
         val results = RunVerifyContests.runVerifyContests(auditdir, 18, show = true)
         println()
         print(results)
-        if (results.fail) fail()
+        if (results.hasErrors) fail()
     }
 
     @Test
@@ -76,7 +76,7 @@ class TestVerifyUseCases {
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
-        if (results.fail) fail()
+        if (results.hasErrors) fail()
     }
 
     @Test
@@ -85,7 +85,7 @@ class TestVerifyUseCases {
         val results = RunVerifyContests.runVerifyContests(auditdir, 18, show = true)
         println()
         print(results)
-        if (results.fail) fail()
+        if (results.hasErrors) fail()
     }
 
     @Test
@@ -94,7 +94,7 @@ class TestVerifyUseCases {
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
-        if (results.fail) fail()
+        if (results.hasErrors) fail()
     }
 
     @Test
@@ -103,7 +103,7 @@ class TestVerifyUseCases {
         val results = RunVerifyContests.runVerifyContests(auditdir, 20, show = true)
         println()
         print(results)
-        if (results.fail) fail()
+        if (results.hasErrors) fail()
     }
 
     @Test
@@ -112,7 +112,7 @@ class TestVerifyUseCases {
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
-        if (results.fail) fail()
+        if (results.hasErrors) fail()
     }
 
 }

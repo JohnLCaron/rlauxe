@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.audit.Sampler
-import org.cryptobiotic.rlauxe.verify.tabulateVotesFromCvrs
+import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

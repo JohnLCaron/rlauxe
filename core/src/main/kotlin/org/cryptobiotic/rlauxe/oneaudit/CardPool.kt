@@ -202,7 +202,7 @@ open class CardPoolFromCvrs(
                 logger.error { "cvr has unknown contest $contestId" }
             } else {
                 val contestTab = contestTabs.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
-                contestTab.addVotes(candIds)
+                contestTab.addVotes(candIds, cvr.phantom)
             }
         }
         totalCards++

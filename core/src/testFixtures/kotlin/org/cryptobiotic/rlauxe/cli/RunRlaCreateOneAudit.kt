@@ -184,29 +184,6 @@ object RunRlaCreateOneAudit {
             val mvrTabs = tabulateCvrs(testMvrs.iterator(), infos)
             println("testMvrs = ${mvrTabs}")
             println()
-
-            // TODO use MvrManagerTestFromRecord to do sorting and save sortedCards, mvrsUA
-            // save the sorted cards
-
-            /* val publisher = Publisher(auditDir)
-            //val mvrManager = MvrManagerOneAuditForTesting(allCvrs, testMvrs, auditConfig.seed)
-            //writeAuditableCardCsvFile(mvrManager.sortedCards, publisher.cardsCsvFile())
-            //println("   write ${mvrManager.sortedCards.size} sortedCards to ${publisher.cardsCsvFile()}")
-
-            // save the sorted testMvrs
-            //val mvrFile = "$auditDir/private/testMvrs.csv"
-            //validateOutputDirOfFile(mvrFile)
-            //writeAuditableCardCsvFile(mvrManager.mvrsUA, mvrFile)
-            //println("   write ${mvrManager.sortedCards.size} testMvrs to ${mvrFile}")
-
-            workflow = OneAudit(auditConfig, contestsUA, mvrManager=mvrManager)
-            //writeContestsJsonFile(workflow.contestsUA(), publisher.contestsFile())
-            //println("   writeContestsJsonFile ${publisher.contestsFile()}")
-
-            // get the first round of samples wanted, write them to round1 subdir
-            val auditRound = runChooseSamples(workflow, publisher)
-            writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(1))
-            println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}") */
         }
         override fun cardPools() = allCardPools
         override fun contestsUA() = contestsUA

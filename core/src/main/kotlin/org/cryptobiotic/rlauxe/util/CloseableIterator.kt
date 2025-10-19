@@ -1,5 +1,8 @@
 package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.core.Cvr
+
 interface CloseableIterable<out T> {
     fun iterator(): CloseableIterator<T>
 }

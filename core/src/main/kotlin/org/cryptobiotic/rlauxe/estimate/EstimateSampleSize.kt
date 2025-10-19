@@ -102,7 +102,8 @@ fun makeEstimationTasks(
         AuditType.CLCA -> {
             // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
             if (contest.isIrv()) {
-                SimulateIrvTestData(contest as RaireContest, contestRound.contestUA.minMargin(), auditConfig.sampleLimit).makeCvrs()
+                val testData = SimulateIrvTestData(contest as RaireContest, contestRound.contestUA.minMargin(), auditConfig.sampleLimit)
+                testData.makeCvrs()
             } else {
                 ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit).makeCvrs()
             }

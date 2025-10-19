@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.audit.RegVotes
-import org.cryptobiotic.rlauxe.audit.RegVotesImpl
+import org.cryptobiotic.rlauxe.util.RegVotes
+import org.cryptobiotic.rlauxe.util.RegVotesImpl
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo

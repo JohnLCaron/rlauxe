@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.ContestTabulation
-import org.cryptobiotic.rlauxe.audit.RegVotes
-import org.cryptobiotic.rlauxe.audit.RegVotesImpl
+import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.RegVotes
+import org.cryptobiotic.rlauxe.util.RegVotesImpl
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -56,7 +56,7 @@ interface CardPoolIF {
 class CardPoolWithBallotStyle(
     override val poolName: String,
     override val poolId: Int,
-    val voteTotals: Map<Int, Map<Int, Int>>, // contestId -> candidateId -> nvotes // TODO use ContestTabulation
+    val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes // TODO use ContestTabulation
     val infos: Map<Int, ContestInfo>, // all infos
 ) : CardPoolIF
 {
@@ -68,8 +68,8 @@ class CardPoolWithBallotStyle(
     override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
 
     init {
-        voteTotals.forEach { (contestId, candidateCounts) ->
-            val voteSum = candidateCounts.map { it.value }.sum()
+        voteTotals.forEach { (contestId, contestTab) ->
+            val voteSum = contestTab.nvotes()
             val info = infos[contestId]!!
             // need at least this many cards would you need for this contest?
             minCardsNeeded[contestId] = roundUp(voteSum.toDouble() / info.voteForN)
@@ -79,7 +79,7 @@ class CardPoolWithBallotStyle(
 
     override fun contains(contestId: Int) = voteTotals.contains(contestId)
     override fun regVotes(): Map<Int, RegVotes> {
-        return voteTotals.mapValues { (id, votes) -> RegVotesImpl(votes, ncards(), undervoteForContest(id)) }
+        return voteTotals.mapValues { (id, contestTab) -> RegVotesImpl(contestTab.votes, ncards(), undervoteForContest(id)) }
     }
     override fun ncards() = maxMinCardsNeeded + adjustCards
 
@@ -93,12 +93,12 @@ class CardPoolWithBallotStyle(
     fun showVotes(contestIds: Collection<Int>, width: Int=4) = buildString {
         append("${trunc(poolName, 9)}:")
         contestIds.forEach { id ->
-            val contestVote = voteTotals[id]
-            if (contestVote == null)
+            val contestTab = voteTotals[id]
+            if (contestTab == null)
                 append("    |")
             else {
-                val sum = contestVote.map { it.value } .sum()
-                append("${nfn(sum, width)}|")
+                val voteSum = contestTab.nvotes()
+                append("${nfn(voteSum, width)}|")
             }
         }
         appendLine()
@@ -119,25 +119,25 @@ class CardPoolWithBallotStyle(
 
     // undervotes per contest when single BallotStyle, no blanks
     fun undervotes(): Map<Int, Int> {  // contest -> undervote
-        val undervote = voteTotals.map { (id, cands) ->
-            val sum = cands.map { it.value }.sum()
+        val undervote = voteTotals.map { (id, contestTab) ->
+            val voteSum = contestTab.nvotes()
             val info = infos[id]!!
-            Pair(id, ncards() * info.voteForN - sum)
+            Pair(id, ncards() * info.voteForN - voteSum)
         }
         return undervote.toMap().toSortedMap()
     }
 
     fun undervoteForContest(contestId: Int): Int {
-        val votesForContest = voteTotals[contestId] ?: return 0
-        val sum = votesForContest.map { it.value }.sum()
+        val contestTab = voteTotals[contestId] ?: return 0
+        val voteSum = contestTab.nvotes()
         val info = infos[contestId]!!
-        return ncards() * info.voteForN - sum
+        return ncards() * info.voteForN - voteSum
     }
 
     override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
         val poolUndervotes = undervoteForContest(contestId)
         val votesForContest = voteTotals[contestId]!!
-        return VotesAndUndervotes(votesForContest, poolUndervotes, infos[contestId]!!.voteForN)
+        return VotesAndUndervotes(votesForContest.votes, poolUndervotes, votesForContest.voteForN)
     }
 
     override fun toString(): String {
@@ -212,7 +212,7 @@ open class CardPoolFromCvrs(
 
     override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
         val contestTab = contestTabs[contestId]!!
-        return contestTab.votesAndUndervotes() // good reason for carsPool to always have contestTabs?
+        return contestTab.votesAndUndervotes() // good reason for cardPool to always have contestTabs
     }
 
     // every cvr has to have every contest in the pool TODO not needed?

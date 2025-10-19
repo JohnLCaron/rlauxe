@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.createSortedCards
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.partition
 import org.cryptobiotic.rlauxe.util.Prng
@@ -12,8 +11,7 @@ import kotlin.math.max
 
 
 class TestPoolUndervotes {
-
-/*
+    /*
     // TODO fuzz tests
     @Test
     fun testPoolUndervotesOneContest() {
@@ -111,8 +109,6 @@ class TestPoolUndervotes {
         CountClcaAssorterValues("clcaAssorter", bassorter, contestUA.id, pairs, show = false).show()
         println()
     }
-
- */
 }
 
 class CountClcaAssorterValues(val name: String, cassorter: ClcaAssorter, contestId: Int, pairs: List<Pair<Cvr, Cvr>>, usePhantoms: Boolean = false, show: Boolean= false) {
@@ -187,7 +183,7 @@ class AssortValueCount() {
     }
 }
 
-/* assumes Np = 0
+// assumes Np = 0
 fun makeSmallContest(name: String, id:Int, Nc: Int, nwinners:Int = 1): OneAuditContest1 { // TODO set margin
     // the candidates
     val info = ContestInfo(
@@ -242,4 +238,5 @@ fun makeSmallContest(name: String, id:Int, Nc: Int, nwinners:Int = 1): OneAuditC
 }
 
  */
+}
 

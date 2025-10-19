@@ -1,4 +1,4 @@
-package org.cryptobiotic.cli
+package org.cryptobiotic.util
 
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import kotlin.test.Test

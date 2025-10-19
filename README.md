@@ -1,7 +1,7 @@
-**RLAUXE ("r-lux")**
+**rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 10/01/2025_
+_last changed: 10/19/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is a independent implementation of the SHANGRLA framework, based on the
@@ -11,6 +11,7 @@ The [SHANGRLA python library](https://github.com/pbstark/SHANGRLA) is the work o
 Also see [OneAudit example python code](https://github.com/spertus/UI-TS)
 
 Also see:
+* [Rlauxe Implementation Overview](docs/Overview.md)
 * [Implementation Specificaton](docs/RlauxeSpec.md)
 * [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer)
 
@@ -18,7 +19,6 @@ Click on plot images to get an interactive html plot. You can also read this doc
 
 **Table of Contents**
 <!-- TOC -->
-* [Audit Workflow](#audit-workflow)
 * [SHANGRLA framework](#shangrla-framework)
 * [Audit Types](#audit-types)
   * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
@@ -53,41 +53,6 @@ Click on plot images to get an interactive html plot. You can also read this doc
   * [Developer Notes](#developer-notes)
 <!-- TOC -->
 
-# Audit Workflow
-
-An audit is performed in _rounds_, as outlined here:
-
-For each contest:
-- Count the votes in the usual way. The reported winner(s) and the reported margins are based on this vote count.
-- Determine the total number of valid ballots, including undervotes and overvotes (Nc).
-- For a Card Level Comparison Audit (CLCA), extract the Cast Vote Records (CVRs) from the vote tabulation system.
-
-For the election:
-- Create a Card Location Manifest (aka Ballot Manifest), in which every physical ballot has a unique entry. If this is a CLCA, attach the
-  Cvr to its CardLocation.
-- If necessary, add phantoms to the Card Location Manifest following SHANGRLA section 3.4.
-
-The purpose of the audit is to determine whether the reported winner(s) are correct, to within the chosen risk limit.
-
-- initialize the audit by choosing the contests to be audited, the risk limit, and the random seed.
-- Contests are removed from the audit if:
-  - The contest has no losers (e.g. the number of candidate <= number of winners); the contest is marked NoLosers.
-  - The contest has no winners (e.g. no candidates receive minFraction of the votes in a SUPERMAJORITY contest); the contest is marked NoWinners.
-  - The contest is a tie, or its reported margin is less than _auditConfig.minMargin_; the contest is marked MinMargin.
-  - The contest's reported margin is less than its phantomPct (Np/Nc); the audit is marked TooManyPhantoms.
-  - The contest internal fields are inconsistent; the audit is marked ContestMisformed.
-  - The contest is manually removed by the Auditors; the audit is marked AuditorRemoved.
-
-For each audit round:
-1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function, 
-   by running simulations of the contest with its votes and margins, and an estimate of the error rates.
-2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited. 
-This may be done with an automated algorithm, or the Auditor may make individual contest choices.
-3. _Random sampling_: The actual ballots to be sampled are selected randomly from the Manifest based on a carefully chosen random seed.
-4. _Manual Audit_: find the chosen paper ballots that were selected to audit and do a manual audit of each.
-5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
-6. _Run the audit_: For each contest, calculate if the risk limit is satisfied, based on the manual audits.
-7. _Decide on Next Round_: for each contest not satisfied, decide whether to continue to another round, or call for a hand recount.
 
 # SHANGRLA framework
 
@@ -634,6 +599,7 @@ Modules
 * plots: plot generation and testing
 
 Also See:
+* [Verification](docs/Verification.md)
 * [Implementation Specificaton](docs/RlauxeSpec.md)
 * [Case Studies](docs/CaseStudies.md)
 * [Developer Notes](docs/Development.md)

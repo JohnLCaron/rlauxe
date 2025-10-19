@@ -1,6 +1,5 @@
 **Rlauxe Implementation Specification**
-
-_9/20/25_
+_last changed: 9/20/25_
 
 See [references](../papers/papers.txt) for reference papers.
 

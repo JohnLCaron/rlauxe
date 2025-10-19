@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.verifier
+package org.cryptobiotic.rlauxe.verify
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.persist.AuditRecord

@@ -21,18 +21,19 @@ class TestMakeRaireContest {
         val stopwatch = Stopwatch()
 
         val topDir = "/home/stormy/rla/cases/sf2024"
-        val publisher = Publisher("$topDir/audit")
+        val publisher = Publisher("$topDir/clca/audit")
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
         val contestsUA = if (contestsResults is Ok) contestsResults.unwrap()
         else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()} err = $contestsResults")
 
         val irvCounters = mutableListOf<IrvCounter>()
-        contestsUA.filter { it.isIrv}.forEach { contestUA ->
+        contestsUA.filter { it.isIrv }.forEach { contestUA ->
             println("$contestUA")
             println("   winners=${contestUA.contest.winnerNames()}")
             irvCounters.add(IrvCounter(contestUA.contest as RaireContest))
         }
 
+        // takes too long - get smaller example
         val cvrCsv = "$topDir/cvrExport.csv"
         val cvrIter = CvrExportToCvrAdapter(cvrExportCsvIterator(cvrCsv))
         var count = 0
@@ -48,7 +49,6 @@ class TestMakeRaireContest {
             val irvCount = IrvCount(cvotes, counter.rcontest.info.candidateIds)
             showIrvCount(counter.rcontest, irvCount)
         }
-
         println("showIrvCounts took $stopwatch")
     }
 }

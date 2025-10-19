@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.verifier
+package org.cryptobiotic.rlauxe.verify
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
@@ -18,7 +17,11 @@ import org.cryptobiotic.rlauxe.persist.json.readCardPoolsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.RegVotes
 import org.cryptobiotic.rlauxe.util.doubleIsClose
+import org.cryptobiotic.rlauxe.util.sumContestTabulations
+import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -55,6 +58,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         val result = VerifyResults()
         result.addMessage("---RunVerifyContests on $auditRecordLocation ")
         if (contests.size == 1) result.addMessage("  ${contests.first()} ")
+
         verifyCardCounts(auditConfig, contests, cards, infos, result, show = show)
         if (auditConfig.isOA) {
             verifyCardsWithPools(auditConfig, contests, cards, cardPools, infos, result, show = show)
@@ -96,12 +100,6 @@ class VerifyResults() {
         messes.forEach { appendLine(it) }
     }
 }
-
-data class ContestSummary(
-    val allVotes: Map<Int, ContestTabulation>,
-    val cardPoolVotes: Map<Int, ContestTabulation>,
-    val nonPoolTabs: Map<Int, ContestTabulation>,
-)
 
 fun verifyCardCounts(
     auditConfig: AuditConfig,
@@ -349,7 +347,7 @@ within pooli:
 
     Sum{bassort(cvr, cvr)} / noerror = ncvr + Sum { npooli }, i = 1..npools }
     Sum{bassort(cvr, cvr)} / noerror = totalNumberOfCvrs
- */
+
 
 // this only works if the cvrs have the votes in them
 fun verifyBAssortAvg(
@@ -391,6 +389,8 @@ fun verifyBAssortAvg(
     }
     return result
 }
+
+ */
 
     /* specialized debugging, use pool 20
     fun verifyPoolAssortAvg(

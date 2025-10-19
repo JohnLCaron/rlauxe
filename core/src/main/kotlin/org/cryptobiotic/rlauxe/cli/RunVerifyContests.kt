@@ -6,8 +6,8 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.verifier.VerifyContests
-import org.cryptobiotic.rlauxe.verifier.VerifyResults
+import org.cryptobiotic.rlauxe.verify.VerifyContests
+import org.cryptobiotic.rlauxe.verify.VerifyResults
 
 /** Run election record verification CLI. */
 object RunVerifyContests {

@@ -116,13 +116,14 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
     return Pair(rcontestUA, testCvrs)
 }
 
+/*
 data class SimulateIrvTestData(
     val contest: RaireContest,
     val minMargin: Double,
     val sampleLimits: Int,
     val excessVotes: Int? = null,
     val quiet: Boolean = true
-)
+) */
 
 // TODO use SimulateIrvTestData
 data class RaireContestTestData(

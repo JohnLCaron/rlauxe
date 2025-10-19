@@ -2,10 +2,13 @@ package org.cryptobiotic.rlauxe.audit
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.csv.AuditableCardToCvrAdapter
 import org.cryptobiotic.rlauxe.persist.csv.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
+import org.cryptobiotic.rlauxe.verify.checkContestsWithCvrs
+import org.cryptobiotic.rlauxe.verify.tabulateVotesFromCvrs
 import org.junit.jupiter.api.Assertions
 
 // TODO move to verifier
@@ -21,7 +24,8 @@ class TestCheckAudits {
         val contestsUA = readContestsJsonFile(publisher.contestsFile()).unwrap()
         // fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: CloseableIterator<Cvr>,
         //                          ballotPools: List<BallotPool>?, show: Boolean = false) = buildString {
-        val state = checkContestsWithCvrs(contestsUA, CvrExportToCvrAdapter(cvrExportCsvIterator(cvrExport)), cardPools = null)
+        val state =
+            checkContestsWithCvrs(contestsUA, CvrExportToCvrAdapter(cvrExportCsvIterator(cvrExport)), cardPools = null)
         println(state)
         Assertions.assertTrue(!state.contains("***"))
     }
@@ -33,11 +37,11 @@ class TestCheckAudits {
 
         val publisher = Publisher(auditDir)
         val contestsUA = readContestsJsonFile(publisher.contestsFile()).unwrap()
-        val state = checkContestsWithCvrs(contestsUA, CvrIteratorCloser(cardIter), cardPools = null)
+        val state = checkContestsWithCvrs(contestsUA, AuditableCardToCvrAdapter(cardIter), cardPools = null)
         println(state)
         Assertions.assertTrue(!state.contains("***"))
 
-        val tabCvrs: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(CvrIteratorCloser(cardIter)).toSortedMap()
+        val tabCvrs: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(AuditableCardToCvrAdapter(cardIter)).toSortedMap()
         tabCvrs.forEach { (contest, cvrMap) -> println("contest $contest : ${cvrMap}")}
     }
 

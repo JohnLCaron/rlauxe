@@ -10,7 +10,7 @@ import au.org.democracydevelopers.raire.irv.IRVResult
 import au.org.democracydevelopers.raire.irv.Votes
 import au.org.democracydevelopers.raire.time.TimeOut
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.ContestTabulation
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
 
 private val quiet = true

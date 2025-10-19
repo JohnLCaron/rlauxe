@@ -10,9 +10,11 @@ import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.CreateAudit
-import org.cryptobiotic.rlauxe.workflow.CreateElectionIF
-import org.cryptobiotic.rlauxe.workflow.createCvrsFromPools
+import org.cryptobiotic.rlauxe.audit.CreateAudit
+import org.cryptobiotic.rlauxe.audit.CreateElectionIF
+import org.cryptobiotic.rlauxe.audit.createCvrsFromPools
+import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
+import org.cryptobiotic.rlauxe.verify.tabulateVotesFromCvrs
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -108,7 +110,8 @@ open class BoulderElectionOA(
                     redacted.contestVotes.filter{ (key, value) -> key != 12 }
                 } else redacted.contestVotes
 
-            CardPoolWithBallotStyle(cleanCsvString(redacted.ballotType), redactedIdx, useContestVotes.toMap(), infoMap)
+            val contestTabs = useContestVotes.mapValues{ ContestTabulation(infoMap[it.key]!!, it.value) }
+            CardPoolWithBallotStyle(cleanCsvString(redacted.ballotType), redactedIdx, contestTabs, infoMap)
         }
     }
 
@@ -142,11 +145,11 @@ open class BoulderElectionOA(
     private fun makeRedactedCvrs(cardPool: CardPoolWithBallotStyle, show: Boolean) : List<Cvr> { // contestId -> candidateId -> nvotes
 
         val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
-        cardPool.voteTotals.forEach { (contestId, candVotes) ->
+        cardPool.voteTotals.forEach { (contestId, contestTab) ->
             val oaContest: OneAuditContestBoulder = oaContests[contestId]!!
-            val sumVotes = candVotes.map { it.value }.sum()
+            val sumVotes = contestTab.nvotes()
             val underVotes = cardPool.ncards() * oaContest.info.voteForN - sumVotes
-            contestVotes[contestId] = VotesAndUndervotes(candVotes, underVotes, oaContest.info.voteForN)
+            contestVotes[contestId] = VotesAndUndervotes(contestTab.votes, underVotes, oaContest.info.voteForN)
         }
 
         val cvrs = makeVunderCvrs(contestVotes, cardPool.poolName, poolId = cardPool.poolId) // TODO test
@@ -176,7 +179,7 @@ open class BoulderElectionOA(
                 println("  contestTab=$contestTab")
                 println()
             }
-            require(checkEquivilentVotes(cardPool.voteTotals[contestId]!!, contestTab.votes))
+            require(checkEquivilentVotes(cardPool.voteTotals[contestId]!!.votes, contestTab.votes))
         }
 
         return cvrs

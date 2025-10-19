@@ -1,13 +1,15 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.persist.*
+import org.cryptobiotic.rlauxe.persist.csv.AuditableCardToCvrAdapter
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.util.Prng
+import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
+import org.cryptobiotic.rlauxe.verify.checkContestsWithCvrs
 import java.nio.file.Path
 import kotlin.test.Test
 
@@ -52,7 +54,11 @@ class TestPersistentOneAudit {
         // these checks may modify the contest status
         checkContestsCorrectlyFormed(auditConfig, oaWorkflow.contestsUA())
         // TODO val cardPools = readCardPoolsJsonFile(publisher.cardPoolsFile(), infos).unwrap()
-        checkContestsWithCvrs(oaWorkflow.contestsUA(), CvrIteratorCloser(readCardsCsvIterator(publisher.cardsCsvFile())), cardPools = null)
+        checkContestsWithCvrs(
+            oaWorkflow.contestsUA(),
+            AuditableCardToCvrAdapter(readCardsCsvIterator(publisher.cardsCsvFile())),
+            cardPools = null
+        )
 
         writeContestsJsonFile(oaWorkflow.contestsUA(), publisher.contestsFile())
         println("write writeContestsJsonFile to ${publisher.contestsFile()} ")

@@ -11,9 +11,11 @@ import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestIF
 import org.cryptobiotic.rlauxe.oneaudit.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.CreateAudit
-import org.cryptobiotic.rlauxe.workflow.CreateElectionIF
-import org.cryptobiotic.rlauxe.workflow.createCvrsFromPools
+import org.cryptobiotic.rlauxe.audit.CreateAudit
+import org.cryptobiotic.rlauxe.audit.CreateElectionIF
+import org.cryptobiotic.rlauxe.audit.createCvrsFromPools
+import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
+import org.cryptobiotic.rlauxe.verify.tabulateVotesFromCvrs
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.max
@@ -107,28 +109,25 @@ class ColoradoOneAudit (
         println("precincts = ${precincts.size}")
 
         return precincts.mapIndexed { idx, precinct ->
-            val voteTotals = mutableMapOf<Int, MutableMap<Int, Int>>()
+            val contestTabs = mutableMapOf<Int, ContestTabulation>()
             precinct.contestChoices.forEach { (name, choices) ->
                 val contestName = mutatisMutandi(contestNameCleanup(name))
                 val info = infoMap.values.find { it.name == contestName }
                 if (info != null) {
-                    voteTotals[info.id] = mutableMapOf()
-                    val cands = voteTotals[info.id]!!
+                    val contestTab = ContestTabulation(info)
+                    contestTabs[info.id] = contestTab
                     choices.forEach { choice ->
                         val choiceName = candidateNameCleanup(choice.choice)
                         val candId = info.candidateNames[choiceName]
                         if (candId == null) {
                             // logger.warn{"*** precinct ${precinct} candidate ${choiceName} writein missing in info ${info.id} $contestName infoNames= ${info.candidateNames}"}
                         } else {
-                            cands[candId] = choice.totalVotes
+                            contestTab.addVote(candId, choice.totalVotes)
                         }
                     }
-                } else {
-                    // probably > 260
-                    // println("*** precinct ${precinct} contest ${contestName} missing in info")
                 }
             }
-            CardPoolWithBallotStyle("${precinct.county}-${precinct.precinct}", idx, voteTotals.toMap(), infoMap)
+            CardPoolWithBallotStyle("${precinct.county}-${precinct.precinct}", idx, contestTabs, infoMap)
         }
     }
 
@@ -219,11 +218,11 @@ class OneAuditContestCorla(val info: ContestInfo, val detailContest: ElectionDet
 fun makeCvrsFromPool(cardPool: CardPoolWithBallotStyle, oaContestMap: Map<Int, OneAuditContestCorla>, isClca: Boolean) : List<Cvr> {
 
     val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
-    cardPool.voteTotals.forEach { (contestId, candVotes) ->
+    cardPool.voteTotals.forEach { (contestId, contestTab) ->
         val oaContest: OneAuditContestCorla = oaContestMap[contestId]!!
-        val sumVotes = candVotes.map { it.value }.sum()
+        val sumVotes = contestTab.nvotes()
         val underVotes = cardPool.ncards() * oaContest.info.voteForN - sumVotes
-        contestVotes[contestId] = VotesAndUndervotes(candVotes, underVotes, oaContest.info.voteForN)
+        contestVotes[contestId] = VotesAndUndervotes(contestTab.votes, underVotes, oaContest.info.voteForN)
     }
 
     val cvrs = makeVunderCvrs(contestVotes, cardPool.poolName, poolId = if (isClca) null else cardPool.poolId) // TODO test
@@ -241,10 +240,9 @@ fun makeCvrsFromPool(cardPool: CardPoolWithBallotStyle, oaContestMap: Map<Int, O
     }
 
     val infos = oaContestMap.mapValues { it.value.info }
-    val cvrTab = tabulateCvrs(cvrs.iterator(), infos).toSortedMap()
-    cvrTab.forEach { contestId, contestTab ->
-        val oaContest: OneAuditContestCorla = oaContestMap[contestId]!!
-        require(checkEquivilentVotes(cardPool.voteTotals[contestId]!!, contestTab.votes))
+    val contestTabs = tabulateCvrs(cvrs.iterator(), infos).toSortedMap()
+    contestTabs.forEach { contestId, contestTab ->
+        require(checkEquivilentVotes(cardPool.voteTotals[contestId]!!.votes, contestTab.votes))
     }
 
     return cvrs

@@ -13,9 +13,9 @@ import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.workflow.CreateAudit
-import org.cryptobiotic.rlauxe.workflow.CreateElectionIF
-import kotlin.Boolean
+import org.cryptobiotic.rlauxe.audit.CreateAudit
+import org.cryptobiotic.rlauxe.audit.CreateElectionIF
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach

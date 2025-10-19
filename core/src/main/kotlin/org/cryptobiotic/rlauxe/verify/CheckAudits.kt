@@ -1,14 +1,21 @@
-package org.cryptobiotic.rlauxe.audit
+package org.cryptobiotic.rlauxe.verify
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.sumContestTabulations
+import org.cryptobiotic.rlauxe.util.tabulateCardPools
+import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.collections.component1
 import kotlin.collections.component2
+import kotlin.collections.iterator
 
 private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOANS")
 
+// TODO move to verify
 fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>) {
 
     contestsUA.forEach { contestUA ->

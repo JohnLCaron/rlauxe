@@ -18,8 +18,9 @@ import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.makeRaireContestUA
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.workflow.CreateAudit
-import org.cryptobiotic.rlauxe.workflow.CreateElectionIF
+import org.cryptobiotic.rlauxe.audit.CreateAudit
+import org.cryptobiotic.rlauxe.audit.CreateElectionIF
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import kotlin.Boolean
 import kotlin.collections.component1
 import kotlin.collections.component2

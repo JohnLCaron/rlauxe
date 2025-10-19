@@ -141,6 +141,7 @@ data class ContestVotes(val contestId: Int, val candVotes: List<Int>)
 // raw data from Boulder, before we start to adjust it. Turn into a CardPool,
 // unfortunately, we dont know how many ballots this group represents, nor the number of undervotes
 class RedactedGroup(val ballotType: String) {
+    // dont have ContestInfos yet
     val contestVotes = mutableMapOf<Int, MutableMap<Int, Int>>()  // contestId -> candidateId -> nvotes
     var csvRecord : CSVRecord? = null // debugging
 

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
@@ -74,7 +75,7 @@ fun makeOneContestUA(
     val pool = CardPoolWithBallotStyle(
             "noCvr",
             1, // poolId
-            voteTotals = mapOf(contestId to votesNoCvr),
+            voteTotals = mapOf(contestId to ContestTabulation(info, votesNoCvr)),
             infos = mapOf(contestId to info),
         )
     pool.adjustCards = poolUnderVotes

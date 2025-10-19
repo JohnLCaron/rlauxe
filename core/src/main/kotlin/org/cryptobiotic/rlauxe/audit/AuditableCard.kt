@@ -1,8 +1,6 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.util.Prng
 
 // A generalization of Cvr, allowing votes to be null, eg for Polling or OneAudit
 data class AuditableCard (
@@ -10,8 +8,8 @@ data class AuditableCard (
     val index: Int,  // index into the original, canonical list of cards
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
-    val contests: IntArray, // list of contests on this ballot. TODO optional when !hasStyles ??
-    val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, ranked first to last; missing for pooled data
+    val contests: IntArray, // list of contests on this ballot. TODO optional when !hasStyles
+    val votes: List<IntArray>?, // for each contest, an array of the candidate ids voted for; for IRV, ranked first to last; missing for pooled data
     val poolId: Int?, // for OneAudit
 ) {
     // if there are no votes, the IntArrays are all empty; looks like all undervotes
@@ -98,22 +96,3 @@ data class AuditableCard (
     }
 }
 
-class CvrIteratorAdapter(val cardIterator: Iterator<AuditableCard>) : CloseableIterator<Cvr> {
-    override fun hasNext() = cardIterator.hasNext()
-    override fun next() = cardIterator.next().cvr()
-    override fun close() {}
-}
-
-class CvrIteratorCloser(val cardIterator: CloseableIterator<AuditableCard>) : CloseableIterator<Cvr> {
-    override fun hasNext() = cardIterator.hasNext()
-    override fun next() = cardIterator.next().cvr()
-    override fun close() {
-        cardIterator.close()
-    }
-}
-
-// convert cvrs into AuditableCard sorted by prn
-fun createSortedCards(cvrs: List<Cvr>, seed: Long) : List<AuditableCard> {
-    val prng = Prng(seed)
-    return cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }
-}

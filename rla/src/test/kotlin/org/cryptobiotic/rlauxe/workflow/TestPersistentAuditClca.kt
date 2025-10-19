@@ -6,11 +6,14 @@ import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.persist.*
+import org.cryptobiotic.rlauxe.persist.csv.AuditableCardToCvrAdapter
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
+import org.cryptobiotic.rlauxe.verify.checkContestsWithCvrs
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
@@ -55,8 +58,11 @@ class TestPersistentWorkflowClca {
 
         // these checks may modify the contest status
         checkContestsCorrectlyFormed(auditConfig, clcaWorkflow.contestsUA())
-        checkContestsWithCvrs(clcaWorkflow.contestsUA(), CvrIteratorCloser(readCardsCsvIterator(publisher.cardsCsvFile())),
-            cardPools = null)
+        checkContestsWithCvrs(
+            clcaWorkflow.contestsUA(),
+            AuditableCardToCvrAdapter(readCardsCsvIterator(publisher.cardsCsvFile())),
+            cardPools = null
+        )
 
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
         println("write writeContestsJsonFile to ${publisher.contestsFile()} ")

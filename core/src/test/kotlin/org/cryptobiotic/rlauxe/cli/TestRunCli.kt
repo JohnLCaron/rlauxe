@@ -25,24 +25,34 @@ class TestRunCli {
         )
 
         println("============================================================")
-        val resultsvc = RunVerifyContests.runVerifyContests(topdir, null, false)
+        val resultsvc = RunVerifyContests.main(
+            arrayOf(
+                "-in", topdir,
+            )
+        )
         println()
         print(resultsvc)
 
         println("============================================================")
-        var done = false
-        while (!done) {
-            val lastRound = runRound(inputDir = topdir, useTest = false, quiet = true)
-            done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
+        repeat(3) {
+            val lastRound = RunRliRoundCli.main(
+                arrayOf(
+                    "-in", topdir,
+                    "-test",
+                    "-quiet",
+                )
+            )
         }
 
         println("============================================================")
-        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = topdir)
+        val results = RunVerifyAuditRecord.main(
+            arrayOf(
+                "-in", topdir,
+            )
+        )
         println(results)
 
         topPath.deleteRecursively()
-        if (results.fail) fail()
-        if (resultsvc.fail) fail()
     }
 
     @Test

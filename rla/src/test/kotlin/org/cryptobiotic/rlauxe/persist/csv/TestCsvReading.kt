@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
-import org.cryptobiotic.rlauxe.persist.AuditRecord.Companion.readFrom
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -11,7 +10,7 @@ class TestCsvReading {
 
     @Test
     fun testAuditableCardCsvFile() {
-        val filenameIn = "/home/stormy/rla/cases/sf2024Poa/cards.csv"
+        val filenameIn = "/home/stormy/rla/cases/sf2024/oa/audit/sortedCards.csv"
         val original = readAuditableCardCsvFile(filenameIn)
         val filenameOut = "$tempDir/sfCards.csv"
 

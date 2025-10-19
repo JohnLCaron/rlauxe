@@ -7,9 +7,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
-import org.cryptobiotic.rlauxe.audit.ContestTabulation
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.FileOutputStream
@@ -63,8 +62,7 @@ fun CardPoolJson.import(infos: Map<Int, ContestInfo>): CardPoolIF {
 // class CardPoolWithBallotStyle(
 //    override val poolName: String,
 //    override val poolId: Int,
-//    val voteTotals: Map<Int, Map<Int, Int>>, // contestId -> candidateId -> nvotes // TODO use ContestTabulation ??
-//    val infos: Map<Int, ContestInfo>, // all infos
+//    val voteTotals: Map<Int, Map<Int, Int>>, // contestId -> candidateId -> nvotes
 //) : CardPoolIF
 //{
 //    val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
@@ -74,14 +72,14 @@ fun CardPoolJson.import(infos: Map<Int, ContestInfo>): CardPoolIF {
 class CardPoolWithBallotStyleJson(
     val poolName: String,
     val poolId: Int,
-    val voteTotals: Map<Int, Map<Int, Int>>, // contestId -> candidateId -> nvotes // TODO use ContestTabulation ??
+    val voteTotals: Map<Int, ContestTabulationJson>, // contestId -> candidateId -> nvotes
     val adjustCards: Int
 )
 
 fun CardPoolWithBallotStyle.publishJson() = CardPoolWithBallotStyleJson(
     this.poolName,
     this.poolId,
-    this.voteTotals,
+    this.voteTotals.mapValues { it.value.publishJson() },
     this.adjustCards,
 )
 
@@ -89,7 +87,7 @@ fun CardPoolWithBallotStyleJson.import(infos: Map<Int, ContestInfo>): CardPoolWi
     val cardPool = CardPoolWithBallotStyle(
         this.poolName,
         this.poolId,
-        this.voteTotals,
+        this.voteTotals.mapValues { it.value.import(infos[it.key]!!) },
         infos
     )
     cardPool.adjustCards = this.adjustCards

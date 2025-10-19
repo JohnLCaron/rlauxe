@@ -5,9 +5,8 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
-import org.cryptobiotic.rlauxe.cli.RunVerifyContests.runVerifyContests
-import org.cryptobiotic.rlauxe.verifier.VerifyAuditRecord
-import org.cryptobiotic.rlauxe.verifier.VerifyResults
+import org.cryptobiotic.rlauxe.verify.VerifyAuditRecord
+import org.cryptobiotic.rlauxe.verify.VerifyResults
 
 /** Run election record verification CLI. */
 object RunVerifyAuditRecord {

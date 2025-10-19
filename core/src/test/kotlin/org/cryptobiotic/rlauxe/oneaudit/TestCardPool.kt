@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.audit.tabulateCvrs
+import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
@@ -87,9 +87,8 @@ class TestCardPool {
         val cvrs = makeVunderCvrs(contestVotes, "poolName", poolId = 42)
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
         val cvrTabs = tabulateCvrs(cvrs.iterator(), infos)
-        val votes = cvrTabs.mapValues { it.value.votes }
 
-        val cardPool = CardPoolWithBallotStyle("pool42", 42, votes, infos)
+        val cardPool = CardPoolWithBallotStyle("pool42", 42, cvrTabs, infos)
         CardPoolWithBallotStyle.showVotes(contestVotes.keys.toList(), listOf(cardPool), width=6)
     }
 }

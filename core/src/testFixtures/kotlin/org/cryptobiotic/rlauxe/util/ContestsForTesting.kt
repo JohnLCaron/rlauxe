@@ -1,9 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.audit.ContestTabulation
-import org.cryptobiotic.rlauxe.audit.checkEquivilentVotes
-import org.cryptobiotic.rlauxe.audit.tabulateCvrs
-import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
+import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
+import org.cryptobiotic.rlauxe.verify.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import kotlin.random.Random

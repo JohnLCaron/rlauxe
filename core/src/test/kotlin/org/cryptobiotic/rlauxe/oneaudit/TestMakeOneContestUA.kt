@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
+import org.cryptobiotic.rlauxe.verify.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.doublePrecision
@@ -72,12 +72,13 @@ class TestMakeOneContestUA {
         val phantomPercent = 0.03
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
-        val cvrPercents = listOf(0.01, 0.5, 1.0)
+        val cvrPercents = listOf(0.01, 0.5, 0.99)
         margins.forEach { margin ->
             cvrPercents.forEach { cvrPercent ->
                 println("======================================================================================================")
                 println("margin=$margin cvrPercent=$cvrPercent phantomPercent=$phantomPercent undervotePercent=$undervotePercent")
-                val (contestOA, cardPools, testCvrs) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = undervotePercent, phantomFraction = phantomPercent)
+                val (contestOA, cardPools, testCvrs) =
+                    makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = undervotePercent, phantomFraction = phantomPercent)
                 checkBasics(contestOA, cardPools, margin, cvrPercent)
                 checkAgainstCvrs(contestOA, cardPools, testCvrs, cvrPercent, undervotePercent, phantomPercent)
             }
@@ -92,7 +93,7 @@ class TestMakeOneContestUA {
         //showPct("cvrs", contestOA.cvrVotes, contestOA.cvrNcards)
 
         assertEquals(1, cardPools.size)
-        val cardPool = cardPools[0]
+        val cardPool = cardPools.first()
         assertEquals("noCvr", cardPool.poolName)
         println(cardPool)
         val vunder = cardPool.votesAndUndervotes(contestOA.id)

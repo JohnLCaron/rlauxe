@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.audit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.persist.csv.AuditableCardToCvrAdapter
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 
@@ -11,7 +12,7 @@ private val logger = KotlinLogging.logger("MvrManager")
 interface MvrManager {
     // either Cvrs (clca) or CardLocations (polling) or both (oneaudit)
     fun sortedCards(): CloseableIterable<AuditableCard>
-    fun sortedCvrs(): CloseableIterable<Cvr> = CloseableIterable { CvrIteratorCloser(sortedCards().iterator()) }
+    fun sortedCvrs(): CloseableIterable<Cvr> = CloseableIterable { AuditableCardToCvrAdapter(sortedCards().iterator()) }
 
     //// for uniformSampling
     fun takeFirst(nmvrs: Int): List<AuditableCard> {

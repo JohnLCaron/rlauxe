@@ -2,11 +2,12 @@ package org.cryptobiotic.rlauxe.cli
 
 import kotlin.test.Test
 
+// TODO: test that the sampleMvrs are correct
 class TestEnterMvrsCli {
 
     @Test
     fun testEnterMvrsClca() {
-        val auditDir = "/home/stormy/rla/persist/testPersistentWorkflowClca"
+        val auditDir = "src/test/data/workflow/testCliRoundClca"
         EnterMvrsCli.main(
             arrayOf(
                 "-in", auditDir,

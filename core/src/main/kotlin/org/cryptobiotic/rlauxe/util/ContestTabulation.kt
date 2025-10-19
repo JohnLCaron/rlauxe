@@ -1,18 +1,13 @@
-package org.cryptobiotic.rlauxe.audit
+package org.cryptobiotic.rlauxe.util
 
-import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
-import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.raire.VoteConsolidator
-import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.iterator
-
-private val logger = KotlinLogging.logger("ContestTabulation")
 
 // IRV have empty votes
 interface RegVotes {
@@ -44,6 +39,10 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
     init {
         // The candidate Ids must go From 0 ... ncandidates-1, for Raire; use the ordering from ContestInfo.candidateIds
         candidateIdToIndex = if (isIrv) info.candidateIds.mapIndexed { idx, candidateId -> Pair(candidateId, idx) }.toMap() else emptyMap()
+    }
+
+    constructor(info: ContestInfo, votes: Map<Int, Int>): this(info) {
+        votes.forEach{ this.addVote(it.key, it.value) }
     }
 
     override fun ncards() = ncards
@@ -166,28 +165,6 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
         contestSum.sum(otherTab)
     }
 }
-
-/* add other into this TODO needed?
-fun MutableMap<Int, ContestTabulation>.addJustVotes(other: Map<Int, ContestTabulation>) {
-    other.forEach { (contestId, otherTab) ->
-        val contestSum = this.getOrPut(contestId) { ContestTabulation(otherTab.info) }
-        contestSum.addJustVotes(otherTab)
-    }
-} */
-
-/* return contestId -> ContestTabulation
-fun tabulateBallotPools(ballotPools: Iterator<BallotPool>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
-    val votes = mutableMapOf<Int, ContestTabulation>()
-    ballotPools.forEach { ballotPool ->
-        val info = infos[ballotPool.contestId]
-        if (info != null) {
-            val contestTab = votes.getOrPut(ballotPool.contestId) { ContestTabulation(infos[ballotPool.contestId]!!) }
-            ballotPool.votes.forEach { (cand, vote) -> contestTab.addVote(cand, vote) }
-            contestTab.ncards += ballotPool.ncards
-        }
-    }
-    return votes
-} */
 
 // only accumulates regular votes, not IRV
 fun tabulateCardPools(cardPools: Iterator<CardPoolIF>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {

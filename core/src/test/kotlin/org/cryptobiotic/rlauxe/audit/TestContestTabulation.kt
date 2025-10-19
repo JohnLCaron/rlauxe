@@ -1,6 +1,9 @@
 package org.cryptobiotic.rlauxe.audit
 
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.makeContestsWithUndervotesAndPhantoms
+import org.cryptobiotic.rlauxe.util.tabulateCvrs
+import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals

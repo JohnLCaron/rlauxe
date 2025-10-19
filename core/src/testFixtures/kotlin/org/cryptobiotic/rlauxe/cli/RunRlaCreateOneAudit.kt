@@ -7,15 +7,13 @@ import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
 
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.workflow.*
+import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.io.path.Path
 
 object RunRlaCreateOneAudit {

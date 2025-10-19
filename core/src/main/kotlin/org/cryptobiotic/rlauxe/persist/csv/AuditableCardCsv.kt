@@ -1,9 +1,8 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
-
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ZipReader
@@ -19,7 +18,7 @@ private val logger = KotlinLogging.logger("AuditableCardCsv")
 //    val prn: Long,   // psuedo random number
 //    val phantom: Boolean,
 //    val contests: IntArray, // list of contests on this ballot. TODO optional when !hasStyles ??
-//    val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, ranked first to last
+//    val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, ranked first to last; missing for pooled data
 //    val poolId: Int?, // for OneAudit
 //)
 
@@ -179,6 +178,14 @@ class IteratorCardsCsvFile(filename: String): CloseableIterator<AuditableCard> {
 
     override fun close() {
         reader.close()
+    }
+}
+
+class AuditableCardToCvrAdapter(val cardIterator: CloseableIterator<AuditableCard>) : CloseableIterator<Cvr> {
+    override fun hasNext() = cardIterator.hasNext()
+    override fun next() = cardIterator.next().cvr()
+    override fun close() {
+        cardIterator.close()
     }
 }
 

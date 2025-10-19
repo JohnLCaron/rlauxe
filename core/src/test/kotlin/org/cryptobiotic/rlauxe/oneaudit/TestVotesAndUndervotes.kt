@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.audit.ContestTabulation
-import org.cryptobiotic.rlauxe.audit.checkEquivilentVotes
-import org.cryptobiotic.rlauxe.audit.tabulateCvrs
-import org.cryptobiotic.rlauxe.audit.tabulateVotesFromCvrs
+import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
+import org.cryptobiotic.rlauxe.util.tabulateCvrs
+import org.cryptobiotic.rlauxe.verify.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.util.makeContestsWithUndervotesAndPhantoms
 import org.cryptobiotic.rlauxe.util.makeVunderCvrs

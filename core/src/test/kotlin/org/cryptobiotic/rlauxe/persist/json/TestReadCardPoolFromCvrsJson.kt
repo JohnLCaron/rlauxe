@@ -6,14 +6,13 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import kotlin.io.path.createTempFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 // TODO mo betta
-class TestReadCardPoolJson {
+class TestReadCardPoolFromCvrsJson {
 
     @Test
-    fun testRoundtrip() {
+    fun testCardPoolFromCvrs() {
         // val auditDir = "/home/stormy/rla/persist/testCliRoundOneAudit/audit"
         val auditDir = "src/test/data/workflow/testCliRoundOneAudit/audit"
 
@@ -23,7 +22,7 @@ class TestReadCardPoolJson {
         val infos = contests.map { it.contest.info()}.associateBy { it.id }
 
         val pools = readCardPoolsJsonFile(poolFile, infos).unwrap()
-        println("read ${pools} pools (original")
+        println("read ${pools} pool (original)")
         val pool = pools.first()
         assertTrue(pool is CardPoolFromCvrs)
         assertEquals(1, pool.poolId)
@@ -41,11 +40,13 @@ class TestReadCardPoolJson {
         writeCardPoolsJsonFile(pools, scratchFile.toString())
 
         val roundtrip = readCardPoolsJsonFile(scratchFile.toString(), infos).unwrap()
-        println("read ${roundtrip} pools (roundtrip")
+        println("read ${roundtrip} pool (roundtrip)")
         assertEquals(pools.toSet(), roundtrip.toSet())
+        val rpool = roundtrip.first()
+        assertEquals(pool, rpool)
+        assertEquals(pool.hashCode(), rpool.hashCode())
 
         scratchFile.delete()
     }
-
 
 }

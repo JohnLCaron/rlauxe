@@ -5,7 +5,7 @@ import io.kotest.property.arbitrary.double
 import io.kotest.property.arbitrary.int
 import io.kotest.property.checkAll
 import kotlinx.coroutines.test.runTest
-import org.cryptobiotic.rlauxe.audit.checkEquivilentVotes
+import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.propTestFastConfig
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -42,6 +42,7 @@ class TestAssorterMargins {
             ) { ncontests, nstyles, Nc ->
                 val test = MultiContestTestData(ncontests, nstyles, Nc, 0.011..0.033)
                 val cvrs = test.makeCvrsFromContests()
+                println("$ncontests, $nstyles, $Nc")
 
                 try {
                     test.contests.forEach { contest ->

@@ -15,7 +15,6 @@ import org.cryptobiotic.rlauxe.audit.CreateAudit
 import org.cryptobiotic.rlauxe.audit.CreateElectionIF
 import org.cryptobiotic.rlauxe.audit.createCvrsFromPools
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
-import org.cryptobiotic.rlauxe.verify.tabulateVotesFromCvrs
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.max
@@ -228,18 +227,19 @@ fun makeCvrsFromPool(cardPool: CardPoolWithBallotStyle, oaContestMap: Map<Int, O
     val cvrs = makeVunderCvrs(contestVotes, cardPool.poolName, poolId = if (isClca) null else cardPool.poolId) // TODO test
 
     // check
-    val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
+    val infos = oaContestMap.mapValues { it.value.info }
+
+    val tabVotes: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infos)
     contestVotes.forEach { (contestId, vunders) ->
-        val tv = tabVotes[contestId] ?: emptyMap()
-        if (!checkEquivilentVotes(vunders.candVotesSorted, tv)) {
+        val tv = tabVotes[contestId]
+        if (tv != null && !checkEquivilentVotes(vunders.candVotesSorted, tv.votes)) {
             println("  contestId=${contestId}")
             println("  tabVotes=${tv}")
             println("  vunders= ${vunders.candVotesSorted}")
-            require(checkEquivilentVotes(vunders.candVotesSorted, tv))
+            require(checkEquivilentVotes(vunders.candVotesSorted, tv.votes))
         }
     }
 
-    val infos = oaContestMap.mapValues { it.value.info }
     val contestTabs = tabulateCvrs(cvrs.iterator(), infos).toSortedMap()
     contestTabs.forEach { contestId, contestTab ->
         require(checkEquivilentVotes(cardPool.voteTotals[contestId]!!.votes, contestTab.votes))

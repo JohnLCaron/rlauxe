@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
+import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
@@ -12,15 +13,21 @@ import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.iterator
+import kotlin.math.max
+import kotlin.math.min
 
 private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOANS")
 
-// TODO move to verify
-fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>) {
+fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>, results: VerifyResults) {
+    results.addMessage("checkContestsCorrectlyFormed")
+
+    checkContestInfos(contestsUA, results)
 
     contestsUA.forEach { contestUA ->
+        checkWinners(contestUA, results)
+
         if (contestUA.preAuditStatus == TestH0Status.InProgress && !contestUA.isIrv) {
-            checkWinners(contestUA)
+            checkWinnerVotes(contestUA, results)
 
             // see if margin is too small
             if (contestUA.recountMargin() <= auditConfig.minRecountMargin) {
@@ -36,49 +43,109 @@ fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<Cont
                 }
             }
         }
-        // println("contest ${contestUA} minMargin ${minMargin} + phantomRate ${contestUA.contest.phantomRate()} = adjustedMargin ${adjustedMargin}")
     }
 }
 
-// check winners are correctly formed
-fun checkWinners(contestUA: ContestUnderAudit, ) {
-    val contest = if (contestUA.contest is Contest) contestUA.contest
-        // else if (contestUA.contest is OneAuditContest && contestUA.contest.contest is Contest) contestUA.contest.contest
-        else null
-    if (contest == null) return
+fun checkContestInfos(contestsUA: List<ContestUnderAudit>, results: VerifyResults) {
+    val contestNames = mutableSetOf<String>()
+    val contestIds = mutableSetOf<Int>()
+    contestsUA.forEach { contestUA ->
+        // 2. over all contests, verify that the names and ids are unique.
+        if (!contestNames.add(contestUA.name)) {
+            results.addError("Contest ${contestUA.name} duplicate name")
+            contestUA.preAuditStatus = TestH0Status.ContestMisformed
+        }
+        if (!contestIds.add(contestUA.id)) {
+            results.addError("Contest ${contestUA.id} duplicate id")
+            contestUA.preAuditStatus = TestH0Status.ContestMisformed
+        }
 
-    val sortedVotes: List<Map.Entry<Int, Int>> = contest.votes.entries.sortedByDescending { it.value } // TODO wtf?
-    val nwinners = contest.winners.size
-
-    // make sure that the winners are unique
-    val winnerSet = mutableSetOf<Int>()
-    winnerSet.addAll(contest.winners)
-    if (winnerSet.size != contest.winners.size) {
-        logger.warn{"*** winners in contest ${contest} have duplicates"}
-        contestUA.preAuditStatus = TestH0Status.ContestMisformed
-        return
+        // 1. for each contest, verify that candidate names and candidate ids are unique.
+        val candNames = mutableSetOf<String>()
+        val candIds = mutableSetOf<Int>()
+        contestUA.contest.info().candidateNames.forEach { name, id ->
+            if (!candNames.add(name)) {
+                results.addError("Contest ${contestUA.name} (${contestUA.id}) candidate $name duplicate name")
+                contestUA.preAuditStatus = TestH0Status.ContestMisformed
+            }
+            if (!candIds.add(id)) {
+                results.addError("Contest ${contestUA.name} (${contestUA.id}) candidate $id duplicate id")
+                contestUA.preAuditStatus = TestH0Status.ContestMisformed
+            }
+        }
     }
+}
 
-    // see if theres a tie TODO check this
-    val winnerMin: Int = sortedVotes.take(nwinners).map{ it.value }.min()
-    if (sortedVotes.size > nwinners) {
-        val firstLoser = sortedVotes[nwinners]
-        if (firstLoser.value == winnerMin ) {
-            logger.warn{"*** tie in contest ${contest}"}
-            contestUA.preAuditStatus = TestH0Status.MinMargin
-            return
+fun checkWinners(contestUA: ContestUnderAudit, results: VerifyResults) {
+    val contest = contestUA.contest
+    val info = contest.info()
+
+    // hmmm, maybe we allow writeIns not in info ?? as long as they dont win or lose?
+    /* if (contest is Contest) {
+        contest.votes.keys.forEach { candId ->
+            if (!info.candidateIds.contains(candId)) results.addError("Contest ${info.name} (${info.id}) has vote for candidate $candId not in ContestInfo")
+        }
+    } */
+
+    // 1. verify that the candidateIds match whats in the ContestInfo
+    val candidatesInContest = contest.winners() + contest.losers()
+    candidatesInContest.forEach { candId ->
+        if (!info.candidateIds.contains(candId)) {
+            results.addError("Contest ${info.name} (${info.id}) has candidate $candId not in ContestInfo")
+            contestUA.preAuditStatus = TestH0Status.ContestMisformed
         }
     }
 
-    // check that the top nwinners are in winners list
-    sortedVotes.take(nwinners).forEach { (candId, vote) ->
+    // 2. verify that the candidateIds are unique
+    val candidatesIds = mutableSetOf<Int>()
+    candidatesInContest.forEach {
+        if (!candidatesIds.add(it)) {
+            results.addError("Contest ${info.name} (${info.id}) has duplicate contestId $candidatesIds")
+            contestUA.preAuditStatus = TestH0Status.ContestMisformed
+        }
+    }
+
+    // 3. verify that nwinners == min(ncandidates, info.nwinners)
+    val maxwinners = min(info.candidateIds.size, info.nwinners)
+    if (contest.winners().size != maxwinners) {
+        results.addError("Contest ${info.name} (${info.id}) has ${contest.winners().size} winners should be $maxwinners")
+        contestUA.preAuditStatus = TestH0Status.ContestMisformed
+    }
+}
+
+// 3. verify that the winners have more votes than the losers (margins > 0 for all assertions)
+// 4. check that the top nwinners are in the list of winners
+fun checkWinnerVotes(contestUA: ContestUnderAudit, results: VerifyResults) {
+    val contest = contestUA.contest as Contest
+    val info = contest.info
+
+    val sortedVotes: List<Map.Entry<Int, Int>> = contest.votes.entries.sortedByDescending { it.value } // highest vote count first
+    val nwinners = contest.winners.size
+
+    // 3. verify that the winners have more votes than the losers (margins > 0 for all assertions)
+    sortedVotes.take(nwinners).forEach { (candId, _) ->
         if (!contest.winners.contains(candId)) {
-            logger.warn{"*** winners ${contest.winners} does not contain candidateId $candId"}
+            results.addError("Contest ${info.name} (${info.id}) winners ${contest.winners} should contain candidateId $candId")
             contestUA.preAuditStatus = TestH0Status.ContestMisformed
             return
         }
     }
+
+    // see if theres a tie
+    val winnerMin: Int? = sortedVotes.take(nwinners).minOfOrNull { it.value }
+    if (sortedVotes.size > nwinners) {
+        val firstLoser = sortedVotes[nwinners]
+        if (firstLoser.value == winnerMin ) {
+            results.addError("Contest ${info.name} (${info.id}) has a tie: ${sortedVotes.map { it.value }} ")
+            contestUA.preAuditStatus = TestH0Status.MinMargin
+            return
+        }
+    }
 }
+
+
+//////////////////////////////////////////////////////////////////////////////
+/*
 
 // TODO use VerifyContests instead. problem here is whether the ballot pools have to be added or not.
 fun checkContestsWithCvrs(contestsUA: List<ContestUnderAudit>, cvrs: CloseableIterator<Cvr>,
@@ -124,9 +191,6 @@ fun checkEquivilentVotes(votes1: Map<Int, Int>, votes2: Map<Int, Int>, ) : Boole
     return votes1z == votes2z
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// TODO use ContestTabulation ??
-
 // Number of votes in each contest, return contestId -> candidateId -> nvotes
 fun tabulateVotesFromCvrs(cvrs: Iterator<Cvr>): Map<Int, Map<Int, Int>> {
     val votes = mutableMapOf<Int, MutableMap<Int, Int>>()
@@ -161,5 +225,6 @@ fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int
     }
     return result
 }
+*/
 
 

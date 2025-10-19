@@ -20,9 +20,9 @@ class TestIrvContestVotes {
         println(info)
 
         var target = ContestTabulation(info)
-        target.addVotes(intArrayOf(111,11) )
-        target.addVotes(intArrayOf(12,123) )
-        target.addVotes(intArrayOf(12,123) )
+        target.addVotes(intArrayOf(111,11), false )
+        target.addVotes(intArrayOf(12,123), false )
+        target.addVotes(intArrayOf(12,123), false )
 
         println(target.irvVotes)
         assertEquals(listOf(
@@ -32,8 +32,8 @@ class TestIrvContestVotes {
 
         ////
         target = ContestTabulation(info)
-        target.addVotes(intArrayOf(111,11,11) )
-        target.addVotes(intArrayOf(12,123,12,12,12,12,12) )
+        target.addVotes(intArrayOf(111,11,11), false )
+        target.addVotes(intArrayOf(12,123,12,12,12,12,12), false )
 
         println(target.irvVotes)
     }

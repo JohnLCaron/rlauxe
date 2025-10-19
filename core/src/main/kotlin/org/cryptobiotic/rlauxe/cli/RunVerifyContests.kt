@@ -42,7 +42,7 @@ object RunVerifyContests {
     fun runVerifyContests(auditDir: String, contestId: Int?, show: Boolean): VerifyResults {
         val verifier = VerifyContests(auditDir, show)
         if (contestId != null) {
-            val wantContest = verifier.contests.find { it.id == contestId }
+            val wantContest = verifier.contests!!.find { it.id == contestId }
             if (wantContest == null) return VerifyResults("Cant find contest with id $contestId")
             return verifier.verifyContest(wantContest)
         }

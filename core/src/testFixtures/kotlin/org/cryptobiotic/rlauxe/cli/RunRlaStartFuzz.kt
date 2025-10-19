@@ -82,6 +82,7 @@ object RunRlaStartFuzz {
             else startTestElectionPolling(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests)
     }
 
+    // TODO use CreateAudit
     fun startTestElectionClca(
         auditDir: String,
         minMargin: Double,

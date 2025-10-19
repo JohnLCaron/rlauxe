@@ -7,8 +7,8 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.audit.ClcaWithoutReplacement
+import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
-import org.cryptobiotic.rlauxe.verify.tabulateVotesFromCvrs
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals

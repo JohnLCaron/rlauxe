@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeCardPoolsJsonFile
@@ -22,7 +23,7 @@ import org.cryptobiotic.rlauxe.util.SortMerge
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.cleanCsvString
 import org.cryptobiotic.rlauxe.util.createZipFile
-import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
+import org.cryptobiotic.rlauxe.verify.VerifyContests
 import kotlin.collections.forEach
 import kotlin.io.path.Path
 
@@ -87,16 +88,12 @@ class CreateAudit(val name: String, val topdir: String, val auditConfig: AuditCo
             writeSortedCardsExternalSort(topdir=topdir, cvrIter, extra + phantoms, auditConfig.seed, poolNameToId)
         }
 
-        // corla
-        //   val cards =  createSortedCards(allCvrs, auditConfig.seed)
-        // boulder
-        //   val cards = createSortedCardsFromPools(allCvrs, election.cardPools, auditConfig.seed)
-        // sf
-        //  SortMerge(scratchDirectory = working, "$auditDir/$sortedCardsFile", seed = seed, pools = pools).run(cvrExportCsv)
-
-        checkContestsCorrectlyFormed(auditConfig, contestsUA)
-
-        // election.checkContests(contestsUA)
+        // this may change the auditStatus to misformed
+        val verifier = VerifyContests(auditDir)
+        val resultsv = verifier.verify(contestsUA, false)
+        if (resultsv.hasErrors) {
+            logger.warn{ resultsv.toString() }
+        }
 
         // sf only writes these:
         // val auditableContests: List<OAContestUnderAudit> = contestsUA.filter { it.preAuditStatus == TestH0Status.InProgress }

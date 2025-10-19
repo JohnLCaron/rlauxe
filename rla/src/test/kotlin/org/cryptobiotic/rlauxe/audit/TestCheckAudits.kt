@@ -7,14 +7,12 @@ import org.cryptobiotic.rlauxe.persist.csv.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
-import org.cryptobiotic.rlauxe.verify.checkContestsWithCvrs
-import org.cryptobiotic.rlauxe.verify.tabulateVotesFromCvrs
 import org.junit.jupiter.api.Assertions
 
 // TODO move to verifier
 class TestCheckAudits {
 
-    // @Test
+    /* @Test
     fun testCheckContestsWithCvrs() {
         val topDir = "/home/stormy/rla/cases/sf2024"
         val auditDir = "$topDir/audit"
@@ -43,6 +41,6 @@ class TestCheckAudits {
 
         val tabCvrs: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(AuditableCardToCvrAdapter(cardIter)).toSortedMap()
         tabCvrs.forEach { (contest, cvrMap) -> println("contest $contest : ${cvrMap}")}
-    }
+    } */
 
 }

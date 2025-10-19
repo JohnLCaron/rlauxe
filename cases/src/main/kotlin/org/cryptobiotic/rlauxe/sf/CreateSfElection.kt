@@ -88,7 +88,7 @@ class CreateSfElection(
 
                 cvrExport.votes.forEach { (id, cands) ->
                     val contestTab = contestTabs.getOrPut(id) { ContestTabulation(contestInfos[id]!!) }
-                    contestTab.addVotes(cands)
+                    contestTab.addVotes(cands, phantom=false)
                 }
             }
         }

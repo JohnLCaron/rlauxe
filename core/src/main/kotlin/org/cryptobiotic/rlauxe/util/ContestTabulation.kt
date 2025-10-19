@@ -35,6 +35,7 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
     var novote = 0  // how many cards had no vote for this contest?
     var undervotes = 0  // how many undervotes = voteForN - nvotes
     var overvotes = 0  // how many overvotes = (voteForN < cands.size)
+    var nphantoms = 0  // how many overvotes = (voteForN < cands.size)
 
     init {
         // The candidate Ids must go From 0 ... ncandidates-1, for Raire; use the ordering from ContestInfo.candidateIds
@@ -48,8 +49,9 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
     override fun ncards() = ncards
     override fun undervotes() = undervotes
 
-    fun addVotes(cands: IntArray) {
+    fun addVotes(cands: IntArray, phantom:Boolean) {
         if (!isIrv) addVotesReg(cands) else addVotesIrv(cands)
+        if (phantom) nphantoms++
     }
 
     fun addVotesReg(cands: IntArray) {
@@ -196,7 +198,7 @@ fun tabulateCloseableCvrs(cvrs: CloseableIterator<Cvr>, infos: Map<Int, ContestI
                 val info = infos[contestId]
                 if (info != null) {
                     val tab = votes.getOrPut(contestId) { ContestTabulation(info) }
-                    tab.addVotes(conVotes)
+                    tab.addVotes(conVotes, cvr.phantom)
                 }
             }
         }
@@ -210,9 +212,10 @@ fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<I
         while (cardIter.hasNext()) {
             val card = cardIter.next()
             card.contests.forEachIndexed { idx, contestId ->
-            val info = infos[contestId]!!
+                val info = infos[contestId]!!
                 val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
                 tab.ncards++
+                if (card.phantom) tab.nphantoms++
                 if (card.votes == null) tab.undervotes++ else {
                     val cands = card.votes[idx]
                     if (cands.isEmpty()) tab.undervotes++

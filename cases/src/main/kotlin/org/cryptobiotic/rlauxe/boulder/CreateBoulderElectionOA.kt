@@ -14,7 +14,6 @@ import org.cryptobiotic.rlauxe.audit.CreateAudit
 import org.cryptobiotic.rlauxe.audit.CreateElectionIF
 import org.cryptobiotic.rlauxe.audit.createCvrsFromPools
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
-import org.cryptobiotic.rlauxe.verify.tabulateVotesFromCvrs
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -156,15 +155,15 @@ open class BoulderElectionOA(
         if (cardPool.ncards() != cvrs.size)
             logger.error{"cardPool.ncards ${cardPool.ncards()} cvrsize = ${cvrs.size}"}
 
-        // check
-        val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
+        // checkit
+        val contestTabs: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infoMap)
         contestVotes.forEach { (contestId, vunders) ->
-            val tv = tabVotes[contestId] ?: emptyMap()
-            if (!checkEquivilentVotes(vunders.candVotesSorted, tv)) {
+            val tv = contestTabs[contestId]!!
+            if (!checkEquivilentVotes(vunders.candVotesSorted, tv.votes)) {
                 println("  contestId=${contestId}")
                 println("  tabVotes=${tv}")
                 println("  vunders= ${vunders.candVotesSorted}")
-                require(checkEquivilentVotes(vunders.candVotesSorted, tv))
+                require(checkEquivilentVotes(vunders.candVotesSorted, tv.votes))
             }
         }
 
@@ -217,7 +216,7 @@ open class BoulderElectionOA(
         export.cvrs.forEach { cvr ->
             cvr.contestVotes.forEach { contestVote: ContestVotes ->
                 val tab = votes.getOrPut(contestVote.contestId) { ContestTabulation(infoMap[contestVote.contestId]!!) }
-                tab.addVotes(contestVote.candVotes.toIntArray())
+                tab.addVotes(contestVote.candVotes.toIntArray(), phantom=false)
             }
         }
         return votes

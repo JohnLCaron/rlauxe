@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.audit.Sampler
-import org.cryptobiotic.rlauxe.verify.tabulateVotesFromCvrs
 import kotlin.random.Random
 import kotlin.test.Test
 

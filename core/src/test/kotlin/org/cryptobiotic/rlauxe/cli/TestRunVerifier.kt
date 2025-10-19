@@ -14,7 +14,7 @@ class TestRunVerifyContests {
         val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
         println()
         print(results)
-        if (results.fail) fail()
+        if (results.hasErrors) fail()
     }
 
     @Test
@@ -24,6 +24,6 @@ class TestRunVerifyContests {
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
-        if (results.fail) fail()
+        if (results.hasErrors) fail()
     }
 }

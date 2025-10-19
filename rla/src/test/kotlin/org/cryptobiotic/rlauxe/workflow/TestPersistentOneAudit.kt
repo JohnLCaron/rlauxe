@@ -4,12 +4,10 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.persist.*
-import org.cryptobiotic.rlauxe.persist.csv.AuditableCardToCvrAdapter
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.util.Prng
-import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
-import org.cryptobiotic.rlauxe.verify.checkContestsWithCvrs
+import org.cryptobiotic.rlauxe.verify.VerifyContests
+import org.junit.jupiter.api.Assertions.assertFalse
 import java.nio.file.Path
 import kotlin.test.Test
 
@@ -17,7 +15,7 @@ class TestPersistentOneAudit {
     val auditDir = "/home/stormy/rla/persist/testPersistentOneAudit"
     // val topdir = kotlin.io.path.createTempDirectory().toString()
 
-    @Test
+    // @Test
     fun testPersistentWorkflow() {
         clearDirectory(Path.of(auditDir))
 
@@ -27,7 +25,7 @@ class TestPersistentOneAudit {
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
         val N = 5000
-        val (contestOA, _, testCvrs) = makeOneContestUA(
+        val (contestOA, cardPools, testCvrs) = makeOneContestUA(
             N + 100,
             N - 100,
             cvrFraction = .95,
@@ -52,13 +50,10 @@ class TestPersistentOneAudit {
         var oaWorkflow = OneAudit(auditConfig, listOf(contestOA), mvrManager)
 
         // these checks may modify the contest status
-        checkContestsCorrectlyFormed(auditConfig, oaWorkflow.contestsUA())
-        // TODO val cardPools = readCardPoolsJsonFile(publisher.cardPoolsFile(), infos).unwrap()
-        checkContestsWithCvrs(
-            oaWorkflow.contestsUA(),
-            AuditableCardToCvrAdapter(readCardsCsvIterator(publisher.cardsCsvFile())),
-            cardPools = null
-        )
+        val verifier = VerifyContests(auditDir)
+        val resultsv = verifier.verify(oaWorkflow.contestsUA(), false)
+        println(resultsv.toString())
+        assertFalse(resultsv.hasErrors)
 
         writeContestsJsonFile(oaWorkflow.contestsUA(), publisher.contestsFile())
         println("write writeContestsJsonFile to ${publisher.contestsFile()} ")

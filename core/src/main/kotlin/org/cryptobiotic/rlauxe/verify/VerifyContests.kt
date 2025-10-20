@@ -31,7 +31,8 @@ import kotlin.text.appendLine
 // but only is you call cerify with the contests' note only then do you get contestUA.preAuditStatus saved
 class VerifyContests(val auditRecordLocation: String, val show: Boolean = false) {
     val auditConfig: AuditConfig
-    val contests: List<ContestUnderAudit>?
+    val allContests: List<ContestUnderAudit>?
+    val allInfos: Map<Int, ContestInfo>?
     val cards: CloseableIterable<AuditableCard>
     val mvrs: CloseableIterable<AuditableCard>?
     val publisher: Publisher
@@ -42,14 +43,14 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         auditConfig = auditConfigResult.unwrap()
 
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
-        contests = if (contestsResults is Ok) contestsResults.unwrap().sortedBy { it.id } else null
+        allContests = if (contestsResults is Ok) contestsResults.unwrap().sortedBy { it.id } else null
+        allInfos = allContests?.map{ it.contest.info() }?.associateBy { it.id }
 
         cards = AuditableCardCsvReader(publisher.cardsCsvFile())
         mvrs = if (existsOrZip(publisher.testMvrsFile())) AuditableCardCsvReader(publisher.testMvrsFile()) else null
-
     }
 
-    fun verify() = verify( contests!!, show = show)
+    fun verify() = verify( allContests!!, show = show)
 
     fun verifyContest(contest: ContestUnderAudit) = verify(listOf(contest), show = true)
 
@@ -59,7 +60,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         if (contests.size == 1) results.addMessage("  ${contests.first()} ")
 
         // all
-        val infos = contests.associate { it.id to it.contest.info() }
+        val infos = allInfos ?: contests.associate { it.id to it.contest.info() }
         checkContestsCorrectlyFormed(auditConfig, contests, results)
         val contestSummary = verifyManifest(auditConfig, contests, cards, infos, results, show = show)
 
@@ -161,15 +162,19 @@ fun verifyManifest(
 
             if (config.hasStyles) {
                 card.contests.forEachIndexed { idx, contestId ->
-                    val cands = if (card.votes != null) card.votes[idx] else intArrayOf()
-                    val allTab = allCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
-                    allTab.addVotes(cands, card.phantom)
-                    if (card.poolId == null) {
-                        val nonpoolCvrTab = nonpoolCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
-                        nonpoolCvrTab.addVotes(cands, card.phantom)
-                    } else {
-                        val poolCvrTab = poolCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
-                        poolCvrTab.addVotes(cands, card.phantom)
+                    val info = infos[contestId]
+                    if (info != null) {
+                        val cands = if (card.votes != null) card.votes[idx] else intArrayOf()
+                        val allTab = allCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
+                        allTab.addVotes(cands, card.phantom)
+                        if (card.poolId == null) {
+                            val nonpoolCvrTab =
+                                nonpoolCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
+                            nonpoolCvrTab.addVotes(cands, card.phantom)
+                        } else {
+                            val poolCvrTab = poolCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
+                            poolCvrTab.addVotes(cands, card.phantom)
+                        }
                     }
                 }
             }

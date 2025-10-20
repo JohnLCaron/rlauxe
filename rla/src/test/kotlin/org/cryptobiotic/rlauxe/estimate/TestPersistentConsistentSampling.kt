@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.persist.PersistentAudit
+import org.cryptobiotic.rlauxe.workflow.PersistentAudit
 import org.cryptobiotic.rlauxe.audit.previousSamples
 
 class TestPersistentConsistentSampling {

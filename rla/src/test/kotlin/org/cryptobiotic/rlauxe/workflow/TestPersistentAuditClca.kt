@@ -52,7 +52,7 @@ class TestPersistentWorkflowClca {
 
         // val mvrManagerTest = MvrManagerTestFromRecord(testCvrs, testMvrs, auditConfig.seed) this does the mvrs manipulations internally
         val mvrManager = MvrManagerFromRecord(auditDir)
-        var clcaWorkflow = ClcaAudit(auditConfig, contests, emptyList(), mvrManager)
+        var clcaWorkflow = ClcaAuditTester(auditConfig, contests, emptyList(), mvrManager)
 
         // these checks may modify the contest status
         val verifier = VerifyContests(auditDir)

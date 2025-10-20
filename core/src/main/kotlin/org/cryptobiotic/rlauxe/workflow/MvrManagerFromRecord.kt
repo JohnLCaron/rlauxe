@@ -1,20 +1,19 @@
-package org.cryptobiotic.rlauxe.persist
+package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
-import java.nio.file.Files
-import java.nio.file.Path
 
 private val logger = KotlinLogging.logger("MvrManagerFromRecord")
 private val checkValidity = true
 
-// assumes that the mvrs have been set externally into the election record.
+// assumes that the mvrs have been set externally into the election record, eg by EnterMvrsCli.
 class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerPollingIF {
     private val cardFile: String
 

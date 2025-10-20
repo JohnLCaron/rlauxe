@@ -41,7 +41,7 @@ class PollingContestAuditTaskGenerator(
         }
 
         val ballotCards = MvrManagerPollingForTesting(ballotManifest.cardLocations, testMvrs, useConfig.seed)
-        val pollingWorkflow = PollingAudit(useConfig, listOf(sim.contest), ballotCards)
+        val pollingWorkflow = PollingAuditTester(useConfig, listOf(sim.contest), ballotCards)
         return ContestAuditTask(
             name(),
             pollingWorkflow,
@@ -78,7 +78,7 @@ class PollingSingleRoundAuditTaskGenerator(
         var ballotManifest = sim.makeBallotManifest(useConfig.hasStyles)
 
         val ballotCards = MvrManagerPollingForTesting(ballotManifest.cardLocations, testMvrs, useConfig.seed)
-        val pollingWorkflow = PollingAudit(useConfig, listOf(sim.contest), ballotCards)
+        val pollingWorkflow = PollingAuditTester(useConfig, listOf(sim.contest), ballotCards)
 
         return PollingSingleRoundAuditTask(
             name(),

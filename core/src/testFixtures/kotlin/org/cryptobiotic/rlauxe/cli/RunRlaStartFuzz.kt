@@ -150,7 +150,7 @@ object RunRlaStartFuzz {
         writeAuditableCardCsvFile(mvrManager.mvrsUA, mvrFile)
         println("   write ${mvrManager.sortedCards.size} testMvrs to ${mvrFile}")
 
-        val clcaWorkflow = ClcaAudit(auditConfig, contests, raireContests, mvrManager)
+        val clcaWorkflow = ClcaAuditTester(auditConfig, contests, raireContests, mvrManager)
         writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
         println("   writeContestsJsonFile ${publisher.contestsFile()}")
 
@@ -211,7 +211,7 @@ object RunRlaStartFuzz {
         println("   writeMvrsJsonFile ${mvrFile}")
 
         // PollingWorkflow creates the assertions
-        val pollingWorkflow = PollingAudit(auditConfig, contests, mvrManager)
+        val pollingWorkflow = PollingAuditTester(auditConfig, contests, mvrManager)
 
         writeContestsJsonFile(pollingWorkflow.contestsUA(), publisher.contestsFile())
         println("   writeContestsJsonFile ${publisher.contestsFile()}")

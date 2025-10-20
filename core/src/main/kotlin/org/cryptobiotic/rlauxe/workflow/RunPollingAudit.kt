@@ -3,50 +3,9 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.*
 
 private val logger = KotlinLogging.logger("PollingAudit")
-
-class PollingAudit(
-    val auditConfig: AuditConfig,
-    contestsToAudit: List<ContestIF>, // the contests you want to audit
-    val mvrManager: MvrManagerPollingIF,
-): RlauxAuditIF {
-    private val contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
-    private val auditRounds = mutableListOf<AuditRound>()
-
-    init {
-        require (auditConfig.auditType == AuditType.POLLING)
-
-        /* contestsUA.forEach {
-            if (it.choiceFunction != SocialChoiceFunction.IRV) {
-                checkWinners(it, (it.contest as Contest).votes.entries.sortedByDescending { it.value })
-            }
-        } */
-
-        /* TODO filter out contests that are done...
-        contestsUA.forEach { contest ->
-            contest.makePollingAssertions()
-        } */
-
-        /* check contests well formed etc
-        contests = contestsUA.map { ContestRound(it, 1) }
-        check(auditConfig, contests) */
-    }
-
-    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        val complete = runPollingAudit(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx, quiet)
-        auditRound.auditWasDone = true
-        auditRound.auditIsComplete = complete
-        return complete
-    }
-
-    override fun auditConfig() =  this.auditConfig
-    override fun auditRounds() = auditRounds
-    override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun mvrManager() = mvrManager
-}
 
 // TODO parallelize over contests
 fun runPollingAudit(

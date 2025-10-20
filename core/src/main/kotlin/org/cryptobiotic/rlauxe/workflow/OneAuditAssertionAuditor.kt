@@ -3,40 +3,11 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 
-private val logger = KotlinLogging.logger("OneAudit")
+private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
 
-class OneAudit(
-    val auditConfig: AuditConfig,
-    val contestsUA: List<OAContestUnderAudit>, // the contests you want to audit
-    val mvrManager: MvrManagerClcaIF,
-): RlauxAuditIF {
-    private val auditRounds = mutableListOf<AuditRound>()
-
-    init {
-        require (auditConfig.auditType == AuditType.ONEAUDIT)
-    }
-
-    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
-            auditor = OneAuditAssertionAuditor()
-        )
-        auditRound.auditWasDone = true
-        auditRound.auditIsComplete = complete
-        return complete
-    }
-
-    override fun auditConfig() =  this.auditConfig
-    override fun auditRounds() = auditRounds
-    override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-
-    override fun mvrManager() = mvrManager
-}
-
-class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor {
+class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditorIF {
 
     override fun run(
         auditConfig: AuditConfig,

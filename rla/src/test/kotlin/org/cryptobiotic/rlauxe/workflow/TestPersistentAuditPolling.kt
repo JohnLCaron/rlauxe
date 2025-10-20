@@ -47,7 +47,7 @@ class TestPersistentAuditPolling {
         val testMvrsUA = cards.map { AuditableCard.fromCvr(testMvrs[it.index], it.index, it.prn) }
 
         val mvrManager = MvrManagerFromRecord(auditDir)
-        val pollingWorkflow = PollingAudit(auditConfig, contests, mvrManager)
+        val pollingWorkflow = PollingAuditTester(auditConfig, contests, mvrManager)
 
         // these checks may modify the contest status
         val verifier = VerifyContests(auditDir)

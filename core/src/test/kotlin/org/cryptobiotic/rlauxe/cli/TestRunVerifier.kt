@@ -30,8 +30,7 @@ class TestRunVerifyContests {
 
     @Test
     fun testRunVerifyPolling() {
-        val auditdir = "../core/src/test/data/workflow/testCliRoundPolling/audit"
-        // val auditdir = "/home/stormy/rla/persist/testCliRoundClca"
+        val auditdir = "../core/src/test/data/workflow/testCliRoundPolling"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)

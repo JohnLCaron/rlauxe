@@ -3,60 +3,17 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
-import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 
 private val logger = KotlinLogging.logger("ClcaAudit")
-
-class ClcaAudit(
-    val auditConfig: AuditConfig,
-    contestsToAudit: List<Contest>, // the contests you want to audit
-    raireContests: List<RaireContestUnderAudit>,
-    val mvrManager: MvrManagerClcaIF,
-): RlauxAuditIF {
-    private val contestsUA: List<ContestUnderAudit>
-    private val auditRounds = mutableListOf<AuditRound>()
-
-    init {
-        require (auditConfig.auditType == AuditType.CLCA)
-
-        val regularContests = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
-        contestsUA = regularContests + raireContests
-
-        contestsUA.forEach { contest ->
-            contest.addClcaAssertionsFromReportedMargin()
-        }
-
-        /* TODO only check regular contests ??
-        check(auditConfig, contests)
-        // TODO filter out contests that are done... */
-    }
-
-    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
-            auditor = AuditClcaAssertion(quiet)
-        )
-        auditRound.auditWasDone = true
-        auditRound.auditIsComplete = complete
-        return complete
-    }
-
-    override fun auditConfig() =  this.auditConfig
-    override fun auditRounds() = auditRounds
-    override fun contestsUA(): List<ContestUnderAudit> = contestsUA
-    override fun mvrManager() = mvrManager
-}
-
-/////////////////////////////////////////////////////////////////////////////////
 
 // run all contests and assertions for one round with the given auditor
 fun runClcaAudit(auditConfig: AuditConfig,
                  contests: List<ContestRound>,
                  mvrManager: MvrManagerClcaIF,
                  roundIdx: Int,
-                 auditor: ClcaAssertionAuditor,
+                 auditor: ClcaAssertionAuditorIF,
 ): Boolean {
     val cvrPairs = mvrManager.makeCvrPairsForRound() // same over all contests!
 
@@ -77,7 +34,7 @@ class RunContestTask(
     val config: AuditConfig,
     val contest: ContestRound,
     val cvrPairs: List<Pair<Cvr, Cvr>>,
-    val auditor: ClcaAssertionAuditor,
+    val auditor: ClcaAssertionAuditorIF,
     val roundIdx: Int): ConcurrentTaskG<Boolean> {
 
     override fun name() = "RunContestTask for ${contest.contestUA.name} round $roundIdx nassertions ${contest.assertionRounds.size}"
@@ -103,7 +60,7 @@ class RunContestTask(
 }
 
 // abstraction so ClcaAudit can be used for OneAudit
-fun interface ClcaAssertionAuditor {
+fun interface ClcaAssertionAuditorIF {
     fun run(
         auditConfig: AuditConfig,
         contest: ContestIF,
@@ -113,7 +70,7 @@ fun interface ClcaAssertionAuditor {
     ): TestH0Result
 }
 
-class AuditClcaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
+class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
     override fun run(
         auditConfig: AuditConfig,

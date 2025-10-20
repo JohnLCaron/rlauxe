@@ -45,7 +45,7 @@ class TestPollingAudit {
         // Synthetic cvrs for testing reflecting the exact contest votes. In practice, we dont actually have the cvrs.
         val (testCvrs, ballots) = test.makeCvrsAndBallots(auditConfig.hasStyles)
 
-        val workflow = PollingAudit(auditConfig, contests,
+        val workflow = PollingAuditTester(auditConfig, contests,
             MvrManagerPollingForTesting(ballots, testCvrs, auditConfig.seed)
         )
         runAudit("testPollingNoStyle", workflow)
@@ -93,7 +93,7 @@ class TestPollingAudit {
         val (testCvrs, ballots) = test.makeCvrsAndBallots(auditConfig.hasStyles)
         val testMvrs = testCvrs
 
-        val workflow = PollingAudit(auditConfig, contests,
+        val workflow = PollingAuditTester(auditConfig, contests,
             MvrManagerPollingForTesting(ballots, testMvrs, auditConfig.seed)
         )
         runAudit("testPollingWithStyle", workflow)
@@ -129,7 +129,7 @@ class TestPollingAudit {
         val (testCvrs, ballots) = test.makeCvrsAndBallots(auditConfig.hasStyles)
         val testMvrs = makeFuzzedCvrsFrom(test.contests, testCvrs, mvrFuzzPct)
 
-        val workflow = PollingAudit(auditConfig, contests,
+        val workflow = PollingAuditTester(auditConfig, contests,
             MvrManagerPollingForTesting(ballots, testMvrs, auditConfig.seed)
         )
         runAudit("testPollingWithStyle", workflow)
@@ -165,7 +165,7 @@ class TestPollingAudit {
 
         val auditConfig = AuditConfig(AuditType.POLLING, hasStyles = true, nsimEst = 10)
         val (testCvrs, ballots) = test.makeCvrsAndBallots(auditConfig.hasStyles)
-        val workflow = PollingAudit(auditConfig, test.contests,
+        val workflow = PollingAuditTester(auditConfig, test.contests,
             MvrManagerPollingForTesting(ballots, testCvrs, auditConfig.seed)
         )
 

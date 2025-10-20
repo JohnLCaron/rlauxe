@@ -135,9 +135,6 @@ fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {
         )
     } else {
         val first = successRuns.first()
-        if (first.name == "CorlaSingleRoundAuditTaskGenerator") {
-            print("")
-        }
         val failures = runs.size - successRuns.count()
         val successPct = successRuns.count() / runs.size.toDouble()
         val failPct = failures / runs.size.toDouble()

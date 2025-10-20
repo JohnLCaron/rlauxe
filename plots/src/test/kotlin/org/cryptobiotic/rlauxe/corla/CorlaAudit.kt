@@ -34,7 +34,7 @@ class CorlaSingleRoundAuditTaskGenerator(
         val testMvrs = if (p2flips != null || p1flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips) else
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
-        val clcaWorkflow = ClcaAudit(useConfig, listOf(sim.contest), emptyList(),
+        val clcaWorkflow = ClcaAuditTester(useConfig, listOf(sim.contest), emptyList(),
                                  MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed))
         return ClcaSingleRoundAuditTask(
             name(),
@@ -118,7 +118,7 @@ class CorlaAudit(
 /////////////////////////////////////////////////////////////////////////////////
 
 // See ComparisonAudit.riskMeasurement() in colorado-rla us.freeandfair.corla.model
-class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditor {
+class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
     override fun run(
         auditConfig: AuditConfig,

@@ -34,7 +34,7 @@ class RaireContestAuditTaskGenerator(
         )
         var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
 
-        val clca = ClcaAudit(
+        val clca = ClcaAuditTester(
             useConfig, emptyList(), listOf(rcontest),
             MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed),
         )
@@ -46,7 +46,6 @@ class RaireContestAuditTaskGenerator(
         )
     }
 }
-
 
 // Do the audit in a single round, dont use estimateSampleSizes
 class RaireSingleRoundAuditTaskGenerator(
@@ -80,7 +79,7 @@ class RaireSingleRoundAuditTaskGenerator(
         )
         var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
 
-        val raireAudit = ClcaAudit(
+        val raireAudit = ClcaAuditTester(
             useConfig, emptyList(), listOf(rcontest),
             MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed),
         )
@@ -91,7 +90,7 @@ class RaireSingleRoundAuditTaskGenerator(
             testMvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 4.0),
             quiet = true,
-            auditor = AuditClcaAssertion(),
+            auditor = ClcaAssertionAuditor(),
         )
     }
 }

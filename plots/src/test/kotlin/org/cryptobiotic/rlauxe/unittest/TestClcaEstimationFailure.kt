@@ -33,7 +33,7 @@ class TestClcaEstimationFailure {
         )
 
         val ballotCards = MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed)
-        val workflow = ClcaAudit(auditConfig, test.contests, emptyList(), ballotCards)
+        val workflow = ClcaAuditTester(auditConfig, test.contests, emptyList(), ballotCards)
 
         println("\nrunClcaSimulation")
         workflow.contestsUA().forEach { contestUA ->

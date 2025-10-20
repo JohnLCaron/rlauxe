@@ -32,10 +32,10 @@ class TestOneRoundClcaAudit {
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
-        val workflow = ClcaAudit(auditConfig, contests, emptyList(),
+        val workflow = ClcaAuditTester(auditConfig, contests, emptyList(),
             MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed))
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
-        runClcaSingleRoundAudit(workflow, contestRounds, auditor = AuditClcaAssertion())
+        runClcaSingleRoundAudit(workflow, contestRounds, auditor = ClcaAssertionAuditor())
     }
 
 }

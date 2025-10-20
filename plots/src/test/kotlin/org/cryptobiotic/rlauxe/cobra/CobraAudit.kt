@@ -92,7 +92,7 @@ class CobraAudit(
 
 class AuditCobraAssertion(
     val p2prior: Double, // apriori rate of 2-vote overstatements
-) : ClcaAssertionAuditor {
+) : ClcaAssertionAuditorIF {
 
     override fun run(
         auditConfig: AuditConfig,

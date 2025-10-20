@@ -6,7 +6,7 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.required
 import kotlinx.cli.default
 import org.cryptobiotic.rlauxe.audit.AuditRound
-import org.cryptobiotic.rlauxe.persist.PersistentAudit
+import org.cryptobiotic.rlauxe.workflow.PersistentAudit
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.nio.file.Files.notExists
 import java.nio.file.Path

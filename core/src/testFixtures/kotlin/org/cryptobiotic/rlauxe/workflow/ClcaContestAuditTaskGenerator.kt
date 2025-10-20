@@ -41,7 +41,7 @@ class ClcaContestAuditTaskGenerator(
             testMvrs = testMvrs + otherCvrs
         }
 
-        val clcaWorkflow = ClcaAudit(useConfig, listOf(sim.contest), emptyList(),
+        val clcaWorkflow = ClcaAuditTester(useConfig, listOf(sim.contest), emptyList(),
             MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed))
 
         return ContestAuditTask(
@@ -87,7 +87,7 @@ class ClcaSingleRoundAuditTaskGenerator(
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
         }
 
-        val clcaWorkflow = ClcaAudit(useConfig, listOf(sim.contest), emptyList(),
+        val clcaWorkflow = ClcaAuditTester(useConfig, listOf(sim.contest), emptyList(),
             MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed))
 
         /* make sure margins are below 0
@@ -107,7 +107,7 @@ class ClcaSingleRoundAuditTaskGenerator(
             testMvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0),
             quiet,
-            auditor = AuditClcaAssertion(),
+            auditor = ClcaAssertionAuditor(),
         )
     }
 }
@@ -118,7 +118,7 @@ class ClcaSingleRoundAuditTask(
     val testMvrs: List<Cvr>,
     val otherParameters: Map<String, Any>,
     val quiet: Boolean,
-    val auditor: ClcaAssertionAuditor,
+    val auditor: ClcaAssertionAuditorIF,
 ) : ConcurrentTaskG<WorkflowResult> {
 
     override fun name() = name
@@ -162,7 +162,7 @@ class ClcaSingleRoundAuditTask(
 
 // keep this seperate function for testing
 fun runClcaSingleRoundAudit(workflow: RlauxAuditIF, contestRounds: List<ContestRound>, quiet: Boolean = true,
-                            auditor: ClcaAssertionAuditor
+                            auditor: ClcaAssertionAuditorIF
 ): Int {
     val stopwatch = Stopwatch()
     runClcaAudit(workflow.auditConfig(), contestRounds, workflow.mvrManager() as MvrManagerClcaIF, 1, auditor = auditor)

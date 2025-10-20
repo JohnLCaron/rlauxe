@@ -1,23 +1,15 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.cli.RunRlaCreateOneAudit.TestOneAuditElection
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
-import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.persist.*
-import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.cryptobiotic.rlauxe.verify.VerifyContests
-import org.junit.jupiter.api.Assertions.assertFalse
-import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.test.Test
 
@@ -43,7 +35,7 @@ class TestPersistentOneAudit2 {
         val testMvrsUA = readAuditableCardCsvFile(publisher.testMvrsFile())
 
         val mvrManager = MvrManagerFromRecord(auditDir)
-        var oaWorkflow = OneAudit(auditConfig, election.contestsUA(), mvrManager)
+        var oaWorkflow = OneAuditTester(auditConfig, election.contestsUA(), mvrManager)
         var round = 1
         var done = false
         var workflow : RlauxAuditIF = oaWorkflow

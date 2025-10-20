@@ -9,13 +9,17 @@ fun makeContestFromCvrs(
     info: ContestInfo,
     cvrs: List<Cvr>,
 ): Contest {
-    val contestTab = tabulateCvrs(cvrs.iterator(), mapOf(info.id to info))[info.id]!!
-    return Contest(
-        info,
-        contestTab.votes,
-        Nc=contestTab.ncards + contestTab.nphantoms,
-        Ncast=contestTab.ncards,
-    )
+    val contestTabs = tabulateCvrs(cvrs.iterator(), mapOf(info.id to info))
+    val contestTab = contestTabs[info.id]
+    return if (contestTab == null)
+        Contest(info, emptyMap(), 0, 0)
+    else
+        Contest(
+            info,
+            contestTab.votes,
+            Nc=contestTab.ncards + contestTab.nphantoms,
+            Ncast=contestTab.ncards,
+            )
 }
 
 // Number of cards in each contest, return contestId -> ncards

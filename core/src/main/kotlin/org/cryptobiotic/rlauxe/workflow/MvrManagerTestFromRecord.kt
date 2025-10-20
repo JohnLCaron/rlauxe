@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.persist
+package org.cryptobiotic.rlauxe.workflow
 
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
@@ -6,6 +6,7 @@ import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
@@ -18,14 +19,9 @@ import java.nio.file.Path
 private val logger = KotlinLogging.logger("MvrManagerTestFromRecord")
 private val checkValidity = true
 
-// stores the testMvrs in "$auditDir/private/testMvrs.csv"
+// assumes testMvrs are in "$auditDir/private/testMvrs.csv"
 class MvrManagerTestFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerPollingIF, MvrManagerTest {
-    private val cardFile: String
-
-    init {
-        val publisher = Publisher(auditDir)
-        cardFile = publisher.cardsCsvFile()
-    }
+    val publisher = Publisher(auditDir)
 
     override fun Nballots(contestUA: ContestUnderAudit) = 0 // TODO ???
     override fun sortedCards() = CloseableIterable { auditableCards() }
@@ -60,12 +56,12 @@ class MvrManagerTestFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrMana
         return sampledCvrs.map{ it.cvr() }
     }
 
-    private fun auditableCards(): CloseableIterator<AuditableCard> = readCardsCsvIterator(cardFile)
+    private fun auditableCards(): CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.cardsCsvFile())
 
     //// MvrManagerTest
     // only used when its an MvrManagerTest with fake mvrs in "$auditDir/private/testMvrs.csv"
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {
-        val mvrFile = "$auditDir/private/testMvrs.csv"
+        val mvrFile = publisher.testMvrsFile()
         val sampledMvrs = if (Files.exists(Path.of(mvrFile))) {
             val mvrIterator = readCardsCsvIterator(mvrFile)
             findSamples(sampleNumbers, mvrIterator)

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.sf
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.persist.PersistentAudit
+import org.cryptobiotic.rlauxe.workflow.PersistentAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator

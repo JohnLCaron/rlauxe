@@ -145,7 +145,7 @@ class TestClcaAudit {
             else if (auditConfig.clcaConfig.strategy != ClcaStrategyType.fuzzPct) testCvrs
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
-        val workflow = ClcaAudit(auditConfig, contests, emptyList(),
+        val workflow = ClcaAuditTester(auditConfig, contests, emptyList(),
             MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed))
         return runAudit("testClcaWorkflow", workflow)
     }

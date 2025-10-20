@@ -1,23 +1,25 @@
-package org.cryptobiotic.rlauxe.persist
+package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
-import org.cryptobiotic.rlauxe.workflow.*
 import java.nio.file.Files
 import java.nio.file.Path
 
 private val logger = KotlinLogging.logger("PersistentAudit")
 
-/** Created from persistent state.
- * See rla/src/main/kotlin/org/cryptobiotic/rlauxe/cli/RunRlaStartFuzz.kt */
+/** RlauxAuditIF created from persistent state. */
 class PersistentAudit(
     val auditDir: String,
     val useTest: Boolean,
 ): RlauxAuditIF {
     val auditRecord: AuditRecord = AuditRecord.readFrom(auditDir) // TODO need auditConfig, contests in record
+    val publisher = Publisher(auditDir)
+
     private val auditConfig: AuditConfig = auditRecord.auditConfig
     private val contestsUA: List<ContestUnderAudit> = auditRecord.contests
     private val auditRounds = mutableListOf<AuditRound>()
@@ -25,7 +27,7 @@ class PersistentAudit(
 
     init {
         auditRounds.addAll(auditRecord.rounds)
-        mvrManager = if (useTest || Files.exists(Path.of("$auditDir/private/testMvrs.csv"))) {
+        mvrManager = if (useTest || Files.exists(Path.of(publisher.testMvrsFile()))) {
             MvrManagerTestFromRecord(auditRecord.location)
         } else {
             MvrManagerFromRecord(auditRecord.location)
@@ -52,8 +54,6 @@ class PersistentAudit(
         return nextRound
     }
 
-    // 6. _Run the audit_: For each contest, calculate if the risk limit is satisfied, based on the manual audits.
-    //  return complete
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  { // return complete
         val roundIdx = auditRound.roundIdx
 
@@ -66,7 +66,7 @@ class PersistentAudit(
         }
 
         val complete =  when (auditConfig.auditType) {
-            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = AuditClcaAssertion(quiet))
+            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = ClcaAssertionAuditor(quiet))
             AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerPollingIF, auditRound.roundIdx, quiet)
             AuditType.ONEAUDIT -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = OneAuditAssertionAuditor(quiet))
         }
@@ -89,6 +89,5 @@ class PersistentAudit(
     override fun toString(): String {
         return "PersistentAudit(auditDir='$auditDir', useTest=$useTest, mvrManager=$mvrManager)"
     }
-
 
 }

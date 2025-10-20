@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.verify.VerifyContests
 import org.junit.jupiter.api.Assertions.assertFalse
 import java.nio.file.Path
-import kotlin.test.Test
 
 class TestPersistentOneAudit {
     val auditDir = "/home/stormy/rla/persist/testPersistentOneAudit"
@@ -47,7 +46,7 @@ class TestPersistentOneAudit {
 
         // val mvrManagerTest = MvrManagerTestFromRecord(testCvrs, testMvrs, auditConfig.seed) this does the mvrs manipulations internally
         val mvrManager = MvrManagerFromRecord(auditDir)
-        var oaWorkflow = OneAudit(auditConfig, listOf(contestOA), mvrManager)
+        var oaWorkflow = OneAuditTester(auditConfig, listOf(contestOA), mvrManager)
 
         // these checks may modify the contest status
         val verifier = VerifyContests(auditDir)

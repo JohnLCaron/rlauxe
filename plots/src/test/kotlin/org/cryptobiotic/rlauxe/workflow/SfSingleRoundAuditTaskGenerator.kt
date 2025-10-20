@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.ClcaNoErrorIterator
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
-import org.cryptobiotic.rlauxe.persist.PersistentAudit
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReaderSkip
 
 class SfSingleRoundAuditTaskGenerator(
@@ -61,7 +60,7 @@ class SfSingleRoundAuditTask(
                         mvrManager.sortedCvrs().iterator(),
                     )
 
-                val runner = AuditClcaAssertion()
+                val runner = ClcaAssertionAuditor()
                 val result: TestH0Result = runner.run(
                     rlauxAudit.auditConfig(),
                     contestUA.contest,

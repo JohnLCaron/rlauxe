@@ -5,7 +5,7 @@ import kotlin.test.fail
 
 class TestRunVerifyContests {
 
-    val show = false
+    val show = true
 
     @Test
     fun testRunVerifyClca1() {
@@ -20,6 +20,17 @@ class TestRunVerifyContests {
     @Test
     fun testRunVerifyOA() {
         val auditdir = "../core/src/test/data/workflow/testCliRoundOneAudit/audit"
+        // val auditdir = "/home/stormy/rla/persist/testCliRoundClca"
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        println()
+        print(results)
+        if (results.hasErrors) fail()
+    }
+
+
+    @Test
+    fun testRunVerifyPolling() {
+        val auditdir = "../core/src/test/data/workflow/testCliRoundPolling/audit"
         // val auditdir = "/home/stormy/rla/persist/testCliRoundClca"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()

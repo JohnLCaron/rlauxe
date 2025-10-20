@@ -246,6 +246,10 @@ open class BoulderElectionOA(
         val regContests = infoList.filter { !it.isIrv }.map { info ->
             val oaContest = oaContests[info.id]!!
             val candVotes = oaContest.candVoteTotals().filter { info.candidateIds.contains(it.key) } // remove Write-Ins
+            if (info.id == 20) {
+                println("sovo contest has Nc = ${oaContest.sovoContest.totalBallots}")
+                println("sovo contest has ncards = ${oaContest.ncards()}")
+            }
             val ncards = oaContest.ncards()
             val useNc = max( ncards, oaContest.Nc())
             val contest = Contest(info, candVotes, useNc, ncards)

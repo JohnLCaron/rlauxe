@@ -95,16 +95,18 @@ class OneAuditContestBoulder(val info: ContestInfo, val sovoContest: BoulderCont
     // sumVotes = 17110, ncast = (17110 + 8345) / 3 = 8485, correct
 
     fun Nc(): Int {
-        return max(totalCards, sovoContest.totalBallots)
+        return sovoContest.totalBallots
+        // return max(totalCards, sovoContest.totalBallots)
     }
 
     fun ncards(): Int {
-        if (info.id != 20) return sumAllCards()
-        val current = sumAllCards()  // status quo
+        // for contest 20, correct the ncards, ignore undervote count
+        return if (info.id == 20) 8252 else return sumAllCards()
+        /* val current = sumAllCards()  // status quo
         val sumVotes = candVoteTotals().filter { info.candidateIds.contains(it.key) }.map { it.value }.sum() // remove Write-Ins
         val newcalc = (sumVotes + cvr.undervotes + redUndervotes) / info.voteForN
         println("contest ${info.id} ncards: new $newcalc != $current old diff= ${newcalc - current}")
-        return newcalc
+        return newcalc */
     }
 
     // total number of cards for this contest in the pools. this is dynamic because the pools get adjusted

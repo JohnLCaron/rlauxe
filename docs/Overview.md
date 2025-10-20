@@ -65,7 +65,7 @@ Each audit type has specialized processing for creating the AuditableCards and t
       contests.json         // ContestsUnderAuditJson
       sortedCards.csv       // AuditableCardCsv (or)
       sortedCards.csv.zip   // AuditableCardCsv
-      ballotPools.csv       // BallotPoolCsv (OneAudit only)
+      cardPools.json          // CardPoolJson (OneAudit only)
 
       roundX/
         auditState.json     // AuditRoundJson

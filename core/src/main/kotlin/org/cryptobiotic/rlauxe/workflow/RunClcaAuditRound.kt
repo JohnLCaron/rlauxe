@@ -9,11 +9,11 @@ import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
 private val logger = KotlinLogging.logger("ClcaAudit")
 
 // run all contests and assertions for one round with the given auditor
-fun runClcaAudit(auditConfig: AuditConfig,
-                 contests: List<ContestRound>,
-                 mvrManager: MvrManagerClcaIF,
-                 roundIdx: Int,
-                 auditor: ClcaAssertionAuditorIF,
+fun runClcaAuditRound(auditConfig: AuditConfig,
+                      contests: List<ContestRound>,
+                      mvrManager: MvrManagerClcaIF,
+                      roundIdx: Int,
+                      auditor: ClcaAssertionAuditorIF,
 ): Boolean {
     val cvrPairs = mvrManager.makeCvrPairsForRound() // same over all contests!
 

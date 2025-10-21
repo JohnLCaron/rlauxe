@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 
-class MvrManagerCardsSingleRound(val sortedCards: CloseableIterable<AuditableCard>, val maxSamples: Int = -1) :
+class MvrManagerClcaSingleRound(val sortedCards: CloseableIterable<AuditableCard>, val maxSamples: Int = -1) :
     MvrManagerClcaIF {
 
     override fun Nballots(contestUA: ContestUnderAudit) = contestUA.Nc - contestUA.Np // TODO wtf ??

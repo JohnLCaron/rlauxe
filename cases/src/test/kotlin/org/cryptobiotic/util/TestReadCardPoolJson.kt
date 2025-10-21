@@ -4,9 +4,12 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolWithBallotStyle
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readCardPoolsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeCardPoolsJsonFile
+import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import kotlin.io.path.createTempFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -117,6 +120,24 @@ class TestReadCardPoolJson {
         }
 
         scratchFile.delete()
+    }
+
+    @Test
+    fun compareContestTabs() {
+        val oa = readContestTabs("/home/stormy/rla/cases/sf2024/oa/audit")
+        val clca = readContestTabs("/home/stormy/rla/cases/sf2024/clca/audit")
+        println("  oa[18] = ${oa[18]}")
+        println("clca[18] = ${clca[18]}")
+        println("clca[18] == oa18: ${clca[18] == oa[18]}")
+    }
+
+    fun readContestTabs(auditDir: String): Map<Int, ContestTabulation> {
+        val publisher = Publisher(auditDir)
+        val contests = readContestsJsonFile(publisher.contestsFile()).unwrap()
+        val infos = contests.map { it.contest.info() }.associateBy { it.id }
+
+        val scardIter = readCardsCsvIterator(publisher.cardsCsvFile())
+        return tabulateAuditableCards(scardIter, infos)
     }
 
 }

@@ -41,12 +41,12 @@ class SfSingleRoundAuditTask(
         println("SfSingleRoundAuditTask start ${name()}")
         val wresults = mutableListOf<WorkflowResult>()
 
-        val rlauxAudit = PersistentAudit(auditDir, true)
+        val rlauxAudit = PersistedWorkflow(auditDir, true)
         rlauxAudit.contestsUA().forEach { contestUA ->
             contestUA.clcaAssertions.forEach { cassertion ->
                 val assertionRound = AssertionRound(cassertion, 1, null)
 
-                val mvrManager = MvrManagerCardsSingleRound(
+                val mvrManager = MvrManagerClcaSingleRound(
                     AuditableCardCsvReaderSkip(
                         "$auditDir/sortedCards.csv",
                         skipPerRun * run

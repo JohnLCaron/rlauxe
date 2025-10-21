@@ -41,7 +41,7 @@ class PollingContestAuditTaskGenerator(
         }
 
         val ballotCards = MvrManagerPollingForTesting(ballotManifest.cardLocations, testMvrs, useConfig.seed)
-        val pollingWorkflow = PollingAuditTester(useConfig, listOf(sim.contest), ballotCards)
+        val pollingWorkflow = WorkflowTesterPolling(useConfig, listOf(sim.contest), ballotCards)
         return ContestAuditTask(
             name(),
             pollingWorkflow,
@@ -78,7 +78,7 @@ class PollingSingleRoundAuditTaskGenerator(
         var ballotManifest = sim.makeBallotManifest(useConfig.hasStyles)
 
         val ballotCards = MvrManagerPollingForTesting(ballotManifest.cardLocations, testMvrs, useConfig.seed)
-        val pollingWorkflow = PollingAuditTester(useConfig, listOf(sim.contest), ballotCards)
+        val pollingWorkflow = WorkflowTesterPolling(useConfig, listOf(sim.contest), ballotCards)
 
         return PollingSingleRoundAuditTask(
             name(),
@@ -92,7 +92,7 @@ class PollingSingleRoundAuditTaskGenerator(
 
 class PollingSingleRoundAuditTask(
     val name: String,
-    val workflow: RlauxAuditIF,
+    val workflow: AuditWorkflowIF,
     val testMvrs: List<Cvr>,
     val otherParameters: Map<String, Any>,
     val quiet: Boolean,
@@ -102,7 +102,7 @@ class PollingSingleRoundAuditTask(
 
     override fun run(): WorkflowResult {
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
-        runPollingAudit(workflow.auditConfig(), contestRounds, workflow.mvrManager() as MvrManagerPollingIF, 1)
+        runPollingAuditRound(workflow.auditConfig(), contestRounds, workflow.mvrManager() as MvrManagerPollingIF, 1)
 
         var maxSamples = 0
         contestRounds.forEach { contest->

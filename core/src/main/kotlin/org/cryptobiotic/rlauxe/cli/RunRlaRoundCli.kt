@@ -6,7 +6,7 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.required
 import kotlinx.cli.default
 import org.cryptobiotic.rlauxe.audit.AuditRound
-import org.cryptobiotic.rlauxe.workflow.PersistentAudit
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.nio.file.Files.notExists
 import java.nio.file.Path
@@ -52,7 +52,7 @@ fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
 
         var complete = false
         var roundIdx = 0
-        val rlauxAudit = PersistentAudit(inputDir, useTest)
+        val rlauxAudit = PersistedWorkflow(inputDir, useTest)
 
         if (!rlauxAudit.auditRounds().isEmpty()) {
             val auditRound = rlauxAudit.auditRounds().last()

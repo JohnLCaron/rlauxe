@@ -1,15 +1,13 @@
 package org.cryptobiotic.rlauxe.sf
 
-import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.workflow.PersistentAudit
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
+import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.MvrManagerCardsSingleRound
+import org.cryptobiotic.rlauxe.workflow.MvrManagerClcaSingleRound
 import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
 import kotlin.test.Test
 
@@ -18,34 +16,6 @@ class TestSfElection {
     val zipFilename = "$sfDir/CVR_Export_20241202143051.zip"
     val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
     val topDir = "/home/stormy/rla/cases/sf2024oa"
-
-    /* create the audit contests using the cvrExport files
-    @Test
-    fun createSF2024OA() {
-        val auditDir = "$topDir/audit"
-        clearDirectory(Path.of(auditDir))
-
-        createSfElectionFromCvrExportOA(
-            auditDir,
-            zipFilename,
-            "ContestManifest.json",
-            "CandidateManifest.json",
-            cvrExportCsv = cvrExportCsv,
-            show = true,
-        )
-        createSF2024OAsortedCards()
-    }
-
-    // create sorted cards, assumes auditDir/auditConfig already exists
-    // do this after createSF2024OA, so ballotPools have been created
-    // @Test
-    fun createSF2024OAsortedCards() {
-        val sfDir = "/home/stormy/rla/cases/sf2024"
-        val topDir = "/home/stormy/rla/cases/sf2024oa"
-        val auditDir = "$topDir/audit"
-        val ballotPoolFile = "$auditDir/$ballotPoolsFile"
-        createSortedCards(topDir, auditDir, cvrExportCsv = cvrExportCsv, zip = true, ballotPoolFile = ballotPoolFile) // write to "$auditDir/sortedCards.csv"
-    } */
 
     @Test
     fun createSFElectionOA() {
@@ -146,34 +116,16 @@ class TestSfElection {
         }
     } */
 
-    @Test
-    fun compareContestTabs() {
-        val oa = readContestTabs("/home/stormy/rla/cases/sf2024/oa/audit")
-        val clca = readContestTabs("/home/stormy/rla/cases/sf2024/clca/audit")
-        println("  oa[18] = ${oa[18]}")
-        println("clca[18] = ${clca[18]}")
-        println("clca[18] == oa18: ${clca[18] == oa[18]}")
-    }
-
-    fun readContestTabs(auditDir: String): Map<Int, ContestTabulation> {
-        val publisher = Publisher(auditDir)
-        val contests = readContestsJsonFile(publisher.contestsFile()).unwrap()
-        val infos = contests.map { it.contest.info() }.associateBy { it.id }
-
-        val scardIter = readCardsCsvIterator(publisher.cardsCsvFile())
-        return tabulateAuditableCards(scardIter, infos)
-    }
-
     private val show = true
 
     // @Test
     fun auditSf2024oa() {
         val auditDir = "$topDir/audit"
 
-        val rlauxAudit = PersistentAudit(auditDir, true)
+        val rlauxAudit = PersistedWorkflow(auditDir, true)
         val contestRounds = rlauxAudit.contestsUA().map { ContestRound(it, 1) }
 
-        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReader(Publisher(auditDir).cardsCsvFile()))
+        val mvrManager = MvrManagerClcaSingleRound(AuditableCardCsvReader(Publisher(auditDir).cardsCsvFile()))
         val cvrPairs = mvrManager.makeCvrPairsForRound() // TODO use iterator, not List
         val runner = OneAuditAssertionAuditor()
 

@@ -22,6 +22,7 @@ import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.RegVotes
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
+import org.cryptobiotic.rlauxe.util.tabulateCardPools
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -223,7 +224,7 @@ fun verifyManifest(
 fun verifyOAagainstCards(
     contests: List<ContestUnderAudit>,
     contestSummary: ContestSummary,
-    cardPools: List<CardPoolIF>?,
+    cardPools: List<CardPoolIF>,
     infos: Map<Int, ContestInfo>,
     result: VerifyResults,
     show: Boolean = false
@@ -232,15 +233,17 @@ fun verifyOAagainstCards(
     val nonpoolCvrVotes = contestSummary.nonpoolCvrVotes
     val poolCvrVotes = contestSummary.poolCvrVotes
 
-    val poolSums = infos.mapValues { ContestTabulation(it.value) }
-    cardPools!!.forEach { cardPool ->
+    val poolSums = tabulateCardPools(cardPools, infos)
+
+    /* val poolSums = infos.mapValues { ContestTabulation(it.value) }
+    cardPools.forEach { cardPool ->
         cardPool.regVotes().forEach { (contestId, regVotes: RegVotes) ->
             val poolSum = poolSums[contestId]!!
             regVotes.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
             poolSum.ncards += regVotes.ncards()
             poolSum.undervotes += regVotes.undervotes()
         }
-    }
+    } */
 
     val sumWithPools = mutableMapOf<Int, ContestTabulation>()
     sumWithPools.sumContestTabulations(nonpoolCvrVotes)
@@ -337,10 +340,7 @@ fun verifyAssortAvg(
                     val assortAvg = avg.getOrPut(passorter) { AssortAvg() } // TODO could have a hash collision ?
                     if (card.hasContest(contestUA.id)) {
                         assortAvg.ncards++
-                        assortAvg.totalAssort += passorter.assort(
-                            card.cvr(),
-                            usePhantoms = false
-                        )
+                        assortAvg.totalAssort += passorter.assort(card.cvr(), usePhantoms = false)
                     }
                 }
             }

@@ -34,7 +34,7 @@ class RaireContestAuditTaskGenerator(
         )
         var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
 
-        val clca = ClcaAuditTester(
+        val clca = WorkflowTesterClca(
             useConfig, emptyList(), listOf(rcontest),
             MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed),
         )
@@ -79,7 +79,7 @@ class RaireSingleRoundAuditTaskGenerator(
         )
         var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
 
-        val raireAudit = ClcaAuditTester(
+        val raireAudit = WorkflowTesterClca(
             useConfig, emptyList(), listOf(rcontest),
             MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed),
         )

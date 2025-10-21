@@ -7,12 +7,11 @@ import org.cryptobiotic.rlauxe.audit.MvrManagerPollingIF
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 
-// TODO can this be merged with PollingContestAuditTaskGenerator ??
-class PollingAuditTester(
+class WorkflowTesterPolling(
     val auditConfig: AuditConfig,
     contestsToAudit: List<ContestIF>, // the contests you want to audit
     val mvrManager: MvrManagerPollingIF,
-): RlauxAuditIF {
+): AuditWorkflowIF {
     private val contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isComparison=false, auditConfig.hasStyles) }
     private val auditRounds = mutableListOf<AuditRound>()
 
@@ -21,7 +20,7 @@ class PollingAuditTester(
     }
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        val complete = runPollingAudit(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx, quiet)
+        val complete = runPollingAuditRound(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx, quiet)
         auditRound.auditWasDone = true
         auditRound.auditIsComplete = complete
         return complete

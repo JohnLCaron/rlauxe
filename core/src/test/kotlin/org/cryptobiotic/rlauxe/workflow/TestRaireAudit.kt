@@ -23,7 +23,7 @@ class TestRaireAudit {
 
     fun testRaireWorkflow(auditConfig: AuditConfig) {
         val (rcontest, testCvrs) = simulateRaireTestContest(N=20000, contestId=111, ncands=3, minMargin=.04, quiet = true)
-        val workflow = ClcaAuditTester(auditConfig, emptyList(), listOf(rcontest),
+        val workflow = WorkflowTesterClca(auditConfig, emptyList(), listOf(rcontest),
             MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed))
         runAudit("testRaireWorkflow", workflow)
     }
@@ -38,7 +38,7 @@ class TestRaireAudit {
 
         val (rcontest: RaireContestUnderAudit, testCvrs: List<Cvr>) = simulateRaireTestContest(N=20000, contestId=111, ncands=4, minMargin=.04, quiet = true)
         val testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrFuzzPct)
-        val workflow = ClcaAuditTester(auditConfig, emptyList(), listOf(rcontest),
+        val workflow = WorkflowTesterClca(auditConfig, emptyList(), listOf(rcontest),
             MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed))
         runAudit("testRaireWorkflow", workflow)
     }

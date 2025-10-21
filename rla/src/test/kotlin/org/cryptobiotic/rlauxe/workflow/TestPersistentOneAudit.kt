@@ -46,7 +46,7 @@ class TestPersistentOneAudit {
 
         // val mvrManagerTest = MvrManagerTestFromRecord(testCvrs, testMvrs, auditConfig.seed) this does the mvrs manipulations internally
         val mvrManager = MvrManagerFromRecord(auditDir)
-        var oaWorkflow = OneAuditTester(auditConfig, listOf(contestOA), mvrManager)
+        var oaWorkflow = WorkflowTesterOneAudit(auditConfig, listOf(contestOA), mvrManager)
 
         // these checks may modify the contest status
         val verifier = VerifyContests(auditDir)
@@ -59,10 +59,10 @@ class TestPersistentOneAudit {
 
         var round = 1
         var done = false
-        var workflow : RlauxAuditIF = oaWorkflow
+        var workflow : AuditWorkflowIF = oaWorkflow
         while (!done) {
             done = runPersistentWorkflowStage(round, workflow, auditDir, testMvrsUA, publisher)
-            workflow = PersistentAudit(auditDir, useTest = false)
+            workflow = PersistedWorkflow(auditDir, useTest = false)
             round++
         }
         println("------------------ ")

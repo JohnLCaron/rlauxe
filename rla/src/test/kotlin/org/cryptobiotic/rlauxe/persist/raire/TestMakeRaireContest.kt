@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
+import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.raire.IrvCount
 import org.cryptobiotic.rlauxe.raire.RaireContest
@@ -33,8 +34,8 @@ class TestMakeRaireContest {
             irvCounters.add(IrvCounter(contestUA.contest as RaireContest))
         }
 
-        // takes too long - get smaller example
-        val cvrCsv = "$topDir/cvrExport.csv"
+        // takes too long - TODO get smaller example
+        val cvrCsv = "$topDir/$cvrExportCsvFile"
         val cvrIter = CvrExportToCvrAdapter(cvrExportCsvIterator(cvrCsv))
         var count = 0
         while (cvrIter.hasNext()) {

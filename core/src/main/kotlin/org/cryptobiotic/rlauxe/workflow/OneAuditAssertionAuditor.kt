@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 
 private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
 
+// allows to run OneAudit with runClcaAuditRound
 class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditorIF {
 
     override fun run(

@@ -124,7 +124,7 @@ class TestClcaAuditNoStyles {
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
-        val workflow = ClcaAuditTester(auditConfig, contests, emptyList(),
+        val workflow = WorkflowTesterClca(auditConfig, contests, emptyList(),
             MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed))
         runAudit("TestClcaWorkflowNoStyles", workflow)
     }

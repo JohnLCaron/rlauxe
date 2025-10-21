@@ -52,7 +52,7 @@ class TestPersistentWorkflowClca {
 
         // val mvrManagerTest = MvrManagerTestFromRecord(testCvrs, testMvrs, auditConfig.seed) this does the mvrs manipulations internally
         val mvrManager = MvrManagerFromRecord(auditDir)
-        var clcaWorkflow = ClcaAuditTester(auditConfig, contests, emptyList(), mvrManager)
+        var clcaWorkflow = WorkflowTesterClca(auditConfig, contests, emptyList(), mvrManager)
 
         // these checks may modify the contest status
         val verifier = VerifyContests(auditDir)
@@ -65,17 +65,17 @@ class TestPersistentWorkflowClca {
 
         var round = 1
         var done = false
-        var workflow : RlauxAuditIF = clcaWorkflow
+        var workflow : AuditWorkflowIF = clcaWorkflow
         while (!done) {
             done = runPersistentWorkflowStage(round, workflow, auditDir, testMvrsUA, publisher)
-            workflow = PersistentAudit(auditDir, useTest = false)
+            workflow = PersistedWorkflow(auditDir, useTest = false)
             round++
         }
         println("------------------ ")
     }
 }
 
-fun runPersistentWorkflowStage(roundIdx: Int, workflow: RlauxAuditIF, auditDir: String, testMvrsUA: List<AuditableCard>, publish: Publisher): Boolean {
+fun runPersistentWorkflowStage(roundIdx: Int, workflow: AuditWorkflowIF, auditDir: String, testMvrsUA: List<AuditableCard>, publish: Publisher): Boolean {
     val roundStopwatch = Stopwatch()
     var done = false
     println("------------------ Round ${roundIdx}")

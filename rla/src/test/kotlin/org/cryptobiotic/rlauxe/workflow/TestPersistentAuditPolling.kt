@@ -47,7 +47,7 @@ class TestPersistentAuditPolling {
         val testMvrsUA = cards.map { AuditableCard.fromCvr(testMvrs[it.index], it.index, it.prn) }
 
         val mvrManager = MvrManagerFromRecord(auditDir)
-        val pollingWorkflow = PollingAuditTester(auditConfig, contests, mvrManager)
+        val pollingWorkflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)
 
         // these checks may modify the contest status
         val verifier = VerifyContests(auditDir)
@@ -60,10 +60,10 @@ class TestPersistentAuditPolling {
 
         var round = 1
         var done = false
-        var workflow : RlauxAuditIF = pollingWorkflow
+        var workflow : AuditWorkflowIF = pollingWorkflow
         while (!done) {
             done = runPersistentWorkflowStage(round, workflow, auditDir, testMvrsUA, publisher)
-            workflow = PersistentAudit(auditDir, useTest = false)
+            workflow = PersistedWorkflow(auditDir, useTest = false)
             round++
         }
         println("------------------ ")

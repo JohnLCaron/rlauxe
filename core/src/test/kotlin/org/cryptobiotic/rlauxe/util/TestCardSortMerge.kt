@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
@@ -12,7 +13,7 @@ import kotlin.test.assertEquals
 
 class TestCardSortMerge {
     val tempDir = createTempDirectory()
-    val cvrExportFile = "src/test/data/cvrExport.csv"
+    val cvrExportFile = "src/test/data/$cvrExportCsvFile"
 
     @OptIn(ExperimentalPathApi::class)
     @AfterTest

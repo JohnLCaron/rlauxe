@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
-import org.cryptobiotic.rlauxe.persist.AuditRecord.Companion.readFrom
+import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -20,10 +20,10 @@ class TestCsvReading {
         assertEquals(original, roundtrip)
     }
 
-    // @Test // slow
+    // @Test // slow TODO get smaller test file
     fun testCvrExportCsvFile() {
-        val filenameIn = "/home/stormy/rla/cases/sf2024/cvrExport.csv"
-        val filenameOut = "$tempDir/cvrExport.csv"
+        val filenameIn = "/home/stormy/rla/cases/sf2024/$cvrExportCsvFile"
+        val filenameOut = "$tempDir/$cvrExportCsvFile"
         writeCvrExportCsvFile(IteratorCvrExportFile(filenameIn), filenameOut)
         assertTrue(areIteratorsEqual(IteratorCvrExportFile(filenameIn), IteratorCvrExportFile(filenameOut)))
     }

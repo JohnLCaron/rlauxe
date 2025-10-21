@@ -2,6 +2,7 @@ package org.cryptobiotic.util
 
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
 import org.cryptobiotic.rlauxe.corla.createColoradoOneAuditNew
+import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.sf.createSfElection
 import org.cryptobiotic.rlauxe.sf.createSfElectionNoStyles
 import org.junit.jupiter.api.Test
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.Test
 class TestGenerateAllUseCases {
     val sfDir = "/home/stormy/rla/cases/sf2024"
     val sfZipFile = "$sfDir/CVR_Export_20241202143051.zip"
-    val cvrExportCsvFile = "cvrExport.csv"
 
     @Test
     fun createBoulder24oa() {

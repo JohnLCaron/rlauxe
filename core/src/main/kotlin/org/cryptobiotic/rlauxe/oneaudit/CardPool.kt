@@ -45,7 +45,6 @@ interface CardPoolIF {
     fun regVotes() : Map<Int, RegVotes> // contestId -> RegVotes, regular contests only
     fun ncards() : Int // total number of cards in the pool, including undervotes
     fun contains(contestId: Int) : Boolean // does the pool contain this contest ?
-    // fun toBallotPools(): List<BallotPool>
     fun contests(): IntArray
     fun votesAndUndervotes(contestId: Int): VotesAndUndervotes
 }

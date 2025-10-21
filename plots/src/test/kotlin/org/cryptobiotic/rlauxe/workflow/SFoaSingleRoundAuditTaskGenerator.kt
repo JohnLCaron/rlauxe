@@ -48,12 +48,12 @@ class SfoaSingleRoundAuditTask(
         println("SfoaSingleRoundAuditTask start ${name()}")
         val wresults = mutableListOf<WorkflowResult>()
 
-        val rlauxAudit = PersistentAudit(auditDir, true)
+        val rlauxAudit = PersistedWorkflow(auditDir, true)
         rlauxAudit.contestsUA().forEach { contestUA ->
             contestUA.clcaAssertions.forEach { cassertion ->
                 val assertionRound = AssertionRound(cassertion, 1, null)
 
-                val mvrManager = MvrManagerCardsSingleRound(
+                val mvrManager = MvrManagerClcaSingleRound(
                     AuditableCardCsvReaderSkip(
                         "$auditDir/sortedCards.csv",
                         skipPerRun * run
@@ -109,12 +109,12 @@ class SfoaSingleRoundAuditTaskContest18(
     override fun run(): WorkflowResult {
         if (!quiet) println("SfoaSingleRoundAuditTask start ${name()}")
 
-        val rlauxAudit = PersistentAudit(auditDir, true)
+        val rlauxAudit = PersistedWorkflow(auditDir, true)
         val contest18 = rlauxAudit.contestsUA().find { it.contest.id == 18 }!!
         val minAssertion = contest18.minClcaAssertion()!!
         val assertionRound = AssertionRound(minAssertion, 1, null)
 
-        val mvrManager = MvrManagerCardsSingleRound(AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run))
+        val mvrManager = MvrManagerClcaSingleRound(AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run))
         val sampler =
             ClcaNoErrorIterator(
                 contest18.id,

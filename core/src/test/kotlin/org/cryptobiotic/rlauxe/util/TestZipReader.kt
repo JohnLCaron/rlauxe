@@ -27,13 +27,13 @@ class TestZipReader {
         }.message!!.contains("does not exist")
 
         assertFailsWith<RuntimeException> {
-            ZipReader("src/test/data/ballotPools.csv")
+            ZipReader("src/test/data/cvrExport.csv")
         }.message!!.contains("must end in zip")
     }
 
     @Test
     fun testZipReaderTour() {
-        val filename = "src/test/data/cvrexport.zip"
+        val filename = "src/test/data/cvrExport.zip"
         var countFiles = 0
         // ZipReaderTour(zipFile: String, val silent: Boolean = true, val sort: Boolean = true,
         //    val filter: (Path) -> Boolean, val visitor: (InputStream) -> Unit)

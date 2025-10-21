@@ -33,7 +33,7 @@ class TestOABasics {
 
     @Test
     fun testMakeOneContestUA() {
-        val (contestUA, ballotPools, cvrs) = makeOneContestUA(
+        val (contestUA, cardPools, cvrs) = makeOneContestUA(
             20000,
             18000,
             cvrFraction = .66,

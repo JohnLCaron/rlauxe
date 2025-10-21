@@ -60,7 +60,7 @@ class CobraAudit(
     contestsToAudit: List<Contest>, // the contests you want to audit
     val mvrManagerForTesting: MvrManagerClcaForTesting, // mutable
     val p2prior: Double,
-) : RlauxAuditIF {
+) : AuditWorkflowIF {
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
@@ -74,7 +74,7 @@ class CobraAudit(
     }
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, mvrManagerForTesting, auditRound.roundIdx,
+        val complete = runClcaAuditRound(auditConfig, auditRound.contestRounds, mvrManagerForTesting, auditRound.roundIdx,
             auditor = AuditCobraAssertion(p2prior)
         )
         auditRound.auditWasDone = true

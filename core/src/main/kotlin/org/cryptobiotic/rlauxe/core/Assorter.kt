@@ -25,8 +25,8 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 // or a valid vote for every loser in a ballot-polling audit.
 
 interface AssorterIF {
-    // we need usePhantoms=false for avgAssort = reportedMargin, and for the overstatement
-    // we need usePhantoms=true for polling assort
+    // usePhantoms=false for avgAssort = reportedMargin, and for the clca overstatement
+    // usePhantoms=true for polling assort value
     fun assort(mvr: Cvr, usePhantoms: Boolean = false) : Double
 
     fun upperBound(): Double
@@ -48,6 +48,7 @@ interface AssorterIF {
     fun calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false, show: Boolean= false): Double {
         return mean2margin(calcAssortAvgFromCvrs(contestId, cvrs, usePhantoms))
     }
+
     fun calcAssortAvgFromCvrs(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false): Double {
         return cvrs.filter{ it.hasContest(contestId) }.map {
             val av = assort(it, usePhantoms = usePhantoms)
@@ -124,7 +125,7 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     }
 }
 
-// TODO does this algorithm work for vote4N > 1 ?
+// TODO does SuperMajorityAssorter algorithm work for voteForN > 1 ?
 //             assorter=Assorter(
 //                contest=contest,
 //                assort=lambda c, contest_id=contest.id: (

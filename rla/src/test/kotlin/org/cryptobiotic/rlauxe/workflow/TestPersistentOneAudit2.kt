@@ -35,14 +35,14 @@ class TestPersistentOneAudit2 {
         val testMvrsUA = readAuditableCardCsvFile(publisher.testMvrsFile())
 
         val mvrManager = MvrManagerFromRecord(auditDir)
-        var oaWorkflow = OneAuditTester(auditConfig, election.contestsUA(), mvrManager)
+        var oaWorkflow = WorkflowTesterOneAudit(auditConfig, election.contestsUA(), mvrManager)
         var round = 1
         var done = false
-        var workflow : RlauxAuditIF = oaWorkflow
+        var workflow : AuditWorkflowIF = oaWorkflow
         while (!done) {
             // why doesnt mvrManager read in the mvrs?
             done = runPersistentWorkflowStage(round, workflow, auditDir, testMvrsUA, Publisher(auditDir))
-            workflow = PersistentAudit(auditDir, useTest = false)
+            workflow = PersistedWorkflow(auditDir, useTest = false)
             round++
         }
         println("------------------ ")

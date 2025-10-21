@@ -7,20 +7,24 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.Path
 
+const val cvrExportCsvFile = "cvrExport.csv"
 private val logger = KotlinLogging.logger("Publisher")
 
 /*
-    topdir/
-      auditConfig.json      // AuditConfigJson
-      contests.json         // ContestsUnderAuditJson
-      sortedCards.csv       // AuditableCardCsv (or)
-      sortedCards.zip       // AuditableCardCsv
-      ballotPools.csv        // BallotPoolCsv (OneAudit only)
+$topdir/
+  auditConfig.json      // AuditConfigJson
+  contests.json         // ContestsUnderAuditJson
+  sortedCards.csv       // AuditableCardCsv (or)
+  sortedCards.zip       // AuditableCardCsv
+  cardPools.json        // CardPoolJson (OneAudit only)
 
-      roundX/
-        auditState.json     // AuditRoundJson
-        samplePrns.json     // SamplePrnsJson // the sample prns to be audited
-        sampleMvrs.csv      // AuditableCardCsv  // the mvrs used for the audit; matches sampleNumbers.json
+  private/
+    testMvrs.csv        // AuditableCardCsv, for tests only
+
+  roundX/
+    auditState.json     // AuditRoundJson
+    samplePrns.json     // SamplePrnsJson, the sample prns to be audited
+    sampleMvrs.csv      // AuditableCardCsv, the mvrs used for the audit; matches samplePrns.csv
  */
 
 class Publisher(val auditDir: String) {

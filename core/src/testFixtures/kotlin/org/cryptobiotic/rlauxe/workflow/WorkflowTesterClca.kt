@@ -8,13 +8,12 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 
-// TODO can this be merged with ClcaContestAuditTaskGenerator ?
-class ClcaAuditTester(
+class WorkflowTesterClca(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>,
     val mvrManager: MvrManagerClcaIF,
-): RlauxAuditIF {
+): AuditWorkflowIF {
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 
@@ -31,7 +30,7 @@ class ClcaAuditTester(
     }
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
+        val complete = runClcaAuditRound(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
             auditor = ClcaAssertionAuditor(quiet)
         )
         auditRound.auditWasDone = true

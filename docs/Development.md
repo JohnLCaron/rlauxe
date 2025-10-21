@@ -11,6 +11,17 @@
 | 10/13/2025 | 88.7 % | 4734/5336       |
 | 10/19/2025 | 91.7 % | 5028/5483       |
 | 10/19/2025 | 91.1 % | 5019/5512       |
+| 10/20/2025 | 91.3 % | 4961/5432       |
+| 10/21/2025 | 91.4 % | 4837/5290       |
+
+## Modules
+
+* cases: code to create case study audits
+* core: core library
+* docs: documentation
+* libs: local copy of raire-java library
+* plots: code to generate plots for documentation
+* rla: additional tests
 
 ## UML
 last changed: 03/10/2025

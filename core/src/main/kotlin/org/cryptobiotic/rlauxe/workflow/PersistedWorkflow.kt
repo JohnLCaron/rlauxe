@@ -12,11 +12,11 @@ import java.nio.file.Path
 
 private val logger = KotlinLogging.logger("PersistentAudit")
 
-/** RlauxAuditIF created from persistent state. */
-class PersistentAudit(
+/** AuditWorkflow with persistent state. */
+class PersistedWorkflow(
     val auditDir: String,
     val useTest: Boolean,
-): RlauxAuditIF {
+): AuditWorkflowIF {
     val auditRecord: AuditRecord = AuditRecord.readFrom(auditDir) // TODO need auditConfig, contests in record
     val publisher = Publisher(auditDir)
 
@@ -66,9 +66,9 @@ class PersistentAudit(
         }
 
         val complete =  when (auditConfig.auditType) {
-            AuditType.CLCA -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = ClcaAssertionAuditor(quiet))
-            AuditType.POLLING -> runPollingAudit(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerPollingIF, auditRound.roundIdx, quiet)
-            AuditType.ONEAUDIT -> runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = OneAuditAssertionAuditor(quiet))
+            AuditType.CLCA -> runClcaAuditRound(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = ClcaAssertionAuditor(quiet))
+            AuditType.POLLING -> runPollingAuditRound(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerPollingIF, auditRound.roundIdx, quiet)
+            AuditType.ONEAUDIT -> runClcaAuditRound(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = OneAuditAssertionAuditor(quiet))
         }
 
         auditRound.auditWasDone = true

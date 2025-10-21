@@ -7,12 +7,11 @@ import org.cryptobiotic.rlauxe.audit.MvrManagerClcaIF
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 
-// TODO can this be merged with OneAuditContestAuditTaskGenerator ?
-class OneAuditTester(
+class WorkflowTesterOneAudit(
     val auditConfig: AuditConfig,
     val contestsUA: List<OAContestUnderAudit>, // the contests you want to audit
     val mvrManager: MvrManagerClcaIF,
-): RlauxAuditIF {
+): AuditWorkflowIF {
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
@@ -20,7 +19,7 @@ class OneAuditTester(
     }
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
-        val complete = runClcaAudit(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
+        val complete = runClcaAuditRound(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
             auditor = OneAuditAssertionAuditor()
         )
         auditRound.auditWasDone = true

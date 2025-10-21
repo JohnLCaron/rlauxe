@@ -135,10 +135,6 @@ class CardPoolImpl(override val poolName: String, override val poolId: Int, val 
 
     override fun contests() = intArrayOf(contestId)
 
-    /* override fun toBallotPools(): List<BallotPool> {
-        return listOf(BallotPool("poolName", poolId, contestId, regVotes.ncards(), regVotes.votes))
-    } */
-
     override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
         val poolUndervotes = ncards() - regVotes.votes.values.sum()
         return VotesAndUndervotes(regVotes.votes, poolUndervotes, 1)

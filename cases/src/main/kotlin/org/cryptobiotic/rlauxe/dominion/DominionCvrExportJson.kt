@@ -159,9 +159,7 @@ data class Mark(
     }
 }
 
-// Convert Dominion CvrExport_xxxxx.json files to CvrExport.csv.
 // remove candidate duplicates on IRV contests.
-
 fun DominionCvrExportJson.import(contestManifest: ContestManifest) : DominionCvrSummary {
     val irvContests = contestManifest.irvContests
     var ncards = 0

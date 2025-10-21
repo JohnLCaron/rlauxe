@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.listToMap
@@ -8,6 +10,9 @@ import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.util.makeContestsWithUndervotesAndPhantoms
 import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 
 class TestAssorterCvrMeans {
 
@@ -59,6 +64,38 @@ class TestAssorterCvrMeans {
         testMeanAssort(cvrs, contestUA)
     }
 
+    @Test
+    fun testPluralityAssorterWithPhantoms() {
+        val cvrs = CvrBuilders()
+            .addCvr().addContest("AvB", "0").ddone()
+            .addCvr().addContest("AvB", "1").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            // artifact of creating Contests and candidates from cvrs.
+            .addCvr().addContest("AvB").addCandidate("3", 0).ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addPhantomCvr().addContest("AvB").ddone()
+            .build()
+
+        val contestInfo = ContestInfo(
+            name = "AvB",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.PLURALITY,
+            candidateNames = listToMap( "0", "1", "2", "3", "4"),
+        )
+        val contest = makeContestFromCvrs(contestInfo, cvrs)
+        val contestUA = ContestUnderAudit(contest, isComparison = false)
+
+        println("\n$contestUA")
+        println("ncvrs = ${cvrs.size}")
+        testMeanAssort(cvrs, contestUA)
+    }
+
     fun testMeanAssort(cvrs: List<Cvr>, contestUA: ContestUnderAudit) {
         val assorter = contestUA.pollingAssertions[0].assorter
         val tracker = MeanMarginTracker(contestUA.id, assorter)
@@ -95,6 +132,7 @@ class MeanMarginTracker(val contestId: Int, val assorter: AssorterIF) {
         val margin = (winnerCount - loserCount) / ncards.toDouble()
         val meanFromMargin = margin2mean(margin)
         val assortMean = welford.mean
+        println(" assort = ${assortValue} assortMean=$assortMean meanFromMargin=$meanFromMargin")
         // if (isPhantom) println(" assort = ${assortValue} assortMean=$assortMean meanFromMargin=$meanFromMargin")
 
         if (!doubleIsClose(meanFromMargin, assortMean)) {

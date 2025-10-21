@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.*
 private val logger = KotlinLogging.logger("PollingAudit")
 
 // TODO parallelize over contests
-fun runPollingAudit(
+fun runPollingAuditRound(
     auditConfig: AuditConfig,
     contests: List<ContestRound>,
     mvrManager: MvrManagerPollingIF,

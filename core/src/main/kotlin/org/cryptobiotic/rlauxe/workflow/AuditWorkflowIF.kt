@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 private val logger = KotlinLogging.logger("RlauxAuditIF")
 
 // abstraction for running an audit.
-interface RlauxAuditIF {
+interface AuditWorkflowIF {
     fun auditConfig() : AuditConfig
     fun mvrManager() : MvrManager
     fun auditRounds(): MutableList<AuditRound>
@@ -67,36 +67,3 @@ interface RlauxAuditIF {
     // 6. _Run the audit_
     fun runAuditRound(auditRound: AuditRound, quiet: Boolean = true): Boolean  // return complete
 }
-
-/*
-fun RlauxAuditIF.showResults() {
-    println("Audit Rounds")
-    auditRounds().forEach { println(it) }
-
-    println("Audit results")
-    this.contestsUA().forEach{ contest ->
-        val minAssertion = contest.minAssertion()
-        if (minAssertion == null) {
-            println(" $contest has no assertions; status=${contest.status}")
-        } else {
-            // if (minAssertion.roundResults.size == 1) {
-                print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} done=${contest.done} status=${contest.status} est=${contest.estMvrs} ${minAssertion.auditResult}")
-                if (!this.auditConfig().hasStyles) println(" estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}") else println()
-           /* } else {
-                print(" ${contest.name} (${contest.id}) Nc=${contest.Nc} done=${contest.done} status=${contest.status} est=${contest.estMvrs}")
-                if (!this.auditConfig().hasStyles) println(" estSampleSizeNoStyles=${contest.estSampleSizeNoStyles}") else println()
-                minAssertion.roundResults.forEach { rr -> println("   $rr") }
-            } */
-        }
-    }
-
-    var maxBallotsUsed = 0
-    this.contestsUA().forEach { contest ->
-        contest.assertions.filter { it.auditResult != null }.forEach { assertion ->
-            val lastRound = assertion.auditResult!!
-            maxBallotsUsed = max(maxBallotsUsed, lastRound.maxBallotIndexUsed)
-        }
-    }
-    println("$estSampleSize - $maxBallotsUsed = extra ballots = ${estSampleSize - maxBallotsUsed}\n")
-}
- */

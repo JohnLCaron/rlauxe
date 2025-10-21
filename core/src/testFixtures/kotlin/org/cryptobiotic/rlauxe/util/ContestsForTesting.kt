@@ -14,11 +14,12 @@ fun makeContestFromCvrs(
     return if (contestTab == null)
         Contest(info, emptyMap(), 0, 0)
     else
+        // the cvrs include the phantoms
         Contest(
             info,
             contestTab.votes,
-            Nc=contestTab.ncards + contestTab.nphantoms,
-            Ncast=contestTab.ncards,
+            Nc=contestTab.ncards,
+            Ncast=contestTab.ncards - contestTab.nphantoms,
             )
 }
 

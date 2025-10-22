@@ -18,7 +18,7 @@ class TestDominionCvrExportJson {
     @Test
     fun testReadDominionCvrJsonFile() {
         val filename = "src/test/data/SF2024/CvrExport_15.json"
-        val filename2 = "/home/stormy/rla/cases/sf2024/CvrExport_23049.json"
+        "/home/stormy/rla/cases/sf2024/CvrExport_23049.json"
         val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonFile(filename)
         val dominionCvrs = if (result is Ok) result.unwrap()
             else throw RuntimeException("Cannot read DominionCvrJson from ${filename} err = $result")

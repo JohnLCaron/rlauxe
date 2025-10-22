@@ -62,10 +62,10 @@ fun flipExactVotes(cvrs: MutableList<Cvr>, wantAvg: Double): Int {
 fun makeFlippedMvrs(cvrs: List<Cvr>, N: Int, p2o: Double?, p1o: Double?): List<Cvr> {
     val mmvrs = mutableListOf<Cvr>()
     mmvrs.addAll(cvrs)
-    val flippedVotes2 = if (p2o == null) 0 else {
+    if (p2o == null) 0 else {
         add2voteOverstatements(mmvrs, needToChangeVotesFromA = roundUp(N * p2o))
     }
-    val flippedVotes1 = if (p1o == null) 0 else {
+    if (p1o == null) 0 else {
         require(p1o >= 0.0)
         add1voteOverstatements(mmvrs, needToChangeVotesFromA = roundUp(N * p1o))
     }

@@ -171,7 +171,7 @@ class TestAssertions {
 
         // TODO: no winners have minFraction = .66, where do we test that ?
         //val exception = assertFailsWith<RuntimeException> {
-            val contestUA = ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
+        ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
         //}
         //println(exception)
         //assertNotNull(exception.message)

@@ -75,8 +75,6 @@ class CreateSfElectionNS(
         cvrExportCsv: String,
     ): Pair<List<CardPoolNs>, Map<Int, Int>> { // return CardPools, contestId -> increaseNc
 
-        val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
-
         // create the card Pools,
         var count = 0
         val cardPools: MutableMap<String, CardPoolNs> = mutableMapOf()

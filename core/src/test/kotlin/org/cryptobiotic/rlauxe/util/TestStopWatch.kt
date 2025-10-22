@@ -70,7 +70,7 @@ class TestStopWatch {
         assertTrue(stopwatch.toString().endsWith("ns"))
 
         stopwatch.start()
-        val wtf = sqrt(3.0)
+        sqrt(3.0)
         stopwatch.stop()
         println(stopwatch)
         assertTrue(stopwatch.toString().endsWith("μs"))

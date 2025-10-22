@@ -33,7 +33,7 @@ class TestOABasics {
 
     @Test
     fun testMakeOneContestUA() {
-        val (contestUA, cardPools, cvrs) = makeOneContestUA(
+        val (contestUA, _, cvrs) = makeOneContestUA(
             20000,
             18000,
             cvrFraction = .66,
@@ -72,8 +72,8 @@ class TestOABasics {
         println(" other: (1.5 - pa) / (2 - v)  = ${(1.5 - poolAverage) / (2 - assorterMargin) } ") // voted for winner
         println(" loser: (1 - pa) / (2 - v) = ${(1.0 - poolAverage) / (2 - assorterMargin) } ") // voted for loser
 
-        val min = (1.0 - poolAverage) / (2 - assorterMargin)
-        val max = (2.0 - poolAverage) / (2 - assorterMargin)
+        (1.0 - poolAverage) / (2 - assorterMargin)
+        (2.0 - poolAverage) / (2 - assorterMargin)
 
         val loserVote = (1.0 - poolAverage) / (2 - assorterMargin)
         val otherVote = (1.5 - poolAverage) / (2 - assorterMargin)

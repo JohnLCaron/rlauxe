@@ -64,7 +64,7 @@ class TestIrvCount {
      }
 
     fun countWinners(result: IrvCountResult) {
-        var winners = mutableMapOf<Int, Int>()
+        mutableMapOf<Int, Int>()
         result.ivrRoundsPaths.forEach { ivrRoundsPath ->
             // TODO
         }

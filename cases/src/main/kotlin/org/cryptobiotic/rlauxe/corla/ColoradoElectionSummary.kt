@@ -56,7 +56,7 @@ class ColoradoElectionContestSummary(
         appendLine("${shortName}: votes=${contestVotes} voteMargin=$vmargin margin=${dfn(margin,4)} dilutedMargin=${dfn(dilutedMargin,4)} %")
         sortedCandidates.forEach {
             val calcPct = 100.0 * it.totalVotes / contestVotes
-            appendLine("  ${sfn(it.name, 20)} (${it.partyName}): ${it.totalVotes} ${dfn(it.percentVotes,2)}")
+            appendLine("  ${sfn(it.name, 20)} (${it.partyName}): ${it.totalVotes} ${dfn(it.percentVotes,2)} calcPct=$calcPct")
         }
         appendLine()
     }
@@ -90,7 +90,7 @@ fun readColoradoElectionSummaryCsv(filename: String): List<ColoradoElectionConte
 
     // we expect the first line to be the headers
     val headerRecord = records.next()
-    val header = headerRecord.toList().joinToString(", ")
+    headerRecord.toList().joinToString(", ")
     // println(header)
 
     // subsequent lines contain ballot manifest info

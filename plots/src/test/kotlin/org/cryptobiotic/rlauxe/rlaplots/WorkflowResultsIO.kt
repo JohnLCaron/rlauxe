@@ -53,7 +53,7 @@ class WorkflowResultsIO(val filename: String) {
 
     fun readResults(): List<WorkflowResult> {
         val reader: BufferedReader = File(filename).bufferedReader()
-        val header = reader.readLine() // get rid of header line
+        reader.readLine() // get rid of header line
 
         val srts = mutableListOf<WorkflowResult>()
         while (true) {
@@ -75,7 +75,7 @@ class WorkflowResultsIO(val filename: String) {
         val statusS = ttokens[idx++]
         val nrounds = ttokens[idx++].toDouble()
         val samplesUsed = ttokens[idx++].toDouble()
-        val samplesNeeded = ttokens[idx++].toDouble()
+        ttokens[idx++].toDouble()
         val nmvrs = ttokens[idx++].toDouble()
         val failPct = ttokens[idx++].toDouble()
         val stddev = if (tokens.size > 9) ttokens[idx++].toDouble() else 0.0

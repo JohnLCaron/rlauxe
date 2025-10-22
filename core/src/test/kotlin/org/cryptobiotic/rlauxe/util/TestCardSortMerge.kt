@@ -27,7 +27,7 @@ class TestCardSortMerge {
         SortMerge(
             "$tempDir/testSortMergeRun",
             outputFile = outputFile,
-            seed = Random.Default.nextLong(),
+            seed = Random.nextLong(),
             poolNameToId = null,
             maxChunk = 100,
             showPoolVotes = true,
@@ -45,7 +45,7 @@ class TestCardSortMerge {
         SortMerge(
             "$tempDir/testSortMergeRunZip",
             outputFile = outputFile,
-            seed = Random.Default.nextLong(),
+            seed = Random.nextLong(),
             poolNameToId = null,
             maxChunk = 100,
             showPoolVotes = false,

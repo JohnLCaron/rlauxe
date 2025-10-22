@@ -18,13 +18,12 @@ class TestPersistentOneAudit {
     fun testPersistentWorkflow() {
         clearDirectory(Path.of(auditDir))
 
-        val fuzzMvrPct = .01
         val publisher = Publisher(auditDir)
         val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, seed = 12356667890L, nsimEst=10)
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
         val N = 5000
-        val (contestOA, cardPools, testCvrs) = makeOneContestUA(
+        val (contestOA, _, testCvrs) = makeOneContestUA(
             N + 100,
             N - 100,
             cvrFraction = .95,

@@ -154,7 +154,7 @@ class TestRaireProblemSerialization {
             mapper.writeValueAsString(noStatus),
             AssertionAndDifficulty::class.java
         )
-        assertTrue(noStatusS.assertion.isNEB())
+        assertTrue(noStatusS.assertion.isNEB)
         assertEquals(2.0, noStatusS.difficulty)
         assertEquals(7, noStatusS.margin)
         assertNull(noStatusS.status)
@@ -166,7 +166,7 @@ class TestRaireProblemSerialization {
             mapper.writeValueAsString(hasStatus),
             AssertionAndDifficulty::class.java
         )
-        assertTrue(hasStatusS.assertion.isNEB())
+        assertTrue(hasStatusS.assertion.isNEB)
         assertEquals(3.0, hasStatusS.difficulty)
         assertEquals(8, hasStatusS.margin)
         assertNotNull(hasStatusS.status)

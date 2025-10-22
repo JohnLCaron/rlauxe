@@ -212,7 +212,7 @@ fun wrsScatterPlot(
     val xvalues = mutableListOf<Double>()
     val yvalues = mutableListOf<Double>()
     val runNames = mutableListOf<String>()
-    groups.forEach { (cat, wrs) ->
+    groups.forEach { (_, wrs) ->
         val ssrtList = wrs.sortedBy { xfld(it) }
         val xvalue = ssrtList.map { xfld(it) }
         xvalues.addAll(xvalue)

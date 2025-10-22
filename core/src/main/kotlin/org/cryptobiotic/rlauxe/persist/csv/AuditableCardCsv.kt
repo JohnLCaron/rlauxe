@@ -142,7 +142,7 @@ fun auditableCardCsvIterator(filename: String): CloseableIterator<AuditableCard>
 
 fun readAuditableCardCsvFile(filename: String): List<AuditableCard> {
     val reader: BufferedReader = File(filename).bufferedReader()
-    val header = reader.readLine() // get rid of header line
+    reader.readLine() // get rid of header line
 
     val pools = mutableListOf<AuditableCard>()
     while (true) {

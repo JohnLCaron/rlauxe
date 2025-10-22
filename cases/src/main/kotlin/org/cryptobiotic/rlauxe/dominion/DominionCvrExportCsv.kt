@@ -238,7 +238,6 @@ fun readDominionCvrExportCsv(filename: String, countyId: String): DominionCvrExp
         CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)
     }
 
-    var my_record_count = 0
     val records: Iterator<CSVRecord> = parser.iterator()
     var lineNum = 1
 

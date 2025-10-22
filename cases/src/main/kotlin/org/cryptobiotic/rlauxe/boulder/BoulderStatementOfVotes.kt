@@ -165,7 +165,7 @@ fun readBoulderStatementOfVotes(filename: String, variation: String): BoulderSta
     val records = parser.iterator()
 
     // we expect the first line to be the headers
-    val headerRecord = records.next()
+    records.next()
     // val header = headerRecord.toList().joinToString(", ")
     // println(header)
 

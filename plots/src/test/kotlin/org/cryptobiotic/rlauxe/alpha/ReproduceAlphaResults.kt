@@ -474,7 +474,7 @@ class ReproduceAlphaResults {
             listToMap("A", "B"),
             choiceFunction = SocialChoiceFunction.PLURALITY
         )
-        val contest = makeContestFromFakeCvrs(info, 100)
+        makeContestFromFakeCvrs(info, 100)
 
         val srs = mutableListOf<SRT>()
         for (theta in thetas) {
@@ -489,7 +489,7 @@ class ReproduceAlphaResults {
                 val drawSample = makeClcaNoErrorSampler(contest.id, true, cvrs, assorter)
                 val etaActual =  assorter.noerror()
                 val etaExpect =  1.0/(2-margin)
-                val same = doubleIsClose(etaActual, etaExpect)
+                doubleIsClose(etaActual, etaExpect)
                 // println(" theta=$theta N=$N etaActual=$etaActual same=$same ")
 
                 val mart: RunTestRepeatedResult = runAlphaMartRepeated(
@@ -557,8 +557,8 @@ class ReproduceAlphaResults {
 
     @Test
     fun testNvsThetaFactors() {
-        val thetas = listOf(.501, .502, .503, .504, .505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
-        val nlist = listOf(50000, 20000, 10000, 5000, 1000)
+        listOf(.501, .502, .503, .504, .505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
+        listOf(50000, 20000, 10000, 5000, 1000)
         val theta = .510
         val N = 10000
         val factors = listOf(1.0, 2.0)

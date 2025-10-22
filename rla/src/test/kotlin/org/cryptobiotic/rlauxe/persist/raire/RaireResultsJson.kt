@@ -94,7 +94,7 @@ fun RaireResultsAssertionJson.import(): RaireAssertion {
         this.loser.toInt(),
         0.0,
         0, // not available, calculate instead
-        RaireAssertionType.Companion.fromString(this.assertion_type),
+        RaireAssertionType.fromString(this.assertion_type),
         this.already_eliminated.map { it.toInt() },  // must invert
         emptyMap(),
     )

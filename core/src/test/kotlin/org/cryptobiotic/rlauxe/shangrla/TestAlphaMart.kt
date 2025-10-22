@@ -56,7 +56,7 @@ class TestAlphaMart {
         val x = DoubleArray(5) { .5 }
         val eta0 = 0.5
 
-        val (allHalf, dseq) = testAlphaMartBatch(eta0, x.toList())
+        val (_, dseq) = testAlphaMartBatch(eta0, x.toList())
         println(" allHalf = ${dseq.pvalues()}")
         dseq.pvalues().forEach {
             assertEquals(1.0, it)

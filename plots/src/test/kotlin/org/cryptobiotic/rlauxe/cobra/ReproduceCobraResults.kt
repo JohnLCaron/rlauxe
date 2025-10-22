@@ -228,7 +228,7 @@ class ReproduceCobraResults {
                 val compareAssorter = makeStandardComparisonAssorter(theta, N)
                 for (p1prior in p1priors) {
                     for (p2prior in p2priors) {
-                        val stopwatch = Stopwatch()
+                        Stopwatch()
 
                         // generate with the oracle, or true rates
                         val sampler = ClcaAttackSampler(
@@ -388,8 +388,8 @@ fun optimal_comparison(alpha: Double, u: Double, rate_error_2: Double = 1e-4): D
     val p2 = rate_error_2 // getattr(self, "rate_error_2", 1e-4)  // rate of 2-vote overstatement errors
     val bet = (1 - u * (1 - p2)) / (2 - 2 * u) + u * (1 - p2) - .5
     // 1 / alpha = bet ^ size
-    val term1 = -ln(alpha)
-    val term2 = ln(bet)
+    -ln(alpha)
+    ln(bet)
     val size = -ln(alpha) / ln(bet)
     return size
 }

@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.audit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
@@ -19,6 +20,7 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.cleanCsvString
 import org.cryptobiotic.rlauxe.util.createZipFile
 import kotlin.collections.forEach
 import kotlin.io.path.Path
@@ -73,23 +75,6 @@ class CreateAudit2(val name: String, val topdir: String, val config: AuditConfig
             logger.info { "write ${countMvrs} cards to ${publisher.testMvrsFile()}" }
         }
 
-            /* save the sorted testMvrs if they exist
-            if (testMvrs.isNotEmpty()) {
-                require (testMvrs.size == sortedCards.size)
-
-                val mvrCards = sortedCards.map { AuditableCard.fromCvr(testMvrs[it.index], it.index, it.prn) }
-                val mvrFile = publisher.testMvrsFile()
-                validateOutputDirOfFile(mvrFile)
-                writeAuditableCardCsvFile(mvrCards, mvrFile)
-                logger.info{"write ${testMvrs.size} test mvrs to $mvrFile"}
-            } */
-
-       /*  } else {
-            val (cvrIter, extra) = election.cvrExport()!!
-            val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-            writeSortedCardsExternalSort(topdir=topdir, cvrIter, extra + phantoms, config.seed, poolNameToId)
-        } */
-
         /* this may change the auditStatus to misformed
         val verifier = VerifyContests(auditDir)
         val resultsv = verifier.verify(contestsUA, false)
@@ -122,50 +107,8 @@ fun writeSortedCardsInternalSort(publisher: Publisher, seed: Long) {
     }
 }
 
-/*
-fun writeSortedCardsExternalSort(topdir: String, seed: Long, poolNameToId: Map<String, Int>?) {
-    val publisher = Publisher("$topdir/audit")
-    SortMerge(scratchDirectory = "$topdir/sortChunks", publisher.sortedCardsFile(), seed, poolNameToId, showPoolVotes = config.isClca)
-        .run(cards.iterator(), phantoms)
-    createZipFile(publisher.sortedCardsFile(), delete = false)
-
-    // kludge; test Mvrs are the same as the Cvrs but the votes are shown
-    validateOutputDirOfFile(publisher.testMvrsFile())
-    SortMerge(scratchDirectory = "$topdir/sortChunks", publisher.testMvrsFile(), seed, poolNameToId, showPoolVotes = true)
-        .run(cards.iterator(), phantoms)
-    createZipFile(publisher.testMvrsFile(), delete = false)
-}
-
-fun createSortedCardsFromPools2(cvrs: List<Cvr>, seed: Long, pools: List<CardPoolWithBallotStyle>) : List<AuditableCard> {
-    val prng = Prng(seed)
-    val cards = mutableListOf<AuditableCard>()
-    var idx = 0
-    cvrs.forEach { cards.add(AuditableCard.fromCvr(it, idx++, prng.next())) }
-
-    // add the pool votes
-    pools.forEach { pool ->
-        val cleanName = cleanCsvString(pool.poolName)
-        repeat(pool.ncards()) { poolIndex ->
-            cards.add(
-                AuditableCard(
-                    location = "pool${cleanName} card ${poolIndex + 1}",
-                    index = idx++,
-                    prn = prng.next(),
-                    phantom = false,
-                    contests = pool.contests(),
-                    votes = null,
-                    poolId = pool.poolId
-                )
-            )
-        }
-    }
-
-    // or use external memory sort
-    return cards.sortedBy { it.prn }
-}
-
 // The pooled cvrs dont have votes associated with them
-fun createCvrsFromPools2(pools: List<CardPoolIF>) : List<Cvr> {
+fun createCvrsFromPools(pools: List<CardPoolIF>) : List<Cvr> {
     val cvrs = mutableListOf<Cvr>()
 
     pools.forEach { pool ->
@@ -184,8 +127,7 @@ fun createCvrsFromPools2(pools: List<CardPoolIF>) : List<Cvr> {
     val totalRedactedBallots = pools.sumOf { it.ncards() }
     require(cvrs.size == totalRedactedBallots)
     return cvrs
-} */
-
+}
 
 // for a real audit, there are no votes
 fun createSortedCards(unsortedCards: CloseableIterator<AuditableCard>, seed: Long) : List<AuditableCard> {

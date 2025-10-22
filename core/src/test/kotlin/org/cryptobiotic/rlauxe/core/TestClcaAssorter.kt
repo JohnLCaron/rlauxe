@@ -379,7 +379,6 @@ class TestClcaAssorter {
         val contest = makeContestFromCvrs(info, cvrs)
 
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
-        val awinnerAvg = .55
         val cassorter = ClcaAssorter(info, assorter)
         val noerror = cassorter.noerror()
         println("  noerror = $noerror")

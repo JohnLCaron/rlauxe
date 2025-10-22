@@ -61,7 +61,7 @@ class TestConsistentSamplingFromShangrla {
 
     @Test
     fun testSamplingWithPhantoms() {
-        val infos: List<ContestInfo> = listOf(
+        listOf(
             ContestInfo("city_council", 0, candidateNames= listToMap("Alice", "Bob", "Charlie", "Doug", "Emily"),
                 choiceFunction = SocialChoiceFunction.PLURALITY),
             ContestInfo("measure_1", 1, candidateNames= listToMap("yes", "no"),

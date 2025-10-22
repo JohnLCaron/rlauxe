@@ -72,13 +72,13 @@ fun readColoradoPrecinctLevelResults(inputStream: InputStream): List<ColoradoPre
 
     // we expect the first line to be the headers
     val headerRecord = records.next()
-    val header = headerRecord.toList().joinToString(", ")
+    headerRecord.toList().joinToString(", ")
     // println(header)
 
     // val precintResult = mutableListOf<ColoradoPrecinctLevelResult>()
 
     val precincts = mutableMapOf<String, ColoradoPrecinctLevelResults>()
-    var count = 0;
+    var count = 0
     var line: CSVRecord? = null
     try {
         while (records.hasNext()) {

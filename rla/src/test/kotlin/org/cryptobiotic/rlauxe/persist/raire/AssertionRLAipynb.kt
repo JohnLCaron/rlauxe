@@ -267,7 +267,7 @@ class AssertionRLA {
         //               }
         //
         //contests = Contest.from_dict_of_dicts(contest_dict)
-        val scontest = ShangrlaContest(
+        ShangrlaContest(
             name = "DA",
             risk_limit = 0.05,
             cards = 146662,
@@ -319,7 +319,7 @@ class AssertionRLA {
         // This single contest cvr file is the only real cvr data in SHANGRLA
         // //         'cvr_file':       './data/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire',
         val raireCvrs = readRaireBallotsCsv(audit.cvrFile)
-        val rcContest = raireCvrs.contests.first()
+        raireCvrs.contests.first()
         val N = raireCvrs.cvrs.size // ??
         println(" raireCvrs contests=${raireCvrs.contests.size} ncards =${N}")
         assertEquals(1, raireCvrs.contests.size)
@@ -415,7 +415,7 @@ class AssertionRLA {
 
         val results = calc_sample_sizes(10, raireResults.contests, raireCvrs.cvrs)
         println("calc_sample_sizes = $results")
-        val sampleSize = results.sampleCount[0] // TODO
+        results.sampleCount[0] // TODO
 
 
         ///// consistent sampling
@@ -425,7 +425,7 @@ class AssertionRLA {
 //prng = SHA256(audit.seed)
 //CVR.assign_sample_nums(cvr_list, prng)
         // TODO evaluate secureRandom for production, also needs to be deterministic, ie seeded
-        val cvras = rcvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, Random.nextLong())}
+        rcvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, Random.nextLong())}
 
         println("calc_sample_sizes = $results")
 

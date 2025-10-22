@@ -179,7 +179,7 @@ class TestShangrlaAssertions {
 
         val cvr0 = aliceMvr
         val cvr1 = bobMvr
-        val cvr2 = undervoteMvr
+        undervoteMvr
         // val cvr3 = wrongContestMvr
         val cvr4 = phantomMvr
 
@@ -414,7 +414,7 @@ class TestShangrlaAssertions {
     fun test_overstatement_assorter() {
         val mvr0 = aliceMvr
         val mvr1 = bobMvr
-        val mvr2 = wrongContestMvr
+        wrongContestMvr
         val cvr0 = aliceMvr
         val cvr1 = bobMvr
 

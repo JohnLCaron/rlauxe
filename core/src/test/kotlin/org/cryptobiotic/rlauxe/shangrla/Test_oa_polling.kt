@@ -214,13 +214,10 @@ class TestOAPolling(withoutReplacement: Boolean = true) {
         val dl = listOf(10, 100, 1000)
 
         // for RiLACs
-        val D = 10
-        val beta = 1
 
         // for ONEAudit
-        val one_frac = 0.99  // fraction of the upper bound to use for null mean
 
-        val resl = listOf("rej_N", "not_rej_N")
+        listOf("rej_N", "not_rej_N")
 
         val resultsAB = mutableListOf<TestPollingResult>()
         val resultsApaB = mutableListOf<TestPollingResult>()
@@ -244,7 +241,7 @@ class TestOAPolling(withoutReplacement: Boolean = true) {
                         // a priori Kelly and a priori SPRT
                         for (eta in etal) {
                             val n_eta_A = (nonBlank * eta).toInt()
-                            val n_eta_B = nonBlank - n_eta_A
+                            nonBlank - n_eta_A
                             val eta_shangrla = (nonBlank * eta + (N - nonBlank) / 2.0) / N
                             val eta_oneaudit = assorterMean(eta_shangrla)
                             val c = c_base * (eta - 1.0 / 2)
@@ -264,14 +261,14 @@ class TestOAPolling(withoutReplacement: Boolean = true) {
                                     u = 1.0,
                                     estim = { x, N, mu, eta, u -> shrinkTrunc(x, N, mu, eta, 1.0, c = c, d = d) }
                                 )
-                                val foundAlpha = martAlpha.indexOfFirst { it >= 1.0 / alpha }
+                                martAlpha.indexOfFirst { it >= 1.0 / alpha }
                                 resultsAB.add( TestPollingResult(theta,N,b,eta, d,found >= 0,found))
                             }
 
                             // OneAudit a priori
                             val martOneAudit = sprtMart(x, N, mu = 1.0 / 2, eta = eta_oneaudit, u = upperBound(eta), randomOrder = true)
                             // rejections by N
-                            val foundOneAudit = martOneAudit.indexOfFirst { it >= 1.0 / alpha }
+                            martOneAudit.indexOfFirst { it >= 1.0 / alpha }
                             resultsCompB.add( TestPollingResult(theta,N,b,eta, 0,found >= 0,found))
 
                             // OneAudit ALPHA
@@ -285,7 +282,7 @@ class TestOAPolling(withoutReplacement: Boolean = true) {
                                     estim = { x, N, mu, eta0, u -> shrinkTrunc(x, N, mu, eta0, 1.0, c = c, d = d) }
                                 )
                                 // rejections by N
-                                val foundOneAuditAlpha = martOneAuditAlpha.indexOfFirst { it >= 1.0 / alpha }
+                                martOneAuditAlpha.indexOfFirst { it >= 1.0 / alpha }
                                 resultsCompAB.add( TestPollingResult(theta,N,b,eta, d,found >= 0,found))
                             }
                         }

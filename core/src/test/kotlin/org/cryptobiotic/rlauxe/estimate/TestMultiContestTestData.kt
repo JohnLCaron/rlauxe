@@ -147,7 +147,7 @@ class TestMultiContestTestData {
 
     @Test
     fun testPhantomCvrs() {
-        val (cvrs, ballotManifest) = test.makeCvrsAndBallots(true)
+        val (cvrs, _) = test.makeCvrsAndBallots(true)
 
         test.contests.forEachIndexed { idx, contest ->
             val fcontest = test.fcontests[idx]

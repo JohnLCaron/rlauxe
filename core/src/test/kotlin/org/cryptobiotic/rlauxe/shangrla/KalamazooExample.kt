@@ -39,9 +39,7 @@ class KalamazooExample {
             "Whitmer" to 23
         )
 
-        var errors = 0 // CVRs all matched the cards
         val nCvr = 8
-        val nPoll = 32
 
         println("Stratum")
         for (s in 0..1) {
@@ -93,7 +91,6 @@ class KalamazooExample {
 
         //%%
         val reps = 10000 // 10.0.pow(5).toInt()
-        val alpha = 0.05
         val pv = mutableListOf<Double>()
 
         // Note our bet is always .99 of maximum; using sprt_mart here
@@ -110,14 +107,13 @@ class KalamazooExample {
         println()
 
         val eta = noerror
-        val c = (eta - 1 / 2) / 2
-        val d = 2
+        (eta - 1 / 2) / 2
         sam.shuffle()
         val martSprt = sprtMart(sam, N = N, mu = 1.0 / 2, eta = eta, u = uB, randomOrder = true)
         println("martSprt=${martSprt.contentToString()}")
         println("KK=${sam.cumulativeProduct().contentToString()}")
 
-        val expectedMartSprt = listOf(1.02248561, 1.02473944, 1.04779161, 1.02210432, 1.02435733,
+        listOf(1.02248561, 1.02473944, 1.04779161, 1.02210432, 1.02435733,
             1.02661546, 1.0014549 , 1.02397427, 0.9988792 , 1.00107941,
             0.97655364, 0.99850341, 1.02095567, 1.02320619, 0.99812979,
             0.99812983, 1.02057377, 1.04353172, 1.06701567, 1.09103788,
@@ -125,7 +121,7 @@ class KalamazooExample {
             1.22237451, 1.24996266, 1.27818491, 1.24675376, 1.27490254,
             1.24355305, 1.27162855, 1.30034957, 1.30323919, 1.3326873 ,
             1.36281303, 1.3292679 , 1.35931526, 1.3623404 , 1.39314907)
-        val actualMartSprt = listOf(1.0224856054347498, 0.9974532784938619, 1.0198725730879747,
+        listOf(1.0224856054347498, 0.9974532784938619, 1.0198725730879747,
             0.9949049740443163, 1.0172661763536113, 1.040119824645172, 1.0634964107308147, 1.0374440531146072,
             1.0607794834821263, 1.0846292282147685, 1.1090251161322875, 1.1090266860632607, 1.1339916295384642,
             1.1595185518650055, 1.1310764524535908, 1.1335765485635532, 1.1360801548244055, 1.108212898115588,
@@ -136,14 +132,14 @@ class KalamazooExample {
             1.3896970357177454, 1.3927873035321539)
         // assertTrue(doublesAreClose(expectedMartSprt, martSprt.toList())) fail
 
-        val expectedKK = listOf(1.50212073, 1.57600486, 2.36734958, 1.07225356, 1.12499401, 1.18032857,
+        listOf(1.50212073, 1.57600486, 2.36734958, 1.07225356, 1.12499401, 1.18032857,
             0.53461116, 0.80305051, 0.36372903, 0.38161961, 0.17284857, 0.25963942,
             0.39000975, 0.40919298, 0.18533749, 0.18533749, 0.27839929, 0.41818934,
             0.62817088, 0.9435885,   1.41738385, 2.12908167, 2.23380384, 3.35544306,
             5.04028058, 7.57110996, 11.37272124, 17.08320036, 7.73756548, 11.62275753,
             5.26434424, 7.90768063, 11.87829102, 12.46254311, 18.72024439, 28.12006722,
             12.73653981, 19.13182051, 20.07284865, 30.15184212)
-        val actualKK = listOf(0.7510603663094279, 0.17009045850624255, 0.12774820207143706, 0.028930764074863814,
+        listOf(0.7510603663094279, 0.17009045850624255, 0.12774820207143706, 0.028930764074863814,
             0.02172875026367885, 0.016319603132484716, 0.012257007106708457, 0.0027758087794442373, 0.0020847999586943145,
             0.001565810620658832, 0.001176018298323215, 5.880091491616075E-4, 4.4163036696261187E-4, 3.316910651843063E-4,
             7.51171116069508E-5, 3.9405931391366775E-5, 2.067208650069311E-5, 4.681547354790117E-6, 3.516124671183598E-6,
@@ -161,7 +157,7 @@ class KalamazooExample {
         )
         println("martAlpha=${martAlpha.contentToString()}")
 
-        val expectedMartAlpha = listOf(1.49252803,  1.56456573,  2.33520443,  1.08213862,  1.13436882,
+        listOf(1.49252803,  1.56456573,  2.33520443,  1.08213862,  1.13436882,
             1.18912203,  0.55103326,  0.82243428,  0.38111139,  0.399499  ,
             0.18512245,  0.27629563,  0.41237922,  0.4322832 ,  0.20031765,
             0.2003178 ,  0.29898015,  0.44624465,  0.66605718,  0.99416356,
@@ -231,7 +227,7 @@ class KalamazooExample {
         val Nc = stratumSizes[0] + stratumSizes[1]
 
 
-        val contest = Contest.makeWithCandidateNames( info, mapOf(
+        Contest.makeWithCandidateNames( info, mapOf(
                     "Butkovich" to 6,
                     "Gelineau" to 56,
                     "Kurland" to 23,
@@ -258,9 +254,7 @@ class KalamazooExample {
             "Schuette" to 8,
             "Whitmer" to 23
         )
-        var errors = 0 // CVRs all matched the cards
         val nCvr = 8
-        val nPoll = 32
 
         println("Stratum")
         for (s in 0..1) {
@@ -295,7 +289,6 @@ class KalamazooExample {
 
         //%%
         val reps = 10 // 10.0.pow(5).toInt()
-        val alpha = 0.05
         val pv = mutableListOf<Double>()
 
         repeat(reps) {
@@ -308,8 +301,7 @@ class KalamazooExample {
         println("mean p: ${pv.average()}; sd p: ${pv.standardDeviation()}, 90th percentile p: ${pv.percentile(90)}, fraction of SUITE: ${(pv.average()) / .0374}")
         //%%
         val eta = noerror
-        val c = (eta - 1 / 2) / 2
-        val d = 2
+        (eta - 1 / 2) / 2
         sam.shuffle()
         val martSprt = sprtMart(sam, N = Nc, mu = 1.0 / 2, eta = eta, u = uB, randomOrder = true)
         println("martSprt=${martSprt.contentToString()}")

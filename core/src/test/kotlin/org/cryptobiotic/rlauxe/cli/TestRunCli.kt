@@ -13,6 +13,7 @@ class TestRunCli {
     fun testCliRoundClca() {
         val topPath = createTempDirectory()
         val topdir = topPath.toString()
+        val auditdir = "$topdir/audit"
 
         RunRlaStartFuzz.main(
             arrayOf(
@@ -27,7 +28,7 @@ class TestRunCli {
         println("============================================================")
         val resultsvc = RunVerifyContests.main(
             arrayOf(
-                "-in", topdir,
+                "-in", auditdir,
             )
         )
         println()
@@ -37,7 +38,7 @@ class TestRunCli {
         repeat(3) {
             val lastRound = RunRliRoundCli.main(
                 arrayOf(
-                    "-in", topdir,
+                    "-in", auditdir,
                     "-test",
                     "-quiet",
                 )
@@ -45,12 +46,11 @@ class TestRunCli {
         }
 
         println("============================================================")
-        val results = RunVerifyAuditRecord.main(
+        RunVerifyAuditRecord.main(
             arrayOf(
-                "-in", topdir,
+                "-in", auditdir,
             )
         )
-        println(results)
 
         topPath.deleteRecursively()
     }
@@ -59,6 +59,8 @@ class TestRunCli {
     fun testCliRoundPolling() {
         val topPath = createTempDirectory()
         val topdir = topPath.toString()
+        val auditdir = "$topdir/audit"
+
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
@@ -68,33 +70,32 @@ class TestRunCli {
             )
         )
 
-        // i think cant call runVerifyContests on polling, as there are no cvrs to compare
-        // revistit when we merge with CheckAudit
-        //println("============================================================")
-        //val resultsvc = RunVerifyContests.runVerifyContests(topdir, null, false)
-        //println()
-        //print(resultsvc)
+        println("============================================================")
+        val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)
+        println()
+        print(resultsvc)
 
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = topdir, useTest = false, quiet = true)
+            val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 7
         }
 
         println("============================================================")
-        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = topdir)
+        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = auditdir)
         println(results)
 
         topPath.deleteRecursively()
         if (results.hasErrors) fail()
-        //if (resultsvc.fail) fail()
+        if (resultsvc.hasErrors) fail()
     }
 
     @Test
     fun testCliRoundRaire() {
         val topPath = createTempDirectory()
         val topdir = topPath.toString()
+        val auditdir = "$topdir/audit"
 
         RunRlaStartFuzz.main(
             arrayOf(
@@ -109,19 +110,19 @@ class TestRunCli {
         )
 
         println("============================================================")
-        val resultsvc = RunVerifyContests.runVerifyContests(topdir, null, false)
+        val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)
         println()
         print(resultsvc)
 
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = topdir, useTest = false, quiet = true)
+            val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
         }
 
         println("============================================================")
-        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = topdir)
+        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = auditdir)
         println(results)
 
         topPath.deleteRecursively()
@@ -133,6 +134,7 @@ class TestRunCli {
     fun testCliOneAudit() {
         val topPath = createTempDirectory()
         val topdir = topPath.toString()
+
         // val topdir = "/home/stormy/rla/persist/testRlaOA"
 
         RunRlaCreateOneAudit.main(

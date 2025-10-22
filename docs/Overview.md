@@ -60,17 +60,20 @@ Each audit type has specialized processing for creating the AuditableCards and t
 
 ## AuditRecord
 
-    auditDir/
-      auditConfig.json      // AuditConfigJson
-      contests.json         // ContestsUnderAuditJson
-      sortedCards.csv       // AuditableCardCsv (or)
-      sortedCards.csv.zip   // AuditableCardCsv
-      cardPools.json          // CardPoolJson (OneAudit only)
-
-      roundX/
+    $auditdir/
+        auditConfig.json      // AuditConfigJson
+        contests.json         // ContestsUnderAuditJson
+        sortedCards.csv       // AuditableCardCsv (or)
+        sortedCards.zip       // AuditableCardCsv
+        cardPools.json        // CardPoolJson (OneAudit only)
+    
+    private/
+       testMvrs.csv        // AuditableCardCsv, for tests only
+    
+    roundX/
         auditState.json     // AuditRoundJson
-        samplePrns.json     // SamplePrnsJson // the sample prns to be audited
-        sampleMvrs.csv      // AuditableCardCsv  // the mvrs used for the audit; matches samplePrns.json
+        samplePrns.json     // SamplePrnsJson, the sample prns to be audited
+        sampleMvrs.csv      // AuditableCardCsv, the mvrs used for the audit; matches samplePrns.csv
 
 For each round, the selected ballot prns are written into samplePrns.json in order. The mvrs are gathered or
 simulated and written to sampleMvrs.csv.

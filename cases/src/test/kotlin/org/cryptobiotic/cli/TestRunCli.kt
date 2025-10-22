@@ -8,6 +8,8 @@ class TestRunCli {
     @Test
     fun testCliRoundClca() {
         val topdir = "/home/stormy/rla/persist/testCliRoundClca"
+        val auditdir = "$topdir/audit"
+
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
@@ -19,23 +21,25 @@ class TestRunCli {
         )
 
         println("============================================================")
-        RunVerifyContests.main(arrayOf("-in", topdir))
+        RunVerifyContests.main(arrayOf("-in", auditdir))
 
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = topdir, useTest = false, quiet = true)
+            val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
         }
 
         println("============================================================")
-        val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=topdir)
+        val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=auditdir)
         println(status)
     }
 
     @Test
     fun testCliRoundPolling() {
         val topdir = "/home/stormy/rla/persist/testCliRoundPolling"
+        val auditdir = "$topdir/audit"
+
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
@@ -48,16 +52,16 @@ class TestRunCli {
 
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = topdir, useTest = false, quiet = true)
+            val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 7
         }
 
         println("============================================================")
-        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=topdir)
+        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=auditdir)
         println(results)
 
         println("============================================================")
-        val results2 = RunVerifyContests.runVerifyContests(topdir, null, false)
+        val results2 = RunVerifyContests.runVerifyContests(auditdir, null, false)
         println()
         print(results2)
 
@@ -68,6 +72,8 @@ class TestRunCli {
     @Test
     fun testCliRoundRaire() {
         val topdir = "/home/stormy/rla/persist/testCliRoundRaire"
+        val auditdir = "$topdir/audit"
+
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
@@ -81,17 +87,17 @@ class TestRunCli {
         )
 
         println("============================================================")
-        RunVerifyContests.main(arrayOf("-in", topdir))
+        RunVerifyContests.main(arrayOf("-in", auditdir))
 
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = topdir, useTest = false, quiet = true)
+            val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
         }
 
         println("============================================================")
-        val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=topdir)
+        val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=auditdir)
         println(status)
     }
 

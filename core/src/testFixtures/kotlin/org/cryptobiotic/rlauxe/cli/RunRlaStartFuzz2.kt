@@ -9,27 +9,29 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
+import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.util.CvrToAuditableCardClca
+import org.cryptobiotic.rlauxe.util.CvrToAuditableCardPolling
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.io.path.Path
 import kotlin.math.min
 
 /**
  * Create a multicontest audit, with fuzzed test data, stored in private record.
  */
-object RunRlaStartFuzz {
+object RunRlaStartFuzz2 {
 
     @JvmStatic
     fun main(args: Array<String>) {
         val parser = ArgParser("RunRlaStartFuzz")
-        val inputDir by parser.option(
+        val topdir by parser.option(
             ArgType.String,
             shortName = "in",
             description = "Directory containing test election record"
@@ -76,14 +78,14 @@ object RunRlaStartFuzz {
         ).default(5)
 
         parser.parse(args)
-        println("RunRlaStartFuzz on $inputDir isPolling=$isPolling minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
+        println("RunRlaStartFuzz on $topdir isPolling=$isPolling minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
                 " addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates")
-        if (!isPolling) startTestElectionClca(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates)
-            else startTestElectionPolling(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests)
+        if (!isPolling) startTestElectionClca2(topdir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates)
+            else startTestElectionPolling2(topdir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests)
     }
 }
 
-fun startTestElectionPolling(
+fun startTestElectionPolling2(
     topdir: String,
     minMargin: Double,
     fuzzMvrsPct: Double,
@@ -96,7 +98,7 @@ fun startTestElectionPolling(
     val auditConfig = AuditConfig(AuditType.POLLING, hasStyles = true, nsimEst = 100)
 
     clearDirectory(Path(auditDir))
-    val election = TestPollingElection(
+    val election = TestPollingElection2(
         auditConfig,
         minMargin,
         fuzzMvrsPct,
@@ -104,19 +106,19 @@ fun startTestElectionPolling(
         ncards,
         ncontests,
     )
-    CreateAudit("startTestElectionPolling2", topdir = topdir, auditConfig, election, clear = false)
+    CreateAudit2("startTestElectionPolling2", topdir = topdir, auditConfig, election, clear = false)
 }
 
-class TestPollingElection(
+class TestPollingElection2(
     auditConfig: AuditConfig,
     minMargin: Double,
     fuzzMvrsPct: Double,
     pctPhantoms: Double?,
     ncards: Int,
     ncontests: Int,
-): CreateElectionIF {
+): CreateElection2IF {
     val contestsUA = mutableListOf<ContestUnderAudit>()
-    val allCvrs = mutableListOf<Cvr>()
+    val cvrs: List<Cvr>
     val testMvrs: List<Cvr>
 
     init {
@@ -133,10 +135,8 @@ class TestPollingElection(
 
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
         val (testCvrs, ballots) = testData.makeCvrsAndBallots(auditConfig.hasStyles)
-        testMvrs = makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrsPct)
-
-        allCvrs.addAll(testCvrs)
-        println("ncvrs = ${allCvrs.size}")
+        cvrs = testCvrs
+        testMvrs = makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrsPct) // ??
 
         val regularContests = testData.contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
         contestsUA.addAll(regularContests)
@@ -149,14 +149,17 @@ class TestPollingElection(
         println()
     }
     override fun cardPools() = null
+    override fun hasTestMvrs() = true
+
     override fun contestsUA() = contestsUA
 
-    override fun allCvrs() = Pair(allCvrs, testMvrs)
-    override fun cvrExport() = null
+    override fun allCvrs() = Pair(
+        CloseableIterable { CvrToAuditableCardPolling(Closer(cvrs.iterator())) },
+        CloseableIterable { CvrToAuditableCardPolling(Closer(testMvrs.iterator())) }
+    )
 }
 
-
-fun startTestElectionClca(
+fun startTestElectionClca2(
     topdir: String,
     minMargin: Double,
     fuzzMvrs: Double,
@@ -175,7 +178,7 @@ fun startTestElectionClca(
     )
 
     clearDirectory(Path(auditDir))
-    val election = TestClcaElection(
+    val election = TestClcaElection2(
         auditConfig,
         minMargin,
         fuzzMvrs,
@@ -185,10 +188,10 @@ fun startTestElectionClca(
         addRaire,
         addRaireCandidates)
 
-    CreateAudit("startTestElectionClca2", topdir = topdir, auditConfig, election, clear = false)
+    CreateAudit2("startTestElectionClca2", topdir = topdir, auditConfig, election, clear = false)
 }
 
-class TestClcaElection(
+class TestClcaElection2(
     auditConfig: AuditConfig,
     minMargin: Double,
     fuzzMvrs: Double,
@@ -197,7 +200,7 @@ class TestClcaElection(
     ncontests: Int,
     addRaire: Boolean,
     addRaireCandidates: Int,
-): CreateElectionIF {
+): CreateElection2IF {
     val contestsUA = mutableListOf<ContestUnderAudit>()
     val allCvrs = mutableListOf<Cvr>()
     val testMvrs: List<Cvr>
@@ -213,6 +216,7 @@ class TestClcaElection(
         println("$testData")
 
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
+        // includes phantom Cvrs
         allCvrs.addAll(testData.makeCvrsFromContests())
         println("ncvrs (not raire) = ${allCvrs.size}")
 
@@ -239,7 +243,10 @@ class TestClcaElection(
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
 
-    override fun allCvrs() = Pair(allCvrs, testMvrs)
-    override fun cvrExport() = null
+    override fun hasTestMvrs() = true
+    override fun allCvrs() = Pair(
+        CloseableIterable { CvrToAuditableCardClca(Closer(allCvrs.iterator())) },
+        CloseableIterable { CvrToAuditableCardClca(Closer(testMvrs.iterator())) }
+    )
 }
 

@@ -18,3 +18,18 @@ class Closer<out T>(val iter: Iterator<T>) : CloseableIterator<T> {
     override fun next() = iter.next()
     override fun close() {}
 }
+
+
+class CvrToAuditableCardPolling(val cvrs: CloseableIterator<Cvr>) : CloseableIterator<AuditableCard> {
+    var count = 0
+    override fun hasNext() = cvrs.hasNext()
+    override fun next() = AuditableCard.fromCvrForPolling(cvrs.next(), count++)
+    override fun close() = cvrs.close()
+}
+
+class CvrToAuditableCardClca(val cvrs: CloseableIterator<Cvr>) : CloseableIterator<AuditableCard> {
+    var count = 0
+    override fun hasNext() = cvrs.hasNext()
+    override fun next() = AuditableCard.fromCvr(cvrs.next(), count++, sampleNum=0)
+    override fun close() = cvrs.close()
+}

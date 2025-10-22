@@ -3,8 +3,10 @@ package org.cryptobiotic.rlauxe.persist.csv
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.*
 import java.nio.file.Files
@@ -33,8 +35,8 @@ fun writeAuditableCardCsv(card: AuditableCard) = buildString {
     appendLine()
 }
 
-fun writeAuditableCardCsvFile(cards: List<AuditableCard>, filename: String) {
-    val writer: OutputStreamWriter = FileOutputStream(filename).writer()
+fun writeAuditableCardCsvFile(cards: List<AuditableCard>, outputFilename: String) {
+    val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
     writer.write(AuditableCardHeader)
     cards.forEach {
         writer.write(writeAuditableCardCsv(it))
@@ -42,8 +44,22 @@ fun writeAuditableCardCsvFile(cards: List<AuditableCard>, filename: String) {
     writer.close()
 }
 
-class AuditableCardCsvWriter(filename: String) {
-    val writer: OutputStreamWriter = FileOutputStream(filename).writer()
+fun writeAuditableCardCsvFile(cards: CloseableIterator<AuditableCard>, outputFilename: String): Int {
+    val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
+    writer.write(AuditableCardHeader)
+    var count = 0
+    cards.use { cardIter ->
+        while (cardIter.hasNext()) {
+            writer.write(writeAuditableCardCsv(cardIter.next()))
+            count++
+        }
+    }
+    writer.close()
+    return count
+}
+
+class AuditableCardCsvWriter(outputFilename: String) {
+    val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
     var countCards = 0
     init {
         writer.write(AuditableCardHeader)
@@ -111,6 +127,16 @@ class AuditableCardCsvReaderSkip(val filename: String, val skip: Int): Closeable
         val iter = readCardsCsvIterator(filename)
         repeat(skip) { if (iter.hasNext()) (iter.next()) }
         return iter
+    }
+}
+
+fun auditableCardCsvIterator(filename: String): CloseableIterator<AuditableCard> {
+    return if (filename.endsWith("zip")) {
+        val reader = ZipReader(filename)
+        val input = reader.inputStream()
+        IteratorCardsCsvStream(input)
+    } else {
+        Closer(readAuditableCardCsvFile(filename).iterator() )
     }
 }
 

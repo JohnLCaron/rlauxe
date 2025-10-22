@@ -11,8 +11,6 @@ import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestIF
 import org.cryptobiotic.rlauxe.oneaudit.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.audit.CreateAudit
-import org.cryptobiotic.rlauxe.audit.CreateElectionIF
 import org.cryptobiotic.rlauxe.audit.createCvrsFromPools
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import kotlin.collections.component1
@@ -28,7 +26,7 @@ class ColoradoOneAudit (
     precinctFile: String,
     val isClca: Boolean,
     val hasStyles: Boolean = true,
-): CreateElectionIF {
+): CreateElection2IF {
     val roundContests: List<ContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
 
@@ -151,6 +149,7 @@ class ColoradoOneAudit (
     }
 
     override fun cardPools() = cardPools
+
     override fun contestsUA() = contestsUA
 
     fun makeCvrs(): List<Cvr> {
@@ -171,13 +170,18 @@ class ColoradoOneAudit (
         return rcvrs
     }
 
-    override fun allCvrs(): Pair<List<Cvr>, List<Cvr>> {
+    override fun hasTestMvrs() = isClca // TODO if you leave off mvrs, i think it will automatically use the cvrs (no error)
+    override fun allCvrs(): Pair<CloseableIterable<AuditableCard>, CloseableIterable<AuditableCard>> {
         val poolCvrs = if (isClca) makeCvrs() else createCvrsFromPools(cardPools) // OOM error when both cvrs are made
         val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-        return if (isClca) Pair(poolCvrs + phantoms, poolCvrs + phantoms) else Pair(poolCvrs + phantoms, emptyList())
-    }
+        val cvrs = poolCvrs + phantoms
+        val mvrs = if (isClca) poolCvrs + phantoms else emptyList()
 
-    override fun cvrExport() = null
+        return Pair(
+            CloseableIterable { CvrToAuditableCardClca(Closer(cvrs.iterator())) },
+            CloseableIterable { CvrToAuditableCardClca(Closer(mvrs.iterator())) },
+        )
+    }
 }
 
 class OneAuditContestCorla(val info: ContestInfo, val detailContest: ElectionDetailContest, val contestRound: ContestRoundCsv): OneAuditContestIF {
@@ -250,7 +254,7 @@ fun makeCvrsFromPool(cardPool: CardPoolWithBallotStyle, oaContestMap: Map<Int, O
 
 ////////////////////////////////////////////////////////////////////
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
-fun createColoradoOneAuditNew(
+fun createColoradoOneAudit(
     topdir: String,
     electionDetailXmlFile: String,
     contestRoundFile: String,
@@ -274,8 +278,8 @@ fun createColoradoOneAuditNew(
         )
     }
 
-    CreateAudit("corla", topdir, auditConfig, election, clear = clear)
-    println("createColoradoOneAuditNew took $stopwatch")
+    CreateAudit2("corla", topdir, auditConfig, election, clear = clear)
+    println("createColoradoOneAudit took $stopwatch")
 }
 
 

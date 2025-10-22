@@ -1,5 +1,9 @@
 package org.cryptobiotic.rlauxe.cli
 
+import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
+import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
@@ -15,7 +19,7 @@ class TestRunCli {
         val topdir = topPath.toString()
         val auditdir = "$topdir/audit"
 
-        RunRlaStartFuzz.main(
+        RunRlaStartFuzz2.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",
@@ -24,34 +28,23 @@ class TestRunCli {
                 "-ncontests", "25",
             )
         )
+        val publisher = Publisher(auditdir)
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
 
         println("============================================================")
-        val resultsvc = RunVerifyContests.main(
-            arrayOf(
-                "-in", auditdir,
-            )
-        )
-        println()
-        print(resultsvc)
+        RunVerifyContests.main(arrayOf("-in", auditdir))
 
         println("============================================================")
-        repeat(3) {
-            val lastRound = RunRliRoundCli.main(
-                arrayOf(
-                    "-in", auditdir,
-                    "-test",
-                    "-quiet",
-                )
-            )
+        var done = false
+        while (!done) {
+            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
+            done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
         }
 
         println("============================================================")
-        RunVerifyAuditRecord.main(
-            arrayOf(
-                "-in", auditdir,
-            )
-        )
-
+        val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=auditdir)
+        println(status)
         topPath.deleteRecursively()
     }
 
@@ -61,34 +54,38 @@ class TestRunCli {
         val topdir = topPath.toString()
         val auditdir = "$topdir/audit"
 
-        RunRlaStartFuzz.main(
+        RunRlaStartFuzz2.main(
             arrayOf(
                 "-in", topdir,
                 "-isPolling",
                 "-fuzzMvrs", ".0023",
                 "-ncards", "20000",
+                "-ncontests", "2",
             )
         )
 
-        println("============================================================")
-        val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)
-        println()
-        print(resultsvc)
+        val publisher = Publisher(auditdir)
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
 
-        println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
+            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 7
         }
 
         println("============================================================")
-        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = auditdir)
+        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=auditdir)
         println(results)
 
-        topPath.deleteRecursively()
+        println("============================================================")
+        val results2 = RunVerifyContests.runVerifyContests(auditdir, null, false)
+        println()
+        print(results2)
+
         if (results.hasErrors) fail()
-        if (resultsvc.hasErrors) fail()
+        if (results2.hasErrors) fail()
+        topPath.deleteRecursively()
     }
 
     @Test
@@ -97,7 +94,7 @@ class TestRunCli {
         val topdir = topPath.toString()
         val auditdir = "$topdir/audit"
 
-        RunRlaStartFuzz.main(
+        RunRlaStartFuzz2.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",
@@ -108,6 +105,48 @@ class TestRunCli {
                 "--addRaireCandidates", "5",
             )
         )
+        val publisher = Publisher(auditdir)
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
+
+        println("============================================================")
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, false)
+
+        println("============================================================")
+        var done = false
+        while (!done) {
+            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
+            done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
+        }
+
+        println("============================================================")
+        val results2 = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=auditdir)
+
+        topPath.deleteRecursively()
+        if (results.hasErrors) fail()
+        if (results2.hasErrors) fail()
+    }
+
+    @Test
+    fun testCliOneAudit() {
+        val topPath = createTempDirectory()
+        val topdir = topPath.toString()
+        val auditdir = "$topdir/audit"
+
+        RunRlaCreateOneAudit.main(
+            arrayOf(
+                "-in", topdir,
+                "-minMargin", "0.01",
+                "-fuzzMvrs", "0.001",
+                "-ncards", "10000",
+                "-ncontests", "10", // ignored
+                "--addRaireContest",
+                "--addRaireCandidates", "5",
+            )
+        )
+        val publisher = Publisher(auditdir)
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
 
         println("============================================================")
         val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)
@@ -117,7 +156,7 @@ class TestRunCli {
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
+            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
         }
 
@@ -125,49 +164,9 @@ class TestRunCli {
         val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = auditdir)
         println(results)
 
-        topPath.deleteRecursively()
         if (results.hasErrors) fail()
         if (resultsvc.hasErrors) fail()
-    }
-
-    @Test
-    fun testCliOneAudit() {
-        val topPath = createTempDirectory()
-        val topdir = topPath.toString()
-
-        // val topdir = "/home/stormy/rla/persist/testRlaOA"
-
-        RunRlaCreateOneAudit.main(
-            arrayOf(
-                "-in", topdir,
-                "-minMargin", "0.01",
-                "-fuzzMvrs", "0.001",
-                "-ncards", "10000",
-                "-ncontests", "10",
-                "--addRaireContest",
-                "--addRaireCandidates", "5",
-            )
-        )
-
-        val auditDir = "$topdir/audit"
-        println("============================================================")
-        val resultsvc = RunVerifyContests.runVerifyContests(auditDir, null, false)
-        println()
-        print(resultsvc)
-
-        println("============================================================")
-        var done = false
-        while (!done) {
-            val lastRound = runRound(inputDir = auditDir, useTest = false, quiet = true)
-            done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
-        }
-
-        println("============================================================")
-        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = auditDir)
-        println(results)
-
         topPath.deleteRecursively()
-        if (results.hasErrors) fail()
-        if (resultsvc.hasErrors) fail()
     }
+
 }

@@ -19,7 +19,6 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Prng
-import org.cryptobiotic.rlauxe.util.RegVotes
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateCardPools
@@ -47,8 +46,8 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         allContests = if (contestsResults is Ok) contestsResults.unwrap().sortedBy { it.id } else null
         allInfos = allContests?.map{ it.contest.info() }?.associateBy { it.id }
 
-        cards = AuditableCardCsvReader(publisher.cardsCsvFile())
-        mvrs = if (existsOrZip(publisher.testMvrsFile())) AuditableCardCsvReader(publisher.testMvrsFile()) else null
+        cards = AuditableCardCsvReader(publisher.sortedCardsFile())
+        mvrs = if (existsOrZip(publisher.sortedMvrsFile())) AuditableCardCsvReader(publisher.sortedMvrsFile()) else null
     }
 
     fun verify() = verify( allContests!!, show = show)
@@ -116,7 +115,7 @@ data class ContestSummary(
     val poolCvrVotes: Map<Int, ContestTabulation>,
 )
 
-// tryimg to do it all in one iteration
+// all audits, including polling
 fun verifyManifest(
     config: AuditConfig,
     contests: List<ContestUnderAudit>,
@@ -290,22 +289,21 @@ fun verifyClcaAgainstCards(
     result: VerifyResults,
     show: Boolean = false
 ) {
-
     val allCvrVotes = contestSummary.allVotes
 
     // check contest.votes == cvrTab.votes (non-IRV)
     var allOk = true
     contests.filter { it.preAuditStatus == TestH0Status.InProgress && !it.isIrv }.forEach { contestUA ->
         val contestVotes = contestUA.contest.votes()!!
-        val contestTab = allCvrVotes[contestUA.id]
-        if (contestTab == null) {
+        val cvrTab = allCvrVotes[contestUA.id]
+        if (cvrTab == null) {
             result.addError("contest ${contestUA.id} not found in tabulated Cvrs")
             allOk = false
         } else {
-            if (!checkEquivilentVotes(contestVotes, contestTab.votes)) {
+            if (!checkEquivilentVotes(contestVotes, cvrTab.votes)) {
                 result.addError("contest ${contestUA.id} votes disagree with cvrs")
                 result.addError("    contestVotes = $contestVotes")
-                result.addError("    sumWithPools = ${contestTab.votes}")
+                result.addError("          cvrTab = ${cvrTab.votes}")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
                 allOk = false
             } else {

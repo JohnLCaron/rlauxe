@@ -1,5 +1,9 @@
 package org.cryptobiotic.rlauxe.cli
 
+import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
+import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import kotlin.test.Test
 import kotlin.test.fail
 
@@ -10,7 +14,7 @@ class TestRunCli {
         val topdir = "/home/stormy/rla/persist/testCliRoundClca"
         val auditdir = "$topdir/audit"
 
-        RunRlaStartFuzz.main(
+        RunRlaStartFuzz2.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",
@@ -19,6 +23,9 @@ class TestRunCli {
                 "-ncontests", "25",
             )
         )
+        val publisher = Publisher(auditdir)
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
 
         println("============================================================")
         RunVerifyContests.main(arrayOf("-in", auditdir))
@@ -26,7 +33,7 @@ class TestRunCli {
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
+            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
         }
 
@@ -40,7 +47,7 @@ class TestRunCli {
         val topdir = "/home/stormy/rla/persist/testCliRoundPolling"
         val auditdir = "$topdir/audit"
 
-        RunRlaStartFuzz.main(
+        RunRlaStartFuzz2.main(
             arrayOf(
                 "-in", topdir,
                 "-isPolling",
@@ -50,9 +57,13 @@ class TestRunCli {
             )
         )
 
+        val publisher = Publisher(auditdir)
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
+
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
+            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 7
         }
 
@@ -74,7 +85,7 @@ class TestRunCli {
         val topdir = "/home/stormy/rla/persist/testCliRoundRaire"
         val auditdir = "$topdir/audit"
 
-        RunRlaStartFuzz.main(
+        RunRlaStartFuzz2.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",
@@ -85,6 +96,9 @@ class TestRunCli {
                 "--addRaireCandidates", "5",
             )
         )
+        val publisher = Publisher(auditdir)
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
 
         println("============================================================")
         RunVerifyContests.main(arrayOf("-in", auditdir))
@@ -92,7 +106,7 @@ class TestRunCli {
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
+            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
         }
 
@@ -104,6 +118,7 @@ class TestRunCli {
     @Test
     fun testCliOneAudit() {
         val topdir = "/home/stormy/rla/persist/testCliRoundOneAudit"
+        val auditdir = "$topdir/audit"
 
         RunRlaCreateOneAudit.main(
             arrayOf(
@@ -116,22 +131,24 @@ class TestRunCli {
                 "--addRaireCandidates", "5",
             )
         )
+        val publisher = Publisher(auditdir)
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
 
-        val auditDir = "$topdir/audit"
         println("============================================================")
-        val resultsvc = RunVerifyContests.runVerifyContests(auditDir, null, false)
+        val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)
         println()
         print(resultsvc)
 
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditDir, useTest = false, quiet = true)
+            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
         }
 
         println("============================================================")
-        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = auditDir)
+        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = auditdir)
         println(results)
 
         if (results.hasErrors) fail()

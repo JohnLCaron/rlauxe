@@ -10,8 +10,6 @@ import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.audit.CreateAudit
-import org.cryptobiotic.rlauxe.audit.CreateElectionIF
 import org.cryptobiotic.rlauxe.audit.createCvrsFromPools
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import kotlin.collections.component1
@@ -32,7 +30,7 @@ open class BoulderElectionOA(
     val isClca: Boolean,
     val hasStyles: Boolean = true,
     val quiet: Boolean = true,
-): CreateElectionIF {
+): CreateElection2IF {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convert() }
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infoMap = infoList.associateBy { it.id }
@@ -262,17 +260,19 @@ open class BoulderElectionOA(
 
     override fun contestsUA() = contestsUA
 
-    override fun allCvrs(): Pair<List<Cvr>,List<Cvr>> {
+    override fun hasTestMvrs() = true
+    override fun allCvrs(): Pair<CloseableIterable<AuditableCard>, CloseableIterable<AuditableCard>>  { // (cvrs, mvrs) including phantoms
         val poolCvrs = if (isClca) redactedCvrs else createCvrsFromPools(cardPools)
         val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
         val cvrs =  this.exportCvrs + poolCvrs + phantoms
         val mvrs =  this.exportCvrs + redactedCvrs + phantoms
         require(cvrs.size == mvrs.size)
-        return Pair(cvrs, mvrs)
+
+        return Pair(
+            CloseableIterable { CvrToAuditableCardClca(Closer(cvrs.iterator())) },
+            CloseableIterable { CvrToAuditableCardClca(Closer(mvrs.iterator())) }
+        )
     }
-
-    override fun cvrExport() = null
-
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -311,7 +311,7 @@ fun createBoulderElection(
 
     val election = BoulderElectionOA(export, sovo, isClca = isClca)
 
-    CreateAudit("boulder", topdir, auditConfig, election, auditdir = auditDir, clear = clear)
+    CreateAudit2("boulder", topdir, auditConfig, election, auditdir = auditDir, clear = clear)
     println("createBoulderElectionOAnew took $stopwatch")
 }
 

@@ -68,8 +68,7 @@ class MvrManagerPollingForTesting(cardLocations: List<CardLocation>, mvrs: List<
 
     init {
         val prng = Prng(seed)
-        sortedCards = cardLocations.mapIndexed { idx, it -> AuditableCard.fromCardLocation(it, idx, prng.next()) }
-            .sortedBy { it.prn}
+        sortedCards = cardLocations.mapIndexed { idx, it -> AuditableCard.fromCardLocation(it, idx, prng.next()) }.sortedBy { it.prn}
         mvrsUA = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
     }
 

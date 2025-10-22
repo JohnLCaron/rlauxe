@@ -136,7 +136,7 @@ class TestReadCardPoolJson {
         val contests = readContestsJsonFile(publisher.contestsFile()).unwrap()
         val infos = contests.map { it.contest.info() }.associateBy { it.id }
 
-        val scardIter = readCardsCsvIterator(publisher.cardsCsvFile())
+        val scardIter = readCardsCsvIterator(publisher.sortedCardsFile())
         return tabulateAuditableCards(scardIter, infos)
     }
 

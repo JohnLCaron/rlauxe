@@ -90,9 +90,7 @@ class TestConsistentSampling {
         // double check the number of cvrs == sampleSize
         println("contest.name (id) == sampleSize")
         contestRounds.forEach { contest ->
-            val ballotsForContest = mvrManager.mvrsUA.filter {
-                it.hasContest(contest.id)
-            }.count()
+            val ballotsForContest = mvrManager.mvrsUA.count { it.hasContest(contest.id) }
             assertTrue(contest.estSampleSize <= ballotsForContest)
         }
     }

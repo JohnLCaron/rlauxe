@@ -67,6 +67,13 @@ data class AuditableCard (
     }
 
     companion object {
+        fun fromCvrForPolling(cvr: Cvr, index: Int): AuditableCard {
+            // store the contest separate from the candidates
+            val sortedVotes = cvr.votes.toSortedMap()
+            val contests = sortedVotes.keys.toList()
+            return AuditableCard(cvr.id, index, 0, cvr.phantom, contests.toIntArray(), null, null)
+        }
+
         // dont use this, except for testing and initialization. generally, sampleNum should be set.
         fun fromCvrWithZeros(cvr: Cvr): AuditableCard {
             // store the contest separate from the candidates

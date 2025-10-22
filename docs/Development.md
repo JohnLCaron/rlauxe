@@ -16,12 +16,12 @@
 
 ## Modules
 
-* cases: code to create case study audits
-* core: core library
-* docs: documentation
-* libs: local copy of raire-java library
-* plots: code to generate plots for documentation
-* rla: additional tests
+* **cases**: code to create case study audits
+* **core**: core library
+* **docs**: documentation
+* **libs**: local copy of raire-java library
+* **plots**: code to generate plots for documentation
+* **rla**: additional tests
 
 ## UML
 last changed: 03/10/2025

@@ -7,16 +7,16 @@ import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
 
 import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
+import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.io.path.Path
 import kotlin.math.min
@@ -81,105 +81,45 @@ object RunRlaStartFuzz {
         if (!isPolling) startTestElectionClca(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates)
             else startTestElectionPolling(inputDir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests)
     }
+}
 
-    // TODO use CreateAudit
-    fun startTestElectionClca(
-        auditDir: String,
-        minMargin: Double,
-        fuzzMvrs: Double,
-        pctPhantoms: Double?,
-        ncards: Int,
-        ncontests: Int,
-        addRaire: Boolean,
-        addRaireCandidates: Int,
-    ): Int {
-        println("Start startTestElectionClca")
-        clearDirectory(Path(auditDir))
+fun startTestElectionPolling(
+    topdir: String,
+    minMargin: Double,
+    fuzzMvrsPct: Double,
+    pctPhantoms: Double?,
+    ncards: Int,
+    ncontests: Int = 11,
+) {
+    val auditDir = "$topdir/audit"
+    clearDirectory(Path(auditDir))
+    val auditConfig = AuditConfig(AuditType.POLLING, hasStyles = true, nsimEst = 100)
 
-        val publisher = Publisher(auditDir)
-        val auditConfig = AuditConfig(
-            AuditType.CLCA, hasStyles = true, nsimEst = 100,
-            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
-        )
-        writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
+    clearDirectory(Path(auditDir))
+    val election = TestPollingElection(
+        auditConfig,
+        minMargin,
+        fuzzMvrsPct,
+        pctPhantoms,
+        ncards,
+        ncontests,
+    )
+    CreateAudit("startTestElectionPolling2", topdir = topdir, auditConfig, election, clear = false)
+}
 
-        // TODO something better about generating range of margins, phantoms, fuzz, etc.
-        //   maybe just make it all configurable...
-        val maxMargin = .10
-        val useMin = min(minMargin, maxMargin)
-        val phantomPctRange: ClosedFloatingPointRange<Double> =
-            if (pctPhantoms == null) 0.00..0.005 else pctPhantoms..pctPhantoms
+class TestPollingElection(
+    auditConfig: AuditConfig,
+    minMargin: Double,
+    fuzzMvrsPct: Double,
+    pctPhantoms: Double?,
+    ncards: Int,
+    ncontests: Int,
+): CreateElectionIF {
+    val contestsUA = mutableListOf<ContestUnderAudit>()
+    val allCvrs = mutableListOf<Cvr>()
+    val testMvrs: List<Cvr>
 
-        val testData =
-            MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
-        println("$testData")
-
-        // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
-        // TODO add raire cvrs here
-        var testCvrs = testData.makeCvrsFromContests()
-        println("ncvrs = ${testCvrs.size}")
-
-        val raireContests = mutableListOf<RaireContestUnderAudit>()
-        if (addRaire) {
-            val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N=ncards/2, contestId=111, addRaireCandidates, minMargin=.04, quiet = true)
-            raireContests.add(rcontest)
-            testCvrs = testCvrs + rcvrs
-        }
-
-        val contests: List<Contest> = testData.contests
-        val allContests = contests + raireContests.map { it.contest }
-
-        allContests.forEach { println("  $it") }
-        println()
-
-        // TODO are these randomized?
-        val testMvrs = if (fuzzMvrs == 0.0) testCvrs
-                    // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-                    else makeFuzzedCvrsFrom(allContests, testCvrs, fuzzMvrs)
-        println("nmvrs = ${testMvrs.size}")
-
-        // TODO use MvrManagerTestFromRecord to do sorting and save sortedCards, mvrsUA
-        // save the sorted cards
-        val mvrManager = MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed)
-        writeAuditableCardCsvFile(mvrManager.sortedCards, publisher.cardsCsvFile()) // TODO wrap in Result ??
-        println("   write ${mvrManager.sortedCards.size} sortedCards to ${publisher.cardsCsvFile()}")
-
-        // save the sorted testMvrs
-        val mvrFile = "$auditDir/private/testMvrs.csv"
-        validateOutputDirOfFile(mvrFile)
-        writeAuditableCardCsvFile(mvrManager.mvrsUA, mvrFile)
-        println("   write ${mvrManager.sortedCards.size} testMvrs to ${mvrFile}")
-
-        val clcaWorkflow = WorkflowTesterClca(auditConfig, contests, raireContests, mvrManager)
-        writeContestsJsonFile(clcaWorkflow.contestsUA(), publisher.contestsFile())
-        println("   writeContestsJsonFile ${publisher.contestsFile()}")
-
-        // get the first round of samples wanted, write them to round1 subdir
-        val auditRound = runChooseSamples(clcaWorkflow, publisher)
-
-        // write the partial audit state to round1
-        writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(1))
-        println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}")
-
-        return if (auditRound.samplePrns.isNotEmpty()) 0 else 1
-    }
-
-    fun startTestElectionPolling(
-        auditDir: String,
-        minMargin: Double,
-        fuzzMvrsPct: Double,
-        pctPhantoms: Double?,
-        ncards: Int,
-        ncontests: Int = 11,
-    ): Int {
-        println("Start startTestElectionPolling")
-        clearDirectory(Path(auditDir))
-
-        val publisher = Publisher(auditDir)
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles = true, nsimEst = 100)
-        writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
-        println("   writeAuditConfigJsonFile ${publisher.auditConfigFile()}")
-
+    init {
         val maxMargin = .08
         val useMin = min(minMargin, maxMargin)
         val phantomPctRange: ClosedFloatingPointRange<Double> =
@@ -192,49 +132,116 @@ object RunRlaStartFuzz {
         println()
 
         val (testCvrs, ballots) = testData.makeCvrsAndBallots(auditConfig.hasStyles)
-        val testMvrs = makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrsPct)
-        val pairs = testMvrs.zip(testCvrs)
-        pairs.forEach { (mvr, cvr) ->
-            require(mvr.id == cvr.id)
-        }
+        testMvrs = makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrsPct)
 
-        // TODO use MvrManagerTestFromRecord to do sorting and save sortedCards, mvrsUA
-        // save the sorted cards
-        val mvrManager = MvrManagerPollingForTesting(ballots, testMvrs, auditConfig.seed)
-        writeAuditableCardCsvFile(mvrManager.sortedCards, publisher.cardsCsvFile())
-        println("   writeCvrsCvsFile ${publisher.cardsCsvFile()}")
+        // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
+        // includes phantom Cvrs
+        allCvrs.addAll(testCvrs)
+        println("ncvrs = ${allCvrs.size}")
 
-        // save the sorted testMvrs
-        val mvrFile = "$auditDir/private/testMvrs.csv"
-        validateOutputDirOfFile(mvrFile)
-        writeAuditableCardCsvFile(mvrManager.mvrsUA, mvrFile)
-        println("   writeMvrsJsonFile ${mvrFile}")
+        val regularContests = testData.contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
+        contestsUA.addAll(regularContests)
+        contestsUA.forEach { println("  $it") }
+        println()
 
-        // PollingWorkflow creates the assertions
-        val pollingWorkflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)
-
-        writeContestsJsonFile(pollingWorkflow.contestsUA(), publisher.contestsFile())
-        println("   writeContestsJsonFile ${publisher.contestsFile()}")
-
-        // get the first round of samples wanted, write them to round1 subdir
-        val auditRound = runChooseSamples(pollingWorkflow, publisher)
-
-        // write the partial audit state to round1
-        writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(1))
-        println("   writeAuditStateJsonFile ${publisher.auditRoundFile(1)}")
-
-        return if (auditRound.samplePrns.isNotEmpty()) 0 else 1
+        val infos = contestsUA().map { it.contest.info() }.associateBy { it.id }
+        val mvrTabs = tabulateCvrs(testMvrs.iterator(), infos)
+        println("testMvrs = ${mvrTabs}")
+        println()
     }
+    override fun cardPools() = null
+    override fun contestsUA() = contestsUA
+
+    override fun allCvrs() = Pair(allCvrs, testMvrs)
+    override fun cvrExport() = null
 }
 
-fun runChooseSamples(workflow: AuditWorkflowIF, publish: Publisher): AuditRound {
-    val round = workflow.startNewRound(quiet = false)
-    if (round.samplePrns.isNotEmpty()) {
-        writeSamplePrnsJsonFile(round.samplePrns, publish.samplePrnsFile(round.roundIdx))
-        println("   writeSampleIndicesJsonFile ${publish.samplePrnsFile(round.roundIdx)}")
-    } else {
-        println("*** FAILED TO GET ANY SAMPLES ***")
+
+fun startTestElectionClca(
+    topdir: String,
+    minMargin: Double,
+    fuzzMvrs: Double,
+    pctPhantoms: Double?,
+    ncards: Int,
+    ncontests: Int,
+    addRaire: Boolean,
+    addRaireCandidates: Int,
+) {
+    val auditDir = "$topdir/audit"
+    clearDirectory(Path(auditDir))
+
+    val auditConfig = AuditConfig(
+        AuditType.CLCA, hasStyles = true, nsimEst = 100,
+        clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
+    )
+
+    clearDirectory(Path(auditDir))
+    val election = TestClcaElection(
+        auditConfig,
+        minMargin,
+        fuzzMvrs,
+        pctPhantoms,
+        ncards,
+        ncontests,
+        addRaire,
+        addRaireCandidates)
+
+    CreateAudit("startTestElectionClca2", topdir = topdir, auditConfig, election, clear = false)
+}
+
+class TestClcaElection(
+    auditConfig: AuditConfig,
+    minMargin: Double,
+    fuzzMvrs: Double,
+    pctPhantoms: Double?,
+    ncards: Int,
+    ncontests: Int,
+    addRaire: Boolean,
+    addRaireCandidates: Int,
+): CreateElectionIF {
+    val contestsUA = mutableListOf<ContestUnderAudit>()
+    val allCvrs = mutableListOf<Cvr>()
+    val testMvrs: List<Cvr>
+
+    init {
+        val maxMargin = .10
+        val useMin = min(minMargin, maxMargin)
+        val phantomPctRange: ClosedFloatingPointRange<Double> =
+            if (pctPhantoms == null) 0.00..0.005 else pctPhantoms..pctPhantoms
+
+        val testData =
+            MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
+        println("$testData")
+
+        // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
+        // includes phantom Cvrs
+        allCvrs.addAll(testData.makeCvrsFromContests())
+        println("ncvrs (not raire) = ${allCvrs.size}")
+
+        if (addRaire) {
+            val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N=ncards/2, contestId=111, addRaireCandidates, minMargin=.04, quiet = true)
+            contestsUA.add(rcontest)
+            allCvrs.addAll(rcvrs)
+        }
+
+        val regularContests = testData.contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
+        contestsUA.addAll(regularContests)
+        contestsUA.forEach { println("  $it") }
+        println()
+
+        testMvrs = if (fuzzMvrs == 0.0) allCvrs
+            else makeFuzzedCvrsFrom(contestsUA.map { it.contest}, allCvrs, fuzzMvrs)
+        println("nmvrs = ${testMvrs.size}")
+
+        val infos = contestsUA().map { it.contest.info() }.associateBy { it.id }
+        val mvrTabs = tabulateCvrs(testMvrs.iterator(), infos)
+        println("testMvrs = ${mvrTabs}")
+        println()
     }
-    return round
+    override fun cardPools() = null
+    override fun contestsUA() = contestsUA
+
+    override fun allCvrs() = Pair(allCvrs, testMvrs)
+    override fun cvrExport() = null
 }
 

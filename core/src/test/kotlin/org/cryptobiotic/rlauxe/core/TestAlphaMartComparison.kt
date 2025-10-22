@@ -42,7 +42,6 @@ fun doOneAlphaMartRun(
     u: Double,
     withoutReplacement: Boolean = true,
 ): TestH0Result {
-    val t = 0.5
     val upperBound = u
 
     val estimFn = TruncShrinkage(

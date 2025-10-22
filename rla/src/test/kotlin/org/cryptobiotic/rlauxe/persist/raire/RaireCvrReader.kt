@@ -120,7 +120,7 @@ fun readRaireBallotsCsv(fileName: String): RaireCvrs {
 
     val raireContests = mutableListOf<RaireCvrContest>()
     for ((cid, trip) in contest_info) {
-        val (cands, winner, order) = trip // TODO what is order ?
+        val (cands, winner, _) = trip // TODO what is order ?
         val contestNumber = cid.toInt()
         /*     val contestNumber: Int, val candidates: List<Int>, val ncvrs: Int, val winner: Int = -1, */
         val con = RaireCvrContest(

@@ -66,7 +66,7 @@ fun estimateSampleSizeOptimalLambda(
     val term2 = ln(lam)
     val r = term1 / term2 // round up
 
-    val T = pow(lam, r)
+    pow(lam, r)
     val size = ceil(r)
     // println("   lam=$lam r=$r T=$T size=$size")
 

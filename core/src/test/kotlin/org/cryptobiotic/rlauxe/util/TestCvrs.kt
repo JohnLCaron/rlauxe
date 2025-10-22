@@ -73,7 +73,7 @@ class TestCvrs {
             minFraction = .42
         )
 
-        val m = assertFailsWith<RuntimeException> {
+        assertFailsWith<RuntimeException> {
             val contest = makeContestFromCvrs(info, cvrs)
             makeContestUAFromCvrs(listOf(contest), cvrs, true) // contest -> candidate -> count
         }.message
@@ -120,7 +120,7 @@ class TestCvrs {
         val contest = makeContestFromCvrs(info, cvrs)
         val contestUA = ContestUnderAudit(contest, isComparison = false)
         val asrtns = contestUA.pollingAssertions
-        val assort = asrtns.first().assorter
+        asrtns.first().assorter
 
 //        val m = assertFailsWith<RuntimeException> {
             makeContestUAFromCvrs(listOf(contest), cvrs) // contest -> candidate -> count

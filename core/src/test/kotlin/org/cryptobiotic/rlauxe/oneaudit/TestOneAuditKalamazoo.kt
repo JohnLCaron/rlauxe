@@ -18,7 +18,7 @@ class TestOneAuditKalamazoo {
 
     @Test
     fun testReportedMargins() {
-        val (contestUA, ballotPools, cvrs) = makeContestKalamazoo()
+        val (contestUA, _, _) = makeContestKalamazoo()
         val info = contestUA.contest.info()
         println("oaContest = $contestUA  ncandidates = ${info.candidateIds.size}")
 
@@ -29,7 +29,7 @@ class TestOneAuditKalamazoo {
         //    infos: Map<Int, ContestInfo>,
         //    show: Boolean = false
         //): ContestSummary {
-        val infos = mapOf( info.id to info )
+        mapOf( info.id to info )
         //val summ =  verifyCards(listOf(contestUA), cvrs.iterator(), ballotPools, infos, show = true)
         //println(summ.results)
 

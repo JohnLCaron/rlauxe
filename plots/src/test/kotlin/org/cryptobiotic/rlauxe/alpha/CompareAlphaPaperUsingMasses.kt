@@ -57,7 +57,7 @@ class CompareAlphaPaperUsingMasses {
             thetas.add(theta)
         }
 
-        val expected = listOf(
+        listOf(
             0.9946234445107308, 0.9491996903839541, 0.872444371417956,
             0.7438389502041729, 0.6236597364242038, 0.5499456507451624, 0.5059920323745111
         )

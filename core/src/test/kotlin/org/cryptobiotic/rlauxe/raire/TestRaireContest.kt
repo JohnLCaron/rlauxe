@@ -41,7 +41,7 @@ class TestRaireContest {
     @Test
     fun testSimulateRaireTestContest() {
         val contestId=111
-        val (rcontestUA: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(5000, contestId=contestId, ncands=3, minMargin=.04, quiet = true)
+        val (rcontestUA: RaireContestUnderAudit, _: List<Cvr>) = simulateRaireTestContest(5000, contestId=contestId, ncands=3, minMargin=.04, quiet = true)
         rcontestUA.addClcaAssertionsFromReportedMargin() // why do we have to call this, why doesnt simulateRaireTestContest add these ??
 
         assertEquals(rcontestUA, rcontestUA)

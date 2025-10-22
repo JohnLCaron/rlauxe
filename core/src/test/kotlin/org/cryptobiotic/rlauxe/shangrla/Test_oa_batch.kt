@@ -135,7 +135,7 @@ class TestOnePollingAudit {
         val cc = B(1.0, 1.0, v, u)
 
         // make the overstatement data
-        val nn = N_per_pct * pct / 2.0
+        N_per_pct * pct / 2.0
         val x1 = DoubleArray(10000) { cc }
         val x2 = DoubleArray((faa * N_per_pct * pct / 2.0).toInt()) { aa }
         val x3 = DoubleArray(((1 - faa) * N_per_pct * pct / 2.0).toInt()) { ba }

@@ -65,7 +65,7 @@ tasks.register<Jar>("uberJar") {
 }
 
 tasks {
-    withType<JavaCompile>() {
+    withType<JavaCompile> {
         options.release.set(21)
     }
 }

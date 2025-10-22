@@ -104,7 +104,7 @@ open class BoulderElectionOA(
             // each group becomes a pool
             // correct bug adding contest 12 to pool 06
             val useContestVotes = if (redacted.ballotType.startsWith("06")) {
-                    redacted.contestVotes.filter{ (key, value) -> key != 12 }
+                    redacted.contestVotes.filter{ (key, _) -> key != 12 }
                 } else redacted.contestVotes
 
             val contestTabs = useContestVotes.mapValues{ ContestTabulation(infoMap[it.key]!!, it.value) }

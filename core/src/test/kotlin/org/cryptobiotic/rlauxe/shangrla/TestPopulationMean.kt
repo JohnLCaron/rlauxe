@@ -152,7 +152,7 @@ class TestPopulationMeanWithoutReplacement {
 
         val sampler = SampleFromArray(x.toDoubleArray())
         println("alphaTestH0")
-        val result: TestH0Result = alpha.testH0(x.size, false) { sampler.sample() }
+        alpha.testH0(x.size, false) { sampler.sample() }
 
         // alphaTestH0
         // 1: howAbout sum=0.0 result = 0.5
@@ -211,8 +211,8 @@ class TestPopulationMeanWithoutReplacement {
         val N = 100
         val halfSamples = HalfSamples()
         repeat(100) {
-            val num = (N * 0.5 - halfSamples.sum())
-            val den = (N - halfSamples.numberOfSamples())
+            (N * 0.5 - halfSamples.sum())
+            (N - halfSamples.numberOfSamples())
             val mj = populationMeanIfH0(N = N, withoutReplacement = true, prevSampleTracker = halfSamples)
             // println("mj=${mj} num=$num den=$den")
             halfSamples.count++
@@ -238,7 +238,7 @@ class TestPopulationMeanWithoutReplacement {
         println("awinnerAvg=${awinnerAvg} noerror=${samples.noerror}")
 
         repeat(100) {
-            val mj = populationMeanIfH0(N = N, withoutReplacement = true, prevSampleTracker = samples)
+            populationMeanIfH0(N = N, withoutReplacement = true, prevSampleTracker = samples)
             // println("mj=${mj}")
             samples.count++
         }

@@ -36,9 +36,7 @@ class OAIrvContestUA(
         if (!super.equals(other)) return false
 
         other as OAIrvContestUA
-        if (rassertions != other.rassertions) return false
-
-        return true
+        return rassertions == other.rassertions
     }
 
     override fun hashCode(): Int {

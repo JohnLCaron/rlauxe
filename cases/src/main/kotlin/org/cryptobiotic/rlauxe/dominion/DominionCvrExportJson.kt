@@ -44,7 +44,7 @@ class DominionCvrSummary(
 
     override fun toString() = buildString {
         appendLine("DominionCvrSummary ncvrs=$ncvrs ncards=$ncards cvrs=$cvrExports")
-        contestSums.toSortedMap().forEach { (id, summary) ->
+        contestSums.toSortedMap().forEach { (_, summary) ->
             appendLine("  $summary")
         }
     }
@@ -80,7 +80,7 @@ data class DominionCvrExportJson(
 ) {
     override fun toString() = buildString {
         appendLine("DominionCvrJson(Version='$Version', ElectionId='$ElectionId')")
-        Sessions.forEach() { append("  $it") }
+        Sessions.forEach { append("  $it") }
     }
 }
 
@@ -112,7 +112,7 @@ data class Cards (
 ) {
     override fun toString() = buildString {
         appendLine("Cards(PrecinctPortionId=$PrecinctPortionId, BallotTypeId=$BallotTypeId, IsCurrent=$IsCurrent)")
-        Cards.forEach() { append("    $it") }
+        Cards.forEach { append("    $it") }
     }
 }
 
@@ -125,7 +125,7 @@ data class Card(
 ) {
     override fun toString() = buildString {
         appendLine("Card(Id=$Id, KeyInId=$KeyInId, PaperIndex=$PaperIndex)")
-        Contests.forEach() { append("      $it") }
+        Contests.forEach { append("      $it") }
     }}
 
 @Serializable
@@ -139,7 +139,7 @@ data class Contest(
 ) {
     override fun toString() = buildString {
         appendLine("Contest(Id=$Id, ManifestationId=$ManifestationId, Undervotes=$Undervotes, Overvotes=$Overvotes)")
-        Marks.forEach() { append("        $it") }
+        Marks.forEach { append("        $it") }
     }
 }
 

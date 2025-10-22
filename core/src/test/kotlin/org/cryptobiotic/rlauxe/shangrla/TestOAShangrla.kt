@@ -41,7 +41,7 @@ class TestOAShangrla {
         val margin = .6571495728340697
         val Nc = 10000
 
-        val (contestUA, pools, testCvrs) = makeOneContestUA(
+        val (contestUA, pools, _) = makeOneContestUA(
             margin,
             Nc,
             cvrFraction = 0.33,

@@ -66,7 +66,7 @@ class TestWelford {
         welfordW.update(2.0, 10)
         println("welfordW = $welfordW")
 
-        val (wm, wv, _) = welfordW.result()
+        val (wm, _, _) = welfordW.result()
         assertEquals((120.0 / 110), wm)
 
         assertEquals(welford.mean, welfordW.mean, doublePrecision)

@@ -123,7 +123,7 @@ fun verifyManifest(
     infos: Map<Int, ContestInfo>,
     results: VerifyResults,
     show: Boolean = false
-): ContestSummary? {
+): ContestSummary {
 
     results.addMessage("VerifyManifest")
 

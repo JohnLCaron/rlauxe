@@ -25,7 +25,7 @@ data class ContestManifestJson(
 ) {
     override fun toString() = buildString {
         appendLine("ContestManifestJson(Version='$Version')")
-        List.forEach() { appendLine("  $it") }
+        List.forEach { appendLine("  $it") }
     }
 }
 
@@ -118,7 +118,7 @@ data class CandidateManifestJson(
 ) {
     override fun toString() = buildString {
         appendLine("CandidateManifestJson(Version='$Version')")
-        List.forEach() { appendLine("  $it") }
+        List.forEach { appendLine("  $it") }
     }
 }
 

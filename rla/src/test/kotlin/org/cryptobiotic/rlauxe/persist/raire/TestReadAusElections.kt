@@ -13,10 +13,10 @@ class TestReadAusElections {
             if (!it.isDirectory) {
                 println(it.path)
                 if (!it.path.contains("_out.json")) {
-                    val rp = readRaireProblemJson(it.path)
+                    readRaireProblemJson(it.path)
                     //println(rp)
                 } else {
-                    val rr = readRaireSolutionJson(it.path)
+                    readRaireSolutionJson(it.path)
                     //println(rr)
                 }
             }

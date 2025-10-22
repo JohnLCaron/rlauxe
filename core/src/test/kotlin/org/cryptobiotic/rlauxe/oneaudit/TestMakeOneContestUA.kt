@@ -16,7 +16,7 @@ class TestMakeOneContestUA {
     @Test
     fun testAllAreCvrs() {
         val margin = .02
-        val (contestOA, ballotPools, testCvrs) =
+        val (contestOA, _, testCvrs) =
             makeOneContestUA(margin, Nc, cvrFraction = 0.9, undervoteFraction = 0.0, phantomFraction = 0.0)
 
         assertEquals(Nc, contestOA.Nc)
@@ -34,7 +34,7 @@ class TestMakeOneContestUA {
     fun testHalfAreCvrs() {
         val margin = .02
         val cvrPercent = 0.5
-        val (contestOA, pools, cvrs) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = 0.0, phantomFraction = 0.0)
+        val (contestOA, pools, _) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = 0.0, phantomFraction = 0.0)
 
         checkBasics(contestOA, pools, margin, cvrPercent)
     }
@@ -44,7 +44,7 @@ class TestMakeOneContestUA {
         val margin = .02
         val cvrPercent = 0.5
 
-        val (contestOA, pools, cvrs) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = 0.10, phantomFraction = 0.0)
+        val (contestOA, pools, _) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = 0.10, phantomFraction = 0.0)
         checkBasics(contestOA, pools, margin, cvrPercent)
     }
 
@@ -53,7 +53,7 @@ class TestMakeOneContestUA {
         val margin = .02
         val cvrPercent = 0.5
 
-        val (contestOA, pools, cvrs) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = 0.0, phantomFraction = 0.03)
+        val (contestOA, pools, _) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = 0.0, phantomFraction = 0.03)
         checkBasics(contestOA, pools, margin, cvrPercent)
     }
 
@@ -62,7 +62,7 @@ class TestMakeOneContestUA {
         val margin = .02
         val cvrPercent = 0.5
 
-        val (contestOA, pools, cvrs) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = 0.10, phantomFraction = 0.03)
+        val (contestOA, pools, _) = makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = 0.10, phantomFraction = 0.03)
         checkBasics(contestOA, pools, margin, cvrPercent)
     }
 

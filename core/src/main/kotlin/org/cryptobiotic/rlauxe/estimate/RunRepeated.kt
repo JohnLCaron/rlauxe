@@ -48,7 +48,7 @@ fun runTestRepeated(
             welford.update(testH0Result.sampleCount.toDouble()) // just to keep the stddev
 
             // sampleCount was what percent of N? keep 10% histogram bins. TODO remove
-            val percent = ceilDiv(100 * testH0Result.sampleCount, Nc) // percent, rounded up
+            ceilDiv(100 * testH0Result.sampleCount, Nc) // percent, rounded up
             sampleCounts.add(testH0Result.sampleCount)
         }
         if (showH0Result) println(" $it $testH0Result")

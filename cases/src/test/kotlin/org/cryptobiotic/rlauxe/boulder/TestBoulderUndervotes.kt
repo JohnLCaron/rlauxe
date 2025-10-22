@@ -53,7 +53,7 @@ class TestBoulderUndervotes {
                 }
             }
         }
-        cardStyles.toSortedMap().forEach { (key, value) ->
+        cardStyles.toSortedMap().forEach { (_, value) ->
             println(value)
         }
 
@@ -100,7 +100,7 @@ class TestBoulderUndervotes {
 
         val election2 = BoulderElectionOA(export, sovo, isClca=false)
         println()
-        election2.oaContests.forEach { (id, oa) ->
+        election2.oaContests.forEach { (_, oa) ->
             println(BoulderContestVotes.header)
             println(oa.details())
         }

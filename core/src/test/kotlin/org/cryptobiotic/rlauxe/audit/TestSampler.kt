@@ -27,7 +27,7 @@ class TestSampler {
 
         var count = 0
         while (target.hasNext()) {
-            val wtf = target.next()
+            target.next()
             count++
         }
         assertEquals(cvrs.size, count)
@@ -41,7 +41,7 @@ class TestSampler {
 
         var count = 0
         while (target.hasNext()) {
-            val wtf = target.next()
+            target.next()
             count++
         }
         assertEquals(cvrs.size, count)
@@ -55,7 +55,7 @@ class TestSampler {
 
         var count = 0
         while (target.hasNext()) {
-            val wtf = target.next()
+            target.next()
             count++
         }
         assertEquals(cvrs.size, count)
@@ -69,7 +69,7 @@ class TestSampler {
 
         var count = 0
         while (target.hasNext()) {
-            val wtf = target.next()
+            target.next()
             count++
         }
         assertEquals(cvrs.size, count)

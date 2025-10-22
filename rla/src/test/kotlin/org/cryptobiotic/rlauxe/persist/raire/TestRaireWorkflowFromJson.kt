@@ -20,7 +20,7 @@ class TestRaireWorkflowFromJson {
     }
 
     fun testRaireWorkflow(auditConfig: AuditConfig) {
-        val stopwatch = Stopwatch()
+        Stopwatch()
 
         // This single contest cvr file is the only real cvr data in SHANGRLA
         // not sure who generates it, is it raire specific?
@@ -67,7 +67,7 @@ fun runComparisonWorkflowR(workflow: WorkflowTesterClca, sortedMvrs: CloseableIt
                 "took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
 
         // TODO addMvrs ?
-        val sampledMvrus = findSamples(currRound.samplePrns, sortedMvrs) // TODO use IteratorCvrsCsvFile?
+        findSamples(currRound.samplePrns, sortedMvrs) // TODO use IteratorCvrsCsvFile?
         done = workflow.runAuditRound(currRound)
         println("runAudit ${currRound.roundIdx} done=$done took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms\n")
     }

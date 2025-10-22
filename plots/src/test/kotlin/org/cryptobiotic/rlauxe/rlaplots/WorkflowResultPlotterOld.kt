@@ -92,9 +92,9 @@ class WorkflowResultsPlotterOld(val dir: String, val filename: String) {
 
     fun showEstSizesVsMargin(data: List<WorkflowResult>, subtitle: String, catName: String, yscale: ScaleTypeOld = ScaleTypeOld.Linear, catfld: (WorkflowResult) -> String) {
         val exemplar = data[0]
-        val nruns = exemplar.parameters["nruns"]!!
+        exemplar.parameters["nruns"]!!
         val fuzzPct = exemplar.parameters["fuzzPct"]
-        val fuzzPctLabel = if (fuzzPct == null) "" else " fuzzPct=$fuzzPct"
+        if (fuzzPct == null) "" else " fuzzPct=$fuzzPct"
 
         wrsPlot(
             titleS = if (yscale == ScaleTypeOld.Pct) "$filename extraSamples/nmvrs %" else  "$filename nmvrs - samplesNeeded",

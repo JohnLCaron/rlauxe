@@ -42,7 +42,7 @@ class TestConsistentSampling {
 
         // must be ordered
         var lastRN = 0L
-        auditRound.samplePrns.forEach { it ->
+        auditRound.samplePrns.forEach {
             require(it > lastRN)
             lastRN = it
         }
@@ -79,7 +79,7 @@ class TestConsistentSampling {
 
         // must be ordered
         var lastRN = 0L
-        auditRound.samplePrns.forEach { it ->
+        auditRound.samplePrns.forEach {
             require(it > lastRN)
             lastRN = it
         }
@@ -116,7 +116,7 @@ class TestConsistentSampling {
 
         // must be ordered
         var lastRN = 0L
-        auditRound.samplePrns.forEach { it ->
+        auditRound.samplePrns.forEach {
             require(it > lastRN)
             lastRN = it
         }

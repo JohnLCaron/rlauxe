@@ -15,7 +15,6 @@ fun createPctRatio(dlcalcs: Map<Int, List<SRT>>, thetas: List<Double>, ns: List<
     thetas.forEach { margin ->
         ns.forEach { N ->
             var pctMin = 100.0
-            var dMin = 0
             dlmapPct.forEach { entry ->
                 val (_, mmap: Map<Int, Map<Double, Double>>) = entry.value
                 val dmap = mmap[N]
@@ -26,7 +25,7 @@ fun createPctRatio(dlcalcs: Map<Int, List<SRT>>, thetas: List<Double>, ns: List<
                 val (d, mmap) = entry.value
                 val dmap = mmap[N]
                 val pct = if (dmap != null) extractPct(dmap[margin]) else 100.0
-                val ratio = pct / pctMin
+                pct / pctMin
                 // (val N: Int, val theta: Double, val nsamples: Double, val pct: Double, val stddev: Double,
                 //               val reportedMeanDiff: Double, val d: Int, val eta0: Double, val hist: Histogram?)
                 // data class SRT(val N: Int, val theta: Double, val reportedMeanDiff: Double, val d: Int, val eta0: Double,

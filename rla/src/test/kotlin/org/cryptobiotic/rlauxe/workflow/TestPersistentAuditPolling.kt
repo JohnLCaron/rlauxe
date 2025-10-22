@@ -20,7 +20,6 @@ class TestPersistentAuditPolling {
     fun testPersistentWorkflowPolling() {
         clearDirectory(Path.of(auditDir))
 
-        val fuzzMvrPct = .01
         val publisher = Publisher(auditDir)
         val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, nsimEst=10)
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())

@@ -171,7 +171,6 @@ class TestBettingMart {
     @Test
     fun testAgrapaWithVariance() {
         val N = 100
-        val n = 10
         val c_g_0 = 0.6
         val c_g_m = 0.9
         val c_g_g = 2.0

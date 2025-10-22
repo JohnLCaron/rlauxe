@@ -41,8 +41,7 @@ class PlotPollingDiffMeans {
             (o1 == null && o2 == null) -> 0
             (o1 == null) -> -1
             else -> {
-                val c = o1.d.compareTo(o2.d)
-                when (c) {
+                when (val c = o1.d.compareTo(o2.d)) {
                     -1, 1 -> c
                     else -> o1.diffMean.compareTo(o2.diffMean)
                 }
@@ -64,8 +63,8 @@ class PlotPollingDiffMeans {
     // These are d vs MeanDiff plots for various values of N, theta
     @Test
     fun plotDvsMeanDiff() {
-        val reportedMeanDiffs = listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0, -.005, -.01, -.025, -.05, -0.1, -0.2)
-        val dlist = listOf(10, 50, 250, 1250)
+        listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0, -.005, -.01, -.025, -.05, -0.1, -0.2)
+        listOf(10, 50, 250, 1250)
         val nrepeat = 100
 
         val reader = SRTcsvReader("/home/stormy/rla/PollingDiffMeans/SRT$nrepeat.csv")
@@ -90,8 +89,7 @@ class PlotPollingDiffMeans {
             (o1 == null && o2 == null) -> 0
             (o1 == null) -> -1
             else -> {
-                val c = o1.theta.compareTo(o2.theta)
-                when (c) {
+                when (val c = o1.theta.compareTo(o2.theta)) {
                     -1, 1 -> c
                     else -> o1.N.compareTo(o2.N)
                 }

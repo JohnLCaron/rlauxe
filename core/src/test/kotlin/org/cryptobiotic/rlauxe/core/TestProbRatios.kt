@@ -87,7 +87,7 @@ class TestProbRatios {
         println("             r1=Xj*nu/mu = ${r1}")
         println(" r0=(1-Xj)*(1-nu)/(1-mu) = ${r0}")
         println(" r1+r0 = ${r1+r0}")
-        val sumrs = r1 + r0
+        r1 + r0
         when {
             Xj == 0.5 -> assertEquals(1.0, r1+r0)
             Xj < 0.5 -> assertTrue(1.0 > r1+r0) // TODO intermittent failures
@@ -176,15 +176,15 @@ class TestProbRatios {
         val (termN1, termN2, termN3) = calcTerms(upperBound, etaj, xj)
         val (termD1, termD2, termD3) = calcTerms(upperBound, mj, xj)
 
-        val num = termN1 + termN2 * termN3
-        val den = termD1 + termD2 * termD3
+        termN1 + termN2 * termN3
+        termD1 + termD2 * termD3
         // println("num=$num den = $den, diff = ${num-den}")
 
         // u * (u - x) + mean * (2x - u), mean = nj or mj
         val d1 = upperBound * (upperBound - xj)
         val d2 = 2*xj - upperBound // this term is zero when xj = upper/2, whuch is always is for cvrs that match the mvr
-        val tn = d1 + etaj * d2
-        val tm = d1 + mj * d2
+        d1 + etaj * d2
+        d1 + mj * d2
        // println("tn=$tn tm = $tm")
 
     }

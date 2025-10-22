@@ -9,7 +9,6 @@ class TestSrt {
 
     @Test
     fun testWriteRead() {
-        val ntrials = 111
 
         // SRT(val N: Int, val reportedMean: Double, val reportedMeanDiff: Double, val d: Int, val eta0: Double, val eta0Factor: Double,
         //               val nsuccess: Int, val ntrials: Int, val totalSamplesNeeded: Int, val stddev: Double, val percentHist: Deciles?)

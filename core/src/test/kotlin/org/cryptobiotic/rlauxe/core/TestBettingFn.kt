@@ -7,7 +7,6 @@ class TestBettingFn {
 
     @Test
     fun testOptimalComparison() {
-        val N = 100
         val mean = .51                              // .5 < mean <= 1
         val dilutedMargin = 2 * mean - 1            // aka v;  0 < v <= 1
         val noerror = 1.0 / (2.0 - dilutedMargin)   // aka a;  1/2 < a <= 1

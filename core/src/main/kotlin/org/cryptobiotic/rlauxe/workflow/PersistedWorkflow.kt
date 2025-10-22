@@ -5,10 +5,9 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.existsOrZip
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
-import java.nio.file.Files
-import java.nio.file.Path
 
 private val logger = KotlinLogging.logger("PersistentAudit")
 
@@ -27,7 +26,7 @@ class PersistedWorkflow(
 
     init {
         auditRounds.addAll(auditRecord.rounds)
-        mvrManager = if (useTest || Files.exists(Path.of(publisher.testMvrsFile()))) {
+        mvrManager = if (useTest || existsOrZip(publisher.sortedMvrsFile())) {
             MvrManagerTestFromRecord(auditRecord.location)
         } else {
             MvrManagerFromRecord(auditRecord.location)

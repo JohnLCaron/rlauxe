@@ -19,7 +19,7 @@ class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerP
 
     init {
         val publisher = Publisher(auditDir)
-        cardFile = publisher.cardsCsvFile()
+        cardFile = publisher.sortedCardsFile()
     }
 
     override fun Nballots(contestUA: ContestUnderAudit) = 0 // TODO ???

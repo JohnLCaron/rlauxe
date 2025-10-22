@@ -9,6 +9,9 @@ import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.*
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.util.CvrToAuditableCardPolling
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.io.path.Path
 import kotlin.test.Test
@@ -30,9 +33,9 @@ class TestPersistentOneAudit2 {
         clearDirectory(Path(auditDir))
         val election = TestOneAuditElection(0.0)
 
-        CreateAudit("TestPersistentOneAudit2", topdir = topdir, auditConfig, election, clear = false)
+        CreateAudit2("TestPersistentOneAudit2", topdir = topdir, auditConfig, election, clear = false)
         val publisher = Publisher(auditDir)
-        val testMvrsUA = readAuditableCardCsvFile(publisher.testMvrsFile())
+        val testMvrsUA = readAuditableCardCsvFile(publisher.sortedMvrsFile())
 
         val mvrManager = MvrManagerFromRecord(auditDir)
         var oaWorkflow = WorkflowTesterOneAudit(auditConfig, election.contestsUA(), mvrManager)
@@ -48,7 +51,7 @@ class TestPersistentOneAudit2 {
         println("------------------ ")
     }
 
-    class TestOneAuditElection(fuzzMvrs: Double): CreateElectionIF {
+    class TestOneAuditElection(fuzzMvrs: Double): CreateElection2IF {
         val contestsUA = mutableListOf<OAContestUnderAudit>()
         val allCardPools = mutableListOf<CardPoolIF>()
         val allCvrs: List<Cvr>
@@ -89,9 +92,13 @@ class TestPersistentOneAudit2 {
         }
 
         override fun cardPools() = allCardPools
+        override fun hasTestMvrs() = true
+
         override fun contestsUA() = contestsUA
 
-        override fun allCvrs() = Pair(allCvrs, testMvrs)
-        override fun cvrExport() = null
+        override fun allCvrs() = Pair(
+            CloseableIterable { CvrToAuditableCardPolling(Closer(allCvrs.iterator())) },
+            CloseableIterable { CvrToAuditableCardPolling(Closer(testMvrs.iterator())) }
+        )
     }
 }

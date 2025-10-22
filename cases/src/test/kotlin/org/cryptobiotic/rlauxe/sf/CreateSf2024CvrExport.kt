@@ -13,7 +13,7 @@ import kotlin.test.assertNotNull
 
 class CreateSf2024CvrExport {
 
-    // extract the cvrExport from zipFilename json, write to cvrExport.csv
+    // extract the cvrExport from $zipFilename json files, write to cvrExport.csv
     // only need to do this once, all the SF variants can use.
     @Test
     fun createSf2024CvrExport() {

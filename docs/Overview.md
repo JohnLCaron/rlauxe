@@ -1,5 +1,5 @@
 # Rlauxe Implementation Overview
-_last changed 10/19/2025_
+_last changed 10/22/2025_
 
 While Rlauxe is intended to be used in real elections, its primary use currently is to simulate elections for testing
 RLA algorithms.
@@ -85,21 +85,21 @@ There are several representations of CVRs:
 
 **CvrExport( val id: String, val group: Int, val votes: Map<Int, IntArray>))**
 
-is an intermediate CVR representation for DominionCvrExportJson. Used by SanFrancisico and Corla.
+is an intermediate representation for DominionCvrExportJson. It serializes compactly to CvrExportCsv. Used by SanFrancisico and Corla.
 
-Use CardSortMerge to do out-of-memory sorting: using an Iterator\<CvrExport\>, this converts to AuditableCard, assign prn, sorts and writes
+Use CardSortMerge to do out-of-memory sorting: using an Iterator\<CvrExport\>, this converts to AuditableCard, assigns prn, sorts and writes
 to _sortedCards.csv_.
 
 **AuditableCard( val location: String, val index: Int, val prn: Long, val phantom: Boolean, val contests: IntArray, val votes: List<IntArray>?, val poolId: Int? )**
 
-is a serialization format for CVRs, written to a csv file. Optionally zipped. Rlauxe can read from the zipped file directly.
-Note that _votes_ may be null, which is used for for pooled data with no CVRs.
+is a serialization format for both CVRs and CardLocations, written to a csv file. Optionally zipped. Rlauxe can read from the zipped file directly.
+Note that _votes_ may be null, which is used for for polling audits and for pooled data with no CVRs.
 
 **Cvr( val id: String, val votes: Map<Int, IntArray>, val phantom: Boolean, val poolId: Int?)**
 
-is the core abstraction, used by all the core routines.
+is the core abstraction, used by assorters and all the core routines. It represents both CVRs and MVRs.
 
-**CardLocation(  val location: String, val phantom: Boolean, val cardStyle: CardStyle?, val contestIds: List<Int>? = null)**
+**CardLocation(val location: String, val phantom: Boolean, val cardStyle: CardStyle?, val contestIds: List<Int>? = null)**
 
 is used to make the CardLocationManifest (aka Ballot Manifest), especially when there are no CVRs.
 

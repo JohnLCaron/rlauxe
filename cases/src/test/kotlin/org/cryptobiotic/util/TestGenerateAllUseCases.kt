@@ -1,7 +1,7 @@
 package org.cryptobiotic.util
 
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
-import org.cryptobiotic.rlauxe.corla.createColoradoOneAuditNew
+import org.cryptobiotic.rlauxe.corla.createColoradoOneAudit
 import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.sf.createSfElection
 import org.cryptobiotic.rlauxe.sf.createSfElectionNoStyles
@@ -38,7 +38,7 @@ class TestGenerateAllUseCases {
         val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoOneAuditNew(topdir, detailXmlFile, contestRoundFile, precinctFile, isClca=false, clear=true)
+        createColoradoOneAudit(topdir, detailXmlFile, contestRoundFile, precinctFile, isClca=false, clear=true)
     }
 
     @Test
@@ -48,7 +48,7 @@ class TestGenerateAllUseCases {
         val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoOneAuditNew(topdir, detailXmlFile, contestRoundFile, precinctFile, isClca=true, clear=true)
+        createColoradoOneAudit(topdir, detailXmlFile, contestRoundFile, precinctFile, isClca=true, clear=true)
     }
 
     @Test

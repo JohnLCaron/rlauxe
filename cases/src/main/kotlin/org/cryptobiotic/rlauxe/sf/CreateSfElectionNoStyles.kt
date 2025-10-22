@@ -13,8 +13,7 @@ import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.audit.CreateAudit
-import org.cryptobiotic.rlauxe.audit.CreateElectionIF
+import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -29,7 +28,7 @@ class CreateSfElectionNS(
     contestManifestFilename: String,
     candidateManifestFile: String,
     val cvrExportCsv: String,
-): CreateElectionIF {
+): CreateElection2IF {
     val cardPoolsNotUnpooled: List<CardPoolIF>
     val contestsOA: List<ContestUnderAudit>
     val extra = mutableListOf<Cvr>()
@@ -156,12 +155,21 @@ class CreateSfElectionNS(
     override fun cardPools() = cardPoolsNotUnpooled
     override fun contestsUA() = contestsOA
 
-    override fun allCvrs() = Pair(emptyList<Cvr>(), emptyList<Cvr>())
+    override fun hasTestMvrs() = false
+    override fun allCvrs(): Pair<CloseableIterable<AuditableCard>, CloseableIterable<AuditableCard>> {
+        val phantomCvrs = makePhantomCvrs(contestsUA().map { it.contest })
+        val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0L) }.asSequence()
 
-    override fun cvrExport(): Pair<CloseableIterable<CvrExport>, List<Cvr>> {
-        val iterable = CardPoolModifiedCvrIterable(cardPoolsNs, CloseableIterable { cvrExportCsvIterator(cvrExportCsv) })
-        return Pair(iterable, extra)
+        val cvrIter: CloseableIterable<CvrExport>  = CardPoolModifiedCvrIterable(cardPoolsNs, CloseableIterable { cvrExportCsvIterator(cvrExportCsv) })
+        val poolNameToId = cardPoolsNotUnpooled.associate { it.poolName to it.poolId }
+        val cardSeq = CvrExportToCardAdapter(cvrIter.iterator(), poolNameToId).asSequence()
+
+        val allCardsIter = (cardSeq + phantomSeq).iterator()
+        val allCardsIterable = CloseableIterable { allCardsIter.iterator() }
+        val emptyIterable = CloseableIterable { emptyList<AuditableCard>().iterator() }
+        return Pair(allCardsIterable, emptyIterable)
     }
+
 }
 
 // keep all the CVRS, which we can use to calculate average assort.
@@ -261,6 +269,6 @@ fun createSfElectionNoStyles(
         cvrExportCsv,
     )
 
-    CreateAudit("sf2024", topdir, auditConfig, election)
+    CreateAudit2("sf2024", topdir, auditConfig, election)
     println("createSfElectionNoStyles took $stopwatch")
 }

@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.boulder
 
-import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
+import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import kotlin.test.Test
 
 class TestBoulderElectionOneAudit {
@@ -20,7 +20,7 @@ class TestBoulderElectionOneAudit {
         val election = BoulderElectionOA(export, sovo, isClca=true)
         val infos = election.oaContests.mapValues { it.value.info }
         val (cvrs, _) = election.allCvrs()
-        val allTab = tabulateCvrs(cvrs.iterator(), infos).toSortedMap()
+        val allTab = tabulateAuditableCards(cvrs.iterator(), infos).toSortedMap()
 
         election.oaContests.forEach { (contestId, oaContest) ->
             oaContest.checkCvrs(allTab[contestId]!!)

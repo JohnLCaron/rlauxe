@@ -11,10 +11,9 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.existsOrZip
 import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
 import org.cryptobiotic.rlauxe.util.CloseableIterable
-import java.nio.file.Files
-import java.nio.file.Path
 
 private val logger = KotlinLogging.logger("MvrManagerTestFromRecord")
 private val checkValidity = true
@@ -56,13 +55,13 @@ class MvrManagerTestFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrMana
         return sampledCvrs.map{ it.cvr() }
     }
 
-    private fun auditableCards(): CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.cardsCsvFile())
+    private fun auditableCards(): CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.sortedCardsFile())
 
     //// MvrManagerTest
     // only used when its an MvrManagerTest with fake mvrs in "$auditDir/private/testMvrs.csv"
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {
-        val mvrFile = publisher.testMvrsFile()
-        val sampledMvrs = if (Files.exists(Path.of(mvrFile))) {
+        val mvrFile = publisher.sortedMvrsFile()
+        val sampledMvrs = if (existsOrZip(mvrFile)) {
             val mvrIterator = readCardsCsvIterator(mvrFile)
             findSamples(sampleNumbers, mvrIterator)
         } else {

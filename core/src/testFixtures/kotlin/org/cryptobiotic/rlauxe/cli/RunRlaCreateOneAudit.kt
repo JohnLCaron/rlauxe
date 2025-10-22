@@ -13,6 +13,9 @@ import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.clearDirectory
+import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.util.CvrToAuditableCardClca
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.io.path.Path
 
@@ -98,7 +101,7 @@ object RunRlaCreateOneAudit {
         )
 
         clearDirectory(Path(auditDir))
-        val election = TestOneAuditElection(
+        val election = TestOneAuditElection2(
             auditDir,
             auditConfig,
             minMargin,
@@ -109,10 +112,10 @@ object RunRlaCreateOneAudit {
             addRaire,
             addRaireCandidates)
 
-        CreateAudit("RunRlaStartOneAudit", topdir = topdir, auditConfig, election, clear = false)
+        CreateAudit2("RunRlaStartOneAudit", topdir = topdir, auditConfig, election, clear = false)
     }
 
-    class TestOneAuditElection(
+    class TestOneAuditElection2(
         auditDir: String,
         auditConfig: AuditConfig,
         minMargin: Double,
@@ -122,7 +125,7 @@ object RunRlaCreateOneAudit {
         ncontests: Int,
         addRaire: Boolean,
         addRaireCandidates: Int,
-    ): CreateElectionIF {
+    ): CreateElection2IF {
         // val workflow: OneAudit
         val contestsUA = mutableListOf<OAContestUnderAudit>()
         val allCardPools = mutableListOf<CardPoolIF>()
@@ -188,7 +191,10 @@ object RunRlaCreateOneAudit {
         override fun cardPools() = allCardPools
         override fun contestsUA() = contestsUA
 
-        override fun allCvrs() = Pair(allCvrs, testMvrs)
-        override fun cvrExport() = null
+        override fun hasTestMvrs() = true
+        override fun allCvrs() = Pair(
+            CloseableIterable { CvrToAuditableCardClca(Closer(allCvrs.iterator())) },
+            CloseableIterable { CvrToAuditableCardClca(Closer(testMvrs.iterator())) }
+        )
     }
 }

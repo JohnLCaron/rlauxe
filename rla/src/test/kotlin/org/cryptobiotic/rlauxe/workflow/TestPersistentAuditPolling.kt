@@ -40,8 +40,8 @@ class TestPersistentAuditPolling {
         // the order of the cardLocations cannot be changed once the audit is initialized.
         val prng = Prng(auditConfig.seed)
         val cards = cardLocations.mapIndexed { idx, it -> AuditableCard.fromCardLocation(it, idx, prng.next()) }.sortedBy { it.prn }
-        writeAuditableCardCsvFile(cards, publisher.cardsCsvFile())
-        println("write sortedCards to ${publisher.cardsCsvFile()} ")
+        writeAuditableCardCsvFile(cards, publisher.sortedCardsFile())
+        println("write sortedCards to ${publisher.sortedCardsFile()} ")
 
         // put the testMvrs in the same sorted order as the cards
         val testMvrsUA = cards.map { AuditableCard.fromCvr(testMvrs[it.index], it.index, it.prn) }

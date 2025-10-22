@@ -1,6 +1,10 @@
 package org.cryptobiotic.rlauxe.boulder
 
+import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.cli.RunRliRoundCli
+import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -40,22 +44,32 @@ class TestCreateBoulderElection {
 
     @Test
     fun createBoulder24oa() {
+        val topdir = "/home/stormy/rla/cases/boulder24/oa"
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            topdir = "/home/stormy/rla/cases/boulder24/oa",
+            topdir = topdir,
             isClca = false,
         )
+
+        val publisher = Publisher("$topdir/audit")
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
     }
 
     @Test
     fun createBoulder24clca() { // simulate CVRs
+        val topdir = "/home/stormy/rla/cases/boulder24/clca"
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            topdir = "/home/stormy/rla/cases/boulder24/clca",
+            topdir = topdir,
             isClca = true,
         )
+
+        val publisher = Publisher("$topdir/audit")
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
     }
 
     /*

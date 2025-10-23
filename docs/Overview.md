@@ -7,8 +7,9 @@ RLA algorithms.
 All audits require a ballot manifest that has a complete list of physical ballots, augmented with phantom ballots as needed.
 Rlauxe represents this as a list of _AuditableCards_, or _cards_ for short. Each card has a location which allows the
 auditor to locate the physical ballot. The ordered list of cards is committed to (publically recorded) before the random seed is
-chosen. After the random seed is selected, the PRG (pseudo random generator) assigns a prn (pseudo random number) to each card in canonical order.
-Rlauxe sorts the cards by prn and stores them in _sortedCrds.csv_.
+chosen. Rlauxe stores the ordered list of cards in _cardManifest.csv_. After the random seed is selected, the 
+PRG (pseudo random generator) assigns a prn (pseudo random number) to each card in canonical order.
+Rlauxe sorts the cards by prn and stores them in _sortedCards.csv_.
 
 In Rlauxe, at a minimum each card has a location, an index in the canonical order, and a prn. Optionally it may contain the list
 of contests that are on the CVR, and optionally it may contain the list of candidate votes for each contest on the CVR. If the list of contests
@@ -62,13 +63,14 @@ Each audit type has specialized processing for creating the AuditableCards and t
 
     $auditdir/
         auditConfig.json      // AuditConfigJson
-        contests.json         // ContestsUnderAuditJson
-        sortedCards.csv       // AuditableCardCsv (or)
-        sortedCards.zip       // AuditableCardCsv
         cardPools.json        // CardPoolJson (OneAudit only)
+        contests.json         // ContestsUnderAuditJson
+        cardManifest.csv.zip  // AuditableCardCsv 
+        sortedCards.csv.zip   // AuditableCardCsv 
     
     private/
-       testMvrs.csv        // AuditableCardCsv, for tests only
+       sortedMvrs.csv.zip     // AuditableCardCsv, for tests only
+       testMvrs.csv.zip       // AuditableCardCsv, for tests only
     
     roundX/
         auditState.json     // AuditRoundJson
@@ -113,14 +115,17 @@ For each contest:
 - For a Card Level Comparison Audit (CLCA), extract the Cast Vote Records (CVRs) from the vote tabulation system.
 
 For the election:
-- Create a Card Location Manifest (aka Ballot Manifest), in which every physical ballot has a unique entry. If this is a CLCA, attach the
+- Create a Card Manifest (aka Ballot Manifest), in which every physical ballot has a unique entry. If this is a CLCA, attach the
   Cvr to its CardLocation.
-- If necessary, add phantoms to the Card Location Manifest following SHANGRLA section 3.4.
-
-The purpose of the audit is to determine whether the reported winner(s) are correct, to within the chosen risk limit.
+- If necessary, add phantoms to the Card Manifest following SHANGRLA section 3.4.
+- Write the Card Manifest to cardManifest.csv.zip
 
 - initialize the audit by choosing the contests to be audited, the risk limit, and the random seed.
-- Contests are removed from the audit if:
+- sort the Card Manifest by prn and wrte to to cardManifest.csv.zip.
+
+
+The purpose of the audit is to determine whether the reported winner(s) are correct, to within the chosen risk limit.
+Contests are removed from the audit if:
     - The contest has no losers (e.g. the number of candidate <= number of winners); the contest is marked NoLosers.
     - The contest has no winners (e.g. no candidates receive minFraction of the votes in a SUPERMAJORITY contest); the contest is marked NoWinners.
     - The contest is a tie, or its reported margin is less than _auditConfig.minMargin_; the contest is marked MinMargin.
@@ -133,7 +138,7 @@ For each audit round:
    by running simulations of the contest with its votes and margins, and an estimate of the error rates.
 2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited.
    This may be done with an automated algorithm, or the Auditor may make individual contest choices.
-3. _Random sampling_: The actual ballots to be sampled are selected randomly from the Manifest based on a carefully chosen random seed.
+3. _Random sampling_: The actual ballots to be sampled are selected from the sorted Manifest until the sample size is satisfied.
 4. _Manual Audit_: find the chosen paper ballots that were selected to audit and do a manual audit of each.
 5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
 6. _Run the audit_: For each contest, calculate if the risk limit is satisfied, based on the manual audits.

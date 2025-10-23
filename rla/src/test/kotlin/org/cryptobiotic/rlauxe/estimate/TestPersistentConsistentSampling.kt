@@ -2,13 +2,14 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import org.cryptobiotic.rlauxe.audit.previousSamples
+import kotlin.test.Test
 
 class TestPersistentConsistentSampling {
 
-    // @Test TODO failing
+    @Test //  TODO what can we assert ?
     fun testPersistentConsistentSampling() {
-        val topdir = "/home/stormy/rla/persist/testRlaClcaFuzz"
-        val workflow = PersistedWorkflow(topdir, true)
+        val auditDir = "../core/src/test/data/workflow/testCliRoundPolling"
+        val workflow = PersistedWorkflow(auditDir, true)
         val auditRecord = workflow.auditRecord
         val auditRound = workflow.auditRounds().last()
 
@@ -20,13 +21,13 @@ class TestPersistentConsistentSampling {
 
         repeat(auditRound.roundIdx) {
             val previousSamples = auditRecord.rounds.previousSamples(it+1)
-            println("round = ${it+1} previousSamples = ${previousSamples.size}")
+            println("round = ${it+1} previousSample size = ${previousSamples.size}")
         }
 
         val previousSamples = auditRecord.rounds.previousSamples(auditRound.roundIdx)
 
         consistentSampling(auditRound, workflow.mvrManager(), previousSamples)
-        val actualNewMvrs = auditRound.contestRounds.map { it.actualNewMvrs}
-        println("actualNewMvrs = $actualNewMvrs")
+        val actualNewMvrs = auditRound.contestRounds.associate { it.contestUA.id to it.actualNewMvrs }
+        println("last auditRound actualNewMvrs = $actualNewMvrs")
     }
 }

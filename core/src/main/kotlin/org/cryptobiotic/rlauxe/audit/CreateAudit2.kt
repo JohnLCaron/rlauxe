@@ -3,11 +3,13 @@ package org.cryptobiotic.rlauxe.audit
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
+import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.existsOrZip
@@ -19,11 +21,13 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
+import org.cryptobiotic.rlauxe.util.SortMerge
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.cleanCsvString
 import org.cryptobiotic.rlauxe.util.createZipFile
 import kotlin.collections.forEach
 import kotlin.io.path.Path
+import kotlin.random.Random
 
 interface CreateElection2IF {
     fun contestsUA(): List<ContestUnderAudit>
@@ -107,7 +111,40 @@ fun writeSortedCardsInternalSort(publisher: Publisher, seed: Long) {
     }
 }
 
-// The pooled cvrs dont have votes associated with them
+fun createSortedCards(unsortedCards: CloseableIterator<AuditableCard>, seed: Long) : List<AuditableCard> {
+    val prng = Prng(seed)
+    val cards = mutableListOf<AuditableCard>()
+    unsortedCards.use { cardIter ->
+        while (cardIter.hasNext()) {
+            cards.add( cardIter.next().copy(prn = prng.next()))
+        }
+    }
+    return cards.sortedBy { it.prn }
+}
+
+fun writeSortedCardsExternalSort(topdir: String, publisher: Publisher, seed: Long) {
+    val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile())
+    writeExternalSortedCards(topdir, publisher.sortedCardsFile(), unsortedCards, seed)
+    // logger.info{"write ${unsortedCards.size} cards to ${publisher.sortedCardsFile()}"}
+
+    if (existsOrZip(publisher.testMvrsFile())) {
+        val unsortedMvrs = readCardsCsvIterator(publisher.testMvrsFile())
+        writeExternalSortedCards(topdir, publisher.sortedMvrsFile(), unsortedMvrs, seed)
+        // logger.info{"write ${countMvrs} cards to ${publisher.sortedMvrsFile()}"}
+    }
+}
+
+fun writeExternalSortedCards(topdir: String, outputFile: String, unsortedCards: CloseableIterator<AuditableCard>, seed: Long) {
+    val sorter = SortMerge<AuditableCard>("$topdir/sortChunks", outputFile = outputFile, seed = seed)
+    sorter.run(
+        cardIter = unsortedCards,
+        cvrs = emptyList(),
+        toAuditableCard = { from: AuditableCard, index: Int, prn: Long -> from.copy(index = index, prn = prn) }
+    )
+    createZipFile(outputFile, delete = true)
+}
+
+// The pooled cvrs dont have votes associated with them, used to make the Card Manifest
 fun createCvrsFromPools(pools: List<CardPoolIF>) : List<Cvr> {
     val cvrs = mutableListOf<Cvr>()
 
@@ -127,16 +164,4 @@ fun createCvrsFromPools(pools: List<CardPoolIF>) : List<Cvr> {
     val totalRedactedBallots = pools.sumOf { it.ncards() }
     require(cvrs.size == totalRedactedBallots)
     return cvrs
-}
-
-// for a real audit, there are no votes
-fun createSortedCards(unsortedCards: CloseableIterator<AuditableCard>, seed: Long) : List<AuditableCard> {
-    val prng = Prng(seed)
-    val cards = mutableListOf<AuditableCard>()
-    unsortedCards.use { cardIter ->
-        while (cardIter.hasNext()) {
-            cards.add( cardIter.next().copy(prn = prng.next()))
-        }
-    }
-    return cards.sortedBy { it.prn }
 }

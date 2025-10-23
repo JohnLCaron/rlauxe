@@ -41,7 +41,7 @@ open class BoulderElectionOA(
     val contestsUA : List<ContestUnderAudit>
 
     val cardPools: List<CardPoolWithBallotStyle> = convertRedactedToCardPool() // convertRedactedToCardPoolPaired(export.redacted, infoMap) // convertRedactedToCardPool2()
-    val redactedCvrs: List<Cvr>
+    val redactedCvrs: List<Cvr> // fake CVRs for the pooled cards
 
     init {
         oaContests.values.forEach { it.adjustPoolInfo(cardPools)}
@@ -112,6 +112,7 @@ open class BoulderElectionOA(
         }
     }
 
+    // make up fake CVRs for the pooled cards
     fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<Cvr>()
         cardPools.forEach { cardPool ->

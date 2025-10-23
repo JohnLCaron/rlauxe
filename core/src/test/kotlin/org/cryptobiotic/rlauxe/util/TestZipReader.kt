@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrExportStream
+import java.io.InputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -35,13 +37,65 @@ class TestZipReader {
     fun testZipReaderTour() {
         val filename = "src/test/data/cvrExport.zip"
         var countFiles = 0
+        var countCards = 0
+        var countPoolCards = 0
         // ZipReaderTour(zipFile: String, val silent: Boolean = true, val sort: Boolean = true,
         //    val filter: (Path) -> Boolean, val visitor: (InputStream) -> Unit)
-        val tour = ZipReaderTour(filename,
+        val tour = ZipReaderTour(
+            zipFile = filename,
             filter = { it.toString().endsWith(".csv") },
-            visitor = { countFiles++ },
+            visitor = { input ->
+                countFiles++
+                val (c1, c2) = readCvrExport(input)
+                countCards += c1
+                countPoolCards += c2
+            },
         )
         tour.tourFiles()
+        println("file count: $countFiles")
+        println("card Count: $countCards")
+        println("countPoolCards: $countPoolCards")
+
         assertEquals(10, countFiles)
+        assertEquals(4252, countCards)
+    }
+
+    fun readCvrExport(input: InputStream): Pair<Int, Int> {
+        var count = 0
+        var countPoolData = 0
+        IteratorCvrExportStream(input).use { cvrIter ->
+            while (cvrIter.hasNext()) {
+                val cvr = cvrIter.next()
+                if (cvr.group == 1) countPoolData++
+                count++
+            }
+        }
+        return Pair(count, countPoolData)
+    }
+
+    @Test
+    fun testZipReaderIterator() {
+        val filename = "src/test/data/cvrExport.zip"
+        var countCards = 0
+        var countPoolCards = 0
+        // ZipReaderTour(zipFile: String, val silent: Boolean = true, val sort: Boolean = true,
+        //    val filter: (Path) -> Boolean, val visitor: (InputStream) -> Unit)
+        val zipper = ZipReaderIterator(
+            zipFile = filename,
+            filter = { it.toString().endsWith(".csv") },
+            reader = { input -> IteratorCvrExportStream(input) }
+        )
+
+        zipper.use { iter ->
+            while (iter.hasNext()) {
+                val cvr = iter.next()
+                countCards++
+                if (cvr.group == 1) countPoolCards++
+            }
+        }
+        println("card Count: $countCards")
+        println("countPoolCards: $countPoolCards")
+        assertEquals(4252, countCards)
+        assertEquals(0, countPoolCards)
     }
 }

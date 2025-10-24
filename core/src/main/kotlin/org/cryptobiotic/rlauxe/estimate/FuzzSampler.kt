@@ -105,59 +105,6 @@ class PollingFuzzSampler(
     override fun next(): Double = sample()
 }
 
-/* TODO no longer used by simulateSampleSizeOneAuditAssorter
-class OneAuditFuzzSampler(
-    val fuzzPct: Double,
-    val cvrs: List<Cvr>,
-    val contestUA: OAContestUnderAudit,
-    val cassorter: ClcaAssorter
-): Sampler, Iterator<Double> {
-    val maxSamples = cvrs.count { it.hasContest(contestUA.id) }
-    val N = cvrs.size
-    val permutedIndex = MutableList(N) { it }
-    val welford = Welford()
-    val stratumNames : Set<String>
-    var cvrPairs: List<Pair<Cvr, Cvr>> // (mvr, cvr)
-    var idx = 0
-
-    init {
-        stratumNames = emptySet() // TODO contestUA.contest.pools.values.map { it.name }.toSet() // TODO
-        val mvrs = remakeFuzzed()
-        cvrPairs = mvrs.zip(cvrs)
-    }
-
-    override fun sample(): Double {
-        while (idx < N) {
-            val (mvr, cvr) = cvrPairs[permutedIndex[idx]]
-            idx++
-            if (cvr.hasContest(contestUA.id)) {
-                val result = cassorter.bassort(mvr, cvr)
-                welford.update(result)
-                return result
-            }
-        }
-        throw RuntimeException("no samples left for ${contestUA.id} and ComparisonAssorter ${cassorter}")
-    }
-
-    override fun reset() {
-        val mvrs = remakeFuzzed()
-        cvrPairs = mvrs.zip(cvrs)
-        permutedIndex.shuffle(Random)
-        idx = 0
-    }
-
-    fun remakeFuzzed(): List<Cvr> {
-        return makeFuzzedCvrsFrom(listOf(contestUA.contest), cvrs, fuzzPct) { !stratumNames.contains(it.id) }
-    }
-
-    override fun maxSamples() = maxSamples
-    override fun maxSampleIndexUsed() = idx
-    override fun nmvrs() = idx // TODO
-
-    override fun hasNext(): Boolean = (idx < N)
-    override fun next(): Double = sample()
-} */
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO can this be used on approval?
 

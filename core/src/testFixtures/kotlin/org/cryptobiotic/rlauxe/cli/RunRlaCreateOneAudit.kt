@@ -13,7 +13,6 @@ import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.CvrToAuditableCardClca
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
@@ -101,7 +100,7 @@ object RunRlaCreateOneAudit {
         )
 
         clearDirectory(Path(auditDir))
-        val election = TestOneAuditElection2(
+        val election = TestOneAuditElection(
             auditDir,
             auditConfig,
             minMargin,
@@ -112,10 +111,10 @@ object RunRlaCreateOneAudit {
             addRaire,
             addRaireCandidates)
 
-        CreateAudit2("RunRlaStartOneAudit", topdir = topdir, auditConfig, election, clear = false)
+        CreateAudit("RunRlaStartOneAudit", topdir = topdir, auditConfig, election, clear = false)
     }
 
-    class TestOneAuditElection2(
+    class TestOneAuditElection(
         auditDir: String,
         auditConfig: AuditConfig,
         minMargin: Double,
@@ -125,7 +124,7 @@ object RunRlaCreateOneAudit {
         ncontests: Int,
         addRaire: Boolean,
         addRaireCandidates: Int,
-    ): CreateElection2IF {
+    ): CreateElectionIF {
         // val workflow: OneAudit
         val contestsUA = mutableListOf<OAContestUnderAudit>()
         val allCardPools = mutableListOf<CardPoolIF>()
@@ -191,10 +190,9 @@ object RunRlaCreateOneAudit {
         override fun cardPools() = allCardPools
         override fun contestsUA() = contestsUA
 
-        override fun hasTestMvrs() = true
         override fun allCvrs() = Pair(
-            CloseableIterable { CvrToAuditableCardClca(Closer(allCvrs.iterator())) },
-            CloseableIterable { CvrToAuditableCardClca(Closer(testMvrs.iterator())) }
+            CvrToAuditableCardClca(Closer(allCvrs.iterator())),
+            CvrToAuditableCardClca(Closer(testMvrs.iterator()))
         )
     }
 }

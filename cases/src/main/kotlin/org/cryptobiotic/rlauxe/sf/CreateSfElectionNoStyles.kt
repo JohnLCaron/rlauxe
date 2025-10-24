@@ -14,6 +14,7 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
+import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -28,7 +29,7 @@ class CreateSfElectionNS(
     contestManifestFilename: String,
     candidateManifestFile: String,
     val cvrExportCsv: String,
-): CreateElection2IF {
+): CreateElectionIF {
     val cardPoolsNotUnpooled: List<CardPoolIF>
     val contestsOA: List<ContestUnderAudit>
     val extra = mutableListOf<Cvr>()
@@ -153,8 +154,7 @@ class CreateSfElectionNS(
     override fun cardPools() = cardPoolsNotUnpooled
     override fun contestsUA() = contestsOA
 
-    override fun hasTestMvrs() = false
-    override fun allCvrs(): Pair<CloseableIterable<AuditableCard>, CloseableIterable<AuditableCard>> {
+    override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
         val phantomCvrs = makePhantomCvrs(contestsUA().map { it.contest })
         val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0L) }.asSequence()
 
@@ -163,9 +163,7 @@ class CreateSfElectionNS(
         val cardSeq = CvrExportToCardAdapter(cvrIter.iterator(), poolNameToId).asSequence()
 
         val allCardsIter = (cardSeq + phantomSeq).iterator()
-        val allCardsIterable = CloseableIterable { allCardsIter.iterator() }
-        val emptyIterable = CloseableIterable { emptyList<AuditableCard>().iterator() }
-        return Pair(allCardsIterable, emptyIterable)
+        return Pair(Closer(allCardsIter), null)
     }
 
 }
@@ -178,7 +176,7 @@ class CardPoolNs( poolName: String, poolId: Int, contestInfos: Map<Int, ContestI
     }
 }
 
-// tricky bit of business, an iterator where we substitute the mofified
+// tricky bit of business, an iterator where we substitute the modified cards
 class CardPoolModifiedCvrIterable(val poolMap: Map<String, CardPoolNs>, val org: CloseableIterable<CvrExport>): CloseableIterable<CvrExport> {
 
     override fun iterator(): CloseableIterator<CvrExport> = CardPoolModifiedCvrIterator(org.iterator())
@@ -197,49 +195,6 @@ class CardPoolModifiedCvrIterable(val poolMap: Map<String, CardPoolNs>, val org:
         override fun close() = orgIter.close()
     }
 }
-
-/* TODO remove
-class CardPoolCvrIterator(val cardPools: Collection<CardPoolNs>): Iterable<CvrExport> {
-
-    override fun iterator(): CloseableIterator<CvrExport> {
-        return PoolIterator()
-    }
-
-    inner class PoolIterator() : CloseableIterator<CvrExport> {
-        var pools = cardPools.iterator()
-        var base = getNextBaseIterator()
-
-        override fun hasNext(): Boolean {
-            if (base == null) base = getNextBaseIterator()
-            if (base == null) return false
-
-            // its possible that the base iterator is empty
-            while (!base!!.hasNext()) {
-                base = getNextBaseIterator()
-                if (base == null) return false
-            }
-            return true
-        }
-
-        override fun next(): CvrExport {
-            return base!!.next()
-        }
-
-        fun getNextBaseIterator(): BaseIterator? {
-            if (!pools.hasNext()) return null
-            return BaseIterator(pools.next())
-        }
-
-        override fun close() {}
-    }
-
-    class BaseIterator(val pool: CardPoolNs) : CloseableIterator<CvrExport> {
-        val bitter = pool.cvrMap.values.iterator()
-        override fun hasNext(): Boolean = bitter.hasNext()
-        override fun next(): CvrExport = bitter.next()
-        override fun close() {}
-    }
-} */
 
 //////////////////////////////////////////////////////////////////////////////////////
 
@@ -267,6 +222,6 @@ fun createSfElectionNoStyles(
         cvrExportCsv,
     )
 
-    CreateAudit2("sf2024", topdir, auditConfig, election)
+    CreateAudit("sf2024", topdir, auditConfig, election)
     println("createSfElectionNoStyles took $stopwatch")
 }

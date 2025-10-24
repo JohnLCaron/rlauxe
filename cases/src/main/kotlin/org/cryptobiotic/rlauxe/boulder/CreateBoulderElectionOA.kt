@@ -30,7 +30,7 @@ open class BoulderElectionOA(
     val isClca: Boolean,
     val hasStyles: Boolean = true,
     val quiet: Boolean = true,
-): CreateElection2IF {
+): CreateElectionIF {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convert() }
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infoMap = infoList.associateBy { it.id }
@@ -261,17 +261,16 @@ open class BoulderElectionOA(
 
     override fun contestsUA() = contestsUA
 
-    override fun hasTestMvrs() = true
-    override fun allCvrs(): Pair<CloseableIterable<AuditableCard>, CloseableIterable<AuditableCard>>  { // (cvrs, mvrs) including phantoms
+    override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?>  { // (cvrs, mvrs) including phantoms
         val poolCvrs = if (isClca) redactedCvrs else createCvrsFromPools(cardPools)
         val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-        val cvrs =  this.exportCvrs + poolCvrs + phantoms
+        val cvrs =  this.exportCvrs + poolCvrs + phantoms  // TODO same when isClca, so could omit
         val mvrs =  this.exportCvrs + redactedCvrs + phantoms
         require(cvrs.size == mvrs.size)
 
         return Pair(
-            CloseableIterable { CvrToAuditableCardClca(Closer(cvrs.iterator())) },
-            CloseableIterable { CvrToAuditableCardClca(Closer(mvrs.iterator())) }
+            CvrToAuditableCardClca(Closer(cvrs.iterator())),
+            CvrToAuditableCardClca(Closer(mvrs.iterator()))
         )
     }
 }
@@ -312,7 +311,7 @@ fun createBoulderElection(
 
     val election = BoulderElectionOA(export, sovo, isClca = isClca)
 
-    CreateAudit2("boulder", topdir, auditConfig, election, auditdir = auditDir, clear = clear)
+    CreateAudit("boulder", topdir, auditConfig, election, auditdir = auditDir, clear = clear)
     println("createBoulderElectionOAnew took $stopwatch")
 }
 

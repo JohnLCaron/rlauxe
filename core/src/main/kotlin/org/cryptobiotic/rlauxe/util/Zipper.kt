@@ -198,7 +198,7 @@ fun createZipFile(filename: String, delete: Boolean = false): File {
     }
     if (delete) {
         val ok = file.delete()
-        logger.info{ "delete file $filename} was successful = $ok"}
+        if (!ok) logger.warn{ "delete file $filename} failed"}
     }
     return outputZipFile
 }

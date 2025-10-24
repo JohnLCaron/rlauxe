@@ -12,7 +12,7 @@ class TestCsvReading {
     @Test
     fun testAuditableCardCsvFile() {
         val filenameIn = "/home/stormy/rla/cases/sf2024/oa/audit/sortedCards.csv"
-        val original = readAuditableCardCsvFile(filenameIn)
+        val original = AuditableCardCsvReader(filenameIn).iterator().asSequence().toList()
         val filenameOut = "$tempDir/sfCards.csv"
 
         writeAuditableCardCsvFile(original, filenameOut)
@@ -24,8 +24,8 @@ class TestCsvReading {
     fun testCvrExportCsvFile() {
         val filenameIn = "/home/stormy/rla/cases/sf2024/$cvrExportCsvFile"
         val filenameOut = "$tempDir/$cvrExportCsvFile"
-        writeCvrExportCsvFile(IteratorCvrExportFile(filenameIn), filenameOut)
-        assertTrue(areIteratorsEqual(IteratorCvrExportFile(filenameIn), IteratorCvrExportFile(filenameOut)))
+        writeCvrExportCsvFile(cvrExportCsvIterator(filenameIn), filenameOut)
+        assertTrue(areIteratorsEqual(cvrExportCsvIterator(filenameIn), cvrExportCsvIterator(filenameOut)))
     }
 
     fun <T> areIteratorsEqual(iterator1: Iterator<T>, iterator2: Iterator<T>): Boolean {

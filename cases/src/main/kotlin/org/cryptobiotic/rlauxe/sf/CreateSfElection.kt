@@ -19,10 +19,11 @@ import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.makeRaireContestUA
-import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
+import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import kotlin.Boolean
@@ -39,7 +40,7 @@ class CreateSfElection(
     candidateManifestFile: String,
     val cvrExportCsv: String,
     val isClca: Boolean,
-): CreateElection2IF {
+): CreateElectionIF {
     val cardPoolsNotUnpooled: List<CardPoolIF>
     val contestsOA: List<ContestUnderAudit>
     val extra = mutableListOf<Cvr>()
@@ -120,11 +121,9 @@ class CreateSfElection(
     }
 
     override fun cardPools() = cardPoolsNotUnpooled
-    override fun hasTestMvrs() = false
-
     override fun contestsUA() = contestsOA
 
-    override fun allCvrs(): Pair<CloseableIterable<AuditableCard>, CloseableIterable<AuditableCard>> {
+    override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
         val phantomCvrs = makePhantomCvrs(contestsUA().map { it.contest })
         val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0L) }.asSequence()
 
@@ -133,12 +132,10 @@ class CreateSfElection(
         val cardSeq = CvrExportToCardAdapter(cvrIter, poolNameToId).asSequence()
 
         val allCardsIter = (cardSeq + phantomSeq).iterator()
-        val allCardsIterable = CloseableIterable { allCardsIter.iterator() }
-        val emptyIterable = CloseableIterable { emptyList<AuditableCard>().iterator() }
-        return Pair(allCardsIterable, emptyIterable)
+
+        return Pair(Closer(allCardsIter), null)
     }
 }
-
 
 fun makeAllOneAuditContests(contestTabSums: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, unpooled: CardPoolFromCvrs): List<OAContestUnderAudit> {
     val contestsUAs = mutableListOf<OAContestUnderAudit>()
@@ -253,6 +250,6 @@ fun createSfElection(
         isClca = isClca,
     )
 
-    CreateAudit2("sf2024", topdir, auditConfig, election)
+    CreateAudit("sf2024", topdir, auditConfig, election)
     println("createSfElection took $stopwatch")
 }

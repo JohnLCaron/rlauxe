@@ -74,7 +74,7 @@ class TestCardSortMerge {
 
     @Test
     fun testSortMergeRunZipTree() {
-        val outputFile = "$tempDir/testSortMergeRunZip/testSortMergeRunZipTree.csv"
+        val outputFile = "$tempDir/testSortMergeRunZipTree/testSortMergeRunZipTree.csv"
         val sorter = SortMerge<CvrExport>(
             "$tempDir/testSortMergeRunZipTree",
             outputFile = outputFile,
@@ -83,7 +83,7 @@ class TestCardSortMerge {
         )
 
         sorter.run(
-            cardIter = cvrExportCsvIterator(filename = "cvrExport.zip"),
+            cardIter = cvrExportCsvIterator(filename = "$cvrExportFile.zip"),
             cvrs = emptyList(),
             toAuditableCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
         )

@@ -1,69 +1,103 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
+import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
-import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.persist.*
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.util.Prng
-import org.cryptobiotic.rlauxe.verify.VerifyContests
-import org.junit.jupiter.api.Assertions.assertFalse
-import java.nio.file.Path
+import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
+import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.util.CvrToAuditableCardPolling
+import org.cryptobiotic.rlauxe.util.tabulateCvrs
+import kotlin.io.path.Path
+import kotlin.test.Test
 
 class TestPersistentOneAudit {
-    val auditDir = "/home/stormy/rla/persist/testPersistentOneAudit"
+    val topdir = "/home/stormy/rla/persist/testPersistentOneAudit"
     // val topdir = kotlin.io.path.createTempDirectory().toString()
 
-    // @Test
+    @Test
     fun testPersistentWorkflow() {
-        clearDirectory(Path.of(auditDir))
+        val auditDir = "$topdir/audit"
+        clearDirectory(Path(auditDir))
 
-        val publisher = Publisher(auditDir)
-        val auditConfig = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, seed = 12356667890L, nsimEst=10)
-        writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
-
-        val N = 5000
-        val (contestOA, _, testCvrs) = makeOneContestUA(
-            N + 100,
-            N - 100,
-            cvrFraction = .95,
-            undervoteFraction = .0,
-            phantomFraction = .0
+        val auditConfig = AuditConfig(
+            AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, nsimEst = 10,
+            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
 
-        // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
-        val testMvrs = testCvrs
+        clearDirectory(Path(auditDir))
+        val election = TestOneAuditElection(0.0)
 
-        // the order of the cvrs cannot be changed once the audit is initialized.
-        val prng = Prng(auditConfig.seed)
-        val cvrsUA = testCvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }
-        writeAuditableCardCsvFile(cvrsUA, publisher.sortedCardsFile())
-        println("write sortedCards to ${publisher.sortedCardsFile()} ")
+        CreateAudit("TestPersistentOneAudit2", topdir = topdir, auditConfig, election, clear = false)
 
-        // put the testMvrs in the same sorted order as the cvrsUA
-        val testMvrsUA = cvrsUA.map { AuditableCard.fromCvr(testMvrs[it.index], it.index, it.prn) }
+        val publisher = Publisher(auditDir)
+        writeSortedCardsInternalSort(publisher, auditConfig.seed)
 
-        // val mvrManagerTest = MvrManagerTestFromRecord(testCvrs, testMvrs, auditConfig.seed) this does the mvrs manipulations internally
+        val testMvrsUA = AuditableCardCsvReader(publisher.sortedMvrsFile()).iterator().asSequence().toList()
         val mvrManager = MvrManagerFromRecord(auditDir)
-        var oaWorkflow = WorkflowTesterOneAudit(auditConfig, listOf(contestOA), mvrManager)
-
-        // these checks may modify the contest status
-        val verifier = VerifyContests(auditDir)
-        val resultsv = verifier.verify(oaWorkflow.contestsUA(), false)
-        println(resultsv.toString())
-        assertFalse(resultsv.hasErrors)
-
-        writeContestsJsonFile(oaWorkflow.contestsUA(), publisher.contestsFile())
-        println("write writeContestsJsonFile to ${publisher.contestsFile()} ")
-
+        var oaWorkflow = WorkflowTesterOneAudit(auditConfig, election.contestsUA(), mvrManager)
         var round = 1
         var done = false
         var workflow : AuditWorkflowIF = oaWorkflow
         while (!done) {
-            done = runPersistentWorkflowStage(round, workflow, auditDir, testMvrsUA, publisher)
+            // why doesnt mvrManager read in the mvrs?
+            done = runPersistentWorkflowStage(round, workflow, auditDir, testMvrsUA, Publisher(auditDir))
             workflow = PersistedWorkflow(auditDir, useTest = false)
             round++
         }
         println("------------------ ")
+    }
+
+    class TestOneAuditElection(fuzzMvrs: Double): CreateElectionIF {
+        val contestsUA = mutableListOf<OAContestUnderAudit>()
+        val allCardPools = mutableListOf<CardPoolIF>()
+        val allCvrs: List<Cvr>
+        val testMvrs: List<Cvr>
+
+        init {
+            val N = 5000
+            val (contestOA, cardPools, testCvrs) = makeOneContestUA(
+                N + 100,
+                N - 100,
+                cvrFraction = .95,
+                undervoteFraction = .0,
+                phantomFraction = .0
+            )
+
+            // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
+            // includes the pools votes
+
+            contestsUA.add(contestOA)
+            val infos = mapOf(contestOA.contest.info().id to contestOA.contest.info())
+            allCardPools.addAll(cardPools)
+
+            val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
+            allCvrs = testCvrs + phantoms
+
+            val cvrTabs = tabulateCvrs(allCvrs.iterator(), infos)
+            println("allCvrs = ${cvrTabs}")
+
+            val allContests = contestsUA.map { it.contest }
+            println("contests")
+            allContests.forEach { println("  $it") }
+            println()
+
+            testMvrs = if (fuzzMvrs == 0.0) allCvrs
+            // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
+            else makeFuzzedCvrsFrom(allContests, allCvrs, fuzzMvrs)
+            println("nmvrs = ${testMvrs.size} fuzzed at ${fuzzMvrs}")
+        }
+
+        override fun cardPools() = allCardPools
+        override fun contestsUA() = contestsUA
+
+        override fun allCvrs() = Pair(
+            CvrToAuditableCardPolling(Closer(allCvrs.iterator())),
+            CvrToAuditableCardPolling(Closer(testMvrs.iterator()))
+        )
     }
 }

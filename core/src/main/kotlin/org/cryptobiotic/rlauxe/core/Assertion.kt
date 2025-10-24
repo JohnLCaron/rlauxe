@@ -29,8 +29,8 @@ open class Assertion(
     }
 
     open fun show() = buildString {
-        appendLine(" contestInfo: $info \n")
-        appendLine("  assorter: ${assorter.desc()}")
+        appendLine(" contestInfo: $info")
+        appendLine("    assorter: ${assorter.desc()}")
     }
 
     fun id() = "contest ${info.id} winner: $winner loser: $loser"

@@ -3,15 +3,73 @@ package org.cryptobiotic.rlauxe.dominion
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.sf.ContestManifest
 import org.cryptobiotic.rlauxe.sf.readBallotTypeContestManifestJsonFromZip
 import org.cryptobiotic.rlauxe.sf.readContestManifest
 import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.util.ZipReaderIterator
 import org.cryptobiotic.rlauxe.util.ZipReaderTour
 import java.io.FileOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.use
 
 class TestDominionCvrExportJson {
+
+    // https://www.sfelections.org/results/20240305/data/20240322/CVR_Export_20240322103409.zip
+    @Test
+    fun testZipReader() {
+        val topDir = "/home/stormy/rla/cases/sf2024"
+        val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
+        val contestManifest = readContestManifest("src/test/data/SF2024/manifests/ContestManifest.json")
+
+        testZipReader(zipFilename, contestManifest)
+    }
+
+    fun testZipReader(filename: String, contestManifest: ContestManifest) {
+        var countFiles = 0
+        var countCards = 0
+        var countPoolCards = 0
+        // ZipReaderTour(zipFile: String, val silent: Boolean = true, val sort: Boolean = true,
+        //    val filter: (Path) -> Boolean, val visitor: (InputStream) -> Unit)
+        val tour = ZipReaderTour(
+            zipFile = filename,
+            filter = { it.toString().contains("CvrExport_") },
+            visitor = { input ->
+                countFiles++
+                val cvrs = convertCvrExportJsonToCvrExports(input, contestManifest)
+                cvrs.forEach {
+                    countCards++
+                    if (it.group == 1) countPoolCards++
+                }
+            },
+        )
+        tour.tourFiles()
+        println("file count: $countFiles")
+        println("card Count: $countCards")
+        println("countPoolCards: $countPoolCards")
+
+        var countCards2 = 0
+        var countPoolCards2 = 0
+        // ZipReaderTour(zipFile: String, val silent: Boolean = true, val sort: Boolean = true,
+        //    val filter: (Path) -> Boolean, val visitor: (InputStream) -> Unit)
+        val zipper = ZipReaderIterator(
+            zipFile = filename,
+            filter = { it.toString().contains("CvrExport_") },
+            reader = { input -> convertCvrExportJsonToCvrExports(input, contestManifest)}
+        )
+        zipper.use { iter ->
+            while (iter.hasNext()) {
+                val cvr = iter.next()
+                countCards2++
+                if (cvr.group == 1) countPoolCards2++
+            }
+        }
+        println("card Count: $countCards2")
+        println("countPoolCards: $countPoolCards2")
+        assertEquals(countCards, countCards2)
+        assertEquals(countPoolCards, countPoolCards2)
+    }
 
     // https://www.sfelections.org/results/20240305/data/20240322/CVR_Export_20240322103409.zip
 

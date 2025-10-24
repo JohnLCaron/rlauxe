@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.corla
 
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
+import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
@@ -31,7 +31,7 @@ class TestCreateColoradoAudits {
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
+        writeSortedCardsExternalSort(topdir, publisher, config.seed)
     }
 
     @Test
@@ -45,7 +45,7 @@ class TestCreateColoradoAudits {
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
+        writeSortedCardsExternalSort(topdir, publisher, config.seed)
     }
 
     @Test

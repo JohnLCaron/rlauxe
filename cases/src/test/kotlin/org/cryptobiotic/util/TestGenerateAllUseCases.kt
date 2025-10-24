@@ -1,6 +1,7 @@
 package org.cryptobiotic.util
 
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
 import org.cryptobiotic.rlauxe.corla.createColoradoOneAudit
@@ -57,7 +58,7 @@ class TestGenerateAllUseCases {
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
+        writeSortedCardsExternalSort(topdir, publisher, config.seed)
     }
 
     @Test
@@ -71,7 +72,7 @@ class TestGenerateAllUseCases {
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
+        writeSortedCardsExternalSort(topdir, publisher, config.seed)
     }
 
     @Test

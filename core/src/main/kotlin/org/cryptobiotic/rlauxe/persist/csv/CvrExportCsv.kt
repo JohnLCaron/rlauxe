@@ -44,43 +44,33 @@ fun cvrExportCsvIterator(filename: String): CloseableIterator<CvrExport> {
         val input = reader.inputStream()
         IteratorCvrExportStream(input)
     } else {
-        IteratorCvrExportFile(filename)
+        IteratorCvrExportStream(File(filename).inputStream())
     }
 }
 
 class IteratorCvrExportStream(input: InputStream): CloseableIterator<CvrExport> {
     val reader = BufferedReader(InputStreamReader(input, "ISO-8859-1"))
-    var nextLine: String? = reader.readLine() // get rid of header line
-
+    var nextLine: String? = null
     var countLines  = 0
+
+    init {
+        reader.readLine() // get rid of header line
+    }
+
     override fun hasNext() : Boolean {
-        countLines++
-        nextLine = reader.readLine()
+        if (nextLine == null) {
+            countLines++
+            nextLine = reader.readLine()
+        }
         return nextLine != null
     }
 
     override fun next(): CvrExport {
-        return readCvrExportCsv(nextLine!!)
-    }
-
-    override fun close() {
-        reader.close()
-    }
-}
-
-class IteratorCvrExportFile(filename: String): CloseableIterator<CvrExport> {
-    val reader: BufferedReader = File(filename).bufferedReader()
-    var nextLine: String? = reader.readLine() // get rid of header line
-
-    var countLines  = 0
-    override fun hasNext() : Boolean {
-        countLines++
-        nextLine = reader.readLine()
-        return nextLine != null
-    }
-
-    override fun next(): CvrExport {
-        return readCvrExportCsv(nextLine!!)
+        if (!hasNext())
+            throw NoSuchElementException()
+        val result =  readCvrExportCsv(nextLine!!)
+        nextLine = null
+        return result
     }
 
     override fun close() {

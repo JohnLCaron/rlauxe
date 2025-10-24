@@ -14,8 +14,6 @@ import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
-import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.CvrToAuditableCardClca
 import org.cryptobiotic.rlauxe.util.CvrToAuditableCardPolling
@@ -98,7 +96,7 @@ fun startTestElectionPolling2(
     val auditConfig = AuditConfig(AuditType.POLLING, hasStyles = true, nsimEst = 100)
 
     clearDirectory(Path(auditDir))
-    val election = TestPollingElection2(
+    val election = TestPollingElection(
         auditConfig,
         minMargin,
         fuzzMvrsPct,
@@ -106,17 +104,17 @@ fun startTestElectionPolling2(
         ncards,
         ncontests,
     )
-    CreateAudit2("startTestElectionPolling2", topdir = topdir, auditConfig, election, clear = false)
+    CreateAudit("startTestElectionPolling2", topdir = topdir, auditConfig, election, clear = false)
 }
 
-class TestPollingElection2(
+class TestPollingElection(
     auditConfig: AuditConfig,
     minMargin: Double,
     fuzzMvrsPct: Double,
     pctPhantoms: Double?,
     ncards: Int,
     ncontests: Int,
-): CreateElection2IF {
+): CreateElectionIF {
     val contestsUA = mutableListOf<ContestUnderAudit>()
     val cvrs: List<Cvr>
     val testMvrs: List<Cvr>
@@ -149,13 +147,12 @@ class TestPollingElection2(
         println()
     }
     override fun cardPools() = null
-    override fun hasTestMvrs() = true
 
     override fun contestsUA() = contestsUA
 
     override fun allCvrs() = Pair(
-        CloseableIterable { CvrToAuditableCardPolling(Closer(cvrs.iterator())) },
-        CloseableIterable { CvrToAuditableCardPolling(Closer(testMvrs.iterator())) }
+        CvrToAuditableCardPolling(Closer(cvrs.iterator())),
+        CvrToAuditableCardPolling(Closer(testMvrs.iterator()))
     )
 }
 
@@ -178,7 +175,7 @@ fun startTestElectionClca2(
     )
 
     clearDirectory(Path(auditDir))
-    val election = TestClcaElection2(
+    val election = TestClcaElection(
         auditConfig,
         minMargin,
         fuzzMvrs,
@@ -188,10 +185,10 @@ fun startTestElectionClca2(
         addRaire,
         addRaireCandidates)
 
-    CreateAudit2("startTestElectionClca2", topdir = topdir, auditConfig, election, clear = false)
+    CreateAudit("startTestElectionClca2", topdir = topdir, auditConfig, election, clear = false)
 }
 
-class TestClcaElection2(
+class TestClcaElection(
     auditConfig: AuditConfig,
     minMargin: Double,
     fuzzMvrs: Double,
@@ -200,7 +197,7 @@ class TestClcaElection2(
     ncontests: Int,
     addRaire: Boolean,
     addRaireCandidates: Int,
-): CreateElection2IF {
+): CreateElectionIF {
     val contestsUA = mutableListOf<ContestUnderAudit>()
     val allCvrs = mutableListOf<Cvr>()
     val testMvrs: List<Cvr>
@@ -243,10 +240,9 @@ class TestClcaElection2(
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
 
-    override fun hasTestMvrs() = true
     override fun allCvrs() = Pair(
-        CloseableIterable { CvrToAuditableCardClca(Closer(allCvrs.iterator())) },
-        CloseableIterable { CvrToAuditableCardClca(Closer(testMvrs.iterator())) }
+        CvrToAuditableCardClca(Closer(allCvrs.iterator())),
+        CvrToAuditableCardClca(Closer(testMvrs.iterator()))
     )
 }
 

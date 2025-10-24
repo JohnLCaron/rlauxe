@@ -113,7 +113,7 @@ class TruncShrinkage(
 //            np.maximum(weighted, m * (1 + np.finfo(float).eps) + tol)
 //        )
 // TODO test against TruncShrinkage
-class TruncShrinkageNew(
+/* class TruncShrinkageNew(
     val N: Int,
     val withoutReplacement: Boolean = true,
     val upperBound: Double,
@@ -193,7 +193,7 @@ class TruncShrinkageNew(
         val boundedEst = min(capAbove, max(weighted, capBelow))
         return boundedEst
     }
-}
+} */
 
 // wrapper around BettingMart; used for polling
 class AlphaMart(

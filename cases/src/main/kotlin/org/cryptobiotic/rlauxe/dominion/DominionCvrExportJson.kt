@@ -232,6 +232,15 @@ fun removeDuplicates(svotes : List<Int> ) : List<Int> {
     return result
 }
 
+fun convertCvrExportJsonToCvrExports(inputStream: InputStream, contestManifest: ContestManifest): Iterator<CvrExport> {
+    val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
+    val dominionCvrs = if (result is Ok) result.unwrap()
+        else throw RuntimeException("Cannot read DominionCvrJson err = $result")
+
+    val summary = dominionCvrs.import(contestManifest)
+    return summary.cvrExports.iterator()
+}
+
 // read CvrExport JSON inputStream and append CvrExport csv to outputStream
 fun convertCvrExportJsonToCsv(inputStream: InputStream, outputStream: OutputStream, contestManifest: ContestManifest): DominionCvrSummary {
     val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
@@ -271,6 +280,7 @@ fun Session.import(irvContests: Set<Int>): List<Cvr> {
     }
     return result
 }
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 fun readDominionCvrJsonFile(filename: String): Result<DominionCvrExportJson, ErrorMessages> {
@@ -296,8 +306,10 @@ fun readDominionCvrJsonStream(inputStream: InputStream): Result<DominionCvrExpor
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true }
 
     return try {
-        val json = jsonReader.decodeFromStream<DominionCvrExportJson>(inputStream)
-        if (errs.hasErrors()) Err(errs) else Ok(json)
+        inputStream.use { input ->
+            val json = jsonReader.decodeFromStream<DominionCvrExportJson>(input)
+            if (errs.hasErrors()) Err(errs) else Ok(json)
+        }
     } catch (t: Throwable) {
         errs.add("Exception= ${t.message} ${t.stackTraceToString()}")
     }

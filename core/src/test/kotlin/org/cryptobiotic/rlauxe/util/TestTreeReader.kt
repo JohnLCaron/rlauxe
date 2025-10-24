@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.CvrExport
-import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrExportFile
+import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -17,7 +17,7 @@ class TestTreeReader {
 
         TreeReaderIterator(topDir,
             fileFilter = { it.toString().endsWith(".csv") },
-            reader = {  path -> countFiles++; IteratorCvrExportFile(path.toString()) },
+            reader = {  path -> countFiles++; cvrExportCsvIterator(path.toString()) },
         ).use { treeIter ->
             while (treeIter.hasNext()) {
                 val cvrExport: CvrExport = treeIter.next()

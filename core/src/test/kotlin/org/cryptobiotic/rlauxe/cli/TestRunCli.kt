@@ -36,6 +36,13 @@ class TestRunCli {
         RunVerifyContests.main(arrayOf("-in", auditdir))
 
         println("============================================================")
+        RunRliRoundCli.main(
+            arrayOf(
+                "-in", auditdir,
+                "-test",
+            )
+        )
+
         var done = false
         while (!done) {
             val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
@@ -43,7 +50,11 @@ class TestRunCli {
         }
 
         println("============================================================")
-        val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=auditdir)
+        val status = RunVerifyAuditRecord.main(
+            arrayOf(
+                "-in", auditdir,
+            )
+        )
         println(status)
         topPath.deleteRecursively()
     }

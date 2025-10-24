@@ -11,7 +11,6 @@ dependencies {
     implementation(files("../libs/raire-java-1.0.2.jar"))
 
     implementation(libs.bull.result)
-    implementation(libs.commons.csv)
     implementation(libs.commons.math)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.cli)

@@ -34,15 +34,15 @@ class TestMakeRaireContest {
             irvCounters.add(IrvCounter(contestUA.contest as RaireContest))
         }
 
-        // takes too long - TODO get smaller example
         val cvrCsv = "$topDir/$cvrExportCsvFile"
         val cvrIter = CvrExportToCvrAdapter(cvrExportCsvIterator(cvrCsv))
         var count = 0
         while (cvrIter.hasNext()) {
-            irvCounters.forEach { it.addCvr(cvrIter.next())}
+            val cvr = cvrIter.next()
+            irvCounters.forEach { it.addCvr(cvr)}
             count++
         }
-        println("processed $count cvrs $stopwatch") // TODO takes 1 min, should we save the VC?
+        println("processed $count cvrs $stopwatch")
 
         irvCounters.forEach { counter ->
             println("${counter.rcontest}")

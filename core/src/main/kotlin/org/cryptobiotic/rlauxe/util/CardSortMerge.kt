@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.util
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
@@ -12,34 +11,32 @@ import java.nio.file.*
 private val maxChunkDefault = 100000
 private val logger = KotlinLogging.logger("SortMerge")
 
-// from Iterator<CvrExport>, convert to AuditableCard, assign prn, external sort and write sortedCards.
-class SortMerge(
+// from Iterator<T>, convert to AuditableCard, assign prn, external sort and write sortedCards.
+class SortMerge<T>(
     val scratchDirectory: String,
     val outputFile: String,
     val seed: Long,
-    val poolNameToId: Map<String, Int>? = null,
-    val showPoolVotes: Boolean,
     val maxChunk: Int = maxChunkDefault) {
 
-    fun run(cardIter: CloseableIterator<CvrExport>, cvrs: List<Cvr>) {
+    fun run(cardIter: CloseableIterator<T>, cvrs: List<Cvr>, toAuditableCard: (from: T, index: Int, prn: Long) -> AuditableCard) {
         // out of memory sort by sampleNum()
-        sortCards(cardIter, cvrs, scratchDirectory, seed, pools = poolNameToId)
+        sortCards(cardIter, cvrs, scratchDirectory, seed, toAuditableCard)
         mergeCards(scratchDirectory, outputFile)
     }
 
     // out of memory sorting
     fun sortCards(
-        cardIterator: CloseableIterator<CvrExport>,
+        cardIterator: CloseableIterator<T>,
         cvrs: List<Cvr>, // phantoms
         scratchDirectory: String,
         seed: Long,
-        pools: Map<String, Int>?
+        toAuditableCard: (from: T, index: Int, prn: Long) -> AuditableCard
     ) {
         clearDirectory(Path.of(scratchDirectory))
         validateOutputDir(Path.of(scratchDirectory), ErrorMessages("sortCards"))
 
         val prng = Prng(seed)
-        val cardSorter = ChunkSorter(scratchDirectory, prng, maxChunk, pools = pools, showPoolVotes = showPoolVotes)
+        val cardSorter = ChunkSorter<T>(scratchDirectory, prng, maxChunk, toAuditableCard)
 
         cardIterator.use { cardIter ->
             while (cardIter.hasNext()) {
@@ -70,14 +67,15 @@ class SortMerge(
     }
 }
 
-class ChunkSorter(val workingDirectory: String, val prng: Prng, val max: Int, val pools: Map<String, Int>?, val showPoolVotes: Boolean) {
+private class ChunkSorter<T>(val workingDirectory: String, val prng: Prng, val max: Int,
+                             val toAuditableCard: (from: T, index: Int, prn: Long) -> AuditableCard) {
     var index = 0
     var count = 0
     val cards = mutableListOf<AuditableCard>()
     var countChunks = 0
 
-    fun add(card: CvrExport) {
-        val card = card.toAuditableCard(index=index, prn=prng.next(), false, pools = pools, showPoolVotes)
+    fun add(from: T) {
+        val card = toAuditableCard(from, index, prng.next()) // , false, pools = pools, showPoolVotes)
         cards.add(card)
         index++
         count++
@@ -109,8 +107,8 @@ class ChunkSorter(val workingDirectory: String, val prng: Prng, val max: Int, va
     }
 }
 
-class CardMerger(chunkFilenames: List<String>, val writer: AuditableCardCsvWriter, val maxChunk: Int) {
-    val nextUps = chunkFilenames.map { NextUp(IteratorCardsCsvFile(it)) }
+private class CardMerger(chunkFilenames: List<String>, val writer: AuditableCardCsvWriter, val maxChunk: Int) {
+    val nextUps = chunkFilenames.map { NextUp(readCardsCsvIterator(it)) }
     val cards = mutableListOf<AuditableCard>()
     var total = 0
 

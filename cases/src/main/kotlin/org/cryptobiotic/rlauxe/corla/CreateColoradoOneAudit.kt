@@ -11,28 +11,28 @@ import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestIF
 import org.cryptobiotic.rlauxe.oneaudit.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.audit.createCvrsFromPools
-import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.max
+import kotlin.sequences.plus
 
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
 // making OneAudit pools from the precinct results
+// TODO vary percent cards in pools, show plot
 class ColoradoOneAudit (
     electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
     val isClca: Boolean,
     val hasStyles: Boolean = true,
-): CreateElection2IF {
+): CreateElectionIF {
     val roundContests: List<ContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
 
     val oaContests = makeOneContestInfo(electionDetailXml, roundContests)
     val infoMap = oaContests.associate { it.info.id to it.info }
-    val cardPools = convertPrecinctsToCardPools(precinctFile, infoMap)
+    val cardPools: List<CardPoolWithBallotStyle> = convertPrecinctsToCardPools(precinctFile, infoMap)
 
     val contestsUA: List<ContestUnderAudit>
 
@@ -152,25 +152,51 @@ class ColoradoOneAudit (
 
     override fun contestsUA() = contestsUA
 
-    fun makeCvrs(): List<Cvr> {
+    // dont load into memory all at once, just one pool at a time
+    inner class MakeCvrs(): Iterator<Cvr> {
         val oaContestMap = oaContests.associateBy { it.info.id }
+        val cardPoolIter = cardPools.iterator()
+        var innerIter: CardsFromPool
 
-        val rcvrs = mutableListOf<Cvr>()
-        cardPools.forEach { cardPool ->
-            rcvrs.addAll(makeCvrsFromPool(cardPool, oaContestMap, isClca))
+        init {
+            innerIter = CardsFromPool(cardPoolIter.next(), oaContestMap, isClca)
         }
 
-        val rcvrTabs = tabulateCvrs(rcvrs.iterator(), infoMap).toSortedMap()
-        rcvrTabs.forEach { contestId, contestTab ->
-            val oaContest: OneAuditContestCorla = oaContestMap[contestId]!!
-            require(checkEquivilentVotes(oaContest.candidateVotes, contestTab.votes))
-            // if (voteForN[contestId] == 1) require(redUndervotes == contestTab.undervotes) // TODO
+        override fun next(): Cvr {
+            return innerIter.next()
         }
 
-        return rcvrs
+        override fun hasNext(): Boolean {
+            if (innerIter.hasNext()) return true
+            if (cardPoolIter.hasNext()) {
+                innerIter = CardsFromPool(cardPoolIter.next(), oaContestMap, isClca)
+                return hasNext()
+            }
+            return false
+        }
     }
 
-    override fun hasTestMvrs() = isClca // TODO if you leave off mvrs, i think it will automatically use the cvrs (no error)
+    // these are chosen randomly, so in order for mvrs and cvrs to match, the cvrs have to be made from the mvrs.
+    class CardsFromPool(val cardPool: CardPoolWithBallotStyle, val oaContestMap: Map<Int, OneAuditContestCorla>, val isClca: Boolean) : Iterator<Cvr> {
+        val cvrs: Iterator<Cvr>
+
+        init {
+            val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
+            cardPool.voteTotals.forEach { (contestId, contestTab) ->
+                val oaContest: OneAuditContestCorla = oaContestMap[contestId]!!
+                val sumVotes = contestTab.nvotes()
+                val underVotes = cardPool.ncards() * oaContest.info.voteForN - sumVotes
+                contestVotes[contestId] = VotesAndUndervotes(contestTab.votes, underVotes, oaContest.info.voteForN)
+            }
+
+            cvrs = makeVunderCvrs(contestVotes, cardPool.poolName, poolId = if (isClca) null else cardPool.poolId).iterator()
+        }
+
+        override fun next() = cvrs.next()
+        override fun hasNext() = cvrs.hasNext()
+    }
+
+    /* override fun hasTestMvrs() = isClca // TODO if you leave off mvrs, i think it will automatically use the cvrs (no error)
     override fun allCvrs(): Pair<CloseableIterable<AuditableCard>, CloseableIterable<AuditableCard>> {
         val poolCvrs = if (isClca) makeCvrs() else createCvrsFromPools(cardPools) // OOM error when both cvrs are made
         val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
@@ -181,6 +207,19 @@ class ColoradoOneAudit (
             CloseableIterable { CvrToAuditableCardClca(Closer(cvrs.iterator())) },
             CloseableIterable { CvrToAuditableCardClca(Closer(mvrs.iterator())) },
         )
+    } */
+
+    override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
+        val phantomCvrs = makePhantomCvrs(contestsUA().map { it.contest })
+        val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0L) }.asSequence()
+
+        val cvrIter: Iterator<Cvr> = MakeCvrs()  // "fake" truth
+        val poolNameToId = cardPools.associate { it.poolName to it.poolId }
+        val cardSeq = CvrToCardAdapter(Closer(cvrIter), poolNameToId).asSequence()
+
+        val allCardsIter = (cardSeq + phantomSeq).iterator()
+
+        return Pair(null, Closer( allCardsIter))
     }
 }
 
@@ -218,40 +257,6 @@ class OneAuditContestCorla(val info: ContestInfo, val detailContest: ElectionDet
     override fun expectedPoolNCards() = Nc
 }
 
-fun makeCvrsFromPool(cardPool: CardPoolWithBallotStyle, oaContestMap: Map<Int, OneAuditContestCorla>, isClca: Boolean) : List<Cvr> {
-
-    val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
-    cardPool.voteTotals.forEach { (contestId, contestTab) ->
-        val oaContest: OneAuditContestCorla = oaContestMap[contestId]!!
-        val sumVotes = contestTab.nvotes()
-        val underVotes = cardPool.ncards() * oaContest.info.voteForN - sumVotes
-        contestVotes[contestId] = VotesAndUndervotes(contestTab.votes, underVotes, oaContest.info.voteForN)
-    }
-
-    val cvrs = makeVunderCvrs(contestVotes, cardPool.poolName, poolId = if (isClca) null else cardPool.poolId) // TODO test
-
-    // check
-    val infos = oaContestMap.mapValues { it.value.info }
-
-    val tabVotes: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infos)
-    contestVotes.forEach { (contestId, vunders) ->
-        val tv = tabVotes[contestId]
-        if (tv != null && !checkEquivilentVotes(vunders.candVotesSorted, tv.votes)) {
-            println("  contestId=${contestId}")
-            println("  tabVotes=${tv}")
-            println("  vunders= ${vunders.candVotesSorted}")
-            require(checkEquivilentVotes(vunders.candVotesSorted, tv.votes))
-        }
-    }
-
-    val contestTabs = tabulateCvrs(cvrs.iterator(), infos).toSortedMap()
-    contestTabs.forEach { contestId, contestTab ->
-        require(checkEquivilentVotes(cardPool.voteTotals[contestId]!!.votes, contestTab.votes))
-    }
-
-    return cvrs
-}
-
 ////////////////////////////////////////////////////////////////////
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
 fun createColoradoOneAudit(
@@ -278,7 +283,7 @@ fun createColoradoOneAudit(
         )
     }
 
-    CreateAudit2("corla", topdir, auditConfig, election, clear = clear)
+    CreateAudit("corla", topdir, auditConfig, election, clear = clear)
     println("createColoradoOneAudit took $stopwatch")
 }
 

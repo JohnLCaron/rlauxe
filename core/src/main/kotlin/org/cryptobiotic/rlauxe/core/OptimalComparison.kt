@@ -273,7 +273,7 @@ class OptimalLambda(val a: Double, val errorRates: ClcaErrorRates, val mui: Doub
 //     'test':             NonnegMean.betting_mart,
 //     'bet':              NonnegMean.kelly_optimal /'test_kwargs': {'d': 100, 'f': 0}
 
-class KellyOptimal(val x: DoubleArray, val t: Double)  {
+/* class KellyOptimal(val x: DoubleArray, val t: Double)  {
     /*
         return the Kelly-optimal bet
 
@@ -364,7 +364,7 @@ fun solve(function: UnivariateFunction, lo: Double, hi: Double): Double {
     val result = solver.solve(1000, function, lo, hi)
 
     return result
-}
+} */
 
 // note SHANGRLA uses "bisect" here, not "brent"
 // hmmm Brent might not want the derivitive, rather the function itself??

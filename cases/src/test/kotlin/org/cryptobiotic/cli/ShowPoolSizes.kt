@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.audit
+package org.cryptobiotic.cli
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap

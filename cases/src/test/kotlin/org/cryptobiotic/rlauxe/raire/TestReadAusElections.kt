@@ -1,5 +1,7 @@
-package org.cryptobiotic.rlauxe.persist.raire
+package org.cryptobiotic.rlauxe.raire
 
+import org.cryptobiotic.rlauxe.rairejson.readRaireProblemJson
+import org.cryptobiotic.rlauxe.rairejson.readRaireSolutionJson
 import java.io.File
 import kotlin.test.Test
 

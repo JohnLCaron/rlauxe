@@ -39,11 +39,10 @@ class CreateSfElection(
     contestManifestFilename: String,
     candidateManifestFile: String,
     val cvrExportCsv: String,
-    val isClca: Boolean,
+    val isClca: Boolean,  // TODO appears unused
 ): CreateElectionIF {
     val cardPoolsNotUnpooled: List<CardPoolIF>
     val contestsOA: List<ContestUnderAudit>
-    val extra = mutableListOf<Cvr>()
 
     init {
         val (contestNcs, contestInfos) = makeContestInfos(

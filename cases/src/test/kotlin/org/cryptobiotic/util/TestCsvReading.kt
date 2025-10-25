@@ -1,13 +1,18 @@
-package org.cryptobiotic.rlauxe.persist.csv
+package org.cryptobiotic.util
 
+import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
+import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.writeCvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
+import org.junit.jupiter.api.Assertions
+import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-import org.junit.jupiter.api.Assertions.assertTrue
-
 class TestCsvReading {
-    val tempDir = kotlin.io.path.createTempDirectory()
+    val tempDir = createTempDirectory()
 
     @Test
     fun testAuditableCardCsvFile() {
@@ -22,10 +27,10 @@ class TestCsvReading {
 
     // @Test // slow TODO get smaller test file
     fun testCvrExportCsvFile() {
-        val filenameIn = "/home/stormy/rla/cases/sf2024/$cvrExportCsvFile"
-        val filenameOut = "$tempDir/$cvrExportCsvFile"
+        val filenameIn = "/home/stormy/rla/cases/sf2024/${cvrExportCsvFile}"
+        val filenameOut = "$tempDir/${cvrExportCsvFile}"
         writeCvrExportCsvFile(cvrExportCsvIterator(filenameIn), filenameOut)
-        assertTrue(areIteratorsEqual(cvrExportCsvIterator(filenameIn), cvrExportCsvIterator(filenameOut)))
+        Assertions.assertTrue(areIteratorsEqual(cvrExportCsvIterator(filenameIn), cvrExportCsvIterator(filenameOut)))
     }
 
     fun <T> areIteratorsEqual(iterator1: Iterator<T>, iterator2: Iterator<T>): Boolean {

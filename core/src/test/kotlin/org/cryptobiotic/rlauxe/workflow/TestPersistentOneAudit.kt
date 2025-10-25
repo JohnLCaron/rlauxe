@@ -16,8 +16,8 @@ import kotlin.io.path.Path
 import kotlin.test.Test
 
 class TestPersistentOneAudit {
-    val topdir = "/home/stormy/rla/persist/testPersistentOneAudit"
-    // val topdir = kotlin.io.path.createTempDirectory().toString()
+    // topdir = "/home/stormy/rla/persist/testPersistentOneAudit"
+    val topdir = kotlin.io.path.createTempDirectory().toString()
 
     @Test
     fun testPersistentWorkflow() {

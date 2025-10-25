@@ -42,8 +42,8 @@ class PollWithoutReplacement(
                 return assorter.assort(mvr, usePhantoms = true)
             }
         }
-        logger.error{"no samples left for contest ${contestId} and Assorter ${assorter}"}
-        throw RuntimeException("no samples left for contest ${contestId} and assorter ${assorter}")
+        logger.error{"PollWithoutReplacement no samples left for contest ${contestId} and Assorter ${assorter}"}
+        throw RuntimeException("PollWithoutReplacement no samples left for contest ${contestId} and assorter ${assorter}")
     }
 
     override fun reset() {

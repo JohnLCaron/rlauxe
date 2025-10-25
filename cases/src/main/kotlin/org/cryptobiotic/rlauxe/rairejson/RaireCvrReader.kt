@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.persist.raire
+package org.cryptobiotic.rlauxe.rairejson
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import java.io.File

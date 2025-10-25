@@ -16,12 +16,12 @@ import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
 
-class TestPersistentWorkflowClca {
+class TestPersistentAuditClca {
     val auditDir = "/home/stormy/rla/persist/testPersistentWorkflowClca"
     // val auditDir = kotlin.io.path.createTempDirectory().toString()
 
     @Test
-    fun testPersistentWorkflowClca() {
+    fun testPersistentAuditClca() {
         clearDirectory(Path.of(auditDir))
 
         val fuzzMvrPct = .01

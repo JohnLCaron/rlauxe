@@ -69,7 +69,7 @@ Note that this gives us the number of samples estimated for each audit round, fr
 There are 725 contests listed on round1/contest.csv. There are 295 listed in detail.xml. I was told they dont have precinct data (or CVRs?) for contests \>= 260. So we restrict our attention to those 260 contests.
 
 
-The file data/2024audit/_targetedContests.xlsx_ shows contests selected for audit, eg:
+The file corla/2024audit/_targetedContests.xlsx_ shows contests selected for audit, eg:
 
 ````
   "County","Contest","Vote For","Lowest Winner","Highest Loser","Contest Margin","Diluted Margin","Risk Limit","Estimated # of CVRs to audit","# of CVRs","Remarks",,,,,,,,,,,,,,,,

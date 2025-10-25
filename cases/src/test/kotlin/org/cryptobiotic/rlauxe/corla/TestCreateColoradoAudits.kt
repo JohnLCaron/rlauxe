@@ -23,8 +23,8 @@ class TestCreateColoradoAudits {
     @Test
     fun testCreateColoradoOneAudit() {
         val topdir = "/home/stormy/rla/cases/corla/oneaudit"
-        val detailXmlFile = "src/test/data/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
+        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
+        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
 
         createColoradoOneAudit(topdir, detailXmlFile, contestRoundFile, precinctFile, isClca=false, clear=true)
@@ -37,9 +37,9 @@ class TestCreateColoradoAudits {
     @Test
     fun testCreateColoradoClca() {
         val topdir = "/home/stormy/rla/cases/corla/clca"
-        val detailXmlFile = "src/test/data/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
+        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
+        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
+        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         createColoradoOneAudit(topdir, detailXmlFile, contestRoundFile, precinctFile, isClca=true, clear=true)
 

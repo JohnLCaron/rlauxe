@@ -310,30 +310,6 @@ open class ContestUnderAudit(
         return assertions
     }
 
-    /* TODO replace with use margin
-    fun makeClcaAssertions(cvrs : Iterable<Cvr>): ContestUnderAudit {
-        val assertionMap = pollingAssertions.map { Pair(it, Welford()) }
-        cvrs.filter { it.hasContest(id) }.forEach { cvr ->
-            assertionMap.map { (assertion, welford) ->
-                welford.update(assertion.assorter.assort(cvr, usePhantoms = false))  //TODO usePhantoms?
-            }
-        }
-        return makeClcaAssertions(assertionMap)
-    }
-
-    fun makeClcaAssertions(assertionMap: List<Pair<Assertion, Welford>> ): ContestUnderAudit {
-        require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
-
-        this.clcaAssertions = assertionMap.filter { it.first.info.id == this.id }
-            .map { (assertion, welford) ->
-                val clcaAssorter = makeClcaAssorter(assertion, welford.mean)
-                ClcaAssertion(contest.info(), clcaAssorter)
-            }
-        return this
-    } */
-
-    // This is more robust than averaging cvrs, since cvrs have to be complete and accurate.
-    // OTOH, need complete and accurate CardLocation Manifest anyway!!
     fun addClcaAssertionsFromReportedMargin(): ContestUnderAudit {
         require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
 
@@ -443,28 +419,4 @@ open class ContestUnderAudit(
     }
 
 }
-
-/* TODO replace with use margin
-// add ClcaAssertions for multiple Contests from one iteration over the Cvrs
-// The Cvrs must have the undervotes recorded
-fun addClcaAssertions(contestsUA: List<ContestUnderAudit>, cvrs: CloseableIterator<Cvr>) {
-    val assertionMap = mutableListOf<Pair<Assertion, Welford>>()
-    contestsUA.forEach { contestUA ->
-        contestUA.pollingAssertions.forEach { assertion ->
-            assertionMap.add(Pair(assertion, Welford()))
-        }
-    }
-
-    cvrs.use { cvrIter ->
-        while (cvrIter.hasNext()) {
-            val cvr = cvrIter.next()
-            assertionMap.map { (assertion, welford) ->
-                if (cvr.hasContest(assertion.info.id)) {
-                    welford.update(assertion.assorter.assort(cvr, usePhantoms = false))
-                }
-            }
-        }
-    }
-    contestsUA.forEach { it.makeClcaAssertions(assertionMap) }
-} */
 

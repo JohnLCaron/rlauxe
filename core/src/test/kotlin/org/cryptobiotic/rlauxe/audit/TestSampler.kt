@@ -10,8 +10,10 @@ import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class TestSampler {
     val cvrs: List<Cvr> = makeCvrsByExactCount(listOf(1, 1))
@@ -31,6 +33,14 @@ class TestSampler {
             count++
         }
         assertEquals(cvrs.size, count)
+        assertEquals(cvrs.size, target.maxSamples())
+        assertEquals(cvrs.size, target.maxSampleIndexUsed())
+        assertEquals(cvrs.size, target.nmvrs())
+
+        // deliberately try to read more that there are
+        val failMess = assertFailsWith<RuntimeException> { target.next() }.message!!
+        println(failMess)
+        assertTrue(failMess.startsWith("PollWithoutReplacement no samples left for contest 0"))
     }
 
     @Test
@@ -45,6 +55,13 @@ class TestSampler {
             count++
         }
         assertEquals(cvrs.size, count)
+        assertEquals(cvrs.size, target.maxSamples())
+        assertEquals(cvrs.size, target.maxSampleIndexUsed())
+        assertEquals(cvrs.size, target.nmvrs())
+
+        // deliberately try to read more that there are
+        val failMess = assertFailsWith<RuntimeException> { target.next() }.message!!
+        assertTrue(failMess.startsWith("ClcaWithoutReplacement no samples left for 0"))
     }
 
     @Test
@@ -59,6 +76,12 @@ class TestSampler {
             count++
         }
         assertEquals(cvrs.size, count)
+        assertEquals(cvrs.size, target.maxSamples())
+        assertEquals(cvrs.size, target.maxSampleIndexUsed())
+        assertEquals(cvrs.size, target.nmvrs())
+
+        // deliberately try to read more that there are
+        assertEquals(0.0, target.next())
     }
 
     @Test
@@ -73,6 +96,12 @@ class TestSampler {
             count++
         }
         assertEquals(cvrs.size, count)
+        assertEquals(cvrs.size, target.maxSamples())
+        assertEquals(cvrs.size, target.maxSampleIndexUsed())
+        assertEquals(cvrs.size, target.nmvrs())
+
+        // deliberately try to read more that there are
+        assertEquals(0.0, target.next())
     }
 
 }

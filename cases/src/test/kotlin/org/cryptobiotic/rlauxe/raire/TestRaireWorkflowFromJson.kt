@@ -1,6 +1,9 @@
-package org.cryptobiotic.rlauxe.persist.raire
+package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.rairejson.import
+import org.cryptobiotic.rlauxe.rairejson.readRaireBallotsCsv
+import org.cryptobiotic.rlauxe.rairejson.readRaireResultsJson
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Stopwatch

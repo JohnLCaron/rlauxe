@@ -124,7 +124,7 @@ fun makeEstimationTasks(
             var startingTestStatistic = 1.0
             if (roundIdx > 1) {
                 val prevAuditResult = assertionRound.prevAuditResult!!
-                if (prevAuditResult.samplesUsed == contestRound.Nc) {   // TODO or pct of ?
+                if (prevAuditResult.samplesUsed == contestRound.Nc) {
                     logger.info{"***LimitReached $contestRound"}
                     contestRound.done = true
                     contestRound.status = TestH0Status.LimitReached

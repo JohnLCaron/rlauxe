@@ -1,10 +1,10 @@
-package org.cryptobiotic.rlauxe.persist.raire
+package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.raire.RaireAssertionType
-import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
-import org.cryptobiotic.rlauxe.raire.VoteConsolidator
-import org.cryptobiotic.rlauxe.raire.VoteSequences
+import org.cryptobiotic.rlauxe.rairejson.RaireCvrs
+import org.cryptobiotic.rlauxe.rairejson.import
+import org.cryptobiotic.rlauxe.rairejson.readRaireBallotsCsv
+import org.cryptobiotic.rlauxe.rairejson.readRaireResultsJson
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.junit.jupiter.api.Assertions
 import java.io.File

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalSerializationApi::class)
 
-package org.cryptobiotic.rlauxe.persist.raire
+package org.cryptobiotic.rlauxe.rairejson
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable

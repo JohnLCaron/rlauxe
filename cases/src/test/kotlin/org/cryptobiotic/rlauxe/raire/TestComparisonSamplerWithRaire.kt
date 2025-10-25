@@ -1,16 +1,20 @@
-package org.cryptobiotic.rlauxe.persist.raire
+package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.ClcaErrorTable
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.ClcaSimulation
+import org.cryptobiotic.rlauxe.rairejson.import
+import org.cryptobiotic.rlauxe.rairejson.readRaireBallotsCsv
+import org.cryptobiotic.rlauxe.rairejson.readRaireResultsJson
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
+import kotlin.test.Test
 
 class TestComparisonSamplerWithRaire {
 
-    // @Test TODO failing
+    // @Test
     fun testComparisonSamplerForRaire() {
         // This single contest cvr file is the only real cvr data in SHANGRLA
         val cvrFile =
@@ -26,6 +30,7 @@ class TestComparisonSamplerWithRaire {
         // val raireResults2 = readRaireResults("/home/stormy/dev/github/rla/rlauxe/core/src/test/data/SFDA2019/SF2019Nov8Assertions.json").import()
         val contestUA = raireResults.contests.first()
 
+        // TODO margin not set because its not present in RaireAssertions.json
         contestUA.addClcaAssertionsFromReportedMargin()
 
         contestUA.clcaAssertions.forEach { assert ->

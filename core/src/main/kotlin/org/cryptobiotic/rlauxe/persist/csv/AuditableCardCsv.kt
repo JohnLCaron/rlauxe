@@ -122,14 +122,6 @@ class AuditableCardCsvReader(filename: String): CloseableIterable<AuditableCard>
     }
 }
 
-class AuditableCardCsvReaderSkip(val filename: String, val skip: Int): CloseableIterable<AuditableCard> {
-    override fun iterator(): CloseableIterator<AuditableCard> {
-        val iter = readCardsCsvIterator(filename)
-        repeat(skip) { if (iter.hasNext()) (iter.next()) }
-        return iter
-    }
-}
-
 fun readAuditableCardCsvFile(filename: String): List<AuditableCard> {
     val reader: BufferedReader = File(filename).bufferedReader()
     reader.readLine() // get rid of header line

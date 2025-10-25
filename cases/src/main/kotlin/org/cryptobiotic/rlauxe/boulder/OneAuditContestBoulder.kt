@@ -102,7 +102,7 @@ class OneAuditContestBoulder(val info: ContestInfo, val sovoContest: BoulderCont
     fun ncards(): Int {
         // for contest 20, correct the ncards, ignore undervote count
         return if (info.id == 20)
-            8254
+            8256
         else return sumAllCards()
     }
 

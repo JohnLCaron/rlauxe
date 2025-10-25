@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.ClcaNoErrorIterator
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
-import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReaderSkip
 
 val skipPerRun = 8_000
 
@@ -54,10 +53,7 @@ class SfoaSingleRoundAuditTask(
                 val assertionRound = AssertionRound(cassertion, 1, null)
 
                 val mvrManager = MvrManagerClcaSingleRound(
-                    AuditableCardCsvReaderSkip(
-                        "$auditDir/sortedCards.csv",
-                        skipPerRun * run
-                    )
+                    AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run)
                 )
                 val sampler =
                     ClcaNoErrorIterator(

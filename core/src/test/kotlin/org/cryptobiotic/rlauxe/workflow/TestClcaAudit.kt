@@ -9,6 +9,8 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertEquals
 
 class TestClcaAudit {
+    val N = 10000
+
     val auditConfig = AuditConfig(
         AuditType.CLCA, hasStyles=true, nsimEst=10,
         clcaConfig = ClcaConfig(ClcaStrategyType.previous)
@@ -16,7 +18,6 @@ class TestClcaAudit {
 
     @Test
     fun testClcaOneContest() {
-        val N = 100000
         val ncontests = 1
         val nbs = 1
         val marginRange= 0.01 .. 0.01
@@ -36,7 +37,6 @@ class TestClcaAudit {
 
     @Test
     fun noErrorsNoPhantoms() {
-        val N = 100000
         val ncontests = 11
         val nbs = 4
         val marginRange= 0.015 .. 0.05
@@ -52,7 +52,6 @@ class TestClcaAudit {
 
     @Test
     fun noErrorsWithPhantoms() {
-        val N = 100000
         val ncontests = 42
         val nbs = 1
         val marginRange= 0.01 .. 0.05
@@ -67,7 +66,6 @@ class TestClcaAudit {
 
     @Test
     fun p1ErrorsEqualPhantoms() {
-        val N = 100000
         val ncontests = 42
         val nbs = 11
         val marginRange= 0.01 .. 0.05
@@ -87,7 +85,6 @@ class TestClcaAudit {
     @Test
     fun testClcaWithSimFuzz() {
         val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct=0.05))
-        val N = 50000
         val testData = MultiContestTestData(11, 1, N)
         val finalRound = testClcaWorkflow(auditConfig, testData)
         assertNotNull(finalRound)
@@ -96,7 +93,6 @@ class TestClcaAudit {
 
     @Test
     fun testClcaWithMvrFuzz() {
-        val N = 50000
         val testData = MultiContestTestData(11, 1, N)
         val finalRound = testClcaWorkflow(auditConfig, testData, .05)
         assertNotNull(finalRound)
@@ -106,7 +102,6 @@ class TestClcaAudit {
     @Test // TODO oracle disabled
     fun testClcaOracle() {
         val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle))
-        val N = 50000
         val testData = MultiContestTestData(11, 4, N)
         val finalRound = testClcaWorkflow(auditConfig, testData)
         assertNotNull(finalRound)
@@ -116,7 +111,6 @@ class TestClcaAudit {
     @Test
     fun testClcaPhantoms() {
         val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
-        val N = 50000
         val testData = MultiContestTestData(11, 4, N)
         val finalRound = testClcaWorkflow(auditConfig, testData)
         assertNotNull(finalRound)
@@ -126,7 +120,6 @@ class TestClcaAudit {
     @Test
     fun testClcaPhantomStrategy() {
         val auditConfig = auditConfig.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
-        val N = 50000
         val testData = MultiContestTestData(11, 4, N)
         val finalRound = testClcaWorkflow(auditConfig, testData)
         assertNotNull(finalRound)

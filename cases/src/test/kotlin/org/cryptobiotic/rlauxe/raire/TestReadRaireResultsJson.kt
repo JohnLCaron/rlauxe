@@ -1,9 +1,8 @@
-package org.cryptobiotic.rlauxe.persist.raire
+package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.raire.RaireAssertionType
-import org.cryptobiotic.rlauxe.raire.RaireAssorter
-import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
+import org.cryptobiotic.rlauxe.rairejson.import
+import org.cryptobiotic.rlauxe.rairejson.readRaireResultsJson
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

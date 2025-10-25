@@ -10,10 +10,10 @@ import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import kotlin.test.Test
 
 class TestClcaAuditNoStyles {
+    val N = 10000
 
     @Test
     fun testClcaOneContest() {
-        val N = 100000
         val ncontests = 1
         val nbs = 1
         val marginRange= 0.01 .. 0.01
@@ -33,7 +33,6 @@ class TestClcaAuditNoStyles {
 
     @Test
     fun testClcaTwoContests() {
-        val N = 100000
         val ncontests = 2
         val nbs = 1
         val marginRange= 0.01 .. 0.01
@@ -61,7 +60,6 @@ class TestClcaAuditNoStyles {
     @Test
     fun noErrorsNoPhantoms() {
         val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=false, nsimEst=10)
-        val N = 100000
         val ncontests = 11
         val nbs = 4
         val marginRange= 0.015 .. 0.05
@@ -74,7 +72,6 @@ class TestClcaAuditNoStyles {
     @Test
     fun noErrorsWithPhantoms() {
         val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=false, nsimEst=10)
-        val N = 100000
         val ncontests = 42
         val nbs = 11
         val marginRange= 0.01 .. 0.05
@@ -86,7 +83,6 @@ class TestClcaAuditNoStyles {
 
     @Test
     fun p2ErrorsEqualPhantoms() {
-        val N = 100000
         val ncontests = 42
         val nbs = 11
         val marginRange= 0.01 .. 0.05

@@ -1,31 +1,18 @@
-/*
-  Copyright 2023 Democracy Developers
-  This is a Java re-implementation of raire-rs https://github.com/DemocracyDevelopers/raire-rs
-  It attempts to copy the design, API, and naming as much as possible subject to being idiomatic and efficient Java.
+package org.cryptobiotic.rlauxe.raire
 
-  This file is part of raire-java.
-  raire-java is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-  raire-java is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
-  You should have received a copy of the GNU Affero General Public License along with ConcreteSTV.  If not, see <https://www.gnu.org/licenses/>.
-
- */
-package org.cryptobiotic.rlauxe.shangrla
-
-import au.org.democracydevelopers.raire.RaireError.*
+import au.org.democracydevelopers.raire.RaireError
 import au.org.democracydevelopers.raire.RaireProblem
 import au.org.democracydevelopers.raire.RaireSolution
-import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError
 import au.org.democracydevelopers.raire.assertions.Assertion
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
-
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 // Not really sure if this should be here. Its testing the raire-java code.
 class TestRaireProblemSerialization {
@@ -70,57 +57,57 @@ class TestRaireProblemSerialization {
     fun testErrorSerialization() {
         assertEquals(
             "{\"Err\":\"InvalidTimeout\"}",
-            mapper.writeValueAsString(RaireResultOrError(InvalidTimeout()))
+            mapper.writeValueAsString(RaireSolution.RaireResultOrError(RaireError.InvalidTimeout()))
         )
         assertEquals(
             "{\"Err\":\"InvalidNumberOfCandidates\"}",
-            mapper.writeValueAsString(RaireResultOrError(InvalidNumberOfCandidates()))
+            mapper.writeValueAsString(RaireSolution.RaireResultOrError(RaireError.InvalidNumberOfCandidates()))
         )
         assertEquals(
             "{\"Err\":\"InvalidCandidateNumber\"}",
-            mapper.writeValueAsString(RaireResultOrError(InvalidCandidateNumber()))
+            mapper.writeValueAsString(RaireSolution.RaireResultOrError(RaireError.InvalidCandidateNumber()))
         )
         assertEquals(
             "{\"Err\":\"TimeoutCheckingWinner\"}",
-            mapper.writeValueAsString(RaireResultOrError(TimeoutCheckingWinner()))
+            mapper.writeValueAsString(RaireSolution.RaireResultOrError(RaireError.TimeoutCheckingWinner()))
         )
         assertEquals(
             "{\"Err\":{\"TimeoutFindingAssertions\":3.0}}",
-            mapper.writeValueAsString(RaireResultOrError(TimeoutFindingAssertions(3.0)))
+            mapper.writeValueAsString(RaireSolution.RaireResultOrError(RaireError.TimeoutFindingAssertions(3.0)))
         )
         assertEquals(
             "{\"Err\":\"TimeoutTrimmingAssertions\"}",
-            mapper.writeValueAsString(RaireResultOrError(TimeoutTrimmingAssertions()))
+            mapper.writeValueAsString(RaireSolution.RaireResultOrError(RaireError.TimeoutTrimmingAssertions()))
         )
         assertEquals(
             "{\"Err\":{\"TiedWinners\":[2,3]}}",
-            mapper.writeValueAsString(RaireResultOrError(TiedWinners(intArrayOf(2, 3))))
+            mapper.writeValueAsString(RaireSolution.RaireResultOrError(RaireError.TiedWinners(intArrayOf(2, 3))))
         )
         assertEquals(
             "{\"Err\":{\"WrongWinner\":[2,3]}}",
-            mapper.writeValueAsString(RaireResultOrError(WrongWinner(intArrayOf(2, 3))))
+            mapper.writeValueAsString(RaireSolution.RaireResultOrError(RaireError.WrongWinner(intArrayOf(2, 3))))
         )
         assertEquals(
             "{\"Err\":{\"CouldNotRuleOut\":[2,3]}}",
-            mapper.writeValueAsString(RaireResultOrError(CouldNotRuleOut(intArrayOf(2, 3))))
+            mapper.writeValueAsString(RaireSolution.RaireResultOrError(RaireError.CouldNotRuleOut(intArrayOf(2, 3))))
         )
         assertEquals(
             "{\"Err\":\"InternalErrorRuledOutWinner\"}",
-            mapper.writeValueAsString(RaireResultOrError(InternalErrorRuledOutWinner()))
+            mapper.writeValueAsString(RaireSolution.RaireResultOrError(RaireError.InternalErrorRuledOutWinner()))
         )
         assertEquals(
             "{\"Err\":\"InternalErrorDidntRuleOutLoser\"}",
-            mapper.writeValueAsString(RaireResultOrError(InternalErrorDidntRuleOutLoser()))
+            mapper.writeValueAsString(RaireSolution.RaireResultOrError(RaireError.InternalErrorDidntRuleOutLoser()))
         )
         assertEquals(
             "{\"Err\":\"InternalErrorTrimming\"}",
-            mapper.writeValueAsString(RaireResultOrError(InternalErrorTrimming()))
+            mapper.writeValueAsString(RaireSolution.RaireResultOrError(RaireError.InternalErrorTrimming()))
         )
     }
 
     @Throws(JsonProcessingException::class)
     fun checkIdempotentDeserializeAndSerializeRaireResultOrError(json: String?) {
-        val deserialized = mapper.readValue<RaireResultOrError?>(json, RaireResultOrError::class.java)
+        val deserialized = mapper.readValue<RaireSolution.RaireResultOrError?>(json, RaireSolution.RaireResultOrError::class.java)
         assertEquals(json, mapper.writeValueAsString(deserialized))
     }
 

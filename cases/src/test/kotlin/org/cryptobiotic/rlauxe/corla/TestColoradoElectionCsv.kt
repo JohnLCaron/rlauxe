@@ -6,7 +6,7 @@ class TestColoradoElectionCsv {
 
     @Test
     fun testColoradoElectionSummary() {
-        val filename = "src/test/data/2024election/summary.csv"
+        val filename = "src/test/data/corla/2024election/summary.csv"
         val contests = readColoradoElectionSummaryCsv(filename)
         contests.forEach { it.complete() }
         println("--------------------------------------------------------------")
@@ -20,7 +20,7 @@ class TestColoradoElectionCsv {
 
     @Test
     fun testColoradoContestRoundCsv() {
-        val filename = "src/test/data/2024audit/round1/contest.csv"
+        val filename = "src/test/data/corla/2024audit/round1/contest.csv"
         val contests = readColoradoContestRoundCsv(filename)
         println("read ${contests.size} contests from $filename")
         contests.forEach { it.showEstimation() }

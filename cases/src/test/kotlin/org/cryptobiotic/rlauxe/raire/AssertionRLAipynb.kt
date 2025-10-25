@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.persist.raire
+package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
@@ -6,7 +6,9 @@ import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
-import org.cryptobiotic.rlauxe.raire.*
+import org.cryptobiotic.rlauxe.rairejson.import
+import org.cryptobiotic.rlauxe.rairejson.readRaireBallotsCsv
+import org.cryptobiotic.rlauxe.rairejson.readRaireResultsJson
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.random.Random
 import kotlin.test.assertEquals

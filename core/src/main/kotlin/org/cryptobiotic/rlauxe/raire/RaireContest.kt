@@ -193,7 +193,7 @@ enum class RaireAssertionType(val aname:String) {
     }
 }
 
-// wraps the info in au.org.democracydevelopers.raire.assertions.Assertion
+// wraps the info from au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty
 // converts a raire.java AssertionAndDifficulty
 data class RaireAssertion(
     val winnerId: Int, // this must be the candidate ID, in order to match with Cvr.votes

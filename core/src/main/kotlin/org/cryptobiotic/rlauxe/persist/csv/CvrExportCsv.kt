@@ -94,14 +94,6 @@ fun CvrExport.toCsv() = buildString {
     appendLine()
 }
 
-class CvrExportToCvrAdapter(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: Map<String, Int>? = null) : CloseableIterator<Cvr> {
-    override fun hasNext() = cvrExportIterator.hasNext()
-    override fun next() = cvrExportIterator.next().toCvr(pools=pools)
-    override fun close() {
-        cvrExportIterator.close()
-    }
-}
-
 class CvrExportToCardAdapter(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: Map<String, Int>? = null, startCount: Int = 0) : CloseableIterator<AuditableCard> {
     var count = startCount
     override fun hasNext() = cvrExportIterator.hasNext()
@@ -110,6 +102,8 @@ class CvrExportToCardAdapter(val cvrExportIterator: CloseableIterator<CvrExport>
         cvrExportIterator.close()
     }
 }
+
+// CvrExportToCvrAdapter is now in showRaireCOntests
 
 
 

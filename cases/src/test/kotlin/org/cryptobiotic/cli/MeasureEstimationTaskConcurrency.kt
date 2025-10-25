@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.util
+package org.cryptobiotic.cli
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +20,7 @@ import org.cryptobiotic.rlauxe.estimate.makeEstimationTasks
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ContestRound
+import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
 class MeasureEstimationTaskConcurrency {

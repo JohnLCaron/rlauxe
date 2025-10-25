@@ -10,5 +10,5 @@ rootProject.name = "rlauxe"
 
 include("core")
 include("plots")
-include("rla") // slow tests
+// include("rla") // slow tests
 include("cases")

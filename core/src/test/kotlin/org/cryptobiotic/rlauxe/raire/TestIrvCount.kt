@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.raire
 
+import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 
 class TestIrvCount {
@@ -61,12 +62,17 @@ class TestIrvCount {
             println(showIrvCountResult(result, testContest.info))
             println()
         }
+
+        val show = showIrvCountResult(result, testContest.info)
+        println(show)
+        assertTrue(show.contains("(winner)"))
      }
 
     fun countWinners(result: IrvCountResult) {
-        mutableMapOf<Int, Int>()
+        val winners = mutableSetOf<Int>()
         result.ivrRoundsPaths.forEach { ivrRoundsPath ->
-            // TODO
+            winners.addAll(ivrRoundsPath.irvWinner.winners)
         }
+        assertTrue(winners.isNotEmpty())
     }
 }

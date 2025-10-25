@@ -21,8 +21,8 @@ class VoteConsolidator {
     fun nvotes() = votes.size
 
     fun addVote(pref: IntArray) {
-            val key = HashableIntArray(pref)
-            votes[key] = votes.getOrPut(key) { 0 } + 1
+        val key = HashableIntArray(pref)
+        votes[key] = votes.getOrPut(key) { 0 } + 1
     }
 
     // add other's votes into this

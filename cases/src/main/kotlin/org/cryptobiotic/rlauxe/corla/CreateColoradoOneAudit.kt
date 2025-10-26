@@ -128,8 +128,8 @@ class ColoradoOneAudit (
         }
     }
 
-
-    fun makeUAContests(hasStyles: Boolean): List<OAContestUnderAudit> {
+    // TODO do we need to make non-OAContestUnderAudit when isClca ?
+    fun makeUAContests(hasStyles: Boolean): List<ContestUnderAudit> {
         val infoList= oaContests.map { it.info }.sortedBy { it.id }
         val contestMap= oaContests.associateBy { it.info.id }
 
@@ -142,7 +142,7 @@ class ColoradoOneAudit (
             val useNc = max( ncards, oaContest.Nc)
             val contest = Contest(info, candVotes, useNc, ncards)
             info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
-            OAContestUnderAudit(contest, hasStyles)
+            if (isClca) ContestUnderAudit(contest, hasStyles) else OAContestUnderAudit(contest, hasStyles)
         }
 
         return regContests

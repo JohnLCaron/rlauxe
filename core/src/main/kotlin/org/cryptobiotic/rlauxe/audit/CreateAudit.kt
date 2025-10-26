@@ -24,6 +24,9 @@ import org.cryptobiotic.rlauxe.util.ToAuditableCardPolling
 import org.cryptobiotic.rlauxe.util.ToAuditableCardPooled
 import org.cryptobiotic.rlauxe.util.cleanCsvString
 import org.cryptobiotic.rlauxe.util.createZipFile
+import org.cryptobiotic.rlauxe.verify.VerifyContests
+import org.cryptobiotic.rlauxe.verify.VerifyResults
+import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
 import kotlin.collections.forEach
 import kotlin.io.path.Path
 
@@ -100,12 +103,14 @@ class CreateAudit(val name: String, val topdir: String, val config: AuditConfig,
             }
         }
 
-        /* this may change the auditStatus to misformed
-        val verifier = VerifyContests(auditDir)
-        val resultsv = verifier.verify(contestsUA, false)
-        if (resultsv.hasErrors) {
-            logger.warn{ resultsv.toString() }
-        } */
+        // this may change the auditStatus to misformed
+        val results = VerifyResults()
+        checkContestsCorrectlyFormed(config, contestsUA, results)
+        if (results.hasErrors) {
+            logger.warn{ results.toString() }
+        } else {
+            logger.info{ results.toString() }
+        }
 
         // sf only writes these:
         // val auditableContests: List<OAContestUnderAudit> = contestsUA.filter { it.preAuditStatus == TestH0Status.InProgress }

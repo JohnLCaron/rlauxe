@@ -48,7 +48,7 @@ class TestGenerateAllUseCases {
     }
 
     @Test
-    fun testCreateColoradoOneAudit() {
+    fun createColoradoOneAudit() {
         val topdir = "/home/stormy/rla/cases/corla/oneaudit"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
@@ -62,7 +62,7 @@ class TestGenerateAllUseCases {
     }
 
     @Test
-    fun testCreateColoradoClca() {
+    fun createColoradoClca() {
         val topdir = "/home/stormy/rla/cases/corla/clca"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"

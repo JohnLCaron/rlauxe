@@ -44,10 +44,14 @@ data class Welford(
     fun variance() = if (count == 0) 0.0 else M2 / count
 
     override fun toString(): String {
-        return "(mean, variance, sampleVariance, stddev) = ${this.result()}, ${sqrt(variance())}"
+        return "(count, mean, variance, sampleVariance, stddev) = ${this.count}, ${this.result()}, ${sqrt(variance())}"
     }
 
     fun show(): String {
         return "mean = ${dfn(mean, 4)} stddev = ${dfn(sqrt(variance()), 4)}"
+    }
+
+    fun show2(): String {
+        return "count =  ${this.count}, sum = ${dfn(mean*count, 1)}, mean = ${df(mean)}"
     }
 }

@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
@@ -39,7 +38,7 @@ class CreateSfElection(
     contestManifestFilename: String,
     candidateManifestFile: String,
     val cvrExportCsv: String,
-    val isClca: Boolean,  // TODO appears unused
+    val isClca: Boolean,
 ): CreateElectionIF {
     val cardPoolsNotUnpooled: List<CardPoolIF>
     val contestsOA: List<ContestUnderAudit>
@@ -65,7 +64,8 @@ class CreateSfElection(
 
         // make contests based on cardPool tabulations
         val unpooledPool = cardPoolMap.find { it.poolName == unpooled }!!
-        contestsOA = makeAllOneAuditContests(contestTabSums, contestNcs, unpooledPool).sortedBy { it.id }
+        contestsOA = if (isClca) makeClcaContests(contestTabSums, contestNcs).sortedBy { it.id }
+            else makeAllOneAuditContests(contestTabSums, contestNcs, unpooledPool).sortedBy { it.id }
     }
 
     fun createCardPools(
@@ -156,6 +156,26 @@ fun makeAllOneAuditContests(contestTabSums: Map<Int, ContestTabulation>, contest
             val poolPct = (100 - unpooledPct).toInt()
             contestOA.contest.info().metadata["PoolPct"] = poolPct
             contestsUAs.add(contestOA)
+        }
+    }
+    return contestsUAs
+}
+
+fun makeClcaContests(contestTabSums: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>): List<ContestUnderAudit> {
+    val contestsUAs = mutableListOf<ContestUnderAudit>()
+    contestTabSums.map { (contestId, contestSumTab)  ->
+        val info = contestSumTab.info
+
+        val useNc = contestNcs[info.id] ?: contestSumTab.ncards
+        if (useNc > 0) {
+            val contestUA: ContestUnderAudit = if (!contestSumTab.isIrv) {
+                val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
+                ContestUnderAudit(contest)
+            } else {
+                makeRaireContestUA(contestSumTab.info, contestSumTab, useNc)
+            }
+            contestUA.contest.info().metadata["PoolPct"] = 0
+            contestsUAs.add(contestUA)
         }
     }
     return contestsUAs

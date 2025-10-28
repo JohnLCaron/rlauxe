@@ -1,4 +1,4 @@
-package org.cryptobiotic.util
+package org.cryptobiotic.rlauxe.verify
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs

@@ -18,6 +18,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.oshai.logging)
     implementation(libs.commons.csv)
+    implementation(libs.commons.poi)
+    implementation(libs.commons.poi.ooxml)
     implementation(libs.bundles.xmlutil)
 
     testImplementation(libs.bundles.jvmtest)

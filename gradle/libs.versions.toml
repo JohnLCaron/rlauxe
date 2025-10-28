@@ -11,6 +11,7 @@ oshai-version = "7.0.0"
 bull-result = "1.1.18"
 commons-csv = "1.4"
 commons-math = "3.6.1"
+commons-poi = "5.4.1"
 letsPlot = "0.8.0"
 letsPlotStatistics = "0.4.0"
 serialization = "1.7.1"
@@ -37,6 +38,8 @@ lets-plot-statistics = { group = "org.jetbrains.kotlinx", name = "kotlin-statist
 bull-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "bull-result" }
 commons-csv = { module = "org.apache.commons:commons-csv", version.ref = "commons-csv" }
 commons-math = { module = "org.apache.commons:commons-math3", version.ref = "commons-math" }
+commons-poi = { module = "org.apache.poi:poi", version.ref = "commons-poi" }
+commons-poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "commons-poi" }
 pdvrieze-xmlutil-core-xml = { module = "io.github.pdvrieze.xmlutil:core-jvmcommon", version.ref = "xmlutil-version" }
 pdvrieze-xmlutil-serialization-xml = { module = "io.github.pdvrieze.xmlutil:serialization-jvm", version.ref = "xmlutil-version" }
 

@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.dhondt
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -19,10 +18,14 @@ class TestBasics {
         val assorters = testTabulateVotes(parties, nseats)
         assorters.forEach { it ->
             val (gavg, havg) = it.getAssortAvg(parties)
-            println("${it.show()} gavg=${df(gavg)}")
-            val expect = 0.5 - gavg / (2 * it.a)
-            println("             havg=${df(havg)} expect=${df(expect)}")
-            assertEquals(expect, havg, doublePrecision)
+            println("${it.show()}")
+            println("             gavg=${gavg.show2()}")
+            println("             havg=${havg.show2()}")
+            assertEquals(it.margin, gavg.mean, doublePrecision)
+            assertEquals(it.h(it.margin), havg.mean, doublePrecision)
+
+            // TODO: in plurality, the avg assort value = margin2mean( assort.margin). here, avg assort value = assort margin. maybe a different choice of c ?
+            // TODO margin2mean and mean2margin assumes lower = 1. is that wrong ?
         }
     }
 
@@ -35,6 +38,8 @@ class TestBasics {
 
     fun testTabulateVotes(parties: List<Party>, nseats: Int): List<DHondtAssorter>{
         println("---------------------------------------------------------------")
+        val Nc = parties.sumOf { it.votes }
+        parties.forEach { it.Nc = Nc  }
 
         val dhResult = assignWinners(parties, nseats = nseats)
         parties.forEach {
@@ -91,6 +96,7 @@ data class Party(val id: Int, val votes: Int) {
     var seatsWon: Int = 0 // We
     var lastSeatWon: Int? = null // We
     var firstSeatLost: Int? = null // Le
+    var Nc: Int = 0
 
     fun setResults(results: DHondtResult) {
         results.sortedAvgs.filter{ it.partyId == this.id }.forEach { println(" ${it}") }
@@ -131,7 +137,9 @@ data class DHondtAssorter(val winner: Party, val loser: Party) {
 
     val fw = winner.votes / winner.lastSeatWon!!.toDouble()
     val fl = loser.votes / loser.firstSeatLost!!.toDouble()
-    val a = -1.0 / loser.firstSeatLost!!  // lower bound
+    val margin = (fw - fl)/winner.Nc
+
+    val a = -1.0 / loser.firstSeatLost!!  // -1/d(WB): lower bound of g
     val c = -1.0 / (2 * a)  // affine transform h = c * g + 1/2
 
     fun g(partyVote: Int): Double {
@@ -145,15 +153,15 @@ data class DHondtAssorter(val winner: Party, val loser: Party) {
         return c * g(partyVote) + 0.5
     }
 
-    // h(b) = (g(b) - 1)/-2a
-    fun h2(partyVote: Int): Double {
-        return (g(partyVote) - a) / (-2*a)
+    fun h(g: Double): Double {
+        return c * g + 0.5
     }
 
+    fun show() = "(${winner.id}/${loser.id}) votes=${winner.votes}/${loser.votes} denom=${winner.lastSeatWon}/${loser.firstSeatLost} " +
+            "a = $a margin=${df(margin)} hmargin=${df(h(margin))}"
 
-    fun show() = "(${winner.id}/${loser.id}) votes=${winner.votes}/${loser.votes} denom=${winner.lastSeatWon}/${loser.firstSeatLost} a = $a fw=${df(fw)} fl=${df(fl)}"
-
-    fun getAssortAvg(parties: List<Party>): Pair<Double, Double> {
+    // assumes no undervotes
+    fun getAssortAvg(parties: List<Party>): Pair<Welford, Welford> {
         val gavg = Welford()
         val havg = Welford()
         parties.forEach { party ->
@@ -163,6 +171,13 @@ data class DHondtAssorter(val winner: Party, val loser: Party) {
                 havg.update(h(party.id))
             }
         }
-        return Pair(gavg.mean, havg.mean)
+        return Pair(gavg, havg)
     }
 }
+
+/*
+
+
+
+
+ */

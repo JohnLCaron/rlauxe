@@ -53,34 +53,38 @@ class TestRaireContest {
 
         println(rcontestUA.showShort())
         assertTrue(rcontestUA.showShort().startsWith("rcontest111 (111) Nc=5000 winner 0 losers [1, 2] minMargin="))
-        println(rcontestUA.show())
-        assertTrue(rcontestUA.show().contains("recount=-1.0000 Nc=5000 Np=25 Nu=250"), rcontestUA.show())
-        assertEquals(-1.0, rcontestUA.recountMargin(), doublePrecision)
+        println("show='${rcontestUA.show()}'")
+        assertTrue(rcontestUA.show().contains(rcontestUA.contest.showCandidates()), rcontestUA.show())
+        assertTrue(rcontestUA.recountMargin() > 0.0 && rcontestUA.recountMargin() < 1.0)
     }
 
     @Test
     fun testMakeRaireContestUA() {
         val contestId=111
-        val (rcontestUA: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(5000, contestId=contestId, ncands=5, minMargin=.04, quiet = true)
-        rcontestUA.addClcaAssertionsFromReportedMargin()
+        val (rcu: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(5000, contestId=contestId, ncands=5, minMargin=.04, quiet = true)
+        rcu.addClcaAssertionsFromReportedMargin()
 
-        val info = rcontestUA.contest.info()
+        val info = rcu.contest.info()
         val contestTab = tabulateCvrs(rcvrs.iterator(), mapOf(info.id to info))
         val tab = contestTab[info.id]!!
         assertTrue(tab.irvVotes.nvotes() > 0)
 
-        val rc = makeRaireContestUA(info, contestTab[info.id]!!, rcontestUA.Nc)
+        assertTrue(rcu.recountMargin() > 0.0)
+        assertTrue(rcu.recountMargin() < 1.0)
 
-        assertTrue(rc.recountMargin() > 0.0)
-        assertTrue(rc.recountMargin() < 1.0)
+        println("recountMargin = ${rcu.recountMargin()}")
+        val minAssertion = rcu.minAssertion()
+        if (minAssertion != null) {
+            println("showAssertionDiff = ${rcu.contest.showAssertionDiff(minAssertion)}")
+        }
 
-        rc.rassertions.forEach {
+        rcu.rassertions.forEach {
             print(it.show())
             println(" remaining = ${it.remaining(info.candidateIds)}")
         }
 
-        rc.addClcaAssertionsFromReportedMargin()
-        rc.clcaAssertions.forEach {
+        rcu.addClcaAssertionsFromReportedMargin()
+        rcu.clcaAssertions.forEach {
             print(it.show())
         }
     }

@@ -36,8 +36,8 @@ interface AuditWorkflowIF {
         val stopwatch = Stopwatch()
 
         // 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function,
-        val cvrIterator = if (auditConfig().auditType != AuditType.ONEAUDIT) null else
-            mvrManager().sortedCvrs().iterator()
+        // only need cvrIterator for OneAudit
+        val cvrIterator = if (auditConfig().auditType != AuditType.ONEAUDIT) null else mvrManager().sortedCvrs().iterator()
 
         estimateSampleSizes(
             auditConfig(),

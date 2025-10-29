@@ -1,0 +1,17 @@
+{
+    "auditType": "CLCA",
+    "hasStyles": true,
+    "riskLimit": 0.05,
+    "seed": 7504229627250814000,
+    "nsimEst": 100,
+    "quantile": 0.8,
+    "sampleLimit": -1,
+    "minRecountMargin": 0.005,
+    "removeTooManyPhantoms": false,
+    "version": 1.2,
+    "clcaConfig": {
+        "strategy": "previous",
+        "d": 100
+    },
+    "skipContests": []
+}

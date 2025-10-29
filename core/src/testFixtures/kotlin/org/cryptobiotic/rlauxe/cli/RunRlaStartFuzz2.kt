@@ -136,7 +136,7 @@ class TestPollingElection(
         cvrs = testCvrs
         testMvrs = makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrsPct) // ??
 
-        val regularContests = testData.contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
+        val regularContests = testData.contests.map { ContestUnderAudit(it, isComparison=true, hasStyle=auditConfig.hasStyles) }
         contestsUA.addAll(regularContests)
         contestsUA.forEach { println("  $it") }
         println()
@@ -223,7 +223,7 @@ class TestClcaElection(
             allCvrs.addAll(rcvrs)
         }
 
-        val regularContests = testData.contests.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
+        val regularContests = testData.contests.map { ContestUnderAudit(it, isComparison=true, hasStyle=auditConfig.hasStyles) }
         contestsUA.addAll(regularContests)
         contestsUA.forEach { println("  $it") }
         println()

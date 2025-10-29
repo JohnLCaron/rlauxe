@@ -24,7 +24,6 @@ import org.cryptobiotic.rlauxe.util.ToAuditableCardPolling
 import org.cryptobiotic.rlauxe.util.ToAuditableCardPooled
 import org.cryptobiotic.rlauxe.util.cleanCsvString
 import org.cryptobiotic.rlauxe.util.createZipFile
-import org.cryptobiotic.rlauxe.verify.VerifyContests
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
 import kotlin.collections.forEach

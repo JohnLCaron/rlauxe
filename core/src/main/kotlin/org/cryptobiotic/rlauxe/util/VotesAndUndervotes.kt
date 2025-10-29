@@ -96,13 +96,35 @@ class VotesAndUndervotes(candVotes: Map<Int, Int>, val undervotes: Int, val vote
         return candIdx
     }
 
+
+
     override fun toString() = buildString {
-        append("VotesAndUndervotes(undervotes=$undervotes, voteForN=$voteForN, votes=${candVotesSorted} candidateIds=$candidateIds)")
+        append("votes=${candVotesSorted} undervotes=$undervotes, voteForN=$voteForN")
     }
 
     fun votesAndUndervotes(): Map<Int, Int> {
-        return (candVotesSorted.map { Pair(it.key, it.value)} + Pair(candVotesSorted.size, undervotes)).toMap().toSortedMap()
+        val maxId = candVotesSorted.maxOf{ it.key }
+        return (candVotesSorted.map { Pair(it.key, it.value)} + Pair(maxId+1, undervotes)).toMap().toSortedMap()
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is VotesAndUndervotes) return false
+
+        if (undervotes != other.undervotes) return false
+        if (voteForN != other.voteForN) return false
+        if (candVotesSorted != other.candVotesSorted) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = undervotes
+        result = 31 * result + voteForN
+        result = 31 * result + candVotesSorted.hashCode()
+        return result
+    }
+
 }
 
 // make cvrs until we exhaust the votes

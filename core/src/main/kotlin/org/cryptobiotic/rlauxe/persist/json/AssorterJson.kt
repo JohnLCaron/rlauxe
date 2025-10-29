@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.persist.json
 
 import kotlinx.serialization.Serializable
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.dhondt.DHondtAssorterIF
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.raire.RaireAssorter
 
@@ -75,10 +76,12 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
 data class AssorterIFJson(
     val className: String,
     val reportedMargin: Double,
-    val winner: Int,   // estimated sample size
-    val loser: Int? = null,   // estimated sample size
+    val winner: Int,
+    val loser: Int? = null,
     val minFraction: Double? = null,
     val rassertion: RaireAssertionJson? = null,
+    val lastSeatWon: Int? = null,
+    val firstSeatLost: Int? = null,
 )
 
 fun AssorterIF.publishJson() : AssorterIFJson {
@@ -105,6 +108,15 @@ fun AssorterIF.publishJson() : AssorterIFJson {
                 this.rassertion.loserId,
                 rassertion = this.rassertion.publishJson(),
             )
+        is DHondtAssorterIF ->
+            AssorterIFJson(
+                "DHondtAssorterIF",
+                this.reportedMean(), // TODO bogus
+                this.winner,
+                this.loser,
+                lastSeatWon = this.lastSeatWon,
+                firstSeatLost = this.firstSeatLost,
+            )
         else -> throw RuntimeException("unknown assorter type ${this.javaClass.simpleName} = $this")
     }
 }
@@ -130,6 +142,16 @@ fun AssorterIFJson.import(info: ContestInfo): AssorterIF {
             RaireAssorter(
                 info,
                 this.rassertion!!.import(),
+                this.reportedMargin,
+            )
+        "DHondtAssorterIF" ->
+            // DHondtAssorterIF(val info: ContestInfo, val winner: Int, val loser: Int, val firstSeatLost: Int, val lastSeatWon: Int, val margin: Double): AssorterIF  {
+            DHondtAssorterIF(
+                info,
+                this.winner,
+                this.loser!!,
+                lastSeatWon = this.lastSeatWon!!,
+                firstSeatLost = this.firstSeatLost!!,
                 this.reportedMargin,
             )
         else -> throw RuntimeException()

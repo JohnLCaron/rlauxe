@@ -104,7 +104,7 @@ class TestAuditPolling {
             println("Contests")
             contests.forEach { println("  ${it}") }
         }
-        val contestsUA = contests.map { ContestUnderAudit(it, isComparison = false) }
+        val contestsUA = contests.map { ContestUnderAudit(it, isComparison=false) }
 
         // this has to be run separately for each assorter, but we want to combine them in practice
         val results = mutableListOf<RunTestRepeatedResult>()

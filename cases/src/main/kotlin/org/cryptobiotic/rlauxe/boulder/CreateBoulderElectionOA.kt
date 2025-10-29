@@ -28,7 +28,7 @@ open class BoulderElectionOA(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
     val isClca: Boolean,
-    val hasStyles: Boolean = true,
+    val hasStyle: Boolean = true,
     val quiet: Boolean = true,
 ): CreateElectionIF {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convert() }
@@ -56,7 +56,7 @@ open class BoulderElectionOA(
         distributeExpectedOvervotes(oaContest63, cardPools)
         oaContests.values.forEach { it.adjustPoolInfo(cardPools)}
 
-        contestsUA = makeUAContests(hasStyles)
+        contestsUA = makeUAContests(hasStyle)
 
         redactedCvrs = makeRedactedCvrs()
         val totalRedactedBallots = cardPools.sumOf { it.ncards() }
@@ -239,7 +239,7 @@ open class BoulderElectionOA(
 
     override fun cardPools() = cardPools
 
-    fun makeUAContests(hasStyles: Boolean): List<ContestUnderAudit> {
+    fun makeUAContests(hasStyle: Boolean): List<ContestUnderAudit> {
         if (!quiet) println("ncontests with info = ${infoList.size}")
 
         val regContests = infoList.filter { !it.isIrv }.map { info ->
@@ -253,7 +253,7 @@ open class BoulderElectionOA(
             val useNc = max( ncards, oaContest.Nc())
             val contest = Contest(info, candVotes, useNc, ncards)
             info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
-            if (isClca) ContestUnderAudit(contest, hasStyles) else OAContestUnderAudit(contest, hasStyles)
+            if (isClca) ContestUnderAudit(contest, hasStyle=hasStyle) else OAContestUnderAudit(contest, hasStyle=hasStyle)
         }
 
         return regContests

@@ -1,10 +1,13 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundToClosest
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.math.min
 
-enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV }
+enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV, DHONDT }
 
 /** pre-election information **/
 data class ContestInfo(
@@ -20,14 +23,16 @@ data class ContestInfo(
     val metadata = mutableMapOf<String, Int>()
     val isIrv = choiceFunction == SocialChoiceFunction.IRV
 
+    val candidateIdToName: Map<Int, String> by lazy { candidateNames.entries.associate {(k,v) -> v to k } }
+
     init {
         if (choiceFunction == SocialChoiceFunction.SUPERMAJORITY) {
             require((nwinners == 1 && voteForN == 1)) { "SUPERMAJORITY must have nwinners == 1, and voteForN == 1" }
         }
         require(choiceFunction != SocialChoiceFunction.SUPERMAJORITY || minFraction != null) { "SUPERMAJORITY requires minFraction"}
-        require(choiceFunction == SocialChoiceFunction.SUPERMAJORITY || minFraction == null) { "only SUPERMAJORITY can have minFraction"}
+        require(choiceFunction == SocialChoiceFunction.SUPERMAJORITY || choiceFunction == SocialChoiceFunction.DHONDT || minFraction == null) { "only SUPERMAJORITY, DHONDT can have minFraction"}
         require(minFraction == null || minFraction in (0.0..1.0)) { "minFraction between 0 and 1"}
-        require(nwinners in (1..candidateNames.size)) { "nwinners between 1 and candidateNames.size"}
+        if (choiceFunction != SocialChoiceFunction.DHONDT) require(nwinners in (1..candidateNames.size)) { "nwinners between 1 and candidateNames.size"}
         require(voteForN in (1..candidateNames.size)) { "voteForN between 1 and candidateNames.size"}
 
         val candidateSet = candidateNames.toList().map { it.first }.toSet()
@@ -74,6 +79,9 @@ interface ContestIF {
     fun phantomRate() = Np() / Nc().toDouble()
     fun isIrv() = choiceFunction == SocialChoiceFunction.IRV
     fun show() : String = toString()
+    fun showCandidates(): String
+    fun recountMargin(assertion: Assertion): Double
+    fun showAssertionDiff(assertion: Assertion): String
 
     fun votes() : Map<Int, Int>? {
         if (this is Contest) return this.votes
@@ -119,12 +127,13 @@ open class Contest(
     override fun winners() = winners
     override fun losers() = losers
 
-    val winnerNames: List<String>
-    val winners: List<Int>
-    val losers: List<Int>
-
     val votes: Map<Int, Int>  // candidateId -> nvotes; zero vote candidates have been added
     val undervotes: Int
+
+    // overridden by DHondt
+    var winnerNames: List<String>
+    var winners: List<Int>
+    var losers: List<Int>
 
     init {
         require(Ncast <= Nc) { "contest $id Ncast= $Ncast must be <= Nc= $Nc" }
@@ -157,7 +166,7 @@ open class Contest(
         undervotes = info.voteForN * Ncast - nvotes   // C1
 
         //// find winners, check that the minimum value is satisfied
-        // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest
+        // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest, DHONDT by ContestDHondt
 
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
         val useMin = info.minFraction ?: 0.0
@@ -180,7 +189,7 @@ open class Contest(
     }
 
     override fun toString() = buildString {
-        append("$name ($id) Nc=$Nc Np=${Np()} votesAndUndervotes=${votesAndUndervotes()}")
+        append("$name ($id) Nc=$Nc Np=${Np()} ${votesAndUndervotes()}")
     }
 
     fun calcMargin(winner: Int, loser: Int): Double {
@@ -195,12 +204,43 @@ open class Contest(
     }
 
     // put the undervotes into the candidate map.
-    fun votesAndUndervotes(): Map<Int, Int> {
-        return (votes.map { Pair(it.key, it.value)} + Pair(ncandidates, undervotes)).toMap()
+    fun votesAndUndervotes(): VotesAndUndervotes {
+        return VotesAndUndervotes(votes, undervotes, info.voteForN)
+    }
+
+    override fun recountMargin(assertion: Assertion): Double {
+        val votes = votes()!!
+        val winner = votes[assertion.assorter.winner()]!!
+        val loser = votes[assertion.assorter.loser()]!!
+        return (winner - loser) / (winner.toDouble())
+    }
+
+    override fun showAssertionDiff(assertion: Assertion): String {
+        val votes = votes()!!
+        val winner = votes[assertion.assorter.winner()]!!
+        val loser = votes[assertion.assorter.loser()]!!
+        val recountMargin = (winner - loser) / (winner.toDouble())
+        return "winner=$winner loser=$loser diff=${winner-loser} recountMargin=$recountMargin"
     }
 
     override fun show(): String {
-        return "Contest(info=$info, Nc=$Nc, Np=${Np()}, id=$id, name='$name', choiceFunction=$choiceFunction, ncandidates=$ncandidates, votesAndUndervotes=${votesAndUndervotes()}, winnerNames=$winnerNames, winners=$winners, losers=$losers)"
+        return "Contest(info=$info, Nc=$Nc, Np=${Np()}, id=$id, name='$name', choiceFunction=$choiceFunction, ncandidates=$ncandidates, ${votesAndUndervotes()}, winnerNames=$winnerNames, winners=$winners, losers=$losers)"
+    }
+
+    override fun showCandidates() = buildString {
+        if (votes() != null) {
+            val votes = votes()!!
+            info().candidateNames.forEach { (name, id) ->
+                val win = if (winners().contains(id)) " (winner)" else ""
+                appendLine("   $id '$name': votes=${votes[id]} $win")
+            }
+            append("    Total=${votes.values.sum()}")
+        } else {
+            info().candidateNames.forEach { (name, id) ->
+                val win = if (winners().contains(id)) " (winner)" else ""
+                appendLine("   $id '$name' $win")
+            }
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -244,6 +284,7 @@ open class ContestUnderAudit(
     val contest: ContestIF,
     val isComparison: Boolean = true,
     val hasStyle: Boolean = true,
+    addAssertions: Boolean = true,
 ) {
     val id = contest.id
     val name = contest.name
@@ -265,10 +306,17 @@ open class ContestUnderAudit(
             preAuditStatus = TestH0Status.NoWinners
         }
         // should really be called after init is done
-        if (contest is Contest) { // || (contest is OneAuditContest && (contest.contest is Contest))) {
+        if (addAssertions) {
             pollingAssertions = makePollingAssertions()
         }
-        // Raire has to add its own assertions
+    }
+
+    fun addAssertionsFromAssorters(assorters: List<AssorterIF>){
+        val assertions = mutableListOf<Assertion>()
+        assorters.forEach { assorter ->
+            assertions.add(Assertion(contest.info(), assorter))
+        }
+        pollingAssertions = assertions
     }
 
     // TODO rename to primitive assertions ??
@@ -349,42 +397,19 @@ open class ContestUnderAudit(
         else (minPollingAssertion()?.assorter?.reportedMargin() ?: 0.0)
     }
 
-    open fun recountMargin(): Double {
-        var pct = -1.0
-        val minAssertion: Assertion = minAssertion() ?: return pct
-        if (contest.votes() != null) {
-            val votes = contest.votes()!!
-            val winner = votes[minAssertion.assorter.winner()]!!
-            val loser = votes[minAssertion.assorter.loser()]!!
-            pct = (winner - loser) / (winner.toDouble())
-        }
-        return pct
+    fun recountMargin(): Double {
+        val minAssertion: Assertion = minAssertion() ?: return -1.0
+        return contest.recountMargin(minAssertion)
     }
 
     override fun toString() = contest.toString()
 
     open fun show() = buildString {
-        val votes = if (contest is Contest) contest.votesAndUndervotes() else emptyMap()
+        val vunder = if (contest is Contest) contest.votesAndUndervotes() else null
         val sumVotes = if (contest is Contest) contest.votes()!!.map{ it.value }.sum() else 0
-        appendLine("${contest.javaClass.simpleName} '$name' ($id) $choiceFunction voteForN=${contest.info().voteForN} votesAndUndervotes=${votes}")
-        appendLine(" winners=${contest.winners()} minMargin=${df(minMargin())} recount=${df(recountMargin())} Nc=$Nc Np=$Np Nu=$Nu, sumVotes=$sumVotes")
-        append(showCandidates())
-    }
-
-    open fun showCandidates() = buildString {
-        if (contest.votes() != null) {
-            val votes = contest.votes()!!
-            contest.info().candidateNames.forEach { (name, id) ->
-                val win = if (contest.winners().contains(id)) " (winner)" else ""
-                appendLine("   $id '$name': votes=${votes[id]} $win")
-            }
-            append("    Total=${votes.values.sum()}")
-        } else {
-            contest.info().candidateNames.forEach { (name, id) ->
-                val win = if (contest.winners().contains(id)) " (winner)" else ""
-                appendLine("   $id '$name' $win")
-            }
-        }
+        appendLine("${contest.javaClass.simpleName} '$name' ($id) $choiceFunction voteForN=${contest.info().voteForN} ${vunder}")
+        appendLine(" winners=${contest.winners()} minMargin=${df(minMargin())} recountMargin=${df(recountMargin())} Nc=$Nc Np=$Np Nu=$Nu, sumVotes=$sumVotes")
+        append(contest.showCandidates())
     }
 
     open fun showShort() = buildString {

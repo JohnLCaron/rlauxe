@@ -124,4 +124,12 @@ class TestVerifyUseCases {
         if (results.hasErrors) fail()
     }
 
+    @Test
+    fun testRunVerifyDHondt() {
+        val auditdir = "/home/stormy/rla/cases/belgium/2024/Hainaut/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        println()
+        print(results)
+        if (results.hasErrors) fail()
+    }
 }

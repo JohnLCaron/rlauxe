@@ -94,7 +94,7 @@ class CorlaAudit(
     init {
         require (auditConfig.auditType == AuditType.CLCA)
 
-        contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
+        contestsUA = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, hasStyle=auditConfig.hasStyles) }
         contestsUA.forEach { contest ->
             contest.addClcaAssertionsFromReportedMargin()
         }

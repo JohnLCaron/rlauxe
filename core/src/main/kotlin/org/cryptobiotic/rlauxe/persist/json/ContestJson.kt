@@ -10,6 +10,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.dhondt.ContestDHondt
+import org.cryptobiotic.rlauxe.dhondt.DhondtScore
 import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OAIrvContestUA
 import org.cryptobiotic.rlauxe.raire.*
@@ -94,10 +96,21 @@ data class ContestIFJson(
     val Ncast: Int,
     val irvRoundsPaths: List<IrvRoundsPathJson>? = null,
     val undervotes: Int? = null,
+    val sortedScores: List<DhondtScoreJson>? = null
 )
 
 fun ContestIF.publishJson() : ContestIFJson {
     return when (this) {
+        is ContestDHondt ->
+            ContestIFJson(
+                "ContestDHondt",
+                votes = this.votes,
+                this.winners,
+                this.Nc,
+                this.Ncast,
+                undervotes = this.undervotes, // TODO
+                sortedScores = this.sortedScores.map { it.publishJson() }
+            )
         is Contest ->
             ContestIFJson(
                 "Contest",
@@ -142,6 +155,15 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
             }
             rcontest
         }
+        "ContestDHondt" -> {
+            ContestDHondt(
+                info,
+                this.votes!!,
+                this.Nc,
+                this.Ncast,
+                sortedScores = this.sortedScores!!.map { it.import() }
+            )
+        }
         else -> throw RuntimeException()
     }
 }
@@ -168,6 +190,20 @@ fun IrvRoundsPathJson.import() = IrvRoundsPath(
     IrvWinners(this.done, this.winners),
 )
 
+// data class DhondtScore(val candidate: Int, val score: Double, val divisor: Int) {
+@Serializable
+data class DhondtScoreJson(
+    val candidate: Int,
+    val score: Double,
+    val divisor: Int,
+    val winningSeat: Int?,
+)
+
+fun DhondtScore.publishJson() = DhondtScoreJson(candidate, score, divisor, winningSeat)
+
+fun DhondtScoreJson.import() = DhondtScore(candidate, score, divisor).setWinningSeat(this.winningSeat)
+
+
 // open class ContestUnderAudit(
 //    val contest: ContestIF,
 //    val isComparison: Boolean = true,
@@ -179,7 +215,7 @@ fun IrvRoundsPathJson.import() = IrvRoundsPath(
 
 @Serializable
 data class ContestUnderAuditJson(
-    val info: ContestInfoJson, // This is where the infos are kept. TODO store separate ??
+    val info: ContestInfoJson, // This is where the infos are kept.
     val contest: ContestIFJson,
     val isComparison: Boolean,
     val hasStyle: Boolean,
@@ -202,8 +238,8 @@ fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
 
 fun ContestUnderAuditJson.import(isOA: Boolean): ContestUnderAudit {
     val info = this.info.import()
-    val contestUA = if (isOA) OAContestUnderAudit(this.contest.import(info), this.hasStyle)
-            else ContestUnderAudit(this.contest.import(info), this.isComparison, this.hasStyle)
+    val contestUA = if (isOA) OAContestUnderAudit(this.contest.import(info), hasStyle=this.hasStyle, addAssertions = false)
+            else ContestUnderAudit(this.contest.import(info), isComparison=this.isComparison, hasStyle=this.hasStyle, addAssertions = false)
     contestUA.pollingAssertions = this.pollingAssertions.map { it.import(info) }
     contestUA.clcaAssertions = this.clcaAssertions.map { it.import(info) }
     contestUA.preAuditStatus = this.status

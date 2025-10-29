@@ -52,6 +52,6 @@ data class Welford(
     }
 
     fun show2(): String {
-        return "count =  ${this.count}, sum = ${dfn(mean*count, 1)}, mean = ${df(mean)}"
+        return "count=${this.count}, sum=${dfn(mean*count, 1)}, mean=${df(mean)}"
     }
 }

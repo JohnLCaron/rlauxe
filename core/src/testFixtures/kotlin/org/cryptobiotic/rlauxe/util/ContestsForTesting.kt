@@ -86,7 +86,7 @@ fun makeContestFromFakeCvrs(info: ContestInfo, ncvrs: Int): Contest {
 }
 
 fun makeContestUAfromCvrs(info: ContestInfo, cvrs: List<Cvr>, isComparison: Boolean=true, hasStyle: Boolean=true) : ContestUnderAudit {
-    return ContestUnderAudit( makeContestFromCvrs(info, cvrs), isComparison, hasStyle)
+    return ContestUnderAudit( makeContestFromCvrs(info, cvrs), isComparison=isComparison, hasStyle=hasStyle)
 }
 
 fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyles: Boolean=true): List<ContestUnderAudit> {
@@ -108,7 +108,7 @@ fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyles: B
         if (contest == null)
             throw RuntimeException("no contest for contest id= $conId")
         val accumVotes = allVotes[conId]!!
-        val contestUA = ContestUnderAudit(contest, true, hasStyles)
+        val contestUA = ContestUnderAudit(contest, isComparison=true, hasStyle=hasStyles)
         require(checkEquivilentVotes((contestUA.contest as Contest).votes, accumVotes))
         contestUA
     }
@@ -170,15 +170,15 @@ fun tabulateVotesFromCvrs(cvrs: Iterator<Cvr>): Map<Int, Map<Int, Int>> {
     return votes
 }
 
-fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int, voteForN: Int = 1): Map<Int, Int> {
+fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int, voteForN: Int = 1): VotesAndUndervotes {
     val result = mutableMapOf<Int, Int>()
+    var undervotes = 0
     cvrs.forEach{ cvr ->
         if (cvr.hasContest(contestId) && !cvr.phantom) {
             val candVotes = cvr.votes[contestId] // should always succeed
             if (candVotes != null) {
                 if (candVotes.size < voteForN) {  // undervote
-                    val count = result[ncands] ?: 0
-                    result[ncands] = count + (voteForN - candVotes.size)
+                    undervotes += (voteForN - candVotes.size)
                 }
                 for (cand in candVotes) {
                     val count = result[cand] ?: 0
@@ -187,5 +187,5 @@ fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int
             }
         }
     }
-    return result
+    return VotesAndUndervotes(result, undervotes, voteForN)
 }

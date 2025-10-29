@@ -4,8 +4,9 @@ import org.cryptobiotic.rlauxe.core.*
 
 open class OAContestUnderAudit(
     contest: ContestIF,
-    hasStyle: Boolean = true
-): ContestUnderAudit(contest, isComparison=true, hasStyle=hasStyle) {
+    hasStyle: Boolean = true,
+    addAssertions: Boolean = true
+): ContestUnderAudit(contest, isComparison=true, hasStyle=hasStyle, addAssertions=addAssertions) {
 
     // TODO did override     open fun makeClcaAssorter(assertion: Assertion, assortValueFromCvrs: Double?): ClcaAssorter {
     fun makeClcaAssorter(assertion: Assertion, poolAverages: AssortAvgsInPools): ClcaAssorter {

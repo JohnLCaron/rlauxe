@@ -64,6 +64,7 @@ interface AssorterIF {
 
     fun shortName() = "winner/loser:${winner()}/${loser()}"
     fun winLose() = "${winner()}/${loser()}"
+    fun hashcodeDesc(): String // Used as unique reference, DO NOT CHANGE!
 }
 
 /** See SHANGRLA, section 2.1, p.4 */
@@ -87,6 +88,7 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
 
     override fun upperBound() = 1.0
     override fun desc() = " winner=$winner loser=$loser reportedMargin=${df(reportedMargin)} reportedMean=${df(margin2mean(reportedMargin))}"
+    override fun hashcodeDesc() = "${winLose()} ${info.hashCode()}" // must be unique for serialization
     override fun winner() = winner
     override fun loser() = loser
     override fun reportedMargin() = reportedMargin
@@ -154,6 +156,7 @@ data class SuperMajorityAssorter(val info: ContestInfo, val winner: Int, val min
 
     override fun upperBound() = upperBound
     override fun desc() = "SuperMajorityAssorter winner=$winner minFraction=$minFraction"
+    override fun hashcodeDesc() = "winner=$winner minFraction=$minFraction ${info.hashCode()}" // must be unique for serialization
     override fun winner() = winner
     override fun loser() = -1 // everyone else is a loser
     override fun reportedMargin() = reportedMargin

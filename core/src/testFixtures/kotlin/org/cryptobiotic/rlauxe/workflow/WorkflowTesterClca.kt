@@ -20,7 +20,7 @@ class WorkflowTesterClca(
     init {
         require (auditConfig.auditType == AuditType.CLCA)
 
-        val regularContests = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, auditConfig.hasStyles) }
+        val regularContests = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, hasStyle=auditConfig.hasStyles) }
         contestsUA = regularContests + raireContests
 
         // TODO dont raire contests already have assertions added ??

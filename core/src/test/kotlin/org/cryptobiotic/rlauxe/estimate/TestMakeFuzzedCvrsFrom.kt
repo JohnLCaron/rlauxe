@@ -215,9 +215,9 @@ class TestMakeFuzzedCvrsFrom {
                 val contest = contestOA.contest as Contest
                 if (showOA) println("ncands = $ncands fuzzPct = $fuzzPct, margin = $margin ${contest.votes}")
 
-                val cvrVotes = tabulateVotesWithUndervotes(cvrs.iterator(), 0, ncands)
-                if (showOA) println("cvrVotes = ${cvrVotes}  contestVotes = ${contest.votesAndUndervotes()}")
-                assertEquals(cvrVotes, contest.votesAndUndervotes())
+                val vunder = tabulateVotesWithUndervotes(cvrs.iterator(), 0, ncands)
+                if (showOA) println("cvrVotes = ${vunder}  contestVotes = ${contest.votesAndUndervotes()}")
+                assertEquals(vunder, contest.votesAndUndervotes())
                 assertEquals(Nc, cvrs.size)
 
                 val fuzzed = makeFuzzedCvrsFrom(listOf(contestOA.contest), cvrs, fuzzPct, welfordFromFuzz)

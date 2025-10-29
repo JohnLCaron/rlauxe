@@ -106,10 +106,12 @@ fun checkWinners(contestUA: ContestUnderAudit, results: VerifyResults) {
     }
 
     // 3. verify that nwinners == min(ncandidates, info.nwinners)
-    val maxwinners = min(info.candidateIds.size, info.nwinners)
-    if (contest.winners().size != maxwinners) {
-        results.addError("Contest ${info.name} (${info.id}) has ${contest.winners().size} winners should be $maxwinners")
-        contestUA.preAuditStatus = TestH0Status.ContestMisformed
+    if (info.choiceFunction != SocialChoiceFunction.DHONDT) {
+        val maxwinners = min(info.candidateIds.size, info.nwinners)
+        if (contest.winners().size != maxwinners) {
+            results.addError("Contest ${info.name} (${info.id}) has ${contest.winners().size} winners should be $maxwinners")
+            contestUA.preAuditStatus = TestH0Status.ContestMisformed
+        }
     }
 }
 

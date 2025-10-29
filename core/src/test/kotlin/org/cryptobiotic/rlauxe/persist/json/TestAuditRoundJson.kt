@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.workflow.*
+import kotlin.io.path.createTempFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -93,7 +94,7 @@ class TestAuditRoundJson {
             auditorWantNewMvrs = 2223,
             )
 
-        val scratchFile = kotlin.io.path.createTempFile().toFile()
+        val scratchFile = createTempFile().toFile()
 
         writeAuditRoundJsonFile(target, scratchFile.toString())
         val result = readAuditRoundJsonFile(scratchFile.toString(), contestsUAs, target.samplePrns, emptyList())
@@ -147,7 +148,7 @@ class TestAuditRoundJson {
         check(target, roundtrip)
         assertEquals(roundtrip, target)
 
-        val scratchFile = kotlin.io.path.createTempFile().toFile()
+        val scratchFile = createTempFile().toFile()
 
         writeAuditRoundJsonFile(target, scratchFile.toString())
         val result = readAuditRoundJsonFile(scratchFile.toString(), clcaWorkflow.contestsUA(), target.samplePrns, emptyList())
@@ -162,7 +163,6 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtripWithRaire() {
-
         val fuzzMvrs = .01
         val auditConfig = AuditConfig(
             AuditType.CLCA, hasStyles = true, seed = 12356667890L, nsimEst = 10,
@@ -199,12 +199,12 @@ class TestAuditRoundJson {
             auditorWantNewMvrs = 33733,
         )
         val json = target.publishJson()
-        val roundtrip = json.import(clcaWorkflow.contestsUA(), target.samplePrns, emptyList())
+        val roundtrip: AuditRound = json.import(clcaWorkflow.contestsUA(), target.samplePrns, emptyList())
         assertNotNull(roundtrip)
         check(target, roundtrip)
         assertEquals(roundtrip, target)
 
-        val scratchFile = kotlin.io.path.createTempFile().toFile()
+        val scratchFile = createTempFile().toFile()
 
         writeAuditRoundJsonFile(target, scratchFile.toString())
         val result = readAuditRoundJsonFile(scratchFile.toString(), clcaWorkflow.contestsUA(), target.samplePrns, emptyList())
@@ -235,6 +235,7 @@ fun check(s1: AuditRound, s2: AuditRound) {
             assertEquals(a1.cassorter, a2.cassorter, "clcaAssertion.cassorter ${a1.cassorter}\n not ${a2.cassorter}")
             assertEquals(a1, a2, "clcaAssertion ${a1}\n not ${a2}")
         }
-        assertEquals(c1, c2, "contestUA $c1\n not $c2")
+        val ok = c1.equivalent(c2)
+        assertEquals(c1, c2, "contestUA $c1\n not equal $c2")
     }
 }

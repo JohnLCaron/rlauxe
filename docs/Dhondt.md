@@ -121,6 +121,8 @@ From this, we define the proto-assorter for any ballot b as
     or equivilantly, g_AB(b) = bA/d(WA) - bB/d(WB)
 
 The lower bound is -1/d(WB)
+The upper bound is 1/d(WA)
+  h upper bound is h(1/d(WA)) ?
 
 5.3  More complex methods: Multi-candidate voting
 

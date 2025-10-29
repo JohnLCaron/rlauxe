@@ -43,7 +43,10 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         auditConfig = auditConfigResult.unwrap()
 
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
-        allContests = if (contestsResults is Ok) contestsResults.unwrap().sortedBy { it.id } else null
+        allContests = if (contestsResults is Ok) contestsResults.unwrap().sortedBy { it.id } else {
+            println(contestsResults)
+            null
+        }
         allInfos = allContests?.map{ it.contest.info() }?.associateBy { it.id }
 
         cards = AuditableCardCsvReader(publisher.sortedCardsFile())

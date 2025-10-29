@@ -25,7 +25,7 @@ class ColoradoOneAudit (
     contestRoundFile: String,
     precinctFile: String,
     val isClca: Boolean,
-    val hasStyles: Boolean = true,
+    val hasStyle: Boolean = true,
 ): CreateElectionIF {
     val roundContests: List<ContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
@@ -54,7 +54,7 @@ class ColoradoOneAudit (
             undervote.add(it.poolUndervote(cardPools))
         }
 
-        contestsUA = makeUAContests(hasStyles)
+        contestsUA = makeUAContests()
     }
 
     private fun makeOneContestInfo(electionDetailXml: ElectionDetailXml, roundContests: List<ContestRoundCsv>): List<OneAuditContestCorla> {
@@ -129,7 +129,7 @@ class ColoradoOneAudit (
     }
 
     // TODO do we need to make non-OAContestUnderAudit when isClca ?
-    fun makeUAContests(hasStyles: Boolean): List<ContestUnderAudit> {
+    fun makeUAContests(): List<ContestUnderAudit> {
         val infoList= oaContests.map { it.info }.sortedBy { it.id }
         val contestMap= oaContests.associateBy { it.info.id }
 
@@ -142,7 +142,7 @@ class ColoradoOneAudit (
             val useNc = max( ncards, oaContest.Nc)
             val contest = Contest(info, candVotes, useNc, ncards)
             info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
-            if (isClca) ContestUnderAudit(contest, hasStyles) else OAContestUnderAudit(contest, hasStyles)
+            if (isClca) ContestUnderAudit(contest, hasStyle=hasStyle) else OAContestUnderAudit(contest, hasStyle=hasStyle)
         }
 
         return regContests

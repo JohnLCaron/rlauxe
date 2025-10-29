@@ -133,8 +133,7 @@ fun ContestRound.publishJson() : ContestRoundJson {
 }
 
 fun ContestRoundJson.import(contestUA: ContestUnderAudit): ContestRound {
-    // TODO not exactly type safe TODO fails on Raire. Why cant we use hash ?? FIX THIS!
-    val assertionMap = contestUA.assertions().associateBy { it.assorter.desc() }
+    val assertionMap = contestUA.assertions().associateBy { it.assorter.hashcodeDesc() }
     val assertionRounds = assertionRounds.map {
         val ref = assertionMap[it.assorterDesc]
         if (ref == null)
@@ -184,7 +183,7 @@ data class AssertionRoundJson(
 
 fun AssertionRound.publishJson() : AssertionRoundJson {
     return AssertionRoundJson(
-        this.assertion.assorter.desc(),
+        this.assertion.assorter.hashcodeDesc(),
         this.roundIdx,
         this.estSampleSize,
         this.estNewSampleSize,

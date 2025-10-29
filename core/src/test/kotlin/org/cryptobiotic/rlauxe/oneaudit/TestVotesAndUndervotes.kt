@@ -71,10 +71,10 @@ class TestVotesAndUndervotes {
                 require(checkEquivilentVotes(vunders.candVotesSorted, tv))
         }
 
-        assertEquals("VotesAndUndervotes(undervotes=51, voteForN=1, votes={0=200, 1=123, 2=17} candidateIds=[0, 1, 2])", contestVotes[0].toString())
+        assertEquals("votes={0=200, 1=123, 2=17} undervotes=51, voteForN=1", contestVotes[0].toString())
         assertEquals(mapOf(0 to 200, 1 to 123, 2 to 17, 3 to 51), contestVotes[0]!!.votesAndUndervotes())
 
-        assertEquals("VotesAndUndervotes(undervotes=51, voteForN=1, votes={1=123, 0=71, 2=3} candidateIds=[1, 0, 2])", contestVotes[1].toString())
+        assertEquals("votes={1=123, 0=71, 2=3} undervotes=51, voteForN=1", contestVotes[1].toString())
         assertEquals(mapOf(0 to 71, 1 to 123, 2 to 3, 3 to 51), contestVotes[1]!!.votesAndUndervotes())
     }
 
@@ -99,7 +99,7 @@ class TestVotesAndUndervotes {
             require(checkEquivilentVotes(vunders.candVotesSorted, tv))
         }
 
-        assertEquals("VotesAndUndervotes(undervotes=51, voteForN=2, votes={0=200, 1=123, 2=17} candidateIds=[0, 1, 2])", contestVotes[0].toString())
+        assertEquals("votes={0=200, 1=123, 2=17} undervotes=51, voteForN=2", contestVotes[0].toString())
         assertEquals(mapOf(0 to 200, 1 to 123, 2 to 17, 3 to 51), contestVotes[0]!!.votesAndUndervotes())
     }
 

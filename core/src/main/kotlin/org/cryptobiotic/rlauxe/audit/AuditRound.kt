@@ -35,6 +35,7 @@ data class AuditRound(
         }
         return result
     }
+
 }
 
 fun List<AuditRound>.previousSamples(currentRoundIdx: Int): Set<Long> {
@@ -131,6 +132,21 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
         result = 31 * result + assertionRounds.hashCode()
         result = 31 * result + status.hashCode()
         return result
+    }
+
+    fun equivalent(other: ContestRound): Boolean {
+        if (!this.contestUA.equals(other.contestUA)) {
+            return false
+        }
+        val assertionsZip = this.assertionRounds.zip(other.assertionRounds)
+        assertionsZip.forEach { (myAssertionRound, otherAssertionRound) ->
+            if (!myAssertionRound.equals(otherAssertionRound)) {
+                println(myAssertionRound)
+                println(otherAssertionRound)
+                return false
+            }
+        }
+        return true
     }
 }
 

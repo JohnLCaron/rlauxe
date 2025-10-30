@@ -60,7 +60,7 @@ class TestDhondtContest {
         println("\nContestDHondt.cvrs, AssorterIF")
         val nvotes = dcontest.validVotes
         val Ncast = nvotes + undervotes
-        val contestd: ContestDHondt = dcontest.createContest(Ncast, Ncast)
+        val contestd: DHondtContest = dcontest.createContest(Ncast, Ncast)
         val cvrsIF = contestd.createSimulatedCvrs()
         println("validVotes = ${contestd.votes.values.sum()} undervotes=${contestd.undervotes} ncvrsIF = ${cvrsIF.size}")
 

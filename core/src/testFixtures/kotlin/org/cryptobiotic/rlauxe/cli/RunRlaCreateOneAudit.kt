@@ -133,13 +133,6 @@ object RunRlaCreateOneAudit {
         val testMvrs: List<Cvr>
 
         init {
-            // fun makeOneContestUA(
-            //    margin: Double,
-            //    Nc: Int,
-            //    cvrFraction: Double,
-            //    undervoteFraction: Double,
-            //    phantomFraction: Double,
-            //): Triple<OAContestUnderAudit, List<BallotPool>, List<Cvr>> {
             val (contestOA, cardPools, testCvrs) = makeOneContestUA(
                 margin = minMargin,
                 Nc = ncards,

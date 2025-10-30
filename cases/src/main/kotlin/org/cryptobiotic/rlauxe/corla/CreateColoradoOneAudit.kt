@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolWithBallotStyle
-// import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestIF
 import org.cryptobiotic.rlauxe.oneaudit.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.util.*
@@ -128,7 +127,6 @@ class ColoradoOneAudit (
         }
     }
 
-    // TODO do we need to make non-OAContestUnderAudit when isClca ?
     fun makeUAContests(): List<ContestUnderAudit> {
         val infoList= oaContests.map { it.info }.sortedBy { it.id }
         val contestMap= oaContests.associateBy { it.info.id }
@@ -142,7 +140,7 @@ class ColoradoOneAudit (
             val useNc = max( ncards, oaContest.Nc)
             val contest = Contest(info, candVotes, useNc, ncards)
             info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
-            ContestUnderAudit(contest, hasStyle=hasStyle) // else OAContestUnderAudit(contest, hasStyle=hasStyle)
+            ContestUnderAudit(contest, hasStyle=hasStyle)
         }
 
         return regContests

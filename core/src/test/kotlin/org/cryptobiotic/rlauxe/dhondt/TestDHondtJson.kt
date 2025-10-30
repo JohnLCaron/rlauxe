@@ -46,7 +46,7 @@ class TestDHondtJson {
         contestUA.addAssertionsFromAssorters(dcontest.makeAssorters())
 
         val json = contestUA.publishJson()
-        val roundtrip = json.import(isOA = false)
+        val roundtrip = json.import()
         assertNotNull(roundtrip)
         assertEquals(contestUA, roundtrip)
         assertTrue(roundtrip.equals(contestUA))

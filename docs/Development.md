@@ -17,6 +17,7 @@
 | 10/24/2025 | 92.6 % | 5073/5481       |
 | 10/24/2025 | 92.9 % | 5091/5478       |
 | 10/25/2025 | 92.6 % | 5068/5475       |
+| 10/30/2025 | 90.6 % | 5279/5828       |
 
 ## Modules
 
@@ -25,7 +26,6 @@
 * **docs**: documentation
 * **libs**: local copy of raire-java library
 * **plots**: code to generate plots for documentation
-* **rla**: additional tests
 
 ## UML
 last changed: 03/10/2025

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.belgium
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.dhondt.ContestDHondt
+import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.sequences.plus
@@ -11,7 +11,7 @@ import kotlin.sequences.plus
 private val logger = KotlinLogging.logger("BelgiumClca")
 
 class BelgiumClca (
-    contestd: ContestDHondt,
+    contestd: DHondtContest,
 ): CreateElectionIF {
 
     val infoMap: Map<Int, ContestInfo>
@@ -42,7 +42,7 @@ class BelgiumClca (
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
 fun createBelgiumClca(
     topdir: String,
-    contestd: ContestDHondt,
+    contestd: DHondtContest,
     auditConfigIn: AuditConfig? = null,
     clear: Boolean = true)
 {

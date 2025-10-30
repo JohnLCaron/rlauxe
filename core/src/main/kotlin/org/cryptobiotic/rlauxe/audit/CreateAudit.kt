@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
-// import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
@@ -112,7 +111,7 @@ class CreateAudit(val name: String, val topdir: String, val config: AuditConfig,
         }
 
         // sf only writes these:
-        // val auditableContests: List<OAContestUnderAudit> = contestsUA.filter { it.preAuditStatus == TestH0Status.InProgress }
+        // contestsUA.filter { it.preAuditStatus == TestH0Status.InProgress }
 
         // write contests
         writeContestsJsonFile(contestsUA, publisher.contestsFile())

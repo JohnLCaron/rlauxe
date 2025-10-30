@@ -28,7 +28,7 @@ fun RaireContestUnderAudit.publishRaireJson() = RaireContestUnderAuditJson(
     )
 
 fun RaireContestUnderAuditJson.import(): RaireContestUnderAudit {
-    val contestUA = this.contestUA.import(isOA = false)
+    val contestUA = this.contestUA.import()
     val raireContest = this.raireContest.import(contestUA.contest.info())
 
     val result = RaireContestUnderAudit(

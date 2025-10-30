@@ -16,10 +16,10 @@ import org.cryptobiotic.rlauxe.util.trunc
 
 private val showDetails = false
 
-fun makeDhondtContest(name: String, id: Int, parties: List<DhondtCandidate>, nseats: Int, undervotes: Int, minPct: Double): DHondtContest {
-    // have to do this before winenrs are assigned
-    val Nc = parties.sumOf { it.votes }
-    parties.forEach { if (it.votes/Nc.toDouble() < minPct) it.belowMinPct = true }
+fun makeProtoContest(name: String, id: Int, parties: List<DhondtCandidate>, nseats: Int, undervotes: Int, minPct: Double): ProtoContest {
+    // have to do this before winners are assigned
+    val nvotes = parties.sumOf { it.votes }
+    parties.forEach { if (it.votes/nvotes.toDouble() < minPct) it.belowMinPct = true }
 
     if (showDetails) println("makeDhondtElection")
     val dHondtContest = assignWinners(name, id, parties, nseats = nseats, undervotes=undervotes, minPct = minPct)
@@ -28,15 +28,11 @@ fun makeDhondtContest(name: String, id: Int, parties: List<DhondtCandidate>, nse
         if (showDetails) println()
     }
 
-    val assorters= makeAssorters(dHondtContest)
-    if (showDetails) {
-        assorters.forEach { println(it.show()) }
-        if (showDetails) println()
-    }
-    return dHondtContest.setAssorters(assorters)
+    dHondtContest.makeProtoAssorters()
+    return dHondtContest
 }
 
-fun assignWinners(name: String, id: Int, parties: List<DhondtCandidate>, nseats : Int, undervotes: Int, minPct: Double): DHondtContest {
+fun assignWinners(name: String, id: Int, parties: List<DhondtCandidate>, nseats : Int, undervotes: Int, minPct: Double): ProtoContest {
     val scores = mutableListOf<DhondtScore>()
 
     parties.filter{ !it.belowMinPct }.forEach { party->
@@ -50,12 +46,12 @@ fun assignWinners(name: String, id: Int, parties: List<DhondtCandidate>, nseats 
 
     repeat(nseats) { idx ->
         val score = scores[idx]
-        score.winningSeat = idx + 1
+        score.setWinningSeat(idx + 1)
         if (showDetails) println(" ${idx+1}: ${scores[idx]}")
     }
     if (showDetails) println()
 
-    return DHondtContest(name, id, parties, scores, nseats, undervotes, minPct)
+    return ProtoContest(name, id, parties, scores, nseats, undervotes, minPct)
 }
 
 data class DhondtCandidate(val name: String, val id: Int, val votes: Int) {
@@ -65,7 +61,7 @@ data class DhondtCandidate(val name: String, val id: Int, val votes: Int) {
 
     constructor(id: Int, votes: Int) : this("party-$id", id, votes)
 
-    fun setResults(results: DHondtContest) {
+    fun setResults(results: ProtoContest) {
         if (showDetails) results.sortedScores.filter{ it.candidate == this.id }.forEach { println(" ${it}") }
 
         lastSeatWon = results.winners.filter { it.candidate == this.id }.maxOfOrNull { it.divisor }
@@ -92,11 +88,12 @@ data class DhondtScore(val candidate: Int, val score: Double, val divisor: Int) 
     }
 }
 
-data class DHondtContest(val name: String, val id: Int, val parties: List<DhondtCandidate>, val sortedScores: List<DhondtScore>,
-                         val nseats: Int, val undervotes: Int, val minPct: Double) {
+data class ProtoContest(val name: String, val id: Int, val parties: List<DhondtCandidate>, val sortedScores: List<DhondtScore>,
+                        val nseats: Int, val undervotes: Int, val minPct: Double) {
     val winners = sortedScores.subList(0, nseats)
     val losers = sortedScores.subList(nseats, sortedScores.size)
-    val assorters = mutableListOf<DHondtAssorter>()
+    val assorters = mutableListOf<ProtoAssorter>()
+
     val validVotes: Int  = parties.sumOf { it.votes }
     val totalVotes = validVotes + undervotes
 
@@ -104,10 +101,24 @@ data class DHondtContest(val name: String, val id: Int, val parties: List<Dhondt
         parties.forEach { if (it.votes/validVotes.toDouble() < minPct) it.belowMinPct = true }
     }
 
-    fun setAssorters(assorts: List<DHondtAssorter>): DHondtContest {
-        assorters.addAll(assorts)
-        return this
+    fun makeProtoAssorters() {
+        // Let f_e,s = Te /d(s) for entity e and seat s
+        // f_A,WA > f_B,LB, so e = A and s = Wa
+
+        parties.forEach { winner ->
+            if (winner.lastSeatWon != null) {
+                parties.filter { it.id != winner.id }.forEach { loser ->
+                    if (loser.firstSeatLost != null) {
+                        val passorter = ProtoAssorter(this, winner, loser)
+                        assorters.add(passorter)
+                        if (showDetails) println(passorter.show())
+                    }
+                }
+            }
+        }
     }
+
+    fun makeAssorters(): List<DHondtAssorterIF> = assorters.map { it.makeAssorter() }
 
     fun show() = buildString {
         appendLine("'$name' ($id) Nc=$validVotes nseats=$nseats minPct=$minPct")
@@ -121,14 +132,6 @@ data class DHondtContest(val name: String, val id: Int, val parties: List<Dhondt
         }
     }
 
-    // data class ContestInfo(
-    //    val name: String,
-    //    val id: Int,
-    //    val candidateNames: Map<String, Int>, // candidate name -> candidate id
-    //    val choiceFunction: SocialChoiceFunction,  // electionguard has "VoteVariationType"
-    //    val nwinners: Int = 1,          // aka "numberElected"
-    //    val voteForN: Int = nwinners,   // aka "contestSelectionLimit" or "optionSelectionLimit"
-    //    val minFraction: Double? = null, // supermajority only.
     fun createInfo() = ContestInfo(
         name,
         id,
@@ -139,29 +142,16 @@ data class DHondtContest(val name: String, val id: Int, val parties: List<Dhondt
         minFraction = minPct,
     )
 
-    //         val info: ContestInfo,
-    //        voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
-    //        val Nc: Int,               // trusted maximum ballots/cards that contain this contest
-    //        val Ncast: Int,            // number of cast ballots containing this Contest, including undervotes
-    fun createContest(Nc: Int? = null, Ncast: Int? = null) = ContestDHondt(
-        createInfo(),
-        parties.associate { Pair(it.id, it.votes) },
-        Nc ?: this.validVotes,
-        Ncast ?: this.validVotes,
-        this.sortedScores,
-    )
-
-    fun createSimulatedCvrs(): List<Cvr> {
-        val cvrs = mutableListOf<Cvr>()
-        var count=0
-        this.parties.forEach { party ->
-            repeat(party.votes) {
-                count++
-                cvrs.add( Cvr("cvr$count", mapOf(id to intArrayOf(party.id))))
-            }
-        }
-        cvrs.shuffle()
-        return cvrs
+    fun createContest(Nc: Int? = null, Ncast: Int? = null): ContestDHondt {
+        val result = ContestDHondt(
+            createInfo(),
+            parties.associate { Pair(it.id, it.votes) },
+            Nc ?: this.validVotes,
+            Ncast ?: this.validVotes,
+            this.sortedScores,
+        )
+        result.assorters.addAll(assorters.map { it.makeAssorter() })
+        return result
     }
 }
 
@@ -183,6 +173,7 @@ class ContestDHondt(
 
     val belowMinPct : Set<Int> // contestIds under minPct
     val winnerSeats : Map<Int, Int>
+    val assorters = mutableListOf<DHondtAssorterIF>()
 
     init {
         val nvotes = votes.values.sum()
@@ -227,7 +218,7 @@ class ContestDHondt(
         val width0 = 15
         val width = 12
         val maxRound = sortedScores.filter{ it.winningSeat != null }.maxOfOrNull { it.divisor }!!
-        append("${trunc("Round", width0)}:")
+        append("candidate ${trunc("Round", width0 - "candidate".length + 2)}:")
         for (round in 1 .. maxRound) {
             append("${nfn(round, width)} |")
         }
@@ -235,12 +226,13 @@ class ContestDHondt(
 
         info.candidateIds.forEach { id ->
             val rounds = sortedScores.filter { it.candidate == id }.map { Dround(id, it.score, it.divisor, it.winningSeat) }
-            append(showCandidate(info.candidateIdToName[id]!!, votes[id]!!, maxRound, rounds, width0, width))
+            val candName = "${nfn(id, 2)} ${trunc(info.candidateIdToName[id]!!, width0)}"
+            append(showCandidate(candName, votes[id]!!, maxRound, rounds, width))
         }
     }
 
-    fun showCandidate(candName: String, candTotal: Int, maxRound: Int, rounds: List<Dround>, width0: Int, width:Int) = buildString {
-        append("${trunc(candName, width0)}:")
+    fun showCandidate(candName: String, candTotal: Int, maxRound: Int, rounds: List<Dround>, width:Int) = buildString {
+        append("${candName}:")
         for (round in 1 .. maxRound) {
             val candRound = rounds.find { it.round == round }
             if (candRound == null) {
@@ -297,29 +289,10 @@ class ContestDHondt(
         return result
     }
 
+    class Dround(val candId: Int, val score: Double, val round: Int, val winningSeat: Int?)
 }
 
-class Dround(val candId: Int, val score: Double, val round: Int, val winningSeat: Int?)
-
-
-fun makeAssorters(contest: DHondtContest): List<DHondtAssorter> {
-    // Let f_e,s = Te /d(s) for entity e and seat s
-    // f_A,WA > f_B,LB, so e = A and s = Wa
-
-    val assorters = mutableListOf<DHondtAssorter>()
-    contest.parties.forEach { winner ->
-        if (winner.lastSeatWon != null) {
-            contest.parties.filter { it.id != winner.id }.forEach { loser ->
-                if (loser.firstSeatLost != null) {
-                    assorters.add(DHondtAssorter(contest, winner, loser))
-                }
-            }
-        }
-    }
-    return assorters
-}
-
-data class DHondtAssorter(val contest: DHondtContest, val winner: DhondtCandidate, val loser: DhondtCandidate) {
+data class ProtoAssorter(val contest: ProtoContest, val winner: DhondtCandidate, val loser: DhondtCandidate) {
     // Let f_e,s = Te/d(s) for entity e and seat s
     // f_A,WA > f_B,LB, so e = A and s = Wa
 
@@ -349,8 +322,7 @@ data class DHondtAssorter(val contest: DHondtContest, val winner: DhondtCandidat
 
     fun show() = buildString {
         append("(${winner.id}/${loser.id}): fw/fl=${dfn(fw,1)}/${dfn(fl, 1)} ")
-        appendLine("gmean=${df(gmean)} hmean=${df(h(gmean))}")
-        appendLine("  lower =$lower upper =$upper hlower =${h(lower)} hupper =${h(upper)}")
+        appendLine("gmean=${df(gmean)} hmean=${df(h(gmean))} contest.totalVotes=${contest.totalVotes}")
     }
 
     fun getAssortAvg(undervotes: Int): Pair<Welford, Welford> {
@@ -378,14 +350,6 @@ data class DHondtAssorter(val contest: DHondtContest, val winner: DhondtCandidat
         return if (cands.size == 1) h(cands.first()) else 0.5
     }
 
-    fun upperBound() = h(upper)
-
-    fun desc() = show()
-
-    fun winner() = winner.id
-
-    fun loser() = loser.id
-
     fun reportedMean() = hmean
     fun reportedMargin() = mean2margin(hmean) // TODO maybe wrong?
 
@@ -400,9 +364,8 @@ data class DHondtAssorter(val contest: DHondtContest, val winner: DhondtCandidat
 }
 
 data class DHondtAssorterIF(val info: ContestInfo, val winner: Int, val loser: Int, val lastSeatWon: Int, val firstSeatLost: Int, val reportedMean: Double): AssorterIF  {
-
-    val lower = -1.0 / firstSeatLost  // lower bound of g
     val upper = 1.0 / lastSeatWon  // upper bound of g
+    val lower = -1.0 / firstSeatLost  // lower bound of g
     val c = -1.0 / (2 * lower)  // affine transform h = c * g + 1/2
 
     fun g(partyVote: Int): Double {
@@ -439,10 +402,10 @@ data class DHondtAssorterIF(val info: ContestInfo, val winner: Int, val loser: I
     override fun upperBound() = h2(upper)
 
     override fun desc() = buildString {
-        appendLine("(${winner}/${loser}): reportedMean=${df(reportedMean)} reportedMargin=${df(reportedMargin() )}")
+        append("(${winner}/${loser}): reportedMean=${df(reportedMean)} reportedMargin=${df(reportedMargin() )}")
     }
 
-    override fun hashcodeDesc() = "${winLose()} ${info.hashCode()}" // must be unique for serialization
+    override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization
 
     override fun winner() = winner
 
@@ -482,5 +445,4 @@ data class DHondtAssorterIF(val info: ContestInfo, val winner: Int, val loser: I
     }
 
     override fun toString() = desc()
-
 }

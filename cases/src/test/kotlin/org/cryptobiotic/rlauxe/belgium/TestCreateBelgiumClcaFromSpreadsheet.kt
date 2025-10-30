@@ -4,9 +4,9 @@ package org.cryptobiotic.rlauxe.belgium
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
-import org.cryptobiotic.rlauxe.dhondt.DHondtContest
+import org.cryptobiotic.rlauxe.dhondt.ProtoContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
-import org.cryptobiotic.rlauxe.dhondt.makeDhondtContest
+import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import kotlin.test.Test
@@ -40,14 +40,14 @@ class TestCreateBelgiumClcaFromSpreadsheet {
 
         // use infoA parties, because they are complete
         val dhondtParties = infoA.parties.map { DhondtCandidate(it.name, it.num, it.total) }
-        val dcontest: DHondtContest = makeDhondtContest(infoB.electionName, 1, dhondtParties, infoB.winners.size, 0,.05)
+        val dcontest: ProtoContest = makeProtoContest(infoB.electionName, 1, dhondtParties, infoB.winners.size, 0,.05)
         println("Calculated Winners")
         dcontest.winners.sortedBy { it.winningSeat }.forEach {
             println("  ${it}")
         }
         println()
 
-        createBelgiumClca(topdir, dcontest, dcontest.createContest())
+        createBelgiumClca(topdir, dcontest.createContest())
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()

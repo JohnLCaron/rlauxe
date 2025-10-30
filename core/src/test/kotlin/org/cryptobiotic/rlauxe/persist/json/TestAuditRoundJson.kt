@@ -5,6 +5,8 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
+import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
@@ -197,6 +199,55 @@ class TestAuditRoundJson {
             samplePrns = nextRound.samplePrns,
             nmvrs = 33333,
             auditorWantNewMvrs = 33733,
+        )
+        val json = target.publishJson()
+        val roundtrip: AuditRound = json.import(clcaWorkflow.contestsUA(), target.samplePrns, emptyList())
+        assertNotNull(roundtrip)
+        check(target, roundtrip)
+        assertEquals(roundtrip, target)
+
+        val scratchFile = createTempFile().toFile()
+
+        writeAuditRoundJsonFile(target, scratchFile.toString())
+        val result = readAuditRoundJsonFile(scratchFile.toString(), clcaWorkflow.contestsUA(), target.samplePrns, emptyList())
+        assertTrue(result is Ok)
+        val roundtripIO = result.unwrap()
+        assertTrue(roundtripIO.equals(target))
+        assertEquals(roundtripIO, target)
+
+        scratchFile.delete()
+    }
+
+    @Test
+    fun testRoundtripWithDHondt() {
+        val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
+        val dcontest = makeProtoContest("contest1", 1, parties, 8, 0, 0.01)
+        val info = dcontest.createInfo()
+        val contestd = dcontest.createContest(dcontest.validVotes, dcontest.validVotes)
+        val contests = listOf(contestd)
+
+        val fuzzMvrs = .01
+        val auditConfig = AuditConfig(
+            AuditType.CLCA, hasStyles = true, seed = 12356667890L, nsimEst = 10,
+        )
+
+        val testCvrs = contestd.createSimulatedCvrs()
+        val testMvrs = if (fuzzMvrs == 0.0) testCvrs
+            else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
+
+        var clcaWorkflow = WorkflowTesterClca(auditConfig, contests, emptyList(),
+            MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed))
+        val nextRound = clcaWorkflow.startNewRound()
+        clcaWorkflow.runAuditRound(nextRound)
+
+        val target = AuditRound(
+            1,
+            nextRound.contestRounds,
+            false,
+            false,
+            samplePrns = nextRound.samplePrns,
+            nmvrs = testCvrs.size,
+            auditorWantNewMvrs = 333,
         )
         val json = target.publishJson()
         val roundtrip: AuditRound = json.import(clcaWorkflow.contestsUA(), target.samplePrns, emptyList())

@@ -1,14 +1,18 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.unwrap
+
 import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.AuditRound
-import org.cryptobiotic.rlauxe.persist.AuditRecord.Companion.readFrom
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericScatter
 import org.cryptobiotic.rlauxe.util.nfn
 import kotlin.io.path.Path
 import kotlin.test.Test
+import kotlin.test.fail
 
 // comnpare audit variance across SF, SFoa and SFaNS
 class SfAuditVarianceScatter {
@@ -73,7 +77,11 @@ data class AssertionAndCat(val assertion: AssertionRound, val cat: String, val m
 }
 
 fun readAssertionAndTotal(auditDir: String, cat: String, marginOverride:Map<Int, Double>? = null): Pair<Int, List<AssertionAndCat>> {
-    val auditRecord = readFrom(auditDir)
+    val auditRecord = AuditRecord.readFrom(auditDir)
+    if (auditRecord == null) {
+        fail()
+    }
+
     val auditRounds = auditRecord.rounds
     require( auditRounds.size >= 1)
     val auditRound: AuditRound = auditRounds[0]

@@ -1,11 +1,9 @@
 package org.cryptobiotic.rlauxe.belgium
 
-
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.ContestDHondt
-import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.sequences.plus
@@ -13,8 +11,7 @@ import kotlin.sequences.plus
 private val logger = KotlinLogging.logger("BelgiumClca")
 
 class BelgiumClca (
-    val dcontest: DHondtContest,
-    val contestd: ContestDHondt,
+    contestd: ContestDHondt,
 ): CreateElectionIF {
 
     val infoMap: Map<Int, ContestInfo>
@@ -23,7 +20,7 @@ class BelgiumClca (
 
     init {
         val contestUA = ContestUnderAudit(contestd, isComparison=true, hasStyle=true, addAssertions=false)
-        contestUA.addAssertionsFromAssorters(dcontest.assorters.map { it.makeAssorter() })
+        contestUA.addAssertionsFromAssorters(contestd.assorters)
         contestsUA = listOf(contestUA)
         infoMap = contestsUA.associate { it.id to it.contest.info() }
         cvrs = contestd.createSimulatedCvrs()
@@ -45,13 +42,12 @@ class BelgiumClca (
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
 fun createBelgiumClca(
     topdir: String,
-    dcontest: DHondtContest,
     contestd: ContestDHondt,
     auditConfigIn: AuditConfig? = null,
     clear: Boolean = true)
 {
     val stopwatch = Stopwatch()
-    val election = BelgiumClca(dcontest, contestd)
+    val election = BelgiumClca(contestd)
 
     val auditConfig = when {
         (auditConfigIn != null) -> auditConfigIn

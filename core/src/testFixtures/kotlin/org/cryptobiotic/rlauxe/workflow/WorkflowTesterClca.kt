@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.MvrManagerClcaIF
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.dhondt.ContestDHondt
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 
 class WorkflowTesterClca(
@@ -20,7 +21,15 @@ class WorkflowTesterClca(
     init {
         require (auditConfig.auditType == AuditType.CLCA)
 
-        val regularContests = contestsToAudit.map { ContestUnderAudit(it, isComparison=true, hasStyle=auditConfig.hasStyles) }
+        val regularContests = contestsToAudit.map {
+            if (it is ContestDHondt) {
+                val cua = ContestUnderAudit(it, isComparison = true, hasStyle = auditConfig.hasStyles, addAssertions = false)
+                cua.addAssertionsFromAssorters(it.assorters)
+                cua
+            } else {
+                ContestUnderAudit(it, isComparison = true, hasStyle = auditConfig.hasStyles)
+            }
+        }
         contestsUA = regularContests + raireContests
 
         // TODO dont raire contests already have assertions added ??

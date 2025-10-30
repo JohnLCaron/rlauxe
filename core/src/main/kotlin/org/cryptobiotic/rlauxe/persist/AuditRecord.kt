@@ -2,7 +2,9 @@ package org.cryptobiotic.rlauxe.persist
 
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
+import com.github.michaelbull.result.unwrapError
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
@@ -11,6 +13,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
+import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -67,20 +70,44 @@ class AuditRecord(
 
     companion object {
 
-        fun readFrom(location: String): AuditRecord {
+        fun readFrom(location: String): AuditRecord? {
+            val auditRecordResult = readFromResult(location)
+            if (auditRecordResult is Ok) {
+                return auditRecordResult.unwrap()
+            } else {
+                println( auditRecordResult.toString() )
+                logger.error { auditRecordResult.toString() }
+                return null
+            }
+        }
+
+        fun readFromResult(location: String): Result<AuditRecord, ErrorMessages> {
+            val errs = ErrorMessages("readAuditRecord from '${location}'")
+
             val publisher = Publisher(location)
             val auditConfigResult = readAuditConfigJsonFile(publisher.auditConfigFile())
-            val auditConfig = auditConfigResult.unwrap()
+            val auditConfig = if (auditConfigResult is Ok) auditConfigResult.unwrap() else {
+                errs.addNested(auditConfigResult.unwrapError())
+                null
+            }
 
             val contestsResults = readContestsJsonFile(publisher.contestsFile())
-            val contests = if (contestsResults is Ok) contestsResults.unwrap()
-                else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()} err = $contestsResults")
+            val contests = if (contestsResults is Ok) contestsResults.unwrap()  else {
+                errs.addNested(contestsResults.unwrapError())
+                null
+            }
+            if (errs.hasErrors()) return Err(errs)
 
             val sampledMvrsAll = mutableListOf<AuditableCard>()
 
             val rounds = mutableListOf<AuditRound>()
             for (roundIdx in 1..publisher.currentRound()) {
-                val sampledNumbers = readSamplePrnsJsonFile(publisher.samplePrnsFile(roundIdx)).unwrap()
+                val sampledNumbersResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(roundIdx))
+                val sampledNumbers = if (sampledNumbersResult is Ok) sampledNumbersResult.unwrap() else {
+                    errs.addNested(sampledNumbersResult.unwrapError())
+                    null
+                }
+                if (errs.hasErrors()) return Err(errs)
 
                 // may not exist yet
                 val mvrsForRoundFile = publisher.sampleMvrsFile(roundIdx)
@@ -94,16 +121,19 @@ class AuditRecord(
                 // may not exist yet
                 val auditRoundFile = publisher.auditRoundFile(roundIdx)
                 if (Files.exists(Path.of(auditRoundFile))) {
-                    val auditRound = readAuditRoundJsonFile(
+                    val auditRoundResult = readAuditRoundJsonFile(
                         auditRoundFile,
-                        contests,
-                        sampledNumbers,
+                        contests!!,
+                        sampledNumbers!!,
                         sampledMvrs
                     )
-                    rounds.add(auditRound.unwrap())
+                    if (auditRoundResult is Ok) rounds.add(auditRoundResult.unwrap()) else {
+                        errs.addNested(auditRoundResult.unwrapError())
+                    }
                 }
             }
-            return AuditRecord(location, auditConfig, contests, rounds, sampledMvrsAll)
+            return if (errs.hasErrors()) Err(errs) else
+                Ok(AuditRecord(location, auditConfig!!, contests!!, rounds, sampledMvrsAll))
         }
     }
 }

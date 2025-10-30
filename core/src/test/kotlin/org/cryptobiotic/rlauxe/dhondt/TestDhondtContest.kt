@@ -11,9 +11,10 @@ class TestDhondtContest {
 
     @Test
     fun testMakeDhondtContest1() {
-        val dcontest = makeDhondtContest("contest1", 1, listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500)), 8, 0, minPct)
+        val dcontest = makeProtoContest("contest1", 1, listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500)), 8, 0, minPct)
         val contestd = dcontest.createContest()
         println(contestd.show())
+        println(contestd.showCandidates())
 
         assertEquals(listOf(1,2), contestd.winners)
         assertEquals(listOf("party-1", "party-2"), contestd.winnerNames)
@@ -24,7 +25,7 @@ class TestDhondtContest {
 
     @Test
     fun testMakeDhondtContest2() {
-        val dcontest = makeDhondtContest("contest2", 2, listOf(DhondtCandidate(1, 11000), DhondtCandidate(2, 7000), DhondtCandidate(3, 2500)), 11, 0, minPct)
+        val dcontest = makeProtoContest("contest2", 2, listOf(DhondtCandidate(1, 11000), DhondtCandidate(2, 7000), DhondtCandidate(3, 2500)), 11, 0, minPct)
         val contestd = dcontest.createContest()
         println(contestd.show())
     }
@@ -36,7 +37,7 @@ class TestDhondtContest {
     }
 
     fun testAssortAvg(parties: List<DhondtCandidate>, nseats: Int, minPct: Double) {
-        val dcontest = makeDhondtContest("contest1", 1, parties, nseats, 0, minPct)
+        val dcontest = makeProtoContest("contest1", 1, parties, nseats, 0, minPct)
         dcontest.assorters.forEach { it ->
             val (gavg, havg) = it.getAssortAvg(0)
             print(it.show())
@@ -52,37 +53,28 @@ class TestDhondtContest {
 
     @Test
     fun testCvrs() {
-        val dcontest: DHondtContest = makeDhondtContest("contest1", 1, listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500)), 8, 0, minPct)
-        println(dcontest.show())
+        val undervotes = 200
+        val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
+        val dcontest: ProtoContest = makeProtoContest("contest1", 1, parties, 8, undervotes, minPct)
 
-        val cvrs = dcontest.createSimulatedCvrs()
-        dcontest.assorters.forEach { assorter ->
-            val welford = Welford()
-            cvrs.forEach { cvr ->
-                welford.update(assorter.assort(cvr, usePhantoms=false))
-            }
-            val (gavg, havg) = assorter.getAssortAvg(0)
-            print(assorter.show())
-            println("             gavg=${gavg.show2()}")
-            println("             havg=${havg.show2()}")
-            println("             assort mean = ${df(welford.mean)}")
-            assertEquals(welford.mean, havg.mean, doublePrecision)
-        }
+        println("\nContestDHondt.cvrs, AssorterIF")
+        val nvotes = dcontest.validVotes
+        val Ncast = nvotes + undervotes
+        val contestd: ContestDHondt = dcontest.createContest(Ncast, Ncast)
+        val cvrsIF = contestd.createSimulatedCvrs()
+        println("validVotes = ${contestd.votes.values.sum()} undervotes=${contestd.undervotes} ncvrsIF = ${cvrsIF.size}")
 
-        println("\nAssorterIF")
         dcontest.assorters.forEach { assorter ->
             val assorterif = assorter.makeAssorter()
+            println(" assorterif reportedMean= ${df(assorterif.reportedMean())} reportedMargin= ${df(assorterif.reportedMargin())}")
+
             val welford = Welford()
-            cvrs.forEach { cvr ->
+            cvrsIF.forEach { cvr ->
                 welford.update(assorterif.assort(cvr))
             }
 
-            val (gavg, havg) = assorter.getAssortAvg(0)
-            print(assorter.show())
-            println("             gavg=${gavg.show2()}")
-            println("             havg=${havg.show2()}")
             println("             assort mean = ${df(welford.mean)}")
-            assertEquals(welford.mean, havg.mean, doublePrecision)
+            assertEquals(welford.mean, assorterif.reportedMean(), doublePrecision)
         }
     }
 }

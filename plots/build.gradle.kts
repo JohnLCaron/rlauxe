@@ -16,6 +16,7 @@ dependencies {
     api(project(":cases"))
 
     implementation(kotlin("stdlib"))
+    implementation(libs.bull.result)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.lets.plot)
     implementation(libs.lets.plot.statistics)

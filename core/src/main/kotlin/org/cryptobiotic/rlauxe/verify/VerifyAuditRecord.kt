@@ -1,13 +1,25 @@
 package org.cryptobiotic.rlauxe.verify
 
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.unwrap
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.persist.AuditRecord
+
+private val logger = KotlinLogging.logger("VerifyAuditRecord")
 
 class VerifyAuditRecord(val auditRecordLocation: String) {
     val auditRecord: AuditRecord
 
     init {
-        auditRecord = AuditRecord.readFrom(auditRecordLocation)
+        val auditRecordResult = AuditRecord.readFromResult(auditRecordLocation)
+        if (auditRecordResult is Ok) {
+            auditRecord = auditRecordResult.unwrap()
+        } else {
+            println( auditRecordResult.toString() )
+            logger.error{ auditRecordResult.toString() }
+            throw RuntimeException( auditRecordResult.toString() )
+        }
     }
 
     fun verify(): VerifyResults {

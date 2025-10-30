@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
@@ -16,15 +18,26 @@ class PersistedWorkflow(
     val auditDir: String,
     val useTest: Boolean,
 ): AuditWorkflowIF {
-    val auditRecord: AuditRecord = AuditRecord.readFrom(auditDir) // TODO need auditConfig, contests in record
+    val auditRecord: AuditRecord // TODO need auditConfig, contests in record
     val publisher = Publisher(auditDir)
 
-    private val auditConfig: AuditConfig = auditRecord.auditConfig
-    private val contestsUA: List<ContestUnderAudit> = auditRecord.contests
+    private val auditConfig: AuditConfig
+    private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
     private val mvrManager: MvrManager
 
     init {
+        val auditRecordResult = AuditRecord.readFromResult(auditDir)
+        if (auditRecordResult is Ok) {
+            auditRecord = auditRecordResult.unwrap()
+        } else {
+            logger.error{ auditRecordResult.toString() }
+            throw RuntimeException( auditRecordResult.toString() )
+        }
+
+        auditConfig = auditRecord.auditConfig
+        contestsUA = auditRecord.contests
+
         auditRounds.addAll(auditRecord.rounds)
         mvrManager = if (useTest || existsOrZip(publisher.sortedMvrsFile())) {
             MvrManagerTestFromRecord(auditRecord.location)

@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
+import kotlin.test.fail
 
 class TestPersistentAuditClca {
     val auditDir = "/home/stormy/rla/persist/testPersistentWorkflowClca"
@@ -92,9 +95,16 @@ fun runPersistentWorkflowStage(roundIdx: Int, workflow: AuditWorkflowIF, auditDi
 
         // fetch the corresponding testMvrs, add them to the audit record
         val sampledMvrs =  findSamples(auditRound.samplePrns, Closer(testMvrsUA.iterator()))
-        val auditRecord = AuditRecord.readFrom(auditDir)
-        auditRecord.enterMvrs(sampledMvrs)
 
+        val auditRecordResult = AuditRecord.readFromResult(auditDir)
+        val auditRecord = if (auditRecordResult is Ok) {
+            auditRecordResult.unwrap()
+        } else {
+            println( auditRecordResult.toString() )
+            fail()
+        }
+
+        auditRecord.enterMvrs(sampledMvrs)
         done = workflow.runAuditRound(auditRound)
 
         println("runAudit $roundIdx done=$done took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")

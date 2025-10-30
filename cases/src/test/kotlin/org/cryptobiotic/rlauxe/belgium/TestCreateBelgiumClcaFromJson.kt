@@ -8,9 +8,8 @@ import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.cli.runRound
-import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
-import org.cryptobiotic.rlauxe.dhondt.makeDhondtContest
+import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.util.ErrorMessages
@@ -63,16 +62,15 @@ class TestCreateBelgiumClcaFromJson {
         val belgiumElection = if (result is Ok) result.unwrap()
             else throw RuntimeException("Cannot read belgiumElection from ${filename} err = $result")
 
-        // use infoA parties, because they are complete
         val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, idx+1, it.NrOfVotes) }
         val nwinners = belgiumElection.ElectionLists.sumOf { it.NrOfSeats }
-        val dcontest = makeDhondtContest(electionName, 1, dhondtParties, nwinners, belgiumElection.NrOfBlankVotes,.05)
+        val dcontest = makeProtoContest(electionName, 1, dhondtParties, nwinners, belgiumElection.NrOfBlankVotes,.05)
 
         val totalVotes = belgiumElection.NrOfValidVotes + belgiumElection.NrOfBlankVotes
         val contestd = dcontest.createContest(Nc = totalVotes, Ncast = totalVotes)
 
         val topdir = "$toptopdir/$electionName"
-        createBelgiumClca(topdir, dcontest, contestd)
+        createBelgiumClca(topdir, contestd)
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
@@ -101,7 +99,11 @@ class TestCreateBelgiumClcaFromJson {
 
     @Test
     fun showBelgiumElection() {
-        showBelgiumElection("Anvers")
+        val electionName = "Anvers"
+        val result = showBelgiumElection(electionName)
+        val pct = (100.0 * result.second) / result.first.toDouble()
+        println("${sfn(electionName, 15)}: Nc= ${trunc(result.first.toString(), 10)} " +
+                " nmvrs= ${trunc(result.second.toString(), 6)} pct= ${dfn(pct, 2)} %")
     }
 
     @Test

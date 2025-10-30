@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.belgium
 
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
-import org.cryptobiotic.rlauxe.dhondt.makeDhondtContest
+import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.util.df
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.math.abs
@@ -83,7 +83,7 @@ class TestBelgiumElectionFromSpreadsheet {
 
         // use infoA parties, because they are complete
         val dhondtParties = infoA.parties.map { DhondtCandidate(it.name, it.num, it.total) }
-        val dcontest = makeDhondtContest(infoB.electionName, 1, dhondtParties, infoB.winners.size, 0, .05)
+        val dcontest = makeProtoContest(infoB.electionName, 1, dhondtParties, infoB.winners.size, 0, .05)
         println("Calculated Winners")
         dcontest.winners.sortedBy { it.winningSeat }.forEach {
             println("  ${it}")
@@ -109,6 +109,6 @@ class TestBelgiumElectionFromSpreadsheet {
             assertTrue(abs(winner.score - infoWinner.score) <= 1.0)
         }
 
-        testCvrs1(dcontest)
+        testCvrs(dcontest, contestd)
     }
 }

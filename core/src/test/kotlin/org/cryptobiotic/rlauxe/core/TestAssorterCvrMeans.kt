@@ -1,9 +1,13 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
+import org.cryptobiotic.rlauxe.dhondt.ProtoContest
+import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.Welford
+import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
@@ -11,8 +15,6 @@ import org.cryptobiotic.rlauxe.util.makeContestsWithUndervotesAndPhantoms
 import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
-import kotlin.test.assertNotNull
 
 class TestAssorterCvrMeans {
 
@@ -106,6 +108,8 @@ class TestAssorterCvrMeans {
     }
 }
 
+private val show = false
+
 class MeanMarginTracker(val contestId: Int, val assorter: AssorterIF) {
     val welford = Welford()
     val winner = assorter.winner()
@@ -132,12 +136,13 @@ class MeanMarginTracker(val contestId: Int, val assorter: AssorterIF) {
         val margin = (winnerCount - loserCount) / ncards.toDouble()
         val meanFromMargin = margin2mean(margin)
         val assortMean = welford.mean
-        println(" assort = ${assortValue} assortMean=$assortMean meanFromMargin=$meanFromMargin")
+        if (show) println(" assort = ${assortValue} assortMean=$assortMean meanFromMargin=$meanFromMargin")
         // if (isPhantom) println(" assort = ${assortValue} assortMean=$assortMean meanFromMargin=$meanFromMargin")
 
         if (!doubleIsClose(meanFromMargin, assortMean)) {
             println(" *** assortMean=$assortMean meanFromMargin=$meanFromMargin")
         }
+        assertEquals(meanFromMargin, assortMean, doublePrecision)
     }
 
 }

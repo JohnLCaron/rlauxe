@@ -218,14 +218,16 @@ class ContestDHondt(
     }
 
     override fun show() = buildString {
-        append(super.show())
-        appendLine("   nseats=${winnerSeats.values.sum()} winners=${winnerSeats} belowMin=${belowMinPct}")
+        appendLine(super.show())
+        append("   nseats=${winnerSeats.values.sum()} winners=${winnerSeats} belowMin=${belowMinPct}")
     }
 
     override fun showCandidates() = buildString {
         val width0 = 20
         val width = 12
         val maxRound = sortedScores.filter{ it.winningSeat != null }.maxOfOrNull { it.divisor }!! + 1
+
+        appendLine()
         append("candidate ${trunc("Round", width0 - "candidate".length + 3)}:")
         for (round in 1 .. maxRound) {
             append("${nfn(round, width)} |")

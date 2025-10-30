@@ -2,17 +2,19 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.Assertion
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.RaireAssertion
 import org.cryptobiotic.rlauxe.raire.RaireAssorter
 import org.cryptobiotic.rlauxe.raire.RaireContest
 
-private val logger = KotlinLogging.logger("OAIrvContestUA")
+
+/* private val logger = KotlinLogging.logger("OAIrvContestUA")
 
 class OAIrvContestUA(
     contest: RaireContest,
     hasStyle: Boolean = true,
     val rassertions: List<RaireAssertion>,
-): OAContestUnderAudit(contest, hasStyle=hasStyle, addAssertions=false) {
+): ContestUnderAudit(contest, hasStyle=hasStyle, addAssertions=false) {
 
     init {
         this.pollingAssertions = makeRairePollingAssertions()
@@ -40,4 +42,4 @@ class OAIrvContestUA(
         return result
     }
 
-}
+} */

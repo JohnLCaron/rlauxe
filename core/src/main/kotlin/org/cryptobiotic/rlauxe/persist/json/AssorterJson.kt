@@ -157,3 +157,21 @@ fun AssorterIFJson.import(info: ContestInfo): AssorterIF {
         else -> throw RuntimeException()
     }
 }
+
+// data class AssortAvgsInPools (
+//    val assortAverage: Map<Int, Double>, // poolId -> average assort value, for one assorter
+//)
+@Serializable
+data class AssortAvgsInPoolsJson(
+    val contest: Int?, // TODO remove
+    val assortAverage: Map<Int, Double>,
+)
+
+fun AssortAvgsInPools.publishJson() = AssortAvgsInPoolsJson(
+    contest = null,
+    assortAverage,
+)
+
+fun AssortAvgsInPoolsJson.import() = AssortAvgsInPools(
+    assortAverage,
+)

@@ -16,11 +16,11 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "1": 6881,
-                    "0": 6278
+                    "0": 7163,
+                    "1": 6461
                 },
-                "Nc": 13768,
-                "Ncast": 13732
+                "Nc": 14076,
+                "Ncast": 14062
             },
             "isComparison": true,
             "hasStyle": true,
@@ -29,9 +29,9 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMargin": 0.04379721092388147,
-                        "winner": 1,
-                        "loser": 0
+                        "reportedMargin": 0.049872122762148335,
+                        "winner": 0,
+                        "loser": 1
                     }
                 }
             ],
@@ -41,9 +41,9 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMargin": 0.04379721092388147,
-                            "winner": 1,
-                            "loser": 0
+                            "reportedMargin": 0.049872122762148335,
+                            "winner": 0,
+                            "loser": 1
                         },
                         "hasStyle": true
                     }
@@ -67,11 +67,11 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "0": 5313,
-                    "1": 4454
+                    "0": 2439,
+                    "1": 2091
                 },
-                "Nc": 11061,
-                "Ncast": 11011
+                "Nc": 5948,
+                "Ncast": 5938
             },
             "isComparison": true,
             "hasStyle": true,
@@ -80,7 +80,7 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMargin": 0.07766024771720459,
+                        "reportedMargin": 0.05850706119704102,
                         "winner": 0,
                         "loser": 1
                     }
@@ -92,7 +92,7 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMargin": 0.07766024771720459,
+                            "reportedMargin": 0.05850706119704102,
                             "winner": 0,
                             "loser": 1
                         },
@@ -104,6 +104,5 @@
         }
     ],
     "rcontestsUnderAudit": [],
-    "oacontestsUnderAudit": [],
     "oarcontestsUnderAudit": []
 }

@@ -1,11 +1,12 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+// import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.*
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
@@ -53,7 +54,7 @@ class TestPersistentOneAudit {
     }
 
     class TestOneAuditElection(fuzzMvrs: Double): CreateElectionIF {
-        val contestsUA = mutableListOf<OAContestUnderAudit>()
+        val contestsUA = mutableListOf<ContestUnderAudit>()
         val allCardPools = mutableListOf<CardPoolIF>()
         val allCvrs: List<Cvr>
         val testMvrs: List<Cvr>

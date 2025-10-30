@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.roundToClosest
@@ -85,7 +86,7 @@ class TestMakeOneContestUA {
         }
     }
 
-    fun checkBasics(contestOA: OAContestUnderAudit, cardPools: List<CardPoolIF>, margin: Double, cvrPercent: Double) {
+    fun checkBasics(contestOA: ContestUnderAudit, cardPools: List<CardPoolIF>, margin: Double, cvrPercent: Double) {
         println(contestOA)
 
         //val nvotes = contestOA.cvrNcards + ballotPools.map{ it.ncards }.sum()
@@ -109,7 +110,7 @@ class TestMakeOneContestUA {
         println()
     }
 
-    fun checkAgainstCvrs(contestOA: OAContestUnderAudit, cardPools: List<CardPoolIF>, testCvrs: List<Cvr>, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double) {
+    fun checkAgainstCvrs(contestOA: ContestUnderAudit, cardPools: List<CardPoolIF>, testCvrs: List<Cvr>, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double) {
 
         val bassorter = contestOA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         println(bassorter)

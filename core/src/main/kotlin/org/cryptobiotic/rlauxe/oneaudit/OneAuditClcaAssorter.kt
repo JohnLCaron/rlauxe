@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.core.*
 
+/*
 open class OAContestUnderAudit(
     contest: ContestIF,
     hasStyle: Boolean = true,
@@ -23,7 +24,7 @@ open class OAContestUnderAudit(
         result = 31 * result + contest.hashCode()
         return result
     }
-}
+} */
 
 /** See OneAudit Section 2.3.
  * Suppose we have a CVR ci for every ballot card whose index i is in C. The cardinality of C is |C|.

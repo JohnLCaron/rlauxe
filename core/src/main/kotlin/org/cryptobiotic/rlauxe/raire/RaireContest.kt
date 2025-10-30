@@ -69,7 +69,9 @@ data class RaireContest(
         }
     }
 
-    override fun showAssertionDiff(assertion: Assertion): String {
+    override fun showAssertionDiff(assertion: Assertion?): String {
+        if (assertion == null) return ""
+
         val rassorter = assertion.assorter as RaireAssorter
         val rassertion = rassorter.rassertion
         val pctDefault = rassertion.marginInVotes / Nc.toDouble()
@@ -87,6 +89,10 @@ data class RaireContest(
         val loser = latestRound.count[assertion.loser]!!
         val recountMargin = (winner - loser) / (winner.toDouble())
         return "winner=$winner loser=$loser diff=${winner-loser} recountMargin=${recountMargin}"
+    }
+
+    override fun show() = buildString {
+        appendLine("'$name' ($id) $choiceFunction voteForN=${info.voteForN} winners=${winners()} Nc=${Nc()} Np=${Np()} Ncast=$Ncast Nu=${Nundervotes()}")
     }
 
     override fun showCandidates() = buildString {

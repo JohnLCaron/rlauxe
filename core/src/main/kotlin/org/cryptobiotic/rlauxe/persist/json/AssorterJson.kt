@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.persist.json
 
 import kotlinx.serialization.Serializable
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.dhondt.DHondtAssorterIF
+import org.cryptobiotic.rlauxe.dhondt.DHondtAssorter
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.raire.RaireAssorter
 
@@ -108,7 +108,7 @@ fun AssorterIF.publishJson() : AssorterIFJson {
                 this.rassertion.loserId,
                 rassertion = this.rassertion.publishJson(),
             )
-        is DHondtAssorterIF ->
+        is DHondtAssorter ->
             AssorterIFJson(
                 "DHondtAssorterIF",
                 this.reportedMean(), // TODO bogus
@@ -146,7 +146,7 @@ fun AssorterIFJson.import(info: ContestInfo): AssorterIF {
             )
         "DHondtAssorterIF" ->
             // DHondtAssorterIF(val info: ContestInfo, val winner: Int, val loser: Int, val firstSeatLost: Int, val lastSeatWon: Int, val margin: Double): AssorterIF  {
-            DHondtAssorterIF(
+            DHondtAssorter(
                 info,
                 this.winner,
                 this.loser!!,

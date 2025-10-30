@@ -119,19 +119,7 @@ data class ProtoContest(val name: String, val id: Int, val parties: List<DhondtC
         }
     }
 
-    fun makeAssorters(): List<DHondtAssorterIF> = assorters.map { it.makeAssorter() }
-
-    fun show() = buildString {
-        appendLine("'$name' ($id) Nc=$validVotes nseats=$nseats minPct=$minPct")
-        appendLine(showWinners())
-    }
-
-    fun showWinners() = buildString {
-        appendLine("Calculated Winners")
-        winners.sortedBy { it.winningSeat }.forEach {
-            appendLine("  ${it}")
-        }
-    }
+    fun makeAssorters(): List<DHondtAssorter> = assorters.map { it.makeAssorter() }
 
     fun createInfo() = ContestInfo(
         name,
@@ -143,8 +131,8 @@ data class ProtoContest(val name: String, val id: Int, val parties: List<DhondtC
         minFraction = minPct,
     )
 
-    fun createContest(Nc: Int? = null, Ncast: Int? = null): ContestDHondt {
-        val result = ContestDHondt(
+    fun createContest(Nc: Int? = null, Ncast: Int? = null): DHondtContest {
+        val result = DHondtContest(
             createInfo(),
             parties.associate { Pair(it.id, it.votes) },
             Nc ?: this.validVotes,
@@ -156,7 +144,7 @@ data class ProtoContest(val name: String, val id: Int, val parties: List<DhondtC
     }
 }
 
-class ContestDHondt(
+class DHondtContest(
     info: ContestInfo,
     voteInput: Map<Int, Int>,   // candidateId -> nvotes;  sum is nvotes or V_c
     Nc: Int,                // trusted maximum ballots/cards that contain this contest
@@ -174,7 +162,7 @@ class ContestDHondt(
 
     val belowMinPct: Set<Int>// contestIds under minPct
     val winnerSeats : Map<Int, Int> // cand, nseats
-    val assorters = mutableListOf<DHondtAssorterIF>()
+    val assorters = mutableListOf<DHondtAssorter>()
 
     init {
         val nvotes = votes.values.sum()
@@ -200,7 +188,7 @@ class ContestDHondt(
     }
 
     override fun recountMargin(assertion: Assertion): Double {
-        val dassorter = assertion.assorter as DHondtAssorterIF
+        val dassorter = assertion.assorter as DHondtAssorter
         val winnerScore = votes[assertion.assorter.winner()]!! / dassorter.lastSeatWon.toDouble()
         val loserScore = votes[assertion.assorter.loser()]!! / dassorter.firstSeatLost.toDouble()
 
@@ -210,7 +198,7 @@ class ContestDHondt(
 
     override fun showAssertionDiff(assertion: Assertion?): String {
         if (assertion == null) return ""
-        val dassorter = assertion.assorter as DHondtAssorterIF
+        val dassorter = assertion.assorter as DHondtAssorter
         val winner = votes[assertion.assorter.winner()]!! / dassorter.lastSeatWon.toDouble()
         val loser = votes[assertion.assorter.loser()]!! / dassorter.firstSeatLost.toDouble()
         val recountMargin = (winner - loser) / (winner.toDouble())
@@ -282,7 +270,7 @@ class ContestDHondt(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is ContestDHondt) return false
+        if (other !is DHondtContest) return false
         if (!super.equals(other)) return false
 
         if (sortedScores != other.sortedScores) return false
@@ -364,7 +352,7 @@ data class ProtoAssorter(val contest: ProtoContest, val winner: DhondtCandidate,
     fun reportedMean() = hmean
     fun reportedMargin() = mean2margin(hmean) // TODO maybe wrong?
 
-    fun makeAssorter() = DHondtAssorterIF(
+    fun makeAssorter() = DHondtAssorter(
         contest.createInfo(),
         winner.id,
         loser.id,
@@ -374,7 +362,7 @@ data class ProtoAssorter(val contest: ProtoContest, val winner: DhondtCandidate,
     )
 }
 
-data class DHondtAssorterIF(val info: ContestInfo, val winner: Int, val loser: Int, val lastSeatWon: Int, val firstSeatLost: Int, val reportedMean: Double): AssorterIF  {
+data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val lastSeatWon: Int, val firstSeatLost: Int, val reportedMean: Double): AssorterIF  {
     val upper = 1.0 / lastSeatWon  // upper bound of g
     val lower = -1.0 / firstSeatLost  // lower bound of g
     val c = -1.0 / (2 * lower)  // affine transform h = c * g + 1/2
@@ -427,7 +415,7 @@ data class DHondtAssorterIF(val info: ContestInfo, val winner: Int, val loser: I
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is DHondtAssorterIF) return false
+        if (other !is DHondtAssorter) return false
 
         if (winner != other.winner) return false
         if (loser != other.loser) return false

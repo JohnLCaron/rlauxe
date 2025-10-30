@@ -11,12 +11,8 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
-// import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
-// import org.cryptobiotic.rlauxe.oneaudit.OAIrvContestUA
 import org.cryptobiotic.rlauxe.oneaudit.unpooled
 import org.cryptobiotic.rlauxe.persist.csv.*
-import org.cryptobiotic.rlauxe.raire.RaireContest
-import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.makeRaireContestUA
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
@@ -149,7 +145,6 @@ fun makeAllOneAuditContests(contestTabSums: Map<Int, ContestTabulation>, contest
                 ContestUnderAudit(contest)
             } else {
                 makeRaireContestUA(contestSumTab.info, contestSumTab, useNc)
-                // OAIrvContestUA(rau.contest as RaireContest,  hasStyle=true, rau.rassertions)
             }
             // annotate with the pool %
             val unpooledPct = 100.0 * unpooledTab.ncards / contestSumTab.ncards

@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
-// import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.*
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
@@ -40,7 +39,7 @@ class TestPersistentOneAudit {
 
         val testMvrsUA = AuditableCardCsvReader(publisher.sortedMvrsFile()).iterator().asSequence().toList()
         val mvrManager = MvrManagerFromRecord(auditDir)
-        var oaWorkflow = WorkflowTesterOneAudit(auditConfig, election.contestsUA(), mvrManager)
+        val oaWorkflow = WorkflowTesterOneAudit(auditConfig, election.contestsUA(), mvrManager)
         var round = 1
         var done = false
         var workflow : AuditWorkflowIF = oaWorkflow

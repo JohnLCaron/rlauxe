@@ -2,30 +2,6 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.core.*
 
-/*
-open class OAContestUnderAudit(
-    contest: ContestIF,
-    hasStyle: Boolean = true,
-    addAssertions: Boolean = true
-): ContestUnderAudit(contest, isComparison=true, hasStyle=hasStyle, addAssertions=addAssertions) {
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        if (!super.equals(other)) return false
-
-        other as OAContestUnderAudit
-
-        return contest == other.contest
-    }
-
-    override fun hashCode(): Int {
-        var result = super.hashCode()
-        result = 31 * result + contest.hashCode()
-        return result
-    }
-} */
-
 /** See OneAudit Section 2.3.
  * Suppose we have a CVR ci for every ballot card whose index i is in C. The cardinality of C is |C|.
  * Ballot cards not in C are partitioned into G ≥ 1 disjoint groups {Gg} for which reported assorter subtotals are available.

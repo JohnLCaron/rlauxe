@@ -32,7 +32,7 @@ class TestContestJson {
         assertTrue(contestUAc.clcaAssertions.isNotEmpty())
 
         val json = contestUAc.publishJson()
-        val roundtrip = json.import(isOA = false)
+        val roundtrip = json.import()
         assertNotNull(roundtrip)
         assertEquals(roundtrip, contestUAc)
         assertTrue(roundtrip.equals(contestUAc))

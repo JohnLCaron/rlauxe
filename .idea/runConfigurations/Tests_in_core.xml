@@ -46,6 +46,16 @@
           <option name="ENABLED" value="true" />
           <option name="INCLUDE" value="false" />
         </pattern>
+        <pattern>
+          <option name="PATTERN" value="org.cryptobiotic.rlauxe.poi.*" />
+          <option name="ENABLED" value="true" />
+          <option name="INCLUDE" value="false" />
+        </pattern>
+        <pattern>
+          <option name="PATTERN" value="org.cryptobiotic.rlauxe.belgium.*" />
+          <option name="ENABLED" value="true" />
+          <option name="INCLUDE" value="false" />
+        </pattern>
       </extension>
     </EXTENSION>
     <DebugAllEnabled>false</DebugAllEnabled>

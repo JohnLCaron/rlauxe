@@ -119,7 +119,7 @@ class RaireContestUnderAudit(
     }
 
     override fun showShort() = buildString {
-        appendLine("${name} ($id) Nc=$Nc winner ${contest.winners().first()}  losers ${contest.losers()} minMargin=${df(minMargin())}") //  est=$estMvrs status=$status")
+        append("${name} ($id) Nc=$Nc winner ${contest.winners().first()} losers ${contest.losers()} minMargin=${df(minMargin())}") //  est=$estMvrs status=$status")
     }
 
     override fun equals(other: Any?): Boolean {

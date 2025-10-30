@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.raire.RaireAssertion
 import org.cryptobiotic.rlauxe.raire.RaireAssorter
 import org.cryptobiotic.rlauxe.raire.RaireContest
 
+
 /* private val logger = KotlinLogging.logger("OAIrvContestUA")
 
 class OAIrvContestUA(

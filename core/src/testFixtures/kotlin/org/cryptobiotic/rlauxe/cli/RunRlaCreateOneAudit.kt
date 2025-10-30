@@ -5,12 +5,13 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+// import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.util.Closer
@@ -126,7 +127,7 @@ object RunRlaCreateOneAudit {
         addRaireCandidates: Int,
     ): CreateElectionIF {
         // val workflow: OneAudit
-        val contestsUA = mutableListOf<OAContestUnderAudit>()
+        val contestsUA = mutableListOf<ContestUnderAudit>()
         val allCardPools = mutableListOf<CardPoolIF>()
         val allCvrs: List<Cvr>
         val testMvrs: List<Cvr>

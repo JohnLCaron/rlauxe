@@ -253,7 +253,7 @@ open class BoulderElectionOA(
             val useNc = max( ncards, oaContest.Nc())
             val contest = Contest(info, candVotes, useNc, ncards)
             info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
-            if (isClca) ContestUnderAudit(contest, hasStyle=hasStyle) else OAContestUnderAudit(contest, hasStyle=hasStyle)
+            ContestUnderAudit(contest, hasStyle=hasStyle) // else OAContestUnderAudit(contest, hasStyle=hasStyle)
         }
 
         return regContests

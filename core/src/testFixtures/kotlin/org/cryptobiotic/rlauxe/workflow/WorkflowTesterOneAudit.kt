@@ -5,11 +5,10 @@ import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.MvrManagerClcaIF
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 
 class WorkflowTesterOneAudit(
     val auditConfig: AuditConfig,
-    val contestsUA: List<OAContestUnderAudit>, // the contests you want to audit
+    val contestsUA: List<ContestUnderAudit>, // the contests you want to audit
     val mvrManager: MvrManagerClcaIF,
 ): AuditWorkflowIF {
     private val auditRounds = mutableListOf<AuditRound>()

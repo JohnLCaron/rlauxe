@@ -1,9 +1,10 @@
 package org.cryptobiotic.rlauxe.persist.json
 
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.TestH0Status
-import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.OAIrvContestUA
+// import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+// import org.cryptobiotic.rlauxe.oneaudit.OAIrvContestUA
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.makeTestContestOAIrv
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
@@ -58,7 +59,7 @@ class TestOneAuditJson {
 
     @Test
     fun testContestUARoundtrip() {
-        val target: OAContestUnderAudit = makeTestContestOA()
+        val target: ContestUnderAudit = makeTestContestOA()
 
         val json = target.publishJson()
         val roundtrip = json.import(isOA = true)
@@ -67,7 +68,7 @@ class TestOneAuditJson {
         assertTrue(roundtrip.equals(target))
     }
 
-    fun makeTestContestOA(): OAContestUnderAudit {
+    fun makeTestContestOA(): ContestUnderAudit {
         val (contestOA, _, _) = makeOneContestUA(23000, 21000, cvrFraction = .70, undervoteFraction=.01, phantomFraction=.01)
         contestOA.preAuditStatus = TestH0Status.ContestMisformed
         val minAllAsserter = contestOA.minClcaAssertion()
@@ -81,10 +82,10 @@ class TestOneAuditJson {
 
     @Test
     fun testOAIrvRoundtrip() {
-        val raireContestUA = makeTestContestOAIrv()
-        val target = OAIrvContestUA(raireContestUA.contest as RaireContest, true,  raireContestUA.rassertions)
+        val target = makeTestContestOAIrv()
+        // val target = OAIrvContestUA(raireContestUA.contest as RaireContest, true,  raireContestUA.rassertions)
 
-        val json = target.publishOAIrvJson()
+        val json = target.publishRaireJson()
         val roundtrip = json.import()
         assertNotNull(roundtrip)
         assertEquals(target, roundtrip)

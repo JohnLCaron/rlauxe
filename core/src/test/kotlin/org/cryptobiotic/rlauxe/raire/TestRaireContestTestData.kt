@@ -37,7 +37,6 @@ class TestRaireContestTestData {
         val np = cvrs.count { it.phantom }
         assertEquals(rcontestUA.Np, np)
 
-        assertEquals(0, rcontestUA.winner)
         assertEquals(listOf(0), rcontest.winners)
         assertEquals(listOf("cand0"), rcontest.winnerNames)
 
@@ -52,7 +51,6 @@ class TestRaireContestTestData {
         val np = cvrs.count { it.phantom }
         assertEquals(np, rcontestUA.Np)
 
-        assertEquals(0, rcontestUA.winner)
         rcontestUA.rassertions.forEach { println("  $it marginPct=${it.marginInVotes/N.toDouble()}") }
     }
 }

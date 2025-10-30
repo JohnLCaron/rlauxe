@@ -92,7 +92,7 @@ data class RaireContest(
     }
 
     override fun show() = buildString {
-        appendLine("'$name' ($id) $choiceFunction voteForN=${info.voteForN} winners=${winners()} Nc=${Nc()} Np=${Np()} Ncast=$Ncast Nu=${Nundervotes()}")
+        append("'$name' ($id) $choiceFunction voteForN=${info.voteForN} winners=${winners()} Nc=${Nc()} Np=${Np()} Ncast=$Ncast Nu=${Nundervotes()}")
     }
 
     override fun showCandidates() = buildString {
@@ -102,7 +102,6 @@ data class RaireContest(
 
 class RaireContestUnderAudit(
     contest: RaireContest,
-    val winner: Int,
     val rassertions: List<RaireAssertion>,
     hasStyle: Boolean = true,  // TODO do we really support hasStyle == false?
 ): ContestUnderAudit(contest, isComparison=true, hasStyle=hasStyle, addAssertions=false) {
@@ -120,7 +119,7 @@ class RaireContestUnderAudit(
     }
 
     override fun showShort() = buildString {
-        appendLine("${name} ($id) Nc=$Nc winner $winner losers ${contest.losers()} minMargin=${df(minMargin())}") //  est=$estMvrs status=$status")
+        appendLine("${name} ($id) Nc=$Nc winner ${contest.winners().first()}  losers ${contest.losers()} minMargin=${df(minMargin())}") //  est=$estMvrs status=$status")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -130,7 +129,6 @@ class RaireContestUnderAudit(
 
         other as RaireContestUnderAudit
 
-        if (winner != other.winner) return false
         if (rassertions != other.rassertions) return false
         if (candidates != other.candidates) return false
 
@@ -139,7 +137,6 @@ class RaireContestUnderAudit(
 
     override fun hashCode(): Int {
         var result = super.hashCode()
-        result = 31 * result + winner
         result = 31 * result + rassertions.hashCode()
         result = 31 * result + candidates.hashCode()
         return result
@@ -163,7 +160,7 @@ class RaireContestUnderAudit(
                 Ncast = Ncast,
                 undervotes = undervotes,
             )
-            return RaireContestUnderAudit(contest, winnerId, assertions)
+            return RaireContestUnderAudit(contest, assertions)
         }
     }
 }
@@ -203,7 +200,7 @@ NEN(irv_elimination): ci > ck if only {S} remain
   NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
   NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
  */
-enum class RaireAssertionType(val aname:String) {
+enum class RaireAssertionType(val aname: String) {
     winner_only("NEB"),
     irv_elimination("NEN");
 

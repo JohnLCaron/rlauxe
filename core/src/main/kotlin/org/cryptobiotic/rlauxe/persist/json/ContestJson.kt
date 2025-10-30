@@ -12,8 +12,8 @@ import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.ContestDHondt
 import org.cryptobiotic.rlauxe.dhondt.DhondtScore
-import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.OAIrvContestUA
+// import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+// import org.cryptobiotic.rlauxe.oneaudit.OAIrvContestUA
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.enumValueOf
@@ -238,8 +238,8 @@ fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
 
 fun ContestUnderAuditJson.import(isOA: Boolean): ContestUnderAudit {
     val info = this.info.import()
-    val contestUA = if (isOA) OAContestUnderAudit(this.contest.import(info), hasStyle=this.hasStyle, addAssertions = false)
-            else ContestUnderAudit(this.contest.import(info), isComparison=this.isComparison, hasStyle=this.hasStyle, addAssertions = false)
+    val contestUA = // if (isOA) OAContestUnderAudit(this.contest.import(info), hasStyle=this.hasStyle, addAssertions = false) else
+            ContestUnderAudit(this.contest.import(info), isComparison=this.isComparison, hasStyle=this.hasStyle, addAssertions = false)
     contestUA.pollingAssertions = this.pollingAssertions.map { it.import(info) }
     contestUA.clcaAssertions = this.clcaAssertions.map { it.import(info) }
     contestUA.preAuditStatus = this.status
@@ -251,34 +251,34 @@ fun ContestUnderAuditJson.import(isOA: Boolean): ContestUnderAudit {
 data class ContestsUnderAuditJson(
     val contestsUnderAudit: List<ContestUnderAuditJson>,
     val rcontestsUnderAudit: List<RaireContestUnderAuditJson>,
-    val oacontestsUnderAudit: List<ContestUnderAuditJson>,
-    val oarcontestsUnderAudit: List<OAIrvContestJson>,
+    // val oacontestsUnderAudit: List<ContestUnderAuditJson>,
+    // val oarcontestsUnderAudit: List<OAIrvContestJson>,
 )
 
 fun List<ContestUnderAudit>.publishJson() : ContestsUnderAuditJson {
     val contests = mutableListOf<ContestUnderAuditJson>()
     val rcontests = mutableListOf<RaireContestUnderAuditJson>()
-    val oacontests = mutableListOf<ContestUnderAuditJson>()
-    val oarcontests = mutableListOf<OAIrvContestJson>()
+    // val oacontests = mutableListOf<ContestUnderAuditJson>()
+    // val oarcontests = mutableListOf<OAIrvContestJson>()
     this.forEach {
         if (it is RaireContestUnderAudit) {
             rcontests.add( it.publishRaireJson())
-        } else if (it is OAIrvContestUA) {
-            oarcontests.add( it.publishOAIrvJson())
-        } else if (it is OAContestUnderAudit) {
-            oacontests.add( it.publishJson())
+        // } else if (it is OAIrvContestUA) {
+        //    oarcontests.add( it.publishOAIrvJson())
+        //} else if (it is OAContestUnderAudit) {
+        //    oacontests.add( it.publishJson())
         } else {
             contests.add( it.publishJson())
         }
     }
-    return ContestsUnderAuditJson(contests, rcontests, oacontests, oarcontests)
+    return ContestsUnderAuditJson(contests, rcontests)
 }
 
 fun ContestsUnderAuditJson.import() : List<ContestUnderAudit> {
     return this.contestsUnderAudit.map { it.import(isOA = false) } +
-            this.rcontestsUnderAudit.map { it.import() } +
-            this.oacontestsUnderAudit.map { it.import(isOA = true) } +
-            this.oarcontestsUnderAudit.map { it.import() }
+            this.rcontestsUnderAudit.map { it.import() }
+            // this.oacontestsUnderAudit.map { it.import(isOA = true) } +
+            // this.oarcontestsUnderAudit.map { it.import()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////

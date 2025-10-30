@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
+// import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
@@ -59,7 +59,7 @@ class CreateAudit(val name: String, val topdir: String, val config: AuditConfig,
 
         val contestsUA = election.contestsUA()
         if (config.isOA) {
-            addOAClcaAssortersFromMargin(contestsUA as List<OAContestUnderAudit>, cardPools!!)
+            addOAClcaAssortersFromMargin(contestsUA, cardPools!!)
         } else {
             contestsUA.forEach { it.addClcaAssertionsFromReportedMargin() }
         }

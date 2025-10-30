@@ -6,8 +6,9 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.raire.RaireAssertion
 import org.cryptobiotic.rlauxe.raire.RaireAssertionType
 import org.cryptobiotic.rlauxe.raire.RaireContest
+import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 
-fun makeTestContestOAIrv(): OAIrvContestUA {
+fun makeTestContestOAIrv(): RaireContestUnderAudit {
 
         val info = ContestInfo(
             "TestOneAuditIrvContest",
@@ -25,7 +26,7 @@ fun makeTestContestOAIrv(): OAIrvContestUA {
         val assert2 = RaireAssertion(1, 2, 0.0,422, RaireAssertionType.irv_elimination,
             listOf(2), mapOf(1 to 1, 2 to 2, 3 to 3))
 
-        val oaIrv =  OAIrvContestUA(rcontest, true, listOf(assert1, assert2))
+        val oaIrv =  RaireContestUnderAudit(rcontest, hasStyle=true, rassertions=listOf(assert1, assert2))
 
         // add pools
 

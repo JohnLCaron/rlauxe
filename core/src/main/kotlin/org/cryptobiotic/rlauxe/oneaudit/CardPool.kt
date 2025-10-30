@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.util.RegVotesImpl
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -286,7 +287,7 @@ open class CardPoolFromCvrs(
 
 // use reportedMargin to set the pool assorter averages. can only use for non-IRV contests
 fun addOAClcaAssortersFromMargin(
-    oaContests: List<OAContestUnderAudit>,
+    oaContests: List<ContestUnderAudit>,
     cardPools: List<CardPoolIF> // poolId -> pool
 ) {
     // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages

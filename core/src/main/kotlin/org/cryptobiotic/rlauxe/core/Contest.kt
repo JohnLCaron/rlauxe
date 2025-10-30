@@ -226,7 +226,7 @@ open class Contest(
 
     override fun show() = buildString {
         appendLine("'$name' ($id) $choiceFunction voteForN=${info.voteForN} ${votesAndUndervotes()}")
-        appendLine("   winners=${winners()} Nc=${Nc()} Np=${Np()} Nu=${Nundervotes()} sumVotes=${votes.values.sum()}")
+        append("   winners=${winners()} Nc=${Nc()} Np=${Np()} Nu=${Nundervotes()} sumVotes=${votes.values.sum()}")
     }
 
     override fun showCandidates() = buildString {
@@ -408,8 +408,7 @@ open class ContestUnderAudit(
 
     open fun show() = buildString {
         appendLine("${contest.javaClass.simpleName} ${contest.show()}")
-        appendLine(contest.showAssertionDiff(minAssertion()))
-        appendLine()
+        appendLine("   ${contest.showAssertionDiff(minAssertion())}")
         append(contest.showCandidates())
     }
 

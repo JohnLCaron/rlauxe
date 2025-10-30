@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.util.RegVotesImpl
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
@@ -71,7 +72,7 @@ class TestOneAuditKalamazoo {
 }
 
 // from oa_polling.ipynb
-fun makeContestKalamazoo(nwinners:Int = 1): Triple<OAContestUnderAudit, List<CardPoolIF>, List<Cvr>> {
+fun makeContestKalamazoo(nwinners:Int = 1): Triple<ContestUnderAudit, List<CardPoolIF>, List<Cvr>> {
 
     // the candidates
     val info = ContestInfo(
@@ -114,7 +115,7 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<OAContestUnderAudit, List<Car
     val regVotes = RegVotesImpl(poolVotes, stratumSizes[1], poolUndervotes)
     val cardPool = CardPoolImpl("kali", 1, info.id, regVotes)
 
-    val contestUA = OAContestUnderAudit(contest)
+    val contestUA = ContestUnderAudit(contest)
     addOAClcaAssortersFromMargin(listOf(contestUA), listOf(cardPool))
 
     // reported results for the two strata

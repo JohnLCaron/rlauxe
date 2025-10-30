@@ -11,7 +11,7 @@ fun makeOneContestUA(
     cvrFraction: Double,
     undervoteFraction: Double,
     phantomFraction: Double,
-): Triple<OAContestUnderAudit, List<CardPoolIF>, List<Cvr>> {
+): Triple<ContestUnderAudit, List<CardPoolIF>, List<Cvr>> {
     val nvotes = roundToClosest(Nc * (1.0 - undervoteFraction - phantomFraction))
     val winner = roundToClosest((margin * Nc + nvotes) / 2)
     val loser = nvotes - winner
@@ -28,7 +28,7 @@ fun makeOneContestUA(
     undervoteFraction: Double,
     phantomFraction: Double,
     contestId: Int = 0,
-): Triple<OAContestUnderAudit, List<CardPoolIF>, List<Cvr>> {
+): Triple<ContestUnderAudit, List<CardPoolIF>, List<Cvr>> {
     require(cvrFraction > 0.0)
 
     // the candidates
@@ -99,7 +99,7 @@ fun makeOneContestUA(
     val contest = Contest(info, mapOf(0 to winnerVotes, 1 to loserVotes), Nc = Nc, Ncast = Nc - Np)
     info.metadata["PoolPct"] = (100.0 * poolNcards / Nc).toInt()
 
-    val oaUA = OAContestUnderAudit(contest, hasStyle=true)
+    val oaUA = ContestUnderAudit(contest, hasStyle=true)
     addOAClcaAssortersFromMargin(listOf(oaUA), pools)
 
     val cvrs = makeTestMvrs(oaUA, cvrNc, cvrVotes, cvrUndervotes, pools)
@@ -112,7 +112,7 @@ fun makeOneContestUA(
 }
 
 fun makeTestMvrs(
-    oaContestUA: OAContestUnderAudit,
+    oaContestUA: ContestUnderAudit,
     cvrNcards: Int,
     cvrVotes:Map<Int, Int>,
     cvrUndervotes: Int,

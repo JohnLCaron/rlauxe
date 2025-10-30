@@ -8,11 +8,6 @@ open class OAContestUnderAudit(
     addAssertions: Boolean = true
 ): ContestUnderAudit(contest, isComparison=true, hasStyle=hasStyle, addAssertions=addAssertions) {
 
-    // TODO did override     open fun makeClcaAssorter(assertion: Assertion, assortValueFromCvrs: Double?): ClcaAssorter {
-    fun makeClcaAssorter(assertion: Assertion, poolAverages: AssortAvgsInPools): ClcaAssorter {
-        return OneAuditClcaAssorter(contest.info(), assertion.assorter, hasStyle = true, poolAverages)
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

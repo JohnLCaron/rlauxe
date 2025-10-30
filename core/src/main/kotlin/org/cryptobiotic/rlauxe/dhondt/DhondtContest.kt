@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
+import kotlin.collections.mutableListOf
 
 private val showDetails = false
 
@@ -171,8 +172,8 @@ class ContestDHondt(
     override fun winners() = winners
     override fun losers() = losers
 
-    val belowMinPct : Set<Int> // contestIds under minPct
-    val winnerSeats : Map<Int, Int>
+    val belowMinPct: Set<Int>// contestIds under minPct
+    val winnerSeats : Map<Int, Int> // cand, nseats
     val assorters = mutableListOf<DHondtAssorterIF>()
 
     init {
@@ -180,10 +181,11 @@ class ContestDHondt(
 
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
         val useMin = info.minFraction ?: 0.0
-        val belowMinPctM= mutableSetOf<Int>()
+        val belowMinPctM= mutableListOf<Int>()
         votes.toList().filter{ it.second.toDouble()/nvotes < useMin }.forEach {
             belowMinPctM.add(it.first)
         }
+        belowMinPctM.sort()
         belowMinPct = belowMinPctM.toSet()
 
         val winnerSeatsM= mutableMapOf<Int, Int>()
@@ -206,19 +208,25 @@ class ContestDHondt(
         return pct
     }
 
-    override fun showAssertionDiff(assertion: Assertion): String {
+    override fun showAssertionDiff(assertion: Assertion?): String {
+        if (assertion == null) return ""
         val dassorter = assertion.assorter as DHondtAssorterIF
         val winner = votes[assertion.assorter.winner()]!! / dassorter.lastSeatWon.toDouble()
         val loser = votes[assertion.assorter.loser()]!! / dassorter.firstSeatLost.toDouble()
         val recountMargin = (winner - loser) / (winner.toDouble())
-        return "winner=$winner loser=$loser diff=${winner-loser} recountMargin=$recountMargin"
+        return "winner=${dfn(winner, 1)} loser=${dfn(loser, 1)} diff=${dfn(winner-loser, 1)} recountMargin=${df(recountMargin)}"
+    }
+
+    override fun show() = buildString {
+        append(super.show())
+        appendLine("   nseats=${winnerSeats.values.sum()} winners=${winnerSeats} belowMin=${belowMinPct}")
     }
 
     override fun showCandidates() = buildString {
-        val width0 = 15
+        val width0 = 20
         val width = 12
-        val maxRound = sortedScores.filter{ it.winningSeat != null }.maxOfOrNull { it.divisor }!!
-        append("candidate ${trunc("Round", width0 - "candidate".length + 2)}:")
+        val maxRound = sortedScores.filter{ it.winningSeat != null }.maxOfOrNull { it.divisor }!! + 1
+        append("candidate ${trunc("Round", width0 - "candidate".length + 3)}:")
         for (round in 1 .. maxRound) {
             append("${nfn(round, width)} |")
         }
@@ -226,7 +234,8 @@ class ContestDHondt(
 
         info.candidateIds.forEach { id ->
             val rounds = sortedScores.filter { it.candidate == id }.map { Dround(id, it.score, it.divisor, it.winningSeat) }
-            val candName = "${nfn(id, 2)} ${trunc(info.candidateIdToName[id]!!, width0)}"
+            val below = if (belowMinPct.contains(id)) "*" else " "
+            val candName = "${nfn(id, 2)} ${trunc(info.candidateIdToName[id]!!, width0)}$below"
             append(showCandidate(candName, votes[id]!!, maxRound, rounds, width))
         }
     }

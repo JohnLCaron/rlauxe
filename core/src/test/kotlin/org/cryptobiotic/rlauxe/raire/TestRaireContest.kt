@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.doublePrecision
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals

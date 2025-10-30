@@ -81,7 +81,7 @@ interface ContestIF {
     fun show() : String = toString()
     fun showCandidates(): String
     fun recountMargin(assertion: Assertion): Double
-    fun showAssertionDiff(assertion: Assertion): String
+    fun showAssertionDiff(assertion: Assertion?): String
 
     fun votes() : Map<Int, Int>? {
         if (this is Contest) return this.votes
@@ -215,7 +215,8 @@ open class Contest(
         return (winner - loser) / (winner.toDouble())
     }
 
-    override fun showAssertionDiff(assertion: Assertion): String {
+    override fun showAssertionDiff(assertion: Assertion?): String {
+        if (assertion == null) return ""
         val votes = votes()!!
         val winner = votes[assertion.assorter.winner()]!!
         val loser = votes[assertion.assorter.loser()]!!
@@ -223,8 +224,9 @@ open class Contest(
         return "winner=$winner loser=$loser diff=${winner-loser} recountMargin=$recountMargin"
     }
 
-    override fun show(): String {
-        return "Contest(info=$info, Nc=$Nc, Np=${Np()}, id=$id, name='$name', choiceFunction=$choiceFunction, ncandidates=$ncandidates, ${votesAndUndervotes()}, winnerNames=$winnerNames, winners=$winners, losers=$losers)"
+    override fun show() = buildString {
+        appendLine("'$name' ($id) $choiceFunction voteForN=${info.voteForN} ${votesAndUndervotes()}")
+        appendLine("   winners=${winners()} Nc=${Nc()} Np=${Np()} Nu=${Nundervotes()} sumVotes=${votes.values.sum()}")
     }
 
     override fun showCandidates() = buildString {
@@ -405,10 +407,18 @@ open class ContestUnderAudit(
     override fun toString() = contest.toString()
 
     open fun show() = buildString {
+        appendLine("${contest.javaClass.simpleName} ${contest.show()}")
+        appendLine(contest.showAssertionDiff(minAssertion()))
+        appendLine()
+        append(contest.showCandidates())
+    }
+
+    fun showOld() = buildString {
         val vunder = if (contest is Contest) contest.votesAndUndervotes() else null
         val sumVotes = if (contest is Contest) contest.votes()!!.map{ it.value }.sum() else 0
         appendLine("${contest.javaClass.simpleName} '$name' ($id) $choiceFunction voteForN=${contest.info().voteForN} ${vunder}")
         appendLine(" winners=${contest.winners()} minMargin=${df(minMargin())} recountMargin=${df(recountMargin())} Nc=$Nc Np=$Np Nu=$Nu, sumVotes=$sumVotes")
+        appendLine()
         append(contest.showCandidates())
     }
 

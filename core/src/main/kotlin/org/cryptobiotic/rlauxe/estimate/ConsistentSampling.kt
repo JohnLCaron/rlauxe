@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.roundToClosest
 
-private val debug = false
 private val debugConsistent = false
 private val debugUniform = false
 private val debugSizeNudge = true
@@ -19,7 +18,7 @@ private val logger = KotlinLogging.logger("ConsistentSampling")
  * Iterates on createSampleIndices, checking for auditRound.sampleNumbers.size <= auditConfig.sampleLimit, removing contests until satisfied.
  * Also called from rlauxe_viewer
  */
-fun sampleCheckLimits(
+fun sampleWithContestCutoff(
     auditConfig: AuditConfig,
     mvrManager : MvrManager,
     auditRound: AuditRound,
@@ -32,8 +31,8 @@ fun sampleCheckLimits(
     while (contestsNotDone.isNotEmpty()) {
         sample(auditConfig, mvrManager, auditRound, previousSamples, quiet = quiet)
 
-        //// the rest of this implements sampleLimit
-        if (auditConfig.sampleLimit < 0 || auditRound.samplePrns.size <= auditConfig.sampleLimit) {
+        //// the rest of this implements contestSampleCutoff
+        if (auditConfig.contestSampleCutoff == null || auditRound.samplePrns.size <= auditConfig.contestSampleCutoff) {
             break
         }
         // find the contest with the largest estimation size eligible for removal, remove it
@@ -64,7 +63,7 @@ fun sample(
         if (!quiet) logger.info{" consistentSamplingSize= ${auditRound.samplePrns.size}"}
     } else {
         if (!quiet) logger.info{"\nuniformSampling round ${auditRound.roundIdx}"}
-        uniformSampling(auditRound, mvrManager, previousSamples, auditConfig.sampleLimit, auditRound.roundIdx)
+        uniformSampling(auditRound, mvrManager, previousSamples, auditConfig.contestSampleCutoff, auditRound.roundIdx)
         if (!quiet) logger.info{" uniformSamplingSize= ${auditRound.samplePrns.size}"}
     }
 }
@@ -155,7 +154,7 @@ fun uniformSampling(
     auditRound: AuditRound,
     mvrManager: MvrManager,
     previousSamples: Set<Long>,
-    sampleLimit: Int,
+    contestSampleCutoff: Int?,
     roundIdx: Int,
 ) {
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }
@@ -168,8 +167,8 @@ fun uniformSampling(
         val estWithFactor = roundToClosest((contestRound.estSampleSize * fac))
         contestRound.estSampleSizeNoStyles = estWithFactor
         // val estPct = estWithFactor / Nb.toDouble()
-        if (sampleLimit > 0 && estWithFactor > sampleLimit) { // might as well test it here, since it will happen a lot
-            if (debugUniform) logger.info{"uniformSampling sampleLimit for ${contestRound.id} estWithFactor $estWithFactor > $sampleLimit round $roundIdx"}
+        if (contestSampleCutoff != null && estWithFactor > contestSampleCutoff) { // might as well test it here, since it will happen a lot
+            if (debugUniform) logger.info{"uniformSampling contestSampleCutoff for contest ${contestRound.id} estWithFactor $estWithFactor > $contestSampleCutoff round $roundIdx"}
             contestRound.done = true // TODO dont do this here?
             contestRound.status = TestH0Status.FailMaxSamplesAllowed
         }
@@ -189,7 +188,7 @@ fun uniformSampling(
 
     // take the first nmvrs of the sorted ballots
     val sampledCards = mvrManager.takeFirst(nmvrs)
-    val newMvrs = sampledCards.filter { !previousSamples.contains(it.prn) }.count()
+    val newMvrs = sampledCards.count { !previousSamples.contains(it.prn) }
 
     // set the results into the auditRound directly
     auditRound.nmvrs = nmvrs

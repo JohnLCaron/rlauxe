@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.raire
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.rairejson.import
 import org.cryptobiotic.rlauxe.rairejson.readRaireResultsJson
+import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -204,6 +205,7 @@ class TestReadRaireResultsJson {
 
 fun RaireContestUnderAudit.makeAssorters(): List<RaireAssorter> {
     return this.rassertions.map {
-        RaireAssorter(contest.info(), it, (it.marginInVotes.toDouble() / contest.Nc()))
+        val mean = margin2mean(it.marginInVotes.toDouble() / contest.Nc())
+        RaireAssorter(contest.info(), it, ).setReportedMean(mean)
     }
 }

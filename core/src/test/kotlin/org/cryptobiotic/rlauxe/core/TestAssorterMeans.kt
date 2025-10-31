@@ -27,12 +27,12 @@ class TestAssorterMeans {
     }
 
     @Test
-    fun testMakeContestFromCvrsSUPER() {
+    fun testMakeContestFromCvrsThreshold() {
         val N = 1000
         val cvrMean = 0.60
 
         val info = ContestInfo("standard", 0, listToMap("A", "B"),
-            choiceFunction = SocialChoiceFunction.SUPERMAJORITY, minFraction = .56)
+            choiceFunction = SocialChoiceFunction.THRESHOLD, minFraction = .56)
 
         val cvrs = makeCvrsByExactMean(N, cvrMean)
         val contest = makeContestFromCvrs(info, cvrs)

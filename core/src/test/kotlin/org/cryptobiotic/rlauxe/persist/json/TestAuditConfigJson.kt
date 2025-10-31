@@ -21,21 +21,21 @@ class TestAuditConfigJson {
         testRoundtrips(
             AuditConfig(
                 AuditType.CLCA, hasStyles=true, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
-            sampleLimit=10000,  version=2.0,
+            contestSampleCutoff=10000,  version=2.0,
             clcaConfig= ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct=.111, ClcaErrorRates(.01, .02, .03, .04), d = 99)
         )
         )
         testRoundtrips(
             AuditConfig(
                 AuditType.POLLING, hasStyles=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
-                sampleLimit=10000,  version=2.0,
+                contestSampleCutoff=10000,  version=2.0,
             pollingConfig= PollingConfig(simFuzzPct=.111, d = 99)
         )
         )
         testRoundtrips(
             AuditConfig(
                 AuditType.ONEAUDIT, hasStyles=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
-                sampleLimit=10000,  version=2.0,
+                contestSampleCutoff=10000,  version=2.0,
             oaConfig= OneAuditConfig(OneAuditStrategyType.bet99, simFuzzPct=.111, d = 99)
         )
         )

@@ -29,7 +29,7 @@ class TestPersistentAuditClca {
 
         val fuzzMvrPct = .01
         val publisher = Publisher(auditDir)
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, seed = 12356667890L, nsimEst=10, sampleLimit = 1000)
+        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000)
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
         val N = 5000

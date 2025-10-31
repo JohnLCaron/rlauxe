@@ -16,7 +16,7 @@ class TestCvrs {
         val info = ContestInfo(
             name = "AvB",
             id = 0,
-            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
             candidateNames = listToMap("A", "B", "C", "D", "E"),
             nwinners = 1,
             minFraction = .42
@@ -68,7 +68,7 @@ class TestCvrs {
         val info = ContestInfo(
             name = "AvB",
             id = 22,
-            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
             candidateNames = listToMap("A", "B", "C", "D", "E"),
             minFraction = .42
         )
@@ -92,7 +92,7 @@ class TestCvrs {
         val info = ContestInfo(
             name = "AvB",
             id = 0,
-            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
             candidateNames = listToMap("A", "B", "C", "D", "E"),
             minFraction = .42
         )

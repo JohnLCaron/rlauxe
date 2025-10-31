@@ -46,9 +46,9 @@ data class RaireContest(
     override fun winners() = winners
     override fun losers() = losers
 
-    override fun recountMargin(assertion: Assertion): Double {
+    override fun recountMargin(assorter: AssorterIF): Double {
         try {
-            val rassorter = assertion.assorter as RaireAssorter
+            val rassorter = assorter as RaireAssorter
             val rassertion = rassorter.rassertion
             val pctDefault = rassertion.marginInVotes / Nc.toDouble()
             if (roundsPaths.isEmpty()) return pctDefault
@@ -57,22 +57,20 @@ data class RaireContest(
 
             // find the latest round with both candidates
             var latestRound : IrvRound? = null
-            rounds.forEach{ it:IrvRound -> if (it.count.contains(assertion.winner) && it.count.contains(assertion.loser)) latestRound = it }
+            rounds.forEach{ it:IrvRound -> if (it.count.contains(assorter.winner()) && it.count.contains(assorter.loser())) latestRound = it }
             if (latestRound == null) return pctDefault
 
-            val winner = latestRound.count[assertion.winner]!!
-            val loser = latestRound.count[assertion.loser]!!
+            val winner = latestRound.count[assorter.winner()]!!
+            val loser = latestRound.count[assorter.loser()]!!
             return (winner - loser) / (winner.toDouble())
         } catch (e : Throwable) {
-            logger.warn(e) { "recountMargin for RaireContest ${id} failed" }
+            logger.warn(e) { "recountMargin for RaireContest ${id} assorter ${assorter.shortName()} failed" }
             return -1.0
         }
     }
 
-    override fun showAssertionDiff(assertion: Assertion?): String {
-        if (assertion == null) return ""
-
-        val rassorter = assertion.assorter as RaireAssorter
+    override fun showAssertionDifficulty(assorter: AssorterIF): String {
+        val rassorter = assorter as RaireAssorter
         val rassertion = rassorter.rassertion
         val pctDefault = rassertion.marginInVotes / Nc.toDouble()
         val diffDdefault = "marginInVotes=${rassertion.marginInVotes} recountMargin=${pctDefault}"
@@ -82,13 +80,13 @@ data class RaireContest(
 
         // find the latest round with both candidates
         var latestRound : IrvRound? = null
-        rounds.forEach{ it:IrvRound -> if (it.count.contains(assertion.winner) && it.count.contains(assertion.loser)) latestRound = it }
+        rounds.forEach{ it:IrvRound -> if (it.count.contains(assorter.winner()) && it.count.contains(assorter.loser())) latestRound = it }
         if (latestRound == null) return diffDdefault
 
-        val winner = latestRound.count[assertion.winner]!!
-        val loser = latestRound.count[assertion.loser]!!
+        val winner = latestRound.count[assorter.winner()]!!
+        val loser = latestRound.count[assorter.loser()]!!
         val recountMargin = (winner - loser) / (winner.toDouble())
-        return "winner=$winner loser=$loser diff=${winner-loser} recountMargin=${recountMargin}"
+        return "winner=$winner loser=$loser diff=${winner-loser} (w-l)/w =${recountMargin} difficulty=${rassertion.difficulty}"
     }
 
     override fun show() = buildString {
@@ -113,7 +111,8 @@ class RaireContestUnderAudit(
 
     fun makeRairePollingAssertions(): List<Assertion> {
         return rassertions.map { rassertion ->
-            val assorter = RaireAssorter(contest.info(), rassertion, (rassertion.marginInVotes.toDouble() / contest.Nc()))
+            val reportedMean = margin2mean(rassertion.marginInVotes.toDouble() / contest.Nc())
+            val assorter = RaireAssorter(contest.info(), rassertion).setReportedMean(reportedMean)
             Assertion(contest.info(), assorter)
         }
     }
@@ -265,14 +264,22 @@ data class RaireAssertion(
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 // This is a "primitive" assorter.
-data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion, val reportedMargin: Double): AssorterIF {
+data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion): AssorterIF {
     val contestId = info.id
     val remaining = info.candidateIds.filter { !rassertion.eliminated.contains(it) } // // TODO this is index ??
+    var reportedMean: Double = 0.0
+
+    fun setReportedMean(mean: Double): RaireAssorter {
+        this.reportedMean = mean
+        return this
+    }
 
     override fun upperBound() = 1.0
     override fun winner() = rassertion.winnerId // candidate id, not index
     override fun loser() = rassertion.loserId   // candidate id, not index
-    override fun reportedMargin() = reportedMargin
+    override fun reportedMargin() = mean2margin(reportedMean)
+    override fun reportedMean() = reportedMean
+
     override fun desc() = buildString {
         append("winner/loser=${rassertion.winnerId}/${rassertion.loserId} margin=${rassertion.marginInVotes} difficulty=${rassertion.difficulty}")
         if (rassertion.assertionType == RaireAssertionType.irv_elimination) append(" eliminated=${rassertion.eliminated}")

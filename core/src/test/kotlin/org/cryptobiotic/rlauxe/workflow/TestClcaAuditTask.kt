@@ -13,7 +13,7 @@ class TestClcaAuditTask {
         val margin = .04
         val mvrFuzzPct = .00123
         val auditConfig = AuditConfig(
-            AuditType.CLCA, hasStyles = true, nsimEst = 10, sampleLimit = 10000,
+            AuditType.CLCA, hasStyles = true, nsimEst = 10, contestSampleCutoff = 10000,
             clcaConfig = ClcaConfig(strategy=ClcaStrategyType.phantoms, simFuzzPct = mvrFuzzPct)
         )
         val taskGen = ClcaContestAuditTaskGenerator(
@@ -35,7 +35,7 @@ class TestClcaAuditTask {
         val margin = .02
         val mvrFuzzPct = .00123
         val auditConfig = AuditConfig(
-            AuditType.CLCA, hasStyles = true, nsimEst = 10, sampleLimit = 10000,
+            AuditType.CLCA, hasStyles = true, nsimEst = 10, contestSampleCutoff = 10000,
             clcaConfig = ClcaConfig(strategy=ClcaStrategyType.phantoms, simFuzzPct = mvrFuzzPct)
         )
         val taskGen = ClcaSingleRoundAuditTaskGenerator(

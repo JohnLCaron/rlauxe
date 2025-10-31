@@ -9,12 +9,12 @@ import kotlin.random.Random
 data class SimulateIrvTestData(
     val contest: RaireContest,
     val minMargin: Double,
-    val sampleLimits: Int,
+    val sampleLimits: Int?,
     val excessVotes: Int? = null,
     val quiet: Boolean = true
 ) {
     val ncands = contest.ncandidates
-    val ncards = if (sampleLimits > 0) min(contest.Nc, sampleLimits) else contest.Nc
+    val ncards = if (sampleLimits != null) min(contest.Nc, sampleLimits) else contest.Nc
 
     fun makeCvrs(): List<Cvr> {
         var count = 0

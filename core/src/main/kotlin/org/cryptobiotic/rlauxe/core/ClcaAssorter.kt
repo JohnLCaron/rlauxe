@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.util.dfn
 
 private val logger = KotlinLogging.logger("ClcaAssorter")
 
@@ -42,11 +43,15 @@ open class ClcaAssorter(
     val upperBound: Double // upper bound of clca assorter; betting functions may need to know this
 
     init {
-        if (info.choiceFunction == SocialChoiceFunction.SUPERMAJORITY) {
-            require(assorter is SuperMajorityAssorter) { "assorter must be SuperMajorityAssorter" }
-        }
+        /* if (info.choiceFunction == SocialChoiceFunction.THRESHOLD) {
+            require(assorter is ThresholdAssorter) { "assorter must be Threshold" }
+        } else if (info.choiceFunction == SocialChoiceFunction.DHONDT) {
+            require(assorter is DHondtAssorter) { "assorter must be DHondt" }
+        }  else if (info.choiceFunction == SocialChoiceFunction.IRV) {
+            require(assorter is RaireAssorter) { "assorter must be Raire" }
+        } */
 
-        // Define v ≡ 2Āc − 1, the assorter margin
+        // Define v ≡ 2Ā − 1, the assorter margin
         reportedAssortMargin = assorter.reportedMargin() // (0, 1)
         // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
         noerror = 1.0 / (2.0 - reportedAssortMargin / assorter.upperBound()) // clca assort value when no error (.5, 1)
@@ -197,7 +202,7 @@ open class ClcaAssorter(
     override fun toString() = buildString {
         appendLine("ClcaAssorter for contest ${info.name} (${info.id})")
         appendLine("  assorter=${assorter.desc()}")
-        append("  cvrAssortMargin=$reportedAssortMargin noerror=$noerror upperBound=$upperBound")
+        append("  cvrAssortMargin=${dfn(reportedAssortMargin, 8)} noerror=${dfn(noerror, 8)} upperBound=${dfn(upperBound, 8)}")
     }
 
     fun shortName() = assorter.shortName()

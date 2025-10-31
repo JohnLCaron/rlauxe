@@ -299,13 +299,13 @@ fun createBoulderElection(
                 AuditType.CLCA,
                 hasStyles = true,
                 riskLimit = riskLimit,
-                sampleLimit = 20000,
+                contestSampleCutoff = 20000,
                 minRecountMargin = minRecountMargin,
                 nsimEst = 10,
                 clcaConfig = ClcaConfig(ClcaStrategyType.optimalComparison)
             )
         else AuditConfig(
-            AuditType.ONEAUDIT, hasStyles=true, riskLimit=riskLimit, sampleLimit=20000, minRecountMargin=minRecountMargin, nsimEst=10,
+            AuditType.ONEAUDIT, hasStyles=true, riskLimit=riskLimit, contestSampleCutoff=20000, minRecountMargin=minRecountMargin, nsimEst=10,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
 

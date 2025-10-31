@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.math.roundToInt
 import kotlin.random.Random
@@ -133,6 +134,24 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
     // if (debug) println("flipped = $needToChangeVotesFromA had $startingAvotes now have $checkAvotes votes for A")
     require(checkAvotes == startingAvotes - needToChangeVotesFromA)
     return changed
+}
+
+
+// Calculate the assorter margin for the CVRs containing the given contest, including the phantoms,
+//    by treating the phantom CVRs as if they contain no valid vote in the contest
+//    (i.e., the assorter assigns the value 1/2 to phantom CVRs). SHANGRLA section 3.4 p 12.
+// It is not necessary to adjust the margins to account for those omissions. Rather, it is
+//    enough to treat only the ballots that the audit attempts to find but cannot find as votes for the losers
+//    (more generally, in the most pessimistic way) P2Z section 2 p. 3.
+
+// This only agrees with reportedMargin when the cvrs are complete with undervotes and phantoms.
+// Note that we rely on it.hasContest(contestId), assumes undervotes are in the cvr, ie hasStyle = true.
+fun AssorterIF.calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false, show: Boolean= false): Double {
+    return mean2margin(calcAssortAvgFromCvrs(contestId, cvrs, usePhantoms))
+}
+
+fun AssorterIF.calcAssortAvgFromCvrs(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false): Double {
+    return cvrs.filter{ it.hasContest(contestId) }.map { assort(it, usePhantoms = usePhantoms) }.average()
 }
 
 

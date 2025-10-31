@@ -22,7 +22,7 @@ class TestAssertion {
         superContest = AuditContest(
             id = "AvB",
             idx = 0,
-            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
             candidates = listOf(0, 1, 2),
             winners = listOf(0),
             minFraction = 2.0 / 3,

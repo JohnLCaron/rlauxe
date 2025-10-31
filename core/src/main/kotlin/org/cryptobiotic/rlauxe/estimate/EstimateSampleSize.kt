@@ -101,16 +101,16 @@ fun makeEstimationTasks(
         AuditType.CLCA -> {
             // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
             if (contest.isIrv()) {
-                val testData = SimulateIrvTestData(contest as RaireContest, contestRound.contestUA.minMargin(), auditConfig.sampleLimit)
+                val testData = SimulateIrvTestData(contest as RaireContest, contestRound.contestUA.minMargin(), auditConfig.contestSampleCutoff)
                 testData.makeCvrs()
             } else {
-                ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit).makeCvrs()
+                ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.contestSampleCutoff).makeCvrs()
             }
         }
         AuditType.POLLING -> {
             // Simulation of multicandidate Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
             // TODO what about supermajority?
-            ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.sampleLimit).makeCvrs()
+            ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.contestSampleCutoff).makeCvrs()
         }
         else -> null
     }
@@ -448,7 +448,7 @@ fun simulateSampleSizeOneAuditAssorter(
         OneAuditNoErrorIterator(
             contestUA.id,
             contestUA.Nc,
-            auditConfig.sampleLimit,
+            auditConfig.contestSampleCutoff,
             cassertion.cassorter,
             cvrIterator,
         )

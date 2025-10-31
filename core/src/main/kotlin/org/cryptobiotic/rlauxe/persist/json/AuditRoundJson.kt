@@ -4,7 +4,6 @@ package org.cryptobiotic.rlauxe.persist.json
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.unwrap
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -12,7 +11,6 @@ import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.enumValueOf
 
@@ -137,8 +135,8 @@ fun ContestRoundJson.import(contestUA: ContestUnderAudit): ContestRound {
     val assertionRounds = assertionRounds.map {
         val ref = assertionMap[it.assorterDesc]
         if (ref == null)
-            println("wtf")
-        it.import( ref!! )
+            throw RuntimeException("ContestRoundJson.assorterDesc '${it.assorterDesc}' is missing")
+        it.import( ref )
     }
     val contestRound = ContestRound(contestUA, assertionRounds, this.roundIdx)
 

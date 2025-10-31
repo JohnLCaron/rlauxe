@@ -26,7 +26,7 @@ import java.nio.file.StandardOpenOption
 //    val candidateNames: Map<String, Int>, // candidate name -> candidate id
 //    val choiceFunction: SocialChoiceFunction,
 //    val nwinners: Int = 1,
-//    val minFraction: Double? = null, // supermajority only.
+//    val minFraction: Double? = null,
 //)
 @Serializable
 data class ContestInfoJson(

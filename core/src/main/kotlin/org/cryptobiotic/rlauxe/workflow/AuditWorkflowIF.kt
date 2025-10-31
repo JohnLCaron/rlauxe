@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
-import org.cryptobiotic.rlauxe.estimate.sampleCheckLimits
+import org.cryptobiotic.rlauxe.estimate.sampleWithContestCutoff
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
 private val logger = KotlinLogging.logger("RlauxAuditIF")
@@ -49,7 +49,7 @@ interface AuditWorkflowIF {
 
         // 2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited.
         // 3. _Random sampling_: The actual ballots to be sampled are selected randomly based on a carefully chosen random seed.
-        sampleCheckLimits(
+        sampleWithContestCutoff(
             auditConfig(),
             mvrManager(),
             auditRound,

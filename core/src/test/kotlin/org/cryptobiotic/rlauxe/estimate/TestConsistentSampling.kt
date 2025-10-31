@@ -108,10 +108,10 @@ class TestConsistentSampling {
 
         //val prng = Prng(Random.nextLong())
         //val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit( it, idx, prng.next()) }
-        val sampleLimit = 10000
+        val contestSampleCutoff = 10000
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList(), sampledBorc = emptyList())
-        uniformSampling(auditRound, mvrManager, previousSamples=emptySet(), sampleLimit=sampleLimit, 0)
+        uniformSampling(auditRound, mvrManager, previousSamples=emptySet(), contestSampleCutoff=contestSampleCutoff, 0)
         println("nsamples needed = ${auditRound.samplePrns.size}\n")
 
         // must be ordered
@@ -132,7 +132,7 @@ class TestConsistentSampling {
             assertTrue(contest.done || contest.estSampleSizeNoStyles <= auditRound.samplePrns.size)
 
             println("contest ${contest.id} estSampleSize=${contest.estSampleSizeEligibleForRemoval()} done=${contest.done}")
-            if (contest.estSampleSizeEligibleForRemoval() > sampleLimit)
+            if (contest.estSampleSizeEligibleForRemoval() > contestSampleCutoff)
                 assertTrue(contest.done)
         }
     }

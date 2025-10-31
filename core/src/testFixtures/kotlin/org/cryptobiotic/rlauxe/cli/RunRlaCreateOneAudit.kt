@@ -96,7 +96,7 @@ object RunRlaCreateOneAudit {
         clearDirectory(Path(auditDir))
 
         val auditConfig = AuditConfig(
-            AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 20000, nsimEst = 10,
+            AuditType.ONEAUDIT, hasStyles = true, contestSampleCutoff = 20000, nsimEst = 10,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
 

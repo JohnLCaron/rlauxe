@@ -13,7 +13,7 @@ class TestAuditConfig {
         )
         val expected =
 """AuditConfig(auditType=CLCA, hasStyles=true, riskLimit=0.05, seed=-2417429242344992892
-  nsimEst=10, quantile=0.8, sampleLimit=-1, minRecountMargin=0.005 version=1.2
+  nsimEst=10, quantile=0.8, contestSampleCutoff=null, minRecountMargin=0.005 version=1.2
   ClcaConfig(strategy=previous, simFuzzPct=null, errorRates=null, d=100)
 """
         assertEquals(expected, auditConfig.toString())
@@ -27,7 +27,7 @@ class TestAuditConfig {
         )
         val expected =
             """AuditConfig(auditType=POLLING, hasStyles=true, riskLimit=0.05, seed=-2417429242344992892
-  nsimEst=10, quantile=0.8, sampleLimit=-1, minRecountMargin=0.005 version=1.2
+  nsimEst=10, quantile=0.8, contestSampleCutoff=null, minRecountMargin=0.005 version=1.2
   PollingConfig(simFuzzPct=null, d=100)
 """
         assertEquals(expected, auditConfig.toString())
@@ -42,7 +42,7 @@ class TestAuditConfig {
         )
         val expected =
             """AuditConfig(auditType=ONEAUDIT, hasStyles=true, riskLimit=0.05, seed=-2417429242344992892
-  nsimEst=10, quantile=0.8, sampleLimit=-1, minRecountMargin=0.005 version=1.2
+  nsimEst=10, quantile=0.8, contestSampleCutoff=null, minRecountMargin=0.005 version=1.2
   OneAuditConfig(strategy=eta0Eps, simFuzzPct=null, d=100, useFirst=false)
 """
         assertEquals(expected, auditConfig.toString())

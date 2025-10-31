@@ -20,7 +20,7 @@ class TestConsistentSamplingFromShangrla {
             ContestInfo("city_council", 0, candidateNames= listToMap("Alice", "Bob", "Charlie", "Doug", "Emily"),
                 choiceFunction = SocialChoiceFunction.PLURALITY),
             ContestInfo("measure_1", 1, candidateNames= listToMap("yes", "no"),
-                SocialChoiceFunction.SUPERMAJORITY, minFraction = .6666),
+                SocialChoiceFunction.THRESHOLD, minFraction = .6666),
             ContestInfo("dont_care", 2, candidateNames= listToMap("yes", "no"),
                 SocialChoiceFunction.PLURALITY),
         )
@@ -65,7 +65,7 @@ class TestConsistentSamplingFromShangrla {
             ContestInfo("city_council", 0, candidateNames= listToMap("Alice", "Bob", "Charlie", "Doug", "Emily"),
                 choiceFunction = SocialChoiceFunction.PLURALITY),
             ContestInfo("measure_1", 1, candidateNames= listToMap("yes", "no"),
-                SocialChoiceFunction.SUPERMAJORITY, minFraction = .6666),
+                SocialChoiceFunction.THRESHOLD, minFraction = .6666),
             ContestInfo("measure_2", 2, candidateNames= listToMap("yes", "no"),
                 SocialChoiceFunction.PLURALITY),
         )

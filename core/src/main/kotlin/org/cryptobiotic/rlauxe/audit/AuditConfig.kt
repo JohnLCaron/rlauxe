@@ -14,7 +14,7 @@ data class AuditConfig(
     // simulation control
     val nsimEst: Int = 100, // number of simulation estimations
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
-    val sampleLimit: Int = -1, // dont sample more than this, -1 means dont use
+    val contestSampleCutoff: Int? = null, // remove contests that need more samples than this
     val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
     val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
 
@@ -30,7 +30,7 @@ data class AuditConfig(
 
     override fun toString() = buildString {
         appendLine("AuditConfig(auditType=$auditType, hasStyles=$hasStyles, riskLimit=$riskLimit, seed=$seed")
-        appendLine("  nsimEst=$nsimEst, quantile=$quantile, sampleLimit=$sampleLimit, minRecountMargin=$minRecountMargin version=$version")
+        appendLine("  nsimEst=$nsimEst, quantile=$quantile, contestSampleCutoff=$contestSampleCutoff, minRecountMargin=$minRecountMargin version=$version")
         if (skipContests.isNotEmpty()) { appendLine("  skipContests=$skipContests") }
         when (auditType) {
             AuditType.POLLING -> appendLine("  $pollingConfig")

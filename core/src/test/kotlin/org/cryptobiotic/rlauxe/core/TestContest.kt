@@ -13,20 +13,20 @@ class TestContest {
         assertEquals("'testContestInfo' (0) candidates=[0, 1] choiceFunction=PLURALITY nwinners=1 voteForN=1", info.toString())
 
         val mess = assertFailsWith<IllegalArgumentException> {
-            ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1), SocialChoiceFunction.SUPERMAJORITY)
+            ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1), SocialChoiceFunction.THRESHOLD)
         }.message
-        assertEquals("SUPERMAJORITY requires minFraction", mess)
+        assertEquals("THRESHOLD requires minFraction", mess)
 
         val mess2 = assertFailsWith<IllegalArgumentException> {
             ContestInfo(
                 "testContestInfo",
                 0,
                 mapOf("cand0" to 0, "cand1" to 1),
-                SocialChoiceFunction.SUPERMAJORITY,
+                SocialChoiceFunction.THRESHOLD,
                 minFraction = -.05
             )
         }.message
-        assertEquals("minFraction between 0 and 1", mess2)
+        assertEquals("minFraction must be between 0 and 1", mess2)
 
         val mess3 = assertFailsWith<IllegalArgumentException> {
             ContestInfo(
@@ -37,7 +37,7 @@ class TestContest {
                 minFraction = .35
             )
         }.message
-        assertEquals("only SUPERMAJORITY, DHONDT can have minFraction", mess3)
+        assertEquals("APPROVAL may not have minFraction", mess3)
 
         val mess4 = assertFailsWith<IllegalArgumentException> {
             ContestInfo(
@@ -145,7 +145,7 @@ class TestContest {
             "testContestInfo",
             0,
             mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2),
-            SocialChoiceFunction.SUPERMAJORITY,
+            SocialChoiceFunction.THRESHOLD,
             minFraction = .55,
         )
         val contest = Contest(info, mapOf(0 to 100, 1 to 125), Nc=227, Ncast=225)
@@ -174,7 +174,7 @@ class TestContest {
             "testContestInfo",
             0,
             mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2),
-            SocialChoiceFunction.SUPERMAJORITY,
+            SocialChoiceFunction.THRESHOLD,
             minFraction = .55,
         )
         val contest = Contest(info, mapOf(0 to 100, 1 to 123, 2 to 2), Nc=227, Ncast=225)
@@ -207,7 +207,7 @@ class TestContest {
             "testContestInfo",
             0,
             mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2),
-            SocialChoiceFunction.SUPERMAJORITY,
+            SocialChoiceFunction.THRESHOLD,
             minFraction = .55,
         )
         val mess = assertFailsWith<IllegalArgumentException> {
@@ -223,7 +223,7 @@ class TestContest {
             "testContestInfo",
             0,
             mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2),
-            SocialChoiceFunction.SUPERMAJORITY,
+            SocialChoiceFunction.THRESHOLD,
             minFraction = .33,
             nwinners = 2
         )
@@ -284,14 +284,14 @@ class TestContest {
 
         val expectedShow = """Contest 'testContestInfo' (0) PLURALITY voteForN=1 votes={1=108, 0=100, 2=0} undervotes=1, voteForN=1
    winners=[1] Nc=211 Np=2 Nu=1 sumVotes=208
-   winner=108 loser=100 diff=8 recountMargin=0.07407407407407407
+   1/0 votes=108/100 diff=8 (w-l)/w =0.07407407407407407
    0 'cand0': votes=100 
    1 'cand1': votes=108  (winner)
    2 'cand2': votes=0 
     Total=208"""
         assertEquals(expectedShow, contestUAc.show())
 
-        assertEquals(0.07407407407407407, contestUAc.recountMargin(), doublePrecision)
+        assertEquals(0.07407407407407407, contestUAc.minRecountMargin(), doublePrecision)
     }
 
     @Test

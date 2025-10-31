@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.estimate.calcAssorterMargin
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -126,7 +127,7 @@ class TestAssorterBasics {
         val contestInfo = ContestInfo(
             name = "AvB",
             id = 0,
-            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
             candidateNames = listToMap( "0", "1", "2", "3", "4"),
             nwinners = 1,
             minFraction = .42,

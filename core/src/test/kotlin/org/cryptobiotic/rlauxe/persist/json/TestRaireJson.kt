@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.persist.json
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.raire.*
 import org.cryptobiotic.rlauxe.util.listToMap
+import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -77,7 +78,8 @@ class TestRaireJson {
         )
         val rassertion = RaireAssertion(4, 2, 0.0,42, RaireAssertionType.irv_elimination,
             listOf(1,3,5),  mapOf(1 to 111, 2 to 222, 3 to 333))
-        val target = RaireAssorter(info, rassertion, rassertion.marginInVotes.toDouble() / 1000)
+        val mean = margin2mean(rassertion.marginInVotes.toDouble() / 1000)
+        val target = RaireAssorter(info, rassertion).setReportedMean(mean)
 
         val json = target.publishJson()
         val roundtrip = json.import(info)

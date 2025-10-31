@@ -28,7 +28,7 @@ class TestClcaEstimationFailure {
             AuditType.CLCA,
             hasStyles = true,
             quantile = .50,     // TODO review
-            sampleLimit = 5000,
+            contestSampleCutoff = 5000,
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.phantoms)
         )
 

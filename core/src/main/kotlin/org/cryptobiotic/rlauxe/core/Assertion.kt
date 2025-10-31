@@ -44,7 +44,7 @@ class ClcaAssertion(
     override fun toString() = cassorter.assorter().desc()
 
     override fun show() = buildString {
-        appendLine(" cassorter: ${cassorter}")
+        append(" cassorter: ${cassorter}")
     }
 
     fun checkEquals(other: ClcaAssertion) = buildString {

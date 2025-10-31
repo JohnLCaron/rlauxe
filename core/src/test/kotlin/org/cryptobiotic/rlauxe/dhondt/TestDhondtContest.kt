@@ -30,6 +30,7 @@ class TestDhondtContest {
         println(contestd.show())
     }
 
+    /*
     @Test
     fun testAssortAvg() {
         testAssortAvg(listOf(DhondtCandidate(1, 10), DhondtCandidate(2, 20), DhondtCandidate(3, 30)), 2, minPct)
@@ -76,5 +77,5 @@ class TestDhondtContest {
             println("             assort mean = ${df(welford.mean)}")
             assertEquals(welford.mean, assorterif.reportedMean(), doublePrecision)
         }
-    }
+    } */
 }

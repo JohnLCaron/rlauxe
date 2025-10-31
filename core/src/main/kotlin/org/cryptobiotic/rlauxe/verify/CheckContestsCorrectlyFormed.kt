@@ -3,17 +3,8 @@ package org.cryptobiotic.rlauxe.verify
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
-import org.cryptobiotic.rlauxe.raire.RaireContest
-import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.sumContestTabulations
-import org.cryptobiotic.rlauxe.util.tabulateCardPools
-import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.iterator
-import kotlin.math.max
 import kotlin.math.min
 
 private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOANS")
@@ -30,8 +21,8 @@ fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<Cont
             checkWinnerVotes(contestUA, results)
 
             // see if margin is too small
-            if (contestUA.recountMargin() <= auditConfig.minRecountMargin) {
-                logger.info{"*** MinMargin contest ${contestUA} recountMargin ${contestUA.recountMargin()} <= ${auditConfig.minRecountMargin}"}
+            if (contestUA.minRecountMargin() <= auditConfig.minRecountMargin) {
+                logger.info{"*** MinMargin contest ${contestUA} recountMargin ${contestUA.minRecountMargin()} <= ${auditConfig.minRecountMargin}"}
                 contestUA.preAuditStatus = TestH0Status.MinMargin
             } else {
                 // see if too many phantoms

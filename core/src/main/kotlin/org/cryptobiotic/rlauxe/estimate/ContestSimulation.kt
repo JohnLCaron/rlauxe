@@ -143,18 +143,18 @@ class ContestSimulation(val contest: Contest) {
             return ContestSimulation(contest)
         }
 
-        fun makeContestWithLimits(contest: Contest, sampleLimit: Int): ContestSimulation {
-            if (sampleLimit < 0 || contest.Nc <= sampleLimit) return ContestSimulation(contest)
+        fun makeContestWithLimits(contest: Contest, contestSampleCutoff: Int?): ContestSimulation {
+            if (contestSampleCutoff == null || contest.Nc <= contestSampleCutoff) return ContestSimulation(contest)
 
             // otherwise scale everything
-            val sNc = sampleLimit / contest.Nc.toDouble()
+            val sNc = contestSampleCutoff / contest.Nc.toDouble()
             val sNp = roundToClosest(sNc * contest.Np())
             val sNu = roundToClosest(sNc * contest.Nundervotes())
             val orgVoteCount = contest.votes.map { it.value }.sum() // V_c
             val svotes = contest.votes.map { (id, nvotes) -> id to roundToClosest(sNc * nvotes) }.toMap()
             val voteCount = svotes.map { it.value }.sum() // V_c
 
-            if (voteCount > sampleLimit) {
+            if (voteCount > contestSampleCutoff) {
                 println("*** org = ${orgVoteCount} voteCount = ${voteCount}")
             }
 

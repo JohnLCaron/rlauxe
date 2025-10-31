@@ -75,7 +75,7 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
 @Serializable
 data class AssorterIFJson(
     val className: String,
-    val reportedMargin: Double,
+    val reportedMean: Double,
     val winner: Int,
     val loser: Int? = null,
     val minFraction: Double? = null,
@@ -89,33 +89,47 @@ fun AssorterIF.publishJson() : AssorterIFJson {
         is PluralityAssorter ->
             AssorterIFJson(
                 "PluralityAssorter",
-                this.reportedMargin,
+                reportedMean = this.reportedMean(),
                 this.winner,
                 this.loser,
             )
         is SuperMajorityAssorter ->
             AssorterIFJson(
                 "SuperMajorityAssorter",
-                this.reportedMargin,
-                this.winner,
+                reportedMean = this.reportedMean(),
+                this.candId,
                 minFraction = this.minFraction,
             )
         is RaireAssorter ->
             AssorterIFJson(
                 "RaireAssorter",
-                this.reportedMargin,
+                reportedMean = this.reportedMean(),
                 this.rassertion.winnerId,
                 this.rassertion.loserId,
                 rassertion = this.rassertion.publishJson(),
             )
         is DHondtAssorter ->
             AssorterIFJson(
-                "DHondtAssorterIF",
-                this.reportedMean(), // TODO bogus
+                "DHondtAssorter",
+                reportedMean = this.reportedMean(),
                 this.winner,
                 this.loser,
                 lastSeatWon = this.lastSeatWon,
                 firstSeatLost = this.firstSeatLost,
+            )
+        is TresholdAssorter ->
+            AssorterIFJson(
+                "UnderThreshold",
+                reportedMean = this.reportedMean(),
+                winner = this.winner,
+                minFraction = this.t,
+            )
+        is UnderThreshold ->
+            AssorterIFJson(
+                "UnderThreshold",
+                reportedMean = this.reportedMean(),
+                winner = this.candId,
+                minFraction = this.t,
             )
         else -> throw RuntimeException("unknown assorter type ${this.javaClass.simpleName} = $this")
     }
@@ -127,40 +141,51 @@ fun AssorterIFJson.import(info: ContestInfo): AssorterIF {
             PluralityAssorter(
                 info,
                 this.winner,
-                this.loser!!,
-                this.reportedMargin,
-            )
+                this.loser!!)
+            .setReportedMean(this.reportedMean)
+
         "SuperMajorityAssorter" ->
             SuperMajorityAssorter(
                 info,
                 this.winner,
-                this.minFraction!!,
-                this.reportedMargin,
-            )
+                this.minFraction!!)
+            .setReportedMean(this.reportedMean)
+
         "RaireAssorter" ->
             // data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion): AssorterIF {
             RaireAssorter(
                 info,
-                this.rassertion!!.import(),
-                this.reportedMargin,
-            )
-        "DHondtAssorterIF" ->
-            // DHondtAssorterIF(val info: ContestInfo, val winner: Int, val loser: Int, val firstSeatLost: Int, val lastSeatWon: Int, val margin: Double): AssorterIF  {
+                this.rassertion!!.import())
+            .setReportedMean(this.reportedMean)
+
+        "DHondtAssorterIF",
+        "DHondtAssorter" ->
             DHondtAssorter(
                 info,
                 this.winner,
                 this.loser!!,
                 lastSeatWon = this.lastSeatWon!!,
-                firstSeatLost = this.firstSeatLost!!,
-                this.reportedMargin,
-            )
+                firstSeatLost = this.firstSeatLost!!)
+            .setReportedMean(this.reportedMean)
+
+        "TresholdAssorter" ->
+            TresholdAssorter(
+                info,
+                this.winner,
+                this.minFraction!!)
+                .setReportedMean(this.reportedMean)
+
+        "UnderThreshold" ->
+            UnderThreshold(
+                info,
+                this.winner,
+                this.minFraction!!)
+            .setReportedMean(this.reportedMean)
+
         else -> throw RuntimeException()
     }
 }
 
-// data class AssortAvgsInPools (
-//    val assortAverage: Map<Int, Double>, // poolId -> average assort value, for one assorter
-//)
 @Serializable
 data class AssortAvgsInPoolsJson(
     val contest: Int?, // TODO remove

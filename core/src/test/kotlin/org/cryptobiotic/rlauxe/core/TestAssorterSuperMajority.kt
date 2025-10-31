@@ -18,7 +18,7 @@ class TestAssorterSuperMajority {
         val info = ContestInfo(
             name = "ABC",
             id = 0,
-            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
             candidateNames = listToMap( "A", "B", "C"),
             minFraction = 0.60,
         )
@@ -42,7 +42,6 @@ class TestAssorterSuperMajority {
         assertEquals(0.5, superAssorter.assort(cvr02)) // otherwise
 
         // A in {0, 1/2, u}
-
     }
 
     @Test
@@ -50,7 +49,7 @@ class TestAssorterSuperMajority {
         val info = ContestInfo(
             name = "ABC",
             id = 0,
-            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
             candidateNames = listToMap( "A", "B", "C"),
             minFraction = 0.60,
         )
@@ -67,82 +66,29 @@ class TestAssorterSuperMajority {
         // (2)= 0.04006410256410255
     }
 
-    // @Test not allowed
-    fun testThreeCandidateMultipleWinners() {
-        val info = ContestInfo(
-            name = "ABC",
-            id = 0,
-            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listToMap( "A", "B", "C"),
-            nwinners = 2,
-            minFraction = 0.35,
-        )
-        val counts = listOf(1000, 980, 100)
-        val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
-        val contest = makeContestFromCvrs(info, cvrs)
-
-        repeat(3) { winner ->
-            val assortAvg = testNway(contest, cvrs, counts, winner)
-            assertEquals(assortAvg > .5, contest.winners.contains(winner))
-        }
-        //  (0)= 0.6868131868131773
-        // (1)= 0.6730769230769145
-        // (2)= 0.06868131868131867
-    }
-
-    // @Test not allowed
-    fun testNCandidateSuperMajority() {
-        val counts = listOf(1600, 1300, 500, 1500, 50, 12, 1)
-        val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
-        val ncandidates = counts.size
-
-        val info = ContestInfo(
-            name = "ABCs",
-            id = 0,
-            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
-            candidateNames = listToMap( "A", "B", "C", "D", "E", "F", "G"),
-            nwinners = 3,
-            minFraction = 0.25,
-        )
-        val contest = makeContestFromCvrs(info, cvrs)
-
-        repeat(ncandidates) { winner ->
-            val assortAvg = testNway(contest, cvrs, counts, winner)
-            assertEquals(assortAvg > .5, contest.winners.contains(winner))
-        }
-
-        //  (0)= 0.6447713076768083
-        // (1)= 0.5238766874874068
-        // (2)= 0.20149103364900262
-        // (3)= 0.6044731009470079
-        // (4)= 0.02014910336490026
-        // (5)= 0.0048357848075760625
-        // (6)= 4.0298206729800525E-4
-    }
-
     fun testNway(contest: Contest, cvrs: List<Cvr>, counts: List<Int>, winner: Int): Double {
         val assort = SuperMajorityAssorter.makeWithVotes(contest, winner, contest.info.minFraction!!)
         assertEquals(1.0 / (2 * assort.minFraction), assort.upperBound())
         val assortAvg = cvrs.map { assort.assort(it) }.average()
-        assertEquals(margin2mean(assort.reportedMargin), assortAvg, doublePrecision)
+        assertEquals(margin2mean(assort.reportedMargin()), assortAvg, doublePrecision)
 
         val n = counts.sum().toDouble()
         val p = counts[winner] / n
         val q = counts.sum() / n
         // pq/(2f ) + (1 − q)/2
-        val avg = p * q / (2 * contest.info.minFraction!!) + (1.0 - q) / 2.0
+        val avg = p * q / (2 * contest.info.minFraction) + (1.0 - q) / 2.0
         assertEquals(avg, assortAvg, doublePrecision)
         println(" ($winner)= $assortAvg")
         return assortAvg
     }
 
     @Test
-    fun testAssortValues() {
+    fun testSuperMajorityAssorterValues() {
         val f = 0.60
         val info = ContestInfo(
             name = "ABC",
             id = 0,
-            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
             candidateNames = listToMap( "A", "B", "C"),
             minFraction = f,
             nwinners = 1,
@@ -174,4 +120,80 @@ class TestAssorterSuperMajority {
         assertEquals(0.5, assorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = true), usePhantoms = true))
     }
 
+    @Test
+    fun testEquivileantThresholdAssorter() {
+        val f = 0.60
+        val info = ContestInfo(
+            name = "ABC",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
+            candidateNames = listToMap( "A", "B", "C"),
+            minFraction = f,
+            nwinners = 1,
+        )
+        val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc=100, Ncast=100)
+
+        val assorter = TresholdAssorter.makeFromVotes(info, 1, contest.votes, f, contest.Nc)
+        assertEquals(1, assorter.winner())
+        assertEquals(-1, assorter.loser())
+
+        val minFraction = contest.info.minFraction!!
+        assertEquals(1.0 / (2 * minFraction), assorter.upperBound())
+        assertEquals(0.0, assorter.assort(makeCvr(0))) // bi has a mark for exactly one candidate and not Alice
+        assertEquals(0.5 / minFraction, assorter.assort(makeCvr(1))) // // bi has a mark for Alice and no one else
+        assertEquals(0.0, assorter.assort(makeCvr(2))) // // bi has a mark for exactly one candidate and not Alice
+
+        // undervote
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(0 to IntArray(0)), phantom = false), usePhantoms = false))
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(0 to IntArray(0)), phantom = false), usePhantoms = true))
+        // phantom
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(0 to IntArray(0)), phantom = true), usePhantoms = false))
+        assertEquals(0.0, assorter.assort(Cvr("id", mapOf(0 to IntArray(0)), phantom = true), usePhantoms = true))
+
+        // contest not on cvr
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = false), usePhantoms = false))
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = false), usePhantoms = true))
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = true), usePhantoms = false))
+        assertEquals(0.5, assorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = true), usePhantoms = true))
+    }
+
+    @Test
+    fun testUnderThresholdValues() {
+        val f = 0.40
+        val info = ContestInfo(
+            name = "ABC",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
+            candidateNames = listToMap( "A", "B", "C"),
+            minFraction = f,
+            nwinners = 1,
+        )
+        val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc=100, Ncast=100)
+
+        val massorter = UnderThreshold.makeFromVotes(info, 2, contest.votes, f, contest.Nc)
+        println(massorter.desc())
+
+        assertEquals(2, massorter.winner())
+        assertEquals(-1, massorter.loser())
+
+        val minFraction = contest.info.minFraction!!
+        // assertEquals(1.0 / (2 * minFraction), tassorter.upperBound())
+        assertEquals(massorter.upperBound(), massorter.assort(makeCvr(0))) // bi has a mark for exactly one candidate and not Alice
+        assertEquals(massorter.upperBound(), massorter.assort(makeCvr(1))) // // bi has a mark for Alice and no one else
+        assertEquals(massorter.lowerBound(), massorter.assort(makeCvr(2))) // // bi has a mark for exactly one candidate and not Alice
+
+        // undervote
+        assertEquals(0.5, massorter.assort(Cvr("id", mapOf(0 to IntArray(0)), phantom = false), usePhantoms = false))
+        assertEquals(0.5, massorter.assort(Cvr("id", mapOf(0 to IntArray(0)), phantom = false), usePhantoms = true))
+        // phantom
+        assertEquals(0.5, massorter.assort(Cvr("id", mapOf(0 to IntArray(0)), phantom = true), usePhantoms = false))
+        assertEquals(0.0, massorter.assort(Cvr("id", mapOf(0 to IntArray(0)), phantom = true), usePhantoms = true))
+
+        // contest not on cvr
+        assertEquals(0.5, massorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = false), usePhantoms = false))
+        assertEquals(0.5, massorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = false), usePhantoms = true))
+        assertEquals(0.5, massorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = true), usePhantoms = false))
+        assertEquals(0.5, massorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = true), usePhantoms = true))
+    }
 }
+

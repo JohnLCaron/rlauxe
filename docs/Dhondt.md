@@ -52,6 +52,42 @@ TA − t * Sum(Ti) > 0
 
 aA = (1-t), ai = -t for i != A.
 
+g(b) = a1 b1 + a2 b2 + · · · + am bm
+     = (1-t)*bA + t*sum(bi, i != A)
+
+so if vote is for A, g = (1-t)
+   if vote for not B, r = -t
+   else 0
+
+lower bound a = -t
+upper bound a = (1-t)
+c = -1/2a
+h = (g(b) - a)/-2a
+
+
+Another example is an under threshold assertion, pA < t, for some threshold t.
+
+````
+pA < t
+TA/TL < t
+TA < t * TL
+0 < t * TL - TA
+0 < t * Sum(Ti) - TA
+t * Sum(Ti) - TA > 0
+(t-1) TA + t * {Ti, i != A}
+````
+
+aA = (t-1), ai = t for i != A.
+
+so if vote is for A, g = (t-1)
+if vote for not B, r = t
+else 0
+
+lower bound a = (t-1)
+upper bound a = t
+c = -1/2(t-1)
+h = c * g(b) + 1/2
+
 Step 2. For the given linear assertion, we define the following function on ballots, which we call a proto-assorter :
 
         g(b) = a1*b1 + a2*b2 + · · · + am*bm

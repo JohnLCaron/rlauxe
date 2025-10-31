@@ -42,7 +42,7 @@ class TestClcaAssorter {
         val contest =  Contest(info, votes, 2000, Ncast=2000)
 
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
-        assertEquals(20/2000.toDouble(), assorter.reportedMargin, doublePrecision)
+        assertEquals(20/2000.toDouble(), assorter.reportedMargin(), doublePrecision)
 
         val awinnerAvg = .505
         val margin = 2.0 * awinnerAvg - 1.0 // reported assorter margin
@@ -202,7 +202,7 @@ class TestClcaAssorter {
         val info = ContestInfo(
             name = "ABC",
             id = 0,
-            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
             candidateNames = listToMap( "A", "B", "C"),
             minFraction = 0.60,
         )
@@ -291,12 +291,12 @@ class TestClcaAssorter {
         val contest =  Contest(info, votes, 2000, Ncast=1990)
 
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
-        assertEquals(10/2000.toDouble(), assorter.reportedMargin, doublePrecision)
+        assertEquals(10/2000.toDouble(), assorter.reportedMargin(), doublePrecision)
 
-        val awinnerAvg = margin2mean(assorter.reportedMargin)
+        val awinnerAvg = assorter.reportedMean()
         assertEquals(awinnerAvg, assorter.reportedMean(), doublePrecision)
         val margin = 2.0 * awinnerAvg - 1.0 // reported assorter margin
-        assertEquals(assorter.reportedMargin, margin, doublePrecision)
+        assertEquals(assorter.reportedMargin(), margin, doublePrecision)
 
         assertEquals(1.0, assorter.assort(winnerCvr)) // voted for the winner
         assertEquals(0.0, assorter.assort(loserCvr))  // voted for the loser

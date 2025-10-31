@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 
@@ -34,41 +34,28 @@ interface AssorterIF {
     fun winner(): Int  // candidate id
     fun loser(): Int   // candidate id
     fun reportedMargin(): Double // in (0, 1]
-    fun reportedMean() = margin2mean(reportedMargin())  // in (.5, 1]
+    fun reportedMean(): Double  // in (.5, 1]
 
-    // Calculate the assorter margin for the CVRs containing the given contest, including the phantoms,
-    //    by treating the phantom CVRs as if they contain no valid vote in the contest
-    //    (i.e., the assorter assigns the value 1/2 to phantom CVRs). SHANGRLA section 3.4 p 12.
-    // It is not necessary to adjust the margins to account for those omissions. Rather, it is
-    //    enough to treat only the ballots that the audit attempts to find but cannot find as votes for the losers
-    //    (more generally, in the most pessimistic way) P2Z section 2 p. 3.
+    fun shortName() = "${winner()}/${loser()}"
+    fun winLose() = "${winner()}/${loser()}"
+    fun hashcodeDesc(): String // Used as unique reference, DO NOT CHANGE!
 
-    // This only agrees with reportedMargin when the cvrs are complete with undervotes and phantoms.
-    // Note that we rely on it.hasContest(contestId), assumes undervotes are in the cvr, ie hasStyle = true.
-    fun calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false, show: Boolean= false): Double {
-        return mean2margin(calcAssortAvgFromCvrs(contestId, cvrs, usePhantoms))
-    }
-
-    fun calcAssortAvgFromCvrs(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false): Double {
-        return cvrs.filter{ it.hasContest(contestId) }.map {
-            val av = assort(it, usePhantoms = usePhantoms)
-            av
-        }.average()
-    }
-
+    // used when you need to calculate reportedMargin from some subset of votes
     fun calcReportedMargin(useVotes: Map<Int, Int>, Nc: Int): Double {
         val winnerVotes = useVotes[winner()] ?: 0
         val loserVotes = useVotes[loser()] ?: 0
         return if (Nc == 0) 0.0 else (winnerVotes - loserVotes) / Nc.toDouble()
     }
-
-    fun shortName() = "winner/loser:${winner()}/${loser()}"
-    fun winLose() = "${winner()}/${loser()}"
-    fun hashcodeDesc(): String // Used as unique reference, DO NOT CHANGE!
 }
 
 /** See SHANGRLA, section 2.1, p.4 */
-open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val reportedMargin: Double): AssorterIF {
+open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: Int): AssorterIF {
+    var reportedMean: Double = 0.0
+
+    fun setReportedMean(mean: Double): PluralityAssorter {
+        this.reportedMean = mean
+        return this
+    }
 
     // If a ballot cannot be found (because the manifest is wrong—either because it lists a ballot that is not there, or
     //   because it does not list all the ballots), pretend that the audit actually finds a ballot, an evil zombie
@@ -87,11 +74,12 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     }
 
     override fun upperBound() = 1.0
-    override fun desc() = " winner=$winner loser=$loser reportedMargin=${df(reportedMargin)} reportedMean=${df(margin2mean(reportedMargin))}"
+    override fun desc() = " winner=$winner loser=$loser reportedMargin=${dfn(reportedMargin(), 8)} reportedMean=${dfn(reportedMean, 8)}"
     override fun hashcodeDesc() = "${winLose()} ${info.hashCode()}" // must be unique for serialization
     override fun winner() = winner
     override fun loser() = loser
-    override fun reportedMargin() = reportedMargin
+    override fun reportedMargin() = mean2margin(reportedMean)
+    override fun reportedMean() = reportedMean
 
     override fun toString(): String = desc()
     override fun equals(other: Any?): Boolean {
@@ -102,7 +90,7 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
 
         if (winner != other.winner) return false
         if (loser != other.loser) return false
-        if (reportedMargin != other.reportedMargin) return false
+        if (reportedMean != other.reportedMean) return false
         if (info != other.info) return false
 
         return true
@@ -111,7 +99,7 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     override fun hashCode(): Int {
         var result = winner
         result = 31 * result + loser
-        result = 31 * result + reportedMargin.hashCode()
+        result = 31 * result + reportedMean.hashCode()
         result = 31 * result + info.hashCode()
         return result
     }
@@ -121,26 +109,21 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
             val useVotes = votes ?: (contest as Contest).votes
             val winnerVotes = useVotes[winner] ?: 0
             val loserVotes = useVotes[loser] ?: 0
-            val reportedMargin = (winnerVotes - loserVotes) / contest.Nc().toDouble()
-            return PluralityAssorter(contest.info(), winner, loser, reportedMargin)
+            val reportedMean = margin2mean((winnerVotes - loserVotes) / contest.Nc().toDouble())
+            return PluralityAssorter(contest.info(), winner, loser).setReportedMean(reportedMean)
         }
     }
 }
 
-// TODO does SuperMajorityAssorter algorithm work for voteForN > 1 ?
-//             assorter=Assorter(
-//                contest=contest,
-//                assort=lambda c, contest_id=contest.id: (
-//                    CVR.as_vote(c.get_vote_for(contest.id, winner))
-//                    / (2 * contest.share_to_win)
-//                    if c.has_one_vote(contest.id, cands)
-//                    else 1 / 2
-//                ),
-//                upper_bound=1 / (2 * contest.share_to_win),
-
 /** See SHANGRLA, section 2.3, p.5. */
-data class SuperMajorityAssorter(val info: ContestInfo, val winner: Int, val minFraction: Double, val reportedMargin: Double): AssorterIF {
+data class SuperMajorityAssorter(val info: ContestInfo, val candId: Int, val minFraction: Double): AssorterIF {
     private val upperBound = 0.5 / minFraction // 1/2f  in (.5, Inf)
+    var reportedMean: Double = 0.0
+
+    fun setReportedMean(mean: Double): SuperMajorityAssorter {
+        this.reportedMean = mean
+        return this
+    }
 
     init {
         require (minFraction > 0.0  && minFraction < 1.0)
@@ -150,16 +133,21 @@ data class SuperMajorityAssorter(val info: ContestInfo, val winner: Int, val min
     override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(info.id)) return 0.5
         if (usePhantoms && mvr.phantom) return 0.0 // valid vote for every loser
-        val w = mvr.hasMarkFor(info.id, winner)
+        val w = mvr.hasMarkFor(info.id, candId)
         return if (mvr.hasOneVote(info.id, info.candidateIds)) (w / (2 * minFraction)) else .5
     }
 
     override fun upperBound() = upperBound
-    override fun desc() = "SuperMajorityAssorter winner=$winner minFraction=$minFraction"
-    override fun hashcodeDesc() = "winner=$winner minFraction=$minFraction ${info.hashCode()}" // must be unique for serialization
-    override fun winner() = winner
-    override fun loser() = -1 // everyone else is a loser
-    override fun reportedMargin() = reportedMargin
+    override fun desc() = "SuperMajorityAssorter winner=$candId minFraction=$minFraction"
+    override fun hashcodeDesc() = "winner=$candId minFraction=$minFraction ${info.hashCode()}" // must be unique for serialization
+    override fun winner() = candId
+    override fun loser() = -1
+    override fun reportedMargin() = mean2margin(reportedMean)
+    override fun reportedMean() = reportedMean
+
+    override fun toString(): String {
+        return "SuperMajorityAssorter(candId=$candId, minFraction=$minFraction, reportedMargin=${reportedMargin()}, upperBound=$upperBound)"
+    }
 
     companion object {
         fun makeWithVotes(contest: ContestIF, winner: Int, minFraction: Double, votes: Map<Int, Int>?=null): SuperMajorityAssorter {
@@ -170,8 +158,7 @@ data class SuperMajorityAssorter(val info: ContestInfo, val winner: Int, val min
 
             val weight = 1 / (2 * minFraction)
             val mean =  (winnerVotes * weight + nuetralVotes * 0.5) / contest.Nc().toDouble()
-            val reportedMargin = mean2margin(mean)
-            return SuperMajorityAssorter(contest.info(), winner, minFraction, reportedMargin)
+            return SuperMajorityAssorter(contest.info(), winner, minFraction).setReportedMean(mean)
         }
     }
 }

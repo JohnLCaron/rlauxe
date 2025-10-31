@@ -175,7 +175,7 @@ class ClcaNoErrorIterator(
 class OneAuditNoErrorIterator(
     val contestId: Int,
     val contestNc: Int,
-    val sampleLimit: Int,
+    val contestSampleCutoff: Int?,
     val cassorter: ClcaAssorter,
     cvrIter: Iterator<Cvr>,
 ): Sampler, Iterator<Double> {
@@ -187,7 +187,7 @@ class OneAuditNoErrorIterator(
     private var done = false
 
     init {
-        while ((sampleLimit == -1 || cvrs.size < sampleLimit) && cvrIter.hasNext()) {
+        while ((contestSampleCutoff == null || cvrs.size < contestSampleCutoff) && cvrIter.hasNext()) {
             val cvr = cvrIter.next()
             if (cvr.hasContest(contestId)) cvrs.add(cvr)
         }

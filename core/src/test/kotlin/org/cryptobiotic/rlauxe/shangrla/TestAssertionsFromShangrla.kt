@@ -121,7 +121,7 @@ class TestAssertionsFromShangrla {
         val info = ContestInfo(
             name = "ABCs",
             id = 0,
-            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
             candidateNames = listToMap( "Alice", "Bob", "Candy"),
             minFraction = 2.0 / 3.0,
         )

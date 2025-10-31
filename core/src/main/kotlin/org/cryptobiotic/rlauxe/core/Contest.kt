@@ -7,7 +7,14 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.min
 
-enum class SocialChoiceFunction { PLURALITY, APPROVAL, SUPERMAJORITY, IRV, DHONDT }
+// For a Contest. Assertions may be different.
+enum class SocialChoiceFunction(val hasMinPct: Boolean) {
+    PLURALITY(false),
+    APPROVAL(false),
+    THRESHOLD(true),
+    IRV(false),
+    DHONDT(true)
+}
 
 /** pre-election information **/
 data class ContestInfo(
@@ -26,12 +33,9 @@ data class ContestInfo(
     val candidateIdToName: Map<Int, String> by lazy { candidateNames.entries.associate {(k,v) -> v to k } }
 
     init {
-        if (choiceFunction == SocialChoiceFunction.SUPERMAJORITY) {
-            require((nwinners == 1 && voteForN == 1)) { "SUPERMAJORITY must have nwinners == 1, and voteForN == 1" }
-        }
-        require(choiceFunction != SocialChoiceFunction.SUPERMAJORITY || minFraction != null) { "SUPERMAJORITY requires minFraction"}
-        require(choiceFunction == SocialChoiceFunction.SUPERMAJORITY || choiceFunction == SocialChoiceFunction.DHONDT || minFraction == null) { "only SUPERMAJORITY, DHONDT can have minFraction"}
-        require(minFraction == null || minFraction in (0.0..1.0)) { "minFraction between 0 and 1"}
+        if (choiceFunction.hasMinPct) require(minFraction != null) { "$choiceFunction requires minFraction"}
+        if (!choiceFunction.hasMinPct)  require(minFraction == null) { "$choiceFunction may not have minFraction"}
+        if (minFraction != null) require(minFraction in (0.0..1.0)) { "minFraction must be between 0 and 1"}
         if (choiceFunction != SocialChoiceFunction.DHONDT) require(nwinners in (1..candidateNames.size)) { "nwinners between 1 and candidateNames.size"}
         require(voteForN in (1..candidateNames.size)) { "voteForN between 1 and candidateNames.size"}
 
@@ -80,8 +84,9 @@ interface ContestIF {
     fun isIrv() = choiceFunction == SocialChoiceFunction.IRV
     fun show() : String = toString()
     fun showCandidates(): String
-    fun recountMargin(assertion: Assertion): Double
-    fun showAssertionDiff(assertion: Assertion?): String
+
+    fun recountMargin(assorter: AssorterIF): Double
+    fun showAssertionDifficulty(assorter: AssorterIF): String
 
     fun votes() : Map<Int, Int>? {
         if (this is Contest) return this.votes
@@ -166,7 +171,7 @@ open class Contest(
         undervotes = info.voteForN * Ncast - nvotes   // C1
 
         //// find winners, check that the minimum value is satisfied
-        // This works for PLURALITY, APPROVAL, SUPERMAJORITY.  IRV handled by RaireContest, DHONDT by ContestDHondt
+        // This works for PLURALITY, APPROVAL, THRESHOLD.  IRV handled by RaireContest, DHONDT by ContestDHondt
 
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
         val useMin = info.minFraction ?: 0.0
@@ -208,20 +213,17 @@ open class Contest(
         return VotesAndUndervotes(votes, undervotes, info.voteForN)
     }
 
-    override fun recountMargin(assertion: Assertion): Double {
-        val votes = votes()!!
-        val winner = votes[assertion.assorter.winner()]!!
-        val loser = votes[assertion.assorter.loser()]!!
+    override fun recountMargin(assorter: AssorterIF): Double  {
+        val winner = votes[assorter.winner()]!!
+        val loser = votes[assorter.loser()]!!
         return (winner - loser) / (winner.toDouble())
     }
 
-    override fun showAssertionDiff(assertion: Assertion?): String {
-        if (assertion == null) return ""
+    override fun showAssertionDifficulty(assorter: AssorterIF): String {
         val votes = votes()!!
-        val winner = votes[assertion.assorter.winner()]!!
-        val loser = votes[assertion.assorter.loser()]!!
-        val recountMargin = (winner - loser) / (winner.toDouble())
-        return "winner=$winner loser=$loser diff=${winner-loser} recountMargin=$recountMargin"
+        val winner = votes[assorter.winner()]!!
+        val loser = votes[assorter.loser()]!!
+        return "${assorter.shortName()} votes=$winner/$loser diff=${winner-loser} (w-l)/w =${recountMargin(assorter)}"
     }
 
     override fun show() = buildString {
@@ -294,7 +296,6 @@ open class ContestUnderAudit(
     val ncandidates = contest.ncandidates
     val Nc = contest.Nc()
     val Np = contest.Np()
-    val Nu = contest.Nundervotes()
     val isIrv = contest.info().isIrv
 
     var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms
@@ -321,18 +322,16 @@ open class ContestUnderAudit(
         pollingAssertions = assertions
     }
 
-    // TODO rename to primitive assertions ??
     private fun makePollingAssertions(): List<Assertion> {
         val useVotes = when (contest) {
             is Contest -> contest.votes
-            // is OneAuditContest -> (contest.contest as Contest).votes
             else -> throw RuntimeException("contest type ${contest.javaClass.name} is not supported")
         }
 
         return when (choiceFunction) {
             SocialChoiceFunction.APPROVAL,
             SocialChoiceFunction.PLURALITY -> makePluralityAssertions(useVotes)
-            SocialChoiceFunction.SUPERMAJORITY -> makeSuperMajorityAssertions(useVotes)
+            SocialChoiceFunction.THRESHOLD -> makeThresholdAssertions(useVotes)
             else -> throw RuntimeException("choice function ${choiceFunction} is not supported")
         }
     }
@@ -349,12 +348,12 @@ open class ContestUnderAudit(
         return assertions
     }
 
-    private fun makeSuperMajorityAssertions(votes: Map<Int, Int>): List<Assertion> {
+    private fun makeThresholdAssertions(votes: Map<Int, Int>): List<Assertion> {
         require(contest.info().minFraction != null)
         // each winner generates 1 assertion. SHANGRLA 2.3
         val assertions = mutableListOf<Assertion>()
-        contest.winners().forEach { winner ->
-            val assorter = SuperMajorityAssorter.makeWithVotes(contest, winner, contest.info().minFraction!!, votes)
+        contest.winners().forEach { candId ->
+            val assorter = SuperMajorityAssorter.makeWithVotes(contest, candId, contest.info().minFraction!!, votes)
             assertions.add(Assertion(contest.info(), assorter))
         }
         return assertions
@@ -399,25 +398,21 @@ open class ContestUnderAudit(
         else (minPollingAssertion()?.assorter?.reportedMargin() ?: 0.0)
     }
 
-    fun recountMargin(): Double {
+    fun minRecountMargin(): Double {
         val minAssertion: Assertion = minAssertion() ?: return -1.0
-        return contest.recountMargin(minAssertion)
+        return contest.recountMargin(minAssertion.assorter)
+    }
+
+    fun minAssertionDificulty(): String {
+        val minAssertion: Assertion = minAssertion() ?: return "N/A"
+        return contest.showAssertionDifficulty(minAssertion.assorter)
     }
 
     override fun toString() = contest.toString()
 
     open fun show() = buildString {
         appendLine("${contest.javaClass.simpleName} ${contest.show()}")
-        appendLine("   ${contest.showAssertionDiff(minAssertion())}")
-        append(contest.showCandidates())
-    }
-
-    fun showOld() = buildString {
-        val vunder = if (contest is Contest) contest.votesAndUndervotes() else null
-        val sumVotes = if (contest is Contest) contest.votes()!!.map{ it.value }.sum() else 0
-        appendLine("${contest.javaClass.simpleName} '$name' ($id) $choiceFunction voteForN=${contest.info().voteForN} ${vunder}")
-        appendLine(" winners=${contest.winners()} minMargin=${df(minMargin())} recountMargin=${df(recountMargin())} Nc=$Nc Np=$Np Nu=$Nu, sumVotes=$sumVotes")
-        appendLine()
+        if (minAssertion() != null) appendLine("   ${contest.showAssertionDifficulty(minAssertion()!!.assorter)}")
         append(contest.showCandidates())
     }
 

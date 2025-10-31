@@ -58,7 +58,7 @@ class TestCorlaEstimateSampleSize {
         contestRounds.forEach { contestRound ->
             val cn = contestRound.Nc
             val estSizes = mutableListOf<Int>()
-            val cvrs = ContestSimulation.makeContestWithLimits(contestRound.contestUA.contest as Contest, auditConfig.sampleLimit).makeCvrs()
+            val cvrs = ContestSimulation.makeContestWithLimits(contestRound.contestUA.contest as Contest, auditConfig.contestSampleCutoff).makeCvrs()
             val sampleSizes = contestRound.assertionRounds.map { assertRound ->
                 val result = simulateSampleSizeClcaAssorter(1, auditConfig, contestRound.contestUA, cvrs, assertRound)
                 val simSize = result.findQuantile(auditConfig.quantile)

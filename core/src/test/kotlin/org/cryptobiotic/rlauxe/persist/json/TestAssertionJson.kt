@@ -73,7 +73,7 @@ class TestAssertionJson {
         val info = ContestInfo(
             name = "AvB",
             id = 0,
-            choiceFunction = SocialChoiceFunction.SUPERMAJORITY,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
             candidateNames = listToMap("A", "B", "C"),
             minFraction = .67
         )

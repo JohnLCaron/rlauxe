@@ -133,7 +133,7 @@ class TestAssorterSuperMajority {
         )
         val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc=100, Ncast=100)
 
-        val assorter = TresholdAssorter.makeFromVotes(info, 1, contest.votes, f, contest.Nc)
+        val assorter = OverThreshold.makeFromVotes(info, 1, contest.votes, f, contest.Nc)
         assertEquals(1, assorter.winner())
         assertEquals(-1, assorter.loser())
 

@@ -88,7 +88,7 @@ class TestSampler {
     fun testOneAuditNoErrorIterator() {
         val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasStyle=false, true)
 
-        val target = OneAuditNoErrorIterator(0, cvrs.size, -1,cassorter, cvrs.iterator())
+        val target = OneAuditNoErrorIterator(0, cvrs.size, null, cassorter, cvrs.iterator())
 
         var count = 0
         while (target.hasNext()) {

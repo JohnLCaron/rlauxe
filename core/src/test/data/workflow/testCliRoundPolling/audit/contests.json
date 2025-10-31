@@ -16,11 +16,11 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "0": 7163,
-                    "1": 6461
+                    "1": 5992,
+                    "0": 5288
                 },
-                "Nc": 14076,
-                "Ncast": 14062
+                "Nc": 15837,
+                "Ncast": 15835
             },
             "isComparison": true,
             "hasStyle": true,
@@ -29,9 +29,9 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMargin": 0.049872122762148335,
-                        "winner": 0,
-                        "loser": 1
+                        "reportedMean": 0.5222264317736945,
+                        "winner": 1,
+                        "loser": 0
                     }
                 }
             ],
@@ -41,9 +41,9 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMargin": 0.049872122762148335,
-                            "winner": 0,
-                            "loser": 1
+                            "reportedMean": 0.5222264317736945,
+                            "winner": 1,
+                            "loser": 0
                         },
                         "hasStyle": true
                     }
@@ -57,7 +57,9 @@
                 "id": 1,
                 "candidateNames": {
                     "cand0": 0,
-                    "cand1": 1
+                    "cand1": 1,
+                    "cand2": 2,
+                    "cand3": 3
                 },
                 "choiceFunction": "PLURALITY",
                 "nwinners": 1,
@@ -67,11 +69,13 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "0": 2439,
-                    "1": 2091
+                    "1": 4793,
+                    "2": 4247,
+                    "3": 2103,
+                    "0": 434
                 },
-                "Nc": 5948,
-                "Ncast": 5938
+                "Nc": 11930,
+                "Ncast": 11923
             },
             "isComparison": true,
             "hasStyle": true,
@@ -80,9 +84,27 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMargin": 0.05850706119704102,
-                        "winner": 0,
-                        "loser": 1
+                        "reportedMean": 0.6826906957250629,
+                        "winner": 1,
+                        "loser": 0
+                    }
+                },
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.5228834870075441,
+                        "winner": 1,
+                        "loser": 2
+                    }
+                },
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.6127409891031015,
+                        "winner": 1,
+                        "loser": 3
                     }
                 }
             ],
@@ -92,9 +114,33 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMargin": 0.05850706119704102,
-                            "winner": 0,
-                            "loser": 1
+                            "reportedMean": 0.6826906957250629,
+                            "winner": 1,
+                            "loser": 0
+                        },
+                        "hasStyle": true
+                    }
+                },
+                {
+                    "cassorter": {
+                        "className": "ClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMean": 0.5228834870075441,
+                            "winner": 1,
+                            "loser": 2
+                        },
+                        "hasStyle": true
+                    }
+                },
+                {
+                    "cassorter": {
+                        "className": "ClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMean": 0.6127409891031015,
+                            "winner": 1,
+                            "loser": 3
                         },
                         "hasStyle": true
                     }
@@ -103,6 +149,5 @@
             "status": "InProgress"
         }
     ],
-    "rcontestsUnderAudit": [],
-    "oarcontestsUnderAudit": []
+    "rcontestsUnderAudit": []
 }

@@ -14,9 +14,12 @@ data class AuditConfig(
     // simulation control
     val nsimEst: Int = 100, // number of simulation estimations
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
-    val contestSampleCutoff: Int? = null, // remove contests that need more samples than this
+
+    // audit sample size control
+    val contestSampleCutoff: Int? = null, // do not audit contests that need more samples than this
     val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
     val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
+    val auditSampleLimit: Int? = null, // stop auditing when samples exceed this
 
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.previous),

@@ -3,6 +3,7 @@ package org.cryptobiotic.util
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
+import org.cryptobiotic.rlauxe.belgium.createBelgiumElection
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
 import org.cryptobiotic.rlauxe.corla.createColoradoOneAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -126,6 +127,11 @@ class TestGenerateAllUseCases {
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
+    }
+
+    @Test
+    fun createBelgiumElection() {
+        createBelgiumElection("Anvers")
     }
 
 }

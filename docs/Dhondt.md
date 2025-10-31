@@ -80,7 +80,7 @@ t * Sum(Ti) - TA > 0
 aA = (t-1), ai = t for i != A.
 
 so if vote is for A, g = (t-1)
-if vote for not B, r = t
+if vote for not A, r = t
 else 0
 
 lower bound a = (t-1)

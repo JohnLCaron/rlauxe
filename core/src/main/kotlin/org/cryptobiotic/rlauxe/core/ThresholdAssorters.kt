@@ -3,7 +3,15 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.mean2margin
 
-
+// pA < t
+// TA/TL < t
+// TA < t * TL
+// 0 < t * TL - TA
+// 0 < t * Sum(Ti) - TA
+// t * Sum(Ti) - TA > 0
+//( t-1) TA + t * {Ti, i != A}
+//
+//
 // aA = (t-1), ai = t for i != A.
 //
 //so if vote is for A, g = (t-1)
@@ -83,7 +91,18 @@ data class UnderThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     }
 }
 
-
+// pA > t
+// TA/TL > t
+// TA > t * TL
+// TA − t * TL > 0
+// TA − t * Sum(Ti) > 0
+// (1-t) TA - t * {Ti, i != A}
+//
+// aA = (1-t), ai = -t for i != A.
+//
+// g(b) = a1 b1 + a2 b2 + · · · + am bm
+//     = (1-t)*bA + t*sum(bi, i != A)
+//
 // so if vote is for A, g = (1-t)
 //   if vote for not A, r = -t
 //   else 0
@@ -92,13 +111,13 @@ data class UnderThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 //c = -1/2a
 //h = c · g(b) + 1/2 = g/-2a + 1/2 = g/-2a + -a/-2a  =  (g(b) - a)/-2a
 
-data class TresholdAssorter(val info: ContestInfo, val winner: Int, val t: Double): AssorterIF  {
+data class OverThreshold(val info: ContestInfo, val winner: Int, val t: Double): AssorterIF  {
     val lowerg = -t
     val upperg = (1.0 - t)
     val c = -1.0 / (2 * lowerg)  // affine transform h = c * g + 1/2
     var reportedMean: Double = 0.0
 
-    fun setReportedMean(mean: Double): TresholdAssorter {
+    fun setReportedMean(mean: Double): OverThreshold {
         this.reportedMean = mean
         return this
     }
@@ -139,8 +158,8 @@ data class TresholdAssorter(val info: ContestInfo, val winner: Int, val t: Doubl
     override fun reportedMargin() = mean2margin(reportedMean)
 
     companion object {
-        fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int): TresholdAssorter {
-            val result = TresholdAssorter(info, partyId, minFraction)
+        fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int): OverThreshold {
+            val result = OverThreshold(info, partyId, minFraction)
 
             val winnerVotes = votes[partyId] ?: 0
             val otherVotes = votes.filter { it.key != partyId }.values.sum()

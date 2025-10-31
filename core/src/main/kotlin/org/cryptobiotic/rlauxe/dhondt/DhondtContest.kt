@@ -5,8 +5,8 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.core.OverThreshold
 import org.cryptobiotic.rlauxe.core.UnderThreshold
-import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.mean2margin
@@ -30,13 +30,6 @@ data class DhondtCandidate(val name: String, val id: Int, val votes: Int) {
 
         lastSeatWon = results.winners.filter { it.candidate == this.id }.maxOfOrNull { it.divisor }
         firstSeatLost = results.losers.filter { it.candidate == this.id }.minOfOrNull { it.divisor }
-        if (showDetails) println(this)
-    }
-
-    override fun toString(): String {
-        val fw = if (this.lastSeatWon == null) 0.0 else this.votes / this.lastSeatWon!!.toDouble()
-        val fl = if (this.firstSeatLost == null) 0.0 else this.votes / this.firstSeatLost!!.toDouble()
-        return "Party(name='$name' id=$id, votes=$votes, lastSeatWon=$lastSeatWon, firstSeatLost=$firstSeatLost, belowMinPct=$belowMinPct"
     }
 }
 
@@ -93,7 +86,7 @@ data class ProtoContest(val name: String, val id: Int, val parties: List<DhondtC
                         val nseats: Int, val undervotes: Int, val minFraction: Double) {
     val winners = sortedScores.subList(0, nseats)
     val losers = sortedScores.subList(nseats, sortedScores.size)
-    private val assorters = mutableListOf<ProtoAssorter>()
+    private val assorters = mutableListOf<AssorterBuilder>()
 
     val validVotes: Int  = parties.sumOf { it.votes }
     val totalVotes = validVotes + undervotes
@@ -111,9 +104,8 @@ data class ProtoContest(val name: String, val id: Int, val parties: List<DhondtC
             if (winner.lastSeatWon != null) {
                 parties.filter { it.id != winner.id }.forEach { loser ->
                     if (loser.firstSeatLost != null) {
-                        val passorter = ProtoAssorter(this, winner, loser)
+                        val passorter = AssorterBuilder(this, winner, loser)
                         assorters.add(passorter)
-                        if (showDetails) println(passorter.show())
                     }
                 }
             }
@@ -144,7 +136,13 @@ data class ProtoContest(val name: String, val id: Int, val parties: List<DhondtC
             this.sortedScores,
         )
         result.assorters.addAll(assorters.map { it.makeAssorter() })
-        result.belowMinPct.forEach { result.assorters.add( UnderThreshold.makeFromVotes(info, partyId=it, votes, minFraction, useNc))}
+        parties.forEach { party ->
+            if (party.belowMinPct) {
+                result.assorters.add(UnderThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, useNc))
+            } else {
+                result.assorters.add(OverThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, useNc))
+            }
+        }
 
         return result
     }
@@ -157,6 +155,7 @@ class DHondtContest(
     Ncast: Int,             // number of cast ballots containing this Contest, including undervotes
     val sortedScores: List<DhondtScore>,
 ): Contest(info, voteInput, Nc, Ncast) {
+    val nvotes = votes.values.sum()
 
     override fun Nc() = Nc
     override fun Np() = Nc - Ncast
@@ -171,7 +170,6 @@ class DHondtContest(
     val assorters = mutableListOf<AssorterIF>()
 
     init {
-        val nvotes = votes.values.sum()
 
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
         val useMin = info.minFraction ?: 0.0
@@ -202,7 +200,11 @@ class DHondtContest(
                 (winnerScore - loserScore) / winnerScore
             }
             is UnderThreshold -> {
-                assorter.t - votes[assorter.winner()]!! / Nc.toDouble()
+                assorter.t - votes[assorter.winner()]!! / nvotes.toDouble()
+            }
+
+            is OverThreshold -> {
+                votes[assorter.winner()]!! / nvotes.toDouble() - assorter.t
             }
             else -> throw RuntimeException()
         }
@@ -215,13 +217,19 @@ class DHondtContest(
                 val loserScore = votes[assorter.loser()]!! / assorter.firstSeatLost.toDouble()
                 val recountMargin = (winnerScore - loserScore) / winnerScore
                 "DHondt ${assorter.shortName()} votes=${dfn(winnerScore, 1)}/${dfn(loserScore, 1)}" +
-                        "diff=${dfn(winnerScore - loserScore, 1)} (w-l)/w =${dfn(recountMargin, 5)}"
+                        " diff=${dfn(winnerScore - loserScore, 1)} (w-l)/w =${dfn(recountMargin, 5)}"
             }
             is UnderThreshold -> {
                 val votesFor = votes[assorter.winner()]!!
-                val pct = 100.0 * votesFor / Nc.toDouble()
+                val pct = 100.0 * votesFor / nvotes
                 val diff= 100.0 * assorter.t - pct
                 "UnderThreshold cand=${assorter.winner()} votesFor=$votesFor pct=${dfn(pct, 4)} diff=${dfn(diff, 6)} %"
+            }
+            is OverThreshold -> {
+                val votesFor = votes[assorter.winner()]!!
+                val pct = 100.0 * votesFor / nvotes
+                val diff= pct - 100.0 * assorter.t
+                "OverThreshold cand=${assorter.winner()} votesFor=$votesFor pct=${dfn(pct, 4)} diff=${dfn(diff, 6)} %"
             }
             else -> throw RuntimeException()
         }
@@ -313,7 +321,7 @@ class DHondtContest(
     class Dround(val candId: Int, val score: Double, val round: Int, val winningSeat: Int?)
 }
 
-private data class ProtoAssorter(val contest: ProtoContest, val winner: DhondtCandidate, val loser: DhondtCandidate) {
+private data class AssorterBuilder(val contest: ProtoContest, val winner: DhondtCandidate, val loser: DhondtCandidate) {
     // Let f_e,s = Te/d(s) for entity e and seat s
     // f_A,WA > f_B,LB, so e = A and s = Wa
 
@@ -326,49 +334,8 @@ private data class ProtoAssorter(val contest: ProtoContest, val winner: DhondtCa
     val c = -1.0 / (2 * lower)  // affine transform h = c * g + 1/2
     val hmean = h(gmean)
 
-    fun g(partyVote: Int): Double {
-        return if (partyVote == winner.id) 1.0 / winner.lastSeatWon!!
-        else if (partyVote == loser.id) -1.0 / loser.firstSeatLost!!
-        else 0.0
-    }
-
-    // h(b) = c · g(b) + 1/2
-    fun h(partyVote: Int): Double {
-        return c * g(partyVote) + 0.5
-    }
-
     fun h(g: Double): Double {
         return c * g + 0.5
-    }
-
-    fun show() = buildString {
-        append("(${winner.id}/${loser.id}): fw/fl=${dfn(fw,1)}/${dfn(fl, 1)} ")
-        appendLine("gmean=${df(gmean)} hmean=${df(h(gmean))} contest.totalVotes=${contest.totalVotes}")
-    }
-
-    fun getAssortAvg(undervotes: Int): Pair<Welford, Welford> {
-        val gavg = Welford()
-        val havg = Welford()
-        contest.parties.forEach { party ->
-            repeat(party.votes) {
-                // println("  (${winner.id}/${loser.id}) voteFor= ${party.id} g=${g(party.id)} h=${h(party.id)}")
-                gavg.update(g(party.id))
-                havg.update(h(party.id))
-            }
-        }
-        repeat(undervotes) {
-            // println("  (${winner.id}/${loser.id}) voteFor= ${party.id} g=${g(party.id)} h=${h(party.id)}")
-            gavg.update(g(-99))
-            havg.update(h(-99))
-        }
-        return Pair(gavg, havg)
-    }
-
-    fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
-        if (!mvr.hasContest(contest.id)) return 0.5
-        if (usePhantoms && mvr.phantom) return 0.0 // worst case
-        val cands = mvr.votes[contest.id]!!
-        return if (cands.size == 1) h(cands.first()) else 0.5
     }
 
     fun makeAssorter() = DHondtAssorter(

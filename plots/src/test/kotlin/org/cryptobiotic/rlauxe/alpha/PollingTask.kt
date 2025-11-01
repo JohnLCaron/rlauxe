@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.audit.Sampler
 import org.cryptobiotic.rlauxe.audit.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.concur.RepeatedTask
+import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.math.max
 
 data class PollingTask(
@@ -52,7 +53,7 @@ data class PollingTask(
     }
 
     override fun makeTestParameters(): Map<String, Double> {
-        return mapOf("eta0" to eta0, "d" to d.toDouble())
+        return mapOf("eta0" to eta0, "d" to d.toDouble(), "margin" to mean2margin(reportedMean()))
     }
 
     // override fun maxSamples(): Int  = N

@@ -17,7 +17,6 @@ fun runTestRepeated(
     testParameters: Map<String, Double>,
     terminateOnNullReject: Boolean = true,
     startingTestStatistic: Double = 1.0,
-    margin: Double?,
     Nc:Int, // maximum cards in the contest
 ): RunTestRepeatedResult {
     var totalSamplesNeeded = 0
@@ -28,7 +27,7 @@ fun runTestRepeated(
     val sampleCounts = mutableListOf<Int>()
 
     repeat(ntrials) {
-        if (it != 0) drawSample.reset() // TODO this is supposed to create all the variation for the estimation
+        if (it != 0) drawSample.reset() // this creates all the variation for the estimation
         val testH0Result = testFn.testH0(
             maxSamples=drawSample.maxSamples(),
             terminateOnNullReject=terminateOnNullReject,
@@ -47,8 +46,6 @@ fun runTestRepeated(
             totalSamplesNeeded += testH0Result.sampleCount
             welford.update(testH0Result.sampleCount.toDouble()) // just to keep the stddev
 
-            // sampleCount was what percent of N? keep 10% histogram bins. TODO remove
-            ceilDiv(100 * testH0Result.sampleCount, Nc) // percent, rounded up
             sampleCounts.add(testH0Result.sampleCount)
         }
         if (showH0Result) println(" $it $testH0Result")
@@ -56,7 +53,7 @@ fun runTestRepeated(
 
     val (_, variance, _) = welford.result()
     return RunTestRepeatedResult(testParameters=testParameters, Nc=Nc, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
-        ntrials=ntrials, variance=variance, statusMap, sampleCounts, margin = margin)
+        ntrials=ntrials, variance=variance, statusMap, sampleCounts) // , margin = margin)
 }
 
 data class RunTestRepeatedResult(
@@ -66,10 +63,8 @@ data class RunTestRepeatedResult(
     val nsuccess: Int,           // number of successful trials
     val ntrials: Int,            // total number of trials
     val variance: Double,        // variance over ntrials of samples needed
-    // val percentHist: Deciles? = null, // TODO remove?
     val status: Map<TestH0Status, Int>? = null, // count of the trial status
     val sampleCount: List<Int> = emptyList(),
-    val margin: Double?, // TODO needed?
 ) {
 
     fun successPct(): Double = 100.0 * nsuccess / (if (ntrials == 0) 1 else ntrials)

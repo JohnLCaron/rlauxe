@@ -17,12 +17,12 @@ class TestSrt {
                 mapOf("d" to 99.0, "eta0" to 77.0, "eta0Factor" to 1.1),
                 123, 234, 456, 0.009)
 
-        val testFile = "/home/stormy/rla/testSrt/testWriteRead.csv"
-        val writer = SRTcsvWriter(testFile)
+        val tempFile = kotlin.io.path.createTempFile().toString()
+        val writer = SRTcsvWriter(tempFile)
         writer.writeCalculations(listOf(target))
         writer.close()
 
-        val reader = SRTcsvReader(testFile)
+        val reader = SRTcsvReader(tempFile)
         val srts = reader.readCalculations()
 
         assertEquals(1, srts.size)
@@ -45,20 +45,18 @@ class TestSrt {
         //               val variance: Double,        // variance over ntrials of samples needed
         //               val percentHist: Deciles? = null, // histogram of successful sample size as percentage of N, count trials in 10% bins
         //               val status: Map<TestH0Status, Int>? = null, // count of the trial status
-        val parameters = mapOf("p1" to .01, "p2" to .001, "lam" to 1.1)
-        val betta = RunTestRepeatedResult(parameters, Nc=43, totalSamplesNeeded=112, nsuccess=12,
-            ntrials=ntrials, variance=11.5, status, margin = .04,
-        )
+        val parameters = mapOf("p1" to .01, "p2" to .001, "lam" to 1.1, "margin" to .04)
+        val betta = RunTestRepeatedResult(parameters, Nc=43, totalSamplesNeeded=112, nsuccess=12, ntrials=ntrials, variance=11.5, status)
 
         // N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0
         val target = betta.makeSRT(reportedMean=.52, reportedMeanDiff=.005)
 
-        val testFile = "/home/stormy/rla/testSrt/testWriteReadBetaResult.csv"
-        val writer = SRTcsvWriter(testFile)
+        val tempFile = kotlin.io.path.createTempFile().toString()
+        val writer = SRTcsvWriter(tempFile)
         writer.writeCalculations(listOf(target))
         writer.close()
 
-        val reader = SRTcsvReader(testFile)
+        val reader = SRTcsvReader(tempFile)
         val srts = reader.readCalculations()
 
         assertEquals(1, srts.size)
@@ -75,12 +73,12 @@ class TestSrt {
                 mapOf("d" to 99.0, "eta0" to 77.0, "eta0Factor" to 1.1),
                 123, 234, 456, 0.009)
 
-        val testFile = "/home/stormy/rla/testSrt/testWriteRead1.csv"
-        val writer = SRTcsvWriterVersion1(testFile)
+        val tempFile = kotlin.io.path.createTempFile().toString()
+        val writer = SRTcsvWriterVersion1(tempFile)
         writer.writeCalculations(listOf(target))
         writer.close()
 
-        val reader = SRTcsvReaderVersion1(testFile)
+        val reader = SRTcsvReaderVersion1(tempFile)
         val srts = reader.readCalculations()
 
         assertEquals(1, srts.size)
@@ -97,12 +95,12 @@ class TestSrt {
                 mapOf("d" to 99.0, "eta0" to 77.0, "eta0Factor" to 1.1),
                 123, 234, 456, 0.009)
 
-        val testFile = "/home/stormy/rla/testSrt/testNullHistogram.csv"
-        val writer = SRTcsvWriter(testFile)
+        val tempFile = kotlin.io.path.createTempFile().toString()
+        val writer = SRTcsvWriter(tempFile)
         writer.writeCalculations(listOf(target))
         writer.close()
 
-        val reader = SRTcsvReader(testFile)
+        val reader = SRTcsvReader(tempFile)
         val srts = reader.readCalculations()
 
         assertEquals(1, srts.size)

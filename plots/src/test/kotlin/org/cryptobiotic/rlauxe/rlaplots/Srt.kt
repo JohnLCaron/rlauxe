@@ -72,7 +72,7 @@ data class SRT(val Nc: Int,
 fun RunTestRepeatedResult.makeSRT(reportedMean: Double, reportedMeanDiff: Double): SRT {
     return SRT(
         this.Nc,
-        this.margin ?: mean2margin(reportedMean),
+        this.testParameters["margin"] ?: mean2margin(reportedMean),
         reportedMeanDiff,
         this.testParameters,
         this.nsuccess, this.ntrials, this.totalSamplesNeeded,

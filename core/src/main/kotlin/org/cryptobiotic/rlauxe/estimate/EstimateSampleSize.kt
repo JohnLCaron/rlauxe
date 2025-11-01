@@ -286,7 +286,7 @@ fun simulateSampleSizeClcaAssorter(
         auditConfig,
         sampler,
         bettingFn,
-        cassorter.assorter().reportedMargin(),
+        // cassorter.assorter().reportedMargin(),
         cassorter.noerror(),
         cassorter.upperBound(),
         contest.Nc(),
@@ -311,7 +311,7 @@ fun simulateSampleSizeBettingMart(
     auditConfig: AuditConfig,
     sampleFn: Sampler,
     bettingFn: BettingFn,
-    margin: Double,
+    // margin: Double,
     noerror: Double,
     upperBound: Double,
     Nc: Int,
@@ -334,7 +334,7 @@ fun simulateSampleSizeBettingMart(
         testFn = testFn,
         testParameters = moreParameters,
         startingTestStatistic = startingTestStatistic,
-        margin = margin,
+        // margin = margin,
         Nc = Nc,
     )
     return result
@@ -397,7 +397,7 @@ fun simulateSampleSizeAlphaMart(
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
-    val margin = mean2margin(eta0)
+    // val margin = mean2margin(eta0)
 
     val useEstimFn = estimFn ?: TruncShrinkage(
         N = Nc,
@@ -419,7 +419,7 @@ fun simulateSampleSizeAlphaMart(
         testFn = testFn,
         testParameters = mapOf("ntrials" to auditConfig.nsimEst.toDouble(), "polling" to 1.0) + moreParameters,
         startingTestStatistic = startingTestStatistic,
-        margin = margin,
+        // margin = margin,
         Nc = Nc,
     )
     return result
@@ -459,7 +459,7 @@ fun simulateSampleSizeOneAuditAssorter(
             auditConfig,
             sampler,
             bettingFn,
-            oaCassorter.assorter().reportedMargin(),
+            // oaCassorter.assorter().reportedMargin(),
             oaCassorter.noerror(),
             oaCassorter.upperBound(),
             contestUA.Nc,

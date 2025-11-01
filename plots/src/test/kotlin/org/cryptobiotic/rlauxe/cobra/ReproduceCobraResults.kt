@@ -12,6 +12,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.audit.makeClcaNoErrorSampler
 import org.cryptobiotic.rlauxe.makeStandardContest
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
+import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.showDeciles
 import kotlin.math.ln
 import kotlin.test.Test
@@ -51,8 +52,8 @@ class ReproduceCobraResults {
                     // maxSamples = N,
                     ntrials = ntrials,
                     testFn = betting,
-                    testParameters = mapOf("alpha" to alpha),
-                    margin = margin,
+                    testParameters = mapOf("alpha" to alpha, "margin" to margin),
+                    // margin = margin,
                     Nc=N,
                     )
                 println("  result = ${result.status} ${result.avgSamplesNeeded()}")
@@ -106,8 +107,8 @@ class ReproduceCobraResults {
                     // maxSamples = N,
                     ntrials = ntrials,
                     testFn = betting,
-                    testParameters = mapOf("p2" to p2),
-                    margin = margin,
+                    testParameters = mapOf("p2" to p2, "margin" to margin),
+                    // margin = margin,
                     Nc=N,
                     )
                 println("  result = ${result.avgSamplesNeeded()} ${showDeciles(result.sampleCount)}")
@@ -175,8 +176,8 @@ class ReproduceCobraResults {
                             // maxSamples = N,
                             ntrials = ntrials,
                             testFn = betting,
-                            testParameters = mapOf("p1" to p1, "p2" to p2),
-                            margin = margin,
+                            testParameters = mapOf("p1" to p1, "p2" to p2, "margin" to margin),
+                            // margin = margin,
                             Nc=N,
                             )
                         println("  result = ${result.avgSamplesNeeded()} ${showDeciles(result.sampleCount)}")
@@ -259,8 +260,8 @@ class ReproduceCobraResults {
                             // maxSamples = N,
                             ntrials = ntrials,
                             testFn = betting,
-                            testParameters = mapOf("p1" to p1o, "p2" to p2o),
-                            margin = margin,
+                            testParameters = mapOf("p1" to p1o, "p2" to p2o, "margin" to margin),
+                            // margin = margin,
                             Nc=N,
                             )
                         println("  result = ${result.avgSamplesNeeded()} dist: ${showDeciles(result.sampleCount)}")

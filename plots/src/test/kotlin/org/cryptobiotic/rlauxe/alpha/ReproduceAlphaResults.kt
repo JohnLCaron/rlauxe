@@ -150,8 +150,8 @@ class ReproduceAlphaResults {
                             // maxSamples = N,
                             ntrials = reps,
                             testFn = alpha,
-                            testParameters = mapOf("eta0" to eta0, "d" to d.toDouble()),
-                            margin = mean2margin(eta0),
+                            testParameters = mapOf("eta0" to eta0, "d" to d.toDouble(), "margin" to mean2margin(eta0)),
+                            // margin = mean2margin(eta0),
                             Nc=N,
                         )
                         println("  avgSamplesNeeded = ${result.avgSamplesNeeded()}")
@@ -508,7 +508,7 @@ class ReproduceAlphaResults {
         plotSRS(srs, title, true, colf = "%6.3f", rowf = "%6.0f",
             colFld = { srt: SRT -> srt.reportedMean },
             rowFld = { srt: SRT -> srt.Nc.toDouble() },
-            fld = { srt: SRT -> srt.nsamples.toDouble() }
+            fld = { srt: SRT -> srt.nsamples }
         )
 
         val titlePct = " pct nsamples, ballot comparison, eta0=compareUpper, d = $d, error-free\n theta (col) vs N (row)"

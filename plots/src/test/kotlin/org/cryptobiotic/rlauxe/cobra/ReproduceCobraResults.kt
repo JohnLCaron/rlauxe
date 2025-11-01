@@ -5,12 +5,13 @@ import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.doublePrecision
-import org.cryptobiotic.rlauxe.makeStandardComparisonAssorter
 import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.estimate.ClcaAttackSampler
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.audit.makeClcaNoErrorSampler
+import org.cryptobiotic.rlauxe.makeStandardContest
+import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
 import org.cryptobiotic.rlauxe.util.showDeciles
 import kotlin.math.ln
 import kotlin.test.Test
@@ -393,3 +394,7 @@ fun optimal_comparison(alpha: Double, u: Double, rate_error_2: Double = 1e-4): D
     val size = -ln(alpha) / ln(bet)
     return size
 }
+
+// deprecated
+private fun makeStandardComparisonAssorter(avgCvrAssortValue: Double, Nc: Int) =
+    ClcaAssorter(makeStandardContest(Nc).info, makeStandardPluralityAssorter(Nc), check=false)

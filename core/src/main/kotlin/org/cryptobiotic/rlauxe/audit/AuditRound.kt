@@ -11,7 +11,6 @@ data class AuditRound(
     var auditWasDone: Boolean = false,
     var auditIsComplete: Boolean = false,
     var samplePrns: List<Long>, // card prns to sample for this round
-    var sampledBorc: List<AuditableCard> = emptyList(), // ballots to sample for this round TODO not used ?
     var nmvrs: Int = 0,
     var newmvrs: Int = 0,
     var auditorWantNewMvrs: Int = -1,
@@ -22,7 +21,7 @@ data class AuditRound(
 
     fun createNextRound() : AuditRound {
         val nextContests = contestRounds.filter { !it.status.complete }.map{ it.createNextRound() }
-        return AuditRound(roundIdx + 1, nextContests, samplePrns = emptyList(), sampledBorc = emptyList())
+        return AuditRound(roundIdx + 1, nextContests, samplePrns = emptyList())
     }
 
     //// called from viewer
@@ -35,13 +34,13 @@ data class AuditRound(
         }
         return result
     }
-
 }
 
 fun List<AuditRound>.previousSamples(currentRoundIdx: Int): Set<Long> {
     val result = mutableSetOf<Long>()
     this.filter { it.roundIdx < currentRoundIdx }.forEach { auditRound ->
-        result.addAll(auditRound.samplePrns.map { it }) // TODO
+        // result.addAll(auditRound.samplePrns.map { it })
+        result.addAll(auditRound.samplePrns)
     }
     return result.toSet()
 }
@@ -161,12 +160,11 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     var status = TestH0Status.InProgress
     var round = 0           // round when set to proved or disproved
 
-    // TODO why override defaults?
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
 
-        other as AssertionRound
+    // TODO why override default equals??
+    /* override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is AssertionRound) return false
 
         if (roundIdx != other.roundIdx) return false
         if (estSampleSize != other.estSampleSize) return false
@@ -192,7 +190,7 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
         result = 31 * result + (auditResult?.hashCode() ?: 0)
         result = 31 * result + status.hashCode()
         return result
-    }
+    } */
 }
 
 data class EstimationRoundResult(

@@ -42,6 +42,8 @@ object RunRliRoundCli {
 }
 
 // Also called from rlaux-viewer
+
+// TODO break into initial estimate and the real run round ?
 fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
     try {
         if (notExists(Path.of(inputDir))) {

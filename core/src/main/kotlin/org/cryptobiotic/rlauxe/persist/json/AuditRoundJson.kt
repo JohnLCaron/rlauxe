@@ -58,7 +58,7 @@ fun AuditRound.publishJson() : AuditRoundJson {
     )
 }
 
-fun AuditRoundJson.import(contestUAs: List<ContestUnderAudit>, sampleNumbers: List<Long>, sampledBorc: List<AuditableCard>): AuditRound {
+fun AuditRoundJson.import(contestUAs: List<ContestUnderAudit>, samplePrns: List<Long>): AuditRound {
     val contestUAmap = contestUAs.associateBy { it.id }
     val contestRounds = this.contestRounds.map {
         it.import( contestUAmap[it.id]!! )
@@ -68,8 +68,7 @@ fun AuditRoundJson.import(contestUAs: List<ContestUnderAudit>, sampleNumbers: Li
         contestRounds,
         this.auditWasDone,
         this.auditIsComplete,
-        sampleNumbers,
-        sampledBorc,
+        samplePrns,
         this.nmvrs,
         this.newmvrs,
         this.auditorWantNewMvrs,
@@ -321,8 +320,7 @@ fun writeAuditRoundJsonFile(AuditRound: AuditRound, filename: String) {
 fun readAuditRoundJsonFile(
     auditRoundFile: String,
     contests: List<ContestUnderAudit>,
-    sampledIndices: List<Long>,
-    sampledBorc: List<AuditableCard>,
+    samplePrns: List<Long>,
 ): Result<AuditRound, ErrorMessages> {
 
     val errs = ErrorMessages("readAuditRoundJsonFile '${auditRoundFile}'")
@@ -335,7 +333,7 @@ fun readAuditRoundJsonFile(
     return try {
         Files.newInputStream(filepath, StandardOpenOption.READ).use { inp ->
             val json = jsonReader.decodeFromStream<AuditRoundJson>(inp)
-            val AuditRound = json.import(contests, sampledIndices, sampledBorc)
+            val AuditRound = json.import(contests, samplePrns)
             if (errs.hasErrors()) Err(errs) else Ok(AuditRound)
         }
     } catch (t: Throwable) {

@@ -19,8 +19,6 @@ private val debugSampleSmall = false
 
 private val logger = KotlinLogging.logger("EstimateSampleSizes")
 
-// TODO: always one contest, always the minimum-margin assertion (?)
-
 ////////////////////////////////////////////////////////////////////////////////////////////
 //// Comparison, Polling, OneAudit.
 

@@ -147,7 +147,6 @@ fun consistentSampling(
     auditRound.nmvrs = sampledCards.size
     auditRound.newmvrs = newMvrs
     auditRound.samplePrns = sampledCards.map { it.prn }
-    auditRound.sampledBorc = sampledCards
 }
 
 // for audits with hasStyles = false
@@ -195,7 +194,6 @@ fun uniformSampling(
     auditRound.nmvrs = nmvrs
     auditRound.newmvrs = newMvrs
     auditRound.samplePrns = sampledCards.map { it.prn }
-    auditRound.sampledBorc = sampledCards
 }
 
 

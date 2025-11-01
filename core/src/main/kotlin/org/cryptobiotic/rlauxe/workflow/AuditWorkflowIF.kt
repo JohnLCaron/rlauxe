@@ -25,7 +25,7 @@ interface AuditWorkflowIF {
         val auditRound = if (previousRound == null) {
             // first time, create the rounds
             val contestRounds = contestsUA().filter { !auditConfig().skipContests.contains(it.id) }.map { ContestRound(it, roundIdx) }
-            AuditRound(roundIdx, contestRounds = contestRounds, samplePrns = emptyList(), sampledBorc = emptyList())
+            AuditRound(roundIdx, contestRounds = contestRounds, samplePrns = emptyList())
         } else {
             // next time, create from previous round
             previousRound.createNextRound()

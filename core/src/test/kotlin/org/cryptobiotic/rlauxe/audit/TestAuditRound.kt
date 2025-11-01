@@ -27,7 +27,7 @@ class TestAuditRound {
         val prng = Prng(Random.nextLong())
         testCvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }
 
-        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList(), sampledBorc = emptyList())
+        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
         consistentSampling(auditRound, mvrManager)
 
         contestRounds.forEach { contestRound ->

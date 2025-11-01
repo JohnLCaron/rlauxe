@@ -31,7 +31,7 @@ class TestConsistentSampling {
         val prng = Prng(Random.nextLong())
         val cards = testCvrs.mapIndexed { idx, it -> AuditableCard.fromCvr( it, idx, prng.next()) }
 
-        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList(), sampledBorc = emptyList())
+        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
         // fun consistentSampling(
         //    auditRound: AuditRound,
         //    ballotCards: BallotCards,
@@ -74,7 +74,7 @@ class TestConsistentSampling {
         //val prng = Prng(Random.nextLong())
         //val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit( it, idx, prng.next()) }
 
-        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList(), sampledBorc = emptyList())
+        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
         consistentSampling(auditRound, mvrManager)
         println("nsamples needed = ${auditRound.samplePrns.size}\n")
 
@@ -112,7 +112,7 @@ class TestConsistentSampling {
         val contestSampleCutoff = 10000
         val config = AuditConfig(AuditType.CLCA, true, contestSampleCutoff = 10000)
 
-        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList(), sampledBorc = emptyList())
+        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
         uniformSampling(auditRound, mvrManager, previousSamples=emptySet(), config, 0)
         println("nsamples needed = ${auditRound.samplePrns.size}\n")
 

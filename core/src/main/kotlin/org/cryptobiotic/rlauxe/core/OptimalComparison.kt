@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.core
 
 
 import org.apache.commons.math3.analysis.UnivariateFunction
-import org.apache.commons.math3.analysis.solvers.BisectionSolver
 import org.apache.commons.math3.optim.MaxEval
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType
 import org.apache.commons.math3.optim.univariate.BrentOptimizer
@@ -72,13 +71,13 @@ class AdaptiveBetting(
     val withoutReplacement: Boolean = true,
     val a: Double, // compareAssorter.noerror
     val d: Int,  // weight
-    errorRates: ClcaErrorRates, // ? = null,  // a priori estimate of the error rates
+    errorRates: ClcaErrorRates, // a priori estimate of the error rates
     val eps: Double = .00001    // TODO I think we picked this number out of a hat.
 ): BettingFn {
-    val p2o: Double = if (errorRates == null) -1.0 else errorRates.p2o // apriori rate of 2-vote overstatements; set < 0 to remove consideration
-    val p1o: Double = if (errorRates == null) -1.0 else errorRates.p1o // apriori rate of 1-vote overstatements; set < 0 to remove consideration
-    val p1u: Double = if (errorRates == null) -1.0 else errorRates.p1u // apriori rate of 1-vote understatements; set < 0 to remove consideration
-    val p2u: Double = if (errorRates == null) -1.0 else errorRates.p2u // apriori rate of 2-vote understatements; set < 0 to remove consideration
+    val p2o: Double = errorRates.p2o // apriori rate of 2-vote overstatements; set < 0 to remove consideration
+    val p1o: Double = errorRates.p1o // apriori rate of 1-vote overstatements; set < 0 to remove consideration
+    val p1u: Double = errorRates.p1u // apriori rate of 1-vote understatements; set < 0 to remove consideration
+    val p2u: Double = errorRates.p2u // apriori rate of 2-vote understatements; set < 0 to remove consideration
 
     override fun bet(prevSamples: PrevSamplesWithRates): Double {
         val lastj = prevSamples.numberOfSamples()

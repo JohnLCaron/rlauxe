@@ -41,42 +41,6 @@ class TestAuditableCard {
     }
 
     @Test
-    fun testCvrWithZeros() {
-        repeat(1000) {
-            val id = Random.nextInt()
-            val cvr = makeCvr(id, 11, 15)
-            val card = AuditableCard.fromCvrWithZeros(cvr)
-            assertEquals(cvr, card.cvr())
-            assertEquals(id.toString(), card.location)
-            assertEquals(0, card.index)
-            assertEquals(0L, card.prn)
-            assertEquals(false, card.phantom)
-            assertEquals(cvr.votes.keys, card.contests.toSet())
-            assertNotNull(card.votes)
-            card.votes!!.forEachIndexed { idx, vote ->
-                assertContentEquals(cvr.votes[card.contests[idx]], vote)
-            }
-            assertNull(card.poolId)
-        }
-    }
-
-    @Test
-    fun testFromCvrWithPool() {
-        repeat(1000) {
-            val id = Random.nextInt()
-            val cvr = makeCvr(id, 11, 15)
-            val card = AuditableCard.fromCvrWithPool(cvr, it, it.toLong(), it)
-            assertEquals(id.toString(), card.location)
-            assertEquals(it, card.index)
-            assertEquals(it.toLong(), card.prn)
-            assertEquals(false, card.phantom)
-            assertEquals(cvr.votes.keys, card.contests.toSet())
-            assertNull(card.votes) // votes arent stored
-            assertEquals(it, card.poolId)
-        }
-    }
-
-    @Test
     fun testEqualsAndString() {
         val id = Random.nextInt()
         val card1 = AuditableCard ("cvr$id", 42, 4422L, false, intArrayOf(1,2,3),

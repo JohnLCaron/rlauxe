@@ -46,8 +46,5 @@ fun makeStandardPluralityAssorter(Nc: Int): PluralityAssorter {
     return PluralityAssorter.makeWithVotes(contest, 0, 1, contest.votes)
 }
 
-// deprecate
-fun makeStandardComparisonAssorter(avgCvrAssortValue: Double, Nc: Int) =
-    ClcaAssorter(makeStandardContest(Nc).info, makeStandardPluralityAssorter(Nc), check=false)
 
 

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -143,18 +144,19 @@ class ContestSimulation(val contest: Contest) {
             return ContestSimulation(contest)
         }
 
-        fun makeContestWithLimits(contest: Contest, contestSampleCutoff: Int?): ContestSimulation {
-            if (contestSampleCutoff == null || contest.Nc <= contestSampleCutoff) return ContestSimulation(contest)
+        fun makeContestWithLimits(contest: Contest, auditConfig: AuditConfig): ContestSimulation {
+            val limit = auditConfig.contestSampleCutoff
+            if (limit == null || contest.Nc <= limit) return ContestSimulation(contest)
 
             // otherwise scale everything
-            val sNc = contestSampleCutoff / contest.Nc.toDouble()
+            val sNc = limit / contest.Nc.toDouble()
             val sNp = roundToClosest(sNc * contest.Np())
             val sNu = roundToClosest(sNc * contest.Nundervotes())
             val orgVoteCount = contest.votes.map { it.value }.sum() // V_c
             val svotes = contest.votes.map { (id, nvotes) -> id to roundToClosest(sNc * nvotes) }.toMap()
             val voteCount = svotes.map { it.value }.sum() // V_c
 
-            if (voteCount > contestSampleCutoff) {
+            if (voteCount > limit) {
                 println("*** org = ${orgVoteCount} voteCount = ${voteCount}")
             }
 

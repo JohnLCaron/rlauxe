@@ -14,16 +14,18 @@ data class AuditConfig(
     // simulation control
     val nsimEst: Int = 100, // number of simulation estimations
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
+    val contestSampleCutoff: Int? = 30000, // use this number of cvrs in the estimation
 
     // audit sample size control
-    val contestSampleCutoff: Int? = null, // do not audit contests that need more samples than this
+    val removeCutoffContests: Boolean = false, // remove contests that need more samples than contestSampleCutoff
     val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
     val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
-    val auditSampleLimit: Int? = null, // stop auditing when samples exceed this
+    val auditSampleLimit: Int? = null, // limit audit sample size; audit all samples, ignore risk limit
 
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.previous),
     val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true),
+
     val version: Double = 1.2,
     val skipContests: List<Int> = emptyList()
 ) {
@@ -32,8 +34,8 @@ data class AuditConfig(
     val isPolling = auditType == AuditType.POLLING
 
     override fun toString() = buildString {
-        appendLine("AuditConfig(auditType=$auditType, hasStyles=$hasStyles, riskLimit=$riskLimit, seed=$seed")
-        appendLine("  nsimEst=$nsimEst, quantile=$quantile, contestSampleCutoff=$contestSampleCutoff, minRecountMargin=$minRecountMargin version=$version")
+        appendLine("AuditConfig(auditType=$auditType, hasStyles=$hasStyles, riskLimit=$riskLimit, seed=$seed version=$version" )
+        appendLine("  nsimEst=$nsimEst, quantile=$quantile, contestSampleCutoff=$contestSampleCutoff, auditSampleLimit=$auditSampleLimit minRecountMargin=$minRecountMargin removeTooManyPhantoms=$removeTooManyPhantoms")
         if (skipContests.isNotEmpty()) { appendLine("  skipContests=$skipContests") }
         when (auditType) {
             AuditType.POLLING -> appendLine("  $pollingConfig")

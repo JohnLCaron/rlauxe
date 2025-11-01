@@ -104,13 +104,13 @@ fun makeEstimationTasks(
                 val testData = SimulateIrvTestData(contest as RaireContest, contestRound.contestUA.minMargin(), auditConfig.contestSampleCutoff)
                 testData.makeCvrs()
             } else {
-                ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.contestSampleCutoff).makeCvrs()
+                ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig).makeCvrs()
             }
         }
         AuditType.POLLING -> {
             // Simulation of multicandidate Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
             // TODO what about supermajority?
-            ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig.contestSampleCutoff).makeCvrs()
+            ContestSimulation.makeContestWithLimits(contest as Contest, auditConfig).makeCvrs()
         }
         else -> null
     }

@@ -21,7 +21,7 @@ class PersistedWorkflow(
     val auditRecord: AuditRecord // TODO need auditConfig, contests in record
     val publisher = Publisher(auditDir)
 
-    private val auditConfig: AuditConfig
+    private val config: AuditConfig
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
     private val mvrManager: MvrManager
@@ -35,7 +35,7 @@ class PersistedWorkflow(
             throw RuntimeException( auditRecordResult.toString() )
         }
 
-        auditConfig = auditRecord.auditConfig
+        config = auditRecord.auditConfig
         contestsUA = auditRecord.contests
 
         auditRounds.addAll(auditRecord.rounds)
@@ -55,6 +55,10 @@ class PersistedWorkflow(
             nextRound.auditIsComplete = true
         } else {
             val publisher = Publisher(auditDir)
+
+            if (config.auditSampleLimit != null ) {
+                nextRound.samplePrns = nextRound.samplePrns.subList(0, config.auditSampleLimit)
+            }
 
             writeAuditRoundJsonFile(nextRound, publisher.auditRoundFile(nextRound.roundIdx))
             logger.info {"   writeAuditStateJsonFile ${publisher.auditRoundFile(nextRound.roundIdx)}"}
@@ -77,10 +81,10 @@ class PersistedWorkflow(
             logger.info {"  added ${sampledMvrs.size} mvrs to mvrManager"}
         }
 
-        val complete =  when (auditConfig.auditType) {
-            AuditType.CLCA -> runClcaAuditRound(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = ClcaAssertionAuditor(quiet))
-            AuditType.POLLING -> runPollingAuditRound(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerPollingIF, auditRound.roundIdx, quiet)
-            AuditType.ONEAUDIT -> runClcaAuditRound(auditConfig, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = OneAuditAssertionAuditor(quiet))
+        val complete =  when (config.auditType) {
+            AuditType.CLCA -> runClcaAuditRound(config, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = ClcaAssertionAuditor(quiet))
+            AuditType.POLLING -> runPollingAuditRound(config, auditRound.contestRounds, mvrManager as MvrManagerPollingIF, auditRound.roundIdx, quiet)
+            AuditType.ONEAUDIT -> runClcaAuditRound(config, auditRound.contestRounds, mvrManager as MvrManagerClcaIF, auditRound.roundIdx, auditor = OneAuditAssertionAuditor(quiet))
         }
 
         auditRound.auditWasDone = true
@@ -93,7 +97,7 @@ class PersistedWorkflow(
         return complete
     }
 
-    override fun auditConfig() =  this.auditConfig
+    override fun auditConfig() =  this.config
     override fun mvrManager() = mvrManager
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA

@@ -15,13 +15,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestBelgiumElectionJson {
-    val elections = mapOf(
-        "Namur" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Namur.json"
-    )
 
     @Test
     fun testReadBelgiumElectionJson() {
-        val filename = elections["Namur"]!!
+        val filename = belgianElectionMap["Namur"]!!
         val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumElectionJson(filename)
         val belgiumElection = if (result is Ok) result.unwrap()
         else throw RuntimeException("Cannot read belgiumElection from ${filename} err = $result")
@@ -36,7 +33,7 @@ class TestBelgiumElectionJson {
     fun testBelgiumContest(electionName: String) {
         println("======================================================")
         println("ElectionName $electionName")
-        val filename = elections[electionName]!!
+        val filename = belgianElectionMap[electionName]!!
         val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumElectionJson(filename)
         val belgiumElection = if (result is Ok) result.unwrap()
         else throw RuntimeException("Cannot read belgiumElection from ${filename} err = $result")

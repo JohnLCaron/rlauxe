@@ -73,7 +73,7 @@ fun interface ClcaAssertionAuditorIF {
 class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
     override fun run(
-        auditConfig: AuditConfig,
+        config: AuditConfig,
         contest: ContestIF,
         assertionRound: AssertionRound,
         sampler: Sampler,
@@ -83,7 +83,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
 
-        val clcaConfig = auditConfig.clcaConfig
+        val clcaConfig = config.clcaConfig
         val errorRates: ClcaErrorRates = when (clcaConfig.strategy) {
             ClcaStrategyType.optimalComparison,
             ClcaStrategyType.previous,
@@ -127,12 +127,13 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             Nc = contest.Nc(),
             noerror = cassorter.noerror(),
             upperBound = cassorter.upperBound(),
-            riskLimit = auditConfig.riskLimit,
+            riskLimit = config.riskLimit,
             withoutReplacement = true
         )
         // testFn.setDebuggingSequences()
 
-        val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
+        val terminateOnNullReject = config.auditSampleLimit == null
+        val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = terminateOnNullReject) { sampler.sample() }
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,

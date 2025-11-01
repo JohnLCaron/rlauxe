@@ -32,9 +32,10 @@ fun sampleWithContestCutoff(
         sample(auditConfig, mvrManager, auditRound, previousSamples, quiet = quiet)
 
         //// the rest of this implements contestSampleCutoff
-        if (auditConfig.contestSampleCutoff == null || auditRound.samplePrns.size <= auditConfig.contestSampleCutoff) {
+        if (!auditConfig.removeCutoffContests || auditConfig.contestSampleCutoff == null || auditRound.samplePrns.size <= auditConfig.contestSampleCutoff) {
             break
         }
+
         // find the contest with the largest estimation size eligible for removal, remove it
         val maxEstimation = contestsNotDone.maxOf { it.estSampleSizeEligibleForRemoval() }
         val maxContest = contestsNotDone.first { it.estSampleSizeEligibleForRemoval() == maxEstimation }
@@ -63,7 +64,7 @@ fun sample(
         if (!quiet) logger.info{" consistentSamplingSize= ${auditRound.samplePrns.size}"}
     } else {
         if (!quiet) logger.info{"\nuniformSampling round ${auditRound.roundIdx}"}
-        uniformSampling(auditRound, mvrManager, previousSamples, auditConfig.contestSampleCutoff, auditRound.roundIdx)
+        uniformSampling(auditRound, mvrManager, previousSamples, auditConfig, auditRound.roundIdx)
         if (!quiet) logger.info{" uniformSamplingSize= ${auditRound.samplePrns.size}"}
     }
 }
@@ -154,7 +155,7 @@ fun uniformSampling(
     auditRound: AuditRound,
     mvrManager: MvrManager,
     previousSamples: Set<Long>,
-    contestSampleCutoff: Int?,
+    auditConfig: AuditConfig,
     roundIdx: Int,
 ) {
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }
@@ -167,8 +168,8 @@ fun uniformSampling(
         val estWithFactor = roundToClosest((contestRound.estSampleSize * fac))
         contestRound.estSampleSizeNoStyles = estWithFactor
         // val estPct = estWithFactor / Nb.toDouble()
-        if (contestSampleCutoff != null && estWithFactor > contestSampleCutoff) { // might as well test it here, since it will happen a lot
-            if (debugUniform) logger.info{"uniformSampling contestSampleCutoff for contest ${contestRound.id} estWithFactor $estWithFactor > $contestSampleCutoff round $roundIdx"}
+        if (auditConfig.removeCutoffContests && auditConfig.contestSampleCutoff != null && estWithFactor > auditConfig.contestSampleCutoff) {
+            if (debugUniform) logger.info{"uniformSampling contestSampleCutoff for contest ${contestRound.id} estWithFactor $estWithFactor > ${auditConfig.contestSampleCutoff} round $roundIdx"}
             contestRound.done = true // TODO dont do this here?
             contestRound.status = TestH0Status.FailMaxSamplesAllowed
         }

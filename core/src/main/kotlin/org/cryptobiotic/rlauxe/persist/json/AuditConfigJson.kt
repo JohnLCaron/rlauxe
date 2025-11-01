@@ -19,6 +19,30 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
+/*
+data class AuditConfig(
+    val auditType: AuditType,
+    val hasStyles: Boolean, // has Card Style Data (CSD), i.e. we know which contests each card/ballot contains
+    val riskLimit: Double = 0.05,
+    val seed: Long = secureRandom.nextLong(), // determines sample order. set carefully to ensure truly random.
+
+    // simulation control
+    val nsimEst: Int = 100, // number of simulation estimations
+    val quantile: Double = 0.80, // use this percentile success for estimated sample size
+
+    // audit sample size control
+    val contestSampleCutoff: Int? = null, // do not audit contests that need more samples than this
+    val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
+    val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
+    val auditSampleLimit: Int? = null, // stop auditing when samples exceed this
+
+    val pollingConfig: PollingConfig = PollingConfig(),
+    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.previous),
+    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true),
+    val version: Double = 1.2,
+    val skipContests: List<Int> = emptyList()
+)
+ */
 @Serializable
 data class AuditConfigJson(
     val auditType: String,
@@ -28,13 +52,16 @@ data class AuditConfigJson(
     val nsimEst: Int,
     val quantile: Double,
     val contestSampleCutoff: Int?,
+    val removeCutoffContests: Boolean?,
     val minRecountMargin: Double, // should be minRecountMargin
     val removeTooManyPhantoms: Boolean,
-    val version : Double,
+    val auditSampleLimit: Int?,
+
     val pollingConfig: PollingConfigJson? = null,
     val clcaConfig: ClcaConfigJson? = null,
     val oaConfig: OneAuditConfigJson?  = null,
     val skipContests: List<Int>?  = null,
+    val version : Double,
 )
 
 fun AuditConfig.publishJson() : AuditConfigJson {
@@ -47,11 +74,13 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.nsimEst,
             this.quantile,
             this.contestSampleCutoff,
+            this.removeCutoffContests,
             this.minRecountMargin,
             this.removeTooManyPhantoms,
-            this.version,
+            this.auditSampleLimit,
             clcaConfig = this.clcaConfig.publishJson(),
             skipContests = skipContests,
+            version = this.version,
         )
 
         AuditType.POLLING -> AuditConfigJson(
@@ -62,11 +91,13 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.nsimEst,
             this.quantile,
             this.contestSampleCutoff,
+            this.removeCutoffContests,
             this.minRecountMargin,
             this.removeTooManyPhantoms,
-            this.version,
+            this.auditSampleLimit,
             pollingConfig = this.pollingConfig.publishJson(),
             skipContests = skipContests,
+            version = this.version,
         )
 
         AuditType.ONEAUDIT -> AuditConfigJson(
@@ -77,11 +108,13 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.nsimEst,
             this.quantile,
             this.contestSampleCutoff,
+            this.removeCutoffContests,
             this.minRecountMargin,
             this.removeTooManyPhantoms,
-            this.version,
+            this.auditSampleLimit,
             oaConfig = this.oaConfig.publishJson(),
             skipContests = skipContests,
+            version = this.version,
         )
     }
 }
@@ -97,8 +130,10 @@ fun AuditConfigJson.import(): AuditConfig {
             this.nsimEst,
             this.quantile,
             this.contestSampleCutoff,
+            this.removeCutoffContests ?: (this.contestSampleCutoff != null),
             this.minRecountMargin,
             this.removeTooManyPhantoms,
+            auditSampleLimit = this.auditSampleLimit,
             clcaConfig = this.clcaConfig!!.import(),
             version = this.version,
             skipContests = skipContests?: emptyList(),
@@ -112,8 +147,10 @@ fun AuditConfigJson.import(): AuditConfig {
             this.nsimEst,
             this.quantile,
             this.contestSampleCutoff,
+            this.removeCutoffContests ?: (this.contestSampleCutoff != null),
             this.minRecountMargin,
             this.removeTooManyPhantoms,
+            auditSampleLimit = this.auditSampleLimit,
             pollingConfig = this.pollingConfig!!.import(),
             version = this.version,
             skipContests = skipContests?: emptyList(),
@@ -127,8 +164,10 @@ fun AuditConfigJson.import(): AuditConfig {
             this.nsimEst,
             this.quantile,
             this.contestSampleCutoff,
+            this.removeCutoffContests ?: (this.contestSampleCutoff != null),
             this.minRecountMargin,
             this.removeTooManyPhantoms,
+            auditSampleLimit = this.auditSampleLimit,
             oaConfig = this.oaConfig!!.import(),
             version = this.version,
             skipContests = skipContests?: emptyList(),

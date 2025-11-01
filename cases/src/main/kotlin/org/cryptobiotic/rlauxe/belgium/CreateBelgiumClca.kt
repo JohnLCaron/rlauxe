@@ -39,7 +39,6 @@ class BelgiumClca (
 }
 
 ////////////////////////////////////////////////////////////////////
-// Create audit where pools are from the precinct total. May be CLCA or OneAudit
 fun createBelgiumClca(
     topdir: String,
     contestd: DHondtContest,
@@ -52,7 +51,7 @@ fun createBelgiumClca(
     val auditConfig = when {
         (auditConfigIn != null) -> auditConfigIn
         else -> AuditConfig(
-            AuditType.CLCA, hasStyles = true, contestSampleCutoff = 20000, riskLimit = .05, nsimEst=10, minRecountMargin=0.0,
+            AuditType.CLCA, hasStyles = true, removeCutoffContests = false, riskLimit = .05, nsimEst=10, minRecountMargin=0.0,
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
         )
     }

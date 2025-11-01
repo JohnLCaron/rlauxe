@@ -39,8 +39,7 @@ data class UnderThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     }
 
     fun g (vote: Int): Double {
-        return if (vote == candId) lowerg
-        else upperg
+        return if (vote == candId) lowerg else upperg
     }
 
     // h(b) = c · g(b) + 1/2
@@ -63,7 +62,7 @@ data class UnderThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     fun lowerBound() = h2(lowerg)
 
     override fun desc() = buildString {
-        append("cand= $candId: reportedMean=${df(reportedMean())} reportedMargin=${df(reportedMargin())} g=[$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
+        append("UnderThreshold cand= $candId: reportedMean=${df(reportedMean())} reportedMargin=${df(reportedMargin())} g=[$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
     }
 
     override fun hashcodeDesc() = "UnderThreshold ${candId} ${info.name}" // must be unique for serialization
@@ -73,6 +72,8 @@ data class UnderThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 
     override fun reportedMean() = reportedMean
     override fun reportedMargin() = mean2margin(reportedMean)
+
+    override fun toString() = desc()
 
     companion object {
         fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int): UnderThreshold {
@@ -123,8 +124,7 @@ data class OverThreshold(val info: ContestInfo, val winner: Int, val t: Double):
     }
 
     fun g (vote: Int): Double {
-        return if (vote == winner) (1.0 - t)
-        else -t
+        return if (vote == winner) (1.0 - t) else -t
     }
 
     // h(b) = c · g(b) + 1/2
@@ -146,7 +146,7 @@ data class OverThreshold(val info: ContestInfo, val winner: Int, val t: Double):
     override fun upperBound() = h2(upperg)
 
     override fun desc() = buildString {
-        append("cand= $winner: reportedMean=${df(reportedMean)} reportedMargin=${df(reportedMargin() )} g= [$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
+        append("OverThreshold cand= $winner: reportedMean=${df(reportedMean)} reportedMargin=${df(reportedMargin() )} g= [$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
     }
 
     override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization
@@ -156,6 +156,8 @@ data class OverThreshold(val info: ContestInfo, val winner: Int, val t: Double):
 
     override fun reportedMean() = reportedMean
     override fun reportedMargin() = mean2margin(reportedMean)
+
+    override fun toString() = desc()
 
     companion object {
         fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int): OverThreshold {

@@ -19,20 +19,20 @@ import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import kotlin.test.Test
 import kotlin.test.fail
 
-val belgianEleection = mapOf(
-    "Anvers" to "/home/stormy/rla/cases/belgium/2014/2014_chambre-des-représentants_Circonscription d'Anvers.json",
-    "Bruxelles" to "/home/stormy/rla/cases/belgium/2014/2014_chambre-des-représentants_Circonscription de Bruxelles-Capitale.json",
-    "FlandreWest" to "/home/stormy/rla/cases/belgium/2014/2014_chambre-des-représentants_Circonscription de Flandre occidentale.json",
-    "FlandreEast" to "/home/stormy/rla/cases/belgium/2014/2014_chambre-des-représentants_Circonscription de Flandre orientale.json",
-    "Hainaut" to "/home/stormy/rla/cases/belgium/2014/2014_chambre-des-représentants_Circonscription de Hainaut.json",
-    "Liège" to "/home/stormy/rla/cases/belgium/2014/2014_chambre-des-représentants_Circonscription de Liège.json",
-    "Limbourg" to "/home/stormy/rla/cases/belgium/2014/2014_chambre-des-représentants_Circonscription de Limbourg.json",
-    "Luxembourg" to "/home/stormy/rla/cases/belgium/2014/2014_chambre-des-représentants_Circonscription de Luxembourg.json",
-    "Namur" to "/home/stormy/rla/cases/belgium/2014/2014_chambre-des-représentants_Circonscription de Namur.json",
-    "BrabantFlamant" to "/home/stormy/rla/cases/belgium/2014/2014_chambre-des-représentants_Circonscription du Brabant flamand.json",
-    "BrabantWallon" to "/home/stormy/rla/cases/belgium/2014/2014_chambre-des-représentants_Circonscription du Brabant wallon.json",
+val belgianElectionMap = mapOf(
+    "Anvers" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription d'Anvers.json",
+    "Bruxelles" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Bruxelles-Capitale.json",
+    "FlandreWest" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Flandre occidentale.json",
+    "FlandreEast" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Flandre orientale.json",
+    "Hainaut" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Hainaut.json",
+    "Liège" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Liège.json",
+    "Limbourg" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Limbourg.json",
+    "Luxembourg" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Luxembourg.json",
+    "Namur" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Namur.json",
+    "BrabantFlamant" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription du Brabant flamand.json",
+    "BrabantWallon" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription du Brabant wallon.json",
 )
-val toptopdir = "/home/stormy/rla/cases/belgium/2014"
+val toptopdir = "/home/stormy/rla/cases/belgium/2024"
 
 class TestCreateBelgiumClcaFromJson {
     @Test
@@ -43,7 +43,7 @@ class TestCreateBelgiumClcaFromJson {
     @Test
     fun createAllBelgiumElection() {
         val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
-        belgianEleection.keys.forEach {
+        belgianElectionMap.keys.forEach {
             allmvrs[it] =  createBelgiumElection(it)
         }
         allmvrs.forEach {
@@ -65,7 +65,7 @@ class TestCreateBelgiumClcaFromJson {
     @Test
     fun showAllBelgiumElection() {
         val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
-        belgianEleection.keys.forEach {
+        belgianElectionMap.keys.forEach {
             allmvrs[it] = showBelgiumElection(it)
         }
         allmvrs.forEach {
@@ -79,7 +79,7 @@ class TestCreateBelgiumClcaFromJson {
 fun createBelgiumElection(electionName: String): Pair<Int, Int> {
     println("======================================================")
     println("electionName $electionName")
-    val filename = belgianEleection[electionName]!!
+    val filename = belgianElectionMap[electionName]!!
     val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumElectionJson(filename)
     val belgiumElection = if (result is Ok) result.unwrap()
     else throw RuntimeException("Cannot read belgiumElection from ${filename} err = $result")

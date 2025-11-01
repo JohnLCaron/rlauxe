@@ -13,7 +13,6 @@ import kotlin.math.max
 // this creates the riskTestingFn for you
 fun runAlphaMartRepeated(
     drawSample: Sampler,
-    // maxSamples: Int,
     eta0: Double,
     d: Int = 500,
     withoutReplacement: Boolean = true,
@@ -33,12 +32,11 @@ fun runAlphaMartRepeated(
 
     return runTestRepeated(
         drawSample = drawSample,
-        // maxSamples = maxSamples,
         terminateOnNullReject = true,
         ntrials = ntrials,
         testFn = alpha,
-        testParameters = mapOf("eta0" to eta0, "d" to d.toDouble()),
-        margin = mean2margin(eta0),
+        testParameters = mapOf("eta0" to eta0, "d" to d.toDouble(), "margin" to mean2margin(eta0)),
+        // margin = mean2margin(eta0),
         Nc=drawSample.maxSamples(), // TODO ??
     )
 }

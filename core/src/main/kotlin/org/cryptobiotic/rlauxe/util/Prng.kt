@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
-// TODO is this secure enough ?
+// TODO is java library HmacSHA256 secure enough ?
 
 class Prng(seed: Long) {
     val useSeed = if (seed > 0) seed else -seed

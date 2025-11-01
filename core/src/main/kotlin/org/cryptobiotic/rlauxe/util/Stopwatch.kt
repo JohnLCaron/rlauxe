@@ -67,7 +67,6 @@ class Stopwatch(running: Boolean = true, val timeUnit: TimeUnit = TimeUnit.MILLI
             return "took ${tookMs} ms for $nrows $what, ${perRow.sigfig()} ms per $what"
         }
 
-        // TODO units option
         fun ratio(num: Long, den: Long): String {
             val ratio = num.toDouble() / den
             val numValue = num / 1_000_000

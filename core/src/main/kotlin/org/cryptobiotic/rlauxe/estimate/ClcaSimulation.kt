@@ -10,7 +10,7 @@ private val show = true
 private val logger = KotlinLogging.logger("ClcaSimulation")
 
 /** Create internal cvr and mvr with the correct under/over statements that match the given error rates.
- * Specific to a contest. Only used for estimating the sample size.
+ * Specific to a contest. Only used for estimating the sample size, not auditing.
  */
 class ClcaSimulation(
     rcvrs: List<Cvr>, // may have phantoms
@@ -55,7 +55,7 @@ class ClcaSimulation(
 
     override fun maxSamples() = maxSamples
     override fun maxSampleIndexUsed() = idx
-    override fun nmvrs() = idx // TODO
+    override fun nmvrs() = mvrs.size
 
     override fun reset() {
         permutedIndex.shuffle(Random)

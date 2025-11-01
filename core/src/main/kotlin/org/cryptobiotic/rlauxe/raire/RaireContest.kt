@@ -14,7 +14,7 @@ private val logger = KotlinLogging.logger("RaireContest")
 // this is the motivation for ContestIF
 data class RaireContest(
     val info: ContestInfo,
-    val winners: List<Int>, // TODO only one
+    val winners: List<Int>, // actually only one winner is allowed
     val Nc: Int,
     val Ncast: Int,
     val undervotes: Int,
@@ -270,7 +270,7 @@ data class RaireAssertion(
 // This is a "primitive" assorter.
 data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion): AssorterIF {
     val contestId = info.id
-    val remaining = info.candidateIds.filter { !rassertion.eliminated.contains(it) } // // TODO this is index ??
+    val remaining = info.candidateIds.filter { !rassertion.eliminated.contains(it) }
     var reportedMean: Double = 0.0
 
     fun setReportedMean(mean: Double): RaireAssorter {

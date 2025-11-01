@@ -373,15 +373,6 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         return c * g + 0.5
     }
 
-    /* TODO
-    fun assort2(mvr: Cvr, usePhantoms: Boolean): Double {
-        if (!mvr.hasContest(contest.id)) return 0.5
-        if (usePhantoms && mvr.phantom) return 0.0 // worst case
-        val w = mvr.hasMarkFor(contest.id, winner.id)
-        val l = mvr.hasMarkFor(contest.id, loser.id)
-        return (w - l + 1) * 0.5
-    } */
-
     override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(info.id)) return 0.5
         if (usePhantoms && mvr.phantom) return 0.0 // worst case
@@ -402,7 +393,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     override fun loser() = loser
 
     override fun reportedMean() = reportedMean
-    override fun reportedMargin() = mean2margin(reportedMean) // TODO
+    override fun reportedMargin() = mean2margin(reportedMean)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

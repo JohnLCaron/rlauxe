@@ -50,7 +50,7 @@ class ClcaFuzzSampler(
 
     override fun maxSamples() = maxSamples
     override fun maxSampleIndexUsed() = idx
-    override fun nmvrs() = idx // TODO
+    override fun nmvrs() = cvrPairs.size
 
     override fun hasNext(): Boolean = (idx < N)
     override fun next(): Double = sample()
@@ -99,7 +99,7 @@ class PollingFuzzSampler(
 
     override fun maxSamples() = maxSamples
     override fun maxSampleIndexUsed() = idx
-    override fun nmvrs() = idx // TODO
+    override fun nmvrs() = mvrs.size
 
     override fun hasNext(): Boolean = (idx < N)
     override fun next(): Double = sample()
@@ -108,7 +108,7 @@ class PollingFuzzSampler(
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO can this be used on approval?
 
-val fac = 10000.0
+private val fac = 10000.0 // TODO wtf?
 fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Double, welford: Welford? = null, filter: ((CvrBuilder) -> Boolean)? = null): List<Cvr> {
     if (fuzzPct == 0.0) return cvrs
     val limit = fac / fuzzPct
@@ -124,7 +124,7 @@ fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Doub
                 if (isIRV[ccontest.name]!!) {
                     switchCandidateRankings(cvb, ccontest.candidateIds)
                 } else {
-                    val currId: Int? = if (cvb.votes.size == 0) null else cvb.votes[0] // TODO only one vote allowed
+                    val currId: Int? = if (cvb.votes.size == 0) null else cvb.votes[0] // TODO only one vote allowed, cant use on Raire
                     cvb.votes.clear()
                     // choose a different candidate, or none.
                     val ncandId = chooseNewCandidate(currId, ccontest.candidateIds)

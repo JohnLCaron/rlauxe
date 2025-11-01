@@ -147,7 +147,6 @@ fun consistentSampling(
     auditRound.nmvrs = sampledCards.size
     auditRound.newmvrs = newMvrs
     auditRound.samplePrns = sampledCards.map { it.prn }
-    auditRound.sampledBorc = sampledCards
 }
 
 // for audits with hasStyles = false
@@ -170,7 +169,7 @@ fun uniformSampling(
         // val estPct = estWithFactor / Nb.toDouble()
         if (auditConfig.removeCutoffContests && auditConfig.contestSampleCutoff != null && estWithFactor > auditConfig.contestSampleCutoff) {
             if (debugUniform) logger.info{"uniformSampling contestSampleCutoff for contest ${contestRound.id} estWithFactor $estWithFactor > ${auditConfig.contestSampleCutoff} round $roundIdx"}
-            contestRound.done = true // TODO dont do this here?
+            contestRound.done = true
             contestRound.status = TestH0Status.FailMaxSamplesAllowed
         }
     }
@@ -178,7 +177,7 @@ fun uniformSampling(
     if (estTotalSampleSizes.isEmpty()) return
     var nmvrs = estTotalSampleSizes.max()
 
-    if (auditRound.roundIdx > 2) { // TODO check this
+    if (auditRound.roundIdx > 2) {
         val prevSampleSize = previousSamples.size
         val prevNudged = (1.25 * prevSampleSize).toInt()
         if (prevNudged > nmvrs) {
@@ -195,7 +194,6 @@ fun uniformSampling(
     auditRound.nmvrs = nmvrs
     auditRound.newmvrs = newMvrs
     auditRound.samplePrns = sampledCards.map { it.prn }
-    auditRound.sampledBorc = sampledCards
 }
 
 

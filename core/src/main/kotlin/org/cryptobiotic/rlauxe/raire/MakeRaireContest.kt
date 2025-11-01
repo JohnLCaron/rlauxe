@@ -26,8 +26,6 @@ fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int
     val cvotes = vc.makeVotes()
     val votes = Votes(cvotes, info.candidateIds.size)
 
-    //// TODO seems like we just need to know the winner. we could replace this with IrvCount
-    //      then we could add annotation here, currently in makeIrvContests
     // Tabulates the outcome of the IRV election, returning the outcome as an IRVResult.
     val irvResult: IRVResult = votes.runElection(TimeOut.never())
     if (!quiet) logger.debug{" runElection: possibleWinners=${irvResult.possibleWinners.contentToString()} eliminationOrder=${irvResult.eliminationOrder.contentToString()}"}

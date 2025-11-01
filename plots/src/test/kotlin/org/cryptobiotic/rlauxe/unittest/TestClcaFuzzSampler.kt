@@ -47,7 +47,7 @@ class TestClcaFuzzSampler {
     }
 }
 
-fun runWithComparisonFuzzSampler(
+private fun runWithComparisonFuzzSampler(
     auditConfig: AuditConfig,
     contestUA: ContestUnderAudit,
     assertionRound: AssertionRound,
@@ -72,10 +72,10 @@ fun runWithComparisonFuzzSampler(
         auditConfig,
         sampler,
         optimal,
-        assorter.assorter().reportedMargin(),
+        // assorter.assorter().reportedMargin(),
         assorter.noerror(),
         assorter.upperBound(),
         Nc=contestUA.Nc,
-        moreParameters=moreParameters,
+        moreParameters=moreParameters + mapOf("margin" to assorter.assorter().reportedMargin()),
     )
 }

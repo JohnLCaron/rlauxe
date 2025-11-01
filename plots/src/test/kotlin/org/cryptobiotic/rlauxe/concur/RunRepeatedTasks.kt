@@ -22,7 +22,6 @@ import org.cryptobiotic.rlauxe.audit.Sampler
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.mean2margin
 
 interface RepeatedTask {
     fun makeSampler() : Sampler
@@ -82,11 +81,9 @@ class RunRepeatedTasks {
 
         return runTestRepeated(
             drawSample = task.makeSampler(),
-            // maxSamples = task.maxSamples(),
             ntrials = ntrials,
             testFn = task.makeTestFn(),
             testParameters = task.makeTestParameters(),
-            margin = mean2margin(task.reportedMean()),
             Nc=task.N(),
             )
     }

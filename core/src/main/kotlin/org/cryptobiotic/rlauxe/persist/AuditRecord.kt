@@ -32,7 +32,7 @@ class AuditRecord(
         mvrs.forEach { previousMvrs[it.prn] = it } // cumulative
     }
 
-    // TODO new mvrs vs mvrs. Build interface to manage this process
+    // TODO new mvrs vs mvrs may confuse people. Build interface to manage this process?
     fun enterMvrs(mvrs: List<AuditableCard>): Boolean {
         val mvrMap = mvrs.associateBy { it.prn }.toMap()
 
@@ -102,9 +102,9 @@ class AuditRecord(
 
             val rounds = mutableListOf<AuditRound>()
             for (roundIdx in 1..publisher.currentRound()) {
-                val sampledNumbersResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(roundIdx))
-                val sampledNumbers = if (sampledNumbersResult is Ok) sampledNumbersResult.unwrap() else {
-                    errs.addNested(sampledNumbersResult.unwrapError())
+                val samplePrnsResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(roundIdx))
+                val samplePrns = if (samplePrnsResult is Ok) samplePrnsResult.unwrap() else {
+                    errs.addNested(samplePrnsResult.unwrapError())
                     null
                 }
                 if (errs.hasErrors()) return Err(errs)
@@ -124,8 +124,7 @@ class AuditRecord(
                     val auditRoundResult = readAuditRoundJsonFile(
                         auditRoundFile,
                         contests!!,
-                        sampledNumbers!!,
-                        sampledMvrs
+                        samplePrns!!,
                     )
                     if (auditRoundResult is Ok) rounds.add(auditRoundResult.unwrap()) else {
                         errs.addNested(auditRoundResult.unwrapError())

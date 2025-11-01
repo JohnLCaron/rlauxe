@@ -50,7 +50,7 @@ class TestConsistentSamplingFromShangrla {
         contestRounds[0].estSampleSize = 3
         contestRounds[1].estSampleSize = 4
 
-        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList(), sampledBorc = emptyList())
+        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
 
         val ballotCards = MvrManagerClcaForTesting(cvrs, cvrs, 12345678901L)
         consistentSampling(auditRound, ballotCards)
@@ -100,7 +100,7 @@ class TestConsistentSamplingFromShangrla {
         var cards = (cvrs + phantomCVRs).mapIndexed { idx, it -> AuditableCard.fromCvr( it, idx, prng.next()) }
         assertEquals(10, cards.size)
 
-        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList(), sampledBorc = emptyList())
+        val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
         val ballotCards = MvrManagerClcaForTesting(cvrs, cvrs, 123456789012L)
         consistentSampling(auditRound, ballotCards)
         assertEquals(7, auditRound.samplePrns.size)

@@ -56,13 +56,13 @@ interface CardPoolIF {
 class CardPoolWithBallotStyle(
     override val poolName: String,
     override val poolId: Int,
-    val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes // TODO use ContestTabulation
+    val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes //
     val infos: Map<Int, ContestInfo>, // all infos
 ) : CardPoolIF
 {
     val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
     val maxMinCardsNeeded: Int
-    var adjustCards = 0 // TODO simply relationship with undervotes
+    var adjustCards = 0 // TODO simplify relationship with undervotes
 
     // a convenient place to keep this, used in addOAClcaAssortersFromCvrs()
     override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
@@ -215,7 +215,7 @@ open class CardPoolFromCvrs(
         return contestTab.votesAndUndervotes() // good reason for cardPool to always have contestTabs
     }
 
-    // every cvr has to have every contest in the pool TODO not needed?
+    // every cvr has to have every contest in the pool
     fun addUndervotes(cvr: Cvr): Cvr {
         var wasAmended = false
         val votesM= cvr.votes.toMutableMap()

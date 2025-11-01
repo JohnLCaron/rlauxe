@@ -338,7 +338,7 @@ fun verifyAssortAvg(
                 val avg = assortAvg.getOrPut(contestUA.id) { mutableMapOf() }
                 contestUA.pollingAssertions.forEach { assertion ->
                     val passorter = assertion.assorter
-                    val assortAvg = avg.getOrPut(passorter) { AssortAvg() } // TODO could have a hash collision ?
+                    val assortAvg = avg.getOrPut(passorter) { AssortAvg() } // TODO could we have a hash collision ?
                     if (card.hasContest(contestUA.id)) {
                         assortAvg.ncards++
                         assortAvg.totalAssort += passorter.assort(card.cvr(), usePhantoms = false)

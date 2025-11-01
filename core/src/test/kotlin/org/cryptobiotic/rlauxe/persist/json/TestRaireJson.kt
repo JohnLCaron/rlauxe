@@ -96,7 +96,7 @@ fun makeRaireUA(): RaireContestUnderAudit {
         choiceFunction = SocialChoiceFunction.IRV,
         candidateNames = listToMap("A", "B", "C", "D"),
     )
-    val contest = RaireContest(info, listOf(2), 42, 33, undervotes=1)
+    val contest = RaireContest(info, listOf(2), 120, 111, undervotes=1)
 
     val round1 =  IrvRound(mapOf(0 to 42, 1 to 99, 2 to 1032)) // data class IrvRound(val count: Map<Int, Int>) { // count is candidate -> nvotes for one round
     val round2 =  IrvRound(mapOf(1 to 99, 2 to 1032))
@@ -105,7 +105,7 @@ fun makeRaireUA(): RaireContestUnderAudit {
     contest.roundsPaths.add(irp)
 
     val assert1 = RaireAssertion(1, 0, 0.0,42, RaireAssertionType.winner_only)
-    val assert2 = RaireAssertion(1, 2, 0.0,422, RaireAssertionType.irv_elimination,
+    val assert2 = RaireAssertion(1, 2, 0.0,22, RaireAssertionType.irv_elimination,
         listOf(2), mapOf(1 to 1, 2 to 2, 3 to 3))
 
     return RaireContestUnderAudit(contest, rassertions=listOf(assert1, assert2))

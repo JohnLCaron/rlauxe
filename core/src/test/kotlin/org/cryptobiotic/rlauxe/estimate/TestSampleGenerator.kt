@@ -46,7 +46,7 @@ class TestSampleGenerator {
             }
             assertEquals(contest.winners, listOf(0))
         }
-        val contestsUA = contests.map { ContestUnderAudit(it, isComparison = false) }
+        val contestsUA = contests.map { ContestUnderAudit(it, isClca = false).addStandardAssertions() }
 
         contestsUA.forEach { contestUA ->
             contestUA.pollingAssertions.forEach { ass ->

@@ -118,7 +118,7 @@ class TestCvrs {
             candidateNames = listToMap("A", "B", "C", "D", "E"),
         )
         val contest = makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = false)
+        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
         val asrtns = contestUA.pollingAssertions
         asrtns.first().assorter
 

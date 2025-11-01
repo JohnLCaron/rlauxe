@@ -251,13 +251,12 @@ class TestClcaAssorter {
 
         val info = ContestInfo("standard", 0, listToMap("A", "B"), choiceFunction = SocialChoiceFunction.PLURALITY)
         val cvrs = makeCvrsByExactMean(N, cvrMean)
-        val contest = makeContestUAfromCvrs(info, cvrs)
-        val contestAU = contest.addClcaAssertionsFromReportedMargin()
-        val compareAssertion = contestAU.clcaAssertions.first()
+        val contestUA = makeContestUAfromCvrs(info, cvrs)
+        val compareAssertion = contestUA.clcaAssertions.first()
         val compareAssorter1 = compareAssertion.cassorter
 
         // check the same
-        val compareAssorter2 = makeContestUAfromCvrs(info, cvrs).addClcaAssertionsFromReportedMargin().clcaAssertions.first().cassorter
+        val compareAssorter2 = makeContestUAfromCvrs(info, cvrs).clcaAssertions.first().cassorter
         assertEquals(compareAssorter1, compareAssorter2)
 
         // check assort values for ComparisonSamplerSimulation
@@ -267,10 +266,10 @@ class TestClcaAssorter {
         //    cvr=card-379 (false) 0: [0]
         //    alteredMvr=card-379 (false) 0: [1, 0]
         val passorter = compareAssorter1.assorter()
-        assertEquals(1.0, passorter.assort(Cvr(contest.id, listOf(0))))
-        assertEquals(0.0, passorter.assort(Cvr(contest.id, listOf(1))))
-        assertEquals(0.5, passorter.assort(Cvr(contest.id, listOf(1,0))))
-        assertEquals(0.5, passorter.assort(Cvr(contest.id, listOf())))
+        assertEquals(1.0, passorter.assort(Cvr(info.id, listOf(0))))
+        assertEquals(0.0, passorter.assort(Cvr(info.id, listOf(1))))
+        assertEquals(0.5, passorter.assort(Cvr(info.id, listOf(1,0))))
+        assertEquals(0.5, passorter.assort(Cvr(info.id, listOf())))
     }
 
 
@@ -416,9 +415,8 @@ class TestClcaAssorter {
 
         val info = ContestInfo("standard", 0, listToMap("A", "B"), choiceFunction = SocialChoiceFunction.PLURALITY)
         val cvrs = makeCvrsByExactMean(N, cvrMean)
-        val contest = makeContestUAfromCvrs(info, cvrs)
-        val contestAU = contest.addClcaAssertionsFromReportedMargin()
-        val compareAssertion = contestAU.clcaAssertions.first()
+        val contestUA = makeContestUAfromCvrs(info, cvrs)
+        val compareAssertion = contestUA.clcaAssertions.first()
         val cassorter = compareAssertion.cassorter
 
         val theta = cassorter.noerror()

@@ -24,7 +24,7 @@ class TestMakeOneContestUA {
         val contest = contestOA.contest as Contest
         val cvrVotes =  tabulateVotesFromCvrs(testCvrs.iterator())[0]!!
         assertEquals(cvrVotes, contest.votes)
-        assertEquals(margin, contest.calcMargin(0, 1), doublePrecision)
+        assertEquals(margin, contest.margin(0, 1), doublePrecision)
 
         val oaAssorter = contestOA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         assertEquals(1, oaAssorter.poolAverages.assortAverage.size)
@@ -105,7 +105,7 @@ class TestMakeOneContestUA {
 
         assertEquals(Nc, contestOA.Nc)
         val contest = contestOA.contest as Contest
-        assertEquals(margin, contest.calcMargin(0, 1), doublePrecision)
+        assertEquals(margin, contest.margin(0, 1), doublePrecision)
         showPct("allVotes", contest.votes, contestOA.Nc)
         println()
     }

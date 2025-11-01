@@ -41,7 +41,6 @@ class TestRaireContest {
     fun testSimulateRaireTestContest() {
         val contestId=111
         val (rcontestUA: RaireContestUnderAudit, _: List<Cvr>) = simulateRaireTestContest(5000, contestId=contestId, ncands=3, minMargin=.04, quiet = true)
-        rcontestUA.addClcaAssertionsFromReportedMargin() // why do we have to call this, why doesnt simulateRaireTestContest add these ??
 
         assertEquals(rcontestUA, rcontestUA)
         assertEquals(rcontestUA.hashCode(), rcontestUA.hashCode())
@@ -61,7 +60,6 @@ class TestRaireContest {
     fun testMakeRaireContestUA() {
         val contestId=111
         val (rcu: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(5000, contestId=contestId, ncands=5, minMargin=.04, quiet = true)
-        rcu.addClcaAssertionsFromReportedMargin()
 
         val info = rcu.contest.info()
         val contestTab = tabulateCvrs(rcvrs.iterator(), mapOf(info.id to info))
@@ -82,7 +80,6 @@ class TestRaireContest {
             println(" remaining = ${it.remaining(info.candidateIds)}")
         }
 
-        rcu.addClcaAssertionsFromReportedMargin()
         rcu.clcaAssertions.forEach {
             print(it.show())
         }

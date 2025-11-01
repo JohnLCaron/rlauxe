@@ -36,7 +36,7 @@ fun RaireContestUnderAuditJson.import(): RaireContestUnderAudit {
         this.rassertions.map { it.import() },
         hasStyle=contestUA.hasStyle,
     )
-    result.clcaAssertions = contestUA.clcaAssertions
+    result.clcaAssertions = contestUA.clcaAssertions // TODO wonky
     return result
 }
 

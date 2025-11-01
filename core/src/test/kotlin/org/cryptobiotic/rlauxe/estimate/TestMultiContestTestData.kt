@@ -53,9 +53,9 @@ class TestMultiContestTestData {
                     assertTrue(underVotePct.contains(fcontest.undervotePct))
                     assertTrue(phantomRange.contains(fcontest.phantomPct))
 
-                    val calcMargin = contest.calcMargin(winner, loser)
+                    val calcMargin = contest.margin(winner, loser)
                     val margin = (contest.votes[winner]!! - contest.votes[loser]!!) / contest.Nc.toDouble()
-                    val calcReportedMargin = contest.calcMargin(winner, loser)
+                    val calcReportedMargin = contest.margin(winner, loser)
                     assertEquals(margin, calcReportedMargin, doublePrecision)
                     assertEquals(margin, calcMargin, doublePrecision)
                     println(" ${contest.id} fcontest= ${fcontest.margin} contest=$margin")
@@ -138,7 +138,7 @@ class TestMultiContestTestData {
 
             print(" fcontest margin=${df(fcontest.margin)} undervotePct=${fcontest.undervotePct} phantomPct=${fcontest.phantomPct}")
             println(" underCount=${fcontest.underCount} phantomCount=${fcontest.phantomCount}")
-            val contestUA = ContestUnderAudit(contest, isComparison = false)
+            val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
             contestUA.assertions().forEach {
                 println("  $it")
             }
@@ -160,7 +160,7 @@ class TestMultiContestTestData {
             println("Nc=${contest.Nc} nphantom=$nphantom pct= $phantomPct =~ ${fcontest.phantomPct} abs=${abs(phantomPct - fcontest.phantomPct)} tol=${1.0/Nc}")
             if (nphantom > 1) assertEquals(fcontest.phantomPct, phantomPct, 5.0/Nc) // TODO seems like should be 2 at the most, maybe 1
 
-            val contestUA = ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
+            val contestUA = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
             val cassorter = contestUA.minClcaAssertion()!!.cassorter
 
             val sampler = ClcaWithoutReplacement(contest.id, true, cvrs.zip(cvrs), cassorter, true)

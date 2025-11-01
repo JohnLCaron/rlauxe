@@ -48,7 +48,7 @@ class TestAssertionsFromShangrla {
             nwinners = 2,
         )
         val contest = makeContestFromFakeCvrs(info, 100)
-        val contestUA = ContestUnderAudit(contest, isComparison = false)
+        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
         val asrtns = contestUA.pollingAssertions
 
         val aliceVsCandy = asrtns.find { it.assorter.desc().contains("winner=0 loser=2") }!!
@@ -126,7 +126,7 @@ class TestAssertionsFromShangrla {
             minFraction = 2.0 / 3.0,
         )
         val contest = makeContestFromFakeCvrs(info, 100)
-        val contestUA = ContestUnderAudit(contest, isComparison = false)
+        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
         val asrtns = contestUA.pollingAssertions
         val target = asrtns.first()
 

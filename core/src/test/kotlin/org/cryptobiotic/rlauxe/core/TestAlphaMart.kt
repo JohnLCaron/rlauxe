@@ -2,13 +2,11 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.*
-import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.audit.Sampler
-import kotlin.math.max
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -34,7 +32,7 @@ class TestAlphaMart {
         val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
 
         val contest = test.contests.first()
-        val contestUA = ContestUnderAudit(contest, isComparison = false, hasStyle = true)
+        val contestUA = ContestUnderAudit(contest, isClca = false, hasStyle = true).addStandardAssertions()
         val assorter = contestUA.minPollingAssertion()!!.assorter
 
         val cvrs = test.makeCvrsFromContests()

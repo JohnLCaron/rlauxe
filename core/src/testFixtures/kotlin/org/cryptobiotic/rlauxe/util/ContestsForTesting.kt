@@ -86,7 +86,7 @@ fun makeContestFromFakeCvrs(info: ContestInfo, ncvrs: Int): Contest {
 }
 
 fun makeContestUAfromCvrs(info: ContestInfo, cvrs: List<Cvr>, isComparison: Boolean=true, hasStyle: Boolean=true) : ContestUnderAudit {
-    return ContestUnderAudit( makeContestFromCvrs(info, cvrs), isComparison=isComparison, hasStyle=hasStyle)
+    return ContestUnderAudit( makeContestFromCvrs(info, cvrs), isClca=isComparison, hasStyle=hasStyle).addStandardAssertions()
 }
 
 fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyles: Boolean=true): List<ContestUnderAudit> {
@@ -108,7 +108,7 @@ fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyles: B
         if (contest == null)
             throw RuntimeException("no contest for contest id= $conId")
         val accumVotes = allVotes[conId]!!
-        val contestUA = ContestUnderAudit(contest, isComparison=true, hasStyle=hasStyles)
+        val contestUA = ContestUnderAudit(contest, isClca=true, hasStyle=hasStyles).addStandardAssertions()
         require(checkEquivilentVotes((contestUA.contest as Contest).votes, accumVotes))
         contestUA
     }

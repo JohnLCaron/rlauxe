@@ -12,6 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+// reading raire output json format - but margin not reported here, so cant actually use....
 class TestReadRaireBallotsCsv {
     val cvrFile = "src/test/data/raire/SFDA2019/SFDA2019_PrelimReport12VBMJustDASheets.raire"
     val raireCvrs = readRaireBallotsCsv(cvrFile)
@@ -29,9 +30,6 @@ class TestReadRaireBallotsCsv {
         val contestsUA = raireResults.contests // TODO incorporate into reading ??
         tabulateRaireMargins(contestsUA, cvrs)
 
-        contestsUA.forEach { contestUA ->
-            contestUA.addClcaAssertionsFromReportedMargin()
-        }
         val cassertions = contestsUA.first().clcaAssertions
         assertTrue(cassertions.isNotEmpty())
         cassertions.forEach { cassertion ->
@@ -129,7 +127,7 @@ fun tabulateRaireMargins(rcontests: List<RaireContestUnderAudit>, cvrs: List<Cvr
                 assertTrue(margin > 0)
                 rassertion.marginInVotes = margin
             }
-            rcontest.addClcaAssertionsFromReportedMargin()
+            // rcontest.addClcaAssertionsFromReportedMargin()
         }
     }
 }

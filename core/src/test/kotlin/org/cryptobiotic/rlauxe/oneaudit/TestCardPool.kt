@@ -41,7 +41,7 @@ class TestCardPool {
     fun testAddUndervotes() {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map {
-            ContestUnderAudit(it, isComparison = true)
+            ContestUnderAudit(it, isClca = true).addStandardAssertions()
         }
 
         val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
@@ -72,7 +72,7 @@ class TestCardPool {
     fun testCardPool() {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map {
-            ContestUnderAudit(it, isComparison = true)
+            ContestUnderAudit(it, isClca = true).addStandardAssertions()
         }
 
         val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes

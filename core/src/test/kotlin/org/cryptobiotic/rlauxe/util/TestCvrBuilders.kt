@@ -46,7 +46,7 @@ class TestCvrBuilders {
             println("fuzzPct = $fuzzPct")
             val allErrorRates = mutableListOf<ClcaErrorRates>()
             contests.forEach { contest ->
-                val contestUA = makeContestUAfromCvrs(contest.info, cvrs).addClcaAssertionsFromReportedMargin()
+                val contestUA = makeContestUAfromCvrs(contest.info, cvrs)
                 val minAssert = contestUA.minClcaAssertion()
                 if (minAssert != null) repeat(ntrials) {
                     val minAssort = minAssert.cassorter
@@ -71,10 +71,10 @@ class TestCvrBuilders {
             }
             val total = ntrials * ncontests
             val avgRates = ClcaErrorRates(
-                allErrorRates.map{ it.p2o }.sum() / total,
-                allErrorRates.map{ it.p1o }.sum() / total,
-                allErrorRates.map{ it.p1u }.sum() / total,
-                allErrorRates.map{ it.p2u }.sum() / total,
+                allErrorRates.sumOf { it.p2o } / total,
+                allErrorRates.sumOf { it.p1o } / total,
+                allErrorRates.sumOf { it.p1u } / total,
+                allErrorRates.sumOf { it.p2u } / total,
             )
             println("  avgRates = $avgRates")
             // println("  error% = ${avgRates.map { it / (total * fuzzPct) }}")

@@ -35,7 +35,7 @@ data class AuditConfig(
 
     override fun toString() = buildString {
         appendLine("AuditConfig(auditType=$auditType, hasStyles=$hasStyles, riskLimit=$riskLimit, seed=$seed version=$version" )
-        appendLine("  nsimEst=$nsimEst, quantile=$quantile, contestSampleCutoff=$contestSampleCutoff, auditSampleLimit=$auditSampleLimit minRecountMargin=$minRecountMargin removeTooManyPhantoms=$removeTooManyPhantoms")
+        appendLine("  nsimEst=$nsimEst, quantile=$quantile, contestSampleCutoff=$contestSampleCutoff, auditSampleLimit=$auditSampleLimit, minRecountMargin=$minRecountMargin removeTooManyPhantoms=$removeTooManyPhantoms")
         if (skipContests.isNotEmpty()) { appendLine("  skipContests=$skipContests") }
         when (auditType) {
             AuditType.POLLING -> appendLine("  $pollingConfig")

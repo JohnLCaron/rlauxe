@@ -140,7 +140,7 @@ class ColoradoOneAudit (
             val useNc = max( ncards, oaContest.Nc)
             val contest = Contest(info, candVotes, useNc, ncards)
             info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
-            ContestUnderAudit(contest, hasStyle=hasStyle)
+            ContestUnderAudit(contest, hasStyle=hasStyle).addStandardAssertions()
         }
 
         return regContests

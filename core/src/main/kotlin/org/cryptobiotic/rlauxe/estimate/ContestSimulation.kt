@@ -163,7 +163,7 @@ class ContestSimulation(val contest: Contest) {
             val contest = Contest(
                 contest.info,
                 svotes,
-                Nc = voteCount + sNu,
+                Nc = voteCount + sNu + sNp,
                 Ncast = voteCount + sNu,
             )
 

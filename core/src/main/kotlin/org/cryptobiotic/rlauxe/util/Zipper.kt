@@ -184,7 +184,7 @@ class ZipReaderIterator<T>(zipFile: String, val filter: (Path) -> Boolean, val r
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// TODO files only. not directories
+// TODO add ability to zip directories of files
 fun createZipFile(filename: String, delete: Boolean = false): File {
     val file = File(filename)
     val outputZipFile = File(filename + ".zip")

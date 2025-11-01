@@ -32,7 +32,7 @@ class AuditRecord(
         mvrs.forEach { previousMvrs[it.prn] = it } // cumulative
     }
 
-    // TODO new mvrs vs mvrs. Build interface to manage this process
+    // TODO new mvrs vs mvrs may confuse people. Build interface to manage this process?
     fun enterMvrs(mvrs: List<AuditableCard>): Boolean {
         val mvrMap = mvrs.associateBy { it.prn }.toMap()
 

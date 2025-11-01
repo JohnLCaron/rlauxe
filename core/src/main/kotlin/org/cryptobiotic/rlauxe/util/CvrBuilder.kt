@@ -150,7 +150,7 @@ class ContestVoteBuilder(
     }
 
     fun addCandidate(candId: Int, addVote: Int = 1): ContestVoteBuilder {
-        if (addVote == 1) votes.add(candId) // TODO assumes vote = 1
+        if (addVote == 1) votes.add(candId) // assumes vote = 1, only need track the candidates who got one vote
         return this
     }
 

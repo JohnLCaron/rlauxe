@@ -106,7 +106,6 @@ fun ContestIF.publishJson() : ContestIFJson {
                 this.winners,
                 this.Nc,
                 this.Ncast,
-                undervotes = this.undervotes, // TODO
                 sortedScores = this.sortedScores.map { it.publishJson() }
             )
         is Contest ->

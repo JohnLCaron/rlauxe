@@ -98,7 +98,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
                 ClcaErrorTable.calcErrorRates(contest.id, cassorter, cvrPairs)
             } */
 
-            ClcaStrategyType.oracle, // TODO: disabled
+            ClcaStrategyType.oracle, // TODO: removed so remove?
             ClcaStrategyType.noerror
                 -> {
                 ClcaErrorRates(0.0, 0.0, 0.0, 0.0)

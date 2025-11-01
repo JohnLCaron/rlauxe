@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.raire.SimulateIrvTestData
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
-import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.math.min
 
 private val debug = false

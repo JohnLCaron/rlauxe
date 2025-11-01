@@ -151,6 +151,6 @@ fun makeVunderCvrs(contestVotes: Map<Int, VotesAndUndervotes>, poolName: String,
         count++
     }
 
-    rcvrs.shuffle() // TODO need?
+    rcvrs.shuffle()
     return rcvrs
 }

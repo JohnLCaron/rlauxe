@@ -106,7 +106,7 @@ fun CardPoolWithBallotStyleJson.import(infos: Map<Int, ContestInfo>): CardPoolWi
 class CardPoolFromCvrsJson(
     val poolName: String,
     val poolId: Int,
-    val contestTabs: Map<Int, ContestTabulationJson>, // contestId -> candidateId -> nvotes // TODO use ContestTabulation ??
+    val contestTabs: Map<Int, ContestTabulationJson>, // contestId -> candidateId -> nvotes //
     val totalCards: Int // ??
 )
 

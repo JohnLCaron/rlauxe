@@ -55,7 +55,7 @@ data class RaireAssertionJson(
     val winner: Int,
     val loser: Int,
     val difficulty: Double,
-    val margin: Int, // TODO change to marginInVotes
+    val marginInVotes: Int,
     val assertion_type: String,
     val eliminated: List<Int>,
     val votes: Map<Int, Int>,
@@ -76,7 +76,7 @@ fun RaireAssertionJson.import(): RaireAssertion {
         this.winner,
         this.loser,
         this.difficulty,
-        this.margin,
+        this.marginInVotes,
         RaireAssertionType.fromString(this.assertion_type),
         this.eliminated,
         this.votes,

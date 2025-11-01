@@ -18,7 +18,7 @@ class PersistedWorkflow(
     val auditDir: String,
     val useTest: Boolean,
 ): AuditWorkflowIF {
-    val auditRecord: AuditRecord // TODO need auditConfig, contests in record
+    val auditRecord: AuditRecord // only need auditConfig, contests from record
     val publisher = Publisher(auditDir)
 
     private val config: AuditConfig

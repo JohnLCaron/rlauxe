@@ -227,7 +227,7 @@ fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
     return ContestUnderAuditJson(
         this.contest.info().publishJson(),
         this.contest.publishJson(),
-        this.isComparison,
+        this.isClca,
         this.hasStyle,
         this.pollingAssertions.map { it.publishIFJson() },
         this.clcaAssertions.map { it.publishJson() },
@@ -237,7 +237,7 @@ fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
 
 fun ContestUnderAuditJson.import(): ContestUnderAudit {
     val info = this.info.import()
-    val contestUA = ContestUnderAudit(this.contest.import(info), isComparison=this.isComparison, hasStyle=this.hasStyle, addAssertions = false)
+    val contestUA = ContestUnderAudit(this.contest.import(info), isClca=this.isComparison, hasStyle=this.hasStyle)
     contestUA.pollingAssertions = this.pollingAssertions.map { it.import(info) }
     contestUA.clcaAssertions = this.clcaAssertions.map { it.import(info) }
     contestUA.preAuditStatus = this.status

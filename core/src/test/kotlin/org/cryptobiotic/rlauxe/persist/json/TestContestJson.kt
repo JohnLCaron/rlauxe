@@ -26,7 +26,7 @@ class TestContestJson {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.PLURALITY)
         val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Ncast=211, )
 
-        val contestUAc = ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
+        val contestUAc = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
         contestUAc.preAuditStatus = TestH0Status.ContestMisformed
         assertTrue(contestUAc.pollingAssertions.isNotEmpty())
         assertTrue(contestUAc.clcaAssertions.isNotEmpty())

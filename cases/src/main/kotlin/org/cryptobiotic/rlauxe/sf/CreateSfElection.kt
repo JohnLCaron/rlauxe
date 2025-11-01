@@ -142,7 +142,7 @@ fun makeAllOneAuditContests(contestTabSums: Map<Int, ContestTabulation>, contest
         if (useNc > 0) {
             val contestOA: ContestUnderAudit = if (!contestSumTab.isIrv) {
                 val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
-                ContestUnderAudit(contest)
+                ContestUnderAudit(contest).addStandardAssertions()
             } else {
                 makeRaireContestUA(contestSumTab.info, contestSumTab, useNc)
             }
@@ -165,7 +165,7 @@ fun makeClcaContests(contestTabSums: Map<Int, ContestTabulation>, contestNcs: Ma
         if (useNc > 0) {
             val contestUA: ContestUnderAudit = if (!contestSumTab.isIrv) {
                 val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
-                ContestUnderAudit(contest)
+                ContestUnderAudit(contest).addStandardAssertions()
             } else {
                 makeRaireContestUA(contestSumTab.info, contestSumTab, useNc)
             }

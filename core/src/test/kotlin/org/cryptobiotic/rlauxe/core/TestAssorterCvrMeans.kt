@@ -1,13 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
-import org.cryptobiotic.rlauxe.dhondt.ProtoContest
-import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.Welford
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
@@ -30,7 +26,7 @@ class TestAssorterCvrMeans {
         val contest = makeContestFromCvrs(info, cvrs)
         println("\n$contest")
 
-        val contestUA = ContestUnderAudit(contest, isComparison = false)
+        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
         testMeanAssort(cvrs, contestUA)
     }
 
@@ -44,7 +40,7 @@ class TestAssorterCvrMeans {
         val (contests, cvrs) = makeContestsWithUndervotesAndPhantoms(candVotes,
             listOf(15, 123, 3), listOf(0, 0, 0))
 
-        val contestUA = ContestUnderAudit(contests[2], isComparison = false)
+        val contestUA = ContestUnderAudit(contests[2], isClca = false).addStandardAssertions()
         println("\n$contestUA")
         println("ncvrs = ${cvrs.size}")
         testMeanAssort(cvrs, contestUA)
@@ -60,7 +56,7 @@ class TestAssorterCvrMeans {
         val (contests, cvrs) = makeContestsWithUndervotesAndPhantoms(candVotes,
             listOf(15, 123, 3), listOf(11, 12, 13))
 
-        val contestUA = ContestUnderAudit(contests[1], isComparison = false)
+        val contestUA = ContestUnderAudit(contests[1], isClca = false).addStandardAssertions()
         println("\n$contestUA")
         println("ncvrs = ${cvrs.size}")
         testMeanAssort(cvrs, contestUA)
@@ -91,7 +87,7 @@ class TestAssorterCvrMeans {
             candidateNames = listToMap( "0", "1", "2", "3", "4"),
         )
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = false)
+        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
 
         println("\n$contestUA")
         println("ncvrs = ${cvrs.size}")

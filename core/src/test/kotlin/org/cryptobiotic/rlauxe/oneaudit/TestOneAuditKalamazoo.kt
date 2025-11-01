@@ -115,7 +115,7 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<ContestUnderAudit, List<CardP
     val regVotes = RegVotesImpl(poolVotes, stratumSizes[1], poolUndervotes)
     val cardPool = CardPoolImpl("kali", 1, info.id, regVotes)
 
-    val contestUA = ContestUnderAudit(contest)
+    val contestUA = ContestUnderAudit(contest).addStandardAssertions()
     addOAClcaAssortersFromMargin(listOf(contestUA), listOf(cardPool))
 
     // reported results for the two strata

@@ -39,7 +39,7 @@ class TestClcaErrorTable {
             val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
             val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
-            val contestUA = ContestUnderAudit(sim.contest).addClcaAssertionsFromReportedMargin()
+            val contestUA = ContestUnderAudit(sim.contest).addStandardAssertions()
             val assertion = contestUA.minClcaAssertion()!!
             val errors = ClcaErrorTable.calcErrorRates(0, assertion.cassorter, testMvrs.zip(testCvrs))
             val estPct = ClcaErrorTable.calcFuzzPct(2, errors)

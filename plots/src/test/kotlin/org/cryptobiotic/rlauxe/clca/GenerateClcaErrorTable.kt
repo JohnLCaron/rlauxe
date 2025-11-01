@@ -50,9 +50,7 @@ class GenerateClcaErrorTable {
 
                     repeat(auditConfig.nsimEst) {
                         val cvrs = sim.makeCvrs()
-                        val contestUA = ContestUnderAudit(contest, true, hasStyle=true)
-                        // val votes: Map<Int, Map<Int, Int>> = tabulateVotes(cvrs)
-                        contestUA.addClcaAssertionsFromReportedMargin()
+                        val contestUA = ContestUnderAudit(contest, true, hasStyle=true).addStandardAssertions()
                         val minAssert = contestUA.minClcaAssertion()!!
                         val minAssort = minAssert.cassorter
 

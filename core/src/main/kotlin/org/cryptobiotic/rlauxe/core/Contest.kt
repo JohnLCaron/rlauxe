@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.min
@@ -24,7 +23,7 @@ data class ContestInfo(
     val choiceFunction: SocialChoiceFunction,  // electionguard has "VoteVariationType"
     val nwinners: Int = 1,          // aka "numberElected"
     val voteForN: Int = nwinners,   // aka "contestSelectionLimit" or "optionSelectionLimit"
-    val minFraction: Double? = null, // supermajority only.
+    val minFraction: Double? = null, // threshold, dhondt only.
 ) {
     val candidateIds: List<Int> // same order as candidateNames
     val metadata = mutableMapOf<String, Int>()
@@ -79,7 +78,6 @@ interface ContestIF {
     fun winners(): List<Int>
     fun losers(): List<Int>
 
-    fun undervotePct() = roundToClosest(100.0 * Nundervotes() / (info().voteForN * Nc()))
     fun phantomRate() = Np() / Nc().toDouble()
     fun isIrv() = choiceFunction == SocialChoiceFunction.IRV
     fun show() : String = toString()
@@ -89,29 +87,12 @@ interface ContestIF {
     fun showAssertionDifficulty(assorter: AssorterIF): String
 
     fun votes() : Map<Int, Int>? {
-        if (this is Contest) return this.votes
-        // if (this is OneAuditContest) return this.contest.votes()
-        return null
+        return if (this is Contest) this.votes else null
     }
 }
 
-//    When we have styles and a complete CardLocationManifest, we can calculate Nb_c = physical ballots containing contest C.
-//    Then Nc = Np + Nb_c
-
-// nvotes = sum(votes)
-// undervotes = Nc * nwinners - nvotes - Np
-
-// Nu =
-//    Let V_c = reported votes for contest C; V_c <= Nb_c <= N_c.
-
-//    Let N_c = upper bound on ballots for contest C.
-//    Let V_c = reported votes for contest C
-//    Let U_c = undervotes for contest C; U_c = Nb_c - V_c >= 0.
-//    Let Np_c = nphantoms for contest C; Np_c = N_c - Nb_c.
-//    Then N_c = V_c + U_c + Np_c.
-
 /**
- * Contest with the reported results.
+ * Contest with the reported votes.
  * Immutable.
  * @parameter voteInput: candidateId -> reported number of votes. keys must be in info.candidateIds, though zeros may be omitted.
  * @parameter Nc: maximum ballots/cards that contain this contest, independently verified (not from cvrs).
@@ -171,7 +152,7 @@ open class Contest(
         undervotes = info.voteForN * Ncast - nvotes   // C1
 
         //// find winners, check that the minimum value is satisfied
-        // This works for PLURALITY, APPROVAL, THRESHOLD.  IRV handled by RaireContest, DHONDT by ContestDHondt
+        // This works for PLURALITY, APPROVAL, THRESHOLD.  IRV handled by RaireContest, DHONDT by DHondtContest
 
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
         val useMin = info.minFraction ?: 0.0
@@ -193,11 +174,7 @@ open class Contest(
         losers = mlosers.toList()
     }
 
-    override fun toString() = buildString {
-        append("$name ($id) Nc=$Nc Np=${Np()} ${votesAndUndervotes()}")
-    }
-
-    fun calcMargin(winner: Int, loser: Int): Double {
+    fun margin(winner: Int, loser: Int): Double {
         val winnerVotes = votes[winner] ?: 0
         val loserVotes = votes[loser] ?: 0
         return (winnerVotes - loserVotes) / Nc.toDouble()
@@ -247,6 +224,10 @@ open class Contest(
         }
     }
 
+    override fun toString() = buildString {
+        append("$name ($id) Nc=$Nc Np=${Np()} ${votesAndUndervotes()}")
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -286,9 +267,8 @@ open class Contest(
 /** Could rename to "Contest with assertions". note mutability. */
 open class ContestUnderAudit(
     val contest: ContestIF,
-    val isComparison: Boolean = true,
+    val isClca: Boolean = true,
     val hasStyle: Boolean = true,
-    addAssertions: Boolean = true,
 ) {
     val id = contest.id
     val name = contest.name
@@ -308,32 +288,41 @@ open class ContestUnderAudit(
         } else if (contest.winners().size == 0) {
             preAuditStatus = TestH0Status.NoWinners
         }
-        // should really be called after init is done
-        if (addAssertions) {
-            pollingAssertions = makePollingAssertions()
-        }
     }
 
-    fun addAssertionsFromAssorters(assorters: List<AssorterIF>){
+    fun addAssertionsFromAssorters(assorters: List<AssorterIF>): ContestUnderAudit {
         val assertions = mutableListOf<Assertion>()
         assorters.forEach { assorter ->
             assertions.add(Assertion(contest.info(), assorter))
         }
         pollingAssertions = assertions
+
+        if (isClca) {
+            addClcaAssertionsFromReportedMargin()
+        }
+
+        return this
     }
 
-    private fun makePollingAssertions(): List<Assertion> {
+    fun addStandardAssertions(): ContestUnderAudit {
         val useVotes = when (contest) {
             is Contest -> contest.votes
             else -> throw RuntimeException("contest type ${contest.javaClass.name} is not supported")
         }
 
-        return when (choiceFunction) {
+        this.pollingAssertions = when (choiceFunction) {
             SocialChoiceFunction.APPROVAL,
             SocialChoiceFunction.PLURALITY -> makePluralityAssertions(useVotes)
             SocialChoiceFunction.THRESHOLD -> makeThresholdAssertions(useVotes)
             else -> throw RuntimeException("choice function ${choiceFunction} is not supported")
         }
+
+        // formerly seperate
+        if (isClca) {
+            addClcaAssertionsFromReportedMargin()
+        }
+
+        return this
     }
 
     private fun makePluralityAssertions(votes: Map<Int, Int>): List<Assertion> {
@@ -359,8 +348,8 @@ open class ContestUnderAudit(
         return assertions
     }
 
-    fun addClcaAssertionsFromReportedMargin(): ContestUnderAudit {
-        require(isComparison) { "makeComparisonAssertions() can be called only on comparison contest"}
+    private fun addClcaAssertionsFromReportedMargin(): ContestUnderAudit {
+        require(isClca) { "makeComparisonAssertions() can be called only on comparison contest"}
 
         this.clcaAssertions = pollingAssertions.map { assertion ->
             val clcaAssorter = makeClcaAssorter(assertion)
@@ -374,7 +363,7 @@ open class ContestUnderAudit(
     }
 
     fun assertions(): List<Assertion> {
-        return if (isComparison) clcaAssertions else pollingAssertions
+        return if (isClca) clcaAssertions else pollingAssertions
     }
 
     fun minClcaAssertion(): ClcaAssertion? {
@@ -390,11 +379,11 @@ open class ContestUnderAudit(
     }
 
     fun minAssertion(): Assertion? {
-        return if (isComparison) minClcaAssertion() else minPollingAssertion()
+        return if (isClca) minClcaAssertion() else minPollingAssertion()
     }
 
     fun minMargin(): Double {
-        return if (isComparison) (minClcaAssertion()?.assorter?.reportedMargin() ?: 0.0)
+        return if (isClca) (minClcaAssertion()?.assorter?.reportedMargin() ?: 0.0)
         else (minPollingAssertion()?.assorter?.reportedMargin() ?: 0.0)
     }
 
@@ -427,7 +416,7 @@ open class ContestUnderAudit(
 
         other as ContestUnderAudit
 
-        if (isComparison != other.isComparison) return false
+        if (isClca != other.isClca) return false
         if (hasStyle != other.hasStyle) return false
         if (!contest.equals(other.contest)) return false
         if (preAuditStatus != other.preAuditStatus) return false
@@ -438,7 +427,7 @@ open class ContestUnderAudit(
     }
 
     override fun hashCode(): Int {
-        var result = isComparison.hashCode()
+        var result = isClca.hashCode()
         result = 31 * result + hasStyle.hashCode()
         result = 31 * result + contest.hashCode()
         result = 31 * result + preAuditStatus.hashCode()

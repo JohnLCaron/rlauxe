@@ -21,7 +21,7 @@ class TestMakeFuzzedCvrsFrom {
         val ncvrs = 10000
         val testCvrs = makeCvrsByExactMean(ncvrs, avgCvrAssortValue)
         val contest = makeContestsFromCvrs(testCvrs).first()
-        val contestUA = ContestUnderAudit(contest).addClcaAssertionsFromReportedMargin()
+        val contestUA = ContestUnderAudit(contest).addStandardAssertions()
         val assort = contestUA.clcaAssertions.first().cassorter
 
         // fuzz
@@ -60,7 +60,7 @@ class TestMakeFuzzedCvrsFrom {
             println("fuzzPct = $fuzzPct")
             val totalErrorCounts = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
             test.contests.forEach { contest ->
-                val contestUA = makeContestUAfromCvrs(contest.info, cvrs).addClcaAssertionsFromReportedMargin()
+                val contestUA = makeContestUAfromCvrs(contest.info, cvrs)
                 val minAssert = contestUA.minClcaAssertion()
                 if (minAssert != null) repeat(ntrials) { trial ->
                     val minAssort = minAssert.cassorter

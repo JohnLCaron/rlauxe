@@ -23,7 +23,7 @@ class CompareShrinkTrunkWithFixed {
         val N = 10000
         etas.forEach { eta ->
             val cvrs = makeCvrsByExactMean(N, eta)
-            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first())
+            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
 
             val sampleFn = PollWithoutReplacement(contestUA.id, true, cvrs, makeStandardPluralityAssorter(N))
 
@@ -63,7 +63,7 @@ class CompareShrinkTrunkWithFixed {
 
         etas.forEach { eta ->
             val cvrs = makeCvrsByExactMean(N, eta)
-            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first())
+            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
 
             val sampleFn = PollWithoutReplacement(contestUA.id, true, cvrs, makeStandardPluralityAssorter(N))
 

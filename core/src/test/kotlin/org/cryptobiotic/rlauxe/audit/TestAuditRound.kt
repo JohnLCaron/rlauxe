@@ -16,12 +16,11 @@ class TestAuditRound {
     fun testAuditRound() {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map {
-            ContestUnderAudit(it, isComparison = true)
+            ContestUnderAudit(it, isClca = true).addStandardAssertions()
         }
         val testCvrs = test.makeCvrsFromContests()
         val mvrManager = MvrManagerClcaForTesting(testCvrs, testCvrs, Random.nextLong())
 
-        contestsUAs.forEach { it.addClcaAssertionsFromReportedMargin() }
         val contestRounds = contestsUAs.map { contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
 

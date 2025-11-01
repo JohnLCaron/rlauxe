@@ -99,7 +99,7 @@ fun makeOneContestUA(
     val contest = Contest(info, mapOf(0 to winnerVotes, 1 to loserVotes), Nc = Nc, Ncast = Nc - Np)
     info.metadata["PoolPct"] = (100.0 * poolNcards / Nc).toInt()
 
-    val oaUA = ContestUnderAudit(contest, hasStyle=true)
+    val oaUA = ContestUnderAudit(contest, hasStyle=true).addStandardAssertions()
     addOAClcaAssortersFromMargin(listOf(oaUA), pools)
 
     val cvrs = makeTestMvrs(oaUA, cvrNc, cvrVotes, cvrUndervotes, pools)

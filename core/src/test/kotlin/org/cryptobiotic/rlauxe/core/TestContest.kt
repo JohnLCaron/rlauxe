@@ -162,8 +162,8 @@ class TestContest {
             "testContestInfo (0) Nc=227 Np=2 votes={1=125, 0=100, 2=0} undervotes=0, voteForN=1",
             contest.toString()
         )
-        println("margin(1,0) = ${contest.calcMargin(1,0)}")
-        assertEquals(25/227.toDouble(), contest.calcMargin(1,0))
+        println("margin(1,0) = ${contest.margin(1,0)}")
+        assertEquals(25/227.toDouble(), contest.margin(1,0))
 
         assertTrue(contest.percent(1) > info.minFraction!!)
     }
@@ -191,12 +191,12 @@ class TestContest {
             "testContestInfo (0) Nc=227 Np=2 votes={1=123, 0=100, 2=2} undervotes=0, voteForN=1",
             contest.toString()
         )
-        println("margin(1,0) = ${contest.calcMargin(1,0)}")
-        assertEquals(23/227.toDouble(), contest.calcMargin(1,0))
+        println("margin(1,0) = ${contest.margin(1,0)}")
+        assertEquals(23/227.toDouble(), contest.margin(1,0))
 
         assertTrue(contest.percent(1) < info.minFraction!!)
 
-        val contestUAc = ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
+        val contestUAc = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
         contestUAc.clcaAssertions.forEach { println("  ${it.cassorter.assorter.desc()} ${it.cassorter}") }
         println("minAssert = ${contestUAc.minAssertion()}")
     }
@@ -241,18 +241,18 @@ class TestContest {
             "testContestInfo (0) Nc=227 Np=2 votes={1=123, 0=100, 2=2}",
             contest.toString()
         )
-        println("margin(1,0) = ${contest.calcMargin(1,0)} percent(1) = ${contest.percent(1)}")
-        assertEquals(23/227.toDouble(), contest.calcMargin(1,0))
-        println("margin(1,2) = ${contest.calcMargin(1,2)} percent(2) = ${contest.percent(2)}")
-        assertEquals(121/227.toDouble(), contest.calcMargin(1,2))
-        println("margin(0,2) = ${contest.calcMargin(0,2)} percent(0) = ${contest.percent(0)}")
-        assertEquals(98/227.toDouble(), contest.calcMargin(0,2))
+        println("margin(1,0) = ${contest.margin(1,0)} percent(1) = ${contest.percent(1)}")
+        assertEquals(23/227.toDouble(), contest.margin(1,0))
+        println("margin(1,2) = ${contest.margin(1,2)} percent(2) = ${contest.percent(2)}")
+        assertEquals(121/227.toDouble(), contest.margin(1,2))
+        println("margin(0,2) = ${contest.margin(0,2)} percent(0) = ${contest.percent(0)}")
+        assertEquals(98/227.toDouble(), contest.margin(0,2))
 
         assertTrue(contest.percent(0) >= info.minFraction!!)
         assertTrue(contest.percent(1) >= info.minFraction!!)
         assertTrue(contest.percent(2) < info.minFraction!!)
 
-        val contestUAc = ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
+        val contestUAc = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
         contestUAc.clcaAssertions.forEach { println("  ${it.cassorter.assorter.desc()} ${it.cassorter}") }
         println("minAssert = ${contestUAc.minAssertion()}")
     }
@@ -262,13 +262,13 @@ class TestContest {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.PLURALITY)
         val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Ncast=209)
 
-        val contestUAp = ContestUnderAudit(contest, isComparison = false)
-        val contestUAc = ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
+        val contestUAp = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
+        val contestUAc = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
 
         assertNotEquals(contestUAp, contestUAc)
         assertNotEquals(contestUAp.hashCode(), contestUAc.hashCode())
 
-        val contestUAc2 = ContestUnderAudit(contest, isComparison = true).addClcaAssertionsFromReportedMargin()
+        val contestUAc2 = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
         assertEquals(contestUAc2, contestUAc)
         assertEquals(contestUAc2.hashCode(), contestUAc.hashCode())
         assertEquals(contestUAc2.toString(), contestUAc.toString())
@@ -300,21 +300,9 @@ class TestContest {
         val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc = 211, Ncast=211)
 
         val mess1 = assertFailsWith<RuntimeException> {
-            ContestUnderAudit(contest, isComparison = false)
+            ContestUnderAudit(contest, isClca = false).addStandardAssertions()
         }.message
         assertEquals("choice function IRV is not supported", mess1)
-    }
-
-    @Test
-    fun testContestUnderAuditExceptions() {
-        val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.PLURALITY)
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Ncast=210)
-
-        val contestUAc = ContestUnderAudit(contest, isComparison = false)
-        val mess4 = assertFailsWith<RuntimeException> {
-            contestUAc.addClcaAssertionsFromReportedMargin()
-        }.message
-        assertEquals("makeComparisonAssertions() can be called only on comparison contest", mess4)
     }
 
     @Test

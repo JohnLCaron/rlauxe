@@ -24,7 +24,7 @@ class TestAssorterMargins {
         //repeat(100) {
             val test = MultiContestTestData(16, 13, 27703, 0.02..0.033)
             test.contests.forEach { contest ->
-                val contestUA = ContestUnderAudit(contest, isComparison = false)
+                val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
                 val cvrs = test.makeCvrsFromContests()
                 assertNotNull(test.fcontests.find { it.info.name == contest.name })
                 testAssertions(contest, contestUA.pollingAssertions, cvrs)
@@ -47,7 +47,7 @@ class TestAssorterMargins {
 
                 try {
                     test.contests.forEach { contest ->
-                        val contestUA = ContestUnderAudit(contest, isComparison = false)
+                        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
                         testAssertions(contest, contestUA.pollingAssertions, cvrs)
                     }
                 } catch( t: Throwable) {
@@ -70,7 +70,7 @@ class TestAssorterMargins {
             ) { reportedMargin, underVotePct, phantomPct, Nc, Np ->
                 val sim = ContestSimulation.make2wayTestContest(Nc, reportedMargin, undervotePct=underVotePct, phantomPct=phantomPct)
                 // val sim = ContestSimulation.make2wayTestContestOld(reportedMargin, underVotePct, phantomPct, Nc=Nc)
-                val contestUA = ContestUnderAudit(sim.contest, isComparison = false)
+                val contestUA = ContestUnderAudit(sim.contest, isClca = false).addStandardAssertions()
                 println(
                     "${sim.show()} margin=${df(reportedMargin)} under=${df(underVotePct)} phantom=${df(phantomPct)} votes: [${
                         showVotes(
@@ -94,7 +94,7 @@ class TestAssorterMargins {
             }
             assertTrue(checkEquivilentVotes(contest.votes, votem))
 
-            val calcReportedMargin = contest.calcMargin(ast.winner, ast.loser)
+            val calcReportedMargin = contest.margin(ast.winner, ast.loser)
             val calcAssorterMargin = ast.assorter.calcAssorterMargin(ast.info.id, cvrs)
             assertEquals(calcReportedMargin, calcAssorterMargin, doublePrecision, "calcReportedMargin")
             assertEquals(ast.assorter.reportedMargin(), calcAssorterMargin, doublePrecision, "calcAssorterMargin")

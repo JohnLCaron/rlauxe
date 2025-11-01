@@ -37,7 +37,7 @@ class TestAvgAssortValues {
         )
         val contest = makeContestFromCvrs(contestInfo, cvrs) // Nc is set as number of cvrs with that contest
         println(contest)
-        val contestUA = ContestUnderAudit(contest, isComparison = false)
+        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
 
         val assertions = contestUA.pollingAssertions
         assertNotNull(assertions)
@@ -83,7 +83,7 @@ class TestAvgAssortValues {
             candidateNames = listToMap( "0", "1", "2", "3", "4"),
         )
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = false)
+        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
 
         val assertions = contestUA.pollingAssertions
         assertNotNull(assertions)
@@ -138,7 +138,7 @@ class TestAvgAssortValues {
             candidateNames = listToMap( "0", "1", "2", "3", "4"),
         )
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, isComparison = false)
+        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
 
         val assertions = contestUA.pollingAssertions
         assertNotNull(assertions)

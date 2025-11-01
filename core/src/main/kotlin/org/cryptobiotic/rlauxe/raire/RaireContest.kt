@@ -102,11 +102,15 @@ class RaireContestUnderAudit(
     contest: RaireContest,
     val rassertions: List<RaireAssertion>,
     hasStyle: Boolean = true,  // TODO do we really support hasStyle == false?
-): ContestUnderAudit(contest, isComparison=true, hasStyle=hasStyle, addAssertions=false) {
+): ContestUnderAudit(contest, isClca=true, hasStyle=hasStyle) {
     val candidates =  contest.info.candidateIds
 
     init {
         this.pollingAssertions = makeRairePollingAssertions()
+        this.clcaAssertions = pollingAssertions.map { assertion ->
+            val clcaAssorter = makeClcaAssorter(assertion)
+            ClcaAssertion(contest.info(), clcaAssorter)
+        }
     }
 
     fun makeRairePollingAssertions(): List<Assertion> {

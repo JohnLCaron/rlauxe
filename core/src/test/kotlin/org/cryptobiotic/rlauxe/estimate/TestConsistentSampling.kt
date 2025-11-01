@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
+import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.core.*
@@ -18,12 +20,11 @@ class TestConsistentSampling {
     fun testConsistentClcaSampling() {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map {
-            ContestUnderAudit(it, isComparison = true)
+            ContestUnderAudit(it, isClca = true).addStandardAssertions()
         }
         val testCvrs = test.makeCvrsFromContests()
         val mvrManager = MvrManagerClcaForTesting(testCvrs, testCvrs, Random.nextLong())
 
-        contestsUAs.forEach { it.addClcaAssertionsFromReportedMargin() }
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
 
@@ -63,7 +64,7 @@ class TestConsistentSampling {
     @Test
     fun testConsistentPollingSampling() {
         val test = MultiContestTestData(20, 11, 20000)
-        val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false) }
+        val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isClca = false).addStandardAssertions() }
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
 
@@ -99,7 +100,7 @@ class TestConsistentSampling {
     fun testUniformPollingSampling() {
         val N = 20000
         val test = MultiContestTestData(20, 11, N)
-        val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isComparison = false) }
+        val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isClca = false).addStandardAssertions() }
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = 100 + Random.nextInt(it.Nc/2) }
 
@@ -109,9 +110,10 @@ class TestConsistentSampling {
         //val prng = Prng(Random.nextLong())
         //val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit( it, idx, prng.next()) }
         val contestSampleCutoff = 10000
+        val config = AuditConfig(AuditType.CLCA, true, contestSampleCutoff = 10000)
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList(), sampledBorc = emptyList())
-        uniformSampling(auditRound, mvrManager, previousSamples=emptySet(), contestSampleCutoff=contestSampleCutoff, 0)
+        uniformSampling(auditRound, mvrManager, previousSamples=emptySet(), config, 0)
         println("nsamples needed = ${auditRound.samplePrns.size}\n")
 
         // must be ordered
@@ -129,6 +131,8 @@ class TestConsistentSampling {
         println("contest.name (id) == sampleSize")
         contestRounds.forEach { contest ->
             assertTrue(contest.estSampleSizeEligibleForRemoval() <= auditRound.samplePrns.size)
+
+            println("done ${contest.done} or estSampleSize=${contest.estSampleSizeEligibleForRemoval()} <= ${auditRound.samplePrns.size}")
             assertTrue(contest.done || contest.estSampleSizeNoStyles <= auditRound.samplePrns.size)
 
             println("contest ${contest.id} estSampleSize=${contest.estSampleSizeEligibleForRemoval()} done=${contest.done}")

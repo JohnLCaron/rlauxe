@@ -23,19 +23,12 @@ class WorkflowTesterClca(
 
         val regularContests = contestsToAudit.map {
             if (it is DHondtContest) {
-                val cua = ContestUnderAudit(it, isComparison = true, hasStyle = auditConfig.hasStyles, addAssertions = false)
-                cua.addAssertionsFromAssorters(it.assorters)
-                cua
+                ContestUnderAudit(it, isClca = true, hasStyle = auditConfig.hasStyles).addAssertionsFromAssorters(it.assorters)
             } else {
-                ContestUnderAudit(it, isComparison = true, hasStyle = auditConfig.hasStyles)
+                ContestUnderAudit(it, isClca = true, hasStyle = auditConfig.hasStyles).addStandardAssertions()
             }
         }
         contestsUA = regularContests + raireContests
-
-        // TODO dont raire contests already have assertions added ??
-        contestsUA.forEach { contest ->
-            contest.addClcaAssertionsFromReportedMargin()
-        }
     }
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {

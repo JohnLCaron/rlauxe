@@ -31,7 +31,7 @@ class TestComparisonSamplerWithRaire {
         val contestUA = raireResults.contests.first()
 
         // TODO margin not set because its not present in RaireAssertions.json
-        contestUA.addClcaAssertionsFromReportedMargin()
+        contestUA.addStandardAssertions()
 
         contestUA.clcaAssertions.forEach { assert ->
             run(cvrs, contestUA, assert.cassorter)

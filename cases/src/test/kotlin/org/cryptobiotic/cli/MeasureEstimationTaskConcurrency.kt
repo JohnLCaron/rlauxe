@@ -28,8 +28,7 @@ class MeasureEstimationTaskConcurrency {
     fun measure() {
         val test = MultiContestTestData(15, 1, 20000)
         val cvrs = test.makeCvrsFromContests()
-        val contestsUA: List<ContestUnderAudit> =
-            test.contests.map { ContestUnderAudit(it).addClcaAssertionsFromReportedMargin() }
+        val contestsUA  = test.contests.map { ContestUnderAudit(it).addStandardAssertions() }
         val nassertions = contestsUA.sumOf { it.assertions().size }
         println("ncontests=${contestsUA.size} nassertions=${nassertions} ncvrs=${cvrs.size}")
         val contestRounds = contestsUA.map{ contest -> ContestRound(contest, 1) }

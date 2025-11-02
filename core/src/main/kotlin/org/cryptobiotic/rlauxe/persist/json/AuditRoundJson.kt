@@ -130,6 +130,8 @@ fun ContestRound.publishJson() : ContestRoundJson {
 
 fun ContestRoundJson.import(contestUA: ContestUnderAudit): ContestRound {
     val assertionMap = contestUA.assertions().associateBy { it.assorter.hashcodeDesc() }
+    // contestUA.pollingAssertions.forEach{ println("  contestUA ${it.assorter} desc='${it.assorter.hashcodeDesc()}' info=${it.info}")}
+
     val assertionRounds = assertionRounds.map {
         val ref = assertionMap[it.assorterDesc]
         if (ref == null)

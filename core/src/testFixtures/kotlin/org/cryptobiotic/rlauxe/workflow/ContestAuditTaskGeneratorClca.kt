@@ -114,7 +114,7 @@ class ClcaSingleRoundAuditTaskGenerator(
 
 class ClcaSingleRoundAuditTask(
     val name: String,
-    val workflow: AuditWorkflowIF,
+    val workflow: AuditWorkflow,
     val testMvrs: List<Cvr>,
     val otherParameters: Map<String, Any>,
     val quiet: Boolean,
@@ -161,7 +161,7 @@ class ClcaSingleRoundAuditTask(
 }
 
 // keep this seperate function for testing
-fun runClcaSingleRoundAudit(workflow: AuditWorkflowIF, contestRounds: List<ContestRound>, quiet: Boolean = true,
+fun runClcaSingleRoundAudit(workflow: AuditWorkflow, contestRounds: List<ContestRound>, quiet: Boolean = true,
                             auditor: ClcaAssertionAuditorIF
 ): Int {
     val stopwatch = Stopwatch()

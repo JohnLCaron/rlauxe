@@ -9,8 +9,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 
 private val logger = KotlinLogging.logger("RlauxAuditIF")
 
-// abstraction for running an audit.
-abstract class AuditWorkflow {
+ abstract class AuditWorkflow {
     abstract fun auditConfig() : AuditConfig
     abstract fun mvrManager() : MvrManager
     abstract fun auditRounds(): MutableList<AuditRound>

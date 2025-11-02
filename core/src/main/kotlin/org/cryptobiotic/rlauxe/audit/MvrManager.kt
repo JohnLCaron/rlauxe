@@ -8,21 +8,13 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 
 private val logger = KotlinLogging.logger("MvrManager")
 
-// use MvrManager for audits, not create audit
+// use MvrManager for auditing, not creating an audit
 interface MvrManager {
     // either Cvrs (clca) or CardLocations (polling) or both (oneaudit)
     fun sortedCards(): CloseableIterable<AuditableCard>
     fun sortedCvrs(): CloseableIterable<Cvr> = CloseableIterable { AuditableCardToCvrAdapter(sortedCards().iterator()) }
 
-    //// for uniformSampling
-    fun takeFirst(nmvrs: Int): List<AuditableCard> {
-        val result = mutableListOf<AuditableCard>()
-        val ballotCardsIter = sortedCards().iterator()
-        while (ballotCardsIter.hasNext() && result.size < nmvrs) {
-            result.add(ballotCardsIter.next())
-        }
-        return result
-    }
+    // noStyle: scale by proportion of ballots that have this contest. Nb >= Nc
     fun Nballots(contestUA: ContestUnderAudit): Int // TODO where does this come from ?
 }
 

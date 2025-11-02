@@ -60,7 +60,7 @@ class CobraAudit(
     contestsToAudit: List<Contest>, // the contests you want to audit
     val mvrManagerForTesting: MvrManagerClcaForTesting, // mutable
     val p2prior: Double,
-) : AuditWorkflowIF {
+) : AuditWorkflow() {
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 

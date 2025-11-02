@@ -113,6 +113,7 @@ data class MultiContestTestData(
         return CardLocationManifest(cardLocations + phantoms, ballotStyles)
     }
 
+    // TODO may not be needed
     fun makeCvrsAndBallots(hasStyle: Boolean): Pair<List<Cvr>, List<CardLocation>> {
         val cvrs = makeCvrsFromContests()
         val cardLocations = cvrs.map { cvr ->

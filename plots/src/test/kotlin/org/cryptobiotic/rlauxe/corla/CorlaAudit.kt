@@ -87,7 +87,7 @@ class CorlaAudit(
     contestsToAudit: List<Contest>, // the contests you want to audit
     val mvrManagerForTesting: MvrManagerClcaForTesting, // mutable
     val quiet: Boolean = false,
-): AuditWorkflowIF {
+): AuditWorkflow() {
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
 

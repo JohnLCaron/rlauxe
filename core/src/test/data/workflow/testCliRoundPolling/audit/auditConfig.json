@@ -1,6 +1,6 @@
 {
     "auditType": "POLLING",
-    "hasStyles": true,
+    "hasStyle": true,
     "riskLimit": 0.05,
     "seed": 8127253899321333630,
     "nsimEst": 100,

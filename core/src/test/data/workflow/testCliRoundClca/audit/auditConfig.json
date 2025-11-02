@@ -1,6 +1,6 @@
 {
     "auditType": "CLCA",
-    "hasStyles": true,
+    "hasStyle": true,
     "riskLimit": 0.05,
     "seed": -446804960042342188,
     "nsimEst": 100,

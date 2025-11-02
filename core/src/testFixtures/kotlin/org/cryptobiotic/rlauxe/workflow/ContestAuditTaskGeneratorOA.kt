@@ -20,7 +20,7 @@ class OneAuditContestAuditTaskGenerator(
     override fun name() = "OneAuditWorkflowTaskGenerator"
 
     override fun generateNewTask(): ContestAuditTask {
-        val auditConfig = auditConfigIn ?: AuditConfig(
+        val config = auditConfigIn ?: AuditConfig(
             AuditType.ONEAUDIT, true, nsimEst = nsimEst,
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean, simFuzzPct = mvrsFuzzPct)
         )
@@ -34,8 +34,8 @@ class OneAuditContestAuditTaskGenerator(
         )
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA.contest), oaCvrs, mvrsFuzzPct)
 
-        val oneaudit = WorkflowTesterOneAudit(auditConfig=auditConfig, listOf(contestOA),
-            MvrManagerClcaForTesting(oaCvrs, oaMvrs, auditConfig.seed))
+        val oneaudit = WorkflowTesterOneAudit(auditConfig=config, listOf(contestOA),
+            MvrManagerClcaForTesting(oaCvrs, oaMvrs, config.seed))
         return ContestAuditTask(
             name(),
             oneaudit,
@@ -63,7 +63,7 @@ class OneAuditSingleRoundAuditTaskGenerator(
     override fun name() = "ClcaSingleRoundAuditTaskGenerator"
 
     override fun generateNewTask(): ClcaSingleRoundAuditTask {
-        val auditConfig = auditConfigIn ?: AuditConfig(
+        val config = auditConfigIn ?: AuditConfig(
             AuditType.ONEAUDIT, true, nsimEst = nsimEst,
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean, simFuzzPct = mvrsFuzzPct)
         )
@@ -83,7 +83,7 @@ class OneAuditSingleRoundAuditTaskGenerator(
             makeFuzzedCvrsFrom(listOf(contestOA.contest), oaCvrs, mvrsFuzzPct)
         }
 
-        val oneaudit = WorkflowTesterOneAudit(auditConfig=auditConfig, listOf(contestOA), MvrManagerClcaForTesting(oaCvrs, oaMvrs, auditConfig.seed))
+        val oneaudit = WorkflowTesterOneAudit(auditConfig=config, listOf(contestOA), MvrManagerClcaForTesting(oaCvrs, oaMvrs, config.seed))
         return ClcaSingleRoundAuditTask(
             name(),
             oneaudit,

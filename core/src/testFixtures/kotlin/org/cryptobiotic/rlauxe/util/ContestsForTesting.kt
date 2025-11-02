@@ -5,6 +5,8 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import kotlin.random.Random
 
+// CANDIDATE FOR REMOVAL; use MultiContestTestData
+
 fun makeContestFromCvrs(
     info: ContestInfo,
     cvrs: List<Cvr>,
@@ -89,7 +91,7 @@ fun makeContestUAfromCvrs(info: ContestInfo, cvrs: List<Cvr>, isComparison: Bool
     return ContestUnderAudit( makeContestFromCvrs(info, cvrs), isClca=isComparison, hasStyle=hasStyle).addStandardAssertions()
 }
 
-fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyles: Boolean=true): List<ContestUnderAudit> {
+fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyle: Boolean=true): List<ContestUnderAudit> {
     if (contests.isEmpty()) return emptyList()
 
     val allVotes = mutableMapOf<Int, MutableMap<Int, Int>>() // contestId -> votes (cand -> vote)
@@ -108,7 +110,7 @@ fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyles: B
         if (contest == null)
             throw RuntimeException("no contest for contest id= $conId")
         val accumVotes = allVotes[conId]!!
-        val contestUA = ContestUnderAudit(contest, isClca=true, hasStyle=hasStyles).addStandardAssertions()
+        val contestUA = ContestUnderAudit(contest, isClca=true, hasStyle=hasStyle).addStandardAssertions()
         require(checkEquivilentVotes((contestUA.contest as Contest).votes, accumVotes))
         contestUA
     }

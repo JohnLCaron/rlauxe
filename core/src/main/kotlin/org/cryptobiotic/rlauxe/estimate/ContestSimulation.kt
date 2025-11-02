@@ -144,8 +144,8 @@ class ContestSimulation(val contest: Contest) {
             return ContestSimulation(contest)
         }
 
-        fun makeContestWithLimits(contest: Contest, auditConfig: AuditConfig): ContestSimulation {
-            val limit = auditConfig.contestSampleCutoff
+        fun makeContestWithLimits(contest: Contest, config: AuditConfig): ContestSimulation {
+            val limit = config.contestSampleCutoff
             if (limit == null || contest.Nc <= limit) return ContestSimulation(contest)
 
             // otherwise scale everything

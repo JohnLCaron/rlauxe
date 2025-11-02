@@ -19,7 +19,7 @@ interface Sampler: Iterator<Double> {
 //// For polling audits.
 class PollWithoutReplacement(
     val contestId: Int,
-    val hasStyles: Boolean,
+    val hasStyle: Boolean,
     val mvrs : List<Cvr>,
     val assorter: AssorterIF,
     val allowReset: Boolean = true,
@@ -67,7 +67,7 @@ class PollWithoutReplacement(
 //// For clca audits
 class ClcaWithoutReplacement(
     val contestId: Int,
-    val hasStyles: Boolean,
+    val hasStyle: Boolean,
     val cvrPairs: List<Pair<Cvr, Cvr>>,
     val cassorter: ClcaAssorter,
     val allowReset: Boolean,
@@ -120,9 +120,9 @@ class ClcaWithoutReplacement(
     fun poolCount() = poolCount
 }
 
-fun makeClcaNoErrorSampler(contestId: Int, hasStyles: Boolean, cvrs : List<Cvr>, cassorter: ClcaAssorter): Sampler {
+fun makeClcaNoErrorSampler(contestId: Int, hasStyle: Boolean, cvrs : List<Cvr>, cassorter: ClcaAssorter): Sampler {
     val cvrPairs = cvrs.zip(cvrs)
-    return ClcaWithoutReplacement(contestId, hasStyles, cvrPairs, cassorter, true, false)
+    return ClcaWithoutReplacement(contestId, hasStyle, cvrPairs, cassorter, true, false)
 }
 
 //// For clca audits with styles and no errors

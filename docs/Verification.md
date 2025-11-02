@@ -54,7 +54,7 @@ data class AuditableCard (
     val index: Int,  // index into the original, canonical list of cards
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
-    val contests: IntArray, // list of contests on this ballot. optional when !hasStyles 
+    val contests: IntArray, // list of contests on this ballot. optional when !hasStyle
     val votes: List<IntArray>?, // for each contest, an array of the candidate ids voted for; for IRV, ranked first to last; missing for pooled data
     val poolId: Int?, // for OneAudit
 )
@@ -92,8 +92,8 @@ For IRV contests:
 
 For each audit round, for each contest, verify that the cards selected for auditing have the smallest PRN.
 
-1. if !hasStyles the cards are selected using UniformSampling.
-2. if hasStyles the cards are selected using ConsistentSampling.
+1. if !hasStyle the cards are selected using UniformSampling.
+2. if hasStyle the cards are selected using ConsistentSampling.
 
 
 

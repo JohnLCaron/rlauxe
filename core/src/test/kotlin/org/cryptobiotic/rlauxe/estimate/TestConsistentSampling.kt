@@ -18,7 +18,7 @@ class TestConsistentSampling {
 
     @Test
     fun testConsistentClcaSampling() {
-        val test = MultiContestTestData(20, 11, 20000)
+        val test = MultiContestTestData(20, 11, 20000, hasStyle=true)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map {
             ContestUnderAudit(it, isClca = true).addStandardAssertions()
         }
@@ -63,12 +63,12 @@ class TestConsistentSampling {
 
     @Test
     fun testConsistentPollingSampling() {
-        val test = MultiContestTestData(20, 11, 20000)
+        val test = MultiContestTestData(20, 11, 20000, hasStyle=true)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isClca = false).addStandardAssertions() }
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
 
-        val ballotManifest = test.makeCardLocationManifest(true)
+        val ballotManifest = test.makeCardLocationManifest()
         val mvrManager = MvrManagerPollingForTesting(ballotManifest.cardLocations, test.makeCvrsFromContests(), Random.nextLong())
 
         //val prng = Prng(Random.nextLong())
@@ -99,12 +99,12 @@ class TestConsistentSampling {
     @Test
     fun testUniformPollingSampling() {
         val N = 20000
-        val test = MultiContestTestData(20, 11, N)
+        val test = MultiContestTestData(20, 11, N, hasStyle=false)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isClca = false).addStandardAssertions() }
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = 100 + Random.nextInt(it.Nc/2) }
 
-        val ballotManifest = test.makeCardLocationManifest(false)
+        val ballotManifest = test.makeCardLocationManifest()
         val mvrManager = MvrManagerPollingForTesting(ballotManifest.cardLocations, test.makeCvrsFromContests(), Random.nextLong())
 
         val contestSampleCutoff = 10000

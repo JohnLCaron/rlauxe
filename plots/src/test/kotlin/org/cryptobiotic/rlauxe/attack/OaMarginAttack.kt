@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.attack
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
@@ -118,7 +117,7 @@ class OaMarginAttack {
         val taskgen = ClcaSingleRoundAuditTaskGenerator(
             N, margin=reportedMargin, 0.0, 0.0, 0.0,
             parameters = mapOf("nruns" to nruns, "cat" to flip1),
-            auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle)),
+            config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle)),
             p1flips=flip1,
         )
         val task: ClcaSingleRoundAuditTask = taskgen.generateNewTask()

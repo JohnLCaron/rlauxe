@@ -90,7 +90,7 @@ Jurisdiction Scenarios
 Audit types
 
 1. Polling/Comparison
-2. hasStyles/noStyles
+2. hasStyle/noStyle
 4. ONEAudit?
 5. Hybrid?
 6. Stratified?

@@ -16,7 +16,6 @@ import org.cryptobiotic.rlauxe.verify.VerifyContests
 import org.junit.jupiter.api.Assertions.assertFalse
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
-import kotlin.test.Test
 import kotlin.test.fail
 
 class TestPersistentAuditClca {
@@ -29,11 +28,11 @@ class TestPersistentAuditClca {
 
         val fuzzMvrPct = .01
         val publisher = Publisher(auditDir)
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000)
+        val auditConfig = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000)
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
         val N = 5000
-        val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
+        val testData = MultiContestTestData(11, 4, N, hasStyle=true, marginRange=0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistentWorkflowClca $testData")

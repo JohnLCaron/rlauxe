@@ -44,7 +44,7 @@ class CompareCorlaPlots {
             val clca0 = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, phantomPct, fuzzPct,
                 parameters = mapOf("nruns" to nruns, "cat" to "rlauxe.$name"),
-                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
+                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clca0))
 
@@ -60,7 +60,7 @@ class CompareCorlaPlots {
             val clca1 = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, phantomPct, fuzzPct,
                 parameters = mapOf("nruns" to nruns, "cat" to "rlauxe.$name"),
-                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
+                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clca1))
 
@@ -76,7 +76,7 @@ class CompareCorlaPlots {
             val clca2 = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, phantomPct, fuzzPct,
                 parameters = mapOf("nruns" to nruns, "cat" to "rlauxe.$name"),
-                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
+                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clca2))
 
@@ -92,7 +92,7 @@ class CompareCorlaPlots {
             val clca3= ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, phantomPct, fuzzPct,
                 parameters = mapOf("nruns" to nruns, "cat" to "rlauxe.$name"),
-                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
+                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clca3))
 
@@ -108,7 +108,7 @@ class CompareCorlaPlots {
             val clca4 = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, phantomPct, fuzzPct,
                 parameters = mapOf("nruns" to nruns, "cat" to "rlauxe.$name"),
-                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
+                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clca4))
         }

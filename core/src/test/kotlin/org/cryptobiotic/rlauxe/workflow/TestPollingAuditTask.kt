@@ -15,7 +15,7 @@ class TestPollingAuditTask {
         val margin = .04
         val mvrFuzzPct = .0123
         val auditConfig = AuditConfig(
-            AuditType.POLLING, hasStyles = true, nsimEst = 1,
+            AuditType.POLLING, hasStyle = true, nsimEst = 1,
             pollingConfig = PollingConfig(simFuzzPct = mvrFuzzPct)
         )
         val taskGen = PollingContestAuditTaskGenerator(
@@ -37,7 +37,7 @@ class TestPollingAuditTask {
         val margin = .08
         val mvrFuzzPct = .0123
         val auditConfig = AuditConfig(
-            AuditType.POLLING, hasStyles = true, nsimEst = 10, contestSampleCutoff = 10000,
+            AuditType.POLLING, hasStyle = true, nsimEst = 10, contestSampleCutoff = 10000,
             pollingConfig = PollingConfig(simFuzzPct = mvrFuzzPct)
         )
         val taskGen = PollingSingleRoundAuditTaskGenerator(

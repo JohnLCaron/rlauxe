@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.audit
 
+// CANDIDATE FOR REMOVAL. just use cardManifest.csv
+
 // used for polling audits using List<CardLocation> instead of List<Cvr>
 // AuditableCard serializes both, adding the original index in the manifest and the prn.
 data class CardLocationManifest(
@@ -11,8 +13,8 @@ data class CardLocationManifest(
 data class CardLocation(
     val location: String,
     val phantom: Boolean = false,
-    val cardStyle: CardStyle?, // if hasStyles (or)
-    val contestIds: List<Int>? = null, // if hasStyles
+    val cardStyle: CardStyle?, // if hasStyle (or)
+    val contestIds: List<Int>? = null, // if hasStyle
 ) {
     fun hasContest(contestId: Int): Boolean {
         if (cardStyle != null) return cardStyle.hasContest(contestId)

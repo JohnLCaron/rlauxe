@@ -9,21 +9,13 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
-import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.cli.runRound
-import org.cryptobiotic.rlauxe.dhondt.DHondtContest
-import org.cryptobiotic.rlauxe.dhondt.ProtoContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
-import org.cryptobiotic.rlauxe.dhondt.DhondtScore
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.util.ErrorMessages
-import org.cryptobiotic.rlauxe.util.Welford
-import kotlin.math.abs
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.fail
 
 class TestBelgiumAuditSampleLimit {
     val electionName = "Hainaut"
@@ -58,9 +50,9 @@ fun createBelgiumElectionLimited(electionName: String)  {
     val totalVotes = belgiumElection.NrOfValidVotes + belgiumElection.NrOfBlankVotes
     val contestd = dcontest.createContest(Nc = totalVotes, Ncast = totalVotes)
 
-    val auditConfig = AuditConfig(
+    val config = AuditConfig(
         AuditType.CLCA,
-        hasStyles = true,
+        hasStyle = true,
         removeCutoffContests = false,
         auditSampleLimit = 1000,
         riskLimit = .05,
@@ -69,10 +61,9 @@ fun createBelgiumElectionLimited(electionName: String)  {
         clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
     )
     val topdir = "$toptopdir/${electionName}Limited"
-    createBelgiumClca(topdir, contestd, auditConfigIn = auditConfig)
+    createBelgiumClca(topdir, contestd, auditConfigIn = config)
 
     val publisher = Publisher("$topdir/audit")
-    val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
     writeSortedCardsExternalSort(topdir, publisher, config.seed)
 
     // get estimate, set up first round

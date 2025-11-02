@@ -23,8 +23,8 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtrip() {
-        val testData = MultiContestTestData(11, 4, 50000)
-        val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, false, false).addStandardAssertions()}
+        val testData = MultiContestTestData(11, 4, 50000,  hasStyle=false)
+        val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, isClca=false, hasStyle=false).addStandardAssertions()}
         val contestRounds = contestsUAs.map{ contest ->
             val cr = ContestRound(contest, 1,)
             //     var actualMvrs = 0 // Actual number of ballots with this contest contained in this round's sample.
@@ -70,8 +70,8 @@ class TestAuditRoundJson {
     @Test
     fun testRoundtripIO() {
 
-        val testData = MultiContestTestData(11, 4, 50000)
-        val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, false, false).addStandardAssertions()}
+        val testData = MultiContestTestData(11, 4, 50000, hasStyle=false)
+        val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, isClca=false, hasStyle=false).addStandardAssertions()}
         val contestRounds = contestsUAs.map{ contest ->
             val cr = ContestRound(contest, 1)
             cr.actualMvrs = 420
@@ -111,13 +111,12 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtripWithRounds() {
-
         val fuzzMvrs = .01
-        val auditConfig = AuditConfig(
-            AuditType.CLCA, hasStyles = true, seed = 12356667890L, nsimEst = 10,
+        val config = AuditConfig(
+            AuditType.CLCA, hasStyle = true, seed = 12356667890L, nsimEst = 10,
         )
         val N = 5000
-        val testData = MultiContestTestData(11, 4, N, marginRange = 0.03..0.05)
+        val testData = MultiContestTestData(11, 4, N, hasStyle=false, marginRange = 0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testComparisonWorkflow $testData")
@@ -130,8 +129,8 @@ class TestAuditRoundJson {
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
-        var clcaWorkflow = WorkflowTesterClca(auditConfig, contests, emptyList(),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed))
+        var clcaWorkflow = WorkflowTesterClca(config, contests, emptyList(),
+            MvrManagerClcaForTesting(testCvrs, testMvrs, config.seed))
         val lastRound = runAudit("testComparisonWorkflow", clcaWorkflow, quiet = true)
         assertNotNull(lastRound)
 
@@ -166,12 +165,12 @@ class TestAuditRoundJson {
     @Test
     fun testRoundtripWithRaire() {
         val fuzzMvrs = .01
-        val auditConfig = AuditConfig(
-            AuditType.CLCA, hasStyles = true, seed = 12356667890L, nsimEst = 10,
+        val config = AuditConfig(
+            AuditType.CLCA, hasStyle = true, seed = 12356667890L, nsimEst = 10,
         )
 
         val N = 5000
-        val testData = MultiContestTestData(11, 4, N, marginRange = 0.03..0.05)
+        val testData = MultiContestTestData(11, 4, N, config.hasStyle , marginRange = 0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testComparisonWorkflow $testData")
@@ -186,8 +185,8 @@ class TestAuditRoundJson {
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
-        var clcaWorkflow = WorkflowTesterClca(auditConfig, contests, listOf(rcontest),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed))
+        var clcaWorkflow = WorkflowTesterClca(config, contests, listOf(rcontest),
+            MvrManagerClcaForTesting(testCvrs, testMvrs, config.seed))
         val nextRound = clcaWorkflow.startNewRound()
         clcaWorkflow.runAuditRound(nextRound)
 
@@ -227,16 +226,16 @@ class TestAuditRoundJson {
         val contests = listOf(contestd)
 
         val fuzzMvrs = .01
-        val auditConfig = AuditConfig(
-            AuditType.CLCA, hasStyles = true, seed = 12356667890L, nsimEst = 10,
+        val config = AuditConfig(
+            AuditType.CLCA, hasStyle = true, seed = 12356667890L, nsimEst = 10,
         )
 
         val testCvrs = contestd.createSimulatedCvrs()
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
-        var clcaWorkflow = WorkflowTesterClca(auditConfig, contests, emptyList(),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed))
+        val clcaWorkflow = WorkflowTesterClca(config, contests, emptyList(),
+            MvrManagerClcaForTesting(testCvrs, testMvrs, config.seed))
         val nextRound = clcaWorkflow.startNewRound()
         clcaWorkflow.runAuditRound(nextRound)
 

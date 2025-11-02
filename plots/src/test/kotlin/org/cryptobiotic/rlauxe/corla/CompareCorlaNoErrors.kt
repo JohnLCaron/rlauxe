@@ -11,8 +11,6 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
-import org.jetbrains.kotlinx.kandy.util.color.Color
-
 class CompareCorlaNoErrors {
     val nruns = 10
     val nsimEst = 10
@@ -44,7 +42,7 @@ class CompareCorlaNoErrors {
             val clca0 = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, phantomPct, fuzzPct,
                 parameters = mapOf("nruns" to nruns, "cat" to "rlauxe"),
-                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
+                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clca0))
         }

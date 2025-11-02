@@ -35,7 +35,7 @@ class PersistedWorkflow(
             throw RuntimeException( auditRecordResult.toString() )
         }
 
-        config = auditRecord.auditConfig
+        config = auditRecord.config
         contestsUA = auditRecord.contests
 
         auditRounds.addAll(auditRecord.rounds)

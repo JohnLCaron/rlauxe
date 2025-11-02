@@ -84,7 +84,7 @@ which corresponds to case 1.
 The margin is calculated with both undervotes and phantoms = 1/2.
 But in reality, the phantoms use "worst case" vote for the loser.
 If the phantom pct is greater than the margin, the audit will fail.
-When hasStyles, we know what that percent is.
+When hasStyle, we know what that percent is.
 So for estimation, we could calculate the margin with usePhantoms=true, since thats what were going to see during the audit.
 
 If we have styles, we can count undervotes, and so we know Np. Since Np has such a strong effect, we will keep it per

@@ -269,19 +269,19 @@ fun createColoradoOneAudit(
     val stopwatch = Stopwatch()
     val election = ColoradoOneAudit(electionDetailXmlFile, contestRoundFile, precinctFile, isClca)
 
-    val auditConfig = when {
+    val config = when {
         (auditConfigIn != null) -> auditConfigIn
         isClca -> AuditConfig(
-            AuditType.CLCA, hasStyles = true, contestSampleCutoff = 20000, riskLimit = .03, nsimEst=10,
+            AuditType.CLCA, hasStyle = true, contestSampleCutoff = 20000, riskLimit = .03, nsimEst=10,
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
         )
         else -> AuditConfig(
-            AuditType.ONEAUDIT, hasStyles = true, riskLimit = .03, contestSampleCutoff = null, nsimEst = 1,
+            AuditType.ONEAUDIT, hasStyle = true, riskLimit = .03, contestSampleCutoff = null, nsimEst = 1,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
     }
 
-    CreateAudit("corla", topdir, auditConfig, election, clear = clear)
+    CreateAudit("corla", topdir, config, election, clear = clear)
     println("createColoradoOneAudit took $stopwatch")
 }
 

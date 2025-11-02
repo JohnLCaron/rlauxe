@@ -8,9 +8,10 @@ data class AuditableCard (
     val index: Int,  // index into the original, canonical list of cards
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
-    val contests: IntArray, // list of contests on this ballot. TODO optional when !hasStyles
-    val votes: List<IntArray>?, // for each contest, an array of the candidate ids voted for; for IRV, ranked first to last; missing for pooled data
+    val contests: IntArray, // list of contests on this ballot. TODO when !hasStyle, include all contests that might be on the ballot. NOTE these look like undervotes, is that ok?
+    val votes: List<IntArray>?, // for each contest, an array of the candidate ids voted for; for IRV, ranked first to last; missing for pooled data or polling audits
     val poolId: Int?, // for OneAudit
+    // val hasStyle: Boolean, // TODO ??
 ) {
     // if there are no votes, the IntArrays are all empty; looks like all undervotes
     fun cvr() : Cvr {
@@ -82,6 +83,7 @@ data class AuditableCard (
             return AuditableCard(cvr.id, index, 0, cvr.phantom, contests.toIntArray(), null, null)
         }
 
+        // go away
         fun fromCardLocation(cardLocation: CardLocation, index: Int, sampleNum: Long, poolId: Int? = null): AuditableCard {
             return AuditableCard(cardLocation.location, index, sampleNum, cardLocation.phantom, cardLocation.contests(), null, poolId)
         }

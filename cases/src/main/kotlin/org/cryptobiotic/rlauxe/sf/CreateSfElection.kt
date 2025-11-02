@@ -244,14 +244,14 @@ fun createSfElection(
     isClca : Boolean,
 ) {
     val stopwatch = Stopwatch()
-    val auditConfig = when {
+    val config = when {
         (auditConfigIn != null) -> auditConfigIn
         isClca -> AuditConfig(
-            AuditType.CLCA, hasStyles = true, contestSampleCutoff = 20000, riskLimit = .05, nsimEst=10,
+            AuditType.CLCA, hasStyle = true, contestSampleCutoff = 20000, riskLimit = .05, nsimEst=10,
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
         )
         else -> AuditConfig(
-            AuditType.ONEAUDIT, hasStyles = true, riskLimit = .05, contestSampleCutoff = 20000, nsimEst = 1,
+            AuditType.ONEAUDIT, hasStyle = true, riskLimit = .05, contestSampleCutoff = 20000, nsimEst = 1,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
     }
@@ -264,6 +264,6 @@ fun createSfElection(
         isClca = isClca,
     )
 
-    CreateAudit("sf2024", topdir, auditConfig, election)
+    CreateAudit("sf2024", topdir, config, election)
     println("createSfElection took $stopwatch")
 }

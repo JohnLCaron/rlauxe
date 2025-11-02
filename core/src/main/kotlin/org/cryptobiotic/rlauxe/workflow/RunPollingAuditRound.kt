@@ -9,7 +9,7 @@ private val logger = KotlinLogging.logger("PollingAudit")
 
 // TODO parallelize over contests
 fun runPollingAuditRound(
-    auditConfig: AuditConfig,
+    config: AuditConfig,
     contests: List<ContestRound>,
     mvrManager: MvrManagerPollingIF,
     roundIdx: Int,
@@ -30,9 +30,9 @@ fun runPollingAuditRound(
             if (!assertionRound.status.complete) {
                 val assertion = assertionRound.assertion
                 val assorter = assertion.assorter
-                val sampler = PollWithoutReplacement(contest.id, auditConfig.hasStyles, mvrs, assorter, allowReset=false)
+                val sampler = PollWithoutReplacement(contest.id, config.hasStyle, mvrs, assorter, allowReset=false)
 
-                val testH0Result = auditPollingAssertion(auditConfig, contest.contestUA.contest, assertionRound, sampler, roundIdx, quiet)
+                val testH0Result = auditPollingAssertion(config, contest.contestUA.contest, assertionRound, sampler, roundIdx, quiet)
                 assertionRound.status = testH0Result.status
                 if (testH0Result.status.complete) assertionRound.round = roundIdx
             }
@@ -46,7 +46,7 @@ fun runPollingAuditRound(
 }
 
 fun auditPollingAssertion(
-    auditConfig: AuditConfig,
+    config: AuditConfig,
     contest: ContestIF,
     assertionRound: AssertionRound,
     sampler: Sampler,
@@ -62,14 +62,14 @@ fun auditPollingAssertion(
         N = contest.Nc(),
         withoutReplacement = true,
         upperBound = assorter.upperBound(),
-        d = auditConfig.pollingConfig.d,
+        d = config.pollingConfig.d,
         eta0 = eta0,
     )
     val testFn = AlphaMart(
         estimFn = estimFn,
         N = contest.Nc(),
         withoutReplacement = true,
-        riskLimit = auditConfig.riskLimit,
+        riskLimit = config.riskLimit,
         upperBound = assorter.upperBound(),
     )
 

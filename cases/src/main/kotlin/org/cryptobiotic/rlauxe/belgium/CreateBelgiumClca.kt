@@ -47,15 +47,15 @@ fun createBelgiumClca(
     val stopwatch = Stopwatch()
     val election = BelgiumClca(contestd)
 
-    val auditConfig = when {
+    val config = when {
         (auditConfigIn != null) -> auditConfigIn
         else -> AuditConfig(
-            AuditType.CLCA, hasStyles = true, removeCutoffContests = false, riskLimit = .05, nsimEst=10, minRecountMargin=0.0,
+            AuditType.CLCA, hasStyle = true, removeCutoffContests = false, riskLimit = .05, nsimEst=10, minRecountMargin=0.0,
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
         )
     }
 
-    CreateAudit("belgiumClca", topdir, auditConfig, election, clear = clear)
+    CreateAudit("belgiumClca", topdir, config, election, clear = clear)
     println("createBelgiumClca took $stopwatch")
 }
 

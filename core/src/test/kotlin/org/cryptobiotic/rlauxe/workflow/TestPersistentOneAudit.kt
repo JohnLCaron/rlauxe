@@ -13,7 +13,6 @@ import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.CvrToAuditableCardPolling
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.io.path.Path
-import kotlin.test.Test
 
 class TestPersistentOneAudit {
     // topdir = "/home/stormy/rla/persist/testPersistentOneAudit"
@@ -25,7 +24,7 @@ class TestPersistentOneAudit {
         clearDirectory(Path(auditDir))
 
         val auditConfig = AuditConfig(
-            AuditType.ONEAUDIT, hasStyles = true, contestSampleCutoff = 20000, nsimEst = 10,
+            AuditType.ONEAUDIT, hasStyle = true, contestSampleCutoff = 20000, nsimEst = 10,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
 

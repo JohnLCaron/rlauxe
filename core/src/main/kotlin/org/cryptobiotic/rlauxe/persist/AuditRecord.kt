@@ -21,7 +21,7 @@ private val logger = KotlinLogging.logger("AuditRecord")
 
 class AuditRecord(
     val location: String,
-    val auditConfig: AuditConfig,
+    val config: AuditConfig,
     val contests: List<ContestUnderAudit>,
     val rounds: List<AuditRound>,
     mvrs: List<AuditableCard> // mvrs already sampled
@@ -86,7 +86,7 @@ class AuditRecord(
 
             val publisher = Publisher(location)
             val auditConfigResult = readAuditConfigJsonFile(publisher.auditConfigFile())
-            val auditConfig = if (auditConfigResult is Ok) auditConfigResult.unwrap() else {
+            val config = if (auditConfigResult is Ok) auditConfigResult.unwrap() else {
                 errs.addNested(auditConfigResult.unwrapError())
                 null
             }
@@ -132,7 +132,7 @@ class AuditRecord(
                 }
             }
             return if (errs.hasErrors()) Err(errs) else
-                Ok(AuditRecord(location, auditConfig!!, contests!!, rounds, sampledMvrsAll))
+                Ok(AuditRecord(location, config!!, contests!!, rounds, sampledMvrsAll))
         }
     }
 }

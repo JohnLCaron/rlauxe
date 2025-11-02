@@ -20,15 +20,15 @@ class TestClcaAuditNoStyles {
         val underVotePct= 0.02 .. 0.12
         val phantomPct= 0.005
         val phantomRange= phantomPct .. phantomPct
-        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
+        val testData = MultiContestTestData(ncontests, nbs, N, hasStyle=true, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(
-            AuditType.CLCA, hasStyles=false, seed=12356667890L, nsimEst=10,
+        val config = AuditConfig(
+            AuditType.CLCA, hasStyle=false, seed=12356667890L, nsimEst=10,
             clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates)
         )
 
-        testClcaWorkflow(auditConfig, testData)
+        testClcaWorkflow(config, testData)
     }
 
     @Test
@@ -39,15 +39,15 @@ class TestClcaAuditNoStyles {
         val underVotePct= 0.02 .. 0.12
         val phantomPct= 0.005
         val phantomRange= phantomPct .. phantomPct
-        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
+        val testData = MultiContestTestData(ncontests, nbs, N, hasStyle=true, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(
-            AuditType.CLCA, hasStyles=false, seed=12356667890L, nsimEst=10,
+        val config = AuditConfig(
+            AuditType.CLCA, hasStyle=false, seed=12356667890L, nsimEst=10,
             clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates)
         )
 
-        testClcaWorkflow(auditConfig, testData)
+        testClcaWorkflow(config, testData)
     }
 
     // @Test
@@ -59,26 +59,26 @@ class TestClcaAuditNoStyles {
 
     @Test
     fun noErrorsNoPhantoms() {
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=false, nsimEst=10)
+        val config = AuditConfig(AuditType.CLCA, hasStyle=false, nsimEst=10)
         val ncontests = 11
         val nbs = 4
         val marginRange= 0.015 .. 0.05
         val underVotePct= 0.02 .. 0.12
         val phantomPct= 0.00 .. 0.00
-        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
-        testClcaWorkflow(auditConfig, testData)
+        val testData = MultiContestTestData(ncontests, nbs, N, config.hasStyle, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
+        testClcaWorkflow(config, testData)
     }
 
     @Test
     fun noErrorsWithPhantoms() {
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=false, nsimEst=10)
+        val config = AuditConfig(AuditType.CLCA, hasStyle=false, nsimEst=10)
         val ncontests = 42
         val nbs = 11
         val marginRange= 0.01 .. 0.05
         val underVotePct= 0.02 .. 0.22
         val phantomPct= 0.005 .. 0.005
-        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
-        testClcaWorkflow(auditConfig, testData)
+        val testData = MultiContestTestData(ncontests, nbs, N, config.hasStyle, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
+        testClcaWorkflow(config, testData)
     }
 
     @Test
@@ -89,39 +89,39 @@ class TestClcaAuditNoStyles {
         val underVotePct= 0.02 .. 0.22
         val phantomPct= 0.005
         val phantomRange= phantomPct .. phantomPct
-        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
+        val testData = MultiContestTestData(ncontests, nbs, N, hasStyle=true, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
-        val auditConfig = AuditConfig(
-            AuditType.CLCA, hasStyles=true, nsimEst=10,
+        val config = AuditConfig(
+            AuditType.CLCA, hasStyle=true, nsimEst=10,
             clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates)
         )
-        testClcaWorkflow(auditConfig, testData)
+        testClcaWorkflow(config, testData)
     }
 
     @Test
     fun testClcaWithFuzz() {
-        val auditConfig = AuditConfig(
-            AuditType.CLCA, hasStyles=true, nsimEst=10,
+        val config = AuditConfig(
+            AuditType.CLCA, hasStyle=true, nsimEst=10,
             clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct = 0.01)
         )
 
         val N = 50000
-        val testData = MultiContestTestData(11, 4, N)
-        testClcaWorkflow(auditConfig, testData)
+        val testData = MultiContestTestData(11, 4, N, config.hasStyle)
+        testClcaWorkflow(config, testData)
     }
 
-    fun testClcaWorkflow(auditConfig: AuditConfig, testData: MultiContestTestData) {
+    fun testClcaWorkflow(config: AuditConfig, testData: MultiContestTestData) {
         val contests: List<Contest> = testData.contests
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
-        val testMvrs = if (auditConfig.clcaConfig.strategy != ClcaStrategyType.fuzzPct) testCvrs
+        val testMvrs = if (config.clcaConfig.strategy != ClcaStrategyType.fuzzPct) testCvrs
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-            else makeFuzzedCvrsFrom(contests, testCvrs, auditConfig.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
+            else makeFuzzedCvrsFrom(contests, testCvrs, config.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
-        val workflow = WorkflowTesterClca(auditConfig, contests, emptyList(),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed))
+        val workflow = WorkflowTesterClca(config, contests, emptyList(),
+            MvrManagerClcaForTesting(testCvrs, testMvrs, config.seed))
         runAudit("TestClcaWorkflowNoStyles", workflow)
     }
 

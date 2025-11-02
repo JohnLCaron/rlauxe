@@ -22,7 +22,7 @@ import java.nio.file.StandardOpenOption
 /*
 data class AuditConfig(
     val auditType: AuditType,
-    val hasStyles: Boolean, // has Card Style Data (CSD), i.e. we know which contests each card/ballot contains
+    val hasStyle: Boolean,
     val riskLimit: Double = 0.05,
     val seed: Long = secureRandom.nextLong(), // determines sample order. set carefully to ensure truly random.
 
@@ -46,7 +46,7 @@ data class AuditConfig(
 @Serializable
 data class AuditConfigJson(
     val auditType: String,
-    val hasStyles: Boolean,
+    val hasStyle: Boolean,
     val riskLimit: Double,
     val seed: Long,
     val nsimEst: Int,
@@ -68,7 +68,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
     return when (this.auditType) {
         AuditType.CLCA -> AuditConfigJson(
             this.auditType.name,
-            this.hasStyles,
+            this.hasStyle,
             this.riskLimit,
             this.seed,
             this.nsimEst,
@@ -85,7 +85,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
 
         AuditType.POLLING -> AuditConfigJson(
             this.auditType.name,
-            this.hasStyles,
+            this.hasStyle,
             this.riskLimit,
             this.seed,
             this.nsimEst,
@@ -102,7 +102,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
 
         AuditType.ONEAUDIT -> AuditConfigJson(
             this.auditType.name,
-            this.hasStyles,
+            this.hasStyle,
             this.riskLimit,
             this.seed,
             this.nsimEst,
@@ -124,7 +124,7 @@ fun AuditConfigJson.import(): AuditConfig {
     return when (auditType) {
         AuditType.CLCA -> AuditConfig(
             auditType,
-            this.hasStyles,
+            this.hasStyle,
             this.riskLimit,
             this.seed,
             this.nsimEst,
@@ -141,7 +141,7 @@ fun AuditConfigJson.import(): AuditConfig {
 
         AuditType.POLLING -> AuditConfig(
             auditType,
-            this.hasStyles,
+            this.hasStyle,
             this.riskLimit,
             this.seed,
             this.nsimEst,
@@ -158,7 +158,7 @@ fun AuditConfigJson.import(): AuditConfig {
 
         AuditType.ONEAUDIT -> AuditConfig(
             auditType,
-            this.hasStyles,
+            this.hasStyle,
             this.riskLimit,
             this.seed,
             this.nsimEst,

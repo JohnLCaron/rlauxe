@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 class MvrManagerClcaSingleRound(val sortedCards: CloseableIterable<AuditableCard>, val maxSamples: Int = -1) :
     MvrManagerClcaIF {
 
-    override fun Nballots(contestUA: ContestUnderAudit) = contestUA.Nc - contestUA.Np // TODO wtf ??
+    // override fun Nballots(contestUA: ContestUnderAudit) = contestUA.Nc - contestUA.Np // TODO wtf ??
 
     override fun sortedCards() = sortedCards
 

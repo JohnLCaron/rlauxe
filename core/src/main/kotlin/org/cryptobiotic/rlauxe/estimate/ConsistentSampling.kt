@@ -65,7 +65,7 @@ fun sample(
         if (!quiet) logger.info{" consistentSamplingSize= ${auditRound.samplePrns.size}"}
     } else {
         if (!quiet) logger.info{"\nuniformSampling round ${auditRound.roundIdx}"}
-        uniformSampling(auditRound, mvrManager, previousSamples, config, auditRound.roundIdx)
+        uniformSampling(auditRound, mvrManager as MvrManagerNoStyleIF, previousSamples, config, auditRound.roundIdx)
         if (!quiet) logger.info{" uniformSamplingSize= ${auditRound.samplePrns.size}"}
     }
 }
@@ -153,7 +153,7 @@ fun consistentSampling(
 // for audits with hasStyle = false
 fun uniformSampling(
     auditRound: AuditRound,
-    mvrManager: MvrManager,
+    mvrManager: MvrManagerNoStyleIF,
     previousSamples: Set<Long>,
     config: AuditConfig,
     roundIdx: Int,

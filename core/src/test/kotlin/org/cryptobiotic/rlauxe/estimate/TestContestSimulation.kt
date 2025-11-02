@@ -102,7 +102,7 @@ class TestContestSimulation {
         if (nunder > 2) assertEquals(underVotePct, underPct, .02)
     }
 
-    @Test
+    @Test // flakey floont
     fun compareEstimationSimulation() {
         //// ClcaSingleRoundAuditTaskGenerator
         val Nc = 10000
@@ -143,7 +143,7 @@ class TestContestSimulation {
                 // var testMvrsOrg = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrsOrg, mvrsFuzzPct) // audit, not sim
 
                 // then in the sim, use the actuals cvrs
-                val samplerOrg = ClcaSimulation(testCvrs, contest, cassorter, errorRates)
+                val samplerOrg = ClcaSimulatedErrorRates(testCvrs, contest, cassorter, errorRates)
                 val pairsOrg = samplerOrg.mvrs.zip(samplerOrg.cvrs)
                 val marginOrg = cassorter.calcClcaAssorterMargin(pairsOrg)
 
@@ -152,7 +152,7 @@ class TestContestSimulation {
                 // instead of using testCvrs, we generate the cvrs again
                 val contestSimNow = ContestSimulation(contest)
                 val cvrsNow = contestSimNow.makeCvrs()
-                val samplerNow = ClcaSimulation(cvrsNow, contest, cassorter, errorRates)
+                val samplerNow = ClcaSimulatedErrorRates(cvrsNow, contest, cassorter, errorRates)
                 val pairsNow = samplerNow.mvrs.zip(samplerNow.cvrs)
                 val marginNow = cassorter.calcClcaAssorterMargin(pairsNow)
 

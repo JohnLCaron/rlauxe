@@ -79,7 +79,7 @@ fun estimateSampleSizes(
     return estResults.map { it.repeatedResult }
 }
 
-// For a contest, generate a task for each assertion thats not been completed
+// For one contest, generate a task for each assertion thats not been completed
 // starts from where the last audit left off (prevAuditResult.pvalue)
 fun makeEstimationTasks(
     config: AuditConfig,
@@ -90,24 +90,20 @@ fun makeEstimationTasks(
 ): List<EstimateSampleSizeTask> {
     val tasks = mutableListOf<EstimateSampleSizeTask>()
 
-    // logger.debug{ "makeEstimationTask for contest ${contestRound.contestUA.id} round $roundIdx"}
-
     // simulate the cvrs once for all the assertions for this contest
     val contest = contestRound.contestUA.contest
     val useList: List<Cvr>? = when (config.auditType) {
         AuditType.CLCA -> {
-            // Simulation of Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
+            // TODO why not use the actual cvrs ??
             if (contest.isIrv()) {
                 val testData = SimulateIrvTestData(contest as RaireContest, contestRound.contestUA.minMargin(), config.contestSampleCutoff)
                 testData.makeCvrs()
             } else {
-                ContestSimulation.makeContestWithLimits(contest as Contest, config).makeCvrs()
+                ContestSimulation.simulateContestCvrsWithLimits(contest as Contest, config).makeCvrs()
             }
         }
         AuditType.POLLING -> {
-            // Simulation of multicandidate Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
-            // TODO what about supermajority?
-            ContestSimulation.makeContestWithLimits(contest as Contest, config).makeCvrs()
+            ContestSimulation.simulateContestCvrsWithLimits(contest as Contest, config).makeCvrs()
         }
         else -> null
     }
@@ -170,7 +166,7 @@ class EstimateSampleSizeTask(
     override fun run(): EstimationResult {
         val result: RunTestRepeatedResult = when (config.auditType) {
             AuditType.CLCA ->
-                simulateSampleSizeClcaAssorter(
+                estimateClcaAssertionRound(
                     roundIdx,
                     config,
                     contest.contestUA,
@@ -179,7 +175,7 @@ class EstimateSampleSizeTask(
                     startingTestStatistic
                 )
             AuditType.POLLING ->
-                simulateSampleSizePollingAssorter(
+                estimatePollingAssertionRound(
                     roundIdx,
                     config,
                     contest.contestUA.contest,
@@ -189,7 +185,7 @@ class EstimateSampleSizeTask(
                     moreParameters=moreParameters,
                 )
             AuditType.ONEAUDIT ->
-                simulateSampleSizeOneAuditAssorter(
+                estimateOneAuditAssertionRound(
                     roundIdx,
                     config,
                     contest.contestUA,
@@ -213,7 +209,7 @@ data class EstimationResult(
 
 private const val quiet = true
 
-fun simulateSampleSizeClcaAssorter(
+fun estimateClcaAssertionRound(
     roundIdx: Int,
     config: AuditConfig,
     contestUA: ContestUnderAudit,
@@ -226,8 +222,6 @@ fun simulateSampleSizeClcaAssorter(
     val cassertion = assertionRound.assertion as ClcaAssertion
     val cassorter = cassertion.cassorter
     val contest = contestUA.contest
-
-    // logger.debug{"simulateSampleSizeClcaAssorter ${contest.name} ${cassorter.assorter().desc()}"}
 
     // strategies to choose how much error there is
     var fuzzPct = 0.0
@@ -266,7 +260,7 @@ fun simulateSampleSizeClcaAssorter(
         if (isIrvFzz) fuzzPct = clcaConfig.simFuzzPct
         Pair(
             if (isIrvFzz) ClcaFuzzSampler(clcaConfig.simFuzzPct, cvrs, contest, cassorter)
-            else ClcaSimulation(cvrs, contest, cassorter, errorRates), // TODO why cant we use this with IRV??
+            else ClcaSimulatedErrorRates(cvrs, contest, cassorter, errorRates), // TODO why cant we use this with IRV??
             AdaptiveBetting(Nc = contest.Nc(), a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
         )
     } else {
@@ -281,7 +275,7 @@ fun simulateSampleSizeClcaAssorter(
     sampler.reset()
 
     // run the simulation ntrials (=config.nsimEst) times
-    val result: RunTestRepeatedResult = simulateSampleSizeBettingMart(
+    val result: RunTestRepeatedResult = runRepeatedBettingMart(
         config,
         sampler,
         bettingFn,
@@ -306,11 +300,10 @@ fun simulateSampleSizeClcaAssorter(
     return result
 }
 
-fun simulateSampleSizeBettingMart(
+fun runRepeatedBettingMart(
     config: AuditConfig,
     sampleFn: Sampler,
     bettingFn: BettingFn,
-    // margin: Double,
     noerror: Double,
     upperBound: Double,
     Nc: Int,
@@ -333,7 +326,6 @@ fun simulateSampleSizeBettingMart(
         testFn = testFn,
         testParameters = moreParameters,
         startingTestStatistic = startingTestStatistic,
-        // margin = margin,
         Nc = Nc,
     )
     return result
@@ -342,7 +334,7 @@ fun simulateSampleSizeBettingMart(
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //// Polling
 
-fun simulateSampleSizePollingAssorter(
+fun estimatePollingAssertionRound(
     roundIdx: Int,
     config: AuditConfig,
     contest: ContestIF,
@@ -364,7 +356,7 @@ fun simulateSampleSizePollingAssorter(
         PollingFuzzSampler(pollingConfig.simFuzzPct, cvrs, contest as Contest, assorter) // TODO cant use Raire
     }
 
-    val result = simulateSampleSizeAlphaMart(
+    val result = runRepeatedAlphaMart(
         config,
         sampler,
         null,
@@ -386,7 +378,7 @@ fun simulateSampleSizePollingAssorter(
     return result
 }
 
-fun simulateSampleSizeAlphaMart(
+fun runRepeatedAlphaMart(
     config: AuditConfig,
     sampleFn: Sampler,
     estimFn: EstimFn?, // if null use default TruncShrinkage
@@ -427,7 +419,9 @@ fun simulateSampleSizeAlphaMart(
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //// OneAudit
 
-fun simulateSampleSizeOneAuditAssorter(
+// estimateClcaAssertionRound
+
+fun estimateOneAuditAssertionRound(
     roundIdx: Int,
     config: AuditConfig,
     contestUA: ContestUnderAudit,
@@ -454,7 +448,7 @@ fun simulateSampleSizeOneAuditAssorter(
     val result = if (strategy == OneAuditStrategyType.optimalComparison || strategy == OneAuditStrategyType.optimalBet) {
         val bettingFn: BettingFn = OptimalComparisonNoP1(contestUA.Nc, true, oaCassorter.upperBound, p2 = 0.0)
 
-        simulateSampleSizeBettingMart(
+        runRepeatedBettingMart(
             config,
             sampler,
             bettingFn,
@@ -483,7 +477,7 @@ fun simulateSampleSizeOneAuditAssorter(
             )
         }
 
-        simulateSampleSizeAlphaMart(
+        runRepeatedAlphaMart(
             config,
             sampler,
             estimFn = estimFn,

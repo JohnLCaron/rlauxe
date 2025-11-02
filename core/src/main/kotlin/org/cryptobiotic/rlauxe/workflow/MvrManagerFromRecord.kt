@@ -22,7 +22,7 @@ class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerP
         cardFile = publisher.sortedCardsFile()
     }
 
-    override fun Nballots(contestUA: ContestUnderAudit) = 0 // TODO Danger Will Rogers!!
+    // override fun Nballots(contestUA: ContestUnderAudit) = 0 // TODO Danger Will Rogers!!
     override fun sortedCards() = CloseableIterable{ auditableCards() }
 
     // same pairs over all contests (!)

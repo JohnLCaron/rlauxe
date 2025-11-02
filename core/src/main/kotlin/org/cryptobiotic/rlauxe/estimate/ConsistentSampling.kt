@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.roundToClosest
 
@@ -162,7 +163,7 @@ fun uniformSampling(
 
     // scale by proportion of ballots that have this contest
     contestsNotDone.forEach { contestRound ->
-        val Nb = mvrManager.Nballots(contestRound.contestUA)
+        val Nb = mvrManager.Nballots(contestRound.contestUA) // Nb >= Nc
         val fac = Nb / contestRound.Nc.toDouble()
         val estWithFactor = roundToClosest((contestRound.estSampleSize * fac))
         contestRound.estSampleSizeNoStyles = estWithFactor
@@ -187,7 +188,7 @@ fun uniformSampling(
     }
 
     // take the first nmvrs of the sorted ballots
-    val sampledCards = mvrManager.takeFirst(nmvrs)
+    val sampledCards = takeFirst(mvrManager.sortedCards(), nmvrs)
     val newMvrs = sampledCards.count { !previousSamples.contains(it.prn) }
 
     // set the results into the auditRound directly
@@ -195,5 +196,16 @@ fun uniformSampling(
     auditRound.newmvrs = newMvrs
     auditRound.samplePrns = sampledCards.map { it.prn }
 }
+
+fun takeFirst(sortedCards: CloseableIterable<AuditableCard>, nmvrs: Int): List<AuditableCard> {
+    val result = mutableListOf<AuditableCard>()
+    val ballotCardsIter = sortedCards.iterator()
+    while (ballotCardsIter.hasNext() && result.size < nmvrs) {
+        result.add(ballotCardsIter.next())
+    }
+    return result
+}
+
+
 
 

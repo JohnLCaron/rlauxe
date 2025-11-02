@@ -46,6 +46,11 @@ class PersistedWorkflow(
         }
     }
 
+    override fun auditConfig() =  this.config
+    override fun mvrManager() = mvrManager
+    override fun auditRounds() = auditRounds
+    override fun contestsUA(): List<ContestUnderAudit> = contestsUA
+
     override fun startNewRound(quiet: Boolean): AuditRound {
 
         val nextRound = super.startNewRound(quiet)
@@ -97,11 +102,6 @@ class PersistedWorkflow(
 
         return complete
     }
-
-    override fun auditConfig() =  this.config
-    override fun mvrManager() = mvrManager
-    override fun auditRounds() = auditRounds
-    override fun contestsUA(): List<ContestUnderAudit> = contestsUA
 
     override fun toString(): String {
         return "PersistentAudit(auditDir='$auditDir', useTest=$useTest, mvrManager=$mvrManager)"

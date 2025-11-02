@@ -98,27 +98,26 @@ fun makeOneContestUA(
 
     val contest = Contest(info, mapOf(0 to winnerVotes, 1 to loserVotes), Nc = Nc, Ncast = Nc - Np)
     info.metadata["PoolPct"] = (100.0 * poolNcards / Nc).toInt()
-
-    val oaUA = ContestUnderAudit(contest, hasStyle=true).addStandardAssertions()
-    addOAClcaAssortersFromMargin(listOf(oaUA), pools)
-
-    val cvrs = makeTestMvrs(oaUA, cvrNc, cvrVotes, cvrUndervotes, pools)
+    val cvrs = makeTestMvrs(contest, cvrNc, cvrVotes, cvrUndervotes, pools)
 
     // now that we have the cvrs, remake the pools
     val poolFromCvr = CardPoolFromCvrs(pool.poolName, pool.poolId, mapOf(contestId to info))
     cvrs.filter{ it.poolId != null }.forEach { poolFromCvr.accumulateVotes(it) }
 
+    // this changes the reportedMargin; now we can make the assorters
+    val oaUA = ContestUnderAudit(contest, hasStyle=true).addStandardAssertions()
+    addOAClcaAssortersFromMargin(listOf(oaUA), listOf(poolFromCvr))
+
     return Triple(oaUA, listOf(poolFromCvr), cvrs)
 }
 
 fun makeTestMvrs(
-    oaContestUA: ContestUnderAudit,
+    oaContest: Contest,
     cvrNcards: Int,
     cvrVotes:Map<Int, Int>,
     cvrUndervotes: Int,
     pools: List<CardPoolIF>): List<Cvr> {
 
-    val oaContest = oaContestUA.contest
     val cvrs = mutableListOf<Cvr>()
     val info = oaContest.info()
 

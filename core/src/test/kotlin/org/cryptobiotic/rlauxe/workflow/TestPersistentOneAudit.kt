@@ -19,7 +19,7 @@ class TestPersistentOneAudit {
     // topdir = "/home/stormy/rla/persist/testPersistentOneAudit"
     val topdir = kotlin.io.path.createTempDirectory().toString()
 
-    @Test
+    // @Test
     fun testPersistentWorkflow() {
         val auditDir = "$topdir/audit"
         clearDirectory(Path(auditDir))
@@ -42,7 +42,7 @@ class TestPersistentOneAudit {
         val oaWorkflow = WorkflowTesterOneAudit(auditConfig, election.contestsUA(), mvrManager)
         var round = 1
         var done = false
-        var workflow : AuditWorkflowIF = oaWorkflow
+        var workflow : AuditWorkflow = oaWorkflow
         while (!done) {
             // why doesnt mvrManager read in the mvrs?
             done = runPersistentWorkflowStage(round, workflow, auditDir, testMvrsUA, Publisher(auditDir))

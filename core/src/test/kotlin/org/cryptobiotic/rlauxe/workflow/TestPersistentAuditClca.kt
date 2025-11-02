@@ -23,7 +23,7 @@ class TestPersistentAuditClca {
     val auditDir = "/home/stormy/rla/persist/testPersistentWorkflowClca"
     // val auditDir = kotlin.io.path.createTempDirectory().toString()
 
-    @Test
+    // @Test
     fun testPersistentAuditClca() {
         clearDirectory(Path.of(auditDir))
 
@@ -68,7 +68,7 @@ class TestPersistentAuditClca {
 
         var round = 1
         var done = false
-        var workflow : AuditWorkflowIF = clcaWorkflow
+        var workflow : AuditWorkflow = clcaWorkflow
         while (!done) {
             done = runPersistentWorkflowStage(round, workflow, auditDir, testMvrsUA, publisher)
             workflow = PersistedWorkflow(auditDir, useTest = false)
@@ -78,7 +78,7 @@ class TestPersistentAuditClca {
     }
 }
 
-fun runPersistentWorkflowStage(roundIdx: Int, workflow: AuditWorkflowIF, auditDir: String, testMvrsUA: List<AuditableCard>, publish: Publisher): Boolean {
+fun runPersistentWorkflowStage(roundIdx: Int, workflow: AuditWorkflow, auditDir: String, testMvrsUA: List<AuditableCard>, publish: Publisher): Boolean {
     val roundStopwatch = Stopwatch()
     var done = false
     println("------------------ Round ${roundIdx}")

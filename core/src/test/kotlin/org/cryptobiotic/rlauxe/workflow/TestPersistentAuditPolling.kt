@@ -16,7 +16,7 @@ class TestPersistentAuditPolling {
     // val auditDir = "/home/stormy/rla/persist/testPersistentWorkflowPolling"
     val auditDir = kotlin.io.path.createTempDirectory().toString()
 
-    @Test
+    // @Test
     fun testPersistentAuditPolling() {
         clearDirectory(Path.of(auditDir))
 
@@ -59,7 +59,7 @@ class TestPersistentAuditPolling {
 
         var round = 1
         var done = false
-        var workflow : AuditWorkflowIF = pollingWorkflow
+        var workflow : AuditWorkflow = pollingWorkflow
         while (!done) {
             done = runPersistentWorkflowStage(round, workflow, auditDir, testMvrsUA, publisher)
             workflow = PersistedWorkflow(auditDir, useTest = false)

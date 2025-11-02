@@ -16,7 +16,7 @@ interface ContestAuditTaskGenerator {
 // A ContestAuditTask is always for a single contest (unlike a Workflow which may be multi-contest)
 class ContestAuditTask(
     val name: String,
-    val workflow: AuditWorkflowIF,
+    val workflow: AuditWorkflow,
     val otherParameters: Map<String, Any>,
 ) : ConcurrentTaskG<WorkflowResult> {
 

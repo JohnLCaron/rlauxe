@@ -10,7 +10,7 @@ class WorkflowTesterOneAudit(
     val auditConfig: AuditConfig,
     val contestsUA: List<ContestUnderAudit>, // the contests you want to audit
     val mvrManager: MvrManagerClcaIF,
-): AuditWorkflowIF {
+): AuditWorkflow() {
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {

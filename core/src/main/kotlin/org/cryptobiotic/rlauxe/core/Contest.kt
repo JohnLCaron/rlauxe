@@ -52,9 +52,11 @@ data class ContestInfo(
         require(candidateIdSet.size == candidateIds.size) { "duplicate candidate id $candidateIds"}
     }
 
-    override fun toString() = buildString {
+    fun desc() = buildString {
         append("'$name' ($id) candidates=${candidateIds} choiceFunction=$choiceFunction nwinners=$nwinners voteForN=${voteForN}")
     }
+
+    override fun toString() = desc()
 
     fun show() = buildString {
         appendLine("$name ($id) choiceFunction=${choiceFunction} nwinners=$nwinners")

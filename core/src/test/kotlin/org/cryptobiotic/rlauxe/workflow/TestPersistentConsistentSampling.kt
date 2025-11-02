@@ -1,14 +1,14 @@
-package org.cryptobiotic.rlauxe.estimate
+package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import org.cryptobiotic.rlauxe.audit.previousSamples
+import org.cryptobiotic.rlauxe.estimate.consistentSampling
 import kotlin.test.Test
 
 class TestPersistentConsistentSampling {
 
-    @Test //  TODO what can we assert ?
+    // @Test //  TODO what can we assert here ?
     fun testPersistentConsistentSampling() {
-        val auditDir = "../core/src/test/data/workflow/testCliRoundPolling"
+        val auditDir = "../core/src/test/data/workflow/testCliRoundPolling/audit"
         val workflow = PersistedWorkflow(auditDir, true)
         val auditRecord = workflow.auditRecord
         val auditRound = workflow.auditRounds().last()

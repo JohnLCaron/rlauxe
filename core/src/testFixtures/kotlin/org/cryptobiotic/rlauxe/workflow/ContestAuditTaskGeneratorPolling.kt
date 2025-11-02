@@ -92,7 +92,7 @@ class PollingSingleRoundAuditTaskGenerator(
 
 class PollingSingleRoundAuditTask(
     val name: String,
-    val workflow: AuditWorkflowIF,
+    val workflow: AuditWorkflow,
     val testMvrs: List<Cvr>,
     val otherParameters: Map<String, Any>,
     val quiet: Boolean,

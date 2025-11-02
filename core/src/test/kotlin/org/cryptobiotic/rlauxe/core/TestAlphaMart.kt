@@ -29,21 +29,21 @@ class TestAlphaMart {
         val marginRange= 0.01 .. 0.01
         val underVotePct= 0.20 .. 0.20
         val phantomRange= 0.005 .. 0.005
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
+        val test = MultiContestTestData(ncontests, nbs, N, hasStyle=true, marginRange, underVotePct, phantomRange)
 
         val contest = test.contests.first()
         val contestUA = ContestUnderAudit(contest, isClca = false, hasStyle = true).addStandardAssertions()
         val assorter = contestUA.minPollingAssertion()!!.assorter
 
         val cvrs = test.makeCvrsFromContests()
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, nsimEst=10)
-        val cvrSampler = PollWithoutReplacement(contestUA.contest.id, auditConfig.hasStyles, cvrs, assorter)
+        val config = AuditConfig(AuditType.POLLING, hasStyle=true, nsimEst=10)
+        val cvrSampler = PollWithoutReplacement(contestUA.contest.id, config.hasStyle, cvrs, assorter)
 
         val eta0 = assorter.reportedMean()
         println("eta0=$eta0, margin=${mean2margin(eta0)}")
 
         val result = simulateSampleSizeAlphaMart(
-            auditConfig = auditConfig,
+            config = config,
             sampleFn = cvrSampler,
             estimFn = null,
             eta0 = assorter.reportedMean(),

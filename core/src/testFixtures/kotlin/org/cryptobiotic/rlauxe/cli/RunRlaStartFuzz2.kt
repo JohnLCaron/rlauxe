@@ -93,22 +93,22 @@ fun startTestElectionPolling2(
 ) {
     val auditDir = "$topdir/audit"
     clearDirectory(Path(auditDir))
-    val auditConfig = AuditConfig(AuditType.POLLING, hasStyles = true, nsimEst = 100)
+    val config = AuditConfig(AuditType.POLLING, hasStyle = true, nsimEst = 100)
 
     clearDirectory(Path(auditDir))
     val election = TestPollingElection(
-        auditConfig,
+        config,
         minMargin,
         fuzzMvrsPct,
         pctPhantoms,
         ncards,
         ncontests,
     )
-    CreateAudit("startTestElectionPolling2", topdir = topdir, auditConfig, election, clear = false)
+    CreateAudit("startTestElectionPolling2", topdir = topdir, config, election, clear = false)
 }
 
 class TestPollingElection(
-    auditConfig: AuditConfig,
+    config: AuditConfig,
     minMargin: Double,
     fuzzMvrsPct: Double,
     pctPhantoms: Double?,
@@ -124,7 +124,7 @@ class TestPollingElection(
         val useMin = min(minMargin, maxMargin)
         val phantomPctRange: ClosedFloatingPointRange<Double> =
             if (pctPhantoms == null) 0.00..0.005 else pctPhantoms..pctPhantoms
-        val testData = MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
+        val testData = MultiContestTestData(ncontests, 4, ncards, config.hasStyle, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistentWorkflowPolling $testData")
@@ -132,11 +132,11 @@ class TestPollingElection(
         println()
 
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
-        val (testCvrs, ballots) = testData.makeCvrsAndBallots(auditConfig.hasStyles)
+        val (testCvrs, ballots) = testData.makeCvrsAndBallots()
         cvrs = testCvrs
         testMvrs = makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrsPct) // ??
 
-        val regularContests = testData.contests.map { ContestUnderAudit(it, isClca=true, hasStyle=auditConfig.hasStyles).addStandardAssertions() }
+        val regularContests = testData.contests.map { ContestUnderAudit(it, isClca=true, hasStyle=config.hasStyle).addStandardAssertions() }
         contestsUA.addAll(regularContests)
         contestsUA.forEach { println("  $it") }
         println()
@@ -169,14 +169,14 @@ fun startTestElectionClca2(
     val auditDir = "$topdir/audit"
     clearDirectory(Path(auditDir))
 
-    val auditConfig = AuditConfig(
-        AuditType.CLCA, hasStyles = true, nsimEst = 100,
+    val config = AuditConfig(
+        AuditType.CLCA, hasStyle = true, nsimEst = 100,
         clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
     )
 
     clearDirectory(Path(auditDir))
     val election = TestClcaElection(
-        auditConfig,
+        config,
         minMargin,
         fuzzMvrs,
         pctPhantoms,
@@ -185,11 +185,11 @@ fun startTestElectionClca2(
         addRaire,
         addRaireCandidates)
 
-    CreateAudit("startTestElectionClca2", topdir = topdir, auditConfig, election, clear = false)
+    CreateAudit("startTestElectionClca2", topdir = topdir, config, election, clear = false)
 }
 
 class TestClcaElection(
-    auditConfig: AuditConfig,
+    config: AuditConfig,
     minMargin: Double,
     fuzzMvrs: Double,
     pctPhantoms: Double?,
@@ -209,7 +209,7 @@ class TestClcaElection(
             if (pctPhantoms == null) 0.00..0.005 else pctPhantoms..pctPhantoms
 
         val testData =
-            MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
+            MultiContestTestData(ncontests, 4, ncards, config.hasStyle, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
         println("$testData")
 
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
@@ -223,7 +223,7 @@ class TestClcaElection(
             allCvrs.addAll(rcvrs)
         }
 
-        val regularContests = testData.contests.map { ContestUnderAudit(it, isClca=true, hasStyle=auditConfig.hasStyles).addStandardAssertions() }
+        val regularContests = testData.contests.map { ContestUnderAudit(it, isClca=true, hasStyle=config.hasStyle).addStandardAssertions() }
         contestsUA.addAll(regularContests)
         contestsUA.forEach { println("  $it") }
         println()

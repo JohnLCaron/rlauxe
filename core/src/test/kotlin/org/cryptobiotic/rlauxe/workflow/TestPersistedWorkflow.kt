@@ -27,10 +27,10 @@ class TestPersistedWorkflow {
         val topdir = "/home/stormy/rla/persist/testPersistedAuditClca"
         val fuzzMvrPct = .01
 
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000)
+        val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000)
 
         val N = 50000
-        val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
+        val testData = MultiContestTestData(11, 4, N, hasStyle=true, marginRange=0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistentWorkflowClca $testData")
@@ -41,10 +41,10 @@ class TestPersistedWorkflow {
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrPct)
 
-        val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = auditConfig.hasStyles).addStandardAssertions() }
+        val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
         val election = PersistedAudit(contestsUA, testCvrs, testMvrs)
-        CreateAudit("testPersistedAuditClca", topdir, auditConfig, election, clear = true)
+        CreateAudit("testPersistedAuditClca", topdir, config, election, clear = true)
 
         runPersistedAudit(topdir)
     }
@@ -55,10 +55,10 @@ class TestPersistedWorkflow {
         val topdir = "/home/stormy/rla/persist/testPersistedAuditPolling"
         val fuzzMvrPct = .01
 
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, nsimEst=10)
+        val config = AuditConfig(AuditType.POLLING, hasStyle=true, seed = 12356667890L, nsimEst=10)
 
         val N = 50000
-        val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
+        val testData = MultiContestTestData(11, 4, N, hasStyle=true, marginRange=0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistedAuditPolling $testData")
@@ -69,10 +69,10 @@ class TestPersistedWorkflow {
         // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
         else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrPct)
 
-        val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = auditConfig.hasStyles).addStandardAssertions() }
+        val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
         val election = PersistedAudit(contestsUA, testCvrs, testMvrs)
-        CreateAudit("testPersistedAuditClca", topdir, auditConfig, election, clear = true)
+        CreateAudit("testPersistedAuditClca", topdir, config, election, clear = true)
 
         runPersistedAudit(topdir)
     }
@@ -83,8 +83,8 @@ class TestPersistedWorkflow {
         val topdir = "/home/stormy/rla/persist/testPersistedOneAudit"
         val fuzzMvrPct = .01
 
-        val auditConfig = AuditConfig(
-            AuditType.ONEAUDIT, hasStyles = true, contestSampleCutoff = 20000, nsimEst = 10,
+        val config = AuditConfig(
+            AuditType.ONEAUDIT, hasStyle = true, contestSampleCutoff = 20000, nsimEst = 10,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
 
@@ -116,7 +116,7 @@ class TestPersistedWorkflow {
         println("nmvrs = ${testMvrs.size} fuzzed at ${fuzzMvrPct}")
 
         val election = PersistedAudit(contestsUA, allCvrs, testMvrs, cardPools)
-        CreateAudit("testPersistedOneAudit", topdir = topdir, auditConfig, election, clear = true)
+        CreateAudit("testPersistedOneAudit", topdir = topdir, config, election, clear = true)
 
         runPersistedAudit(topdir)
     }

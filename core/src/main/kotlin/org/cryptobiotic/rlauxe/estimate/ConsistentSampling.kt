@@ -16,11 +16,11 @@ private val logger = KotlinLogging.logger("ConsistentSampling")
  * Select the samples to audit.
  * 2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited.
  * 3. _Random sampling_: The actual ballots to be sampled are selected randomly based on a carefully chosen random seed.
- * Iterates on createSampleIndices, checking for auditRound.sampleNumbers.size <= auditConfig.sampleLimit, removing contests until satisfied.
+ * Iterates on createSampleIndices, checking for auditRound.sampleNumbers.size <= config.sampleLimit, removing contests until satisfied.
  * Also called from rlauxe_viewer
  */
 fun sampleWithContestCutoff(
-    auditConfig: AuditConfig,
+    config: AuditConfig,
     mvrManager : MvrManager,
     auditRound: AuditRound,
     previousSamples: Set<Long>,
@@ -30,10 +30,10 @@ fun sampleWithContestCutoff(
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }.toMutableList()
 
     while (contestsNotDone.isNotEmpty()) {
-        sample(auditConfig, mvrManager, auditRound, previousSamples, quiet = quiet)
+        sample(config, mvrManager, auditRound, previousSamples, quiet = quiet)
 
         //// the rest of this implements contestSampleCutoff
-        if (!auditConfig.removeCutoffContests || auditConfig.contestSampleCutoff == null || auditRound.samplePrns.size <= auditConfig.contestSampleCutoff) {
+        if (!config.removeCutoffContests || config.contestSampleCutoff == null || auditRound.samplePrns.size <= config.contestSampleCutoff) {
             break
         }
 
@@ -53,25 +53,25 @@ fun sampleWithContestCutoff(
 
 /** Choose what cards to sample */
 fun sample(
-    auditConfig: AuditConfig,
+    config: AuditConfig,
     mvrManager : MvrManager,
     auditRound: AuditRound,
     previousSamples: Set<Long> = emptySet(),
     quiet: Boolean = true
 ) {
-    if (auditConfig.hasStyles) {
+    if (config.hasStyle) {
         if (!quiet) logger.info{"consistentSampling round ${auditRound.roundIdx} auditorSetNewMvrs=${auditRound.auditorWantNewMvrs}"}
         consistentSampling(auditRound, mvrManager, previousSamples)
         if (!quiet) logger.info{" consistentSamplingSize= ${auditRound.samplePrns.size}"}
     } else {
         if (!quiet) logger.info{"\nuniformSampling round ${auditRound.roundIdx}"}
-        uniformSampling(auditRound, mvrManager, previousSamples, auditConfig, auditRound.roundIdx)
+        uniformSampling(auditRound, mvrManager, previousSamples, config, auditRound.roundIdx)
         if (!quiet) logger.info{" uniformSamplingSize= ${auditRound.samplePrns.size}"}
     }
 }
 
 // From Consistent Sampling with Replacement, Ronald Rivest, August 31, 2018
-// for audits with hasStyles = true
+// for audits with hasStyle = true
 fun consistentSampling(
     auditRound: AuditRound,
     mvrManager: MvrManager,
@@ -150,12 +150,12 @@ fun consistentSampling(
     auditRound.samplePrns = sampledCards.map { it.prn }
 }
 
-// for audits with hasStyles = false
+// for audits with hasStyle = false
 fun uniformSampling(
     auditRound: AuditRound,
     mvrManager: MvrManager,
     previousSamples: Set<Long>,
-    auditConfig: AuditConfig,
+    config: AuditConfig,
     roundIdx: Int,
 ) {
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }
@@ -168,8 +168,8 @@ fun uniformSampling(
         val estWithFactor = roundToClosest((contestRound.estSampleSize * fac))
         contestRound.estSampleSizeNoStyles = estWithFactor
         // val estPct = estWithFactor / Nb.toDouble()
-        if (auditConfig.removeCutoffContests && auditConfig.contestSampleCutoff != null && estWithFactor > auditConfig.contestSampleCutoff) {
-            if (debugUniform) logger.info{"uniformSampling contestSampleCutoff for contest ${contestRound.id} estWithFactor $estWithFactor > ${auditConfig.contestSampleCutoff} round $roundIdx"}
+        if (config.removeCutoffContests && config.contestSampleCutoff != null && estWithFactor > config.contestSampleCutoff) {
+            if (debugUniform) logger.info{"uniformSampling contestSampleCutoff for contest ${contestRound.id} estWithFactor $estWithFactor > ${config.contestSampleCutoff} round $roundIdx"}
             contestRound.done = true
             contestRound.status = TestH0Status.FailMaxSamplesAllowed
         }

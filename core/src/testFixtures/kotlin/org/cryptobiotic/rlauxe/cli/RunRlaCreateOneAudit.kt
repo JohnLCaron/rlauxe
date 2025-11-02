@@ -95,15 +95,15 @@ object RunRlaCreateOneAudit {
         val auditDir = "$topdir/audit"
         clearDirectory(Path(auditDir))
 
-        val auditConfig = AuditConfig(
-            AuditType.ONEAUDIT, hasStyles = true, contestSampleCutoff = 20000, nsimEst = 10,
+        val config = AuditConfig(
+            AuditType.ONEAUDIT, hasStyle = true, contestSampleCutoff = 20000, nsimEst = 10,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
 
         clearDirectory(Path(auditDir))
         val election = TestOneAuditElection(
             auditDir,
-            auditConfig,
+            config,
             minMargin,
             fuzzMvrs,
             pctPhantoms,
@@ -112,12 +112,12 @@ object RunRlaCreateOneAudit {
             addRaire,
             addRaireCandidates)
 
-        CreateAudit("RunRlaStartOneAudit", topdir = topdir, auditConfig, election, clear = false)
+        CreateAudit("RunRlaStartOneAudit", topdir = topdir, config, election, clear = false)
     }
 
     class TestOneAuditElection(
         auditDir: String,
-        auditConfig: AuditConfig,
+        config: AuditConfig,
         minMargin: Double,
         fuzzMvrs: Double,
         pctPhantoms: Double?,

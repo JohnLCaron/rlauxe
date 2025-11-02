@@ -19,7 +19,7 @@ class TestPollingAudit {
 
     @Test
     fun testPollingNoStyle() {
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles = false, nsimEst = 10)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyle = false, nsimEst = 10)
 
         // each contest has a specific margin between the top two vote getters.
         val N = 100000
@@ -32,6 +32,7 @@ class TestPollingAudit {
             ncontests,
             nbs,
             N,
+            hasStyle=auditConfig.hasStyle,
             marginRange = marginRange,
             underVotePctRange = underVotePct,
             phantomPctRange = phantomPct
@@ -43,7 +44,7 @@ class TestPollingAudit {
         println()
 
         // Synthetic cvrs for testing reflecting the exact contest votes. In practice, we dont actually have the cvrs.
-        val (testCvrs, ballots) = test.makeCvrsAndBallots(auditConfig.hasStyles)
+        val (testCvrs, ballots) = test.makeCvrsAndBallots()
 
         val workflow = WorkflowTesterPolling(auditConfig, contests,
             MvrManagerPollingForTesting(ballots, testCvrs, auditConfig.seed)
@@ -58,7 +59,7 @@ class TestPollingAudit {
 
     @Test
     fun testPollingWithStyle() {
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles = true, nsimEst = 10)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyle = true, nsimEst = 10)
 
         // each contest has a specific margin between the top two vote getters.
         val N = 50000
@@ -71,6 +72,7 @@ class TestPollingAudit {
             ncontests,
             nbs,
             N,
+            auditConfig.hasStyle,
             marginRange = marginRange,
             underVotePctRange = underVotePct,
             phantomPctRange = phantomPct
@@ -90,7 +92,7 @@ class TestPollingAudit {
         }
         println()
         // Synthetic cvrs for testing reflecting the exact contest votes. In production, we dont actually have the cvrs.
-        val (testCvrs, ballots) = test.makeCvrsAndBallots(auditConfig.hasStyles)
+        val (testCvrs, ballots) = test.makeCvrsAndBallots()
         val testMvrs = testCvrs
 
         val workflow = WorkflowTesterPolling(auditConfig, contests,
@@ -103,7 +105,7 @@ class TestPollingAudit {
     fun testPollingWithFuzz() {
         val mvrFuzzPct = .0123
         val auditConfig = AuditConfig(
-            AuditType.POLLING, hasStyles = true, nsimEst = 10,
+            AuditType.POLLING, hasStyle = true, nsimEst = 10,
             pollingConfig = PollingConfig(simFuzzPct = mvrFuzzPct)
         )
 
@@ -118,6 +120,7 @@ class TestPollingAudit {
             ncontests,
             nbs,
             N,
+            auditConfig.hasStyle,
             marginRange = marginRange,
             underVotePctRange = underVotePct,
             phantomPctRange = phantomPct
@@ -126,7 +129,7 @@ class TestPollingAudit {
         val contests: List<Contest> = test.contests
 
         // Synthetic cvrs for testing reflecting the exact contest votes. In production, we dont actually have the cvrs.
-        val (testCvrs, ballots) = test.makeCvrsAndBallots(auditConfig.hasStyles)
+        val (testCvrs, ballots) = test.makeCvrsAndBallots()
         val testMvrs = makeFuzzedCvrsFrom(test.contests, testCvrs, mvrFuzzPct)
 
         val workflow = WorkflowTesterPolling(auditConfig, contests,
@@ -147,6 +150,7 @@ class TestPollingAudit {
             ncontests,
             nbs,
             Nc,
+            true,
             marginRange = marginRange,
             underVotePctRange = underVotePct,
             phantomPctRange = phantomPct
@@ -163,8 +167,8 @@ class TestPollingAudit {
             assertEquals(contest.Nc, fcontest.phantomCount + fcontest.underCount + nvotes)
         }
 
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles = true, nsimEst = 10)
-        val (testCvrs, ballots) = test.makeCvrsAndBallots(auditConfig.hasStyles)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyle = true, nsimEst = 10)
+        val (testCvrs, ballots) = test.makeCvrsAndBallots()
         val workflow = WorkflowTesterPolling(auditConfig, test.contests,
             MvrManagerPollingForTesting(ballots, testCvrs, auditConfig.seed)
         )

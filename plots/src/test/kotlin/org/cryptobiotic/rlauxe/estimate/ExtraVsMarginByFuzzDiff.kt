@@ -37,7 +37,7 @@ class ExtraVsMarginByFuzzDiff {
             margins.forEach { margin ->
                 val clcaGenerator1 = ClcaContestAuditTaskGenerator(Nc, margin, 0.0, 0.0, fuzzMvrs,
                     parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "1.0", "fuzzDiff" to fuzzDiff, "fuzzMvrs" to fuzzMvrs),
-                    auditConfig=auditConfig)
+                    config=auditConfig)
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
             }
 

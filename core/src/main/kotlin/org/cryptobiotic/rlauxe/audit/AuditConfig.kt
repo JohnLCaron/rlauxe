@@ -7,7 +7,7 @@ enum class AuditType { POLLING, CLCA, ONEAUDIT }
 
 data class AuditConfig(
     val auditType: AuditType,
-    val hasStyles: Boolean, // has Card Style Data (CSD), i.e. we know which contests each card/ballot contains
+    val hasStyle: Boolean, // has Card Style Data (CSD), i.e. we know which contests each card/ballot contains
     val riskLimit: Double = 0.05,
     val seed: Long = secureRandom.nextLong(), // determines sample order. set carefully to ensure truly random.
 
@@ -34,7 +34,7 @@ data class AuditConfig(
     val isPolling = auditType == AuditType.POLLING
 
     override fun toString() = buildString {
-        appendLine("AuditConfig(auditType=$auditType, hasStyles=$hasStyles, riskLimit=$riskLimit, seed=$seed version=$version" )
+        appendLine("AuditConfig(auditType=$auditType, hasStyle=$hasStyle, riskLimit=$riskLimit, seed=$seed version=$version" )
         appendLine("  nsimEst=$nsimEst, quantile=$quantile, contestSampleCutoff=$contestSampleCutoff, auditSampleLimit=$auditSampleLimit, minRecountMargin=$minRecountMargin removeTooManyPhantoms=$removeTooManyPhantoms")
         if (skipContests.isNotEmpty()) { appendLine("  skipContests=$skipContests") }
         when (auditType) {

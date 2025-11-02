@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
 private val logger = KotlinLogging.logger("ClcaAudit")
 
 // run all contests and assertions for one round with the given auditor
-fun runClcaAuditRound(auditConfig: AuditConfig,
+fun runClcaAuditRound(config: AuditConfig,
                       contests: List<ContestRound>,
                       mvrManager: MvrManagerClcaIF,
                       roundIdx: Int,
@@ -21,7 +21,7 @@ fun runClcaAuditRound(auditConfig: AuditConfig,
     val contestsNotDone = contests.filter{ !it.done }
     val auditContestTasks = mutableListOf<RunContestTask>()
     contestsNotDone.forEach { contest ->
-        auditContestTasks.add(RunContestTask(auditConfig, contest, cvrPairs, auditor, roundIdx))
+        auditContestTasks.add(RunContestTask(config, contest, cvrPairs, auditor, roundIdx))
     }
 
     logger.info { "Run ${auditContestTasks.size} tasks for auditor ${auditor.javaClass.name} " }
@@ -45,7 +45,7 @@ class RunContestTask(
             if (!assertionRound.status.complete) {
                 val cassertion = assertionRound.assertion as ClcaAssertion
                 val cassorter = cassertion.cassorter
-                val sampler =  ClcaWithoutReplacement(contest.id, config.hasStyles, cvrPairs, cassorter, allowReset = false)
+                val sampler =  ClcaWithoutReplacement(contest.id, config.hasStyle, cvrPairs, cassorter, allowReset = false)
 
                 val testH0Result = auditor.run(config, contest.contestUA.contest, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status
@@ -62,7 +62,7 @@ class RunContestTask(
 // abstraction so ClcaAudit can be used for OneAudit
 fun interface ClcaAssertionAuditorIF {
     fun run(
-        auditConfig: AuditConfig,
+        config: AuditConfig,
         contest: ContestIF,
         assertionRound: AssertionRound,
         sampler: Sampler,

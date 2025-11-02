@@ -207,10 +207,10 @@ fun createSfElectionNoStyles(
     auditConfigIn: AuditConfig? = null,
 ) {
     val stopwatch = Stopwatch()
-    val auditConfig = when {
+    val config = when {
         (auditConfigIn != null) -> auditConfigIn
         else -> AuditConfig(
-            AuditType.ONEAUDIT, hasStyles = true, riskLimit = .05, contestSampleCutoff = 20000, nsimEst = 1,
+            AuditType.ONEAUDIT, hasStyle = true, riskLimit = .05, contestSampleCutoff = 20000, nsimEst = 1,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
     }
@@ -222,6 +222,6 @@ fun createSfElectionNoStyles(
         cvrExportCsv,
     )
 
-    CreateAudit("sf2024", topdir, auditConfig, election)
+    CreateAudit("sf2024", topdir, config, election)
     println("createSfElectionNoStyles took $stopwatch")
 }

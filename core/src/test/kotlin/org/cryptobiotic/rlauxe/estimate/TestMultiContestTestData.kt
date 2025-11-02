@@ -24,7 +24,7 @@ class TestMultiContestTestData {
     val test: MultiContestTestData
 
     init {
-        test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
+        test = MultiContestTestData(ncontests, nbs, N, hasStyle=true, marginRange, underVotePct, phantomRange)
         // println(test)
     }
 
@@ -66,7 +66,7 @@ class TestMultiContestTestData {
 
     @Test
     fun testCvrsFromContests() {
-        val (testCvrs, ballots) = test.makeCvrsAndBallots(true)
+        val (testCvrs, ballots) = test.makeCvrsAndBallots()
 
         val votes: Map<Int, Map<Int, Int>> =
             tabulateVotesFromCvrs(testCvrs.iterator()).toSortedMap() // contestId -> candidateId -> nvotes
@@ -116,7 +116,7 @@ class TestMultiContestTestData {
         val underVotePct = 0.20..0.20
         val phantomPct = .05
         val phantomRange = phantomPct..phantomPct
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
+        val test = MultiContestTestData(ncontests, nbs, N, hasStyle=true, marginRange, underVotePct, phantomRange)
         val calcN = test.ballotStylePartition.map { it.value }.sum()
         assertEquals(N, calcN)
         println(test)
@@ -124,7 +124,7 @@ class TestMultiContestTestData {
         assertEquals(ncontests, test.contests.size)
 
         val cvrs = test.makeCvrsFromContests()
-        val ballotManifest = test.makeCardLocationManifest(true)
+        val ballotManifest = test.makeCardLocationManifest()
 
         test.contests.forEachIndexed { idx, contest ->
             assertEquals(roundToClosest(N * (1.0 + phantomPct)), contest.Nc)
@@ -147,7 +147,7 @@ class TestMultiContestTestData {
 
     @Test
     fun testPhantomCvrs() {
-        val (cvrs, _) = test.makeCvrsAndBallots(true)
+        val (cvrs, _) = test.makeCvrsAndBallots()
 
         test.contests.forEachIndexed { idx, contest ->
             val fcontest = test.fcontests[idx]

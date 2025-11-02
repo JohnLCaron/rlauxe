@@ -71,7 +71,7 @@ class CompareAuditVariance {
              val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct, nsimEst = nsimEst,
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "auditType" to "clca"),
-                auditConfig=clcaConfig
+                config=clcaConfig
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
         }

@@ -19,7 +19,7 @@ private val logger = KotlinLogging.logger("AuditableCardCsv")
 //    val index: Int,  // index into the original, canonical list of cards
 //    val prn: Long,   // psuedo random number
 //    val phantom: Boolean,
-//    val contests: IntArray, // list of contests on this ballot. TODO optional when !hasStyles ??
+//    val contests: IntArray, // list of contests on this ballot.
 //    val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, ranked first to last; missing for pooled data
 //    val poolId: Int?, // for OneAudit
 //)

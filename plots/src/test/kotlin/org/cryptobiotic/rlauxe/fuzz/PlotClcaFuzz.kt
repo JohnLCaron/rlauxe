@@ -33,7 +33,7 @@ class PlotClcaFuzz {
                 val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                     N, margin, 0.0, 0.0, mvrsFuzzPct,
                     parameters = mapOf("nruns" to nruns, "fuzzPct" to mvrsFuzzPct),
-                    auditConfig = config,
+                    config = config,
                 )
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
             }

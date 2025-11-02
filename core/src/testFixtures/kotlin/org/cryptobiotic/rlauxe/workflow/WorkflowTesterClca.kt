@@ -23,9 +23,9 @@ class WorkflowTesterClca(
 
         val regularContests = contestsToAudit.map {
             if (it is DHondtContest) {
-                ContestUnderAudit(it, isClca = true, hasStyle = auditConfig.hasStyles).addAssertionsFromAssorters(it.assorters)
+                ContestUnderAudit(it, isClca = true, hasStyle = auditConfig.hasStyle).addAssertionsFromAssorters(it.assorters)
             } else {
-                ContestUnderAudit(it, isClca = true, hasStyle = auditConfig.hasStyles).addStandardAssertions()
+                ContestUnderAudit(it, isClca = true, hasStyle = auditConfig.hasStyle).addStandardAssertions()
             }
         }
         contestsUA = regularContests + raireContests

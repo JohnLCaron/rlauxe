@@ -20,11 +20,12 @@ data class MultiContestTestData(
     val ncontest: Int,
     val nballotStyles: Int,
     val totalBallots: Int, // including undervotes and phantoms
+    val hasStyle: Boolean,
     val marginRange: ClosedFloatingPointRange<Double> = 0.01.. 0.03,
     val underVotePctRange: ClosedFloatingPointRange<Double> = 0.01.. 0.30, // needed to set Nc
     val phantomPctRange: ClosedFloatingPointRange<Double> = 0.00..  0.005, // needed to set Nc
 ) {
-    // generate with ballotStyles; but if hasStyles = false, then these are not visible to the audit
+    // generate with ballotStyles; but if hasStyle = false, then these are not visible to the audit
     val ballotStylePartition = partition(totalBallots, nballotStyles).toMap() // Map bsidx -> ncards in each ballot style (bs)
 
     val fcontests: List<ContestTestData>
@@ -96,8 +97,8 @@ data class MultiContestTestData(
         ballotStyles.forEach { appendLine("  $it") }
     }
 
-    // includes undervotes and phantoms, size = totalBallots + phantom count
-    fun makeCardLocationManifest(hasStyle: Boolean): CardLocationManifest {
+    // TODO may not be needed
+    fun makeCardLocationManifest(): CardLocationManifest {
         val cardLocations = mutableListOf<CardLocation>()
         var ballotId = 0
         ballotStyles.forEach { ballotStyle ->
@@ -114,7 +115,7 @@ data class MultiContestTestData(
     }
 
     // TODO may not be needed
-    fun makeCvrsAndBallots(hasStyle: Boolean): Pair<List<Cvr>, List<CardLocation>> {
+    fun makeCvrsAndBallots(): Pair<List<Cvr>, List<CardLocation>> {
         val cvrs = makeCvrsFromContests()
         val cardLocations = cvrs.map { cvr ->
             CardLocation(cvr.id, cvr.phantom, null, if (hasStyle) cvr.votes.keys.toList() else emptyList())
@@ -125,6 +126,7 @@ data class MultiContestTestData(
     // create new partitions each time this is called
     // includes undervotes and phantoms, size = totalBallots + phantom count
     // TODO replace with VotesAndUndervotes ??
+    // TODO !hasStyles add all contests
     fun makeCvrsFromContests(): List<Cvr> {
         fcontests.forEach { it.resetTracker() } // startFresh
         val cvrbs = CvrBuilders().addContests(fcontests.map { it.info })
@@ -162,6 +164,7 @@ data class MultiContestTestData(
 }
 
 // TODO replace with VotesAndUndervotes ??
+// TODO !hasStyles add all contests
 // This creates a multicandidate contest with the two closest candidates having exactly the given margin.
 // It can create cvrs that exactly reflect this contest's vote; so can be used in simulating the audit.
 // The cvrs are not multicontest.

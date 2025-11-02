@@ -30,7 +30,7 @@ import kotlin.text.appendLine
 // for all audit types. Cards and CardPools must already be published, contests might not,
 // but only is you call cerify with the contests' note only then do you get contestUA.preAuditStatus saved
 class VerifyContests(val auditRecordLocation: String, val show: Boolean = false) {
-    val auditConfig: AuditConfig
+    val config: AuditConfig
     val allContests: List<ContestUnderAudit>?
     val allInfos: Map<Int, ContestInfo>?
     val cards: CloseableIterable<AuditableCard>
@@ -40,7 +40,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
     init {
         publisher = Publisher(auditRecordLocation)
         val auditConfigResult = readAuditConfigJsonFile(publisher.auditConfigFile())
-        auditConfig = auditConfigResult.unwrap()
+        config = auditConfigResult.unwrap()
 
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
         allContests = if (contestsResults is Ok) contestsResults.unwrap().sortedBy { it.id } else {
@@ -64,28 +64,28 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
 
         // all
         val infos = allInfos ?: contests.associate { it.id to it.contest.info() }
-        checkContestsCorrectlyFormed(auditConfig, contests, results)
-        val contestSummary = verifyManifest(auditConfig, contests, cards, infos, results, show = show)
+        checkContestsCorrectlyFormed(config, contests, results)
+        val contestSummary = verifyManifest(config, contests, cards, infos, results, show = show)
 
         // OA
-        if (auditConfig.isOA) {
+        if (config.isOA) {
             val cardPools = readCardPoolsJsonFile(publisher.cardPoolsFile(), infos).unwrap()
             verifyOAagainstCards(contests, contestSummary, cardPools, infos, results, show = show)
         }
 
         // CLCA
-        if (auditConfig.isClca) {
+        if (config.isClca) {
             verifyClcaAgainstCards(contests, contestSummary, results, show = show)
             verifyAssortAvg(contests, cards.iterator(), results, show = show)
-        } else if (auditConfig.isOA) {
+        } else if (config.isOA) {
             results.addMessage("Cant run verify assorters with OneAudit because cards from pools dont contain votes")
         }
 
         /*
         if (mvrs != null) {
             result.addMessage("---RunVerifyContests on testMvrs")
-            verifyCardCounts(auditConfig, contests, cards, infos, result, show = show)
-            verifyCardsWithPools(auditConfig, contests, mvrs, cardPools, infos, result, show = show)
+            verifyCardCounts(config, contests, cards, infos, result, show = show)
+            verifyCardsWithPools(config, contests, mvrs, cardPools, infos, result, show = show)
             verifyAssortAvg(contests, mvrs.iterator(), result, show = show)
         } */
 
@@ -163,7 +163,7 @@ fun verifyManifest(
             lastCard = card
             count++
 
-            if (config.hasStyles) {
+            if (config.hasStyle) {
                 card.contests.forEachIndexed { idx, contestId ->
                     val info = infos[contestId]
                     if (info != null) {
@@ -195,7 +195,7 @@ fun verifyManifest(
 
     // 3. If hasStyle, check that the count of phantom cards containing a contest = Contest.Nc - Contest.Ncast.
     // 4. If hasStyle, check that the count of non-phantom cards containing a contest = Contest.Ncast.
-    if (config.hasStyles) {
+    if (config.hasStyle) {
         var allOk = true
         contests.forEach { contestUA ->
             val contestTab = allCvrVotes[contestUA.id]

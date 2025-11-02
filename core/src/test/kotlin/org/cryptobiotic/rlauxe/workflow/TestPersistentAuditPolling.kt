@@ -10,7 +10,6 @@ import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.verify.VerifyContests
 import org.junit.jupiter.api.Assertions.assertFalse
 import java.nio.file.Path
-import kotlin.test.Test
 
 class TestPersistentAuditPolling {
     // val auditDir = "/home/stormy/rla/persist/testPersistentWorkflowPolling"
@@ -21,11 +20,11 @@ class TestPersistentAuditPolling {
         clearDirectory(Path.of(auditDir))
 
         val publisher = Publisher(auditDir)
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L, nsimEst=10)
+        val auditConfig = AuditConfig(AuditType.POLLING, hasStyle=true, seed = 12356667890L, nsimEst=10)
         writeAuditConfigJsonFile(auditConfig, publisher.auditConfigFile())
 
         val N = 5000
-        val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
+        val testData = MultiContestTestData(11, 4, N, hasStyle=true, marginRange=0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistentWorkflowPolling $testData")
@@ -33,7 +32,7 @@ class TestPersistentAuditPolling {
         println()
 
         // We use the simulated cvrs as the mvrs. TODO assuming there are no errors for now
-        val (testMvrs, cardLocations) = testData.makeCvrsAndBallots(auditConfig.hasStyles)
+        val (testMvrs, cardLocations) = testData.makeCvrsAndBallots()
         // val testMvrs = makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrPct)
 
         // the order of the cardLocations cannot be changed once the audit is initialized.

@@ -26,14 +26,14 @@ import kotlin.test.Test
 class MeasureEstimationTaskConcurrency {
     @Test
     fun measure() {
-        val test = MultiContestTestData(15, 1, 20000)
+        val test = MultiContestTestData(15, 1, 20000, hasStyle = true)
         val cvrs = test.makeCvrsFromContests()
         val contestsUA  = test.contests.map { ContestUnderAudit(it).addStandardAssertions() }
         val nassertions = contestsUA.sumOf { it.assertions().size }
         println("ncontests=${contestsUA.size} nassertions=${nassertions} ncvrs=${cvrs.size}")
         val contestRounds = contestsUA.map{ contest -> ContestRound(contest, 1) }
 
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles = true, nsimEst = 10)
+        val auditConfig = AuditConfig(AuditType.CLCA, hasStyle = true, nsimEst = 10)
         val tasks = mutableListOf<ConcurrentTaskG<EstimationResult>>()
 
         contestRounds.filter { !it.done }.forEach { contest ->

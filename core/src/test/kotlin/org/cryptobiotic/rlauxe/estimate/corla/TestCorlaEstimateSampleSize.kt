@@ -16,7 +16,7 @@ class TestCorlaEstimateSampleSize {
 
     @Test
     fun testFindSampleSizePolling() {
-        val test = MultiContestTestData(20, 11, 20000)
+        val test = MultiContestTestData(20, 11, 20000, hasStyle=true)
         val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isClca = false, hasStyle = true).addStandardAssertions() } // CORLA does polling?
 
         contestsUA.forEach { contest ->
@@ -29,7 +29,7 @@ class TestCorlaEstimateSampleSize {
 
     @Test
     fun testFindSampleSize() {
-        val test = MultiContestTestData(20, 11, 20000)
+        val test = MultiContestTestData(20, 11, 20000, hasStyle=true)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit( it, isClca = true, hasStyle = true).addStandardAssertions() }
         val cvrs = test.makeCvrsFromContests()
 
@@ -52,16 +52,16 @@ class TestCorlaEstimateSampleSize {
         //println("computeSize = $computeSize")
 
         val gamma = 1.2
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyles=true, seed = 1234567890L, quantile=.90)
+        val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 1234567890L, quantile=.90)
 
         contestRounds.forEach { contestRound ->
             val cn = contestRound.Nc
             val estSizes = mutableListOf<Int>()
-            val cvrs = ContestSimulation.makeContestWithLimits(contestRound.contestUA.contest as Contest, auditConfig).makeCvrs()
+            val cvrs = ContestSimulation.makeContestWithLimits(contestRound.contestUA.contest as Contest, config).makeCvrs()
             val sampleSizes = contestRound.assertionRounds.map { assertRound ->
-                val result = simulateSampleSizeClcaAssorter(1, auditConfig, contestRound.contestUA, cvrs, assertRound)
-                val simSize = result.findQuantile(auditConfig.quantile)
-                val estSize = estimateSampleSizeSimple(auditConfig.riskLimit, assertRound.assertion.assorter.reportedMargin(), gamma,
+                val result = simulateSampleSizeClcaAssorter(1, config, contestRound.contestUA, cvrs, assertRound)
+                val simSize = result.findQuantile(config.quantile)
+                val estSize = estimateSampleSizeSimple(config.riskLimit, assertRound.assertion.assorter.reportedMargin(), gamma,
                     oneOver = roundUp(cn*p1), // p1
                     twoOver = roundUp(cn*p2), // p2
                     oneUnder = roundUp(cn*p3), // p3

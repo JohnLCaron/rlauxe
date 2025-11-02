@@ -14,27 +14,27 @@ class TestAuditConfigJson {
 
     @Test
     fun testRoundtrip() {
-        testRoundtrips(AuditConfig(AuditType.CLCA, hasStyles=true, seed = 12356667890L))
-        testRoundtrips(AuditConfig(AuditType.POLLING, hasStyles=true, seed = 12356667890L))
-        testRoundtrips(AuditConfig(AuditType.ONEAUDIT, hasStyles=true, seed = 12356667890L))
+        testRoundtrips(AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L))
+        testRoundtrips(AuditConfig(AuditType.POLLING, hasStyle=true, seed = 12356667890L))
+        testRoundtrips(AuditConfig(AuditType.ONEAUDIT, hasStyle=true, seed = 12356667890L))
 
         testRoundtrips(
             AuditConfig(
-                AuditType.CLCA, hasStyles=true, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
+                AuditType.CLCA, hasStyle=true, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
             contestSampleCutoff=10000,  version=2.0,
             clcaConfig= ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct=.111, ClcaErrorRates(.01, .02, .03, .04), d = 99)
         )
         )
         testRoundtrips(
             AuditConfig(
-                AuditType.POLLING, hasStyles=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
+                AuditType.POLLING, hasStyle=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
                 contestSampleCutoff=10000,  version=2.0,
             pollingConfig= PollingConfig(simFuzzPct=.111, d = 99)
         )
         )
         testRoundtrips(
             AuditConfig(
-                AuditType.ONEAUDIT, hasStyles=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
+                AuditType.ONEAUDIT, hasStyle=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
                 contestSampleCutoff=10000,  version=2.0,
             oaConfig= OneAuditConfig(OneAuditStrategyType.bet99, simFuzzPct=.111, d = 99)
         )
@@ -57,7 +57,7 @@ class TestAuditConfigJson {
     fun testRoundtripIO(target: AuditConfig) {
         val scratchFile = kotlin.io.path.createTempFile().toFile()
 
-        val target = AuditConfig(AuditType.CLCA, hasStyles=true, seed = 12356667890L)
+        val target = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L)
         writeAuditConfigJsonFile(target, scratchFile.toString())
 
         val result = readAuditConfigJsonFile(scratchFile.toString())

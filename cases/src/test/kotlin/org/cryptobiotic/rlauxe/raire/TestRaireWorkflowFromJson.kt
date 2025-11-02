@@ -14,15 +14,15 @@ class TestRaireWorkflowFromJson {
 
     // @Test TODO failing
     fun testRaireComparisonWithStyle() {
-        testRaireWorkflow(AuditConfig(AuditType.CLCA, hasStyles=true, seed = 12356667890L, nsimEst=10))
+        testRaireWorkflow(AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10))
     }
 
     // @Test TODO failing
     fun testRaireComparisonNoStyle() {
-        testRaireWorkflow(AuditConfig(AuditType.CLCA, hasStyles=false, seed = 123568667890L, nsimEst=10))
+        testRaireWorkflow(AuditConfig(AuditType.CLCA, hasStyle=false, seed = 123568667890L, nsimEst=10))
     }
 
-    fun testRaireWorkflow(auditConfig: AuditConfig) {
+    fun testRaireWorkflow(config: AuditConfig) {
         Stopwatch()
 
         // This single contest cvr file is the only real cvr data in SHANGRLA
@@ -50,8 +50,8 @@ class TestRaireWorkflowFromJson {
 
         val nassertions = raireResults.contests.sumOf { it.rassertions.size }
 
-        val ballotCards = MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed)
-        val workflow = WorkflowTesterClca(auditConfig, emptyList(), raireResults.contests, ballotCards)
+        val ballotCards = MvrManagerClcaForTesting(testCvrs, testCvrs, config.seed)
+        val workflow = WorkflowTesterClca(config, emptyList(), raireResults.contests, ballotCards)
 
         runComparisonWorkflowR(workflow, Closer(ballotCards.sortedCards.iterator()), nassertions)
     }

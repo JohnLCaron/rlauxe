@@ -13,12 +13,12 @@ class TestRaireAudit {
 
     @Test
     fun testRaireClcaWithStyle() {
-        testRaireWorkflow(AuditConfig(AuditType.CLCA, hasStyles=true, nsimEst=10))
+        testRaireWorkflow(AuditConfig(AuditType.CLCA, hasStyle=true, nsimEst=10))
     }
 
     @Test
     fun testRaireClcaNoStyle() {
-        testRaireWorkflow(AuditConfig(AuditType.CLCA, hasStyles=false, nsimEst=10))
+        testRaireWorkflow(AuditConfig(AuditType.CLCA, hasStyle=false, nsimEst=10))
     }
 
     fun testRaireWorkflow(auditConfig: AuditConfig) {
@@ -32,7 +32,7 @@ class TestRaireAudit {
     fun testRaireFuzz() {
         val mvrFuzzPct = .02
         val auditConfig = AuditConfig(
-            AuditType.CLCA, hasStyles=false, nsimEst=10,
+            AuditType.CLCA, hasStyle=false, nsimEst=10,
             clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct = mvrFuzzPct)
         )
 

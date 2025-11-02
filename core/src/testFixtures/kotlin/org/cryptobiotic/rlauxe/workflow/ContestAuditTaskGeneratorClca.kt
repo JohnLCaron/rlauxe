@@ -14,7 +14,7 @@ class ClcaContestAuditTaskGenerator(
     val phantomPct: Double,
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
-    val auditConfig: AuditConfig? = null,
+    val config: AuditConfig? = null,
     val clcaConfigIn: ClcaConfig? = null,
     val Nb: Int = Nc,
     val nsimEst: Int = 100,
@@ -23,7 +23,7 @@ class ClcaContestAuditTaskGenerator(
     override fun name() = "ClcaWorkflowTaskGenerator"
 
     override fun generateNewTask(): ContestAuditTask {
-        val useConfig = auditConfig ?:
+        val useConfig = config ?:
         AuditConfig(
             AuditType.CLCA, true, nsimEst = nsimEst,
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror)
@@ -34,7 +34,7 @@ class ClcaContestAuditTaskGenerator(
         var testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
             makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
-        if (!useConfig.hasStyles && Nb > Nc) { // TODO wtf?
+        if (!useConfig.hasStyle && Nb > Nc) { // TODO wtf?
             val otherContestId = 42
             val otherCvrs = List<Cvr>(Nb - Nc) { makeUndervoteForContest(otherContestId) }
             testCvrs = testCvrs + otherCvrs
@@ -60,7 +60,7 @@ class ClcaSingleRoundAuditTaskGenerator(
     val phantomPct: Double,
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
-    val auditConfig: AuditConfig? = null,
+    val config: AuditConfig? = null,
     val clcaConfigIn: ClcaConfig? = null,
     val nsimEst: Int = 100,
     val quiet: Boolean = true,
@@ -73,7 +73,7 @@ class ClcaSingleRoundAuditTaskGenerator(
     }
 
     override fun generateNewTask(): ClcaSingleRoundAuditTask {
-        val useConfig = auditConfig ?:
+        val useConfig = config ?:
         AuditConfig(
             AuditType.CLCA, true, nsimEst = nsimEst,
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror)

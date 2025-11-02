@@ -35,7 +35,7 @@ data class SRT(val Nc: Int,
     val N : Int = testParameters["N"]?.toInt() ?: 0
     val fuzzPct : Double = (testParameters["fuzzPct"] ?: 0.0)
     val isPolling : Boolean = (testParameters["polling"] != null)
-    val hasStyles : Boolean = (testParameters["hasStyles"] != null)
+    val hasStyle : Boolean = (testParameters["hasStyle"] != null)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

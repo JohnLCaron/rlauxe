@@ -1,6 +1,6 @@
 {
     "auditType": "ONEAUDIT",
-    "hasStyles": true,
+    "hasStyle": true,
     "riskLimit": 0.05,
     "seed": -640736939308182122,
     "nsimEst": 10,

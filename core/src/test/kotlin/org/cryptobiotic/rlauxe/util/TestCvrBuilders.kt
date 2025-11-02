@@ -10,7 +10,7 @@ class TestCvrBuilders {
 
     @Test
     fun testConvertCvrsRoundtrip() {
-        val test = MultiContestTestData(20, 11, 20000)
+        val test = MultiContestTestData(20, 11, 20000, hasStyle=true)
         val contests: List<Contest> = test.contests
         val cvrs = test.makeCvrsFromContests()
 
@@ -35,7 +35,7 @@ class TestCvrBuilders {
     @Test
     fun testFuzzedCvrs() {
         val ncontests = 20
-        val test = MultiContestTestData(ncontests, 11, 50000)
+        val test = MultiContestTestData(ncontests, 11, 50000, hasStyle=true)
         val contests: List<Contest> = test.contests
         val cvrs = test.makeCvrsFromContests()
         val detail = false

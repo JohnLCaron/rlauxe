@@ -70,7 +70,7 @@ fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Lon
                 val card = cardIter.next() // previousSamples must be in same order as sortedBorc
                 if (card.prn == prevNumber) {
                     contestsNotDone.forEach { contest ->
-                        if (card.hasContest(contest.id)) { // TODO assumes hasStyles = true
+                        if (card.hasContest(contest.id)) { // TODO assumes hasStyle = true
                             prevContestCounts[contest] = prevContestCounts[contest]?.plus(1) ?: 1
                         }
                     }

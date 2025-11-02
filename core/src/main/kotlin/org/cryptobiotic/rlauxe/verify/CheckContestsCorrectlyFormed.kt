@@ -9,7 +9,7 @@ import kotlin.math.min
 
 private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOANS")
 
-fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<ContestUnderAudit>, results: VerifyResults) {
+fun checkContestsCorrectlyFormed(config: AuditConfig, contestsUA: List<ContestUnderAudit>, results: VerifyResults) {
     results.addMessage("checkContestsCorrectlyFormed")
 
     checkContestInfos(contestsUA, results)
@@ -21,14 +21,14 @@ fun checkContestsCorrectlyFormed(auditConfig: AuditConfig, contestsUA: List<Cont
             checkWinnerVotes(contestUA, results)
 
             // see if margin is too small
-            if (contestUA.minRecountMargin() <= auditConfig.minRecountMargin) {
-                logger.info{"*** MinMargin contest ${contestUA} recountMargin ${contestUA.minRecountMargin()} <= ${auditConfig.minRecountMargin}"}
+            if (contestUA.minRecountMargin() <= config.minRecountMargin) {
+                logger.info{"*** MinMargin contest ${contestUA} recountMargin ${contestUA.minRecountMargin()} <= ${config.minRecountMargin}"}
                 contestUA.preAuditStatus = TestH0Status.MinMargin
             } else {
                 // see if too many phantoms
                 val minMargin = contestUA.minMargin()
                 val adjustedMargin = minMargin - contestUA.contest.phantomRate()
-                if (auditConfig.removeTooManyPhantoms && adjustedMargin <= 0.0) {
+                if (config.removeTooManyPhantoms && adjustedMargin <= 0.0) {
                     logger.warn{"***TooManyPhantoms contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0"}
                     contestUA.preAuditStatus = TestH0Status.TooManyPhantoms
                 }

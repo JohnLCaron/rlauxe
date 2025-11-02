@@ -51,7 +51,7 @@ class CompareAuditsNoStyles {
             )
             val clcaGeneratorNS = ClcaContestAuditTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "clcaNoStyles"),
-                auditConfig = clcaConfigNS,
+                config = clcaConfigNS,
                 Nb=Nb
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGeneratorNS))
@@ -62,7 +62,7 @@ class CompareAuditsNoStyles {
             )
             val clcaGenerator = ClcaContestAuditTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "clcaWithStyles"),
-                auditConfig = clcaConfig,
+                config = clcaConfig,
                 Nb=Nc
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))

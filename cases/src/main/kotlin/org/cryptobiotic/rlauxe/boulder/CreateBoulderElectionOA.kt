@@ -293,11 +293,11 @@ fun createBoulderElection(
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
     val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
 
-    val auditConfig = if (auditConfigIn != null) auditConfigIn
+    val config = if (auditConfigIn != null) auditConfigIn
         else if (isClca)
             AuditConfig(
                 AuditType.CLCA,
-                hasStyles = true,
+                hasStyle = true,
                 riskLimit = riskLimit,
                 contestSampleCutoff = 20000,
                 minRecountMargin = minRecountMargin,
@@ -305,13 +305,13 @@ fun createBoulderElection(
                 clcaConfig = ClcaConfig(ClcaStrategyType.optimalComparison)
             )
         else AuditConfig(
-            AuditType.ONEAUDIT, hasStyles=true, riskLimit=riskLimit, contestSampleCutoff=20000, minRecountMargin=minRecountMargin, nsimEst=10,
+            AuditType.ONEAUDIT, hasStyle=true, riskLimit=riskLimit, contestSampleCutoff=20000, minRecountMargin=minRecountMargin, nsimEst=10,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
 
     val election = BoulderElectionOA(export, sovo, isClca = isClca)
 
-    CreateAudit("boulder", topdir, auditConfig, election, auditdir = auditDir, clear = clear)
+    CreateAudit("boulder", topdir, config, election, auditdir = auditDir, clear = clear)
     println("createBoulderElectionOAnew took $stopwatch")
 }
 

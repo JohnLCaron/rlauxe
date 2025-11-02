@@ -11,7 +11,7 @@ private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
 class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditorIF {
 
     override fun run(
-        auditConfig: AuditConfig,
+        config: AuditConfig,
         contest: ContestIF,
         assertionRound: AssertionRound,
         sampler: Sampler,
@@ -25,11 +25,11 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         //// eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk
         //// maximal: eta0 = upper*(1 - eps), 99% max bet
 
-        val strategy = auditConfig.oaConfig.strategy
+        val strategy = config.oaConfig.strategy
 
         val testH0Result = if (strategy == OneAuditStrategyType.optimalComparison || strategy == OneAuditStrategyType.optimalBet) {
             runBetting(
-                auditConfig,
+                config,
                 contest.Nc(),
                 cassorter,
                 sampler,
@@ -37,7 +37,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             )
         } else {
             runAlpha(
-                auditConfig,
+                config,
                 contest.Nc(),
                 cassorter,
                 sampler,
@@ -63,27 +63,27 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
     }
 
      fun runAlpha(
-        auditConfig: AuditConfig,
+        config: AuditConfig,
         Nc: Int,
         cassorter: OneAuditClcaAssorter,
         sampler: Sampler,
         upperBound: Double,
     ): TestH0Result {
 
-         val strategy = auditConfig.oaConfig.strategy
+         val strategy = config.oaConfig.strategy
          val eta0 = if (strategy == OneAuditStrategyType.eta0Eps)
              cassorter.upperBound() * (1.0 - eps)
          else
              cassorter.noerror() // seems reasonable, but I dont think SHANGRLA ever uses, so maybe not?
 
-         val estimFn = if (auditConfig.oaConfig.strategy == OneAuditStrategyType.bet99) {
+         val estimFn = if (config.oaConfig.strategy == OneAuditStrategyType.bet99) {
              FixedEstimFn(.99 * cassorter.upperBound())
          } else {
              TruncShrinkage(
                  N = Nc,
                  withoutReplacement = true,
                  upperBound = cassorter.upperBound(),
-                 d = auditConfig.pollingConfig.d,
+                 d = config.pollingConfig.d,
                  eta0 = eta0,
              )
          }
@@ -92,14 +92,14 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             estimFn = estimFn,
             N = Nc,
             withoutReplacement = true,
-            riskLimit = auditConfig.riskLimit,
+            riskLimit = config.riskLimit,
             upperBound = upperBound,
         )
         return alpha.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
     }
 
     fun runBetting(
-        auditConfig: AuditConfig,
+        config: AuditConfig,
         Nc: Int,
         cassorter: OneAuditClcaAssorter,
         sampler: Sampler,
@@ -114,7 +114,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             Nc = Nc,
             noerror = cassorter.noerror(),
             upperBound = cassorter.upperBound(),
-            riskLimit = auditConfig.riskLimit,
+            riskLimit = config.riskLimit,
             withoutReplacement = true
         )
 

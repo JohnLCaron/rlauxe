@@ -334,9 +334,7 @@ private data class AssorterBuilder(val contest: ProtoContest, val winner: Dhondt
     val c = -1.0 / (2 * lower)  // affine transform h = c * g + 1/2
     val hmean = h(gmean)
 
-    fun h(g: Double): Double {
-        return c * g + 0.5
-    }
+    fun h(g: Double): Double = c * g + 0.5
 
     fun makeAssorter() = DHondtAssorter(
         contest.createInfo(),

@@ -17,7 +17,7 @@ private val logger = KotlinLogging.logger("PersistentAudit")
 class PersistedWorkflow(
     val auditDir: String,
     val useTest: Boolean,
-): AuditWorkflowIF {
+): AuditWorkflow() {
     val auditRecord: AuditRecord // only need auditConfig, contests from record
     val publisher = Publisher(auditDir)
 
@@ -56,6 +56,7 @@ class PersistedWorkflow(
         } else {
             val publisher = Publisher(auditDir)
 
+            // heres where we limit the number of samples were willing to audit
             if (config.auditSampleLimit != null ) {
                 nextRound.samplePrns = nextRound.samplePrns.subList(0, config.auditSampleLimit)
             }

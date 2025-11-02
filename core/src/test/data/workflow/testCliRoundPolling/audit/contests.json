@@ -16,11 +16,11 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "1": 5992,
-                    "0": 5288
+                    "0": 5688,
+                    "1": 4851
                 },
-                "Nc": 15837,
-                "Ncast": 15835
+                "Nc": 13395,
+                "Ncast": 13336
             },
             "isComparison": true,
             "hasStyle": true,
@@ -29,9 +29,9 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5222264317736945,
-                        "winner": 1,
-                        "loser": 0
+                        "reportedMean": 0.5312430011198208,
+                        "winner": 0,
+                        "loser": 1
                     }
                 }
             ],
@@ -41,9 +41,9 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.5222264317736945,
-                            "winner": 1,
-                            "loser": 0
+                            "reportedMean": 0.5312430011198208,
+                            "winner": 0,
+                            "loser": 1
                         },
                         "hasStyle": true
                     }
@@ -69,13 +69,13 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "1": 4793,
-                    "2": 4247,
-                    "3": 2103,
-                    "0": 434
+                    "2": 6139,
+                    "0": 5116,
+                    "1": 3662,
+                    "3": 1873
                 },
-                "Nc": 11930,
-                "Ncast": 11923
+                "Nc": 18894,
+                "Ncast": 18836
             },
             "isComparison": true,
             "hasStyle": true,
@@ -84,8 +84,8 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.6826906957250629,
-                        "winner": 1,
+                        "reportedMean": 0.5270720863766275,
+                        "winner": 2,
                         "loser": 0
                     }
                 },
@@ -93,17 +93,17 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5228834870075441,
-                        "winner": 1,
-                        "loser": 2
+                        "reportedMean": 0.5655499100243464,
+                        "winner": 2,
+                        "loser": 1
                     }
                 },
                 {
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.6127409891031015,
-                        "winner": 1,
+                        "reportedMean": 0.6128929818990155,
+                        "winner": 2,
                         "loser": 3
                     }
                 }
@@ -114,8 +114,8 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.6826906957250629,
-                            "winner": 1,
+                            "reportedMean": 0.5270720863766275,
+                            "winner": 2,
                             "loser": 0
                         },
                         "hasStyle": true
@@ -126,9 +126,9 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.5228834870075441,
-                            "winner": 1,
-                            "loser": 2
+                            "reportedMean": 0.5655499100243464,
+                            "winner": 2,
+                            "loser": 1
                         },
                         "hasStyle": true
                     }
@@ -138,8 +138,8 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.6127409891031015,
-                            "winner": 1,
+                            "reportedMean": 0.6128929818990155,
+                            "winner": 2,
                             "loser": 3
                         },
                         "hasStyle": true

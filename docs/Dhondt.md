@@ -47,8 +47,9 @@ TA/TL > t
 TA > t * TL
 TA − t * TL > 0
 TA − t * Sum(Ti) > 0
-(1-t) TA - t * {Ti, i != A}
-````
+(1-t) TA - t * {Ti, i != A} > 0
+
+So the linear coefficients are:
 
 aA = (1-t), ai = -t for i != A.
 
@@ -60,9 +61,10 @@ so if vote is for A, g = (1-t)
    else 0
 
 lower bound a = -t
-upper bound a = (1-t)
+upper bound u = (1-t)
 c = -1/2a
 h = (g(b) - a)/-2a
+````
 
 
 Another example is an under threshold assertion, pA < t, for some threshold t.
@@ -74,19 +76,21 @@ TA < t * TL
 0 < t * TL - TA
 0 < t * Sum(Ti) - TA
 t * Sum(Ti) - TA > 0
-(t-1) TA + t * {Ti, i != A}
-````
+(t-1) TA + t * {Ti, i != A} > 0
 
-aA = (t-1), ai = t for i != A.
+So the linear coefficients are:
+
+  aA = (t-1), ai = t for i != A.
 
 so if vote is for A, g = (t-1)
-if vote for not A, r = t
-else 0
+   if vote for not A, r = t
+   else 0
 
 lower bound a = (t-1)
-upper bound a = t
-c = -1/2(t-1)
-h = c * g(b) + 1/2
+upper bound u = t
+c = -1/2a
+h = (g(b) - a)/-2a
+````
 
 Step 2. For the given linear assertion, we define the following function on ballots, which we call a proto-assorter :
 

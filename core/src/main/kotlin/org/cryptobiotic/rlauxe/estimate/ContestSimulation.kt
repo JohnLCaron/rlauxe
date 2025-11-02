@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -10,6 +11,7 @@ import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.audit.CardLocation
 import org.cryptobiotic.rlauxe.audit.CardLocationManifest
 import org.cryptobiotic.rlauxe.audit.CardStyle
+import kotlin.math.abs
 import kotlin.math.round
 import kotlin.random.Random
 
@@ -29,8 +31,8 @@ import kotlin.random.Random
 //    I think we must have a ballot manifest, which means we have Nb, and ...
 
 /**
- * Simulation of multicandidate Contest that reflects the exact votes and Nc, along with undervotes and phantoms,
- * as specified in Contest.
+ * Simulation of single Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
+ * Ignore hasStyle, since its single contest.
  */
 class ContestSimulation(val contest: Contest) {
     val info = contest.info
@@ -57,8 +59,8 @@ class ContestSimulation(val contest: Contest) {
     }
 
     // TODO replace with VotesAndUndervotes ??
-    // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
-    // cvrs only contain this contest
+    // makes a set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
+    // cvrs only contain this contest; hasStyle is ignored.
     // ncvrs = voteCount + underCount + phantomCount = Nc
     fun makeCvrs(prefix: String = "card", poolId: Int?=null): List<Cvr> {
         resetTracker()
@@ -125,6 +127,8 @@ class ContestSimulation(val contest: Contest) {
     }
 
     companion object {
+        private val logger = KotlinLogging.logger("ContestSimulation")
+
         /** Make a 2 candidate plurality Contest with given margin etc. */
         fun make2wayTestContest(Nc: Int,
                                 margin: Double, // margin of top highest vote getters, not counting undervotePct, phantomPct
@@ -144,7 +148,7 @@ class ContestSimulation(val contest: Contest) {
             return ContestSimulation(contest)
         }
 
-        fun makeContestWithLimits(contest: Contest, config: AuditConfig): ContestSimulation {
+        fun simulateContestCvrsWithLimits(contest: Contest, config: AuditConfig): ContestSimulation {
             val limit = config.contestSampleCutoff
             if (limit == null || contest.Nc <= limit) return ContestSimulation(contest)
 
@@ -156,8 +160,8 @@ class ContestSimulation(val contest: Contest) {
             val svotes = contest.votes.map { (id, nvotes) -> id to roundToClosest(sNc * nvotes) }.toMap()
             val voteCount = svotes.map { it.value }.sum() // V_c
 
-            if (voteCount > limit) {
-                println("*** org = ${orgVoteCount} voteCount = ${voteCount}")
+            if (abs(voteCount - limit) > 10) {
+                logger.warn {"simulateContestCvrsWithLimits limit wanted = ${limit} scaled = ${voteCount}"}
             }
 
             val contest = Contest(

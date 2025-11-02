@@ -14,7 +14,7 @@ data class AuditConfig(
     // simulation control
     val nsimEst: Int = 100, // number of simulation estimations
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
-    val contestSampleCutoff: Int? = 30000, // use this number of cvrs in the estimation
+    val contestSampleCutoff: Int? = 30000, // use this number of cvrs in the estimation, set to null to use all
 
     // audit sample size control
     val removeCutoffContests: Boolean = false, // remove contests that need more samples than contestSampleCutoff

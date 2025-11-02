@@ -21,7 +21,7 @@ class TestClcaSimulation {
             val contestUA = ContestUnderAudit(contest).addStandardAssertions()
             val compareAssorter = contestUA.clcaAssertions.first().cassorter
 
-            val sampler = ClcaSimulation(cvrs,
+            val sampler = ClcaSimulatedErrorRates(cvrs,
                 contestUA.contest as Contest,
                 compareAssorter,
                 ClcaErrorTable.standard,
@@ -65,7 +65,7 @@ class TestClcaSimulation {
 
         val phantomRate = contestUA.contest.phantomRate()
         val errorRates = ClcaErrorRates(0.0, phantomRate, 0.0, 0.0)
-        val sampler = ClcaSimulation(cvrs, contestUA.contest, assorter, errorRates)
+        val sampler = ClcaSimulatedErrorRates(cvrs, contestUA.contest, assorter, errorRates)
         sampler.reset()
 
         val orgCvrs = cvrs.map { assorter.assorter.assort(it) }.average()

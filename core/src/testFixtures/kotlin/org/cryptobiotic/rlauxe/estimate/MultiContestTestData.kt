@@ -28,7 +28,7 @@ data class MultiContestTestData(
     // generate with ballotStyles; but if hasStyle = false, then these are not visible to the audit
     val ballotStylePartition = partition(totalBallots, nballotStyles).toMap() // Map bsidx -> ncards in each ballot style (bs)
 
-    val fcontests: List<ContestTestData>
+    val fcontests: List<ContestTestDataBuilder>
     val contests: List<Contest>
     val ballotStyles: List<CardStyle>
     var countBallots = 0
@@ -41,7 +41,7 @@ data class MultiContestTestData(
         // between 2 and 4 candidates, margin is a random number in marginRange
         fcontests = List(ncontest) { it }.map {// id same as index
             val ncands = max(Random.nextInt(5), 2)
-            ContestTestData(it, ncands,
+            ContestTestDataBuilder(it, ncands,
                 marginRange.start + if (marginRange.endInclusive <= marginRange.start) 0.0 else Random.nextDouble(marginRange.endInclusive - marginRange.start),
                 underVotePctRange.start + if (underVotePctRange.endInclusive <= underVotePctRange.start) 0.0 else Random.nextDouble(underVotePctRange.endInclusive - underVotePctRange.start),
                 phantomPctRange.start + if (phantomPctRange.endInclusive <= phantomPctRange.start) 0.0 else Random.nextDouble(phantomPctRange.endInclusive - phantomPctRange.start),
@@ -50,7 +50,7 @@ data class MultiContestTestData(
         }
 
         // every contest has between 1 and 4 ballot styles, randomly chosen
-        val contestBstyles = mutableMapOf<ContestTestData, Set<Int>>() // fcontest -> set(ballot style id)
+        val contestBstyles = mutableMapOf<ContestTestDataBuilder, Set<Int>>() // fcontest -> set(ballot style id)
         fcontests.forEach{ fcontest ->
             val nbs = min(nballotStyles, 1 + Random.nextInt(4))
             val bset = mutableSetOf<Int>() // the ballot style idx, 0 based
@@ -156,7 +156,7 @@ data class MultiContestTestData(
         return result + phantoms
     }
 
-    private fun makeCvr(cvrbs: CvrBuilders, fcontests: List<ContestTestData>): Cvr {
+    private fun makeCvr(cvrbs: CvrBuilders, fcontests: List<ContestTestDataBuilder>): Cvr {
         val cvrb = cvrbs.addCvr()
         fcontests.forEach { fcontest -> fcontest.addContestToCvr(cvrb) }
         return cvrb.build()
@@ -168,7 +168,7 @@ data class MultiContestTestData(
 // This creates a multicandidate contest with the two closest candidates having exactly the given margin.
 // It can create cvrs that exactly reflect this contest's vote; so can be used in simulating the audit.
 // The cvrs are not multicontest.
-data class ContestTestData(
+data class ContestTestDataBuilder(
     val contestId: Int,
     val ncands: Int,
     val margin: Double, // margin of top highest vote getters, not counting undervotePct, phantomPct

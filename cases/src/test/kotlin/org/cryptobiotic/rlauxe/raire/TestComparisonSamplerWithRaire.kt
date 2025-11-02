@@ -4,13 +4,12 @@ import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.ClcaErrorTable
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.estimate.ClcaSimulation
+import org.cryptobiotic.rlauxe.estimate.ClcaSimulatedErrorRates
 import org.cryptobiotic.rlauxe.rairejson.import
 import org.cryptobiotic.rlauxe.rairejson.readRaireBallotsCsv
 import org.cryptobiotic.rlauxe.rairejson.readRaireResultsJson
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
-import kotlin.test.Test
 
 class TestComparisonSamplerWithRaire {
 
@@ -41,7 +40,7 @@ class TestComparisonSamplerWithRaire {
     fun run(cvrs: List<Cvr>, contestUA: ContestUnderAudit, cassorter: ClcaAssorter) {
         println("\n${cassorter.assorter().desc()}")
 
-        val sampler = ClcaSimulation(cvrs, contestUA.contest, cassorter, ClcaErrorTable.standard)
+        val sampler = ClcaSimulatedErrorRates(cvrs, contestUA.contest, cassorter, ClcaErrorTable.standard)
 
         val orgCvrs = cvrs.map { cassorter.assorter().assort(it) }.average()
         val sampleCvrs = sampler.cvrs.map { cassorter.assorter().assort(it) }.average()

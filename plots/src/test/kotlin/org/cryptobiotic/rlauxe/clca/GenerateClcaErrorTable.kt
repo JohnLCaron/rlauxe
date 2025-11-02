@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.estimate.ClcaFuzzSampler
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
-import org.cryptobiotic.rlauxe.estimate.ContestTestData
+import org.cryptobiotic.rlauxe.estimate.ContestTestDataBuilder
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.audit.AuditConfig
@@ -38,7 +38,7 @@ class GenerateClcaErrorTable {
             println("| ncand | r2o    | r1o    | r1u    | r2u    |")
             println("|-------|--------|--------|--------|--------|")
             ncands.forEach { ncand ->
-                val fcontest = ContestTestData(0, ncand, margin, underVotePct, 0.0)
+                val fcontest = ContestTestDataBuilder(0, ncand, margin, underVotePct, 0.0)
                 fcontest.ncards = N
                 val contest = fcontest.makeContest()
                 // print("contest votes = ${contest.votes} ")

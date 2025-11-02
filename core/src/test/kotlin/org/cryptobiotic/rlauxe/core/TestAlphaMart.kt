@@ -42,7 +42,7 @@ class TestAlphaMart {
         val eta0 = assorter.reportedMean()
         println("eta0=$eta0, margin=${mean2margin(eta0)}")
 
-        val result = simulateSampleSizeAlphaMart(
+        val result = runRepeatedAlphaMart(
             config = config,
             sampleFn = cvrSampler,
             estimFn = null,

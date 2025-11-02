@@ -9,10 +9,13 @@ import kotlin.random.Random
 private val show = true
 private val logger = KotlinLogging.logger("ClcaSimulation")
 
-/** Create internal cvr and mvr with the correct under/over statements that match the given error rates.
- * Specific to a contest. Only used for estimating the sample size, not auditing.
+/** 
+ * Create Sampler with internal cvrs, and simulated mvrs with that match the given error rates.
+ * Specific to a contest. The cvrs may be real or themselves simulated to match a Contest's vote.
+ * Only used for estimating the sample size, not auditing.
+ * Call reset to get a new permutation.
  */
-class ClcaSimulation(
+class ClcaSimulatedErrorRates(
     rcvrs: List<Cvr>, // may have phantoms
     val contest: ContestIF,
     val cassorter: ClcaAssorter,

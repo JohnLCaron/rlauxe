@@ -22,7 +22,7 @@ private val checkValidity = true
 class MvrManagerTestFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerPollingIF, MvrManagerTest {
     val publisher = Publisher(auditDir)
 
-    override fun Nballots(contestUA: ContestUnderAudit) = 0 // TODO Danger Will Rogers!!
+    // override fun Nballots(contestUA: ContestUnderAudit) = 0 // TODO Danger Will Rogers!!
     override fun sortedCards() = CloseableIterable { auditableCards() }
 
     // same pairs over all contests (!)

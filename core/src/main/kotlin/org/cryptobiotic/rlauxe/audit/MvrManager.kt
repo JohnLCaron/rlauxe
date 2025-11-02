@@ -13,9 +13,6 @@ interface MvrManager {
     // either Cvrs (clca) or CardLocations (polling) or both (oneaudit)
     fun sortedCards(): CloseableIterable<AuditableCard>
     fun sortedCvrs(): CloseableIterable<Cvr> = CloseableIterable { AuditableCardToCvrAdapter(sortedCards().iterator()) }
-
-    // noStyle: scale by proportion of ballots that have this contest. Nb >= Nc
-    fun Nballots(contestUA: ContestUnderAudit): Int // TODO where does this come from ?
 }
 
 interface MvrManagerClcaIF : MvrManager {
@@ -26,6 +23,11 @@ interface MvrManagerClcaIF : MvrManager {
 interface MvrManagerPollingIF : MvrManager {
     // this is used for audit, not estimation. need List so we can do mvrs[permutedIndex[idx]]
     fun makeMvrsForRound(): List<Cvr>
+}
+
+interface MvrManagerNoStyleIF : MvrManager {
+    // noStyle: scale by proportion of ballots that have this contest. Nb >= Nc
+    fun Nballots(contestUA: ContestUnderAudit): Int // TODO where does this come from ?
 }
 
 // when the MvrManager supplies the audited mvrs, its a test

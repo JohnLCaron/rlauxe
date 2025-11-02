@@ -4,24 +4,25 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.mean2margin
 
 // pA < t
-// TA/TL < t
-// TA < t * TL
-// 0 < t * TL - TA
-// 0 < t * Sum(Ti) - TA
-// t * Sum(Ti) - TA > 0
-//( t-1) TA + t * {Ti, i != A}
+//TA/TL < t
+//TA < t * TL
+//0 < t * TL - TA
+//0 < t * Sum(Ti) - TA
+//t * Sum(Ti) - TA > 0
+//(t-1) TA + t * {Ti, i != A} > 0
 //
+//So the linear coefficients are:
 //
-// aA = (t-1), ai = t for i != A.
+//  aA = (t-1), ai = t for i != A.
 //
 //so if vote is for A, g = (t-1)
-//if vote for not A, r = t
-//else 0
+//   if vote for not A, r = t
+//   else 0
 //
 //lower bound a = (t-1)
-//upper bound = t
-//c = -1/2a = -1/2(t-1)
-//h = c * g(b) + 1/2
+//upper bound u = t
+//c = -1/2a
+//h = (g(b) - a)/-2a
 
 // h = (g(b) - a)/-2a
 // h(lower) = (lower - a)/-2a = (a - a)/-2a = 0

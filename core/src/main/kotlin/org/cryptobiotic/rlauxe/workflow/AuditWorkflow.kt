@@ -10,20 +10,20 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 private val logger = KotlinLogging.logger("RlauxAuditIF")
 
 // abstraction for running an audit.
-interface AuditWorkflowIF {
-    fun auditConfig() : AuditConfig
-    fun mvrManager() : MvrManager
-    fun auditRounds(): MutableList<AuditRound>
-    fun contestsUA(): List<ContestUnderAudit>
+abstract class AuditWorkflow {
+    abstract fun auditConfig() : AuditConfig
+    abstract fun mvrManager() : MvrManager
+    abstract fun auditRounds(): MutableList<AuditRound>
+    abstract fun contestsUA(): List<ContestUnderAudit>
 
     // start new round and create estimate
-    fun startNewRound(quiet: Boolean = true): AuditRound {
+    open fun startNewRound(quiet: Boolean = true): AuditRound {
         val auditRounds = auditRounds()
         val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
         val roundIdx = auditRounds.size + 1
 
         val auditRound = if (previousRound == null) {
-            // first time, create the rounds
+            // first time, create the round
             val contestRounds = contestsUA().filter { !auditConfig().skipContests.contains(it.id) }.map { ContestRound(it, roundIdx) }
             AuditRound(roundIdx, contestRounds = contestRounds, samplePrns = emptyList())
         } else {
@@ -35,10 +35,10 @@ interface AuditWorkflowIF {
         logger.info{"Estimate round ${roundIdx}"}
         val stopwatch = Stopwatch()
 
-        // 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function,
         // only need cvrIterator for OneAudit
         val cvrIterator = if (auditConfig().auditType != AuditType.ONEAUDIT) null else mvrManager().sortedCvrs().iterator()
 
+        // 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function,
         estimateSampleSizes(
             auditConfig(),
             auditRound,
@@ -65,5 +65,5 @@ interface AuditWorkflowIF {
     // AuditRecord.enterMvrs(mvrFile: String)
 
     // 6. _Run the audit_
-    fun runAuditRound(auditRound: AuditRound, quiet: Boolean = true): Boolean  // return complete
+    abstract fun runAuditRound(auditRound: AuditRound, quiet: Boolean = true): Boolean  // return complete
 }

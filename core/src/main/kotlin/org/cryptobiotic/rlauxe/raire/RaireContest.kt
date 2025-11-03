@@ -289,7 +289,7 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
         if (rassertion.assertionType == RaireAssertionType.irv_elimination) append(" eliminated=${rassertion.eliminated}")
         append(" votes=${rassertion.votes}")
     }
-    override fun hashcodeDesc() = "${winLose()} ${info.hashCode()} ${rassertion.hashCode()}" // must be unique for serialization
+    override fun hashcodeDesc() = "${winLose()} ${info.name} ${rassertion.hashCode()}" // must be unique for serialization
 
     override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
         if (usePhantoms && mvr.phantom) return 0.5

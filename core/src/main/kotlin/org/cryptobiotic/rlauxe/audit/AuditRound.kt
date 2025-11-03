@@ -74,8 +74,7 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
 
     fun wantSampleSize(prevCount: Int): Int {
         return if (auditorWantNewMvrs > 0) (auditorWantNewMvrs + prevCount)
-                else if (contestUA.hasStyle) estSampleSize
-                else estSampleSizeNoStyles
+                else if (contestUA.hasStyle) estSampleSize else estSampleSizeNoStyles
     }
 
     fun estSampleSizeEligibleForRemoval(): Int {

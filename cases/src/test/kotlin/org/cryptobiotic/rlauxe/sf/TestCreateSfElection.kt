@@ -2,12 +2,13 @@ package org.cryptobiotic.rlauxe.sf
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.cli.runRound
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import kotlin.test.Test
 
-class TestSfElection {
+class TestCreateSfElection {
     val sfDir = "/home/stormy/rla/cases/sf2024"
     val zipFilename = "$sfDir/CVR_Export_20241202143051.zip"
     val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
@@ -49,7 +50,7 @@ class TestSfElection {
     }
 
     @Test
-    fun createSFElectionOAnostyles() {
+    fun createSFElectionOneAuditNostyles() {
         val topdir = "/home/stormy/rla/cases/sf2024/oans"
 
         createSfElectionNoStyles(
@@ -58,11 +59,36 @@ class TestSfElection {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
+            isPolling = false
         )
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
+    }
+
+    @Test
+    fun createSFElectionPollingNostyles() {
+        val topdir = "/home/stormy/rla/cases/sf2024/polling"
+
+        createSfElectionNoStyles(
+            topdir,
+            zipFilename,
+            "ContestManifest.json",
+            "CandidateManifest.json",
+            cvrExportCsv = cvrExportCsv,
+            isPolling = true
+        )
+
+        val publisher = Publisher("$topdir/audit")
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
+    }
+
+    @Test
+    fun runSFElectionPollingNostyles() {
+        val topdir = "/home/stormy/rla/cases/sf2024/polling"
+        runRound(inputDir = "$topdir/audit", useTest = true, quiet = false)
     }
 
     /*

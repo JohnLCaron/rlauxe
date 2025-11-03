@@ -19,11 +19,11 @@ private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
 // making OneAudit pools from the precinct results
 // TODO vary percent cards in pools, show plot
-class ColoradoOneAudit (
+open class ColoradoOneAudit (
     electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
-    val isClca: Boolean,
+    val config: AuditConfig,
     val hasStyle: Boolean = true,
 ): CreateElectionIF {
     val roundContests: List<ContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
@@ -146,18 +146,18 @@ class ColoradoOneAudit (
         return regContests
     }
 
-    override fun cardPools() = cardPools
+    override fun cardPools(): List<CardPoolIF>?  = cardPools
 
     override fun contestsUA() = contestsUA
 
     // dont load into memory all at once, just one pool at a time
-    inner class MakeCvrs(): Iterator<Cvr> {
+    inner class CvrIteratorfromPools(): Iterator<Cvr> {
         val oaContestMap = oaContests.associateBy { it.info.id }
         val cardPoolIter = cardPools.iterator()
         var innerIter: CardsFromPool
 
         init {
-            innerIter = CardsFromPool(cardPoolIter.next(), oaContestMap, isClca)
+            innerIter = CardsFromPool(cardPoolIter.next(), oaContestMap)
         }
 
         override fun next(): Cvr {
@@ -167,7 +167,7 @@ class ColoradoOneAudit (
         override fun hasNext(): Boolean {
             if (innerIter.hasNext()) return true
             if (cardPoolIter.hasNext()) {
-                innerIter = CardsFromPool(cardPoolIter.next(), oaContestMap, isClca)
+                innerIter = CardsFromPool(cardPoolIter.next(), oaContestMap)
                 return hasNext()
             }
             return false
@@ -175,7 +175,7 @@ class ColoradoOneAudit (
     }
 
     // these are chosen randomly, so in order for mvrs and cvrs to match, the cvrs have to be made from the mvrs.
-    class CardsFromPool(val cardPool: CardPoolWithBallotStyle, val oaContestMap: Map<Int, OneAuditContestCorla>, val isClca: Boolean) : Iterator<Cvr> {
+    inner class CardsFromPool(val cardPool: CardPoolWithBallotStyle, val oaContestMap: Map<Int, OneAuditContestCorla>) : Iterator<Cvr> {
         val cvrs: Iterator<Cvr>
 
         init {
@@ -187,31 +187,18 @@ class ColoradoOneAudit (
                 contestVotes[contestId] = VotesAndUndervotes(contestTab.votes, underVotes, oaContest.info.voteForN)
             }
 
-            cvrs = makeVunderCvrs(contestVotes, cardPool.poolName, poolId = if (isClca) null else cardPool.poolId).iterator()
+            cvrs = makeVunderCvrs(contestVotes, cardPool.poolName, poolId = if (config.isClca) null else cardPool.poolId).iterator()
         }
 
         override fun next() = cvrs.next()
         override fun hasNext() = cvrs.hasNext()
     }
 
-    /* override fun hasTestMvrs() = isClca // TODO if you leave off mvrs, i think it will automatically use the cvrs (no error)
-    override fun allCvrs(): Pair<CloseableIterable<AuditableCard>, CloseableIterable<AuditableCard>> {
-        val poolCvrs = if (isClca) makeCvrs() else createCvrsFromPools(cardPools) // OOM error when both cvrs are made
-        val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-        val cvrs = poolCvrs + phantoms
-        val mvrs = if (isClca) poolCvrs + phantoms else emptyList()
-
-        return Pair(
-            CloseableIterable { CvrToAuditableCardClca(Closer(cvrs.iterator())) },
-            CloseableIterable { CvrToAuditableCardClca(Closer(mvrs.iterator())) },
-        )
-    } */
-
     override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
         val phantomCvrs = makePhantomCvrs(contestsUA().map { it.contest })
         val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0L) }.asSequence()
 
-        val cvrIter: Iterator<Cvr> = MakeCvrs()  // "fake" truth
+        val cvrIter: Iterator<Cvr> = CvrIteratorfromPools()  // "fake" truth
         val poolNameToId = cardPools.associate { it.poolName to it.poolId }
         val cardSeq = CvrToCardAdapter(Closer(cvrIter), poolNameToId).asSequence()
 
@@ -267,7 +254,6 @@ fun createColoradoOneAudit(
     clear: Boolean = true)
 {
     val stopwatch = Stopwatch()
-    val election = ColoradoOneAudit(electionDetailXmlFile, contestRoundFile, precinctFile, isClca)
 
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
@@ -280,6 +266,7 @@ fun createColoradoOneAudit(
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
     }
+    val election = ColoradoOneAudit(electionDetailXmlFile, contestRoundFile, precinctFile, config)
 
     CreateAudit("corla", topdir, config, election, clear = clear)
     println("createColoradoOneAudit took $stopwatch")

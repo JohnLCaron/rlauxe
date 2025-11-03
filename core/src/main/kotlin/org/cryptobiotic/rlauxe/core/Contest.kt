@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.min
@@ -80,6 +81,7 @@ interface ContestIF {
     fun winners(): List<Int>
     fun losers(): List<Int>
 
+    fun undervotePct() = roundToClosest(100.0 * Nundervotes() / (info().voteForN * Nc())) // for viewer
     fun phantomRate() = Np() / Nc().toDouble()
     fun isIrv() = choiceFunction == SocialChoiceFunction.IRV
     fun show() : String = toString()
@@ -283,6 +285,7 @@ open class ContestUnderAudit(
     var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms
     var pollingAssertions: List<Assertion> = emptyList() // mutable needed for Raire override and serialization
     var clcaAssertions: List<ClcaAssertion> = emptyList() // mutable needed for serialization
+    var Nb: Int? = null
 
     init {
         if (contest.losers().size == 0) {
@@ -291,6 +294,8 @@ open class ContestUnderAudit(
             preAuditStatus = TestH0Status.NoWinners
         }
     }
+
+    fun setNb(ncards: Int) { this.Nb = ncards }
 
     fun addAssertionsFromAssorters(assorters: List<AssorterIF>): ContestUnderAudit {
         val assertions = mutableListOf<Assertion>()
@@ -319,7 +324,6 @@ open class ContestUnderAudit(
             else -> throw RuntimeException("choice function ${choiceFunction} is not supported")
         }
 
-        // formerly seperate
         if (isClca) {
             addClcaAssertionsFromReportedMargin()
         }
@@ -402,7 +406,8 @@ open class ContestUnderAudit(
     override fun toString() = contest.toString()
 
     open fun show() = buildString {
-        appendLine("${contest.javaClass.simpleName} ${contest.show()}")
+        append("${contest.javaClass.simpleName} ${contest.show()}")
+        if (!hasStyle && Nb != null) appendLine(" Nb=$Nb") else appendLine()
         if (minAssertion() != null) appendLine("   ${contest.showAssertionDifficulty(minAssertion()!!.assorter)}")
         append(contest.showCandidates())
     }

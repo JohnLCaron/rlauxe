@@ -28,7 +28,7 @@ import kotlin.collections.forEach
 
 private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOA")
 
-// Compare CLCA, OneAudit with styles, and OneAudit without styles on the SanFrancisco 2024 General Election.
+// Compare CLCA against OneAudit with styles on the SanFrancisco 2024 General Election.
 class CreateSfElection(
     castVoteRecordZip: String,
     contestManifestFilename: String,
@@ -36,6 +36,7 @@ class CreateSfElection(
     val cvrExportCsv: String,
     val isClca: Boolean,
 ): CreateElectionIF {
+
     val cardPoolsNotUnpooled: List<CardPoolIF>
     val contestsOA: List<ContestUnderAudit>
 
@@ -142,7 +143,7 @@ fun makeAllOneAuditContests(contestTabSums: Map<Int, ContestTabulation>, contest
         if (useNc > 0) {
             val contestOA: ContestUnderAudit = if (!contestSumTab.isIrv) {
                 val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
-                ContestUnderAudit(contest).addStandardAssertions()
+                ContestUnderAudit(contest, isClca = true).addStandardAssertions()
             } else {
                 makeRaireContestUA(contestSumTab.info, contestSumTab, useNc)
             }
@@ -230,7 +231,6 @@ fun makeContestNcs(contestManifest: ContestManifest, contestInfos: List<ContestI
     }
     return contestNcs
 }
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

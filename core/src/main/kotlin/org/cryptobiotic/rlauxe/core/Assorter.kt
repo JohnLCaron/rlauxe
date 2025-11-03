@@ -75,7 +75,7 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
 
     override fun upperBound() = 1.0
     override fun desc() = " winner=$winner loser=$loser reportedMargin=${dfn(reportedMargin(), 8)} reportedMean=${dfn(reportedMean, 8)}"
-    override fun hashcodeDesc() = "${winLose()} ${info.hashCode()}" // must be unique for serialization
+    override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization
     override fun winner() = winner
     override fun loser() = loser
     override fun reportedMargin() = mean2margin(reportedMean)
@@ -139,7 +139,7 @@ data class SuperMajorityAssorter(val info: ContestInfo, val candId: Int, val min
 
     override fun upperBound() = upperBound
     override fun desc() = "SuperMajorityAssorter winner=$candId minFraction=$minFraction"
-    override fun hashcodeDesc() = "winner=$candId minFraction=$minFraction ${info.hashCode()}" // must be unique for serialization
+    override fun hashcodeDesc() = "winner=$candId minFraction=$minFraction ${info.name}" // must be unique for serialization
     override fun winner() = candId
     override fun loser() = -1
     override fun reportedMargin() = mean2margin(reportedMean)

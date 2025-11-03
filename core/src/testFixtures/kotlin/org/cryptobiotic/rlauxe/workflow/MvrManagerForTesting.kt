@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
 // simulated cvrs, mvrs for testing are sorted and kept here in memory
-class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerClcaIF, MvrManagerNoStyleIF, MvrManagerTest {
+class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerClcaIF, MvrManagerTest {
     val sortedCards: List<AuditableCard>
     val mvrsUA: List<AuditableCard>
     private var mvrsRound: List<AuditableCard> = emptyList()
@@ -20,7 +20,6 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
         mvrsUA = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
     }
 
-    override fun Nballots(contestUA: ContestUnderAudit) = sortedCards.size // TODO
     override fun sortedCards() = CloseableIterable { Closer(sortedCards.iterator()) }
 
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>  {
@@ -61,7 +60,7 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
 }
 
 // simulated cardLocations, mvrs for testing are sorted and kept here in memory
-class MvrManagerPollingForTesting(cardLocations: List<CardLocation>, mvrs: List<Cvr>, seed: Long) : MvrManagerPollingIF, MvrManagerNoStyleIF, MvrManagerTest {
+class MvrManagerPollingForTesting(cardLocations: List<CardLocation>, mvrs: List<Cvr>, seed: Long) : MvrManagerPollingIF, MvrManagerTest {
     val sortedCards: List<AuditableCard>
     val mvrsUA: List<AuditableCard>
     var mvrsRound: List<AuditableCard> = emptyList()
@@ -72,7 +71,6 @@ class MvrManagerPollingForTesting(cardLocations: List<CardLocation>, mvrs: List<
         mvrsUA = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
     }
 
-    override fun Nballots(contestUA: ContestUnderAudit) = sortedCards.size // TODO
     override fun sortedCards() = CloseableIterable { Closer(sortedCards.iterator()) }
 
     override fun makeMvrsForRound(): List<Cvr> {
@@ -113,7 +111,6 @@ class MvrManagerOneAuditForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long)
         mvrsUA = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
     }
 
-    // override fun Nballots(contestUA: ContestUnderAudit) = sortedCards.size // TODO
     override fun sortedCards() = CloseableIterable { Closer(sortedCards.iterator()) }
 
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>  {

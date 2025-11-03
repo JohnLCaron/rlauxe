@@ -1,5 +1,5 @@
 # Case Studies
-_last changed 10/17/2025_
+_last changed 11/03/2025_
 
 ## SanFrancisco County 2024
 
@@ -17,7 +17,7 @@ Input is in _CVR_Export_20241202143051.zip_. This contains the Dominion CVR_Expo
 Contest Manifest, Candidate Manifest, and other manifests. We also have the San Francisco County _summary.xml_ file from
 their website for corroboration. The summary.xml ncards match the CVRS exactly, so there are no phantoms.
 
-**createSfElectionFromCards/createSfElectionFromCardsOA/createSfElectionFromCardsOANS**: We read the CVR_Export files 
+**CreateSfElection/CreateSfElectionNoStyles**: We read the CVR_Export files 
 and write equivilent csv files in our own "AuditableCard" format to a temporary "cvrExport.csv" file.
 We make the contests from the information in ContestManifest and CandidateManifest files,
 and tabulate the votes from the cvrs. If its an IRV contest, we use the raire-java library to create the Raire assertions.
@@ -26,23 +26,30 @@ We write the auditConfig.json (which contains the prn seed) and contests.json fi
 **createSortedCards**: Using the prn seed, we assign prns to all cvrs and rewrite the cvrs to sortedCards.csv (optionally zipped), using an out-of-memory
 sorting algorithm.
 
-The CVRs are in two groups, "mail-in" and "in-person". The _createSfElectionFromCardsOA_ variant assumes that the mail-in cvrs can be matched 
-to the corresponding physical ballot, but the in-person cannot. We can use OneAudit by putting the in-person cvrs into pools by precinct, since we can
-then calculate the ContestTabulation and assortMean for each pool. For IRV, we can calculate the VoteConsolidator for each pool.
-This allows us to calculate the RaireAssertions and assortMean for each pool. 
-So we can run a real IRV, at the cost of increased sample sizes to use OneAudit instead of CLCA. 
-In this case we use Card Style Data to do style sampling, which is equivilent to assuming we can match the CRV to the MRV,
-but the crv vote counts have been redacted for privacy reasons.
+The CVRs are in two groups, "mail-in" and "in-person".
 
-The _createSfElectionFromCards_ variant assumes we can match in-person CVRs to physical ballots, so theres no need to use OneAudit.
+**CreateSfElection(isClca = false) One Audit, hasStyle:** assumes we can match all CVRs to physical ballots, 
+but the in-person (precinct) votes must be redacted and not available to be matched against the mvrs. 
+We can use OneAudit by putting the in-person cvrs into pools by precinct, since we can
+then calculate the ContestTabulation and assortMean for each pool. For IRV, we can calculate the VoteConsolidator for each pool.
+This allows us to calculate the RaireAssertions and assortMean for each pool.
+So we can run a real IRV, at the cost of increased sample sizes to use OneAudit instead of CLCA.
+In this case we use Card Style Data to do style sampling, which is equivilent to assuming we can match the CRV to the MRV,
+but the in-person crv vote counts have been redacted for privacy reasons.
+
+**CreateSfElection(isClca = true) CLCA, hasStyle:** assumes we can match all CVRs to physical ballots, so we can do a regular CLCA.
 This allows us to compare the cost of OneAudit vs CLCA.
 
-The _createSfElectionFromCardsOANS_ ("One Audit, no Styles") variant assumes we cannot match in-person CVRs to physical ballots, so uses OneAudit, 
-but assumes that we dont know which cards have which contests for the pooled data. Instead it uses Philip's approach of 
+**CreateSfElectionNoStyle(isPolling = false)_ One Audit, noStyle** assumes we cannot match precinct CVRs to physical ballots, 
+so uses OneAudit, and assumes that we dont know which cards have which contests for the pooled data. Instead it uses Philip's approach of 
 adding contest undervotes to all the cards in the pool (so that all cards have all the contests in the pool), and increasing the contest upper limit (Nc). 
 Consistent sampling is still used, but with increased undervotes in the pool ballots.
-This allows us to test the two approaches. 
 
+**CreateSfElectionNoStyle(isPolling = true) One Audit, noStyle:** assumes we cannot match any CVRs to physical ballots,
+so uses Polling. It is assumed that for each precinct, the set of possible contests for that precinct is known.
+When creating the CardManifest, for each precinct, every cvr gets that list of contests on it. Then all the cards are read and for 
+each contest, the total number of ballots that may contain the contest is tabulated. This is Nb for that contest.
+Consistent sampling can still be used, but the estimated ballots needed for each contest are scaled by Nb/Nc >= 1.
 
 ## Colorado RLA (CORLA) 2024
 
@@ -96,18 +103,30 @@ Not exactly consistent, eg 1728159 - 1377441 = 350718 != 350348, but close enoug
 We use the published precinct level results to create simulated CVRs and run simulated RLAs. Note that we need CVRs to do IRV contests, so we cant handle
   IRV contests.
 
-* createColoradoClcaAudit: contestRound, electionDetailXml, precinctResults -> precinctCvrs -> CvrExport.csv
-* createCorla2024sortedCards: use CardSortMerge to convert to AuditableCard, assign prn, sort and write sortedCards (900 Mb, 120 Mb zipped)
+**ColoradoOneAudit(isClca = true) CLCA, hasStyle:** assumes we can match the CVRs to physical ballots and does a regular CLCA.
+This allows us to compare the cost of OneAudit vs CLCA.
 
-### precinct pools for OneAudit audit
+### precinct pools for OneAudit
 
-We could also run a OneAudit with the precinct as the pools. 
+We also run a OneAudit with the precinct as the pools. 
 
-* Assume that the contest list constitutes the ballot style for that batch. They do record when Candidate total votes = 0.
+* They do record when a Candidate total votes = 0.
 * We have Nc from contestRound.contestBallotCardCount
-* Do we have the number of cards for each precinct? No, not in createColoradoElectionFromDetailXmlAndPrecincts. 
-* Add undervotes to minimize phantoms.
+* We dont have the number of cards for each precinct, so we add undervotes to minimize phantoms.
 
+**ColoradoOneAudit(isClca = false) One Audit, hasStyle:** has all ballots in OneAudit pools by precinct.
+Assume that the contest list constitutes the ballot style for that precinct pool.
+In this case we use Card Style Data to do style sampling, which is equivilent to assuming we can match the CardLocations to the MRV,
+but there are no votes.
+
+### precinct styles for Polling audit
+
+**ColoradoOneAuditPolling() Polling, noStyle:** assume that the precinct contest list constitutes the ballot style for that precinct pool.
+When creating the CardManifest, for each precinct, every cvr gets that list of contests on it. Then all the cards are read and for
+each contest, the total number of ballots that may contain the contest is tabulated. This is Nb - Np for that contest.
+Consistent sampling is used, but the estimated ballots needed for each contest are scaled by Nb/Nc >= 1.
+
+Because every ballot is in a pool, Nb = Nc. Not too interesting.
 
 ### Next Steps
 
@@ -158,13 +177,13 @@ _createBoulderElection_: BoulderStatementOfVotes, 2024-Boulder-County-General-Re
 * Both the cvrs and the redacted pool totals reference a BallotType, which can be used as the Card Style Data.
 * We are not given the count of ballots or undervotes in the redacted pools.
 * The StatementOfVotes gives us enough information to calculate Nc.
-* We estimate the undervotes and pool counts as explained below, and adjust the contest Nc to be consistest with the ballot manifest.
+* We estimate the undervotes and pool counts as explained below, and adjust the contest Nc to be consistest with the card manifest.
 
-**createBoulderElection(isClca = false)** create a OneAudit by assuming that each pool has a single CardStyle, which allows us to 
+**createBoulderElection(isClca = false) OneAudit, hasStyle** create a OneAudit by assuming that each pool has a single CardStyle, which allows us to 
 use style based sampling. This constrains the way that undervotes are added to the pools. We need to know the number of cards in each batch. We dont,
 so we approximate it, and adjust Nc. 
 
-**createBoulderElection(isClca = true)** creates a CLCA by simulating cvrs in each pool and adding to the regular cvrs.
+**createBoulderElection(isClca = true)  CLCA, hasStyle:** creates a CLCA by simulating cvrs in each pool and adding to the regular cvrs.
 This allows us to characterize the pool variances.
 
 Its not possible to run an IRV audit with redacted CVRs. There are lines called "RCV Redacted & Randomly Sorted", but they dont make much sense so far. To do IRV with OneAudit you need to create VoteConsolidator for each pool from the real cvrs.

@@ -113,7 +113,7 @@ class TestGenerateAllUseCases {
     }
 
     @Test
-    fun createSFElectionOAnostyles() {
+    fun createSFElectionOneAyditNostyles() {
         val topdir = "/home/stormy/rla/cases/sf2024/oans"
 
         createSfElectionNoStyles(
@@ -122,6 +122,25 @@ class TestGenerateAllUseCases {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
+            isPolling = false
+        )
+
+        val publisher = Publisher("$topdir/audit")
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
+    }
+
+    @Test
+    fun createSFElectionPollingNostyles() {
+        val topdir = "/home/stormy/rla/cases/sf2024/polling"
+
+        createSfElectionNoStyles(
+            topdir,
+            sfZipFile,
+            "ContestManifest.json",
+            "CandidateManifest.json",
+            cvrExportCsv = "$sfDir/$cvrExportCsvFile",
+            isPolling = true
         )
 
         val publisher = Publisher("$topdir/audit")

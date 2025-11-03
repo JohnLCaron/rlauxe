@@ -25,11 +25,6 @@ interface MvrManagerPollingIF : MvrManager {
     fun makeMvrsForRound(): List<Cvr>
 }
 
-interface MvrManagerNoStyleIF : MvrManager {
-    // noStyle: scale by proportion of ballots that have this contest. Nb >= Nc
-    fun Nballots(contestUA: ContestUnderAudit): Int // TODO where does this come from ?
-}
-
 // when the MvrManager supplies the audited mvrs, its a test
 // calling this sets the internal state used by makeCvrPairsForRound(), makeMvrsForRound()
 interface MvrManagerTest : MvrManager {
@@ -65,7 +60,7 @@ fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Lon
     val prevContestCounts = mutableMapOf<ContestRound, Int>()
     contestsNotDone.forEach { prevContestCounts[it] = 0 }
 
-    // Note this iterates through sortedBorc only until all previousSamples have been found and counted
+    // Note this iterates through sortedCards only until all previousSamples have been found and counted
     sortedCards.use { cardIter ->
         previousSamples.forEach { prevNumber ->
             while (cardIter.hasNext()) {

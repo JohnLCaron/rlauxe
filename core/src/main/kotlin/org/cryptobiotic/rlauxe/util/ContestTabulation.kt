@@ -226,3 +226,13 @@ fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<I
     }
     return tabs
 }
+
+fun tabulateCvr(cvr: Cvr, infos: Map<Int, ContestInfo>, result: MutableMap<Int, ContestTabulation>) {
+    for ((contestId, conVotes) in cvr.votes) {
+        val info = infos[contestId]
+        if (info != null) {
+            val tab = result.getOrPut(contestId) { ContestTabulation(info) }
+            tab.addVotes(conVotes, cvr.phantom)
+        }
+    }
+}

@@ -24,7 +24,7 @@ import kotlin.math.min
 /**
  * Create a multicontest audit, with fuzzed test data, stored in private record.
  */
-object RunRlaStartFuzz2 {
+object RunRlaStartFuzz {
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -78,12 +78,12 @@ object RunRlaStartFuzz2 {
         parser.parse(args)
         println("RunRlaStartFuzz on $topdir isPolling=$isPolling minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
                 " addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates")
-        if (!isPolling) startTestElectionClca2(topdir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates)
-            else startTestElectionPolling2(topdir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests)
+        if (!isPolling) startTestElectionClca(topdir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates)
+            else startTestElectionPolling(topdir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests)
     }
 }
 
-fun startTestElectionPolling2(
+fun startTestElectionPolling(
     topdir: String,
     minMargin: Double,
     fuzzMvrsPct: Double,
@@ -104,7 +104,7 @@ fun startTestElectionPolling2(
         ncards,
         ncontests,
     )
-    CreateAudit("startTestElectionPolling2", topdir = topdir, config, election, clear = false)
+    CreateAudit("startTestElectionPolling", topdir = topdir, config, election, clear = false)
 }
 
 class TestPollingElection(
@@ -156,7 +156,7 @@ class TestPollingElection(
     )
 }
 
-fun startTestElectionClca2(
+fun startTestElectionClca(
     topdir: String,
     minMargin: Double,
     fuzzMvrs: Double,
@@ -185,7 +185,7 @@ fun startTestElectionClca2(
         addRaire,
         addRaireCandidates)
 
-    CreateAudit("startTestElectionClca2", topdir = topdir, config, election, clear = false)
+    CreateAudit("startTestElectionClca", topdir = topdir, config, election, clear = false)
 }
 
 class TestClcaElection(

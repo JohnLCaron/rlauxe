@@ -1,11 +1,18 @@
 package org.cryptobiotic.rlauxe.cli
 
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.existsOrZip
+import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.nio.file.Files.notExists
 import java.nio.file.Path
 
@@ -34,19 +41,24 @@ object EnterMvrsCli {
     }
 }
 
-fun enterMvrs(inputDir: String, mvrFile: String): Boolean {
+fun enterMvrs(inputDir: String, mvrFile: String): Result<Boolean, ErrorMessages> {
+    val errs = ErrorMessages("enterMvrs")
+
     if (notExists(Path.of(inputDir))) {
-        println("EnterMvrsCli Audit Directory $inputDir does not exist")
-        return false
+        return errs.add("EnterMvrsCli Audit Directory $inputDir does not exist")
     }
-    if (notExists(Path.of(mvrFile))) {
-        println("EnterMvrsCli Mvrs file $mvrFile does not exist")
-        return false
+    if (!existsOrZip(mvrFile)) {
+        return errs.add("EnterMvrsCli Mvrs file $mvrFile does not exist")
     }
 
-    val auditRecord = AuditRecord.readFrom(inputDir)
-    return if (auditRecord == null) false else {
-        val mvrs = readAuditableCardCsvFile(mvrFile)
-        auditRecord.enterMvrs(mvrs)
+    val result = AuditRecord.readFromResult(inputDir)
+    if (result is Err) return result
+
+    val auditRecord = result.unwrap()
+    val mvrs = AuditableCardCsvReader(mvrFile)
+
+    if (!auditRecord.enterMvrs(mvrs, errs)) {
+        return Err(errs)
     }
+    return Ok(true)
 }

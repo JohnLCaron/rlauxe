@@ -1,9 +1,14 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.cli.EnterMvrsCli
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
+import org.cryptobiotic.rlauxe.cli.enterMvrs
 import org.cryptobiotic.rlauxe.cli.runRound
+import org.cryptobiotic.rlauxe.cli.runRoundResult
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -15,6 +20,7 @@ import org.cryptobiotic.rlauxe.persist.*
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.CvrToCardAdapter
+import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.test.Test
 import kotlin.test.fail
@@ -33,7 +39,7 @@ class TestPersistedWorkflow {
         val testData = MultiContestTestData(11, 4, N, hasStyle=true, marginRange=0.03..0.05)
 
         val contests: List<Contest> = testData.contests
-        println("Start testPersistentWorkflowClca $testData")
+        println("Start testPersistedAuditClca $testData")
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
@@ -152,15 +158,27 @@ fun runPersistedAudit(topdir: String) {
 
     println("============================================================")
     var done = false
-    var finalRound: AuditRound? = null
+    var lastRound: AuditRound? = null
+
     while (!done) {
-        val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
-        if (lastRound != null) finalRound = lastRound
-        done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
+        val roundResult = runRoundResult(inputDir = auditdir, useTest = false, quiet = true)
+        if (roundResult is Err) {
+            println("runRoundResult failed ${roundResult.error}")
+            fail()
+        }
+        lastRound = roundResult.unwrap()
+
+        val enterResult = enterMvrs(auditdir, publisher.sortedCardsFile())
+        if (enterResult is Err) {
+            println("enterMvrs failed ${enterResult.error}")
+            fail()
+        }
+
+        done = lastRound.auditIsComplete || lastRound.roundIdx > 5
     }
 
-    if (finalRound != null) {
-        println("nrounds = ${finalRound.roundIdx} nmvrs = ${finalRound.nmvrs} topdir=$topdir")
+    if (lastRound != null) {
+        println("nrounds = ${lastRound.roundIdx} nmvrs = ${lastRound.nmvrs} topdir=$topdir")
     } else {
         println("failed in topdir=$topdir")
         fail()

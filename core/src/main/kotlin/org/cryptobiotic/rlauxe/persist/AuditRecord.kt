@@ -13,11 +13,14 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
+import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.workflow.findSamples
 import java.nio.file.Files
 import java.nio.file.Path
 
 private val logger = KotlinLogging.logger("AuditRecord")
+private val showMissing = true
 
 class AuditRecord(
     val location: String,
@@ -26,41 +29,52 @@ class AuditRecord(
     val rounds: List<AuditRound>,
     mvrs: List<AuditableCard> // mvrs already sampled
 ) {
-    val previousMvrs = mutableMapOf<Long, AuditableCard>()
+    val previousMvrs = mutableMapOf<Long, AuditableCard>() // TODO not used ??
 
     init {
         mvrs.forEach { previousMvrs[it.prn] = it } // cumulative
     }
 
     // TODO new mvrs vs mvrs may confuse people. Build interface to manage this process?
-    fun enterMvrs(mvrs: List<AuditableCard>): Boolean {
-        val mvrMap = mvrs.associateBy { it.prn }.toMap()
+    fun enterMvrs(mvrs: CloseableIterable<AuditableCard>, errs: ErrorMessages): Boolean {
+        // val mvrMap = mvrs.associateBy { it.prn }.toMap()
 
         val publisher = Publisher(location)
         val lastRoundIdx = if (rounds.isEmpty()) 1 else rounds.last().roundIdx
 
         // get complete match with sampleNums in last round
-        var missing = false
         val sampledPrnsResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(lastRoundIdx))
         if (sampledPrnsResult is Err) {
-            logger.error{ "$sampledPrnsResult" }
+            logger.error{ "$sampledPrnsResult" } // needed?
+            errs.addNested(sampledPrnsResult.error)
+            return false
         }
         val sampledPrns = sampledPrnsResult.unwrap()
+
+        val sampledMvrs = findSamples(sampledPrns, mvrs.iterator())
+        // wantedMvrs.forEach { previousMvrs[it.prn] = it }
+/*
+        val missingMvrs = mutableListOf<Long>()
         sampledPrns.forEach { sampleNumber ->
             var mvr = previousMvrs[sampleNumber]
             if (mvr == null) {
                 mvr = mvrMap[sampleNumber]
                 if (mvr == null) {
-                    logger.error{ "Missing MVR for sampleNumber $sampleNumber"}
-                    missing = true
+                    missingMvrs.add(sampleNumber)
                 } else {
                     previousMvrs[sampleNumber] = mvr
                 }
             }
         }
-        if (missing) return false
+        if (missingMvrs.isNotEmpty()) {
+            errs.add("Cant find MVRs that match ${publisher.samplePrnsFile(lastRoundIdx)} ")
+            val useMissing = if (missingMvrs.size > 10) missingMvrs.subList(0, 10) else missingMvrs
+            errs.add(" missingMvs =  ${useMissing} ")
+            return false
+        } */
 
-        val sampledMvrs = sampledPrns.map{ sampleNumber -> previousMvrs[sampleNumber]!! }
+        // val sampledMvrs = sampledPrns.map{ sampleNumber -> previousMvrs[sampleNumber]!! }
+        // TODO only writing the mvrs that match samplePrnsFile for this round
         writeAuditableCardCsvFile(sampledMvrs , publisher.sampleMvrsFile(lastRoundIdx))
         logger.info{"enterMvrs write sampledMvrs to '${publisher.sampleMvrsFile(lastRoundIdx)}' for round $lastRoundIdx"}
 

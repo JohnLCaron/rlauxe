@@ -19,7 +19,7 @@ class TestRunCli {
         val topdir = topPath.toString()
         val auditdir = "$topdir/audit"
 
-        RunRlaStartFuzz2.main(
+        RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",
@@ -65,7 +65,7 @@ class TestRunCli {
         val topdir = topPath.toString()
         val auditdir = "$topdir/audit"
 
-        RunRlaStartFuzz2.main(
+        RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
                 "-isPolling",
@@ -105,7 +105,7 @@ class TestRunCli {
         val topdir = topPath.toString()
         val auditdir = "$topdir/audit"
 
-        RunRlaStartFuzz2.main(
+        RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",

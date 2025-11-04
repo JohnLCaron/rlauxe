@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.existsOrZip
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
 
@@ -39,7 +38,7 @@ class PersistedWorkflow(
         contestsUA = auditRecord.contests
 
         auditRounds.addAll(auditRecord.rounds)
-        mvrManager = if (useTest || existsOrZip(publisher.sortedMvrsFile())) {
+        mvrManager = if (useTest) { //  || existsOrZip(publisher.sortedMvrsFile())) {
             MvrManagerTestFromRecord(auditRecord.location)
         } else {
             MvrManagerFromRecord(auditRecord.location)
@@ -106,5 +105,4 @@ class PersistedWorkflow(
     override fun toString(): String {
         return "PersistentAudit(auditDir='$auditDir', useTest=$useTest, mvrManager=$mvrManager)"
     }
-
 }

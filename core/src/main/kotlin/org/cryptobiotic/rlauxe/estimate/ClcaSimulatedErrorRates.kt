@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.audit.Sampler
 import kotlin.math.max
 import kotlin.random.Random
 

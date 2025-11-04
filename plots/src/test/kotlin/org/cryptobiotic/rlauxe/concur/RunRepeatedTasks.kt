@@ -18,7 +18,7 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
-import org.cryptobiotic.rlauxe.audit.Sampler
+import org.cryptobiotic.rlauxe.estimate.Sampler
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.util.Stopwatch

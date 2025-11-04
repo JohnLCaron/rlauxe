@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.audit.Sampler
 import kotlin.math.sqrt
 
 private const val showH0Result = false

@@ -3,14 +3,19 @@ package org.cryptobiotic.util
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
+import org.cryptobiotic.rlauxe.belgium.belgianElectionMap
 import org.cryptobiotic.rlauxe.belgium.createBelgiumElection
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
 import org.cryptobiotic.rlauxe.corla.createColoradoOneAudit
+import org.cryptobiotic.rlauxe.corla.createColoradoPolling
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.sf.createSfElection
-import org.cryptobiotic.rlauxe.sf.createSfElectionNoStyles
+import org.cryptobiotic.rlauxe.sf.createSfElectionPoolStyles
+import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.sfn
+import org.cryptobiotic.rlauxe.util.trunc
 import org.junit.jupiter.api.Test
 
 class TestGenerateAllUseCases {
@@ -77,6 +82,20 @@ class TestGenerateAllUseCases {
     }
 
     @Test
+    fun testCreateColoradoPolling() {
+        val topdir = "/home/stormy/rla/cases/corla/polling"
+        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
+        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
+        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
+
+        createColoradoPolling(topdir, detailXmlFile, contestRoundFile, precinctFile, clear=true)
+
+        val publisher = Publisher("$topdir/audit")
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsExternalSort(topdir, publisher, config.seed)
+    }
+
+    @Test
     fun createSFElectionOA() {
         val topdir = "/home/stormy/rla/cases/sf2024/oa"
 
@@ -113,10 +132,10 @@ class TestGenerateAllUseCases {
     }
 
     @Test
-    fun createSFElectionOneAyditNostyles() {
+    fun createSFElectionOneAuditPoolStyles() {
         val topdir = "/home/stormy/rla/cases/sf2024/oans"
 
-        createSfElectionNoStyles(
+        createSfElectionPoolStyles(
             topdir,
             sfZipFile,
             "ContestManifest.json",
@@ -131,10 +150,10 @@ class TestGenerateAllUseCases {
     }
 
     @Test
-    fun createSFElectionPollingNostyles() {
+    fun createSFElectionPolling() {
         val topdir = "/home/stormy/rla/cases/sf2024/polling"
 
-        createSfElectionNoStyles(
+        createSfElectionPoolStyles(
             topdir,
             sfZipFile,
             "ContestManifest.json",
@@ -149,8 +168,16 @@ class TestGenerateAllUseCases {
     }
 
     @Test
-    fun createBelgiumElection() {
-        createBelgiumElection("Anvers")
+    fun createAllBelgiumElections() {
+        val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
+        belgianElectionMap.keys.forEach {
+            allmvrs[it] =  createBelgiumElection(it)
+        }
+        allmvrs.forEach {
+            val pct = (100.0 * it.value.second) / it.value.first.toDouble()
+            println("${sfn(it.key, 15)}: Nc= ${trunc(it.value.first.toString(), 10)} " +
+                    " nmvrs= ${trunc(it.value.second.toString(), 6)} pct= ${dfn(pct, 2)} %")
+        }
     }
 
 }

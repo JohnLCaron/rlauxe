@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.cli
 
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType

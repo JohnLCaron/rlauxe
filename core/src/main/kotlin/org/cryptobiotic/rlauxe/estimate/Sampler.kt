@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.audit
+package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*

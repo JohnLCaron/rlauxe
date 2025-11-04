@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.plots.plotNTsamples
 import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
-import org.cryptobiotic.rlauxe.audit.Sampler
+import org.cryptobiotic.rlauxe.estimate.Sampler
 import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.random.Random
 import kotlin.test.Test

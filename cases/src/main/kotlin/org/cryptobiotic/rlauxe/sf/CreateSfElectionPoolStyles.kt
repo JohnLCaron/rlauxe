@@ -14,12 +14,10 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
-import org.cryptobiotic.rlauxe.raire.makeRaireContestUA
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.util.tabulateCvr
-import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -27,8 +25,8 @@ import kotlin.collections.forEach
 private val logger = KotlinLogging.logger("CreateSfElectionNS")
 private val show = false
 
-// no styles case
-class CreateSfElectionNoStyles(
+// the contests in a pool constitute the ballot "pool style"
+class CreateSfElectionPoolStyles(
     castVoteRecordZip: String,
     contestManifestFilename: String,
     candidateManifestFile: String,
@@ -212,7 +210,7 @@ class CardPoolModifiedCvrIterable(val poolMap: Map<String, CardPoolNs>, val org:
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-fun createSfElectionNoStyles(
+fun createSfElectionPoolStyles(
     topdir: String,
     castVoteRecordZip: String,
     contestManifestFilename: String,
@@ -224,16 +222,16 @@ fun createSfElectionNoStyles(
     val stopwatch = Stopwatch()
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
-        isPolling -> AuditConfig(
+        isPolling -> AuditConfig( // use the pool style to calculate Nb
             AuditType.POLLING, hasStyle = false, riskLimit = .05, contestSampleCutoff = null, nsimEst = 10,
             pollingConfig = PollingConfig())
-        else -> AuditConfig(
-            AuditType.ONEAUDIT, hasStyle = false, riskLimit = .05, contestSampleCutoff = 20000, nsimEst = 1,
+        else -> AuditConfig( // Note hasStyle = true
+            AuditType.ONEAUDIT, hasStyle = true, riskLimit = .05, contestSampleCutoff = 20000, nsimEst = 1,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
     }
 
-    val election = CreateSfElectionNoStyles(
+    val election = CreateSfElectionPoolStyles(
         castVoteRecordZip,
         contestManifestFilename,
         candidateManifestFile,

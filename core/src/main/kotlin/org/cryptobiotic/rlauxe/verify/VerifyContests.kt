@@ -77,8 +77,6 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         if (config.isClca) {
             verifyClcaAgainstCards(contests, contestSummary, results, show = show)
             verifyAssortAvg(contests, cards.iterator(), results, show = show)
-        } else if (config.isOA) {
-            results.addMessage("Cant run verify assorters with OneAudit because cards from pools dont contain votes")
         }
 
         /*
@@ -183,6 +181,9 @@ fun verifyManifest(
             }
         }
     }
+    if (!results.hasErrors) {
+        results.addMessage("  verify $count cards in the Manifest are ordered with no duplicates")
+    }
 
     // 2. Given the seed and the PRNG, check that the PRNs are correct and are assigned sequentially by index.
     val indexSorted = indexList.sortedBy { it.first }
@@ -191,7 +192,7 @@ fun verifyManifest(
         val prn = prng.next()
         require(it.second == prn) // TODO dont allow to barf, but return null maybe
     }
-    results.addMessage("  verify $count cards in the Ballot Manifest")
+    results.addMessage("  verify $count cards in the Manifest have correct prn")
 
     // 3. If hasStyle, check that the count of phantom cards containing a contest = Contest.Nc - Contest.Ncast.
     // 4. If hasStyle, check that the count of non-phantom cards containing a contest = Contest.Ncast.
@@ -218,7 +219,7 @@ fun verifyManifest(
                 }
             }
         }
-        if (allOk) results.addMessage("  verify contest.Nc and Np agree with manifest\n")
+        if (allOk) results.addMessage("  verify contest.Nc and Np agree with manifest")
     }
     return ContestSummary(allCvrVotes, nonpoolCvrVotes, poolCvrVotes)
 }

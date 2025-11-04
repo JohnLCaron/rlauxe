@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.estimate.Sampler
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 
 private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
@@ -63,11 +64,11 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
     }
 
      fun runAlpha(
-        config: AuditConfig,
-        Nc: Int,
-        cassorter: OneAuditClcaAssorter,
-        sampler: Sampler,
-        upperBound: Double,
+         config: AuditConfig,
+         Nc: Int,
+         cassorter: OneAuditClcaAssorter,
+         sampler: Sampler,
+         upperBound: Double,
     ): TestH0Result {
 
          val strategy = config.oaConfig.strategy

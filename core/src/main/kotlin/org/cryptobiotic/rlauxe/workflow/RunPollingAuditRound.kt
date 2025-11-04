@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.estimate.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.estimate.Sampler
 import org.cryptobiotic.rlauxe.util.*
 
 private val logger = KotlinLogging.logger("PollingAudit")
@@ -30,7 +32,7 @@ fun runPollingAuditRound(
             if (!assertionRound.status.complete) {
                 val assertion = assertionRound.assertion
                 val assorter = assertion.assorter
-                val sampler = PollWithoutReplacement(contest.id, config.hasStyle, mvrs, assorter, allowReset=false)
+                val sampler = PollWithoutReplacement(contest.id, config.hasStyle, mvrs, assorter, allowReset = false)
 
                 val testH0Result = auditPollingAssertion(config, contest.contestUA.contest, assertionRound, sampler, roundIdx, quiet)
                 assertionRound.status = testH0Result.status

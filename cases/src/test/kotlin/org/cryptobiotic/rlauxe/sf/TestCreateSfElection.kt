@@ -53,7 +53,7 @@ class TestCreateSfElection {
     fun createSFElectionOneAuditNostyles() {
         val topdir = "/home/stormy/rla/cases/sf2024/oans"
 
-        createSfElectionNoStyles(
+        createSfElectionPoolStyles(
             topdir,
             zipFilename,
             "ContestManifest.json",
@@ -71,7 +71,7 @@ class TestCreateSfElection {
     fun createSFElectionPollingNostyles() {
         val topdir = "/home/stormy/rla/cases/sf2024/polling"
 
-        createSfElectionNoStyles(
+        createSfElectionPoolStyles(
             topdir,
             zipFilename,
             "ContestManifest.json",

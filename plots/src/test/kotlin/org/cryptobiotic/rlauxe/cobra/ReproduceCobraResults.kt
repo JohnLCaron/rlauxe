@@ -9,10 +9,9 @@ import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.estimate.ClcaAttackSampler
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.audit.makeClcaNoErrorSampler
+import org.cryptobiotic.rlauxe.estimate.makeClcaNoErrorSampler
 import org.cryptobiotic.rlauxe.makeStandardContest
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
-import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.showDeciles
 import kotlin.math.ln
 import kotlin.test.Test

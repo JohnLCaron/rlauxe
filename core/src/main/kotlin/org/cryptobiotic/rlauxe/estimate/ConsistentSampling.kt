@@ -6,6 +6,8 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.roundToClosest
+import org.cryptobiotic.rlauxe.workflow.MvrManager
+import org.cryptobiotic.rlauxe.workflow.wantSampleSize
 
 private val debugConsistent = false
 private val debugUniform = false

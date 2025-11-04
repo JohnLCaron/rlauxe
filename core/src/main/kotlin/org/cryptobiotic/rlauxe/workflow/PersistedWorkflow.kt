@@ -98,7 +98,7 @@ class PersistedWorkflow(
 
         val publisher = Publisher(auditDir)
         writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(roundIdx))
-        logger.info {"    writeAuditRoundJsonFile to '${publisher.auditRoundFile(roundIdx)}'"}
+        logger.info {"writeAuditRoundJsonFile to '${publisher.auditRoundFile(roundIdx)}'"}
 
         return complete
     }

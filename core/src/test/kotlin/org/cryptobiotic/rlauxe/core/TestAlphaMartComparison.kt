@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.audit.Sampler
+import org.cryptobiotic.rlauxe.estimate.Sampler
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.audit.makeClcaNoErrorSampler
+import org.cryptobiotic.rlauxe.estimate.makeClcaNoErrorSampler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

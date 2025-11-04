@@ -3,17 +3,20 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.estimate.ClcaWithoutReplacement
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
+import org.cryptobiotic.rlauxe.estimate.Sampler
 
 private val logger = KotlinLogging.logger("ClcaAudit")
 
 // run all contests and assertions for one round with the given auditor
-fun runClcaAuditRound(config: AuditConfig,
-                      contests: List<ContestRound>,
-                      mvrManager: MvrManagerClcaIF,
-                      roundIdx: Int,
-                      auditor: ClcaAssertionAuditorIF,
+fun runClcaAuditRound(
+    config: AuditConfig,
+    contests: List<ContestRound>,
+    mvrManager: MvrManagerClcaIF,
+    roundIdx: Int,
+    auditor: ClcaAssertionAuditorIF,
 ): Boolean {
     val cvrPairs = mvrManager.makeCvrPairsForRound() // same over all contests!
 
@@ -45,7 +48,8 @@ class RunContestTask(
             if (!assertionRound.status.complete) {
                 val cassertion = assertionRound.assertion as ClcaAssertion
                 val cassorter = cassertion.cassorter
-                val sampler =  ClcaWithoutReplacement(contest.id, config.hasStyle, cvrPairs, cassorter, allowReset = false)
+                val sampler =
+                    ClcaWithoutReplacement(contest.id, config.hasStyle, cvrPairs, cassorter, allowReset = false)
 
                 val testH0Result = auditor.run(config, contest.contestUA.contest, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status

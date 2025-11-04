@@ -6,6 +6,10 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.estimate.ClcaNoErrorIterator
+import org.cryptobiotic.rlauxe.estimate.ClcaWithoutReplacement
+import org.cryptobiotic.rlauxe.estimate.OneAuditNoErrorIterator
+import org.cryptobiotic.rlauxe.estimate.PollWithoutReplacement
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.util.listToMap

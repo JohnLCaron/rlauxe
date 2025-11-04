@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.audit.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.audit.Sampler
+import org.cryptobiotic.rlauxe.estimate.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.estimate.Sampler
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
@@ -10,7 +10,6 @@ import org.cryptobiotic.rlauxe.estimate.runTestRepeated
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.mean2margin
 
-import kotlin.math.max
 import kotlin.test.Test
 
 // CANDIDATE FOR REMOVAL

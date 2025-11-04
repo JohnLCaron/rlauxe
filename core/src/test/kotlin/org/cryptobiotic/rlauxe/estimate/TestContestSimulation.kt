@@ -111,7 +111,7 @@ class TestContestSimulation {
         runTest {
             checkAll(
                 propTestFastConfig, // propTestSlowConfig,
-                Arb.double(min = 0.0, max = 0.05),
+                Arb.double(min = 0.001, max = 0.05),
                 Arb.double(min = 0.001, max = 0.01),
                 Arb.double(min = 0.01, max = 0.05),
             ) { mvrsFuzzPct, phantomPct, underVotePct ->

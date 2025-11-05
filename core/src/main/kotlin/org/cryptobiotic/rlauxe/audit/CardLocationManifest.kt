@@ -23,8 +23,8 @@ data class CardLocation(
     }
     fun contests(): IntArray {
         return if (cardStyle != null) cardStyle.contestIds.toIntArray()
-        else if (contestIds != null) contestIds.toIntArray()
-        else intArrayOf()
+            else if (contestIds != null) contestIds.toIntArray()
+            else intArrayOf()
     }
 }
 

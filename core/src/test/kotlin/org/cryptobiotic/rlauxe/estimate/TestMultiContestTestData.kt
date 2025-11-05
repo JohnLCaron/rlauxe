@@ -37,7 +37,7 @@ class TestMultiContestTestData {
     fun testMakeContests() {
         assertEquals(ncontests, test.contests.size)
         test.contests.forEachIndexed { idx, contest ->
-            val fcontest = test.fcontests[idx]
+            val fcontest = test.contestBuilders[idx]
             assertEquals(fcontest.ncards + fcontest.phantomCount, contest.Nc)
             val avotes = fcontest.adjustedVotes.sumOf { it.second }
             assertEquals(fcontest.ncards, avotes, "failed for contest = ${contest.id}")
@@ -64,7 +64,7 @@ class TestMultiContestTestData {
     }
 
     @Test
-    fun testCvrsFromContests() {
+    fun testMakeCvrsAndBallots() {
         val (testCvrs, ballots) = test.makeCvrsAndBallots()
 
         val votes: Map<Int, Map<Int, Int>> =
@@ -77,10 +77,10 @@ class TestMultiContestTestData {
             }
         }
 
-        println("test makeBallotsForPolling nballots= ${ballots.size}")
+        println("test makeCvrsAndBallots nballots= ${ballots.size}")
 
         test.contests.forEachIndexed { idx, contest ->
-            val fcontest = test.fcontests[idx]
+            val fcontest = test.contestBuilders[idx]
             val Nc = fcontest.ncards + fcontest.phantomCount
 
             assertEquals(contest.Nc, Nc)
@@ -88,6 +88,48 @@ class TestMultiContestTestData {
             val ncvr = testCvrs.count { it.hasContest(contest.id) }
             assertEquals(contest.Nc, ncvr)
             val nbs = ballots.count { it.hasContest(contest.id) }
+            assertEquals(contest.Nc, nbs)
+
+            val nphantom = testCvrs.count { it.hasContest(contest.id) && it.phantom }
+            assertEquals(fcontest.phantomCount, nphantom)
+            val phantomPct = nphantom/ Nc.toDouble()
+            println("  nphantom=$nphantom pct= $phantomPct =~ ${fcontest.phantomPct} abs=${abs(phantomPct - fcontest.phantomPct)} " +
+                    " rel=${abs(phantomPct - fcontest.phantomPct)/phantomPct}")
+            if (nphantom > 5) assertEquals(fcontest.phantomPct, phantomPct, 5.0/Nc)
+
+            val nunder = testCvrs.count { it.hasContest(contest.id) && !it.phantom && it.votes[contest.id]!!.isEmpty() }
+            assertEquals(fcontest.underCount, nunder)
+            val underPct = nunder/ Nc.toDouble()
+            println("  nunder=$nunder == ${fcontest.underCount}; pct= $underPct =~ ${fcontest.undervotePct} abs=${abs(underPct - fcontest.undervotePct)} " +
+                    " rel=${abs(underPct - fcontest.undervotePct)/underPct}")
+            // TODO if (nunder > 5) assertEquals(fcontest.undervotePct, underPct, .03)
+        }
+    }
+
+    @Test
+    fun testCvrsFromContests() {
+        val testCvrs = test.makeCvrsFromContests()
+
+        val votes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(testCvrs.iterator()).toSortedMap() // contestId -> candidateId -> nvotes
+        votes.forEach { vcontest ->
+            println("  tabulate contest $vcontest")
+            votes.forEach { vcontest ->
+                val contest = test.contests.find { it.id == vcontest.key }!!
+                assertTrue(checkEquivilentVotes(vcontest.value, contest.votes))
+            }
+        }
+
+        println("test makeBallotsForPolling nballots= ${testCvrs.size}")
+
+        test.contests.forEachIndexed { idx, contest ->
+            val fcontest = test.contestBuilders[idx]
+            val Nc = fcontest.ncards + fcontest.phantomCount
+
+            assertEquals(contest.Nc, Nc)
+            println(" ${contest.id} ncards ${fcontest.ncards} Nc=${contest.Nc}")
+            val ncvr = testCvrs.count { it.hasContest(contest.id) }
+            assertEquals(contest.Nc, ncvr)
+            val nbs = testCvrs.count { it.hasContest(contest.id) }
             assertEquals(contest.Nc, nbs)
 
             val nphantom = testCvrs.count { it.hasContest(contest.id) && it.phantom }
@@ -127,7 +169,7 @@ class TestMultiContestTestData {
 
         test.contests.forEachIndexed { idx, contest ->
             assertEquals(roundToClosest(N * (1.0 + phantomPct)), contest.Nc)
-            val fcontest = test.fcontests[idx]
+            val fcontest = test.contestBuilders[idx]
             assertEquals(contest.Nc, fcontest.ncards + fcontest.phantomCount)
             println("contest $contest ncards=${fcontest.ncards}")
             val ncvr = cvrs.count { it.hasContest(contest.id) }
@@ -149,7 +191,7 @@ class TestMultiContestTestData {
         val (cvrs, _) = test.makeCvrsAndBallots()
 
         test.contests.forEachIndexed { idx, contest ->
-            val fcontest = test.fcontests[idx]
+            val fcontest = test.contestBuilders[idx]
             val Nc = fcontest.ncards + fcontest.phantomCount
             assertEquals(contest.Nc, Nc)
 

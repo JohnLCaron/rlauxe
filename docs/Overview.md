@@ -65,12 +65,12 @@ Each audit type has specialized processing for creating the AuditableCards and t
         auditConfig.json      // AuditConfigJson
         cardPools.json        // CardPoolJson (OneAudit only)
         contests.json         // ContestsUnderAuditJson
-        cardManifest.csv.zip  // AuditableCardCsv 
-        sortedCards.csv.zip   // AuditableCardCsv 
+        cardManifest.csv.zip  // AuditableCardCsv    cardManifst committment
+        sortedCards.csv.zip   // AuditableCardCsv    sorted by prn
     
     private/
-       sortedMvrs.csv.zip     // AuditableCardCsv, for tests only
-       testMvrs.csv.zip       // AuditableCardCsv, for tests only
+       sortedMvrs.csv.zip     // AuditableCardCsv, for tests only, sorted by prn
+       testMvrs.csv.zip       // AuditableCardCsv, for tests only, test mvrs
     
     roundX/
         auditState.json     // AuditRoundJson
@@ -143,3 +143,69 @@ For each audit round:
 5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
 6. _Run the audit_: For each contest, calculate if the risk limit is satisfied, based on the manual audits.
 7. _Decide on Next Round_: for each contest not satisfied, decide whether to continue to another round, or call for a hand recount.
+
+
+## Audit Types and hasStyle
+
+1. Physical ballot has location id that is recorded on the CVR. CVR records complete info (or references a ballot style). (CLCA)
+
+2. In addition to 1, there are pools where the physical ballot has a location but is not associated with a CVR. (OneAudit)
+   1. CVR exists and has complete info (or references a ballot style). If there are multiple ballot styles, divide pool so each has one ballot style. (SF OneAudit)
+   2. Pool totals only. Pool ballotStyle is the Union of all contests in the precinct. (Boulder OneAudit)
+
+3. There are no CVRs (Polling)
+   1. Theres only 1 pool of ballots, sample from all of them. fully diluted margin is N.
+   2. There are multiple pools; each pool has a characteristic ballot style. Add the ballot style to the manifest.
+
+
+Ballot vs Card : If the pysical cards are stored and processed separately (common case), then everything is done with cards. 
+If the cards are kept together, we can pretend the ballot is one card.
+The only exception (possibly) is that the BallotStyle can be used in forming the CardManifest, see p.13 below.
+
+ballots vs cards
+
+p.6 (c = 1)
+There are N ballots cast in the jurisdiction, of which N_B = N contain contest B and
+N_S = p * N < N contain contest S, where p ∈ (0, 1).
+
+The reported margin of contest B is M_B votes and the reported margin of contest S is M_S votes. 
+Let m_B ≡ M_b /N_B and m_S ≡ M_S /N_S be the two _partially diluted margins_.
+
+p.9 (c > 1)
+Now suppose that each ballot consists of c > 1 cards. For simplicity, suppose that every
+voter casts all c cards of their ballot. Contest B is on all N ballots and on N of the N * c cards.
+Contest S is on N * p of the N * c cards.
+
+fully diluted margin (noStyle) = 
+
+    for B: M_B/(N*c) = (1/c) * m_B, B assumed to be on all ballots
+    for S: M_S/(N*c) = (p/c) * m_S, p is proportion of ballot containing S
+
+p 13 (polling audit)
+
+Suppose for each precinct, we know which ballots contain S but not which particular cards contain S, and
+that the c cards comprising each ballot are kept in the same container. (This is an idealization
+of precinct-based voting where each voter in a precinct gets the same ballot style and casts
+all c cards of the ballot.) 
+
+So we have a set of precinct pools, and when auditing S, we dont sample pools that dont contain S.
+
+We can reduce the sampling universe for contest S from the original population of N * c cards to a smaller
+population of p * N * c cards, of which p * N actually contain contest S.
+
+
+1. Keep the CardLocationManifest -> CardManifest. May include a CardStyles record.
+2. Add CardStyle reference to AuditableCard I think. Used when card style is used. Maybe "all" always returns contains(contest) = true ??
+3. Pools are used for both OA and Polling.
+4. Have to use diluted margin everywhere.
+
+
+Where is hasStyle used? Perhaps not needed except when forming CardManifest?
+
+ClcaAssorter.overstatementError()
+ContestSimulation.makeBallotManifest()
+AuditRound estSampleSize else estSampleSizeNoStyles
+
+not needed in:
+ClcaWithoutReplacement
+PollWithoutReplacement

@@ -28,7 +28,7 @@ class TestPollingAudit {
         val marginRange= 0.05 .. 0.10
         val underVotePct= 0.02..0.02
         val phantomPct= 0.005..0.005
-        val test = MultiContestTestData(
+        val multiContestTest = MultiContestTestData(
             ncontests,
             nbs,
             N,
@@ -37,14 +37,14 @@ class TestPollingAudit {
             underVotePctRange = underVotePct,
             phantomPctRange = phantomPct
         )
-        val contests: List<Contest> = test.contests
+        val contests: List<Contest> = multiContestTest.contests
 
         println("Start testPollingNoStyle N=$N")
         contests.forEach{ println(" $it")}
         println()
 
         // Synthetic cvrs for testing reflecting the exact contest votes. In practice, we dont actually have the cvrs.
-        val (testCvrs, ballots) = test.makeCvrsAndBallots()
+        val (testCvrs, ballots) = multiContestTest.makeCvrsAndBallots()
 
         val workflow = WorkflowTesterPolling(auditConfig, contests,
             MvrManagerPollingForTesting(ballots, testCvrs, auditConfig.seed)
@@ -81,7 +81,7 @@ class TestPollingAudit {
         val contests: List<Contest> = test.contests
         contests.forEachIndexed { idx, contest ->
             val nvotes = contest.votes.map{ it.value }.sum()
-            val fcontest = test.fcontests[idx]
+            val fcontest = test.contestBuilders[idx]
             println(" $contest")
             val Nc = contest.Nc.toDouble()
             print("    phantomCount=${fcontest.phantomCount} (${df(fcontest.phantomCount / Nc)})")
@@ -157,7 +157,7 @@ class TestPollingAudit {
         )
         test.contests.forEachIndexed { idx, contest ->
             val nvotes = contest.votes.map{ it.value }.sum()
-            val fcontest = test.fcontests[idx]
+            val fcontest = test.contestBuilders[idx]
             println(" $contest")
             val Nc = contest.Nc.toDouble()
             print("    phantomCount=${fcontest.phantomCount} (${df(fcontest.phantomCount / Nc)})")

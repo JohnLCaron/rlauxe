@@ -28,7 +28,7 @@ data class MultiContestTestData(
     // generate with ballotStyles; but if hasStyle = false, then these are not visible to the audit
     val ballotStylePartition = partition(totalBallots, nballotStyles).toMap() // Map bsidx -> ncards in each ballot style (bs)
 
-    val fcontests: List<ContestTestDataBuilder>
+    val contestBuilders: List<ContestTestDataBuilder>
     val contests: List<Contest>
     val ballotStyles: List<CardStyle>
     var countBallots = 0
@@ -39,7 +39,7 @@ data class MultiContestTestData(
         require(totalBallots > nballotStyles * ncontest) // TODO
 
         // between 2 and 4 candidates, margin is a random number in marginRange
-        fcontests = List(ncontest) { it }.map {// id same as index
+        contestBuilders = List(ncontest) { it }.map {// id same as index
             val ncands = max(Random.nextInt(5), 2)
             ContestTestDataBuilder(it, ncands,
                 marginRange.start + if (marginRange.endInclusive <= marginRange.start) 0.0 else Random.nextDouble(marginRange.endInclusive - marginRange.start),
@@ -51,7 +51,7 @@ data class MultiContestTestData(
 
         // every contest has between 1 and 4 ballot styles, randomly chosen
         val contestBstyles = mutableMapOf<ContestTestDataBuilder, Set<Int>>() // fcontest -> set(ballot style id)
-        fcontests.forEach{ fcontest ->
+        contestBuilders.forEach{ fcontest ->
             val nbs = min(nballotStyles, 1 + Random.nextInt(4))
             val bset = mutableSetOf<Int>() // the ballot style idx, 0 based
             while (bset.size < nbs) { // randomly choose nbs ballot styles
@@ -64,7 +64,7 @@ data class MultiContestTestData(
         ballotStyles = List(nballotStyles) { it }.map {
             var contestsForThisBs = contestBstyles.filter{ (fc, bset) -> bset.contains( it ) }.map { (fc, _) -> fc }
             // every ballot style needs at least one contest. just make it first contest I guess
-            if (contestsForThisBs.isEmpty()) contestsForThisBs = listOf(fcontests.first())
+            if (contestsForThisBs.isEmpty()) contestsForThisBs = listOf(contestBuilders.first())
             val contestList = contestsForThisBs.map { it.info.name }
             val contestIds = contestsForThisBs.map { it.info.id }
             val ncards = ballotStylePartition[it]!!
@@ -73,13 +73,13 @@ data class MultiContestTestData(
         }
         require(countBallots == totalBallots)
         countCards()
-        contests = fcontests.map { it.makeContest() }
+        contests = contestBuilders.map { it.makeContest() }
     }
 
     fun countCards() {
         ballotStyles.forEach { bs ->
             bs.contestNames.forEach { contestName ->
-                val contest = fcontests.find { it.info.name == contestName }!!
+                val contest = contestBuilders.find { it.info.name == contestName }!!
                 contest.ncards += bs.ncards
             }
         }
@@ -88,7 +88,7 @@ data class MultiContestTestData(
     override fun toString() = buildString {
         append("ncontest=$ncontest, nballotStyles=$nballotStyles, totalBallots=$totalBallots")
         appendLine(" marginRange=$marginRange underVotePct=$underVotePctRange phantomPct=$phantomPctRange")
-        fcontests.forEach { fcontest ->
+        contestBuilders.forEach { fcontest ->
             append("  $fcontest")
             val bs4id = ballotStyles.filter{ it.contestIds.contains(fcontest.contestId) }.map{ it.id }
             appendLine(" ballotStyles=$bs4id")
@@ -109,7 +109,7 @@ data class MultiContestTestData(
             }
         }
         // add phantoms
-        val ncardsByContest = fcontests.associate { Pair(it.contestId, it.ncards) }
+        val ncardsByContest = contestBuilders.associate { Pair(it.contestId, it.ncards) }
         val phantoms = makePhantomBallots(contests, ncardsByContest)
         return CardLocationManifest(cardLocations + phantoms, ballotStyles)
     }
@@ -128,29 +128,16 @@ data class MultiContestTestData(
     // TODO replace with VotesAndUndervotes ??
     // TODO !hasStyles add all contests
     fun makeCvrsFromContests(): List<Cvr> {
-        fcontests.forEach { it.resetTracker() } // startFresh
-        val cvrbs = CvrBuilders().addContests(fcontests.map { it.info })
+        contestBuilders.forEach { it.resetTracker() } // startFresh
+        val cvrbs = CvrBuilders().addContests(contestBuilders.map { it.info })
         val result = mutableListOf<Cvr>()
         ballotStyles.forEach { ballotStyle ->
-            val fcontests = fcontests.filter { ballotStyle.contestNames.contains(it.info.name) }
+            val fcontests = contestBuilders.filter { ballotStyle.contestNames.contains(it.info.name) }
             repeat(ballotStyle.ncards) {
                 // add regular Cvrs including undervotes
                 result.add(makeCvr(cvrbs, fcontests))
             }
         }
-
-        /* add phantoms
-        val ncardsPerContest = mutableMapOf<Int, Int>() // contestId -> ncards
-        result.forEach { cvr ->
-            cvr.votes.keys.forEach{ contestId -> ncardsPerContest.merge(contestId, 1) { a, b -> a + b } }
-        }
-
-        // is this the same?
-        val ncardsByContest = fcontests.associate { Pair(it.contestId, it.ncards) }
-        if (ncardsByContest != ncardsPerContest) {
-            println("$ncardsByContest != $ncardsPerContest")
-        }
-        require( ncardsByContest == ncardsPerContest) */
 
         val phantoms = makePhantomCvrs(contests)
         return result + phantoms
@@ -163,8 +150,6 @@ data class MultiContestTestData(
     }
 }
 
-// TODO replace with VotesAndUndervotes ??
-// TODO !hasStyles add all contests
 // This creates a multicandidate contest with the two closest candidates having exactly the given margin.
 // It can create cvrs that exactly reflect this contest's vote; so can be used in simulating the audit.
 // The cvrs are not multicontest.

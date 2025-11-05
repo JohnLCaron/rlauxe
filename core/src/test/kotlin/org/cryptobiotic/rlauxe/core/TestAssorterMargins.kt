@@ -26,7 +26,7 @@ class TestAssorterMargins {
             test.contests.forEach { contest ->
                 val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
                 val cvrs = test.makeCvrsFromContests()
-                assertNotNull(test.fcontests.find { it.info.name == contest.name })
+                assertNotNull(test.contestBuilders.find { it.info.name == contest.name })
                 testAssertions(contest, contestUA.pollingAssertions, cvrs)
             }
         //}

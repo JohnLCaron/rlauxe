@@ -51,7 +51,7 @@ class GenerateClcaErrorTable {
                     repeat(auditConfig.nsimEst) {
                         val cvrs = sim.makeCvrs()
                         val contestUA = ContestUnderAudit(contest, true, hasStyle=true).addStandardAssertions()
-                        val minAssert = contestUA.minClcaAssertion()!!
+                        val minAssert = contestUA.minClcaAssertion().first!!
                         val minAssort = minAssert.cassorter
 
                         val tracker = PrevSamplesWithRates(minAssort.noerror())

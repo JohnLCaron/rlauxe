@@ -147,16 +147,27 @@ For each audit round:
 
 ## Audit Types and hasStyle
 
-1. Physical ballot has location id that is recorded on the CVR. CVR records complete info (or references a ballot style). (CLCA)
+1. Physical ballot has location id that is recorded on the CVR. (CLCA)
+   1. CVR records complete info (or references a ballot style). (hasStyle)
+   2. CVR records does not record undervotes, does not reference a ballot style . (noStyle)
 
 2. In addition to 1, there are pools where the physical ballot has a location but is not associated with a CVR. (OneAudit)
-   1. CVR exists and has complete info (or references a ballot style). If there are multiple ballot styles, divide pool so each has one ballot style. (SF OneAudit)
-   2. Pool totals only. Pool ballotStyle is the Union of all contests in the precinct. (Boulder OneAudit)
+   1. CVR exists and has complete info (or references a ballot style). (hasStyle) If there are multiple ballot styles, divide pool so each has one ballot style. (SF OneAudit)
+   2. CVR exists but does not record undervotes or reference a ballot style. (noStyle) 
+   3. Pool totals only. Pool ballotStyle is the Union of all contests in the precinct. (noStyle) (Boulder OneAudit?)
 
 3. There are no CVRs (Polling)
-   1. Theres only 1 pool of ballots, sample from all of them. fully diluted margin is N.
-   2. There are multiple pools; each pool has a characteristic ballot style. Add the ballot style to the manifest.
+   1. Theres only 1 pool of ballots, unknow ballot styles. (noStyle)
+   2. There are multiple pools and each pool has one ballot style. (hasStyle) (Boulder Polling?)
+   3. There are multiple pools that can be used to narrow the population size. (noStyle)
 
+In ClcaAssorter.overstatementError(), hasStyle penalises MVR not having the contest, but noStyle treats it as a non-vote,
+since you are sampling a population where you expect non-votes.
+
+Otherwise, hasStyle only affects the calculation of the dilutedMargin.
+
+when (hasStyle), margin = dilutedMargin, else margin > dilutedMargin.
+always use dilutedMargin when estimating the sample size.
 
 Ballot vs Card : If the pysical cards are stored and processed separately (common case), then everything is done with cards. 
 If the cards are kept together, we can pretend the ballot is one card.
@@ -202,9 +213,11 @@ population of p * N * c cards, of which p * N actually contain contest S.
 
 Where is hasStyle used? Perhaps not needed except when forming CardManifest?
 
-ClcaAssorter.overstatementError()
-ContestSimulation.makeBallotManifest()
-AuditRound estSampleSize else estSampleSizeNoStyles
+ClcaAssorter.overstatementError()  // needed
+ContestSimulation.makeBallotManifest()  // needed
+
+MultiContestTestData ??
+AuditRound estSampleSize else estSampleSizeNoStyles // maybe not
 
 not needed in:
 ClcaWithoutReplacement

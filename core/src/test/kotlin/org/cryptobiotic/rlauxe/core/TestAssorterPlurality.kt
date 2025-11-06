@@ -317,7 +317,7 @@ class TestAssorterPlurality {
             println("  assorter = $assorter")
         }
 
-        val assertion = contestUA.minPollingAssertion()!!
+        val assertion = contestUA.minPollingAssertion().first!!
         assertTrue(assertion.winner == 1)
         assertTrue(assertion.loser == 2)
         val assorter = assertion.assorter

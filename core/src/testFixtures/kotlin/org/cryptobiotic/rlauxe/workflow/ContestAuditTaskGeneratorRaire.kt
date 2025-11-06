@@ -30,9 +30,10 @@ class RaireContestAuditTaskGenerator(
             minMargin = margin,
             undervotePct = underVotePct,
             phantomPct = phantomPct,
-            quiet = true
+            quiet = true,
+            hasStyle=useConfig.hasStyle
         )
-        var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
+        val testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
 
         val clca = WorkflowTesterClca(
             useConfig, emptyList(), listOf(rcontest),
@@ -75,9 +76,10 @@ class RaireSingleRoundAuditTaskGenerator(
             minMargin = margin,
             undervotePct = underVotePct,
             phantomPct = phantomPct,
-            quiet = true
+            quiet = true,
+            hasStyle=useConfig.hasStyle
         )
-        var testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
+        val testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
 
         val raireAudit = WorkflowTesterClca(
             useConfig, emptyList(), listOf(rcontest),

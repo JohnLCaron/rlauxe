@@ -176,7 +176,7 @@ class TestAuditRoundJson {
         println("Start testComparisonWorkflow $testData")
         contests.forEach { println("  $it") }
 
-        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N/2, contestId=111, ncands=5, minMargin=.04, quiet = true)
+        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N/2, contestId=111, ncands=5, minMargin=.04, quiet = true, hasStyle=config.hasStyle)
         println(rcontest)
         println()
 

@@ -55,7 +55,7 @@ class TestSampleGenerator {
             contestUA.pollingAssertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
-                PollWithoutReplacement(contestUA.id, true, cvrs, it.assorter)
+                PollWithoutReplacement(contestUA.id, cvrs, it.assorter)
             }
         }
     }

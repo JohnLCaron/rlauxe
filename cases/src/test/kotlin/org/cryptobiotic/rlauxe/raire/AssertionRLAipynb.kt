@@ -617,9 +617,9 @@ fun replicate_p_values(
 
 
     val contest = contests.first()
-    val minAssorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
+    val minAssorter = contest.minClcaAssertion().first!!.cassorter // the one with the smallest margin
 
-    val sampler: Sampler = makeClcaNoErrorSampler(contest.id, true, cvrs, minAssorter)
+    val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, minAssorter)
 
     val optimal = OptimalComparisonNoP1(
         N = N,
@@ -648,9 +648,9 @@ fun calc_sample_sizes(
     //val minAssorter = minAssertion.assorter
 
     val contest = contests.first().addStandardAssertions()
-    val minAssorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
+    val minAssorter = contest.minClcaAssertion().first!!.cassorter // the one with the smallest margin
 
-    val sampler: Sampler = makeClcaNoErrorSampler(contest.id, true, cvrs, minAssorter)
+    val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, minAssorter)
 
     val optimal = AdaptiveBetting(
         Nc = N,

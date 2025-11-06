@@ -96,7 +96,7 @@ fun makeEstimationTasks(
         AuditType.CLCA -> {
             // TODO why not use the actual cvrs ??
             if (contest.isIrv()) {
-                val testData = SimulateIrvTestData(contest as RaireContest, contestRound.contestUA.minMargin(), config.contestSampleCutoff)
+                val testData = SimulateIrvTestData(contest as RaireContest, contestRound.contestUA.minDilutedMargin(), config.contestSampleCutoff)
                 testData.makeCvrs()
             } else {
                 ContestSimulation.simulateContestCvrsWithLimits(contest as Contest, config).makeCvrs()
@@ -260,13 +260,13 @@ fun estimateClcaAssertionRound(
         if (isIrvFzz) fuzzPct = clcaConfig.simFuzzPct
         Pair(
             if (isIrvFzz) ClcaFuzzSampler(clcaConfig.simFuzzPct, cvrs, contest, cassorter)
-            else ClcaSimulatedErrorRates(cvrs, contest, cassorter, errorRates), // TODO why cant we use this with IRV??
+                else ClcaSimulatedErrorRates(cvrs, contest, cassorter, errorRates), // TODO why cant we use this with IRV??
             AdaptiveBetting(Nc = contest.Nc(), a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
         )
     } else {
         // this is noerrors
         Pair(
-            makeClcaNoErrorSampler(contest.id, config.hasStyle, cvrs, cassorter),
+            makeClcaNoErrorSampler(contest.id, cvrs, cassorter),
             AdaptiveBetting(Nc = contest.Nc(), a = cassorter.noerror(), d = clcaConfig.d, errorRates = ClcaErrorRates(0.0, 0.0, 0.0, 0.0))
         )
     }
@@ -350,7 +350,7 @@ fun estimatePollingAssertionRound(
     var fuzzPct = 0.0
     val pollingConfig = config.pollingConfig
     val sampler = if (pollingConfig.simFuzzPct == null || pollingConfig.simFuzzPct == 0.0) {
-        PollWithoutReplacement(contest.id, config.hasStyle, cvrs, assorter, allowReset=true)
+        PollWithoutReplacement(contest.id, cvrs, assorter, allowReset=true)
     } else {
         fuzzPct = pollingConfig.simFuzzPct
         PollingFuzzSampler(pollingConfig.simFuzzPct, cvrs, contest as Contest, assorter) // TODO cant use Raire

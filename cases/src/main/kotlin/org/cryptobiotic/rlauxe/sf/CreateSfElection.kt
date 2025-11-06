@@ -35,6 +35,7 @@ class CreateSfElection(
     candidateManifestFile: String,
     val cvrExportCsv: String,
     val isClca: Boolean,
+    val hasStyle:Boolean,
 ): CreateElectionIF {
 
     val cardPoolsNotUnpooled: List<CardPoolIF>
@@ -61,8 +62,8 @@ class CreateSfElection(
 
         // make contests based on cardPool tabulations
         val unpooledPool = cardPoolMap.find { it.poolName == unpooled }!!
-        contestsOA = if (isClca) makeClcaContests(contestTabSums, contestNcs).sortedBy { it.id }
-            else makeAllOneAuditContests(contestTabSums, contestNcs, unpooledPool).sortedBy { it.id }
+        contestsOA = if (isClca) makeClcaContests(contestTabSums, contestNcs, hasStyle).sortedBy { it.id }
+            else makeAllOneAuditContests(contestTabSums, contestNcs, unpooledPool, hasStyle).sortedBy { it.id }
     }
 
     fun createCardPools(
@@ -133,7 +134,7 @@ class CreateSfElection(
     }
 }
 
-fun makeAllOneAuditContests(contestTabSums: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, unpooled: CardPoolFromCvrs): List<ContestUnderAudit> {
+fun makeAllOneAuditContests(contestTabSums: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, unpooled: CardPoolFromCvrs, hasStyle:Boolean): List<ContestUnderAudit> {
     val contestsUAs = mutableListOf<ContestUnderAudit>()
     contestTabSums.map { (contestId, contestSumTab)  ->
         val info = contestSumTab.info
@@ -145,7 +146,7 @@ fun makeAllOneAuditContests(contestTabSums: Map<Int, ContestTabulation>, contest
                 val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
                 ContestUnderAudit(contest, isClca = true).addStandardAssertions()
             } else {
-                makeRaireContestUA(contestSumTab.info, contestSumTab, useNc)
+                makeRaireContestUA(contestSumTab.info, contestSumTab, useNc, hasStyle=hasStyle)
             }
             // annotate with the pool %
             val unpooledPct = 100.0 * unpooledTab.ncards / contestSumTab.ncards
@@ -157,7 +158,7 @@ fun makeAllOneAuditContests(contestTabSums: Map<Int, ContestTabulation>, contest
     return contestsUAs
 }
 
-fun makeClcaContests(contestTabSums: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>): List<ContestUnderAudit> {
+fun makeClcaContests(contestTabSums: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, hasStyle:Boolean): List<ContestUnderAudit> {
     val contestsUAs = mutableListOf<ContestUnderAudit>()
     contestTabSums.map { (contestId, contestSumTab)  ->
         val info = contestSumTab.info
@@ -168,7 +169,7 @@ fun makeClcaContests(contestTabSums: Map<Int, ContestTabulation>, contestNcs: Ma
                 val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
                 ContestUnderAudit(contest).addStandardAssertions()
             } else {
-                makeRaireContestUA(contestSumTab.info, contestSumTab, useNc)
+                makeRaireContestUA(contestSumTab.info, contestSumTab, useNc, hasStyle)
             }
             contestUA.contest.info().metadata["PoolPct"] = 0
             contestsUAs.add(contestUA)
@@ -262,6 +263,7 @@ fun createSfElection(
         candidateManifestFile,
         cvrExportCsv,
         isClca = isClca,
+        hasStyle = config.hasStyle,
     )
 
     CreateAudit("sf2024", topdir, config, election)

@@ -26,7 +26,7 @@ fun checkContestsCorrectlyFormed(config: AuditConfig, contestsUA: List<ContestUn
                 contestUA.preAuditStatus = TestH0Status.MinMargin
             } else {
                 // see if too many phantoms
-                val minMargin = contestUA.minMargin()
+                val minMargin = contestUA.minDilutedMargin()
                 val adjustedMargin = minMargin - contestUA.contest.phantomRate()
                 if (config.removeTooManyPhantoms && adjustedMargin <= 0.0) {
                     logger.warn{"***TooManyPhantoms contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0"}

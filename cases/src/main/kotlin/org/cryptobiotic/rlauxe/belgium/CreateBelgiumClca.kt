@@ -12,6 +12,7 @@ private val logger = KotlinLogging.logger("BelgiumClca")
 
 class BelgiumClca (
     contestd: DHondtContest,
+    hasStyle: Boolean,
 ): CreateElectionIF {
 
     val infoMap: Map<Int, ContestInfo>
@@ -19,7 +20,7 @@ class BelgiumClca (
     val cvrs: List<Cvr>
 
     init {
-        val contestUA = ContestUnderAudit(contestd, isClca=true, hasStyle=true).addAssertionsFromAssorters(contestd.assorters)
+        val contestUA = ContestUnderAudit(contestd, isClca=true, hasStyle=hasStyle).addAssertionsFromAssorters(contestd.assorters)
         contestsUA = listOf(contestUA)
         infoMap = contestsUA.associate { it.id to it.contest.info() }
         cvrs = contestd.createSimulatedCvrs()
@@ -45,7 +46,6 @@ fun createBelgiumClca(
     clear: Boolean = true)
 {
     val stopwatch = Stopwatch()
-    val election = BelgiumClca(contestd)
 
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
@@ -54,6 +54,7 @@ fun createBelgiumClca(
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
         )
     }
+    val election = BelgiumClca(contestd, config.hasStyle)
 
     CreateAudit("belgiumClca", topdir, config, election, clear = clear)
     println("createBelgiumClca took $stopwatch")

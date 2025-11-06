@@ -32,6 +32,7 @@ class CreateSfElectionPoolStyles(
     candidateManifestFile: String,
     val cvrExportCsv: String,
     val isPolling: Boolean,
+    val hasStyle:Boolean,
     ): CreateElectionIF {
 
     val contestsUA: List<ContestUnderAudit>
@@ -61,7 +62,7 @@ class CreateSfElectionPoolStyles(
 
             val contestNcsAmended = mutableMapOf<Int, Int>()
             unamendedContestNcs.forEach { (contestId, Nc) -> contestNcsAmended[contestId] = Nc + (increaseNc[contestId] ?: 0) }
-            contestsUA = makeAllOneAuditContests(contestTabSums, contestNcsAmended, unpooledPool).sortedBy { it.id }
+            contestsUA = makeAllOneAuditContests(contestTabSums, contestNcsAmended, unpooledPool, hasStyle).sortedBy { it.id }
 
         }  else { // Polling
             // use unamended tabs and contest.Nc.
@@ -236,7 +237,8 @@ fun createSfElectionPoolStyles(
         contestManifestFilename,
         candidateManifestFile,
         cvrExportCsv,
-        isPolling
+        isPolling,
+        config.hasStyle,
     )
 
     CreateAudit("sf2024", topdir, config, election)

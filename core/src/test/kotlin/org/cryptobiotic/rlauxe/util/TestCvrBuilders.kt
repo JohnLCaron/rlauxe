@@ -47,7 +47,7 @@ class TestCvrBuilders {
             val allErrorRates = mutableListOf<ClcaErrorRates>()
             contests.forEach { contest ->
                 val contestUA = makeContestUAfromCvrs(contest.info, cvrs)
-                val minAssert = contestUA.minClcaAssertion()
+                val minAssert = contestUA.minClcaAssertion().first
                 if (minAssert != null) repeat(ntrials) {
                     val minAssort = minAssert.cassorter
                     val samples = PrevSamplesWithRates(minAssort.noerror())

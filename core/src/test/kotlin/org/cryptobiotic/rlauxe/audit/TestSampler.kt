@@ -29,7 +29,7 @@ class TestSampler {
 
     @Test
     fun testPollWithoutReplacement() {
-        val target = PollWithoutReplacement(0, true, cvrs, assertion.assorter)
+        val target = PollWithoutReplacement(0, cvrs, assertion.assorter)
 
         var count = 0
         while (target.hasNext()) {
@@ -51,7 +51,7 @@ class TestSampler {
     fun testClcaWithoutReplacement() {
         val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasStyle=false, true)
         val cvrPairs = cvrs.zip( cvrs)
-        val target = ClcaWithoutReplacement(0, true, cvrPairs, cassorter, true)
+        val target = ClcaWithoutReplacement(0, cvrPairs, cassorter, true)
 
         var count = 0
         while (target.hasNext()) {

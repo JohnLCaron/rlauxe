@@ -32,7 +32,7 @@ import kotlin.random.Random
 
 /**
  * Simulation of single Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
- * Ignore hasStyle, since its single contest.
+ * TODO what about hasStyle, since its single contest.
  */
 class ContestSimulation(val contest: Contest) {
     val info = contest.info

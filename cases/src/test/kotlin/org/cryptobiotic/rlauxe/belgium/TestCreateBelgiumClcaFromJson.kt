@@ -129,8 +129,8 @@ fun showBelgiumElection(electionName: String): Pair<Int, Int> {
     val auditRecord = PersistedWorkflow(auditdir, useTest=true).auditRecord
     val contestUA = auditRecord.contests.first()
     println(contestUA.show())
-    println("minAssertion: ${contestUA.minAssertion()!!.assorter}")
-    println("  ${contestUA.minAssertionDificulty()}")
+    println("minAssertion: ${contestUA.minAssertion().first!!.assorter}")
+    println("  ${contestUA.minAssertionDifficulty()}")
     println(contestUA.contest.showCandidates())
 
     val finalRound = auditRecord.rounds.last()

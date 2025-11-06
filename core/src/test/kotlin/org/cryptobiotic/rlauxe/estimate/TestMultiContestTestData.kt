@@ -202,9 +202,9 @@ class TestMultiContestTestData {
             if (nphantom > 1) assertEquals(fcontest.phantomPct, phantomPct, 5.0/Nc) // TODO seems like should be 2 at the most, maybe 1
 
             val contestUA = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
-            val cassorter = contestUA.minClcaAssertion()!!.cassorter
+            val cassorter = contestUA.minClcaAssertion().first!!.cassorter
 
-            val sampler = ClcaWithoutReplacement(contest.id, true, cvrs.zip(cvrs), cassorter, true)
+            val sampler = ClcaWithoutReplacement(contest.id, cvrs.zip(cvrs), cassorter, true)
             val tracker = PrevSamplesWithRates(cassorter.noerror())
             while (sampler.hasNext()) { tracker.addSample(sampler.next()) }
             // println("   tracker.errorRates = ${tracker.errorRates()}")

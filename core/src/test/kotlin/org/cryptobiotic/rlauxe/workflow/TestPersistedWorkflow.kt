@@ -78,7 +78,7 @@ class TestPersistedWorkflow {
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
         val election = PersistedAudit(contestsUA, testCvrs, testMvrs)
-        CreateAudit("testPersistedAuditClca", topdir, config, election, clear = true)
+        CreateAudit("testPersistedAuditPolling", topdir, config, election, clear = true)
 
         runPersistedAudit(topdir)
     }

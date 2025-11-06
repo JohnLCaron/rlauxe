@@ -161,11 +161,10 @@ fun verifyManifest(
             lastCard = card
             count++
 
-            /*if (config.hasStyle) { TODO
-                card.contests.forEachIndexed { idx, contestId ->
+            if (config.hasStyle && !config.isPolling) {
+                card.votes!!.forEach { (contestId, cands) ->
                     val info = infos[contestId]
                     if (info != null) {
-                        val cands = if (card.votes != null) card.votes[idx] else intArrayOf()
                         val allTab = allCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
                         allTab.addVotes(cands, card.phantom)
                         if (card.poolId == null) {
@@ -178,7 +177,7 @@ fun verifyManifest(
                         }
                     }
                 }
-            //} */
+            }
         }
     }
     if (!results.hasErrors) {
@@ -196,7 +195,7 @@ fun verifyManifest(
 
     // 3. If hasStyle, check that the count of phantom cards containing a contest = Contest.Nc - Contest.Ncast.
     // 4. If hasStyle, check that the count of non-phantom cards containing a contest = Contest.Ncast.
-    if (config.hasStyle) {
+    if (config.hasStyle && !config.isPolling) {
         var allOk = true
         contests.forEach { contestUA ->
             val contestTab = allCvrVotes[contestUA.id]

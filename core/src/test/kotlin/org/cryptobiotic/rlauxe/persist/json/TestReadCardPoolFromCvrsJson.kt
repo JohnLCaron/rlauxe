@@ -13,8 +13,8 @@ class TestReadCardPoolFromCvrsJson {
 
     @Test
     fun testCardPoolFromCvrs() {
-        // val auditDir = "/home/stormy/rla/persist/testCliRoundOneAudit/audit"
-        val auditDir = "src/test/data/workflow/testCliRoundOneAudit/audit"
+        val auditDir = "/home/stormy/rla/persist/testCliRoundOneAudit/audit"
+        // val auditDir = "src/test/data/workflow/testCliRoundOneAudit/audit"
 
         val publisher = Publisher(auditDir)
         val poolFile = publisher.cardPoolsFile()

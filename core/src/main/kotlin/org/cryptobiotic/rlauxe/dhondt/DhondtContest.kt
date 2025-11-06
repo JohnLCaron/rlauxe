@@ -393,6 +393,20 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     override fun reportedMean() = reportedMean
     override fun reportedMargin() = mean2margin(reportedMean)
 
+    override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
+        if (useVotes == null || N <= 0) {
+            return 0.0
+        } // shouldnt happen
+
+        val winnerVotes = useVotes[winner()] ?: 0
+        val loserVotes = useVotes[loser()] ?: 0
+
+        val winnerScore = winnerVotes / lastSeatWon.toDouble()
+        val loserScore = loserVotes / firstSeatLost.toDouble()
+
+        return (winnerScore - loserScore) / N
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is DHondtAssorter) return false

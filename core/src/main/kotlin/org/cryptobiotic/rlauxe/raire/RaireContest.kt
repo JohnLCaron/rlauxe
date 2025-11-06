@@ -122,7 +122,7 @@ class RaireContestUnderAudit(
     }
 
     override fun showShort() = buildString {
-        append("${name} ($id) Nc=$Nc winner ${contest.winners().first()} losers ${contest.losers()} minMargin=${df(minMargin())}") //  est=$estMvrs status=$status")
+        append("${name} ($id) Nc=$Nc winner ${contest.winners().first()} losers ${contest.losers()} minMargin=${df(minDilutedMargin())}") //  est=$estMvrs status=$status")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -152,7 +152,8 @@ class RaireContestUnderAudit(
                  Nc: Int,
                  Ncast: Int,
                  undervotes: Int,
-                 assertions: List<RaireAssertion>
+                 assertions: List<RaireAssertion>,
+                 hasStyle: Boolean,
          ): RaireContestUnderAudit {
 
             val winnerId = info.candidateIds[winnerIndex]
@@ -163,7 +164,7 @@ class RaireContestUnderAudit(
                 Ncast = Ncast,
                 undervotes = undervotes,
             )
-            return RaireContestUnderAudit(contest, assertions)
+            return RaireContestUnderAudit(contest, assertions, hasStyle=hasStyle)
         }
     }
 }
@@ -290,6 +291,10 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
         append(" votes=${rassertion.votes}")
     }
     override fun hashcodeDesc() = "${winLose()} ${info.name} ${rassertion.hashCode()}" // must be unique for serialization
+
+    override fun calcMargin(useVotes: Map<Int, Int>?, N: Int?): Double {
+        return rassertion.marginInVotes / N!!.toDouble()
+    }
 
     override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
         if (usePhantoms && mvr.phantom) return 0.5

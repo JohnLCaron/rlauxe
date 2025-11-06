@@ -107,7 +107,7 @@ class SfoaSingleRoundAuditTaskContest18(
 
         val rlauxAudit = PersistedWorkflow(auditDir, true)
         val contest18 = rlauxAudit.contestsUA().find { it.contest.id == 18 }!!
-        val minAssertion = contest18.minClcaAssertion()!!
+        val minAssertion = contest18.minClcaAssertion().first!!
         val assertionRound = AssertionRound(minAssertion, 1, null)
 
         val mvrManager = MvrManagerClcaSingleRound(AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run))

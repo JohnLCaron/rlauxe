@@ -149,30 +149,12 @@ open class ClcaAssorter(
             throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
         }
 
-        //        If use_style, then if the CVR contains the contest but the MVR does
-        //        not, treat the MVR as having a vote for the loser (assort()=0)
-
-        //        # assort the MVR
-        //        mvr_assort = (
-        //            0
-        //            if mvr.phantom or (use_style and not mvr.has_contest(self.contest.id))
-        //            else self.assort(mvr)
-        //
+        // If use_style, then if the CVR contains the contest but the MVR does
+        // not, treat the MVR as having a vote for the loser (assort()=0)
+        // If not use_style, then if the CVR contains the contest but the MVR does not,
+        // the MVR is considered to be a non-vote in the contest (assort()=1/2).
         val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(info.id))) 0.0
             else this.assorter.assort(mvr, usePhantoms = false)
-
-        //        If not use_style, then if the CVR contains the contest but the MVR does not,
-        //        the MVR is considered to be a non-vote in the contest (assort()=1/2).
-        //
-        //        # assort the CVR
-        //        cvr_assort = (
-        //            self.tally_pool_means[cvr.tally_pool]
-        //            if
-        //                cvr.pool and self.tally_pool_means is not None
-        //            else
-        //                int(cvr.phantom) / 2 + (1 - int(cvr.phantom)) * self.assort(cvr)
-        //        )
-        //        return cvr_assort - mvr_assort
 
         val cvr_assort = if (cvr.phantom) .5 else this.assorter.assort(cvr, usePhantoms = false)
         return cvr_assort - mvr_assort

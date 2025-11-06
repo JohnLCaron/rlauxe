@@ -33,11 +33,11 @@ class TestAlphaMart {
 
         val contest = test.contests.first()
         val contestUA = ContestUnderAudit(contest, isClca = false, hasStyle = true).addStandardAssertions()
-        val assorter = contestUA.minPollingAssertion()!!.assorter
+        val assorter = contestUA.minPollingAssertion().first!!.assorter
 
         val cvrs = test.makeCvrsFromContests()
         val config = AuditConfig(AuditType.POLLING, hasStyle=true, nsimEst=10)
-        val cvrSampler = PollWithoutReplacement(contestUA.contest.id, config.hasStyle, cvrs, assorter)
+        val cvrSampler = PollWithoutReplacement(contestUA.contest.id, cvrs, assorter)
 
         val eta0 = assorter.reportedMean()
         println("eta0=$eta0, margin=${mean2margin(eta0)}")

@@ -26,7 +26,7 @@ class TestAlphaMartComparison {
         val d = 100
 
         println("N=$N cvrMean=$cvrMean theta=$theta eta0=$eta0, d=$d compareAssorter.upperBound=${compareAssorter.upperBound()}")
-        val sampler = makeClcaNoErrorSampler(contest.id, true, cvrs, compareAssorter)
+        val sampler = makeClcaNoErrorSampler(contest.id, cvrs, compareAssorter)
         val result = doOneAlphaMartRun(sampler, N, eta0 = eta0, d = d, u = compareAssorter.upperBound())
         println("\n${result}")
 

@@ -41,7 +41,7 @@ class TestFuzzedWithRaire {
             }
         }
 
-        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N/2, contestId=111, ncands=3, minMargin=.04, quiet = true)
+        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N/2, contestId=111, ncands=3, minMargin=.04, quiet = true, hasStyle=true)
         if (show) {
             println("\nraire cvrs")
             rcvrs.forEach {

@@ -48,7 +48,7 @@ class ColoradoPolling (
             val useNc = max( ncards, oaContest.Nc)
             val contest = Contest(info, candVotes, useNc, ncards)
             info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
-            ContestUnderAudit(contest, isClca=false, hasStyle=false).addStandardAssertions()
+            ContestUnderAudit(contest, isClca=false, hasStyle=config.hasStyle).addStandardAssertions()
         }
 
         return regContests

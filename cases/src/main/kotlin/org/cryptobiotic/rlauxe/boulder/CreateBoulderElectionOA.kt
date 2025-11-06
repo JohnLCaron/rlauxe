@@ -309,7 +309,7 @@ fun createBoulderElection(
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
 
-    val election = BoulderElectionOA(export, sovo, isClca = isClca)
+    val election = BoulderElectionOA(export, sovo, isClca = isClca, hasStyle=config.hasStyle)
 
     CreateAudit("boulder", topdir, config, election, auditdir = auditDir, clear = clear)
     println("createBoulderElectionOAnew took $stopwatch")

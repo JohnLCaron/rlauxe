@@ -58,7 +58,7 @@ class TestDHondtJson {
         val contest = dcontest.createContest(dcontest.validVotes, dcontest.validVotes)
         val contestUA = ContestUnderAudit(contest, isClca=true, hasStyle=true).addAssertionsFromAssorters(dcontest.makeAssorters())
 
-        val target = contestUA.minPollingAssertion()!!.assorter
+        val target = contestUA.minPollingAssertion().first!!.assorter
 
         val json = target.publishJson()
         val roundtrip = json.import(contest.info())

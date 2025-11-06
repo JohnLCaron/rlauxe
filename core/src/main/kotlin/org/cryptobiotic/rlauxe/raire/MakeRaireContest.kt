@@ -18,7 +18,7 @@ private val logger = KotlinLogging.logger("MakeRaireContest")
 
 // make RaireContestUnderAudit from ContestTabulation; get RaireAssertions from raire-java libray
 // note ivrRoundsPaths are filled in
-fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int): RaireContestUnderAudit {
+fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, hasStyle: Boolean): RaireContestUnderAudit {
     // TODO consistency checks on voteConsolidator
     // all candidate indexes
     val vc = contestTab.irvVotes
@@ -108,6 +108,7 @@ fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int
         Ncast = contestTab.ncards,
         undervotes = contestTab.undervotes,
         raireAssertions,
+        hasStyle,
     )
 
     val candidateIdxs = info.candidateIds.mapIndexed { idx, candidateId -> idx } // TODO use candidateIdToIndex?

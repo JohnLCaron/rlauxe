@@ -18,17 +18,19 @@ import org.cryptobiotic.rlauxe.util.listToMap
 import kotlin.random.Random
 
 // Simulation of Raire Contest; pass in the parameters and simulate the cvrs; then call raire library to generate the assertions
-fun simulateRaireTestContest(N: Int, contestId: Int, ncands:Int, minMargin: Double, undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true)
+fun simulateRaireTestContest(N: Int, contestId: Int, ncands:Int, minMargin: Double,
+                             undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true, hasStyle: Boolean)
 : Pair<RaireContestUnderAudit, List<Cvr>> {
 
     repeat(11) {
-        val result = trytoMakeRaireContest(N, contestId, ncands, minMargin, undervotePct, phantomPct, quiet)
+        val result = trytoMakeRaireContest(N, contestId, ncands, minMargin, undervotePct, phantomPct, quiet, hasStyle)
         if (result != null) return result
     }
     throw RuntimeException("failed 11 times to make raire contest with N=$N minMargin=$minMargin")
 }
 
-private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin: Double, undervotePct: Double, phantomPct: Double, quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>>? {
+private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin: Double, undervotePct: Double, phantomPct: Double,
+                                  quiet: Boolean = false, hasStyle: Boolean): Pair<RaireContestUnderAudit, List<Cvr>>? {
     val testContest = RaireContestTestData(contestId, ncands=ncands, ncards=N, minMargin=minMargin, undervotePct = undervotePct, phantomPct = phantomPct)
     val testCvrs = testContest.makeCvrs()
 
@@ -111,6 +113,7 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
         Ncast = testContest.Nc - testContest.phantomCount,
         undervotes=testContest.underCount,
         raireAssertions,
+        hasStyle,
     )
 
     return Pair(rcontestUA, testCvrs)

@@ -218,7 +218,7 @@ class TestClcaElection(
         println("ncvrs (not raire) = ${allCvrs.size}")
 
         if (addRaire) {
-            val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N=ncards/2, contestId=111, addRaireCandidates, minMargin=.04, quiet = true)
+            val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N=ncards/2, contestId=111, addRaireCandidates, minMargin=.04, quiet = true, hasStyle=config.hasStyle)
             contestsUA.add(rcontest)
             allCvrs.addAll(rcvrs)
         }

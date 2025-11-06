@@ -49,7 +49,7 @@ class RunContestTask(
                 val cassertion = assertionRound.assertion as ClcaAssertion
                 val cassorter = cassertion.cassorter
                 val sampler =
-                    ClcaWithoutReplacement(contest.id, config.hasStyle, cvrPairs, cassorter, allowReset = false)
+                    ClcaWithoutReplacement(contest.id, cvrPairs, cassorter, allowReset = false)
 
                 val testH0Result = auditor.run(config, contest.contestUA.contest, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status

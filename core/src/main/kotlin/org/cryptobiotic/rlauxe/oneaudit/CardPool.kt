@@ -300,7 +300,7 @@ fun addOAClcaAssortersFromMargin(
                 if (cardPool.contains(contestId)) {
                     val regVotes = cardPool.regVotes()[oaContest.id]!!
                     if (regVotes.ncards() > 0) {
-                        val poolMargin = assertion.assorter.calcReportedMargin(regVotes.votes, regVotes.ncards())
+                        val poolMargin = assertion.assorter.calcMargin(regVotes.votes, regVotes.ncards())
                         assortAverages[cardPool.poolId] = margin2mean(poolMargin)
                     }
                 }

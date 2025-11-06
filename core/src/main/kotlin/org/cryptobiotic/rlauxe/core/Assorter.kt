@@ -40,11 +40,14 @@ interface AssorterIF {
     fun winLose() = "${winner()}/${loser()}"
     fun hashcodeDesc(): String // Used as unique reference, DO NOT CHANGE!
 
+    // reportedMargin : N = Nc
+    // dilutedMargin: N = sample population size (Nsample)
     // used when you need to calculate reportedMargin from some subset of votes
-    fun calcReportedMargin(useVotes: Map<Int, Int>, Nc: Int): Double {
+    fun calcMargin(useVotes: Map<Int, Int>?, N: Int?): Double {
+        if (useVotes == null || N == null) return Double.NaN // shouldnt happen
         val winnerVotes = useVotes[winner()] ?: 0
         val loserVotes = useVotes[loser()] ?: 0
-        return if (Nc == 0) 0.0 else (winnerVotes - loserVotes) / Nc.toDouble()
+        return if (N == 0) 0.0 else (winnerVotes - loserVotes) / N.toDouble()
     }
 }
 

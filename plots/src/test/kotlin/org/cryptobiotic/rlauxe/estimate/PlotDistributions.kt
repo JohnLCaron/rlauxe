@@ -121,11 +121,11 @@ class PlotDistributions {
 
             // "oracle" audit
             val contestUA = workflow.contestsUA().first()
-            val assertionRound = AssertionRound(contestUA.minAssertion()!!, 1, null)
+            val assertionRound = AssertionRound(contestUA.minAssertion().first!!, 1, null)
 
             val cassertion = assertionRound.assertion as ClcaAssertion
             val cassorter = cassertion.cassorter
-            val sampler = ClcaWithoutReplacement(contestUA.id, auditConfig.hasStyle, sortedPairs, cassorter, allowReset = false)
+            val sampler = ClcaWithoutReplacement(contestUA.id, sortedPairs, cassorter, allowReset = false)
 
             ClcaAssertionAuditor().run(auditConfig, contestUA.contest, assertionRound, sampler, 1)
             results.add(assertionRound.auditResult!!.samplesUsed)

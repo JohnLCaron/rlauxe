@@ -27,7 +27,6 @@ class TestMakeFuzzedCvrsFrom {
         val testMvrs = makeFuzzedCvrsFrom(listOf(contest), testCvrs, mvrsFuzzPct)
         val sampler = ClcaWithoutReplacement(
             contestUA.id,
-            true,
             testMvrs.zip(testCvrs),
             assort,
             allowReset = true
@@ -60,7 +59,7 @@ class TestMakeFuzzedCvrsFrom {
             val totalErrorCounts = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
             test.contests.forEach { contest ->
                 val contestUA = makeContestUAfromCvrs(contest.info, cvrs)
-                val minAssert = contestUA.minClcaAssertion()
+                val minAssert = contestUA.minClcaAssertion().first
                 if (minAssert != null) repeat(ntrials) { trial ->
                     val minAssort = minAssert.cassorter
                     val samples = PrevSamplesWithRates(minAssort.noerror())

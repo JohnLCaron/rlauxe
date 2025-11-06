@@ -7,7 +7,7 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.min
 
-// For a Contest. Assertions may be different.
+// For a Contest; Assertions may be mixed.
 enum class SocialChoiceFunction(val hasMinPct: Boolean) {
     PLURALITY(false),
     APPROVAL(false),
@@ -295,7 +295,7 @@ open class ContestUnderAudit(
         }
     }
 
-    fun setNb(ncards: Int) { this.Nb = ncards }
+    fun setNb(ncards: Int): ContestUnderAudit  { this.Nb = ncards; return this }
 
     fun addAssertionsFromAssorters(assorters: List<AssorterIF>): ContestUnderAudit {
         val assertions = mutableListOf<Assertion>()
@@ -372,35 +372,38 @@ open class ContestUnderAudit(
         return if (isClca) clcaAssertions else pollingAssertions
     }
 
-    fun minClcaAssertion(): ClcaAssertion? {
-        val margins = clcaAssertions.map { it.assorter.reportedMargin()  }
-        val minMargin = if (margins.isEmpty()) 0.0 else margins.min()
-        return clcaAssertions.find { it.assorter.reportedMargin() == minMargin }
+    fun minClcaAssertion(): Pair<ClcaAssertion?, Double> {
+        if (clcaAssertions.isEmpty()) return Pair(null, 0.0)
+        val margins = clcaAssertions.map { Pair(it, it.assorter.calcMargin(contest.votes(), Nb))  }
+        val minMargin = margins.sortedBy { it.second }
+        return minMargin.first()
     }
 
-    fun minPollingAssertion(): Assertion? {
-        val margins = pollingAssertions.map { it.assorter.reportedMargin() }
-        val minMargin = if (margins.isEmpty()) 0.0 else margins.min()
-        return pollingAssertions.find { it.assorter.reportedMargin() == minMargin }
+    fun minPollingAssertion(): Pair<Assertion?, Double> {
+        if (pollingAssertions.isEmpty()) return Pair(null, 0.0)
+        val margins = pollingAssertions.map { Pair(it, it.assorter.calcMargin(contest.votes(), Nb))  }
+        val minMargin = margins.sortedBy { it.second }
+        return minMargin.first()
     }
 
-    fun minAssertion(): Assertion? {
+    fun minAssertion(): Pair<Assertion?, Double> {
         return if (isClca) minClcaAssertion() else minPollingAssertion()
     }
 
-    fun minMargin(): Double {
-        return if (isClca) (minClcaAssertion()?.assorter?.reportedMargin() ?: 0.0)
-        else (minPollingAssertion()?.assorter?.reportedMargin() ?: 0.0)
+    fun minDilutedMargin(): Double {
+        return if (isClca) minClcaAssertion().second else minPollingAssertion().second
     }
 
     fun minRecountMargin(): Double {
-        val minAssertion: Assertion = minAssertion() ?: return -1.0
-        return contest.recountMargin(minAssertion.assorter)
+        val minAssertion = minAssertion()
+        if (minAssertion.first == null) return -1.0
+        return contest.recountMargin(minAssertion.first!!.assorter)
     }
 
-    fun minAssertionDificulty(): String {
-        val minAssertion: Assertion = minAssertion() ?: return "N/A"
-        return contest.showAssertionDifficulty(minAssertion.assorter)
+    fun minAssertionDifficulty(): String {
+        val minAssertion = minAssertion()
+        if (minAssertion.first == null) return "N/A"
+        return contest.showAssertionDifficulty(minAssertion.first!!.assorter)
     }
 
     override fun toString() = contest.toString()
@@ -408,13 +411,13 @@ open class ContestUnderAudit(
     open fun show() = buildString {
         append("${contest.javaClass.simpleName} ${contest.show()}")
         if (!hasStyle && Nb != null) appendLine(" Nb=$Nb") else appendLine()
-        if (minAssertion() != null) appendLine("   ${contest.showAssertionDifficulty(minAssertion()!!.assorter)}")
+        if (minAssertion().first != null) appendLine("   ${minAssertionDifficulty()}")
         append(contest.showCandidates())
     }
 
     open fun showShort() = buildString {
         val votes = contest.votes() ?: "N/A"
-        append("$name ($id) votes=${votes} Nc=$Nc minMargin=${df(minMargin())}")
+        append("$name ($id) votes=${votes} Nc=$Nc minMargin=${df(minDilutedMargin())}")
     }
 
     override fun equals(other: Any?): Boolean {

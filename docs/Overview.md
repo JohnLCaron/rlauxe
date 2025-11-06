@@ -147,33 +147,42 @@ For each audit round:
 
 ## Audit Types and hasStyle
 
-1. Physical ballot has location id that is recorded on the CVR. (CLCA)
-   1. CVR records complete info (or references a ballot style). (hasStyle)
-   2. CVR records does not record undervotes, does not reference a ballot style . (noStyle)
+1. Physical card has location id that is recorded on the CVR. (CLCA)
+   1. CVR has complete info (or references a card style). (hasStyle)
+   2. CVR does not have undervotes, does not reference a card style. (noStyle) TODO
 
-2. In addition to 1, there are pools where the physical ballot has a location but is not associated with a CVR. (OneAudit)
-   1. CVR exists and has complete info (or references a ballot style). (hasStyle) If there are multiple ballot styles, divide pool so each has one ballot style. (SF OneAudit)
-   2. CVR exists but does not record undervotes or reference a ballot style. (noStyle) 
-   3. Pool totals only. Pool ballotStyle is the Union of all contests in the precinct. (noStyle) (Boulder OneAudit?)
+2. Some/all ballots are in pools where CVR does not exist or CVR id is not recorded on the physical card. (OneAudit)
+   1. CVR exists and has complete info (or references a card style), but id not recorded. (hasStyle) 
+      * If ncards > 1, and physical card location knows which card it is, divide pool so each has one card style. (SF OneAudit)
+      * Otherwise, form the union of contests == pool card style. (SF OneAudit)
+   2. CVR exists but does not record undervotes or reference a card style. (noStyle) TODO
+   3. CVR does not exist, only Pool totals. Pool cardStyle is the Union of all contests in the precinct. (noStyle) (Boulder OneAudit?)
 
 3. There are no CVRs (Polling)
-   1. Theres only 1 pool of ballots, unknow ballot styles. (noStyle)
-   2. There are multiple pools and each pool has one ballot style. (hasStyle) (Boulder Polling?)
-   3. There are multiple pools that can be used to narrow the population size. (noStyle)
+
+    When polling, you can reduce the sample size by
+    choosing ballots that contain the contests you want. So then the diluted margin comes back in when estimating.
+
+   1. Theres only 1 pool of cards, unknow card styles. (noStyle)
+   2. There are multiple pools and each pool has one card style. (hasStyle) (Boulder Polling?)
+   3. There are multiple pools that can be used to narrow the population size. (OneAudit noStyle vs Polling?)
+
+* In all variants, for each card, the list of possible contests that are on it is recorded (and made as tight as possible). Card
+  styles can be factored out or not. The diluted margin of a contest is calculated by summing over the cards.
 
 In ClcaAssorter.overstatementError(), hasStyle penalises MVR not having the contest, but noStyle treats it as a non-vote,
 since you are sampling a population where you expect non-votes.
 
 Otherwise, hasStyle only affects the calculation of the dilutedMargin.
 
-when (hasStyle), margin = dilutedMargin, else margin > dilutedMargin.
+When hasStyle, margin = dilutedMargin, else margin > dilutedMargin.
 always use dilutedMargin when estimating the sample size.
 
-Ballot vs Card : If the pysical cards are stored and processed separately (common case), then everything is done with cards. 
+Ballot vs Card : If the physical cards are stored and processed separately (common case), then everything is done with cards. 
 If the cards are kept together, we can pretend the ballot is one card.
-The only exception (possibly) is that the BallotStyle can be used in forming the CardManifest, see p.13 below.
+The only exception (possibly) is if the card style can be used in forming the CardManifest, see p.13 below.
 
-ballots vs cards
+From MoreStyle
 
 p.6 (c = 1)
 There are N ballots cast in the jurisdiction, of which N_B = N contain contest B and
@@ -192,7 +201,7 @@ fully diluted margin (noStyle) =
     for B: M_B/(N*c) = (1/c) * m_B, B assumed to be on all ballots
     for S: M_S/(N*c) = (p/c) * m_S, p is proportion of ballot containing S
 
-p 13 (polling audit)
+p. 13 (polling audit)
 
 Suppose for each precinct, we know which ballots contain S but not which particular cards contain S, and
 that the c cards comprising each ballot are kept in the same container. (This is an idealization
@@ -205,19 +214,21 @@ We can reduce the sampling universe for contest S from the original population o
 population of p * N * c cards, of which p * N actually contain contest S.
 
 
+Notes
+
 1. Keep the CardLocationManifest -> CardManifest. May include a CardStyles record.
 2. Add CardStyle reference to AuditableCard I think. Used when card style is used. Maybe "all" always returns contains(contest) = true ??
 3. Pools are used for both OA and Polling.
-4. Have to use diluted margin everywhere.
+4. Have to use diluted margin in estimation and audit, and in the ClcaAssorter..
 
 
-Where is hasStyle used? Perhaps not needed except when forming CardManifest?
+Where is hasStyle used? 
 
 ClcaAssorter.overstatementError()  // needed
 ContestSimulation.makeBallotManifest()  // needed
 
 MultiContestTestData ??
-AuditRound estSampleSize else estSampleSizeNoStyles // maybe not
+AuditRound estSampleSize else estSampleSizeNoStyles // maybe can get rid of estSampleSizeNoStyles?
 
 not needed in:
 ClcaWithoutReplacement

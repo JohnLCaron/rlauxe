@@ -49,7 +49,7 @@ class TestSampler {
 
     @Test
     fun testClcaWithoutReplacement() {
-        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasStyle=false, true)
+        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasStyle=false, dilutedMargin=assertion.assorter.reportedMargin(), true)
         val cvrPairs = cvrs.zip( cvrs)
         val target = ClcaWithoutReplacement(0, cvrPairs, cassorter, true)
 
@@ -70,7 +70,7 @@ class TestSampler {
 
     @Test
     fun testClcaNoErrorIterator() {
-        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasStyle=false, true)
+        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasStyle=false, dilutedMargin=assertion.assorter.reportedMargin(), true)
 
         val target = ClcaNoErrorIterator(0, cvrs.size, cassorter, cvrs.iterator())
 
@@ -90,7 +90,7 @@ class TestSampler {
 
     @Test
     fun testOneAuditNoErrorIterator() {
-        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasStyle=false, true)
+        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasStyle=false, dilutedMargin=assertion.assorter.reportedMargin(), true)
 
         val target = OneAuditNoErrorIterator(0, cvrs.size, null, cassorter, cvrs.iterator())
 

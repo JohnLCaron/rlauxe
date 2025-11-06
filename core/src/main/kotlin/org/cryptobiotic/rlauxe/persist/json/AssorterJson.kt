@@ -26,6 +26,7 @@ data class ClcaAssorterJson(
     val className: String,
     val assorter: AssorterIFJson, // TODO duplicate
     val hasStyle: Boolean,
+    val dilutedMargin: Double,
     val poolAverages: AssortAvgsInPoolsJson?,
 )
 
@@ -34,7 +35,8 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
         ClcaAssorterJson(
             "OAClcaAssorter",
             this.assorter.publishJson(),
-            true,
+            this.hasStyle,
+            this.dilutedMargin,
             poolAverages.publishJson()
         )
 
@@ -43,6 +45,7 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
             "ClcaAssorter",
             this.assorter.publishJson(),
             this.hasStyle,
+            this.dilutedMargin,
             null,
         )
     }
@@ -55,6 +58,7 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
                 info,
                 this.assorter.import(info),
                 this.hasStyle,
+                this.dilutedMargin,
             )
 
         "OAClcaAssorter" ->
@@ -62,6 +66,7 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
                 info,
                 this.assorter.import(info),
                 this.hasStyle,
+                this.dilutedMargin,
                 poolAverages!!.import()
             )
 

@@ -8,49 +8,53 @@ data class AuditableCard (
     val index: Int,  // index into the original, canonical list of cards
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
-    val contests: IntArray, // list of contests on this ballot. TODO when !hasStyle, include all contests that might be on the ballot. NOTE these look like undervotes, is that ok?
-    val votes: List<IntArray>?, // for each contest, an array of the candidate ids voted for; for IRV, ranked first to last; missing for pooled data or polling audits
+    val possibleContests: IntArray, // list of contests that might be on the ballot. TODO replace with cardStyle
+    val votes: Map<Int, IntArray>?, // for CLCA, a map of contest -> the candidate ids voted; must include undervotes (??)
+                                    // for IRV, ranked first to last; missing for pooled data or polling audits
     val poolId: Int?, // for OneAudit
-    // val hasStyle: Boolean, // TODO ??
+    // val cardStyle: String, // TODO ??
 ) {
     // if there are no votes, the IntArrays are all empty; looks like all undervotes
+    // TODO smelly
     fun cvr() : Cvr {
-        val votePairs = contests.mapIndexed { idx, contestId ->
-            Pair(contestId, votes?.get(idx) ?: intArrayOf())
+        val useVotes = if (votes != null) votes else {
+            possibleContests.mapIndexed { idx, contestId ->
+                Pair(contestId, votes?.get(idx) ?: intArrayOf())
+            }.toMap()
         }
-        return Cvr(location, votePairs.toMap(), phantom, poolId)
+        return Cvr(location, useVotes, phantom, poolId)
     }
 
     override fun toString() = buildString {
-        appendLine("AuditableCard(desc='$location', index=$index, sampleNum=$prn, phantom=$phantom, contests=${contests.contentToString()}, poolId=$poolId)")
-        votes?.forEachIndexed { idx, vote -> appendLine("   contest $idx: ${vote.contentToString()}")}
+        appendLine("AuditableCard(desc='$location', index=$index, sampleNum=$prn, phantom=$phantom, possibleContests=${possibleContests.contentToString()}, poolId=$poolId)")
+        votes?.forEach { id, vote -> appendLine("   contest $id: ${vote.contentToString()}")}
     }
 
     fun hasContest(contestId: Int): Boolean {
          // TODO shit cant tell if we have styles or not.
-        return contests.contains(contestId)
+        return possibleContests.contains(contestId)
     }
 
     // Kotlin data class doesnt handle IntArray and List<IntArray> correctly
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as AuditableCard
+        if (other !is AuditableCard) return false
 
         if (index != other.index) return false
         if (prn != other.prn) return false
         if (phantom != other.phantom) return false
         if (poolId != other.poolId) return false
         if (location != other.location) return false
-        if (!contests.contentEquals(other.contests)) return false
+        if (!possibleContests.contentEquals(other.possibleContests)) return false
         if ((votes == null) != (other.votes == null)) return false
+
         if (votes != null) {
-            if (votes.size != other.votes!!.size) return false
-            votes.forEachIndexed { idx, vote ->
-                if (!vote.contentEquals(other.votes[idx])) return false
+            for ((contestId, candidates) in votes) {
+                if (!candidates.contentEquals(other.votes!![contestId])) return false
             }
         }
+
         return true
     }
 
@@ -60,10 +64,8 @@ data class AuditableCard (
         result = 31 * result + phantom.hashCode()
         result = 31 * result + (poolId ?: 0)
         result = 31 * result + location.hashCode()
-        result = 31 * result + contests.contentHashCode()
-        votes?.forEach { vote ->
-            result = 31 * result + vote.contentHashCode()
-        }
+        result = 31 * result + possibleContests.contentHashCode()
+        votes?.forEach { (contestId, candidates) -> result = 31 * result + contestId.hashCode() + candidates.contentHashCode() }
         return result
     }
 
@@ -73,14 +75,18 @@ data class AuditableCard (
         fun fromCvr(cvr: Cvr, index: Int, sampleNum: Long): AuditableCard {
             val sortedVotes = cvr.votes.toSortedMap()
             val contests = sortedVotes.keys.toList()
-            return AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), sortedVotes.values.toList(), cvr.poolId)
+            return AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), cvr.votes, cvr.poolId)
         }
 
-        // throw away the votes
-        fun fromCvrForPolling(cvr: Cvr, index: Int): AuditableCard {
-            val sortedVotes = cvr.votes.toSortedMap()
-            val contests = sortedVotes.keys.toList()
-            return AuditableCard(cvr.id, index, 0, cvr.phantom, contests.toIntArray(), null, null)
+        fun fromCvrHasStyle(cvr: Cvr, index: Int, isClca: Boolean): AuditableCard {
+            val contests = cvr.votes.keys.toList().sorted().toIntArray()
+            val votes = if (isClca) cvr.votes else null
+            return AuditableCard(cvr.id, index, 0, cvr.phantom, contests, votes, null)
+        }
+
+        fun fromCvrNoStyle(cvr: Cvr, index: Int, possibleContests: IntArray, isClca: Boolean): AuditableCard {
+            val votes = if (isClca) cvr.votes else null
+            return AuditableCard(cvr.id, index, 0, cvr.phantom, possibleContests, votes = votes, null)
         }
 
         // go away

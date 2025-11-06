@@ -97,7 +97,7 @@ fun CvrExport.toCsv() = buildString {
 class CvrExportToCardAdapter(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: Map<String, Int>? = null, startCount: Int = 0) : CloseableIterator<AuditableCard> {
     var count = startCount
     override fun hasNext() = cvrExportIterator.hasNext()
-    override fun next() = AuditableCard.fromCvr(cvrExportIterator.next().toCvr(pools=pools), count++, sampleNum=0)
+    override fun next() = AuditableCard.fromCvrHasStyle(cvrExportIterator.next().toCvr(pools=pools), count++, isClca=true)
     override fun close() {
         cvrExportIterator.close()
     }

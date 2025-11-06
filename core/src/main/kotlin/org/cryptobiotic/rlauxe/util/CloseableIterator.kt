@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrExport
 
 interface CloseableIterable<out T> {
     fun iterator(): CloseableIterator<T>
@@ -23,14 +22,30 @@ class Closer<out T>(val iter: Iterator<T>) : CloseableIterator<T> {
 class CvrToAuditableCardPolling(val cvrs: CloseableIterator<Cvr>) : CloseableIterator<AuditableCard> {
     var count = 0
     override fun hasNext() = cvrs.hasNext()
-    override fun next() = AuditableCard.fromCvrForPolling(cvrs.next(), count++)
+    override fun next() = AuditableCard.fromCvrHasStyle(cvrs.next(), count++, isClca=false)
     override fun close() = cvrs.close()
 }
 
 class CvrToAuditableCardClca(val cvrs: CloseableIterator<Cvr>) : CloseableIterator<AuditableCard> {
     var count = 0
     override fun hasNext() = cvrs.hasNext()
-    override fun next() = AuditableCard.fromCvr(cvrs.next(), count++, sampleNum=0)
+    override fun next() = AuditableCard.fromCvrHasStyle(cvrs.next(), count++, isClca=true)
+    override fun close() = cvrs.close()
+}
+
+class CvrToCardAdapter(val cvrIterator: CloseableIterator<Cvr>, val pools: Map<String, Int>? = null, startCount: Int = 0) : CloseableIterator<AuditableCard> {
+    var count = startCount
+    override fun hasNext() = cvrIterator.hasNext()
+    override fun next() = AuditableCard.fromCvrHasStyle(cvrIterator.next(), count++, isClca=true)
+    override fun close() {
+        cvrIterator.close()
+    }
+}
+
+class FromCvrNoStyle(val cvrs: CloseableIterator<Cvr>, val possibleContests: IntArray, val isClca: Boolean) : CloseableIterator<AuditableCard> {
+    var count = 0
+    override fun hasNext() = cvrs.hasNext()
+    override fun next() = AuditableCard.fromCvrNoStyle(cvrs.next(), count++, possibleContests, isClca)
     override fun close() = cvrs.close()
 }
 
@@ -52,11 +67,3 @@ class ToAuditableCardPolling(val cards: CloseableIterator<AuditableCard>) : Clos
     override fun close() = cards.close()
 }
 
-class CvrToCardAdapter(val cvrIterator: CloseableIterator<Cvr>, val pools: Map<String, Int>? = null, startCount: Int = 0) : CloseableIterator<AuditableCard> {
-    var count = startCount
-    override fun hasNext() = cvrIterator.hasNext()
-    override fun next() = AuditableCard.fromCvr(cvrIterator.next(), count++, sampleNum=0)
-    override fun close() {
-        cvrIterator.close()
-    }
-}

@@ -65,19 +65,12 @@ class CreateSfElectionPoolStyles(
             contestsUA = makeAllOneAuditContests(contestTabSums, contestNcsAmended, unpooledPool, hasStyle).sortedBy { it.id }
 
         }  else { // Polling
+            // TODO wrong
             // use unamended tabs and contest.Nc.
-            contestsUA = makePollingContests(unamendedContestTabs, unamendedContestNcs).sortedBy { it.id }
 
             // calculate Nb by totalling the cvrs that have that contest
-            val contestMap = contestsUA.associateBy { it.id }
-            val contestTabs = tabulateAuditableCards(cvrs(), infos)
-            contestTabs.forEach { contestId, tab ->
-                val contest = contestMap[contestId]
-                if (contest != null) {
-                    contest.setNb(tab.ncards + contest.Np)
-                    println("contest $contestId Nb = ${tab.ncards} Nb/Nc = ${tab.ncards / contest.Nc.toDouble()}")
-                }
-            }
+            val contestTabs = tabulateAuditableCards(cardManifest(), infos)
+            contestsUA = makePollingContests(contestTabs, unamendedContestNcs).sortedBy { it.id }
         }
     }
 
@@ -87,8 +80,9 @@ class CreateSfElectionPoolStyles(
             val useNc = contestNcs[contestId] ?: contestSumTab.ncards
             if (useNc > 0) {
                 if (!contestSumTab.isIrv) { // cant do IRV
-                    val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
-                    val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
+                    val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards) // TODO Ncast = Nb wrong
+                    val Nb = contestSumTab.ncards // tabs.ncards + contest.Np TODO
+                    val contestUA = ContestUnderAudit(contest, isClca = false, Nbin=Nb).addStandardAssertions()
                     contestUA.contest.info().metadata["PoolPct"] = 0
                     contestsUAs.add(contestUA)
                 }
@@ -163,9 +157,9 @@ class CreateSfElectionPoolStyles(
     override fun cardPools() = if (isPolling) null else cardPools
     override fun contestsUA() = contestsUA
 
-    fun cvrs(): CloseableIterator<AuditableCard> {
+    fun cardManifest(): CloseableIterator<AuditableCard> {
         val phantomCvrs = makePhantomCvrs(contestsUA().map { it.contest })
-        val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0L) }.asSequence()
+        val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvrHasStyle(cvr, idx, isClca=true) }.asSequence()
 
         val cvrIter: CloseableIterable<CvrExport>  = CardPoolModifiedCvrIterable(cardPoolMapByName, CloseableIterable { cvrExportCsvIterator(cvrExportCsv) })
         val poolNameToId = cardPools.associate { it.poolName to it.poolId }
@@ -176,7 +170,7 @@ class CreateSfElectionPoolStyles(
     }
 
     override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
-        return Pair(Closer(cvrs()), null)
+        return Pair(Closer(cardManifest()), null)
     }
 
 }

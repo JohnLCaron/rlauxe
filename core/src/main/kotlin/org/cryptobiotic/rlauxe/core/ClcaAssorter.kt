@@ -31,39 +31,29 @@ private val logger = KotlinLogging.logger("ClcaAssorter")
 open class ClcaAssorter(
     val info: ContestInfo,
     val assorter: AssorterIF,   // A
-    val hasStyle: Boolean = true,
+    val hasStyle: Boolean,
+    val dilutedMargin: Double,
     val check: Boolean = true,
 ) {
-    // Define v ≡ 2Āc − 1, the assorter margin
-    val reportedAssortMargin: Double
+    // Define v ≡ 2Ā − 1, the assorter margin
+    // reportedAssortMargin = assorter.reportedMargin() // (0, 1) // TODO
     // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
-    val noerror: Double // clca assort value when no error
+    val noerror: Double = 1.0 / (2.0 - dilutedMargin / assorter.upperBound()) // clca assort value when no error
+    // clca assort value when no error (.5, 1)
+
+    // upper bound of clca assorter;
     // A ranges from [0, u], so ωi ≡ A(ci) − A(bi) ranges from +/- u,
     // so (1 − (ωi / u)) ranges from 0 to 2, and B ranges from 0 to 2 /(2 − v/u) = 2 * noerror, from eq (7)
-    val upperBound: Double // upper bound of clca assorter; betting functions may need to know this
+    val upperBound: Double = 2.0 * noerror // upper bound of clca assorter; betting functions may need to know this
 
     init {
-        /* if (info.choiceFunction == SocialChoiceFunction.THRESHOLD) {
-            require(assorter is ThresholdAssorter) { "assorter must be Threshold" }
-        } else if (info.choiceFunction == SocialChoiceFunction.DHONDT) {
-            require(assorter is DHondtAssorter) { "assorter must be DHondt" }
-        }  else if (info.choiceFunction == SocialChoiceFunction.IRV) {
-            require(assorter is RaireAssorter) { "assorter must be Raire" }
-        } */
-
-        // Define v ≡ 2Ā − 1, the assorter margin
-        reportedAssortMargin = assorter.reportedMargin() // (0, 1)
-        // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
-        noerror = 1.0 / (2.0 - reportedAssortMargin / assorter.upperBound()) // clca assort value when no error (.5, 1)
-        // A ranges from [0, u], so ωi ≡ A(ci) − A(bi) ranges from +/- u,
-        // so (1 − (ωi / u)) ranges from 0 to 2, and B ranges from 0 to 2 /(2 − v/u) = 2 * noerror, from eq (7) above
-        upperBound = 2.0 * noerror // upper bound of clca assorter;
-
-        val reportedAssortAvg = assorter.reportedMean()
+        val reportedAssortAvg = assorter.reportedMean() // ?? what used for ??
         if (check) { // TODO suspend checking for some tests that expect to fail
             require(reportedAssortAvg > 0.5) {
                 "*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($reportedAssortAvg) must be > .5"
             }
+            if (noerror < .5)
+                println("why")
             // the math requires this; otherwise divide by negative number flips the inequality
             require(noerror > 0.5) { "${info.name} ${assorter.desc()}: ($noerror) noerror must be > .5" }
         }
@@ -93,6 +83,7 @@ open class ClcaAssorter(
     //      [2,         1.875,      1.125,      1,  .875,       .125,       0] * noerror  for u = 4
     //      [2,         1.666,      1.333,      1,  .666,       .333,       0] * noerror  for u = .75
 
+    // TODO always use this.hasStyle?
     // SHANGRLA overstatement_assorter()
     open fun bassort(mvr: Cvr, cvr:Cvr, hasStyle: Boolean = this.hasStyle): Double {
         val overstatement = overstatementError(mvr, cvr, hasStyle) // ωi eq (1)
@@ -184,7 +175,7 @@ open class ClcaAssorter(
     override fun toString() = buildString {
         appendLine("ClcaAssorter for contest ${info.name} (${info.id})")
         appendLine("  assorter=${assorter.desc()}")
-        append("  cvrAssortMargin=${dfn(reportedAssortMargin, 8)} noerror=${dfn(noerror, 8)} upperBound=${dfn(upperBound, 8)}")
+        append("  dilutedMargin=${dfn(dilutedMargin, 8)} noerror=${dfn(noerror, 8)} upperBound=${dfn(upperBound, 8)}")
     }
 
     fun shortName() = assorter.shortName()

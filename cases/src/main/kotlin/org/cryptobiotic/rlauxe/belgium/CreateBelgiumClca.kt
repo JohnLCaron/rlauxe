@@ -31,7 +31,7 @@ class BelgiumClca (
 
     override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
         val phantomCvrs = makePhantomCvrs(contestsUA().map { it.contest })
-        val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0L) }.asSequence()
+        val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvrHasStyle(cvr, idx, isClca=true) }.asSequence()
         val cardSeq = CvrToCardAdapter(Closer(cvrs.iterator())).asSequence()
         val allCardsIter = (cardSeq + phantomSeq).iterator()
         return Pair(null, Closer( allCardsIter))

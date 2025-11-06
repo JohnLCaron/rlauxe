@@ -161,7 +161,7 @@ fun verifyManifest(
             lastCard = card
             count++
 
-            //if (config.hasStyle) {
+            /*if (config.hasStyle) { TODO
                 card.contests.forEachIndexed { idx, contestId ->
                     val info = infos[contestId]
                     if (info != null) {
@@ -178,7 +178,7 @@ fun verifyManifest(
                         }
                     }
                 }
-            //}
+            //} */
         }
     }
     if (!results.hasErrors) {

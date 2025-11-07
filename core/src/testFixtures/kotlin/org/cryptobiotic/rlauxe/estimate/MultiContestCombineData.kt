@@ -26,9 +26,9 @@ data class MultiContestCombineData(
 
     // create new partitions each time this is called
     // includes undervotes and phantoms, size = totalBallots + phantom count
-    fun makeCvrsFromContests(): List<Cvr> {
+    fun makeCvrsFromContests(startCvrId : Int = 0): List<Cvr> {
         contestBuilders.forEach { it.resetTracker() } // startFresh
-        val cvrbs = CvrBuilders().addContests(contestBuilders.map { it.contest.info })
+        val cvrbs = CvrBuilders(startCvrId).addContests(contestBuilders.map { it.contest.info })
         val result = mutableListOf<Cvr>()
         repeat(totalBallots) {
             // add regular Cvrs including undervotes

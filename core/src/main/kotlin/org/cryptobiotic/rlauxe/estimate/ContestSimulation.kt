@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.audit.CardLocation
 import org.cryptobiotic.rlauxe.audit.CardLocationManifest
 import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import kotlin.math.abs
 import kotlin.math.round
 import kotlin.random.Random
@@ -31,15 +32,14 @@ import kotlin.random.Random
 //    I think we must have a ballot manifest, which means we have Nb, and ...
 
 /**
- * Simulation of single Contest that reflects the exact votes and Nc, along with undervotes and phantoms, as specified in Contest.
- * TODO what about hasStyle, since its single contest.
+ * Simulation of single Contest that reflects the exact votes and Nb (diluted), along with undervotes and phantoms, as specified in Contest.
  */
-class ContestSimulation(val contest: Contest) {
+class ContestSimulation(val contest: Contest, val Nb: Int) {
     val info = contest.info
     val ncands = info.candidateIds.size
     val voteCount = contest.votes.map { it.value }.sum() // V_c
     val phantomCount = contest.Np() //  - underCount - voteCount // Np_c
-    val underCount = contest.Nc * info.voteForN - contest.Np() - voteCount // U_c
+    val underCount = Nb * info.voteForN - contest.Np() - voteCount // U_c
 
     var trackVotesRemaining = mutableListOf<Pair<Int, Int>>()
     var votesLeft = 0
@@ -110,7 +110,7 @@ class ContestSimulation(val contest: Contest) {
     }
 
     fun makeBallotManifest(hasStyle: Boolean): CardLocationManifest {
-        val ncards: Int = contest.Nc - contest.Np()
+        val ncards: Int = Nb - contest.Np()
         val contests = listOf("contest0")
         val contestIds = listOf(0)
         val bs = CardStyle.make(0, contests, listOf(0), ncards)
@@ -145,12 +145,12 @@ class ContestSimulation(val contest: Contest) {
                 Nc = Nc,
                 Ncast = roundToClosest(nvotes + Nu)
             )
-            return ContestSimulation(contest)
+            return ContestSimulation(contest, Nc)
         }
 
         fun simulateContestCvrsWithLimits(contest: Contest, config: AuditConfig): ContestSimulation {
             val limit = config.contestSampleCutoff
-            if (limit == null || contest.Nc <= limit) return ContestSimulation(contest)
+            if (limit == null || contest.Nc <= limit) return ContestSimulation(contest, contest.Nc)
 
             // otherwise scale everything
             val sNc = limit / contest.Nc.toDouble()
@@ -171,7 +171,36 @@ class ContestSimulation(val contest: Contest) {
                 Ncast = voteCount + sNu,
             )
 
-            return ContestSimulation(contest)
+            return ContestSimulation(contest, contest.Nc)
+        }
+
+        fun simulateCvrsDilutedMargin(contestUA: ContestUnderAudit, config: AuditConfig): List<Cvr> {
+            val limit = config.contestSampleCutoff
+            val contestOrg = contestUA.contest as Contest // TODO
+            if (limit == null || contestOrg.Nc <= limit) return ContestSimulation(contestOrg, contestUA.Nb).makeCvrs()
+
+            // otherwise scale everything
+            val sNc = limit / contestOrg.Nc.toDouble()
+            val sNb = roundToClosest(sNc * contestUA.Nb)
+            val sNp = roundToClosest(sNc * contestOrg.Np())
+            val sNu = roundToClosest(sNc * contestOrg.Nundervotes())
+            val orgVoteCount = contestOrg.votes.map { it.value }.sum() // V_c
+            val svotes = contestOrg.votes.map { (id, nvotes) -> id to roundToClosest(sNc * nvotes) }.toMap()
+            val voteCount = svotes.map { it.value }.sum() // V_c
+
+            if (abs(voteCount - limit) > 10) {
+                logger.warn {"simulateContestCvrsWithLimits limit wanted = ${limit} scaled = ${voteCount}"}
+            }
+
+            val contestScaled = Contest(
+                contestOrg.info,
+                svotes,
+                Nc = voteCount + sNu + sNp,
+                Ncast = voteCount + sNu,
+            )
+
+            val sim = ContestSimulation(contestScaled, sNb)
+            return sim.makeCvrs()
         }
     }
 

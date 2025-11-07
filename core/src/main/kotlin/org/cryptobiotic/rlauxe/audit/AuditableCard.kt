@@ -81,12 +81,12 @@ data class AuditableCard (
         fun fromCvrHasStyle(cvr: Cvr, index: Int, isClca: Boolean): AuditableCard {
             val contests = cvr.votes.keys.toList().sorted().toIntArray()
             val votes = if (isClca) cvr.votes else null
-            return AuditableCard(cvr.id, index, 0, cvr.phantom, contests, votes, null)
+            return AuditableCard(cvr.id, index, 0, cvr.phantom, contests, votes, cvr.poolId)
         }
 
         fun fromCvrNoStyle(cvr: Cvr, index: Int, possibleContests: IntArray, isClca: Boolean): AuditableCard {
             val votes = if (isClca) cvr.votes else null
-            return AuditableCard(cvr.id, index, 0, cvr.phantom, possibleContests, votes = votes, null)
+            return AuditableCard(cvr.id, index, 0, cvr.phantom, possibleContests, votes = votes, cvr.poolId)
         }
 
         // go away

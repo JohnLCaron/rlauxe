@@ -42,7 +42,7 @@ class GenerateClcaErrorTable {
                 fcontest.ncards = N
                 val contest = fcontest.makeContest()
                 // print("contest votes = ${contest.votes} ")
-                val sim = ContestSimulation(contest)
+                val sim = ContestSimulation(contest, contest.Nc)
 
                 val sumRForNcand = mutableListOf(0.0, 0.0, 0.0, 0.0)
                 fuzzPcts.forEach { fuzzPct ->

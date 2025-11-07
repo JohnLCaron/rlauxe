@@ -13,7 +13,7 @@ private val logger = KotlinLogging.logger("MvrManager")
 // use MvrManager for auditing, not creating an audit
 interface MvrManager {
     // either Cvrs (clca) or CardLocations (polling) or both (oneaudit)
-    fun sortedCards(): CloseableIterable<AuditableCard>
+    fun sortedCards(): CloseableIterable<AuditableCard> // TODO card manifest
     fun sortedCvrs(): CloseableIterable<Cvr> = CloseableIterable { AuditableCardToCvrAdapter(sortedCards().iterator()) }
 }
 

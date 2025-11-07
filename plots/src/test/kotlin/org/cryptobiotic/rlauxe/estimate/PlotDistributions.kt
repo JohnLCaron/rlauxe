@@ -65,7 +65,7 @@ class PlotDistributions {
     }
 
     // calculate 100 estimateSampleSizes, return List<EstimationResult>, single contest, no phantoms
-    fun doOneEstSample(Nc: Int, margin: Double, mvrsFuzzPct: Double, auditConfig: AuditConfig): List<RunTestRepeatedResult> {
+    fun doOneEstSample(Nc: Int, margin: Double, mvrsFuzzPct: Double, config: AuditConfig): List<RunTestRepeatedResult> {
         val undervotePct = 0.0
         val phantomPct = 0.0
 
@@ -74,20 +74,20 @@ class PlotDistributions {
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
         println("oracle errorRates = ${ClcaErrorTable.getErrorRates(2, mvrsFuzzPct)}")
 
-        val ballotCards = MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed)
-        val workflow = WorkflowTesterClca(auditConfig, listOf(sim.contest), emptyList(), ballotCards)
+        val mvrManager = MvrManagerClcaForTesting(testCvrs, testCvrs, config.seed)
+        val workflow = WorkflowTesterClca(config, listOf(sim.contest), emptyList(), mvrManager)
 
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         val auditRound = AuditRound(1, contestRounds = contestRounds, samplePrns = emptyList())
 
-        val cvrIterator = if (auditConfig.auditType != AuditType.ONEAUDIT) null else
-            ballotCards.sortedCvrs().iterator()
+        val cvrIterator = if (config.auditType != AuditType.ONEAUDIT) null else
+            mvrManager.sortedCvrs().iterator()
 
         // just want the sample estimation stuff
         return estimateSampleSizes(
-            auditConfig,
+            config,
             auditRound,
-            cvrIterator = cvrIterator
+            cardManifest = if (config.auditType == AuditType.POLLING) null else mvrManager.sortedCards(),
         )
     }
 

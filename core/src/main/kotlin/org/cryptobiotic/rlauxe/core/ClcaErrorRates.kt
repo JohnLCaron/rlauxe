@@ -19,6 +19,8 @@ data class ClcaErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val
     }
 
     companion object {
+        val Zero =  ClcaErrorRates(0.0, 0.0, 0.0, 0.0)
+
         fun fromList(list: List<Double>): ClcaErrorRates {
             require(list.size == 4) { "ErrorRates list must have 4 elements"}
             return ClcaErrorRates(list[0], list[1], list[2], list[3])

@@ -2,9 +2,9 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.*
 
-class CvrBuilders {
+class CvrBuilders(startCvrId: Int = 0) {
     val builders = mutableListOf<CvrBuilder>()
-    var nextCvrId = 0
+    var nextCvrId = startCvrId
     val contests = mutableMapOf<String, CvrContest>()
     var contestId = 0
 

@@ -10,7 +10,7 @@ private val logger = KotlinLogging.logger("Sampler")
 //// abstraction for creating a sequence of samples
 interface Sampler: Iterator<Double> {
     fun sample(): Double // get next in sample
-    fun maxSamples(): Int  // population size
+    fun maxSamples(): Int  // population size TODO wtf?
     fun reset()   // start over again with different permutation (may be prohibited)
     fun maxSampleIndexUsed(): Int // the largest cvr index used in the sampling
     fun nmvrs(): Int // total number mvrs
@@ -162,7 +162,7 @@ class ClcaNoErrorIterator(
     override fun maxSampleIndexUsed() = idx
     override fun nmvrs() = contestNc
 
-    override fun hasNext() = !done && (count < contestNc)
+    override fun hasNext() = !done && cvrIterator.hasNext()
     override fun next() = sample()
 
     companion object {
@@ -170,6 +170,7 @@ class ClcaNoErrorIterator(
     }
 }
 
+// what about a function to fuzz the cvr or mvr on the fly ??
 class OneAuditNoErrorIterator(
     val contestId: Int,
     val contestNc: Int,
@@ -224,8 +225,6 @@ class OneAuditNoErrorIterator(
         var warned = false
     }
 }
-
-
 
 
 

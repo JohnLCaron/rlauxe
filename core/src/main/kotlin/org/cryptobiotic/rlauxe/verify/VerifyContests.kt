@@ -237,16 +237,6 @@ fun verifyOAagainstCards(
 
     val poolSums = tabulateCardPools(cardPools, infos)
 
-    /* val poolSums = infos.mapValues { ContestTabulation(it.value) }
-    cardPools.forEach { cardPool ->
-        cardPool.regVotes().forEach { (contestId, regVotes: RegVotes) ->
-            val poolSum = poolSums[contestId]!!
-            regVotes.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
-            poolSum.ncards += regVotes.ncards()
-            poolSum.undervotes += regVotes.undervotes()
-        }
-    } */
-
     val sumWithPools = mutableMapOf<Int, ContestTabulation>()
     sumWithPools.sumContestTabulations(nonpoolCvrVotes)
     sumWithPools.sumContestTabulations(poolSums)
@@ -273,13 +263,13 @@ fun verifyOAagainstCards(
             allOk = false
         } else {
             if (!checkEquivilentVotes(contestVotes, sumWithPool.votes)) {
-                result.addError("contest ${contestUA.id} votes disagree with cvrs = $sumWithPool")
+                result.addError("contest ${contestUA.id} votes disagree with sumWithPool = $sumWithPool")
                 result.addError("    contestVotes = $contestVotes")
                 result.addError("    sumWithPools = ${sumWithPool.votes}")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
                 allOk = false
             } else {
-                if (show) result.addMessage("  contest ${contestUA.id} contest.votes matches cvrTabulation")
+                if (show) result.addMessage("  contest ${contestUA.id} contest.votes matches sumWithPool")
             }
         }
     }

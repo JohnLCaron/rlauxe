@@ -34,14 +34,11 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         logger.info{"Estimate round ${roundIdx}"}
         val stopwatch = Stopwatch()
 
-        // only need cvrIterator for OneAudit
-        val cvrIterator = if (auditConfig().auditType != AuditType.ONEAUDIT) null else mvrManager().sortedCvrs().iterator()
-
         // 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function,
         estimateSampleSizes(
             auditConfig(),
             auditRound,
-            cvrIterator = cvrIterator,
+            cardManifest = if (auditConfig().auditType == AuditType.POLLING) null else mvrManager().sortedCards(),
             // nthreads=1,
         )
         logger.info{"Estimate round ${roundIdx} took ${stopwatch}"}

@@ -29,18 +29,8 @@ class PollingContestAuditTaskGenerator(
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
         var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
-        var ballotManifest = sim.makeBallotManifest(useConfig.hasStyle)
 
-        if (!useConfig.hasStyle && Nb > Nc) {
-            val otherContestId = 42
-            val otherCvrs = List<Cvr>(Nb - Nc) { makeUndervoteForContest(otherContestId) }
-            testMvrs = testMvrs + otherCvrs
-
-            val otherCardLocations = List<CardLocation>(Nb - Nc) { CardLocation("other${Nc+it}", false, null) }
-            ballotManifest = CardLocationManifest(ballotManifest.cardLocations + otherCardLocations, emptyList())
-        }
-
-        val ballotCards = MvrManagerPollingForTesting(ballotManifest.cardLocations, testMvrs, useConfig.seed)
+        val ballotCards = MvrManagerPollingForTesting(testMvrs, testMvrs, useConfig.seed)
         val pollingWorkflow = WorkflowTesterPolling(useConfig, listOf(sim.contest), ballotCards)
         return ContestAuditTask(
             name(),
@@ -75,9 +65,8 @@ class PollingSingleRoundAuditTaskGenerator(
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
         val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
-        val ballotManifest = sim.makeBallotManifest(useConfig.hasStyle)
 
-        val ballotCards = MvrManagerPollingForTesting(ballotManifest.cardLocations, testMvrs, useConfig.seed)
+        val ballotCards = MvrManagerPollingForTesting(testCvrs, testMvrs, useConfig.seed)
         val pollingWorkflow = WorkflowTesterPolling(useConfig, listOf(sim.contest), ballotCards)
 
         return PollingSingleRoundAuditTask(

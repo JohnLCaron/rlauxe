@@ -8,9 +8,6 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.roundToClosest
-import org.cryptobiotic.rlauxe.audit.CardLocation
-import org.cryptobiotic.rlauxe.audit.CardLocationManifest
-import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import kotlin.math.abs
 import kotlin.math.round
@@ -107,23 +104,6 @@ class ContestSimulation(val contest: Contest, val Nb: Int) {
         trackVotesRemaining[idx] = Pair(candidateId, nvotes-1)
         votesLeft--
         return candidateId
-    }
-
-    fun makeBallotManifest(hasStyle: Boolean): CardLocationManifest {
-        val ncards: Int = Nb - contest.Np()
-        val contests = listOf("contest0")
-        val contestIds = listOf(0)
-        val bs = CardStyle.make(0, contests, listOf(0), ncards)
-
-        val cardLocations = mutableListOf<CardLocation>()
-        repeat(ncards) {
-            cardLocations.add(CardLocation("ballot$it", false, if (hasStyle) bs else null))
-        }
-        // add phantoms
-        repeat(contest.Np()) {
-            cardLocations.add(CardLocation("phantom$it", true, null, contestIds))
-        }
-        return CardLocationManifest(cardLocations, listOf(bs))
     }
 
     companion object {

@@ -2,7 +2,8 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
 
-// A generalization of Cvr, allowing votes to be null, eg for Polling or OneAudit
+// A generalization of Cvr, allowing votes to be null, eg for Polling or OneAudit.
+// Also possibleContests/cardStyle represents sample population information
 data class AuditableCard (
     val location: String, // info to find the card for a manual audit. Aka ballot identifier.
     val index: Int,  // index into the original, canonical list of cards
@@ -12,10 +13,9 @@ data class AuditableCard (
     val votes: Map<Int, IntArray>?, // for CLCA, a map of contest -> the candidate ids voted; must include undervotes (??)
                                     // for IRV, ranked first to last; missing for pooled data or polling audits
     val poolId: Int?, // for OneAudit
-    // val cardStyle: String, // TODO ??
+    val cardStyle: String? = null,
 ) {
     // if there are no votes, the IntArrays are all empty; looks like all undervotes
-    // TODO smelly
     fun cvr() : Cvr {
         val useVotes = if (votes != null) votes else {
             possibleContests.mapIndexed { idx, contestId ->
@@ -31,12 +31,16 @@ data class AuditableCard (
     }
 
     fun hasContest(contestId: Int): Boolean {
-         // TODO shit cant tell if we have styles or not.
-        return possibleContests.contains(contestId)
+        return contests().contains(contestId)
+    }
+
+    fun contests(): List<Int> {
+        return if (possibleContests.isNotEmpty()) possibleContests.toList()
+            else if (votes != null) votes.keys.toList()
+            else emptyList()
     }
 
     // Kotlin data class doesnt handle IntArray and List<IntArray> correctly
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is AuditableCard) return false
@@ -51,7 +55,8 @@ data class AuditableCard (
 
         if (votes != null) {
             for ((contestId, candidates) in votes) {
-                if (!candidates.contentEquals(other.votes!![contestId])) return false
+                val otherCands = other.votes!![contestId]
+                if (!candidates.contentEquals(otherCands)) return false
             }
         }
 
@@ -88,12 +93,33 @@ data class AuditableCard (
             val votes = if (isClca) cvr.votes else null
             return AuditableCard(cvr.id, index, 0, cvr.phantom, possibleContests, votes = votes, cvr.poolId)
         }
+    }
+}
 
-        // go away
-        fun fromCardLocation(cardLocation: CardLocation, index: Int, sampleNum: Long, poolId: Int? = null): AuditableCard {
-            return AuditableCard(cardLocation.location, index, sampleNum, cardLocation.phantom, cardLocation.contests(), null, poolId)
+data class CardLocationManifest(
+    val cardLocations: List<AuditableCard>,
+    val cardStyles: List<CardStyle> // empty if style info not available
+)
+
+// essentially, CardStyle factors out the contestIds, which the CardLocation references, so its a form of normalization
+data class CardStyle(
+    val name: String,
+    val id: Int,
+    val contestNames: List<String>,
+    val contestIds: List<Int>,
+    val numberOfCards: Int?,
+) {
+    val ncards = numberOfCards ?: 0
+    fun hasContest(contestId: Int) = contestIds.contains(contestId)
+
+    override fun toString() = buildString {
+        append("CardStyle('$name' ($id), contestIds=$contestIds")
+    }
+
+    companion object {
+        fun make(styleId: Int, contestNames: List<String>, contestIds: List<Int>, numberBallots: Int?): CardStyle {
+            return CardStyle("style$styleId", styleId, contestNames, contestIds, numberBallots)
         }
-
     }
 }
 

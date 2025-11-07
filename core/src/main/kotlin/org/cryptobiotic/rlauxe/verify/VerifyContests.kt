@@ -161,7 +161,7 @@ fun verifyManifest(
             lastCard = card
             count++
 
-            if (config.hasStyle && !config.isPolling) {
+            if (!config.isPolling) {
                 card.votes!!.forEach { (contestId, cands) ->
                     val info = infos[contestId]
                     if (info != null) {
@@ -195,7 +195,7 @@ fun verifyManifest(
 
     // 3. If hasStyle, check that the count of phantom cards containing a contest = Contest.Nc - Contest.Ncast.
     // 4. If hasStyle, check that the count of non-phantom cards containing a contest = Contest.Ncast.
-    if (config.hasStyle && !config.isPolling) {
+    if (!config.isPolling) {
         var allOk = true
         contests.forEach { contestUA ->
             val contestTab = allCvrVotes[contestUA.id]
@@ -319,13 +319,13 @@ fun verifyAssortAvg(
     var allOk = true
 
     // sum all the assorter values in one pass across all the cvrs, including Pools
-    val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+    val cardAssortAvgs = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
     cards.use { cardIter ->
         while (cardIter.hasNext()) {
             val card = cardIter.next()
 
             contestsUA.forEach { contestUA ->
-                val avg = assortAvg.getOrPut(contestUA.id) { mutableMapOf() }
+                val avg = cardAssortAvgs.getOrPut(contestUA.id) { mutableMapOf() }
                 contestUA.pollingAssertions.forEach { assertion ->
                     val passorter = assertion.assorter
                     val assortAvg = avg.getOrPut(passorter) { AssortAvg() } // TODO could we have a hash collision ?
@@ -340,12 +340,14 @@ fun verifyAssortAvg(
 
     // compare the assortAverage with the contest's reportedMargin in passorter.
     contestsUA.forEach { contestUA ->
-        val contestAssortAvg = assortAvg[contestUA.id]!!
+        val cardAssortAvg = cardAssortAvgs[contestUA.id]!!
         contestUA.pollingAssertions.forEach { assertion ->
             val passorter = assertion.assorter
-            val assortAvg = contestAssortAvg[passorter]!!
-            if (!doubleIsClose(passorter.reportedMargin(), assortAvg.margin())) {
-                result.addError("  **** margin does not agree for contest ${contestUA.id} assorter '$passorter'")
+            val assortAvg = cardAssortAvg[passorter]!!
+            val dilutedMargin = contestUA.makeDilutedMargin(passorter)
+            val cardMargin = assortAvg.margin()
+            if (!doubleIsClose(dilutedMargin, cardMargin)) {
+                result.addError("  margin does not agree for contest ${contestUA.id} assorter '$passorter'")
                 result.addError("     reportedMean= ${passorter.reportedMean()} cvrs.assortAvg= ${assortAvg.avg()} ")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
                 allOk = false

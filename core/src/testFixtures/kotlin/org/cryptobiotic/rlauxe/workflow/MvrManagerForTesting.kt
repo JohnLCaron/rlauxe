@@ -60,14 +60,14 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
 }
 
 // simulated cardLocations, mvrs for testing are sorted and kept here in memory
-class MvrManagerPollingForTesting(cardLocations: List<CardLocation>, mvrs: List<Cvr>, seed: Long) : MvrManagerPollingIF, MvrManagerTest {
+class MvrManagerPollingForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerPollingIF, MvrManagerTest {
     val sortedCards: List<AuditableCard>
     val mvrsUA: List<AuditableCard>
     var mvrsRound: List<AuditableCard> = emptyList()
 
     init {
         val prng = Prng(seed)
-        sortedCards = cardLocations.mapIndexed { idx, it -> AuditableCard.fromCardLocation(it, idx, prng.next()) }.sortedBy { it.prn}
+        sortedCards = cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn}
         mvrsUA = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
     }
 

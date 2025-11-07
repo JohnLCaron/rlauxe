@@ -107,6 +107,7 @@ class PollingFuzzSampler(
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO can this be used on approval?
 
+// include undervotes i think
 private val fac = 10000.0 // TODO wtf?
 fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Double, welford: Welford? = null, filter: ((CvrBuilder) -> Boolean)? = null): List<Cvr> {
     if (fuzzPct == 0.0) return cvrs

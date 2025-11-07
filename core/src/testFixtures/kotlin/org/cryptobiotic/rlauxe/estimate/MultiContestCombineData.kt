@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.shuffle
@@ -8,10 +9,6 @@ import kotlin.random.Random
 
 private const val debugAdjust = false
 
-/**
- * Creates a set of contests and ballotStyles, with randomly chosen candidates and margins.
- * It can create cvrs that reflect the contests' exact votes.
- */
 data class MultiContestCombineData(
     val contests: List<Contest>,
     val totalBallots: Int, // including undervotes and phantoms
@@ -24,6 +21,29 @@ data class MultiContestCombineData(
         contestBuilders = contests.map { ContestTracker(it) }
     }
 
+    // multicontest cvrs
+    // create new partitions each time this is called
+    // includes undervotes and phantoms, size = totalBallots + phantom count
+    fun makeCardsFromContests(startCvrId : Int = 0): List<AuditableCard> {
+        contestBuilders.forEach { it.resetTracker() } // startFresh
+        val cvrbs = CardBuilders(startCvrId).addContests(contestBuilders.map { it.contest.info })
+        val result = mutableListOf<AuditableCard>()
+        repeat(totalBallots) {
+            // add regular Cvrs including undervotes
+            result.add(makeCard(cvrbs, contestBuilders))
+        }
+
+        val phantoms = makePhantomCards(contests)
+        return result + phantoms
+    }
+
+    private fun makeCard(cvrbs: CardBuilders, fcontests: List<ContestTracker>): AuditableCard {
+        val cvrb = cvrbs.addCard()
+        fcontests.forEach { fcontest -> fcontest.addContestToCard(cvrb) }
+        return cvrb.build()
+    }
+
+    // multicontest cvrs
     // create new partitions each time this is called
     // includes undervotes and phantoms, size = totalBallots + phantom count
     fun makeCvrsFromContests(startCvrId : Int = 0): List<Cvr> {
@@ -47,9 +67,6 @@ data class MultiContestCombineData(
     }
 }
 
-// This creates a multicandidate contest with the two closest candidates having exactly the given margin.
-// It can create cvrs that exactly reflect this contest's vote; so can be used in simulating the audit.
-// The cvrs are not multicontest.
 data class ContestTracker(
     val contest: Contest,
 ) {
@@ -74,6 +91,17 @@ data class ContestTracker(
             cvrb.addContest(info.name) // undervote
         } else {
             cvrb.addContest(info.name, info.candidateIds[candidateIdx])
+        }
+    }
+
+    // choose Candidate, add contest, including undervote
+    fun addContestToCard(cvrb: CardBuilder) {
+        if (votesLeft == 0) return
+        val candidateIdx = chooseCandidate(Random.nextInt(votesLeft))
+        if (candidateIdx == ncands) {
+            cvrb.addContest(info.id, null) // undervote
+        } else {
+            cvrb.addContest(info.id, info.candidateIds[candidateIdx])
         }
     }
 

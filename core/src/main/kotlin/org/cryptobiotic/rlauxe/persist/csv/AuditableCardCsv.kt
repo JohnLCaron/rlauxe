@@ -96,8 +96,10 @@ fun readAuditableCardCsv(line: String): AuditableCard {
 
     // possible contests aka style
     val pcontestsStr = ttokens[idx++]
-    val pcontestsTokens = pcontestsStr.split(" ")
-    val pcontests = pcontestsTokens.map { it.trim().toInt() }.toIntArray()
+    val pcontests = if (pcontestsStr.trim().isEmpty()) intArrayOf() else {
+        val pcontestsTokens = pcontestsStr.split(" ")
+        pcontestsTokens.map { it.trim().toInt() }.toIntArray()
+    }
 
     // if clca, list of actual contests and their votes
     return if (idx < ttokens.size-1) {

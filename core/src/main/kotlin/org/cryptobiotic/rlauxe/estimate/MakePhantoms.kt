@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.CardLocation
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -134,16 +134,15 @@ fun makePhantomCvrs(
     return phantombs.map { it.buildCvr() }
 }
 
-fun makePhantomBallots(
+// cards for multiple contests
+fun makePhantomCards(
     contests: List<Contest>,
-    ncvrs: Map<Int, Int>,  // contest id -> ncards in contest
     prefix: String = "phantom-",
-): List<CardLocation> {
+): List<AuditableCard> {
 
     val phantombs = mutableListOf<PhantomBuilder>()
-
     for (contest in contests) {
-        val phantoms_needed = contest.Nc - ncvrs[contest.id]!!
+        val phantoms_needed = contest.Np()
         while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
             phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}"))
         }
@@ -152,16 +151,18 @@ fun makePhantomBallots(
             phantombs[it].contests.add(contest.id)
         }
     }
-    return phantombs.map { it.buildBallot() }
+    return phantombs.map { it.buildCard() }
 }
 
 class PhantomBuilder(val id: String) {
     val contests = mutableListOf<Int>()
+
     fun buildCvr(): Cvr {
         val votes = contests.associateWith { IntArray(0) }
         return Cvr(id, votes, phantom = true)
     }
-    fun buildBallot(): CardLocation {
-        return CardLocation(id, phantom = true, null, contests)
+
+    fun buildCard(): AuditableCard {
+        return AuditableCard(location=id, index=0, prn=0L, phantom = true, possibleContests=contests.toIntArray(), votes=null, poolId=null)
     }
 }

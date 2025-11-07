@@ -68,11 +68,8 @@ class TestConsistentSampling {
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
 
-        val ballotManifest = test.makeCardLocationManifest()
-        val mvrManager = MvrManagerPollingForTesting(ballotManifest.cardLocations, test.makeCvrsFromContests(), Random.nextLong())
-
-        //val prng = Prng(Random.nextLong())
-        //val ballotsUA = ballotManifest.ballots.mapIndexed { idx, it -> BallotUnderAudit( it, idx, prng.next()) }
+        val cvrs = test.makeCvrsFromContests()
+        val mvrManager = MvrManagerPollingForTesting(cvrs, cvrs, Random.nextLong())
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
         consistentSampling(auditRound, mvrManager)
@@ -104,8 +101,8 @@ class TestConsistentSampling {
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = 100 + Random.nextInt(it.Nc/2) }
 
-        val ballotManifest = test.makeCardLocationManifest()
-        val mvrManager = MvrManagerPollingForTesting(ballotManifest.cardLocations, test.makeCvrsFromContests(), Random.nextLong())
+        val cvrs = test.makeCvrsFromContests()
+        val mvrManager = MvrManagerPollingForTesting(cvrs, cvrs, Random.nextLong())
 
         val contestSampleCutoff = 10000
         val config = AuditConfig(AuditType.CLCA, true, contestSampleCutoff = contestSampleCutoff)

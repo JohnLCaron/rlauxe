@@ -43,8 +43,10 @@ interface AssorterIF {
     // reportedMargin : N = Nc
     // dilutedMargin: N = sample population size (Nsample)
     // used when you need to calculate reportedMargin from some subset of votes
-    fun calcMargin(useVotes: Map<Int, Int>?, N: Int?): Double {
-        if (useVotes == null || N == null) return Double.NaN // shouldnt happen
+    fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
+        if (useVotes == null) {
+            return 0.0
+        } // shouldnt happen
         val winnerVotes = useVotes[winner()] ?: 0
         val loserVotes = useVotes[loser()] ?: 0
         return if (N == 0) 0.0 else (winnerVotes - loserVotes) / N.toDouble()

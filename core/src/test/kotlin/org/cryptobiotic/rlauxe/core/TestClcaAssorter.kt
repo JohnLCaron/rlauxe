@@ -55,9 +55,9 @@ class TestClcaAssorter {
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
 
-        val cassorter = ClcaAssorter(info, assorter)
+        val cassorter = ClcaAssorter(info, assorter, hasStyle=true, dilutedMargin=assorter.reportedMargin())
         assertEquals(.01, mean2margin(awinnerAvg), doublePrecision)
-        assertEquals(margin, cassorter.reportedAssortMargin, doublePrecision)
+        assertEquals(margin, cassorter.dilutedMargin, doublePrecision)
         assertEquals(0.0, cassorter.overstatementError(winnerCvr, winnerCvr, true))
         assertEquals(-1.0, cassorter.overstatementError(winnerCvr, loserCvr, true))
         assertEquals(-0.5, cassorter.overstatementError(winnerCvr, otherCvr, true))
@@ -113,7 +113,7 @@ class TestClcaAssorter {
 
         val awinner = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
         val awinnerAvg = cvrs.map { awinner.assort(it) }.average()
-        val cwinner = ClcaAssorter(info, awinner)
+        val cwinner = ClcaAssorter(info, awinner, hasStyle=true, dilutedMargin=awinner.reportedMargin())
         val cwinnerAvg = cvrs.map { cwinner.bassort(it, it) }.average()
         println("cwinnerAvg=$cwinnerAvg <= awinnerAvg=$awinnerAvg")
         assertTrue(cwinnerAvg <= awinnerAvg)
@@ -121,9 +121,9 @@ class TestClcaAssorter {
 
         val aloser = PluralityAssorter.makeWithVotes(contest, winner = 1, loser = 0)
         val aloserAvg = cvrs.map { aloser.assort(it) }.average()
-        val closer = ClcaAssorter(info, aloser, check=false)
-        assertEquals(mean2margin(aloserAvg), closer.reportedAssortMargin, doublePrecision)
-        assertEquals(aloserAvg, margin2mean(closer.reportedAssortMargin))
+        val closer = ClcaAssorter(info, aloser, hasStyle=true, check=false, dilutedMargin=aloser.reportedMargin())
+        assertEquals(mean2margin(aloserAvg), closer.dilutedMargin, doublePrecision)
+        assertEquals(aloserAvg, margin2mean(closer.dilutedMargin))
 
         val closerAvg = cvrs.map { closer.bassort(it, it) }.average()
         println("closerAvg=$closerAvg < aloserAvg=$aloserAvg")
@@ -187,9 +187,9 @@ class TestClcaAssorter {
     fun testNwayPlurality(contest : Contest, cvrs: List<Cvr>, winner: Int, loser:Int): Double {
         val assort = PluralityAssorter.makeWithVotes(contest, winner, loser)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
-        val cwinner = ClcaAssorter(contest.info, assort, check=false)
+        val cwinner = ClcaAssorter(contest.info, assort, hasStyle=true, check=false, dilutedMargin=assort.reportedMargin())
         val cwinnerAvg = cvrs.map { cwinner.bassort(it, it) }.average()
-        assertEquals(assortAvg, margin2mean(cwinner.reportedAssortMargin), doublePrecision)
+        assertEquals(assortAvg, margin2mean(cwinner.dilutedMargin), doublePrecision)
 
         println(" ($winner, $loser)= $cwinnerAvg")
         return cwinnerAvg
@@ -222,9 +222,9 @@ class TestClcaAssorter {
     fun testNwaySupermajority(contest : Contest, cvrs: List<Cvr>, winner: Int): Double {
         val assort = SuperMajorityAssorter.makeWithVotes(contest, winner, contest.info.minFraction!!)
         val assortAvg = cvrs.map { assort.assort(it) }.average()
-        val cwinner = ClcaAssorter(contest.info, assort, check=false)
+        val cwinner = ClcaAssorter(contest.info, assort, hasStyle=true, check=false, dilutedMargin=assort.reportedMargin())
         val cwinnerAvg = cvrs.map { cwinner.bassort(it, it) }.average()
-        assertEquals(assortAvg, margin2mean(cwinner.reportedAssortMargin), doublePrecision)
+        assertEquals(assortAvg, margin2mean(cwinner.dilutedMargin), doublePrecision)
 
         println(" ($winner)= $cwinnerAvg")
         return cwinnerAvg
@@ -304,9 +304,9 @@ class TestClcaAssorter {
         assertEquals(0.0, assorter.assort(phantomCvr, true))  // cvr is a phantom
         // so assort in {0, .5, 1}
 
-        val cassorter = ClcaAssorter(info, assorter)
-        assertEquals(margin, cassorter.reportedAssortMargin, doublePrecision)
-        assertEquals(awinnerAvg, margin2mean(cassorter.reportedAssortMargin))
+        val cassorter = ClcaAssorter(info, assorter, hasStyle=true, dilutedMargin=assorter.reportedMargin())
+        assertEquals(margin, cassorter.dilutedMargin, doublePrecision)
+        assertEquals(awinnerAvg, margin2mean(cassorter.dilutedMargin))
 
         assertEquals(0.0, cassorter.overstatementError(winnerCvr, winnerCvr, true))
         assertEquals(-1.0, cassorter.overstatementError(winnerCvr, loserCvr, true))
@@ -378,7 +378,7 @@ class TestClcaAssorter {
         val contest = makeContestFromCvrs(info, cvrs)
 
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
-        val cassorter = ClcaAssorter(info, assorter)
+        val cassorter = ClcaAssorter(info, assorter, hasStyle=true, dilutedMargin=assorter.reportedMargin())
         val noerror = cassorter.noerror()
         println("  noerror = $noerror")
 

@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -204,7 +205,7 @@ open class Contest(
         val votes = votes()!!
         val winner = votes[assorter.winner()]!!
         val loser = votes[assorter.loser()]!!
-        return "${assorter.shortName()} votes=$winner/$loser diff=${winner-loser} (w-l)/w =${recountMargin(assorter)}"
+        return "${assorter.shortName()} votes=$winner/$loser diff=${winner-loser} (w-l)/w =${df(recountMargin(assorter))}"
     }
 
     override fun show() = buildString {
@@ -273,6 +274,7 @@ open class ContestUnderAudit(
     val contest: ContestIF,
     val isClca: Boolean = true,
     val hasStyle: Boolean = true,
+    Nbin: Int? = null,
 ) {
     val id = contest.id
     val name = contest.name
@@ -280,12 +282,12 @@ open class ContestUnderAudit(
     val ncandidates = contest.ncandidates
     val Nc = contest.Nc()
     val Np = contest.Np()
+    val Nb: Int = Nbin ?: Nc
     val isIrv = contest.info().isIrv
 
     var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms
     var pollingAssertions: List<Assertion> = emptyList() // mutable needed for Raire override and serialization
     var clcaAssertions: List<ClcaAssertion> = emptyList() // mutable needed for serialization
-    var Nb: Int? = null
 
     init {
         if (contest.losers().size == 0) {
@@ -295,8 +297,6 @@ open class ContestUnderAudit(
         }
     }
 
-    fun setNb(ncards: Int): ContestUnderAudit  { this.Nb = ncards; return this }
-
     fun addAssertionsFromAssorters(assorters: List<AssorterIF>): ContestUnderAudit {
         val assertions = mutableListOf<Assertion>()
         assorters.forEach { assorter ->
@@ -305,7 +305,7 @@ open class ContestUnderAudit(
         pollingAssertions = assertions
 
         if (isClca) {
-            addClcaAssertionsFromReportedMargin()
+            addClcaAssertionsFromDilutedMargin()
         }
 
         return this
@@ -325,7 +325,7 @@ open class ContestUnderAudit(
         }
 
         if (isClca) {
-            addClcaAssertionsFromReportedMargin()
+            addClcaAssertionsFromDilutedMargin()
         }
 
         return this
@@ -354,18 +354,24 @@ open class ContestUnderAudit(
         return assertions
     }
 
-    private fun addClcaAssertionsFromReportedMargin(): ContestUnderAudit {
+    fun makeDilutedMargin(assorter: AssorterIF): Double {
+        val margin = assorter.calcMargin(contest.votes(), Nb)
+        if (margin < 0)
+            println("makeDilutedMargin")
+        return margin
+    }
+
+    private fun addClcaAssertionsFromDilutedMargin(): ContestUnderAudit {
         require(isClca) { "makeComparisonAssertions() can be called only on comparison contest"}
 
         this.clcaAssertions = pollingAssertions.map { assertion ->
-            val clcaAssorter = makeClcaAssorter(assertion)
-            ClcaAssertion(contest.info(), clcaAssorter)
+            ClcaAssertion(contest.info(), makeClcaAssorter(assertion))
         }
         return this
     }
 
     open fun makeClcaAssorter(assertion: Assertion): ClcaAssorter {
-        return ClcaAssorter(contest.info(), assertion.assorter, hasStyle=hasStyle)
+        return ClcaAssorter(contest.info(), assertion.assorter, hasStyle=hasStyle, dilutedMargin=makeDilutedMargin(assertion.assorter))
     }
 
     fun assertions(): List<Assertion> {
@@ -374,14 +380,14 @@ open class ContestUnderAudit(
 
     fun minClcaAssertion(): Pair<ClcaAssertion?, Double> {
         if (clcaAssertions.isEmpty()) return Pair(null, 0.0)
-        val margins = clcaAssertions.map { Pair(it, it.assorter.calcMargin(contest.votes(), Nb))  }
+        val margins = clcaAssertions.map { Pair(it, makeDilutedMargin(it.assorter))  }
         val minMargin = margins.sortedBy { it.second }
         return minMargin.first()
     }
 
     fun minPollingAssertion(): Pair<Assertion?, Double> {
         if (pollingAssertions.isEmpty()) return Pair(null, 0.0)
-        val margins = pollingAssertions.map { Pair(it, it.assorter.calcMargin(contest.votes(), Nb))  }
+        val margins = pollingAssertions.map { Pair(it, makeDilutedMargin(it.assorter))  }
         val minMargin = margins.sortedBy { it.second }
         return minMargin.first()
     }
@@ -409,9 +415,9 @@ open class ContestUnderAudit(
     override fun toString() = contest.toString()
 
     open fun show() = buildString {
-        append("${contest.javaClass.simpleName} ${contest.show()}")
-        if (!hasStyle && Nb != null) appendLine(" Nb=$Nb") else appendLine()
-        if (minAssertion().first != null) appendLine("   ${minAssertionDifficulty()}")
+        appendLine("${contest.javaClass.simpleName} ${contest.show()}")
+        if (minAssertion().first != null) append("   ${minAssertionDifficulty()}")
+        appendLine(" Nb=$Nb dilutedMargin=${df((minDilutedMargin()))}")
         append(contest.showCandidates())
     }
 

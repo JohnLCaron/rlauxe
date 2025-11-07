@@ -161,11 +161,10 @@ fun verifyManifest(
             lastCard = card
             count++
 
-            //if (config.hasStyle) {
-                card.contests.forEachIndexed { idx, contestId ->
+            if (config.hasStyle && !config.isPolling) {
+                card.votes!!.forEach { (contestId, cands) ->
                     val info = infos[contestId]
                     if (info != null) {
-                        val cands = if (card.votes != null) card.votes[idx] else intArrayOf()
                         val allTab = allCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
                         allTab.addVotes(cands, card.phantom)
                         if (card.poolId == null) {
@@ -178,7 +177,7 @@ fun verifyManifest(
                         }
                     }
                 }
-            //}
+            }
         }
     }
     if (!results.hasErrors) {
@@ -196,7 +195,7 @@ fun verifyManifest(
 
     // 3. If hasStyle, check that the count of phantom cards containing a contest = Contest.Nc - Contest.Ncast.
     // 4. If hasStyle, check that the count of non-phantom cards containing a contest = Contest.Ncast.
-    if (config.hasStyle) {
+    if (config.hasStyle && !config.isPolling) {
         var allOk = true
         contests.forEach { contestUA ->
             val contestTab = allCvrVotes[contestUA.id]
@@ -238,16 +237,6 @@ fun verifyOAagainstCards(
 
     val poolSums = tabulateCardPools(cardPools, infos)
 
-    /* val poolSums = infos.mapValues { ContestTabulation(it.value) }
-    cardPools.forEach { cardPool ->
-        cardPool.regVotes().forEach { (contestId, regVotes: RegVotes) ->
-            val poolSum = poolSums[contestId]!!
-            regVotes.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
-            poolSum.ncards += regVotes.ncards()
-            poolSum.undervotes += regVotes.undervotes()
-        }
-    } */
-
     val sumWithPools = mutableMapOf<Int, ContestTabulation>()
     sumWithPools.sumContestTabulations(nonpoolCvrVotes)
     sumWithPools.sumContestTabulations(poolSums)
@@ -274,13 +263,13 @@ fun verifyOAagainstCards(
             allOk = false
         } else {
             if (!checkEquivilentVotes(contestVotes, sumWithPool.votes)) {
-                result.addError("contest ${contestUA.id} votes disagree with cvrs = $sumWithPool")
+                result.addError("contest ${contestUA.id} votes disagree with sumWithPool = $sumWithPool")
                 result.addError("    contestVotes = $contestVotes")
                 result.addError("    sumWithPools = ${sumWithPool.votes}")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
                 allOk = false
             } else {
-                if (show) result.addMessage("  contest ${contestUA.id} contest.votes matches cvrTabulation")
+                if (show) result.addMessage("  contest ${contestUA.id} contest.votes matches sumWithPool")
             }
         }
     }

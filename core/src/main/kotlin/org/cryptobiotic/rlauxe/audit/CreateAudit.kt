@@ -58,7 +58,7 @@ class CreateAudit(val name: String, val topdir: String, val config: AuditConfig,
 
         val contestsUA = election.contestsUA()
         if (config.isOA) {
-            addOAClcaAssortersFromMargin(contestsUA, cardPools!!)
+            addOAClcaAssortersFromMargin(contestsUA, cardPools!!, config.hasStyle) // hmmm shouldnt these already be added ??
         }
         logger.info { "added ClcaAssertions from reported margin " }
 

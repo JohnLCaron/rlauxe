@@ -106,7 +106,7 @@ fun makeOneContestUA(
 
     // this changes the reportedMargin; now we can make the assorters
     val oaUA = ContestUnderAudit(contest, hasStyle=true).addStandardAssertions()
-    addOAClcaAssortersFromMargin(listOf(oaUA), listOf(poolFromCvr))
+    addOAClcaAssortersFromMargin(listOf(oaUA), listOf(poolFromCvr), hasStyle=true)
 
     return Triple(oaUA, listOf(poolFromCvr), cvrs)
 }

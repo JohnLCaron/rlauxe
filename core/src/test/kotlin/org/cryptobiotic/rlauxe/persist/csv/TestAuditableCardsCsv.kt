@@ -16,7 +16,7 @@ class TestAuditableCardsCsv {
             43L,
             true,
             intArrayOf(19, 23, 99, 123456),
-            listOf(intArrayOf(1,2,3), intArrayOf(), intArrayOf(1,2,3,4,5,6,7,8,9,0), intArrayOf(23498724)),
+            mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
             11
         )
 
@@ -53,8 +53,10 @@ class TestAuditableCardsCsv {
         val target = listOf(
             AuditableCard ("deets", 42, 43L, false, intArrayOf(19, 23, 99, 123456), null, 111),
             AuditableCard ("deets", 42, 43L, false, intArrayOf(19, 23, 99, 123456), null, null),
-            AuditableCard ("info to find card", 42, 43L, true, intArrayOf(19, 23, 99, 123456), listOf(intArrayOf(1,2,3), intArrayOf(), intArrayOf(1,2,3,4,5,6,7,8,9,0), intArrayOf(23498724)), 11),
-            AuditableCard ("info to find card", 42, 43L, true, intArrayOf(19, 23, 99, 123456), listOf(intArrayOf(1,2,3), intArrayOf(), intArrayOf(1,2,3,4,5,6,7,8,9,0), intArrayOf(23498724)), null),
+            AuditableCard ("info to find card", 42, 43L, true, intArrayOf(19, 23, 99, 123456),
+                mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), 11),
+            AuditableCard ("info to find card", 42, 43L, true, intArrayOf(19, 23, 99, 123456),
+                mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), null),
         )
 
         val scratchFile = kotlin.io.path.createTempFile().toFile()

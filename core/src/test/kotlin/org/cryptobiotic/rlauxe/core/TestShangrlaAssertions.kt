@@ -195,7 +195,7 @@ class TestShangrlaAssertions {
         //                        - CVR.as_vote(c.get_vote_for("AvB", losr))
         //                        + 1)/2), upper_bound=1))
         val aliceVsBob = PluralityAssorter.makeWithVotes(plur_con_test, winner = 0, loser = 1)
-        val cassorter = ClcaAssorter(plur_con_test.info, aliceVsBob )
+        val cassorter = ClcaAssorter(plur_con_test.info, aliceVsBob, hasStyle=true, dilutedMargin=aliceVsBob.reportedMargin() )
 
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=True) == 0
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=False) == 0
@@ -295,7 +295,7 @@ class TestShangrlaAssertions {
     fun test_overstatement_plurality() { // agrees with SHANGRLA
         // winner = alice, loser = bob
         val aliceVsBobP = PluralityAssorter(plur_con_test.info, winner = 0, loser = 1).setReportedMean(margin2mean(0.2))
-        val aliceVsBob = ClcaAssorter(plur_con_test.info, aliceVsBobP)
+        val aliceVsBob = ClcaAssorter(plur_con_test.info, aliceVsBobP, hasStyle=true, dilutedMargin=aliceVsBobP.reportedMargin())
 
         // mvr == cvr, always get noerror
         assertEquals(0.0, aliceVsBob.overstatementError(aliceMvr, aliceMvr, hasStyle = true)) // 1
@@ -363,7 +363,7 @@ class TestShangrlaAssertions {
     fun test_overstatement_plurality_assort() { // agrees with SHANGRLA
         // winner = alice, loser = bob
         val aliceVsBobP = PluralityAssorter(plur_con_test.info, winner = 0, loser = 1).setReportedMean(margin2mean(0.2))
-        val aliceVsBob = ClcaAssorter(plur_con_test.info, aliceVsBobP)
+        val aliceVsBob = ClcaAssorter(plur_con_test.info, aliceVsBobP, hasStyle=true, dilutedMargin=aliceVsBobP.reportedMargin())
 
         // mvr == cvr, always get noerror
         assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(aliceMvr, aliceMvr, hasStyle = true)) // 1
@@ -433,7 +433,7 @@ class TestShangrlaAssertions {
         //                        + 1)/2), upper_bound=1/(2 * self.con_test.share_to_win))
         //        aVb.margin=0.2
         var aliceVsBob = SuperMajorityAssorter(sm_con_test.info, candId = 0, sm_con_test.info.minFraction!!).setReportedMean(margin2mean(0.2))
-        var cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob)
+        var cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob, hasStyle=true, dilutedMargin=aliceVsBob.reportedMargin())
 
         assertEquals(cassorter.noerror, cassorter.bassort(mvr0, cvr0, hasStyle = true))
         assertEquals(cassorter.noerror, cassorter.bassort(mvr1, cvr1, hasStyle = true))
@@ -448,7 +448,7 @@ class TestShangrlaAssertions {
         //        assert aVb.overstatement_assorter(mvrs[0], cvrs[1], use_style=True) == 2/1.7
         //        assert aVb.overstatement_assorter(mvrs[0], cvrs[1], use_style=False) == 2/1.7
         aliceVsBob = SuperMajorityAssorter(sm_con_test.info, candId = 0, sm_con_test.info.minFraction).setReportedMean(margin2mean(0.3))
-        cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob)
+        cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob, hasStyle=true, dilutedMargin=aliceVsBob.reportedMargin())
         assertEquals(cassorter.noerror, cassorter.bassort(mvr0, cvr0, hasStyle = true))
         assertEquals(2 * cassorter.noerror, cassorter.bassort(mvr0, cvr1, hasStyle = true))
         assertEquals(2 * cassorter.noerror, cassorter.bassort(mvr0, cvr1, hasStyle = false))
@@ -463,7 +463,7 @@ class TestShangrlaAssertions {
         //        assert aVb.overstatement_assorter(mvrs[2], cvrs[0], use_style=False) == 0.5/1.9
         aliceVsBob = SuperMajorityAssorter(sm_con_test.info, candId = 0, sm_con_test.info.minFraction).setReportedMean(margin2mean(0.1))
         assertEquals(3/4.0, aliceVsBob.upperBound())
-        cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob)
+        cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob, hasStyle=true, dilutedMargin=aliceVsBob.reportedMargin())
         // noerror = 1.0 / (2.0 - reportedAssortMargin / assorter.upperBound()) = 1/ (2 - .1 / .75)
         assertEquals(1 / (2 - .1 / .75), cassorter.noerror, doublePrecision)
         assertEquals(2 * cassorter.noerror, cassorter.upperBound)

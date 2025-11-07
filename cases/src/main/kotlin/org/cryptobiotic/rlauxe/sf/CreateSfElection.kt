@@ -122,7 +122,7 @@ class CreateSfElection(
 
     override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
         val phantomCvrs = makePhantomCvrs(contestsUA().map { it.contest })
-        val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0L) }.asSequence()
+        val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvrHasStyle(cvr, idx, isClca=true) }.asSequence()
 
         val cvrIter = cvrExportCsvIterator(cvrExportCsv)
         val poolNameToId = cardPoolsNotUnpooled.associate { it.poolName to it.poolId }

@@ -3,12 +3,19 @@ package org.cryptobiotic.rlauxe.dominion
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
+import org.cryptobiotic.rlauxe.persist.csv.CvrExportCsvHeader
+import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.toCsv
+import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
+import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.sf.ContestManifest
 import org.cryptobiotic.rlauxe.sf.readBallotTypeContestManifestJsonFromZip
 import org.cryptobiotic.rlauxe.sf.readContestManifest
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.ZipReaderIterator
 import org.cryptobiotic.rlauxe.util.ZipReaderTour
+import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import java.io.FileOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -86,30 +93,50 @@ class TestDominionCvrExportJson {
 
         val summary = dominionCvrs.import(contestManifest)
         println("number of cvrs = ${summary.ncvrs}")
-        /* val tabs1 = tabulateCvrs(cvrsNoManifest.iterator())
-        tabs1.forEach { (key, tab) ->
-            println("  $key == $tab")
+    }
+
+    @Test
+    fun testReadWriteDominionCvrs() {
+        // read example json file
+        // val filename = "src/test/data/SF2024/CvrExport_15.json" // group 2
+        val filename = "src/test/data/SF2024/CvrExport_23049.json" // group 1, precinct 31-125
+        val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonFile(filename)
+        val dominionCvrs = if (result is Ok) result.unwrap()
+        else throw RuntimeException("Cannot read DominionCvrJson from ${filename} err = $result")
+        // println(dominionCvrs)
+
+        val contestManifest = readContestManifest("src/test/data/SF2024/manifests/ContestManifest.json")
+
+        val summary = dominionCvrs.import(contestManifest)
+        println("number of cvrs = ${summary.ncvrs}")
+
+        // write to cvrExport.csv
+        val topdir = "/home/stormy/rla/tests/scratch/"
+        val cvrExportFilename = "$topdir/$cvrExportCsvFile"
+        val cvrExportCsvStream = FileOutputStream(cvrExportFilename)
+        cvrExportCsvStream.write(CvrExportCsvHeader.toByteArray())
+
+        summary.cvrExports.forEach {
+            summary.cvrExports.forEach {
+                cvrExportCsvStream.write(it.toCsv().toByteArray()) // UTF-8
+            }
         }
+        cvrExportCsvStream.close()
 
-        val cvrsWithManifest = dominionCvrs.import(irvIds, manifest)
-        println("with manifest ncvrs = ${cvrsWithManifest.size}")
-        repeat(5) { println(cvrsWithManifest[it]) }
-        val tabs2 = tabulateCvrs(cvrsWithManifest.iterator())
-        tabs2.forEach { (key, tab) ->
-            println("  $key == $tab")
-            assertEquals(tab.votes, tabs1[key]!!.votes)
+        // read cvrExport.csv back in, and write it to AuditableCard
+        val cardManifestFilename = "$topdir/cardManifest.csv"
+        val cardManifestWriter = FileOutputStream(cardManifestFilename).writer()
+        cardManifestWriter.write(AuditableCardHeader)
+
+        cvrExportCsvIterator(cvrExportFilename).use { csvIter ->
+            var index = 0
+            while (csvIter.hasNext()) {
+                val cvrExport = csvIter.next()
+                val card = cvrExport.toAuditableCard(index++, 0, false, mapOf("31-125" to 11))
+                cardManifestWriter.write(writeAuditableCardCsv(card))
+            }
         }
-
-        cvrs.forEach { println(it) }
-
-        println("==================================================")
-        print(AuditableCardHeader)
-        cvrs.forEach {
-            val card = AuditableCard.fromCvrWithZeros(it)
-            println(writeAuditableCardCsv(card))
-        }
-
-         */
+        cardManifestWriter.close()
     }
 
     @Test

@@ -121,8 +121,8 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<ContestUnderAudit, List<CardP
     val cvrUndervotes = cvrNcards - cvrVotes.values.sum()
 
     val cvrs = makeTestMvrs(contest, cvrNcards = cvrNcards, cvrVotes, cvrUndervotes, listOf(cardPool))
-    val contestUA = ContestUnderAudit(contest).addStandardAssertions()
-    addOAClcaAssortersFromMargin(listOf(contestUA), listOf(cardPool))
+    val contestUA = ContestUnderAudit(contest, hasStyle=true).addStandardAssertions()
+    addOAClcaAssortersFromMargin(listOf(contestUA), listOf(cardPool), hasStyle=true)
 
     return Triple(contestUA, listOf(cardPool), cvrs)
 }

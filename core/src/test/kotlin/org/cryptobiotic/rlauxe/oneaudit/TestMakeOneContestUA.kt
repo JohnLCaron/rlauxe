@@ -1,18 +1,27 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.roundToClosest
+import org.cryptobiotic.rlauxe.util.sumContestTabulations
+import org.cryptobiotic.rlauxe.util.tabulateCardPools
+import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.junit.jupiter.api.Assertions.assertEquals
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.math.abs
 import kotlin.test.Test
+import kotlin.test.fail
 
 
 class TestMakeOneContestUA {
-    val Nc = 50000
+    val Nc = 10000
 
     @Test
     fun testAllAreCvrs() {
@@ -82,11 +91,44 @@ class TestMakeOneContestUA {
                     makeOneContestUA(margin, Nc, cvrFraction = cvrPercent, undervoteFraction = undervotePercent, phantomFraction = phantomPercent)
                 checkBasics(contestOA, cardPools, margin, cvrPercent)
                 checkAgainstCvrs(contestOA, cardPools, testCvrs, cvrPercent, undervotePercent, phantomPercent)
+                checkAgainstVerify(contestOA, cardPools, testCvrs)
             }
         }
     }
 
-    fun checkBasics(contestOA: ContestUnderAudit, cardPools: List<CardPoolIF>, margin: Double, cvrPercent: Double) {
+    @Test
+    fun testProblem() {
+        //         RunRlaCreateOneAudit.main(
+        //            arrayOf(
+        //                "-in", topdir,
+        //                "-minMargin", "0.01",
+        //                "-fuzzMvrs", "0.001",
+        //                "-ncards", "10000",
+        //                "-ncontests", "10", // ignored
+        //                "--addRaireContest",
+        //                "--addRaireCandidates", "5",
+        //            )
+        //        )
+        //                 margin = minMargin,
+        //                Nc = ncards,
+        //                cvrFraction = .95,
+        //                undervoteFraction = .01,
+        //                phantomFraction = pctPhantoms ?: 0.0
+        val margin = .01
+        val cvrPercent = 0.95
+        val phantomPercent = 0.0
+        val undervotePercent = 0.01
+        val Nc2=10000
+        println("======================================================================================================")
+        println("margin=$margin cvrPercent=$cvrPercent phantomPercent=$phantomPercent undervotePercent=$undervotePercent")
+        val (contestOA, cardPools, testCvrs) =
+            makeOneContestUA(margin, Nc2, cvrFraction = cvrPercent, undervoteFraction = undervotePercent, phantomFraction = phantomPercent)
+        checkBasics(contestOA, cardPools, margin, cvrPercent, Nc2)
+        checkAgainstCvrs(contestOA, cardPools, testCvrs, cvrPercent, undervotePercent, phantomPercent)
+        checkAgainstVerify(contestOA, cardPools, testCvrs)
+    }
+
+    fun checkBasics(contestOA: ContestUnderAudit, cardPools: List<CardPoolIF>, margin: Double, cvrPercent: Double, expectedNc: Int = Nc) {
         println(contestOA)
 
         //val nvotes = contestOA.cvrNcards + ballotPools.map{ it.ncards }.sum()
@@ -103,7 +145,7 @@ class TestMakeOneContestUA {
         val ncast = contestOA.contest.Ncast()
         assertEquals(roundToClosest(ncast*(1.0 - cvrPercent)), cardPool.ncards())
 
-        assertEquals(Nc, contestOA.Nc)
+        assertEquals(expectedNc, contestOA.Nc)
         val contest = contestOA.contest as Contest
         assertEquals(margin, contest.margin(0, 1), doublePrecision)
         showPct("allVotes", contest.votes, contestOA.Nc)
@@ -111,33 +153,81 @@ class TestMakeOneContestUA {
     }
 
     fun checkAgainstCvrs(contestOA: ContestUnderAudit, cardPools: List<CardPoolIF>, testCvrs: List<Cvr>, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double) {
-
         val bassorter = contestOA.minClcaAssertion().first!!.cassorter as OneAuditClcaAssorter
         println(bassorter)
-        // println("reportedMargin = ${bassorter.assorter.reportedMargin()} calcAssortMargin = ${mean2margin(bassorter.calcAssortMeanFromPools())} ")
 
         // sanity check
         val allCount = testCvrs.count()
         assertEquals(allCount, contestOA.Nc)
 
         val cvrCount = testCvrs.count { it.poolId == null && !it.phantom }
-        val noCvrCount = testCvrs.count { it.poolId != null }
-        println("allCount = $allCount cvrCount=$cvrCount noCvrCount=$noCvrCount")
-        // assertEquals(cvrCount, contest.cvrNcards)
-        // assertEquals(noCvrCount, ballotPools!!.ncards)
+        val poolCount = testCvrs.count { it.poolId != null }
+        println("allCount = $allCount cvrCount=$cvrCount poolCount=$poolCount")
 
         val nphantom = testCvrs.count { it.hasContest(contestOA.id) && it.phantom }
         assertEquals(contestOA.Np, nphantom)
-        val phantomPct = nphantom/ contestOA.Nc.toDouble()
-        println("  nphantom=$nphantom pct= $phantomPct =~ ${phantomPct} abs=${abs(phantomPct - phantomPercent)} " +
-                " rel=${abs(phantomPct - phantomPercent) /phantomPercent}")
+        val phantomPct = nphantom / contestOA.Nc.toDouble()
+        println(
+            "  nphantom=$nphantom pct= $phantomPct =~ ${phantomPct} abs=${abs(phantomPct - phantomPercent)} " +
+                    " rel=${abs(phantomPct - phantomPercent) / phantomPercent}"
+        )
         if (nphantom > 2) assertEquals(phantomPct, phantomPercent, .001)
 
         val nunder = testCvrs.count { it.hasContest(contestOA.id) && !it.phantom && it.votes[contestOA.id]!!.isEmpty() }
         // assertEquals(contest.undervotes, nunder)
-        val underPct = nunder/ contestOA.Nc.toDouble()
-        println("  nunder=$nunder == ${undervotePercent}; pct= $underPct =~ ${undervotePercent} abs=${abs(underPct - undervotePercent)} " +
-                " rel=${abs(underPct - undervotePercent) /underPct}")
+        val underPct = nunder / contestOA.Nc.toDouble()
+        println(
+            "  nunder=$nunder == ${undervotePercent}; pct= $underPct =~ ${undervotePercent} abs=${abs(underPct - undervotePercent)} " +
+                    " rel=${abs(underPct - undervotePercent) / underPct}"
+        )
         if (nunder > 2) assertEquals(undervotePercent, underPct, .001)
+    }
+
+    fun checkAgainstVerify(contestOA: ContestUnderAudit, cardPools: List<CardPoolIF>, testCvrs: List<Cvr>) {
+
+        val allCvrVotes = mutableMapOf<Int, ContestTabulation>()
+        val nonpoolCvrVotes = mutableMapOf<Int, ContestTabulation>()
+        val poolCvrVotes = mutableMapOf<Int, ContestTabulation>()
+
+        testCvrs.forEach { cvr ->
+            cvr.votes.forEach { (contestId, cands) ->
+                val info = contestOA.contest.info()
+                val allTab = allCvrVotes.getOrPut(contestId) { ContestTabulation(info) }
+                allTab.addVotes(cands, cvr.phantom)
+                if (cvr.poolId == null) {
+                    val nonpoolCvrTab = nonpoolCvrVotes.getOrPut(contestId) { ContestTabulation(info) }
+                    nonpoolCvrTab.addVotes(cands, cvr.phantom)
+                } else {
+                    val poolCvrTab = poolCvrVotes.getOrPut(contestId) { ContestTabulation(info) }
+                    poolCvrTab.addVotes(cands, cvr.phantom)
+                }
+            }
+        }
+
+        val infos = mapOf(contestOA.id to contestOA.contest.info())
+        val poolSums = tabulateCardPools(cardPools, infos)
+        val sumWithPools = mutableMapOf<Int, ContestTabulation>()
+        sumWithPools.sumContestTabulations(nonpoolCvrVotes)
+        sumWithPools.sumContestTabulations(poolSums)
+
+        val id = contestOA.id
+        println("  contest ${id}")
+        println("       allCvrVotes = ${allCvrVotes[id]}")
+        println("   nonpoolCvrVotes = ${nonpoolCvrVotes[id]}")
+        println("      poolCvrVotes = ${poolCvrVotes[id]}")
+        println("          poolSums = ${poolSums[id]}")
+        println("      sumWithPools = ${sumWithPools[id]}")
+
+        val contestVotes = contestOA.contest.votes()!!
+        val sumWithPool = sumWithPools[contestOA.id]!!
+        if (!checkEquivilentVotes(contestVotes, sumWithPool.votes)) {
+            println("contest ${contestOA.id} votes disagree with cvrs = $sumWithPool")
+            println("    contestVotes = $contestVotes")
+            println("    sumWithPools = ${sumWithPool.votes}")
+            contestOA.preAuditStatus = TestH0Status.ContestMisformed
+            fail()
+        } else {
+            println("contest ${contestOA.id} contest.votes matches sumWithPool")
+        }
     }
 }

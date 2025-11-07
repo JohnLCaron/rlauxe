@@ -292,8 +292,8 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
     }
     override fun hashcodeDesc() = "${winLose()} ${info.name} ${rassertion.hashCode()}" // must be unique for serialization
 
-    override fun calcMargin(useVotes: Map<Int, Int>?, N: Int?): Double {
-        return rassertion.marginInVotes / N!!.toDouble()
+    override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
+        return rassertion.marginInVotes / N.toDouble()
     }
 
     override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {

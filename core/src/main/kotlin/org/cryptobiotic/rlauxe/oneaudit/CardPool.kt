@@ -285,10 +285,11 @@ open class CardPoolFromCvrs(
     }
 }
 
-// use reportedMargin to set the pool assorter averages. can only use for non-IRV contests
+// use dilutedMargin to set the pool assorter averages. can only use for non-IRV contests
 fun addOAClcaAssortersFromMargin(
     oaContests: List<ContestUnderAudit>,
-    cardPools: List<CardPoolIF> // poolId -> pool
+    cardPools: List<CardPoolIF>, // poolId -> pool
+    hasStyle: Boolean,
 ) {
     // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
     // create the clcaAssertions and add then to the oaContests
@@ -305,7 +306,8 @@ fun addOAClcaAssortersFromMargin(
                     }
                 }
             }
-            val clcaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter, true, poolAverages = AssortAvgsInPools(assortAverages))
+            val clcaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter, hasStyle, poolAverages = AssortAvgsInPools(assortAverages),
+                dilutedMargin = oaContest.makeDilutedMargin(assertion.assorter))
             ClcaAssertion(assertion.info, clcaAssorter)
         }
         oaContest.clcaAssertions = clcaAssertions

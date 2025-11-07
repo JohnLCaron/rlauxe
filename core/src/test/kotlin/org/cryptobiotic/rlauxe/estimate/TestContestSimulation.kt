@@ -150,7 +150,7 @@ class TestContestSimulation {
                 //// what are we doing now
 
                 // instead of using testCvrs, we generate the cvrs again
-                val contestSimNow = ContestSimulation(contest)
+                val contestSimNow = ContestSimulation(contest, contest.Nc)
                 val cvrsNow = contestSimNow.makeCvrs()
                 val samplerNow = ClcaSimulatedErrorRates(cvrsNow, contest, cassorter, errorRates)
                 val pairsNow = samplerNow.mvrs.zip(samplerNow.cvrs)

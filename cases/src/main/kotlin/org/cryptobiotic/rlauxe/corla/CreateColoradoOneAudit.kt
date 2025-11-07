@@ -196,7 +196,7 @@ open class ColoradoOneAudit (
 
     override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
         val phantomCvrs = makePhantomCvrs(contestsUA().map { it.contest })
-        val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0L) }.asSequence()
+        val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvrHasStyle(cvr, idx, isClca=true) }.asSequence()
 
         val cvrIter: Iterator<Cvr> = CvrIteratorfromPools()  // "fake" truth
         val poolNameToId = cardPools.associate { it.poolName to it.poolId }

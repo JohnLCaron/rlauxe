@@ -22,20 +22,11 @@ class ColoradoPolling (
     val contestsPolling: List<ContestUnderAudit>
 
     init {
-        contestsPolling = makePollingContests()
-        val contestMap = contestsPolling.associateBy { it.id }
-
-        val contestTabs = tabulateCvrs(CvrIteratorfromPools(), infoMap)
-        contestTabs.forEach { contestId, tab ->
-            val contest = contestMap[contestId]
-            if (contest != null) {
-                contest.setNb(tab.ncards + contest.Np)
-                println("contest $contestId Nb = ${tab.ncards} Nb/Nc = ${tab.ncards / contest.Nc.toDouble()}")
-            }
-        }
+        val contestTabs: Map<Int, ContestTabulation> = tabulateCvrs(CvrIteratorfromPools(), infoMap)
+        contestsPolling = makePollingContests(contestTabs)
     }
 
-    fun makePollingContests(): List<ContestUnderAudit> {
+    fun makePollingContests(tabs: Map<Int, ContestTabulation>): List<ContestUnderAudit> {
         val infoList= oaContests.map { it.info }.sortedBy { it.id }
         val contestMap= oaContests.associateBy { it.info.id }
 
@@ -48,7 +39,8 @@ class ColoradoPolling (
             val useNc = max( ncards, oaContest.Nc)
             val contest = Contest(info, candVotes, useNc, ncards)
             info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
-            ContestUnderAudit(contest, isClca=false, hasStyle=config.hasStyle).addStandardAssertions()
+            val Nb = tabs[contest.id]?.ncards // tabs.ncards + contest.Np TODO
+            ContestUnderAudit(contest, isClca=false, hasStyle=config.hasStyle, Nbin=Nb).addStandardAssertions()
         }
 
         return regContests
@@ -59,7 +51,7 @@ class ColoradoPolling (
 
     override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
         val phantomCvrs = makePhantomCvrs(contestsUA().map { it.contest })
-        val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0L) }.asSequence()
+        val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvrHasStyle(cvr, idx, isClca=false) }.asSequence()
 
         val cvrIter: Iterator<Cvr> = CvrIteratorfromPools()  // "fake" truth
         val cardSeq = CvrToAuditableCardPolling(Closer(cvrIter)).asSequence()

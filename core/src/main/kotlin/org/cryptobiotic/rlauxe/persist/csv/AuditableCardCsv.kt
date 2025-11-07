@@ -3,10 +3,8 @@ package org.cryptobiotic.rlauxe.persist.csv
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.*
 import java.nio.file.Files
@@ -24,14 +22,19 @@ private val logger = KotlinLogging.logger("AuditableCardCsv")
 //    val poolId: Int?, // for OneAudit
 //)
 
-val AuditableCardHeader = "location, index, prn, phantom, poolId, contests, candidates0, candidates1, ...\n"
+val AuditableCardHeader = "location, index, prn, phantom, poolId, style, contests, candidates0, candidates1, ...\n"
 
 fun writeAuditableCardCsv(card: AuditableCard) = buildString {
     append("${card.location}, ${card.index}, ${card.prn}, ${card.phantom}, ")
     if (card.poolId == null) append(", ") else append("${card.poolId}, ")
-    append("${card.contests.joinToString(" ")}, ")
-    if (card.votes != null)
-        card.votes.forEach { candidates -> append("${candidates.joinToString(" ")}, ")}
+    append("${card.possibleContests.joinToString(" ")}, ")
+
+    if (card.votes != null) {
+        val contests = card.votes.map { it.key }.toIntArray()
+        val candidates = card.votes.map { it.value }
+        append("${contests.joinToString(" ")}, ")
+        candidates.forEach { append("${it.joinToString(" ")}, ") }
+    }
     appendLine()
 }
 
@@ -90,26 +93,37 @@ fun readAuditableCardCsv(line: String): AuditableCard {
     val phantom = ttokens[idx++] == "true"
     val poolIdToken = ttokens[idx++]
     val poolId = if (poolIdToken.isEmpty()) null else poolIdToken.toInt()
-    val contestsStr = ttokens[idx++]
-    val contestsTokens = contestsStr.split(" ")
-    val contests = contestsTokens.map { it.trim().toInt() }.toIntArray()
 
-    // detect trailing comma ?
-    val hasVotes = (idx + contests.size) < ttokens.size
-    val votes = if (!hasVotes) null else {
-        val work = mutableListOf<IntArray>()
-        while (idx < ttokens.size && (work.size < contests.size)) {
-            val vtokens = ttokens[idx]
-            val candArray =
-                if (vtokens.isEmpty()) intArrayOf() else vtokens.split(" ").map { it.trim().toInt() }.toIntArray()
-            work.add(candArray)
-            idx++
+    // possible contests aka style
+    val pcontestsStr = ttokens[idx++]
+    val pcontestsTokens = pcontestsStr.split(" ")
+    val pcontests = pcontestsTokens.map { it.trim().toInt() }.toIntArray()
+
+    // if clca, list of actual contests and their votes
+    return if (idx < ttokens.size-1) {
+        val contestsStr = ttokens[idx++]
+        val contestsTokens = contestsStr.split(" ")
+        val contests = contestsTokens.map { it.trim().toInt() }
+
+        // detect trailing comma ?
+        val hasVotes = (idx + contests.size) < ttokens.size
+        val votes = if (!hasVotes) null else {
+            val work = mutableListOf<IntArray>()
+            while (idx < ttokens.size && (work.size < contests.size)) {
+                val vtokens = ttokens[idx]
+                val candArray =
+                    if (vtokens.isEmpty()) intArrayOf() else vtokens.split(" ").map { it.trim().toInt() }
+                        .toIntArray()
+                work.add(candArray)
+                idx++
+            }
+            require(contests.size == work.size) { "contests.size (${contests.size}) != votes.size (${work.size})" }
+            contests.zip(work).toMap()
         }
-        require(contests.size == work.size) { "contests.size (${contests.size}) != votes.size (${work.size})" }
-        work
+        AuditableCard(desc, index, sampleNum, phantom, pcontests, votes, poolId)
+    } else {
+        AuditableCard(desc, index, sampleNum, phantom, pcontests, null, poolId)
     }
-
-    return AuditableCard(desc, index, sampleNum, phantom, contests, votes, poolId)
 }
 
 class AuditableCardCsvReader(filename: String): CloseableIterable<AuditableCard> {

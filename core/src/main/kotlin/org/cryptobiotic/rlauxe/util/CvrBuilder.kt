@@ -67,17 +67,6 @@ class CvrBuilders(startCvrId: Int = 0) {
     }
 }
 
-class CvrContest(val name: String, val id: Int) {
-    val candidates = mutableMapOf<String, Int>()
-    var candidateId = 0
-
-    val candidateIds: List<Int> by lazy { candidates.values.toList() }
-
-    fun getCandidateIdx(name: String): Int {
-        return candidates.getOrPut(name) { candidateId++ }
-    }
-}
-
 class CvrBuilder(
     val builders: CvrBuilders,
     val id: String,
@@ -134,6 +123,18 @@ class CvrBuilder(
             }
             return cvrb
         }
+    }
+}
+
+
+class CvrContest(val name: String, val id: Int) {
+    val candidates = mutableMapOf<String, Int>()
+    var candidateId = 0
+
+    val candidateIds: List<Int> by lazy { candidates.values.toList() }
+
+    fun getCandidateIdx(name: String): Int {
+        return candidates.getOrPut(name) { candidateId++ }
     }
 }
 

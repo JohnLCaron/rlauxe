@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.audit.CardLocation
 import org.cryptobiotic.rlauxe.audit.CardLocationManifest
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import kotlin.math.abs
@@ -13,8 +13,9 @@ import kotlin.random.Random
 private const val debugAdjust = false
 
 /**
- * Creates a set of contests and ballotStyles, with randomly chosen candidates and margins.
+ * Creates a set of contests and cardStyles, with randomly chosen candidates and margins.
  * It can create cvrs that reflect the contests' exact votes.
+ * Not for OneAudit, use makeOneContestUA()
  */
 data class MultiContestTestData(
     val ncontest: Int,
@@ -97,36 +98,6 @@ data class MultiContestTestData(
         ballotStyles.forEach { appendLine("  $it") }
     }
 
-    // TODO may not be needed
-    fun makeCardLocationManifest(): CardLocationManifest {
-        val cardLocations = mutableListOf<CardLocation>()
-        var ballotId = 0
-        ballotStyles.forEach { ballotStyle ->
-            repeat(ballotStyle.ncards) {
-                val cardLocation = CardLocation("ballot$ballotId", false, if (hasStyle) ballotStyle else null)
-                cardLocations.add(cardLocation)
-                ballotId++
-            }
-        }
-        // add phantoms
-        val ncardsByContest = contestBuilders.associate { Pair(it.contestId, it.ncards) }
-        val phantoms = makePhantomBallots(contests, ncardsByContest)
-        return CardLocationManifest(cardLocations + phantoms, ballotStyles)
-    }
-
-    // TODO may not be needed
-    fun makeCvrsAndBallots(): Pair<List<Cvr>, List<CardLocation>> {
-        val cvrs = makeCvrsFromContests()
-        val cardLocations = cvrs.map { cvr ->
-            CardLocation(cvr.id, cvr.phantom, null, if (hasStyle) cvr.votes.keys.toList() else emptyList())
-        }
-        return Pair(cvrs, cardLocations)
-    }
-
-    // create new partitions each time this is called
-    // includes undervotes and phantoms, size = totalBallots + phantom count
-    // TODO replace with VotesAndUndervotes ??
-    // TODO !hasStyles add all contests
     fun makeCvrsFromContests(): List<Cvr> {
         contestBuilders.forEach { it.resetTracker() } // startFresh
         val cvrbs = CvrBuilders().addContests(contestBuilders.map { it.info })
@@ -146,6 +117,36 @@ data class MultiContestTestData(
     private fun makeCvr(cvrbs: CvrBuilders, fcontests: List<ContestTestDataBuilder>): Cvr {
         val cvrb = cvrbs.addCvr()
         fcontests.forEach { fcontest -> fcontest.addContestToCvr(cvrb) }
+        return cvrb.build()
+    }
+
+    // multicontest cvrs
+    // create new partitions each time this is called
+    // includes undervotes and phantoms, size = totalBallots + phantom count
+    fun makeCardsFromContests(): List<AuditableCard> {
+        contestBuilders.forEach { it.resetTracker() } // startFresh
+        val cvrbs = CardBuilders().addContests(contestBuilders.map { it.info })
+        val result = mutableListOf<AuditableCard>()
+        ballotStyles.forEach { ballotStyle ->
+            val fcontests = contestBuilders.filter { ballotStyle.contestNames.contains(it.info.name) }
+            repeat(ballotStyle.ncards) {
+                // add regular Cvrs including undervotes
+                result.add(makeCard(cvrbs, fcontests))
+            }
+        }
+
+        val phantoms = makePhantomCards(contests)
+        return result + phantoms
+    }
+
+    fun makeCardLocationManifest(): CardLocationManifest {
+        val cards = makeCardsFromContests()
+        return CardLocationManifest(cards, ballotStyles)
+    }
+
+    private fun makeCard(cvrbs: CardBuilders, fcontests: List<ContestTestDataBuilder>): AuditableCard {
+        val cvrb = cvrbs.addCard()
+        fcontests.forEach { fcontest -> fcontest.addContestToCard(cvrb) }
         return cvrb.build()
     }
 }
@@ -218,12 +219,22 @@ data class ContestTestDataBuilder(
     }
 
     // choose Candidate, add contest, including undervote
+    fun addContestToCard(cvrb: CardBuilder) {
+        val candidateIdx = chooseCandidate(Random.nextInt(votesLeft))
+        if (candidateIdx == ncands) {
+            cvrb.addContest(info.id, null) // undervote
+        } else {
+            cvrb.addContest(info.id, info.candidateIds[candidateIdx])
+        }
+    }
+
+    // choose Candidate, add contest, including undervote
     fun addContestToCvr(cvrb: CvrBuilder) {
         val candidateIdx = chooseCandidate(Random.nextInt(votesLeft))
         if (candidateIdx == ncands) {
             cvrb.addContest(info.name) // undervote
         } else {
-            cvrb.addContest(info.name, candidateIdx)
+            cvrb.addContest(info.name, info.candidateIds[candidateIdx])
         }
     }
 

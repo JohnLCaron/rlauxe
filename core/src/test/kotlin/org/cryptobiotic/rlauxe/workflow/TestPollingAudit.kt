@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.util.df
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -44,11 +45,10 @@ class TestPollingAudit {
         println()
 
         // Synthetic cvrs for testing reflecting the exact contest votes. In practice, we dont actually have the cvrs.
-        val (testCvrs, ballots) = multiContestTest.makeCvrsAndBallots()
+        val cvrs = multiContestTest.makeCvrsFromContests()
+        val mvrManager = MvrManagerPollingForTesting(cvrs, cvrs, Random.nextLong())
+        val workflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)
 
-        val workflow = WorkflowTesterPolling(auditConfig, contests,
-            MvrManagerPollingForTesting(ballots, testCvrs, auditConfig.seed)
-        )
         runAudit("testPollingNoStyle", workflow)
     }
 
@@ -91,13 +91,11 @@ class TestPollingAudit {
             assertEquals(contest.Nc, fcontest.phantomCount + fcontest.underCount + nvotes)
         }
         println()
-        // Synthetic cvrs for testing reflecting the exact contest votes. In production, we dont actually have the cvrs.
-        val (testCvrs, ballots) = test.makeCvrsAndBallots()
-        val testMvrs = testCvrs
 
-        val workflow = WorkflowTesterPolling(auditConfig, contests,
-            MvrManagerPollingForTesting(ballots, testMvrs, auditConfig.seed)
-        )
+        val testCvrs = test.makeCvrsFromContests()
+        val mvrManager = MvrManagerPollingForTesting(testCvrs, testCvrs, Random.nextLong())
+
+        val workflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)
         runAudit("testPollingWithStyle", workflow)
     }
 
@@ -129,12 +127,11 @@ class TestPollingAudit {
         val contests: List<Contest> = test.contests
 
         // Synthetic cvrs for testing reflecting the exact contest votes. In production, we dont actually have the cvrs.
-        val (testCvrs, ballots) = test.makeCvrsAndBallots()
+        val testCvrs = test.makeCvrsFromContests()
         val testMvrs = makeFuzzedCvrsFrom(test.contests, testCvrs, mvrFuzzPct)
+        val mvrManager = MvrManagerPollingForTesting(testCvrs, testMvrs, Random.nextLong())
 
-        val workflow = WorkflowTesterPolling(auditConfig, contests,
-            MvrManagerPollingForTesting(ballots, testMvrs, auditConfig.seed)
-        )
+        val workflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)
         runAudit("testPollingWithStyle", workflow)
     }
 
@@ -146,7 +143,7 @@ class TestPollingAudit {
         val marginRange= 0.05 .. 0.05
         val underVotePct= 0.05 .. 0.05
         val phantomPct= 0.005 .. 0.005
-        val test = MultiContestTestData(
+        val multiContestTest = MultiContestTestData(
             ncontests,
             nbs,
             Nc,
@@ -155,9 +152,9 @@ class TestPollingAudit {
             underVotePctRange = underVotePct,
             phantomPctRange = phantomPct
         )
-        test.contests.forEachIndexed { idx, contest ->
+        multiContestTest.contests.forEachIndexed { idx, contest ->
             val nvotes = contest.votes.map{ it.value }.sum()
-            val fcontest = test.contestBuilders[idx]
+            val fcontest = multiContestTest.contestBuilders[idx]
             println(" $contest")
             val Nc = contest.Nc.toDouble()
             print("    phantomCount=${fcontest.phantomCount} (${df(fcontest.phantomCount / Nc)})")
@@ -168,10 +165,9 @@ class TestPollingAudit {
         }
 
         val auditConfig = AuditConfig(AuditType.POLLING, hasStyle = true, nsimEst = 10)
-        val (testCvrs, ballots) = test.makeCvrsAndBallots()
-        val workflow = WorkflowTesterPolling(auditConfig, test.contests,
-            MvrManagerPollingForTesting(ballots, testCvrs, auditConfig.seed)
-        )
+        val cvrs = multiContestTest.makeCvrsFromContests()
+        val mvrManager = MvrManagerPollingForTesting(cvrs, cvrs, Random.nextLong())
+        val workflow = WorkflowTesterPolling(auditConfig, multiContestTest.contests, mvrManager)
 
         runAudit("testPollingOneContest", workflow)
     }

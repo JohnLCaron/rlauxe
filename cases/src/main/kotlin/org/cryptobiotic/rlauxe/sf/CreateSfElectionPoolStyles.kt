@@ -26,6 +26,7 @@ private val logger = KotlinLogging.logger("CreateSfElectionNS")
 private val show = false
 
 // the contests in a pool constitute the ballot "pool style"
+// TODO dont modify the contest.Nc, but generate the cardManifest with possibleContests
 class CreateSfElectionPoolStyles(
     castVoteRecordZip: String,
     contestManifestFilename: String,
@@ -65,8 +66,7 @@ class CreateSfElectionPoolStyles(
             contestsUA = makeAllOneAuditContests(contestTabSums, contestNcsAmended, unpooledPool, hasStyle).sortedBy { it.id }
 
         }  else { // Polling
-            // TODO wrong
-            // use unamended tabs and contest.Nc.
+            // TODO wrong: use unamended tabs and contest.Nc.
 
             // calculate Nb by totalling the cvrs that have that contest
             val contestTabs = tabulateAuditableCards(cardManifest(), infos)
@@ -217,9 +217,11 @@ fun createSfElectionPoolStyles(
     val stopwatch = Stopwatch()
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
+
         isPolling -> AuditConfig( // use the pool style to calculate Nb
             AuditType.POLLING, hasStyle = false, riskLimit = .05, contestSampleCutoff = null, nsimEst = 10,
             pollingConfig = PollingConfig())
+
         else -> AuditConfig( // Note hasStyle = true
             AuditType.ONEAUDIT, hasStyle = true, riskLimit = .05, contestSampleCutoff = 20000, nsimEst = 1,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)

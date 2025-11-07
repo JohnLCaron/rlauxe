@@ -1,11 +1,14 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.doubleIsClose
+import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import kotlin.math.abs
@@ -20,11 +23,13 @@ class TestMultiContestTestData {
     val marginRange = 0.01..0.04
     val underVotePct = 0.234..0.345
     val phantomRange = 0.001..0.01
+
     val test: MultiContestTestData
+    val infos: Map<Int, ContestInfo>
 
     init {
         test = MultiContestTestData(ncontests, nbs, N, hasStyle=true, marginRange, underVotePct, phantomRange)
-        // println(test)
+        infos = test.contests.associate { it.id to it.info }
     }
 
     @Test
@@ -64,20 +69,22 @@ class TestMultiContestTestData {
     }
 
     @Test
-    fun testMakeCvrsAndBallots() {
-        val (testCvrs, ballots) = test.makeCvrsAndBallots()
+    fun testMakeCardLocationManifest() {
+        val cardManifest = test.makeCardLocationManifest()
+        val testCards = cardManifest.cardLocations
 
-        val votes: Map<Int, Map<Int, Int>> =
-            tabulateVotesFromCvrs(testCvrs.iterator()).toSortedMap() // contestId -> candidateId -> nvotes
-        votes.forEach { vcontest ->
-            println("  tabulate contest $vcontest")
-            votes.forEach { vcontest ->
-                val contest = test.contests.find { it.id == vcontest.key }!!
-                assertTrue(checkEquivilentVotes(vcontest.value, contest.votes))
+        val tabs = tabulateAuditableCards(Closer(testCards.iterator()), infos).toSortedMap() // contestId -> candidateId -> nvotes
+        tabs.forEach { id, tab ->
+            println("  tabulate contest $id")
+            val contest = test.contests.find { it.id == id }
+            if (contest == null)
+                println("wtf")
+            else if (!checkEquivilentVotes(contest.votes, tab.votes)) {
+                assertTrue(checkEquivilentVotes(contest.votes, tab.votes))
             }
         }
 
-        println("test makeCvrsAndBallots nballots= ${ballots.size}")
+        println("test testMakeCardLocationManifest ncards= ${testCards.size}")
 
         test.contests.forEachIndexed { idx, contest ->
             val fcontest = test.contestBuilders[idx]
@@ -85,19 +92,17 @@ class TestMultiContestTestData {
 
             assertEquals(contest.Nc, Nc)
             println(" ${contest.id} ncards ${fcontest.ncards} Nc=${contest.Nc}")
-            val ncvr = testCvrs.count { it.hasContest(contest.id) }
+            val ncvr = testCards.count { it.hasContest(contest.id) }
             assertEquals(contest.Nc, ncvr)
-            val nbs = ballots.count { it.hasContest(contest.id) }
-            assertEquals(contest.Nc, nbs)
 
-            val nphantom = testCvrs.count { it.hasContest(contest.id) && it.phantom }
+            val nphantom = testCards.count { it.hasContest(contest.id) && it.phantom }
             assertEquals(fcontest.phantomCount, nphantom)
             val phantomPct = nphantom/ Nc.toDouble()
             println("  nphantom=$nphantom pct= $phantomPct =~ ${fcontest.phantomPct} abs=${abs(phantomPct - fcontest.phantomPct)} " +
                     " rel=${abs(phantomPct - fcontest.phantomPct)/phantomPct}")
             if (nphantom > 5) assertEquals(fcontest.phantomPct, phantomPct, 5.0/Nc)
 
-            val nunder = testCvrs.count { it.hasContest(contest.id) && !it.phantom && it.votes[contest.id]!!.isEmpty() }
+            val nunder = testCards.count { it.hasContest(contest.id) && !it.phantom && it.votes!![contest.id]!!.isEmpty() }
             assertEquals(fcontest.underCount, nunder)
             val underPct = nunder/ Nc.toDouble()
             println("  nunder=$nunder == ${fcontest.underCount}; pct= $underPct =~ ${fcontest.undervotePct} abs=${abs(underPct - fcontest.undervotePct)} " +
@@ -165,7 +170,6 @@ class TestMultiContestTestData {
         assertEquals(ncontests, test.contests.size)
 
         val cvrs = test.makeCvrsFromContests()
-        val ballotManifest = test.makeCardLocationManifest()
 
         test.contests.forEachIndexed { idx, contest ->
             assertEquals(roundToClosest(N * (1.0 + phantomPct)), contest.Nc)
@@ -174,8 +178,6 @@ class TestMultiContestTestData {
             println("contest $contest ncards=${fcontest.ncards}")
             val ncvr = cvrs.count { it.hasContest(contest.id) }
             assertEquals(contest.Nc, ncvr)
-            val nbsCount = ballotManifest.cardLocations.count { it.hasContest(contest.id) }
-            assertEquals(contest.Nc, nbsCount)
 
             print(" fcontest margin=${df(fcontest.margin)} undervotePct=${fcontest.undervotePct} phantomPct=${fcontest.phantomPct}")
             println(" underCount=${fcontest.underCount} phantomCount=${fcontest.phantomCount}")
@@ -188,14 +190,16 @@ class TestMultiContestTestData {
 
     @Test
     fun testPhantomCvrs() {
-        val (cvrs, _) = test.makeCvrsAndBallots()
+        val cardManifest = test.makeCardLocationManifest()
+        val testCards = cardManifest.cardLocations
+        val testCvrs = testCards.map { it.cvr() }
 
         test.contests.forEachIndexed { idx, contest ->
             val fcontest = test.contestBuilders[idx]
             val Nc = fcontest.ncards + fcontest.phantomCount
             assertEquals(contest.Nc, Nc)
 
-            val nphantom = cvrs.count { it.hasContest(contest.id) && it.phantom }
+            val nphantom = testCards.count { it.hasContest(contest.id) && it.phantom }
             assertEquals(fcontest.phantomCount, nphantom)
             val phantomPct = nphantom/ Nc.toDouble()
             println("Nc=${contest.Nc} nphantom=$nphantom pct= $phantomPct =~ ${fcontest.phantomPct} abs=${abs(phantomPct - fcontest.phantomPct)} tol=${1.0/Nc}")
@@ -204,7 +208,7 @@ class TestMultiContestTestData {
             val contestUA = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
             val cassorter = contestUA.minClcaAssertion().first!!.cassorter
 
-            val sampler = ClcaWithoutReplacement(contest.id, cvrs.zip(cvrs), cassorter, true)
+            val sampler = ClcaWithoutReplacement(contest.id, testCvrs.zip(testCvrs), cassorter, true)
             val tracker = PrevSamplesWithRates(cassorter.noerror())
             while (sampler.hasNext()) { tracker.addSample(sampler.next()) }
             // println("   tracker.errorRates = ${tracker.errorRates()}")

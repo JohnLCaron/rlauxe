@@ -40,12 +40,12 @@ but the in-person crv vote counts have been redacted for privacy reasons.
 **CreateSfElection(isClca = true) CLCA, hasStyle:** assumes we can match all CVRs to physical ballots, so we can do a regular CLCA.
 This allows us to compare the cost of OneAudit vs CLCA.
 
-**CreateSfElectionNoStyle(isPolling = false)_ One Audit, noStyle** assumes we cannot match precinct CVRs to physical ballots, 
+**CreateSfElectionPoolStyle(isPolling = false)_ One Audit, noStyle** assumes we cannot match precinct CVRs to physical ballots, 
 so uses OneAudit, and assumes that we dont know which cards have which contests for the pooled data. Instead it uses Philip's approach of 
 adding contest undervotes to all the cards in the pool (so that all cards have all the contests in the pool), and increasing the contest upper limit (Nc). 
 Consistent sampling is still used, but with increased undervotes in the pool ballots.
 
-**CreateSfElectionNoStyle(isPolling = true) One Audit, noStyle:** assumes we cannot match any CVRs to physical ballots,
+**CreateSfElectionPoolStyle(isPolling = true) One Audit, noStyle:** assumes we cannot match any CVRs to physical ballots,
 so uses Polling. It is assumed that for each precinct, the set of possible contests for that precinct is known.
 When creating the CardManifest, for each precinct, every cvr gets that list of contests on it. Then all the cards are read and for 
 each contest, the total number of ballots that may contain the contest is tabulated. This is Nb for that contest.

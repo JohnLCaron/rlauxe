@@ -23,7 +23,8 @@ class TestCreateSfElection {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
-            isClca = false,
+            hasStyle = true,
+            auditType = AuditType.ONEAUDIT,
         )
 
         val publisher = Publisher("$topdir/audit")
@@ -41,8 +42,8 @@ class TestCreateSfElection {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
-            isClca = true,
-        )
+            hasStyle = true,
+            auditType = AuditType.CLCA,        )
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
@@ -53,7 +54,7 @@ class TestCreateSfElection {
     fun createSFElectionOneAuditNostyles() {
         val topdir = "/home/stormy/rla/cases/sf2024/oans"
 
-        createSfElectionPoolStyles(
+        createSfElectionPoolStyle(
             topdir,
             zipFilename,
             "ContestManifest.json",
@@ -71,7 +72,7 @@ class TestCreateSfElection {
     fun createSFElectionPollingNostyles() {
         val topdir = "/home/stormy/rla/cases/sf2024/polling"
 
-        createSfElectionPoolStyles(
+        createSfElectionPoolStyle(
             topdir,
             zipFilename,
             "ContestManifest.json",

@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 
 // A generalization of Cvr, allowing votes to be null, eg for Polling or OneAudit.
 // Also possibleContests/cardStyle represents sample population information
@@ -84,9 +86,10 @@ data class AuditableCard (
         }
 
         fun fromCvrHasStyle(cvr: Cvr, index: Int, isClca: Boolean): AuditableCard {
-            val contests = cvr.votes.keys.toList().sorted().toIntArray()
+            val contests = if (isClca) intArrayOf() else cvr.votes.keys.toList().sorted().toIntArray()
             val votes = if (isClca) cvr.votes else null
-            return AuditableCard(cvr.id, index, 0, cvr.phantom, contests, votes, cvr.poolId)
+            val poolId = if (isClca) null else cvr.poolId
+            return AuditableCard(cvr.id, index, 0, cvr.phantom, contests, votes, poolId)
         }
 
         fun fromCvrNoStyle(cvr: Cvr, index: Int, possibleContests: IntArray, isClca: Boolean): AuditableCard {
@@ -97,7 +100,7 @@ data class AuditableCard (
 }
 
 data class CardLocationManifest(
-    val cardLocations: List<AuditableCard>,
+    val cardLocations: CloseableIterable<AuditableCard>,
     val cardStyles: List<CardStyle> // empty if style info not available
 )
 

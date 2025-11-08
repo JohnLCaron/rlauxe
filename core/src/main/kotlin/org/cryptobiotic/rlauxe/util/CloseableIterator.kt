@@ -13,6 +13,10 @@ inline fun <T> CloseableIterable(crossinline iterator: () -> Iterator<T>): Close
 
 interface CloseableIterator<out T> : Iterator<T>, AutoCloseable
 
+fun <T> emptyCloseableIterable() : CloseableIterable<T> {
+    return CloseableIterable { Closer(emptyList<T>().iterator()) }
+}
+
 class Closer<out T>(val iter: Iterator<T>) : CloseableIterator<T> {
     override fun hasNext() = iter.hasNext()
     override fun next() = iter.next()

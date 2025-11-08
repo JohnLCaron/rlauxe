@@ -18,6 +18,7 @@ import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.util.tabulateCvr
+import kotlin.String
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -27,7 +28,7 @@ private val show = false
 
 // the contests in a pool constitute the ballot "pool style"
 // TODO dont modify the contest.Nc, but generate the cardManifest with possibleContests
-class CreateSfElectionPoolStyles(
+class CreateSfElectionPoolStyle(
     castVoteRecordZip: String,
     contestManifestFilename: String,
     candidateManifestFile: String,
@@ -37,11 +38,11 @@ class CreateSfElectionPoolStyles(
     ): CreateElectionIF {
 
     val contestsUA: List<ContestUnderAudit>
+    var cardPoolMapByName: Map<String, CardPoolIF>
     val cardPools: List<CardPoolIF>
-    var cardPoolMapByName: Map<String, CardPoolNs>
 
     init {
-        val (unamendedContestNcs, contestInfos) = makeContestInfos(
+        val (contestNcs, contestInfos) = makeContestInfos(
             castVoteRecordZip,
             contestManifestFilename,
             candidateManifestFile
@@ -49,28 +50,28 @@ class CreateSfElectionPoolStyles(
         val infos = contestInfos.associateBy { it.id }
 
         // pass 1 through cvrs, make card pools
-        val (unamendedContestTabs: Map<Int, ContestTabulation>, allCardPools: List<CardPoolNs>, increaseNc: Map<Int, Int>) = createCardPoolsNoStyle(infos, cvrExportCsv)
-        cardPools = allCardPools.filter { it.poolName != unpooled } // exclude the unpooled
-        cardPoolMapByName = allCardPools.associateBy { it.poolName }
+        val (cvrTabs: Map<Int, ContestTabulation>, allCardPools: Map<String, CardPoolFromCvrs>) = createCardPoolsWithStyle(infos, cvrExportCsv)
+        cardPoolMapByName = allCardPools.filter { it.value.poolName != unpooled } // exclude the unpooled
+        cardPools = cardPoolMapByName.values.toList() // exclude the unpooled
 
         if (!isPolling) { // OneAudit
-            val unpooledPool = allCardPools.find { it.poolName == unpooled }!!
+            val unpooledPool = allCardPools[unpooled]!!
             println(unpooledPool)
 
             // make contests based on cardPool tabulations (included the unpooled)
-            val contestTabSums = mutableMapOf<Int, ContestTabulation>()
-            allCardPools.forEach { pool : CardPoolFromCvrs -> pool.addTo( contestTabSums) }
+            //val contestTabSums = mutableMapOf<Int, ContestTabulation>()
+            //allCardPools.forEach { pool : CardPoolFromCvrs -> pool.addTo( contestTabSums) }
 
-            val contestNcsAmended = mutableMapOf<Int, Int>()
-            unamendedContestNcs.forEach { (contestId, Nc) -> contestNcsAmended[contestId] = Nc + (increaseNc[contestId] ?: 0) }
-            contestsUA = makeAllOneAuditContests(contestTabSums, contestNcsAmended, unpooledPool, hasStyle).sortedBy { it.id }
+            //val contestNcsAmended = mutableMapOf<Int, Int>()
+            //unamendedContestNcs.forEach { (contestId, Nc) -> contestNcsAmended[contestId] = Nc + (increaseNc[contestId] ?: 0) }
+            contestsUA = makeAllOneAuditContests(cvrTabs, contestNcs, unpooledPool, emptyMap<Int, Int>(), hasStyle).sortedBy { it.id }
 
         }  else { // Polling
             // TODO wrong: use unamended tabs and contest.Nc.
 
             // calculate Nb by totalling the cvrs that have that contest
-            val contestTabs = tabulateAuditableCards(cardManifest(), infos)
-            contestsUA = makePollingContests(contestTabs, unamendedContestNcs).sortedBy { it.id }
+            val contestTabs = tabulateAuditableCards(cardManifestOld(), infos)
+            contestsUA = makePollingContests(contestTabs, contestNcs).sortedBy { it.id }
         }
     }
 
@@ -91,16 +92,16 @@ class CreateSfElectionPoolStyles(
         return contestsUAs
     }
 
-    fun createCardPoolsNoStyle(
+    fun createCardPoolsWithStyle(
         infos: Map<Int, ContestInfo>,
         cvrExportCsv: String,
-    ): Triple<Map<Int, ContestTabulation>, List<CardPoolNs>, Map<Int, Int>> { // return CardPools, contestId -> increaseNc
+    ): Pair< Map<Int, ContestTabulation>, Map<String, CardPoolFromCvrs>> { // return CardPools, contestId -> increaseNc
 
-        val unamendedContestTabs = mutableMapOf<Int, ContestTabulation>()
+        val cvrTabs = mutableMapOf<Int, ContestTabulation>()
 
         // create the card Pools from the CvrExport
         var count = 0
-        val cardPools: MutableMap<String, CardPoolNs> = mutableMapOf()
+        val cardPools: MutableMap<String, CardPoolFromCvrs> = mutableMapOf()
         cvrExportCsvIterator(cvrExportCsv).use { cvrIter ->
             while (cvrIter.hasNext()) {
                 count++
@@ -110,58 +111,24 @@ class CreateSfElectionPoolStyles(
                 }
                 val cvr = cvrExport.toCvr()
                 pool.accumulateVotes(cvr)
-                pool.add(cvrExport)
 
-                tabulateCvr(cvr, infos, unamendedContestTabs)
+                tabulateCvr(cvr, infos, cvrTabs)
             }
         }
         println("pools = ${cardPools.size} from $count cvrs")
 
-        // for each pool, every cvr has to have every contest in the pool
-        var cvrsAmended = 0
-        val increaseNc = mutableMapOf<Int, Int>()  // contestId, nadded
-        cardPools.filter { it.key != unpooled }.values.forEach { pool ->
-            val needContests = pool.contestTabs.keys
-            val cvrsM = mutableListOf<CvrExport>()
-
-            pool.cvrMap.values.forEach { cvr ->
-                var wasAmended = false
-                val votesM = cvr.votes.toMutableMap()
-                needContests.forEach { contestId ->
-                    if (!votesM.containsKey(contestId)) {
-                        votesM[contestId] = IntArray(0)
-                        wasAmended = true
-                        pool.addUndervote(contestId)
-                        val ca = increaseNc.getOrPut(contestId) { 0 }
-                        increaseNc[contestId] = ca + 1
-                    }
-                }
-                if (wasAmended) {
-                    cvrsM.add(cvr.copy(votes = votesM))
-                    cvrsAmended++
-                }
-            }
-            // replace the modified cvrs
-            cvrsM.forEach { pool.cvrMap[it.id] = it }
-        }
-
-        if (show) {
-            println("cvrsAmended = $cvrsAmended")
-            println("contestAmended")
-            increaseNc.toSortedMap().forEach { println("  $it") }
-        }
-
-        return Triple(unamendedContestTabs, cardPools.values.toList(), increaseNc)
+        return Pair(cvrTabs, cardPools)
     }
 
     override fun cardPools() = if (isPolling) null else cardPools
     override fun contestsUA() = contestsUA
 
-    fun cardManifest(): CloseableIterator<AuditableCard> {
+    fun cardManifestOld(): CloseableIterator<AuditableCard> {
         val phantomCvrs = makePhantomCvrs(contestsUA().map { it.contest })
         val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvrHasStyle(cvr, idx, isClca=true) }.asSequence()
 
-        val cvrIter: CloseableIterable<CvrExport>  = CardPoolModifiedCvrIterable(cardPoolMapByName, CloseableIterable { cvrExportCsvIterator(cvrExportCsv) })
+        // bogus
+        val cvrIter: CloseableIterable<CvrExport>  = CardPoolModifiedCvrIterable(cardPoolMapByName as Map<String, CardPoolNs> , CloseableIterable { cvrExportCsvIterator(cvrExportCsv) })
         val poolNameToId = cardPools.associate { it.poolName to it.poolId }
         val cardSeq = CvrExportToCardAdapter(cvrIter.iterator(), poolNameToId).asSequence()
 
@@ -170,7 +137,7 @@ class CreateSfElectionPoolStyles(
     }
 
     override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
-        return Pair(Closer(cardManifest()), null)
+        return Pair(Closer(cardManifestOld()), null)
     }
 
 }
@@ -205,7 +172,7 @@ class CardPoolModifiedCvrIterable(val poolMap: Map<String, CardPoolNs>, val org:
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-fun createSfElectionPoolStyles(
+fun createSfElectionPoolStyle(
     topdir: String,
     castVoteRecordZip: String,
     contestManifestFilename: String,
@@ -218,17 +185,17 @@ fun createSfElectionPoolStyles(
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
 
-        isPolling -> AuditConfig( // use the pool style to calculate Nb
-            AuditType.POLLING, hasStyle = false, riskLimit = .05, contestSampleCutoff = null, nsimEst = 10,
+        isPolling -> AuditConfig( // I think hasStyle = false since we are using diluted margins
+            AuditType.POLLING, hasStyle = false, riskLimit = .05, contestSampleCutoff = 10000, nsimEst = 100,
             pollingConfig = PollingConfig())
 
-        else -> AuditConfig( // Note hasStyle = true
-            AuditType.ONEAUDIT, hasStyle = true, riskLimit = .05, contestSampleCutoff = 20000, nsimEst = 1,
+        else -> AuditConfig( // I think hasStyle = false since we are using diluted margins
+            AuditType.ONEAUDIT, hasStyle = false, riskLimit = .05, contestSampleCutoff = 30000, nsimEst = 100,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
     }
 
-    val election = CreateSfElectionPoolStyles(
+    val election = CreateSfElectionPoolStyle(
         castVoteRecordZip,
         contestManifestFilename,
         candidateManifestFile,

@@ -135,12 +135,12 @@ data class MultiContestTestData(
             }
         }
 
-        val phantoms = makePhantomCards(contests)
+        val phantoms = makePhantomCards(contests, result.size)
         return result + phantoms
     }
 
     fun makeCardLocationManifest(): CardLocationManifest {
-        val cards = makeCardsFromContests()
+        val cards = CloseableIterable { makeCardsFromContests().iterator() }
         return CardLocationManifest(cards, ballotStyles)
     }
 

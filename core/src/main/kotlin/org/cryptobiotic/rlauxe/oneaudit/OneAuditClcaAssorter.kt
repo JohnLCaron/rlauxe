@@ -22,6 +22,66 @@ import org.cryptobiotic.rlauxe.core.*
  *  B̄b = u /(2u − v)       (OA 9)
  */
 
+/* TODO OneAudit p.9
+This algorithm be made more efficient statistically and logistically in a variety
+of ways, for instance, by making an affine translation of the data so that the
+minimum possible value is 0 (by subtracting the minimum of the possible over-
+statement assorters across batches and re-scaling so that the null mean is still
+1/2) and by starting with a sample size that is expected to be large enough to
+confirm the contest outcome if the reported results are correct.
+
+"Your intuition is right: if you don't use the same affine transformation for the entire pool of cards, you'd have to
+introduce weights and/or use stratified sampling to make the null mean for the whole contest 1/2. But a single affine
+transformation could be based on the minimum possible value across all batches and the resulting implicit scaling
+needed to get back to 1/2. So it could be used, but might not help much if the ONEAudit cvrs are for batches
+(rather than for the whole election) and the batches are heterogeneous.
+
+Ive been thinking only about "hybrid" audits, where you have one "batch" that has Cvrs, and one or more pools where you only have the batch totals,
+as in the San Francisco example for OneAudit in SHANGRLA.
+In that case,  the CVR batch values are in the range [0, 2 * noerror], and the "minimum possible value across all batches" is 0, so there's nothing to be gained.
+
+But, eq (10) would be useful in the case where all the batches are pooled data, and the minimum possible value across
+all batches is non-zero. This use case I havent started to work with, but it sounds like I should, since
+OneAudit will be "far more efficient than BLCA"." 4/27/25 email
+
+TODO p.10-12
+Moving from tests about raw assorter values to tests about overstatements rel-
+ative to ONE CVRs derived from overall contest totals is just an affine trans-
+formation: no information is gained or lost. Thus, if we audited using an affine
+equivariant statistical test, the sample size should be the same whether the data
+are the original assorter values (i.e., BPA) or overstatements from ONE CVRs.
+However, the statistical tests used in RLAs are not affine equivariant because
+they rely on a priori bounds on the assorter values. The original assorter values
+will generally be closer to the endpoints of [0, u] than the transformed values
+are to the endpoints of [0, 2u/(2u − v)].
+
+To see why, suppose that there are
+no reported CVRs (C = ∅) and that only contest totals are reported from the
+system—so every cast ballot card is in G1 . For a BPA, the population values
+from which the sample is drawn are the original assorter values {A(bi )}, which
+for many social choice functions can take only the values 0, 1/2, and u. For
+instance, consider a two-candidate plurality contest, Alice v. Bob, where Alice
+is the reported winner. This can be audited using a single assorter that assigns
+the value 0 to a card with a vote for Bob, the value u = 1 to a card with a vote
+for Alice, and the value 1/2 to other cards. In contrast, for a comparison audit,
+the possible population values {B(bi )} are
+
+...
+
+Unless v = 1—i.e., unless every card was reported to have a vote for Alice—
+the minimum value of the overstatement assorter is greater than 0 and the
+maximum is less than u.
+
+A test that uses the prior information xj ∈ [0, u] may not be as efficient for
+populations for which xj ∈ [a, b] with a > 0 and b < u as it is for populations
+where the values 0 and u actually occur. An affine transformation of the over-
+statement assorter values can move them back to the endpoints of the support
+constraint by subtracting the minimum possible value then re-scaling so that the
+null mean is 1/2 once again, which reproduces the original assorter, A:
+
+
+ */
+
 class OneAuditClcaAssorter(
     info: ContestInfo,
     assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs: plurality or IRV

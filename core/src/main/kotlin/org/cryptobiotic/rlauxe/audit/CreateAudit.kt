@@ -33,8 +33,9 @@ interface CreateElectionIF {
     fun contestsUA(): List<ContestUnderAudit>
     fun cardPools(): List<CardPoolIF>? // only if OneAudit
 
-    fun cardManifest(): CardLocationManifest = CardLocationManifest(emptyCloseableIterable(), emptyList())
-    fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?>  // (cvrs, mvrs) including phantoms
+    fun cardManifest(): CardLocationManifest
+    // if you immediately write to disk, you only need one pass through the iterator
+    // fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?>  // (cvrs, mvrs) including phantoms
 }
 
 private val logger = KotlinLogging.logger("CreateAudit")
@@ -64,15 +65,12 @@ class CreateAudit(val name: String, val topdir: String, val config: AuditConfig,
         }
         logger.info { "added ClcaAssertions from reported margin " }
 
-        val (cards, mvrs) = election.allCvrs()
-        require (cards != null || mvrs != null)
-        if (cards != null) {
-            val countCvrs = writeAuditableCardCsvFile(cards, publisher.cardManifestFile())
+        val (cards, _) = election.cardManifest()
+            val countCvrs = writeAuditableCardCsvFile(cards.iterator(), publisher.cardManifestFile())
             createZipFile(publisher.cardManifestFile(), delete = true)
             logger.info { "write ${countCvrs} cards to ${publisher.cardManifestFile()}" }
-        }
 
-        if (mvrs != null) {
+        /* if (mvrs != null) {
             validateOutputDirOfFile(publisher.testMvrsFile())
             val countMvrs = writeAuditableCardCsvFile(mvrs, publisher.testMvrsFile())
             createZipFile(publisher.testMvrsFile(), delete = true)
@@ -99,7 +97,7 @@ class CreateAudit(val name: String, val topdir: String, val config: AuditConfig,
                 createZipFile(publisher.cardManifestFile(), delete = true)
                 logger.info { "copy ${countCvrs} cards to ${publisher.cardManifestFile()} remove all votes" }
             }
-        }
+        } */
 
         // this may change the auditStatus to misformed
         val results = VerifyResults()

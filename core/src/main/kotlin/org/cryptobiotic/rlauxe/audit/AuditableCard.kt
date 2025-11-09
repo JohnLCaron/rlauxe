@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.CloseableIterator
 
 // A generalization of Cvr, allowing votes to be null, eg for Polling or OneAudit.
 // Also possibleContests/cardStyle represents sample population information
@@ -11,9 +10,9 @@ data class AuditableCard (
     val index: Int,  // index into the original, canonical list of cards
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
-    val possibleContests: IntArray, // list of contests that might be on the ballot. TODO replace with cardStyle
-    val votes: Map<Int, IntArray>?, // for CLCA, a map of contest -> the candidate ids voted; must include undervotes (??)
-                                    // for IRV, ranked first to last; missing for pooled data or polling audits
+    val possibleContests: IntArray, // list of contests that might be on the ballot. TODO replace with cardStyle?
+    val votes: Map<Int, IntArray>?, // for CLCA or OneAudit, a map of contest -> the candidate ids voted; must include undervotes; missing for pooled data or polling audits
+                                                                                // when IRV, ranked first to last
     val poolId: Int?, // for OneAudit
     val cardStyle: String? = null,
 ) {
@@ -33,6 +32,7 @@ data class AuditableCard (
     }
 
     fun hasContest(contestId: Int): Boolean {
+        if (possibleContests.isEmpty() && votes == null) return true
         return contests().contains(contestId)
     }
 
@@ -104,16 +104,27 @@ data class CardLocationManifest(
     val cardStyles: List<CardStyle> // empty if style info not available
 )
 
+interface CardStyleIF {
+    fun name(): String
+    fun id(): Int
+    fun hasContest(contestId: Int): Boolean
+    fun contests() : IntArray
+}
+
 // essentially, CardStyle factors out the contestIds, which the CardLocation references, so its a form of normalization
 data class CardStyle(
     val name: String,
     val id: Int,
     val contestNames: List<String>,
     val contestIds: List<Int>,
-    val numberOfCards: Int?,
-) {
+    val numberOfCards: Int?, // TODO why do we want this?
+): CardStyleIF {
     val ncards = numberOfCards ?: 0
-    fun hasContest(contestId: Int) = contestIds.contains(contestId)
+
+    override fun name() = name
+    override fun id() = id
+    override fun hasContest(contestId: Int) = contestIds.contains(contestId)
+    override fun contests() = contestIds.toIntArray()
 
     override fun toString() = buildString {
         append("CardStyle('$name' ($id), contestIds=$contestIds")

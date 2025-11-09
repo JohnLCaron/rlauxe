@@ -6,6 +6,7 @@ import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -26,11 +27,11 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.CvrToAuditableCardClca
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
-import org.cryptobiotic.rlauxe.util.tabulateCloseableCvrs
 import kotlin.Boolean
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
+import kotlin.collections.plus
 import kotlin.sequences.plus
 
 private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOA")
@@ -46,7 +47,8 @@ class CreateSfElection(
 ): CreateElectionIF {
     val cardPoolMapByName: Map<String, CardPoolIF>
     val cardPools: List<CardPoolIF>
-    val contestsOA: List<ContestUnderAudit>
+    val contests: List<ContestIF>
+    val contestsUA: List<ContestUnderAudit>
     val cardCount: Int
     val manifest: CardLocationManifest
 
@@ -57,6 +59,7 @@ class CreateSfElection(
             candidateManifestFile
         )
         val infos = contestInfos.associateBy { it.id }
+        println("contestNcs ${contestNcs}")
 
         // pass 1 through cvrs, make card pools, including unpooled
         val (allCardPools: Map<String, CardPoolFromCvrs>, cvrTabs: Map<Int, ContestTabulation>, ncards) = createCardPools(
@@ -70,13 +73,16 @@ class CreateSfElection(
         val unpooledPool = allCardPools[unpooled]!!
         this.cardCount = ncards
 
+        contests = makeContests(cvrTabs, contestNcs)
+
         // we need to know the diluted Nb before we can create the UAs
         manifest = createCardManifest()
         val manifestTabs = tabulateAuditableCards(manifest.cardLocations.iterator(), infos)
         val contestNbs = manifestTabs.mapValues { it.value.ncards }
+        println("contestNbs ${contestNbs}")
 
         // make contests based on cvr tabulations
-        contestsOA = if (config.isClca) makeClcaContests(cvrTabs, contestNcs, contestNbs, hasStyle).sortedBy { it.id }
+        contestsUA = if (config.isClca) makeClcaContests(contests, cvrTabs, contestNcs, contestNbs, hasStyle).sortedBy { it.id }
             else if (config.isOA) makeAllOneAuditContests(cvrTabs, contestNcs, unpooledPool, contestNbs, hasStyle).sortedBy { it.id }
             else makePollingContests(cvrTabs, contestNcs, contestNbs, hasStyle).sortedBy { it.id }
     }
@@ -142,8 +148,18 @@ class CreateSfElection(
         return Triple(cardPools, poolTabs, cardCount)
     }
 
+    fun makeContests(contestTabSums: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>): List<ContestIF> {
+        val contests = mutableListOf<ContestIF>()
+        contestTabSums.forEach { (contestId, contestSumTab) ->
+            val info = contestSumTab.info
+            val useNc = contestNcs[info.id] ?: contestSumTab.ncards
+            if (useNc > 0) contests.add( Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)) // The IRV are fake
+        }
+        return contests
+    }
+
     override fun cardPools() = if (config.isOA) cardPools else null
-    override fun contestsUA() = contestsOA
+    override fun contestsUA() = contestsUA
     override fun cardManifest() = manifest
 
     fun createCardManifest(): CardLocationManifest {
@@ -151,7 +167,7 @@ class CreateSfElection(
             cardPoolMapByName,
             CloseableIterable { cvrExportCsvIterator(cvrExportCsv) },
             config)
-        val phantomCards = makePhantomCards(contestsUA().map { it.contest }, this.cardCount)
+        val phantomCards = makePhantomCards(contests, this.cardCount)
 
         return CardLocationManifest(CardIterable(phantomCards, cardPoolIterable), emptyList())
     }
@@ -165,28 +181,26 @@ class CreateSfElection(
         }
     }
 
-    // deprecate i think
+    /* deprecate i think
     override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
         return Pair(cardManifest().cardLocations.iterator(), null)
-    }
+    } */
 }
 
-fun makeClcaContests(contestTabSums: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, contestNbs: Map<Int, Int>, hasStyle:Boolean): List<ContestUnderAudit> {
+fun makeClcaContests(contests: List<ContestIF>, cvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>, hasStyle:Boolean): List<ContestUnderAudit> {
     val contestsUAs = mutableListOf<ContestUnderAudit>()
-    contestTabSums.map { (contestId, contestSumTab)  ->
-        val info = contestSumTab.info
+    contests.map { contest  ->
+        val info = contest.info()
+        val cvrTab = cvrTabs[contest.id]!!
 
-        val useNc = contestNcs[info.id] ?: contestSumTab.ncards
-        if (useNc > 0) {
-            val contestUA: ContestUnderAudit = if (!contestSumTab.isIrv) {
-                val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
-                ContestUnderAudit(contest, hasStyle=hasStyle, Nbin=contestNbs[info.id]).addStandardAssertions()
-            } else {
-                makeRaireContestUA(contestSumTab.info, contestSumTab, useNc, hasStyle=hasStyle, Nbin=contestNbs[info.id])
-            }
-            contestUA.contest.info().metadata["PoolPct"] = 0
-            contestsUAs.add(contestUA)
+        val useNc = contestNcs[info.id] ?: cvrTab.ncards
+        val contestUA: ContestUnderAudit = if (!cvrTab.isIrv) {
+            ContestUnderAudit(contest, hasStyle=hasStyle, Nbin=contestNbs[info.id]).addStandardAssertions()
+        } else {
+            makeRaireContestUA(info, cvrTab, useNc, hasStyle=hasStyle, Nbin=contestNbs[info.id])
         }
+        contestUA.contest.info().metadata["PoolPct"] = 0
+        contestsUAs.add(contestUA)
     }
     return contestsUAs
 }
@@ -201,7 +215,7 @@ fun makeAllOneAuditContests(contestTabSums: Map<Int, ContestTabulation>, contest
         if (useNc > 0) {
             val contestOA: ContestUnderAudit = if (!contestSumTab.isIrv) {
                 val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
-                ContestUnderAudit(contest, isClca = true).addStandardAssertions()
+                ContestUnderAudit(contest, isClca = true, Nbin=contestNbs[info.id]).addStandardAssertions()
             } else {
                 makeRaireContestUA(contestSumTab.info, contestSumTab, useNc, hasStyle=hasStyle, Nbin=contestNbs[info.id])
             }
@@ -287,7 +301,6 @@ fun makeContestNcs(contestManifest: ContestManifest, contestInfos: List<ContestI
 }
 
 class CardPoolCvrIterable(val poolMap: Map<String, CardPoolIF>, val org: CloseableIterable<CvrExport>, val config: AuditConfig): CloseableIterable<AuditableCard> {
-    val poolNameToId = poolMap.mapValues { it.value.poolId }
 
     override fun iterator(): CloseableIterator<AuditableCard> = CardPoolCvrIterator(org.iterator())
 
@@ -297,22 +310,11 @@ class CardPoolCvrIterable(val poolMap: Map<String, CardPoolIF>, val org: Closeab
 
         override fun next(): AuditableCard {
             val orgCvrExport = orgIter.next()
-            val poolId = orgCvrExport.poolKey()
-            val pool = poolMap[poolId]
-
-            val contests = if (!config.hasStyle) orgCvrExport.votes.keys.toList().sorted() else emptyList()
-            val votes = if (!config.isPolling) orgCvrExport.votes else null
-
-            //     val location: String, // info to find the card for a manual audit. Aka ballot identifier.
-            //    val index: Int,  // index into the original, canonical list of cards
-            //    val prn: Long,   // psuedo random number
-            //    val phantom: Boolean,
-            //    val possibleContests: IntArray, // list of contests that might be on the ballot. TODO replace with cardStyle
-            //    val votes: Map<Int, IntArray>?, // for CLCA, a map of contest -> the candidate ids voted; must include undervotes (??)
-            //                                    // for IRV, ranked first to last; missing for pooled data or polling audits
-            //    val poolId: Int?, // for OneAudit
-            //    val cardStyle: String? = null,
-            return AuditableCard(orgCvrExport.id, cardIndex, 0, phantom=false, contests.toIntArray(), votes, pool?.poolId)
+            val pool = poolMap[orgCvrExport.poolKey()]
+            val hasCvr = config.isClca || (pool == null)
+            val contests = if (hasCvr) intArrayOf() else pool.contests()
+            val votes = if (hasCvr) orgCvrExport.votes else null
+            return AuditableCard(orgCvrExport.id, cardIndex++, 0, phantom=false, contests, votes, pool?.poolId)
         }
 
         override fun close() = orgIter.close()

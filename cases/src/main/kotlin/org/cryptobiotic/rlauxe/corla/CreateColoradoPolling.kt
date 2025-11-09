@@ -49,7 +49,7 @@ class ColoradoPolling (
     override fun cardPools() = null
     override fun contestsUA() = contestsPolling
 
-    override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
+    fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
         val phantomCvrs = makePhantomCvrs(contestsUA().map { it.contest })
         val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvrHasStyle(cvr, idx, isClca=false) }.asSequence()
 

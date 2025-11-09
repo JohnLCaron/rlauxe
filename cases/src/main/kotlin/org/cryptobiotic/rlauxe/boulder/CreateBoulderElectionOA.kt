@@ -299,12 +299,6 @@ open class BoulderElectionOA(
         }
     }
 
-    override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?>  {
-        val manifest = cardManifest()
-        return Pair(manifest.cardLocations.iterator(), null)
-    }
-
-
     /* i dont see how you can only do one iteration.
     override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?>  { // (cvrs, mvrs) including phantoms
         val poolCvrs = if (isClca) redactedCvrs else createCvrsFromPools(cardPools)

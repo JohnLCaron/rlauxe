@@ -161,17 +161,17 @@ fun verifyManifest(
             lastCard = card
             count++
 
-            if (!config.isPolling) {
-                card.votes!!.forEach { (contestId, cands) ->
+            if (card.votes != null) {
+                card.votes.forEach { (contestId, cands) ->
                     val info = infos[contestId]
                     if (info != null) {
                         val allTab = allCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
                         allTab.addVotes(cands, card.phantom)
                         if (card.poolId == null) {
-                            val nonpoolCvrTab =
-                                nonpoolCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
+                            val nonpoolCvrTab = nonpoolCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
                             nonpoolCvrTab.addVotes(cands, card.phantom)
                         } else {
+                            // TODO seems like this never happen? have a poolId and votes ??
                             val poolCvrTab = poolCvrVotes.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
                             poolCvrTab.addVotes(cands, card.phantom)
                         }
@@ -195,7 +195,7 @@ fun verifyManifest(
 
     // 3. If hasStyle, check that the count of phantom cards containing a contest = Contest.Nc - Contest.Ncast.
     // 4. If hasStyle, check that the count of non-phantom cards containing a contest = Contest.Ncast.
-    if (!config.isPolling) {
+    if (config.isClca) {
         var allOk = true
         contests.forEach { contestUA ->
             val contestTab = allCvrVotes[contestUA.id]

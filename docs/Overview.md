@@ -243,3 +243,6 @@ For use_style=false, the contest is sampled from all cards that might contain th
 For OneAudit, the contest is sampled from all CVRs that claim to have that contest, plus all the cards in pools that might contain the contest.
 
 So when calculating the overstatement_error, use hasStyles=true if the card has a CVR, and hasStyles=false if the card is from a pool.
+
+If using CSD, the Prover must commit to the CSD before the PRN is chosen.
+A verifier needs to check that cards are chosen in order of smallest PRN, and satisfy the CSD if used.

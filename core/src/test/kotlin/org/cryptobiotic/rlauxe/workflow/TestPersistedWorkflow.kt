@@ -1,13 +1,10 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.cli.EnterMvrsCli
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.cli.enterMvrs
-import org.cryptobiotic.rlauxe.cli.runRound
 import org.cryptobiotic.rlauxe.cli.runRoundResult
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
@@ -17,10 +14,8 @@ import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.*
-import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.util.CvrToCardAdapter
-import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.CvrsWithPoolsToCards
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.test.Test
 import kotlin.test.fail
@@ -41,15 +36,15 @@ class TestPersistedWorkflow {
         val contests: List<Contest> = testData.contests
         println("Start testPersistedAuditClca $testData")
 
-        // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
+        // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
-        val testMvrs = if (fuzzMvrPct == 0.0) testCvrs
+        val testMvrs = if (fuzzMvrPct == 0.0) testCvrs // TODO REDO
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrPct)
 
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
-        val election = PersistedAudit(contestsUA, testCvrs, testMvrs)
+        val election = PersistedAudit(contestsUA, testCvrs, config=config)
         CreateAudit("testPersistedAuditClca", topdir, config, election, clear = true)
 
         runPersistedAudit(topdir)
@@ -69,15 +64,15 @@ class TestPersistedWorkflow {
         val contests: List<Contest> = testData.contests
         println("Start testPersistedAuditPolling $testData")
 
-        // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
+        // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
-        val testMvrs = if (fuzzMvrPct == 0.0) testCvrs
+        val testMvrs = if (fuzzMvrPct == 0.0) testCvrs // TODO REDO
         // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-        else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrPct)
+            else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrPct)
 
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
-        val election = PersistedAudit(contestsUA, testCvrs, testMvrs)
+        val election = PersistedAudit(contestsUA, testCvrs, config=config)
         CreateAudit("testPersistedAuditPolling", topdir, config, election, clear = true)
 
         runPersistedAudit(topdir)
@@ -95,6 +90,7 @@ class TestPersistedWorkflow {
         )
 
         val N = 5000
+        // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
         val (contestOA, cardPools, testCvrs) = makeOneContestUA(
             N + 100,
             N - 100,
@@ -104,25 +100,11 @@ class TestPersistedWorkflow {
         )
 
         val contestsUA = listOf(contestOA)
-        val infos = mapOf(contestOA.contest.info().id to contestOA.contest.info())
 
-        val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-        val allCvrs = testCvrs + phantoms
+        val election = PersistedAudit(contestsUA, testCvrs, cardPools, config=config)
+        CreateAudit("testPersistedAuditPolling", topdir, config, election, clear = true)
 
-        val cvrTabs = tabulateCvrs(allCvrs.iterator(), infos)
-        println("allCvrs = ${cvrTabs}")
-
-        val allContests = contestsUA.map { it.contest }
-        println("contests")
-        allContests.forEach { println("  $it") }
-        println()
-
-        val testMvrs = if (fuzzMvrPct == 0.0) allCvrs
-            else makeFuzzedCvrsFrom(allContests, allCvrs, fuzzMvrPct)
-        println("nmvrs = ${testMvrs.size} fuzzed at ${fuzzMvrPct}")
-
-        val election = PersistedAudit(contestsUA, allCvrs, testMvrs, cardPools)
-        CreateAudit("testPersistedOneAudit", topdir = topdir, config, election, clear = true)
+        runPersistedAudit(topdir)
 
         runPersistedAudit(topdir)
     }
@@ -131,17 +113,19 @@ class TestPersistedWorkflow {
 class PersistedAudit (
     val contestsUA: List<ContestUnderAudit>,
     val cvrs: List<Cvr>,
-    val mvrs: List<Cvr>,
     val cardPools: List<CardPoolIF>? = null,
+    val config: AuditConfig,
 ): CreateElectionIF {
 
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
 
-    override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
-        val cvrIter = CvrToCardAdapter(Closer(cvrs.iterator()))
-        val mvrIter = CvrToCardAdapter(Closer(mvrs.iterator()))
-        return Pair(cvrIter, mvrIter)
+    override fun cardManifest(): CardLocationManifest {
+        val poolMap = cardPools?.associateBy { it.poolId }
+
+        val cvrsIterable  = CloseableIterable{ cvrs.iterator() }
+        val cardLocations = CvrsWithPoolsToCards(cvrsIterable, poolMap, null, config) // already has phantoms
+        return CardLocationManifest(cardLocations, emptyList())
     }
 }
 
@@ -161,7 +145,7 @@ fun runPersistedAudit(topdir: String) {
     var lastRound: AuditRound? = null
 
     while (!done) {
-        val roundResult = runRoundResult(inputDir = auditdir, useTest = false, quiet = true)
+        val roundResult = runRoundResult(inputDir = auditdir, useTest = false, quiet = true) // TODO useTest = false ?
         if (roundResult is Err) {
             println("runRoundResult failed ${roundResult.error}")
             fail()

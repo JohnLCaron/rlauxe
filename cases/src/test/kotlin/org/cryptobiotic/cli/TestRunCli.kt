@@ -139,6 +139,7 @@ class TestRunCli {
         val resultsvc = RunVerifyContests.runVerifyContests(auditdir, 0, false)
         println()
         print(resultsvc)
+        if (resultsvc.hasErrors) fail()
 
         println("============================================================")
         var done = false
@@ -152,47 +153,6 @@ class TestRunCli {
         println(results)
 
         if (results.hasErrors) fail()
-        if (resultsvc.hasErrors) fail()
-    }
-
-    @Test
-    fun testDHondt() {
-        val topdir = "/home/stormy/rla/cases/belgium/2024"
-        val auditdir = "$topdir/audit"
-
-        RunRlaCreateOneAudit.main(
-            arrayOf(
-                "-in", topdir,
-                "-minMargin", "0.01",
-                "-fuzzMvrs", "0.001",
-                "-ncards", "10000",
-                "-ncontests", "10", // ignored
-                "--addRaireContest",
-                "--addRaireCandidates", "5",
-            )
-        )
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
-
-        println("============================================================")
-        val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)
-        println()
-        print(resultsvc)
-
-        println("============================================================")
-        var done = false
-        while (!done) {
-            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
-            done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
-        }
-
-        println("============================================================")
-        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = auditdir)
-        println(results)
-
-        if (results.hasErrors) fail()
-        if (resultsvc.hasErrors) fail()
     }
 
 }

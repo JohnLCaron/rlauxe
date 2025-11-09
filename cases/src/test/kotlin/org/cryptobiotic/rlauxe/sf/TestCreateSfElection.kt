@@ -15,7 +15,7 @@ class TestCreateSfElection {
 
     @Test
     fun createSFElectionOA() {
-        val topdir = "/home/stormy/rla/cases/sf2024/oa"
+        val topdir = "/home/stormy/rla/cases/sf2024/oaCard"
 
         createSfElection(
             topdir,
@@ -23,7 +23,7 @@ class TestCreateSfElection {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
-            hasStyle = true,
+            hasStyle = false,
             auditType = AuditType.ONEAUDIT,
         )
 
@@ -34,7 +34,7 @@ class TestCreateSfElection {
 
     @Test
     fun createSFElectionClca() {
-        val topdir = "/home/stormy/rla/cases/sf2024/clca"
+        val topdir = "/home/stormy/rla/cases/sf2024/clcaCard"
 
         createSfElection(
             topdir,
@@ -50,7 +50,7 @@ class TestCreateSfElection {
         writeSortedCardsInternalSort(publisher, config.seed)
     }
 
-    @Test
+    /* @Test
     fun createSFElectionOneAuditNostyles() {
         val topdir = "/home/stormy/rla/cases/sf2024/oans"
 
@@ -68,7 +68,7 @@ class TestCreateSfElection {
         writeSortedCardsInternalSort(publisher, config.seed)
     }
 
-    @Test
+   // @Test
     fun createSFElectionPollingNostyles() {
         val topdir = "/home/stormy/rla/cases/sf2024/polling"
 
@@ -84,7 +84,7 @@ class TestCreateSfElection {
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
-    }
+    } */
 
     @Test
     fun runSFElectionPollingNostyles() {

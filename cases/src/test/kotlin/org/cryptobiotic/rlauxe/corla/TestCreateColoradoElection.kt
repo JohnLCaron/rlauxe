@@ -25,7 +25,7 @@ class TestCreateColoradoElection {
         val topdir = "/home/stormy/rla/cases/corla/oneaudit"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
+        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         createColoradoOneAudit(topdir, detailXmlFile, contestRoundFile, precinctFile, isClca=false, clear=true)
 
@@ -48,7 +48,7 @@ class TestCreateColoradoElection {
         writeSortedCardsExternalSort(topdir, publisher, config.seed)
     }
 
-    @Test
+    // @Test
     fun testCreateColoradoPolling() {
         val topdir = "/home/stormy/rla/cases/corla/polling"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"

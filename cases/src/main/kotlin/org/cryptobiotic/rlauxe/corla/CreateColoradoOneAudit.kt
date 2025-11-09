@@ -13,7 +13,6 @@ import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.max
-import kotlin.sequences.plus
 
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
@@ -33,8 +32,9 @@ open class ColoradoOneAudit (
     val infoMap = oaContests.associate { it.info.id to it.info }
     val cardPools: List<CardPoolWithBallotStyle> = convertPrecinctsToCardPools(precinctFile, infoMap)
 
+    val contests: List<ContestIF>
     val contestsUA: List<ContestUnderAudit>
-
+    val manifest:  CardLocationManifest
     init {
         // add pool counts into contests
         oaContests.forEach { it.adjustPoolInfo(cardPools) }
@@ -53,7 +53,16 @@ open class ColoradoOneAudit (
             undervote.add(it.poolUndervote(cardPools))
         }
 
-        contestsUA = makeUAContests()
+        // we need to know the diluted Nb before we can create the UAs
+        contests = makeContests()
+        manifest = createCardManifest()
+
+        val manifestTabs = tabulateAuditableCards(manifest.cardLocations.iterator(), infoMap)
+        val contestNbs = manifestTabs.mapValues { it.value.ncards }
+
+        contestsUA = contests.map { contest ->
+            ContestUnderAudit(contest, hasStyle=hasStyle, Nbin=contestNbs[contest.id]).addStandardAssertions()
+        }
     }
 
     private fun makeOneContestInfo(electionDetailXml: ElectionDetailXml, roundContests: List<ContestRoundCsv>): List<OneAuditContestCorla> {
@@ -127,6 +136,21 @@ open class ColoradoOneAudit (
         }
     }
 
+    fun makeContests(): List<ContestIF> {
+        val infoList= oaContests.map { it.info }.sortedBy { it.id }
+        val contestMap= oaContests.associateBy { it.info.id }
+        println("ncontests with info = ${infoList.size}")
+
+        return infoList.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
+            val oaContest = contestMap[info.id]!!
+            val candVotes = oaContest.candidateVotes.filter { info.candidateIds.contains(it.key) } // remove Write-Ins
+            val ncards = oaContest.poolTotalCards()
+            val useNc = max( ncards, oaContest.Nc)
+            info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
+            Contest(info, candVotes, useNc, ncards)
+        }
+    }
+
     fun makeUAContests(): List<ContestUnderAudit> {
         val infoList= oaContests.map { it.info }.sortedBy { it.id }
         val contestMap= oaContests.associateBy { it.info.id }
@@ -147,8 +171,17 @@ open class ColoradoOneAudit (
     }
 
     override fun cardPools(): List<CardPoolIF>?  = cardPools
-
     override fun contestsUA() = contestsUA
+    override fun cardManifest() = manifest
+
+    fun createCardManifest(): CardLocationManifest {
+        val phantomCvrs = makePhantomCvrs(contests)
+
+        val cvrsFromPools = CloseableIterable { CvrIteratorfromPools()  } // "fake" truth
+        val poolMap = cardPools.associateBy { it.poolId }
+
+        return CardLocationManifest(CvrsWithPoolsToCards(cvrsFromPools, poolMap, phantomCvrs, config), emptyList())
+    }
 
     // dont load into memory all at once, just one pool at a time
     inner class CvrIteratorfromPools(): Iterator<Cvr> {
@@ -193,19 +226,6 @@ open class ColoradoOneAudit (
         override fun next() = cvrs.next()
         override fun hasNext() = cvrs.hasNext()
     }
-
-    override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
-        val phantomCvrs = makePhantomCvrs(contestsUA().map { it.contest })
-        val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvrHasStyle(cvr, idx, isClca=true) }.asSequence()
-
-        val cvrIter: Iterator<Cvr> = CvrIteratorfromPools()  // "fake" truth
-        val poolNameToId = cardPools.associate { it.poolName to it.poolId }
-        val cardSeq = CvrToCardAdapter(Closer(cvrIter), poolNameToId).asSequence()
-
-        val allCardsIter = (cardSeq + phantomSeq).iterator()
-
-        return Pair(null, Closer( allCardsIter))
-    }
 }
 
 class OneAuditContestCorla(val info: ContestInfo, val detailContest: ElectionDetailContest, val contestRound: ContestRoundCsv): OneAuditContestIF {
@@ -231,7 +251,7 @@ class OneAuditContestCorla(val info: ContestInfo, val detailContest: ElectionDet
     override fun poolTotalCards(): Int  = poolTotalCards
 
     override fun adjustPoolInfo(cardPools: List<CardPoolIF>){
-        poolTotalCards = cardPools.filter{ it.contains(info.id) }.sumOf { it.ncards() }
+        poolTotalCards = cardPools.filter{ it.hasContest(info.id) }.sumOf { it.ncards() }
     }
 
     fun poolUndervote(cardPools: List<CardPoolWithBallotStyle>): Int {
@@ -262,7 +282,7 @@ fun createColoradoOneAudit(
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
         )
         else -> AuditConfig(
-            AuditType.ONEAUDIT, hasStyle = true, riskLimit = .03, contestSampleCutoff = null, nsimEst = 1,
+            AuditType.ONEAUDIT, hasStyle = false, riskLimit = .03, contestSampleCutoff = null, nsimEst = 1,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
     }

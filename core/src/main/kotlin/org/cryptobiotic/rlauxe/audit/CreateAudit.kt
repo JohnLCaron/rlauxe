@@ -23,6 +23,7 @@ import org.cryptobiotic.rlauxe.util.ToAuditableCardPolling
 import org.cryptobiotic.rlauxe.util.ToAuditableCardPooled
 import org.cryptobiotic.rlauxe.util.cleanCsvString
 import org.cryptobiotic.rlauxe.util.createZipFile
+import org.cryptobiotic.rlauxe.util.emptyCloseableIterable
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
 import kotlin.collections.forEach
@@ -32,7 +33,9 @@ interface CreateElectionIF {
     fun contestsUA(): List<ContestUnderAudit>
     fun cardPools(): List<CardPoolIF>? // only if OneAudit
 
-    fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?>  // (cvrs, mvrs) including phantoms
+    fun cardManifest(): CardLocationManifest
+    // if you immediately write to disk, you only need one pass through the iterator
+    // fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?>  // (cvrs, mvrs) including phantoms
 }
 
 private val logger = KotlinLogging.logger("CreateAudit")
@@ -62,15 +65,12 @@ class CreateAudit(val name: String, val topdir: String, val config: AuditConfig,
         }
         logger.info { "added ClcaAssertions from reported margin " }
 
-        val (cards, mvrs) = election.allCvrs()
-        require (cards != null || mvrs != null)
-        if (cards != null) {
-            val countCvrs = writeAuditableCardCsvFile(cards, publisher.cardManifestFile())
+        val (cards, _) = election.cardManifest()
+            val countCvrs = writeAuditableCardCsvFile(cards.iterator(), publisher.cardManifestFile())
             createZipFile(publisher.cardManifestFile(), delete = true)
             logger.info { "write ${countCvrs} cards to ${publisher.cardManifestFile()}" }
-        }
 
-        if (mvrs != null) {
+        /* if (mvrs != null) {
             validateOutputDirOfFile(publisher.testMvrsFile())
             val countMvrs = writeAuditableCardCsvFile(mvrs, publisher.testMvrsFile())
             createZipFile(publisher.testMvrsFile(), delete = true)
@@ -97,7 +97,7 @@ class CreateAudit(val name: String, val topdir: String, val config: AuditConfig,
                 createZipFile(publisher.cardManifestFile(), delete = true)
                 logger.info { "copy ${countCvrs} cards to ${publisher.cardManifestFile()} remove all votes" }
             }
-        }
+        } */
 
         // this may change the auditStatus to misformed
         val results = VerifyResults()
@@ -167,23 +167,36 @@ fun writeExternalSortedCards(topdir: String, outputFile: String, unsortedCards: 
 }
 
 // The pooled cvrs dont have votes associated with them, used to make the Card Manifest
-fun createCvrsFromPools(pools: List<CardPoolIF>) : List<Cvr> {
-    val cvrs = mutableListOf<Cvr>()
+fun createCardsFromPools(pools: List<CardPoolIF>, startIdx: Int) : List<AuditableCard> {
+    var idx = startIdx
+    val cards = mutableListOf<AuditableCard>()
 
     pools.forEach { pool ->
         val cleanName = cleanCsvString(pool.poolName)
         repeat(pool.ncards()) { poolIndex ->
-            cvrs.add(
-                Cvr(
-                    id = "pool${cleanName} card ${poolIndex + 1}",
-                    votes = pool.contests().associate{ it to IntArray(0) },
+            cards.add(
+                //     val location: String, // info to find the card for a manual audit. Aka ballot identifier.
+                //    val index: Int,  // index into the original, canonical list of cards
+                //    val prn: Long,   // psuedo random number
+                //    val phantom: Boolean,
+                //    val possibleContests: IntArray, // list of contests that might be on the ballot. TODO replace with cardStyle
+                //    val votes: Map<Int, IntArray>?, // for CLCA, a map of contest -> the candidate ids voted; must include undervotes (??)
+                //                                    // for IRV, ranked first to last; missing for pooled data or polling audits
+                //    val poolId: Int?, // for OneAudit
+                //    val cardStyle: String? = null,
+                AuditableCard(
+                    location = "pool${cleanName} card ${poolIndex + 1}",
+                    index=idx++,
+                    prn=0L,
                     phantom = false,
+                    possibleContests=pool.contests(),
+                    votes = null,
                     poolId = pool.poolId
                 )
             )
         }
     }
     val totalRedactedBallots = pools.sumOf { it.ncards() }
-    require(cvrs.size == totalRedactedBallots)
-    return cvrs
+    require(cards.size == totalRedactedBallots)
+    return cards
 }

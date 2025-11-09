@@ -52,8 +52,6 @@ open class ClcaAssorter(
             require(reportedAssortAvg > 0.5) {
                 "*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($reportedAssortAvg) must be > .5"
             }
-            if (noerror < .5)
-                println("why")
             // the math requires this; otherwise divide by negative number flips the inequality
             require(noerror > 0.5) { "${info.name} ${assorter.desc()}: ($noerror) noerror must be > .5" }
         }
@@ -83,7 +81,6 @@ open class ClcaAssorter(
     //      [2,         1.875,      1.125,      1,  .875,       .125,       0] * noerror  for u = 4
     //      [2,         1.666,      1.333,      1,  .666,       .333,       0] * noerror  for u = .75
 
-    // TODO always use this.hasStyle?
     // SHANGRLA overstatement_assorter()
     open fun bassort(mvr: Cvr, cvr:Cvr, hasStyle: Boolean = this.hasStyle): Double {
         val overstatement = overstatementError(mvr, cvr, hasStyle) // ωi eq (1)

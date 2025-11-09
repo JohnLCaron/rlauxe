@@ -96,6 +96,7 @@ fun makeEstimationTasks(
     val tasks = mutableListOf<EstimateSampleSizeTask>()
 
     // simulate the cvrs once for all the assertions for this contest
+    // TODO could do them for all contests in one pass; could be in one list
     val contestUA = contestRound.contestUA
     val cvrs: List<Cvr> = when (config.auditType) {
         AuditType.CLCA -> {

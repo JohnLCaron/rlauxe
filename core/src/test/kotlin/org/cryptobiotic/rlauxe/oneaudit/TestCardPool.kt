@@ -32,8 +32,8 @@ class TestCardPool {
 
         // only one pool, only one contest
         val cardPool = cardPools.first()
-        assertTrue(cardPool.contains(info.id))
-        assertFalse(cardPool.contains(42))
+        assertTrue(cardPool.hasContest(info.id))
+        assertFalse(cardPool.hasContest(42))
         assertEquals(1, cardPool.regVotes().size)
     }
 

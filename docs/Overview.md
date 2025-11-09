@@ -233,3 +233,16 @@ AuditRound estSampleSize else estSampleSizeNoStyles // maybe can get rid of estS
 not needed in:
 ClcaWithoutReplacement
 PollWithoutReplacement
+
+======================
+
+For use_style=true, the contest is sampled from just the cards claiming to contain that contest. If the MVR does not contain the contest, the overstatement_error() penalizes by assuming a vote for the loser.
+
+For use_style=false, the contest is sampled from all cards that might contain that contest, and we use the fully diluted margin to account for this (and match the assorter mean). We expect some of the MVRs to not have the contest, so the MVR is considered to be a non-vote in the contest
+
+For OneAudit, the contest is sampled from all CVRs that claim to have that contest, plus all the cards in pools that might contain the contest.
+
+So when calculating the overstatement_error, use hasStyles=true if the card has a CVR, and hasStyles=false if the card is from a pool.
+
+If using CSD, the Prover must commit to the CSD before the PRN is chosen.
+A verifier needs to check that cards are chosen in order of smallest PRN, and satisfy the CSD if used.

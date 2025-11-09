@@ -14,6 +14,8 @@ import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
+import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.CvrToAuditableCardClca
 import org.cryptobiotic.rlauxe.util.CvrToAuditableCardPolling
@@ -145,14 +147,16 @@ class TestPollingElection(
         println("testMvrs = ${mvrTabs}")
         println()
     }
-    override fun cardPools() = null
 
+    override fun cardPools() = null
     override fun contestsUA() = contestsUA
 
-    override fun allCvrs() = Pair(
-        CvrToAuditableCardPolling(Closer(cvrs.iterator())),
-        CvrToAuditableCardPolling(Closer(testMvrs.iterator()))
-    )
+    override fun cardManifest(): CardLocationManifest {
+        val wtf: CloseableIterator<AuditableCard> = CvrToAuditableCardClca(Closer(cvrs.iterator()))
+        return CardLocationManifest(
+            CloseableIterable { wtf },
+            emptyList())
+    }
 }
 
 fun startTestElectionClca(
@@ -239,9 +243,16 @@ class TestClcaElection(
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
 
-    override fun allCvrs() = Pair(
+    fun allCvrs() = Pair(
         CvrToAuditableCardClca(Closer(allCvrs.iterator())),
         CvrToAuditableCardClca(Closer(testMvrs.iterator()))
     )
+
+    override fun cardManifest(): CardLocationManifest {
+        val wtf: CloseableIterator<AuditableCard> = CvrToAuditableCardClca(Closer(allCvrs.iterator()))
+        return CardLocationManifest(
+            CloseableIterable { wtf },
+            emptyList())
+    }
 }
 

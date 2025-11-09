@@ -33,7 +33,7 @@ data class MultiContestCombineData(
             result.add(makeCard(cvrbs, contestBuilders))
         }
 
-        val phantoms = makePhantomCards(contests)
+        val phantoms = makePhantomCards(contests, startIdx=result.size)
         return result + phantoms
     }
 

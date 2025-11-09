@@ -10,7 +10,6 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.collections.get
-import kotlin.math.max
 
 private val logger = KotlinLogging.logger("OneAuditContestBoulder")
 
@@ -110,7 +109,7 @@ class OneAuditContestBoulder(val info: ContestInfo, val sovoContest: BoulderCont
     override fun poolTotalCards() = poolTotalCards
 
     override fun adjustPoolInfo(cardPools: List<CardPoolIF>) {
-        poolTotalCards = cardPools.filter{ it.contains(info.id)}.sumOf { it.ncards() }
+        poolTotalCards = cardPools.filter{ it.hasContest(info.id)}.sumOf { it.ncards() }
     }
 
     // calculated total cards in the pools

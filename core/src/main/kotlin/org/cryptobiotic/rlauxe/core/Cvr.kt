@@ -9,7 +9,7 @@ data class Cvr(
     val id: String, // ballot identifier
     val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
     val phantom: Boolean = false,
-    val poolId: Int? = null,
+    val poolId: Int? = null,  // or style.id ?
 ) {
     init {
         require(id.indexOf(',') < 0) { "cvr.id='$id' must not have commas"} // must not have nasty commas

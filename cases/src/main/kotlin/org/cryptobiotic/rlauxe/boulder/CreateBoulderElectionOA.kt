@@ -7,15 +7,17 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.ContestVotes
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
+import org.cryptobiotic.rlauxe.estimate.makePhantomCards
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.audit.createCvrsFromPools
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
+import kotlin.collections.asSequence
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.collections.map
+import kotlin.collections.plus
 import kotlin.collections.set
 import kotlin.math.max
 
@@ -31,17 +33,18 @@ open class BoulderElectionOA(
     val hasStyle: Boolean = true,
     val quiet: Boolean = true,
 ): CreateElectionIF {
-    val exportCvrs: List<Cvr> = export.cvrs.map { it.convert() }
+    val exportCvrs: List<Cvr> = export.cvrs.map { it.convertToCvr() }
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infoMap = infoList.associateBy { it.id }
 
     val countCvrVotes = countCvrVotes()
     val countRedactedVotes = countRedactedVotes() // wrong
     val oaContests: Map<Int, OneAuditContestBoulder> = makeOAContests().associate { it.info.id to it}
+    val contests: List<ContestIF>
     val contestsUA : List<ContestUnderAudit>
 
     val cardPools: List<CardPoolWithBallotStyle> = convertRedactedToCardPool() // convertRedactedToCardPoolPaired(export.redacted, infoMap) // convertRedactedToCardPool2()
-    val redactedCvrs: List<Cvr> // fake CVRs for the pooled cards
+    val manifest: CardLocationManifest
 
     init {
         oaContests.values.forEach { it.adjustPoolInfo(cardPools)}
@@ -56,9 +59,17 @@ open class BoulderElectionOA(
         distributeExpectedOvervotes(oaContest63, cardPools)
         oaContests.values.forEach { it.adjustPoolInfo(cardPools)}
 
-        contestsUA = makeUAContests(hasStyle)
+        // we need to know the diluted Nb before we can create the UAs
+        contests = makeContests()
+        manifest = if (isClca) cardManifestClca() else cardManifestOA()
 
-        redactedCvrs = makeRedactedCvrs()
+        val manifestTabs = tabulateAuditableCards(manifest.cardLocations.iterator(), infoMap)
+        val contestNbs = manifestTabs.mapValues { it.value.ncards }
+
+        contestsUA = contests.map { contest ->
+            ContestUnderAudit(contest, hasStyle=hasStyle, Nbin=contestNbs[contest.id]).addStandardAssertions()
+        }
+
         val totalRedactedBallots = cardPools.sumOf { it.ncards() }
         logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPools.size} cardPools"}
     }
@@ -112,7 +123,7 @@ open class BoulderElectionOA(
         }
     }
 
-    // make up fake CVRs for the pooled cards
+    // make up fake CVRs for the pooled (redacted) votes
     fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<Cvr>()
         cardPools.forEach { cardPool ->
@@ -139,7 +150,6 @@ open class BoulderElectionOA(
     }
 
     // the redacted Cvrs simulate the real CVRS that are in the pools, for testing and estimation
-    // for a real OneAudit, only the pool averages are used. CLCA can only be used for testing, not for a real audit.
     private fun makeRedactedCvrs(cardPool: CardPoolWithBallotStyle, show: Boolean) : List<Cvr> { // contestId -> candidateId -> nvotes
 
         val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
@@ -237,30 +247,59 @@ open class BoulderElectionOA(
         return votes
     }
 
-    override fun cardPools() = cardPools
-
-    fun makeUAContests(hasStyle: Boolean): List<ContestUnderAudit> {
+    fun makeContests(): List<ContestIF> {
         if (!quiet) println("ncontests with info = ${infoList.size}")
 
-        val regContests = infoList.filter { !it.isIrv }.map { info ->
+        return infoList.filter { !it.isIrv }.map { info ->
             val oaContest = oaContests[info.id]!!
             val candVotes = oaContest.candVoteTotals().filter { info.candidateIds.contains(it.key) } // remove Write-Ins
-            if (info.id == 20) {
-                println("sovo contest has Nc = ${oaContest.sovoContest.totalBallots}")
-                println("sovo contest has ncards = ${oaContest.ncards()}")
-            }
             val ncards = oaContest.ncards()
             val useNc = max( ncards, oaContest.Nc())
-            val contest = Contest(info, candVotes, useNc, ncards)
             info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
-            ContestUnderAudit(contest, hasStyle=hasStyle).addStandardAssertions()
+            Contest(info, candVotes, useNc, ncards)
         }
+    }
 
-        return regContests
+    fun makeUAContests(hasStyle: Boolean, contestNb: Map<Int, Int>): List<ContestUnderAudit> {
+        return contests.map { contest ->
+            ContestUnderAudit(contest, hasStyle=hasStyle, Nbin=contestNb[contest.id]).addStandardAssertions()
+        }
     }
 
     override fun contestsUA() = contestsUA
+    override fun cardPools() = cardPools
+    override fun cardManifest() = manifest
 
+    fun cardManifestClca(): CardLocationManifest {
+        val redactedCvrs = makeRedactedCvrs()
+        val phantoms = makePhantomCvrs(contests)
+        val cvrs =  exportCvrs + redactedCvrs + phantoms
+        return CardLocationManifest(ClcaCvrIterable(cvrs), emptyList())
+    }
+
+    data class ClcaCvrIterable(val cvrs : List<Cvr>): CloseableIterable<AuditableCard> {
+        override fun iterator(): CloseableIterator<AuditableCard> {
+            return CvrToAuditableCardClca(Closer(cvrs.iterator()))
+        }
+    }
+
+    fun cardManifestOA(): CardLocationManifest {
+        val poolCards =  createCardsFromPools(cardPools, this.exportCvrs.size)
+        val phantoms = makePhantomCards( contests, startIdx=this.exportCvrs.size + poolCards.size )
+        return CardLocationManifest(OACardIterable(poolCards, phantoms, this.exportCvrs), emptyList())
+    }
+
+    data class OACardIterable(val poolCards : List<AuditableCard>, val phantoms : List<AuditableCard>, val exportCvrs: List<Cvr>): CloseableIterable<AuditableCard> {
+        override fun iterator(): CloseableIterator<AuditableCard> {
+            val poolCards =  poolCards.asSequence()
+            val phantoms = phantoms.asSequence()
+            val exportedCards = CvrToAuditableCardClca(Closer(exportCvrs.iterator())).asSequence()
+            val cardSeq =  exportedCards + poolCards + phantoms
+            return Closer( cardSeq.iterator())
+        }
+    }
+
+    /* i dont see how you can only do one iteration.
     override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?>  { // (cvrs, mvrs) including phantoms
         val poolCvrs = if (isClca) redactedCvrs else createCvrsFromPools(cardPools)
         val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
@@ -272,11 +311,12 @@ open class BoulderElectionOA(
             CvrToAuditableCardClca(Closer(cvrs.iterator())),
             CvrToAuditableCardClca(Closer(mvrs.iterator()))
         )
-    }
+    } */
 }
 
 ////////////////////////////////////////////////////////////////////
-// Create a OneAudit where pools are from the redacted cvrs, use pool vote totals for assort average
+// Clca: create simulated cvrs for the redacted groups, for a full CLCA audit with hasStyles=true.
+// OA: Create a OneAudit where pools are from the redacted cvrs.
 fun createBoulderElection(
     cvrExportFile: String,
     sovoFile: String,

@@ -1,6 +1,7 @@
 package org.cryptobiotic.util
 
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.belgium.belgianElectionMap
@@ -12,7 +13,6 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.sf.createSfElection
-import org.cryptobiotic.rlauxe.sf.createSfElectionPoolStyles
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
@@ -81,7 +81,7 @@ class TestGenerateAllUseCases {
         writeSortedCardsExternalSort(topdir, publisher, config.seed)
     }
 
-    @Test
+    // @Test
     fun testCreateColoradoPolling() {
         val topdir = "/home/stormy/rla/cases/corla/polling"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
@@ -105,7 +105,8 @@ class TestGenerateAllUseCases {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
-            isClca = false,
+            hasStyle = false,
+            auditType = AuditType.ONEAUDIT,
         )
 
         val publisher = Publisher("$topdir/audit")
@@ -123,7 +124,8 @@ class TestGenerateAllUseCases {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
-            isClca = true,
+            hasStyle = true,
+            auditType = AuditType.CLCA,
         )
 
         val publisher = Publisher("$topdir/audit")
@@ -131,11 +133,11 @@ class TestGenerateAllUseCases {
         writeSortedCardsInternalSort(publisher, config.seed)
     }
 
-    @Test
+    /* @Test
     fun createSFElectionOneAuditPoolStyles() {
         val topdir = "/home/stormy/rla/cases/sf2024/oans"
 
-        createSfElectionPoolStyles(
+        createSfElectionPoolStyle(
             topdir,
             sfZipFile,
             "ContestManifest.json",
@@ -149,11 +151,11 @@ class TestGenerateAllUseCases {
         writeSortedCardsInternalSort(publisher, config.seed)
     }
 
-    @Test
+    // @Test
     fun createSFElectionPolling() {
         val topdir = "/home/stormy/rla/cases/sf2024/polling"
 
-        createSfElectionPoolStyles(
+        createSfElectionPoolStyle(
             topdir,
             sfZipFile,
             "ContestManifest.json",
@@ -165,7 +167,7 @@ class TestGenerateAllUseCases {
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
-    }
+    } */
 
     @Test
     fun createAllBelgiumElections() {

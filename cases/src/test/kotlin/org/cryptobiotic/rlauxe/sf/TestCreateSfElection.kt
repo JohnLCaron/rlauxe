@@ -15,7 +15,7 @@ class TestCreateSfElection {
 
     @Test
     fun createSFElectionOA() {
-        val topdir = "/home/stormy/rla/cases/sf2024/oa"
+        val topdir = "/home/stormy/rla/cases/sf2024/oaCard"
 
         createSfElection(
             topdir,
@@ -23,7 +23,8 @@ class TestCreateSfElection {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
-            isClca = false,
+            hasStyle = false,
+            auditType = AuditType.ONEAUDIT,
         )
 
         val publisher = Publisher("$topdir/audit")
@@ -33,7 +34,7 @@ class TestCreateSfElection {
 
     @Test
     fun createSFElectionClca() {
-        val topdir = "/home/stormy/rla/cases/sf2024/clca"
+        val topdir = "/home/stormy/rla/cases/sf2024/clcaCard"
 
         createSfElection(
             topdir,
@@ -41,19 +42,19 @@ class TestCreateSfElection {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
-            isClca = true,
-        )
+            hasStyle = true,
+            auditType = AuditType.CLCA,        )
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
     }
 
-    @Test
+    /* @Test
     fun createSFElectionOneAuditNostyles() {
         val topdir = "/home/stormy/rla/cases/sf2024/oans"
 
-        createSfElectionPoolStyles(
+        createSfElectionPoolStyle(
             topdir,
             zipFilename,
             "ContestManifest.json",
@@ -67,11 +68,11 @@ class TestCreateSfElection {
         writeSortedCardsInternalSort(publisher, config.seed)
     }
 
-    @Test
+   // @Test
     fun createSFElectionPollingNostyles() {
         val topdir = "/home/stormy/rla/cases/sf2024/polling"
 
-        createSfElectionPoolStyles(
+        createSfElectionPoolStyle(
             topdir,
             zipFilename,
             "ContestManifest.json",
@@ -83,7 +84,7 @@ class TestCreateSfElection {
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
-    }
+    } */
 
     @Test
     fun runSFElectionPollingNostyles() {

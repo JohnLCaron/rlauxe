@@ -9,13 +9,11 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
-// import org.cryptobiotic.rlauxe.oneaudit.OAContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.util.CvrToAuditableCardClca
+import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.CvrsWithPoolsToCards
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.io.path.Path
 
@@ -117,7 +115,7 @@ object RunRlaCreateOneAudit {
 
     class TestOneAuditElection(
         auditDir: String,
-        config: AuditConfig,
+        val config: AuditConfig,
         minMargin: Double,
         fuzzMvrs: Double,
         pctPhantoms: Double?,
@@ -126,13 +124,14 @@ object RunRlaCreateOneAudit {
         addRaire: Boolean,
         addRaireCandidates: Int,
     ): CreateElectionIF {
-        // val workflow: OneAudit
         val contestsUA = mutableListOf<ContestUnderAudit>()
-        val allCardPools = mutableListOf<CardPoolIF>()
+        val allCardPools: List<CardPoolIF>
         val allCvrs: List<Cvr>
         val testMvrs: List<Cvr>
 
         init {
+            // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
+            // includes the pools votes
             val (contestOA, cardPools, testCvrs) = makeOneContestUA(
                 margin = minMargin,
                 Nc = ncards,
@@ -140,13 +139,11 @@ object RunRlaCreateOneAudit {
                 undervoteFraction = .01,
                 phantomFraction = pctPhantoms ?: 0.0
             )
-
-            // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
-            // includes the pools votes
+            allCvrs = testCvrs
+            allCardPools = cardPools
 
             contestsUA.add(contestOA)
             val infos = mapOf(contestOA.contest.info().id to contestOA.contest.info())
-            allCardPools.addAll(cardPools)
 
             /*
             if (addRaire) {
@@ -161,9 +158,6 @@ object RunRlaCreateOneAudit {
                 allCvrs = testCvrs + rcvrs
             } */
 
-            val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-            allCvrs = testCvrs + phantoms
-
             val cvrTabs = tabulateCvrs(allCvrs.iterator(), infos)
             println("allCvrs = ${cvrTabs}")
 
@@ -172,6 +166,7 @@ object RunRlaCreateOneAudit {
             allContests.forEach { println("  $it") }
             println()
 
+            // TODO reimplement
             testMvrs = if (fuzzMvrs == 0.0) allCvrs
                 // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
                 else makeFuzzedCvrsFrom(allContests, allCvrs, fuzzMvrs)
@@ -181,12 +176,16 @@ object RunRlaCreateOneAudit {
             println("testMvrs = ${mvrTabs}")
             println()
         }
+
         override fun cardPools() = allCardPools
         override fun contestsUA() = contestsUA
 
-        override fun allCvrs() = Pair(
-            CvrToAuditableCardClca(Closer(allCvrs.iterator())),
-            CvrToAuditableCardClca(Closer(testMvrs.iterator()))
-        )
+        override fun cardManifest(): CardLocationManifest {
+            val poolMap = allCardPools.associateBy { it.poolId }
+
+            val cvrsIterable  = CloseableIterable{ allCvrs.iterator() }
+            val cardLocations = CvrsWithPoolsToCards(cvrsIterable, poolMap, null, config) // already has phantoms
+            return CardLocationManifest(cardLocations, emptyList())
+        }
     }
 }

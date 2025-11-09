@@ -22,7 +22,7 @@ private val logger = KotlinLogging.logger("AuditableCardCsv")
 //    val poolId: Int?, // for OneAudit
 //)
 
-val AuditableCardHeader = "location, index, prn, phantom, poolId, style, contests, candidates0, candidates1, ...\n"
+val AuditableCardHeader = "location, index, prn, phantom, poolId, style, cvr contests, candidates0, candidates1, ...\n"
 
 fun writeAuditableCardCsv(card: AuditableCard) = buildString {
     append("${card.location}, ${card.index}, ${card.prn}, ${card.phantom}, ")

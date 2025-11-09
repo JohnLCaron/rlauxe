@@ -96,7 +96,7 @@ class TestDominionCvrReader {
             27 to intArrayOf(1),
         )
         val expected0 = makeCvr(cvr0.cvrNumber, expectedVotes0)
-        val actual0 = cvr0.convert()
+        val actual0 = cvr0.convertToCvr()
         assertEquals(expected0, actual0)
 
         val cvr1 = export.cvrs[1]
@@ -107,7 +107,7 @@ class TestDominionCvrReader {
             24 to intArrayOf(1),
         )
         val expected1 = makeCvr(cvr1.cvrNumber, expectedVotes1)
-        val actual1 = cvr1.convert()
+        val actual1 = cvr1.convertToCvr()
         assertEquals(expected1, actual1)
 
         val cvr2 = export.cvrs[2]
@@ -125,7 +125,7 @@ class TestDominionCvrReader {
             32 to intArrayOf(1),
         )
         val expected2 = makeCvr(cvr2.cvrNumber, expectedVotes2)
-        val actual2 = cvr2.convert()
+        val actual2 = cvr2.convertToCvr()
         assertEquals(expected2, actual2)
 
         val cvr3 = export.cvrs[3]
@@ -145,7 +145,7 @@ class TestDominionCvrReader {
             27 to intArrayOf(1),
         )
         val expected3 = makeCvr(cvr3.cvrNumber, expectedVotes3)
-        val actual3 = cvr3.convert()
+        val actual3 = cvr3.convertToCvr()
         assertEquals(expected3, actual3)
     }
 

@@ -1,7 +1,9 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.util.Closer
@@ -71,7 +73,8 @@ class TestMultiContestTestData {
     @Test
     fun testMakeCardLocationManifest() {
         val cardManifest = test.makeCardLocationManifest()
-        val testCards = cardManifest.cardLocations
+        val testCards = mutableListOf<AuditableCard>()
+        cardManifest.cardLocations.iterator().forEach { testCards.add(it) }
 
         val tabs = tabulateAuditableCards(Closer(testCards.iterator()), infos).toSortedMap() // contestId -> candidateId -> nvotes
         tabs.forEach { id, tab ->
@@ -191,15 +194,15 @@ class TestMultiContestTestData {
     @Test
     fun testPhantomCvrs() {
         val cardManifest = test.makeCardLocationManifest()
-        val testCards = cardManifest.cardLocations
-        val testCvrs = testCards.map { it.cvr() }
+        val testCvrs = mutableListOf<Cvr>()
+        cardManifest.cardLocations.iterator().forEach { testCvrs.add(it.cvr()) }
 
         test.contests.forEachIndexed { idx, contest ->
             val fcontest = test.contestBuilders[idx]
             val Nc = fcontest.ncards + fcontest.phantomCount
             assertEquals(contest.Nc, Nc)
 
-            val nphantom = testCards.count { it.hasContest(contest.id) && it.phantom }
+            val nphantom = testCvrs.count { it.hasContest(contest.id) && it.phantom }
             assertEquals(fcontest.phantomCount, nphantom)
             val phantomPct = nphantom/ Nc.toDouble()
             println("Nc=${contest.Nc} nphantom=$nphantom pct= $phantomPct =~ ${fcontest.phantomPct} abs=${abs(phantomPct - fcontest.phantomPct)} tol=${1.0/Nc}")

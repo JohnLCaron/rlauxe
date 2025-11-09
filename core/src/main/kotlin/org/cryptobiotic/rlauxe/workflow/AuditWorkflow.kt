@@ -38,7 +38,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         estimateSampleSizes(
             auditConfig(),
             auditRound,
-            cardManifest = if (auditConfig().auditType == AuditType.POLLING) null else mvrManager().sortedCards(),
+            cardManifest = mvrManager().sortedCards(),
             // nthreads=1,
         )
         logger.info{"Estimate round ${roundIdx} took ${stopwatch}"}

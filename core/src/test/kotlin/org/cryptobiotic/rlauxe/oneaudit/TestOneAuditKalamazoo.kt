@@ -131,7 +131,7 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<ContestUnderAudit, List<CardP
 class CardPoolImpl(override val poolName: String, override val poolId: Int, val contestId: Int, val regVotes: RegVotes) : CardPoolIF {
     override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
     override fun regVotes() = mapOf(contestId to regVotes)
-    override fun contains(contestId: Int) = contestId == this.contestId
+    override fun hasContest(contestId: Int) = contestId == this.contestId
     override fun ncards() = regVotes.ncards()
 
     override fun contests() = intArrayOf(contestId)

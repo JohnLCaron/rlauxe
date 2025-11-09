@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -66,8 +66,9 @@ class ToAuditableCardPolling(val cards: CloseableIterator<AuditableCard>) : Clos
 }
 
 // CLCA or OneAudit TODO test Polling
-class CvrsWithPoolsToCards(val cvrs: CloseableIterable<Cvr>, val styleMap: Map<Int, CardStyleIF>?, val phantomCvrs : List<Cvr>?, val config: AuditConfig): CloseableIterable<AuditableCard> {
-
+class CvrsWithStylesToCards(val cvrs: CloseableIterable<Cvr>, styles: List<CardStyleIF>?, val phantomCvrs : List<Cvr>?,
+                            val type: AuditType, val hasStyle: Boolean): CloseableIterable<AuditableCard> {
+    val poolMap = styles?.associateBy{ it.id() }
     override fun iterator(): CloseableIterator<AuditableCard> {
         val allSeq = if (phantomCvrs == null) {
             cvrs.iterator().asSequence()
@@ -77,21 +78,67 @@ class CvrsWithPoolsToCards(val cvrs: CloseableIterable<Cvr>, val styleMap: Map<I
             cardSeq + phantomSeq
         }
 
-        return CardPoolCvrIterator(allSeq.iterator())
+        return CvrToCardIterator(allSeq.iterator())
     }
 
-    inner class CardPoolCvrIterator(val orgIter: Iterator<Cvr>): CloseableIterator<AuditableCard> {
+    inner class CvrToCardIterator(val orgIter: Iterator<Cvr>): CloseableIterator<AuditableCard> {
         var cardIndex = 1
         override fun hasNext() = orgIter.hasNext()
 
         override fun next(): AuditableCard {
             val orgCvr = orgIter.next()
-            val style = if (styleMap == null) null else styleMap[orgCvr.poolId]
-            val hasCvr = config.isClca || (config.isOA && style == null)
-            val poolId = if (!config.isOA) null else style?.id()
-            val contests = if (hasCvr) intArrayOf() else style?.contests()
+            val style = if (poolMap == null) null
+                else poolMap[orgCvr.poolId]
+            val hasCvr = type.isClca() || (type.isOA() && style == null)
+            val poolId = if (!type.isOA()) null else style?.id()
+            val contests = when {
+                (hasCvr && hasStyle) -> null
+                (style != null) -> style.contests()
+                hasStyle -> orgCvr.contests()
+                else -> null
+            }
             val votes = if (hasCvr) orgCvr.votes else null
             return AuditableCard(orgCvr.id, cardIndex++, 0, phantom=orgCvr.phantom, contests ?: intArrayOf(), votes, poolId)
+        }
+
+        override fun close() {} // = orgIter.close()
+    }
+}
+
+class CardsWithStylesToCards(val cards: CloseableIterable<AuditableCard>, val styles: List<CardStyleIF>?,
+                             val phantomCvrs : List<AuditableCard>?, val type: AuditType, val hasStyle: Boolean): CloseableIterable<AuditableCard> {
+    val poolMap = styles?.associateBy{ it.id() }
+
+    override fun iterator(): CloseableIterator<AuditableCard> {
+        val allSeq = if (phantomCvrs == null) {
+            cards.iterator().asSequence()
+        } else {
+            val cardSeq = cards.iterator().asSequence()
+            val phantomSeq = phantomCvrs.asSequence() // late binding to index, port to boulder, sf
+            cardSeq + phantomSeq
+        }
+
+        return CardToCardIterator(allSeq.iterator())
+    }
+
+    inner class CardToCardIterator(val orgIter: Iterator<AuditableCard>): CloseableIterator<AuditableCard> {
+        var cardIndex = 1
+        override fun hasNext() = orgIter.hasNext()
+
+        override fun next(): AuditableCard {
+            val orgCard = orgIter.next()
+            val style = if (poolMap == null) null
+                else poolMap[orgCard.poolId]
+            val hasCvr = type.isClca() || (type.isOA() && style == null)
+            val poolId = if (!type.isOA()) null else style?.id()
+            val contests = when {
+                (hasCvr && hasStyle) -> null
+                (style != null) -> style.contests()
+                hasStyle -> orgCard.contests()
+                else -> null
+            }
+            val votes = if (hasCvr) orgCard.votes else null
+            return AuditableCard(orgCard.location, cardIndex++, 0, phantom=orgCard.phantom, contests ?: intArrayOf(), votes, poolId)
         }
 
         override fun close() {} // = orgIter.close()

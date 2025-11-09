@@ -246,3 +246,26 @@ So when calculating the overstatement_error, use hasStyles=true if the card has 
 
 If using CSD, the Prover must commit to the CSD before the PRN is chosen.
 A verifier needs to check that cards are chosen in order of smallest PRN, and satisfy the CSD if used.
+
+MoreStyles Section 5 shows that polling audits can have hasStyle = true.
+
+==========================
+
+````
+    data class AuditableCard (
+        val location: String, // info to find the card for a manual audit. Aka ballot identifier.
+        val index: Int,  // index into the original, canonical list of cards
+        val prn: Long,   // psuedo random number
+        val phantom: Boolean,
+        val possibleContests: IntArray, // list of contests that might be on the ballot. TODO replace with cardStyle?
+        val votes: Map<Int, IntArray>?, // for CLCA or OneAudit, a map of contest -> the candidate ids voted; must include undervotes; missing for pooled data or polling audits
+        
+        val poolId: Int?, // for OneAudit
+        val cardStyle: String? = null, // not used yet
+    ) {
+        fun hasContest(contestId: Int): Boolean {
+            if (possibleContests.isEmpty() && votes == null) return true
+            return contests().contains(contestId)
+        }
+    }
+````

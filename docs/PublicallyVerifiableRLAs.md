@@ -148,3 +148,66 @@ ClcaAssorter
         return cvr_assort - mvr_assort
     }
 ````
+
+## 4.3 The Instance
+
+Before the protocol begins, the prover fixes an instance, which represents the claim it will prove. The instance is:
+
+* a multiset x of ID-tagged cards,
+* a reported outcome O ∈ the set of possible outcomes,
+* a (trusted) upper bound Ncard on the number of cards,
+* (optionally) a decision to use style-based sampling and a (trusted) upper bound Ncontest on the number of cards containing the contest.
+
+The prover will attempt to show that the social choice function TALLY yields the reported outcome O, when applied to the cards x.
+
+## 4.4 The Prover's First Message
+
+In the first step of the protocol, the prover P commits to a collection of claims about x.
+
+* An ID commitment FIND (see Definition 6).
+* (Optionally) a CVR commitment (see Definition 7).
+* A list ASSERTIONS of assertions with corresponding assorters ASSORTERS (see Definition 4, Definition 8 and Definition 9).
+* (Optionally) other data AUX - P , such as tallies or subtotals, which the p-value calculator may input.
+
+## 4.5 The Verifier's challenge
+
+The verifier V samples and sends a seed s.
+
+## 4.6 The Provers Response
+
+The prover P computes uses PRG(s) and π ← ḠSAMPLE,N (se). 
+
+For each index i = 1.. P retrieves MVR(i) with identifier FIND (π_i) ("but is free to do otherwise" ??)
+
+## 4.7 The Verifiers Decision
+
+### 4.7.1. Validating the prover’s first message
+
+1) Each assorter satisfies its upper bound.
+2) ASSERTIONS implies O given TALLY (see Definition 5)
+3) |ASSERTIONS| = |ASSORTERS|.
+4) for all i ∈ 1..|ASSORTERS|, ASSORTERSi expresses ASSERTIONS i (see Definition 9 and 10). This effectively says that 
+   if we are using style-based sampling and there are CVRs that claim to have the contest but are outside the image of
+   FIND then we ignore them.
+5) FIND assigns some i ∈ I to every index in 1..N and does not repeat any ballot ID.
+
+### 4.7.2. Validating the prover’s response to s
+
+Algorithm 1. This is what we call running the audit.
+
+On Line 7, the verifier V identifies the identifier of the card that must be audited. 
+On Line 8, V reads that card, or sets it to ⊥ if no card has been returned. 
+On Line 9, V checks whether the card returned by the prover has the expected ID. If so, V sets MVR(t) to the
+canonical interpretation of that card, and to BAD otherwise.
+
+V then goes through all the assorters 
+on Line 15, it extends the vector a_i with the value that assorter ai takes for this audited card. 
+on line 16 it  updates pi with the p-value computed for this assorter
+
+on line 19 it checks if all p-values are less than the risk limit
+on line 24 it accepts O if all p-values are less than the risk limit
+
+So we need to check that the samples are sorted by PRN.
+So we need to check that the samples PRN are te smallest available based for that contest.
+So we need to check that the MVR id matches the CVR id.
+

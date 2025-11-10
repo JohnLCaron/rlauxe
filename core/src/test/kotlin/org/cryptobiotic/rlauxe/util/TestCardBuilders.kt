@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 class TestCardBuilders {
 
     @Test
-    fun testConvertCsrdsRoundtrip() {
+    fun testConvertCardsRoundtrip() {
         val test = MultiContestTestData(20, 11, 20000, hasStyle=true)
         val cards = test.makeCardsFromContests()
         val cardMap = cards.associateBy { it.location }

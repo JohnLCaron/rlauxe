@@ -14,11 +14,8 @@ import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
-import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.util.CvrToAuditableCardClca
-import org.cryptobiotic.rlauxe.util.CvrToAuditableCardPolling
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.io.path.Path
 import kotlin.math.min
@@ -110,7 +107,7 @@ fun startTestElectionPolling(
 }
 
 class TestPollingElection(
-    config: AuditConfig,
+    val config: AuditConfig,
     minMargin: Double,
     fuzzMvrsPct: Double,
     pctPhantoms: Double?,
@@ -151,11 +148,13 @@ class TestPollingElection(
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
 
-    override fun cardManifest(): CardLocationManifest {
-        val wtf: CloseableIterator<AuditableCard> = CvrToAuditableCardClca(Closer(cvrs.iterator()))
-        return CardLocationManifest(
-            CloseableIterable { wtf },
-            emptyList())
+    override fun cardLocations() : CloseableIterator<AuditableCard> {
+        return CvrsWithStylesToCards(
+            config.auditType, config.hasStyle,
+            Closer(cvrs.iterator()),
+            null,
+            styles = null,
+        )
     }
 }
 
@@ -192,7 +191,7 @@ fun startTestElectionClca(
 }
 
 class TestClcaElection(
-    config: AuditConfig,
+    val config: AuditConfig,
     minMargin: Double,
     fuzzMvrs: Double,
     pctPhantoms: Double?,
@@ -243,16 +242,14 @@ class TestClcaElection(
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
 
-    fun allCvrs() = Pair(
-        CvrToAuditableCardClca(Closer(allCvrs.iterator())),
-        CvrToAuditableCardClca(Closer(testMvrs.iterator()))
-    )
-
-    override fun cardManifest(): CardLocationManifest {
-        val wtf: CloseableIterator<AuditableCard> = CvrToAuditableCardClca(Closer(allCvrs.iterator()))
-        return CardLocationManifest(
-            CloseableIterable { wtf },
-            emptyList())
+    override fun cardLocations() : CloseableIterator<AuditableCard> {
+        return CvrsWithStylesToCards(
+            config.auditType, config.hasStyle,
+            Closer(allCvrs.iterator()),
+            null,
+            styles = null,
+        )
     }
+
 }
 

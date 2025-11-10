@@ -34,7 +34,7 @@ open class ColoradoOneAudit (
 
     val contests: List<ContestIF>
     val contestsUA: List<ContestUnderAudit>
-    val manifest:  CardLocationManifest
+
     init {
         // add pool counts into contests
         oaContests.forEach { it.adjustPoolInfo(cardPools) }
@@ -55,9 +55,8 @@ open class ColoradoOneAudit (
 
         // we need to know the diluted Nb before we can create the UAs
         contests = makeContests()
-        manifest = createCardManifest()
 
-        val manifestTabs = tabulateAuditableCards(manifest.cardLocations.iterator(), infoMap)
+        val manifestTabs = tabulateAuditableCards(createCardIterator(), infoMap)
         val contestNbs = manifestTabs.mapValues { it.value.ncards }
 
         contestsUA = contests.map { contest ->
@@ -151,36 +150,16 @@ open class ColoradoOneAudit (
         }
     }
 
-    fun makeUAContests(): List<ContestUnderAudit> {
-        val infoList= oaContests.map { it.info }.sortedBy { it.id }
-        val contestMap= oaContests.associateBy { it.info.id }
-
-        println("ncontests with info = ${infoList.size}")
-
-        val regContests = infoList.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
-            val oaContest = contestMap[info.id]!!
-            val candVotes = oaContest.candidateVotes.filter { info.candidateIds.contains(it.key) } // remove Write-Ins
-            val ncards = oaContest.poolTotalCards()
-            val useNc = max( ncards, oaContest.Nc)
-            val contest = Contest(info, candVotes, useNc, ncards)
-            info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
-            ContestUnderAudit(contest, hasStyle=hasStyle).addStandardAssertions()
-        }
-
-        return regContests
-    }
-
     override fun cardPools(): List<CardPoolIF>?  = cardPools
     override fun contestsUA() = contestsUA
-    override fun cardManifest() = manifest
+    override fun cardLocations() = createCardIterator()
 
-    fun createCardManifest(): CardLocationManifest {
-        val phantomCvrs = makePhantomCvrs(contests)
-
-        val cvrsFromPools = CloseableIterable { CvrIteratorfromPools()  } // "fake" truth
-
-        return CardLocationManifest(CvrsWithStylesToCards(cvrsFromPools, cardPools, phantomCvrs,
-            config.auditType, hasStyle), emptyList())
+    fun createCardIterator(): CloseableIterator<AuditableCard> {
+        return CvrsWithStylesToCards(config.auditType, hasStyle,
+            Closer(CvrIteratorfromPools()),
+            makePhantomCvrs(contests),
+            if (config.isOA) cardPools else null,
+        )
     }
 
     // dont load into memory all at once, just one pool at a time
@@ -228,7 +207,7 @@ open class ColoradoOneAudit (
     }
 }
 
-class OneAuditContestCorla(val info: ContestInfo, val detailContest: ElectionDetailContest, val contestRound: ContestRoundCsv): OneAuditContestIF {
+class OneAuditContestCorla(val info: ContestInfo, detailContest: ElectionDetailContest, contestRound: ContestRoundCsv): OneAuditContestIF {
     override val contestId = info.id
     val Nc: Int
     val candidateVotes: Map<Int, Int>

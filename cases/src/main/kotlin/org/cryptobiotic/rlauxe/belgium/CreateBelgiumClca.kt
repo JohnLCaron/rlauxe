@@ -6,13 +6,12 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
-import kotlin.sequences.plus
 
 private val logger = KotlinLogging.logger("BelgiumClca")
 
 class BelgiumClca (
     contestd: DHondtContest,
-    hasStyle: Boolean,
+    val hasStyle: Boolean,
 ): CreateElectionIF {
 
     val infoMap: Map<Int, ContestInfo>
@@ -28,16 +27,14 @@ class BelgiumClca (
 
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
+    override fun cardLocations() = createCardIterator()
 
-    override fun cardManifest(): CardLocationManifest {
-        val phantomCvrs = makePhantomCvrs(contestsUA().map { it.contest })
-        val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvrHasStyle(cvr, idx, isClca=true) }.asSequence()
-        val cardSeq = CvrToAuditableCardClca(Closer(cvrs.iterator())).asSequence()
-        val allCardsIter = (cardSeq + phantomSeq).iterator()
-
-        return CardLocationManifest(
-            CloseableIterable { allCardsIter },
-            emptyList())
+    fun createCardIterator(): CloseableIterator<AuditableCard> {
+        return CvrsWithStylesToCards(AuditType.CLCA, hasStyle,
+            Closer(cvrs.iterator()),
+            makePhantomCvrs(contestsUA().map { it.contest }),
+            null,
+        )
     }
 }
 

@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.CloseableIterator
+import kotlin.sequences.plus
 
 // A generalization of Cvr, allowing votes to be null, eg for Polling or OneAudit pools.
 // Also possibleContests/cardStyle represents sample population information
@@ -77,24 +79,10 @@ data class AuditableCard (
     }
 
     companion object {
-
-        // dont throw away the votes
         fun fromCvr(cvr: Cvr, index: Int, sampleNum: Long): AuditableCard {
             val sortedVotes = cvr.votes.toSortedMap()
             val contests = sortedVotes.keys.toList()
             return AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), cvr.votes, cvr.poolId)
-        }
-
-        fun fromCvrHasStyle(cvr: Cvr, index: Int, isClca: Boolean): AuditableCard {
-            val contests = if (isClca) intArrayOf() else cvr.votes.keys.toList().sorted().toIntArray()
-            val votes = if (isClca) cvr.votes else null
-            val poolId = if (isClca) null else cvr.poolId
-            return AuditableCard(cvr.id, index, 0, cvr.phantom, contests, votes, poolId)
-        }
-
-        fun fromCvrNoStyle(cvr: Cvr, index: Int, possibleContests: IntArray, isClca: Boolean): AuditableCard {
-            val votes = if (isClca) cvr.votes else null
-            return AuditableCard(cvr.id, index, 0, cvr.phantom, possibleContests, votes = votes, cvr.poolId)
         }
     }
 }
@@ -138,4 +126,103 @@ data class CardStyle(
         }
     }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+// CLCA or OneAudit or Polling
+class CvrsWithStylesToCards(
+    val type: AuditType,
+    val hasStyle: Boolean,
+    val cvrs: CloseableIterator<Cvr>,
+    val phantomCvrs : List<Cvr>?,
+    styles: List<CardStyleIF>?,
+): CloseableIterator<AuditableCard> {
+
+    val poolMap = styles?.associateBy{ it.id() }
+    val allCvrs: Iterator<Cvr>
+    var cardIndex = 1
+
+    init {
+        allCvrs = if (phantomCvrs == null) {
+            cvrs
+        } else {
+            val cardSeq = cvrs.iterator().asSequence()
+            val phantomSeq = phantomCvrs.asSequence() // late binding to index, port to boulder, sf
+            (cardSeq + phantomSeq).iterator()
+        }
+    }
+
+    override fun hasNext() = allCvrs.hasNext()
+
+    override fun next(): AuditableCard {
+        val orgCvr = allCvrs.next()
+        val style = if (poolMap == null) null
+        else poolMap[orgCvr.poolId]
+        val hasCvr = type.isClca() || (type.isOA() && style == null)
+        val poolId = if (!type.isOA()) null else style?.id()
+        val contests = when {
+            (hasCvr && hasStyle) -> null
+            (style != null) -> style.contests()
+            hasStyle -> orgCvr.contests()
+            else -> null
+        }
+        val votes = if (hasCvr) orgCvr.votes else null
+
+        // compare to AuditableCard.fromCvr
+        //         fun fromCvr(cvr: Cvr, index: Int, sampleNum: Long): AuditableCard {
+        //            val sortedVotes = cvr.votes.toSortedMap()
+        //            val contests = sortedVotes.keys.toList()
+        //            return AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), cvr.votes, cvr.poolId)
+        //        }
+        return AuditableCard(orgCvr.id, cardIndex++, 0, phantom=orgCvr.phantom, contests ?: intArrayOf(), votes, poolId)
+    }
+
+    override fun close() = cvrs.close()
+}
+
+// CLCA or OneAudit or Polling
+class CardsWithStylesToCards(
+    val type: AuditType,
+    val hasStyle: Boolean,
+    val cards: CloseableIterator<AuditableCard>,
+    phantomCards : List<AuditableCard>?,
+    styles: List<CardStyleIF>?,
+): CloseableIterator<AuditableCard> {
+
+    val poolMap = styles?.associateBy{ it.id() }
+    val allCards: Iterator<AuditableCard>
+    var cardIndex = 1
+
+    init {
+        allCards = if (phantomCards == null) {
+            cards
+        } else {
+            val cardSeq = cards.iterator().asSequence()
+            val phantomSeq = phantomCards.asSequence()
+            (cardSeq + phantomSeq).iterator()
+        }
+    }
+
+    override fun hasNext() = allCards.hasNext()
+
+    override fun next(): AuditableCard {
+        val orgCard = allCards.next()
+        val style = if (poolMap == null) null
+        else poolMap[orgCard.poolId]
+        val hasCvr = type.isClca() || (type.isOA() && style == null)
+        val poolId = if (!type.isOA()) null else style?.id()
+        val contests = when {
+            (hasCvr && hasStyle) -> null
+            (style != null) -> style.contests()
+            hasStyle -> orgCard.contests()
+            else -> null
+        }
+        val votes = if (hasCvr) orgCard.votes else null
+
+        return AuditableCard(orgCard.location, cardIndex++, 0, phantom=orgCard.phantom, contests ?: intArrayOf(), votes, poolId)
+    }
+
+    override fun close() = cards.close()
+}
+
 

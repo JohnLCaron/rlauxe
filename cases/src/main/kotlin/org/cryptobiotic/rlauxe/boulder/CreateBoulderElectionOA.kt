@@ -7,12 +7,10 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.ContestVotes
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
-import org.cryptobiotic.rlauxe.estimate.makePhantomCards
 import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
-import kotlin.collections.asSequence
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -44,7 +42,6 @@ open class BoulderElectionOA(
     val contestsUA : List<ContestUnderAudit>
 
     val cardPools: List<CardPoolWithBallotStyle> = convertRedactedToCardPool() // convertRedactedToCardPoolPaired(export.redacted, infoMap) // convertRedactedToCardPool2()
-    val manifest: CardLocationManifest
 
     init {
         oaContests.values.forEach { it.adjustPoolInfo(cardPools)}
@@ -61,9 +58,8 @@ open class BoulderElectionOA(
 
         // we need to know the diluted Nb before we can create the UAs
         contests = makeContests()
-        manifest = if (isClca) cardManifestClca() else cardManifestOA()
 
-        val manifestTabs = tabulateAuditableCards(manifest.cardLocations.iterator(), infoMap)
+        val manifestTabs = tabulateAuditableCards(createCardIterator(), infoMap)
         val contestNbs = manifestTabs.mapValues { it.value.ncards }
 
         contestsUA = contests.map { contest ->
@@ -260,16 +256,52 @@ open class BoulderElectionOA(
         }
     }
 
-    fun makeUAContests(hasStyle: Boolean, contestNb: Map<Int, Int>): List<ContestUnderAudit> {
-        return contests.map { contest ->
-            ContestUnderAudit(contest, hasStyle=hasStyle, Nbin=contestNb[contest.id]).addStandardAssertions()
+    override fun contestsUA() = contestsUA
+    override fun cardPools() = cardPools
+    override fun cardLocations() = createCardIterator()
+
+    fun createCardIterator(): CloseableIterator<AuditableCard> {
+        return if (isClca) {
+            val simulatedCvrs = makeRedactedCvrs()
+            val cvrs =  exportCvrs + simulatedCvrs
+            CvrsWithStylesToCards(
+                AuditType.CLCA, hasStyle,
+                Closer(cvrs.iterator()),
+                makePhantomCvrs(contests),
+                null
+            )
+        } else {
+            val poolCards =  createCvrsFromPools()
+            val cvrs =  exportCvrs + poolCards
+            CvrsWithStylesToCards(
+                AuditType.CLCA, hasStyle,
+                Closer(cvrs.iterator()),
+                makePhantomCvrs(contests),
+                styles = cardPools
+            )
         }
     }
 
-    override fun contestsUA() = contestsUA
-    override fun cardPools() = cardPools
-    override fun cardManifest() = manifest
+    fun createCvrsFromPools() : List<Cvr> {
+        val cvrs = mutableListOf<Cvr>()
 
+        cardPools.forEach { pool ->
+            val cleanName = cleanCsvString(pool.poolName)
+            repeat(pool.ncards()) { poolIndex ->
+                cvrs.add(
+                    Cvr(
+                        id = "pool${cleanName} card ${poolIndex + 1}",
+                        phantom = false,
+                        votes = pool.voteTotals.mapValues { intArrayOf() }, // empty candidates
+                        poolId = pool.poolId
+                    )
+                )
+            }
+        }
+        return cvrs
+    }
+
+    /*
     fun cardManifestClca(): CardLocationManifest {
         val redactedCvrs = makeRedactedCvrs()
         val phantoms = makePhantomCvrs(contests)
@@ -297,20 +329,6 @@ open class BoulderElectionOA(
             val cardSeq =  exportedCards + poolCards + phantoms
             return Closer( cardSeq.iterator())
         }
-    }
-
-    /* i dont see how you can only do one iteration.
-    override fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?>  { // (cvrs, mvrs) including phantoms
-        val poolCvrs = if (isClca) redactedCvrs else createCvrsFromPools(cardPools)
-        val phantoms = makePhantomCvrs(contestsUA.map { it.contest } )
-        val cvrs =  this.exportCvrs + poolCvrs + phantoms  // TODO same when isClca, so could omit
-        val mvrs =  this.exportCvrs + redactedCvrs + phantoms
-        require(cvrs.size == mvrs.size)
-
-        return Pair(
-            CvrToAuditableCardClca(Closer(cvrs.iterator())),
-            CvrToAuditableCardClca(Closer(mvrs.iterator()))
-        )
     } */
 }
 

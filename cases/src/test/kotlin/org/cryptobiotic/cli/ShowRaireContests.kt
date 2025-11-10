@@ -3,8 +3,8 @@ package org.cryptobiotic.cli
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.csv.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
@@ -12,7 +12,6 @@ import org.cryptobiotic.rlauxe.raire.IrvCount
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.raire.VoteConsolidator
 import org.cryptobiotic.rlauxe.raire.showIrvCountResult
-import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
@@ -50,14 +49,6 @@ class ShowRaireContests {
             showIrvCount(counter.rcontest, irvCount)
         }
         println("showIrvCounts took $stopwatch")
-    }
-}
-
-class CvrExportToCvrAdapter(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: Map<String, Int>? = null) : CloseableIterator<Cvr> {
-    override fun hasNext() = cvrExportIterator.hasNext()
-    override fun next() = cvrExportIterator.next().toCvr(pools=pools)
-    override fun close() {
-        cvrExportIterator.close()
     }
 }
 

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 
@@ -77,12 +78,12 @@ data class AssertionAndCat(val assertion: AssertionRound, val cat: String, val m
 }
 
 fun readAssertionAndTotal(auditDir: String, cat: String, marginOverride:Map<Int, Double>? = null): Pair<Int, List<AssertionAndCat>> {
-    val auditRecord = AuditRecord.readFrom(auditDir)
-    if (auditRecord == null) {
+    val auditRecord = AuditRecord.readFromResult(auditDir)
+    if (auditRecord is Err) {
         fail()
     }
 
-    val auditRounds = auditRecord.rounds
+    val auditRounds = auditRecord.unwrap().rounds
     require( auditRounds.size >= 1)
     val auditRound: AuditRound = auditRounds[0]
 

@@ -12,8 +12,8 @@ import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.CvrsWithStylesToCards
+import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.io.path.Path
 
@@ -179,11 +179,15 @@ object RunRlaCreateOneAudit {
 
         override fun cardPools() = allCardPools
         override fun contestsUA() = contestsUA
+        override fun cardLocations() = createCardIterator()
 
-        override fun cardManifest(): CardLocationManifest {
-            val cvrsIterable  = CloseableIterable{ allCvrs.iterator() }
-            val cardLocations = CvrsWithStylesToCards(cvrsIterable, styles=allCardPools, null, config.auditType, config.hasStyle) // already has phantoms
-            return CardLocationManifest(cardLocations, emptyList())
+        fun createCardIterator(): CloseableIterator<AuditableCard> {
+            return CvrsWithStylesToCards(
+                config.auditType, config.hasStyle,
+                Closer(allCvrs.iterator()),
+                null,
+                styles = allCardPools,
+            )
         }
     }
 }

@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.audit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -13,17 +12,13 @@ import org.cryptobiotic.rlauxe.persist.existsOrZip
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeCardPoolsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
-import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.SortMerge
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.ToAuditableCardPolling
-import org.cryptobiotic.rlauxe.util.ToAuditableCardPooled
 import org.cryptobiotic.rlauxe.util.cleanCsvString
 import org.cryptobiotic.rlauxe.util.createZipFile
-import org.cryptobiotic.rlauxe.util.emptyCloseableIterable
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
 import kotlin.collections.forEach
@@ -33,9 +28,8 @@ interface CreateElectionIF {
     fun contestsUA(): List<ContestUnderAudit>
     fun cardPools(): List<CardPoolIF>? // only if OneAudit
 
-    fun cardManifest(): CardLocationManifest
     // if you immediately write to disk, you only need one pass through the iterator
-    // fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?>  // (cvrs, mvrs) including phantoms
+    fun cardLocations() : CloseableIterator<AuditableCard>
 }
 
 private val logger = KotlinLogging.logger("CreateAudit")
@@ -65,39 +59,10 @@ class CreateAudit(val name: String, val topdir: String, val config: AuditConfig,
         }
         logger.info { "added ClcaAssertions from reported margin " }
 
-        val (cards, _) = election.cardManifest()
-            val countCvrs = writeAuditableCardCsvFile(cards.iterator(), publisher.cardManifestFile())
-            createZipFile(publisher.cardManifestFile(), delete = true)
-            logger.info { "write ${countCvrs} cards to ${publisher.cardManifestFile()}" }
-
-        /* if (mvrs != null) {
-            validateOutputDirOfFile(publisher.testMvrsFile())
-            val countMvrs = writeAuditableCardCsvFile(mvrs, publisher.testMvrsFile())
-            createZipFile(publisher.testMvrsFile(), delete = true)
-            logger.info { "write ${countMvrs} cards to ${publisher.testMvrsFile()}" }
-
-            // mvrs may be created randomly, so cant be reproduced, ie can get a new iterator.
-            // if cards arent supplied, we have to read the mvrs we just wrote
-            val mvrIter = if (cards == null) readCardsCsvIterator(publisher.testMvrsFile()) else null
-
-            if (cards == null && config.isClca) { // just make a copy
-                val countCvrs = writeAuditableCardCsvFile(mvrIter!!, publisher.cardManifestFile())
-                createZipFile(publisher.cardManifestFile(), delete = true)
-                logger.info { "copy ${countCvrs} cards to ${publisher.cardManifestFile()}" }
-            }
-
-            if (cards == null && config.isOA) { // remove pooled votes
-                val countCvrs = writeAuditableCardCsvFile(ToAuditableCardPooled(mvrIter!!), publisher.cardManifestFile())
-                createZipFile(publisher.cardManifestFile(), delete = true)
-                logger.info { "copy ${countCvrs} cards to ${publisher.cardManifestFile()} remove pooled votes" }
-            }
-
-            if (cards == null && config.isPolling) { // remove all votes
-                val countCvrs = writeAuditableCardCsvFile(ToAuditableCardPolling(mvrIter!!), publisher.cardManifestFile())
-                createZipFile(publisher.cardManifestFile(), delete = true)
-                logger.info { "copy ${countCvrs} cards to ${publisher.cardManifestFile()} remove all votes" }
-            }
-        } */
+        val cards = election.cardLocations()
+        val countCvrs = writeAuditableCardCsvFile(cards, publisher.cardManifestFile())
+        createZipFile(publisher.cardManifestFile(), delete = true)
+        logger.info { "write ${countCvrs} cards to ${publisher.cardManifestFile()}" }
 
         // this may change the auditStatus to misformed
         val results = VerifyResults()
@@ -196,7 +161,7 @@ fun createCardsFromPools(pools: List<CardPoolIF>, startIdx: Int) : List<Auditabl
             )
         }
     }
-    val totalRedactedBallots = pools.sumOf { it.ncards() }
-    require(cards.size == totalRedactedBallots)
+    val totalCards = pools.sumOf { it.ncards() }
+    require(cards.size == totalCards)
     return cards
 }

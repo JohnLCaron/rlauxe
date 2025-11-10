@@ -10,13 +10,11 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.*
 import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.CvrsWithPoolsToCards
-import org.cryptobiotic.rlauxe.util.tabulateCvrs
+import org.cryptobiotic.rlauxe.util.CvrsWithStylesToCards
 import kotlin.test.Test
 import kotlin.test.fail
 
@@ -44,7 +42,7 @@ class TestPersistedWorkflow {
 
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
-        val election = PersistedAudit(contestsUA, testCvrs, config=config)
+        val election = CreateElectionFromCvrs(contestsUA, testCvrs, config=config)
         CreateAudit("testPersistedAuditClca", topdir, config, election, clear = true)
 
         runPersistedAudit(topdir)
@@ -72,7 +70,7 @@ class TestPersistedWorkflow {
 
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
-        val election = PersistedAudit(contestsUA, testCvrs, config=config)
+        val election = CreateElectionFromCvrs(contestsUA, testCvrs, config=config)
         CreateAudit("testPersistedAuditPolling", topdir, config, election, clear = true)
 
         runPersistedAudit(topdir)
@@ -101,7 +99,7 @@ class TestPersistedWorkflow {
 
         val contestsUA = listOf(contestOA)
 
-        val election = PersistedAudit(contestsUA, testCvrs, cardPools, config=config)
+        val election = CreateElectionFromCvrs(contestsUA, testCvrs, cardPools, config=config)
         CreateAudit("testPersistedAuditPolling", topdir, config, election, clear = true)
 
         runPersistedAudit(topdir)
@@ -110,10 +108,11 @@ class TestPersistedWorkflow {
     }
 }
 
-class PersistedAudit (
+class CreateElectionFromCvrs (
     val contestsUA: List<ContestUnderAudit>,
     val cvrs: List<Cvr>,
     val cardPools: List<CardPoolIF>? = null,
+    val cardStyles: List<CardStyleIF>? = null,
     val config: AuditConfig,
 ): CreateElectionIF {
 
@@ -121,10 +120,8 @@ class PersistedAudit (
     override fun contestsUA() = contestsUA
 
     override fun cardManifest(): CardLocationManifest {
-        val poolMap = cardPools?.associateBy { it.poolId }
-
         val cvrsIterable  = CloseableIterable{ cvrs.iterator() }
-        val cardLocations = CvrsWithPoolsToCards(cvrsIterable, poolMap, null, config) // already has phantoms
+        val cardLocations = CvrsWithStylesToCards(cvrsIterable, cardPools ?: cardStyles, null, type=config.auditType, config.hasStyle) // already has phantoms
         return CardLocationManifest(cardLocations, emptyList())
     }
 }

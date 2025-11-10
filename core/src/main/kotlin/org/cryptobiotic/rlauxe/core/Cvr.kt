@@ -16,6 +16,7 @@ data class Cvr(
     }
 
     fun hasContest(contestId: Int): Boolean = votes[contestId] != null
+    fun contests() = votes.keys.toList().sorted().toIntArray()
 
     constructor(oldCvr: Cvr, votes: Map<Int, IntArray>) : this(oldCvr.id, votes, oldCvr.phantom)
     constructor(contest: Int, ranks: List<Int>): this( "testing", mapOf(contest to ranks.toIntArray())) // for quick testing

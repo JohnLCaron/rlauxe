@@ -356,8 +356,6 @@ open class ContestUnderAudit(
 
     fun makeDilutedMargin(assorter: AssorterIF): Double {
         val margin = assorter.calcMargin(contest.votes(), Nb)
-        if (margin < 0)
-            println("makeDilutedMargin")
         return margin
     }
 

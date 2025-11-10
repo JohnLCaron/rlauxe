@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.audit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 
-// A generalization of Cvr, allowing votes to be null, eg for Polling or OneAudit.
+// A generalization of Cvr, allowing votes to be null, eg for Polling or OneAudit pools.
 // Also possibleContests/cardStyle represents sample population information
 data class AuditableCard (
     val location: String, // info to find the card for a manual audit. Aka ballot identifier.
@@ -13,8 +13,8 @@ data class AuditableCard (
     val possibleContests: IntArray, // list of contests that might be on the ballot. TODO replace with cardStyle?
     val votes: Map<Int, IntArray>?, // for CLCA or OneAudit, a map of contest -> the candidate ids voted; must include undervotes; missing for pooled data or polling audits
                                                                                 // when IRV, ranked first to last
-    val poolId: Int?, // for OneAudit
-    val cardStyle: String? = null,
+    val poolId: Int?, // for OneAudit, or for setting style
+    val cardStyle: String? = null, // not used yet
 ) {
     // if there are no votes, the IntArrays are all empty; looks like all undervotes
     fun cvr() : Cvr {
@@ -36,10 +36,10 @@ data class AuditableCard (
         return contests().contains(contestId)
     }
 
-    fun contests(): List<Int> {
-        return if (possibleContests.isNotEmpty()) possibleContests.toList()
-            else if (votes != null) votes.keys.toList()
-            else emptyList()
+    fun contests(): IntArray {
+        return if (possibleContests.isNotEmpty()) possibleContests
+            else if (votes != null) votes.keys.toList().sorted().toIntArray()
+            else intArrayOf()
     }
 
     // Kotlin data class doesnt handle IntArray and List<IntArray> correctly
@@ -99,9 +99,11 @@ data class AuditableCard (
     }
 }
 
+// Can derive the Find and CVR committments of Verifiable paper, p.8 and section 4.7 ("the prover’s initial declaration about the cards")
+// Using the sorted cards, can verify that the sampled cards are the correct ones.
 data class CardLocationManifest(
     val cardLocations: CloseableIterable<AuditableCard>,
-    val cardStyles: List<CardStyle> // empty if style info not available
+    val cardStyles: List<CardStyle>
 )
 
 interface CardStyleIF {

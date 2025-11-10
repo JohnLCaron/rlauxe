@@ -25,6 +25,7 @@ data class MultiContestTestData(
     val marginRange: ClosedFloatingPointRange<Double> = 0.01.. 0.03,
     val underVotePctRange: ClosedFloatingPointRange<Double> = 0.01.. 0.30, // needed to set Nc
     val phantomPctRange: ClosedFloatingPointRange<Double> = 0.00..  0.005, // needed to set Nc
+    val poolId: Int? = null
 ) {
     // generate with ballotStyles; but if hasStyle = false, then these are not visible to the audit
     val ballotStylePartition = partition(totalBallots, nballotStyles).toMap() // Map bsidx -> ncards in each ballot style (bs)
@@ -117,7 +118,7 @@ data class MultiContestTestData(
     private fun makeCvr(cvrbs: CvrBuilders, fcontests: List<ContestTestDataBuilder>): Cvr {
         val cvrb = cvrbs.addCvr()
         fcontests.forEach { fcontest -> fcontest.addContestToCvr(cvrb) }
-        return cvrb.build()
+        return cvrb.build(poolId)
     }
 
     // multicontest cvrs

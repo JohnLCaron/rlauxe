@@ -178,9 +178,9 @@ open class ColoradoOneAudit (
         val phantomCvrs = makePhantomCvrs(contests)
 
         val cvrsFromPools = CloseableIterable { CvrIteratorfromPools()  } // "fake" truth
-        val poolMap = cardPools.associateBy { it.poolId }
 
-        return CardLocationManifest(CvrsWithPoolsToCards(cvrsFromPools, poolMap, phantomCvrs, config), emptyList())
+        return CardLocationManifest(CvrsWithStylesToCards(cvrsFromPools, cardPools, phantomCvrs,
+            config.auditType, hasStyle), emptyList())
     }
 
     // dont load into memory all at once, just one pool at a time

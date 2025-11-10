@@ -50,7 +50,7 @@ class CardBuilder(
         if (allVotes[id] == null) allVotes[id] = if (candidateId == null) intArrayOf() else intArrayOf(candidateId)
     }
 
-    fun build() : AuditableCard {
+    fun build(poolId:Int? = 0) : AuditableCard {
         // data class AuditableCard (
         //    val location: String, // info to find the card for a manual audit. Aka ballot identifier.
         //    val index: Int,  // index into the original, canonical list of cards
@@ -63,6 +63,7 @@ class CardBuilder(
         //    val cardStyle: String? = null,
         return AuditableCard(location, index=idx, prn=0L, phantom=phantom, possibleContests=possibleContests,
             votes= if (allVotes.isEmpty()) null else allVotes,
-            poolId=poolId, cardStyle=cardStyle)
+            poolId=poolId ?: this.poolId,
+            cardStyle=cardStyle)
     }
 }

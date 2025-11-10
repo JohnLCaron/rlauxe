@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 10/19/2025_
+_last changed: 11/09/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is a independent implementation of the SHANGRLA framework, based on the
@@ -506,9 +506,11 @@ STYLISH	    Stylish Risk-Limiting Audits in Practice. Glazer, Spertus, Stark  16
 
 SliceDice   Dice, but don’t slice: Optimizing the efficiency of ONEAudit. Spertus, Glazer and Stark, Aug 18 2025
     https://arxiv.org/pdf/2507.22179; https://github.com/spertus/UI-TS
+    
+Verifiable  Risk-Limiting Audits Are Interactive Proofs — How Do We Guarantee They Are Sound?
 
 ````
-Also see (reference notes)[docs/notes/papers.txt].
+Also see [complete list](docs/notes/papers.txt).
 
 ## Differences with SHANGRLA
 

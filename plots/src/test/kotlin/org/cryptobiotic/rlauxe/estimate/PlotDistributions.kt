@@ -87,7 +87,7 @@ class PlotDistributions {
         return estimateSampleSizes(
             config,
             auditRound,
-            cardManifest = if (config.auditType == AuditType.POLLING) null else mvrManager.sortedCards(),
+            cardManifest = mvrManager.sortedCards(),
         )
     }
 

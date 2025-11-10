@@ -6,6 +6,8 @@ import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardLocationManifest
+import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.audit.ContestRound
@@ -18,27 +20,34 @@ import org.cryptobiotic.rlauxe.core.ClcaErrorRates
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
+import org.cryptobiotic.rlauxe.util.CardsWithStylesToCards
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.util.CvrsWithStylesToCards
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
+import org.cryptobiotic.rlauxe.util.tabulateCvrs
+import org.cryptobiotic.rlauxe.workflow.CreateElectionFromCvrs
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
-// replicate examples in MoreStyles paper; use Cards not Cvrs
+// replicate examples in MoreStyles paper
 class TestHasStyle {
 
     @Test
-    fun testOneCardBallots() {
+    fun testHasStyleClcaSingleCard() {
         // p 6.
         // Suppose N = 10,000, p = 0.1, and mB = 0.1 = mS . For contest
         // B, there are 5,500 reported votes for the winner and 4,500 reported votes for the loser; for
         // contest S there are 550 votes for the winner and 450 votes for the loser.
+
+        val hasStyle = true
 
         val contestB = Contest(
             ContestInfo("B", 1, mapOf("Wes" to 1, "Les" to 2), SocialChoiceFunction.PLURALITY),
@@ -58,31 +67,39 @@ class TestHasStyle {
         )
         assertEquals(0.1, contestS.margin(1, 2))
 
-        val hasStyle = true
-        val testData = MultiContestCombineData(listOf(contestB, contestS), contestB.Nc, hasStyle = hasStyle)
+        val poolId = if (hasStyle) null else 1
+        val testData = MultiContestCombineData(listOf(contestB, contestS), contestB.Nc, poolId=poolId)
         val testCards = testData.makeCardsFromContests()
 
         val contests = listOf(contestB, contestS)
         val infos = contests.map{ it.info }.associateBy { it.id }
         val tabs = tabulateAuditableCards(Closer(testCards.iterator()), infos).toSortedMap()
-        println(tabs)
+        tabs.forEach { println(it) }
         contests.forEach { contest ->
-            if (contest.votes != tabs[contest.id]!!.votes)
-                println("heh")
             assertEquals(contest.votes, tabs[contest.id]!!.votes)
         }
 
-        val topdir = "/home/stormy/rla/persist/testOneCardBallots"
-        val auditRound = createAndRunTestAudit(topdir, false, contests, emptyList(), hasStyle, testCards)
-        println("testOneCardBallots hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
+        val cardStyles = if (hasStyle) null
+            else listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}, null))
+
+        val topdir = "/home/stormy/rla/persist/testHasStyleClcaSingleCard"
+        val auditRound = createAndRunTestAuditCards(topdir, false, contests, emptyList(), hasStyle, testCards, cardStyles)
+        println("testHasStyleClcaSingleCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
             println(" *** contest ${round.contestUA.name} wants ${round.estSampleSize} mvrs")
         }
 
+        // testHasStyleClcaSingleCard hasStyle=false audit estimates we need 550
+        // *** contest B wants 59 mvrs
+        // *** contest S wants 550 mvrs
+        //
+        // testOneCardBallots hasStyle=true audit estimates we need 111
+        // *** contest B wants 59 mvrs
+        // *** contest S wants 57 mvrs
+
         // testOneCardBallots hasStyle=false audit estimates we need 549
         //        *** contest B wants 59 mvrs
         //        *** contest S wants 549 mvrs
-        //
         // hasStyle=true audit estimates we need 111
         // *** contest B wants 59 mvrs
         // *** contest S wants 57 mvrs
@@ -92,7 +109,7 @@ class TestHasStyle {
     }
 
     @Test
-    fun testMultiCardBallots() {
+    fun testHasStyleClcaMultiCard() {
         // p 9.
         // Now suppose that each ballot consists of c > 1 cards. For simplicity, suppose that every
         // voter casts all c cards of their ballot. Contest B is on all N ballots and on N of the N c cards.
@@ -104,6 +121,10 @@ class TestHasStyle {
         // B, there are 5,500 reported votes for the winner and 4,500 reported votes for the loser; for
         // contest S there are 550 votes for the winner and 450 votes for the loser.
 
+        val hasStyle = true
+        val poolId = if (hasStyle) null else 1
+
+
         val contestB = Contest(
             ContestInfo("B", 1, mapOf("Wes" to 1, "Les" to 2), SocialChoiceFunction.PLURALITY),
             mapOf(1 to 5500, 2 to 4500),
@@ -113,8 +134,7 @@ class TestHasStyle {
         assertEquals(.1, contestB.margin(1, 2))
 
         // card 1
-        val hasStyle = false
-        val testData1 = MultiContestCombineData(listOf(contestB), contestB.Nc, hasStyle = hasStyle)
+        val testData1 = MultiContestCombineData(listOf(contestB), contestB.Nc, poolId = poolId)
         val testCvrs1 = testData1.makeCardsFromContests()
 
         ////////
@@ -136,7 +156,7 @@ class TestHasStyle {
         assertEquals(0.1, contestS.margin(1, 2))
 
         // card 2
-        val testData2 = MultiContestCombineData(listOf(contest3, contestS), contest3.Nc, hasStyle = hasStyle)
+        val testData2 = MultiContestCombineData(listOf(contest3, contestS), contest3.Nc, poolId = poolId)
         val testCvrs2 = testData2.makeCardsFromContests(testCvrs1.size)
 
         val allCards = mutableListOf<AuditableCard>()
@@ -148,23 +168,26 @@ class TestHasStyle {
         val contests = listOf(contestB, contestS, contest3)
         val infos = contests.map{ it.info }.associateBy { it.id }
         val tabs = tabulateAuditableCards(Closer(allCards.iterator()), infos).toSortedMap()
-        println(tabs)
+        tabs.forEach { println(it) }
         contests.forEach { contest ->
             assertEquals(contest.votes, tabs[contest.id]!!.votes)
         }
 
-        val topdir = "/home/stormy/rla/persist/testMultiCardBallots"
-        val auditRound = createAndRunTestAudit(topdir, false, contests, listOf(3), hasStyle, allCards)
-        println("testMultiCardBallots hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
+        val cardStyles = if (hasStyle) null
+            else listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}, null))
+
+        val topdir = "/home/stormy/rla/persist/testHasStyleClcaMultiCard"
+        val auditRound = createAndRunTestAuditCards(topdir, false, contests, listOf(3), hasStyle, allCards, cardStyles)
+        println("testHasStyleClcaMultiCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
             println(" *** contest ${round.contestUA.name} wants ${round.estSampleSize} mvrs")
         }
 
-        // testMultiCardBallots hasStyle=false audit estimates we need 845
+        // testHasStyleClcaMultiCard hasStyle=false audit estimates we need 830
         // *** contest B wants 118 mvrs
-        // *** contest S wants 845 mvrs
+        // *** contest S wants 830 mvrs
         //
-        // testMultiCardBallots hasStyle=true audit estimates we need 116
+        // testHasStyleClcaMultiCard hasStyle=true audit estimates we need 116
         // *** contest B wants 59 mvrs
         // *** contest S wants 57 mvrs
         //
@@ -172,9 +195,8 @@ class TestHasStyle {
         // paper with CSD: "need 128"
     }
 
-
     @Test
-    fun testPollingOneCard() {
+    fun testHasStylePollingSingleCard() {
         // p 11.
         // Consider again auditing contests B and S with margins MB and MS (in votes), N ballots
         // cast each consisting of c cards, contest B on N of the N c cards and S is on pN of the cards
@@ -191,6 +213,8 @@ class TestHasStyle {
         // on the same card and 2 × 608 + 2 × 608 = 2,432 ballot cards if the contests are on different
         // cards. In either case, using CSD reduces the sample size by roughly half.
 
+        val hasStyle = true
+
         val contestB = Contest(
             ContestInfo("B", 1, mapOf("Wes" to 1, "Les" to 2), SocialChoiceFunction.PLURALITY),
             mapOf(1 to 5500, 2 to 4500),
@@ -209,24 +233,36 @@ class TestHasStyle {
         )
         assertEquals(0.1, contestS.margin(1, 2))
 
-        val hasStyle = false
-        val testData = MultiContestCombineData(listOf(contestB, contestS), contestB.Nc, hasStyle = hasStyle)
-        val testCvrs = testData.makeCardsFromContests()
-
+        val testData = MultiContestCombineData(listOf(contestB, contestS), contestB.Nc) // TODO use poolId ??
+        val testCvrs = testData.makeCvrsFromContests()
         val contests = listOf(contestB, contestS)
+
+        val config = AuditConfig(AuditType.POLLING, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, pollingConfig = PollingConfig())
+
+        val cards = mutableListOf<AuditableCard>()
+        CvrsWithStylesToCards(CloseableIterable{testCvrs.iterator()}, styles = null, phantomCvrs = null, type = config.auditType, hasStyle)
+            .iterator().forEach { cards.add(it)}
+
         val infos = contests.map{ it.info }.associateBy { it.id }
-        val tabs = tabulateAuditableCards(Closer(testCvrs.iterator()), infos).toSortedMap()
-        println(tabs)
+        val tabs = tabulateCvrs(testCvrs.iterator(), infos).toSortedMap()
+        tabs.forEach { println(it) }
         contests.forEach { contest ->
             assertEquals(contest.votes, tabs[contest.id]!!.votes)
         }
 
-        val topdir = "/home/stormy/rla/persist/testPollingOneCard"
-        val auditRound = createAndRunTestAudit(topdir, true, contests, emptyList(), hasStyle, testCvrs)
-        println("testPollingOneCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
+        val topdir = "/home/stormy/rla/persist/testHasStylePollingSingleCard"
+        val auditRound = createAndRunTestAuditCvrs(topdir, true, contests, emptyList(), hasStyle, testCvrs)
+        println("testHasStylePollingSingleCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
             println(" *** contest ${round.contestUA.name} wants ${round.estSampleSize} mvrs")
         }
+        //testHasStylePollingSingleCard hasStyle=false audit estimates we need 2061
+        // *** contest B wants 872 mvrs
+        // *** contest S wants 2061 mvrs
+        //
+        // testHasStylePollingSingleCard hasStyle=true audit estimates we need 1526
+        // *** contest B wants 1031 mvrs
+        // *** contest S wants 828 mvrs
 
         // testPollingOneCard hasStyle=false audit estimates we need 2170
         // *** contest B wants 1065 mvrs
@@ -242,7 +278,7 @@ class TestHasStyle {
     }
 
     @Test
-    fun testPollingMultiCard() {
+    fun testHasStylePollingMultiCard() {
         val hasStyle = false
 
         val contestB = Contest(
@@ -254,7 +290,7 @@ class TestHasStyle {
         assertEquals(.1, contestB.margin(1, 2))
 
         // card 1
-        val testData1 = MultiContestCombineData(listOf(contestB), contestB.Nc, hasStyle = hasStyle)
+        val testData1 = MultiContestCombineData(listOf(contestB), contestB.Nc)
         val testCvrs1 = testData1.makeCardsFromContests()
 
         ////////
@@ -276,7 +312,7 @@ class TestHasStyle {
         assertEquals(0.1, contestS.margin(1, 2))
 
         // card 2
-        val testData2 = MultiContestCombineData(listOf(contest3, contestS), contest3.Nc, hasStyle = hasStyle)
+        val testData2 = MultiContestCombineData(listOf(contest3, contestS), contest3.Nc)
         val testCvrs2 = testData2.makeCardsFromContests(testCvrs1.size)
 
         val allCvrs = mutableListOf<AuditableCard>()
@@ -288,22 +324,27 @@ class TestHasStyle {
         val contests = listOf(contestB, contestS, contest3)
         val infos = contests.map{ it.info }.associateBy { it.id }
         val tabs = tabulateAuditableCards(Closer(allCvrs.iterator()), infos).toSortedMap()
-        println(tabs)
+        tabs.forEach { println(it) }
         contests.forEach { contest ->
             assertEquals(contest.votes, tabs[contest.id]!!.votes)
         }
 
-        val topdir = "/home/stormy/rla/persist/testPollingMultiCard"
-        val auditRound = createAndRunTestAudit(topdir, true, contests, listOf(3), hasStyle, allCvrs)
-        println("testMultiCardBallots hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
+        val topdir = "/home/stormy/rla/persist/testHasStylePollingMultiCard"
+        val auditRound = createAndRunTestAuditCards(topdir, true, contests, listOf(3), hasStyle, allCvrs)
+        println("testHasStylePollingMultiCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
             println(" *** contest ${round.contestUA.name} wants ${round.estSampleSize} mvrs")
         }
-
+        // testHasStylePollingMultiCard hasStyle=false audit estimates we need 2769
+        // *** contest B wants 2275 mvrs
+        // *** contest S wants 2769 mvrs
+        // testHasStylePollingMultiCard hasStyle=true audit estimates we need 1800
+        // *** contest B wants 1063 mvrs
+        // *** contest S wants 737 mvrs
+        //
         // testMultiCardBallots hasStyle=false audit estimates we need 2733
         // *** contest B wants 2045 mvrs
         // *** contest S wants 2733 mvrs
-        //
         // testMultiCardBallots hasStyle=true audit estimates we need 1785
         // *** contest B wants 1027 mvrs
         // *** contest S wants 758 mvrs
@@ -313,35 +354,8 @@ class TestHasStyle {
         //  card, we would expect to sample 2 × 608 + 2 × 608 = 2,432 ballot cards if the contests are on different cards."
     }
 
-    fun createAndRunTestAudit(topdir: String, isPolling: Boolean, contests: List<Contest>, skipContests: List<Int>, hasStyle: Boolean, testCards: List<AuditableCard>): AuditRound {
-        // class CvrToCardAdapter(val cvrIterator: CloseableIterator<Cvr>, val pools: Map<String, Int>? = null, startCount: Int = 0) : CloseableIterator<AuditableCard> {
-        // class FromCvrNoStyle(val cvrs: CloseableIterator<Cvr>, val possibleContests: IntArray) : CloseableIterator<AuditableCard> {
-
-        val cardManifest = if (isPolling) {
-            if (hasStyle) {
-                CloseableIterable { Closer(testCards.iterator()) }
-            } else {
-                val possibleContests = intArrayOf(1,2,3)
-                val modCards = testCards.map { it.copy(possibleContests = possibleContests) }
-                CloseableIterable { Closer(modCards.iterator()) }
-            }
-        } else if (hasStyle) {
-            CloseableIterable { Closer(testCards.iterator()) }
-        } else {
-            val possibleContests = intArrayOf(1,2,3)
-            val modCards = testCards.map { it.copy(possibleContests = possibleContests) }
-            CloseableIterable { Closer(modCards.iterator()) }
-        }
-
-        val infos = contests.map{ it.info }.associateBy { it.id }
-        val tabs = tabulateAuditableCards(cardManifest.iterator(), infos)
-
-        val contestsUA = contests.map {
-            val Nb = tabs[it.id]?.ncards ?: throw RuntimeException("Contest ${it.id} not found")
-            ContestUnderAudit(it, true, true, Nbin=Nb).addStandardAssertions()
-        }
-
-        val election = TestCreateElection(contestsUA, hasStyle = hasStyle, cardManifest, null)
+    fun createAndRunTestAuditCvrs(topdir: String, isPolling: Boolean, contests: List<Contest>, skipContests: List<Int>, hasStyle: Boolean,
+                                  testCvrs: List<Cvr>, cardStyles:List<CardStyleIF>? = null ): AuditRound {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         val errorRates = ClcaErrorRates(0.0, 0.001, 0.0, 0.0, )
@@ -353,24 +367,79 @@ class TestHasStyle {
                 clcaConfig = ClcaConfig(strategy= ClcaStrategyType.apriori, errorRates=errorRates))
         }
 
+        val infos = contests.map{ it.info }.associateBy { it.id }
+        val cardIter = CvrsWithStylesToCards(CloseableIterable{testCvrs.iterator()}, styles=cardStyles, phantomCvrs = null,
+            type = config.auditType, hasStyle)
+        val tabs = tabulateAuditableCards(cardIter.iterator(), infos).toSortedMap()
+        tabs.forEach { println(it) }
+
+        val contestsUA = contests.map {
+            val Nb = tabs[it.id]?.ncards ?: throw RuntimeException("Contest ${it.id} not found")
+            ContestUnderAudit(it, true, true, Nbin=Nb).addStandardAssertions()
+        }
+
+        val election = CreateElectionFromCvrs(contestsUA, testCvrs, cardPools = null, cardStyles = cardStyles, config = config)
+
+        CreateAudit("testOneCardBallots", topdir, config, election, clear = true)
+
+        return runTestPersistedAudit(topdir, contestsUA)
+    }
+
+    fun createAndRunTestAuditCards(topdir: String, isPolling: Boolean, contests: List<Contest>, skipContests: List<Int>, hasStyle: Boolean,
+                                   testCards: List<AuditableCard>, cardStyles:List<CardStyleIF>? = null, ): AuditRound {
+
+        // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
+        val errorRates = ClcaErrorRates(0.0, 0.001, 0.0, 0.0, )
+        val config = if (isPolling) {
+            AuditConfig(AuditType.POLLING, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
+                pollingConfig = PollingConfig())
+        } else {
+            AuditConfig(AuditType.CLCA, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
+                clcaConfig = ClcaConfig(strategy= ClcaStrategyType.apriori, errorRates=errorRates))
+        }
+
+        val infos = contests.map{ it.info }.associateBy { it.id }
+        val cardIter = CardsWithStylesToCards(CloseableIterable{ testCards.iterator()}, styles = cardStyles, phantomCvrs = null,
+            type = config.auditType, hasStyle)
+        val tabs = tabulateAuditableCards(cardIter.iterator(), infos)
+        tabs.forEach { println(it) }
+
+        val contestsUA = contests.map {
+            val Nb = tabs[it.id]?.ncards ?: throw RuntimeException("Contest ${it.id} not found")
+            ContestUnderAudit(it, true, true, Nbin=Nb).addStandardAssertions()
+        }
+
+        // class TestCreateElection (
+        //    val contestsUA: List<ContestUnderAudit>,
+        //    val cvrs: List<Cvr>,
+        //    val cardPools: List<CardPoolIF>? = null,
+        //    val config: AuditConfig,
+        //):
+        val election = CreateElectionFromCards(contestsUA, testCards, cardPools=null, cardStyles = cardStyles, config=config)
+
         CreateAudit("testOneCardBallots", topdir, config, election, clear = true)
 
         return runTestPersistedAudit(topdir, contestsUA)
     }
 }
 
-class TestCreateElection (
+class CreateElectionFromCards (
     val contestsUA: List<ContestUnderAudit>,
-    val hasStyle: Boolean,
-    val cardManifest: CloseableIterable<AuditableCard>,
+    val cards: List<AuditableCard>,
     val cardPools: List<CardPoolIF>? = null,
+    val cardStyles: List<CardStyleIF>? = null,
+    val config: AuditConfig,
 ): CreateElectionIF {
 
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
 
     override fun cardManifest(): CardLocationManifest {
-        return CardLocationManifest(cardManifest, emptyList())
+        val styles =  cardPools ?: cardStyles
+
+        val cvrsIterable  = CloseableIterable{ cards.iterator() }
+        val cardLocations = CardsWithStylesToCards(cvrsIterable, styles=styles, null, type = config.auditType, hasStyle = config.hasStyle) // already has phantoms
+        return CardLocationManifest(cardLocations, emptyList())
     }
 }
 
@@ -394,7 +463,7 @@ fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestUnderAudit>): A
     estimateSampleSizes(
         config,
         auditRound,
-        cardManifest = if (config.auditType == AuditType.POLLING) null else mvrManager.sortedCards(),
+        cardManifest = mvrManager.sortedCards(),
         // nthreads=1,
     )
 

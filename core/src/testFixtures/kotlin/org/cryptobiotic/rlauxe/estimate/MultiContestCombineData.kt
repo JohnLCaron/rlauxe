@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.shuffle
-import kotlin.math.abs
 import kotlin.random.Random
 
 private const val debugAdjust = false
@@ -12,7 +11,7 @@ private const val debugAdjust = false
 data class MultiContestCombineData(
     val contests: List<Contest>,
     val totalBallots: Int, // including undervotes and phantoms
-    val hasStyle: Boolean,
+    val poolId: Int? = null,
 ) {
     val contestBuilders: List<ContestTracker>
 
@@ -40,7 +39,7 @@ data class MultiContestCombineData(
     private fun makeCard(cvrbs: CardBuilders, fcontests: List<ContestTracker>): AuditableCard {
         val cvrb = cvrbs.addCard()
         fcontests.forEach { fcontest -> fcontest.addContestToCard(cvrb) }
-        return cvrb.build()
+        return cvrb.build(poolId)
     }
 
     // multicontest cvrs
@@ -63,7 +62,7 @@ data class MultiContestCombineData(
     private fun makeCvr(cvrbs: CvrBuilders, fcontests: List<ContestTracker>): Cvr {
         val cvrb = cvrbs.addCvr()
         fcontests.forEach { fcontest -> fcontest.addContestToCvr(cvrb) }
-        return cvrb.build()
+        return cvrb.build(poolId)
     }
 }
 

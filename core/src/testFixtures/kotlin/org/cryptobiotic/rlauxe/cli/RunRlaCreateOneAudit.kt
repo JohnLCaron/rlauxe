@@ -13,7 +13,7 @@ import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.CvrsWithPoolsToCards
+import org.cryptobiotic.rlauxe.util.CvrsWithStylesToCards
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.io.path.Path
 
@@ -181,10 +181,8 @@ object RunRlaCreateOneAudit {
         override fun contestsUA() = contestsUA
 
         override fun cardManifest(): CardLocationManifest {
-            val poolMap = allCardPools.associateBy { it.poolId }
-
             val cvrsIterable  = CloseableIterable{ allCvrs.iterator() }
-            val cardLocations = CvrsWithPoolsToCards(cvrsIterable, poolMap, null, config) // already has phantoms
+            val cardLocations = CvrsWithStylesToCards(cvrsIterable, styles=allCardPools, null, config.auditType, config.hasStyle) // already has phantoms
             return CardLocationManifest(cardLocations, emptyList())
         }
     }

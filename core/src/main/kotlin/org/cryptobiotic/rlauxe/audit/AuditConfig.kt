@@ -3,7 +3,11 @@ package org.cryptobiotic.rlauxe.audit
 import org.cryptobiotic.rlauxe.core.ClcaErrorRates
 import org.cryptobiotic.rlauxe.util.secureRandom
 
-enum class AuditType { POLLING, CLCA, ONEAUDIT }
+enum class AuditType { POLLING, CLCA, ONEAUDIT;
+    fun isClca() = (this == CLCA)
+    fun isOA() = (this == ONEAUDIT)
+    fun isPolling() = (this == POLLING)
+}
 
 data class AuditConfig(
     val auditType: AuditType,

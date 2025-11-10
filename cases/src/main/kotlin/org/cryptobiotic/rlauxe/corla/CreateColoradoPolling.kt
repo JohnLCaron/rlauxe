@@ -4,10 +4,8 @@ package org.cryptobiotic.rlauxe.corla
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.max
-import kotlin.sequences.plus
 
 private val logger = KotlinLogging.logger("ColoradoPolling")
 
@@ -48,18 +46,6 @@ class ColoradoPolling (
 
     override fun cardPools() = null
     override fun contestsUA() = contestsPolling
-
-    fun allCvrs(): Pair<CloseableIterator<AuditableCard>?, CloseableIterator<AuditableCard>?> {
-        val phantomCvrs = makePhantomCvrs(contestsUA().map { it.contest })
-        val phantomSeq = phantomCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvrHasStyle(cvr, idx, isClca=false) }.asSequence()
-
-        val cvrIter: Iterator<Cvr> = CvrIteratorfromPools()  // "fake" truth
-        val cardSeq = CvrToAuditableCardPolling(Closer(cvrIter)).asSequence()
-
-        val allCardsIter = (cardSeq + phantomSeq).iterator()
-
-        return Pair(null, Closer( allCardsIter))
-    }
 }
 
 ////////////////////////////////////////////////////////////////////

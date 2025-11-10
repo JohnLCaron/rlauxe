@@ -94,7 +94,6 @@ class CardPoolWithBallotStyle(
         adjustCards = max( adjust, adjustCards)
     }
 
-
     fun showVotes(contestIds: Collection<Int>, width: Int=4) = buildString {
         append("${trunc(poolName, 9)}:")
         contestIds.forEach { id ->

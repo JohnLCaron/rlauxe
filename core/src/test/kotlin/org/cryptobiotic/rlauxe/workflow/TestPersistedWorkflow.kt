@@ -10,11 +10,8 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.*
-import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.CvrsWithStylesToCards
 import kotlin.test.Test
 import kotlin.test.fail
 
@@ -105,24 +102,6 @@ class TestPersistedWorkflow {
         runPersistedAudit(topdir)
 
         runPersistedAudit(topdir)
-    }
-}
-
-class CreateElectionFromCvrs (
-    val contestsUA: List<ContestUnderAudit>,
-    val cvrs: List<Cvr>,
-    val cardPools: List<CardPoolIF>? = null,
-    val cardStyles: List<CardStyleIF>? = null,
-    val config: AuditConfig,
-): CreateElectionIF {
-
-    override fun cardPools() = cardPools
-    override fun contestsUA() = contestsUA
-
-    override fun cardManifest(): CardLocationManifest {
-        val cvrsIterable  = CloseableIterable{ cvrs.iterator() }
-        val cardLocations = CvrsWithStylesToCards(cvrsIterable, cardPools ?: cardStyles, null, type=config.auditType, config.hasStyle) // already has phantoms
-        return CardLocationManifest(cardLocations, emptyList())
     }
 }
 

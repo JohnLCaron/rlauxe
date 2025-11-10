@@ -19,8 +19,8 @@ class TestBoulderElectionOneAudit {
 
         val election = BoulderElectionOA(export, sovo, isClca=true)
         val infos = election.oaContests.mapValues { it.value.info }
-        val (cards, _) = election.cardManifest()
-        val allTab = tabulateAuditableCards(cards.iterator(), infos).toSortedMap()
+        val cards = election.cardLocations()
+        val allTab = tabulateAuditableCards(cards, infos).toSortedMap()
 
         election.oaContests.forEach { (contestId, oaContest) ->
             oaContest.checkCvrs(allTab[contestId]!!)

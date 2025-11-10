@@ -1,20 +1,6 @@
-package org.cryptobiotic.rlauxe.estimate
+package org.cryptobiotic.rlauxe.audit
 
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.audit.AuditConfig
-import org.cryptobiotic.rlauxe.audit.AuditRound
-import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardLocationManifest
-import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
-import org.cryptobiotic.rlauxe.audit.ClcaConfig
-import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
-import org.cryptobiotic.rlauxe.audit.ContestRound
-import org.cryptobiotic.rlauxe.audit.CreateAudit
-import org.cryptobiotic.rlauxe.audit.CreateElectionIF
-import org.cryptobiotic.rlauxe.audit.PollingConfig
-import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.core.ClcaErrorRates
 import org.cryptobiotic.rlauxe.core.Contest
@@ -22,17 +8,16 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
-import org.cryptobiotic.rlauxe.util.CardsWithStylesToCards
-import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.util.CvrsWithStylesToCards
+import org.cryptobiotic.rlauxe.estimate.MultiContestCombineData
+import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
+import org.cryptobiotic.rlauxe.estimate.sampleWithContestCutoff
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.cryptobiotic.rlauxe.workflow.CreateElectionFromCvrs
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -68,7 +53,7 @@ class TestHasStyle {
         assertEquals(0.1, contestS.margin(1, 2))
 
         val poolId = if (hasStyle) null else 1
-        val testData = MultiContestCombineData(listOf(contestB, contestS), contestB.Nc, poolId=poolId)
+        val testData = MultiContestCombineData(listOf(contestB, contestS), contestB.Nc, poolId = poolId)
         val testCards = testData.makeCardsFromContests()
 
         val contests = listOf(contestB, contestS)
@@ -163,7 +148,7 @@ class TestHasStyle {
         allCards.addAll(testCvrs1)
         allCards.addAll(testCvrs2)
         assertEquals(20000, allCards.size)
-        allCards.shuffle(kotlin.random.Random)
+        allCards.shuffle(Random)
 
         val contests = listOf(contestB, contestS, contest3)
         val infos = contests.map{ it.info }.associateBy { it.id }
@@ -240,8 +225,11 @@ class TestHasStyle {
         val config = AuditConfig(AuditType.POLLING, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, pollingConfig = PollingConfig())
 
         val cards = mutableListOf<AuditableCard>()
-        CvrsWithStylesToCards(CloseableIterable{testCvrs.iterator()}, styles = null, phantomCvrs = null, type = config.auditType, hasStyle)
-            .iterator().forEach { cards.add(it)}
+        CvrsWithStylesToCards(config.auditType, hasStyle,
+            Closer(testCvrs.iterator()),
+            null,
+            styles = null,
+        ).forEach { cards.add(it)}
 
         val infos = contests.map{ it.info }.associateBy { it.id }
         val tabs = tabulateCvrs(testCvrs.iterator(), infos).toSortedMap()
@@ -319,7 +307,7 @@ class TestHasStyle {
         allCvrs.addAll(testCvrs1)
         allCvrs.addAll(testCvrs2)
         assertEquals(20000, allCvrs.size)
-        allCvrs.shuffle(kotlin.random.Random)
+        allCvrs.shuffle(Random)
 
         val contests = listOf(contestB, contestS, contest3)
         val infos = contests.map{ it.info }.associateBy { it.id }
@@ -368,9 +356,12 @@ class TestHasStyle {
         }
 
         val infos = contests.map{ it.info }.associateBy { it.id }
-        val cardIter = CvrsWithStylesToCards(CloseableIterable{testCvrs.iterator()}, styles=cardStyles, phantomCvrs = null,
-            type = config.auditType, hasStyle)
-        val tabs = tabulateAuditableCards(cardIter.iterator(), infos).toSortedMap()
+        val cardIter = CvrsWithStylesToCards(config.auditType, hasStyle,
+            Closer(testCvrs.iterator()),
+            null,
+            styles = cardStyles,
+        )
+        val tabs = tabulateAuditableCards(cardIter, infos).toSortedMap()
         tabs.forEach { println(it) }
 
         val contestsUA = contests.map {
@@ -378,7 +369,8 @@ class TestHasStyle {
             ContestUnderAudit(it, true, true, Nbin=Nb).addStandardAssertions()
         }
 
-        val election = CreateElectionFromCvrs(contestsUA, testCvrs, cardPools = null, cardStyles = cardStyles, config = config)
+        val election =
+            CreateElectionFromCvrs(contestsUA, testCvrs, cardPools = null, cardStyles = cardStyles, config = config)
 
         CreateAudit("testOneCardBallots", topdir, config, election, clear = true)
 
@@ -399,9 +391,12 @@ class TestHasStyle {
         }
 
         val infos = contests.map{ it.info }.associateBy { it.id }
-        val cardIter = CardsWithStylesToCards(CloseableIterable{ testCards.iterator()}, styles = cardStyles, phantomCvrs = null,
-            type = config.auditType, hasStyle)
-        val tabs = tabulateAuditableCards(cardIter.iterator(), infos)
+        val cardIter = CardsWithStylesToCards(config.auditType, hasStyle,
+            Closer(testCards.iterator()),
+            null,
+            styles = cardStyles,
+        )
+        val tabs = tabulateAuditableCards(cardIter, infos)
         tabs.forEach { println(it) }
 
         val contestsUA = contests.map {
@@ -415,31 +410,12 @@ class TestHasStyle {
         //    val cardPools: List<CardPoolIF>? = null,
         //    val config: AuditConfig,
         //):
-        val election = CreateElectionFromCards(contestsUA, testCards, cardPools=null, cardStyles = cardStyles, config=config)
+        val election =
+            CreateElectionFromCards(contestsUA, testCards, cardPools = null, cardStyles = cardStyles, config = config)
 
         CreateAudit("testOneCardBallots", topdir, config, election, clear = true)
 
         return runTestPersistedAudit(topdir, contestsUA)
-    }
-}
-
-class CreateElectionFromCards (
-    val contestsUA: List<ContestUnderAudit>,
-    val cards: List<AuditableCard>,
-    val cardPools: List<CardPoolIF>? = null,
-    val cardStyles: List<CardStyleIF>? = null,
-    val config: AuditConfig,
-): CreateElectionIF {
-
-    override fun cardPools() = cardPools
-    override fun contestsUA() = contestsUA
-
-    override fun cardManifest(): CardLocationManifest {
-        val styles =  cardPools ?: cardStyles
-
-        val cvrsIterable  = CloseableIterable{ cards.iterator() }
-        val cardLocations = CardsWithStylesToCards(cvrsIterable, styles=styles, null, type = config.auditType, hasStyle = config.hasStyle) // already has phantoms
-        return CardLocationManifest(cardLocations, emptyList())
     }
 }
 
@@ -472,7 +448,8 @@ fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestUnderAudit>): A
         mvrManager,
         auditRound,
         emptySet(),
-        quiet = false)
+        quiet = false
+    )
 
     val nextRound = rlauxAudit.startNewRound(quiet = false)
     return nextRound

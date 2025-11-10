@@ -84,6 +84,17 @@ class AuditRecord(
 
     companion object {
 
+        // used by viewer
+        fun readFrom(location: String): AuditRecord? {
+            val auditRecordResult = readFromResult(location)
+            if (auditRecordResult is Ok) {
+                return auditRecordResult.unwrap()
+            } else {
+                logger.error { auditRecordResult.toString() }
+                return null
+            }
+        }
+
         fun readFromResult(location: String): Result<AuditRecord, ErrorMessages> {
             val errs = ErrorMessages("readAuditRecord from '${location}'")
 

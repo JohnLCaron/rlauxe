@@ -348,7 +348,7 @@ fun verifyAssortAvg(
             val cardMargin = assortAvg.margin()
             if (!doubleIsClose(dilutedMargin, cardMargin)) {
                 result.addError("  margin does not agree for contest ${contestUA.id} assorter '$passorter'")
-                result.addError("     reportedMean= ${passorter.reportedMean()} cvrs.assortAvg= ${assortAvg.avg()} ")
+                result.addError("     assort dilutedMargin= ${dilutedMargin} cvrs.assortMargin= ${cardMargin} ")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
                 allOk = false
             } else {

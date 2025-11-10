@@ -381,7 +381,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     override fun upperBound() = h2(upper)
 
     override fun desc() = buildString {
-        append("(${winner}/${loser}): reportedMean=${df(reportedMean)} reportedMargin=${df(reportedMargin() )}")
+        append("(${winner}/${loser}): reportedMean=${df(reportedMean)} reportedMargin=${dfn(reportedMargin(), 6)}")
     }
 
     override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization
@@ -401,10 +401,14 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         val winnerVotes = useVotes[winner()] ?: 0
         val loserVotes = useVotes[loser()] ?: 0
 
-        val winnerScore = winnerVotes / lastSeatWon.toDouble()
-        val loserScore = loserVotes / firstSeatLost.toDouble()
+        val fw = winnerVotes / lastSeatWon.toDouble()
+        val fl = loserVotes / firstSeatLost.toDouble()
 
-        return (winnerScore - loserScore) / N
+        val gmean = (fw - fl)/N
+        val hmean = h2(gmean)
+        val margin = mean2margin(hmean)
+
+        return margin
     }
 
     override fun equals(other: Any?): Boolean {

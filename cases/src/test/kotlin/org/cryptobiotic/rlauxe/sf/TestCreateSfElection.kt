@@ -23,7 +23,7 @@ class TestCreateSfElection {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
-            hasStyle = false,
+            hasStyle = false, // HEY NOSTYLE
             auditType = AuditType.ONEAUDIT,
         )
 

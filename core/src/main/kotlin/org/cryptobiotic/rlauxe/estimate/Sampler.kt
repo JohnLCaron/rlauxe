@@ -124,7 +124,6 @@ fun makeClcaNoErrorSampler(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAsso
 }
 
 //// For clca audits with styles and no errors
-// use iterator for efficiency
 class ClcaNoErrorIterator(
     val contestId: Int,
     val contestNc: Int,

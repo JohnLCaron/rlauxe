@@ -55,6 +55,7 @@ class SfoaSingleRoundAuditTask(
                 val mvrManager = MvrManagerClcaSingleRound(
                     AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run)
                 )
+
                 val sampler =
                     ClcaNoErrorIterator(
                         contestUA.id,

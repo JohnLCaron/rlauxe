@@ -1,7 +1,12 @@
-package org.cryptobiotic.rlauxe.cli
+package org.cryptobiotic.util
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
+import org.cryptobiotic.rlauxe.cli.RunRlaCreateOneAudit
+import org.cryptobiotic.rlauxe.cli.RunRlaStartFuzz
+import org.cryptobiotic.rlauxe.cli.RunVerifyAuditRecord
+import org.cryptobiotic.rlauxe.cli.RunVerifyContests
+import org.cryptobiotic.rlauxe.cli.runRound
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import kotlin.test.Test

@@ -260,7 +260,7 @@ fun createColoradoOneAudit(
             AuditType.CLCA, hasStyle = true, contestSampleCutoff = 20000, riskLimit = .03, nsimEst=10,
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
         )
-        else -> AuditConfig(
+        else -> AuditConfig( // HEY NOSTYLE
             AuditType.ONEAUDIT, hasStyle = false, riskLimit = .03, contestSampleCutoff = null, nsimEst = 1,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )

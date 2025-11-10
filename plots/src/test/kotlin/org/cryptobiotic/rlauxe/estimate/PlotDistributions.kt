@@ -80,9 +80,6 @@ class PlotDistributions {
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         val auditRound = AuditRound(1, contestRounds = contestRounds, samplePrns = emptyList())
 
-        val cvrIterator = if (config.auditType != AuditType.ONEAUDIT) null else
-            mvrManager.sortedCvrs().iterator()
-
         // just want the sample estimation stuff
         return estimateSampleSizes(
             config,

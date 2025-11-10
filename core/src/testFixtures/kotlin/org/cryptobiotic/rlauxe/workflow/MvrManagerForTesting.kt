@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
 // simulated cvrs, mvrs for testing are sorted and kept here in memory
-class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerClcaIF, MvrManagerTest {
+class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerClcaIF, MvrManagerTestIF {
     val sortedCards: List<AuditableCard>
     val mvrsUA: List<AuditableCard>
     private var mvrsRound: List<AuditableCard> = emptyList()
@@ -60,7 +60,7 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
 }
 
 // simulated cardLocations, mvrs for testing are sorted and kept here in memory
-class MvrManagerPollingForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerPollingIF, MvrManagerTest {
+class MvrManagerPollingForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerPollingIF, MvrManagerTestIF {
     val sortedCards: List<AuditableCard>
     val mvrsUA: List<AuditableCard>
     var mvrsRound: List<AuditableCard> = emptyList()
@@ -99,7 +99,7 @@ class MvrManagerPollingForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) 
     }
 }
 
-class MvrManagerOneAuditForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerClcaIF, MvrManagerTest {
+class MvrManagerOneAuditForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerClcaIF, MvrManagerTestIF {
     val sortedCards: List<AuditableCard>
     val mvrsUA: List<AuditableCard>
     private var mvrsRound: List<AuditableCard> = emptyList()
@@ -167,7 +167,7 @@ fun runAudit(name: String, workflow: AuditWorkflow, quiet: Boolean=true): AuditR
             stopwatch.start()
 
             // workflow MvrManager must implement MvrManagerTest, else Exception
-            (workflow.mvrManager() as MvrManagerTest).setMvrsBySampleNumber(nextRound.samplePrns)
+            (workflow.mvrManager() as MvrManagerTestIF).setMvrsBySampleNumber(nextRound.samplePrns)
 
             if (!quiet) println("\nrunAudit $name ${nextRound.roundIdx}")
             complete = workflow.runAuditRound(nextRound, quiet)

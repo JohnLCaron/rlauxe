@@ -12,8 +12,7 @@ private val logger = KotlinLogging.logger("MvrManager")
 
 // use MvrManager for auditing, not creating an audit
 interface MvrManager {
-    // either Cvrs (clca) or CardLocations (polling) or both (oneaudit)
-    fun sortedCards(): CloseableIterable<AuditableCard> // TODO card manifest
+    fun sortedCards(): CloseableIterable<AuditableCard>
     fun sortedCvrs(): CloseableIterable<Cvr> = CloseableIterable { AuditableCardToCvrAdapter(sortedCards().iterator()) }
 }
 
@@ -29,7 +28,7 @@ interface MvrManagerPollingIF : MvrManager {
 
 // when the MvrManager supplies the audited mvrs, its a test
 // calling this sets the internal state used by makeCvrPairsForRound(), makeMvrsForRound()
-interface MvrManagerTest : MvrManager {
+interface MvrManagerTestIF : MvrManager {
     fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard>
 }
 
@@ -56,6 +55,7 @@ fun findSamples(samplePrns: List<Long>, sortedCards: CloseableIterator<Auditable
     return result
 }
 
+// TODO eliminate this
 //// TODO this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set
 // for each contest, return map contestId -> wantSampleSize
 fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedCards : CloseableIterator<AuditableCard>, debug: Boolean = false): Map<Int, Int> {

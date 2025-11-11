@@ -4,6 +4,7 @@ import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
 import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.sfn
 import java.io.File
 import java.nio.charset.Charset
@@ -53,7 +54,7 @@ class ColoradoElectionContestSummary(
 
     fun show() = buildString{
         val sortedCandidates = candidates.sortedBy { it.totalVotes }.reversed()
-        appendLine("${shortName}: votes=${contestVotes} voteMargin=$vmargin margin=${dfn(margin,4)} dilutedMargin=${dfn(dilutedMargin,4)} %")
+        appendLine("${shortName}: votes=${contestVotes} voteMargin=$vmargin margin=${dfn(margin,4)} dilutedMargin=${pfn(dilutedMargin)}")
         sortedCandidates.forEach {
             val calcPct = 100.0 * it.totalVotes / contestVotes
             appendLine("  ${sfn(it.name, 20)} (${it.partyName}): ${it.totalVotes} ${dfn(it.percentVotes,2)} calcPct=$calcPct")

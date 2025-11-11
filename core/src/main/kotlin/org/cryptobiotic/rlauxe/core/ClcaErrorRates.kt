@@ -1,6 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.sfn
 
 data class ClcaErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u: Double) {
     init {
@@ -24,6 +27,28 @@ data class ClcaErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val
         fun fromList(list: List<Double>): ClcaErrorRates {
             require(list.size == 4) { "ErrorRates list must have 4 elements"}
             return ClcaErrorRates(list[0], list[1], list[2], list[3])
+        }
+    }
+}
+
+class ClcaErrorRatesAvg {
+    val avgs = List(4) { Welford() }
+    fun add(rates: ClcaErrorRates) {
+        rates.toList().forEachIndexed { idx, rate -> avgs[idx].update(rate) }
+    }
+
+    fun avgRates(): List<Double> = avgs.map { it.mean }
+
+    override fun toString() = buildString {
+        avgRates().forEach { append("${dfn(it, 4)}, ") }
+        val sum = avgRates().sum()
+        append("${dfn(sum, 5)}")
+    }
+
+    companion object {
+        val header = "p2o p1o p1u p2u sum"
+        fun header() = buildString {
+            header.split(" ").forEach { append("${sfn(it, 6)}, ") }
         }
     }
 }

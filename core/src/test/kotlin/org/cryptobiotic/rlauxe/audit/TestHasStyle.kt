@@ -22,6 +22,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
+private val showDetails = false
+
 // replicate examples in MoreStyles paper
 class TestHasStyle {
 
@@ -32,7 +34,7 @@ class TestHasStyle {
         // B, there are 5,500 reported votes for the winner and 4,500 reported votes for the loser; for
         // contest S there are 550 votes for the winner and 450 votes for the loser.
 
-        val hasStyle = true
+        val hasStyle = false
 
         val contestB = Contest(
             ContestInfo("B", 1, mapOf("Wes" to 1, "Les" to 2), SocialChoiceFunction.PLURALITY),
@@ -59,7 +61,7 @@ class TestHasStyle {
         val contests = listOf(contestB, contestS)
         val infos = contests.map{ it.info }.associateBy { it.id }
         val tabs = tabulateAuditableCards(Closer(testCards.iterator()), infos).toSortedMap()
-        tabs.forEach { println(it) }
+        if (showDetails) tabs.forEach { println(it) }
         contests.forEach { contest ->
             assertEquals(contest.votes, tabs[contest.id]!!.votes)
         }
@@ -69,6 +71,7 @@ class TestHasStyle {
 
         val topdir = "/home/stormy/rla/persist/testHasStyleClcaSingleCard"
         val auditRound = createAndRunTestAuditCards(topdir, false, contests, emptyList(), hasStyle, testCards, cardStyles)
+        println("==========================")
         println("testHasStyleClcaSingleCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
             println(" *** contest ${round.contestUA.name} wants ${round.estSampleSize} mvrs")
@@ -106,7 +109,7 @@ class TestHasStyle {
         // B, there are 5,500 reported votes for the winner and 4,500 reported votes for the loser; for
         // contest S there are 550 votes for the winner and 450 votes for the loser.
 
-        val hasStyle = true
+        val hasStyle = false
         val poolId = if (hasStyle) null else 1
 
 
@@ -153,7 +156,7 @@ class TestHasStyle {
         val contests = listOf(contestB, contestS, contest3)
         val infos = contests.map{ it.info }.associateBy { it.id }
         val tabs = tabulateAuditableCards(Closer(allCards.iterator()), infos).toSortedMap()
-        tabs.forEach { println(it) }
+        if (showDetails) tabs.forEach { println(it) }
         contests.forEach { contest ->
             assertEquals(contest.votes, tabs[contest.id]!!.votes)
         }
@@ -163,6 +166,7 @@ class TestHasStyle {
 
         val topdir = "/home/stormy/rla/persist/testHasStyleClcaMultiCard"
         val auditRound = createAndRunTestAuditCards(topdir, false, contests, listOf(3), hasStyle, allCards, cardStyles)
+        println("==========================")
         println("testHasStyleClcaMultiCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
             println(" *** contest ${round.contestUA.name} wants ${round.estSampleSize} mvrs")
@@ -198,7 +202,7 @@ class TestHasStyle {
         // on the same card and 2 × 608 + 2 × 608 = 2,432 ballot cards if the contests are on different
         // cards. In either case, using CSD reduces the sample size by roughly half.
 
-        val hasStyle = true
+        val hasStyle = false
 
         val contestB = Contest(
             ContestInfo("B", 1, mapOf("Wes" to 1, "Les" to 2), SocialChoiceFunction.PLURALITY),
@@ -233,13 +237,14 @@ class TestHasStyle {
 
         val infos = contests.map{ it.info }.associateBy { it.id }
         val tabs = tabulateCvrs(testCvrs.iterator(), infos).toSortedMap()
-        tabs.forEach { println(it) }
+        if (showDetails) tabs.forEach { println(it) }
         contests.forEach { contest ->
             assertEquals(contest.votes, tabs[contest.id]!!.votes)
         }
 
         val topdir = "/home/stormy/rla/persist/testHasStylePollingSingleCard"
         val auditRound = createAndRunTestAuditCvrs(topdir, true, contests, emptyList(), hasStyle, testCvrs)
+        println("==========================")
         println("testHasStylePollingSingleCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
             println(" *** contest ${round.contestUA.name} wants ${round.estSampleSize} mvrs")
@@ -312,13 +317,14 @@ class TestHasStyle {
         val contests = listOf(contestB, contestS, contest3)
         val infos = contests.map{ it.info }.associateBy { it.id }
         val tabs = tabulateAuditableCards(Closer(allCvrs.iterator()), infos).toSortedMap()
-        tabs.forEach { println(it) }
+        if (showDetails) tabs.forEach { println(it) }
         contests.forEach { contest ->
             assertEquals(contest.votes, tabs[contest.id]!!.votes)
         }
 
         val topdir = "/home/stormy/rla/persist/testHasStylePollingMultiCard"
         val auditRound = createAndRunTestAuditCards(topdir, true, contests, listOf(3), hasStyle, allCvrs)
+        println("==========================")
         println("testHasStylePollingMultiCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
             println(" *** contest ${round.contestUA.name} wants ${round.estSampleSize} mvrs")
@@ -362,7 +368,7 @@ class TestHasStyle {
             styles = cardStyles,
         )
         val tabs = tabulateAuditableCards(cardIter, infos).toSortedMap()
-        tabs.forEach { println(it) }
+        if (showDetails) tabs.forEach { println(it) }
 
         val contestsUA = contests.map {
             val Nb = tabs[it.id]?.ncards ?: throw RuntimeException("Contest ${it.id} not found")
@@ -397,7 +403,7 @@ class TestHasStyle {
             styles = cardStyles,
         )
         val tabs = tabulateAuditableCards(cardIter, infos)
-        tabs.forEach { println(it) }
+        if (showDetails) tabs.forEach { println(it) }
 
         val contestsUA = contests.map {
             val Nb = tabs[it.id]?.ncards ?: throw RuntimeException("Contest ${it.id} not found")
@@ -427,8 +433,7 @@ fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestUnderAudit>): A
 
     // TODO
     val verifyResults = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
-    println()
-    print(verifyResults)
+    if (showDetails) print(verifyResults)
     if (verifyResults.hasErrors) fail()
 
     val rlauxAudit = PersistedWorkflow(auditdir, useTest=true) // useTest ??

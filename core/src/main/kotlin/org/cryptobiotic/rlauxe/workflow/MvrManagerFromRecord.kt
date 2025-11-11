@@ -13,17 +13,11 @@ private val logger = KotlinLogging.logger("MvrManagerFromRecord")
 private val checkValidity = true
 
 // assumes that the mvrs have been set externally into the election record, eg by EnterMvrsCli.
-class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerPollingIF {
-    private val cardFile: String
-
-    init {
-        val publisher = Publisher(auditDir)
-        cardFile = publisher.sortedCardsFile()
-    }
+open class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerPollingIF {
+    val publisher = Publisher(auditDir)
 
     override fun sortedCards() = CloseableIterable{ auditableCards() }
 
-    // same pairs over all contests (!)
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>> {
         val mvrsRound = readMvrsForRound()
         val sampleNumbers = mvrsRound.map { it.prn }
@@ -53,10 +47,11 @@ class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrManagerP
         return sampledCvrs.map{ it.cvr() }
     }
 
+    // the sampleMvrsFile is written externally for real audits, and by MvrManagerTestFromRecord for test audits
     private fun readMvrsForRound(): List<AuditableCard> {
         val publisher = Publisher(auditDir)
         return readAuditableCardCsvFile(publisher.sampleMvrsFile(publisher.currentRound()))
     }
 
-    private fun auditableCards(): CloseableIterator<AuditableCard> = readCardsCsvIterator(cardFile)
+    open fun auditableCards(): CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.sortedCardsFile())
 }

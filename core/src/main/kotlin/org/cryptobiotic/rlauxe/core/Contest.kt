@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -415,7 +416,7 @@ open class ContestUnderAudit(
     open fun show() = buildString {
         appendLine("${contest.javaClass.simpleName} ${contest.show()}")
         if (minAssertion().first != null) append("   ${minAssertionDifficulty()}")
-        appendLine(" Nb=$Nb dilutedMargin=${df((minDilutedMargin()))}")
+        appendLine(" Nb=$Nb dilutedMargin=${pfn((minDilutedMargin()))}")
         append(contest.showCandidates())
     }
 

@@ -20,6 +20,7 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.doubleIsClose
+import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateCardPools
 import kotlin.collections.component1
@@ -348,11 +349,11 @@ fun verifyAssortAvg(
             val cardMargin = assortAvg.margin()
             if (!doubleIsClose(dilutedMargin, cardMargin)) {
                 result.addError("  margin does not agree for contest ${contestUA.id} assorter '$passorter'")
-                result.addError("     reportedMean= ${passorter.reportedMean()} cvrs.assortAvg= ${assortAvg.avg()} ")
+                result.addError("     assort dilutedMargin= ${pfn(dilutedMargin)} cvrs.assortMargin= ${pfn(cardMargin)} ")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
                 allOk = false
             } else {
-                if (show) result.addMessage("  margin agrees with assort avg ${assortAvg.margin()} for contest ${contestUA.id} assorter '$passorter'")
+                if (show) result.addMessage("  margin agrees with assort avg ${pfn(assortAvg.margin())} for contest ${contestUA.id} assorter '$passorter'")
             }
         }
     }

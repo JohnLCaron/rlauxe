@@ -39,7 +39,7 @@ class PersistedWorkflow(
 
         auditRounds.addAll(auditRecord.rounds)
         mvrManager = if (useTest) { //  || existsOrZip(publisher.sortedMvrsFile())) {
-            MvrManagerTestFromRecord(auditRecord.location)
+            MvrManagerTestFromRecord(auditRecord.location, config)
         } else {
             MvrManagerFromRecord(auditRecord.location)
         }
@@ -58,9 +58,7 @@ class PersistedWorkflow(
             logger.warn {"*** FAILED TO GET ANY SAMPLES (PersistentAudit)"}
             nextRound.auditIsComplete = true
         } else {
-            val publisher = Publisher(auditDir)
-
-            // heres where we limit the number of samples were willing to audit
+            // heres where we limit the number of samples we are willing to audit
             if (config.auditSampleLimit != null ) {
                 nextRound.samplePrns = nextRound.samplePrns.subList(0, config.auditSampleLimit)
             }

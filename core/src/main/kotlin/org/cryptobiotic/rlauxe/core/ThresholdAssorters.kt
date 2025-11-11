@@ -34,8 +34,8 @@ data class UnderThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     val c = -1.0 / (2 * lowerg)  // affine transform h = c * g + 1/2
     var reportedMean: Double = 0.0
 
-    fun setReportedMean(mean: Double): UnderThreshold {
-        this.reportedMean = mean
+    fun setReportedMean(reportedMean: Double): UnderThreshold {
+        this.reportedMean = reportedMean
         return this
     }
 
@@ -74,6 +74,23 @@ data class UnderThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     override fun reportedMean() = reportedMean
     override fun reportedMargin() = mean2margin(reportedMean)
 
+    override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
+        if (useVotes == null || N <= 0) {
+            return 0.0
+        } // shouldnt happen
+
+        val winnerVotes = useVotes[winner()] ?: 0
+        val otherVotes = useVotes.filter { it.key != winner() }.values.sum()
+        val nuetralVotes = N - winnerVotes - otherVotes
+
+        val winnerweight = h2(lowerg) // should be 0
+        val otherweight = h2(upperg)
+        val hmean =  (otherVotes * otherweight + nuetralVotes * 0.5) / N.toDouble()
+        val margin = mean2margin(hmean)
+
+        return margin
+    }
+
     override fun toString() = desc()
 
     companion object {
@@ -86,8 +103,9 @@ data class UnderThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 
             val winnerweight = result.h2(result.lowerg) // should be 0
             val otherweight = result.h2(result.upperg)
-            val mean =  (otherVotes * otherweight + nuetralVotes * 0.5) / Nc.toDouble()
-            result.reportedMean = mean
+            val hmean =  (otherVotes * otherweight + nuetralVotes * 0.5) / Nc.toDouble()
+            result.setReportedMean(hmean)
+
             return result
         }
     }
@@ -119,8 +137,8 @@ data class OverThreshold(val info: ContestInfo, val winner: Int, val t: Double):
     val c = -1.0 / (2 * lowerg)  // affine transform h = c * g + 1/2
     var reportedMean: Double = 0.0
 
-    fun setReportedMean(mean: Double): OverThreshold {
-        this.reportedMean = mean
+    fun setReportedMean(reportedMean: Double): OverThreshold {
+        this.reportedMean = reportedMean
         return this
     }
 
@@ -158,6 +176,23 @@ data class OverThreshold(val info: ContestInfo, val winner: Int, val t: Double):
     override fun reportedMean() = reportedMean
     override fun reportedMargin() = mean2margin(reportedMean)
 
+    override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
+        if (useVotes == null || N <= 0) {
+            return 0.0
+        } // shouldnt happen
+
+        val winnerVotes = useVotes[winner()] ?: 0
+        val otherVotes = useVotes.filter { it.key != winner() }.values.sum()
+        val nuetralVotes = N - winnerVotes - otherVotes
+
+        val winnerweight = h2(upperg)
+        val otherweight = h2(lowerg) // should be 0
+        val hmean = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotes * 0.5) / N.toDouble()
+        val margin = mean2margin(hmean)
+
+        return margin
+    }
+
     override fun toString() = desc()
 
     companion object {
@@ -170,8 +205,8 @@ data class OverThreshold(val info: ContestInfo, val winner: Int, val t: Double):
 
             val winnerweight = result.h2(result.upperg)
             val otherweight = result.h2(result.lowerg) // should be 0
-            val mean = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotes * 0.5) / Nc.toDouble()
-            result.setReportedMean(mean)
+            val hmean = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotes * 0.5) / Nc.toDouble()
+            result.setReportedMean(hmean)
             return result
         }
     }

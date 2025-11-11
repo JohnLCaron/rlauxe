@@ -14,13 +14,6 @@ private val debugUniform = false
 private val debugSizeNudge = true
 private val logger = KotlinLogging.logger("ConsistentSampling")
 
-/**
- * Select the samples to audit.
- * 2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited.
- * 3. _Random sampling_: The actual ballots to be sampled are selected randomly based on a carefully chosen random seed.
- * Iterates on createSampleIndices, checking for auditRound.sampleNumbers.size <= config.sampleLimit, removing contests until satisfied.
- * Also called from rlauxe_viewer
- */
 fun sampleWithContestCutoff(
     config: AuditConfig,
     mvrManager : MvrManager,
@@ -39,6 +32,7 @@ fun sampleWithContestCutoff(
             break
         }
 
+        // TODO test
         // find the contest with the largest estimation size eligible for removal, remove it
         val maxEstimation = contestsNotDone.maxOf { it.estSampleSizeEligibleForRemoval() }
         val maxContest = contestsNotDone.first { it.estSampleSizeEligibleForRemoval() == maxEstimation }
@@ -54,27 +48,27 @@ fun sampleWithContestCutoff(
 }
 
 /** Choose what cards to sample */
-fun sample(
+private fun sample(
     config: AuditConfig,
     mvrManager : MvrManager,
     auditRound: AuditRound,
     previousSamples: Set<Long> = emptySet(),
     quiet: Boolean = true
 ) {
-    if (config.hasStyle) {
+    // if (config.hasStyle) {
         if (!quiet) logger.info{"consistentSampling round ${auditRound.roundIdx} auditorSetNewMvrs=${auditRound.auditorWantNewMvrs}"}
         consistentSampling(auditRound, mvrManager, previousSamples)
         if (!quiet) logger.info{" consistentSamplingSize= ${auditRound.samplePrns.size}"}
-    } else {
-        if (!quiet) logger.info{"\nuniformSampling round ${auditRound.roundIdx}"}
+    /* } else {
+        /* if (!quiet) logger.info{"\nuniformSampling round ${auditRound.roundIdx}"}
         uniformSampling(auditRound, mvrManager, previousSamples, config, auditRound.roundIdx)
-        if (!quiet) logger.info{" uniformSamplingSize= ${auditRound.samplePrns.size}"}
+        if (!quiet) logger.info{" uniformSamplingSize= ${auditRound.samplePrns.size}"} */
 
         if (!quiet) logger.info{"consistentSamplingNoStyle round ${auditRound.roundIdx} auditorSetNewMvrs=${auditRound.auditorWantNewMvrs}"}
         adjustEstimates(auditRound, config, auditRound.roundIdx)
         consistentSampling(auditRound, mvrManager, previousSamples)
         if (!quiet) logger.info{" consistentSamplingNoStyle= ${auditRound.samplePrns.size}"}
-    }
+    } */
 }
 
 // From Consistent Sampling with Replacement, Ronald Rivest, August 31, 2018
@@ -87,7 +81,8 @@ fun consistentSampling(
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }
     if (contestsNotDone.isEmpty()) return
 
-    // calculate how many samples are wanted for each contest
+    // calculate how many samples are wanted for each contest.
+    // TODO eliminate
     val wantSampleSizeMap = wantSampleSize(contestsNotDone, previousSamples, mvrManager.sortedCards().iterator())
     require(wantSampleSizeMap.values.all { it >= 0 }) { "wantSampleSize must be >= 0" }
 
@@ -104,7 +99,7 @@ fun consistentSampling(
     var newMvrs = 0
     val sampledCards = mutableListOf<AuditableCard>()
 
-    // the cards come in order of the prn, aka "ticket number" (Rivest)
+    // threse only one partial iteration over sortedCards, until wantSamples foreach contest are fouond
     var countSamples = 0
     val sortedBorcIter = mvrManager.sortedCards().iterator()
     while (
@@ -157,6 +152,7 @@ fun consistentSampling(
     auditRound.samplePrns = sampledCards.map { it.prn }
 }
 
+// TODO not needed anymore, estimation is now done with diluted margins
 fun adjustEstimates(
     auditRound: AuditRound,
     config: AuditConfig,
@@ -179,6 +175,7 @@ fun adjustEstimates(
     }
 }
 
+// TODO not used i think?
 // for audits with hasStyle = false
 fun uniformSampling(
     auditRound: AuditRound,

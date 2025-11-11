@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.random.Random
 
-// this takes a list of cvrs and fuzzes them
+// for one contest, this takes a list of cvrs and fuzzes them
 class ClcaFuzzSampler(
     val fuzzPct: Double,
     val cvrs: List<Cvr>,
@@ -19,7 +19,7 @@ class ClcaFuzzSampler(
     var idx = 0
 
     init {
-        val mvrs = remakeFuzzed()
+        val mvrs = remakeFuzzed()  // TODO could do fuzzing on the fly ??
         cvrPairs = mvrs.zip(cvrs)
     }
 
@@ -55,7 +55,7 @@ class ClcaFuzzSampler(
     override fun next(): Double = sample()
 }
 
-// used in simulateSampleSizePollingAssorter
+// for one contest, this takes a list of cvrs and fuzzes them
 class PollingFuzzSampler(
     val fuzzPct: Double,
     val cvrs: List<Cvr>,
@@ -107,8 +107,8 @@ class PollingFuzzSampler(
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO can this be used on approval?
 
-// include undervotes i think
-private val fac = 10000.0 // TODO wtf?
+// includes undervotes i think
+private val fac = 10000.0 // this allows us to use fuzzPct to 5 decimal places
 fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Double, welford: Welford? = null, filter: ((CvrBuilder) -> Boolean)? = null): List<Cvr> {
     if (fuzzPct == 0.0) return cvrs
     val limit = fac / fuzzPct

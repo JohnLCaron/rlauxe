@@ -47,7 +47,7 @@ open class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrMan
         return sampledCvrs.map{ it.cvr() }
     }
 
-    // the sampleMvrs must be set externally
+    // the sampleMvrsFile is written externally for real audits, and by MvrManagerTestFromRecord for test audits
     private fun readMvrsForRound(): List<AuditableCard> {
         val publisher = Publisher(auditDir)
         return readAuditableCardCsvFile(publisher.sampleMvrsFile(publisher.currentRound()))

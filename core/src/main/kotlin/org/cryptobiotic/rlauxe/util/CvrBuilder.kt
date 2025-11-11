@@ -126,7 +126,6 @@ class CvrBuilder(
     }
 }
 
-
 class CvrContest(val name: String, val id: Int) {
     val candidates = mutableMapOf<String, Int>()
     var candidateId = 0

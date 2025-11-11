@@ -15,7 +15,7 @@ private val logger = KotlinLogging.logger("MvrManagerTestFromRecord")
 private val checkValidity = true
 
 // assumes testMvrs are in "$auditDir/private/testMvrs.csv"
-class MvrManagerTestFromRecord(auditDir: String) : MvrManagerTestIF, MvrManagerFromRecord(auditDir) {
+class MvrManagerTestFromRecord(auditDir: String, val config: AuditConfig) : MvrManagerTestIF, MvrManagerFromRecord(auditDir) {
 
     //// MvrManagerTest
     // only used when its an MvrManagerTest with fake mvrs in "$auditDir/private/testMvrs.csv"

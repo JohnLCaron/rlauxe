@@ -64,9 +64,10 @@ class PollWithoutReplacement(
 }
 
 //// For clca audits
+// what about a function to fuzz the mvr on the fly ??
 class ClcaWithoutReplacement(
     val contestId: Int,
-    val cvrPairs: List<Pair<Cvr, Cvr>>,
+    val cvrPairs: List<Pair<Cvr, Cvr>>, // TODO List<Pair<Cvr, AuditableCard>> ??
     val cassorter: ClcaAssorter,
     val allowReset: Boolean,
     val trackStratum: Boolean = false, // debugging for oneaudit

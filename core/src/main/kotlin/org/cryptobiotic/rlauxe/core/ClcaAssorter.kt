@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.pfn
 
 private val logger = KotlinLogging.logger("ClcaAssorter")
 
@@ -174,7 +175,7 @@ open class ClcaAssorter(
     override fun toString() = buildString {
         appendLine("ClcaAssorter for contest ${info.name} (${info.id})")
         appendLine("  assorter=${assorter.desc()}")
-        append("  dilutedMargin=${dfn(dilutedMargin, 8)} noerror=${dfn(noerror, 8)} upperBound=${dfn(upperBound, 8)}")
+        append("  dilutedMargin=${pfn(dilutedMargin)} noerror=${dfn(noerror, 8)} upperBound=${dfn(upperBound, 8)}")
     }
 
     fun shortName() = assorter.shortName()

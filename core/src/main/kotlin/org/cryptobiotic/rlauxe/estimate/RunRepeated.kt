@@ -1,11 +1,13 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.math.sqrt
 
 private const val showH0Result = false
+private val logger = KotlinLogging.logger("runTestRepeated")
 
 // single threaded, used for estimating sample size
 // runs RiskTestingFn repeatedly, drawSample.reset() gives different permutation for each trial.
@@ -35,9 +37,8 @@ fun runTestRepeated(
         val currCount = statusMap.getOrPut(testH0Result.status) { 0 }
         statusMap[testH0Result.status] = currCount + 1
 
-        // samples cant fail (I think), since testH0 can use the entire population, so always gets an answer
+        // this can fail when you have limited the number of samples
         if (testH0Result.status == TestH0Status.LimitReached) {
-            println("unexpected failure in sampling, status= ${testH0Result.status}")
             fail++
         } else {
             nsuccess++
@@ -47,7 +48,11 @@ fun runTestRepeated(
 
             sampleCounts.add(testH0Result.sampleCount)
         }
-        if (showH0Result) println(" $it $testH0Result")
+        if (showH0Result) logger.debug{ Result.toString() }
+    }
+
+    if (fail > 0) {
+        logger.warn { "unexpected $fail failures in sampling, welford= ${welford.show2()}" }
     }
 
     val (_, variance, _) = welford.result()

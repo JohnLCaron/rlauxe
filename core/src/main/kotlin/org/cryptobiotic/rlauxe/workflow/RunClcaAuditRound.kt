@@ -18,7 +18,7 @@ fun runClcaAuditRound(
     roundIdx: Int,
     auditor: ClcaAssertionAuditorIF,
 ): Boolean {
-    val cvrPairs = mvrManager.makeCvrPairsForRound() // same over all contests!
+    val cvrPairs = mvrManager.makeCvrPairsForRound()
 
     // parallelize over contests
     val contestsNotDone = contests.filter{ !it.done }
@@ -91,25 +91,23 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val errorRates: ClcaErrorRates = when (clcaConfig.strategy) {
             ClcaStrategyType.optimalComparison,
             ClcaStrategyType.previous,
-            ClcaStrategyType.phantoms
-                -> {
-                // use phantomRate as apriori TODO shouldnt we be using the rate from the previous sample, if any ??
-                ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
+            ClcaStrategyType.phantoms -> {
+                if (assertionRound.prevAuditResult != null) {
+                    // heres where use the previous round's error rates
+                    assertionRound.prevAuditResult!!.measuredRates!!
+                } else {
+                    // use phantomRate as apriori
+                    ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
+                }
             }
 
-            /* ClcaStrategyType.oracle -> {
-                // use the actual errors comparing mvrs to cvrs. Testing only
-                ClcaErrorTable.calcErrorRates(contest.id, cassorter, cvrPairs)
-            } */
-
             ClcaStrategyType.oracle, // TODO: removed so remove?
-            ClcaStrategyType.noerror
-                -> {
+            ClcaStrategyType.noerror -> {
                 ClcaErrorRates(0.0, 0.0, 0.0, 0.0)
             }
 
             ClcaStrategyType.fuzzPct -> {
-                // use computed errors as apriori
+                // use computed errors as apriori. TODO ignoring margin, undervotes.
                 ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
             }
 
@@ -151,7 +149,9 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             measuredRates = testH0Result.tracker.errorRates(),
         )
 
-        if (!quiet) logger.debug{" (${contest.id}) ${contest.name} ${cassertion} ${assertionRound.auditResult}"}
+        if (!quiet) {
+            logger.debug{" (${contest.id}) ${contest.name} ${cassertion} ${assertionRound.auditResult}"}
+        }
         return testH0Result
     }
 }

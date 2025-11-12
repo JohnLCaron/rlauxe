@@ -39,7 +39,7 @@ class PersistedWorkflow(
 
         auditRounds.addAll(auditRecord.rounds)
         mvrManager = if (useTest) { //  || existsOrZip(publisher.sortedMvrsFile())) {
-            MvrManagerTestFromRecord(auditRecord.location, config)
+            MvrManagerTestFromRecord(auditRecord.location, config, contestsUA)
         } else {
             MvrManagerFromRecord(auditRecord.location)
         }

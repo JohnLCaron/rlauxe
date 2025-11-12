@@ -25,7 +25,7 @@ open class ColoradoOneAudit (
     val config: AuditConfig,
     val hasStyle: Boolean = true,
 ): CreateElectionIF {
-    val roundContests: List<ContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
+    val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
 
     val oaContests = makeOneContestInfo(electionDetailXml, roundContests)
@@ -64,7 +64,7 @@ open class ColoradoOneAudit (
         }
     }
 
-    private fun makeOneContestInfo(electionDetailXml: ElectionDetailXml, roundContests: List<ContestRoundCsv>): List<OneAuditContestCorla> {
+    private fun makeOneContestInfo(electionDetailXml: ElectionDetailXml, roundContests: List<CorlaContestRoundCsv>): List<OneAuditContestCorla> {
         val roundContestMap = roundContests.associateBy { mutatisMutandi(contestNameCleanup(it.contestName)) }
 
         val contests = mutableListOf<OneAuditContestCorla>()
@@ -207,7 +207,7 @@ open class ColoradoOneAudit (
     }
 }
 
-class OneAuditContestCorla(val info: ContestInfo, detailContest: ElectionDetailContest, contestRound: ContestRoundCsv): OneAuditContestIF {
+class OneAuditContestCorla(val info: ContestInfo, detailContest: ElectionDetailContest, contestRound: CorlaContestRoundCsv): OneAuditContestIF {
     override val contestId = info.id
     val Nc: Int
     val candidateVotes: Map<Int, Int>

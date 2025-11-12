@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
+import org.cryptobiotic.rlauxe.util.pfn
 
 
 // from SuperSimple:
@@ -79,7 +79,7 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     }
 
     override fun upperBound() = 1.0
-    override fun desc() = " winner=$winner loser=$loser reportedMargin=${dfn(reportedMargin(), 8)} reportedMean=${dfn(reportedMean, 8)}"
+    override fun desc() = " winner=$winner loser=$loser reportedMargin=${pfn(reportedMargin())} reportedMean=${pfn(reportedMean)}"
     override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization
     override fun winner() = winner
     override fun loser() = loser
@@ -151,7 +151,7 @@ data class SuperMajorityAssorter(val info: ContestInfo, val candId: Int, val min
     override fun reportedMean() = reportedMean
 
     override fun toString(): String {
-        return "SuperMajorityAssorter(candId=$candId, minFraction=$minFraction, reportedMargin=${reportedMargin()}, upperBound=$upperBound)"
+        return "SuperMajorityAssorter(candId=$candId, minFraction=$minFraction, reportedMargin=${pfn(reportedMargin())}, upperBound=$upperBound)"
     }
 
     companion object {

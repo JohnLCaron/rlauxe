@@ -9,9 +9,10 @@ import org.cryptobiotic.rlauxe.util.roundUp
 import java.io.File
 import java.nio.charset.Charset
 
-// Colorado Audit Round Contest
-// https://www.coloradosos.gov/pubs/elections/RLA/2024/general/round1/contest.csv
-// "corla/src/test/data/2024audit/round1/contest.csv"
+// Read Colorado Audit Round Contest CSV files, eg
+//   https://www.coloradosos.gov/pubs/elections/RLA/2024/general/round1/contest.csv
+//   corla/src/test/data/2024audit/round1/contest.csv
+//
 // // contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,gamma,overstatements,optimistic_samples_to_audit,estimated_samples_to_audit
 //  0           1            2                   3
 // contest_name,audit_reason,random_audit_status,winners_allowed,
@@ -31,7 +32,7 @@ import java.nio.charset.Charset
 // 16           18, 19
 // 1.03905000,0,772,772
 
-data class ContestRoundCsv(
+data class CorlaContestRoundCsv(
     val contestName: String,
     val nwinners: Int,
     val ballotCardCount: Int,
@@ -81,7 +82,7 @@ fun betPayoffSamples(Nc: Int, risk: Double, assorterMargin: Double, error: Doubl
 }
 
 
-fun readColoradoContestRoundCsv(filename: String): List<ContestRoundCsv> {
+fun readColoradoContestRoundCsv(filename: String): List<CorlaContestRoundCsv> {
     val file = File(filename)
     val parser = CSVParser.parse(file, Charset.forName("ISO-8859-1"), CSVFormat.DEFAULT)
     val records = parser.iterator()
@@ -91,7 +92,7 @@ fun readColoradoContestRoundCsv(filename: String): List<ContestRoundCsv> {
     val header = headerRecord.toList().joinToString(", ")
     println(header)
 
-    val contests = mutableListOf<ContestRoundCsv>()
+    val contests = mutableListOf<CorlaContestRoundCsv>()
 
     // contest_name,audit_reason,random_audit_status,winners_allowed,ballot_card_count,contest_ballot_card_count,winners,min_margin,risk_limit,
     //   audited_sample_count,two_vote_over_count,one_vote_over_count,one_vote_under_count,two_vote_under_count,disagreement_count,other_count,
@@ -100,7 +101,7 @@ fun readColoradoContestRoundCsv(filename: String): List<ContestRoundCsv> {
     try {
         while (records.hasNext()) {
             line = records.next()!!
-            val bmi = ContestRoundCsv(
+            val bmi = CorlaContestRoundCsv(
                 contestName = line.get(0),         // contest_name,
                 nwinners = line.get(3).toInt(),   // winners_allowed,
                 ballotCardCount = line.get(4).toInt(), // ballot_card_count,contest_ballot_card_count,winners,min_margin,

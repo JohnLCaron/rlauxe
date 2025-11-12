@@ -223,7 +223,7 @@ fun AssertionRoundJson.import(assertion: Assertion): AssertionRound {
 data class EstimationRoundResultJson(
     val roundIdx: Int,
     val strategy: String,
-    val fuzzPct: Double,
+    val fuzzPct: Double?,
     val startingTestStatistic: Double,
     val startingRates: List<Double>?,
     val estimatedDistribution: List<Int>,

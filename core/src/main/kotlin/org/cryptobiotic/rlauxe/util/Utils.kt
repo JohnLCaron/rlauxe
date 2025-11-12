@@ -46,7 +46,7 @@ fun calcReportedMargin(useVotes: Map<Int, Int>, Nc: Int, winner: Int, loser: Int
 
 fun df(d: Double) = "%6.4f".format(d)
 fun dfn(d: Double, n: Int) = "%${n+2}.${n}f".format(d)
-fun pfn(d: Double, n: Int=4) = "%${n+2}.${n}f%".format(100*d)
+fun pfn(d: Double, n: Int=4) = "%${n+2}.${n}f%%".format(100*d)
 fun nfn(i: Int, n: Int) = "%${n}d".format(i)
 fun sfn(s: String, n: Int) = "%${n}s".format(s)  // right justify in windth n
 fun trunc(s: String, n:Int) : String {

@@ -3,9 +3,7 @@ package org.cryptobiotic.rlauxe.dominion
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.CardBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.ZipReader
 import org.cryptobiotic.rlauxe.util.nfn
@@ -136,13 +134,6 @@ data class CastVoteRecord(
         return cvrb.build()
     }
 
-    fun convertToCard(idx: Int): AuditableCard {
-        val cvrb = CardBuilder(this.cvrNumber.toString(), idx=idx)
-        this.contestVotes.forEach{
-            cvrb.addContest(it.contestId, it.candVotes.toIntArray())
-        }
-        return cvrb.build()
-    }
 }
 
 // use colIdx to eliminate write-ins.

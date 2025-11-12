@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.BettingFn
-import org.cryptobiotic.rlauxe.estimate.Sampler
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.raire.SimulateIrvTestData
@@ -235,44 +234,49 @@ fun estimateClcaAssertionRound(
     val contest = contestUA.contest
 
     // strategies to choose how much error there is
-    var usefuzzPct = 0.0
-    val errorRates = when {
-        (clcaConfig.strategy == ClcaStrategyType.previous) -> {
-            var errorRates = ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
-            if (assertionRound.prevAuditResult != null) {
-                // heres where use the previous round's error rates
-                errorRates = assertionRound.prevAuditResult!!.measuredRates!!
-            }
-            if (debugErrorRates) println("previous simulate round $roundIdx using errorRates=$errorRates")
-            errorRates
+    var errorRates: ClcaErrorRates = when {
+
+        (assertionRound.prevAuditResult != null) -> {
+            // TODO should be average of previous rates
+            // TODO maybe sample too small to see phantoms?
+            assertionRound.prevAuditResult!!.measuredRates!!
         }
-        (clcaConfig.strategy == ClcaStrategyType.phantoms) -> {
-            val errorRates = ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
-            if (debugErrorRates) println("phantoms simulate round $roundIdx using errorRates=$errorRates")
-            errorRates
+
+        clcaConfig.strategy == ClcaStrategyType.optimalComparison ||
+        clcaConfig.strategy == ClcaStrategyType.phantoms ||
+        clcaConfig.strategy == ClcaStrategyType.previous -> {
+            ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
         }
-        (clcaConfig.simFuzzPct != null && clcaConfig.simFuzzPct != 0.0) -> {
-            usefuzzPct = clcaConfig.simFuzzPct
-            if (debugErrorRates) println("simFuzzPct simulate round $roundIdx using simFuzzPct=${clcaConfig.simFuzzPct} errorRate=${ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)}")
+
+        (clcaConfig.strategy == ClcaStrategyType.fuzzPct)  -> {
             ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
         }
-        (clcaConfig.errorRates != null) -> {
-            if (debugErrorRates) println("simulate apriori round $roundIdx using clcaConfig.errorRates =${clcaConfig.errorRates}")
-            clcaConfig.errorRates
-        } // hmmmm
+
+        (clcaConfig.strategy == ClcaStrategyType.apriori) -> {
+            clcaConfig.errorRates!!
+        }
+
         else -> {
             if (debugErrorRates) println("simulate round $roundIdx using no errorRates")
-            null
+            ClcaErrorRates.Zero
         }
     }
 
+    // TODO if youre going to fuzz, shouldt you add the expected errors in ?
+    if (clcaConfig.simFuzzPct != null && clcaConfig.simFuzzPct > 0.0) {
+        val averager = ClcaErrorRatesCumul()
+        val fuzzRates = ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
+        averager.add(fuzzRates) // TODO avg or sum ??
+        averager.add(errorRates)
+        errorRates = ClcaErrorRates.fromList(averager.sumRates())
+    }
+
     // optional fuzzing of the cvrs
-    val isIrvFzz = (contest.isIrv() && clcaConfig.simFuzzPct != null)
-    val (sampler: Sampler, bettingFn: BettingFn) = if (errorRates != null && !errorRates.areZero()) {
-        if (isIrvFzz) usefuzzPct = clcaConfig.simFuzzPct
+    val (sampler: Sampler, bettingFn: BettingFn) = if (clcaConfig.simFuzzPct != null && clcaConfig.simFuzzPct > 0.0) {
         Pair(
-            if (isIrvFzz) ClcaFuzzSampler(clcaConfig.simFuzzPct, cvrList, contest, cassorter)
-                else ClcaSimulatedErrorRates(cvrList, contest, cassorter, errorRates), // TODO why cant we use this with IRV??
+            ClcaFuzzSampler(clcaConfig.simFuzzPct, cvrList, contest, cassorter),
+            // if (contest.isIrv()) ClcaFuzzSampler(clcaConfig.simFuzzPct, cvrList, contest, cassorter)
+                // else ClcaSimulatedErrorRates(cvrList, contest, cassorter, errorRates), // TODO why cant we use this with IRV??
             AdaptiveBetting(Nc = contest.Nc(), a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
         )
     } else {
@@ -302,7 +306,7 @@ fun estimateClcaAssertionRound(
     // The result is a distribution of ntrials sampleSizes
     assertionRound.estimationResult = EstimationRoundResult(roundIdx,
         clcaConfig.strategy.name,
-        fuzzPct = usefuzzPct,
+        fuzzPct = clcaConfig.simFuzzPct,
         startingTestStatistic = startingTestStatistic,
         startingRates = errorRates,
         estimatedDistribution = makeDeciles(result.sampleCount),
@@ -430,8 +434,6 @@ fun runRepeatedAlphaMart(
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //// OneAudit
-
-// estimateClcaAssertionRound
 
 fun estimateOneAuditAssertionRound(
     roundIdx: Int,
@@ -584,70 +586,3 @@ class CvrsLimitedSampler(
         var warned = false
     }
 }
-
-/*
-// have to fuzz all the contests at once
-// strategies to choose how much error there is
-// maybe instead of a Sampler you want a List<Cvr>
-// you might want one fuzz strategy for Estimation, another for Auditing.
-fun fuzzStatego(config: AuditConfig, prevRound: AssertionRound, cvrList: List<Cvr>): Sampler {
-    return when (config.auditType) {
-        AuditType.CLCA -> {
-            val clcaConfig = config.clcaConfig
-            var usefuzzPct = 0.0
-            val errorRates = when {
-                (clcaConfig.strategy == ClcaStrategyType.previous) -> {
-                    var errorRates = ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
-                    if (prevRound.prevAuditResult != null) {
-                        // heres where use the previous round's error rates
-                        errorRates = prevRound.prevAuditResult!!.measuredRates!!
-                    }
-                    errorRates
-                }
-
-                (clcaConfig.strategy == ClcaStrategyType.phantoms) -> {
-                    val errorRates = ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
-                    errorRates
-                }
-
-                (clcaConfig.simFuzzPct != null && clcaConfig.simFuzzPct != 0.0) -> {
-                    usefuzzPct = clcaConfig.simFuzzPct
-                    ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
-                }
-
-                (clcaConfig.errorRates != null) -> clcaConfig.errorRates // hmmmm
-
-                else -> null
-            }
-
-            // optional fuzzing of the cvrs
-            val isIrvFzz = (contest.isIrv() && clcaConfig.simFuzzPct != null)
-            val sampler: Sampler = if (errorRates != null && !errorRates.areZero()) {
-                if (isIrvFzz) usefuzzPct = clcaConfig.simFuzzPct
-                    if (isIrvFzz) ClcaFuzzSampler(clcaConfig.simFuzzPct, cvrList, contest, cassorter)
-                    else ClcaSimulatedErrorRates(cvrList, contest, cassorter, errorRates
-                )
-            } else { // this is noerrors
-                makeClcaNoErrorSampler(contest.id, cvrList, cassorter)
-            }
-            sampler
-        }
-
-        AuditType.ONEAUDIT -> {
-            val oaConfig = config.oaConfig
-            CvrsLimitedSampler(contestUA.id,  cassertion.cassorter, cvrList)
-        }
-
-        AuditType.POLLING -> {
-            var fuzzPct = 0.0
-            val pollingConfig = config.pollingConfig
-            if (pollingConfig.simFuzzPct == null || pollingConfig.simFuzzPct == 0.0) {
-                PollWithoutReplacement(contest.id, cvrList, assorter, allowReset=true)
-            } else {
-                fuzzPct = pollingConfig.simFuzzPct
-                PollingFuzzSampler(pollingConfig.simFuzzPct, cvrList, contest as Contest, assorter) // TODO cant use Raire
-            }
-
-        }
-    }
-} */

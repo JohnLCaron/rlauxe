@@ -16,7 +16,7 @@ data class AuditConfig(
     val seed: Long = secureRandom.nextLong(), // determines sample order. set carefully to ensure truly random.
 
     // simulation control
-    val nsimEst: Int = 100, // number of simulation estimations
+    val nsimEst: Int = 100, // number of simulation estimation trials
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
     val contestSampleCutoff: Int? = 30000, // use this number of cvrs in the estimation, set to null to use all
 
@@ -37,6 +37,15 @@ data class AuditConfig(
     val isOA = auditType == AuditType.ONEAUDIT
     val isPolling = auditType == AuditType.POLLING
 
+    fun simFuzzPct(): Double? {
+        return when {
+            isPolling -> pollingConfig.simFuzzPct
+            isOA -> oaConfig.simFuzzPct
+            isClca -> clcaConfig.simFuzzPct
+            else -> throw RuntimeException("Unknown AuditType $auditType")
+        }
+    }
+
     override fun toString() = buildString {
         appendLine("AuditConfig(auditType=$auditType, hasStyle=$hasStyle, riskLimit=$riskLimit, seed=$seed version=$version" )
         appendLine("  nsimEst=$nsimEst, quantile=$quantile, contestSampleCutoff=$contestSampleCutoff, auditSampleLimit=$auditSampleLimit, minRecountMargin=$minRecountMargin removeTooManyPhantoms=$removeTooManyPhantoms")
@@ -56,18 +65,20 @@ data class AuditConfig(
     }
 }
 
+// TODO simFuzzPct for simulation; adaptation ??
+// uses AlphaMart
 data class PollingConfig(
     val simFuzzPct: Double? = null, // for the estimation
     val d: Int = 100,  // shrinkTrunc weight TODO study what this should be, eg for noerror assumption?
 )
 
 // oracle: use actual measured error rates, testing only
-// noerror: assume no errors, with adaptation
-// fuzzPct: model errors with fuzz simulation, with adaptation
-// apriori: pass in apriori errorRates, with adaptation
-// phantoms: use phantom rates for apriori
-// previous: use phantom rates for apriori, then previous round measured
-// optimalComparison:  OptimalComparisonNoP1, assume P1 = 0, closed form solution for lamda
+// noerror: assume no errors at first, then measured
+// fuzzPct: model errors with fuzz simulation at first, then measured
+// apriori: pass in apriori errorRates at first, then measured
+// phantoms: use phantom rates at first.
+// previous: use phantom rates at first, then measured. TODO remove, use phantoms
+// optimalComparison:  OptimalComparisonNoP1, assume P1 = 0, closed form solution for lamda TODO
 enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, phantoms, previous, optimalComparison }
 data class ClcaConfig(
     val strategy: ClcaStrategyType,
@@ -76,6 +87,7 @@ data class ClcaConfig(
     val d: Int = 100,  // shrinkTrunc weight for error rates
 )
 
+// TODO ClcaStrategy for simulation
 // reportedMean: eta0 = reportedMean, shrinkTrunk
 // bet99: eta0 = reportedMean, 99% max bet
 // eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk (default strategy)

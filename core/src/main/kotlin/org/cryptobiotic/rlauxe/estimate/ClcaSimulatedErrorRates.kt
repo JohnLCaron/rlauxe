@@ -8,6 +8,7 @@ import kotlin.random.Random
 private val show = true
 private val logger = KotlinLogging.logger("ClcaSimulation")
 
+// TODO assumes plurality assorter
 /** 
  * Create Sampler with internal cvrs, and simulated mvrs with that match the given error rates.
  * Specific to a contest. The cvrs may be real or themselves simulated to match a Contest's vote.
@@ -32,6 +33,7 @@ class ClcaSimulatedErrorRates(
     val flippedVotesP2o: Int
     val flippedVotesP1u: Int
     val flippedVotesP2u: Int
+    val noerror = cassorter.noerror()
 
     private var idx = 0
     private var count = 0

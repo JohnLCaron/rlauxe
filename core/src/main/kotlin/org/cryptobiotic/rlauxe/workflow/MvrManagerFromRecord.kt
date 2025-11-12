@@ -18,6 +18,7 @@ open class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrMan
 
     override fun sortedCards() = CloseableIterable{ auditableCards() }
 
+    // Clca, OneAudit
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>> {
         val mvrsRound = readMvrsForRound()
         val sampleNumbers = mvrsRound.map { it.prn }
@@ -37,6 +38,7 @@ open class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrMan
         return mvrsRound.map{ it.cvr() }.zip(sampledCvrs.map{ it.cvr() })
     }
 
+    // Polling
     override fun makeMvrsForRound(): List<Cvr> {
         val mvrsRound = readMvrsForRound()
         val sampleNumbers = mvrsRound.map { it.prn }
@@ -47,11 +49,12 @@ open class MvrManagerFromRecord(val auditDir: String) : MvrManagerClcaIF, MvrMan
         return sampledCvrs.map{ it.cvr() }
     }
 
-    // the sampleMvrsFile is written externally for real audits, and by MvrManagerTestFromRecord for test audits
+    // the sampleMvrsFile is added externally for real audits, and by MvrManagerTestFromRecord for test audits
+    // it is placed into publisher.sampleMvrsFile, and this just reads from that file.
     private fun readMvrsForRound(): List<AuditableCard> {
         val publisher = Publisher(auditDir)
         return readAuditableCardCsvFile(publisher.sampleMvrsFile(publisher.currentRound()))
     }
 
-    open fun auditableCards(): CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.sortedCardsFile())
+    fun auditableCards(): CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.sortedCardsFile())
 }

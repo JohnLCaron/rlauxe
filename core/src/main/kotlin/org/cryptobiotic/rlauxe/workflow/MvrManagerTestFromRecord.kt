@@ -5,6 +5,8 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsFrom
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -15,18 +17,22 @@ private val logger = KotlinLogging.logger("MvrManagerTestFromRecord")
 private val checkValidity = true
 
 // assumes testMvrs are in "$auditDir/private/testMvrs.csv"
-class MvrManagerTestFromRecord(auditDir: String, val config: AuditConfig) : MvrManagerTestIF, MvrManagerFromRecord(auditDir) {
+class MvrManagerTestFromRecord(auditDir: String, val config: AuditConfig, val contestsUA: List<ContestUnderAudit>) : MvrManagerTestIF, MvrManagerFromRecord(auditDir) {
 
     //// MvrManagerTest
-    // only used when its an MvrManagerTest with fake mvrs in "$auditDir/private/testMvrs.csv"
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {
-        // TODO implement streamed fuzzing ??
-        val mvrFile = publisher.sortedMvrsFile()
+        val mvrFile = publisher.sortedMvrsFile() // "$auditDir/private/sortedMvrs.csv"
         val sampledMvrs = if (existsOrZip(mvrFile)) {
             val mvrIterator = readCardsCsvIterator(mvrFile)
             findSamples(sampleNumbers, mvrIterator)
         } else {
-            findSamples(sampleNumbers, auditableCards()) // use the cvrs - ie, no errors
+            val cards = findSamples(sampleNumbers, auditableCards())
+            if (config.simFuzzPct() == null) {
+                cards // use the cvrs - ie, no errors
+            } else { // fuzz the cvrs
+                val fuzzedCards = makeFuzzedCardsFrom(contestsUA, cards, config.simFuzzPct()!!)
+                fuzzedCards
+            }
         }
 
         if (checkValidity) {
@@ -37,6 +43,7 @@ class MvrManagerTestFromRecord(auditDir: String, val config: AuditConfig) : MvrM
                 lastRN = mvr.prn
             }
         }
+
         val publisher = Publisher(auditDir)
         writeAuditableCardCsvFile(sampledMvrs, publisher.sampleMvrsFile(publisher.currentRound()))
         logger.info{"setMvrsBySampleNumber write sampledMvrs to '${publisher.sampleMvrsFile(publisher.currentRound())}"}

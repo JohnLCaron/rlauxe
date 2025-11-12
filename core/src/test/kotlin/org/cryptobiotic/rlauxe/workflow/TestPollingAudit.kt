@@ -81,7 +81,7 @@ class TestPollingAudit {
         val contests: List<Contest> = test.contests
         contests.forEachIndexed { idx, contest ->
             val nvotes = contest.votes.map{ it.value }.sum()
-            val fcontest = test.contestBuilders[idx]
+            val fcontest = test.contestTestBuilders[idx]
             println(" $contest")
             val Nc = contest.Nc.toDouble()
             print("    phantomCount=${fcontest.phantomCount} (${df(fcontest.phantomCount / Nc)})")
@@ -154,7 +154,7 @@ class TestPollingAudit {
         )
         multiContestTest.contests.forEachIndexed { idx, contest ->
             val nvotes = contest.votes.map{ it.value }.sum()
-            val fcontest = multiContestTest.contestBuilders[idx]
+            val fcontest = multiContestTest.contestTestBuilders[idx]
             println(" $contest")
             val Nc = contest.Nc.toDouble()
             print("    phantomCount=${fcontest.phantomCount} (${df(fcontest.phantomCount / Nc)})")

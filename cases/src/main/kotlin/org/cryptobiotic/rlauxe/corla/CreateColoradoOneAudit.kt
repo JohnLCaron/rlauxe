@@ -152,7 +152,7 @@ open class ColoradoOneAudit (
 
     override fun cardPools(): List<CardPoolIF>?  = cardPools
     override fun contestsUA() = contestsUA
-    override fun cardLocations() = createCardIterator()
+    override fun cardManifest() = createCardIterator()
 
     fun createCardIterator(): CloseableIterator<AuditableCard> {
         return CvrsWithStylesToCards(config.auditType, hasStyle,

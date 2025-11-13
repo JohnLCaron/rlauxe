@@ -258,7 +258,7 @@ open class BoulderElectionOA(
 
     override fun contestsUA() = contestsUA
     override fun cardPools() = cardPools
-    override fun cardLocations() = createCardIterator()
+    override fun cardManifest() = createCardIterator()
 
     fun createCardIterator(): CloseableIterator<AuditableCard> {
         return if (isClca) {
@@ -418,4 +418,43 @@ fun parseIrvContestName(name: String) : Pair<String, Int> {
     val namet = tokens[0].trim()
     val ncand = tokens[1].substringBefore(",").toInt()
     return Pair(namet, ncand)
+}
+
+/////////////////////////////////////////////////////////////////
+
+
+// CANDIDATE for removal
+// The pooled cvrs dont have votes associated with them, used to make the Card Manifest
+fun createCardsFromPools(pools: List<CardPoolIF>, startIdx: Int) : List<AuditableCard> {
+    var idx = startIdx
+    val cards = mutableListOf<AuditableCard>()
+
+    pools.forEach { pool ->
+        val cleanName = cleanCsvString(pool.poolName)
+        repeat(pool.ncards()) { poolIndex ->
+            cards.add(
+                //     val location: String, // info to find the card for a manual audit. Aka ballot identifier.
+                //    val index: Int,  // index into the original, canonical list of cards
+                //    val prn: Long,   // psuedo random number
+                //    val phantom: Boolean,
+                //    val possibleContests: IntArray, // list of contests that might be on the ballot. TODO replace with cardStyle
+                //    val votes: Map<Int, IntArray>?, // for CLCA, a map of contest -> the candidate ids voted; must include undervotes (??)
+                //                                    // for IRV, ranked first to last; missing for pooled data or polling audits
+                //    val poolId: Int?, // for OneAudit
+                //    val cardStyle: String? = null,
+                AuditableCard(
+                    location = "pool${cleanName} card ${poolIndex + 1}",
+                    index=idx++,
+                    prn=0L,
+                    phantom = false,
+                    possibleContests=pool.contests(),
+                    votes = null,
+                    poolId = pool.poolId
+                )
+            )
+        }
+    }
+    val totalCards = pools.sumOf { it.ncards() }
+    require(cards.size == totalCards)
+    return cards
 }

@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.alpha
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.core.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.plots.plotSRS
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
@@ -43,7 +44,7 @@ class CompareAlphaPaper {
             for (eta in etas) {
                 val compareResult: RunTestRepeatedResult = runAlphaMartRepeated(
                     drawSample = makeClcaNoErrorSampler(contest.id, cvrs, compareAssertion.cassorter),
-                    // maxSamples = N,
+                    N = N,
                     eta0 = eta,
                     d = d,
                     ntrials = reps,
@@ -53,7 +54,7 @@ class CompareAlphaPaper {
 
                 val pollingResult = runAlphaMartRepeated(
                     drawSample = PollWithoutReplacement(contestUA.id, cvrs, pollingAssertion.assorter),
-                    // maxSamples = N,
+                    N = N,
                     eta0 = eta, // use the reportedMean for the initial guess
                     d = d,
                     ntrials = reps,

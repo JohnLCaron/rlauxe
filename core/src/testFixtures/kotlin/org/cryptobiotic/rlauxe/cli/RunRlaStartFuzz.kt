@@ -148,7 +148,7 @@ class TestPollingElection(
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
 
-    override fun cardLocations() : CloseableIterator<AuditableCard> {
+    override fun cardManifest() : CloseableIterator<AuditableCard> {
         return CvrsWithStylesToCards(
             config.auditType, config.hasStyle,
             Closer(cvrs.iterator()),
@@ -242,7 +242,7 @@ class TestClcaElection(
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
 
-    override fun cardLocations() : CloseableIterator<AuditableCard> {
+    override fun cardManifest() : CloseableIterator<AuditableCard> {
         return CvrsWithStylesToCards(
             config.auditType, config.hasStyle,
             Closer(allCvrs.iterator()),

@@ -18,7 +18,7 @@ fun runTestRepeated(
     testParameters: Map<String, Double>,
     terminateOnNullReject: Boolean = true,
     startingTestStatistic: Double = 1.0,
-    Nc:Int, // maximum cards in the contest
+    N:Int, // maximum cards in the contest (diluted)
 ): RunTestRepeatedResult {
     var totalSamplesNeeded = 0
     var fail = 0
@@ -56,13 +56,13 @@ fun runTestRepeated(
     }
 
     val (_, variance, _) = welford.result()
-    return RunTestRepeatedResult(testParameters=testParameters, Nc=Nc, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
+    return RunTestRepeatedResult(testParameters=testParameters, N=N, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
         ntrials=ntrials, variance=variance, statusMap, sampleCounts) // , margin = margin)
 }
 
 data class RunTestRepeatedResult(
     val testParameters: Map<String, Double>, // various parameters, depends on the test
-    val Nc: Int,                  // population size (eg number of ballots)
+    val N: Int,                  // population size (eg number of ballots)
     val totalSamplesNeeded: Int, // total number of samples needed in nsuccess trials
     val nsuccess: Int,           // number of successful trials
     val ntrials: Int,            // total number of trials
@@ -74,10 +74,10 @@ data class RunTestRepeatedResult(
     fun successPct(): Double = 100.0 * nsuccess / (if (ntrials == 0) 1 else ntrials)
     fun failPct(): Double  = if (nsuccess == 0) 100.0 else 100.0 * (ntrials - nsuccess) / (if (ntrials == 0) 1 else ntrials)
     fun avgSamplesNeeded(): Int  = totalSamplesNeeded / (if (nsuccess == 0) 1 else nsuccess)
-    fun pctSamplesNeeded(): Double  = 100.0 * avgSamplesNeeded().toDouble() / (if (Nc == 0) 1 else Nc)
+    fun pctSamplesNeeded(): Double  = 100.0 * avgSamplesNeeded().toDouble() / (if (N == 0) 1 else N)
 
     override fun toString() = buildString {
-        appendLine("RunTestRepeatedResult: testParameters=$testParameters Nc=$Nc successPct=${successPct()} in ntrials=$ntrials")
+        appendLine("RunTestRepeatedResult: testParameters=$testParameters N=$N successPct=${successPct()} in ntrials=$ntrials")
         append("  $nsuccess successful trials: avgSamplesNeeded=${avgSamplesNeeded()} stddev=${sqrt(variance)}")
         append(showDeciles(sampleCount))
         if (status != null) appendLine("  status:${status}")

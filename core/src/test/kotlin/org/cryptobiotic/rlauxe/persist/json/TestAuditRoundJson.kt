@@ -131,7 +131,7 @@ class TestAuditRoundJson {
 
         var clcaWorkflow = WorkflowTesterClca(config, contests, emptyList(),
             MvrManagerClcaForTesting(testCvrs, testMvrs, config.seed))
-        val lastRound = runAudit("testComparisonWorkflow", clcaWorkflow, quiet = true)
+        val lastRound = runTestAuditToCompletion("testComparisonWorkflow", clcaWorkflow, quiet = true)
         assertNotNull(lastRound)
 
         val target = AuditRound(

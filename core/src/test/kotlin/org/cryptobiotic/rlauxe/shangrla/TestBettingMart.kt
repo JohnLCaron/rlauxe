@@ -41,7 +41,7 @@ class TestBettingMart {
         for (value in values) {
             for (lam in lams) {
                 println("assort value = $value lam=$lam")
-                val betta = BettingMart(bettingFn = FixedBet(lam), noerror=0.0, Nc = N, upperBound = u)
+                val betta = BettingMart(bettingFn = FixedBet(lam), noerror=0.0, N = N, upperBound = u)
                 val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
@@ -61,13 +61,13 @@ class TestBettingMart {
 
     @Test
     fun testAgrapa0() {
-        var t = 0.5
-        var c_g_0 = 0.5
-        var c_g_m = 0.99
-        var c_g_g = 0.0 // this makes it pretty simple
-        var N = 1000
-        var u = 1.0
-        var n = 10
+        val t = 0.5
+        val c_g_0 = 0.5
+        val c_g_m = 0.99
+        val c_g_g = 0.0 // this makes it pretty simple
+        val N = 1000
+        val u = 1.0
+        val n = 10
 
         // test for sampling with replacement, constant c
         for (value in listOf(0.6, 0.7)) {
@@ -81,7 +81,7 @@ class TestBettingMart {
                     c_grapa_max = c_g_m,
                     c_grapa_grow = c_g_g,
                 )
-                val betta = BettingMart(bettingFn = agrapa, Nc = N, noerror=0.0, upperBound = u)
+                val betta = BettingMart(bettingFn = agrapa, N = N, noerror=0.0, upperBound = u)
                 val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
@@ -105,7 +105,7 @@ class TestBettingMart {
         val c_g_0 = 0.6
         val c_g_m = 0.9
         val c_g_g = 2.0
-        var u = 1.0  // TODO should be 2 * noerror
+        val u = 1.0  // TODO should be 2 * noerror
         // test for sampling without replacement, growing c, but zero sample variance
         for (value in listOf(0.75, 0.9)) {
             for (lam in listOf(0.25, 0.5)) {
@@ -119,7 +119,7 @@ class TestBettingMart {
                     c_grapa_max = c_g_m,
                     c_grapa_grow = c_g_g,
                 )
-                val betta = BettingMart(bettingFn = agrapa, Nc = N, noerror=0.0, upperBound = u)
+                val betta = BettingMart(bettingFn = agrapa, N = N, noerror=0.0, upperBound = u)
                 val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
@@ -174,7 +174,7 @@ class TestBettingMart {
         val c_g_0 = 0.6
         val c_g_m = 0.9
         val c_g_g = 2.0
-        var u = 1.0
+        val u = 1.0
 
         val x = listOf(0.75, 0.9, 0.9, 0.9, 0.75, 0.9, 0.9, 0.9, 0.9, 0.9)
         val lam = 0.55
@@ -189,7 +189,7 @@ class TestBettingMart {
             c_grapa_max = c_g_m,
             c_grapa_grow = c_g_g,
         )
-        val betta = BettingMart(bettingFn = agrapa, Nc = N, noerror=0.0, upperBound = u)
+        val betta = BettingMart(bettingFn = agrapa, N = N, noerror=0.0, upperBound = u)
         val debugSeq = betta.setDebuggingSequences()
 
         val sampler = SampleFromList(x)

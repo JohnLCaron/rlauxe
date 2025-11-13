@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.estimate.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.estimate.Sampler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -48,7 +47,7 @@ class TestAlphaMart {
             estimFn = null,
             eta0 = assorter.reportedMean(),
             upperBound = assorter.upperBound(),
-            Nc = contest.Nc,
+            N = contestUA.Nb,
             moreParameters = mapOf("eta0" to eta0),
         )
         println("simulateSampleSizeAlphaMart = $result")
@@ -57,6 +56,7 @@ class TestAlphaMart {
         cvrSampler.reset()
         val result2 = runAlphaMartRepeated(
             drawSample = cvrSampler,
+            N=N,
             eta0 = eta0,
             d = d,
             ntrials = 10,
@@ -64,42 +64,4 @@ class TestAlphaMart {
         )
         println("runAlphaMartRepeated = $result2")
     }
-}
-
-// run AlphaMart with TrunkShrinkage in repeated trials
-// this creates the riskTestingFn for you
-fun runAlphaMartRepeated(
-    drawSample: Sampler,
-    // maxSamples: Int,
-    eta0: Double,
-    d: Int = 500,
-    withoutReplacement: Boolean = true,
-    ntrials: Int = 1,
-    upperBound: Double = 1.0,
-    estimFn: EstimFn? = null, // if not supplied, use TruncShrinkage
-): RunTestRepeatedResult {
-
-    val useEstimFn = estimFn ?: TruncShrinkage(
-        drawSample.maxSamples(),
-        true,
-        upperBound = upperBound,
-        d = d,
-        eta0 = eta0)
-
-    val alpha = AlphaMart(
-        estimFn = useEstimFn,
-        N = drawSample.maxSamples(),
-        upperBound = upperBound,
-        withoutReplacement = withoutReplacement,
-    )
-
-    return runTestRepeated(
-        drawSample = drawSample,
-        terminateOnNullReject = true,
-        ntrials = ntrials,
-        testFn = alpha,
-        testParameters = mapOf("eta0" to eta0, "d" to d.toDouble(), "margin" to mean2margin(eta0)),
-        // margin = mean2margin(eta0),
-        Nc=drawSample.maxSamples(), // TODO ??
-    )
 }

@@ -13,7 +13,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
 
     override fun run(
         config: AuditConfig,
-        contest: ContestIF,
+        contestUA: ContestUnderAudit,
         assertionRound: AssertionRound,
         sampler: Sampler,
         roundIdx: Int,
@@ -31,7 +31,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         val testH0Result = if (strategy == OneAuditStrategyType.optimalComparison || strategy == OneAuditStrategyType.optimalBet) {
             runBetting(
                 config,
-                contest.Nc(),
+                contestUA.Nb,
                 cassorter,
                 sampler,
                 cassorter.upperBound()
@@ -39,7 +39,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         } else {
             runAlpha(
                 config,
-                contest.Nc(),
+                contestUA.Nb,
                 cassorter,
                 sampler,
                 cassorter.upperBound()
@@ -57,15 +57,17 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),
+            // startingRates = errorRates, TODO
+            measuredRates = testH0Result.tracker.errorRates(),
         )
 
-        if (!quiet) logger.debug{" ${contest.name} strategy=$strategy auditResult= ${assertionRound.auditResult}"}
+        if (!quiet) logger.debug{" ${contestUA.name} strategy=$strategy auditResult= ${assertionRound.auditResult}"}
         return testH0Result
     }
 
      fun runAlpha(
          config: AuditConfig,
-         Nc: Int,
+         N: Int,
          cassorter: OneAuditClcaAssorter,
          sampler: Sampler,
          upperBound: Double,
@@ -81,7 +83,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
              FixedEstimFn(.99 * cassorter.upperBound())
          } else {
              TruncShrinkage(
-                 N = Nc,
+                 N = N,
                  withoutReplacement = true,
                  upperBound = cassorter.upperBound(),
                  d = config.pollingConfig.d,
@@ -91,7 +93,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
 
         val alpha = AlphaMart(
             estimFn = estimFn,
-            N = Nc,
+            N = N,
             withoutReplacement = true,
             riskLimit = config.riskLimit,
             upperBound = upperBound,
@@ -101,18 +103,18 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
 
     fun runBetting(
         config: AuditConfig,
-        Nc: Int,
+        N: Int,
         cassorter: OneAuditClcaAssorter,
         sampler: Sampler,
         upperBound: Double,
     ): TestH0Result {
 
         // no errors!
-        val bettingFn: BettingFn = OptimalComparisonNoP1(Nc, true, upperBound, p2 = 0.0)
+        val bettingFn: BettingFn = OptimalComparisonNoP1(N=N, true, upperBound, p2 = 0.0)
 
         val testFn = BettingMart(
             bettingFn = bettingFn,
-            Nc = Nc,
+            N = N,
             noerror = cassorter.noerror(),
             upperBound = cassorter.upperBound(),
             riskLimit = config.riskLimit,

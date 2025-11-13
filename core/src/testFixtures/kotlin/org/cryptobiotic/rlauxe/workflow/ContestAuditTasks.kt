@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
 import org.cryptobiotic.rlauxe.core.TestH0Status
@@ -7,6 +8,8 @@ import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.math.sqrt
 
 private val quiet = true
+
+private val logger = KotlinLogging.logger("ContestAuditTask")
 
 interface ContestAuditTaskGenerator {
     fun name(): String
@@ -23,9 +26,10 @@ class ContestAuditTask(
     override fun name() = name
     override fun run(): WorkflowResult {
 
-        val lastRound = runAudit(name, workflow, quiet = quiet)
+        val lastRound = runTestAuditToCompletion(name, workflow, quiet = quiet)
 
         if (lastRound == null) {
+            logger.error { "lastRound is null, setting contest to ContestMisformed"}
             return WorkflowResult(
                 name,
                 0,
@@ -42,18 +46,22 @@ class ContestAuditTask(
         val contest = lastRound.contestRounds.first() // theres only one
 
         val minAssertion = contest.minAssertion() // TODO why would this fail ?
-            ?: return WorkflowResult(
+        logger.error { "minAssertion is null, setting contest to ContestMisformed"}
+        if (minAssertion == null) {
+            return WorkflowResult(
                 name,
                 contest.Nc,
-                    0.0,
-                    TestH0Status.ContestMisformed,
-                    0.0, 0.0, 0.0,
-                    otherParameters,
-                    100.0,
-                )
+                0.0,
+                TestH0Status.ContestMisformed,
+                0.0, 0.0, 0.0,
+                otherParameters,
+                100.0,
+            )
+        }
 
         val assorter = minAssertion.assertion.assorter
         return if (minAssertion.auditResult == null) { // TODO why is this empty?
+            logger.error { "minAssertion.auditResult is null, setting contest to ContestMisformed"}
             WorkflowResult(
                 name,
                 contest.Nc,

@@ -113,7 +113,7 @@ fun makePhantomCvrs(
     return results
 }
 
-// cvrs for multiple contests
+//// cvrs for multiple contests
 fun makePhantomCvrs(
     contests: List<ContestIF>,
     prefix: String = "phantom-",
@@ -134,7 +134,23 @@ fun makePhantomCvrs(
     return phantombs.map { it.buildCvr() }
 }
 
-// cards for multiple contests
+fun makePhantomCvrs(
+    phantomCount: Map<Int, Int>, // contestId -> Np
+    prefix: String = "phantom-",
+): List<Cvr> {
+    val phantombs = mutableListOf<PhantomBuilder>()
+    phantomCount.forEach { (contestId, phantoms_needed) ->
+        while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
+            phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}", 0))
+        }
+        // include this contest on the first n phantom CVRs
+        repeat(phantoms_needed) {
+            phantombs[it].contests.add(contestId)
+        }
+    }
+    return phantombs.map { it.buildCvr() }
+}
+
 fun makePhantomCards(
     contests: List<ContestIF>,
     startIdx: Int,
@@ -151,6 +167,26 @@ fun makePhantomCards(
         // include this contest on the first n phantom CVRs
         repeat(phantoms_needed) {
             phantombs[it].contests.add(contest.id)
+        }
+    }
+    return phantombs.map { it.buildCard() }
+}
+
+fun makePhantomCards(
+    phantomCount: Map<Int, Int>, // contestId -> Np
+    startIdx: Int,
+    prefix: String = "phantom-",
+): List<AuditableCard> {
+    var idx = startIdx
+
+    val phantombs = mutableListOf<PhantomBuilder>()
+    phantomCount.forEach { (contestId, phantoms_needed) ->
+        while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
+            phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}", idx++))
+        }
+        // include this contest on the first n phantom CVRs
+        repeat(phantoms_needed) {
+            phantombs[it].contests.add(contestId)
         }
     }
     return phantombs.map { it.buildCard() }

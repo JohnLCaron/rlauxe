@@ -1,0 +1,60 @@
+package org.cryptobiotic.rlauxe.workflow
+
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.unwrap
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsFrom
+import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.existsOrZip
+import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
+
+private val logger = KotlinLogging.logger("PersistedMvrManagerTest")
+private val checkValidity = true
+
+class PersistedMvrManagerTest(auditDir: String, val config: AuditConfig, val contestsUA: List<ContestUnderAudit>) : MvrManagerTestIF, PersistedMvrManager(auditDir) {
+
+    // extract the wanted cards from teh cardManifest, optionally fuzz them, and write them to sampleMvrsFile
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {
+        val cards = findSamples(sampleNumbers, auditableCards())
+        val sampledMvrs = if (config.simFuzzPct() == null) {
+            cards // use the cvrs - ie, no errors
+        } else { // fuzz the cvrs
+            makeFuzzedCardsFrom(contestsUA.map { it.contest} , cards, config.simFuzzPct()!!)
+        }
+
+        if (checkValidity) {
+            require(sampledMvrs.size == sampleNumbers.size)
+            var lastRN = 0L
+            sampledMvrs.forEach { mvr ->
+                require(mvr.prn > lastRN)
+                lastRN = mvr.prn
+            }
+        }
+
+        val publisher = Publisher(auditDir)
+        writeAuditableCardCsvFile(sampledMvrs, publisher.sampleMvrsFile(publisher.currentRound()))
+        logger.info{"setMvrsBySampleNumber write sampledMvrs to '${publisher.sampleMvrsFile(publisher.currentRound())}"}
+        return sampledMvrs
+    }
+
+    // get the wanted sampleNumbers from samplePrnsFile, and call setMvrsBySampleNumber(sampledMvrs) with them.
+    fun setMvrsForRoundIdx(roundIdx: Int): List<AuditableCard> {
+        val publisher = Publisher(auditDir)
+        val resultSamples = readSamplePrnsJsonFile(publisher.samplePrnsFile(roundIdx))
+        if (resultSamples is Err) logger.error{"$resultSamples"}
+        require(resultSamples is Ok)
+        val sampleNumbers = resultSamples.unwrap() // these are the samples we are going to audit.
+
+        return if (sampleNumbers.isEmpty()) {
+            logger.error{"***Error sampled Indices are empty for round $roundIdx"}
+            emptyList()
+        } else {
+            setMvrsBySampleNumber(sampleNumbers)
+        }
+    }
+}

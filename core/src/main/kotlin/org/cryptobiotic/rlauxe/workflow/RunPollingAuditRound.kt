@@ -34,7 +34,7 @@ fun runPollingAuditRound(
                 val assorter = assertion.assorter
                 val sampler = PollWithoutReplacement(contest.id, mvrs, assorter, allowReset = false)
 
-                val testH0Result = auditPollingAssertion(config, contest.contestUA.contest, assertionRound, sampler, roundIdx, quiet)
+                val testH0Result = auditPollingAssertion(config, contest.contestUA, assertionRound, sampler, roundIdx, quiet)
                 assertionRound.status = testH0Result.status
                 if (testH0Result.status.complete) assertionRound.round = roundIdx
             }
@@ -49,7 +49,7 @@ fun runPollingAuditRound(
 
 fun auditPollingAssertion(
     config: AuditConfig,
-    contest: ContestIF,
+    contestUA: ContestUnderAudit,
     assertionRound: AssertionRound,
     sampler: Sampler,
     roundIdx: Int,
@@ -61,7 +61,7 @@ fun auditPollingAssertion(
     val eta0 = margin2mean(assorter.reportedMargin())
 
     val estimFn = TruncShrinkage(
-        N = contest.Nc(),
+        N = contestUA.Nb,
         withoutReplacement = true,
         upperBound = assorter.upperBound(),
         d = config.pollingConfig.d,
@@ -69,7 +69,7 @@ fun auditPollingAssertion(
     )
     val testFn = AlphaMart(
         estimFn = estimFn,
-        N = contest.Nc(),
+        N = contestUA.Nb,
         withoutReplacement = true,
         riskLimit = config.riskLimit,
         upperBound = assorter.upperBound(),
@@ -86,6 +86,6 @@ fun auditPollingAssertion(
         measuredMean = testH0Result.tracker.mean(),
     )
 
-    if (!quiet) logger.debug{" ${contest.name} ${assertionRound.auditResult}"}
+    if (!quiet) logger.debug{" ${contestUA.name} ${assertionRound.auditResult}"}
     return testH0Result
 }

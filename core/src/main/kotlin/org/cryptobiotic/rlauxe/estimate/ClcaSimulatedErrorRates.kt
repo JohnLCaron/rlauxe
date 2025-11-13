@@ -187,7 +187,7 @@ class ClcaSimulatedErrorRates(
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
             if (!usedCvrs.contains(cvr.id) && cassorter.assorter().assort(cvr) == 1.0) {
-                val votes = emptyList(cvr.votes, contest.id)
+                val votes = changeToUndervote(cvr.votes, contest.id)
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
                 if (show && cassorter.assorter().assort(alteredMvr) != 0.5) {
@@ -290,7 +290,7 @@ class ClcaSimulatedErrorRates(
         return result
     }
 
-    fun emptyList(votes: Map<Int, IntArray>, contestId: Int) : Map<Int, IntArray> {
+    fun changeToUndervote(votes: Map<Int, IntArray>, contestId: Int) : Map<Int, IntArray> {
         val result = votes.toMutableMap()
         result[contestId] = intArrayOf()
         return result

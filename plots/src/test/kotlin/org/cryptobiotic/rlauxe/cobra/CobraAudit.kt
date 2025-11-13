@@ -92,9 +92,8 @@ class AuditCobraAssertion(
 
     override fun run(
         auditConfig: AuditConfig,
-        contest: ContestIF,
+        contestUA: ContestUnderAudit,
         assertionRound: AssertionRound,
-        // cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
         sampler: Sampler,
         roundIdx: Int,
     ): TestH0Result {
@@ -104,7 +103,7 @@ class AuditCobraAssertion(
         // val sampler = ClcaWithoutReplacement(contest.id, cvrPairs, cassorter, allowReset = false)
 
         val adaptive = AdaptiveBetting(
-            Nc = contest.Nc(),
+            N = contestUA.Nb,
             withoutReplacement = true,
             a = cassorter.noerror(),
             d = auditConfig.clcaConfig.d,
@@ -113,7 +112,7 @@ class AuditCobraAssertion(
 
         val testFn = BettingMart(
             bettingFn = adaptive,
-            Nc = contest.Nc(),
+            N = contestUA.Nb,
             noerror = cassorter.noerror(),
             upperBound = cassorter.upperBound(),
             withoutReplacement = true

@@ -46,7 +46,7 @@ data class CorlaContestRoundCsv(
 ) {
     fun showEstimation() {
         // TODO they use ballotCardCount instead of contestBallotCardCount for some reason
-        var dilutedMargin = minMargin.toDouble() / ballotCardCount
+        val dilutedMargin = minMargin.toDouble() / ballotCardCount
         if (dilutedMargin > 0) {
             val est = optimistic(riskLimit, dilutedMargin, gamma)
             val (bet, payoff, samples) = betPayoffSamples(ballotCardCount, risk=riskLimit, assorterMargin=dilutedMargin, 0.0)
@@ -60,13 +60,13 @@ data class CorlaContestRoundCsv(
 
 // this assumes you get the same bet each time, which is not true because mui is changing.
 // Also eps (lower bound on the estimated rate) turns out to be important.
-fun betPayoffSamples(Nc: Int, risk: Double, assorterMargin: Double, error: Double): Triple<Double, Double, Int> {
+fun betPayoffSamples(N: Int, risk: Double, assorterMargin: Double, error: Double): Triple<Double, Double, Int> {
     val avgCvrAssortValue = margin2mean(assorterMargin)
     val assorterMargin2 = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin, not clca margin
     // val noerror = 1.0 / (2.0 - assorterMargin / assorter.upperBound())
     val noerror = 1 / (2 - assorterMargin2) // assumes upperBound = 1.0
     val bettingFn = AdaptiveBetting(
-        Nc = Nc,
+        N = N,
         a = noerror,
         d = 100,
         errorRates = ClcaErrorRates(error, error, error, error),
@@ -74,7 +74,7 @@ fun betPayoffSamples(Nc: Int, risk: Double, assorterMargin: Double, error: Doubl
     val samples = PrevSamplesWithRates(noerror)
     repeat(10) { samples.addSample(noerror) }
     val bet = bettingFn.bet(samples)
-    val mj = populationMeanIfH0(Nc, true, samples)
+    val mj = populationMeanIfH0(N=N, true, samples)
 
     val payoff = 1.0 + bet * (noerror - mj)
     val samplesSize = sampleSize(risk, payoff)

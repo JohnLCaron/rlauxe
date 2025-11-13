@@ -51,6 +51,9 @@ fun makeCvrsByExactMean(ncards: Int, mean: Double) : List<Cvr> {
     return randomCvrs
 }
 
+///////////////////////////////////////////////////////////
+// TODO how does this compare to ClcaSimulatedErrorRates ??
+
 // change cvrs to have the exact number of votes for wantAvg
 fun flipExactVotes(cvrs: MutableList<Cvr>, wantAvg: Double): Int {
     val ncards = cvrs.size

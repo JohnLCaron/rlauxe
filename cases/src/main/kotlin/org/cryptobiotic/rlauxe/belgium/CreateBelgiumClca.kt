@@ -27,7 +27,7 @@ class BelgiumClca (
 
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
-    override fun cardLocations() = createCardIterator()
+    override fun cardManifest() = createCardIterator()
 
     fun createCardIterator(): CloseableIterator<AuditableCard> {
         return CvrsWithStylesToCards(AuditType.CLCA, hasStyle,

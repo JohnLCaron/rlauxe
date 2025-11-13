@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.estimate.corla
 
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.estimateClcaAssertionRound
@@ -58,8 +59,9 @@ class TestCorlaEstimateSampleSize {
             val cn = contestRound.Nc
             val estSizes = mutableListOf<Int>()
             val cvrs = ContestSimulation.simulateContestCvrsWithLimits(contestRound.contestUA.contest as Contest, config).makeCvrs()
+            val cards = cvrs.map { AuditableCard.fromCvr(it, 0, 0L)}
             val sampleSizes = contestRound.assertionRounds.map { assertRound ->
-                val result = estimateClcaAssertionRound(1, config, contestRound.contestUA, cvrs, assertRound)
+                val result = estimateClcaAssertionRound(1, config, contestRound.contestUA, cards, assertRound)
                 val simSize = result.findQuantile(config.quantile)
                 val estSize = estimateSampleSizeSimple(config.riskLimit, assertRound.assertion.assorter.reportedMargin(), gamma,
                     oneOver = roundUp(cn*p1), // p1

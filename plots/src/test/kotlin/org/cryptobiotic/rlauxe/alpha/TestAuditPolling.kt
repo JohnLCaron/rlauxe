@@ -47,6 +47,7 @@ class TestAuditPolling {
         val margin = assorter.reportedMargin()
         val result = runAlphaMartRepeated(
             drawSample = cvrSampler,
+            N = N,
             eta0 = margin2mean(margin),
             d = d,
             ntrials = 10,
@@ -118,7 +119,7 @@ class TestAuditPolling {
 
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
-                    // maxSamples = N,
+                    N = contestUA.Nb,
                     eta0 = margin2mean(margin),
                     d = d,
                     ntrials = 10,

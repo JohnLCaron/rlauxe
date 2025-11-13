@@ -107,40 +107,6 @@ class PollingFuzzSampler(
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-fun makeFuzzedCardsFrom(contestsUA: List<ContestUnderAudit>, cards: List<AuditableCard>, fuzzPct: Double) : List<AuditableCard> {
-    if (fuzzPct == 0.0) return cards
-    val limit = fac / fuzzPct
-
-    val contests = contestsUA.map { it.contest }
-    val isIRV = contests.associate { it.id to (it.isIrv()) }
-    val infos = contests.associate { it.id to (it.info()) }
-    var count = 0
-    val cardBuilders = cards.map { CardBuilder.fromCard(it) }
-
-    cardBuilders.filter { !it.phantom }.forEach { cardb: CardBuilder ->
-        val r = Random.nextDouble(limit)
-        cardb.possibleContests.forEach { contestId ->
-            val info = infos[contestId]!!
-            if (r < fac) {
-                if (isIRV[contestId]?:false) {
-                    val currentVotes = cardb.votes[contestId]?.toList()?.toMutableList() ?: mutableListOf<Int>()
-                    switchCandidateRankings(currentVotes, info.candidateIds)
-                    cardb.replaceContestVotes(contestId, currentVotes.toIntArray())
-                } else {
-                    val votes = cardb.votes[contestId]
-                    val currId: Int? = if (votes == null || votes.size == 0) null else votes[0] // TODO only one vote allowed, cant use on Raire
-                    // choose a different candidate, or none.
-                    val ncandId = chooseNewCandidate(currId, info.candidateIds)
-                    cardb.replaceContestVote(contestId, ncandId)
-                }
-                count++
-            }
-        }
-    }
-    return cardBuilders.map { it.build() }
-}
-
-
 // includes undervotes i think
 private val fac = 10000.0 // this allows us to use fuzzPct to 5 decimal places
 fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Double, welford: Welford? = null, filter: ((CvrBuilder) -> Boolean)? = null): List<Cvr> {

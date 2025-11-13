@@ -216,6 +216,11 @@ data class AuditRoundResult(
     val startingRates: ClcaErrorRates? = null, // apriori error rates (clca only)
     val measuredRates: ClcaErrorRates? = null, // measured error rates (clca only)
 ) {
+    init {
+        if (measuredRates == null)
+            println("AuditRoundResult no rates")
+    }
+
     override fun toString() = buildString {
         append("round=$roundIdx pvalue=${df(pvalue)} nmvrs=$nmvrs samplesUsed=$samplesUsed status=$status")
         append(" measuredRates=$measuredRates")

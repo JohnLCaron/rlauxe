@@ -34,8 +34,6 @@ import kotlin.test.Test
 // PlotSampleSizes
 // DiffMeans, PlotDiffMeans
 
-val ff = "%5.2f"
-
 // create the raw data for showing plots of polling with theta != eta0
 // these are 4 dimensional: N, theta, d, diffMean
 class CreatePollingDiffMeans {
@@ -235,7 +233,7 @@ class CreatePollingDiffMeans {
 
             val result = runAlphaMartRepeated(
                 drawSample = cvrSampler,
-                // maxSamples = N,
+                N = N,
                 eta0 = reportedMean, // use the reportedMean for the initial guess
                 d = d,
                 ntrials = nrepeat,

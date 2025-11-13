@@ -60,13 +60,11 @@ class GenBravoResults  {
 
             val rr = runTestRepeated(
                 drawSample = sampler,
-                // maxSamples = m,
                 testParameters = mapOf("eta0" to eta0, "margin" to mean2margin(eta0)),
                 ntrials = ntrials,
                 testFn=alpha,
-                // margin = mean2margin(eta0),
-                Nc=N,
-                )
+                N=N,
+            )
 
             //val rr = runBravo(N, m, eta0, it, withoutReplacement, nrepeat)
             // N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0, rr: RunTestRepeatedResult

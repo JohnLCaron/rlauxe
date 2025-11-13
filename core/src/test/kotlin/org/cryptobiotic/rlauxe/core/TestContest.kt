@@ -339,6 +339,5 @@ class TestContest {
         println("contest = $contest")
         val expected = mapOf(0 to 6, 1 to 56, 2 to 23, 3 to 19, 4 to 1349, 5 to 3765)
         assertEquals(expected, contest.votes)
-
     }
 }

@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.createSortedCards
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.partition
 import org.cryptobiotic.rlauxe.util.Prng
@@ -235,8 +236,6 @@ fun makeSmallContest(name: String, id:Int, Nc: Int, nwinners:Int = 1): OneAuditC
     )
 
     return OneAuditContest1.make(info, votesCvr, ncCvr, pools, 0, 0) // TODO
-}
-
- */
+} */
 }
 

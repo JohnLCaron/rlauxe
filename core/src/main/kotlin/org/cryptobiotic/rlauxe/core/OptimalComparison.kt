@@ -67,7 +67,7 @@ import kotlin.math.min
 // and set equal to 0 to obtain the bet λi .
 //
 class AdaptiveBetting(
-    val Nc: Int, // max number of cards for this contest
+    val N: Int, // max number of cards for this contest
     val withoutReplacement: Boolean = true,
     val a: Double, // compareAssorter.noerror
     val d: Int,  // weight
@@ -86,7 +86,7 @@ class AdaptiveBetting(
         val p1uest = if (p1u < 0.0 || lastj == 0) 0.0 else estimateRate(d, p1u, prevSamples.countP1u().toDouble() / lastj, lastj, eps)
         val p2uest = if (p2u < 0.0 || lastj == 0) 0.0 else estimateRate(d, p2u, prevSamples.countP2u().toDouble() / lastj, lastj, eps)
 
-        val mui = populationMeanIfH0(Nc, withoutReplacement, prevSamples)
+        val mui = populationMeanIfH0(N, withoutReplacement, prevSamples)
         val kelly = OptimalLambda(a, ClcaErrorRates(p2oest, p1oest, p1uest, p2uest), mui)
         return kelly.solve()
     }

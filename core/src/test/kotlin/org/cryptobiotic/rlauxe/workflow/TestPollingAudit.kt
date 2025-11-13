@@ -49,7 +49,7 @@ class TestPollingAudit {
         val mvrManager = MvrManagerPollingForTesting(cvrs, cvrs, Random.nextLong())
         val workflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)
 
-        runAudit("testPollingNoStyle", workflow)
+        runTestAuditToCompletion("testPollingNoStyle", workflow)
     }
 
     // @Test
@@ -96,7 +96,7 @@ class TestPollingAudit {
         val mvrManager = MvrManagerPollingForTesting(testCvrs, testCvrs, Random.nextLong())
 
         val workflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)
-        runAudit("testPollingWithStyle", workflow)
+        runTestAuditToCompletion("testPollingWithStyle", workflow)
     }
 
     @Test
@@ -132,7 +132,7 @@ class TestPollingAudit {
         val mvrManager = MvrManagerPollingForTesting(testCvrs, testMvrs, Random.nextLong())
 
         val workflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)
-        runAudit("testPollingWithStyle", workflow)
+        runTestAuditToCompletion("testPollingWithStyle", workflow)
     }
 
     @Test
@@ -169,6 +169,6 @@ class TestPollingAudit {
         val mvrManager = MvrManagerPollingForTesting(cvrs, cvrs, Random.nextLong())
         val workflow = WorkflowTesterPolling(auditConfig, multiContestTest.contests, mvrManager)
 
-        runAudit("testPollingOneContest", workflow)
+        runTestAuditToCompletion("testPollingOneContest", workflow)
     }
 }

@@ -34,11 +34,11 @@ class Publisher(val auditDir: String) {
 
     fun auditConfigFile() = "$auditDir/auditConfig.json"
     fun contestsFile() = "$auditDir/contests.json"
-    fun cardManifestFile() = "$auditDir/cardManifest.csv"
-    fun sortedCardsFile() = "$auditDir/sortedCards.csv"
+    fun cardManifestFile() = "$auditDir/cardManifest.csv" // cardManifest
+    fun sortedCardsFile() = "$auditDir/sortedCards.csv" // sorted cardManifest
     fun cardPoolsFile() = "$auditDir/cardPools.json"
-    fun testMvrsFile() = "$auditDir/private/testMvrs.csv"
-    fun sortedMvrsFile() = "$auditDir/private/sortedMvrs.csv"
+    // fun testMvrsFile() = "$auditDir/private/testMvrs.csv"
+    // fun sortedMvrsFile() = "$auditDir/private/sortedMvrs.csv"
 
     fun samplePrnsFile(round: Int): String {
         val dir = "$auditDir/round$round"

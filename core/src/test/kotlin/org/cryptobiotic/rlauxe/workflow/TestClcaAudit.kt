@@ -140,6 +140,6 @@ class TestClcaAudit {
 
         val workflow = WorkflowTesterClca(config, contests, emptyList(),
             MvrManagerClcaForTesting(testCvrs, testMvrs, config.seed))
-        return runAudit("testClcaWorkflow", workflow)
+        return runTestAuditToCompletion("testClcaWorkflow", workflow)
     }
 }

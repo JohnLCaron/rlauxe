@@ -20,7 +20,7 @@ class TestOneAuditTask {
             oaConfig = OneAuditConfig(simFuzzPct = mvrFuzzPct, strategy = OneAuditStrategyType.optimalBet)
         )
         val taskGen = OneAuditContestAuditTaskGenerator(
-            Nc, margin, 0.10, 0.01, 0.01,
+            Nc, margin, 0.10, 0.01, 0.99,
             auditConfigIn = config,
             parameters = emptyMap(),
             nsimEst = 10,

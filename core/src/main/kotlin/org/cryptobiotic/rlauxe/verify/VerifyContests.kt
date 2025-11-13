@@ -9,9 +9,9 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
-import org.cryptobiotic.rlauxe.persist.existsOrZip
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readCardPoolsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
@@ -35,7 +35,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
     val allContests: List<ContestUnderAudit>?
     val allInfos: Map<Int, ContestInfo>?
     val cards: CloseableIterable<AuditableCard>
-    val mvrs: CloseableIterable<AuditableCard>?
+    // val mvrs: CloseableIterable<AuditableCard>?
     val publisher: Publisher
 
     init {
@@ -51,7 +51,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         allInfos = allContests?.map{ it.contest.info() }?.associateBy { it.id }
 
         cards = AuditableCardCsvReader(publisher.sortedCardsFile())
-        mvrs = if (existsOrZip(publisher.sortedMvrsFile())) AuditableCardCsvReader(publisher.sortedMvrsFile()) else null
+        // mvrs = if (existsOrZip(publisher.sortedMvrsFile())) AuditableCardCsvReader(publisher.sortedMvrsFile()) else null
     }
 
     fun verify() = verify( allContests!!, show = show)
@@ -72,22 +72,14 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         if (config.isOA) {
             val cardPools = readCardPoolsJsonFile(publisher.cardPoolsFile(), infos).unwrap()
             verifyOAagainstCards(contests, contestSummary, cardPools, infos, results, show = show)
+            verifyOAassortAvg(contests, cards.iterator(), results, show = show)
         }
 
         // CLCA
         if (config.isClca) {
             verifyClcaAgainstCards(contests, contestSummary, results, show = show)
-            verifyAssortAvg(contests, cards.iterator(), results, show = show)
+            verifyClcaAssortAvg(contests, cards.iterator(), results, show = show)
         }
-
-        /*
-        if (mvrs != null) {
-            result.addMessage("---RunVerifyContests on testMvrs")
-            verifyCardCounts(config, contests, cards, infos, result, show = show)
-            verifyCardsWithPools(config, contests, mvrs, cardPools, infos, result, show = show)
-            verifyAssortAvg(contests, mvrs.iterator(), result, show = show)
-        } */
-
         return results
     }
 }
@@ -126,7 +118,6 @@ fun verifyManifest(
     results: VerifyResults,
     show: Boolean = false
 ): ContestSummary {
-
     results.addMessage("VerifyManifest")
 
     val allCvrVotes = mutableMapOf<Int, ContestTabulation>()
@@ -242,6 +233,7 @@ fun verifyOAagainstCards(
     sumWithPools.sumContestTabulations(nonpoolCvrVotes)
     sumWithPools.sumContestTabulations(poolSums)
 
+    result.addMessage("verifyOAagainstCards")
     if (show) {
         contests.forEach { contest ->
             val id = contest.id
@@ -283,6 +275,8 @@ fun verifyClcaAgainstCards(
     result: VerifyResults,
     show: Boolean = false
 ) {
+    result.addMessage("verifyClcaAgainstCards")
+
     val allCvrVotes = contestSummary.allVotes
 
     // check contest.votes == cvrTab.votes (non-IRV)
@@ -308,15 +302,14 @@ fun verifyClcaAgainstCards(
     result.addMessage("  verifyCvrs allOk = $allOk")
 }
 
-
-// problem is that the cvrs dont always have the votes on them, which is what passort needs to assort.
-// how to detect ??
-fun verifyAssortAvg(
+fun verifyClcaAssortAvg(
     contestsUA: List<ContestUnderAudit>,
     cards: CloseableIterator<AuditableCard>,
     result: VerifyResults,
     show: Boolean = false
 ): VerifyResults {
+    result.addMessage("verifyClcaAssortAvg")
+
     var allOk = true
 
     // sum all the assorter values in one pass across all the cvrs, including Pools
@@ -327,8 +320,8 @@ fun verifyAssortAvg(
 
             contestsUA.forEach { contestUA ->
                 val avg = cardAssortAvgs.getOrPut(contestUA.id) { mutableMapOf() }
-                contestUA.pollingAssertions.forEach { assertion ->
-                    val passorter = assertion.assorter
+                contestUA.clcaAssertions.forEach { cassertion ->
+                    val passorter = cassertion.assorter
                     val assortAvg = avg.getOrPut(passorter) { AssortAvg() } // TODO could we have a hash collision ?
                     if (card.hasContest(contestUA.id)) {
                         assortAvg.ncards++
@@ -346,20 +339,74 @@ fun verifyAssortAvg(
             val passorter = assertion.assorter
             val assortAvg = cardAssortAvg[passorter]!!
             val dilutedMargin = contestUA.makeDilutedMargin(passorter)
-            val cardMargin = assortAvg.margin()
-            if (!doubleIsClose(dilutedMargin, cardMargin)) {
-                result.addError("  margin does not agree for contest ${contestUA.id} assorter '$passorter'")
-                result.addError("     assort dilutedMargin= ${pfn(dilutedMargin)} cvrs.assortMargin= ${pfn(cardMargin)} ")
+            if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
+                result.addError("  dilutedMargin does not agree for contest ${contestUA.id} assorter '$passorter'")
+                result.addError("     dilutedMargin= ${pfn(dilutedMargin)} cvrs.assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards}")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
                 allOk = false
             } else {
-                if (show) result.addMessage("  margin agrees with assort avg ${pfn(assortAvg.margin())} for contest ${contestUA.id} assorter '$passorter'")
+                if (show) result.addMessage("  dilutedMargin agrees with cvrs.assortMargin= ${pfn(assortAvg.margin())} for contest ${contestUA.id} assorter '$passorter'")
             }
         }
     }
-    result.addMessage("  verifyAllAssortAvg allOk = $allOk")
+    result.addMessage("  verifyClcaAssortAvg allOk = $allOk")
     return result
 }
+
+fun verifyOAassortAvg(
+    contestsUA: List<ContestUnderAudit>,
+    cards: CloseableIterator<AuditableCard>,
+    result: VerifyResults,
+    show: Boolean = false
+): VerifyResults {
+    result.addMessage("verifyOAassortAvg")
+
+    var allOk = true
+
+    // sum all the assorter values in one pass across all the cvrs, including Pools
+    val cardAssortAvgs = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+    cards.use { cardIter ->
+        while (cardIter.hasNext()) {
+            val card = cardIter.next()
+
+            contestsUA.forEach { contestUA ->
+                val avg = cardAssortAvgs.getOrPut(contestUA.id) { mutableMapOf() }
+                contestUA.clcaAssertions.forEach { cassertion ->
+                    val oaCassorter = cassertion.cassorter as OneAuditClcaAssorter
+                    val passorter = oaCassorter.assorter
+                    val assortAvg = avg.getOrPut(passorter) { AssortAvg() }
+                    if (card.hasContest(contestUA.id)) {
+                        val assortVal = if (card.poolId != null) oaCassorter.poolAverages.assortAverage[card.poolId]!! else
+                                                  passorter.assort(card.cvr(), usePhantoms = false)
+                        assortAvg.totalAssort += assortVal
+                        assortAvg.ncards++
+                    }
+                }
+            }
+        }
+    }
+
+    // compare the assortAverage with the contest's reportedMargin in passorter.
+    contestsUA.forEach { contestUA ->
+        val cardAssortAvg = cardAssortAvgs[contestUA.id]!!
+        contestUA.pollingAssertions.forEach { assertion ->
+            val passorter = assertion.assorter
+            val assortAvg = cardAssortAvg[passorter]!!
+            val dilutedMargin = contestUA.makeDilutedMargin(passorter)
+            if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
+                result.addError("  dilutedMargin does not agree for contest ${contestUA.id} assorter '$passorter'")
+                result.addError("     dilutedMargin= ${pfn(dilutedMargin)} cvrs.assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards}")
+                contestUA.preAuditStatus = TestH0Status.ContestMisformed
+                allOk = false
+            } else {
+                if (show) result.addMessage("  dilutedMargin agrees with cvrs.assortMargin= ${pfn(assortAvg.margin())} for contest ${contestUA.id} assorter '$passorter'")
+            }
+        }
+    }
+    result.addMessage("  verifyOAassortAvg allOk = $allOk")
+    return result
+}
+
 
 // ok if one has zero votes and the other doesnt
 fun checkEquivilentVotes(votes1: Map<Int, Int>, votes2: Map<Int, Int>, ) : Boolean {

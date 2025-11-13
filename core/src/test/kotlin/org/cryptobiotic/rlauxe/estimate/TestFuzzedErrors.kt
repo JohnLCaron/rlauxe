@@ -22,7 +22,7 @@ class TestFuzzedErrors {
         println("              ${ClcaErrorRatesCumul.header()}")
 
         fuzzPcts.forEach { fuzzPct ->
-            val fcards = makeFuzzedCardsFrom(contestsUA, cards, fuzzPct)
+            val fcards = makeFuzzedCardsFrom(contestsUA.map { it.contest} , cards, fuzzPct)
             val testPairs = fcards.zip(cards)
 
             val avgErrorRates = ClcaErrorRatesCumul()

@@ -78,8 +78,6 @@ where the values 0 and u actually occur. An affine transformation of the over-
 statement assorter values can move them back to the endpoints of the support
 constraint by subtracting the minimum possible value then re-scaling so that the
 null mean is 1/2 once again, which reproduces the original assorter, A:
-
-
  */
 
 class OneAuditClcaAssorter(

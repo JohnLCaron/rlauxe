@@ -19,7 +19,7 @@ class FixedEstimFn(
 }
 
 class TruncShrinkage(
-    val N: Int,
+    val N: Int,  // diluted
     val withoutReplacement: Boolean = true,
     val upperBound: Double,
     val eta0: Double,
@@ -198,7 +198,7 @@ class TruncShrinkage(
 // wrapper around BettingMart; used for polling
 class AlphaMart(
     val estimFn : EstimFn,  // estimator of the population mean
-    val N: Int,             // max number of cards for this contest
+    val N: Int,             // max number of cards for this contest (diluted)
     val withoutReplacement: Boolean = true,
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val upperBound: Double = 1.0,  // aka u
@@ -226,7 +226,7 @@ class AlphaMart(
 
 /** Turn EstimFn into a BettingFn */
 class EstimAdapter(
-    val N: Int,
+    val N: Int, // diluted
     val withoutReplacement: Boolean = true,
     val upperBound: Double,
     val estimFn : EstimFn,  // estimator of the population mean

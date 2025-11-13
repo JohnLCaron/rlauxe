@@ -21,6 +21,7 @@ dependencies {
     testFixturesImplementation(libs.bundles.jvmtest)
     testFixturesImplementation(libs.kotest.property)
     testFixturesImplementation(libs.kotlinx.cli)
+    testFixturesImplementation(libs.oshai.logging)
 
     testImplementation(libs.bundles.jvmtest)
     testImplementation(libs.kotest.property)

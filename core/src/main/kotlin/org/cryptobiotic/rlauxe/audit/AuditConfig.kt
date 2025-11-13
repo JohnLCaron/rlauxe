@@ -38,7 +38,7 @@ data class AuditConfig(
     val oaBettingStrategy: OneAuditBettingStrategy = OneAuditBettingStrategy(),
 
     val skipContests: List<Int> = emptyList(),
-    val version: Double = 1.2,
+    val version: Double = 2.0,
 ) {
     val isClca = auditType == AuditType.CLCA
     val isOA = auditType == AuditType.ONEAUDIT
@@ -139,17 +139,17 @@ data class OneAuditBettingStrategy(
 
 //// clca
 //  use selected ClcaBettingStrategy
-//  estimation: use real cards, simulate cards with ClcaSimulatedErrorRates
+//  estimation: use real cards, simulate cards with ClcaCardSimulatedErrorRates
 //  auditing: simulate mvrs with simFuzzPct or ClcaSimulatedErrorRates? if simFuzzPct, see how it compares or ClcaSimulatedErrorRates
 
 /// polling
 //  use AlphaMart/TruncShrink
-//  estimation: use real cards: simulate cards with PollingFuzzSampler with simFuzzPct
+//  estimation: use real cards: simulate cards with PollingCardFuzzSampler with simFuzzPct. done
 //  auditing: simulate mvrs with simFuzzPct
 
 /// OneAudit
 //  use OneAuditBettingStrategy and ClcaBettingStrategy
-//  estimation: use real cards, simulate cards with ClcaBettingStrategy/ClcaSimulatedErrorRates, dont touch pool cards
+//  estimation: use real cards, simulate cards with ClcaBettingStrategy/ClcaCardSimulatedErrorRates, dont touch pool cards
 //  auditing: simulate mvrs with simFuzzPct
 
 

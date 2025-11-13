@@ -107,13 +107,11 @@ class CompareShrinkTrunkWithFixed {
 
         return runTestRepeated(
             drawSample = sampler,
-            // maxSamples = N,
             terminateOnNullReject = true,
             ntrials = ntrials,
             testFn = alpha,
             testParameters = mapOf("eta0" to eta0, "d" to d.toDouble(), "margin" to mean2margin(eta0)),
-            // margin = mean2margin(eta0),
-            Nc=N,
+            N=N,
         )
     }
 
@@ -124,13 +122,11 @@ class CompareShrinkTrunkWithFixed {
 
         return runTestRepeated(
             drawSample = sampler,
-            // maxSamples = N,
             terminateOnNullReject = true,
             ntrials = ntrials,
             testFn = alpha,
             testParameters = mapOf("eta0" to eta0, "margin" to mean2margin(eta0)),
-            // margin = mean2margin(eta0),
-            Nc=N,
-            )
+            N=N,
+        )
     }
 }

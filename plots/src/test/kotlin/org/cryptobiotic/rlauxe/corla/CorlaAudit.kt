@@ -118,9 +118,8 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
     override fun run(
         auditConfig: AuditConfig,
-        contest: ContestIF,
+        contestUA: ContestUnderAudit,
         assertionRound: AssertionRound,
-        // cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
         sampler: Sampler,
         roundIdx: Int,
     ): TestH0Result {
@@ -131,7 +130,7 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         // Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val noerror: Double,
         //    val p1: Double, val p2: Double, val p3: Double, val p4: Double): RiskTestingFn
         val testFn = Corla(
-            N = contest.Nc(),
+            N = contestUA.Nb,
             riskLimit = auditConfig.riskLimit,
             reportedMargin = cassertion.assorter.reportedMargin(),
             noerror = cassorter.noerror(),
@@ -152,7 +151,7 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             measuredRates = testH0Result.tracker.errorRates(),
         )
 
-        if (!quiet) println(" ${contest.name} ${assertionRound.auditResult}")
+        if (!quiet) println(" ${contestUA.name} ${assertionRound.auditResult}")
         return testH0Result
     }
 }

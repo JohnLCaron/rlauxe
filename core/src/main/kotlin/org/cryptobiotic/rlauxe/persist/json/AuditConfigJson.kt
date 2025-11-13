@@ -22,25 +22,34 @@ import java.nio.file.StandardOpenOption
 /*
 data class AuditConfig(
     val auditType: AuditType,
-    val hasStyle: Boolean,
+    val hasStyle: Boolean, // has Card Style Data (CSD), i.e. we know which contests each card/ballot contains
     val riskLimit: Double = 0.05,
     val seed: Long = secureRandom.nextLong(), // determines sample order. set carefully to ensure truly random.
 
     // simulation control
-    val nsimEst: Int = 100, // number of simulation estimations
+    val nsimEst: Int = 100, // number of simulation estimation trials
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
+    val contestSampleCutoff: Int? = 30000, // use this number of cvrs in the estimation, set to null to use all
+    val simFuzzPct: Double = 0.0, // for simulating the estimation and testMvr fuzzing
 
     // audit sample size control
-    val contestSampleCutoff: Int? = null, // do not audit contests that need more samples than this
+    val removeCutoffContests: Boolean = false, // remove contests that need more samples than contestSampleCutoff
     val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
     val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
-    val auditSampleLimit: Int? = null, // stop auditing when samples exceed this
+    val auditSampleLimit: Int? = null, // limit audit sample size; audit all samples, ignore risk limit
 
+    // old config, replace by error strategies
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.previous),
     val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true),
-    val version: Double = 1.2,
-    val skipContests: List<Int> = emptyList()
+
+    // default error strategies
+    val pollingErrorStrategy: PollingErrorStrategy = PollingErrorStrategy(),
+    val clcaBettingStrategy: ClcaBettingStrategy = ClcaBettingStrategy(),
+    val oaBettingStrategy: OneAuditBettingStrategy = OneAuditBettingStrategy(),
+
+    val skipContests: List<Int> = emptyList(),
+    val version: Double = 2.0,
 )
  */
 @Serializable
@@ -49,10 +58,13 @@ data class AuditConfigJson(
     val hasStyle: Boolean,
     val riskLimit: Double,
     val seed: Long,
+
     val nsimEst: Int,
     val quantile: Double,
     val contestSampleCutoff: Int?,
     val removeCutoffContests: Boolean?,
+    val simFuzzPct: Double?,
+
     val minRecountMargin: Double, // should be minRecountMargin
     val removeTooManyPhantoms: Boolean,
     val auditSampleLimit: Int?,
@@ -60,8 +72,13 @@ data class AuditConfigJson(
     val pollingConfig: PollingConfigJson? = null,
     val clcaConfig: ClcaConfigJson? = null,
     val oaConfig: OneAuditConfigJson?  = null,
-    val skipContests: List<Int>?  = null,
+
+    val pollingErrorStrategy: PollingErrorStrategyJson? = null,
+    val clcaBettingStrategy: ClcaBettingStrategyJson? = null,
+    val oaBettingStrategy: OneAuditBettingStrategyJson?  = null,
+
     val version : Double,
+    val skipContests: List<Int>?  = null,
 )
 
 fun AuditConfig.publishJson() : AuditConfigJson {
@@ -75,10 +92,14 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.quantile,
             this.contestSampleCutoff,
             this.removeCutoffContests,
+            this.simFuzzPct,
+
             this.minRecountMargin,
             this.removeTooManyPhantoms,
             this.auditSampleLimit,
             clcaConfig = this.clcaConfig.publishJson(),
+            clcaBettingStrategy = this.clcaBettingStrategy.publishJson(),
+
             skipContests = skipContests,
             version = this.version,
         )
@@ -92,10 +113,14 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.quantile,
             this.contestSampleCutoff,
             this.removeCutoffContests,
+            this.simFuzzPct,
+
             this.minRecountMargin,
             this.removeTooManyPhantoms,
             this.auditSampleLimit,
             pollingConfig = this.pollingConfig.publishJson(),
+            pollingErrorStrategy = this.pollingErrorStrategy.publishJson(),
+
             skipContests = skipContests,
             version = this.version,
         )
@@ -109,10 +134,14 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.quantile,
             this.contestSampleCutoff,
             this.removeCutoffContests,
+            this.simFuzzPct,
+
             this.minRecountMargin,
             this.removeTooManyPhantoms,
             this.auditSampleLimit,
             oaConfig = this.oaConfig.publishJson(),
+            oaBettingStrategy = this.oaBettingStrategy.publishJson(),
+
             skipContests = skipContests,
             version = this.version,
         )
@@ -130,13 +159,17 @@ fun AuditConfigJson.import(): AuditConfig {
             this.nsimEst,
             this.quantile,
             this.contestSampleCutoff,
+            this.simFuzzPct,
+
             this.removeCutoffContests ?: (this.contestSampleCutoff != null),
             this.minRecountMargin,
             this.removeTooManyPhantoms,
             auditSampleLimit = this.auditSampleLimit,
             clcaConfig = this.clcaConfig!!.import(),
-            version = this.version,
+            clcaBettingStrategy = this.clcaBettingStrategy?.import() ?: ClcaBettingStrategy(),
+
             skipContests = skipContests?: emptyList(),
+            version = this.version,
         )
 
         AuditType.POLLING -> AuditConfig(
@@ -147,13 +180,17 @@ fun AuditConfigJson.import(): AuditConfig {
             this.nsimEst,
             this.quantile,
             this.contestSampleCutoff,
+            this.simFuzzPct,
+
             this.removeCutoffContests ?: (this.contestSampleCutoff != null),
             this.minRecountMargin,
             this.removeTooManyPhantoms,
             auditSampleLimit = this.auditSampleLimit,
             pollingConfig = this.pollingConfig!!.import(),
-            version = this.version,
+            pollingErrorStrategy = this.pollingErrorStrategy?.import() ?: PollingErrorStrategy(),
+
             skipContests = skipContests?: emptyList(),
+            version = this.version,
         )
 
         AuditType.ONEAUDIT -> AuditConfig(
@@ -164,48 +201,30 @@ fun AuditConfigJson.import(): AuditConfig {
             this.nsimEst,
             this.quantile,
             this.contestSampleCutoff,
+            this.simFuzzPct,
+
             this.removeCutoffContests ?: (this.contestSampleCutoff != null),
             this.minRecountMargin,
             this.removeTooManyPhantoms,
             auditSampleLimit = this.auditSampleLimit,
             oaConfig = this.oaConfig!!.import(),
-            version = this.version,
+            oaBettingStrategy = this.oaBettingStrategy?.import() ?: OneAuditBettingStrategy(),
+
             skipContests = skipContests?: emptyList(),
+            version = this.version,
         )
     }
 }
 
-// data class PollingConfig(
-//    val fuzzPct: Double? = null,
-//    val d: Int = 100,
-//)
 @Serializable
 data class PollingConfigJson(
     val simFuzzPct: Double?,
     val d: Int,
 )
 
-fun PollingConfig.publishJson() : PollingConfigJson {
-    return PollingConfigJson(
-        this.simFuzzPct,
-        this.d,
-    )
-}
+fun PollingConfig.publishJson() = PollingConfigJson(this.simFuzzPct, this.d)
+fun PollingConfigJson.import() = PollingConfig(this.simFuzzPct, this.d)
 
-fun PollingConfigJson.import(): PollingConfig {
-    return PollingConfig(
-        this.simFuzzPct,
-        this.d,
-    )
-}
-
-// enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori }
-//data class ClcaConfig(
-//    val strategy: ClcaStrategyType,
-//    val simFuzzPct: Double? = null, // use to generate apriori errorRates for simulation
-//    val errorRates: ErrorRates? = null, // use as apriori
-//    val d: Int = 100,  // shrinkTrunc weight for error rates
-//)
 @Serializable
 data class ClcaConfigJson(
     val strategy: String,
@@ -214,31 +233,14 @@ data class ClcaConfigJson(
     val d: Int,
 )
 
-fun ClcaConfig.publishJson() : ClcaConfigJson {
-    return ClcaConfigJson(
-        this.strategy.name,
-        this.simFuzzPct,
-        this.errorRates?.toList(),
-        this.d,
-    )
-}
-
-fun ClcaConfigJson.import(): ClcaConfig {
-    val strategy = enumValueOf(this.strategy, ClcaStrategyType.entries) ?: ClcaStrategyType.noerror
-    return ClcaConfig(
-        strategy,
+fun ClcaConfig.publishJson() = ClcaConfigJson(this.strategy.name, this.simFuzzPct, this.errorRates?.toList(), this.d)
+fun ClcaConfigJson.import() = ClcaConfig(
+        enumValueOf(this.strategy, ClcaStrategyType.entries) ?: ClcaStrategyType.noerror,
         this.simFuzzPct,
         if (this.errorRates != null) ClcaErrorRates.fromList(this.errorRates) else null,
         this.d,
     )
-}
 
-// enum class OneAuditStrategyType { standard, max99 }
-//data class OneAuditConfig(
-//    val strategy: OneAuditStrategyType,
-//    val fuzzPct: Double? = null, // for the estimation
-//    val d: Int = 100,  // shrinkTrunc weight
-//)
 @Serializable
 data class OneAuditConfigJson(
     val strategy: String,
@@ -247,24 +249,56 @@ data class OneAuditConfigJson(
     val useFirst: Boolean,
 )
 
-fun OneAuditConfig.publishJson() : OneAuditConfigJson {
-    return OneAuditConfigJson(
-        this.strategy.name,
+fun OneAuditConfig.publishJson() = OneAuditConfigJson(this.strategy.name, this.simFuzzPct, this.d, this.useFirst)
+fun OneAuditConfigJson.import() = OneAuditConfig(
+        enumValueOf(this.strategy, OneAuditStrategyType.entries) ?: OneAuditStrategyType.optimalComparison,
         this.simFuzzPct,
         this.d,
         this.useFirst
     )
-}
 
-fun OneAuditConfigJson.import(): OneAuditConfig {
-    val strategy = enumValueOf(this.strategy, OneAuditStrategyType.entries) ?: OneAuditStrategyType.reportedMean
-    return OneAuditConfig(
-        strategy,
-        this.simFuzzPct,
-        this.d,
-        this.useFirst
-    )
-}
+@Serializable
+data class PollingErrorStrategyJson(
+    val d: Int = 100,
+)
+
+fun PollingErrorStrategy.publishJson() = PollingErrorStrategyJson(this.d)
+fun PollingErrorStrategyJson.import() = PollingErrorStrategy(this.d)
+
+@Serializable
+data class ClcaBettingStrategyJson(
+    val strategy: String,
+    val fuzzPct: Double? = null, // use to generate apriori errorRates, (if null use simFuzzPct?)
+    val errorRates: List<Double>?, // use as apriori errorRates for simulation and audit
+    val d: Int = 100,  // shrinkTrunc weight for error rates
+)
+
+fun ClcaBettingStrategy.publishJson() = ClcaBettingStrategyJson(this.strategy.name, this.fuzzPct, this.errorRates?.toList(), this.d)
+fun ClcaBettingStrategyJson.import() = ClcaBettingStrategy(
+    enumValueOf(this.strategy, ClcaBettingStrategyType.entries) ?: ClcaBettingStrategyType.noerrors,
+    this.fuzzPct,
+    if (this.errorRates != null) ClcaErrorRates.fromList(this.errorRates) else null,
+    this.d,
+)
+
+// TODO ClcaStrategy for simulation
+// reportedMean: eta0 = reportedMean, shrinkTrunk
+// bet99: eta0 = reportedMean, 99% max bet
+// eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk
+// optimalComparison = uses bettingMart with OptimalComparisonNoP1
+@Serializable
+data class OneAuditBettingStrategyJson(
+    val strategy: String,
+    val d: Int = 100,  // shrinkTrunc weight
+    val useFirst: Boolean = true, // use actual cvrs for estimation
+)
+
+fun OneAuditBettingStrategy.publishJson() = OneAuditBettingStrategyJson(this.strategy.name, this.d, this.useFirst)
+fun OneAuditBettingStrategyJson.import() = OneAuditBettingStrategy(
+    enumValueOf(this.strategy, OneAuditBettingStrategyType.entries) ?: OneAuditBettingStrategyType.optimalComparison,
+    this.d,
+    this.useFirst
+)
 
 /////////////////////////////////////////////////////////////////////////////////
 

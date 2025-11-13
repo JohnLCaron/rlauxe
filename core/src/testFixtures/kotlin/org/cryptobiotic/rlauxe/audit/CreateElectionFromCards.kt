@@ -15,7 +15,7 @@ class CreateElectionFromCards (
 
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
-    override fun cardLocations() = createCardIterator()
+    override fun cardManifest() = createCardIterator()
 
     fun createCardIterator(): CloseableIterator<AuditableCard> {
         return CardsWithStylesToCards(

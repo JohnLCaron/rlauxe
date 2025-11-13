@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.mean2margin
+import org.cryptobiotic.rlauxe.util.pfn
 
 // pA < t
 //TA/TL < t
@@ -63,7 +63,7 @@ data class UnderThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     fun lowerBound() = h2(lowerg)
 
     override fun desc() = buildString {
-        append("UnderThreshold cand= $candId: reportedMean=${df(reportedMean())} reportedMargin=${df(reportedMargin())} g=[$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
+        append("UnderThreshold cand= $candId: reportedMean=${pfn(reportedMean())} reportedMargin=${pfn(reportedMargin())} g=[$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
     }
 
     override fun hashcodeDesc() = "UnderThreshold ${candId} ${info.name}" // must be unique for serialization
@@ -165,7 +165,7 @@ data class OverThreshold(val info: ContestInfo, val winner: Int, val t: Double):
     override fun upperBound() = h2(upperg)
 
     override fun desc() = buildString {
-        append("OverThreshold cand= $winner: reportedMean=${df(reportedMean)} reportedMargin=${df(reportedMargin() )} g= [$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
+        append("OverThreshold cand= $winner: reportedMean=${pfn(reportedMean)} reportedMargin=${pfn(reportedMargin() )} g= [$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
     }
 
     override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization

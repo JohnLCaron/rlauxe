@@ -39,9 +39,9 @@ class PersistedWorkflow(
 
         auditRounds.addAll(auditRecord.rounds)
         mvrManager = if (useTest) { //  || existsOrZip(publisher.sortedMvrsFile())) {
-            MvrManagerTestFromRecord(auditRecord.location, config)
+            PersistedMvrManagerTest(auditRecord.location, config, contestsUA)
         } else {
-            MvrManagerFromRecord(auditRecord.location)
+            PersistedMvrManager(auditRecord.location)
         }
     }
 
@@ -76,10 +76,9 @@ class PersistedWorkflow(
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  { // return complete
         val roundIdx = auditRound.roundIdx
 
-        // TODO
-        //   in a real audit, we need to set the real mvrs externally with auditRecord.enterMvrs(mvrs)
-        //   in a test audit, the test mvrs are in "private/testMvrs.csv"
-        if (mvrManager is MvrManagerTestFromRecord) {
+        //   in a real audit, upi need to set the real mvrs externally with EnterMvrsCli, which calls auditRecord.enterMvrs(mvrs)
+        //   in a test audit, the test mvrs are generated from the cardManifest, with optional fuzzing
+        if (mvrManager is PersistedMvrManagerTest) {
             val sampledMvrs = mvrManager.setMvrsForRoundIdx(roundIdx)
             logger.info {"  added ${sampledMvrs.size} mvrs to mvrManager"}
         }

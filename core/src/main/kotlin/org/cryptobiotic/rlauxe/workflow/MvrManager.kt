@@ -18,12 +18,12 @@ interface MvrManager {
 
 interface MvrManagerClcaIF : MvrManager {
     // this is used for audit, not estimation
-    fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>
+    fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>  // TODO Pair<Cvr, AuditableCard> ?
 }
 
 interface MvrManagerPollingIF : MvrManager {
     // this is used for audit, not estimation. need List so we can do mvrs[permutedIndex[idx]]
-    fun makeMvrsForRound(): List<Cvr>
+    fun makeMvrsForRound(): List<Cvr> // TODO Pair<Cvr, AuditableCard> ?
 }
 
 // when the MvrManager supplies the audited mvrs, its a test

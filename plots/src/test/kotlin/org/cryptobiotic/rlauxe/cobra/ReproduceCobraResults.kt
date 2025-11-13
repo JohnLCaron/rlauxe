@@ -42,18 +42,16 @@ class ReproduceCobraResults {
                 val fixed = FixedBet(2.0)
                 val betting =
                     BettingMart(
-                        riskLimit = alpha, bettingFn = fixed, Nc = N, withoutReplacement = false,
+                        riskLimit = alpha, bettingFn = fixed, N = N, withoutReplacement = false,
                         noerror = compareAssorter.noerror(), upperBound = upperBound
                     )
 
                 val result = runTestRepeated(
                     drawSample = sampler,
-                    // maxSamples = N,
                     ntrials = ntrials,
                     testFn = betting,
                     testParameters = mapOf("alpha" to alpha, "margin" to margin),
-                    // margin = margin,
-                    Nc=N,
+                    N=N,
                     )
                 println("  result = ${result.status} ${result.avgSamplesNeeded()}")
 
@@ -99,17 +97,15 @@ class ReproduceCobraResults {
                     p2 = p2,
                 )
                 val betting =
-                    BettingMart(bettingFn = oracle, Nc = N, noerror=compareAssorter.noerror(), upperBound = upperBound, withoutReplacement = false)
+                    BettingMart(bettingFn = oracle, N = N, noerror=compareAssorter.noerror(), upperBound = upperBound, withoutReplacement = false)
 
                 val result = runTestRepeated(
                     drawSample = sampleWithErrors,
-                    // maxSamples = N,
                     ntrials = ntrials,
                     testFn = betting,
                     testParameters = mapOf("p2" to p2, "margin" to margin),
-                    // margin = margin,
-                    Nc=N,
-                    )
+                    N=N,
+                )
                 println("  result = ${result.avgSamplesNeeded()} ${showDeciles(result.sampleCount)}")
 
                 val expected = findTable1Entry(margin, p2)
@@ -168,7 +164,7 @@ class ReproduceCobraResults {
                             ClcaErrorRates(p2, p1, 0.0, 0.0)
                         )
                         val betting =
-                            BettingMart(bettingFn = oracle, Nc = N, noerror=compareAssorter.noerror(), upperBound = upperBound, withoutReplacement = false)
+                            BettingMart(bettingFn = oracle, N = N, noerror=compareAssorter.noerror(), upperBound = upperBound, withoutReplacement = false)
 
                         val result = runTestRepeated(
                             drawSample = sampleWithErrors,
@@ -177,7 +173,7 @@ class ReproduceCobraResults {
                             testFn = betting,
                             testParameters = mapOf("p1" to p1, "p2" to p2, "margin" to margin),
                             // margin = margin,
-                            Nc=N,
+                            N=N,
                             )
                         println("  result = ${result.avgSamplesNeeded()} ${showDeciles(result.sampleCount)}")
                         val expected = findTable2Entry(p2 = p2, p1 = p1, p2prior = p2m, p1prior = p1m)
@@ -244,7 +240,7 @@ class ReproduceCobraResults {
 
                         // pass the prior rates to the betting function
                         val adaptive = AdaptiveBetting(
-                            Nc = N,
+                            N = N,
                             withoutReplacement = false,
                             a = compareAssorter.noerror(),
                             d = d,
@@ -252,17 +248,15 @@ class ReproduceCobraResults {
                             eps=eps,
                         )
                         val betting =
-                            BettingMart(bettingFn = adaptive, Nc = N, noerror=compareAssorter.noerror(), upperBound = upperBound, withoutReplacement = false)
+                            BettingMart(bettingFn = adaptive, N = N, noerror=compareAssorter.noerror(), upperBound = upperBound, withoutReplacement = false)
 
                         val result = runTestRepeated(
                             drawSample = sampler,
-                            // maxSamples = N,
                             ntrials = ntrials,
                             testFn = betting,
                             testParameters = mapOf("p1" to p1o, "p2" to p2o, "margin" to margin),
-                            // margin = margin,
-                            Nc=N,
-                            )
+                            N=N,
+                        )
                         println("  result = ${result.avgSamplesNeeded()} dist: ${showDeciles(result.sampleCount)}")
                         val expected = findTable2Entry(p2 = p2o, p1 = p1o, p2prior = p2prior, p1prior = p1prior)
                         if (expected != null) {

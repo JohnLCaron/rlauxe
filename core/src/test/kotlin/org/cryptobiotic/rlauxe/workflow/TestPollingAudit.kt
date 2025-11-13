@@ -49,7 +49,7 @@ class TestPollingAudit {
         val mvrManager = MvrManagerPollingForTesting(cvrs, cvrs, Random.nextLong())
         val workflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)
 
-        runAudit("testPollingNoStyle", workflow)
+        runTestAuditToCompletion("testPollingNoStyle", workflow)
     }
 
     // @Test
@@ -81,7 +81,7 @@ class TestPollingAudit {
         val contests: List<Contest> = test.contests
         contests.forEachIndexed { idx, contest ->
             val nvotes = contest.votes.map{ it.value }.sum()
-            val fcontest = test.contestBuilders[idx]
+            val fcontest = test.contestTestBuilders[idx]
             println(" $contest")
             val Nc = contest.Nc.toDouble()
             print("    phantomCount=${fcontest.phantomCount} (${df(fcontest.phantomCount / Nc)})")
@@ -96,7 +96,7 @@ class TestPollingAudit {
         val mvrManager = MvrManagerPollingForTesting(testCvrs, testCvrs, Random.nextLong())
 
         val workflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)
-        runAudit("testPollingWithStyle", workflow)
+        runTestAuditToCompletion("testPollingWithStyle", workflow)
     }
 
     @Test
@@ -132,7 +132,7 @@ class TestPollingAudit {
         val mvrManager = MvrManagerPollingForTesting(testCvrs, testMvrs, Random.nextLong())
 
         val workflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)
-        runAudit("testPollingWithStyle", workflow)
+        runTestAuditToCompletion("testPollingWithStyle", workflow)
     }
 
     @Test
@@ -154,7 +154,7 @@ class TestPollingAudit {
         )
         multiContestTest.contests.forEachIndexed { idx, contest ->
             val nvotes = contest.votes.map{ it.value }.sum()
-            val fcontest = multiContestTest.contestBuilders[idx]
+            val fcontest = multiContestTest.contestTestBuilders[idx]
             println(" $contest")
             val Nc = contest.Nc.toDouble()
             print("    phantomCount=${fcontest.phantomCount} (${df(fcontest.phantomCount / Nc)})")
@@ -169,6 +169,6 @@ class TestPollingAudit {
         val mvrManager = MvrManagerPollingForTesting(cvrs, cvrs, Random.nextLong())
         val workflow = WorkflowTesterPolling(auditConfig, multiContestTest.contests, mvrManager)
 
-        runAudit("testPollingOneContest", workflow)
+        runTestAuditToCompletion("testPollingOneContest", workflow)
     }
 }

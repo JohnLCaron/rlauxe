@@ -8,6 +8,7 @@ import kotlin.random.Random
 private val show = true
 private val logger = KotlinLogging.logger("ClcaSimulation")
 
+// TODO assumes plurality assorter
 /** 
  * Create Sampler with internal cvrs, and simulated mvrs with that match the given error rates.
  * Specific to a contest. The cvrs may be real or themselves simulated to match a Contest's vote.
@@ -32,6 +33,7 @@ class ClcaSimulatedErrorRates(
     val flippedVotesP2o: Int
     val flippedVotesP1u: Int
     val flippedVotesP2u: Int
+    val noerror = cassorter.noerror()
 
     private var idx = 0
     private var count = 0
@@ -185,7 +187,7 @@ class ClcaSimulatedErrorRates(
         while (changed < needToChange && cardIdx < ncards) {
             val cvr = mcvrs[cardIdx]
             if (!usedCvrs.contains(cvr.id) && cassorter.assorter().assort(cvr) == 1.0) {
-                val votes = emptyList(cvr.votes, contest.id)
+                val votes = changeToUndervote(cvr.votes, contest.id)
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
                 if (show && cassorter.assorter().assort(alteredMvr) != 0.5) {
@@ -288,7 +290,7 @@ class ClcaSimulatedErrorRates(
         return result
     }
 
-    fun emptyList(votes: Map<Int, IntArray>, contestId: Int) : Map<Int, IntArray> {
+    fun changeToUndervote(votes: Map<Int, IntArray>, contestId: Int) : Map<Int, IntArray> {
         val result = votes.toMutableMap()
         result[contestId] = intArrayOf()
         return result

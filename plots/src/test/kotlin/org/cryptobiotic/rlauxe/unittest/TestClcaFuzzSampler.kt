@@ -61,7 +61,7 @@ private fun runWithComparisonFuzzSampler(
     // TODO using fuzzPct as mvrsFuzz
     val sampler = ClcaFuzzSampler(clcaConfig.simFuzzPct!!, cvrs, contestUA.contest as Contest, assorter)
     val optimal = AdaptiveBetting(
-        Nc = contestUA.Nc,
+        N = contestUA.Nb,
         withoutReplacement = true,
         a = assorter.noerror(),
         d = clcaConfig.d,
@@ -75,7 +75,7 @@ private fun runWithComparisonFuzzSampler(
         // assorter.assorter().reportedMargin(),
         assorter.noerror(),
         assorter.upperBound(),
-        Nc=contestUA.Nc,
+        N=contestUA.Nb,
         moreParameters=moreParameters + mapOf("margin" to assorter.assorter().reportedMargin()),
     )
 }

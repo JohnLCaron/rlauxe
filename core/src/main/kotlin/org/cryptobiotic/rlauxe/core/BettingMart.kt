@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.util.doubleIsClose
  */
 class BettingMart(
     val bettingFn : BettingFn,
-    val Nc: Int,             // max number of cards for this contest, only used by populationMeanIfH0
+    val N: Int,             // diluted number of cards for this contest, only used by populationMeanIfH0
     val withoutReplacement: Boolean = true,
     val noerror: Double, // for comparison assorters who need rate counting. set to 0 for polling
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
@@ -49,7 +49,7 @@ class BettingMart(
             val lamj = bettingFn.bet(tracker)
 
             // population mean under the null hypothesis
-            mj = populationMeanIfH0(Nc, withoutReplacement, tracker)
+            mj = populationMeanIfH0(N, withoutReplacement, tracker)
             val eta = lamToEta(lamj, mu=mj, upper=upperBound) // informational only
 
             // 1           m[i] > u -> terms[i] = 0.0   # true mean is certainly less than 1/2
@@ -89,7 +89,7 @@ class BettingMart(
         }
 
         // if you have sampled the entire population, then you know if it passed
-        val status = if (sampleNumber == Nc) {
+        val status = if (sampleNumber == N) {
             if (tracker.mean() > 0.5) TestH0Status.SampleSumRejectNull else TestH0Status.AcceptNull
         } else {
             when {

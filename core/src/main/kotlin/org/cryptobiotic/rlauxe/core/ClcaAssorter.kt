@@ -86,7 +86,7 @@ open class ClcaAssorter(
 
     // SHANGRLA overstatement_assorter()
     open fun bassort(mvr: Cvr, cvr:Cvr, hasStyle: Boolean = this.hasStyle): Double {
-        val overstatement = overstatementError(mvr, cvr, hasStyle) // ωi eq (1)
+        val overstatement = overstatementError(mvr, cvr, hasStyle && this.hasStyle) // ωi eq (1)
         val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
         return tau * noerror   // Bi eq (7)
     }

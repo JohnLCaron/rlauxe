@@ -84,8 +84,8 @@ class RunRepeatedTasks {
             ntrials = ntrials,
             testFn = task.makeTestFn(),
             testParameters = task.makeTestParameters(),
-            Nc=task.N(),
-            )
+            N=task.N(),
+        )
     }
 
     private fun CoroutineScope.produceTasks(producer: Iterable<RepeatedTask>): ReceiveChannel<RepeatedTask> =

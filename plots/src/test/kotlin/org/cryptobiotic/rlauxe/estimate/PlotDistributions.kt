@@ -102,8 +102,8 @@ class PlotDistributions {
                     undervotePct = undervotePct,
                     phantomPct = phantomPct
                 )
-            var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-            var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+            val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
+            val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
             // println("mvrsFuzzPct=$mvrsFuzzPct errorRates = ${ClcaErrorRates.getErrorRates(2, mvrsFuzzPct)}")
 
             val ballotCards = MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed)
@@ -124,7 +124,7 @@ class PlotDistributions {
             val cassorter = cassertion.cassorter
             val sampler = ClcaWithoutReplacement(contestUA.id, sortedPairs, cassorter, allowReset = false)
 
-            ClcaAssertionAuditor().run(auditConfig, contestUA.contest, assertionRound, sampler, 1)
+            ClcaAssertionAuditor().run(auditConfig, contestUA, assertionRound, sampler, 1)
             results.add(assertionRound.auditResult!!.samplesUsed)
         }
 

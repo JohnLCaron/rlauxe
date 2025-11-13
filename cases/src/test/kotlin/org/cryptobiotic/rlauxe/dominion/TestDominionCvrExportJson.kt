@@ -225,8 +225,8 @@ class TestDominionCvrExportJson {
         // testWriteSfBallotManifest()
     }
 
-    // @Test fails: BallotTypeContestManifest not accurate?
-    fun testBallotStyles() {
+    // @Test // fails: BallotTypeContestManifest not accurate?
+    fun testBallotTypeContestManifest() {
         val topDir = "/home/stormy/rla/cases/sf2024"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val ifilename = "BallotTypeContestManifest.json"
@@ -259,6 +259,42 @@ class TestDominionCvrExportJson {
 
         println("testBallotStyles $countCards cards are ok")
     }
+
+    /* @Test
+    fun lookForBallotStyles() {
+        val filename = "/home/stormy/dev/github/rla/rlauxe/cases/src/test/data/SF2024/CvrExport_23049.json"
+        var countCards = 0
+
+        val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
+
+
+        val zipReader = ZipReaderTour(
+            zipFilename,
+            silent = true,
+            filter = { path -> path.toString().contains("CvrExport_") },
+            visitor = { inputStream ->
+                val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
+                val dominionCvrs = if (result is Ok) result.unwrap()
+                else throw RuntimeException("Cannot read DominionCvrJson from stream err = $result")
+
+                dominionCvrs.Sessions.forEach {
+                    val ballotType = ballotStyles[it.Original.BallotTypeId]!!
+                    it.Original.Cards.forEach { card ->
+                        if (ballotType.size != card.Contests.size) {
+                            println("HEY")
+                        }
+                        assertEquals(ballotType.size, card.Contests.size)
+                        countCards++
+                    }
+                }
+            },
+        )
+        zipReader.tourFiles()
+
+        println("testBallotStyles $countCards cards are ok")
+    }
+
+*/
 
 
     // use the cvrs to write a fake SF ballot manifest, following ballotManifest-dummy.xlsx format

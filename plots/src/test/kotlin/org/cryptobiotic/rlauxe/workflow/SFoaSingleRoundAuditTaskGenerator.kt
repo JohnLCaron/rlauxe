@@ -67,7 +67,7 @@ class SfoaSingleRoundAuditTask(
                 val runner = OneAuditAssertionAuditor()
                 val result: TestH0Result = runner.run(
                     rlauxAudit.auditConfig(),
-                    contestUA.contest,
+                    contestUA,
                     assertionRound,
                     sampler,
                     1,
@@ -123,7 +123,7 @@ class SfoaSingleRoundAuditTaskContest18(
         val runner = OneAuditAssertionAuditor()
         val result: TestH0Result = runner.run(
             rlauxAudit.auditConfig(),
-            contest18.contest,
+            contest18,
             assertionRound,
             sampler,
             1,

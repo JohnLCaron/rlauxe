@@ -8,6 +8,8 @@ import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import kotlin.math.sqrt
 
+// CANDIDATE for removal
+
 // data class for capturing results from repeated audit trials.
 data class SRT(val Nc: Int,
                val reportedMargin: Double,
@@ -71,7 +73,7 @@ data class SRT(val Nc: Int,
 // TODO reportedMean, reportedMeanDiff in parameters, or in RunTestRepeatedResult
 fun RunTestRepeatedResult.makeSRT(reportedMean: Double, reportedMeanDiff: Double): SRT {
     return SRT(
-        this.Nc,
+        this.N,
         this.testParameters["margin"] ?: mean2margin(reportedMean),
         reportedMeanDiff,
         this.testParameters,

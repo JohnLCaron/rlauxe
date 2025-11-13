@@ -29,7 +29,7 @@ class GenBettingPayoff {
                 //    val p4: Double = 1.0e-4, // apriori rate of 2-vote understatements; set to 0 to remove consideration
                 //    val eps: Double = .00001
                 val optimal = AdaptiveBetting(
-                    Nc = N,
+                    N = N,
                     a = noerror,
                     d = 10000,
                     errorRates = ClcaErrorRates(error, error, error, error),
@@ -52,7 +52,7 @@ class GenBettingPayoff {
                 val noerror = 1 / (2 - margin)
 
                 val bettingFn = AdaptiveBetting(
-                    Nc = N,
+                    N = N,
                     a = noerror,
                     d = 10000,
                     errorRates = ClcaErrorRates(error, error, error, error),
@@ -90,7 +90,7 @@ class GenBettingPayoff {
                 val noerror = 1 / (2 - margin)
 
                 val bettingFn = AdaptiveBetting(
-                    Nc = N,
+                    N = N,
                     a = noerror,
                     d = 10000,
                     errorRates = ClcaErrorRates(error, error, error, error),
@@ -130,7 +130,7 @@ class GenBettingPayoff {
         for (margin in margins) {
             val noerror = 1 / (2 - margin)
             val bettingFn = AdaptiveBetting(
-                Nc = N,
+                N = N,
                 a = noerror,
                 d = 10000,
                 errorRates = ClcaErrorRates(error, error, error, error),

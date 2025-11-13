@@ -44,7 +44,7 @@ class TestMultiContestTestData {
     fun testMakeContests() {
         assertEquals(ncontests, test.contests.size)
         test.contests.forEachIndexed { idx, contest ->
-            val fcontest = test.contestBuilders[idx]
+            val fcontest = test.contestTestBuilders[idx]
             assertEquals(fcontest.ncards + fcontest.phantomCount, contest.Nc)
             val avotes = fcontest.adjustedVotes.sumOf { it.second }
             assertEquals(fcontest.ncards, avotes, "failed for contest = ${contest.id}")
@@ -90,7 +90,7 @@ class TestMultiContestTestData {
         println("test testMakeCardLocationManifest ncards= ${testCards.size}")
 
         test.contests.forEachIndexed { idx, contest ->
-            val fcontest = test.contestBuilders[idx]
+            val fcontest = test.contestTestBuilders[idx]
             val Nc = fcontest.ncards + fcontest.phantomCount
 
             assertEquals(contest.Nc, Nc)
@@ -130,7 +130,7 @@ class TestMultiContestTestData {
         println("test makeBallotsForPolling nballots= ${testCvrs.size}")
 
         test.contests.forEachIndexed { idx, contest ->
-            val fcontest = test.contestBuilders[idx]
+            val fcontest = test.contestTestBuilders[idx]
             val Nc = fcontest.ncards + fcontest.phantomCount
 
             assertEquals(contest.Nc, Nc)
@@ -176,7 +176,7 @@ class TestMultiContestTestData {
 
         test.contests.forEachIndexed { idx, contest ->
             assertEquals(roundToClosest(N * (1.0 + phantomPct)), contest.Nc)
-            val fcontest = test.contestBuilders[idx]
+            val fcontest = test.contestTestBuilders[idx]
             assertEquals(contest.Nc, fcontest.ncards + fcontest.phantomCount)
             println("contest $contest ncards=${fcontest.ncards}")
             val ncvr = cvrs.count { it.hasContest(contest.id) }
@@ -198,7 +198,7 @@ class TestMultiContestTestData {
         cardManifest.cardLocations.iterator().forEach { testCvrs.add(it.cvr()) }
 
         test.contests.forEachIndexed { idx, contest ->
-            val fcontest = test.contestBuilders[idx]
+            val fcontest = test.contestTestBuilders[idx]
             val Nc = fcontest.ncards + fcontest.phantomCount
             assertEquals(contest.Nc, Nc)
 

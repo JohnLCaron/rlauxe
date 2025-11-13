@@ -628,7 +628,7 @@ fun replicate_p_values(
         p2 = 0.01
     )
 
-    val betta = BettingMart(bettingFn = optimal, Nc = N, noerror = minAssorter.noerror(), upperBound = minAssorter.upperBound(), withoutReplacement = false)
+    val betta = BettingMart(bettingFn = optimal, N = N, noerror = minAssorter.noerror(), upperBound = minAssorter.upperBound(), withoutReplacement = false)
     val debugSeq = betta.setDebuggingSequences()
     val result = betta.testH0(sample_size, true) { sampler.sample() }
     println(result)
@@ -653,13 +653,13 @@ fun calc_sample_sizes(
     val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, minAssorter)
 
     val optimal = AdaptiveBetting(
-        Nc = N,
+        N = N,
         withoutReplacement = true,
         a = minAssorter.noerror(),
         d = 100,
         ClcaErrorRates(.001, .01, 0.0, 0.0),
     )
-    val betta = BettingMart(bettingFn = optimal, Nc = N, noerror = minAssorter.noerror(), upperBound = minAssorter.upperBound(), withoutReplacement = false)
+    val betta = BettingMart(bettingFn = optimal, N = N, noerror = minAssorter.noerror(), upperBound = minAssorter.upperBound(), withoutReplacement = false)
 
     return runTestRepeated(
         drawSample = sampler,
@@ -668,7 +668,7 @@ fun calc_sample_sizes(
         testFn = betta,
         testParameters = mapOf("p2o" to optimal.p2o, "margin" to minAssorter.assorter().reportedMargin()),
         // margin = minAssorter.assorter().reportedMargin(),
-        Nc = N,
+        N = N,
     )
 }
 

@@ -122,7 +122,7 @@ class TestClcaAuditNoStyles {
 
         val workflow = WorkflowTesterClca(config, contestsToAudit, emptyList(),
             MvrManagerClcaForTesting(testCvrs, testMvrs, config.seed))
-        runAudit("TestClcaWorkflowNoStyles", workflow)
+        runTestAuditToCompletion("TestClcaWorkflowNoStyles", workflow)
     }
 
     // TODO test, compare hasStyle and noStyle

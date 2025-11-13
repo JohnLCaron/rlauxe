@@ -33,8 +33,8 @@ object RunRliRoundCli {
         val useTest by parser.option(
             ArgType.Boolean,
             shortName = "test",
-            description = "use MvrManagerTestFromRecord"
-        ).default(false)
+            description = "this is a test (uses MvrManagerTestFromRecord to set mvrs)"
+        ).default(true)
         val quiet by parser.option(
             ArgType.Boolean,
             shortName = "quiet",
@@ -57,17 +57,18 @@ fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
 
         var complete = false
         var roundIdx = 0
-        val rlauxAudit = PersistedWorkflow(inputDir, useTest)
+        val workflow = PersistedWorkflow(inputDir, useTest)
 
-        if (!rlauxAudit.auditRounds().isEmpty()) {
-            val auditRound = rlauxAudit.auditRounds().last()
+        if (!workflow.auditRounds().isEmpty()) {
+            val auditRound = workflow.auditRounds().last()
             roundIdx = auditRound.roundIdx
 
             if (!auditRound.auditWasDone) {
                 logger.info { "Run audit round ${auditRound.roundIdx}" }
                 val roundStopwatch = Stopwatch()
 
-                complete = rlauxAudit.runAuditRound(auditRound, quiet)
+                // run the audit for this round
+                complete = workflow.runAuditRound(auditRound, quiet)
                 logger.info { "  complete=$complete took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms" }
             } else {
                 complete = auditRound.auditIsComplete
@@ -77,8 +78,8 @@ fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
         if (!complete) {
             roundIdx++
             // start next round and estimate sample sizes
-            logger.info { "Start audit round $roundIdx using ${rlauxAudit}" }
-            val nextRound = rlauxAudit.startNewRound(quiet = false)
+            logger.info { "Start audit round $roundIdx using ${workflow}" }
+            val nextRound = workflow.startNewRound(quiet = false)
             logger.info { "nextRound ${nextRound.show()}" }
             return if (nextRound.auditIsComplete) null else nextRound // TODO dont return null
         }

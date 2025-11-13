@@ -6,52 +6,51 @@ import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.shuffle
 import kotlin.random.Random
 
-private const val debugAdjust = false
-
 data class MultiContestCombineData(
     val contests: List<Contest>,
     val totalBallots: Int, // including undervotes and phantoms
     val poolId: Int? = null,
 ) {
-    val contestBuilders: List<ContestTracker>
+    val contestVoteTrackers: List<ContestVoteTracker>
 
     init {
         require(contests.size > 0)
-        contestBuilders = contests.map { ContestTracker(it) }
+        contestVoteTrackers = contests.map { ContestVoteTracker(it) }
     }
 
     // multicontest cvrs
     // create new partitions each time this is called
     // includes undervotes and phantoms, size = totalBallots + phantom count
     fun makeCardsFromContests(startCvrId : Int = 0): List<AuditableCard> {
-        contestBuilders.forEach { it.resetTracker() } // startFresh
-        val cvrbs = CardBuilders(startCvrId).addContests(contestBuilders.map { it.contest.info })
+        contestVoteTrackers.forEach { it.resetTracker() } // startFresh
+
+        var nextCardId = startCvrId
         val result = mutableListOf<AuditableCard>()
         repeat(totalBallots) {
-            // add regular Cvrs including undervotes
-            result.add(makeCard(cvrbs, contestBuilders))
+            // add regular Cvrs including undervotes and phantoms
+            result.add(makeCard(nextCardId++, contestVoteTrackers))
         }
 
         val phantoms = makePhantomCards(contests, startIdx=result.size)
         return result + phantoms
     }
 
-    private fun makeCard(cvrbs: CardBuilders, fcontests: List<ContestTracker>): AuditableCard {
-        val cvrb = cvrbs.addCard()
-        fcontests.forEach { fcontest -> fcontest.addContestToCard(cvrb) }
-        return cvrb.build(poolId)
+    private fun makeCard(nextCardId: Int, fcontests: List<ContestVoteTracker>): AuditableCard {
+        val cardBuilder = CardBuilder("card${nextCardId}", nextCardId)
+        fcontests.forEach { fcontest -> fcontest.addContestToCard(cardBuilder) }
+        return cardBuilder.build(poolId)
     }
 
     // multicontest cvrs
     // create new partitions each time this is called
     // includes undervotes and phantoms, size = totalBallots + phantom count
     fun makeCvrsFromContests(startCvrId : Int = 0): List<Cvr> {
-        contestBuilders.forEach { it.resetTracker() } // startFresh
-        val cvrbs = CvrBuilders(startCvrId).addContests(contestBuilders.map { it.contest.info })
+        contestVoteTrackers.forEach { it.resetTracker() } // startFresh
+        val cvrbs = CvrBuilders(startCvrId).addContests(contestVoteTrackers.map { it.contest.info })
         val result = mutableListOf<Cvr>()
         repeat(totalBallots) {
             // add regular Cvrs including undervotes
-            result.add(makeCvr(cvrbs, contestBuilders))
+            result.add(makeCvr(cvrbs, contestVoteTrackers))
         }
 
         result.addAll(makePhantomCvrs(contests))
@@ -59,14 +58,14 @@ data class MultiContestCombineData(
         return result
     }
 
-    private fun makeCvr(cvrbs: CvrBuilders, fcontests: List<ContestTracker>): Cvr {
+    private fun makeCvr(cvrbs: CvrBuilders, fcontests: List<ContestVoteTracker>): Cvr {
         val cvrb = cvrbs.addCvr()
         fcontests.forEach { fcontest -> fcontest.addContestToCvr(cvrb) }
         return cvrb.build(poolId)
     }
 }
 
-data class ContestTracker(
+data class ContestVoteTracker(
     val contest: Contest,
 ) {
     val info = contest.info
@@ -98,9 +97,9 @@ data class ContestTracker(
         if (votesLeft == 0) return
         val candidateIdx = chooseCandidate(Random.nextInt(votesLeft))
         if (candidateIdx == ncands) {
-            cvrb.addContest(info.id, null) // undervote
+            cvrb.replaceContestVote(info.id, null) // undervote
         } else {
-            cvrb.addContest(info.id, info.candidateIds[candidateIdx])
+            cvrb.replaceContestVote(info.id, info.candidateIds[candidateIdx])
         }
     }
 

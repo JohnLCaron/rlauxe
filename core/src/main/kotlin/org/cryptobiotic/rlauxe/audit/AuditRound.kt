@@ -195,7 +195,7 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
 data class EstimationRoundResult(
     val roundIdx: Int,
     val strategy: String,
-    val fuzzPct: Double,
+    val fuzzPct: Double?,
     val startingTestStatistic: Double,
     val startingRates: ClcaErrorRates? = null, // apriori error rates (clca only)
     val estimatedDistribution: List<Int>,   // distribution of estimated sample size; currently deciles
@@ -216,5 +216,13 @@ data class AuditRoundResult(
     val startingRates: ClcaErrorRates? = null, // apriori error rates (clca only)
     val measuredRates: ClcaErrorRates? = null, // measured error rates (clca only)
 ) {
-    override fun toString() = "round=$roundIdx pvalue=${df(pvalue)} nmvrs=$nmvrs samplesUsed=$samplesUsed status=$status"
+    init {
+        if (measuredRates == null)
+            println("AuditRoundResult no rates")
+    }
+
+    override fun toString() = buildString {
+        append("round=$roundIdx pvalue=${df(pvalue)} nmvrs=$nmvrs samplesUsed=$samplesUsed status=$status")
+        append(" measuredRates=$measuredRates")
+    }
 }

@@ -23,7 +23,8 @@ class TestPersistedWorkflow {
         val topdir = "/home/stormy/rla/persist/testPersistedAuditClca"
         val fuzzMvrPct = .01
 
-        val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000)
+        val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000,
+            clcaConfig = ClcaConfig(strategy=ClcaStrategyType.previous, simFuzzPct = .005))
 
         val N = 50000
         val testData = MultiContestTestData(11, 4, N, hasStyle=true, marginRange=0.03..0.05)
@@ -33,10 +34,6 @@ class TestPersistedWorkflow {
 
         // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
-        val testMvrs = if (fuzzMvrPct == 0.0) testCvrs // TODO REDO
-            // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-            else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrPct)
-
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs(contestsUA, testCvrs, config=config)
@@ -121,7 +118,7 @@ fun runPersistedAudit(topdir: String) {
     var lastRound: AuditRound? = null
 
     while (!done) {
-        val roundResult = runRoundResult(inputDir = auditdir, useTest = false, quiet = true) // TODO useTest = false ?
+        val roundResult = runRoundResult(inputDir = auditdir, useTest = true, quiet = true)
         if (roundResult is Err) {
             println("runRoundResult failed ${roundResult.error}")
             fail()

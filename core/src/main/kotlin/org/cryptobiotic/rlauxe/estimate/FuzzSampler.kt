@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.random.Random
@@ -105,7 +106,6 @@ class PollingFuzzSampler(
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-// TODO can this be used on approval?
 
 // includes undervotes i think
 private val fac = 10000.0 // this allows us to use fuzzPct to 5 decimal places
@@ -115,7 +115,8 @@ fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Doub
 
     val isIRV = contests.associate { it.name to (it.isIrv()) }.toMap()
     var count = 0
-    val cvrbs = CvrBuilders.convertCvrs(contests.map { it.info() }, cvrs)
+    val cvrbs: List<CvrBuilder> = CvrBuilders.convertCvrsToBuilders(contests.map { it.info() }, cvrs)
+
     cvrbs.filter { !it.phantom && (filter == null || filter(it)) }.forEach { cvrb: CvrBuilder ->
         val r = Random.nextDouble(limit)
         cvrb.contests.forEach { (_, cvb) ->
@@ -172,5 +173,22 @@ fun switchCandidateRankings(cvb: ContestVoteBuilder, candidateIds: List<Int>) {
         val save = cvb.votes[ncandIdx1]
         cvb.votes[ncandIdx1] = cvb.votes[ncandIdx2]
         cvb.votes[ncandIdx2] = save
+    }
+}
+
+fun switchCandidateRankings(votes: MutableList<Int>, candidateIds: List<Int>) {
+    val ncands = candidateIds.size
+    val size = votes.size
+    if (size == 0) { // no votes -> random one vote
+        val candIdx = Random.nextInt(ncands)
+        votes.add(candidateIds[candIdx])
+    } else if (size == 1) { // one vote -> no votes
+        votes.clear()
+    } else { // switch two randomly selected votes
+        val ncandIdx1 = Random.nextInt(size)
+        val ncandIdx2 = Random.nextInt(size)
+        val save = votes[ncandIdx1]
+        votes[ncandIdx1] = votes[ncandIdx2]
+        votes[ncandIdx2] = save
     }
 }

@@ -1,12 +1,5 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
-import org.cryptobiotic.rlauxe.core.Cvr
-import kotlin.collections.get
-import kotlin.sequences.plus
-
 interface CloseableIterable<out T> {
     fun iterator(): CloseableIterator<T>
 }

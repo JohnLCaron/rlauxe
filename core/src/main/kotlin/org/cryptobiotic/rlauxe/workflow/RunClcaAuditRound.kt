@@ -18,7 +18,7 @@ fun runClcaAuditRound(
     roundIdx: Int,
     auditor: ClcaAssertionAuditorIF,
 ): Boolean {
-    val cvrPairs = mvrManager.makeCvrPairsForRound() // same over all contests!
+    val cvrPairs = mvrManager.makeCvrPairsForRound()
 
     // parallelize over contests
     val contestsNotDone = contests.filter{ !it.done }
@@ -51,7 +51,7 @@ class RunContestTask(
                 val sampler =
                     ClcaWithoutReplacement(contest.id, cvrPairs, cassorter, allowReset = false)
 
-                val testH0Result = auditor.run(config, contest.contestUA.contest, assertionRound, sampler, roundIdx)
+                val testH0Result = auditor.run(config, contest.contestUA, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status
                 if (testH0Result.status.complete) assertionRound.round = roundIdx
             }
@@ -67,7 +67,7 @@ class RunContestTask(
 fun interface ClcaAssertionAuditorIF {
     fun run(
         config: AuditConfig,
-        contest: ContestIF,
+        contestUA: ContestUnderAudit,
         assertionRound: AssertionRound,
         sampler: Sampler,
         roundIdx: Int,
@@ -78,12 +78,12 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
     override fun run(
         config: AuditConfig,
-        contest: ContestIF,
+        contestUA: ContestUnderAudit,
         assertionRound: AssertionRound,
         sampler: Sampler,
         roundIdx: Int,
     ): TestH0Result {
-
+        val contest = contestUA.contest
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
 
@@ -91,25 +91,23 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val errorRates: ClcaErrorRates = when (clcaConfig.strategy) {
             ClcaStrategyType.optimalComparison,
             ClcaStrategyType.previous,
-            ClcaStrategyType.phantoms
-                -> {
-                // use phantomRate as apriori TODO shouldnt we be using the rate from the previous sample, if any ??
-                ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
+            ClcaStrategyType.phantoms -> {
+                if (assertionRound.prevAuditResult != null) {
+                    // heres where use the previous round's error rates
+                    assertionRound.prevAuditResult!!.measuredRates!!
+                } else {
+                    // use phantomRate as apriori
+                    ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
+                }
             }
 
-            /* ClcaStrategyType.oracle -> {
-                // use the actual errors comparing mvrs to cvrs. Testing only
-                ClcaErrorTable.calcErrorRates(contest.id, cassorter, cvrPairs)
-            } */
-
             ClcaStrategyType.oracle, // TODO: removed so remove?
-            ClcaStrategyType.noerror
-                -> {
+            ClcaStrategyType.noerror -> {
                 ClcaErrorRates(0.0, 0.0, 0.0, 0.0)
             }
 
             ClcaStrategyType.fuzzPct -> {
-                // use computed errors as apriori
+                // use computed errors as apriori. TODO ignoring margin, undervotes.
                 ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
             }
 
@@ -121,14 +119,14 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.oracle) {
             OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
         }  else if (clcaConfig.strategy == ClcaStrategyType.optimalComparison) {
-            OptimalComparisonNoP1(N = contest.Nc(), withoutReplacement = true, upperBound = cassorter.noerror(), p2 = errorRates.p2o)
+            OptimalComparisonNoP1(N = contestUA.Nb, withoutReplacement = true, upperBound = cassorter.noerror(), p2 = errorRates.p2o)
         } else {
-            AdaptiveBetting(Nc = contest.Nc(), a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
+            AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
         }
 
         val testFn = BettingMart(
             bettingFn = bettingFn,
-            Nc = contest.Nc(),
+            N = contestUA.Nb,
             noerror = cassorter.noerror(),
             upperBound = cassorter.upperBound(),
             riskLimit = config.riskLimit,
@@ -151,7 +149,9 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             measuredRates = testH0Result.tracker.errorRates(),
         )
 
-        if (!quiet) logger.debug{" (${contest.id}) ${contest.name} ${cassertion} ${assertionRound.auditResult}"}
+        if (!quiet) {
+            logger.debug{" (${contest.id}) ${contest.name} ${cassertion} ${assertionRound.auditResult}"}
+        }
         return testH0Result
     }
 }

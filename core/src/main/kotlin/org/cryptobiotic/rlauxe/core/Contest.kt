@@ -416,7 +416,9 @@ open class ContestUnderAudit(
     open fun show() = buildString {
         appendLine("${contest.javaClass.simpleName} ${contest.show()}")
         if (minAssertion().first != null) append("   ${minAssertionDifficulty()}")
-        appendLine(" Nb=$Nb dilutedMargin=${pfn((minDilutedMargin()))}")
+        val minAssorter = minAssertion().first!!.assorter
+        append(" Nb=$Nb dilutedMargin=${pfn(minDilutedMargin())}")
+        appendLine(" reportedMargin=${pfn(minAssorter.reportedMargin())} recountMargin=${pfn(contest.recountMargin(minAssorter))} ")
         append(contest.showCandidates())
     }
 

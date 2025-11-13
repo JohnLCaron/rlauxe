@@ -27,7 +27,7 @@ class BelgiumClca (
 
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
-    override fun cardLocations() = createCardIterator()
+    override fun cardManifest() = createCardIterator()
 
     fun createCardIterator(): CloseableIterator<AuditableCard> {
         return CvrsWithStylesToCards(AuditType.CLCA, hasStyle,
@@ -51,7 +51,7 @@ fun createBelgiumClca(
         (auditConfigIn != null) -> auditConfigIn
         else -> AuditConfig(
             AuditType.CLCA, hasStyle = true, removeCutoffContests = false, riskLimit = .05, nsimEst=10, minRecountMargin=0.0,
-            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
+            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous, simFuzzPct = .001)
         )
     }
     val election = BelgiumClca(contestd, config.hasStyle)

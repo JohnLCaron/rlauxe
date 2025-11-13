@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe
 
-import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.PluralityAssorter

@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.Welford
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.sfn
 
 data class ClcaErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u: Double) {
@@ -13,7 +13,7 @@ data class ClcaErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val
         require(p2u in 0.0..1.0) {"p2u out of range $p2u"}
     }
     override fun toString(): String {
-        return "[${df(p2o)}, ${df(p1o)}, ${df(p1u)}, ${df(p2u)}]"
+        return "[${pfn(p2o, 8)}, ${pfn(p1o, 8)}, ${pfn(p1u, 8)}, ${pfn(p2u, 8)}]"
     }
     fun toList() = listOf(p2o, p1o, p1u, p2u)
     fun areZero() = (p2o == 0.0 && p1o == 0.0 && p1u == 0.0 && p2u == 0.0)
@@ -31,24 +31,30 @@ data class ClcaErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val
     }
 }
 
-class ClcaErrorRatesAvg {
+class ClcaErrorRatesCumul {
     val avgs = List(4) { Welford() }
+    val sums = MutableList(4) { 0.0 }
+
     fun add(rates: ClcaErrorRates) {
-        rates.toList().forEachIndexed { idx, rate -> avgs[idx].update(rate) }
+        rates.toList().forEachIndexed { idx, rate ->
+            avgs[idx].update(rate)
+            sums[idx] = sums[idx] + rate
+        }
     }
 
     fun avgRates(): List<Double> = avgs.map { it.mean }
+    fun sumRates(): List<Double> = sums
 
     override fun toString() = buildString {
-        avgRates().forEach { append("${dfn(it, 4)}, ") }
+        avgRates().forEach { append("${pfn(it, 6)}, ") }
         val sum = avgRates().sum()
-        append("${dfn(sum, 5)}")
+        append("${pfn(sum, 6)}")
     }
 
     companion object {
         val header = "p2o p1o p1u p2u sum"
         fun header() = buildString {
-            header.split(" ").forEach { append("${sfn(it, 6)}, ") }
+            header.split(" ").forEach { append("${sfn(it, 9)}, ") }
         }
     }
 }

@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.collections.mutableListOf
@@ -381,7 +382,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     override fun upperBound() = h2(upper)
 
     override fun desc() = buildString {
-        append("(${winner}/${loser}): reportedMean=${df(reportedMean)} reportedMargin=${dfn(reportedMargin(), 6)}")
+        append("(${winner}/${loser}): reportedMean=${pfn(reportedMean)} reportedMargin=${pfn(reportedMargin())}")
     }
 
     override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization

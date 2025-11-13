@@ -41,6 +41,11 @@ class TestCreateBelgiumClcaFromJson {
     }
 
     @Test
+    fun runBelgiumElection() {
+        runBelgiumElection("Anvers")
+    }
+
+    @Test
     fun createAllBelgiumElection() {
         val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
         belgianElectionMap.keys.forEach {
@@ -76,7 +81,7 @@ class TestCreateBelgiumClcaFromJson {
     }
 }
 
-fun createBelgiumElection(electionName: String): Pair<Int, Int> {
+fun createBelgiumElection(electionName: String, stopRound:Int=0): Pair<Int, Int> {
     println("======================================================")
     println("electionName $electionName")
     val filename = belgianElectionMap[electionName]!!
@@ -110,13 +115,31 @@ fun createBelgiumElection(electionName: String): Pair<Int, Int> {
     while (!done) {
         val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
         if (lastRound != null) finalRound = lastRound
-        done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
+        done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx == stopRound
     }
 
     return if (finalRound != null) {
         println("$electionName: ${finalRound.show()}")
         Pair(totalVotes, finalRound.nmvrs)
     } else Pair(0, 0)
+}
+
+fun runBelgiumElection(electionName: String, stopRound:Int=0): Int {
+    val topdir = "$toptopdir/$electionName"
+    val auditdir = "$topdir/audit"
+
+    var done = false
+    var finalRound: AuditRound? = null
+    while (!done) {
+        val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
+        if (lastRound != null) finalRound = lastRound
+        done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx == stopRound
+    }
+
+    return if (finalRound != null) {
+        println("$electionName: ${finalRound.show()}")
+        finalRound.nmvrs
+    } else 0
 }
 
 

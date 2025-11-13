@@ -147,12 +147,10 @@ class ReproduceAlphaResults {
                         print("  eta0=$eta0 d=$d")
                         val result =  runTestRepeated(
                             drawSample = sampleFn,
-                            // maxSamples = N,
                             ntrials = reps,
                             testFn = alpha,
                             testParameters = mapOf("eta0" to eta0, "d" to d.toDouble(), "margin" to mean2margin(eta0)),
-                            // margin = mean2margin(eta0),
-                            Nc=N,
+                            N=N,
                         )
                         println("  avgSamplesNeeded = ${result.avgSamplesNeeded()}")
                         al.add(result.makeSRT(theta, 0.0))
@@ -353,7 +351,7 @@ class ReproduceAlphaResults {
             for (d in dl) {
                 val mart: RunTestRepeatedResult = runAlphaMartRepeated(
                     drawSample = SampleFromArrayWithoutReplacement(x),
-                    // maxSamples = N,
+                    N = N,
                     eta0 = eta,
                     d = d,
                     ntrials = reps,
@@ -494,7 +492,7 @@ class ReproduceAlphaResults {
 
                 val mart: RunTestRepeatedResult = runAlphaMartRepeated(
                     drawSample = drawSample,
-                    // maxSamples = N,
+                    N = N,
                     eta0 = compareUpper - eps,
                     d = d,
                     ntrials = ntrials,
@@ -581,7 +579,7 @@ class ReproduceAlphaResults {
 
             val mart: RunTestRepeatedResult = runAlphaMartRepeated(
                 drawSample = drawSample,
-                // maxSamples = N,
+                N = N,
                 eta0 = eta0,
                 d = d,
                 ntrials = ntrials,

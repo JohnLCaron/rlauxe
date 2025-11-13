@@ -19,7 +19,7 @@ class TestBoulderElectionOneAudit {
 
         val election = BoulderElectionOA(export, sovo, isClca=true)
         val infos = election.oaContests.mapValues { it.value.info }
-        val cards = election.cardLocations()
+        val cards = election.cardManifest()
         val allTab = tabulateAuditableCards(cards, infos).toSortedMap()
 
         election.oaContests.forEach { (contestId, oaContest) ->

@@ -21,7 +21,7 @@ class TestOneAudit {
         val workflow = WorkflowTesterOneAudit(config, listOf(contestOA),
             MvrManagerClcaForTesting(testCvrs, testCvrs, config.seed))
 
-        runAudit("testOneAuditContestSmall", workflow)
+        runTestAuditToCompletion("testOneAuditContestSmall", workflow)
     }
 
     @Test
@@ -38,7 +38,7 @@ class TestOneAudit {
         val config = AuditConfig(AuditType.ONEAUDIT, hasStyle=true, nsimEst=10)
         val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerClcaForTesting(testCvrs, testCvrs, config.seed))
 
-        runAudit("testOneAuditContest", workflow)
+        runTestAuditToCompletion("testOneAuditContest", workflow)
     }
 
     @Test
@@ -55,7 +55,7 @@ class TestOneAudit {
         val config = AuditConfig(AuditType.ONEAUDIT, hasStyle=true, nsimEst=10)
         val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerClcaForTesting(testCvrs, testCvrs, config.seed))
 
-        runAudit("testOneAuditContest", workflow)
+        runTestAuditToCompletion("testOneAuditContest", workflow)
     }
 
     @Test
@@ -75,7 +75,7 @@ class TestOneAudit {
         )
 
         val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerClcaForTesting(testCvrs, testCvrs, config.seed))
-        runAudit("testOneAuditContestSmall", workflow)
+        runTestAuditToCompletion("testOneAuditContestSmall", workflow)
     }
 
 /*

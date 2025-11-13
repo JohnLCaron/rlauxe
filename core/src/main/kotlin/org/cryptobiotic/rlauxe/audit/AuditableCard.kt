@@ -16,7 +16,7 @@ data class AuditableCard (
     val votes: Map<Int, IntArray>?, // for CLCA or OneAudit, a map of contest -> the candidate ids voted; must include undervotes; missing for pooled data or polling audits
                                                                                 // when IRV, ranked first to last
     val poolId: Int?, // for OneAudit, or for setting style
-    val cardStyle: String? = null, // not used yet
+    val cardStyle: String? = null, // set style in a way that doesnt interfere with onaudit....
 ) {
     // if there are no votes, the IntArrays are all empty; looks like all undervotes
     fun cvr() : Cvr {
@@ -168,6 +168,18 @@ class CvrsWithStylesToCards(
         }
         val votes = if (hasCvr) orgCvr.votes else null
 
+
+        // compare to CvrExport.toCvr()
+        // class CvrExportToCvrAdapter(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: Map<String, Int>? = null) : CloseableIterator<Cvr> {
+        //    override fun hasNext() = cvrExportIterator.hasNext()
+        //    override fun next() = cvrExportIterator.next().toCvr(pools=pools)
+        //    override fun close() = cvrExportIterator.close()
+        //}
+        //     fun toCvr(phantom: Boolean = false, pools: Map<String, Int>? = null) : Cvr {
+        //        val poolId = if (pools == null || group != 1) null else pools[ poolKey() ] // TODO not general
+        //        return Cvr(id, votes, phantom, poolId)
+        //    }
+        //
         // compare to AuditableCard.fromCvr
         //         fun fromCvr(cvr: Cvr, index: Int, sampleNum: Long): AuditableCard {
         //            val sortedVotes = cvr.votes.toSortedMap()

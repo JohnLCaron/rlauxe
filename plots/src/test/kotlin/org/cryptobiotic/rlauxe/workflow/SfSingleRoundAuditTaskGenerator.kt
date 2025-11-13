@@ -66,7 +66,7 @@ class SfSingleRoundAuditTask(
                 val runner = ClcaAssertionAuditor()
                 val result: TestH0Result = runner.run(
                     rlauxAudit.auditConfig(),
-                    contestUA.contest,
+                    contestUA,
                     assertionRound,
                     sampler,
                     1,

@@ -30,7 +30,7 @@ class TestMultiContestTestData {
     val infos: Map<Int, ContestInfo>
 
     init {
-        test = MultiContestTestData(ncontests, nbs, N, hasStyle=true, marginRange, underVotePct, phantomRange)
+        test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
         infos = test.contests.associate { it.id to it.info }
     }
 
@@ -165,7 +165,7 @@ class TestMultiContestTestData {
         val underVotePct = 0.20..0.20
         val phantomPct = .05
         val phantomRange = phantomPct..phantomPct
-        val test = MultiContestTestData(ncontests, nbs, N, hasStyle=true, marginRange, underVotePct, phantomRange)
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
         val calcN = test.ballotStylePartition.map { it.value }.sum()
         assertEquals(N, calcN)
         println(test)

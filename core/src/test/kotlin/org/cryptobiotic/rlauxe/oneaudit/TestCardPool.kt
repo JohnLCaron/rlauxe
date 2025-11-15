@@ -39,7 +39,7 @@ class TestCardPool {
 
     @Test
     fun testAddUndervotes() {
-        val test = MultiContestTestData(20, 11, 20000, hasStyle=true)
+        val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map {
             ContestUnderAudit(it, isClca = true).addStandardAssertions()
         }
@@ -70,7 +70,7 @@ class TestCardPool {
 
     @Test
     fun testCardPool() {
-        val test = MultiContestTestData(20, 11, 20000, hasStyle=true)
+        val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map {
             ContestUnderAudit(it, isClca = true).addStandardAssertions()
         }

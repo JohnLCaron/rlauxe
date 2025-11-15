@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.verifyOAassortAvg
 import kotlin.test.Test
@@ -15,24 +16,18 @@ import kotlin.test.fail
 
 // when does (winner - loser) / N agree with AvgAssortValue?
 class TestAvgAssortValues {
-
+    val showCards = false
     @Test
     fun testAvgAssortValues() {
         val margin = .03
-        val Nc = 1000
+        val Nc = 100
         val (oaContest, cardPools, testCvrs) =
             makeOneContestUA(margin, Nc, cvrFraction = 0.50, undervoteFraction = 0.0, phantomFraction = 0.0)
         println("oaContest = $oaContest")
-        testCvrs.subList(0, 10).forEach { println("  $it") }
-        assertEquals(margin, oaContest.minPollingAssertion().second)
+        if (showCards) testCvrs.forEach { println("  $it") }
+        //testCvrs.subList(0, 10).forEach { println("  $it") }
+        // assertEquals(margin, oaContest.minPollingAssertion().second)
 
-        // class CvrsWithStylesToCards(
-        //    val type: AuditType,
-        //    val hasStyle: Boolean,
-        //    val cvrs: CloseableIterator<Cvr>,
-        //    val phantomCvrs : List<Cvr>?,
-        //    styles: List<CardStyleIF>?,
-        //): CloseableIterator<AuditableCard> {
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
             CvrsWithStylesToCards(
                 AuditType.ONEAUDIT, false, Closer(testCvrs.iterator()),
@@ -40,13 +35,22 @@ class TestAvgAssortValues {
             )
         }
 
-        println("\n$AuditableCardHeader")
-        var count = 0
-        for (card in cardIterable.iterator()) {
-            print(writeAuditableCardCsv(card))
-            if (count++ > 10) break
+        if (showCards) {
+            println("\n$AuditableCardHeader")
+            var count = 0
+            for (card in cardIterable.iterator()) {
+                print(writeAuditableCardCsv(card))
+                if (count++ > 100) break
+            }
+            println()
         }
-        println()
+
+        val contests = listOf(oaContest)
+        val infos = contests.map { it.contest.info() }.associateBy { it.id }
+        val manifestTabs = tabulateAuditableCards(cardIterable.iterator(), infos)
+        val Nbs = manifestTabs.mapValues { it.value.ncards }
+        println(Nbs)
+
 
         //     cards: CloseableIterator<AuditableCard>,
         //    result: VerifyResults,

@@ -10,13 +10,15 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
 // data class AuditableCard (
-//    val desc: String, // info to find the card for a manual audit. Part of the info the Prover commits to before the audit.
-//    val index: Int,  // index into the original, canonical (committed-to) list of cards
-//    val prn: Long,
+//    val location: String, // info to find the card for a manual audit. Aka ballot identifier.
+//    val index: Int,  // index into the original, canonical list of cards
+//    val prn: Long,   // psuedo random number
 //    val phantom: Boolean,
-//    val contests: IntArray, // aka ballot style.
-//    val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, ranked first to last
-//    val poolId: Int?, // for OneAudit
+//    val possibleContests: IntArray, // list of contests that might be on the ballot. TODO replace with cardStyle?
+//    val votes: Map<Int, IntArray>?, // for CLCA or OneAudit, a map of contest -> the candidate ids voted; must include undervotes; missing for pooled data or polling audits
+//                                                                                // when IRV, ranked first to last
+//    val poolId: Int?, // for OneAudit, or for setting style
+//    val cardStyle: String? = null, // set style in a way that doesnt interfere with onaudit....
 //)
 class TestAuditableCard {
 
@@ -62,7 +64,8 @@ fun makeCvr(id: Int, ncontests: Int, ncandidates: Int): Cvr {
     val cvrb = CvrBuilder2(id.toString(),  false)
     repeat(ncontests) {
         val contestId = Random.nextInt(ncontests)
-        val candidates = IntArray(ncandidates) { Random.nextInt(ncontests) }
+        val votesForN = Random.nextInt(ncandidates)
+        val candidates = IntArray(votesForN) { Random.nextInt(ncandidates) }
         cvrb.addContest(contestId, candidates)
     }
     return cvrb.build()

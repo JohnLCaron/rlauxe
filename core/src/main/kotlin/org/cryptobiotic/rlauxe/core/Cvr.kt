@@ -9,7 +9,7 @@ data class Cvr(
     val id: String, // ballot identifier
     val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
     val phantom: Boolean = false,
-    val poolId: Int? = null,  // or style.id ?
+    val poolId: Int? = null,  // or cardStyle.id
 ) {
     init {
         require(id.indexOf(',') < 0) { "cvr.id='$id' must not have commas"} // must not have nasty commas
@@ -63,10 +63,6 @@ data class Cvr(
         result = 31 * result + id.hashCode()
         votes.forEach { (contestId, candidates) -> result = 31 * result + contestId.hashCode() + candidates.contentHashCode() }
         return result
-    }
-
-    companion object {
-        fun makePhantom(cvrId: String, contestId: Int) = Cvr(cvrId, mapOf(contestId to IntArray(0)), phantom=true)
     }
 }
 

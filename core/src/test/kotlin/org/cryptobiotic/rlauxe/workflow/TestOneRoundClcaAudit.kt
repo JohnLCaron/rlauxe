@@ -18,7 +18,7 @@ class TestOneRoundClcaAudit {
         val underVotePct= 0.02 .. 0.12
         val phantomPct= 0.005
         val phantomRange= phantomPct .. phantomPct
-        val testData = MultiContestTestData(ncontests, nbs, N, hasStyle=true, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))

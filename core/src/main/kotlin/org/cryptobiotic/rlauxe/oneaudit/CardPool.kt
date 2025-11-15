@@ -271,10 +271,6 @@ open class CardPoolFromCvrs(
         return result
     }
 
-    override fun toString(): String {
-        return "CardPoolFromCvrs(poolName='$poolName', poolId=$poolId, contestTabs=$contestTabs, totalCards=$totalCards)"
-    }
-
     companion object {
         // poolId -> CardPoolIF
         fun makeCardPools(cvrs: Iterator<Cvr>, infos: Map<Int, ContestInfo>): Map<Int, CardPoolFromCvrs> {
@@ -307,8 +303,9 @@ fun addOAClcaAssortersFromMargin(
             cardPools.forEach { cardPool ->
                 if (cardPool.hasContest(contestId)) {
                     val regVotes = cardPool.regVotes()[oaContest.id]!!
-                    if (regVotes.ncards() > 0) {
-                        val poolMargin = assertion.assorter.calcMargin(regVotes.votes, regVotes.ncards())
+                    if (cardPool.ncards() > 0) {
+                        // note: use cardPool.ncards(), this is the diluted count
+                        val poolMargin = assertion.assorter.calcMargin(regVotes.votes, cardPool.ncards())
                         assortAverages[cardPool.poolId] = margin2mean(poolMargin)
                     }
                 }

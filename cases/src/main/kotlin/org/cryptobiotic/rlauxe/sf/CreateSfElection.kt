@@ -59,12 +59,13 @@ class CreateSfElection(
             contestManifestFilename,
             cvrExportCsv,
         )
+
         cardPoolMapByName = allCardPools.filter { it.value.poolName != unpooled } // exclude the unpooled
         cardPools = cardPoolMapByName.values.toList() // exclude the unpooled
-        val unpooledPool = allCardPools[unpooled]!!
+        val unpooledPool = allCardPools[unpooled]!! // this does not have the diluted count
         this.cardCount = ncards
 
-        // we need the contests to make the phantom cvrs in createCardIterator()
+        // we need Nc to make the phantom cvrs in createCardIterator()
         phantomCount = countPhantoms(allCvrTabs, contestNcs)
 
         // we need to know the diluted Nb before we can create the UAs: another pass through the cvrExports
@@ -188,7 +189,7 @@ fun makeOneAuditContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs: Ma
     val contestsUAs = mutableListOf<ContestUnderAudit>()
     allCvrTabs.map { (contestId, contestSumTab)  ->
         val info = contestSumTab.info
-        val unpooledTab: ContestTabulation = unpooled.contestTabs[contestId]!!
+        val unpooledTab: ContestTabulation = unpooled.contestTabs[contestId]!! // does not have the diluted count
 
         val useNc = contestNcs[info.id] ?: contestSumTab.ncards
         if (useNc > 0) {

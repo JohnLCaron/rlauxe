@@ -73,6 +73,9 @@ class CardBuilder(
     constructor(location: String, index: Int):
             this(location, index, 0L, false, intArrayOf(), null, null, null)
 
+    constructor(location: String, index: Int, poolId: Int?, cardStyle: String?):
+            this(location, index, 0L, false, intArrayOf(), null, poolId, cardStyle)
+
     fun replaceContestVotes(contestId: Int, contestVotes: IntArray): CardBuilder  {
         votes[contestId] = contestVotes
         return this

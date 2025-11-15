@@ -33,7 +33,6 @@ class TestPollingAudit {
             ncontests,
             nbs,
             N,
-            hasStyle=auditConfig.hasStyle,
             marginRange = marginRange,
             underVotePctRange = underVotePct,
             phantomPctRange = phantomPct
@@ -72,7 +71,6 @@ class TestPollingAudit {
             ncontests,
             nbs,
             N,
-            auditConfig.hasStyle,
             marginRange = marginRange,
             underVotePctRange = underVotePct,
             phantomPctRange = phantomPct
@@ -118,7 +116,6 @@ class TestPollingAudit {
             ncontests,
             nbs,
             N,
-            auditConfig.hasStyle,
             marginRange = marginRange,
             underVotePctRange = underVotePct,
             phantomPctRange = phantomPct
@@ -147,7 +144,6 @@ class TestPollingAudit {
             ncontests,
             nbs,
             Nc,
-            true,
             marginRange = marginRange,
             underVotePctRange = underVotePct,
             phantomPctRange = phantomPct

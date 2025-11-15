@@ -3,8 +3,12 @@ package org.cryptobiotic.rlauxe.dominion
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.audit.CvrsWithStylesToCards
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
 import org.cryptobiotic.rlauxe.persist.csv.CvrExportCsvHeader
+import org.cryptobiotic.rlauxe.persist.csv.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.toCsv
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
@@ -15,7 +19,6 @@ import org.cryptobiotic.rlauxe.sf.readContestManifest
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.ZipReaderIterator
 import org.cryptobiotic.rlauxe.util.ZipReaderTour
-import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import java.io.FileOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -117,9 +120,7 @@ class TestDominionCvrExportJson {
         cvrExportCsvStream.write(CvrExportCsvHeader.toByteArray())
 
         summary.cvrExports.forEach {
-            summary.cvrExports.forEach {
-                cvrExportCsvStream.write(it.toCsv().toByteArray()) // UTF-8
-            }
+            cvrExportCsvStream.write(it.toCsv().toByteArray()) // UTF-8
         }
         cvrExportCsvStream.close()
 
@@ -137,6 +138,43 @@ class TestDominionCvrExportJson {
             }
         }
         cardManifestWriter.close()
+    }
+
+    @Test
+    fun testCvrExportToCvrAdapter() {
+        val topdir = "/home/stormy/rla/tests/scratch/"
+        val cvrExportFilename = "$topdir/$cvrExportCsvFile"
+
+        // read cvrExport.csv back in, and write it with CvrsWithStylesToCards for CLCA
+        val cardManifestFilename2 = "$topdir/cardManifestClca.csv"
+        val cardManifestWriter2 = FileOutputStream(cardManifestFilename2).writer()
+        cardManifestWriter2.write(AuditableCardHeader)
+
+        val cvrExportIter = cvrExportCsvIterator(cvrExportFilename)
+        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, null )
+        val cardIter = CvrsWithStylesToCards(AuditType.CLCA, cvrsAreComplete=true, cvrIter, null, null)
+
+        while (cardIter.hasNext()) {
+            val card = cardIter.next()
+            cardManifestWriter2.write(writeAuditableCardCsv(card))
+        }
+        cardManifestWriter2.close()
+
+        // read cvrExport.csv back in, and write it with CvrsWithStylesToCards for OA
+        val cardManifestFilename3 = "$topdir/cardManifestOA.csv"
+        val cardManifestWriter3 = FileOutputStream(cardManifestFilename3).writer()
+        cardManifestWriter3.write(AuditableCardHeader)
+
+        val cardStyle = CardStyle("31-125", 2, emptyList(), listOf(0,1,2), null)
+        val cvrExportIter2 = cvrExportCsvIterator(cvrExportFilename) // CvrExport
+        val cvrIter2 = CvrExportToCvrAdapter(cvrExportIter2, pools= mapOf("31-125" to 2)) // Cvr
+        val cardIter2 = CvrsWithStylesToCards(AuditType.ONEAUDIT, cvrsAreComplete=false, cvrIter2, null, listOf(cardStyle) ) // AuditableCard
+
+        while (cardIter2.hasNext()) {
+            val card = cardIter2.next()
+            cardManifestWriter3.write(writeAuditableCardCsv(card))
+        }
+        cardManifestWriter3.close()
     }
 
     @Test

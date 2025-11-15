@@ -27,7 +27,7 @@ import kotlin.test.Test
 class MeasureEstimationTaskConcurrency {
     @Test
     fun measure() {
-        val test = MultiContestTestData(15, 1, 20000, hasStyle = true)
+        val test = MultiContestTestData(15, 1, 20000)
         val cards = test.makeCardsFromContests()
 
         val contestsUA  = test.contests.map { ContestUnderAudit(it).addStandardAssertions() }

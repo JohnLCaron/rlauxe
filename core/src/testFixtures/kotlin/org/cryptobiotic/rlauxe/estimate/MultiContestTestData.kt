@@ -21,11 +21,10 @@ data class MultiContestTestData(
     val ncontest: Int,
     val nballotStyles: Int,
     val totalBallots: Int, // including undervotes and phantoms
-    val hasStyle: Boolean, // not used i think
     val marginRange: ClosedFloatingPointRange<Double> = 0.01.. 0.03,
     val underVotePctRange: ClosedFloatingPointRange<Double> = 0.01.. 0.30, // needed to set Nc
     val phantomPctRange: ClosedFloatingPointRange<Double> = 0.00..  0.005, // needed to set Nc
-    val poolId: Int? = null
+    val addStyle: Boolean = false, // add cardStyle info to cvr
 ) {
     // generate with ballotStyles; but if hasStyle = false, then these are not visible to the audit
     val ballotStylePartition = partition(totalBallots, nballotStyles).toMap() // Map bsidx -> ncards in each ballot style (bs)
@@ -112,7 +111,7 @@ data class MultiContestTestData(
             val fcontests = contestTestBuilders.filter { ballotStyle.contestNames.contains(it.info.name) }
             repeat(ballotStyle.ncards) {
                 // add regular Cvrs including undervotes
-                result.add(makeCvr(cvrbs, fcontests))
+                result.add(makeCvr(cvrbs, fcontests, poolId = if (addStyle) ballotStyle.id else null))
             }
         }
 
@@ -120,7 +119,7 @@ data class MultiContestTestData(
         return result + phantoms
     }
 
-    private fun makeCvr(cvrbs: CvrBuilders, fcontests: List<ContestTestDataBuilder>): Cvr {
+    private fun makeCvr(cvrbs: CvrBuilders, fcontests: List<ContestTestDataBuilder>, poolId: Int?): Cvr {
         val cvrb = cvrbs.addCvr()
         fcontests.forEach { fcontest -> fcontest.addContestToCvr(cvrb) }
         return cvrb.build(poolId)
@@ -153,17 +152,20 @@ data class MultiContestTestData(
         ballotStyles.forEach { ballotStyle ->
             val fcontests = contestTestBuilders.filter { ballotStyle.contestNames.contains(it.info.name) }
             repeat(ballotStyle.ncards) {
-                // add regular Cvrs including undervotes
-                result.add(makeCard(nextCardId++, fcontests))
+                if (addStyle)
+                    result.add(makeCard(nextCardId++, fcontests, poolId = ballotStyle.id, cardStyle=ballotStyle.name))
+                else
+                    result.add(makeCard(nextCardId++, fcontests, null, null))
             }
         }
 
-        val phantoms = makePhantomCards(contests, startIdx=result.size)
-        return result + phantoms
+        result.addAll(makePhantomCards(contests, startIdx=result.size))
+        result.shuffle(Random)
+        return result
     }
 
-    private fun makeCard(nextCardId: Int, fcontests: List<ContestTestDataBuilder>): AuditableCard {
-        val cardBuilder = CardBuilder("card${nextCardId}", nextCardId)
+    private fun makeCard(nextCardId: Int, fcontests: List<ContestTestDataBuilder>, poolId: Int?, cardStyle: String?): AuditableCard {
+        val cardBuilder = CardBuilder("card${nextCardId}", nextCardId, poolId, cardStyle)
         fcontests.forEach { fcontest -> fcontest.addContestToCard(cardBuilder) }
         return cardBuilder.build(poolId)
     }

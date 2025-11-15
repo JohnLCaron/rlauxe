@@ -15,7 +15,7 @@ class TestCreateSfElection {
 
     @Test
     fun createSFElectionOA() {
-        val topdir = "/home/stormy/rla/cases/sf2024/oaCard"
+        val topdir = "/home/stormy/rla/cases/sf2024/oa"
 
         createSfElection(
             topdir,
@@ -23,7 +23,7 @@ class TestCreateSfElection {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
-            hasStyle = false, // HEY NOSTYLE
+            hasStyle = true, // hasStyle = cvrs are complete
             auditType = AuditType.ONEAUDIT,
         )
 
@@ -34,7 +34,7 @@ class TestCreateSfElection {
 
     @Test
     fun createSFElectionClca() {
-        val topdir = "/home/stormy/rla/cases/sf2024/clcaCard"
+        val topdir = "/home/stormy/rla/cases/sf2024/clca"
 
         createSfElection(
             topdir,

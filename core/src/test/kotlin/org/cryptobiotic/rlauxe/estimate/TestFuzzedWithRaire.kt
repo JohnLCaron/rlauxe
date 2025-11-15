@@ -24,7 +24,7 @@ class TestFuzzedWithRaire {
         val show = false
 
         val testData =
-            MultiContestTestData(1, 4, N, hasStyle=true,
+            MultiContestTestData(1, 4, N,
                 marginRange = margin..margin,
                 underVotePctRange = underVotePct .. underVotePct,
                 phantomPctRange = phantomPct..phantomPct)

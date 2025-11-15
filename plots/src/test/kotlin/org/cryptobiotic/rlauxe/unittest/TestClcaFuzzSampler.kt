@@ -15,7 +15,7 @@ class TestClcaFuzzSampler {
 
     @Test
     fun testComparisonFuzzed() {
-        val test = MultiContestTestData(20, 11, 20000, hasStyle=true)
+        val test = MultiContestTestData(20, 11, 20000)
         val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it).addStandardAssertions() }
         val cvrs = test.makeCvrsFromContests()
         println("total ncvrs = ${cvrs.size}\n")

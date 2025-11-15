@@ -101,7 +101,7 @@ class TestMakeFuzzedCvrs {
         val choiceChanges = mutableListOf<MutableMap<String, Int>>()
         fuzzPcts.forEach { fuzzPct ->
             margins.forEach { margin ->
-                val test = MultiContestTestData(1, 1, N, hasStyle = true, margin..margin, underVotePctRange = 0.1..0.1)
+                val test = MultiContestTestData(1, 1, N, margin..margin, underVotePctRange = 0.1..0.1)
                 val cvrs = test.makeCvrsFromContests()
                 val contest = test.contests.first()
                 val ncands = contest.ncandidates
@@ -228,7 +228,7 @@ class TestMakeFuzzedCvrs {
     @Test
     fun testFuzzedCvrsMultipleContests() {
         val ncontests = 11
-        val test = MultiContestTestData(ncontests, 1, 50000, hasStyle = true)
+        val test = MultiContestTestData(ncontests, 1, 50000)
         println("contest = ${test.contests.first()}\n")
         val cvrs = test.makeCvrsFromContests()
         val ntrials = 2

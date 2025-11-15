@@ -105,7 +105,7 @@ class TestGenerateAllUseCases {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
-            hasStyle = false,
+            hasStyle = true,
             auditType = AuditType.ONEAUDIT,
         )
 

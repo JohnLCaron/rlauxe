@@ -11,7 +11,7 @@ class TestCardBuilders {
 
     @Test
     fun testConvertCardsRoundtrip() {
-        val test = MultiContestTestData(20, 11, 20000, hasStyle=true)
+        val test = MultiContestTestData(20, 11, 20000)
         val cards = test.makeCardsFromContests()
         val cardMap = cards.associateBy { it.location }
 
@@ -39,7 +39,7 @@ class TestCardBuilders {
     @Test
     fun testFuzzedCards() {
         val ncontests = 20
-        val test = MultiContestTestData(ncontests, 11, 50000, hasStyle=true)
+        val test = MultiContestTestData(ncontests, 11, 50000)
         val contests: List<Contest> = test.contests
         val cards = test.makeCardsFromContests()
         val cvrs = cards.map { it.cvr() }

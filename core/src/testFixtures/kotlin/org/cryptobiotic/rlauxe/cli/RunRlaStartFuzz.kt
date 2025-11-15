@@ -123,7 +123,7 @@ class TestPollingElection(
         val useMin = min(minMargin, maxMargin)
         val phantomPctRange: ClosedFloatingPointRange<Double> =
             if (pctPhantoms == null) 0.00..0.005 else pctPhantoms..pctPhantoms
-        val testData = MultiContestTestData(ncontests, 4, ncards, config.hasStyle, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
+        val testData = MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistentWorkflowPolling $testData")
@@ -211,7 +211,7 @@ class TestClcaElection(
             if (pctPhantoms == null) 0.00..0.005 else pctPhantoms..pctPhantoms
 
         val testData =
-            MultiContestTestData(ncontests, 4, ncards, config.hasStyle, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
+            MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
         println("$testData")
 
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.

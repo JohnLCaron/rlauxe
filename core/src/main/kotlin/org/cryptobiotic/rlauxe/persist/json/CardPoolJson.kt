@@ -42,7 +42,7 @@ fun CardPoolIF.publishJson(): CardPoolJson {
         CardPoolJson(
             "CardPoolWithBallotStyle",
             this.publishJson(),
-            null
+            null,
         ) else if (this is CardPoolFromCvrs)
         CardPoolJson(
             "CardPoolFromCvrs",

@@ -28,9 +28,9 @@ class CvrBuilders(startCvrId: Int = 0) {
     }
 
     // add a new CvrBuilder
-    fun addCvr(): CvrBuilder {
+    fun addCvr(poolId: Int? = null): CvrBuilder {
         this.nextCvrId++
-        val cb = CvrBuilder(this, "card${nextCvrId}")
+        val cb = CvrBuilder(this, "card${nextCvrId}", poolId = poolId)
         builders.add(cb)
         return cb
     }

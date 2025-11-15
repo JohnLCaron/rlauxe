@@ -1,10 +1,13 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.dhondt.DHondtContest
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
+import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.min
@@ -298,6 +301,7 @@ open class ContestUnderAudit(
         }
     }
 
+    // dhondt
     fun addAssertionsFromAssorters(assorters: List<AssorterIF>): ContestUnderAudit {
         val assertions = mutableListOf<Assertion>()
         assorters.forEach { assorter ->
@@ -451,6 +455,24 @@ open class ContestUnderAudit(
         result = 31 * result + pollingAssertions.hashCode()
         result = 31 * result + clcaAssertions.hashCode()
         return result
+    }
+
+    companion object {
+
+        fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCard>, isClca: Boolean, hasStyle: Boolean): List<ContestUnderAudit> {
+            val infos = contests.map { it.info() }.associateBy { it.id }
+            val manifestTabs = tabulateAuditableCards(cards, infos)
+            val Nbs = manifestTabs.mapValues { it.value.ncards }
+            return contests.map {
+                val cua = ContestUnderAudit(it, isClca, hasStyle, Nbin=Nbs[it.id]).addStandardAssertions()
+                if (it is DHondtContest) {
+                    cua.addAssertionsFromAssorters(it.assorters)
+                } else {
+                    cua.addStandardAssertions()
+                }
+            }
+        }
+
     }
 
 }

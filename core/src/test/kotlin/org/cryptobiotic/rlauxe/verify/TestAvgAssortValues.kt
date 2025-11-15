@@ -2,31 +2,23 @@ package org.cryptobiotic.rlauxe.verify
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardsWithStylesToCards
 import org.cryptobiotic.rlauxe.audit.CvrsWithStylesToCards
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
-import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.verify.VerifyResults
-import org.cryptobiotic.rlauxe.verify.verifyOAassortAvg
+import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 import kotlin.test.fail
 
 // when does (winner - loser) / N agree with AvgAssortValue?
 class TestAvgAssortValues {
-    val showCvrs = false
+    val showCvrs = true
 
     @Test
     fun testAvgAssortValues() {
@@ -41,14 +33,6 @@ class TestAvgAssortValues {
 
         val testCvrs =  simContest.makeCvrs()
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
-
-        val contestUA = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
-        println("contestUA = ${contestUA.show()}")
-
-        val (minassert, minMargin) = contestUA.minPollingAssertion()
-        println(minassert)
-
-        assertEquals(minMargin, contestUA.minPollingAssertion().second)
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
             CvrsWithStylesToCards(
@@ -67,11 +51,19 @@ class TestAvgAssortValues {
             println()
         }
 
+        val contestsUA = ContestUnderAudit.make(listOf(contest), cardIterable.iterator(), isClca=true, hasStyle=true)
+        val contestUA= contestsUA.first()
+        println("contestUA = ${contestUA.show()}")
+
+        val (minassert, minMargin) = contestUA.minPollingAssertion()
+        println(minassert)
+        assertEquals(minMargin, contestUA.minPollingAssertion().second)
+
         //     cards: CloseableIterator<AuditableCard>,
         //    result: VerifyResults,
         //    show: Boolean = false
         val results = VerifyResults()
-        verifyClcaAssortAvg(listOf(contestUA), cardIterable.iterator(), results, show = true)
+        verifyClcaAssortAvg(contestsUA, cardIterable.iterator(), results, show = true)
         println(results)
         if (results.hasErrors) fail()
     }
@@ -90,14 +82,6 @@ class TestAvgAssortValues {
         val testCvrs =  simContest.makeCvrs()
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
 
-        val contestUA = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
-        println("contestUA = ${contestUA.show()}")
-
-        val (minassert, minMargin) = contestUA.minPollingAssertion()
-        println(minassert)
-
-        assertEquals(minMargin, contestUA.minPollingAssertion().second)
-
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
             CvrsWithStylesToCards(
                 AuditType.CLCA, false, Closer(testCvrs.iterator()),
@@ -115,11 +99,16 @@ class TestAvgAssortValues {
             println()
         }
 
-        //     cards: CloseableIterator<AuditableCard>,
-        //    result: VerifyResults,
-        //    show: Boolean = false
+        val contestsUA = ContestUnderAudit.make(listOf(contest), cardIterable.iterator(), isClca=true, hasStyle=true)
+        val contestUA= contestsUA.first()
+        println("contestUA = ${contestUA.show()}")
+
+        val (minassert, minMargin) = contestUA.minPollingAssertion()
+        println(minassert)
+        assertEquals(minMargin, contestUA.minPollingAssertion().second)
+
         val results = VerifyResults()
-        verifyClcaAssortAvg(listOf(contestUA), cardIterable.iterator(), results, show = true)
+        verifyClcaAssortAvg(contestsUA, cardIterable.iterator(), results, show = true)
         println(results)
         if (results.hasErrors) fail()
     }
@@ -133,7 +122,7 @@ class TestAvgAssortValues {
         val underVotePct = 0.234..0.345
         val phantomRange = 0.001..0.01
 
-        val test = MultiContestTestData(ncontests, nbs, N, hasStyle=true, marginRange, underVotePct, phantomRange)
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
         val testCvrs = test.makeCvrsFromContests()
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
@@ -153,9 +142,10 @@ class TestAvgAssortValues {
             println()
         }
 
-        val contestsOA = test.contests.map { ContestUnderAudit(it, isClca = true, hasStyle=true).addStandardAssertions() }
+        val contestsUA = ContestUnderAudit.make(test.contests, cardIterable.iterator(), isClca=true, hasStyle=true)
+
         val results = VerifyResults()
-        verifyClcaAssortAvg(contestsOA, cardIterable.iterator(), results, show = false)
+        verifyClcaAssortAvg(contestsUA, cardIterable.iterator(), results, show = false)
         println(results)
         if (results.hasErrors) fail()
     }
@@ -163,35 +153,93 @@ class TestAvgAssortValues {
     @Test
     fun testAvgAssortNoStyle() {
         val N = 100
-        val ncontests = 3
-        val nbs = 11
+        val ncontests = 5
+        val nbs = 3
         val marginRange = 0.01..0.04
         val underVotePct = 0.034..0.0345
         val phantomRange = 0.001..0.005
 
-        val test = MultiContestTestData(ncontests, nbs, N, hasStyle=false, marginRange, underVotePct, phantomRange)
-        val testCvrs = test.makeCvrsFromContests()
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange, addStyle = true)
+
+        println()
+        test.ballotStyles.forEach { println(it) }
+
+        val testCards = test.makeCardsFromContests()
+        if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeAuditableCardCsv(it)}") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsWithStylesToCards(
-                AuditType.CLCA, false, Closer(testCvrs.iterator()),
-                phantomCvrs=null, styles = test.ballotStyles,
+            CardsWithStylesToCards(
+                AuditType.CLCA, false, Closer(testCards.iterator()),
+                phantomCards = null, styles = test.ballotStyles,
             )
         }
 
-        if (true) {
+        if (showCvrs) {
             println("\n$AuditableCardHeader")
             var count = 0
             for (card in cardIterable.iterator()) {
+                if (card.contests().toSet() != card.votes?.keys) print("*** ")
                 print(writeAuditableCardCsv(card))
-                if (count++ > 10) break
+                if (count++ > 100) break
             }
             println()
         }
 
-        val contestsOA = test.contests.map { ContestUnderAudit(it, isClca = true, hasStyle=false).addStandardAssertions() }
+        val contestsUA = ContestUnderAudit.make(test.contests, cardIterable.iterator(), isClca=true, hasStyle=false)
+        contestsUA.forEach {
+            println("$it : Nb diff = ${it.Nb != it.Nc}")
+        }
+
         val results = VerifyResults()
-        verifyClcaAssortAvg(contestsOA, cardIterable.iterator(), results, show = true)
+        verifyClcaAssortAvg(contestsUA, cardIterable.iterator(), results, show = true)
+        println(results)
+        if (results.hasErrors) fail()
+    }
+
+    @Test
+    fun testAvgAssortNoStyleAll() {
+        val N = 100
+        val ncontests = 5
+        val nbs = 3
+        val marginRange = 0.01..0.04
+        val underVotePct = 0.034..0.0345
+        val phantomRange = 0.001..0.005
+
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange, addStyle = true)
+
+        println()
+        test.ballotStyles.forEach { println(it) }
+
+        val modStyles = test.ballotStyles.map { it.copy(contestIds=listOf(0,1,2,3,4)) }
+
+        val testCards = test.makeCardsFromContests()
+        if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeAuditableCardCsv(it)}") }
+
+        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
+            CardsWithStylesToCards(
+                AuditType.CLCA, false, Closer(testCards.iterator()),
+                phantomCards = null, styles = modStyles,
+            )
+        }
+
+        if (showCvrs) {
+            println("\n$AuditableCardHeader")
+            var count = 0
+            for (card in cardIterable.iterator()) {
+                if (card.contests().toSet() != card.votes?.keys) print("*** ")
+                print(writeAuditableCardCsv(card))
+                if (count++ > 100) break
+            }
+            println()
+        }
+
+        val contestsUA = ContestUnderAudit.make(test.contests, cardIterable.iterator(), isClca=true, hasStyle=false)
+        contestsUA.forEach {
+            println("$it : Nb diff = ${it.Nb != it.Nc}")
+        }
+
+        val results = VerifyResults()
+        verifyClcaAssortAvg(contestsUA, cardIterable.iterator(), results, show = true)
         println(results)
         if (results.hasErrors) fail()
     }

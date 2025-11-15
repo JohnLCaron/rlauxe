@@ -23,7 +23,7 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtrip() {
-        val testData = MultiContestTestData(11, 4, 50000,  hasStyle=false)
+        val testData = MultiContestTestData(11, 4, 50000)
         val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, isClca=false, hasStyle=false).addStandardAssertions()}
         val contestRounds = contestsUAs.map{ contest ->
             val cr = ContestRound(contest, 1,)
@@ -70,7 +70,7 @@ class TestAuditRoundJson {
     @Test
     fun testRoundtripIO() {
 
-        val testData = MultiContestTestData(11, 4, 50000, hasStyle=false)
+        val testData = MultiContestTestData(11, 4, 50000)
         val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, isClca=false, hasStyle=false).addStandardAssertions()}
         val contestRounds = contestsUAs.map{ contest ->
             val cr = ContestRound(contest, 1)
@@ -116,7 +116,7 @@ class TestAuditRoundJson {
             AuditType.CLCA, hasStyle = true, seed = 12356667890L, nsimEst = 10,
         )
         val N = 5000
-        val testData = MultiContestTestData(11, 4, N, hasStyle=false, marginRange = 0.03..0.05)
+        val testData = MultiContestTestData(11, 4, N, marginRange = 0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testComparisonWorkflow $testData")
@@ -170,7 +170,7 @@ class TestAuditRoundJson {
         )
 
         val N = 5000
-        val testData = MultiContestTestData(11, 4, N, config.hasStyle , marginRange = 0.03..0.05)
+        val testData = MultiContestTestData(11, 4, N, marginRange = 0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testComparisonWorkflow $testData")

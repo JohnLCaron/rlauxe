@@ -21,7 +21,7 @@ class TestClcaEstimationFailure {
     @Test
     fun testClcaEstimationFailure() {
         // TODO margin not accounting for phantoms
-        val test = MultiContestTestData(50, 25, 50000, hasStyle=true) // , phantomPctRange = 0.0 .. 0.0)
+        val test = MultiContestTestData(50, 25, 50000) // , phantomPctRange = 0.0 .. 0.0)
         val testCvrs = test.makeCvrsFromContests()
 
         val auditConfig = AuditConfig(

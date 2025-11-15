@@ -25,8 +25,11 @@ private val logger = KotlinLogging.logger("AuditableCardCsv")
 val AuditableCardHeader = "location, index, prn, phantom, poolId, style, cvr contests, candidates0, candidates1, ...\n"
 
 fun writeAuditableCardCsv(card: AuditableCard) = buildString {
-    append("${card.location}, ${card.index}, ${card.prn}, ${card.phantom}, ")
+    append("${card.location}, ${card.index}, ${card.prn}, ${if(card.phantom) "yes," else ","} ")
     if (card.poolId == null) append(", ") else append("${card.poolId}, ")
+    // if (card.cardStyle != null)  TODO
+    //        append("\"${card.cardStyle}\", ")  // either the pool name or the possible contests
+    //    else
     append("${card.possibleContests.joinToString(" ")}, ")
 
     if (card.votes != null) {
@@ -86,19 +89,26 @@ fun readAuditableCardCsv(line: String): AuditableCard {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
 
+    var cardStyle : String? = null
+    var pcontests = intArrayOf()
+
     var idx = 0
     val desc = ttokens[idx++]
     val index = ttokens[idx++].toInt()
     val sampleNum = ttokens[idx++].toLong()
-    val phantom = ttokens[idx++] == "true"
+    val phantom = ttokens[idx++] == "yes"
     val poolIdToken = ttokens[idx++]
     val poolId = if (poolIdToken.isEmpty()) null else poolIdToken.toInt()
 
-    // possible contests aka style
+    // possible contests or style name
     val pcontestsStr = ttokens[idx++]
-    val pcontests = if (pcontestsStr.trim().isEmpty()) intArrayOf() else {
-        val pcontestsTokens = pcontestsStr.split(" ")
-        pcontestsTokens.map { it.trim().toInt() }.toIntArray()
+    if (pcontestsStr.startsWith("\"")) {
+        cardStyle=pcontestsStr.removePrefix("\"").removeSuffix("\"").trim()
+    } else {
+        pcontests = if (pcontestsStr.trim().isEmpty()) intArrayOf() else {
+            val pcontestsTokens = pcontestsStr.split(" ")
+            pcontestsTokens.map { it.trim().toInt() }.toIntArray()
+        }
     }
 
     // if clca, list of actual contests and their votes
@@ -122,9 +132,9 @@ fun readAuditableCardCsv(line: String): AuditableCard {
             require(contests.size == work.size) { "contests.size (${contests.size}) != votes.size (${work.size})" }
             contests.zip(work).toMap()
         }
-        AuditableCard(desc, index, sampleNum, phantom, pcontests, votes, poolId)
+        AuditableCard(desc, index, sampleNum, phantom, pcontests, votes, poolId, cardStyle)
     } else {
-        AuditableCard(desc, index, sampleNum, phantom, pcontests, null, poolId)
+        AuditableCard(desc, index, sampleNum, phantom, pcontests, null, poolId, cardStyle)
     }
 }
 

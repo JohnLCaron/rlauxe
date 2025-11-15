@@ -27,7 +27,7 @@ class TestPersistedWorkflow {
             clcaConfig = ClcaConfig(strategy=ClcaStrategyType.previous, simFuzzPct = .005))
 
         val N = 50000
-        val testData = MultiContestTestData(11, 4, N, hasStyle=true, marginRange=0.03..0.05)
+        val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistedAuditClca $testData")
@@ -51,7 +51,7 @@ class TestPersistedWorkflow {
         val config = AuditConfig(AuditType.POLLING, hasStyle=true, seed = 12356667890L, nsimEst=10)
 
         val N = 50000
-        val testData = MultiContestTestData(11, 4, N, hasStyle=true, marginRange=0.03..0.05)
+        val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistedAuditPolling $testData")
@@ -95,8 +95,6 @@ class TestPersistedWorkflow {
 
         val election = CreateElectionFromCvrs(contestsUA, testCvrs, cardPools, config=config)
         CreateAudit("testPersistedAuditPolling", topdir, config, election, clear = true)
-
-        runPersistedAudit(topdir)
 
         runPersistedAudit(topdir)
     }

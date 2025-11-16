@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.audit
 import org.cryptobiotic.rlauxe.util.Closer
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
@@ -92,9 +93,9 @@ class TestCardsWithStylesToCards {
     @Test
     fun testCardsWithStylesToCardsForPolling() {
         val cardOrg = AuditableCard ("cardOrg", 42, 0L, false, intArrayOf(1,2,3),
-            mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), 1)
+            mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), poolId=null, cardStyle="yes")
 
-        var auditType = AuditType.POLLING
+        val auditType = AuditType.POLLING
         var hasStyle = true
         var hasCardStyles = false
         var hasPoolId = false
@@ -135,18 +136,32 @@ class TestCardsWithStylesToCards {
         hasCardStyles = true
         hasPoolId = false
         cvr = cardOrg.copy(cardStyle=null)
-        target = CardsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=listOf(cardStyle))
-        card = target.next()
-        // testOneTarget("", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = cardStyle)
+        assertFailsWith<RuntimeException> {
+            target = CardsWithStylesToCards(
+                auditType,
+                cvrsAreComplete = hasStyle,
+                Closer(listOf(cvr).iterator()),
+                phantomCards = null,
+                styles = listOf(cardStyle)
+            )
+            card = target.next()
+        }
 
         // what if you dont supply the cardStyles? FAIL
         hasStyle = false
         hasCardStyles = false
         hasPoolId = true
         cvr = cardOrg.copy(cardStyle=styleName)
-        target = CardsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=null)
-        card = target.next()
-        // testOneTarget("", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = null)
+        assertFailsWith<RuntimeException> {
+            target = CardsWithStylesToCards(
+                auditType,
+                cvrsAreComplete = hasStyle,
+                Closer(listOf(cvr).iterator()),
+                phantomCards = null,
+                styles = null
+            )
+            card = target.next()
+        }
     }
 
     @Test

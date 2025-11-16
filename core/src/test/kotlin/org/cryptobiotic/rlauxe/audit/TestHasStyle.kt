@@ -71,6 +71,7 @@ class TestHasStyle {
 
         val topdir = "/home/stormy/rla/persist/testHasStyleClcaSingleCard"
         val auditRound = createAndRunTestAuditCards(topdir, false, contests, emptyList(), hasStyle, testCards, cardStyles)
+
         println("==========================")
         println("testHasStyleClcaSingleCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
@@ -166,6 +167,7 @@ class TestHasStyle {
 
         val topdir = "/home/stormy/rla/persist/testHasStyleClcaMultiCard"
         val auditRound = createAndRunTestAuditCards(topdir, false, contests, listOf(3), hasStyle, allCards, cardStyles)
+
         println("==========================")
         println("testHasStyleClcaMultiCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
@@ -222,17 +224,18 @@ class TestHasStyle {
         )
         assertEquals(0.1, contestS.margin(1, 2))
 
-        val testData = MultiContestCombineData(listOf(contestB, contestS), contestB.Nc) // TODO use poolId ??
+        val testData = MultiContestCombineData(listOf(contestB, contestS), contestB.Nc, poolId=1)
         val testCvrs = testData.makeCvrsFromContests()
         val contests = listOf(contestB, contestS)
 
         val config = AuditConfig(AuditType.POLLING, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, pollingConfig = PollingConfig())
 
+        /*
         val cards = mutableListOf<AuditableCard>()
         CvrsWithStylesToCards(config.auditType, hasStyle,
             Closer(testCvrs.iterator()),
             null,
-            styles = null,
+            styles = cardStyles,
         ).forEach { cards.add(it)}
 
         val infos = contests.map{ it.info }.associateBy { it.id }
@@ -240,10 +243,14 @@ class TestHasStyle {
         if (showDetails) tabs.forEach { println(it) }
         contests.forEach { contest ->
             assertEquals(contest.votes, tabs[contest.id]!!.votes)
-        }
+        } */
+
+        // polling audits always must put in the possible contests
+        val cardStyles = listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}, null))
 
         val topdir = "/home/stormy/rla/persist/testHasStylePollingSingleCard"
-        val auditRound = createAndRunTestAuditCvrs(topdir, true, contests, emptyList(), hasStyle, testCvrs)
+        val auditRound = createAndRunTestAuditCvrs(topdir, true, contests, emptyList(), hasStyle, testCvrs, cardStyles)
+
         println("==========================")
         println("testHasStylePollingSingleCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
@@ -284,7 +291,7 @@ class TestHasStyle {
 
         // card 1
         val testData1 = MultiContestCombineData(listOf(contestB), contestB.Nc)
-        val testCvrs1 = testData1.makeCardsFromContests()
+        val testCvrs1 = testData1.makeCardsFromContests(cardStyle="all")
 
         ////////
 
@@ -306,7 +313,7 @@ class TestHasStyle {
 
         // card 2
         val testData2 = MultiContestCombineData(listOf(contest3, contestS), contest3.Nc)
-        val testCvrs2 = testData2.makeCardsFromContests(testCvrs1.size)
+        val testCvrs2 = testData2.makeCardsFromContests(testCvrs1.size, cardStyle="all")
 
         val allCvrs = mutableListOf<AuditableCard>()
         allCvrs.addAll(testCvrs1)
@@ -322,8 +329,14 @@ class TestHasStyle {
             assertEquals(contest.votes, tabs[contest.id]!!.votes)
         }
 
+        // polling audits always must put in the possible contests
+        val cardStyles = listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}, null))
+
+        // make the audit
         val topdir = "/home/stormy/rla/persist/testHasStylePollingMultiCard"
-        val auditRound = createAndRunTestAuditCards(topdir, true, contests, listOf(3), hasStyle, allCvrs)
+        val auditRound = createAndRunTestAuditCards(topdir, true, contests, listOf(3), hasStyle, allCvrs, cardStyles)
+
+        // run the audit rounds
         println("==========================")
         println("testHasStylePollingMultiCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
@@ -349,7 +362,7 @@ class TestHasStyle {
     }
 
     fun createAndRunTestAuditCvrs(topdir: String, isPolling: Boolean, contests: List<Contest>, skipContests: List<Int>, hasStyle: Boolean,
-                                  testCvrs: List<Cvr>, cardStyles:List<CardStyleIF>? = null ): AuditRound {
+                                  testCvrs: List<Cvr>, cardStyles:List<CardStyleIF>?): AuditRound {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         val errorRates = ClcaErrorRates(0.0, 0.001, 0.0, 0.0, )
@@ -384,7 +397,7 @@ class TestHasStyle {
     }
 
     fun createAndRunTestAuditCards(topdir: String, isPolling: Boolean, contests: List<Contest>, skipContests: List<Int>, hasStyle: Boolean,
-                                   testCards: List<AuditableCard>, cardStyles:List<CardStyleIF>? = null, ): AuditRound {
+                                   testCards: List<AuditableCard>, cardStyles:List<CardStyleIF>?): AuditRound {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         val errorRates = ClcaErrorRates(0.0, 0.001, 0.0, 0.0, )
@@ -406,7 +419,8 @@ class TestHasStyle {
         if (showDetails) tabs.forEach { println(it) }
 
         val contestsUA = contests.map {
-            val Nb = tabs[it.id]?.ncards ?: throw RuntimeException("Contest ${it.id} not found")
+            val Nb = tabs[it.id]?.ncards ?:
+                throw RuntimeException("Contest ${it.id} not found")
             ContestUnderAudit(it, isClca=true, hasStyle=hasStyle, Nbin=Nb).addStandardAssertions()
         }
 

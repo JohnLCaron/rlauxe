@@ -2,7 +2,7 @@
     "auditType": "POLLING",
     "hasStyle": true,
     "riskLimit": 0.05,
-    "seed": 8127253899321333630,
+    "seed": -3676959281016155292,
     "nsimEst": 100,
     "quantile": 0.8,
     "contestSampleCutoff": 30000,
@@ -12,6 +12,7 @@
     "pollingConfig": {
         "d": 100
     },
-    "skipContests": [],
-    "version": 1.2
+    "pollingErrorStrategy": {},
+    "version": 2.0,
+    "skipContests": []
 }

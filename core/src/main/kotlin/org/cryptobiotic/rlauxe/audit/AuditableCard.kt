@@ -8,11 +8,13 @@ import kotlin.sequences.plus
 // A generalization of Cvr, allowing votes to be null, eg for Polling or OneAudit pools.
 // Also, possibleContests/cardStyle represents the sample population information.
 //
-// hasStyle == cvrsAreComplete
+// hasStyle -> cvrsAreComplete
 // CLCA and cvrsAreComplete: dont need cardStyles
 // CLCA and !cvrsAreComplete: always need cardStyles
-// OA and cvrsAreComplete: cardStyles only for pooled data
+
+// OA and cvrsAreComplete: cardStyles only for pooled data.
 // OA and !cvrsAreComplete: always need cardStyles; cant use CvrsWithStylesToCards since poolId has been hijacked
+
 // Polling: always need cardStyles
 
 data class AuditableCard (
@@ -31,9 +33,9 @@ data class AuditableCard (
 ) {
     init {
         if (possibleContests.isEmpty() && votes == null) {
-            println("why?")
+            // you could make this case mean "all". But maybe its better to be explicit ??
+            throw RuntimeException("AuditableCard must have votes or possibleContests")
         }
-
     }
 
     // if there are no votes, the IntArrays are all empty; looks like all undervotes
@@ -169,7 +171,7 @@ class CvrsWithStylesToCards(
             cvrs
         } else {
             val cardSeq = cvrs.iterator().asSequence()
-            val phantomSeq = phantomCvrs.asSequence() // late binding to index, port to boulder, sf
+            val phantomSeq = phantomCvrs.asSequence()
             (cardSeq + phantomSeq).iterator()
         }
     }
@@ -177,38 +179,22 @@ class CvrsWithStylesToCards(
     override fun hasNext() = allCvrs.hasNext()
 
     override fun next(): AuditableCard {
-        val orgCvr = allCvrs.next()
-        // LOOK we have to glom onto the poolId for cardStyles
-        val style = if (poolMap == null) null else poolMap[orgCvr.poolId]
+        val org = allCvrs.next()
+        val style = if (poolMap == null) null else poolMap[org.poolId] // hijack poolId
         val hasCvr = type.isClca() || (type.isOA() && style == null)
         val contests = when {
             (hasCvr && cvrsAreComplete) -> null
             (style != null) -> style.contests()
-            cvrsAreComplete -> orgCvr.contests()
+            cvrsAreComplete -> org.contests()
             else -> null
         }
-        val votes = if (hasCvr) orgCvr.votes else null
+        val votes = if (hasCvr) org.votes else null
 
-
-        // compare to CvrExport.toCvr()
-        // class CvrExportToCvrAdapter(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: Map<String, Int>? = null) : CloseableIterator<Cvr> {
-        //    override fun hasNext() = cvrExportIterator.hasNext()
-        //    override fun next() = cvrExportIterator.next().toCvr(pools=pools)
-        //    override fun close() = cvrExportIterator.close()
-        //}
-        //     fun toCvr(phantom: Boolean = false, pools: Map<String, Int>? = null) : Cvr {
-        //        val poolId = if (pools == null || group != 1) null else pools[ poolKey() ] // TODO not general
-        //        return Cvr(id, votes, phantom, poolId)
-        //    }
-        //
-        // compare to AuditableCard.fromCvr
-        //         fun fromCvr(cvr: Cvr, index: Int, sampleNum: Long): AuditableCard {
-        //            val sortedVotes = cvr.votes.toSortedMap()
-        //            val contests = sortedVotes.keys.toList()
-        //            return AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), cvr.votes, cvr.poolId)
-        //        }
-        return AuditableCard(orgCvr.id, cardIndex++, 0, phantom=orgCvr.phantom,
-            contests ?: intArrayOf(), votes, orgCvr.poolId, style?.name())
+        return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
+            contests ?: intArrayOf(),
+            votes,
+            org.poolId,
+            style?.name())
     }
 
     override fun close() = cvrs.close()
@@ -239,24 +225,22 @@ class CardsWithStylesToCards(
     override fun hasNext() = allCards.hasNext()
 
     override fun next(): AuditableCard {
-        val orgCard = allCards.next()
-        val style = if (poolMap == null) null else poolMap[orgCard.cardStyle]
+        val org = allCards.next()
+        val style = if (poolMap == null) null else poolMap[org.cardStyle]
         val hasCvr = type.isClca() || (type.isOA() && style == null)
-        val cardStyle = style?.name()
         val contests = when {
             (hasCvr && cvrsAreComplete) -> null
             (style != null) -> style.contests()
-            cvrsAreComplete -> orgCard.contests()
+            cvrsAreComplete -> org.contests()
             else -> null
         }
-        val votes = if (hasCvr) orgCard.votes else null
+        val votes = if (hasCvr) org.votes else null
 
-        return AuditableCard(orgCard.location, cardIndex++, 0,
-            phantom=orgCard.phantom,
+        return AuditableCard(org.location, cardIndex++, 0, phantom=org.phantom,
             contests ?: intArrayOf(),
             votes,
-            orgCard.poolId,
-            cardStyle,
+            org.poolId,
+            style?.name(),
         )
     }
 

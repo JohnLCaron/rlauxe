@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.clearDirectory
@@ -94,7 +93,7 @@ object RunRlaCreateOneAudit {
         clearDirectory(Path(auditDir))
 
         val config = AuditConfig(
-            AuditType.ONEAUDIT, hasStyle = true, contestSampleCutoff = 20000, nsimEst = 10,
+            AuditType.ONEAUDIT, hasStyle = true, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = fuzzMvrs,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
 
@@ -103,7 +102,6 @@ object RunRlaCreateOneAudit {
             auditDir,
             config,
             minMargin,
-            fuzzMvrs,
             pctPhantoms,
             ncards,
             ncontests,
@@ -117,7 +115,6 @@ object RunRlaCreateOneAudit {
         auditDir: String,
         val config: AuditConfig,
         minMargin: Double,
-        fuzzMvrs: Double,
         pctPhantoms: Double?,
         ncards: Int,
         ncontests: Int,
@@ -127,7 +124,6 @@ object RunRlaCreateOneAudit {
         val contestsUA = mutableListOf<ContestUnderAudit>()
         val allCardPools: List<CardPoolIF>
         val allCvrs: List<Cvr>
-        val testMvrs: List<Cvr>
 
         init {
             // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
@@ -165,16 +161,6 @@ object RunRlaCreateOneAudit {
             println("contests")
             allContests.forEach { println("  $it") }
             println()
-
-            // TODO reimplement
-            testMvrs = if (fuzzMvrs == 0.0) allCvrs
-                // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-                else makeFuzzedCvrsFrom(allContests, allCvrs, fuzzMvrs)
-            println("nmvrs = ${testMvrs.size} fuzzed at ${fuzzMvrs}")
-
-            val mvrTabs = tabulateCvrs(testMvrs.iterator(), infos)
-            println("testMvrs = ${mvrTabs}")
-            println()
         }
 
         override fun cardPools() = allCardPools
@@ -183,7 +169,8 @@ object RunRlaCreateOneAudit {
 
         fun createCardIterator(): CloseableIterator<AuditableCard> {
             return CvrsWithStylesToCards(
-                config.auditType, config.hasStyle,
+                config.auditType,
+                cvrsAreComplete = true, // not supporting !cvrsAreComplete
                 Closer(allCvrs.iterator()),
                 null,
                 styles = allCardPools,

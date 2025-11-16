@@ -96,8 +96,6 @@ class VotesAndUndervotes(candVotes: Map<Int, Int>, val undervotes: Int, val vote
         return candIdx
     }
 
-
-
     override fun toString() = buildString {
         append("votes=${candVotesSorted} undervotes=$undervotes, voteForN=$voteForN")
     }

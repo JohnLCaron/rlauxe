@@ -19,8 +19,8 @@ class TestRunVerifyContests {
 
     @Test
     fun testRunVerifyOA() {
-        // val auditdir = "../core/src/test/data/workflow/testCliRoundOneAudit/audit"
-        val auditdir = "/home/stormy/rla/persist/testCliRoundClca/audit"
+        // val auditdir = "../core/src/test/data/workflow/testCliRoundRaire/audit"
+        val auditdir = "/home/stormy/rla/persist/testCliRoundOneAudit/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
@@ -32,6 +32,17 @@ class TestRunVerifyContests {
     fun testRunVerifyPolling() {
         // val auditdir = "../core/src/test/data/workflow/testCliRoundPolling/audit"
         val auditdir = "/home/stormy/rla/persist/testCliRoundPolling/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        println()
+        print(results)
+        if (results.hasErrors) fail()
+    }
+
+
+    @Test
+    fun testRunVerifyRaire() {
+        // val auditdir = "../core/src/test/data/workflow/testCliRoundRaire/audit"
+        val auditdir = "/home/stormy/rla/persist/testCliRoundRaire/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)

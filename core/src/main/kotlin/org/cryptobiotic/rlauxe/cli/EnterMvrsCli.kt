@@ -36,7 +36,9 @@ object EnterMvrsCli {
 
         parser.parse(args)
         println("EnterMvrs from audit in $inputDir with mvrFile=$mvrFile")
-        enterMvrs(inputDir, mvrFile)
+        val result = enterMvrs(inputDir, mvrFile)
+        println(result)
+        require(result is Ok)
     }
 }
 

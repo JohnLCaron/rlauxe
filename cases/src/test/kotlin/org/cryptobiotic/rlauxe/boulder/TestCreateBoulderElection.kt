@@ -44,7 +44,7 @@ class TestCreateBoulderElection {
 
     @Test
     fun createBoulder24oa() {
-        val topdir = "/home/stormy/rla/cases/boulder24/oaCard"
+        val topdir = "/home/stormy/rla/cases/boulder24/oa"
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
@@ -59,7 +59,7 @@ class TestCreateBoulderElection {
 
     @Test
     fun createBoulder24clca() { // simulate CVRs
-        val topdir = "/home/stormy/rla/cases/boulder24/clcaCard"
+        val topdir = "/home/stormy/rla/cases/boulder24/clca"
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",

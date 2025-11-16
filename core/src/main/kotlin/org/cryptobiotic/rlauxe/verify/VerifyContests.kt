@@ -394,16 +394,18 @@ fun verifyOAassortAvg(
             contestsUA.forEach { contestUA ->
                 val avg = cardAssortAvgs.getOrPut(contestUA.id) { mutableMapOf() }
                 contestUA.clcaAssertions.forEach { cassertion ->
-                    val oaCassorter = cassertion.cassorter as OneAuditClcaAssorter
-                    val passorter = oaCassorter.assorter
-                    val assortAvg = avg.getOrPut(passorter) { AssortAvg() }
-                    if (card.hasContest(contestUA.id)) {
-                        val assortVal = if (card.poolId != null)
-                            oaCassorter.poolAverages.assortAverage[card.poolId]!!
-                        else
-                            passorter.assort(card.cvr(), usePhantoms = false)
-                        assortAvg.totalAssort += assortVal
-                        assortAvg.ncards++
+                    if (cassertion.cassorter is OneAuditClcaAssorter) { //  may be Raire
+                        val oaCassorter = cassertion.cassorter as OneAuditClcaAssorter
+                        val passorter = oaCassorter.assorter
+                        val assortAvg = avg.getOrPut(passorter) { AssortAvg() }
+                        if (card.hasContest(contestUA.id)) {
+                            val assortVal = if (card.poolId != null)
+                                oaCassorter.poolAverages.assortAverage[card.poolId]!!
+                            else
+                                passorter.assort(card.cvr(), usePhantoms = false)
+                            assortAvg.totalAssort += assortVal
+                            assortAvg.ncards++
+                        }
                     }
                 }
             }
@@ -415,15 +417,17 @@ fun verifyOAassortAvg(
         val cardAssortAvg = cardAssortAvgs[contestUA.id]!!
         contestUA.pollingAssertions.forEach { assertion ->
             val passorter = assertion.assorter
-            val assortAvg = cardAssortAvg[passorter]!!
-            val dilutedMargin = contestUA.makeDilutedMargin(passorter)
-            if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
-                result.addError("  dilutedMargin does not agree for contest ${contestUA.id} assorter '$passorter'")
-                result.addError("     dilutedMargin= ${pfn(dilutedMargin)} cvrs.assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards}")
-                contestUA.preAuditStatus = TestH0Status.ContestMisformed
-                allOk = false
-            } else {
-                if (show) result.addMessage("  dilutedMargin agrees with cvrs.assortMargin= ${pfn(assortAvg.margin())} for contest ${contestUA.id} assorter '$passorter'")
+            if (cardAssortAvg[passorter] != null) {  //  may be Raire
+                val assortAvg = cardAssortAvg[passorter]!!
+                val dilutedMargin = contestUA.makeDilutedMargin(passorter)
+                if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
+                    result.addError("  dilutedMargin does not agree for contest ${contestUA.id} assorter '$passorter'")
+                    result.addError("     dilutedMargin= ${pfn(dilutedMargin)} cvrs.assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards}")
+                    contestUA.preAuditStatus = TestH0Status.ContestMisformed
+                    allOk = false
+                } else {
+                    if (show) result.addMessage("  dilutedMargin agrees with cvrs.assortMargin= ${pfn(assortAvg.margin())} for contest ${contestUA.id} assorter '$passorter'")
+                }
             }
         }
     }
@@ -461,21 +465,26 @@ fun verifyOApools(
                     }
                 }
             }
-            result.addMessage("  cardPools assortAvg = ${assortAvg.avg()} assortMargin = ${assortAvg.margin()} ncards = ${assortAvg.ncards}")
+            // result.addMessage("  cardPools assortAvg = ${assortAvg.avg()} assortMargin = ${assortAvg.margin()} ncards = ${assortAvg.ncards}")
 
-            val pooled = contestSummary.pooled[contestId]!!
-            val extra = pooled.ncards() - assortAvg.ncards
-            assortAvg.ncards += extra
-            assortAvg.totalAssort += extra * 0.5 // this says that the extra get counted as 1/2; but i think they get counted as assortAverage[card.poolId]
-            result.addMessage("  diluted extra votes = ${extra}")
+            /* this part may not be needed
+            if (contestSummary.pooled[contestId] != null) {
+                val pooled = contestSummary.pooled[contestId]!!
+                val extra = pooled.ncards() - assortAvg.ncards
+                assortAvg.ncards += extra
+                assortAvg.totalAssort += extra * 0.5 // this says that the extra get counted as 1/2; but i think they get counted as assortAverage[card.poolId]
+                // result.addMessage("  diluted extra votes = ${extra}")
+            } */
 
-            val nonpoolTab = contestSummary.nonpooled[contestId]!!
-            result.addMessage("  nonpoolCvrVotes = ${nonpoolTab}")
-            val poolMargin = assertion.assorter.calcMargin(nonpoolTab.votes, nonpoolTab.ncards())
-            val poolAvg = margin2mean(poolMargin)
-            assortAvg.ncards += nonpoolTab.ncards()
-            assortAvg.totalAssort += nonpoolTab.ncards() * poolAvg
-            result.addMessage("  contest assortAvg = ${assortAvg.avg()} assortMargin = ${assortAvg.margin()} ncards = ${assortAvg.ncards}")
+            if (contestSummary.nonpooled[contestId] != null) {
+                val nonpoolTab = contestSummary.nonpooled[contestId]!!
+                // result.addMessage("  nonpoolCvrVotes = ${nonpoolTab}")
+                val poolMargin = assertion.assorter.calcMargin(nonpoolTab.votes, nonpoolTab.ncards())
+                val poolAvg = margin2mean(poolMargin)
+                assortAvg.ncards += nonpoolTab.ncards()
+                assortAvg.totalAssort += nonpoolTab.ncards() * poolAvg
+                // result.addMessage("  contest assortAvg = ${assortAvg.avg()} assortMargin = ${assortAvg.margin()} ncards = ${assortAvg.ncards}")
+            }
 
             if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
                 result.addError("  dilutedMargin does not agree for contest ${contestUA.id} assorter '$passorter'")

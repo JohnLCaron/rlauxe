@@ -60,8 +60,8 @@ class TestAuditableCard {
     }
 }
 
-fun makeCvr(id: Int, ncontests: Int, ncandidates: Int): Cvr {
-    val cvrb = CvrBuilder2(id.toString(),  false)
+fun makeCvr(id: Int, ncontests: Int, ncandidates: Int, poolId:Int?=null): Cvr {
+    val cvrb = CvrBuilder2(id.toString(),  false, poolId=poolId)
     repeat(ncontests) {
         val contestId = Random.nextInt(ncontests)
         val votesForN = Random.nextInt(ncandidates)

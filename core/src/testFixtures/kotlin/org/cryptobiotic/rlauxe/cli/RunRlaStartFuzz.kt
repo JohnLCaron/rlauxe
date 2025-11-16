@@ -172,7 +172,7 @@ fun startTestElectionClca(
     clearDirectory(Path(auditDir))
 
     val config = AuditConfig(
-        AuditType.CLCA, hasStyle = true, nsimEst = 100,
+        AuditType.CLCA, hasStyle = true, nsimEst = 100, simFuzzPct = fuzzMvrs,
         clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
     )
 
@@ -180,7 +180,6 @@ fun startTestElectionClca(
     val election = TestClcaElection(
         config,
         minMargin,
-        fuzzMvrs,
         pctPhantoms,
         ncards,
         ncontests,
@@ -193,7 +192,6 @@ fun startTestElectionClca(
 class TestClcaElection(
     val config: AuditConfig,
     minMargin: Double,
-    fuzzMvrs: Double,
     pctPhantoms: Double?,
     ncards: Int,
     ncontests: Int,
@@ -202,7 +200,6 @@ class TestClcaElection(
 ): CreateElectionIF {
     val contestsUA = mutableListOf<ContestUnderAudit>()
     val allCvrs = mutableListOf<Cvr>()
-    val testMvrs: List<Cvr>
 
     init {
         val maxMargin = .10
@@ -228,15 +225,6 @@ class TestClcaElection(
         val regularContests = testData.contests.map { ContestUnderAudit(it, isClca=true, hasStyle=config.hasStyle).addStandardAssertions() }
         contestsUA.addAll(regularContests)
         contestsUA.forEach { println("  $it") }
-        println()
-
-        testMvrs = if (fuzzMvrs == 0.0) allCvrs
-            else makeFuzzedCvrsFrom(contestsUA.map { it.contest}, allCvrs, fuzzMvrs)
-        println("nmvrs = ${testMvrs.size}")
-
-        val infos = contestsUA().map { it.contest.info() }.associateBy { it.id }
-        val mvrTabs = tabulateCvrs(testMvrs.iterator(), infos)
-        println("testMvrs = ${mvrTabs}")
         println()
     }
     override fun cardPools() = null

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
@@ -26,7 +27,7 @@ class TestCvrsWithStylesToCards {
     fun testCvrsWithStylesToCardsForClca() {
         val cvrr = makeCvr(abs(Random.nextInt()), 2 + Random.nextInt(3), 2 + Random.nextInt(2))
 
-        var auditType = AuditType.CLCA
+        val auditType = AuditType.CLCA
 
         // simple hasStyle with or without poolid. aka "cvrs are complete".
         var hasStyle = true
@@ -84,7 +85,7 @@ class TestCvrsWithStylesToCards {
 
     @Test
     fun testCvrsWithStylesToCardsForPolling() {
-        val cvrr = makeCvr(abs(Random.nextInt()), 2 + Random.nextInt(3), 2 + Random.nextInt(2))
+        val cvrr = makeCvr(abs(Random.nextInt()), 2 + Random.nextInt(3), 2 + Random.nextInt(2), poolId=1)
 
         var auditType = AuditType.POLLING
         var hasStyle = true
@@ -126,18 +127,32 @@ class TestCvrsWithStylesToCards {
         hasCardStyles = true
         hasPoolId = false
         cvr = cvrr.copy(poolId=null)
-        target = CvrsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=listOf(cardStyle))
-        card = target.next()
-        // testOneTarget("", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = cardStyle)
+        assertFailsWith<RuntimeException> {
+            target = CvrsWithStylesToCards(
+                auditType,
+                cvrsAreComplete = hasStyle,
+                Closer(listOf(cvr).iterator()),
+                phantomCvrs = null,
+                styles = listOf(cardStyle)
+            )
+            card = target.next()
+        }
 
         // what if you dont supply the cardStyles? FAIL
         hasStyle = false
         hasCardStyles = false
         hasPoolId = true
         cvr = cvrr.copy(poolId=1)
-        target = CvrsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=null)
-        card = target.next()
-        // testOneTarget("", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = null)
+        assertFailsWith<RuntimeException> {
+            target = CvrsWithStylesToCards(
+                auditType,
+                cvrsAreComplete = hasStyle,
+                Closer(listOf(cvr).iterator()),
+                phantomCvrs = null,
+                styles = null
+            )
+            card = target.next()
+        }
     }
 
     @Test

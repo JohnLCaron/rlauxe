@@ -21,22 +21,23 @@ data class MultiContestCombineData(
     // multicontest cvrs
     // create new partitions each time this is called
     // includes undervotes and phantoms, size = totalBallots + phantom count
-    fun makeCardsFromContests(startCvrId : Int = 0): List<AuditableCard> {
+    fun makeCardsFromContests(startCvrId : Int = 0, cardStyle:String?=null): List<AuditableCard> {
         contestVoteTrackers.forEach { it.resetTracker() } // startFresh
 
         var nextCardId = startCvrId
         val result = mutableListOf<AuditableCard>()
         repeat(totalBallots) {
             // add regular Cvrs including undervotes and phantoms
-            result.add(makeCard(nextCardId++, contestVoteTrackers))
+            result.add(makeCard(nextCardId++, contestVoteTrackers, cardStyle))
         }
 
         val phantoms = makePhantomCards(contests, startIdx=result.size)
         return result + phantoms
     }
 
-    private fun makeCard(nextCardId: Int, fcontests: List<ContestVoteTracker>): AuditableCard {
-        val cardBuilder = CardBuilder("card${nextCardId}", nextCardId)
+    private fun makeCard(nextCardId: Int, fcontests: List<ContestVoteTracker>, cardStyle:String?): AuditableCard {
+        //     constructor(location: String, index: Int, poolId: Int?, cardStyle: String?):
+        val cardBuilder = CardBuilder("card${nextCardId}", nextCardId, poolId=poolId, cardStyle=cardStyle)
         fcontests.forEach { fcontest -> fcontest.addContestToCard(cardBuilder) }
         return cardBuilder.build(poolId)
     }

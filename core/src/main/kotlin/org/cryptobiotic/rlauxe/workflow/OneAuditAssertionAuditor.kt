@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.Sampler
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import kotlin.math.max
 
 private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
 
@@ -21,6 +22,14 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter as OneAuditClcaAssorter
 
+        var errorRates = if (assertionRound.prevAuditResult != null)
+            // TODO should be average of previous rates?
+            assertionRound.prevAuditResult!!.measuredRates!!
+        else
+            ClcaErrorRates.Zero
+        if (errorRates.p2o < contestUA.contest.phantomRate())
+            errorRates = errorRates.copy( p2o = contestUA.contest.phantomRate())
+
         // // default: eta0 = reportedMean, shrinkTrunk
         //// bet99: eta0 = reportedMean, 99% max bet
         //// eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk
@@ -28,13 +37,14 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
 
         val strategy = config.oaConfig.strategy
 
-        val testH0Result = if (strategy == OneAuditStrategyType.optimalComparison || strategy == OneAuditStrategyType.optimalBet) {
+        val testH0Result = if (strategy == OneAuditStrategyType.optimalComparison) {
             runBetting(
                 config,
                 contestUA.Nb,
                 cassorter,
                 sampler,
-                cassorter.upperBound()
+                cassorter.upperBound(),
+                p2 = errorRates.p2o
             )
         } else {
             runAlpha(
@@ -46,9 +56,6 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             )
         }
 
-        // println(testH0Result)
-        //println("pvalues=  ${debugSeq.pvalues()}")
-
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampler.nmvrs(),
@@ -57,7 +64,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),
-            // startingRates = errorRates, TODO
+            startingRates = errorRates,
             measuredRates = testH0Result.tracker.errorRates(),
         )
 
@@ -107,10 +114,10 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         cassorter: OneAuditClcaAssorter,
         sampler: Sampler,
         upperBound: Double,
+        p2: Double,
     ): TestH0Result {
 
-        // no errors!
-        val bettingFn: BettingFn = OptimalComparisonNoP1(N=N, true, upperBound, p2 = 0.0)
+        val bettingFn: BettingFn = OptimalComparisonNoP1(N=N, true, upperBound, p2 = p2)
 
         val testFn = BettingMart(
             bettingFn = bettingFn,

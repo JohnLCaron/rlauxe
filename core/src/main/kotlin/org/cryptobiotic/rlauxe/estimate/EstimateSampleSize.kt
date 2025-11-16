@@ -215,38 +215,41 @@ fun estimateClcaAssertionRound(
     //  oracle: use actual measured error rates for first round. (violates martingale condition)
     // optimalComparison:  OptimalComparisonNoP1, assume P1 = 0, closed form solution for lamda.
 
+    //// same as ClcaAssertionAuditor
     var errorRates: ClcaErrorRates = when {
-
         // Subsequent rounds, always use measured rates.
         (assertionRound.prevAuditResult != null) -> {
             // TODO should be average of previous rates?
             assertionRound.prevAuditResult!!.measuredRates!!
         }
-
         (clcaConfig.strategy == ClcaStrategyType.fuzzPct)  -> {
             ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct) // TODO do better
         }
-
         (clcaConfig.strategy == ClcaStrategyType.apriori) -> {
             clcaConfig.errorRates!!
         }
-
         else -> {
-            if (debugErrorRates) println("simulate round $roundIdx using no errorRates")
             ClcaErrorRates.Zero
         }
     }
 
     //  estimation: use real cards, simulate cards with ClcaSimulatedErrorRates; the cards already have phantoms
     val sampler = ClcaCardSimulatedErrorRates(contestCards, contest, cassorter, errorRates) // TODO why cant we use this with IRV?? I think we can
-    // val testData = SimulateIrvTestData(contestUA.contest as RaireContest, contestRound.contestUA.minDilutedMargin(), config.contestSampleCutoff)
 
     // Using errorRates in the bettingFn, make sure phantom rate is accounted for
     // the minimum p2o is always the phantom rate.
     if (errorRates.p2o < contest.phantomRate())
         errorRates = errorRates.copy( p2o = contest.phantomRate())
 
-    val bettingFn = AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates) // diluted N
+    val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.oracle) {
+        OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
+    }  else if (clcaConfig.strategy == ClcaStrategyType.optimalComparison) {
+        OptimalComparisonNoP1(N = contestUA.Nb, withoutReplacement = true, upperBound = cassorter.upperBound, p2 = errorRates.p2o)
+    } else {
+        AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
+    }
+
+    // val bettingFn = AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates) // diluted N
 
     // TODO track down simulations and do initial permutation there; we want first trial to use the actual permutation
     // we need a permutation to get uniform distribution of errors, since some simulations put all the errors at the beginning
@@ -409,54 +412,37 @@ fun estimateOneAuditAssertionRound(
     val oaConfig = config.oaConfig
     val clcaConfig = config.clcaConfig
 
-    // TODO factor out with estimateClcaAssertionRound; runAudit?
-    val errorRates: ClcaErrorRates = when {
+    //// same as estimateClcaAssertionRound
+    var errorRates: ClcaErrorRates = when {
         // Subsequent rounds, always use measured rates.
-        (assertionRound.prevAuditResult != null && assertionRound.prevAuditResult!!.measuredRates != null) -> {
+        (assertionRound.prevAuditResult != null) -> {
             // TODO should be average of previous rates?
             assertionRound.prevAuditResult!!.measuredRates!!
         }
-
         (clcaConfig.strategy == ClcaStrategyType.fuzzPct)  -> {
-            ClcaErrorTable.getErrorRates(contestUA.ncandidates, oaConfig.simFuzzPct) // TODO do better
+            ClcaErrorTable.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct) // TODO do better
         }
-
         (clcaConfig.strategy == ClcaStrategyType.apriori) -> {
             clcaConfig.errorRates!!
         }
-
         else -> {
-            if (debugErrorRates) println("simulate round $roundIdx using no errorRates")
             ClcaErrorRates.Zero
         }
     }
 
-    // TODO track down simulations and do initial permutation there; we want first trial to use the actual permutation
-    //  estimation: use real cards, simulate cards with ClcaSimulatedErrorRates
+    //  estimation: use real cards, simulate cards with ClcaSimulatedErrorRates; the cards already have phantoms
     val sampler = ClcaCardSimulatedErrorRates(contestCards, contestUA.contest, oaCassorter, errorRates) // TODO why cant we use this with IRV?? I think we can
 
-    /* this is noerrors TODO subsequent rounds
-    // TODO this works but CvrsLimitedSampler doesnt on testOneAuditContestAuditTaskGenerator
-    val samplerOrg =
-        OneAuditNoErrorIterator(
-            contestUA.id,
-            contestUA.Nc,
-            config.contestSampleCutoff,
-            cassertion.cassorter,
-            cvrList.iterator(),
-        )
-    val sampler = CvrsLimitedSampler(contestUA.id,  cassertion.cassorter, cvrList) */
-
-
-    // the cards already have phantoms; dont need error rates unless we add more OA strategies TODO test strategies again
     // the minimum p2o is always the phantom rate.
-    // if (errorRates.p2o < contestUA.contest.phantomRate())
-    //    errorRates = errorRates.copy( p2o = contestUA.contest.phantomRate())
+    if (errorRates.p2o < contestUA.contest.phantomRate())
+        errorRates = errorRates.copy( p2o = contestUA.contest.phantomRate())
+
+    // TODO track down simulations and do initial permutation there; we want first trial to use the actual permutation
 
     val strategy = config.oaConfig.strategy
-    val result = if (strategy == OneAuditStrategyType.optimalComparison || strategy == OneAuditStrategyType.optimalBet) {
+    val result = if (strategy == OneAuditStrategyType.optimalComparison) {
 
-        val bettingFn: BettingFn = OptimalComparisonNoP1(contestUA.Nb, true, oaCassorter.upperBound, p2 = 0.0) // diluted margin
+        val bettingFn: BettingFn = OptimalComparisonNoP1(contestUA.Nb, true, oaCassorter.upperBound, p2 = errorRates.p2o) // diluted margin
 
         runRepeatedBettingMart(
             config,

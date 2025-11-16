@@ -9,8 +9,6 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsFrom
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.existsOrZip
 import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
 
 private val logger = KotlinLogging.logger("PersistedMvrManagerTest")
@@ -18,7 +16,7 @@ private val checkValidity = true
 
 class PersistedMvrManagerTest(auditDir: String, val config: AuditConfig, val contestsUA: List<ContestUnderAudit>) : MvrManagerTestIF, PersistedMvrManager(auditDir) {
 
-    // extract the wanted cards from teh cardManifest, optionally fuzz them, and write them to sampleMvrsFile
+    // extract the wanted cards from the cardManifest, optionally fuzz them, and write them to sampleMvrsFile
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {
         val cards = findSamples(sampleNumbers, auditableCards())
         val sampledMvrs = if (config.simFuzzPct() == null) {

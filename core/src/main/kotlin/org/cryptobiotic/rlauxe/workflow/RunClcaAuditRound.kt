@@ -86,35 +86,27 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val contest = contestUA.contest
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-
         val clcaConfig = config.clcaConfig
-        val errorRates: ClcaErrorRates = when (clcaConfig.strategy) {
-            ClcaStrategyType.optimalComparison,
-            ClcaStrategyType.previous,
-            ClcaStrategyType.phantoms -> {
-                if (assertionRound.prevAuditResult != null) {
-                    // heres where use the previous round's error rates
-                    assertionRound.prevAuditResult!!.measuredRates!!
-                } else {
-                    // use phantomRate as apriori
-                    ClcaErrorRates(0.0, contest.phantomRate(), 0.0, 0.0)
-                }
-            }
 
-            ClcaStrategyType.oracle, // TODO: removed so remove?
-            ClcaStrategyType.noerror -> {
-                ClcaErrorRates(0.0, 0.0, 0.0, 0.0)
+        //// same as estimateClcaAssertionRound
+        var errorRates: ClcaErrorRates = when {
+            // Subsequent rounds, always use measured rates.
+            (assertionRound.prevAuditResult != null) -> {
+                // TODO should be average of previous rates?
+                assertionRound.prevAuditResult!!.measuredRates!!
             }
-
-            ClcaStrategyType.fuzzPct -> {
-                // use computed errors as apriori. TODO ignoring margin, undervotes.
-                ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct)
+            (clcaConfig.strategy == ClcaStrategyType.fuzzPct)  -> {
+                ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct) // TODO do better
             }
-
-            ClcaStrategyType.apriori ->
-                // use given errors as apriori
+            (clcaConfig.strategy == ClcaStrategyType.apriori) -> {
                 clcaConfig.errorRates!!
+            }
+            else -> {
+                ClcaErrorRates.Zero
+            }
         }
+        if (errorRates.p2o < contest.phantomRate())
+            errorRates = errorRates.copy( p2o = contest.phantomRate())
 
         val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.oracle) {
             OracleComparison(a = cassorter.noerror(), errorRates = errorRates)

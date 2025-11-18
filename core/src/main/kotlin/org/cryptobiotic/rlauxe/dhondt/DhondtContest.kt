@@ -5,8 +5,8 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.core.OverThreshold
-import org.cryptobiotic.rlauxe.core.UnderThreshold
+import org.cryptobiotic.rlauxe.core.AboveThreshold
+import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.mean2margin
@@ -139,9 +139,9 @@ data class ProtoContest(val name: String, val id: Int, val parties: List<DhondtC
         result.assorters.addAll(assorters.map { it.makeAssorter() })
         parties.forEach { party ->
             if (party.belowMinPct) {
-                result.assorters.add(UnderThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, useNc))
+                result.assorters.add(BelowThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, useNc))
             } else {
-                result.assorters.add(OverThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, useNc))
+                result.assorters.add(AboveThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, useNc))
             }
         }
 
@@ -200,11 +200,11 @@ class DHondtContest(
 
                 (winnerScore - loserScore) / winnerScore
             }
-            is UnderThreshold -> {
+            is BelowThreshold -> {
                 assorter.t - votes[assorter.winner()]!! / nvotes.toDouble()
             }
 
-            is OverThreshold -> {
+            is AboveThreshold -> {
                 votes[assorter.winner()]!! / nvotes.toDouble() - assorter.t
             }
             else -> throw RuntimeException()
@@ -217,20 +217,20 @@ class DHondtContest(
                 val winnerScore = votes[assorter.winner()]!! / assorter.lastSeatWon.toDouble()
                 val loserScore = votes[assorter.loser()]!! / assorter.firstSeatLost.toDouble()
                 val recountMargin = (winnerScore - loserScore) / winnerScore
-                "DHondt ${assorter.shortName()} votes=${dfn(winnerScore, 1)}/${dfn(loserScore, 1)}" +
+                "${assorter.shortName()} votes=${dfn(winnerScore, 1)}/${dfn(loserScore, 1)}" +
                         " diff=${dfn(winnerScore - loserScore, 1)} (w-l)/w =${dfn(recountMargin, 5)}"
             }
-            is UnderThreshold -> {
+            is BelowThreshold -> {
                 val votesFor = votes[assorter.winner()]!!
                 val pct = 100.0 * votesFor / nvotes
                 val diff= 100.0 * assorter.t - pct
-                "UnderThreshold cand=${assorter.winner()} votesFor=$votesFor pct=${dfn(pct, 4)} diff=${dfn(diff, 6)} %"
+                "${assorter.shortName()} votesFor=$votesFor pct=${dfn(pct, 4)} diff=${dfn(diff, 6)} %"
             }
-            is OverThreshold -> {
+            is AboveThreshold -> {
                 val votesFor = votes[assorter.winner()]!!
                 val pct = 100.0 * votesFor / nvotes
                 val diff= pct - 100.0 * assorter.t
-                "OverThreshold cand=${assorter.winner()} votesFor=$votesFor pct=${dfn(pct, 4)} diff=${dfn(diff, 6)} %"
+                "${assorter.shortName()} votesFor=$votesFor pct=${dfn(pct, 4)} diff=${dfn(diff, 6)} %"
             }
             else -> throw RuntimeException()
         }
@@ -382,8 +382,10 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     override fun upperBound() = h2(upper)
 
     override fun desc() = buildString {
-        append("(${winner}/${loser}): reportedMean=${pfn(reportedMean)} reportedMargin=${pfn(reportedMargin())}")
+        append("${shortName()}: reportedMean=${pfn(reportedMean)} reportedMargin=${pfn(reportedMargin())}")
     }
+
+    override fun shortName() = "DHondt w='${info.candidateIdToName[winner()]}' l='${info.candidateIdToName[loser()]}'"
 
     override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization
 

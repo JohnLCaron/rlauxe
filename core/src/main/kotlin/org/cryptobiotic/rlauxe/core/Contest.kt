@@ -381,6 +381,7 @@ open class ContestUnderAudit(
         return if (isClca) clcaAssertions else pollingAssertions
     }
 
+    // TODO should use noerror(), not dilutedMargin to find "minimum"
     fun minClcaAssertion(): Pair<ClcaAssertion?, Double> {
         if (clcaAssertions.isEmpty()) return Pair(null, 0.0)
         val margins = clcaAssertions.map { Pair(it, makeDilutedMargin(it.assorter))  }

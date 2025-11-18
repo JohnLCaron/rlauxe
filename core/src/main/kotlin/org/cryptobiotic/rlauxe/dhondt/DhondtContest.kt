@@ -17,6 +17,7 @@ import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.collections.mutableListOf
 
 private val showDetails = false
+private val useBt = false // always use Bt
 
 
 data class DhondtCandidate(val name: String, val id: Int, val votes: Int) {
@@ -85,6 +86,7 @@ data class DhondtScore(val candidate: Int, val score: Double, val divisor: Int) 
 
 data class ProtoContest(val name: String, val id: Int, val parties: List<DhondtCandidate>, val sortedScores: List<DhondtScore>,
                         val nseats: Int, val undervotes: Int, val minFraction: Double) {
+
     val winners = sortedScores.subList(0, nseats)
     val losers = sortedScores.subList(nseats, sortedScores.size)
     private val assorters = mutableListOf<AssorterBuilder>()
@@ -137,9 +139,19 @@ data class ProtoContest(val name: String, val id: Int, val parties: List<DhondtC
             this.sortedScores,
         )
         result.assorters.addAll(assorters.map { it.makeAssorter() })
+        val lastWinningScore = winners.last()
+        val lastWinner = parties.find{ it.id == lastWinningScore.candidate }!!
+
         parties.forEach { party ->
             if (party.belowMinPct) {
-                result.assorters.add(BelowThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, useNc))
+                // decide which is cheaper
+                val bt = BelowThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, useNc)
+                val partyCopy = party.copy()
+                partyCopy.firstSeatLost = 1
+                val dh =  AssorterBuilder(this, lastWinner, partyCopy).makeAssorter()
+                val useAssorter = if (useBt || (bt.noerror() > dh.noerror())) bt else dh
+                println("${party.name} noerror: bt= ${bt.noerror()} dh=${dh.noerror()}")
+                result.assorters.add(useAssorter)
             } else {
                 result.assorters.add(AboveThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, useNc))
             }

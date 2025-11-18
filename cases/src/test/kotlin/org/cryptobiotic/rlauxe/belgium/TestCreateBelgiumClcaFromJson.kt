@@ -39,7 +39,7 @@ val toptopdir = "/home/stormy/rla/cases/belgium/2024"
 class TestCreateBelgiumClcaFromJson {
     @Test
     fun createBelgiumElection() {
-        createBelgiumElection("Limbourg")
+        createBelgiumElection("Anvers")
     }
 
     @Test
@@ -115,7 +115,7 @@ fun createBelgiumElection(electionName: String, stopRound:Int=0): Pair<Int, Int>
     val totalVotes = belgiumElection.NrOfValidVotes // + belgiumElection.NrOfBlankVotes
     val contestd = dcontest.createContest(Nc = totalVotes, Ncast = totalVotes)
 
-    val topdir = "$toptopdir/$electionName"
+    val topdir = "$toptopdir/$electionName/checkBt"
     createBelgiumClca(topdir, contestd)
 
     val publisher = Publisher("$topdir/audit")
@@ -167,7 +167,7 @@ fun showBelgiumElection(electionName: String): Triple<Int, Int, AssorterIF> {
     println("======================================================")
     println("showBelgiumElection $electionName")
     val topdir = "$toptopdir/$electionName"
-    val auditdir = "$topdir/audit"
+    val auditdir = "$topdir/checkBt/audit"
 
     val auditRecord = PersistedWorkflow(auditdir, useTest=true).auditRecord
     val contestUA = auditRecord.contests.first()

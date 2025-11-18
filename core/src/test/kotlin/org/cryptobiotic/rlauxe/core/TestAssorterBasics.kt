@@ -9,7 +9,6 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 
 class TestAssorterBasics {
-
     @Test
     fun testPluralityAssorter() {
         val cvrs = CvrBuilders()

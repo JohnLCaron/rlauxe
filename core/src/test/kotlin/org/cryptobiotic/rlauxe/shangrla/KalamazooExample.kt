@@ -3,9 +3,9 @@ package org.cryptobiotic.rlauxe.shangrla
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.doublePrecision
 import org.cryptobiotic.rlauxe.doublesAreClose
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.math.pow
 

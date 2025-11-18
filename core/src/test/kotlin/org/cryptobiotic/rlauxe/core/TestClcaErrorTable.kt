@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.util.df

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvr
@@ -133,7 +133,7 @@ class TestAssorterSuperMajority {
         )
         val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc=100, Ncast=100)
 
-        val assorter = OverThreshold.makeFromVotes(info, 1, contest.votes, f, contest.Nc)
+        val assorter = AboveThreshold.makeFromVotes(info, 1, contest.votes, f, contest.Nc)
         assertEquals(1, assorter.winner())
         assertEquals(-1, assorter.loser())
 
@@ -170,7 +170,7 @@ class TestAssorterSuperMajority {
         )
         val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc=100, Ncast=100)
 
-        val massorter = UnderThreshold.makeFromVotes(info, 2, contest.votes, f, contest.Nc)
+        val massorter = BelowThreshold.makeFromVotes(info, 2, contest.votes, f, contest.Nc)
         println(massorter.desc())
 
         assertEquals(2, massorter.winner())

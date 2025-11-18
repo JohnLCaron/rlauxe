@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.calcAssorterMargin
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 
-import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.util.doublePrecision
 import kotlin.test.*
 
 class TestClcaErrorRates {

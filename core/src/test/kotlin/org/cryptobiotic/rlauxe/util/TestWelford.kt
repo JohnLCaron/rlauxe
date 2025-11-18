@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.util.doublePrecision
 import kotlin.math.ln
 import kotlin.math.sqrt
 import kotlin.test.Test

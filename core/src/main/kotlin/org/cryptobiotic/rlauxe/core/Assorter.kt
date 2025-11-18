@@ -33,8 +33,13 @@ interface AssorterIF {
     fun desc(): String
     fun winner(): Int  // candidate id
     fun loser(): Int   // candidate id
-    fun reportedMargin(): Double // in (0, 1]
-    fun reportedMean(): Double  // in (.5, 1]
+
+    fun reportedMargin(): Double // TODO could/should this be dilutedMargin?
+    fun reportedMean(): Double
+    fun noerror(): Double  {
+        val ratio = reportedMargin() / upperBound()  // TODO could/should be diluted margin?
+        return 1.0 / (2.0 - ratio)
+    }
 
     fun shortName() = "${winner()}/${loser()}"
     fun winLose() = "${winner()}/${loser()}"
@@ -45,7 +50,7 @@ interface AssorterIF {
     // used when you need to calculate reportedMargin from some subset of votes
     fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
         if (useVotes == null) {
-            return 0.0
+            return 0.0 // TODO something
         } // shouldnt happen
         val winnerVotes = useVotes[winner()] ?: 0
         val loserVotes = useVotes[loser()] ?: 0
@@ -78,7 +83,7 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
         return (w - l + 1) * 0.5
     }
 
-    override fun upperBound() = 1.0
+    override fun upperBound() = 1.0 // upper bound of assorter.assort()
     override fun desc() = " winner=$winner loser=$loser reportedMargin=${pfn(reportedMargin())} reportedMean=${pfn(reportedMean)}"
     override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization
     override fun winner() = winner

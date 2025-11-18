@@ -33,14 +33,13 @@ open class ClcaAssorter(
     val info: ContestInfo,
     val assorter: AssorterIF,   // A
     val hasStyle: Boolean,
-    val dilutedMargin: Double,
+    val dilutedMargin: Double, // dilutedMargin of the primitive assorter; note its only used in dilutedMargin / assorter.upperBound()
     val check: Boolean = true,
 ) {
     // Define v ≡ 2Ā − 1, the assorter margin
     // reportedAssortMargin = assorter.reportedMargin() // (0, 1) // TODO
     // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
     val noerror: Double = 1.0 / (2.0 - dilutedMargin / assorter.upperBound()) // clca assort value when no error
-    // clca assort value when no error (.5, 1)
 
     // upper bound of clca assorter;
     // A ranges from [0, u], so ωi ≡ A(ci) − A(bi) ranges from +/- u,

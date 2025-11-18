@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.SampleFromArray
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.doublesAreClose
 import kotlin.test.Test

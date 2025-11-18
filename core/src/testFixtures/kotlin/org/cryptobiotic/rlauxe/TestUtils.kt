@@ -8,8 +8,6 @@ import org.cryptobiotic.rlauxe.util.doubleIsClose
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-val doublePrecision = 1.0e-8
-
 fun doublesAreClose(a: List<Double>, b: List<Double>, rtol: Double=1.0e-5, atol:Double=1.0e-8): Boolean {
     //    For finite values, isclose uses the following equation to test whether
     //    two floating point values are equivalent.

@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.cli.runRound
+import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -16,6 +17,7 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
+import kotlin.math.pow
 import kotlin.test.Test
 import kotlin.test.fail
 
@@ -42,7 +44,7 @@ class TestCreateBelgiumClcaFromJson {
 
     @Test
     fun runBelgiumElection() {
-        runBelgiumElection("Anvers")
+        runBelgiumElection("Limbourg")
     }
 
     @Test
@@ -60,7 +62,7 @@ class TestCreateBelgiumClcaFromJson {
 
     @Test
     fun showBelgiumElection() {
-        val electionName = "Anvers"
+        val electionName = "Limbourg"
         val result = showBelgiumElection(electionName)
         val pct = (100.0 * result.second) / result.first.toDouble()
         println("${sfn(electionName, 15)}: Nc= ${trunc(result.first.toString(), 10)} " +
@@ -69,14 +71,30 @@ class TestCreateBelgiumClcaFromJson {
 
     @Test
     fun showAllBelgiumElection() {
-        val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
+        val allResults = mutableMapOf<String, Triple<Int, Int, AssorterIF>>()
         belgianElectionMap.keys.forEach {
-            allmvrs[it] = showBelgiumElection(it)
+            allResults[it] = showBelgiumElection(it)
         }
-        allmvrs.forEach {
-            val pct = (100.0 * it.value.second) / it.value.first.toDouble()
-            println("${sfn(it.key, 15)}: Nc= ${trunc(it.value.first.toString(), 10)} " +
-                    " nmvrs= ${trunc(it.value.second.toString(), 6)} pct= ${dfn(pct, 2)} %")
+
+        println("${sfn("", 15)} | ${trunc("minAssorter", 42)} | " +
+                "${trunc("noerror", 8)} | " +
+                "${trunc("mean", 8)} | " +
+                "${trunc("nmvrs", 6)} | ${sfn("pct", 3)} % |")
+
+        allResults.forEach {
+            val (Nc, nmvrs, minAssorter) = it.value
+            val pct = (100.0 * nmvrs) / Nc.toDouble()
+            val expectedRisk = minAssorter.noerror().pow(nmvrs.toDouble())
+
+            println("${sfn(it.key, 15)} | " +
+                    "${sfn(minAssorter.shortName(), 42)} | " +
+                    "${dfn(minAssorter.noerror(), 6)} | " +
+                    "${dfn(minAssorter.reportedMean(), 6)} | " +
+                    // "${trunc(Nc.toString(), 10)} | " +
+                    "${trunc(nmvrs.toString(), 6)} | " +
+                    "${dfn(pct, 2)} % |"
+                    // "${dfn(expectedRisk, 6)} |"
+            )
         }
     }
 }
@@ -91,12 +109,13 @@ fun createBelgiumElection(electionName: String, stopRound:Int=0): Pair<Int, Int>
 
     val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, idx+1, it.NrOfVotes) }
     val nwinners = belgiumElection.ElectionLists.sumOf { it.NrOfSeats }
-    val dcontest = makeProtoContest(electionName, 1, dhondtParties, nwinners, belgiumElection.NrOfBlankVotes,.05)
+    // val dcontest = makeProtoContest(electionName, 1, dhondtParties, nwinners, belgiumElection.NrOfBlankVotes,.05)
+    val dcontest = makeProtoContest(electionName, 1, dhondtParties, nwinners, 0,.05)
 
-    val totalVotes = belgiumElection.NrOfValidVotes + belgiumElection.NrOfBlankVotes
+    val totalVotes = belgiumElection.NrOfValidVotes // + belgiumElection.NrOfBlankVotes
     val contestd = dcontest.createContest(Nc = totalVotes, Ncast = totalVotes)
 
-    val topdir = "$toptopdir/$electionName"
+    val topdir = "$toptopdir/$electionName/checkBt"
     createBelgiumClca(topdir, contestd)
 
     val publisher = Publisher("$topdir/audit")
@@ -143,22 +162,25 @@ fun runBelgiumElection(electionName: String, stopRound:Int=0): Int {
 }
 
 
-fun showBelgiumElection(electionName: String): Pair<Int, Int> {
+// Nc, nmvrs, minAssorter
+fun showBelgiumElection(electionName: String): Triple<Int, Int, AssorterIF> {
     println("======================================================")
     println("showBelgiumElection $electionName")
     val topdir = "$toptopdir/$electionName"
-    val auditdir = "$topdir/audit"
+    val auditdir = "$topdir/checkBt/audit"
 
     val auditRecord = PersistedWorkflow(auditdir, useTest=true).auditRecord
     val contestUA = auditRecord.contests.first()
     println(contestUA.show())
-    println("minAssertion: ${contestUA.minAssertion().first!!.assorter}")
+    val (minAssertion, minMargin) = contestUA.minAssertion()
+    val minAssorter = minAssertion!!.assorter
+    println("minAssorter: ${minAssorter}")
     println("  ${contestUA.minAssertionDifficulty()}")
     println(contestUA.contest.showCandidates())
 
     val finalRound = auditRecord.rounds.last()
     val Nc = finalRound.contestRounds.first().Nc
-    return Pair(Nc, finalRound.nmvrs)
+    return Triple(Nc, finalRound.nmvrs, minAssorter)
 }
 
 /* UnderThreshold assertions only

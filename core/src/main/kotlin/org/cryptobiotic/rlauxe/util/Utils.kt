@@ -7,6 +7,7 @@ import kotlin.math.ceil
 import kotlin.math.round
 
 val secureRandom = SecureRandom.getInstanceStrong()!!
+const val doublePrecision = 1.0e-8
 
 fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8): Boolean {
     //    For finite values, isclose uses the following equation to test whether
@@ -48,7 +49,7 @@ fun df(d: Double) = "%6.4f".format(d)
 fun dfn(d: Double, n: Int) = "%${n+2}.${n}f".format(d)
 fun pfn(d: Double, n: Int=4) = "%${n+2}.${n}f%%".format(100*d)
 fun nfn(i: Int, n: Int) = "%${n}d".format(i)
-fun sfn(s: String, n: Int) = "%${n}s".format(s)  // right justify in windth n
+fun sfn(s: String, n: Int) = "%${n}s".format(s)  // right justify in width n
 fun trunc(s: String, n:Int) : String {
     if (s.length > n) return s.substring(0,n)
     if (s.length < n) return sfn(s, n)

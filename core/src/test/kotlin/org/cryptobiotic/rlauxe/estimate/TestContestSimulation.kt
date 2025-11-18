@@ -6,7 +6,7 @@ import io.kotest.property.arbitrary.int
 import io.kotest.property.checkAll
 import kotlinx.coroutines.test.runTest
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.propTestFastConfig
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.margin2mean

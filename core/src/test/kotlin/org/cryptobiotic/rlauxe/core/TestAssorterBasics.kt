@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.doublePrecision
+import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.calcAssorterMargin
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
@@ -9,7 +9,6 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 
 class TestAssorterBasics {
-
     @Test
     fun testPluralityAssorter() {
         val cvrs = CvrBuilders()

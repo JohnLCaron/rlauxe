@@ -2,7 +2,9 @@ package org.cryptobiotic.rlauxe.betting
 
 import org.cryptobiotic.rlauxe.core.AdaptiveBetting
 import org.cryptobiotic.rlauxe.core.ClcaErrorRates
+import org.cryptobiotic.rlauxe.core.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.core.SampleErrorTracker
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
 
@@ -35,6 +37,23 @@ class GenBettingPayoff {
                     errorRates = ClcaErrorRates(error, error, error, error),
                 )
                 val samples = PrevSamplesWithRates(noerror)
+                repeat(100) { samples.addSample(noerror) }
+                println(" margin=$margin, noerror=$noerror bet = ${optimal.bet(samples)}")
+            }
+        }
+    }
+
+    @Test
+    fun showGeneralAdaptiveComparisonBet() {
+        val N = 10000
+        val margins = listOf(.001, .002, .004, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
+
+        for (error in listOf(0.0, 0.0001, .001, .01)) {
+            println("errors = $error")
+            for (margin in margins) {
+                val noerror = 1 / (2 - margin)
+                val optimal = GeneralAdaptiveBetting(N = N, noerror=noerror, d = 100)
+                val samples = SampleErrorTracker(noerror)
                 repeat(100) { samples.addSample(noerror) }
                 println(" margin=$margin, noerror=$noerror bet = ${optimal.bet(samples)}")
             }

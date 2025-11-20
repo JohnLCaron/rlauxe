@@ -56,6 +56,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             )
         }
 
+        val measuredRates = if (testH0Result.tracker is PrevSamplesWithRates) testH0Result.tracker.errorRates() else ClcaErrorRates.Zero
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampler.nmvrs(),
@@ -65,7 +66,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),
             startingRates = errorRates,
-            measuredRates = testH0Result.tracker.errorRates(),
+            measuredRates = measuredRates,
         )
 
         if (!quiet) logger.debug{" ${contestUA.name} strategy=$strategy auditResult= ${assertionRound.auditResult}"}

@@ -39,7 +39,7 @@ val toptopdir = "/home/stormy/rla/cases/belgium/2024"
 class TestCreateBelgiumClcaFromJson {
     @Test
     fun createBelgiumElection() {
-        createBelgiumElection("Anvers")
+        createBelgiumElection("Limbourg")
     }
 
     @Test
@@ -115,7 +115,7 @@ fun createBelgiumElection(electionName: String, stopRound:Int=0): Pair<Int, Int>
     val totalVotes = belgiumElection.NrOfValidVotes // + belgiumElection.NrOfBlankVotes
     val contestd = dcontest.createContest(Nc = totalVotes, Ncast = totalVotes)
 
-    val topdir = "$toptopdir/$electionName/checkBt"
+    val topdir = "$toptopdir/$electionName"
     createBelgiumClca(topdir, contestd)
 
     val publisher = Publisher("$topdir/audit")
@@ -167,7 +167,7 @@ fun showBelgiumElection(electionName: String): Triple<Int, Int, AssorterIF> {
     println("======================================================")
     println("showBelgiumElection $electionName")
     val topdir = "$toptopdir/$electionName"
-    val auditdir = "$topdir/checkBt/audit"
+    val auditdir = "$topdir/audit"
 
     val auditRecord = PersistedWorkflow(auditdir, useTest=true).auditRecord
     val contestUA = auditRecord.contests.first()
@@ -263,4 +263,63 @@ fun showBelgiumElection(electionName: String): Triple<Int, Int, AssorterIF> {
           Namur: Nc=     338346  nmvrs=    303 pct= 0.09 %
  BrabantFlamant: Nc=     751697  nmvrs=    374 pct= 0.05 %
   BrabantWallon: Nc=     270051  nmvrs=    600 pct= 0.22 %
+ */
+
+/*
+AdaptiveBetting 11/19 noerrors
+                |                                minAssorter |  noerror |     mean |  nmvrs | pct % |
+         Anvers |                   DHondt w/l='CD&V'/'PVDA' | 0.500134 | 0.500267 |  11581 | 0.97 % |
+      Bruxelles |                       DHondt w/l='PS'/'MR' | 0.500210 | 0.500472 |   7260 | 1.40 % |
+    FlandreWest |                   DHondt w/l='PVDA'/'CD&V' | 0.501659 | 0.506614 |    907 | 0.11 % |
+    FlandreEast |                DHondt w/l='Vooruit'/'CD&V' | 0.500455 | 0.500908 |   3328 | 0.32 % |
+        Hainaut |                   BelowThreshold for ECOLO | 0.500164 | 0.500173 |   9364 | 1.27 % |
+          Liège |              DHondt w/l='LES ENGAGÉS'/'PS' | 0.500284 | 0.500663 |   5339 | 0.84 % |
+       Limbourg |       DHondt w/l='Vooruit'/'VLAAMS BELANG' | 0.502437 | 0.507277 |    617 | 0.11 % |
+     Luxembourg |              DHondt w/l='LES ENGAGÉS'/'MR' | 0.503001 | 0.505966 |    501 | 0.29 % |
+          Namur |              DHondt w/l='LES ENGAGÉS'/'PS' | 0.507362 | 0.512092 |    279 | 0.09 % |
+ BrabantFlamant |          DHondt w/l='VLAAMS BELANG'/'N-VA' | 0.504228 | 0.511180 |    357 | 0.05 % |
+  BrabantWallon |              DHondt w/l='MR'/'LES ENGAGÉS' | 0.502644 | 0.504384 |    569 | 0.22 % |
+
+    GeneralAdaptiveBetting 11/20 noerrors
+                |                                minAssorter |  noerror |     mean |  nmvrs | pct % |
+         Anvers |                   DHondt w/l='CD&V'/'PVDA' | 0.500134 | 0.500267 |  11151 | 0.94 % |
+      Bruxelles |                       DHondt w/l='PS'/'MR' | 0.500210 | 0.500472 |   7088 | 1.37 % |
+    FlandreWest |                   DHondt w/l='PVDA'/'CD&V' | 0.501659 | 0.506614 |    904 | 0.11 % |
+    FlandreEast |                DHondt w/l='Vooruit'/'CD&V' | 0.500455 | 0.500908 |   3292 | 0.32 % |
+        Hainaut |                   BelowThreshold for ECOLO | 0.500164 | 0.500173 |   9081 | 1.23 % |
+          Liège |              DHondt w/l='LES ENGAGÉS'/'PS' | 0.500284 | 0.500663 |   5246 | 0.83 % |
+       Limbourg |       DHondt w/l='Vooruit'/'VLAAMS BELANG' | 0.502437 | 0.507277 |    616 | 0.11 % |
+     Luxembourg |              DHondt w/l='LES ENGAGÉS'/'MR' | 0.503001 | 0.505966 |    500 | 0.29 % |
+          Namur |              DHondt w/l='LES ENGAGÉS'/'PS' | 0.507362 | 0.512092 |    279 | 0.09 % |
+ BrabantFlamant |          DHondt w/l='VLAAMS BELANG'/'N-VA' | 0.504228 | 0.511180 |    356 | 0.05 % |
+  BrabantWallon |              DHondt w/l='MR'/'LES ENGAGÉS' | 0.502644 | 0.504384 |    568 | 0.22 % |
+
+  GeneralAdaptiveBetting 11/20 .001 fuzz
+                |                                minAssorter |  noerror |     mean |  nmvrs | pct % |
+         Anvers |                   DHondt w/l='CD&V'/'PVDA' | 0.500134 | 0.500267 |  11151 | 0.94 % |
+      Bruxelles |                       DHondt w/l='PS'/'MR' | 0.500210 | 0.500472 |   9524 | 1.84 % |
+    FlandreWest |                   DHondt w/l='PVDA'/'CD&V' | 0.501659 | 0.506614 |    991 | 0.12 % |
+    FlandreEast |                DHondt w/l='Vooruit'/'CD&V' | 0.500455 | 0.500908 |   3925 | 0.38 % |
+        Hainaut |                   BelowThreshold for ECOLO | 0.500164 | 0.500173 |   9081 | 1.23 % |
+          Liège |              DHondt w/l='LES ENGAGÉS'/'PS' | 0.500284 | 0.500663 |   5246 | 0.83 % |
+       Limbourg |       DHondt w/l='Vooruit'/'VLAAMS BELANG' | 0.502437 | 0.507277 |    616 | 0.11 % |
+     Luxembourg |              DHondt w/l='LES ENGAGÉS'/'MR' | 0.503001 | 0.505966 |    500 | 0.29 % |
+          Namur |              DHondt w/l='LES ENGAGÉS'/'PS' | 0.507362 | 0.512092 |    279 | 0.09 % |
+ BrabantFlamant |          DHondt w/l='VLAAMS BELANG'/'N-VA' | 0.504228 | 0.511180 |    356 | 0.05 % |
+  BrabantWallon |              DHondt w/l='MR'/'LES ENGAGÉS' | 0.502644 | 0.504384 |    665 | 0.26 % |
+
+    GeneralAdaptiveBetting 11/20 .01 fuzz
+                |                                minAssorter |  noerror |     mean |  nmvrs | pct % |
+         Anvers |                   DHondt w/l='CD&V'/'PVDA' | 0.500134 | 0.500267 |  67299 | 5.65 % |
+      Bruxelles |                       DHondt w/l='PS'/'MR' | 0.500210 | 0.500472 |  56993 | 10.98 % |
+    FlandreWest |                   DHondt w/l='PVDA'/'CD&V' | 0.501659 | 0.506614 |    904 | 0.11 % |
+    FlandreEast |                DHondt w/l='Vooruit'/'CD&V' | 0.500455 | 0.500908 |  25639 | 2.47 % |
+        Hainaut |                   BelowThreshold for ECOLO | 0.500164 | 0.500173 |   9081 | 1.23 % |
+          Liège |              DHondt w/l='LES ENGAGÉS'/'PS' | 0.500284 | 0.500663 |  31027 | 4.91 % |
+       Limbourg |       DHondt w/l='Vooruit'/'VLAAMS BELANG' | 0.502437 | 0.507277 |    949 | 0.16 % |
+     Luxembourg |              DHondt w/l='LES ENGAGÉS'/'MR' | 0.503001 | 0.505966 |   1603 | 0.91 % |
+          Namur |              DHondt w/l='LES ENGAGÉS'/'PS' | 0.507362 | 0.512092 |    285 | 0.09 % |
+ BrabantFlamant |          DHondt w/l='VLAAMS BELANG'/'N-VA' | 0.504228 | 0.511180 |    496 | 0.07 % |
+  BrabantWallon |              DHondt w/l='MR'/'LES ENGAGÉS' | 0.502644 | 0.504384 |    568 | 0.22 % |
+
  */

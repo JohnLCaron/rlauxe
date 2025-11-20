@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.core.ClcaErrorRatesCumul
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.core.SampleErrorTracker
 import org.cryptobiotic.rlauxe.util.dfn
 import org.junit.jupiter.api.Test
 
@@ -10,9 +11,9 @@ class TestFuzzedErrors {
 
     @Test
     fun testFuzzedCardsErrors() {
-        val show = false
+        val show = true
         val ncontests = 11
-        val phantomPct = 0.02
+        val phantomPct = 0.00
         val test = MultiContestTestData(ncontests, 1, 50000, phantomPctRange=phantomPct..phantomPct)
         val contestsUA = test.contests.map { ContestUnderAudit(it).addStandardAssertions() }
         val cards = test.makeCardsFromContests()
@@ -30,15 +31,20 @@ class TestFuzzedErrors {
                 contestUA.clcaAssertions.forEach { cassertion ->
                     val cassorter = cassertion.cassorter
                     val samples = PrevSamplesWithRates(cassorter.noerror())
+                    val samplet = SampleErrorTracker(cassorter.noerror())
+
                     if (show) println("  contest = ${contestUA.id} assertion = ${cassorter.shortName()}")
 
                     testPairs.forEach { (fcard, card) ->
                         if (card.hasContest(contestUA.id)) {
-                            samples.addSample(cassorter.bassort(fcard.cvr(), card.cvr()))
+                            val bassort = cassorter.bassort(fcard.cvr(), card.cvr())
+                            samples.addSample(bassort)
+                            samplet.addSample(bassort)
                         }
                     }
                     if (show) println("    errorCounts = ${samples.errorCounts()}")
                     if (show) println("    errorRates =  ${samples.errorRates()}")
+                    if (show) println("    samplet.valueCounter =  ${samplet.valueCounter.toSortedMap()}")
 
                     avgErrorRates.add(samples.errorRates())
                 }

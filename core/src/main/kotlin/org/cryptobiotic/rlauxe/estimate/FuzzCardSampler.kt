@@ -107,11 +107,12 @@ class PollingCardFuzzSampler(
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-private val fac = 10000.0 // this allows us to use fuzzPct to 5 decimal places
-
-fun makeFuzzedCardsFrom(contests: List<ContestIF>, cards: List<AuditableCard>, fuzzPct: Double) : List<AuditableCard> {
+fun makeFuzzedCardsFrom(contests: List<ContestIF>,
+                        cards: List<AuditableCard>,
+                        fuzzPct: Double,
+                        undervotes: Boolean = true,
+) : List<AuditableCard> {
     if (fuzzPct == 0.0) return cards
-    val limit = fac / fuzzPct
 
     val isIRV = contests.associate { it.id to (it.isIrv()) }
     val infos = contests.associate { it.id to (it.info()) }
@@ -119,10 +120,10 @@ fun makeFuzzedCardsFrom(contests: List<ContestIF>, cards: List<AuditableCard>, f
     val cardBuilders = cards.map { CardBuilder.fromCard(it) }
 
     cardBuilders.filter { !it.phantom }.forEach { cardb: CardBuilder ->
-        val r = Random.nextDouble(limit)
+        val r = Random.nextDouble(1.0)
         cardb.possibleContests.forEach { contestId ->
             val info = infos[contestId]
-            if (info != null && r < fac) {
+            if (info != null && r < fuzzPct) {
                 if (isIRV[contestId]?:false) {
                     val currentVotes = cardb.votes[contestId]?.toList()?.toMutableList() ?: mutableListOf<Int>()
                     switchCandidateRankings(currentVotes, info.candidateIds)
@@ -131,12 +132,14 @@ fun makeFuzzedCardsFrom(contests: List<ContestIF>, cards: List<AuditableCard>, f
                     val votes = cardb.votes[contestId]
                     val currId: Int? = if (votes == null || votes.size == 0) null else votes[0] // TODO only one vote allowed, cant use on Raire
                     // choose a different candidate, or none.
-                    val ncandId = chooseNewCandidate(currId, info.candidateIds)
+                    val ncandId = chooseNewCandidate(currId, info.candidateIds, undervotes)
                     cardb.replaceContestVote(contestId, ncandId)
                 }
-                count++
             }
         }
+        if (r < fuzzPct) count++
     }
+    println("changed $count out of ${cards.size}")
+
     return cardBuilders.map { it.build() }
 }

@@ -49,7 +49,7 @@ const val compareBelgium = false
 data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double): AssorterIF  {
     val lowerg = (t-1) // aka 'a'
     val upperg = t
-    val c = -1.0 / (2 * lowerg)  // affine transform h = c * g + 1/2
+    val c = -1.0 / (2 * lowerg)  // 1 / 2(1-t)
     var reportedMean: Double = 0.0
 
     fun setReportedMean(reportedMean: Double): BelowThreshold {
@@ -62,6 +62,8 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     }
 
     // h(b) = c · g(b) + 1/2
+    // l = h(t-1) = (t-1)/2(1-t) + 1/2 = (t-1 + 1-t)/2(1-t) = 0
+    // u = h(t) = (t)/2(1-t) + 1/2 = (t + 1 - t) / 2(1-t) = 1/2(1-t)
     fun h(partyVote: Int): Double {
         return c * g(partyVote) + 0.5
     }
@@ -249,6 +251,8 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
     }
 
     // affine transform h = g/2t + 1/2
+    // l = h(-t) = -t/2t + 1/2 = 0
+    // u = h(1-t) = (1-t)/2t + 1/2 = (1-t+t)/2t = 1/2t
     fun h2(g: Double): Double {
         return c * g + 0.5
     }
@@ -360,3 +364,94 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
         }
     }
 }
+
+// Belgium above threshhold, c == 1
+data class AboveThresholdB(val info: ContestInfo, val winner: Int, val t: Double): AssorterIF  {
+    val lowerg = -t
+    val upperg = (1.0 - t)
+    val c = 1
+    var reportedMean: Double = 0.0
+
+    fun setReportedMean(reportedMean: Double): AboveThresholdB {
+        this.reportedMean = reportedMean
+        return this
+    }
+
+    fun g (vote: Int): Double {
+        return if (vote == winner) (1.0 - t) else -t
+    }
+
+    fun h(partyVote: Int): Double {
+        return c * g(partyVote) + 0.5
+    }
+
+    // affine transform h = g/2t + 1/2
+    fun h2(g: Double): Double {
+        return c * g + 0.5
+    }
+
+    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
+        if (!mvr.hasContest(info.id)) return 0.5
+        if (usePhantoms && mvr.phantom) return 0.0 // worst case
+        val cands = mvr.votes[info.id]!!
+        return if (cands.size == 1) h(cands.first()) else 0.5
+    }
+
+    override fun upperBound() = h2(upperg)
+
+    override fun shortName() = "AboveThresholdB for ${info.candidateIdToName[winner()]}"
+
+    override fun desc() = buildString {
+        append("${shortName()}: reportedMean=${pfn(reportedMean)} reportedMargin=${pfn(reportedMargin() )} g= [$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
+    }
+
+    override fun hashcodeDesc() = "AboveThresholdB ${winLose()} ${info.name}" // must be unique for serialization
+
+    override fun winner() = winner
+    override fun loser() = -1
+
+    override fun reportedMean() = reportedMean
+    override fun reportedMargin() = mean2margin(reportedMean)
+
+    /* Olivia has:
+    # Assertion:
+    #     p_A > 0.05
+    #
+    # Linearises to:              Proto-asserter:                  Minimum for b_a = 0, b_T = 1
+    #     T_A - 0.05 * T_L > 0        => g(b) = b_A - 0.05 * b_T      => a = -.05
+
+ difference is here:
+    # Minimum `a` of proto-assorter is > -.5 so we set `c = 1` and `h(b) = c * g(b) + .5 = b_A - 0.05 b_T + .5`.
+    #
+    # Assorter mean:
+    #     h_bar = g_bar + .5
+    #           = T_A / T_L - .05 + .5
+     */
+    override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
+        if (useVotes == null || N <= 0) {
+            return 0.0
+        } // shouldnt happen
+
+        val winnerVotes = useVotes[winner()] ?: 0
+        return winnerVotes/N.toDouble() + 0.45
+    }
+
+    override fun toString() = desc()
+
+    companion object {
+        fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int): AboveThresholdB {
+            val result = AboveThresholdB(info, partyId, minFraction)
+
+            val winnerVotes = votes[partyId] ?: 0
+            val otherVotes = votes.filter { it.key != partyId }.values.sum()
+            val nuetralVotes = Nc - winnerVotes - otherVotes
+
+            val winnerweight = result.h2(result.upperg)
+            val otherweight = result.h2(result.lowerg) // should be 0
+            val hmean = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotes * 0.5) / Nc.toDouble()
+            result.setReportedMean(hmean)
+            return result
+        }
+    }
+}
+

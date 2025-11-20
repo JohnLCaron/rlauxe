@@ -89,7 +89,7 @@ enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, phantoms, previ
 data class ClcaConfig(
     val strategy: ClcaStrategyType,
     val simFuzzPct: Double? = null, // use to generate apriori errorRates for simulation
-    val errorRates: ClcaErrorRates? = null, // use as apriori errorRates for simulation and audit
+    val errorRates: ClcaErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker
     val d: Int = 100,  // shrinkTrunc weight for error rates
 )
 

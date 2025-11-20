@@ -36,6 +36,7 @@ interface AssorterIF {
 
     fun reportedMargin(): Double // TODO could/should this be dilutedMargin?
     fun reportedMean(): Double
+    // TODO only useful for CLCA? any meaning for polling ??
     fun noerror(): Double  {
         val ratio = reportedMargin() / upperBound()  // TODO could/should be diluted margin?
         return 1.0 / (2.0 - ratio)

@@ -12,9 +12,11 @@ class TestClcaCardSimulationErrorRates {
 
     @Test
     fun testClcaCardSimulationErrorRates() {
-        val N = 20000
+        val N = 30000
         val fuzzPcts = listOf(0.0001, 0.001, .005, .01, .02, .05)
-        val margins = listOf(.017, .03, .05)
+        val margins = listOf(.015, .03, .05)
+        println("N=$N")
+
         for (margin in margins) {
             val theta = margin2mean(margin)
             val cvrs: List<Cvr> = makeCvrsByExactMean(N, theta)
@@ -25,6 +27,7 @@ class TestClcaCardSimulationErrorRates {
 
             println("margin=$margin")
             for (fuzzPct in fuzzPcts) {
+                println(" fuzzPct=$fuzzPct")
                 val errorRates = ClcaErrorTable.getErrorRates(contest.ncandidates, fuzzPct) // TODO do better
 
                 val sampler = ClcaCardSimulatedErrorRates(
@@ -34,7 +37,7 @@ class TestClcaCardSimulationErrorRates {
                     errorRates,
                 )
 
-                println("errorRates = ${sampler.errorRates}")
+                println(" errorRates = ${sampler.errorRates}")
                 println(sampler.showFlips())
 
                 testLimits(sampler, N, compareAssorter.upperBound())

@@ -24,6 +24,7 @@ class TestClcaFuzzSampler {
         val auditConfig = AuditConfig(
             AuditType.CLCA,
             hasStyle = true,
+            nsimEst=10,
             clcaConfig = ClcaConfig(strategy = ClcaStrategyType.phantoms, simFuzzPct = .011)
         )
 
@@ -55,17 +56,15 @@ private fun runWithComparisonFuzzSampler(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val clcaConfig = auditConfig.clcaConfig
-    val assertion = assertionRound.assertion as ClcaAssertion
-    val assorter = assertion.cassorter
+    val cassertion = assertionRound.assertion as ClcaAssertion
+    val assorter = cassertion.cassorter
 
-    // TODO using fuzzPct as mvrsFuzz
     val sampler = ClcaFuzzSampler(clcaConfig.simFuzzPct!!, cvrs, contestUA.contest as Contest, assorter)
-    val optimal = AdaptiveBetting(
+    val optimal = GeneralAdaptiveBetting(
         N = contestUA.Nb,
         withoutReplacement = true,
-        a = assorter.noerror(),
-        d = clcaConfig.d,
-        ClcaErrorTable.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct),
+        noerror=assorter.noerror(),
+        d = 100
     )
 
     return runRepeatedBettingMart(

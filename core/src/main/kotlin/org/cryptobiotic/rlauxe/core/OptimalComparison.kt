@@ -79,12 +79,13 @@ class AdaptiveBetting(
     val p1u: Double = errorRates.p1u // apriori rate of 1-vote understatements; set < 0 to remove consideration
     val p2u: Double = errorRates.p2u // apriori rate of 2-vote understatements; set < 0 to remove consideration
 
-    override fun bet(prevSamples: PrevSamplesWithRates): Double {
+    override fun bet(prevSamples: SampleTracker): Double {
+        val rateSampler = prevSamples as PrevSamplesWithRates
         val lastj = prevSamples.numberOfSamples()
-        val p2oest = if (p2o < 0.0 || lastj == 0) 0.0 else estimateRate(d, p2o, prevSamples.countP2o().toDouble() / lastj, lastj, eps)
-        val p1oest = if (p1o < 0.0 || lastj == 0) 0.0 else estimateRate(d, p1o, prevSamples.countP1o().toDouble() / lastj, lastj, eps)
-        val p1uest = if (p1u < 0.0 || lastj == 0) 0.0 else estimateRate(d, p1u, prevSamples.countP1u().toDouble() / lastj, lastj, eps)
-        val p2uest = if (p2u < 0.0 || lastj == 0) 0.0 else estimateRate(d, p2u, prevSamples.countP2u().toDouble() / lastj, lastj, eps)
+        val p2oest = if (p2o < 0.0 || lastj == 0) 0.0 else estimateRate(d, p2o, rateSampler.countP2o().toDouble() / lastj, lastj, eps)
+        val p1oest = if (p1o < 0.0 || lastj == 0) 0.0 else estimateRate(d, p1o, rateSampler.countP1o().toDouble() / lastj, lastj, eps)
+        val p1uest = if (p1u < 0.0 || lastj == 0) 0.0 else estimateRate(d, p1u, rateSampler.countP1u().toDouble() / lastj, lastj, eps)
+        val p2uest = if (p2u < 0.0 || lastj == 0) 0.0 else estimateRate(d, p2u, rateSampler.countP2u().toDouble() / lastj, lastj, eps)
 
         val mui = populationMeanIfH0(N, withoutReplacement, prevSamples)
         val kelly = OptimalLambda(a, ClcaErrorRates(p2oest, p1oest, p1uest, p2uest), mui)
@@ -117,7 +118,7 @@ class OracleComparison(
         lam = kelly.solve()
     }
     // note lam is a constant
-    override fun bet(prevSamples: PrevSamplesWithRates): Double {
+    override fun bet(prevSamples: SampleTracker): Double {
         return lam
     }
 }
@@ -183,6 +184,7 @@ class OptimalLambda(val a: Double, val errorRates: ClcaErrorRates, val mui: Doub
     // EF [ln(Ti) ] = p0 * ln[1 + λ(a − mu_i)] + p1 * ln[1 + λ(a/2 − mu_i)] + p2 * ln[1 − λ*mu_i)]  + p3 * ln[1 + λ(3*a/2 − mu_i)] + p4 * ln[1 + λ(2*a − mu_i)]
     fun expectedValueLogt(lam: Double): Double {
 
+        // TODO HOLY PLURALITY BATMAN!!
         return ln(1.0 + lam * (a - mui)) * p0 +
                 ln(1.0 - lam * mui) * p2o +
                 ln(1.0 + lam * (a*0.5 - mui)) * p1o +

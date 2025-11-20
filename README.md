@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 11/09/2025_
+_last changed: 11/18/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is a independent implementation of the SHANGRLA framework, based on the
@@ -65,40 +65,40 @@ It uses an _assorter_ to assign a number to each ballot, and checks outcomes by 
 each of which claims that the mean of a finite list of numbers is greater than 1/2. 
 The complementary _null hypothesis_ is that the assorter mean is not greater than 1/2.
 If that hypothesis is rejected for every assertion, the audit concludes that the outcome is correct.
-Otherwise, the audit expands, potentially to a full hand count. If every null is tested at risk level α, this results 
+Otherwise, the audit expands, potentially to a full hand count. If every assertion is tested at risk level α, this results 
 in a risk-limiting audit with risk limit α:
 **_if the election outcome is not correct, the chance the audit will stop shy of a full hand count is at most α_**.
 
-| term       | definition                                                                                     |
-|------------|------------------------------------------------------------------------------------------------|
-| Nc         | a trusted, independent bound on the number of valid ballots cast in the contest c.             |
-| Ncards     | the number of ballot cards validly cast in the contest                                         |
-| risk	      | we want to confirm or reject the null hypothesis with risk level α.                            |
-| assorter   | assigns a number between 0 and upper to each ballot, chosen to make assertions "half average". |
-| assertion  | the mean of assorter values is > 1/2: "half-average assertion"                                 |
-| estimator  | estimates the true population mean from the sampled assorter values.                           |
-| bettingFn  | decides how much to bet for each sample. (BettingMart)                                         |
-| riskFn     | the statistical method to test if the assertion is true.                                       |
-| audit      | iterative process of choosing ballots and checking if all the assertions are true.             |
+| term      | definition                                                                                   |
+|-----------|----------------------------------------------------------------------------------------------|
+| Nc        | a trusted, independent bound on the number of valid cards cast in the contest c.             |
+| Ncast     | the number of ballot cards validly cast in the contest                                       |
+| risk	     | we want to confirm or reject the null hypothesis with risk level α.                          |
+| assorter  | assigns a number between 0 and upper to each card, chosen to make assertions "half average". |
+| assertion | the mean of assorter values is > 1/2: "half-average assertion"                               |
+| estimator | estimates the true population mean from the sampled assorter values.                         |
+| bettingFn | decides how much to bet for each sample. (BettingMart)                                       |
+| riskFn    | the statistical method to test if the assertion is true.                                     |
+| audit     | iterative process of choosing ballots and checking if all the assertions are true.           |
 
 # Audit Types
 
 ## Card Level Comparison Audits (CLCA)
 
 When the election system produces an electronic record for each ballot card, known as a Cast Vote Record (CVR), then
-Card Level Comparison Audits can be done that compare sampled CVRs with the corresponding ballot card that has been 
-hand audited to produce a Manual Vote Record (MVR). A CLCA typically needs many fewer sampled ballots to validate contest
+Card Level Comparison Audits can be done that compare sampled CVRs with the corresponding hand audited ballot card,
+known as the Manual Vote Record (MVR). A CLCA typically needs many fewer sampled ballots to validate contest
 results than other methods.
 
 The requirements for CLCA audits:
 
 * The election system must be able to generate machine-readable Cast Vote Records (CVRs) for each ballot.
-* Unique identifier must be assigned to each physical ballot, and put on the CVR, in order to find the physical ballot that matches the sampled CVR.
+* Unique identifiers must be assigned to each physical ballot, and recorded on the CVR, in order to find the physical ballot that matches the sampled CVR.
 * There must be an independently determined upper bound on the number of cast cards/ballots that contain the contest.
 
 For the _risk function_, rlauxe uses the **BettingMart** function with the **AdaptiveBetting** _betting function_. 
-AdaptiveBetting needs estimates of the rates of over(under)statements. If these estimates are correct, one gets optimal sample sizes.
-AdaptiveBetting uses a variant of ShrinkTrunkage that uses a weighted average of initial estimates (aka priors) with the actual sampled rates.
+AdaptiveBetting needs estimates of the error rates between the Cvrs and the Mvrs. If the error estimates are correct, one gets optimal 
+"sample sizes", the number of ballots needed to prove the election is correct.
 
 See [CLCA Risk function](docs/BettingRiskFunction.md) for details on the BettingMart risk function.
 
@@ -147,8 +147,6 @@ For results, see [OneAudit results](docs/OneAudit4.md).
 
 For details of the use cases, see [OneAudit Use Cases](docs/OneAuditUseCases.md).
 
-Only PLURALITY and IRV can be used with OneAudit at this time.
-
 # Comparing Samples Needed by Audit type
 
 Here we are looking at the actual number of sample sizes needed to reject or confirm the null hypotheses, called the 
@@ -156,9 +154,8 @@ Here we are looking at the actual number of sample sizes needed to reject or con
 theoretical minimum. In the section [Estimating Sample Batch sizes](#estimating-sample-batch-sizes) below, we deal with the 
 need to estimate a batch size, and the extra overhead that brings.
 
-In general samplesNeeded are independent of N, which is helpful to keep in mind
-
-(Actually there is a slight dependence on N for "without replacement" audits when the sample size approaches N, 
+In general, samplesNeeded are independent of N. (Actually there is a slight dependence on N for "without replacement" 
+audits when the sample size approaches N, 
 but that case approaches a full hand audit, and isnt very interesting.)
 
 When Card Style Data (CSD) is missing, the samplesNeeded have to be scaled by Nb / Nc, where Nb is the number of physical ballots

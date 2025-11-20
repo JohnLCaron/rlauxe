@@ -121,7 +121,14 @@ fun AssorterIF.publishJson() : AssorterIFJson {
             )
         is AboveThreshold ->
             AssorterIFJson(
-                "OverThreshold",
+                "AboveThreshold",
+                reportedMean = this.reportedMean(),
+                winner = this.winner,
+                minFraction = this.t,
+            )
+        is AboveThresholdB ->
+            AssorterIFJson(
+                "AboveThresholdB",
                 reportedMean = this.reportedMean(),
                 winner = this.winner,
                 minFraction = this.t,
@@ -170,12 +177,19 @@ fun AssorterIFJson.import(info: ContestInfo): AssorterIF {
                 firstSeatLost = this.firstSeatLost!!)
             .setReportedMean(this.reportedMean)
 
-        "OverThreshold" ->
+        "AboveThreshold" ->
             AboveThreshold(
                 info,
                 this.winner,
                 this.minFraction!!)
-                .setReportedMean(this.reportedMean)
+             .setReportedMean(this.reportedMean)
+
+        "AboveThresholdB" ->
+            AboveThresholdB(
+                info,
+                this.winner,
+                this.minFraction!!)
+             .setReportedMean(this.reportedMean)
 
         "UnderThreshold" ->
             BelowThreshold(

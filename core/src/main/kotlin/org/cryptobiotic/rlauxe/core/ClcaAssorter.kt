@@ -172,6 +172,10 @@ open class ClcaAssorter(
         val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(info.id))) 0.0
             else this.assorter.assort(mvr, usePhantoms = false)
 
+        //         cvr_assort = (
+        //                int(cvr.phantom) / 2 + (1 - int(cvr.phantom)) * self.assort(cvr)
+        //        )
+        // so if they both agree its a phantom, its a p1o, if mvr cant find it and cvr doesnt think its a phantom, its a p2o
         val cvr_assort = if (cvr.phantom) .5 else this.assorter.assort(cvr, usePhantoms = false)
         return cvr_assort - mvr_assort
     }

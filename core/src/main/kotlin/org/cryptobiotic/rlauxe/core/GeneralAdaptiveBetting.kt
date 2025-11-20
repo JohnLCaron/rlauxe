@@ -19,11 +19,11 @@ class GeneralAdaptiveBetting(
     val N: Int, // max number of cards for this contest
     val noerror: Double, // a priori estimate of the error rates
     val withoutReplacement: Boolean = true,
-    // val a: Double, // compareAssorter.noerror
     val d: Int,  // trunc weight
-    val lower: Double = .00001    // TODO I think we picked this number out of a hat.
+    val lowLimit: Double = .00001    // TODO I think we picked this number out of a hat.
 ) : BettingFn {
     var called = 0
+    var lastBet = 0.0
 
     override fun bet(prevSamples: SampleTracker): Double {
         /* val lastj = valueTracker.numberOfSamples() // we know this is > 0 ??
@@ -34,10 +34,14 @@ class GeneralAdaptiveBetting(
          */
 
         called++
-        val valueTracker =  prevSamples as SampleErrorTracker
+        val valueTracker =  prevSamples as ClcaErrorTracker
         val mui = populationMeanIfH0(N, withoutReplacement, valueTracker)
-        val kelly = GeneralOptimalLambda(noerror=noerror, valueTracker, mui, d, lower)
-        return kelly.solve()
+        val kelly = GeneralOptimalLambda(noerror=noerror, valueTracker, mui, d, lowLimit)
+        val bet = kelly.solve()
+        //if (lastBet != 0.0 && bet < lastBet)
+        //    println("lastBet=$lastBet bet=$bet")
+        lastBet = bet
+        return bet
     }
 
     // For k ∈ {1, 2} we set a value d_k ≥ 0, capturing the degree of shrinkage to the a priori estimate p̃_k ,
@@ -53,7 +57,7 @@ class GeneralAdaptiveBetting(
     }
 }
 
-class GeneralOptimalLambda(val noerror: Double, val valueTracker: SampleErrorTracker, val mui: Double, val d: Int, val lower: Double) {
+class GeneralOptimalLambda(val noerror: Double, val valueTracker: ClcaErrorTracker, val mui: Double, val d: Int, val lowLimit: Double) {
     val debug = false
 
     fun solve(): Double {
@@ -101,18 +105,25 @@ class GeneralOptimalLambda(val noerror: Double, val valueTracker: SampleErrorTra
             if (count > 0) {
                 // “shrink-trunc” estimator with apriori = 0.0 for other values
                 // TODO the estimateRate once for one solve(), could cache if needed
-                sumLn += ln(1.0 + lam * (sampleValue - mui)) * estimateRate(d, 0.0, count, N, lower)
+                sumLn += ln(1.0 + lam * (sampleValue - mui)) * estimateRate(d, 0.0, count, N, lowLimit)
             }
         }
 
         return sumLn
     }
 
-    fun estimateRate(d: Int, apriori: Double, sampleCount: Int, sampleNum: Int, lower: Double): Double {
+    fun estimateRate(d: Int, apriori: Double, sampleCount: Int, sampleNum: Int, lowLimit: Double): Double {
         //   (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ epsk  ; COBRA eq (4)
         val est = (d * apriori + sampleCount) / (d + sampleNum - 1)
-        val lower =  max(est, lower) // lower bound on the estimated rate
-        val result =  min(1.0, lower) // upper bound on the estimated rate
-        return result
+        val boundedBelow =  max(est, lowLimit) // lower bound on the estimated rate
+        val boundedAbove =  min(1.0, boundedBelow) // upper bound on the estimated rate
+        return boundedAbove
     }
 }
+
+//     fun estimateRate(d: Int, apriori: Double, sampleRate: Double, sampleNum: Int, eps: Double): Double {
+//        //   (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ epsk  ; COBRA eq (4)
+//        val est = (d * apriori + sampleNum * sampleRate) / (d + sampleNum - 1)
+//        val lower =  max(est, eps) // lower bound on the estimated rate
+//        return min(1.0, lower) // upper bound on the estimated rate
+//    }

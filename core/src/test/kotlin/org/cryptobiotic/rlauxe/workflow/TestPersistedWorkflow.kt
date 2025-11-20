@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.cli.runRoundResult
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.persist.*
 import kotlin.test.Test
@@ -18,13 +17,36 @@ import kotlin.test.fail
 class TestPersistedWorkflow {
 
     @Test
+    fun testPersistedSingleClca() {
+        // val topdir = kotlin.io.path.createTempDirectory().toString()
+        val topdir = "/home/stormy/rla/persist/testPersistedSingleClca"
+
+        val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000,
+            clcaConfig = ClcaConfig(strategy=ClcaStrategyType.previous, simFuzzPct = .01))
+
+        val N = 50000
+        val testData = MultiContestTestData(1, 1, N, marginRange=0.03..0.03, ncands=2)
+
+        val contests: List<Contest> = testData.contests
+        println("Start testPersistedSingleClca $testData")
+
+        // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
+        val testCvrs = testData.makeCvrsFromContests()
+        val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
+
+        val election = CreateElectionFromCvrs(contestsUA, testCvrs, config=config)
+        CreateAudit("testPersistedSingleClca", topdir, config, election, clear = true)
+
+        runPersistedAudit(topdir)
+    }
+
+    @Test
     fun testPersistedAuditClca() {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
         val topdir = "/home/stormy/rla/persist/testPersistedAuditClca"
-        val fuzzMvrPct = .01
 
         val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000,
-            clcaConfig = ClcaConfig(strategy=ClcaStrategyType.previous, simFuzzPct = .005))
+            clcaConfig = ClcaConfig(strategy=ClcaStrategyType.previous, simFuzzPct = .01))
 
         val N = 50000
         val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
@@ -46,9 +68,9 @@ class TestPersistedWorkflow {
     fun testPersistedAuditPolling() {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
         val topdir = "/home/stormy/rla/persist/testPersistedAuditPolling"
-        val fuzzMvrPct = .01
 
-        val config = AuditConfig(AuditType.POLLING, hasStyle=true, seed = 12356667890L, nsimEst=10)
+        val config = AuditConfig(AuditType.POLLING, hasStyle=true, seed = 12356667890L, nsimEst=10,
+            pollingConfig = PollingConfig(simFuzzPct = .01))
 
         val N = 50000
         val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
@@ -58,9 +80,6 @@ class TestPersistedWorkflow {
 
         // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
-        val testMvrs = if (fuzzMvrPct == 0.0) testCvrs // TODO REDO
-        // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-            else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrPct)
 
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
@@ -74,11 +93,10 @@ class TestPersistedWorkflow {
     fun testPersistedOneAudit() {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
         val topdir = "/home/stormy/rla/persist/testPersistedOneAudit"
-        val fuzzMvrPct = .01
 
         val config = AuditConfig(
             AuditType.ONEAUDIT, hasStyle = true, contestSampleCutoff = 20000, nsimEst = 10,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
+            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true, simFuzzPct = .01)
         )
 
         val N = 5000

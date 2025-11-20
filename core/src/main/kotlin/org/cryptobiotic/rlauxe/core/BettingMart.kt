@@ -11,7 +11,7 @@ class BettingMart(
     val bettingFn : BettingFn,
     val N: Int,             // diluted number of cards for this contest, only used by populationMeanIfH0
     val withoutReplacement: Boolean = true,
-    val noerror: Double, // for comparison assorters who need rate counting. set to 0 for polling
+    val tracker: SampleTracker, // for comparison assorters who need rate counting. set to 0 for polling
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val upperBound: Double,  // the upper bound of the values of the sequence.
 ): RiskTestingFn {
@@ -33,7 +33,6 @@ class BettingMart(
         var sampleNumber = 0        // – j ← 0: sample number
         var testStatistic = startingTestStatistic     // – T ← 1: test statistic
         var mj = 0.5                // – m = µ_j = 1/2: population mean under the null hypothesis = H0
-        val tracker = SampleErrorTracker(noerror) // – S ← 0: sample sum
 
         var pvalueLast = 1.0
         var pvalueMin = 1.0

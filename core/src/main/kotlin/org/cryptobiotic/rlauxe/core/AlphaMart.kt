@@ -207,7 +207,7 @@ class AlphaMart(
 
     init {
         val bettingFn = EstimAdapter(N, withoutReplacement, upperBound, estimFn)
-        betting =  BettingMart(bettingFn, N, withoutReplacement, 0.0, riskLimit, upperBound)
+        betting = BettingMart(bettingFn, N, withoutReplacement, ClcaErrorTracker(0.0), riskLimit, upperBound)
     }
 
     override fun testH0(

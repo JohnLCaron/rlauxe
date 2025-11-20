@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.estimate.ClcaNoErrorIterator
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
@@ -51,6 +52,7 @@ class SfoaSingleRoundAuditTask(
         rlauxAudit.contestsUA().forEach { contestUA ->
             contestUA.clcaAssertions.forEach { cassertion ->
                 val assertionRound = AssertionRound(cassertion, 1, null)
+                val contestRound = ContestRound(contestUA, listOf(assertionRound), 1)
 
                 val mvrManager = MvrManagerClcaSingleRound(
                     AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run)
@@ -67,7 +69,7 @@ class SfoaSingleRoundAuditTask(
                 val runner = OneAuditAssertionAuditor()
                 val result: TestH0Result = runner.run(
                     rlauxAudit.auditConfig(),
-                    contestUA,
+                    contestRound,
                     assertionRound,
                     sampler,
                     1,
@@ -110,6 +112,7 @@ class SfoaSingleRoundAuditTaskContest18(
         val contest18 = rlauxAudit.contestsUA().find { it.contest.id == 18 }!!
         val minAssertion = contest18.minClcaAssertion().first!!
         val assertionRound = AssertionRound(minAssertion, 1, null)
+        val contestRound = ContestRound(contest18, listOf(assertionRound), 1)
 
         val mvrManager = MvrManagerClcaSingleRound(AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run))
         val sampler =
@@ -123,7 +126,7 @@ class SfoaSingleRoundAuditTaskContest18(
         val runner = OneAuditAssertionAuditor()
         val result: TestH0Result = runner.run(
             rlauxAudit.auditConfig(),
-            contest18,
+            contestRound,
             assertionRound,
             sampler,
             1,

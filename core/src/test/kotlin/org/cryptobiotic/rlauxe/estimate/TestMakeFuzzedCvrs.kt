@@ -35,11 +35,11 @@ class TestMakeFuzzedCvrs {
         repeat(ncvrs) {
             samples.addSample(sampler.sample())
         }
-        println("  errorCounts = ${samples.errorCounts()}")
+        println("  errorCounts = ${samples.clcaErrorCounts()}")
         println("  errorRates =  ${samples.errorRates()}")
-        assertEquals(ncvrs, samples.errorCounts().sum())
+        assertEquals(ncvrs, samples.clcaErrorCounts().sum())
 
-        val changes = samples.errorCounts().subList(1, samples.errorCounts().size).sum()
+        val changes = samples.clcaErrorCounts().subList(1, samples.clcaErrorCounts().size).sum()
         val changePct = changes / samples.numberOfSamples().toDouble()
         assertEquals(mvrsFuzzPct, changePct, .01)
     }
@@ -255,16 +255,16 @@ class TestMakeFuzzedCvrs {
                     }
                     val fuzz = count.toDouble() / ccount
                     println("  trial $trial ${contest.name} changed = $count out of ${ccount} = ${df(fuzz)}")
-                    println("    errorCounts = ${samples.errorCounts()}")
+                    println("    errorCounts = ${samples.clcaErrorCounts()}")
                     println("    errorRates =  ${samples.errorRates()}")
 
                     // assertEquals(cvrs.size, samples.errorCounts().sum()) // TODO why would this be true ??
 
-                    val changes = samples.errorCounts().subList(1, samples.errorCounts().size).sum()
+                    val changes = samples.clcaErrorCounts().subList(1, samples.clcaErrorCounts().size).sum()
                     val changePct = changes / samples.numberOfSamples().toDouble()
                     assertEquals(fuzzPct, changePct, .015) // 1.5% isnt great
 
-                    samples.errorCounts()
+                    samples.clcaErrorCounts()
                         .forEachIndexed { idx, it -> totalErrorCounts[idx] = totalErrorCounts[idx] + it }
                 }
             }

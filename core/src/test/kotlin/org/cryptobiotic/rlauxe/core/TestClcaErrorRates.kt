@@ -43,10 +43,10 @@ class TestClcaErrorRates {
         tracker.addSample(0.0)
 
         assertEquals(6, tracker.numberOfSamples())
-        assertEquals(listOf(1, 1, 1, 1, 2), tracker.errorCounts())
+        assertEquals(listOf(1, 1, 1, 1, 2), tracker.clcaErrorCounts())
 
         val n = tracker.numberOfSamples().toDouble()
-        assertEquals(listOf(1/n, 1/n, 1/n, 2/n), tracker.errorRates().toList())
+        assertEquals(listOf(1/n, 1/n, 1/n, 2/n), tracker.clcaErrorRates().toList())
         assertEquals(listOf(1/n, 1/n, 1/n, 2/n), tracker.errorRatesList())
 
         assertEquals(0.49, tracker.mean())

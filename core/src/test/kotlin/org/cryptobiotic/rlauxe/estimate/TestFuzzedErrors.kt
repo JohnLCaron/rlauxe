@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.core.ClcaErrorRatesCumul
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
-import org.cryptobiotic.rlauxe.core.SampleErrorTracker
+import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.util.dfn
 import org.junit.jupiter.api.Test
 
@@ -31,7 +31,7 @@ class TestFuzzedErrors {
                 contestUA.clcaAssertions.forEach { cassertion ->
                     val cassorter = cassertion.cassorter
                     val samples = PrevSamplesWithRates(cassorter.noerror())
-                    val samplet = SampleErrorTracker(cassorter.noerror())
+                    val samplet = ClcaErrorTracker(cassorter.noerror())
 
                     if (show) println("  contest = ${contestUA.id} assertion = ${cassorter.shortName()}")
 
@@ -42,11 +42,11 @@ class TestFuzzedErrors {
                             samplet.addSample(bassort)
                         }
                     }
-                    if (show) println("    errorCounts = ${samples.errorCounts()}")
+                    if (show) println("    errorCounts = ${samples.clcaErrorCounts()}")
                     if (show) println("    errorRates =  ${samples.errorRates()}")
                     if (show) println("    samplet.valueCounter =  ${samplet.valueCounter.toSortedMap()}")
 
-                    avgErrorRates.add(samples.errorRates())
+                    avgErrorRates.add(samples.clcaErrorRates())
                 }
             }
             println("fuzzPct ${dfn(fuzzPct,3)}: ${avgErrorRates}")
@@ -102,10 +102,10 @@ fuzzPct 0.050: 0.0077, 0.0350, 0.0125, 0.0064, 0.06162
                             samples.addSample(cassorter.bassort(mvr, cvr))
                         }
                     }
-                    if (show) println("    errorCounts = ${samples.errorCounts()}")
+                    if (show) println("    errorCounts = ${samples.clcaErrorCounts()}")
                     if (show) println("    errorRates =  ${samples.errorRates()}")
 
-                    cumulErrorRates.add(samples.errorRates())
+                    cumulErrorRates.add(samples.clcaErrorRates())
                 }
             }
             println("fuzzPct ${dfn(fuzzPct,3)}: ${cumulErrorRates}")

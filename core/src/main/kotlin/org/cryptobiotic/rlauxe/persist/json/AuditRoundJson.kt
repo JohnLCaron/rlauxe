@@ -225,7 +225,7 @@ data class EstimationRoundResultJson(
     val strategy: String,
     val fuzzPct: Double?,
     val startingTestStatistic: Double,
-    val startingRates: List<Double>?,
+    val startingRates: Map<Double, Double>?,
     val estimatedDistribution: List<Int>,
     val firstSample: Int,
 )
@@ -235,7 +235,7 @@ fun EstimationRoundResult.publishJson() = EstimationRoundResultJson(
     this.strategy,
     this.fuzzPct,
     this.startingTestStatistic,
-    this.startingRates?.toList(),
+    this.startingRates,
     this.estimatedDistribution,
     this.firstSample,
 )
@@ -246,7 +246,7 @@ fun EstimationRoundResultJson.import() : EstimationRoundResult {
         this.strategy,
         this.fuzzPct,
         this.startingTestStatistic,
-        if (this.startingRates != null) ClcaErrorRates.fromList(this.startingRates) else null,
+        this.startingRates,
         this.estimatedDistribution,
         this.firstSample,
     )
@@ -275,8 +275,8 @@ data class AuditRoundResultJson(
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
     val status: String, // testH0 status
     val measuredMean: Double,     // measured population mean
-    val startingRates: List<Double>?,
-    val measuredRates: List<Double>?,
+    val startingRates: Map<Double, Double>?,
+    val measuredCounts: Map<Double, Int>?,
 )
 
 fun AuditRoundResult.publishJson() = AuditRoundResultJson(
@@ -288,8 +288,8 @@ fun AuditRoundResult.publishJson() = AuditRoundResultJson(
     this.samplesUsed,
     this.status.name,
     this.measuredMean,
-    this.startingRates?.toList(),
-    this.measuredRates?.toList(),
+    this.startingRates,
+    this.measuredCounts,
 )
 
 fun AuditRoundResultJson.import() : AuditRoundResult {
@@ -302,8 +302,8 @@ fun AuditRoundResultJson.import() : AuditRoundResult {
         this.samplesUsed,
         status,
         this.measuredMean,
-        if (this.startingRates != null) ClcaErrorRates.fromList(this.startingRates) else null,
-        if (this.measuredRates != null) ClcaErrorRates.fromList(this.measuredRates) else null,
+        this.startingRates,
+        this.measuredCounts,
     )
 }
 

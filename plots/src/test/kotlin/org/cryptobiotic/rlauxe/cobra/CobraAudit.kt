@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.cobra
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.*
@@ -92,11 +93,12 @@ class AuditCobraAssertion(
 
     override fun run(
         auditConfig: AuditConfig,
-        contestUA: ContestUnderAudit,
+        contestRound: ContestRound,
         assertionRound: AssertionRound,
         sampler: Sampler,
         roundIdx: Int,
     ): TestH0Result {
+        val contestUA = contestRound.contestUA
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
 
@@ -109,11 +111,12 @@ class AuditCobraAssertion(
             d = auditConfig.clcaConfig.d,
             ClcaErrorRates(p2prior, 0.0, 0.0, 0.0)
         )
+        val tracker = PrevSamplesWithRates(cassorter.noerror())
 
         val testFn = BettingMart(
             bettingFn = adaptive,
             N = contestUA.Nb,
-            noerror = cassorter.noerror(),
+            tracker = tracker,
             upperBound = cassorter.upperBound(),
             withoutReplacement = true
         )
@@ -121,10 +124,10 @@ class AuditCobraAssertion(
         val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
         val samplesNeeded = testH0Result.sampleCount
 
-        val measuredRates = if (testH0Result.tracker is PrevSamplesWithRates)
-            (testH0Result.tracker as PrevSamplesWithRates).errorRates()
+        val measuredCounts = if (testH0Result.tracker is ClcaErrorRatesIF)
+            (testH0Result.tracker as ClcaErrorRatesIF).errorCounts()
         else
-            ClcaErrorRates.Zero
+            null
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
@@ -134,7 +137,7 @@ class AuditCobraAssertion(
             samplesUsed = samplesNeeded,
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),
-            measuredRates = measuredRates,
+            measuredCounts = measuredCounts,
         )
 
         // println(" ${contest.info.name} ${assertionRound.auditResult}")

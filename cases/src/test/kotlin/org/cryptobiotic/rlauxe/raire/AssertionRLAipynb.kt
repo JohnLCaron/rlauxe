@@ -617,18 +617,22 @@ fun replicate_p_values(
 
 
     val contest = contests.first()
-    val minAssorter = contest.minClcaAssertion().first!!.cassorter // the one with the smallest margin
+    val cassorter = contest.minClcaAssertion().first!!.cassorter // the one with the smallest margin
 
-    val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, minAssorter)
+    val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, cassorter)
 
     val optimal = OptimalComparisonNoP1(
         N = N,
         withoutReplacement = true,
-        upperBound = minAssorter.upperBound(),
+        upperBound = cassorter.upperBound(),
         p2 = 0.01
     )
 
-    val betta = BettingMart(bettingFn = optimal, N = N, noerror = minAssorter.noerror(), upperBound = minAssorter.upperBound(), withoutReplacement = false)
+    val betta = BettingMart(bettingFn = optimal, N = N,
+        tracker = ClcaErrorTracker(0.0),
+        upperBound = cassorter.upperBound(),
+        withoutReplacement = false)
+
     val debugSeq = betta.setDebuggingSequences()
     val result = betta.testH0(sample_size, true) { sampler.sample() }
     println(result)
@@ -648,25 +652,27 @@ fun calc_sample_sizes(
     //val minAssorter = minAssertion.assorter
 
     val contest = contests.first().addStandardAssertions()
-    val minAssorter = contest.minClcaAssertion().first!!.cassorter // the one with the smallest margin
+    val cassorter = contest.minClcaAssertion().first!!.cassorter // the one with the smallest margin
 
-    val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, minAssorter)
+    val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, cassorter)
 
     val optimal = AdaptiveBetting(
         N = N,
         withoutReplacement = true,
-        a = minAssorter.noerror(),
+        a = cassorter.noerror(),
         d = 100,
         ClcaErrorRates(.001, .01, 0.0, 0.0),
     )
-    val betta = BettingMart(bettingFn = optimal, N = N, noerror = minAssorter.noerror(), upperBound = minAssorter.upperBound(), withoutReplacement = false)
+    val betta = BettingMart(bettingFn = optimal, N = N,
+        tracker = PrevSamplesWithRates(0.0),
+        upperBound = cassorter.upperBound(), withoutReplacement = false)
 
     return runTestRepeated(
         drawSample = sampler,
         // maxSamples = N,
         ntrials = ntrials,
         testFn = betta,
-        testParameters = mapOf("p2o" to optimal.p2o, "margin" to minAssorter.assorter().reportedMargin()),
+        testParameters = mapOf("p2o" to optimal.p2o, "margin" to cassorter.assorter().reportedMargin()),
         // margin = minAssorter.assorter().reportedMargin(),
         N = N,
     )

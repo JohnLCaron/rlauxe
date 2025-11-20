@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.Welford
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 
 /** keeps track of the latest sample, number of samples, and the sample sum. */
@@ -11,6 +10,7 @@ interface SampleTracker {
     fun sum(): Double   // sum of samples so far
     fun mean(): Double   // average of samples so far
     fun variance(): Double   // variance of samples so far
+    fun addSample(sample : Double)
 }
 
 /**
@@ -30,18 +30,62 @@ class PrevSamples : SampleTracker {
     override fun mean() = welford.mean
     override fun variance() = welford.variance()
 
-    fun addSample(sample : Double) {
+    override fun addSample(sample : Double) {
         last = sample
         sum += sample
         welford.update(sample)
     }
 }
 
+////////////////////////////////////////////////////////////////
+
+interface ClcaErrorRatesIF {
+    fun errorRates(): Map<Double, Double>
+    fun errorCounts(): Map<Double, Int>
+}
+
+class ClcaErrorTracker(val noerror: Double, val debug:Boolean=false) : SampleTracker, ClcaErrorRatesIF {
+    private var last = 0.0
+    private var sum = 0.0
+    private val welford = Welford()
+
+    override fun last() = last
+    override fun numberOfSamples() = welford.count
+    override fun sum() = sum
+    override fun mean() = welford.mean
+    override fun variance() = welford.variance()
+
+    val valueCounter = mutableMapOf<Double, Int>()
+    var noerrorCount = 0
+
+    override fun addSample(sample : Double) {
+        last = sample
+        sum += sample
+        welford.update(sample)
+
+        if (noerror != 0.0) {
+            if (doubleIsClose(sample, noerror)) noerrorCount++ else {
+                val counter = valueCounter.getOrPut(sample) { 0 }
+                valueCounter[sample] = counter + 1
+                if (debug) println("--> error $sample")
+            }
+        }
+    }
+
+    override fun errorRates() = valueCounter.mapValues { it.value / numberOfSamples().toDouble() }
+    override fun errorCounts() = valueCounter
+
+    override fun toString(): String {
+        return "SampleErrorTracker(noerror=$noerror, noerrorCount=$noerrorCount, valueCounter=${valueCounter.toSortedMap()}, N=${numberOfSamples()})"
+    }
+}
+
 /**
+ * CANDIDATE for removal
  * This also counts the under/overstatements for comparison audits.
  * @param noerror for comparison assorters who need rate counting. set to 0 for polling
  */
-class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
+class PrevSamplesWithRates(val noerror: Double) : SampleTracker, ClcaErrorRatesIF {
     private val isClca = (noerror > 0.0)
     private var last = 0.0
     private var sum = 0.0
@@ -63,7 +107,7 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
     fun countP1u() = countP1u
     fun countP2u() = countP2u
 
-    fun addSample(sample : Double) {
+    override fun addSample(sample : Double) {
         last = sample
         sum += sample
         welford.update(sample)
@@ -77,47 +121,37 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
         }
     }
 
-    fun errorCounts() = listOf(countP0,countP2o,countP1o,countP1u,countP2u) // canonical order
-    fun errorRates(): ClcaErrorRates {
+    override fun errorRates(): Map<Double, Double> {
+        return mapOf(
+            noerror * 0.0 to countP2o / numberOfSamples().toDouble(),
+            noerror * 0.5 to countP1o / numberOfSamples().toDouble(),
+            noerror * 1.5 to countP1u / numberOfSamples().toDouble(),
+            noerror * 2.0 to countP2u / numberOfSamples().toDouble(),
+        )
+    }
+
+    override fun errorCounts(): Map<Double, Int> {
+        return mapOf(
+            noerror * 0.0 to countP2o,
+            noerror * 0.5 to countP1o,
+            noerror * 1.5 to countP1u,
+            noerror * 2.0 to countP2u,
+        )
+    }
+
+    fun clcaErrorCounts() = listOf(countP0,countP2o,countP1o,countP1u,countP2u)
+
+    // canonical order
+    fun clcaErrorRates(): ClcaErrorRates {
         val n = if (numberOfSamples() > 0) numberOfSamples().toDouble() else 1.0
-        val p =  errorCounts().map { it / n }
+        val p =  clcaErrorCounts().map { it / n }
         return ClcaErrorRates(p[1], p[2], p[3], p[4]) // skip p0
     }
     fun errorRatesList(): List<Double> {
-        val p =  errorCounts().map { it / numberOfSamples().toDouble()  /* skip p0 */ }
+        val p =  clcaErrorCounts().map { it / numberOfSamples().toDouble()  /* skip p0 */ }
         return listOf(p[1], p[2], p[3], p[4])
     }
 }
 
-class SampleErrorTracker(val noerror: Double) : SampleTracker {
-    private var last = 0.0
-    private var sum = 0.0
-    private val welford = Welford()
-
-    override fun last() = last
-    override fun numberOfSamples() = welford.count
-    override fun sum() = sum
-    override fun mean() = welford.mean
-    override fun variance() = welford.variance()
-
-    val valueCounter = mutableMapOf<Double, Int>()
-    var noerrorCount = 0
-
-    fun addSample(sample : Double) {
-        last = sample
-        sum += sample
-        welford.update(sample)
-
-        if (doubleIsClose(sample, noerror)) noerrorCount++ else {
-            val counter = valueCounter.getOrPut(sample) { 0 }
-            valueCounter[sample] = counter + 1
-        }
-    }
-
-    override fun toString(): String {
-        return "SampleErrorTracker(noerror=$noerror, noerrorCount=$noerrorCount, valueCounter=${valueCounter.toSortedMap()}, N=${numberOfSamples()})"
-    }
-
-}
 
 

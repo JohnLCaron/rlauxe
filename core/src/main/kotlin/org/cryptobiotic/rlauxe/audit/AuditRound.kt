@@ -94,6 +94,18 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
         return ContestRound(contestUA, nextAssertions, roundIdx + 1)
     }
 
+    fun resultsForAssertion(assorterDesc: String): Pair<List<EstimationRoundResult>, List<AuditRoundResult>> {
+        val estList = mutableListOf<EstimationRoundResult>()
+        val auditList = mutableListOf<AuditRoundResult>()
+        assertionRounds.filter { it.assertion.assorter.hashcodeDesc() == assorterDesc }
+            .forEach { assertionRound ->
+                if (assertionRound.estimationResult != null) estList.add(assertionRound.estimationResult!!)
+                if (assertionRound.prevAuditResult != null) auditList.add(assertionRound.prevAuditResult!!)
+            }
+
+        return Pair(estList, auditList)
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -159,37 +171,27 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     var status = TestH0Status.InProgress
     var round = 0           // round when set to proved or disproved
 
+    fun accumulatedErrorRates(contestRound: ContestRound): ClcaErrorRates {
+        val (_, auditRoundResults) = contestRound.resultsForAssertion(assertion.assorter.hashcodeDesc())
 
-    // TODO why override default equals??
-    /* override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is AssertionRound) return false
+        val sumOfCounts = mutableMapOf<Double, Int>()
+        var samplesUsed = 0
+        auditRoundResults.forEach { auditRoundResult ->
+            if (auditRoundResult.measuredCounts != null) {
+                samplesUsed += auditRoundResult.samplesUsed
+                auditRoundResult.measuredCounts.forEach { (key, value) ->
+                    val sum =  sumOfCounts.getOrPut(key) { 0 }
+                    sumOfCounts[key] = sum + value
+                }
+            }
+        }
 
-        if (roundIdx != other.roundIdx) return false
-        if (estSampleSize != other.estSampleSize) return false
-        if (estNewSampleSize != other.estNewSampleSize) return false
-        if (round != other.round) return false
-        if (assertion != other.assertion) return false
-        if (prevAuditResult != other.prevAuditResult) return false
-        if (estimationResult != other.estimationResult) return false
-        if (auditResult != other.auditResult) return false
-        if (status != other.status) return false
-
-        return true
+        return if (samplesUsed == 0) ClcaErrorRates.Zero else {
+            // TODO something general
+            val noerror = (assertion as ClcaAssertion).cassorter.noerror()
+            ClcaErrorRates.fromCounts(sumOfCounts, noerror, samplesUsed)
+        }
     }
-
-    override fun hashCode(): Int {
-        var result = roundIdx
-        result = 31 * result + estSampleSize
-        result = 31 * result + estNewSampleSize
-        result = 31 * result + round
-        result = 31 * result + assertion.hashCode()
-        result = 31 * result + (prevAuditResult?.hashCode() ?: 0)
-        result = 31 * result + (estimationResult?.hashCode() ?: 0)
-        result = 31 * result + (auditResult?.hashCode() ?: 0)
-        result = 31 * result + status.hashCode()
-        return result
-    } */
 }
 
 data class EstimationRoundResult(
@@ -197,12 +199,16 @@ data class EstimationRoundResult(
     val strategy: String,
     val fuzzPct: Double?,
     val startingTestStatistic: Double,
-    val startingRates: ClcaErrorRates? = null, // apriori error rates (clca only)
+    val startingRates: Map<Double, Double>? = null, // error rates used for estimation
     val estimatedDistribution: List<Int>,   // distribution of estimated sample size; currently deciles
     val firstSample: Int,
 ) {
     override fun toString() = "round=$roundIdx estimatedDistribution=$estimatedDistribution fuzzPct=$fuzzPct " +
             " startingRates=$startingRates"
+
+    fun startingRates() = buildString {
+        startingRates?.toSortedMap()?.forEach { append( "${df(it.key)}=${df(it.value)}, " ) } ?: append("empty")
+    }
 }
 
 data class AuditRoundResult(
@@ -213,19 +219,25 @@ data class AuditRoundResult(
     val samplesUsed: Int,     // sample count when testH0 terminates
     val status: TestH0Status, // testH0 status
     val measuredMean: Double, // measured population mean TODO used?
-    val startingRates: ClcaErrorRates? = null, // apriori error rates (clca only)
-    val measuredRates: ClcaErrorRates? = null, // measured error rates (clca only)
+    val startingRates: Map<Double, Double>? = null, // starting error rates (clca only)
+    val measuredCounts: Map<Double, Int>? = null, // measured error counts (clca only)
 ) {
     init {
-        if (measuredRates == null)
+        if (measuredCounts == null)
             println("AuditRoundResult no rates")
-        else if (measuredRates.sum() > 0.0) {
-            println("AuditRoundResult has some")
-        }
     }
 
     override fun toString() = buildString {
         append("round=$roundIdx pvalue=${df(pvalue)} nmvrs=$nmvrs samplesUsed=$samplesUsed status=$status")
-        append(" measuredRates=$measuredRates")
+        append(" startingRates=${startingRates()}")
+        append(" measuredCounts=${measuredCounts()}")
+    }
+
+    fun measuredCounts() = buildString {
+        measuredCounts?.toSortedMap()?.forEach { append( "${df(it.key)}=${it.value}, " ) } ?: append("empty")
+    }
+
+    fun startingRates() = buildString {
+        startingRates?.toSortedMap()?.forEach { append( "${df(it.key)}=${df(it.value)}, " ) } ?: append("empty")
     }
 }

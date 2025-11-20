@@ -220,7 +220,7 @@ fun estimateClcaAssertionRound(
         // Subsequent rounds, always use measured rates.
         (assertionRound.prevAuditResult != null) -> {
             // TODO should be average of previous rates?
-            assertionRound.prevAuditResult!!.measuredRates!!
+            ClcaErrorRates.fromCounts(assertionRound.prevAuditResult!!.measuredCounts, cassorter.noerror(), assertionRound.prevAuditResult!!.samplesUsed)
         }
         (clcaConfig.strategy == ClcaStrategyType.fuzzPct)  -> {
             ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct) // TODO do better
@@ -238,8 +238,8 @@ fun estimateClcaAssertionRound(
 
     // Using errorRates in the bettingFn, make sure phantom rate is accounted for
     // the minimum p2o is always the phantom rate.
-    if (errorRates.p2o < contest.phantomRate())
-        errorRates = errorRates.copy( p2o = contest.phantomRate())
+    // if (errorRates.p2o < contest.phantomRate())
+    //    errorRates = errorRates.copy( p2o = contest.phantomRate())
 
     val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.oracle) {
         OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
@@ -274,7 +274,7 @@ fun estimateClcaAssertionRound(
         clcaConfig.strategy.name,
         fuzzPct = clcaConfig.simFuzzPct,
         startingTestStatistic = startingTestStatistic,
-        startingRates = errorRates,
+        startingRates = errorRates.errorRates(cassorter.noerror()),
         estimatedDistribution = makeDeciles(result.sampleCount),
         firstSample = if (result.sampleCount.isEmpty()) 0 else result.sampleCount[0],
     )
@@ -296,7 +296,7 @@ fun runRepeatedBettingMart(
     val testFn = BettingMart(
         bettingFn = bettingFn,
         N = N,
-        noerror = noerror,
+        tracker = ClcaErrorTracker(noerror),
         riskLimit = config.riskLimit,
         upperBound = upperBound,
     )
@@ -418,7 +418,7 @@ fun estimateOneAuditAssertionRound(
         // Subsequent rounds, always use measured rates.
         (assertionRound.prevAuditResult != null) -> {
             // TODO should be average of previous rates?
-            assertionRound.prevAuditResult!!.measuredRates!!
+            ClcaErrorRates.fromCounts(assertionRound.prevAuditResult!!.measuredCounts, oaCassorter.noerror(), assertionRound.prevAuditResult!!.samplesUsed)
         }
         (clcaConfig.strategy == ClcaStrategyType.fuzzPct)  -> {
             ClcaErrorTable.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct) // TODO do better
@@ -435,8 +435,8 @@ fun estimateOneAuditAssertionRound(
     val sampler = ClcaCardSimulatedErrorRates(contestCards, contestUA.contest, oaCassorter, errorRates) // TODO why cant we use this with IRV?? I think we can
 
     // the minimum p2o is always the phantom rate.
-    if (errorRates.p2o < contestUA.contest.phantomRate())
-        errorRates = errorRates.copy( p2o = contestUA.contest.phantomRate())
+    // if (errorRates.p2o < contestUA.contest.phantomRate())
+    //    errorRates = errorRates.copy( p2o = contestUA.contest.phantomRate())
 
     // TODO track down simulations and do initial permutation there; we want first trial to use the actual permutation
 

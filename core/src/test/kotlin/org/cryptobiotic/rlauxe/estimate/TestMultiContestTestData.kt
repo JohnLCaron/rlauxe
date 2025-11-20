@@ -215,7 +215,7 @@ class TestMultiContestTestData {
             val tracker = PrevSamplesWithRates(cassorter.noerror())
             while (sampler.hasNext()) { tracker.addSample(sampler.next()) }
             // println("   tracker.errorRates = ${tracker.errorRates()}")
-            val p1o = tracker.errorRates().p1o
+            val p1o = tracker.clcaErrorRates().p1o
             if (!doubleIsClose(phantomPct, p1o, 2.0/Nc)) {
                 println("   *** expected ${phantomPct} got=${p1o}")
             }

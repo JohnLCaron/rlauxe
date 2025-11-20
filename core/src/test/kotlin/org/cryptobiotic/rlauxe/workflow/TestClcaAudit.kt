@@ -30,7 +30,7 @@ class TestClcaAudit {
         // val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
         // high fuzz rate to get multiple rounds
-        val finalRound = testClcaWorkflow(config, testData, 0.05)
+        val finalRound = testClcaWorkflow(config, testData, 0.005)
         assertNotNull(finalRound)
         println(finalRound.show())
     }

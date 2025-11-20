@@ -136,7 +136,7 @@ class TestAssertions {
 
         val expectShow = """ cassorter: ClcaAssorter for contest AvB (0)
   assorter= winner=4 loser=0 reportedMargin=24.9160% reportedMean=62.4580%
-  dilutedMargin=24.9160% noerror=0.57115426 upperBound=1.14230851"""
+  assortMargin=0.24915951 assortMean=0.62457975 upperBound=1.00000000 noerror=0.57115426"""
         assertEquals(expectShow, firstAssertion.show())
 
         assertTrue(firstAssertion.checkEquals(firstAssertion).isEmpty())

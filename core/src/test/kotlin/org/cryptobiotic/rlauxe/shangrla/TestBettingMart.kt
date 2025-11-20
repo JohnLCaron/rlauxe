@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.core.BettingMart
 import org.cryptobiotic.rlauxe.core.FixedBet
 import org.cryptobiotic.rlauxe.core.OptimalComparisonNoP1
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.core.lamToEta
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import kotlin.math.max
@@ -41,7 +42,9 @@ class TestBettingMart {
         for (value in values) {
             for (lam in lams) {
                 println("assort value = $value lam=$lam")
-                val betta = BettingMart(bettingFn = FixedBet(lam), noerror=0.0, N = N, upperBound = u)
+                val betta = BettingMart(bettingFn = FixedBet(lam),
+                    tracker = ClcaErrorTracker(0.0),
+                    N = N, upperBound = u)
                 val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
@@ -81,7 +84,9 @@ class TestBettingMart {
                     c_grapa_max = c_g_m,
                     c_grapa_grow = c_g_g,
                 )
-                val betta = BettingMart(bettingFn = agrapa, N = N, noerror=0.0, upperBound = u)
+                val betta = BettingMart(bettingFn = agrapa, N = N,
+                    tracker = ClcaErrorTracker(0.0),
+                    upperBound = u)
                 val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
@@ -119,7 +124,9 @@ class TestBettingMart {
                     c_grapa_max = c_g_m,
                     c_grapa_grow = c_g_g,
                 )
-                val betta = BettingMart(bettingFn = agrapa, N = N, noerror=0.0, upperBound = u)
+                val betta = BettingMart(bettingFn = agrapa, N = N,
+                    tracker = ClcaErrorTracker(0.0),
+                    upperBound = u)
                 val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
@@ -189,7 +196,9 @@ class TestBettingMart {
             c_grapa_max = c_g_m,
             c_grapa_grow = c_g_g,
         )
-        val betta = BettingMart(bettingFn = agrapa, N = N, noerror=0.0, upperBound = u)
+        val betta = BettingMart(bettingFn = agrapa, N = N,
+            tracker = ClcaErrorTracker(0.0),
+            upperBound = u)
         val debugSeq = betta.setDebuggingSequences()
 
         val sampler = SampleFromList(x)

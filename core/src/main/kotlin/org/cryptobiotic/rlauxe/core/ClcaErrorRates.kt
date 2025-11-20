@@ -2,12 +2,15 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.sfn
 
 data class ClcaErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u: Double) {
     init {
-        require(p2o in 0.0..1.0) {"p2o out of range $p2o"}
+        require(p2o in 0.0..1.0) {
+            "p2o out of range $p2o"
+        }
         require(p1o in 0.0..1.0) {"p1o out of range $p1o"}
         require(p1u in 0.0..1.0) {"p1u out of range $p1u"}
         require(p2u in 0.0..1.0) {"p2u out of range $p2u"}
@@ -22,12 +25,34 @@ data class ClcaErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val
     }
     fun sum() = toList().sum()
 
+    fun errorRates(noerror: Double): Map<Double, Double> {
+        return mapOf(
+            noerror * 0.0 to p2o,
+            noerror * 0.5 to p1o,
+            noerror * 1.5 to p1u,
+            noerror * 2.0 to p2u,
+        )
+    }
+
     companion object {
         val Zero =  ClcaErrorRates(0.0, 0.0, 0.0, 0.0)
 
         fun fromList(list: List<Double>): ClcaErrorRates {
             require(list.size == 4) { "ErrorRates list must have 4 elements"}
             return ClcaErrorRates(list[0], list[1], list[2], list[3])
+        }
+
+        fun fromCounts(counts: Map<Double, Int>?, noerror: Double, N:Int): ClcaErrorRates {
+            if (counts == null) return ClcaErrorRates.Zero
+
+            val rlist = counts.toList()
+            val p2o = rlist.find { doubleIsClose(it.first, 0.0 * noerror)} ?.second ?: 0
+            val p1o = rlist.find { doubleIsClose(it.first, 0.5 * noerror) }?.second ?: 0
+            val p1u = rlist.find { doubleIsClose(it.first, 1.5 * noerror) }?.second ?: 0
+            val p2u = rlist.find { doubleIsClose(it.first, 2.0 * noerror) }?.second ?: 0
+
+            val Nd = N.toDouble()
+            return ClcaErrorRates(p2o/Nd, p1o/Nd, p1u/Nd, p2u/Nd)
         }
     }
 }
@@ -89,7 +114,7 @@ object ClcaErrorTable {
         val samples = PrevSamplesWithRates(cassorter.noerror()) // accumulate error counts here
         cvrPairs.filter { it.first.hasContest(contestId) }.forEach { samples.addSample(cassorter.bassort(it.first, it.second)) }
         // require( samples.errorCounts().sum() ==  cvrPairs.size)
-        return samples.errorRates()
+        return samples.clcaErrorRates()
     }
 
     // given an error rate, what fuzz pct does it corresond to ?

@@ -2,11 +2,12 @@
     "auditType": "CLCA",
     "hasStyle": true,
     "riskLimit": 0.05,
-    "seed": -7935257332746119619,
+    "seed": -3428848163266827270,
     "nsimEst": 100,
     "quantile": 0.8,
     "contestSampleCutoff": 30000,
     "removeCutoffContests": false,
+    "simFuzzPct": 0.0123,
     "minRecountMargin": 0.005,
     "removeTooManyPhantoms": false,
     "clcaConfig": {

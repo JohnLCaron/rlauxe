@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.AdaptiveBetting
 import org.cryptobiotic.rlauxe.core.ClcaErrorRates
 import org.cryptobiotic.rlauxe.core.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
-import org.cryptobiotic.rlauxe.core.SampleErrorTracker
+import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
 
@@ -53,7 +53,7 @@ class GenBettingPayoff {
             for (margin in margins) {
                 val noerror = 1 / (2 - margin)
                 val optimal = GeneralAdaptiveBetting(N = N, noerror=noerror, d = 100)
-                val samples = SampleErrorTracker(noerror)
+                val samples = ClcaErrorTracker(noerror)
                 repeat(100) { samples.addSample(noerror) }
                 println(" margin=$margin, noerror=$noerror bet = ${optimal.bet(samples)}")
             }
@@ -114,9 +114,10 @@ class GenBettingPayoff {
                     d = 10000,
                     errorRates = ClcaErrorRates(error, error, error, error),
                 )
-                val samples = PrevSamplesWithRates(noerror)
-                repeat(10) { samples.addSample(noerror) }
-                val bet = bettingFn.bet(samples)
+                val tracker = PrevSamplesWithRates(noerror)
+
+                repeat(10) { tracker.addSample(noerror) }
+                val bet = bettingFn.bet(tracker)
                 println("margin=$margin, noerror=$noerror bet = $bet}")
 
                 println("2voteOver, 1voteOver, equal, 1voteUnder, 2voteUnder")

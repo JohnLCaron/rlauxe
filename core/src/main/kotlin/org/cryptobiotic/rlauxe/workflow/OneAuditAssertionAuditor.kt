@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.Sampler
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import kotlin.math.max
 
 private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
 
@@ -14,21 +13,21 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
 
     override fun run(
         config: AuditConfig,
-        contestUA: ContestUnderAudit,
+        contestRound: ContestRound,
         assertionRound: AssertionRound,
         sampler: Sampler,
         roundIdx: Int,
     ): TestH0Result {
+        val contestUA = contestRound.contestUA
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter as OneAuditClcaAssorter
 
-        var errorRates = if (assertionRound.prevAuditResult != null)
-            // TODO should be average of previous rates?
-            assertionRound.prevAuditResult!!.measuredRates!!
-        else
-            ClcaErrorRates.Zero
-        if (errorRates.p2o < contestUA.contest.phantomRate())
-            errorRates = errorRates.copy( p2o = contestUA.contest.phantomRate())
+        val errorRates = if (assertionRound.prevAuditResult != null) {
+            assertionRound.accumulatedErrorRates(contestRound)
+        } else ClcaErrorRates.Zero
+
+        //if (errorRates.p2o < contestUA.contest.phantomRate())
+        //    errorRates = errorRates.copy( p2o = contestUA.contest.phantomRate())
 
         // // default: eta0 = reportedMean, shrinkTrunk
         //// bet99: eta0 = reportedMean, 99% max bet
@@ -56,7 +55,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             )
         }
 
-        val measuredRates = if (testH0Result.tracker is PrevSamplesWithRates) testH0Result.tracker.errorRates() else ClcaErrorRates.Zero
+        val measuredCounts = if (testH0Result.tracker is ClcaErrorRatesIF) testH0Result.tracker.errorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampler.nmvrs(),
@@ -65,8 +64,8 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),
-            startingRates = errorRates,
-            measuredRates = measuredRates,
+            startingRates = errorRates.errorRates(cassorter.noerror()),
+            measuredCounts = measuredCounts,
         )
 
         if (!quiet) logger.debug{" ${contestUA.name} strategy=$strategy auditResult= ${assertionRound.auditResult}"}
@@ -123,7 +122,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         val testFn = BettingMart(
             bettingFn = bettingFn,
             N = N,
-            noerror = cassorter.noerror(),
+            tracker = ClcaErrorTracker(cassorter.noerror()), // TODO cant track pool data??
             upperBound = cassorter.upperBound(),
             riskLimit = config.riskLimit,
             withoutReplacement = true

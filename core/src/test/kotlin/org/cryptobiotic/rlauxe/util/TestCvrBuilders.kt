@@ -63,10 +63,10 @@ class TestCvrBuilders {
                     val fuzz = count.toDouble() / ccount
                     println("$it ${contest.name} changed = $count out of ${ccount} = ${df(fuzz)}")
                     if (detail) {
-                        println("  errorCounts = ${samples.errorCounts()}")
+                        println("  errorCounts = ${samples.clcaErrorCounts()}")
                         println("  errorRates =  ${samples.errorRates()}")
                     }
-                    allErrorRates.add(samples.errorRates())
+                    allErrorRates.add(samples.clcaErrorRates())
                 }
             }
             val total = ntrials * ncontests

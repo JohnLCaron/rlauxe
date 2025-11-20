@@ -34,16 +34,17 @@ class ReproduceCobraResults {
             for (margin in margins.reversed()) {
                 val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
-                val compareAssorter = makeStandardComparisonAssorter(theta, N)
-                val sampler = makeClcaNoErrorSampler(compareAssorter.info.id,  cvrs, compareAssorter)
-                val upperBound = compareAssorter.upperBound()
-                println("testFigure1: alpha=${alpha} margin=${margin} a=${compareAssorter.noerror()}")
+                val cassorter = makeStandardComparisonAssorter(theta, N)
+                val sampler = makeClcaNoErrorSampler(cassorter.info.id,  cvrs, cassorter)
+                val upperBound = cassorter.upperBound()
+                println("testFigure1: alpha=${alpha} margin=${margin} a=${cassorter.noerror()}")
 
                 val fixed = FixedBet(2.0)
                 val betting =
                     BettingMart(
                         riskLimit = alpha, bettingFn = fixed, N = N, withoutReplacement = false,
-                        noerror = compareAssorter.noerror(), upperBound = upperBound
+                        tracker = ClcaErrorTracker(cassorter.noerror()),
+                        upperBound = upperBound
                     )
 
                 val result = runTestRepeated(
@@ -52,10 +53,10 @@ class ReproduceCobraResults {
                     testFn = betting,
                     testParameters = mapOf("alpha" to alpha, "margin" to margin),
                     N=N,
-                    )
+                )
                 println("  result = ${result.status} ${result.avgSamplesNeeded()}")
 
-                val expected = ln(1 / alpha) / ln(2 * compareAssorter.noerror())
+                val expected = ln(1 / alpha) / ln(2 * cassorter.noerror())
                 val ratio = result.avgSamplesNeeded().toDouble() / expected
                 ratios.add(ratio)
                 println("  expected = ${expected}, ratio=$ratio")
@@ -84,11 +85,11 @@ class ReproduceCobraResults {
             for (p2 in p2s) {
                 val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
-                val compareAssorter = makeStandardComparisonAssorter(theta, N)
+                val cassorter = makeStandardComparisonAssorter(theta, N)
                 val sampleWithErrors =
-                    ClcaAttackSampler(cvrs, compareAssorter, p2 = p2, p1 = 0.0, withoutReplacement = false)
-                val upperBound = compareAssorter.upperBound()
-                println("testTable1: margin=${margin} a=${compareAssorter.noerror()} p2=${p2}")
+                    ClcaAttackSampler(cvrs, cassorter, p2 = p2, p1 = 0.0, withoutReplacement = false)
+                val upperBound = cassorter.upperBound()
+                println("testTable1: margin=${margin} a=${cassorter.noerror()} p2=${p2}")
 
                 val oracle = OptimalComparisonNoP1(
                     N = N,
@@ -97,7 +98,9 @@ class ReproduceCobraResults {
                     p2 = p2,
                 )
                 val betting =
-                    BettingMart(bettingFn = oracle, N = N, noerror=compareAssorter.noerror(), upperBound = upperBound, withoutReplacement = false)
+                    BettingMart(bettingFn = oracle, N = N,
+                        tracker = ClcaErrorTracker(cassorter.noerror()),
+                        upperBound = upperBound, withoutReplacement = false)
 
                 val result = runTestRepeated(
                     drawSample = sampleWithErrors,
@@ -147,24 +150,26 @@ class ReproduceCobraResults {
                     for (p2m in p2priors) {
                         val theta = margin2mean(margin)
                         val cvrs = makeCvrsByExactMean(N, theta)
-                        val compareAssorter = makeStandardComparisonAssorter(theta, N)
+                        val cassorter = makeStandardComparisonAssorter(theta, N)
                         val sampleWithErrors =
                             ClcaAttackSampler(
                                 cvrs,
-                                compareAssorter,
+                                cassorter,
                                 p2 = p2,
                                 p1 = p1,
                                 withoutReplacement = false
                             )
-                        val upperBound = compareAssorter.upperBound()
+                        val upperBound = cassorter.upperBound()
                         println("testTable2OracleBets: p1=${p1}  p2=${p2}")
 
                         val oracle = OracleComparison(
-                            a = compareAssorter.noerror(),
+                            a = cassorter.noerror(),
                             ClcaErrorRates(p2, p1, 0.0, 0.0)
                         )
                         val betting =
-                            BettingMart(bettingFn = oracle, N = N, noerror=compareAssorter.noerror(), upperBound = upperBound, withoutReplacement = false)
+                            BettingMart(bettingFn = oracle, N = N,
+                                tracker = ClcaErrorTracker(cassorter.noerror()),
+                                upperBound = upperBound, withoutReplacement = false)
 
                         val result = runTestRepeated(
                             drawSample = sampleWithErrors,
@@ -222,7 +227,7 @@ class ReproduceCobraResults {
             for (p1o in p1oracle) {
                 val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
-                val compareAssorter = makeStandardComparisonAssorter(theta, N)
+                val cassorter = makeStandardComparisonAssorter(theta, N)
                 for (p1prior in p1priors) {
                     for (p2prior in p2priors) {
                         Stopwatch()
@@ -230,25 +235,29 @@ class ReproduceCobraResults {
                         // generate with the oracle, or true rates
                         val sampler = ClcaAttackSampler(
                             cvrs,
-                            compareAssorter,
+                            cassorter,
                             p2 = p2o,
                             p1 = p1o,
                             withoutReplacement = false
                         )
-                        val upperBound = compareAssorter.upperBound()
+                        val upperBound = cassorter.upperBound()
                         println("testAdaptiveBets: p1=${p1o}  p2=${p2o} p1prior=${p1prior}  p2prior=${p2prior}")
 
                         // pass the prior rates to the betting function
                         val adaptive = AdaptiveBetting(
                             N = N,
                             withoutReplacement = false,
-                            a = compareAssorter.noerror(),
+                            a = cassorter.noerror(),
                             d = d,
                             ClcaErrorRates(p2prior, p1prior, 0.0, 0.0),
                             eps=eps,
                         )
+                        val tracker = PrevSamplesWithRates(cassorter.noerror())
+
                         val betting =
-                            BettingMart(bettingFn = adaptive, N = N, noerror=compareAssorter.noerror(), upperBound = upperBound, withoutReplacement = false)
+                            BettingMart(bettingFn = adaptive, N = N,
+                                tracker = tracker,
+                                upperBound = upperBound, withoutReplacement = false)
 
                         val result = runTestRepeated(
                             drawSample = sampler,

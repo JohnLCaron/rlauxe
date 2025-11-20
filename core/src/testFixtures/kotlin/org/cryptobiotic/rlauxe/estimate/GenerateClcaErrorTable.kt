@@ -110,10 +110,10 @@ class GenerateClcaErrorTable {
                             samples.addSample(cassorter.bassort(fcard.cvr(), card.cvr()))
                         }
                     }
-                    if (show) println("    errorCounts = ${samples.errorCounts()}")
+                    if (show) println("    errorCounts = ${samples.clcaErrorCounts()}")
                     if (show) println("    errorRates =  ${samples.errorRates()}")
 
-                    avgErrorRates.add(samples.errorRates())
+                    avgErrorRates.add(samples.clcaErrorRates())
                 }
             }
             println("fuzzPct ${dfn(fuzzPct,3)}: ${avgErrorRates}")

@@ -6,8 +6,7 @@ import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
-import org.cryptobiotic.rlauxe.core.SampleErrorTracker
+import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsFrom
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
@@ -36,19 +35,15 @@ class PersistedMvrManagerTest(auditDir: String, val config: AuditConfig, val con
             contestsUA.forEach { contestUA ->
                 contestUA.clcaAssertions.forEach { cassertion ->
                     val cassorter = cassertion.cassorter
-                    val samples = PrevSamplesWithRates(cassorter.noerror())
-                    val samplet = SampleErrorTracker(cassorter.noerror())
+                    val samplet = ClcaErrorTracker(cassorter.noerror())
                     println("  contest = ${contestUA.id} assertion = ${cassorter.shortName()}")
 
                     testPairs.forEach { (fcard, card) ->
                         if (card.hasContest(contestUA.id)) {
                             val bassort = cassorter.bassort(fcard.cvr(), card.cvr())
-                            samples.addSample(bassort)
                             samplet.addSample(bassort)
                         }
                     }
-                    println("    errorCounts = ${samples.errorCounts()}")
-                    println("    errorRates =  ${samples.errorRates()}")
                     println("    SampleErrorTracker = ${samplet}")
                 }
             }

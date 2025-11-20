@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ClcaErrorTable
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.workflow.*
@@ -124,7 +125,9 @@ class PlotDistributions {
             val cassorter = cassertion.cassorter
             val sampler = ClcaWithoutReplacement(contestUA.id, sortedPairs, cassorter, allowReset = false)
 
-            ClcaAssertionAuditor().run(auditConfig, contestUA, assertionRound, sampler, 1)
+            val contestRound = ContestRound(contestUA, listOf(assertionRound), 1)
+            ClcaAssertionAuditor().run(auditConfig, contestRound, assertionRound, sampler, 1)
+
             results.add(assertionRound.auditResult!!.samplesUsed)
         }
 

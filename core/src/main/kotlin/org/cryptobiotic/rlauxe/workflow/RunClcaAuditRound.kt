@@ -51,7 +51,7 @@ class RunContestTask(
                 val sampler =
                     ClcaWithoutReplacement(contest.id, cvrPairs, cassorter, allowReset = false)
 
-                val testH0Result = auditor.run(config, contest.contestUA, assertionRound, sampler, roundIdx)
+                val testH0Result = auditor.run(config, contest, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status
                 if (testH0Result.status.complete) assertionRound.round = roundIdx
             }
@@ -67,7 +67,7 @@ class RunContestTask(
 fun interface ClcaAssertionAuditorIF {
     fun run(
         config: AuditConfig,
-        contestUA: ContestUnderAudit,
+        contestRound: ContestRound,
         assertionRound: AssertionRound,
         sampler: Sampler,
         roundIdx: Int,
@@ -78,22 +78,22 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
     override fun run(
         config: AuditConfig,
-        contestUA: ContestUnderAudit,
+        contestRound: ContestRound,
         assertionRound: AssertionRound,
         sampler: Sampler,
         roundIdx: Int,
     ): TestH0Result {
+        val contestUA = contestRound.contestUA
         val contest = contestUA.contest
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
         val clcaConfig = config.clcaConfig
 
         //// same as estimateClcaAssertionRound
-        var errorRates: ClcaErrorRates = when {
+        var clcaErrorRates: ClcaErrorRates = when {
             // Subsequent rounds, always use measured rates.
             (assertionRound.prevAuditResult != null) -> {
-                // TODO should be average of previous rates?
-                assertionRound.prevAuditResult!!.measuredRates!!
+                assertionRound.accumulatedErrorRates(contestRound)
             }
             (clcaConfig.strategy == ClcaStrategyType.fuzzPct)  -> {
                 ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct) // TODO do better
@@ -105,13 +105,17 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
                 ClcaErrorRates.Zero
             }
         }
-        if (errorRates.p2o < contest.phantomRate())
-            errorRates = errorRates.copy( p2o = contest.phantomRate())
+
+        // phantoms may cause p1o or p2o. Remove this for now. or change to p1o only on initial guess...
+        //if (clcaErrorRates.p2o < contest.phantomRate())
+        //    clcaErrorRates = clcaErrorRates.copy( p2o = contest.phantomRate())
 
         val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.oracle) {
-            OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
+            OracleComparison(a = cassorter.noerror(), errorRates = clcaErrorRates)
+            
         }  else if (clcaConfig.strategy == ClcaStrategyType.optimalComparison) {
-            OptimalComparisonNoP1(N = contestUA.Nb, withoutReplacement = true, upperBound = cassorter.noerror(), p2 = errorRates.p2o)
+            OptimalComparisonNoP1(N = contestUA.Nb, withoutReplacement = true, upperBound = cassorter.noerror(), p2 = clcaErrorRates.p2o)
+            
         } else {
             // AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
             GeneralAdaptiveBetting(N = contestUA.Nb, noerror = cassorter.noerror(), d = clcaConfig.d, ) // HEY NEW!!
@@ -120,7 +124,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val testFn = BettingMart(
             bettingFn = bettingFn,
             N = contestUA.Nb,
-            noerror = cassorter.noerror(),
+            tracker = ClcaErrorTracker(cassorter.noerror()),
             upperBound = cassorter.upperBound(),
             riskLimit = config.riskLimit,
             withoutReplacement = true
@@ -130,7 +134,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val terminateOnNullReject = config.auditSampleLimit == null
         val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = terminateOnNullReject) { sampler.sample() }
 
-        val measuredRates = if (testH0Result.tracker is PrevSamplesWithRates) testH0Result.tracker.errorRates() else ClcaErrorRates.Zero
+        val measuredCounts = if (testH0Result.tracker is ClcaErrorRatesIF) testH0Result.tracker.errorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampler.maxSamples(),
@@ -139,8 +143,8 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),
-            startingRates = errorRates,
-            measuredRates = measuredRates,
+            startingRates = clcaErrorRates.errorRates(cassorter.noerror()),
+            measuredCounts = measuredCounts,
         )
 
         if (!quiet) {

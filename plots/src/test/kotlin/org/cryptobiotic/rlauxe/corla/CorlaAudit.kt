@@ -118,11 +118,12 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
     override fun run(
         auditConfig: AuditConfig,
-        contestUA: ContestUnderAudit,
+        contestRound: ContestRound,
         assertionRound: AssertionRound,
         sampler: Sampler,
         roundIdx: Int,
     ): TestH0Result {
+        val contestUA = contestRound.contestUA
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
         // val sampler = ClcaWithoutReplacement(contest.id, cvrPairs, cassorter, allowReset = false)
@@ -140,10 +141,10 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
         val samplesNeeded = testH0Result.sampleCount
 
-        val measuredRates = if (testH0Result.tracker is PrevSamplesWithRates)
-            (testH0Result.tracker as PrevSamplesWithRates).errorRates()
+        val measuredCounts = if (testH0Result.tracker is ClcaErrorRatesIF)
+            (testH0Result.tracker as ClcaErrorRatesIF).errorCounts()
         else
-            ClcaErrorRates.Zero
+            null
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
@@ -153,7 +154,7 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             samplesUsed = samplesNeeded,
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),
-            measuredRates = measuredRates,
+            measuredCounts = measuredCounts,
         )
 
         if (!quiet) println(" ${contestUA.name} ${assertionRound.auditResult}")

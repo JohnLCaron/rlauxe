@@ -175,7 +175,7 @@ fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boole
             nextRound.auditIsComplete = complete
             println(" runAudit $name ${nextRound.roundIdx} done=$complete samples=${nextRound.samplePrns.size}")
             if (nextRound.roundIdx > maxRounds) {
-                println(" runAudit $name ${nextRound.roundIdx} exceedewd maxROunds = $maxRounds")
+                println(" runAudit $name ${nextRound.roundIdx} exceedewd maxRounds = $maxRounds")
                 break
             }  // safety net
         }

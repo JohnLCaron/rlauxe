@@ -25,6 +25,7 @@ data class MultiContestTestData(
     val underVotePctRange: ClosedFloatingPointRange<Double> = 0.01.. 0.30, // needed to set Nc
     val phantomPctRange: ClosedFloatingPointRange<Double> = 0.00..  0.005, // needed to set Nc
     val addStyle: Boolean = false, // add cardStyle info to cvr
+    val ncands: Int? = null
 ) {
     // generate with ballotStyles; but if hasStyle = false, then these are not visible to the audit
     val ballotStylePartition = partition(totalBallots, nballotStyles).toMap() // Map bsidx -> ncards in each ballot style (bs)
@@ -41,8 +42,8 @@ data class MultiContestTestData(
 
         // between 2 and 4 candidates, margin is a random number in marginRange
         contestTestBuilders = List(ncontest) { it }.map {// id same as index
-            val ncands = max(Random.nextInt(5), 2)
-            ContestTestDataBuilder(it, ncands,
+            val useNcands = ncands ?: max(Random.nextInt(5), 2)
+            ContestTestDataBuilder(it, useNcands,
                 marginRange.start + if (marginRange.endInclusive <= marginRange.start) 0.0 else Random.nextDouble(marginRange.endInclusive - marginRange.start),
                 underVotePctRange.start + if (underVotePctRange.endInclusive <= underVotePctRange.start) 0.0 else Random.nextDouble(underVotePctRange.endInclusive - underVotePctRange.start),
                 phantomPctRange.start + if (phantomPctRange.endInclusive <= phantomPctRange.start) 0.0 else Random.nextDouble(phantomPctRange.endInclusive - phantomPctRange.start),

@@ -33,7 +33,7 @@ class BettingMart(
         var sampleNumber = 0        // – j ← 0: sample number
         var testStatistic = startingTestStatistic     // – T ← 1: test statistic
         var mj = 0.5                // – m = µ_j = 1/2: population mean under the null hypothesis = H0
-        val tracker = PrevSamplesWithRates(noerror) // – S ← 0: sample sum
+        val tracker = SampleErrorTracker(noerror) // – S ← 0: sample sum
 
         var pvalueLast = 1.0
         var pvalueMin = 1.0
@@ -49,7 +49,7 @@ class BettingMart(
             val lamj = bettingFn.bet(tracker)
 
             // population mean under the null hypothesis
-            mj = populationMeanIfH0(N, withoutReplacement, tracker)
+            mj = populationMeanIfH0(N, withoutReplacement, tracker)  // approx .5
             val eta = lamToEta(lamj, mu=mj, upper=upperBound) // informational only
 
             // 1           m[i] > u -> terms[i] = 0.0   # true mean is certainly less than 1/2
@@ -65,7 +65,7 @@ class BettingMart(
             val tj = if (doubleIsClose(0.0, mj) || doubleIsClose(upperBound, mj)) { // 2, 3
                 1.0
             } else {
-                // terms[i] = (1 + λi (Xi − µi )) ALPHA eq 10
+                // terms[i] = (1 + λi (Xi − µi )) ALPHA eq 10 // approx (1 + lam * (xj - .5))
                 val ttj = 1.0 + lamj * (xj - mj) // (1 + λi (Xi − µi )) ALPHA eq 10, SmithRamdas eq 34 (WoR)
                 if (doubleIsClose(ttj, 0.0)) 1.0 else ttj // 4
             }

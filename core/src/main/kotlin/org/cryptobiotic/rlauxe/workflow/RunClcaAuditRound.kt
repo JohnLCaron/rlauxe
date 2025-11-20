@@ -113,7 +113,8 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         }  else if (clcaConfig.strategy == ClcaStrategyType.optimalComparison) {
             OptimalComparisonNoP1(N = contestUA.Nb, withoutReplacement = true, upperBound = cassorter.noerror(), p2 = errorRates.p2o)
         } else {
-            AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
+            // AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
+            GeneralAdaptiveBetting(N = contestUA.Nb, noerror = cassorter.noerror(), d = clcaConfig.d, ) // HEY NEW!!
         }
 
         val testFn = BettingMart(
@@ -129,6 +130,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val terminateOnNullReject = config.auditSampleLimit == null
         val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = terminateOnNullReject) { sampler.sample() }
 
+        val measuredRates = if (testH0Result.tracker is PrevSamplesWithRates) testH0Result.tracker.errorRates() else ClcaErrorRates.Zero
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampler.maxSamples(),
@@ -138,7 +140,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),
             startingRates = errorRates,
-            measuredRates = testH0Result.tracker.errorRates(),
+            measuredRates = measuredRates,
         )
 
         if (!quiet) {

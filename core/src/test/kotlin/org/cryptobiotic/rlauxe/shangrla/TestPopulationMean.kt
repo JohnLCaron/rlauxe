@@ -144,7 +144,7 @@ class TestPopulationMeanWithoutReplacement {
         doublesAreClose(expected, means)
         assertEquals(0.5714285714285714, assortValues.mean(), doublePrecision)
         assertEquals(0.2448979591836735, assortValues.variance(), doublePrecision)
-        assertEquals(ClcaErrorRates(0.0, 0.0, 0.0, 0.0, ), assortValues.errorRates())
+        // assertEquals(ClcaErrorRates(0.0, 0.0, 0.0, 0.0, ), assortValues.errorRates())
 
         // compare directly to ALPHA
         val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta)
@@ -213,7 +213,7 @@ class TestPopulationMeanWithoutReplacement {
         repeat(100) {
             (N * 0.5 - halfSamples.sum())
             (N - halfSamples.numberOfSamples())
-            val mj = populationMeanIfH0(N = N, withoutReplacement = true, prevSampleTracker = halfSamples)
+            val mj = populationMeanIfH0(N = N, withoutReplacement = true, sampleTracker = halfSamples)
             // println("mj=${mj} num=$num den=$den")
             halfSamples.count++
             assertEquals(.5, mj) // its the deviations of the sample from 1/2 that cause mj to change
@@ -227,7 +227,6 @@ class TestPopulationMeanWithoutReplacement {
         override fun sum() = count * .5
         override fun mean() = 0.5
         override fun variance() = 0.0
-        override fun errorRates() = ClcaErrorRates(0.0, 0.0, 0.0, 0.0, )
     }
 
     @Test
@@ -238,7 +237,7 @@ class TestPopulationMeanWithoutReplacement {
         println("awinnerAvg=${awinnerAvg} noerror=${samples.noerror}")
 
         repeat(100) {
-            populationMeanIfH0(N = N, withoutReplacement = true, prevSampleTracker = samples)
+            populationMeanIfH0(N = N, withoutReplacement = true, sampleTracker = samples)
             // println("mj=${mj}")
             samples.count++
         }
@@ -252,7 +251,6 @@ class TestPopulationMeanWithoutReplacement {
         override fun sum() = count * noerror
         override fun mean() = noerror
         override fun variance() = 0.0
-        override fun errorRates() = ClcaErrorRates(0.0, 0.0, 0.0, 0.0, )
     }
 }
 

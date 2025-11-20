@@ -11,7 +11,6 @@ interface SampleTracker {
     fun sum(): Double   // sum of samples so far
     fun mean(): Double   // average of samples so far
     fun variance(): Double   // variance of samples so far
-    fun errorRates(): ClcaErrorRates   // only for clca
 }
 
 /**
@@ -30,7 +29,6 @@ class PrevSamples : SampleTracker {
     override fun sum() = sum
     override fun mean() = welford.mean
     override fun variance() = welford.variance()
-    override fun errorRates() = ClcaErrorRates(0.0, 0.0, 0.0, 0.0, )
 
     fun addSample(sample : Double) {
         last = sample
@@ -76,12 +74,11 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
             else if (doubleIsClose(sample, noerror)) countP0++
             else if (doubleIsClose(sample, noerror * 1.5)) countP1u++
             else if (doubleIsClose(sample, noerror * 2.0)) countP2u++
-            // else println(" sample / noerror = ${df(sample / noerror)}")
         }
     }
 
     fun errorCounts() = listOf(countP0,countP2o,countP1o,countP1u,countP2u) // canonical order
-    override fun errorRates(): ClcaErrorRates {
+    fun errorRates(): ClcaErrorRates {
         val n = if (numberOfSamples() > 0) numberOfSamples().toDouble() else 1.0
         val p =  errorCounts().map { it / n }
         return ClcaErrorRates(p[1], p[2], p[3], p[4]) // skip p0
@@ -91,4 +88,36 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker {
         return listOf(p[1], p[2], p[3], p[4])
     }
 }
+
+class SampleErrorTracker(val noerror: Double) : SampleTracker {
+    private var last = 0.0
+    private var sum = 0.0
+    private val welford = Welford()
+
+    override fun last() = last
+    override fun numberOfSamples() = welford.count
+    override fun sum() = sum
+    override fun mean() = welford.mean
+    override fun variance() = welford.variance()
+
+    val valueCounter = mutableMapOf<Double, Int>()
+    var noerrorCount = 0
+
+    fun addSample(sample : Double) {
+        last = sample
+        sum += sample
+        welford.update(sample)
+
+        if (doubleIsClose(sample, noerror)) noerrorCount++ else {
+            val counter = valueCounter.getOrPut(sample) { 0 }
+            valueCounter[sample] = counter + 1
+        }
+    }
+
+    override fun toString(): String {
+        return "SampleErrorTracker(noerror=$noerror, noerrorCount=$noerrorCount, valueCounter=${valueCounter.toSortedMap()}, N=${numberOfSamples()})"
+    }
+
+}
+
 

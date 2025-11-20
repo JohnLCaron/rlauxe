@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.random.Random
@@ -108,19 +107,23 @@ class PollingFuzzSampler(
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // includes undervotes i think
-private val fac = 10000.0 // this allows us to use fuzzPct to 5 decimal places
-fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Double, welford: Welford? = null, filter: ((CvrBuilder) -> Boolean)? = null): List<Cvr> {
+fun makeFuzzedCvrsFrom(contests: List<ContestIF>,
+                       cvrs: List<Cvr>,
+                       fuzzPct: Double,
+                       welford: Welford? = null,
+                       filter: ((CvrBuilder) -> Boolean)? = null,
+                       underVotes: Boolean = true,
+): List<Cvr> {
     if (fuzzPct == 0.0) return cvrs
-    val limit = fac / fuzzPct
 
     val isIRV = contests.associate { it.name to (it.isIrv()) }.toMap()
     var count = 0
     val cvrbs: List<CvrBuilder> = CvrBuilders.convertCvrsToBuilders(contests.map { it.info() }, cvrs)
 
     cvrbs.filter { !it.phantom && (filter == null || filter(it)) }.forEach { cvrb: CvrBuilder ->
-        val r = Random.nextDouble(limit)
+        val r = Random.nextDouble(1.0)
         cvrb.contests.forEach { (_, cvb) ->
-            if (r < fac) {
+            if (r < fuzzPct) {
                 val ccontest: CvrContest = cvb.contest
                 if (isIRV[ccontest.name]!!) {
                     switchCandidateRankings(cvb, ccontest.candidateIds)
@@ -128,29 +131,45 @@ fun makeFuzzedCvrsFrom(contests: List<ContestIF>, cvrs: List<Cvr>, fuzzPct: Doub
                     val currId: Int? = if (cvb.votes.size == 0) null else cvb.votes[0] // TODO only one vote allowed, cant use on Raire
                     cvb.votes.clear()
                     // choose a different candidate, or none.
-                    val ncandId = chooseNewCandidate(currId, ccontest.candidateIds)
+                    val ncandId = chooseNewCandidate(currId, ccontest.candidateIds, underVotes)
                     if (ncandId != null) {
                         cvb.votes.add(ncandId)
                     }
                 }
-                count++
             }
         }
+        if (r < fuzzPct) count++
     }
 
-    val expect = cvrs.size * fuzzPct
+    val expect = (cvrs.size * fuzzPct).toInt()
     val got = (count / cvrs.size.toDouble())
     if (welford != null) { welford.update(fuzzPct - got) }
-    // println("   limit=$limit fuzzPct=$fuzzPct expect=$expect count: $count")
+    // println("   fuzzPct=$fuzzPct expect=$expect count: $count")
     return cvrbs.map { it.build() }
 }
 
-fun chooseNewCandidate(currId: Int?, candidateIds: List<Int>): Int? {
+fun chooseNewCandidate(currId: Int?, candidateIds: List<Int>, undervotes: Boolean): Int? {
+    return if (undervotes) chooseNewCandidateWithUndervotes(currId, candidateIds) else
+        chooseNewCandidateNoUndervotes(currId, candidateIds)
+}
+
+fun chooseNewCandidateWithUndervotes(currId: Int?, candidateIds: List<Int>): Int? {
     val size = candidateIds.size
     while (true) {
         val ncandIdx = Random.nextInt(size + 1)
         if (ncandIdx == size)
             return null // choose none
+        val candId = candidateIds[ncandIdx]
+        if (candId != currId) {
+            return candId
+        }
+    }
+}
+
+fun chooseNewCandidateNoUndervotes(currId: Int?, candidateIds: List<Int>): Int? {
+    val size = candidateIds.size
+    while (true) {
+        val ncandIdx = Random.nextInt(size)
         val candId = candidateIds[ncandIdx]
         if (candId != currId) {
             return candId

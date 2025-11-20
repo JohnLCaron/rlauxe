@@ -1,11 +1,10 @@
 # AlphaMart risk function for Polling Audits
-last updated Mar 19, 2025
+last updated Nov 18, 2025
 
 <!-- TOC -->
 * [AlphaMart risk function for Polling Audits](#alphamart-risk-function-for-polling-audits)
   * [AlphaMart](#alphamart)
   * [BRAVO testing statistic](#bravo-testing-statistic)
-  * [AlphaMart formula as generalization of Wald SPRT:](#alphamart-formula-as-generalization-of-wald-sprt)
   * [Sampling with or without replacement](#sampling-with-or-without-replacement)
   * [Truncated shrinkage estimate of the population mean](#truncated-shrinkage-estimate-of-the-population-mean)
   * [Using BettingMart to implement AlphaMart](#using-bettingmart-to-implement-alphamart)
@@ -64,61 +63,6 @@ BRAVO is ALPHA with the following restrictions:
 * µ = 1/2, and µi = 1/2 for all i since the sample is drawn with replacement.
 * ηi = η0 := Nw /(Nw + Nℓ ), where Nw is the number of votes reported for candidate w and
   Nℓ is the number of votes reported for candidate ℓ: ηi is not updated as data are collected.
-
-
-## AlphaMart formula as generalization of Wald SPRT:
-
-Bravo: Probability of drawing y if theta=n over probability of drawing y if theta=m:
-
-    y*(n/m) + (1-y)*(1-n)/(1-m)
-
-makes sense where y is 0 or 1, so one term or the other vanishes.
-
-Alpha:
-
-Step 1: Replace discrete y with continuous x:
-
-    (1a) x*(n/m) + (1-x)*(1-n)/(1-m)
-
-Its not obvious what this is now. Still the probability ratio?? Should you really use
-
-    (1b) (x*n + (1-x)*(1-n)) / (x*m + (1-x)*(1-m))
-
-?? Turns out these equations are the same when mu = 1/2. then mu = (1-mu) and
-
-    (1a) x*n/m + (1-x)*(1-n)/(1-m) = (x*n + (1-x)*(1-n) / 2
-
-    (1b denominator) (x*m + (1-x)*(1-m)) = (x + (1-x))/2 = 1/2
-
-    (1c) (x*n + (1-x)(1-n)) / (1/2)
-
-(I think they are not identical for the general case of m != 1/2 and m != n.
-
-Step 2: Generalize range [0,1] to [0,upper]
-
-I think you need to replace x with x/u, (1-x) with (u-x)/u, n with n/u, etc
-
-So then (1a) becomes
-
-    (2a) (x/u*(n/m) + ((u-x)/u)*(u-n)/(u-m))
-       = (x*n/m + (u-x)*(u-n)/(u-m))/u
-
-But 1b becomes
-
-    (2b) (x/u)*(n/u) + ((u-x)/u)*((u-n)/u)) / (x/u)*(m/u) + ((u-x)/u)*((u-m)/u))  
-       = (x*n + (u-x)*(u-n)) / (x*m + (u-x)*(u-m))  
-
-note the lack of division by u, since every term has a u*u denominator, so all those cancel out.
-when m=1/2, 1c becomes
-
-    (2c) (x*n + (u-x)*(u-n)) / (x*m + (u-x)*(u-m)) = (x*n + (u-x)*(u-n)) / (u/2)
-
-
-Step 3: Use estimated nj instead of fixed n, and mj instead of fixed m = 1/2 when sampling without replacement:
-
-    (3a) (xj * (nj/mj) + (u-xj) * (u-nj)/(u-mj)) / u
-
-    (3b) (xj*nj + (u-xj)*(u-nj)) / (x*mj + (u-xj)*(u-mj))
 
 
 ## Sampling with or without replacement

@@ -234,7 +234,7 @@ class EstimAdapter(
     val etas = mutableListOf<Double>()
     val bets = mutableListOf<Double>()
 
-    override fun bet(prevSamples: PrevSamplesWithRates): Double {
+    override fun bet(prevSamples: SampleTracker): Double {
         // let bettingmart handle edge cases
         val mu = populationMeanIfH0(N, withoutReplacement, prevSamples)
         val eta = estimFn.eta(prevSamples)

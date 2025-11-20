@@ -246,7 +246,8 @@ fun estimateClcaAssertionRound(
     }  else if (clcaConfig.strategy == ClcaStrategyType.optimalComparison) {
         OptimalComparisonNoP1(N = contestUA.Nb, withoutReplacement = true, upperBound = cassorter.upperBound, p2 = errorRates.p2o)
     } else {
-        AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
+        //AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
+        GeneralAdaptiveBetting(N = contestUA.Nb, noerror = cassorter.noerror(), d = clcaConfig.d, ) // HEY NEW!!
     }
 
     // val bettingFn = AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates) // diluted N

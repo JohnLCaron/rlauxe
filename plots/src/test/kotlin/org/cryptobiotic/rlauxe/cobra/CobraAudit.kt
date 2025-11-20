@@ -121,6 +121,11 @@ class AuditCobraAssertion(
         val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
         val samplesNeeded = testH0Result.sampleCount
 
+        val measuredRates = if (testH0Result.tracker is PrevSamplesWithRates)
+            (testH0Result.tracker as PrevSamplesWithRates).errorRates()
+        else
+            ClcaErrorRates.Zero
+
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampler.nmvrs(),
@@ -129,7 +134,7 @@ class AuditCobraAssertion(
             samplesUsed = samplesNeeded,
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),
-            measuredRates = testH0Result.tracker.errorRates(),
+            measuredRates = measuredRates,
         )
 
         // println(" ${contest.info.name} ${assertionRound.auditResult}")

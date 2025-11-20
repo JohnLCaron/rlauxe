@@ -12,16 +12,16 @@ import kotlin.math.sqrt
  *  The bet must only use the previous samples.
  */
 interface BettingFn {
-    fun bet(prevSamples: PrevSamplesWithRates): Double
+    fun bet(prevSamples: SampleTracker): Double
 }
 
 class FixedBet(val lam: Double): BettingFn {
-    override fun bet(prevSamples: PrevSamplesWithRates) = lam
+    override fun bet(prevSamples: SampleTracker) = lam
 }
 
-fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, prevSampleTracker: SampleTracker): Double {
-    val sampleNum = prevSampleTracker.numberOfSamples()
-    return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - prevSampleTracker.sum()) / (N - sampleNum)
+fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, sampleTracker: SampleTracker): Double {
+    val sampleNum = sampleTracker.numberOfSamples()
+    return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - sampleTracker.sum()) / (N - sampleNum)
 }
 
 /*
@@ -76,7 +76,7 @@ class AgrapaBet(
     val c_grapa_grow: Double
 ): BettingFn {
 
-    override fun bet(prevSamples: PrevSamplesWithRates): Double {
+    override fun bet(prevSamples: SampleTracker): Double {
         val lastSampleNumber = prevSamples.numberOfSamples()
         if (lastSampleNumber == 0) return lam0 // initial guess
 
@@ -156,7 +156,7 @@ class OptimalComparisonNoP1(
         // require(upperBound * (1.0 - p2) > 1.0)
     }
 
-    override fun bet(prevSamples: PrevSamplesWithRates): Double {
+    override fun bet(prevSamples: SampleTracker): Double {
         val mu = populationMeanIfH0(N, withoutReplacement, prevSamples)
 
         // note eta is a constant

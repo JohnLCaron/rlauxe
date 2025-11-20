@@ -219,6 +219,9 @@ data class AuditRoundResult(
     init {
         if (measuredRates == null)
             println("AuditRoundResult no rates")
+        else if (measuredRates.sum() > 0.0) {
+            println("AuditRoundResult has some")
+        }
     }
 
     override fun toString() = buildString {

@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.util.dfn
-import org.cryptobiotic.rlauxe.util.pfn
+import org.cryptobiotic.rlauxe.util.margin2mean
 
 private val logger = KotlinLogging.logger("ClcaAssorter")
 
@@ -61,7 +61,7 @@ open class ClcaAssorter(
 
     fun id() = info.id
     fun noerror() = noerror
-    fun upperBound() = upperBound
+    fun upperBound() = upperBound  // upper bound of clca assorter; betting functions may need to know this
     fun assorter() = assorter
 
     // B(bi, ci) = (1-o/u)/(2-v/u), where
@@ -76,6 +76,7 @@ open class ClcaAssorter(
     //
     // bassort does affine transformation of overstatementError (1-o/u)/(2-v/u) to [0, 2] * noerror
     // so bassort in
+    //      [p2u,       p1u,                 noerror,          p1o        p2o]
     //      [2,         1.5,                    1,             .5,          0] * noerror (plurality)
     //      [2,         1+.5/u,     1-(.5-u)/u, 1,  1-(u-.5)/u, 1-.5/u,     0] * noerror (SM, u in [.5, 1])
     //      [2,         1-(.5-u)/u, 1+.5/u,     1,  1-.5/u,     1-(u-.5)/u, 0] * noerror (SM, u > 1)
@@ -83,7 +84,27 @@ open class ClcaAssorter(
     //      [2,         1.875,      1.125,      1,  .875,       .125,       0] * noerror  for u = 4
     //      [2,         1.666,      1.333,      1,  .666,       .333,       0] * noerror  for u = .75
 
-    // SHANGRLA overstatement_assorter()
+    // [1+(u-l)/u, 1+(.5-l)/u, 1+(u-.5)/u,  1, 1-(.5-l)/u, 1-(u-.5)/u, 1-(u-l)/u] * noerror
+    // [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror (l==0)
+
+    // Plurality
+    // [2, 3/2, 3/2,  1, 1/2, 1/2, 0] * noerror (l==0, u==1)
+
+    // Below u = 1/2(1-t) ; 1/2u = 2(1-t)/2 = (1-t)
+    // [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror
+    // [2, 1+(1-t), 2-(1-t),  1, 1-(1-t), (1-t), 0] * noerror
+    // [2, 2-t, 1+t,  1, t, 1-t, 0] * noerror
+
+    // Above u = 1/2t ; 1/2u = t   (u > 1 when t < 1/2)
+    // [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror
+    // [2, 1+t, 2-t,  1, 1-t, t, 0] * noerror
+
+    // Dhondt u = (first/last+1)/2 ; 1/2u = 2/(first/last+1)*2 = 1/(first/last+1) = 1/(fol+1)
+    // [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror
+    // [2, 1+1/(fol+1), 2-1/(fol+1),  1, 1-1/(fol+1), 1/(fol+1), 0] * noerror
+    // [2, (fol+1+1)/(fol+1), (2fol+2-1)/(fol+1),  1, (fol+1-1)/(fol+1), 1/(fol+1), 0] * noerror
+    // [2, (fol+2)/(fol+1), (2*fol+1)/(fol+1),  1, fol/(fol+1), 1/(fol+1), 0] * noerror
+
     open fun bassort(mvr: Cvr, cvr:Cvr, hasStyle: Boolean = this.hasStyle): Double {
         val overstatement = overstatementError(mvr, cvr, hasStyle && this.hasStyle) // ωi eq (1)
         val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
@@ -125,6 +146,11 @@ open class ClcaAssorter(
     //      [-1, -.5, 0, .5, 1] (u == 1)
     //      [-u, -.5, .5-u, 0, u-.5, .5, u] (SM, u in [.5, 1])
     //      [-u, .5-u, -.5, 0, .5, u-.5, u] (SM, u > 1)
+
+    // [l, .5, u] - [l, .5, u] = 0, l-.5, l-u
+    //                       = .5-l,  0, .5-u
+    //                       = u-l, u-.5, 0
+    // u-l, u-.5, .5-l,  0, .5-u, l-.5, -(u-l)
 
     fun overstatementError(mvr: Cvr, cvr: Cvr, hasStyle: Boolean): Double {
 
@@ -174,7 +200,9 @@ open class ClcaAssorter(
     override fun toString() = buildString {
         appendLine("ClcaAssorter for contest ${info.name} (${info.id})")
         appendLine("  assorter=${assorter.desc()}")
-        append("  dilutedMargin=${pfn(dilutedMargin)} noerror=${dfn(noerror, 8)} upperBound=${dfn(upperBound, 8)}")
+        append("  assortMargin=${dfn(dilutedMargin, 8)} assortMean=${dfn(margin2mean(dilutedMargin), 8)}")
+        append(" upperBound=${dfn(assorter.upperBound(), 8)}")
+        append(" noerror=${dfn(noerror, 8)}")
     }
 
     fun shortName() = assorter.shortName()

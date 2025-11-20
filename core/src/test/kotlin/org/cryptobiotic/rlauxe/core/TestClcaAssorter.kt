@@ -427,6 +427,32 @@ class TestClcaAssorter {
         val calcMean = margin2mean(calcMargin)
         assertEquals(expected, calcMean, doublePrecision)
     }
+
+    @Test
+    fun showNoError() {
+        println("upper=1")
+        repeat(20) {
+            val mean = 0.5 + it / 40.0
+            val noerror1 = 1.0 / (3 - 2 * mean)
+            assertEquals(1.0 / (2 - mean2margin(mean)), noerror1)
+
+            println(" mean=${dfn(mean, 3)} noerror=${dfn(noerror1, 3)}")
+        }
+
+        println("\nupper=2")
+        repeat(20) {
+            val mean = 0.5 + it / 40.0
+            val noerror = noerror(mean2margin(mean), 2.0)
+            println(" mean=${dfn(mean,3)} noerror=${dfn(noerror, 3)}")
+        }
+
+        println("\nupper=10")
+        repeat(20) {
+            val mean = 0.5 + it / 40.0
+            val noerror = noerror(mean2margin(mean), 10.0)
+            println(" mean=${dfn(mean,3)} noerror=${dfn(noerror, 3)}")
+        }
+    }
 }
 
 fun ClcaAssorter.calcClcaAssorterMargin(cvrPairs: Iterable<Pair<Cvr, Cvr>>): Double {

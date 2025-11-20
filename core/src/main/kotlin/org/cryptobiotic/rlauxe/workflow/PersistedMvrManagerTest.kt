@@ -6,6 +6,8 @@ import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.core.SampleErrorTracker
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsFrom
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
@@ -13,16 +15,44 @@ import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
 
 private val logger = KotlinLogging.logger("PersistedMvrManagerTest")
 private val checkValidity = true
+private val checkFuzz = true
 
 class PersistedMvrManagerTest(auditDir: String, val config: AuditConfig, val contestsUA: List<ContestUnderAudit>) : MvrManagerTestIF, PersistedMvrManager(auditDir) {
 
     // extract the wanted cards from the cardManifest, optionally fuzz them, and write them to sampleMvrsFile
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {
         val cards = findSamples(sampleNumbers, auditableCards())
-        val sampledMvrs = if (config.simFuzzPct() == null) {
+        val fuzzPct = config.simFuzzPct()
+        val sampledMvrs = if (fuzzPct == null) {
             cards // use the cvrs - ie, no errors
         } else { // fuzz the cvrs
-            makeFuzzedCardsFrom(contestsUA.map { it.contest} , cards, config.simFuzzPct()!!)
+            makeFuzzedCardsFrom(contestsUA.map { it.contest }, cards, fuzzPct) // TODO, undervotes=false)
+        }
+
+        if (checkFuzz && fuzzPct != null) {
+            println("fuzzPct = $fuzzPct")
+            val testPairs = sampledMvrs.zip(cards)
+
+            contestsUA.forEach { contestUA ->
+                contestUA.clcaAssertions.forEach { cassertion ->
+                    val cassorter = cassertion.cassorter
+                    val samples = PrevSamplesWithRates(cassorter.noerror())
+                    val samplet = SampleErrorTracker(cassorter.noerror())
+                    println("  contest = ${contestUA.id} assertion = ${cassorter.shortName()}")
+
+                    testPairs.forEach { (fcard, card) ->
+                        if (card.hasContest(contestUA.id)) {
+                            val bassort = cassorter.bassort(fcard.cvr(), card.cvr())
+                            samples.addSample(bassort)
+                            samplet.addSample(bassort)
+                        }
+                    }
+                    println("    errorCounts = ${samples.errorCounts()}")
+                    println("    errorRates =  ${samples.errorRates()}")
+                    println("    SampleErrorTracker = ${samplet}")
+                }
+            }
+            // println("fuzzPct ${dfn(fuzzPct!!,3)}: ${avgErrorRates}")
         }
 
         if (checkValidity) {

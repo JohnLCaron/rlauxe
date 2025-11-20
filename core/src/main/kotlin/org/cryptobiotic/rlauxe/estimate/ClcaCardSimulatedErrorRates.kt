@@ -91,10 +91,10 @@ class ClcaCardSimulatedErrorRates(
     override fun next() = sample()
 
     fun showFlips() = buildString {
-        appendLine(" flippedVotesP1o = $flippedVotesP1o = ${pfn(flippedVotesP1o/Ncards.toDouble())} expect=${needToChange(0)}")
-        appendLine(" flippedVotesP2o = $flippedVotesP2o = ${pfn(flippedVotesP2o/Ncards.toDouble())} expect=${needToChange(1)}")
-        appendLine(" flippedVotesP1u = $flippedVotesP1u = ${pfn(flippedVotesP1u/Ncards.toDouble())} expect=${needToChange(2)}")
-        appendLine(" flippedVotesP2u = $flippedVotesP2u = ${pfn(flippedVotesP2u/Ncards.toDouble())} expect=${needToChange(3)}")
+        appendLine("  flippedVotesP1o = $flippedVotesP1o = ${pfn(flippedVotesP1o/Ncards.toDouble())} expect=${needToChange(0)}")
+        appendLine("  flippedVotesP2o = $flippedVotesP2o = ${pfn(flippedVotesP2o/Ncards.toDouble())} expect=${needToChange(1)}")
+        appendLine("  flippedVotesP1u = $flippedVotesP1u = ${pfn(flippedVotesP1u/Ncards.toDouble())} expect=${needToChange(2)}")
+        appendLine("  flippedVotesP2u = $flippedVotesP2u = ${pfn(flippedVotesP2u/Ncards.toDouble())} expect=${needToChange(3)}")
     }
 
     fun needToChange(idx:Int): Int {

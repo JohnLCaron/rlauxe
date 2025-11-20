@@ -13,13 +13,14 @@ data class ClcaErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val
         require(p2u in 0.0..1.0) {"p2u out of range $p2u"}
     }
     override fun toString(): String {
-        return "[${pfn(p2o, 8)}, ${pfn(p1o, 8)}, ${pfn(p1u, 8)}, ${pfn(p2u, 8)}]"
+        return "[${dfn(p2o, 8)}, ${dfn(p1o, 8)}, ${dfn(p1u, 8)}, ${dfn(p2u, 8)}] sum =${dfn(sum(), 8)}"
     }
     fun toList() = listOf(p2o, p1o, p1u, p2u)
     fun areZero() = (p2o == 0.0 && p1o == 0.0 && p1u == 0.0 && p2u == 0.0)
     fun add(other: ClcaErrorRates): ClcaErrorRates {
         return ClcaErrorRates(p2o + other.p2o, p1o + other.p1o, p1u + other.p1u, p2u + other.p2u)
     }
+    fun sum() = toList().sum()
 
     companion object {
         val Zero =  ClcaErrorRates(0.0, 0.0, 0.0, 0.0)

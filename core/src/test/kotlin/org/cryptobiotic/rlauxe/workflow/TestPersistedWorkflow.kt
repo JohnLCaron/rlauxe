@@ -22,7 +22,7 @@ class TestPersistedWorkflow {
         val topdir = "/home/stormy/rla/persist/testPersistedSingleClca"
 
         val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000,
-            clcaConfig = ClcaConfig(strategy=ClcaStrategyType.previous, simFuzzPct = .01))
+            clcaConfig = ClcaConfig(strategy=ClcaStrategyType.generalAdaptive, simFuzzPct = .01))
 
         val N = 50000
         val testData = MultiContestTestData(1, 1, N, marginRange=0.03..0.03, ncands=2)

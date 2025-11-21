@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate.corla
 
-import org.cryptobiotic.rlauxe.core.ClcaErrorRates
+import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.core.OptimalLambda
 import java.lang.Math.pow
 import kotlin.math.ceil
@@ -50,7 +50,7 @@ fun estimateSampleSizeOptimalLambda(
     alpha: Double, // risk
     dilutedMargin: Double, // the difference in votes for the reported winner and reported loser, divided by the total number of ballots cast.
     upperBound: Double, // assort upper value, = 1 for plurality, 1/(2*minFraction) for supermajority
-    errorRates: ClcaErrorRates,
+    errorRates: PluralityErrorRates,
 ): Int {
 
     //  a := 1 / (2 − v/au)

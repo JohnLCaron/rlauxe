@@ -103,12 +103,20 @@ class AuditsNoErrors {
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
+            val generalAdaptive = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
-                clcaConfigIn= ClcaConfig(ClcaStrategyType.oracle, 0.0),
-                parameters=mapOf("nruns" to nruns, "cat" to "clca")
+                clcaConfigIn= ClcaConfig(ClcaStrategyType.generalAdaptive, 0.0),
+                parameters=mapOf("nruns" to nruns, "cat" to "generalAdaptive")
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
+            tasks.add(RepeatedWorkflowRunner(nruns, generalAdaptive))
+
+            val noerror = ClcaSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, 0.0, 0.0,
+                nsimEst = nsimEst,
+                clcaConfigIn= ClcaConfig(ClcaStrategyType.noerror, 0.0),
+                parameters=mapOf("nruns" to nruns, "cat" to "adaptive")
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, noerror))
         }
 
         // run tasks concurrently and average the results

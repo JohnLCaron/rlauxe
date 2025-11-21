@@ -69,9 +69,9 @@ fun betPayoffSamples(N: Int, risk: Double, assorterMargin: Double, error: Double
         N = N,
         a = noerror,
         d = 100,
-        errorRates = ClcaErrorRates(error, error, error, error),
+        errorRates = PluralityErrorRates(error, error, error, error),
     )
-    val samples = PrevSamplesWithRates(noerror)
+    val samples = PluralityErrorTracker(noerror)
     repeat(10) { samples.addSample(noerror) }
     val bet = bettingFn.bet(samples)
     val mj = populationMeanIfH0(N=N, true, samples)

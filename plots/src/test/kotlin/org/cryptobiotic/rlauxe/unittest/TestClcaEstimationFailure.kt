@@ -51,13 +51,13 @@ class TestClcaEstimationFailure {
         if (debug) println("\n$contest phantomRate=${contest.phantomRate()}")
 
         val phantomRate = contest.phantomRate()
-        val errorRates = ClcaErrorRates(0.0, phantomRate, 0.0, 0.0)
+        val errorRates = PluralityErrorRates(0.0, phantomRate, 0.0, 0.0)
         val sampler = ClcaSimulatedErrorRates(cvrs, contestUA.contest, cassorter, errorRates)
         // if (debug) print(sampler.showFlips())
 
         sampler.reset()
 
-        val tracker = PrevSamplesWithRates(cassorter.noerror())
+        val tracker = PluralityErrorTracker(cassorter.noerror())
         while (sampler.hasNext()) { tracker.addSample(sampler.next()) }
 
         val assorter = cassorter.assorter

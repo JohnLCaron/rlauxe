@@ -66,30 +66,43 @@ import kotlin.math.min
 // At each time i, the shrink-trunc estimated rate p̃_ki can be plugged into (2)
 // and set equal to 0 to obtain the bet λi .
 //
+
+private val showRates = false
+private val showBets = true
+
+// specialized for plurality assorter
 class AdaptiveBetting(
     val N: Int, // max number of cards for this contest
     val withoutReplacement: Boolean = true,
     val a: Double, // compareAssorter.noerror
     val d: Int,  // weight
-    errorRates: ClcaErrorRates, // a priori estimate of the error rates
+    errorRates: PluralityErrorRates, // a priori estimate of the plurality error rates
     val eps: Double = .00001    // TODO I think we picked this number out of a hat.
 ): BettingFn {
     val p2o: Double = errorRates.p2o // apriori rate of 2-vote overstatements; set < 0 to remove consideration
     val p1o: Double = errorRates.p1o // apriori rate of 1-vote overstatements; set < 0 to remove consideration
     val p1u: Double = errorRates.p1u // apriori rate of 1-vote understatements; set < 0 to remove consideration
     val p2u: Double = errorRates.p2u // apriori rate of 2-vote understatements; set < 0 to remove consideration
+    var lastBet = 0.0
 
     override fun bet(prevSamples: SampleTracker): Double {
-        val rateSampler = prevSamples as PrevSamplesWithRates
+        val rateSampler = prevSamples as PluralityErrorTracker
         val lastj = prevSamples.numberOfSamples()
         val p2oest = if (p2o < 0.0 || lastj == 0) 0.0 else estimateRate(d, p2o, rateSampler.countP2o().toDouble() / lastj, lastj, eps)
         val p1oest = if (p1o < 0.0 || lastj == 0) 0.0 else estimateRate(d, p1o, rateSampler.countP1o().toDouble() / lastj, lastj, eps)
         val p1uest = if (p1u < 0.0 || lastj == 0) 0.0 else estimateRate(d, p1u, rateSampler.countP1u().toDouble() / lastj, lastj, eps)
         val p2uest = if (p2u < 0.0 || lastj == 0) 0.0 else estimateRate(d, p2u, rateSampler.countP2u().toDouble() / lastj, lastj, eps)
+        if (showRates) println("  p2oest = $p2oest, p1oest = $p1oest, p1uest = $p1uest, p2uest = $p2uest, nsamples=${prevSamples.numberOfSamples()}")
 
         val mui = populationMeanIfH0(N, withoutReplacement, prevSamples)
-        val kelly = OptimalLambda(a, ClcaErrorRates(p2oest, p1oest, p1uest, p2uest), mui)
-        return kelly.solve()
+        val kelly = OptimalLambda(a, PluralityErrorRates(p2oest, p1oest, p1uest, p2uest), mui)
+        val bet = kelly.solve()
+        if (showBets && lastBet != 0.0 && bet < lastBet) {
+            println("*** regular lastBet=$lastBet bet=$bet")
+            println("    p2oest = $p2oest, p1oest = $p1oest, p1uest = $p1uest, p2uest = $p2uest, nsamples=${prevSamples.numberOfSamples()}")
+        }
+        lastBet = bet
+        return bet
     }
 
     // For k ∈ {1, 2} we set a value d_k ≥ 0, capturing the degree of shrinkage to the a priori estimate p̃_k ,
@@ -110,7 +123,7 @@ fun sampleSize(risk: Double, payoff:Double) = -ln(risk) / ln(payoff)
 // We know the true rate of all errors
 class OracleComparison(
     val a: Double, // noerror
-    val errorRates: ClcaErrorRates,
+    val errorRates: PluralityErrorRates,
 ): BettingFn {
     val lam: Double
     init {
@@ -139,7 +152,7 @@ class OracleComparison(
  * p1u := #{xi = 3a/2}/N is the rate of 1-vote understatements.
  * p2u := #{xi = 2a}/N is the rate of 2-vote understatements.
  */
-class OptimalLambda(val a: Double, val errorRates: ClcaErrorRates, val mui: Double = 0.5) {
+class OptimalLambda(val a: Double, val errorRates: PluralityErrorRates, val mui: Double = 0.5) {
     val p2o = errorRates.p2o
     val p1o = errorRates.p1o
     val p1u = errorRates.p1u
@@ -169,7 +182,7 @@ class OptimalLambda(val a: Double, val errorRates: ClcaErrorRates, val mui: Doub
             GoalType.MAXIMIZE,
             MaxEval(1000)
         )
-        if (debug) println( "Kelly: p2o=${p2o}  p1o=${p1o}  p1u=${p1u}  p2u=${p2u} point=${result.point}")
+        if (debug) println( "  Kelly: p2o=${p2o}  p1o=${p1o}  p1u=${p1u}  p2u=${p2u} point=${result.point}")
         return result.point
     }
 

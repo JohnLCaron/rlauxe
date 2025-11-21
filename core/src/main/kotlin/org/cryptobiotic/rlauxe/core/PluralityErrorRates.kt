@@ -6,7 +6,8 @@ import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.sfn
 
-data class ClcaErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u: Double) {
+// CLCA assorter errors, where upper = 1 (as in plurality)
+data class PluralityErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u: Double) {
     init {
         require(p2o in 0.0..1.0) {
             "p2o out of range $p2o"
@@ -20,8 +21,8 @@ data class ClcaErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val
     }
     fun toList() = listOf(p2o, p1o, p1u, p2u)
     fun areZero() = (p2o == 0.0 && p1o == 0.0 && p1u == 0.0 && p2u == 0.0)
-    fun add(other: ClcaErrorRates): ClcaErrorRates {
-        return ClcaErrorRates(p2o + other.p2o, p1o + other.p1o, p1u + other.p1u, p2u + other.p2u)
+    fun add(other: PluralityErrorRates): PluralityErrorRates {
+        return PluralityErrorRates(p2o + other.p2o, p1o + other.p1o, p1u + other.p1u, p2u + other.p2u)
     }
     fun sum() = toList().sum()
 
@@ -35,15 +36,15 @@ data class ClcaErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val
     }
 
     companion object {
-        val Zero =  ClcaErrorRates(0.0, 0.0, 0.0, 0.0)
+        val Zero =  PluralityErrorRates(0.0, 0.0, 0.0, 0.0)
 
-        fun fromList(list: List<Double>): ClcaErrorRates {
+        fun fromList(list: List<Double>): PluralityErrorRates {
             require(list.size == 4) { "ErrorRates list must have 4 elements"}
-            return ClcaErrorRates(list[0], list[1], list[2], list[3])
+            return PluralityErrorRates(list[0], list[1], list[2], list[3])
         }
 
-        fun fromCounts(counts: Map<Double, Int>?, noerror: Double, N:Int): ClcaErrorRates {
-            if (counts == null) return ClcaErrorRates.Zero
+        fun fromCounts(counts: Map<Double, Int>?, noerror: Double, N:Int): PluralityErrorRates {
+            if (counts == null) return PluralityErrorRates.Zero
 
             val rlist = counts.toList()
             val p2o = rlist.find { doubleIsClose(it.first, 0.0 * noerror)} ?.second ?: 0
@@ -52,7 +53,7 @@ data class ClcaErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val
             val p2u = rlist.find { doubleIsClose(it.first, 2.0 * noerror) }?.second ?: 0
 
             val Nd = N.toDouble()
-            return ClcaErrorRates(p2o/Nd, p1o/Nd, p1u/Nd, p2u/Nd)
+            return PluralityErrorRates(p2o/Nd, p1o/Nd, p1u/Nd, p2u/Nd)
         }
     }
 }
@@ -61,7 +62,7 @@ class ClcaErrorRatesCumul {
     val avgs = List(4) { Welford() }
     val sums = MutableList(4) { 0.0 }
 
-    fun add(rates: ClcaErrorRates) {
+    fun add(rates: PluralityErrorRates) {
         rates.toList().forEachIndexed { idx, rate ->
             avgs[idx].update(rate)
             sums[idx] = sums[idx] + rate
@@ -92,9 +93,9 @@ class ClcaErrorRatesCumul {
 
 object ClcaErrorTable {
     val rrates = mutableMapOf<Int, List<Double>>() // errorRates / FuzzPct
-    val standard = ClcaErrorRates(.01, 1.0e-4, 0.01, 1.0e-4)
+    val standard = PluralityErrorRates(.01, 1.0e-4, 0.01, 1.0e-4)
 
-    fun getErrorRates(ncandidates: Int, fuzzPct: Double?): ClcaErrorRates {
+    fun getErrorRates(ncandidates: Int, fuzzPct: Double?): PluralityErrorRates {
         if (fuzzPct == null) return standard
 
         val useCand = when  {
@@ -103,22 +104,22 @@ object ClcaErrorTable {
             else -> ncandidates
         }
         val rr = rrates[useCand]!!.map { it * fuzzPct }
-        return ClcaErrorRates(rr[0], rr[1], rr[2], rr[3])
+        return PluralityErrorRates(rr[0], rr[1], rr[2], rr[3])
     }
 
     fun calcErrorRates(contestId: Int,
                        cassorter: ClcaAssorter,
                        cvrPairs: List<Pair<Cvr, Cvr>>, // (mvr, cvr)
-    ) : ClcaErrorRates {
+    ) : PluralityErrorRates {
         require(cvrPairs.size > 0)
-        val samples = PrevSamplesWithRates(cassorter.noerror()) // accumulate error counts here
+        val samples = PluralityErrorTracker(cassorter.noerror()) // accumulate error counts here
         cvrPairs.filter { it.first.hasContest(contestId) }.forEach { samples.addSample(cassorter.bassort(it.first, it.second)) }
         // require( samples.errorCounts().sum() ==  cvrPairs.size)
-        return samples.clcaErrorRates()
+        return samples.pluralityErrorRates()
     }
 
     // given an error rate, what fuzz pct does it corresond to ?
-    fun calcFuzzPct(ncandidates: Int, errorRates: ClcaErrorRates ) : List<Double> {
+    fun calcFuzzPct(ncandidates: Int, errorRates: PluralityErrorRates ) : List<Double> {
         val useCand = when  {
             ncandidates < 2 -> 2
             ncandidates > 10 -> 10

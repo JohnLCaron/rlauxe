@@ -64,7 +64,7 @@ class TestClcaSimulationErrorRates {
         println("\n${assorter.assorter.desc()}")
 
         val phantomRate = contestUA.contest.phantomRate()
-        val errorRates = ClcaErrorRates(0.0, phantomRate, 0.0, 0.0)
+        val errorRates = PluralityErrorRates(0.0, phantomRate, 0.0, 0.0)
         val sampler = ClcaSimulatedErrorRates(cvrs, contestUA.contest, assorter, errorRates)
         sampler.reset()
 
@@ -75,7 +75,7 @@ class TestClcaSimulationErrorRates {
 
         val before = cvrs.map { assorter.bassort(it, it) }.average()
 
-        val tracker = PrevSamplesWithRates(assorter.noerror())
+        val tracker = PluralityErrorTracker(assorter.noerror())
         while (sampler.hasNext()) { tracker.addSample(sampler.next()) }
         println(" bassort expectedNoerror=${df(assorter.noerror())} noerror=${df(before)} sampleMean = ${df(tracker.mean())}")
         assertTrue( tracker.mean() > .5)

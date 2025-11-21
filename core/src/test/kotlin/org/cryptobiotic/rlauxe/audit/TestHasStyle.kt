@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.audit
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
-import org.cryptobiotic.rlauxe.core.ClcaErrorRates
+import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
@@ -15,7 +15,6 @@ import org.cryptobiotic.rlauxe.estimate.MultiContestCombineData
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sampleWithContestCutoff
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
-import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import kotlin.random.Random
 import kotlin.test.Test
@@ -365,7 +364,7 @@ class TestHasStyle {
                                   testCvrs: List<Cvr>, cardStyles:List<CardStyleIF>?): AuditRound {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
-        val errorRates = ClcaErrorRates(0.0, 0.001, 0.0, 0.0, )
+        val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
         val config = if (isPolling) {
             AuditConfig(AuditType.POLLING, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
                 pollingConfig = PollingConfig())
@@ -400,7 +399,7 @@ class TestHasStyle {
                                    testCards: List<AuditableCard>, cardStyles:List<CardStyleIF>?): AuditRound {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
-        val errorRates = ClcaErrorRates(0.0, 0.001, 0.0, 0.0, )
+        val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
         val config = if (isPolling) {
             AuditConfig(AuditType.POLLING, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
                 pollingConfig = PollingConfig())

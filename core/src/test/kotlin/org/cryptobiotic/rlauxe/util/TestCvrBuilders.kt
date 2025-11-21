@@ -44,13 +44,13 @@ class TestCvrBuilders {
         fuzzPcts.forEach { fuzzPct ->
             val fcvrs = makeFuzzedCvrsFrom(contests, cvrs, fuzzPct)
             println("fuzzPct = $fuzzPct")
-            val allErrorRates = mutableListOf<ClcaErrorRates>()
+            val allErrorRates = mutableListOf<PluralityErrorRates>()
             contests.forEach { contest ->
                 val contestUA = makeContestUAfromCvrs(contest.info, cvrs)
                 val minAssert = contestUA.minClcaAssertion().first
                 if (minAssert != null) repeat(ntrials) {
                     val minAssort = minAssert.cassorter
-                    val samples = PrevSamplesWithRates(minAssort.noerror())
+                    val samples = PluralityErrorTracker(minAssort.noerror())
                     var ccount = 0
                     var count = 0
                     fcvrs.forEachIndexed { idx, fcvr ->
@@ -63,14 +63,14 @@ class TestCvrBuilders {
                     val fuzz = count.toDouble() / ccount
                     println("$it ${contest.name} changed = $count out of ${ccount} = ${df(fuzz)}")
                     if (detail) {
-                        println("  errorCounts = ${samples.clcaErrorCounts()}")
+                        println("  errorCounts = ${samples.pluralityErrorCounts()}")
                         println("  errorRates =  ${samples.errorRates()}")
                     }
-                    allErrorRates.add(samples.clcaErrorRates())
+                    allErrorRates.add(samples.pluralityErrorRates())
                 }
             }
             val total = ntrials * ncontests
-            val avgRates = ClcaErrorRates(
+            val avgRates = PluralityErrorRates(
                 allErrorRates.sumOf { it.p2o } / total,
                 allErrorRates.sumOf { it.p1o } / total,
                 allErrorRates.sumOf { it.p1u } / total,

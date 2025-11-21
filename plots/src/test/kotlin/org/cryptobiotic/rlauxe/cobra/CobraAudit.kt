@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.cobra
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.*
@@ -109,9 +109,9 @@ class AuditCobraAssertion(
             withoutReplacement = true,
             a = cassorter.noerror(),
             d = auditConfig.clcaConfig.d,
-            ClcaErrorRates(p2prior, 0.0, 0.0, 0.0)
+            PluralityErrorRates(p2prior, 0.0, 0.0, 0.0)
         )
-        val tracker = PrevSamplesWithRates(cassorter.noerror())
+        val tracker = PluralityErrorTracker(cassorter.noerror())
 
         val testFn = BettingMart(
             bettingFn = adaptive,

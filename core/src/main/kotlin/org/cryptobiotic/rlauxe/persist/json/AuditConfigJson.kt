@@ -10,7 +10,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.core.ClcaErrorRates
+import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.enumValueOf
 
@@ -237,7 +237,7 @@ fun ClcaConfig.publishJson() = ClcaConfigJson(this.strategy.name, this.simFuzzPc
 fun ClcaConfigJson.import() = ClcaConfig(
         enumValueOf(this.strategy, ClcaStrategyType.entries) ?: ClcaStrategyType.noerror,
         this.simFuzzPct,
-        if (this.errorRates != null) ClcaErrorRates.fromList(this.errorRates) else null,
+        if (this.errorRates != null) PluralityErrorRates.fromList(this.errorRates) else null,
         this.d,
     )
 
@@ -277,7 +277,7 @@ fun ClcaBettingStrategy.publishJson() = ClcaBettingStrategyJson(this.strategy.na
 fun ClcaBettingStrategyJson.import() = ClcaBettingStrategy(
     enumValueOf(this.strategy, ClcaBettingStrategyType.entries) ?: ClcaBettingStrategyType.noerrors,
     this.fuzzPct,
-    if (this.errorRates != null) ClcaErrorRates.fromList(this.errorRates) else null,
+    if (this.errorRates != null) PluralityErrorRates.fromList(this.errorRates) else null,
     this.d,
 )
 

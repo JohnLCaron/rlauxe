@@ -216,11 +216,11 @@ fun estimateClcaAssertionRound(
     // optimalComparison:  OptimalComparisonNoP1, assume P1 = 0, closed form solution for lamda.
 
     //// same as ClcaAssertionAuditor
-    var errorRates: ClcaErrorRates = when {
+    var errorRates: PluralityErrorRates = when {
         // Subsequent rounds, always use measured rates.
         (assertionRound.prevAuditResult != null) -> {
             // TODO should be average of previous rates?
-            ClcaErrorRates.fromCounts(assertionRound.prevAuditResult!!.measuredCounts, cassorter.noerror(), assertionRound.prevAuditResult!!.samplesUsed)
+            PluralityErrorRates.fromCounts(assertionRound.prevAuditResult!!.measuredCounts, cassorter.noerror(), assertionRound.prevAuditResult!!.samplesUsed)
         }
         (clcaConfig.strategy == ClcaStrategyType.fuzzPct)  -> {
             ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct) // TODO do better
@@ -229,7 +229,7 @@ fun estimateClcaAssertionRound(
             clcaConfig.errorRates!!
         }
         else -> {
-            ClcaErrorRates.Zero
+            PluralityErrorRates.Zero
         }
     }
 
@@ -414,11 +414,11 @@ fun estimateOneAuditAssertionRound(
     val clcaConfig = config.clcaConfig
 
     //// same as estimateClcaAssertionRound
-    var errorRates: ClcaErrorRates = when {
+    var errorRates: PluralityErrorRates = when {
         // Subsequent rounds, always use measured rates.
         (assertionRound.prevAuditResult != null) -> {
             // TODO should be average of previous rates?
-            ClcaErrorRates.fromCounts(assertionRound.prevAuditResult!!.measuredCounts, oaCassorter.noerror(), assertionRound.prevAuditResult!!.samplesUsed)
+            PluralityErrorRates.fromCounts(assertionRound.prevAuditResult!!.measuredCounts, oaCassorter.noerror(), assertionRound.prevAuditResult!!.samplesUsed)
         }
         (clcaConfig.strategy == ClcaStrategyType.fuzzPct)  -> {
             ClcaErrorTable.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct) // TODO do better
@@ -427,7 +427,7 @@ fun estimateOneAuditAssertionRound(
             clcaConfig.errorRates!!
         }
         else -> {
-            ClcaErrorRates.Zero
+            PluralityErrorRates.Zero
         }
     }
 

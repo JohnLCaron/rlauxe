@@ -27,7 +27,8 @@ fun runClcaAuditRound(
         auditContestTasks.add(RunContestTask(config, contest, cvrPairs, auditor, roundIdx))
     }
 
-    logger.info { "Run ${auditContestTasks.size} tasks for auditor ${auditor.javaClass.name} " }
+    // logger.debug { "runClcaAuditRound ($roundIdx) ${auditContestTasks.size} tasks for auditor ${auditor.javaClass.simpleName} " }
+    // println("---runClcaAuditRound running ${auditContestTasks.size} tasks")
 
     val complete: List<Boolean> = ConcurrentTaskRunnerG<Boolean>().run(auditContestTasks)
     return if (complete.isEmpty()) true else complete.reduce { acc, b -> acc && b }
@@ -90,7 +91,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val clcaConfig = config.clcaConfig
 
         //// same as estimateClcaAssertionRound
-        var clcaErrorRates: ClcaErrorRates = when {
+        val clcaErrorRates: PluralityErrorRates = when {
             // Subsequent rounds, always use measured rates.
             (assertionRound.prevAuditResult != null) -> {
                 assertionRound.accumulatedErrorRates(contestRound)
@@ -102,11 +103,11 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
                 clcaConfig.errorRates!!
             }
             else -> {
-                ClcaErrorRates.Zero
+                PluralityErrorRates.Zero
             }
         }
 
-        // phantoms may cause p1o or p2o. Remove this for now. or change to p1o only on initial guess...
+        // TODO phantoms may cause p1o or p2o. Remove this for now. or change to p1o only on initial guess...
         //if (clcaErrorRates.p2o < contest.phantomRate())
         //    clcaErrorRates = clcaErrorRates.copy( p2o = contest.phantomRate())
 
@@ -116,15 +117,20 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         }  else if (clcaConfig.strategy == ClcaStrategyType.optimalComparison) {
             OptimalComparisonNoP1(N = contestUA.Nb, withoutReplacement = true, upperBound = cassorter.noerror(), p2 = clcaErrorRates.p2o)
             
+        } else if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
+            GeneralAdaptiveBetting(N = contestUA.Nb, noerror = cassorter.noerror(), d = clcaConfig.d, )
+
         } else {
-            // AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
-            GeneralAdaptiveBetting(N = contestUA.Nb, noerror = cassorter.noerror(), d = clcaConfig.d, ) // HEY NEW!!
+            AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = clcaErrorRates)
         }
+
+        val tracker = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) ClcaErrorTracker(cassorter.noerror())
+            else PluralityErrorTracker(cassorter.noerror())
 
         val testFn = BettingMart(
             bettingFn = bettingFn,
             N = contestUA.Nb,
-            tracker = ClcaErrorTracker(cassorter.noerror()),
+            tracker = tracker,
             upperBound = cassorter.upperBound(),
             riskLimit = config.riskLimit,
             withoutReplacement = true

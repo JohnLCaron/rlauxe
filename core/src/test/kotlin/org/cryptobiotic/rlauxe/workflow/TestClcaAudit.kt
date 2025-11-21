@@ -74,7 +74,7 @@ class TestClcaAudit {
         val phantomRange= phantomPct .. phantomPct
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
-        val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, ) // TODO automatic
+        val errorRates = PluralityErrorRates(0.0, phantomPct, 0.0, 0.0, ) // TODO automatic
         val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
 
         val finalRound = testClcaWorkflow(config, testData)

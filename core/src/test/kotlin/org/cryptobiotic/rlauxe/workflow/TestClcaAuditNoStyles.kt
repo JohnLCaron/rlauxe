@@ -22,7 +22,7 @@ class TestClcaAuditNoStyles {
         val phantomRange= phantomPct .. phantomPct
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
-        val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
+        val errorRates = PluralityErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val config = AuditConfig(
             AuditType.CLCA, hasStyle=false, seed=12356667890L, nsimEst=10,
             clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates)
@@ -41,7 +41,7 @@ class TestClcaAuditNoStyles {
         val phantomRange= phantomPct .. phantomPct
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
-        val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
+        val errorRates = PluralityErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val config = AuditConfig(
             AuditType.CLCA, hasStyle=false, seed=12356667890L, nsimEst=10,
             clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates)
@@ -91,7 +91,7 @@ class TestClcaAuditNoStyles {
         val phantomRange= phantomPct .. phantomPct
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
-        val errorRates = ClcaErrorRates(0.0, phantomPct, 0.0, 0.0, )
+        val errorRates = PluralityErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val config = AuditConfig(
             AuditType.CLCA, hasStyle=false, nsimEst=10,
             clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates)

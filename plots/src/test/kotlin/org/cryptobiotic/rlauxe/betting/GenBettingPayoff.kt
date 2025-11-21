@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.betting
 
 import org.cryptobiotic.rlauxe.core.AdaptiveBetting
-import org.cryptobiotic.rlauxe.core.ClcaErrorRates
+import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.core.GeneralAdaptiveBetting
-import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
@@ -34,9 +34,9 @@ class GenBettingPayoff {
                     N = N,
                     a = noerror,
                     d = 10000,
-                    errorRates = ClcaErrorRates(error, error, error, error),
+                    errorRates = PluralityErrorRates(error, error, error, error),
                 )
-                val samples = PrevSamplesWithRates(noerror)
+                val samples = PluralityErrorTracker(noerror)
                 repeat(100) { samples.addSample(noerror) }
                 println(" margin=$margin, noerror=$noerror bet = ${optimal.bet(samples)}")
             }
@@ -74,9 +74,9 @@ class GenBettingPayoff {
                     N = N,
                     a = noerror,
                     d = 10000,
-                    errorRates = ClcaErrorRates(error, error, error, error),
+                    errorRates = PluralityErrorRates(error, error, error, error),
                 )
-                val samples = PrevSamplesWithRates(noerror)
+                val samples = PluralityErrorTracker(noerror)
                 repeat(100) { samples.addSample(noerror) }
                 val bet = bettingFn.bet(samples)
                 println("margin=$margin, noerror=$noerror bet = $bet}")
@@ -112,9 +112,9 @@ class GenBettingPayoff {
                     N = N,
                     a = noerror,
                     d = 10000,
-                    errorRates = ClcaErrorRates(error, error, error, error),
+                    errorRates = PluralityErrorRates(error, error, error, error),
                 )
-                val tracker = PrevSamplesWithRates(noerror)
+                val tracker = PluralityErrorTracker(noerror)
 
                 repeat(10) { tracker.addSample(noerror) }
                 val bet = bettingFn.bet(tracker)
@@ -153,9 +153,9 @@ class GenBettingPayoff {
                 N = N,
                 a = noerror,
                 d = 10000,
-                errorRates = ClcaErrorRates(error, error, error, error),
+                errorRates = PluralityErrorRates(error, error, error, error),
             )
-            val samples = PrevSamplesWithRates(noerror)
+            val samples = PluralityErrorTracker(noerror)
             repeat(10) { samples.addSample(noerror) }
             val bet = bettingFn.bet(samples)
             val payoff = 1.0 + bet * (noerror - .5)

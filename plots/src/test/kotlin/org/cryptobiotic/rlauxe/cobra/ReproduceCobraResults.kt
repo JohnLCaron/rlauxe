@@ -164,7 +164,7 @@ class ReproduceCobraResults {
 
                         val oracle = OracleComparison(
                             a = cassorter.noerror(),
-                            ClcaErrorRates(p2, p1, 0.0, 0.0)
+                            PluralityErrorRates(p2, p1, 0.0, 0.0)
                         )
                         val betting =
                             BettingMart(bettingFn = oracle, N = N,
@@ -249,10 +249,10 @@ class ReproduceCobraResults {
                             withoutReplacement = false,
                             a = cassorter.noerror(),
                             d = d,
-                            ClcaErrorRates(p2prior, p1prior, 0.0, 0.0),
+                            PluralityErrorRates(p2prior, p1prior, 0.0, 0.0),
                             eps=eps,
                         )
-                        val tracker = PrevSamplesWithRates(cassorter.noerror())
+                        val tracker = PluralityErrorTracker(cassorter.noerror())
 
                         val betting =
                             BettingMart(bettingFn = adaptive, N = N,

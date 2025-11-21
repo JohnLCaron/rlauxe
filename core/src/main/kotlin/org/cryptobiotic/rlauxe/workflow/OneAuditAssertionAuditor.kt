@@ -24,7 +24,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
 
         val errorRates = if (assertionRound.prevAuditResult != null) {
             assertionRound.accumulatedErrorRates(contestRound)
-        } else ClcaErrorRates.Zero
+        } else PluralityErrorRates.Zero
 
         //if (errorRates.p2o < contestUA.contest.phantomRate())
         //    errorRates = errorRates.copy( p2o = contestUA.contest.phantomRate())

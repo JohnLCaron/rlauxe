@@ -24,7 +24,7 @@ class ClcaCardSimulatedErrorRates(
     cards: List<AuditableCard>, // may have phantoms
     val contest: ContestIF,
     val cassorter: ClcaAssorter,
-    val errorRates: ClcaErrorRates,
+    val errorRates: PluralityErrorRates,
 ): Sampler {
     val Ncards = cards.size
     val maxSamples = cards.count { it.hasContest(contest.id) }

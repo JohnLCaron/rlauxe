@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.audit
 
-import org.cryptobiotic.rlauxe.core.ClcaErrorRates
+import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.util.secureRandom
 
 enum class AuditType { POLLING, CLCA, ONEAUDIT;
@@ -85,11 +85,11 @@ data class PollingConfig(
 // phantoms: use phantom rates at first.
 // previous: use phantom rates at first, then measured.
 // optimalComparison:  OptimalComparisonNoP1, assume P1 = 0, closed form solution for lamda
-enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, phantoms, previous, optimalComparison }
+enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, phantoms, previous, optimalComparison, generalAdaptive }
 data class ClcaConfig(
     val strategy: ClcaStrategyType,
     val simFuzzPct: Double? = null, // use to generate apriori errorRates for simulation
-    val errorRates: ClcaErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker
+    val errorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker
     val d: Int = 100,  // shrinkTrunc weight for error rates
 )
 
@@ -122,7 +122,7 @@ enum class ClcaBettingStrategyType { apriori, fuzzPct, noerrors, oracle, optimal
 data class ClcaBettingStrategy(
     val strategy: ClcaBettingStrategyType = ClcaBettingStrategyType.noerrors,
     val fuzzPct: Double? = null, // use to generate apriori errorRates, (if null use simFuzzPct?)
-    val errorRates: ClcaErrorRates? = null, // use as apriori errorRates for simulation and audit
+    val errorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit
     val d: Int = 100,  // shrinkTrunc weight for error rates
 )
 

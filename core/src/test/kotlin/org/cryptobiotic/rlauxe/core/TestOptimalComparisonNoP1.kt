@@ -3,10 +3,10 @@ package org.cryptobiotic.rlauxe.core
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestOptimalComparison {
+class TestOptimalComparisonNoP1 {
 
     @Test
-    fun compareToOptimalComparisonNoP1() {
+    fun compareOptimalLambdaToOptimalComparisonNoP1() {
         val N = 100
         val margins = listOf(.025, .05, .1)
         val p2s = listOf(.0001, .001, .01)
@@ -16,11 +16,11 @@ class TestOptimalComparison {
             for (p2 in p2s) {
                 println("margin=$margin p2=$p2")
 
-                val kelly = OptimalLambda(a, ClcaErrorRates(p2, 0.0, 0.0, 0.0))
+                val kelly = OptimalLambda(a, PluralityErrorRates(p2, 0.0, 0.0, 0.0))
                 val lam = kelly.solve()
 
                 val optimal = OptimalComparisonNoP1(N = N, withoutReplacement = true, upperBound = 2 * a, p2 = p2)
-                val bet = optimal.bet(PrevSamplesWithRates(a))
+                val bet = optimal.bet(PluralityErrorTracker(a))
 
                 val message = if (lam < 1.0) "**** betting against" else ""
                 println("   OptimalLambda=$lam OptimalComparisonNoP1=$bet $message")
@@ -40,12 +40,12 @@ class TestOptimalComparison {
             for (p2 in p2s) {
                 println("margin=$margin p2=$p2")
 
-                val kelly = OptimalLambda(a, ClcaErrorRates(p2, 0.0, 0.0, 0.0))
+                val kelly = OptimalLambda(a, PluralityErrorRates(p2, 0.0, 0.0, 0.0))
                 val lam = kelly.solve()
 
                 // these fail when upperBound * (1.0 - p2) <= 1.0
                 val optimal = OptimalComparisonNoP1(N = N, withoutReplacement = true, upperBound = 2 * a, p2 = p2)
-                val bet = optimal.bet(PrevSamplesWithRates(a))
+                val bet = optimal.bet(PluralityErrorTracker(a))
 
                 println("   OptimalLambda=$lam OptimalComparisonNoP1=$bet")
                 if (bet > 0.0) {

@@ -19,7 +19,7 @@ class ClcaSimulatedErrorRates(
     rcvrs: List<Cvr>, // may have phantoms
     val contest: ContestIF,
     val cassorter: ClcaAssorter,
-    val errorRates: ClcaErrorRates,
+    val errorRates: PluralityErrorRates,
 ): Sampler {
     val Ncvrs = rcvrs.size
     val maxSamples = rcvrs.count { it.hasContest(contest.id) }

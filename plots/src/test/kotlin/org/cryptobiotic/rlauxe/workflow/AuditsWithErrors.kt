@@ -9,9 +9,8 @@ import kotlin.test.Test
 
 class AuditsWithErrors {
     val nruns = 100
-    val nsimEst = 10
     val name = "AuditsWithErrors2"
-    val dirName = "/home/stormy/rla/plots/oneaudit4/$name"
+    val dirName = "/home/stormy/rla/plots/workflows/$name"
     val N = 50000
     val margin = .02
 
@@ -25,7 +24,22 @@ class AuditsWithErrors {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
 
         fuzzPcts.forEach { fuzzPct ->
-            val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
+
+            val generalAdaptive = ClcaSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, 0.0, fuzzPct, nsimEst=1,
+                clcaConfigIn= ClcaConfig(ClcaStrategyType.generalAdaptive, fuzzPct),
+                parameters=mapOf("nruns" to nruns, "fuzzPct" to fuzzPct, "cat" to "generalAdaptive")
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, generalAdaptive))
+
+            val noerror = ClcaSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, 0.0, fuzzPct, nsimEst = 1,
+                clcaConfigIn= ClcaConfig(ClcaStrategyType.noerror, fuzzPct),
+                parameters=mapOf("nruns" to nruns, "fuzzPct" to fuzzPct, "cat" to "adaptive")
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, noerror))
+
+            /* val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, fuzzPct, nsimEst=nsimEst,
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
             )
@@ -55,10 +69,11 @@ class AuditsWithErrors {
                 clcaConfigIn= ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, raireGenerator))
+            tasks.add(RepeatedWorkflowRunner(nruns, raireGenerator)) */
         }
 
         // run tasks concurrently and average the results
+        println("---genAuditWithFuzzPlots running ${tasks.size} tasks nruns= $nruns")
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
@@ -71,9 +86,14 @@ class AuditsWithErrors {
     @Test
     fun regenPlots() {
         val subtitle = "margin=${margin} Nc=${N} nruns=${nruns}"
-        showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType", catfld= { compareCategories(it) })
-        showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.LogLinear, catName="auditType", catfld= { compareCategories(it) })
-        showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.LogLog, catName="auditType", catfld= { compareCategories(it) })
+        // save
+        // showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType", catfld= { compareCategories(it) })
+        // showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.LogLinear, catName="auditType", catfld= { compareCategories(it) })
+        // showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.LogLog, catName="auditType", catfld= { compareCategories(it) })
+
+        showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType", catfld= { category(it) })
+        showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.LogLinear, catName="auditType", catfld= { category(it) })
+        showSampleSizesVsFuzzPct(dirName, name, subtitle, ScaleType.LogLog, catName="auditType", catfld= { category(it) })
     }
 }
 

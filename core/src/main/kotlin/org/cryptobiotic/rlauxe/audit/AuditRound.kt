@@ -171,7 +171,7 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     var status = TestH0Status.InProgress
     var round = 0           // round when set to proved or disproved
 
-    fun accumulatedErrorRates(contestRound: ContestRound): ClcaErrorRates {
+    fun accumulatedErrorRates(contestRound: ContestRound): PluralityErrorRates {
         val (_, auditRoundResults) = contestRound.resultsForAssertion(assertion.assorter.hashcodeDesc())
 
         val sumOfCounts = mutableMapOf<Double, Int>()
@@ -186,10 +186,10 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
             }
         }
 
-        return if (samplesUsed == 0) ClcaErrorRates.Zero else {
+        return if (samplesUsed == 0) PluralityErrorRates.Zero else {
             // TODO something general
             val noerror = (assertion as ClcaAssertion).cassorter.noerror()
-            ClcaErrorRates.fromCounts(sumOfCounts, noerror, samplesUsed)
+            PluralityErrorRates.fromCounts(sumOfCounts, noerror, samplesUsed)
         }
     }
 }

@@ -661,10 +661,10 @@ fun calc_sample_sizes(
         withoutReplacement = true,
         a = cassorter.noerror(),
         d = 100,
-        ClcaErrorRates(.001, .01, 0.0, 0.0),
+        PluralityErrorRates(.001, .01, 0.0, 0.0),
     )
     val betta = BettingMart(bettingFn = optimal, N = N,
-        tracker = PrevSamplesWithRates(0.0),
+        tracker = PluralityErrorTracker(0.0),
         upperBound = cassorter.upperBound(), withoutReplacement = false)
 
     return runTestRepeated(

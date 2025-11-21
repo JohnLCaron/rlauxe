@@ -82,10 +82,10 @@ class ClcaErrorTracker(val noerror: Double, val debug:Boolean=false) : SampleTra
 
 /**
  * CANDIDATE for removal
- * This also counts the under/overstatements for comparison audits.
+ * This also counts the under/overstatements for clca plurality audits.
  * @param noerror for comparison assorters who need rate counting. set to 0 for polling
  */
-class PrevSamplesWithRates(val noerror: Double) : SampleTracker, ClcaErrorRatesIF {
+class PluralityErrorTracker(val noerror: Double) : SampleTracker, ClcaErrorRatesIF {
     private val isClca = (noerror > 0.0)
     private var last = 0.0
     private var sum = 0.0
@@ -139,16 +139,17 @@ class PrevSamplesWithRates(val noerror: Double) : SampleTracker, ClcaErrorRatesI
         )
     }
 
-    fun clcaErrorCounts() = listOf(countP0,countP2o,countP1o,countP1u,countP2u)
+    fun pluralityErrorCounts() = listOf(countP0,countP2o,countP1o,countP1u,countP2u)
 
     // canonical order
-    fun clcaErrorRates(): ClcaErrorRates {
+    fun pluralityErrorRates(): PluralityErrorRates {
         val n = if (numberOfSamples() > 0) numberOfSamples().toDouble() else 1.0
-        val p =  clcaErrorCounts().map { it / n }
-        return ClcaErrorRates(p[1], p[2], p[3], p[4]) // skip p0
+        val p =  pluralityErrorCounts().map { it / n }
+        return PluralityErrorRates(p[1], p[2], p[3], p[4]) // skip p0
     }
-    fun errorRatesList(): List<Double> {
-        val p =  clcaErrorCounts().map { it / numberOfSamples().toDouble()  /* skip p0 */ }
+
+    fun pluralityErrorRatesList(): List<Double> {
+        val p =  pluralityErrorCounts().map { it / numberOfSamples().toDouble()  /* skip p0 */ }
         return listOf(p[1], p[2], p[3], p[4])
     }
 }

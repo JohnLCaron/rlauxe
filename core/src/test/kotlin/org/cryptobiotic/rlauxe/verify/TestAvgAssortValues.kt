@@ -11,7 +11,6 @@ import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -55,9 +54,9 @@ class TestAvgAssortValues {
         val contestUA= contestsUA.first()
         println("contestUA = ${contestUA.show()}")
 
-        val (minassert, minMargin) = contestUA.minPollingAssertion()
+        val minassert = contestUA.minPollingAssertion()
         println(minassert)
-        assertEquals(minMargin, contestUA.minPollingAssertion().second)
+        assertEquals(contestUA.makeDilutedMargin(minassert!!.assorter), contestUA.minDilutedMargin())
 
         //     cards: CloseableIterator<AuditableCard>,
         //    result: VerifyResults,
@@ -103,9 +102,9 @@ class TestAvgAssortValues {
         val contestUA= contestsUA.first()
         println("contestUA = ${contestUA.show()}")
 
-        val (minassert, minMargin) = contestUA.minPollingAssertion()
+        val minassert = contestUA.minPollingAssertion()
         println(minassert)
-        assertEquals(minMargin, contestUA.minPollingAssertion().second)
+        assertEquals(contestUA.makeDilutedMargin(minassert!!.assorter), contestUA.minDilutedMargin())
 
         val results = VerifyResults()
         verifyClcaAssortAvg(contestsUA, cardIterable.iterator(), results, show = true)

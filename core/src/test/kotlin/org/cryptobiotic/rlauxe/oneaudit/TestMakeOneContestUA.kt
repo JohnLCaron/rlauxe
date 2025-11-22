@@ -34,7 +34,7 @@ class TestMakeOneContestUA {
         assertEquals(cvrVotes, contest.votes)
         assertEquals(margin, contest.margin(0, 1), doublePrecision)
 
-        val oaAssorter = contestOA.minClcaAssertion().first!!.cassorter as OneAuditClcaAssorter
+        val oaAssorter = contestOA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         assertEquals(1, oaAssorter.poolAverages.assortAverage.size)
         println("contestOA = $contestOA")
     }
@@ -152,7 +152,7 @@ class TestMakeOneContestUA {
     }
 
     fun checkAgainstCvrs(contestOA: ContestUnderAudit, cardPools: List<CardPoolIF>, testCvrs: List<Cvr>, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double) {
-        val bassorter = contestOA.minClcaAssertion().first!!.cassorter as OneAuditClcaAssorter
+        val bassorter = contestOA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         println(bassorter)
 
         // sanity check

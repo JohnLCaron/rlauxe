@@ -52,7 +52,7 @@ class TestCardBuilders {
             val allErrorRates = mutableListOf<PluralityErrorRates>()
             contests.forEach { contest ->
                 val contestUA = makeContestUAfromCvrs(contest.info, cvrs)
-                val minAssert = contestUA.minClcaAssertion().first
+                val minAssert = contestUA.minClcaAssertion()
                 if (minAssert != null) repeat(ntrials) {
                     val minAssort = minAssert.cassorter
                     val samples = PluralityErrorTracker(minAssort.noerror())

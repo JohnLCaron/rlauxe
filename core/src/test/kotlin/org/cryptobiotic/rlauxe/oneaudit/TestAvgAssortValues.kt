@@ -71,7 +71,7 @@ class TestAvgAssortValues {
 
         println("oaContest = $oaContest")
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
-        assertEquals(margin, oaContest.minPollingAssertion().second)
+        assertEquals(margin, oaContest.minDilutedMargin())
 
         // class CvrsWithStylesToCards(
         //    val type: AuditType,

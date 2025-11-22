@@ -13,14 +13,14 @@ class BettingMart(
     val withoutReplacement: Boolean = true,
     val tracker: SampleTracker, // for comparison assorters who need rate counting. set to 0 for polling
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
-    val upperBound: Double,  // the upper bound of the values of the sequence.
+    val sampleUpperBound: Double,  // the upper bound of the values of the sequence; bassort for CLCA
 ): RiskTestingFn {
     private val showEachSample = false
     private val sequences = DebuggingSequences()
 
     init {
         require(riskLimit > 0.0 && riskLimit < 1.0 )
-        require(upperBound > 0.5)
+        require(sampleUpperBound > 0.5)
     }
 
     // run until sampleNumber == maxSample (batch mode) or terminateOnNullReject (ballot at a time)
@@ -43,13 +43,13 @@ class BettingMart(
             val xj: Double = drawSample()
             sampleNumber++
             require(xj >= 0.0)
-            require(xj <= upperBound)
+            require(xj <= sampleUpperBound)
 
             val lamj = bettingFn.bet(tracker)
 
             // population mean under the null hypothesis
             mj = populationMeanIfH0(N, withoutReplacement, tracker)  // approx .5
-            val eta = lamToEta(lamj, mu=mj, upper=upperBound) // informational only
+            val eta = lamToEta(lamj, mu=mj, upper=sampleUpperBound) // informational only
 
             // 1           m[i] > u -> terms[i] = 0.0   # true mean is certainly less than 1/2
             // 2           isCloseToZero(m[i], atol) -> terms[i] = 1.0
@@ -58,10 +58,10 @@ class BettingMart(
             // 5           m[i] < 0 -> terms[i] = Double.POSITIVE_INFINITY # true mean certainly greater than 1/2
             // 6           else -> terms[i] = if (Stot > N * t) Double.POSITIVE_INFINITY else terms[i]
 
-            if (mj > upperBound || mj < 0.0) { // 1, 5
+            if (mj > sampleUpperBound || mj < 0.0) { // 1, 5
                 break
             }
-            val tj = if (doubleIsClose(0.0, mj) || doubleIsClose(upperBound, mj)) { // 2, 3
+            val tj = if (doubleIsClose(0.0, mj) || doubleIsClose(sampleUpperBound, mj)) { // 2, 3
                 1.0
             } else {
                 // terms[i] = (1 + λi (Xi − µi )) ALPHA eq 10 // approx (1 + lam * (xj - .5))
@@ -94,7 +94,7 @@ class BettingMart(
             when {
                 (pvalueLast < riskLimit) -> TestH0Status.StatRejectNull
                 (mj < 0.0) -> TestH0Status.SampleSumRejectNull // 5
-                (mj > upperBound) -> TestH0Status.AcceptNull // 1
+                (mj > sampleUpperBound) -> TestH0Status.AcceptNull // 1
                 else -> TestH0Status.LimitReached
             }
         }

@@ -117,7 +117,7 @@ class AuditCobraAssertion(
             bettingFn = adaptive,
             N = contestUA.Nb,
             tracker = tracker,
-            upperBound = cassorter.upperBound(),
+            sampleUpperBound = cassorter.upperBound(),
             withoutReplacement = true
         )
 

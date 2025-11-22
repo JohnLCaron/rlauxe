@@ -123,7 +123,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             bettingFn = bettingFn,
             N = N,
             tracker = ClcaErrorTracker(cassorter.noerror()), // TODO cant track pool data??
-            upperBound = cassorter.upperBound(),
+            sampleUpperBound = cassorter.upperBound(),
             riskLimit = config.riskLimit,
             withoutReplacement = true
         )

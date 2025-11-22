@@ -18,10 +18,10 @@ class TestCvrFlips {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1), SocialChoiceFunction.PLURALITY)
         val contest =  makeContestFromCvrs(info, cvrs)
         val contestUA = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
-        val margin = contestUA.minDilutedMargin()
+        val margin = contestUA.minDilutedMargin()!!
         assertEquals(mean2margin(mean), margin, doublePrecision)
 
-        val minClcaAssertion: ClcaAssertion = contestUA.minClcaAssertion().first!!
+        val minClcaAssertion: ClcaAssertion = contestUA.minClcaAssertion()!!
         val cassorter = minClcaAssertion.cassorter
         val assorter = cassorter.assorter
         val calcAssorter = assorter.calcAssorterMargin(0, cvrs)
@@ -72,10 +72,10 @@ class TestCvrFlips {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1), SocialChoiceFunction.PLURALITY)
         val contest =  makeContestFromCvrs(info, cvrs)
         val contestUA = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
-        val margin = contestUA.minDilutedMargin()
+        val margin = contestUA.minDilutedMargin()!!
         assertEquals(mean2margin(mean), margin, doublePrecision)
 
-        val minClcaAssertion: ClcaAssertion = contestUA.minClcaAssertion().first!!
+        val minClcaAssertion: ClcaAssertion = contestUA.minClcaAssertion()!!
         val cassorter = minClcaAssertion.cassorter
         val assorter = cassorter.assorter
         val calcAssorter = assorter.calcAssorterMargin(0, cvrs)

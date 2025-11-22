@@ -21,12 +21,12 @@ fun checkContestsCorrectlyFormed(config: AuditConfig, contestsUA: List<ContestUn
             checkWinnerVotes(contestUA, results)
 
             // see if margin is too small
-            if (contestUA.minRecountMargin() <= config.minRecountMargin) {
+            if ((contestUA.minRecountMargin()?: 0.0) <= config.minRecountMargin) {
                 logger.info{"*** MinMargin contest ${contestUA} recountMargin ${contestUA.minRecountMargin()} <= ${config.minRecountMargin}"}
                 contestUA.preAuditStatus = TestH0Status.MinMargin
             } else {
                 // see if too many phantoms
-                val minMargin = contestUA.minDilutedMargin()
+                val minMargin = contestUA.minDilutedMargin() ?: 0.0
                 val adjustedMargin = minMargin - contestUA.contest.phantomRate()
                 if (config.removeTooManyPhantoms && adjustedMargin <= 0.0) {
                     logger.warn{"***TooManyPhantoms contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.contest.phantomRate()} < 0.0"}

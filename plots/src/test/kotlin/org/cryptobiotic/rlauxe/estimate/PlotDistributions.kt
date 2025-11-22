@@ -105,7 +105,6 @@ class PlotDistributions {
                 )
             val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
             val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
-            // println("mvrsFuzzPct=$mvrsFuzzPct errorRates = ${ClcaErrorRates.getErrorRates(2, mvrsFuzzPct)}")
 
             val ballotCards = MvrManagerClcaForTesting(testCvrs, testMvrs, auditConfig.seed)
             val workflow = WorkflowTesterClca(auditConfig, listOf(sim.contest), emptyList(), ballotCards)
@@ -119,7 +118,7 @@ class PlotDistributions {
 
             // "oracle" audit
             val contestUA = workflow.contestsUA().first()
-            val assertionRound = AssertionRound(contestUA.minAssertion().first!!, 1, null)
+            val assertionRound = AssertionRound(contestUA.minAssertion()!!, 1, null)
 
             val cassertion = assertionRound.assertion as ClcaAssertion
             val cassorter = cassertion.cassorter

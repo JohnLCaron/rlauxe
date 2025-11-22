@@ -32,7 +32,7 @@ class TestAlphaMart {
 
         val contest = test.contests.first()
         val contestUA = ContestUnderAudit(contest, isClca = false, hasStyle = true).addStandardAssertions()
-        val assorter = contestUA.minPollingAssertion().first!!.assorter
+        val assorter = contestUA.minPollingAssertion()!!.assorter
 
         val cvrs = test.makeCvrsFromContests()
         val config = AuditConfig(AuditType.POLLING, hasStyle=true, nsimEst=10)

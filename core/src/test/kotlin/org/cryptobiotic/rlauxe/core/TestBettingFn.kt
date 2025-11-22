@@ -40,7 +40,7 @@ class TestBettingFn {
             p2 = p2
         )
 
-        val prevSamples = PrevSamplesWithRates(noerror)
+        val prevSamples = PluralityErrorTracker(noerror)
         val x = listOf(1, 1, 1, 0, 1, 1, 0, 0, 1, 1)
         val bets = mutableListOf<Double>()
         x.forEach {
@@ -67,7 +67,7 @@ class TestBettingFn {
         )
 
         val x = listOf(1, 1, 1, 0, 1, 1, 0, 0, 1, 1)
-        val prevSamples2 = PrevSamplesWithRates(noerror)
+        val prevSamples2 = PluralityErrorTracker(noerror)
         val bets2 = mutableListOf<Double>()
         x.forEach {
             bets2.add( betFn2.bet(prevSamples2) )

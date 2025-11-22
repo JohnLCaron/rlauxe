@@ -110,7 +110,7 @@ class SfoaSingleRoundAuditTaskContest18(
 
         val rlauxAudit = PersistedWorkflow(auditDir, true)
         val contest18 = rlauxAudit.contestsUA().find { it.contest.id == 18 }!!
-        val minAssertion = contest18.minClcaAssertion().first!!
+        val minAssertion = contest18.minClcaAssertion()!!
         val assertionRound = AssertionRound(minAssertion, 1, null)
         val contestRound = ContestRound(contest18, listOf(assertionRound), 1)
 

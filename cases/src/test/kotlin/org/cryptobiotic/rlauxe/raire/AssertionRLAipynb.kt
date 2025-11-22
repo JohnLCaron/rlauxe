@@ -617,7 +617,7 @@ fun replicate_p_values(
 
 
     val contest = contests.first()
-    val cassorter = contest.minClcaAssertion().first!!.cassorter // the one with the smallest margin
+    val cassorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
     val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, cassorter)
 
@@ -630,7 +630,7 @@ fun replicate_p_values(
 
     val betta = BettingMart(bettingFn = optimal, N = N,
         tracker = ClcaErrorTracker(0.0),
-        upperBound = cassorter.upperBound(),
+        sampleUpperBound = cassorter.upperBound(),
         withoutReplacement = false)
 
     val debugSeq = betta.setDebuggingSequences()
@@ -652,7 +652,7 @@ fun calc_sample_sizes(
     //val minAssorter = minAssertion.assorter
 
     val contest = contests.first().addStandardAssertions()
-    val cassorter = contest.minClcaAssertion().first!!.cassorter // the one with the smallest margin
+    val cassorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
     val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, cassorter)
 
@@ -665,7 +665,7 @@ fun calc_sample_sizes(
     )
     val betta = BettingMart(bettingFn = optimal, N = N,
         tracker = PluralityErrorTracker(0.0),
-        upperBound = cassorter.upperBound(), withoutReplacement = false)
+        sampleUpperBound = cassorter.upperBound(), withoutReplacement = false)
 
     return runTestRepeated(
         drawSample = sampler,

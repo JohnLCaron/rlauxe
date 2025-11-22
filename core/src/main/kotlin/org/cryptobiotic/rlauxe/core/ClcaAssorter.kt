@@ -84,18 +84,19 @@ open class ClcaAssorter(
     //      [2,         1.875,      1.125,      1,  .875,       .125,       0] * noerror  for u = 4
     //      [2,         1.666,      1.333,      1,  .666,       .333,       0] * noerror  for u = .75
 
+    // so bassort in
     // [1+(u-l)/u, 1+(.5-l)/u, 1+(u-.5)/u,  1, 1-(.5-l)/u, 1-(u-.5)/u, 1-(u-l)/u] * noerror
-    // [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror (l==0)
+    // [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror (l==0) (we will assume this)
 
     // Plurality
     // [2, 3/2, 3/2,  1, 1/2, 1/2, 0] * noerror (l==0, u==1)
 
-    // Below u = 1/2(1-t) ; 1/2u = 2(1-t)/2 = (1-t)
+    // BelowThreshold u = 1/2(1-t) ; 1/2u = 2(1-t)/2 = (1-t)
     // [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror
     // [2, 1+(1-t), 2-(1-t),  1, 1-(1-t), (1-t), 0] * noerror
     // [2, 2-t, 1+t,  1, t, 1-t, 0] * noerror
 
-    // Above u = 1/2t ; 1/2u = t   (u > 1 when t < 1/2)
+    // AboveTheshold u = 1/2t ; 1/2u = t   (u > 1 when t < 1/2)
     // [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror
     // [2, 1+t, 2-t,  1, 1-t, t, 0] * noerror
 

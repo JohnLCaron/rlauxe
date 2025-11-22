@@ -53,7 +53,7 @@ class TestRaireContest {
         assertTrue(rcontestUA.showShort().startsWith("rcontest111 (111) Nc=5000 winner 0 losers [1, 2] minMargin="))
         println("show='${rcontestUA.show()}'")
         assertTrue(rcontestUA.show().contains(rcontestUA.contest.showCandidates()), rcontestUA.show())
-        assertTrue(rcontestUA.minRecountMargin() > 0.0 && rcontestUA.minRecountMargin() < 1.0)
+        assertTrue(rcontestUA.minRecountMargin()!! > 0.0 && rcontestUA.minRecountMargin()!! < 1.0)
     }
 
     @Test
@@ -66,8 +66,8 @@ class TestRaireContest {
         val tab = contestTab[info.id]!!
         assertTrue(tab.irvVotes.nvotes() > 0)
 
-        assertTrue(rcu.minRecountMargin() > 0.0)
-        assertTrue(rcu.minRecountMargin() < 1.0)
+        assertTrue(rcu.minRecountMargin()!! > 0.0)
+        assertTrue(rcu.minRecountMargin()!! < 1.0)
 
         println("recountMargin = ${rcu.minRecountMargin()}")
         val minAssertion = rcu.minAssertion()

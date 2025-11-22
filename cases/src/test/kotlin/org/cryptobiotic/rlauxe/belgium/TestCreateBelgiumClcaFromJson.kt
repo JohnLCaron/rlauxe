@@ -379,7 +379,7 @@ AdaptiveBetting 11/19 noerrors
       Bruxelles |                       DHondt w/l='PS'/'MR' | 0.500210 | 0.500472 | 1.125000 |   7264 |    7137 | 1.40 % |
     FlandreWest |                   DHondt w/l='PVDA'/'CD&V' | 0.501659 | 0.506614 | 2.000000 |    907 |     904 | 0.11 % |
     FlandreEast |                DHondt w/l='Vooruit'/'CD&V' | 0.500455 | 0.500908 | 1.000000 |   3328 |    3296 | 0.32 % |
-        Hainaut |                   BelowThreshold for ECOLO | 0.500164 | 0.500173 | 0.526316 |   9483 |    9136 | 1.28 % |
+        Hainaut |                   BelowThreshold for ECOLO | 0.500164 | 0.500173 | 0.526316 |   9370 |    9136 | 1.27 % |
           Liège |              DHondt w/l='LES ENGAGÉS'/'PS' | 0.500284 | 0.500663 | 1.166667 |   5341 |    5267 | 0.85 % |
        Limbourg |       DHondt w/l='Vooruit'/'VLAAMS BELANG' | 0.502437 | 0.507277 | 1.500000 |    617 |     616 | 0.11 % |
      Luxembourg |              DHondt w/l='LES ENGAGÉS'/'MR' | 0.503001 | 0.505966 | 1.000000 |    501 |     501 | 0.29 % |
@@ -389,17 +389,17 @@ AdaptiveBetting 11/19 noerrors
 
      GeneralAdaptiveBetting 11/22 .001 fuzz
                 |                                minAssorter |  noerror |     mean |    upper |  nmvrs | minMvrs | pct % |
-         Anvers |                   DHondt w/l='CD&V'/'PVDA' | 0.500134 | 0.500267 | 1.000000 |  14351 |   11203 | 1.20 % |
+         Anvers |                   DHondt w/l='CD&V'/'PVDA' | 0.500134 | 0.500267 | 1.000000 |  11464 |   11203 | 0.96 % |
       Bruxelles |                       DHondt w/l='PS'/'MR' | 0.500210 | 0.500472 | 1.125000 |   7158 |    7137 | 1.38 % |
-    FlandreWest |                   DHondt w/l='PVDA'/'CD&V' | 0.501659 | 0.506614 | 2.000000 |    907 |     904 | 0.11 % |
-    FlandreEast |                DHondt w/l='Vooruit'/'CD&V' | 0.500455 | 0.500908 | 1.000000 |  11616 |    3296 | 1.12 % |
-        Hainaut |                   BelowThreshold for ECOLO | 0.500164 | 0.500173 | 0.526316 |   9483 |    9136 | 1.28 % |
-          Liège |              DHondt w/l='LES ENGAGÉS'/'PS' | 0.500284 | 0.500663 | 1.166667 |   5295 |    5267 | 0.84 % |
+    FlandreWest |                   DHondt w/l='PVDA'/'CD&V' | 0.501659 | 0.506614 | 2.000000 |    906 |     904 | 0.11 % |
+    FlandreEast |                DHondt w/l='Vooruit'/'CD&V' | 0.500455 | 0.500908 | 1.000000 |   5461 |    3296 | 0.53 % |
+        Hainaut |                   BelowThreshold for ECOLO | 0.500164 | 0.500173 | 0.526316 |   9354 |    9136 | 1.26 % |
+          Liège |              DHondt w/l='LES ENGAGÉS'/'PS' | 0.500284 | 0.500663 | 1.166667 |   6018 |    5267 | 0.95 % |
        Limbourg |       DHondt w/l='Vooruit'/'VLAAMS BELANG' | 0.502437 | 0.507277 | 1.500000 |    617 |     616 | 0.11 % |
      Luxembourg |              DHondt w/l='LES ENGAGÉS'/'MR' | 0.503001 | 0.505966 | 1.000000 |    501 |     501 | 0.29 % |
-          Namur |              DHondt w/l='LES ENGAGÉS'/'PS' | 0.507362 | 0.512092 | 0.833333 |    279 |     205 | 0.09 % |
+          Namur |                      DHondt w/l='PTB'/'PS' | 0.505404 | 0.516037 | 1.500000 |    279 |     279 | 0.09 % |
  BrabantFlamant |          DHondt w/l='VLAAMS BELANG'/'N-VA' | 0.504228 | 0.511180 | 1.333333 |    357 |     356 | 0.05 % |
-  BrabantWallon |              DHondt w/l='MR'/'LES ENGAGÉS' | 0.502644 | 0.504384 | 0.833333 |   7186 |     568 | 2.80 % |
+  BrabantWallon |              DHondt w/l='MR'/'LES ENGAGÉS' | 0.502644 | 0.504384 | 0.833333 |    569 |     568 | 0.22 % |
 
      GeneralAdaptiveBetting 11/22 .01 fuzz
                      |                                minAssorter |  noerror |     mean |    upper |  nmvrs | minMvrs | pct % |

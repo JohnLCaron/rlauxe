@@ -22,8 +22,8 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter as OneAuditClcaAssorter
 
-        val errorRates = if (assertionRound.prevAuditResult != null) {
-            assertionRound.accumulatedErrorRates(contestRound)
+        val errorCounts = if (assertionRound.prevAuditResult != null) {
+            assertionRound.accumulatedErrorCounts(contestRound).toPluralityErrorRates()
         } else PluralityErrorRates.Zero
 
         //if (errorRates.p2o < contestUA.contest.phantomRate())
@@ -43,7 +43,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
                 cassorter,
                 sampler,
                 cassorter.upperBound(),
-                p2 = errorRates.p2o
+                p2 = 0.0 // errorRates.p2o
             )
         } else {
             runAlpha(
@@ -64,7 +64,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),
-            startingRates = errorRates.errorRates(cassorter.noerror()),
+            startingRates = errorCounts.errorRates(cassorter.noerror()),
             measuredCounts = measuredCounts,
         )
 

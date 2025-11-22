@@ -59,11 +59,11 @@ private fun runWithComparisonFuzzSampler(
     val cassorter = cassertion.cassorter
 
     val sampler = ClcaFuzzSampler(auditConfig.simFuzzPct!!, cvrs, contestUA.contest as Contest, cassorter)
+    val errorCounts = ClcaErrorCounts(emptyMap(), 0, noerror=cassorter.noerror(), upper=cassorter.assorter.upperBound())
+
     val optimal = GeneralAdaptiveBetting(
         N = contestUA.Nb,
-        withoutReplacement = true,
-        noerror=cassorter.noerror(),
-        upper=cassorter.assorter.upperBound(),
+        errorCounts,
         d = 100
     )
 

@@ -35,14 +35,12 @@ class CompareCorlaNoErrors {
             val corla0 = CorlaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, phantomPct, fuzzPct,
                 parameters = mapOf("nruns" to nruns, "cat" to "corla"),
-                auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, corla0))
 
             val clca0 = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, phantomPct, fuzzPct,
                 parameters = mapOf("nruns" to nruns, "cat" to "rlauxe"),
-                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clca0))
         }

@@ -33,7 +33,6 @@ class CompareCorlaWithAttack {
                 val theta = mean - p2
                 val corlaGenerator = CorlaSingleRoundAuditTaskGenerator(
                     N, margin, 0.0, 0.0, 0.0,
-                    clcaConfigIn = ClcaConfig(ClcaStrategyType.noerror),
                     parameters = mapOf("nruns" to nruns, "theta" to theta, "p2" to p2, "cat" to df(p2)),
                     p2flips = p2
                 )

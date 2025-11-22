@@ -250,7 +250,7 @@ class ReproduceCobraResults {
                             a = cassorter.noerror(),
                             d = d,
                             PluralityErrorRates(p2prior, p1prior, 0.0, 0.0),
-                            eps=eps,
+                            minRate=eps,
                         )
                         val tracker = PluralityErrorTracker(cassorter.noerror())
 

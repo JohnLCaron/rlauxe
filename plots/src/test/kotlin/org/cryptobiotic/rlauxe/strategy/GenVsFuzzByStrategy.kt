@@ -38,7 +38,6 @@ class GenVsFuzzByStrategy {
 
             val clcaGenerator2 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "noerror", "fuzzPct" to fuzzPct),
-                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror, fuzzPct))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 

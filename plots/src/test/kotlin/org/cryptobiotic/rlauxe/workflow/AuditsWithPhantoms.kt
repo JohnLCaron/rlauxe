@@ -91,7 +91,6 @@ class AuditsWithPhantoms {
 
         val auditConfig = AuditConfig(
             AuditType.CLCA, true, nsimEst = nsimEst,
-            clcaConfig = ClcaConfig(ClcaStrategyType.noerror)
         )
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()

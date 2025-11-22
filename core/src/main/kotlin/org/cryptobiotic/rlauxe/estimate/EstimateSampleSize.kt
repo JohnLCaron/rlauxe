@@ -208,14 +208,6 @@ fun estimateClcaAssertionRound(
     val cassorter = cassertion.cassorter
     val contest = contestUA.contest
 
-    // Error Rates: the minimum p2o is always the phantom rate. Subsequent rounds, always use measured rates.
-    //  apriori: pass in apriori errorRates for first round.
-    //  fuzzPct: ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct) for first round.
-    //  noerrors: assume noerrors on first round.
-    //  oracle: use actual measured error rates for first round. (violates martingale condition)
-    // optimalComparison:  OptimalComparisonNoP1, assume P1 = 0, closed form solution for lamda.
-
-    //// same as ClcaAssertionAuditor
     var errorRates: PluralityErrorRates = when {
         // Subsequent rounds, always use measured rates.
         (assertionRound.prevAuditResult != null) -> {
@@ -223,13 +215,14 @@ fun estimateClcaAssertionRound(
             PluralityErrorRates.fromCounts(assertionRound.prevAuditResult!!.measuredCounts, cassorter.noerror(), assertionRound.prevAuditResult!!.samplesUsed)
         }
         (clcaConfig.strategy == ClcaStrategyType.fuzzPct)  -> {
-            ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct) // TODO do better
+            ClcaErrorTable.getErrorRates(contest.ncandidates, config.simFuzzPct)
         }
         (clcaConfig.strategy == ClcaStrategyType.apriori) -> {
             clcaConfig.errorRates!!
         }
         else -> {
             PluralityErrorRates.Zero
+            // ClcaErrorTable.getErrorRates(contest.ncandidates, config.clcaConfig.fuzzPct)  // TODO do better
         }
     }
 
@@ -237,20 +230,19 @@ fun estimateClcaAssertionRound(
     val sampler = ClcaCardSimulatedErrorRates(contestCards, contest, cassorter, errorRates) // TODO why cant we use this with IRV?? I think we can
 
     // Using errorRates in the bettingFn, make sure phantom rate is accounted for
-    // the minimum p2o is always the phantom rate.
-    // if (errorRates.p2o < contest.phantomRate())
-    //    errorRates = errorRates.copy( p2o = contest.phantomRate())
+    if (errorRates.p1o < contest.phantomRate())
+        errorRates = errorRates.copy( p1o = contest.phantomRate())
 
-    val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.oracle) {
+    /* val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.oracle) {
         OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
     }  else if (clcaConfig.strategy == ClcaStrategyType.optimalComparison) {
         OptimalComparisonNoP1(N = contestUA.Nb, withoutReplacement = true, upperBound = cassorter.upperBound, p2 = errorRates.p2o)
-    } else {
+    } else { */
         //AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
-        GeneralAdaptiveBetting(N = contestUA.Nb, noerror = cassorter.noerror(), d = clcaConfig.d, ) // HEY NEW!!
-    }
-
     // val bettingFn = AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates) // diluted N
+
+    val errorCounts = ClcaErrorCounts.fromPluralityErrorRates(errorRates, totalSamples = contestCards.size, noerror = cassorter.noerror(), upper = cassorter.assorter.upperBound())
+    val bettingFn = GeneralAdaptiveBetting(N = contestUA.Nb, errorCounts, d = clcaConfig.d, )
 
     // TODO track down simulations and do initial permutation there; we want first trial to use the actual permutation
     // we need a permutation to get uniform distribution of errors, since some simulations put all the errors at the beginning
@@ -272,7 +264,7 @@ fun estimateClcaAssertionRound(
     // The result is a distribution of ntrials sampleSizes
     assertionRound.estimationResult = EstimationRoundResult(roundIdx,
         clcaConfig.strategy.name,
-        fuzzPct = clcaConfig.simFuzzPct,
+        fuzzPct = config.simFuzzPct,
         startingTestStatistic = startingTestStatistic,
         startingRates = errorRates.errorRates(cassorter.noerror()),
         estimatedDistribution = makeDeciles(result.sampleCount),
@@ -298,7 +290,7 @@ fun runRepeatedBettingMart(
         N = N,
         tracker = ClcaErrorTracker(noerror),
         riskLimit = config.riskLimit,
-        upperBound = upperBound,
+        sampleUpperBound = upperBound,
     )
 
     // run the simulation ntrials (config.nsimEst) times
@@ -329,8 +321,7 @@ fun estimatePollingAssertionRound(
     val eta0 = assorter.reportedMean()
 
     // optional fuzzing of the cvrs
-    val pollingConfig = config.pollingConfig
-    val useFuzz = pollingConfig.simFuzzPct ?: 0.0
+    val useFuzz = config.simFuzzPct ?: 0.0
     val sampler = PollingCardFuzzSampler(useFuzz, contestCards, contestUA.contest as Contest, assorter) // cant use Raire
 
     // was
@@ -414,14 +405,14 @@ fun estimateOneAuditAssertionRound(
     val clcaConfig = config.clcaConfig
 
     //// same as estimateClcaAssertionRound
-    var errorRates: PluralityErrorRates = when {
+    val errorRates: PluralityErrorRates = when {
         // Subsequent rounds, always use measured rates.
         (assertionRound.prevAuditResult != null) -> {
             // TODO should be average of previous rates?
             PluralityErrorRates.fromCounts(assertionRound.prevAuditResult!!.measuredCounts, oaCassorter.noerror(), assertionRound.prevAuditResult!!.samplesUsed)
         }
         (clcaConfig.strategy == ClcaStrategyType.fuzzPct)  -> {
-            ClcaErrorTable.getErrorRates(contestUA.ncandidates, clcaConfig.simFuzzPct) // TODO do better
+            ClcaErrorTable.getErrorRates(contestUA.ncandidates, clcaConfig.fuzzPct) // TODO do better
         }
         (clcaConfig.strategy == ClcaStrategyType.apriori) -> {
             clcaConfig.errorRates!!
@@ -489,7 +480,7 @@ fun estimateOneAuditAssertionRound(
     assertionRound.estimationResult = EstimationRoundResult(
         roundIdx,
         oaConfig.strategy.name,
-        fuzzPct = oaConfig.simFuzzPct, // TODO used ??
+        fuzzPct = config.simFuzzPct, // TODO used ??
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
         firstSample = if (result.sampleCount.size > 0) result.sampleCount[0] else 0,

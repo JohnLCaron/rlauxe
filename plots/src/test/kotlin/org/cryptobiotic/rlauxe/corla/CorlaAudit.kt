@@ -25,7 +25,7 @@ class CorlaSingleRoundAuditTaskGenerator(
     override fun generateNewTask(): ClcaSingleRoundAuditTask {
         val useConfig = auditConfig ?: AuditConfig(
             AuditType.CLCA, true, nsimEst = nsimEst,
-            clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror)
+            clcaConfig = clcaConfigIn ?: ClcaConfig()
         )
 
         val sim =

@@ -29,7 +29,6 @@ class TestClcaEstimationFailure {
             hasStyle = true,
             quantile = .50,     // TODO review
             contestSampleCutoff = 5000,
-            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.phantoms)
         )
 
         val ballotCards = MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed)

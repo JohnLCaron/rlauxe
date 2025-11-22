@@ -31,8 +31,7 @@ class ClcaMarginAttack {
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
         margins.forEach { margin ->
             val clcaGenerator2 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
-                parameters= mapOf("nruns" to nruns, "cat" to "noerror", "fuzzPct" to fuzzPct),
-                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror)),
+                parameters= mapOf("nruns" to nruns, "cat" to "generalAdaptive", "fuzzPct" to fuzzPct),
                 p1flips=margin*extra,
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
@@ -43,13 +42,6 @@ class ClcaMarginAttack {
                 p1flips=margin*extra,
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))
-
-            val clcaGenerator5 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
-                parameters= mapOf("nruns" to nruns, "cat" to "phantoms", "fuzzPct" to fuzzPct),
-                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms)),
-                p1flips=margin*extra,
-            )
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
         }
 
         // run tasks concurrently and average the results

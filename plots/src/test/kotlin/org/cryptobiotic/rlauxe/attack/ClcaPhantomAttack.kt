@@ -36,8 +36,7 @@ class ClcaPhantomAttack {
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1)) */
 
             val clcaGenerator2 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
-                parameters= mapOf("nruns" to nruns, "cat" to "noerror", "fuzzPct" to fuzzPct),
-                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.noerror, fuzzPct))
+                parameters= mapOf("nruns" to nruns, "cat" to "generalAdaptive", "fuzzPct" to fuzzPct),
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator2))
 
@@ -51,11 +50,6 @@ class ClcaPhantomAttack {
                 parameters= mapOf("nruns" to nruns, "cat" to "previous", "fuzzPct" to fuzzPct),
                 auditConfig = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.previous)))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4)) */
-
-            val clcaGenerator5 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
-                parameters= mapOf("nruns" to nruns, "cat" to "phantoms", "fuzzPct" to fuzzPct),
-                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms)))
-            tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
 
             /* val clcaGenerator6 = ClcaOneRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "mixed", "fuzzPct" to fuzzPct),

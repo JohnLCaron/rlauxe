@@ -25,7 +25,7 @@ class TestClcaFuzzSampler {
             AuditType.CLCA,
             hasStyle = true,
             nsimEst=10,
-            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.phantoms, simFuzzPct = .011)
+            simFuzzPct = .011
         )
 
         contests.forEach { contest ->
@@ -40,7 +40,7 @@ class TestClcaFuzzSampler {
 
             }
             // TODO use minAssertion()
-            val maxSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.map { it.first }.max() ?: 0
+            val maxSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.maxOfOrNull { it.first } ?: 0
             val pair = if (sampleSizes.isEmpty()) Pair(0, 0.0) else sampleSizes.find{ it.first == maxSize }!!
             contest.estSampleSize = pair.first
             println("${contest.contestUA.name} estSize=${contest.estSampleSize} margin=${df(pair.second)}")
@@ -55,11 +55,10 @@ private fun runWithComparisonFuzzSampler(
     cvrs: List<Cvr>, // (mvr, cvr)
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
-    val clcaConfig = auditConfig.clcaConfig
     val cassertion = assertionRound.assertion as ClcaAssertion
     val cassorter = cassertion.cassorter
 
-    val sampler = ClcaFuzzSampler(clcaConfig.simFuzzPct!!, cvrs, contestUA.contest as Contest, cassorter)
+    val sampler = ClcaFuzzSampler(auditConfig.simFuzzPct!!, cvrs, contestUA.contest as Contest, cassorter)
     val optimal = GeneralAdaptiveBetting(
         N = contestUA.Nb,
         withoutReplacement = true,

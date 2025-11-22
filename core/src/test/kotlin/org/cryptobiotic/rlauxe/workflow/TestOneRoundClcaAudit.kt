@@ -28,9 +28,7 @@ class TestOneRoundClcaAudit {
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
-        val testMvrs = if (config.clcaConfig.strategy != ClcaStrategyType.fuzzPct) testCvrs
-            // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-            else makeFuzzedCvrsFrom(contests, testCvrs, config.clcaConfig.simFuzzPct!!) // mvrs fuzz = sim fuzz
+        val testMvrs = testCvrs
 
         val workflow = WorkflowTesterClca(config, contests, emptyList(),
             MvrManagerClcaForTesting(testCvrs, testMvrs, config.seed))

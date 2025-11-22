@@ -12,7 +12,6 @@ import kotlin.test.Test
 
 class CompareAuditVariance {
     val nruns = 1000
-    val nsimEst = 100
     val N = 50000
     val fuzzPct = .01
 
@@ -21,12 +20,12 @@ class CompareAuditVariance {
         val margins =
             listOf(.02, .03, .04, .05, .06, .07, .08, .10)
 
-        val pollConfig = AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst)
+        val pollConfig = AuditConfig(AuditType.POLLING, true)
         val stopwatch = Stopwatch()
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
             val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
-                 N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct, nsimEst = nsimEst,
+                 N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct,
                  parameters = mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "auditType" to "polling"),
                  auditConfig = pollConfig,
              )
@@ -61,7 +60,7 @@ class CompareAuditVariance {
             listOf(.006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
 
         val clcaConfig = AuditConfig(
-            AuditType.CLCA, true, nsimEst = nsimEst,
+            AuditType.CLCA, true,
             clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct)
         )
 
@@ -69,7 +68,7 @@ class CompareAuditVariance {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
              val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct, nsimEst = nsimEst,
+                N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "auditType" to "clca"),
                 config=clcaConfig
             )

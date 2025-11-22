@@ -29,7 +29,7 @@ data class AuditConfig(
 
     // old config, replace by error strategies
     val pollingConfig: PollingConfig = PollingConfig(),
-    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.previous),
+    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.generalAdaptive),
     val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true),
 
     // default error strategies
@@ -44,14 +44,7 @@ data class AuditConfig(
     val isOA = auditType == AuditType.ONEAUDIT
     val isPolling = auditType == AuditType.POLLING
 
-    fun simFuzzPct(): Double? {
-        return when {
-            isPolling -> pollingConfig.simFuzzPct
-            isOA -> oaConfig.simFuzzPct
-            isClca -> clcaConfig.simFuzzPct
-            else -> throw RuntimeException("Unknown AuditType $auditType")
-        }
-    }
+    fun simFuzzPct() = simFuzzPct
 
     override fun toString() = buildString {
         appendLine("AuditConfig(auditType=$auditType, hasStyle=$hasStyle, riskLimit=$riskLimit, seed=$seed version=$version" )
@@ -74,7 +67,6 @@ data class AuditConfig(
 
 // uses AlphaMart
 data class PollingConfig(
-    val simFuzzPct: Double? = null, // for the estimation
     val d: Int = 100,  // shrinkTrunc weight TODO study what this should be, eg for noerror assumption?
 )
 
@@ -87,8 +79,8 @@ data class PollingConfig(
 // optimalComparison:  OptimalComparisonNoP1, assume P1 = 0, closed form solution for lamda
 enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, phantoms, previous, optimalComparison, generalAdaptive }
 data class ClcaConfig(
-    val strategy: ClcaStrategyType,
-    val simFuzzPct: Double? = null, // use to generate apriori errorRates for simulation
+    val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
+    val fuzzPct: Double? = null, // use to generate apriori errorRates for simulation
     val errorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker
     val d: Int = 100,  // shrinkTrunc weight for error rates
 )
@@ -101,12 +93,12 @@ data class ClcaConfig(
 enum class OneAuditStrategyType { reportedMean, bet99, eta0Eps, optimalComparison }
 data class OneAuditConfig(
     val strategy: OneAuditStrategyType = OneAuditStrategyType.optimalComparison,
-    val simFuzzPct: Double? = null, // for the estimation
     val d: Int = 100,  // shrinkTrunc weight
     val useFirst: Boolean = false, // use actual cvrs for estimation
 )
 
-
+////////////////////////////////////////////////////////////
+// not used yet
 // uses AlphaMart with TruncShrinkage
 data class PollingErrorStrategy(
     val d: Int = 100,  // shrinkTrunc weight TODO study what this should be, eg for noerror assumption?

@@ -12,7 +12,6 @@ class OneAuditNoErrors {
     val dirName = "/home/stormy/rla/audits/$name" // you need to make this directory first
 
     val nruns = 100  // number of times to run workflow
-    val nsimEst = 10
     val N = 50000
     val cvrPercent = 0.80
     val fuzzPct = 0.0
@@ -28,14 +27,12 @@ class OneAuditNoErrors {
         margins.forEach { margin ->
             val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
-                nsimEst = nsimEst,
                 parameters=mapOf("nruns" to nruns, "cat" to "poll")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                 Nc = N, margin=margin, underVotePct=0.0, phantomPct=0.0, mvrsFuzzPct=0.0,
-                nsimEst = nsimEst,
                 clcaConfigIn= ClcaConfig(ClcaStrategyType.noerror, 0.0),
                 parameters=mapOf("nruns" to nruns, "cat" to "clca")
             )
@@ -45,7 +42,7 @@ class OneAuditNoErrors {
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "optimalBet"),
                 auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true, nsimEst = nsimEst,
+                    AuditType.ONEAUDIT, true,
                     oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.optimalComparison)
                 )
             )
@@ -55,7 +52,7 @@ class OneAuditNoErrors {
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "bet99"),
                 auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true, nsimEst = nsimEst,
+                    AuditType.ONEAUDIT, true,
                     oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.bet99)
                 )
             )
@@ -65,7 +62,7 @@ class OneAuditNoErrors {
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "eta0Eps"),
                 auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true, nsimEst = nsimEst,
+                    AuditType.ONEAUDIT, true,
                     oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.eta0Eps)
                 )
             )

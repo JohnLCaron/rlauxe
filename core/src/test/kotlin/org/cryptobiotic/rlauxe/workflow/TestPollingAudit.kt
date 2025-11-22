@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.PollingConfig
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
@@ -101,8 +100,7 @@ class TestPollingAudit {
     fun testPollingWithFuzz() {
         val mvrFuzzPct = .0123
         val auditConfig = AuditConfig(
-            AuditType.POLLING, hasStyle = true, nsimEst = 10,
-            pollingConfig = PollingConfig(simFuzzPct = mvrFuzzPct)
+            AuditType.POLLING, hasStyle = true, nsimEst = 10, simFuzzPct = mvrFuzzPct
         )
 
         // each contest has a specific margin between the top two vote getters.

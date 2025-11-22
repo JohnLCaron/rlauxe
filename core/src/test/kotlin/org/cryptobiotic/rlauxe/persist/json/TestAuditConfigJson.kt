@@ -20,23 +20,23 @@ class TestAuditConfigJson {
 
         testRoundtrips(
             AuditConfig(
-                AuditType.CLCA, hasStyle=true, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
+                AuditType.CLCA, hasStyle=true, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50, simFuzzPct=.111,
             contestSampleCutoff=10000,  version=2.0,
-            clcaConfig= ClcaConfig(ClcaStrategyType.fuzzPct, simFuzzPct=.111, PluralityErrorRates(.01, .02, .03, .04), d = 99)
+            clcaConfig= ClcaConfig(ClcaStrategyType.fuzzPct,  errorRates = PluralityErrorRates(.01, .02, .03, .04), d = 99)
         )
         )
         testRoundtrips(
             AuditConfig(
-                AuditType.POLLING, hasStyle=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
+                AuditType.POLLING, hasStyle=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50, simFuzzPct=.111,
                 contestSampleCutoff=10000,  version=2.0,
-            pollingConfig= PollingConfig(simFuzzPct=.111, d = 99)
+            pollingConfig= PollingConfig(d = 99)
         )
         )
         testRoundtrips(
             AuditConfig(
-                AuditType.ONEAUDIT, hasStyle=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50,
+                AuditType.ONEAUDIT, hasStyle=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50, simFuzzPct=.111,
                 contestSampleCutoff=10000,  version=2.0,
-            oaConfig= OneAuditConfig(OneAuditStrategyType.bet99, simFuzzPct=.111, d = 99)
+            oaConfig= OneAuditConfig(OneAuditStrategyType.bet99, d = 99)
         )
         )
     }

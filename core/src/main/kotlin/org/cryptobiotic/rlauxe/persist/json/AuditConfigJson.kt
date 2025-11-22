@@ -218,25 +218,24 @@ fun AuditConfigJson.import(): AuditConfig {
 
 @Serializable
 data class PollingConfigJson(
-    val simFuzzPct: Double?,
     val d: Int,
 )
 
-fun PollingConfig.publishJson() = PollingConfigJson(this.simFuzzPct, this.d)
-fun PollingConfigJson.import() = PollingConfig(this.simFuzzPct, this.d)
+fun PollingConfig.publishJson() = PollingConfigJson(this.d)
+fun PollingConfigJson.import() = PollingConfig(this.d)
 
 @Serializable
 data class ClcaConfigJson(
     val strategy: String,
-    val simFuzzPct: Double?,
+    val fuzzPct: Double?,
     val errorRates: List<Double>?,
     val d: Int,
 )
 
-fun ClcaConfig.publishJson() = ClcaConfigJson(this.strategy.name, this.simFuzzPct, this.errorRates?.toList(), this.d)
+fun ClcaConfig.publishJson() = ClcaConfigJson(this.strategy.name, this.fuzzPct, this.errorRates?.toList(), this.d)
 fun ClcaConfigJson.import() = ClcaConfig(
         enumValueOf(this.strategy, ClcaStrategyType.entries) ?: ClcaStrategyType.noerror,
-        this.simFuzzPct,
+        this.fuzzPct,
         if (this.errorRates != null) PluralityErrorRates.fromList(this.errorRates) else null,
         this.d,
     )
@@ -244,15 +243,13 @@ fun ClcaConfigJson.import() = ClcaConfig(
 @Serializable
 data class OneAuditConfigJson(
     val strategy: String,
-    val simFuzzPct: Double?,
     val d: Int,
     val useFirst: Boolean,
 )
 
-fun OneAuditConfig.publishJson() = OneAuditConfigJson(this.strategy.name, this.simFuzzPct, this.d, this.useFirst)
+fun OneAuditConfig.publishJson() = OneAuditConfigJson(this.strategy.name, this.d, this.useFirst)
 fun OneAuditConfigJson.import() = OneAuditConfig(
         enumValueOf(this.strategy, OneAuditStrategyType.entries) ?: OneAuditStrategyType.optimalComparison,
-        this.simFuzzPct,
         this.d,
         this.useFirst
     )

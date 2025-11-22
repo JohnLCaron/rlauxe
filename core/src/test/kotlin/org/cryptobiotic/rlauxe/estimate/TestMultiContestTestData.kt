@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.df
@@ -209,13 +209,13 @@ class TestMultiContestTestData {
             if (nphantom > 1) assertEquals(fcontest.phantomPct, phantomPct, 5.0/Nc) // TODO seems like should be 2 at the most, maybe 1
 
             val contestUA = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
-            val cassorter = contestUA.minClcaAssertion().first!!.cassorter
+            val cassorter = contestUA.minClcaAssertion()!!.cassorter
 
             val sampler = ClcaWithoutReplacement(contest.id, testCvrs.zip(testCvrs), cassorter, true)
-            val tracker = PrevSamplesWithRates(cassorter.noerror())
+            val tracker = PluralityErrorTracker(cassorter.noerror())
             while (sampler.hasNext()) { tracker.addSample(sampler.next()) }
             // println("   tracker.errorRates = ${tracker.errorRates()}")
-            val p1o = tracker.clcaErrorRates().p1o
+            val p1o = tracker.pluralityErrorRates().p1o
             if (!doubleIsClose(phantomPct, p1o, 2.0/Nc)) {
                 println("   *** expected ${phantomPct} got=${p1o}")
             }

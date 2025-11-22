@@ -14,7 +14,7 @@ import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
 
 private val logger = KotlinLogging.logger("PersistedMvrManagerTest")
 private val checkValidity = true
-private val checkFuzz = true
+private val checkFuzz = false
 
 class PersistedMvrManagerTest(auditDir: String, val config: AuditConfig, val contestsUA: List<ContestUnderAudit>) : MvrManagerTestIF, PersistedMvrManager(auditDir) {
 

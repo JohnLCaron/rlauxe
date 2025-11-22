@@ -68,7 +68,7 @@ import kotlin.math.min
 //
 
 private val showRates = false
-private val showBets = true
+private val showBets = false
 
 // specialized for plurality assorter
 class AdaptiveBetting(
@@ -92,14 +92,16 @@ class AdaptiveBetting(
         val p1oest = if (p1o < 0.0 || lastj == 0) 0.0 else estimateRate(d, p1o, rateSampler.countP1o().toDouble() / lastj, lastj, eps)
         val p1uest = if (p1u < 0.0 || lastj == 0) 0.0 else estimateRate(d, p1u, rateSampler.countP1u().toDouble() / lastj, lastj, eps)
         val p2uest = if (p2u < 0.0 || lastj == 0) 0.0 else estimateRate(d, p2u, rateSampler.countP2u().toDouble() / lastj, lastj, eps)
-        if (showRates) println("  p2oest = $p2oest, p1oest = $p1oest, p1uest = $p1uest, p2uest = $p2uest, nsamples=${prevSamples.numberOfSamples()}")
+        val p0 = 1.0 - p2oest - p1oest - p1uest - p2uest
+
+        if (showRates) println("  p2oest = $p2oest, p1oest = $p1oest, p1uest = $p1uest, p2uest = $p2uest, p0=$p0 nsamples=${prevSamples.numberOfSamples()}")
 
         val mui = populationMeanIfH0(N, withoutReplacement, prevSamples)
         val kelly = OptimalLambda(a, PluralityErrorRates(p2oest, p1oest, p1uest, p2uest), mui)
         val bet = kelly.solve()
         if (showBets && lastBet != 0.0 && bet < lastBet) {
             println("*** regular lastBet=$lastBet bet=$bet")
-            println("    p2oest = $p2oest, p1oest = $p1oest, p1uest = $p1uest, p2uest = $p2uest, nsamples=${prevSamples.numberOfSamples()}")
+            if (!showRates) println("    p2oest = $p2oest, p1oest = $p1oest, p1uest = $p1uest, p2uest = $p2uest, nsamples=${prevSamples.numberOfSamples()}")
         }
         lastBet = bet
         return bet

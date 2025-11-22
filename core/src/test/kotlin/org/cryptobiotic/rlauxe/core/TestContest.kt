@@ -291,7 +291,7 @@ class TestContest {
     Total=208"""
         assertEquals(expectedShow, contestUAc.show())
 
-        assertEquals(0.07407407407407407, contestUAc.minRecountMargin(), doublePrecision)
+        assertEquals(0.07407407407407407, contestUAc.minRecountMargin()!!, doublePrecision)
     }
 
     @Test

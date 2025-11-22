@@ -52,7 +52,7 @@ class GenBettingPayoff {
             println("errors = $error")
             for (margin in margins) {
                 val noerror = 1 / (2 - margin)
-                val optimal = GeneralAdaptiveBetting(N = N, noerror=noerror, d = 100)
+                val optimal = GeneralAdaptiveBetting(N = N, noerror=noerror, upper = 1.0, d = 100)
                 val samples = ClcaErrorTracker(noerror)
                 repeat(100) { samples.addSample(noerror) }
                 println(" margin=$margin, noerror=$noerror bet = ${optimal.bet(samples)}")

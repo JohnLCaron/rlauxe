@@ -81,7 +81,6 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     }
 
     override fun upperBound() = h2(upperg)
-    fun lowerBound() = h2(lowerg)
 
     override fun desc() = buildString {
         append("${shortName()}: reportedMean=${pfn(reportedMean())} reportedMargin=${pfn(reportedMargin())} g=[$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
@@ -230,7 +229,6 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 
 */
 
-// same as SuperMajorityAssorter, I think
 data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double): AssorterIF  {
     val lowerg = -t
     val upperg = (1.0 - t)
@@ -263,6 +261,14 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
         val cands = mvr.votes[info.id]!!
         return if (cands.size == 1) h(cands.first()) else 0.5
     }
+
+    //    // assort in {0, .5, u}, u > .5
+//    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
+//        if (!mvr.hasContest(info.id)) return 0.5
+//        if (usePhantoms && mvr.phantom) return 0.0 // valid vote for every loser
+//        val w = mvr.hasMarkFor(info.id, candId)
+//        return if (mvr.hasOneVote(info.id, info.candidateIds)) (w / (2 * minFraction)) else .5
+//    }
 
     override fun upperBound() = h2(upperg)
 

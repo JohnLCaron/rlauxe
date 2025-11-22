@@ -210,13 +210,14 @@ fun AssertionRoundJson.import(assertion: Assertion): AssertionRound {
     return assertionRound
 }
 
-// data class EstimationRoundResult(
+//data class EstimationRoundResult(
 //    val roundIdx: Int,
-//    val fuzzPct: Double,
+//    val strategy: String,
+//    val fuzzPct: Double?,
 //    val startingTestStatistic: Double,
-//    val startingRates: ClcaErrorRates? = null, // aprioti error rates (clca only)
-//    val sampleDeciles: List<Int>,   // distribution of estimated sample size as deciles
-//    val firstSample: Int
+//    val startingRates: Map<Double, Double>? = null, // error rates used for estimation
+//    val estimatedDistribution: List<Int>,   // distribution of estimated sample size; currently deciles
+//    val firstSample: Int,
 //)
 
 @Serializable
@@ -254,15 +255,14 @@ fun EstimationRoundResultJson.import() : EstimationRoundResult {
 
 // data class AuditRoundResult(
 //    val roundIdx: Int,
-//    val estSampleSize: Int,   // estimated sample size
-//    val maxBallotsUsed: Int,  // maximum ballot index (for multicontest audits)
+//    val nmvrs: Int,               // number of mvrs available for this contest for this round
+//    val maxBallotIndexUsed: Int,  // maximum ballot index (for multicontest audits)
 //    val pvalue: Double,       // last pvalue when testH0 terminates
-//    val samplesNeeded: Int,   // first sample when pvalue < riskLimit
 //    val samplesUsed: Int,     // sample count when testH0 terminates
 //    val status: TestH0Status, // testH0 status
-//    val measuredMean: Double, // measured population mean
-//    val startingRates: ClcaErrorRates? = null, // aprioti error rates (clca only)
-//    val measuredRates: ClcaErrorRates? = null, // measured error rates (clca only)
+//    val measuredMean: Double, // measured population mean TODO used?
+//    val startingRates: Map<Double, Double>? = null, // starting error rates (clca only)
+//    val measuredCounts: Map<Double, Int>? = null, // measured error counts (clca only)
 //)
 
 @Serializable

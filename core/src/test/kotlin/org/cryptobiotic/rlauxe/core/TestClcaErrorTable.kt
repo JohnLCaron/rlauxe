@@ -40,7 +40,7 @@ class TestClcaErrorTable {
             val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
             val contestUA = ContestUnderAudit(sim.contest).addStandardAssertions()
-            val assertion = contestUA.minClcaAssertion().first!!
+            val assertion = contestUA.minClcaAssertion()!!
             val errors = ClcaErrorTable.calcErrorRates(0, assertion.cassorter, testMvrs.zip(testCvrs))
             val estPct = ClcaErrorTable.calcFuzzPct(2, errors)
             println("margin=$margin mvrsFuzzPct=$mvrsFuzzPct estPct=$estPct")

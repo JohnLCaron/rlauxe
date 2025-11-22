@@ -2,9 +2,6 @@ package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.core.*
 import java.lang.Math.pow
-import kotlin.math.ceil
-import kotlin.math.ln
-import kotlin.math.max
 import kotlin.math.min
 
 // The algorithm that colorado-rla uses, from SuperSimple paper
@@ -23,7 +20,7 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
         require(maxSample <= N)
 
         var sampleNumber = 0        // – j ← 0: sample number
-        val prevSamples = PrevSamplesWithRates(noerror) // – S ← 0: sample sum
+        val prevSamples = PluralityErrorTracker(noerror) // – S ← 0: sample sum
         var pvalue = 0.0
         var pvalueMin = 1.0
 

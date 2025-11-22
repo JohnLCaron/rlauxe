@@ -54,7 +54,7 @@ class TestOAShangrla {
         // fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
         //val contestOA: OneAuditContest = makeContestOA(margin, N, cvrPercent = 0.33, undervotePercent = 0.0, phantomPercent = 0.0) // poolMargin = mean2margin(0.625))
         //val contestUA = contestOA.makeContestUnderAudit()
-        val cassorter = contestUA.minClcaAssertion().first!!.cassorter as OneAuditClcaAssorter
+        val cassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
 
         val assortMargin = cassorter.assorter.reportedMargin()
         val assortMean = margin2mean(assortMargin)

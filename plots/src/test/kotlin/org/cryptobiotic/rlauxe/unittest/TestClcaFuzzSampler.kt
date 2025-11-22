@@ -57,13 +57,14 @@ private fun runWithComparisonFuzzSampler(
 ): RunTestRepeatedResult {
     val clcaConfig = auditConfig.clcaConfig
     val cassertion = assertionRound.assertion as ClcaAssertion
-    val assorter = cassertion.cassorter
+    val cassorter = cassertion.cassorter
 
-    val sampler = ClcaFuzzSampler(clcaConfig.simFuzzPct!!, cvrs, contestUA.contest as Contest, assorter)
+    val sampler = ClcaFuzzSampler(clcaConfig.simFuzzPct!!, cvrs, contestUA.contest as Contest, cassorter)
     val optimal = GeneralAdaptiveBetting(
         N = contestUA.Nb,
         withoutReplacement = true,
-        noerror=assorter.noerror(),
+        noerror=cassorter.noerror(),
+        upper=cassorter.assorter.upperBound(),
         d = 100
     )
 
@@ -72,9 +73,9 @@ private fun runWithComparisonFuzzSampler(
         sampler,
         optimal,
         // assorter.assorter().reportedMargin(),
-        assorter.noerror(),
-        assorter.upperBound(),
+        cassorter.noerror(),
+        cassorter.upperBound(),
         N=contestUA.Nb,
-        moreParameters=moreParameters + mapOf("margin" to assorter.assorter().reportedMargin()),
+        moreParameters=moreParameters + mapOf("margin" to cassorter.assorter.reportedMargin()),
     )
 }

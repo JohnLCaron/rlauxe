@@ -29,6 +29,7 @@ interface AssorterIF {
     // usePhantoms=true for polling assort value
     fun assort(mvr: Cvr, usePhantoms: Boolean = false) : Double
 
+    fun lowerBound() = 0.0  // makes life easier; do an affine tranform if needed to make this true
     fun upperBound(): Double
     fun desc(): String
     fun winner(): Int  // candidate id
@@ -36,7 +37,8 @@ interface AssorterIF {
 
     fun reportedMargin(): Double // TODO could/should this be dilutedMargin?
     fun reportedMean(): Double
-    // TODO only useful for CLCA? any meaning for polling ??
+
+    // only used for CLCA
     fun noerror(): Double  {
         val ratio = reportedMargin() / upperBound()  // TODO could/should be diluted margin?
         return 1.0 / (2.0 - ratio)
@@ -127,6 +129,7 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
 }
 
 /** See SHANGRLA, section 2.3, p.5. */
+// CANDIDATE for removal: same as AboveThreshold
 data class SuperMajorityAssorter(val info: ContestInfo, val candId: Int, val minFraction: Double): AssorterIF {
     private val upperBound = 0.5 / minFraction // 1/2f  in (.5, Inf)
     var reportedMean: Double = 0.0

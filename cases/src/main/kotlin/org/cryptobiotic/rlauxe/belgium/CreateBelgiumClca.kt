@@ -51,7 +51,7 @@ fun createBelgiumClca(
         (auditConfigIn != null) -> auditConfigIn
         else -> AuditConfig(
             AuditType.CLCA, hasStyle = true, removeCutoffContests = false, riskLimit = .05, nsimEst=10, minRecountMargin=0.0, // auditSampleLimit=1000,
-            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous, simFuzzPct = 0.0)
+            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.generalAdaptive, simFuzzPct = 0.01)
         )
     }
     val election = BelgiumClca(contestd, config.hasStyle)

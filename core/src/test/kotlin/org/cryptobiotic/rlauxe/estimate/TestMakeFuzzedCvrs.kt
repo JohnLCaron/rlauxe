@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
@@ -31,15 +31,15 @@ class TestMakeFuzzedCvrs {
             assort,
             allowReset = true
         )
-        val samples = PrevSamplesWithRates(assort.noerror())
+        val samples = PluralityErrorTracker(assort.noerror())
         repeat(ncvrs) {
             samples.addSample(sampler.sample())
         }
-        println("  errorCounts = ${samples.clcaErrorCounts()}")
+        println("  errorCounts = ${samples.pluralityErrorCounts()}")
         println("  errorRates =  ${samples.errorRates()}")
-        assertEquals(ncvrs, samples.clcaErrorCounts().sum())
+        assertEquals(ncvrs, samples.pluralityErrorCounts().sum())
 
-        val changes = samples.clcaErrorCounts().subList(1, samples.clcaErrorCounts().size).sum()
+        val changes = samples.pluralityErrorCounts().subList(1, samples.pluralityErrorCounts().size).sum()
         val changePct = changes / samples.numberOfSamples().toDouble()
         assertEquals(mvrsFuzzPct, changePct, .01)
     }
@@ -240,10 +240,10 @@ class TestMakeFuzzedCvrs {
             val totalErrorCounts = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
             test.contests.forEach { contest ->
                 val contestUA = makeContestUAfromCvrs(contest.info, cvrs)
-                val minAssert = contestUA.minClcaAssertion().first
+                val minAssert = contestUA.minClcaAssertion()
                 if (minAssert != null) repeat(ntrials) { trial ->
                     val minAssort = minAssert.cassorter
-                    val samples = PrevSamplesWithRates(minAssort.noerror())
+                    val samples = PluralityErrorTracker(minAssort.noerror())
                     var ccount = 0
                     var count = 0
                     fcvrs.forEachIndexed { idx, fcvr ->
@@ -255,16 +255,16 @@ class TestMakeFuzzedCvrs {
                     }
                     val fuzz = count.toDouble() / ccount
                     println("  trial $trial ${contest.name} changed = $count out of ${ccount} = ${df(fuzz)}")
-                    println("    errorCounts = ${samples.clcaErrorCounts()}")
+                    println("    errorCounts = ${samples.pluralityErrorCounts()}")
                     println("    errorRates =  ${samples.errorRates()}")
 
                     // assertEquals(cvrs.size, samples.errorCounts().sum()) // TODO why would this be true ??
 
-                    val changes = samples.clcaErrorCounts().subList(1, samples.clcaErrorCounts().size).sum()
+                    val changes = samples.pluralityErrorCounts().subList(1, samples.pluralityErrorCounts().size).sum()
                     val changePct = changes / samples.numberOfSamples().toDouble()
                     assertEquals(fuzzPct, changePct, .015) // 1.5% isnt great
 
-                    samples.clcaErrorCounts()
+                    samples.pluralityErrorCounts()
                         .forEachIndexed { idx, it -> totalErrorCounts[idx] = totalErrorCounts[idx] + it }
                 }
             }

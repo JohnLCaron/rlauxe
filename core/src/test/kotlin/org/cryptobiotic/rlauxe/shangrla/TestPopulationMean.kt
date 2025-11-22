@@ -144,7 +144,6 @@ class TestPopulationMeanWithoutReplacement {
         doublesAreClose(expected, means)
         assertEquals(0.5714285714285714, assortValues.mean(), doublePrecision)
         assertEquals(0.2448979591836735, assortValues.variance(), doublePrecision)
-        // assertEquals(ClcaErrorRates(0.0, 0.0, 0.0, 0.0, ), assortValues.errorRates())
 
         // compare directly to ALPHA
         val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta)

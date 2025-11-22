@@ -381,49 +381,52 @@ open class ContestUnderAudit(
         return if (isClca) clcaAssertions else pollingAssertions
     }
 
-    // TODO should use noerror(), not dilutedMargin to find "minimum"
-    fun minClcaAssertion(): Pair<ClcaAssertion?, Double> {
-        if (clcaAssertions.isEmpty()) return Pair(null, 0.0)
-        val margins = clcaAssertions.map { Pair(it, makeDilutedMargin(it.assorter))  }
+    // Pair(ClcaAssertion, noerror)
+    fun minClcaAssertion(): ClcaAssertion? {
+        if (clcaAssertions.isEmpty()) return null
+        val margins = clcaAssertions.map { Pair(it, it.cassorter.noerror())  }
         val minMargin = margins.sortedBy { it.second }
-        return minMargin.first()
+        return minMargin.first().first
     }
 
-    fun minPollingAssertion(): Pair<Assertion?, Double> {
-        if (pollingAssertions.isEmpty()) return Pair(null, 0.0)
+    // Pair(ClcaAssertion, dilutedMargin)
+    fun minPollingAssertion(): Assertion? {
+        if (pollingAssertions.isEmpty()) return null
         val margins = pollingAssertions.map { Pair(it, makeDilutedMargin(it.assorter))  }
         val minMargin = margins.sortedBy { it.second }
-        return minMargin.first()
+        return minMargin.first().first
     }
 
-    fun minAssertion(): Pair<Assertion?, Double> {
+    fun minAssertion(): Assertion? {
         return if (isClca) minClcaAssertion() else minPollingAssertion()
     }
 
-    fun minDilutedMargin(): Double {
-        return if (isClca) minClcaAssertion().second else minPollingAssertion().second
+    fun minDilutedMargin(): Double? {
+        val minAssertion = minAssertion()
+        return if (minAssertion != null) makeDilutedMargin(minAssertion.assorter) else null
     }
 
-    fun minRecountMargin(): Double {
+    fun minRecountMargin(): Double? {
         val minAssertion = minAssertion()
-        if (minAssertion.first == null) return -1.0
-        return contest.recountMargin(minAssertion.first!!.assorter)
+        return if (minAssertion != null)  contest.recountMargin(minAssertion.assorter) else null
     }
 
     fun minAssertionDifficulty(): String {
         val minAssertion = minAssertion()
-        if (minAssertion.first == null) return "N/A"
-        return contest.showAssertionDifficulty(minAssertion.first!!.assorter)
+        return if (minAssertion != null)  contest.showAssertionDifficulty(minAssertion.assorter) else "N/A"
     }
 
     override fun toString() = contest.toString()
 
     open fun show() = buildString {
         appendLine("${contest.javaClass.simpleName} ${contest.show()}")
-        if (minAssertion().first != null) append("   ${minAssertionDifficulty()}")
-        val minAssorter = minAssertion().first!!.assorter
-        append(" Nb=$Nb dilutedMargin=${pfn(minDilutedMargin())}")
-        appendLine(" reportedMargin=${pfn(minAssorter.reportedMargin())} recountMargin=${pfn(contest.recountMargin(minAssorter))} ")
+        val minAssertion = minAssertion()
+        if (minAssertion != null) {
+            val minAssorter = minAssertion.assorter
+            append("   ${contest.showAssertionDifficulty(minAssertion.assorter)}")
+            append(" Nb=$Nb dilutedMargin=${pfn(makeDilutedMargin(minAssorter))}")
+            appendLine(" reportedMargin=${pfn(minAssorter.reportedMargin())} recountMargin=${pfn(contest.recountMargin(minAssorter))} ")
+        }
         append(contest.showCandidates())
     }
 

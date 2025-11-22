@@ -68,7 +68,7 @@ class TestOneAuditJson {
     fun makeTestContestOA(): ContestUnderAudit {
         val (contestOA, _, _) = makeOneContestUA(23000, 21000, cvrFraction = .70, undervoteFraction=.01, phantomFraction=.01)
         contestOA.preAuditStatus = TestH0Status.ContestMisformed
-        val minAllAsserter = contestOA.minClcaAssertion().first
+        val minAllAsserter = contestOA.minClcaAssertion()
         assertNotNull(minAllAsserter)
 
         return contestOA

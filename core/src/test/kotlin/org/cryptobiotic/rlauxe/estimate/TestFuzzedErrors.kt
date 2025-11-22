@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.ClcaErrorRatesCumul
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.PrevSamplesWithRates
+import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.util.dfn
 import org.junit.jupiter.api.Test
@@ -30,7 +30,7 @@ class TestFuzzedErrors {
             contestsUA.forEach { contestUA ->
                 contestUA.clcaAssertions.forEach { cassertion ->
                     val cassorter = cassertion.cassorter
-                    val samples = PrevSamplesWithRates(cassorter.noerror())
+                    val samples = PluralityErrorTracker(cassorter.noerror())
                     val samplet = ClcaErrorTracker(cassorter.noerror())
 
                     if (show) println("  contest = ${contestUA.id} assertion = ${cassorter.shortName()}")
@@ -42,11 +42,11 @@ class TestFuzzedErrors {
                             samplet.addSample(bassort)
                         }
                     }
-                    if (show) println("    errorCounts = ${samples.clcaErrorCounts()}")
+                    if (show) println("    errorCounts = ${samples.pluralityErrorCounts()}")
                     if (show) println("    errorRates =  ${samples.errorRates()}")
                     if (show) println("    samplet.valueCounter =  ${samplet.valueCounter.toSortedMap()}")
 
-                    avgErrorRates.add(samples.clcaErrorRates())
+                    avgErrorRates.add(samples.pluralityErrorRates())
                 }
             }
             println("fuzzPct ${dfn(fuzzPct,3)}: ${avgErrorRates}")
@@ -94,7 +94,7 @@ fuzzPct 0.050: 0.0077, 0.0350, 0.0125, 0.0064, 0.06162
             contestsUA.forEach { contestUA ->
                 contestUA.clcaAssertions.forEach { cassertion ->
                     val cassorter = cassertion.cassorter
-                    val samples = PrevSamplesWithRates(cassorter.noerror())
+                    val samples = PluralityErrorTracker(cassorter.noerror())
                     if (show) println("  contest = ${contestUA.id} assertion = ${cassorter.shortName()}")
 
                     testPairs.forEach { (mvr, cvr) ->
@@ -102,10 +102,10 @@ fuzzPct 0.050: 0.0077, 0.0350, 0.0125, 0.0064, 0.06162
                             samples.addSample(cassorter.bassort(mvr, cvr))
                         }
                     }
-                    if (show) println("    errorCounts = ${samples.clcaErrorCounts()}")
+                    if (show) println("    errorCounts = ${samples.pluralityErrorCounts()}")
                     if (show) println("    errorRates =  ${samples.errorRates()}")
 
-                    cumulErrorRates.add(samples.clcaErrorRates())
+                    cumulErrorRates.add(samples.pluralityErrorRates())
                 }
             }
             println("fuzzPct ${dfn(fuzzPct,3)}: ${cumulErrorRates}")

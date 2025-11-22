@@ -295,17 +295,15 @@ fun createSfElection(
     val stopwatch = Stopwatch()
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
-        (auditType ==  AuditType.CLCA) -> AuditConfig(
-            AuditType.CLCA, hasStyle = hasStyle, contestSampleCutoff = 20000, riskLimit = .05, nsimEst=10,
-            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
-        )
+
+        (auditType ==  AuditType.CLCA) -> AuditConfig(AuditType.CLCA, hasStyle = hasStyle, contestSampleCutoff = 20000, riskLimit = .05, nsimEst=10)
+
         (auditType ==  AuditType.ONEAUDIT) -> AuditConfig(
             AuditType.ONEAUDIT, hasStyle = hasStyle, riskLimit = .05, contestSampleCutoff = 20000, nsimEst = 1,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
-        else -> AuditConfig(
-            AuditType.POLLING, hasStyle = hasStyle, riskLimit = .05, contestSampleCutoff = 10000, nsimEst = 100,
-            pollingConfig = PollingConfig())
+
+        else -> AuditConfig(AuditType.POLLING, hasStyle = hasStyle, riskLimit = .05, contestSampleCutoff = 10000, nsimEst = 100)
     }
 
     val election = CreateSfElection(

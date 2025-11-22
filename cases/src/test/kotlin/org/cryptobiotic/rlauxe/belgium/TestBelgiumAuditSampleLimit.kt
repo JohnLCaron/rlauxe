@@ -6,14 +6,11 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.ClcaConfig
-import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.cli.runRound
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import kotlin.test.Test
 
@@ -58,7 +55,6 @@ fun createBelgiumElectionLimited(electionName: String)  {
         riskLimit = .05,
         nsimEst = 10,
         minRecountMargin = 0.0,
-        clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
     )
     val topdir = "$toptopdir/${electionName}Limited"
     createBelgiumClca(topdir, contestd, auditConfigIn = config)

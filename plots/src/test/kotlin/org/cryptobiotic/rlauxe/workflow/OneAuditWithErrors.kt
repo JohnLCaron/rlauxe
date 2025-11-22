@@ -27,14 +27,12 @@ class OneAuditWithErrors {
         fuzzPcts.forEach { fuzzPct ->
             val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct,
-                nsimEst = nsimEst,
                 parameters=mapOf("nruns" to nruns, "cat" to "poll")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                 Nc = N, margin=margin, underVotePct=0.0, phantomPct=0.0, mvrsFuzzPct=fuzzPct,
-                nsimEst = nsimEst,
                 clcaConfigIn= ClcaConfig(ClcaStrategyType.noerror, 0.0),
                 parameters=mapOf("nruns" to nruns, "cat" to "clca")
             )

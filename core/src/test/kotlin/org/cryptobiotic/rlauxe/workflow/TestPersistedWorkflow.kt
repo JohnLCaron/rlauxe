@@ -21,8 +21,7 @@ class TestPersistedWorkflow {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
         val topdir = "/home/stormy/rla/persist/testPersistedSingleClca"
 
-        val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000,
-            clcaConfig = ClcaConfig(strategy=ClcaStrategyType.generalAdaptive, simFuzzPct = .01))
+        val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01)
 
         val N = 50000
         val testData = MultiContestTestData(1, 1, N, marginRange=0.03..0.03, ncands=2)
@@ -45,9 +44,7 @@ class TestPersistedWorkflow {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
         val topdir = "/home/stormy/rla/persist/testPersistedAuditClca"
 
-        val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000,
-            clcaConfig = ClcaConfig(strategy=ClcaStrategyType.previous, simFuzzPct = .01))
-
+        val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01)
         val N = 50000
         val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
 
@@ -69,8 +66,7 @@ class TestPersistedWorkflow {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
         val topdir = "/home/stormy/rla/persist/testPersistedAuditPolling"
 
-        val config = AuditConfig(AuditType.POLLING, hasStyle=true, seed = 12356667890L, nsimEst=10,
-            pollingConfig = PollingConfig(simFuzzPct = .01))
+        val config = AuditConfig(AuditType.POLLING, hasStyle=true, seed = 12356667890L, nsimEst=10, simFuzzPct = .01)
 
         val N = 50000
         val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
@@ -95,8 +91,8 @@ class TestPersistedWorkflow {
         val topdir = "/home/stormy/rla/persist/testPersistedOneAudit"
 
         val config = AuditConfig(
-            AuditType.ONEAUDIT, hasStyle = true, contestSampleCutoff = 20000, nsimEst = 10,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true, simFuzzPct = .01)
+            AuditType.ONEAUDIT, hasStyle = true, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = .01,
+            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
 
         val N = 5000

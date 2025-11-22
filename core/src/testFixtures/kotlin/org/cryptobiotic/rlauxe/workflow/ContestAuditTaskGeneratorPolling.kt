@@ -22,13 +22,12 @@ class PollingContestAuditTaskGenerator(
 
     override fun generateNewTask(): ConcurrentTaskG<WorkflowResult> {
         val useConfig = auditConfig ?: AuditConfig(
-            AuditType.POLLING, true, nsimEst = nsimEst,
-            pollingConfig = PollingConfig(simFuzzPct = mvrsFuzzPct)
+            AuditType.POLLING, true, nsimEst = nsimEst, simFuzzPct = mvrsFuzzPct,
         )
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-        var testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+        val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
         val ballotCards = MvrManagerPollingForTesting(testMvrs, testMvrs, useConfig.seed)
         val pollingWorkflow = WorkflowTesterPolling(useConfig, listOf(sim.contest), ballotCards)
@@ -50,7 +49,6 @@ class PollingSingleRoundAuditTaskGenerator(
     val parameters : Map<String, Any>,
     val auditConfig: AuditConfig? = null,
     val Nb: Int = Nc,
-    val nsimEst: Int = 100,
     val quiet: Boolean = true,
     ): ContestAuditTaskGenerator {
 
@@ -58,8 +56,7 @@ class PollingSingleRoundAuditTaskGenerator(
 
     override fun generateNewTask(): PollingSingleRoundAuditTask {
         val useConfig = auditConfig ?: AuditConfig(
-            AuditType.POLLING, true, nsimEst = nsimEst,
-            pollingConfig = PollingConfig(simFuzzPct = mvrsFuzzPct)
+            AuditType.POLLING, true, simFuzzPct = mvrsFuzzPct
         )
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)

@@ -20,7 +20,7 @@ class RaireContestAuditTaskGenerator(
     override fun generateNewTask(): ContestAuditTask {
         val useConfig = auditConfig ?: AuditConfig(
             AuditType.CLCA, true, nsimEst = nsimEst,
-            clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror)
+            clcaConfig = clcaConfigIn ?: ClcaConfig()
         )
 
         val (rcontest, testCvrs) = simulateRaireTestContest(
@@ -66,7 +66,7 @@ class RaireSingleRoundAuditTaskGenerator(
     override fun generateNewTask(): ClcaSingleRoundAuditTask {
         val useConfig = auditConfig ?: AuditConfig(
             AuditType.CLCA, true, nsimEst = nsimEst,
-            clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror)
+            clcaConfig = clcaConfigIn ?: ClcaConfig()
         )
 
         val (rcontest, testCvrs) = simulateRaireTestContest(

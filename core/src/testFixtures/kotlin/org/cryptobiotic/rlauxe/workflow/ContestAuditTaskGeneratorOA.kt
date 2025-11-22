@@ -15,14 +15,14 @@ class OneAuditContestAuditTaskGenerator(
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
     val auditConfigIn: AuditConfig? = null,
-    val nsimEst: Int = 100,
 ) : ContestAuditTaskGenerator {
     override fun name() = "OneAuditWorkflowTaskGenerator"
 
     override fun generateNewTask(): ContestAuditTask {
         val config = auditConfigIn ?: AuditConfig(
-            AuditType.ONEAUDIT, true, nsimEst = nsimEst,
-            oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean, simFuzzPct = mvrsFuzzPct)
+            AuditType.ONEAUDIT, true,
+            simFuzzPct = mvrsFuzzPct,
+            oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean)
         )
 
         val (contestOA, _, oaCvrs) = makeOneContestUA(
@@ -54,7 +54,6 @@ class OneAuditSingleRoundAuditTaskGenerator(
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
     val auditConfigIn: AuditConfig? = null,
-    val nsimEst: Int = 100,
     val quiet: Boolean = true,
     val p2flips: Double? = null,
     val p1flips: Double? = null,
@@ -64,8 +63,9 @@ class OneAuditSingleRoundAuditTaskGenerator(
 
     override fun generateNewTask(): ClcaSingleRoundAuditTask {
         val config = auditConfigIn ?: AuditConfig(
-            AuditType.ONEAUDIT, true, nsimEst = nsimEst,
-            oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean, simFuzzPct = mvrsFuzzPct)
+            AuditType.ONEAUDIT, true,
+            simFuzzPct = mvrsFuzzPct,
+            oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean, )
         )
 
         val (contestOA, _, oaCvrs) =

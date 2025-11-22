@@ -256,10 +256,9 @@ fun createColoradoOneAudit(
 
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
-        isClca -> AuditConfig(
-            AuditType.CLCA, hasStyle = true, contestSampleCutoff = 20000, riskLimit = .03, nsimEst=10,
-            clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
-        )
+
+        isClca -> AuditConfig(AuditType.CLCA, hasStyle = true, contestSampleCutoff = 20000, riskLimit = .03, nsimEst=10)
+
         else -> AuditConfig( // TODO NOSTYLE
             AuditType.ONEAUDIT, hasStyle = false, riskLimit = .03, contestSampleCutoff = null, nsimEst = 1,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)

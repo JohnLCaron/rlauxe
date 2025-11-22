@@ -26,7 +26,7 @@ class ClcaContestAuditTaskGenerator(
         val useConfig = config ?:
         AuditConfig(
             AuditType.CLCA, true, nsimEst = nsimEst,
-            clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror)
+            clcaConfig = clcaConfigIn ?: ClcaConfig()
         )
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
@@ -62,7 +62,6 @@ class ClcaSingleRoundAuditTaskGenerator(
     val parameters : Map<String, Any>,
     val config: AuditConfig? = null,
     val clcaConfigIn: ClcaConfig? = null,
-    val nsimEst: Int = 100,
     val quiet: Boolean = true,
     val p2flips: Double? = null,
     val p1flips: Double? = null,
@@ -75,12 +74,12 @@ class ClcaSingleRoundAuditTaskGenerator(
     override fun generateNewTask(): ClcaSingleRoundAuditTask {
         val useConfig = config ?:
         AuditConfig(
-            AuditType.CLCA, true, nsimEst = nsimEst,
-            clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.noerror)
+            AuditType.CLCA, true,
+            clcaConfig = clcaConfigIn ?: ClcaConfig()
         )
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
-        var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
+        val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
         val testMvrs =  if (p2flips != null || p1flips != null) {
             makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips)
         } else {

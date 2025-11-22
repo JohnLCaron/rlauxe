@@ -29,15 +29,13 @@ class AuditsNoErrors {
         margins.forEach { margin ->
             val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
-                nsimEst = nsimEst,
                 parameters=mapOf("nruns" to nruns, "cat" to "poll")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
-                nsimEst = nsimEst,
-                clcaConfigIn= ClcaConfig(ClcaStrategyType.noerror, 0.0),
+                clcaConfigIn= ClcaConfig(ClcaStrategyType.generalAdaptive, 0.0),
                 parameters=mapOf("nruns" to nruns, "cat" to "clca")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
@@ -112,7 +110,6 @@ class AuditsNoErrors {
 
             val noerror = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
-                nsimEst = nsimEst,
                 clcaConfigIn= ClcaConfig(ClcaStrategyType.noerror, 0.0),
                 parameters=mapOf("nruns" to nruns, "cat" to "adaptive")
             )

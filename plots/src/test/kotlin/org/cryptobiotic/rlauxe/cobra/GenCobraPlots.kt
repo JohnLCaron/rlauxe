@@ -26,7 +26,6 @@ class GenCobraPlots {
 
         val config = AuditConfig(
             AuditType.CLCA, true, nsimEst = nsimEst,
-            clcaConfig = ClcaConfig(ClcaStrategyType.noerror)
         )
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()

@@ -26,14 +26,14 @@ class AuditsWithErrors {
         fuzzPcts.forEach { fuzzPct ->
 
             val generalAdaptive = ClcaSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, 0.0, fuzzPct, nsimEst=1,
+                N, margin, 0.0, 0.0, fuzzPct,
                 clcaConfigIn= ClcaConfig(ClcaStrategyType.generalAdaptive, fuzzPct),
                 parameters=mapOf("nruns" to nruns, "fuzzPct" to fuzzPct, "cat" to "generalAdaptive")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, generalAdaptive))
 
             val noerror = ClcaSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, 0.0, fuzzPct, nsimEst = 1,
+                N, margin, 0.0, 0.0, fuzzPct,
                 clcaConfigIn= ClcaConfig(ClcaStrategyType.noerror, fuzzPct),
                 parameters=mapOf("nruns" to nruns, "fuzzPct" to fuzzPct, "cat" to "adaptive")
             )

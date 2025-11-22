@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.PollingConfig
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -15,8 +14,7 @@ class TestPollingAuditTask {
         val margin = .04
         val mvrFuzzPct = .0123
         val auditConfig = AuditConfig(
-            AuditType.POLLING, hasStyle = true, nsimEst = 1,
-            pollingConfig = PollingConfig(simFuzzPct = mvrFuzzPct)
+            AuditType.POLLING, hasStyle = true, nsimEst = 1, simFuzzPct = mvrFuzzPct
         )
         val taskGen = PollingContestAuditTaskGenerator(
             Nc, margin, 0.0, 0.0, 0.0,
@@ -37,8 +35,7 @@ class TestPollingAuditTask {
         val margin = .08
         val mvrFuzzPct = .0123
         val auditConfig = AuditConfig(
-            AuditType.POLLING, hasStyle = true, nsimEst = 10, contestSampleCutoff = 10000,
-            pollingConfig = PollingConfig(simFuzzPct = mvrFuzzPct)
+            AuditType.POLLING, hasStyle = true, nsimEst = 10, contestSampleCutoff = 10000, simFuzzPct = mvrFuzzPct
         )
         val taskGen = PollingSingleRoundAuditTaskGenerator(
             Nc, margin, 0.0, 0.0, 0.0,

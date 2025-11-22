@@ -173,7 +173,6 @@ fun startTestElectionClca(
 
     val config = AuditConfig(
         AuditType.CLCA, hasStyle = true, nsimEst = 100, simFuzzPct = fuzzMvrs,
-        clcaConfig = ClcaConfig(strategy = ClcaStrategyType.previous)
     )
 
     clearDirectory(Path(auditDir))

@@ -106,16 +106,6 @@ class TestClcaAudit {
 
     @Test
     fun testClcaPhantoms() {
-        val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
-        val testData = MultiContestTestData(11, 4, N, )
-        val finalRound = testClcaWorkflow(config, testData)
-        assertNotNull(finalRound)
-        println(finalRound.show())
-    }
-
-    @Test
-    fun testClcaPhantomStrategy() {
-        val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.phantoms))
         val testData = MultiContestTestData(11, 4, N, )
         val finalRound = testClcaWorkflow(config, testData)
         assertNotNull(finalRound)

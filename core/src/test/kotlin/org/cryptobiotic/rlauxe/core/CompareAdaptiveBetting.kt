@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.doublePrecision
+import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -21,10 +22,12 @@ class CompareAdaptiveBetting {
             val noerror = 1 / (2 - margin) // aka noerror
             println("margin=$margin")
 
-            val bet1 = AdaptiveBetting(N, a=noerror, d=100, errorRates=PluralityErrorRates(0.0, 0.0, 0.0, 0.0))
+            val errorRates = PluralityErrorRates(0.0, 0.0, 0.0, 0.0)
+            val bet1 = AdaptiveBetting(N, a=noerror, d=100, errorRates=errorRates)
             val tracker1 = PluralityErrorTracker(noerror)
 
-            val bet2 = GeneralAdaptiveBetting(N, noerror=noerror, upper = 1.0, d=100)
+            val errorCounts = ClcaErrorCounts.fromPluralityErrorRates(errorRates, totalSamples = N, noerror = noerror, upper = 1.0)
+            val bet2 = GeneralAdaptiveBetting(N, prevRounds = errorCounts, d=100)
             val tracker2 = ClcaErrorTracker(noerror)
 
             var count = 0
@@ -66,11 +69,13 @@ class CompareAdaptiveBetting {
             val contestUA = ContestUnderAudit(sim.contest, Nbin=Nc).addStandardAssertions()
             val cassorter = contestUA.minClcaAssertion()!!.cassorter
 
-            val bet1 = AdaptiveBetting(Nc, a=noerror, d=100, errorRates=PluralityErrorRates(0.0, 0.0, 0.0, 0.0))
+            val errorRates=PluralityErrorRates(0.0, 0.0, 0.0, 0.0)
+            val bet1 = AdaptiveBetting(Nc, a=noerror, d=100, errorRates=errorRates)
             val tracker1 = PluralityErrorTracker(noerror)
             val risk1 = Risk(Nc, tracker1, bet1, cassorter.upperBound())
 
-            val bet2 = GeneralAdaptiveBetting(Nc, noerror=noerror, upper = 1.0, d=100)
+            val errorCounts = ClcaErrorCounts.fromPluralityErrorRates(errorRates, totalSamples = 0, noerror = noerror, upper = 1.0)
+            val bet2 = GeneralAdaptiveBetting(Nc, prevRounds = errorCounts, d=100)
             val tracker2 = ClcaErrorTracker(noerror)
             val risk2 = Risk(Nc, tracker2, bet2, cassorter.upperBound())
 
@@ -87,11 +92,13 @@ class CompareAdaptiveBetting {
                     print(" hay ")
                 if (risk1.pvalue()/risk2.pvalue() > 2.0 || risk2.pvalue()/risk1.pvalue() > 2.0)
                     print(" haya ")
+                if (!doubleIsClose(lam1,lam2, .001))
+                    println("wtf")
 
                 count++
             }
             println("FINAL pvalue1=${risk1.pvalue()} pvalue2=${risk2.pvalue()}")
-            assertEquals(risk1.pvalue(), risk2.pvalue(), .001)
+            assertTrue(doubleIsClose(risk1.pvalue(), risk2.pvalue(), .001))
         }
     }
 }

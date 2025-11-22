@@ -360,7 +360,6 @@ fun createBoulderElection(
                 contestSampleCutoff = 20000,
                 minRecountMargin = minRecountMargin,
                 nsimEst = 10,
-                clcaConfig = ClcaConfig(ClcaStrategyType.optimalComparison)
             )
         else AuditConfig(
             AuditType.ONEAUDIT, hasStyle=true, riskLimit=riskLimit, contestSampleCutoff=20000, minRecountMargin=minRecountMargin, nsimEst=10,

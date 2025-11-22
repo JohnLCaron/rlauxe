@@ -12,8 +12,8 @@ import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
 
-// use Kelly optimization of lambda parameter for the BettingFn
 // generalize AdaptiveBetting for any clca assorter
+// Kelly optimization of lambda parameter with estimated error rates
 
 private val showRates = false
 private val showBets = false
@@ -21,47 +21,41 @@ private val showBets = false
 // TODO what about OneAudit?? given pool sizes and avgs, could optimize....
 class GeneralAdaptiveBetting(
     val N: Int, // population size for this contest
-    val noerror: Double, // value of bassort when theres no error
-    val upper: Double, // primitive assorter upper bound, is always > 1/2
+    val prevRounds: ClcaErrorCounts, // primitive assorter upper bound, is always > 1/2
     val d: Int = 100,  // trunc weight
     val minRate: Double = .00001, // this bounds how close lam gets to 2.0; might be worth playing with
     val withoutReplacement: Boolean = true,
 ) : BettingFn {
     var called = 0
     var lastBet = 0.0
-    val bassortValues: List<Double>
-
-    init {
-        // [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror (l==0) (we will assume this)
-        val u12 = 1.0 / (2 * upper)
-        val taus = listOf(0.0, u12, 1 - u12, 2 - u12, 1 + u12, 2.0)
-        bassortValues = taus.map { it * noerror }.toSet().toList().sorted()
-        // println("  bassortValues = ${bassortValues}")
-    }
 
     override fun bet(prevSamples: SampleTracker): Double {
-        val valueTracker = prevSamples as ClcaErrorTracker
+        val tracker = prevSamples as ClcaErrorTracker
 
         // estimated rates for each bassort value, minimum rate is minRate
-        val estRates = if (valueTracker.numberOfSamples() == 0) emptyMap() else {
-            bassortValues.associate { bassort ->
-                bassort to estimateRate(valueTracker.numberOfSamples(), d, 0.0,
-                    valueTracker.valueCounter[bassort] ?: 0)
+        val sampleNumber = prevRounds.totalSamples + tracker.numberOfSamples()
+        val estRates =
+            prevRounds.bassortValues.associate { bassort -> // TODO could get in trouble over non-exact floating point
+                val est = estimateRate(apriori=0.0,
+                    sampleCount=(tracker.valueCounter[bassort] ?: 0) + (prevRounds.errorCounts()[bassort] ?: 0),
+                    sampleNum=sampleNumber,
+                )
+                bassort to est
             }
-        }
+
         val p0p = 1.0 - estRates.map{ it.value }.sum()
         if (showRates) {
-            val p0 = valueTracker.noerrorCount / valueTracker.numberOfSamples().toDouble()
-            println("  gRates = ${estRates.toSortedMap()} p0=$p0 p0p = $p0p nsamples=${valueTracker.numberOfSamples()}")
+            val p0 = tracker.noerrorCount / tracker.numberOfSamples().toDouble()
+            println("  gRates = ${estRates.toSortedMap()} p0=$p0 p0p = $p0p nsamples=${tracker.numberOfSamples()}")
         }
 
         called++
-        val mui = populationMeanIfH0(N, withoutReplacement, valueTracker)
-        val kelly = GeneralOptimalLambda(noerror = noerror, valueTracker, mui, estRates)
+        val mui = populationMeanIfH0(N, withoutReplacement, tracker)
+        val kelly = GeneralOptimalLambda(noerror = prevRounds.noerror, tracker, mui, estRates)
         val bet = kelly.solve()
         if (showBets && lastBet != 0.0 && bet < lastBet) {
             println("gggggeneral lastBet=$lastBet bet=$bet")
-            if (!showRates) println("    gRates = ${estRates.toSortedMap()} nsamples=${valueTracker.numberOfSamples()}")
+            if (!showRates) println("    gRates = ${estRates.toSortedMap()} nsamples=${tracker.numberOfSamples()}")
         }
         lastBet = bet
         return bet
@@ -73,12 +67,13 @@ class GeneralAdaptiveBetting(
     // Then the shrink-trunc estimate is:
     //   p_̃ki := (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ epsk  ; COBRA eq (4)
 
+    // ease the first d sample in slowly
     fun estimateRate(
-        sampleNum: Int,
-        d: Int,
         apriori: Double,
         sampleCount: Int,
+        sampleNum: Int,
     ): Double {
+        if (sampleNum == 0) return minRate
         // “shrink-trunc” estimator; measured error rate is sampleCount/N
         //   (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ minRate  ; COBRA eq (4)
         val est = (d * apriori + sampleCount) / (d + sampleNum - 1)

@@ -77,7 +77,7 @@ class AdaptiveBetting(
     val a: Double, // compareAssorter.noerror
     val d: Int,  // weight
     errorRates: PluralityErrorRates, // a priori estimate of the plurality error rates
-    val eps: Double = .00001    // TODO I think we picked this number out of a hat.
+    val minRate: Double = .00001    // TODO I think we picked this number out of a hat.
 ): BettingFn {
     val p2o: Double = errorRates.p2o // apriori rate of 2-vote overstatements; set < 0 to remove consideration
     val p1o: Double = errorRates.p1o // apriori rate of 1-vote overstatements; set < 0 to remove consideration
@@ -88,10 +88,10 @@ class AdaptiveBetting(
     override fun bet(prevSamples: SampleTracker): Double {
         val rateSampler = prevSamples as PluralityErrorTracker
         val lastj = prevSamples.numberOfSamples()
-        val p2oest = if (p2o < 0.0 || lastj == 0) 0.0 else estimateRate(d, p2o, rateSampler.countP2o().toDouble() / lastj, lastj, eps)
-        val p1oest = if (p1o < 0.0 || lastj == 0) 0.0 else estimateRate(d, p1o, rateSampler.countP1o().toDouble() / lastj, lastj, eps)
-        val p1uest = if (p1u < 0.0 || lastj == 0) 0.0 else estimateRate(d, p1u, rateSampler.countP1u().toDouble() / lastj, lastj, eps)
-        val p2uest = if (p2u < 0.0 || lastj == 0) 0.0 else estimateRate(d, p2u, rateSampler.countP2u().toDouble() / lastj, lastj, eps)
+        val p2oest = if (p2o < 0.0 || lastj == 0) minRate else estimateRate(d, p2o, rateSampler.countP2o().toDouble() / lastj, lastj)
+        val p1oest = if (p1o < 0.0 || lastj == 0) minRate else estimateRate(d, p1o, rateSampler.countP1o().toDouble() / lastj, lastj)
+        val p1uest = if (p1u < 0.0 || lastj == 0) minRate else estimateRate(d, p1u, rateSampler.countP1u().toDouble() / lastj, lastj)
+        val p2uest = if (p2u < 0.0 || lastj == 0) minRate else estimateRate(d, p2u, rateSampler.countP2u().toDouble() / lastj, lastj)
         val p0 = 1.0 - p2oest - p1oest - p1uest - p2uest
 
         if (showRates) println("  p2oest = $p2oest, p1oest = $p1oest, p1uest = $p1uest, p2uest = $p2uest, p0=$p0 nsamples=${prevSamples.numberOfSamples()}")
@@ -112,10 +112,12 @@ class AdaptiveBetting(
     // Let p̂_ki be the sample rates at time i, e.g., p̂_2i = Sum(1{Xj = 0})/i , j=1..i
     // Then the shrink-trunc estimate is:
     //   p_̃ki := (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ epsk  ; COBRA eq (4)
-    fun estimateRate(d: Int, apriori: Double, sampleRate: Double, sampleNum: Int, eps: Double): Double {
+    fun estimateRate(d: Int, apriori: Double, sampleRate: Double, sampleNum: Int): Double {
+        if (sampleNum == 0) return minRate
+
         //   (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ epsk  ; COBRA eq (4)
         val est = (d * apriori + sampleNum * sampleRate) / (d + sampleNum - 1)
-        val lower =  max(est, eps) // lower bound on the estimated rate
+        val lower =  max(est, minRate) // lower bound on the estimated rate
         return min(1.0, lower) // upper bound on the estimated rate
     }
 }

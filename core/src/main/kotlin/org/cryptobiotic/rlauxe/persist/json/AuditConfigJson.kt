@@ -234,7 +234,7 @@ data class ClcaConfigJson(
 
 fun ClcaConfig.publishJson() = ClcaConfigJson(this.strategy.name, this.fuzzPct, this.errorRates?.toList(), this.d)
 fun ClcaConfigJson.import() = ClcaConfig(
-        enumValueOf(this.strategy, ClcaStrategyType.entries) ?: ClcaStrategyType.noerror,
+        enumValueOf(this.strategy, ClcaStrategyType.entries) ?: ClcaStrategyType.generalAdaptive,
         this.fuzzPct,
         if (this.errorRates != null) PluralityErrorRates.fromList(this.errorRates) else null,
         this.d,

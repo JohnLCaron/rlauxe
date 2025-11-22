@@ -71,13 +71,17 @@ data class PollingConfig(
 )
 
 // oracle: use actual measured error rates, testing only
-// noerror: assume no errors at first, then measured
 // fuzzPct: model errors with fuzz simulation at first, then measured
 // apriori: pass in apriori errorRates at first, then measured
 // phantoms: use phantom rates at first.
 // previous: use phantom rates at first, then measured.
 // optimalComparison:  OptimalComparisonNoP1, assume P1 = 0, closed form solution for lamda
-enum class ClcaStrategyType { oracle, noerror, fuzzPct, apriori, phantoms, previous, optimalComparison, generalAdaptive }
+
+// Error Rates: the minimum p1o is always the phantom rate. Subsequent rounds, always use measured rates.
+//  apriori: pass in apriori errorRates for first round.
+//  fuzzPct: ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct) for first round.
+//  oracle: use actual measured error rates for first round. (violates martingale condition)
+enum class ClcaStrategyType { generalAdaptive, apriori, fuzzPct, oracle  }
 data class ClcaConfig(
     val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
     val fuzzPct: Double? = null, // use to generate apriori errorRates for simulation

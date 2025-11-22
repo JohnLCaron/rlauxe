@@ -34,7 +34,6 @@ class AuditsWithErrors {
 
             val noerror = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, fuzzPct,
-                clcaConfigIn= ClcaConfig(ClcaStrategyType.noerror, fuzzPct),
                 parameters=mapOf("nruns" to nruns, "fuzzPct" to fuzzPct, "cat" to "adaptive")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, noerror))

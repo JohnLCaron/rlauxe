@@ -33,7 +33,6 @@ class OneAuditWithErrors {
 
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                 Nc = N, margin=margin, underVotePct=0.0, phantomPct=0.0, mvrsFuzzPct=fuzzPct,
-                clcaConfigIn= ClcaConfig(ClcaStrategyType.noerror, 0.0),
                 parameters=mapOf("nruns" to nruns, "cat" to "clca")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))

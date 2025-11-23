@@ -50,13 +50,13 @@ class GenVsFuzzByStrategy {
             //// generate mvrs with fuzzPct, but use different errors (twice or half actual) for estimating and auditing
             val clcaGenerator4 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "2*fuzzPct", "fuzzPct" to fuzzPct),
-                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorTable.getErrorRates(2, 2*fuzzPct)))
+                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, fuzzPct, pluralityErrorRates = ClcaErrorTable.getErrorRates(2, 2*fuzzPct)))
                 )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
 
             val clcaGenerator5 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "fuzzPct/2", "fuzzPct" to fuzzPct),
-                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, fuzzPct, errorRates = ClcaErrorTable.getErrorRates(2, fuzzPct/2)))
+                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, fuzzPct, pluralityErrorRates = ClcaErrorTable.getErrorRates(2, fuzzPct/2)))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
         }

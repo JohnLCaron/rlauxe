@@ -19,7 +19,7 @@ class CobraSingleRoundAuditTaskGenerator(
 ) : ContestAuditTaskGenerator {
     override fun name() = "CobraSingleRoundAuditTaskGenerator"
 
-    override fun generateNewTask(): ClcaSingleRoundAuditTask {
+    override fun generateNewTask(): ClcaSingleRoundSingleContestAuditTask {
         // the cvrs get generated with the reportedMeans.
         val testCvrs = makeCvrsByExactMean(Nc, reportedMean)
 
@@ -45,7 +45,7 @@ class CobraSingleRoundAuditTaskGenerator(
             MvrManagerClcaForTesting(testCvrs, sampler.mvrs, auditConfig.seed),
             p2prior)
 
-        return ClcaSingleRoundAuditTask(
+        return ClcaSingleRoundSingleContestAuditTask(
             name(),
             cobraWorkflow2,
             mvrs,

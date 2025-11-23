@@ -34,8 +34,8 @@ class TestOneAuditTask {
     @Test
     fun testOneAuditSingleRoundAuditTaskGenerator() {
         val Nc = 50000
-        val margin = .074
-        val mvrFuzzPct = 0.0
+        val margin = .04
+        val mvrFuzzPct = 0.005
         val config = AuditConfig(
             AuditType.ONEAUDIT, hasStyle = true, simFuzzPct = mvrFuzzPct,
         )
@@ -43,11 +43,36 @@ class TestOneAuditTask {
             Nc,
             margin,
             underVotePct = 0.0,
-            phantomPct = 0.0,
-            cvrPercent = 0.80,
+            phantomPct = 0.01,
+            cvrPercent = 0.90,
             mvrsFuzzPct = mvrFuzzPct,
             auditConfigIn = config,
             parameters = emptyMap(),
+        )
+
+        val task = taskGen.generateNewTask()
+        val workflowResult = task.run()
+        println(workflowResult)
+        assertEquals(TestH0Status.StatRejectNull, workflowResult.status)
+    }
+
+    @Test
+    fun testOneAuditSingleRoundMultipleContests() {
+        val Nc = 50000
+        val mvrFuzzPct = 0.005
+        val config = AuditConfig(
+            AuditType.ONEAUDIT, hasStyle = true, simFuzzPct = mvrFuzzPct,
+        )
+        //     val N: Int,
+        //    val simFuzzPct: Double,
+        //    val ncontests: Int,
+        //    val nballotStyles: Int,
+        val taskGen = OneAuditSingleRoundMultipleContests(
+            Nc,
+            simFuzzPct = mvrFuzzPct,
+            ncontests = 11,
+            nballotStyles = 5,
+            configIn = config
         )
 
         val task = taskGen.generateNewTask()

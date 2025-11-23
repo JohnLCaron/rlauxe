@@ -22,7 +22,7 @@ class CorlaSingleRoundAuditTaskGenerator(
 ): ContestAuditTaskGenerator {
     override fun name() = "CorlaSingleRoundAuditTaskGenerator"
 
-    override fun generateNewTask(): ClcaSingleRoundAuditTask {
+    override fun generateNewTask(): ClcaSingleRoundSingleContestAuditTask {
         val useConfig = auditConfig ?: AuditConfig(
             AuditType.CLCA, true, nsimEst = nsimEst,
             clcaConfig = clcaConfigIn ?: ClcaConfig()
@@ -36,7 +36,7 @@ class CorlaSingleRoundAuditTaskGenerator(
 
         val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(sim.contest), emptyList(),
                                  MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed))
-        return ClcaSingleRoundAuditTask(
+        return ClcaSingleRoundSingleContestAuditTask(
             name(),
             clcaWorkflow,
             testMvrs,

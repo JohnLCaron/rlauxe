@@ -232,7 +232,7 @@ data class ClcaConfigJson(
     val d: Int,
 )
 
-fun ClcaConfig.publishJson() = ClcaConfigJson(this.strategy.name, this.fuzzPct, this.errorRates?.toList(), this.d)
+fun ClcaConfig.publishJson() = ClcaConfigJson(this.strategy.name, this.fuzzPct, this.pluralityErrorRates?.toList(), this.d)
 fun ClcaConfigJson.import() = ClcaConfig(
         enumValueOf(this.strategy, ClcaStrategyType.entries) ?: ClcaStrategyType.generalAdaptive,
         this.fuzzPct,

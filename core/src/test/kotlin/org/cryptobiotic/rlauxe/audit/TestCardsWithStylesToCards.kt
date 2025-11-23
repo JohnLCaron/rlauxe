@@ -33,7 +33,7 @@ class TestCardsWithStylesToCards {
         val cardOrg = AuditableCard ("cardOrg", 42, 0L, false, intArrayOf(1,2,3),
             mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), 1)
         
-        var auditType = AuditType.CLCA
+        val auditType = AuditType.CLCA
 
         // simple hasStyle with or without poolid. aka "cvrs are complete".
         var hasStyle = true
@@ -52,7 +52,7 @@ class TestCardsWithStylesToCards {
         testOneTarget("clca hasStyle and poolIds", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = null)
 
         val styleName = "yes"
-        val cardStyle = CardStyle(styleName, 1, emptyList(), listOf(0,1,2,3,4), null)
+        val cardStyle = CardStyle(styleName, 1, emptyList(), listOf(0,1,2,3,4))
         // doesnt make sense to use; hasStyle means use cvr
         hasStyle = true
         hasCardStyles = true
@@ -113,7 +113,7 @@ class TestCardsWithStylesToCards {
 
         // what happens if the poolId doesnt match ??
         val styleName = "yes"
-        val cardStyle = CardStyle(styleName, 1, emptyList(), listOf(0,1,2,3,4), null)
+        val cardStyle = CardStyle(styleName, 1, emptyList(), listOf(0,1,2,3,4))
         hasStyle = true
         hasCardStyles = true
         hasPoolId = true
@@ -180,8 +180,8 @@ class TestCardsWithStylesToCards {
         var hasCardStyles = true
         var hasPoolId = true
 
-        val cardStyle1 = CardStyle(styleName1, 1, emptyList(), listOf(0,1,2), null)
-        val cardStyle2 = CardStyle(styleName2, 2, emptyList(), listOf(0,1,2,3,4,7), null)
+        val cardStyle1 = CardStyle(styleName1, 1, emptyList(), listOf(0,1,2))
+        val cardStyle2 = CardStyle(styleName2, 2, emptyList(), listOf(0,1,2,3,4,7))
         val cardStyles = listOf(cardStyle1, cardStyle2)
 
         // hasStyle means must supply the list of possibleContests only for pooled data

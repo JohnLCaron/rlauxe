@@ -11,8 +11,7 @@ class OneAuditWithErrors {
     val name = "OneAuditWithErrors4"
     val dirName = "/home/stormy/rla/audits/$name" // you need to make this directory first
 
-    val nruns = 200 // number of times to run workflow
-    val nsimEst = 10
+    val nruns = 100 // number of times to run workflow
     val N = 50000
     val cvrPercent = 0.95
     val margin = .04
@@ -39,9 +38,9 @@ class OneAuditWithErrors {
 
             val oneauditGeneratorReportedMean = OneAuditSingleRoundAuditTaskGenerator(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
-                parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "optimalBet"),
+                parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "optimalComparison"),
                 auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true, nsimEst = nsimEst,
+                    AuditType.ONEAUDIT, true,
                     oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.optimalComparison)
                 )
             )
@@ -51,7 +50,7 @@ class OneAuditWithErrors {
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "bet99"),
                 auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true, nsimEst = nsimEst,
+                    AuditType.ONEAUDIT, true,
                     oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.bet99)
                 )
             )
@@ -61,7 +60,7 @@ class OneAuditWithErrors {
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "eta0Eps"),
                 auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true, nsimEst = nsimEst,
+                    AuditType.ONEAUDIT, true,
                     oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.eta0Eps)
                 )
             )

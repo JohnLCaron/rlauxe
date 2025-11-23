@@ -5,7 +5,10 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.random.Random
 
-// for one contest, this takes a list of cvrs and fuzzes them
+private const val debug = false
+
+// for one contest, this takes a list of cvrs and fuzzes them.
+// Only used for estimating the sample size, not auditing.
 class ClcaCardFuzzSampler(
     val fuzzPct: Double,
     val cards: List<AuditableCard>,
@@ -46,7 +49,7 @@ class ClcaCardFuzzSampler(
     }
 
     fun remakeFuzzed(): List<AuditableCard> {
-        return makeFuzzedCardsFrom(listOf(contest), cards, fuzzPct)
+        return makeFuzzedCardsFrom(listOf(contest.info()), cards, fuzzPct)
     }
 
     override fun maxSamples() = maxSamples
@@ -58,6 +61,7 @@ class ClcaCardFuzzSampler(
 }
 
 // for one contest, this takes a list of cvrs and fuzzes them
+// Only used for estimating the sample size, not auditing.
 class PollingCardFuzzSampler(
     val fuzzPct: Double,
     val cards: List<AuditableCard>,
@@ -95,7 +99,7 @@ class PollingCardFuzzSampler(
     }
 
     fun remakeFuzzed(): List<AuditableCard> {
-        return makeFuzzedCardsFrom(listOf(contest), cards, fuzzPct) // single contest
+        return makeFuzzedCardsFrom(listOf(contest.info()), cards, fuzzPct) // single contest
     }
 
     override fun maxSamples() = maxSamples
@@ -107,15 +111,15 @@ class PollingCardFuzzSampler(
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-fun makeFuzzedCardsFrom(contests: List<ContestIF>,
+fun makeFuzzedCardsFrom(infoList: List<ContestInfo>,
                         cards: List<AuditableCard>,
                         fuzzPct: Double,
                         undervotes: Boolean = true,
 ) : List<AuditableCard> {
     if (fuzzPct == 0.0) return cards
+    val infos = infoList.associate{ it.id to it }
+    val isIRV = infoList.associate { it.id to it.isIrv}
 
-    val isIRV = contests.associate { it.id to (it.isIrv()) }
-    val infos = contests.associate { it.id to (it.info()) }
     var count = 0
     val cardBuilders = cards.map { CardBuilder.fromCard(it) }
 
@@ -139,7 +143,7 @@ fun makeFuzzedCardsFrom(contests: List<ContestIF>,
         }
         if (r < fuzzPct) count++
     }
-    println("changed $count out of ${cards.size}")
+    if (debug) println("changed $count out of ${cards.size}")
 
     return cardBuilders.map { it.build() }
 }

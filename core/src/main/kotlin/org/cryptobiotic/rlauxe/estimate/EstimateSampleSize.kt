@@ -154,7 +154,7 @@ class EstimateSampleSizeTask(
                 estimateClcaAssertionRound(
                     roundIdx,
                     config,
-                    contest.contestUA,
+                    contest,
                     contestCards,
                     assertionRound,
                     startingTestStatistic
@@ -197,17 +197,38 @@ private const val quiet = true
 fun estimateClcaAssertionRound(
     roundIdx: Int,
     config: AuditConfig,
-    contestUA: ContestUnderAudit,
+    contestRound: ContestRound,
     contestCards: List<AuditableCard>,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
+    val contestUA = contestRound.contestUA
+    val contest = contestUA.contest
+
     val clcaConfig = config.clcaConfig
     val cassertion = assertionRound.assertion as ClcaAssertion
     val cassorter = cassertion.cassorter
-    val contest = contestUA.contest
 
+    // From ClcaAssertionAuditor
+    val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
+    prevRounds.setPhantomRate(contest.phantomRate()) // the minimum p1o is always the phantom rate.
+
+    val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
+        GeneralAdaptiveBetting(N = contestUA.Nb, prevRounds = prevRounds, d = clcaConfig.d,)
+
+    } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
+        AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
+
+    } else if (clcaConfig.strategy == ClcaStrategyType.fuzzPct) {
+        val errorsP = ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct) // TODO do better
+        AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates=errorsP) // just stick with them
+
+    } else {
+        throw RuntimeException("unsupported strategy ${clcaConfig.strategy}")
+    }
+
+    /*
     var errorRates: PluralityErrorRates = when {
         // Subsequent rounds, always use measured rates.
         (assertionRound.prevAuditResult != null) -> {
@@ -221,8 +242,7 @@ fun estimateClcaAssertionRound(
             clcaConfig.errorRates!!
         }
         else -> {
-            PluralityErrorRates.Zero
-            // ClcaErrorTable.getErrorRates(contest.ncandidates, config.clcaConfig.fuzzPct)  // TODO do better
+            ClcaErrorTable.getErrorRates(contest.ncandidates, config.clcaConfig.fuzzPct)  // TODO do better
         }
     }
 
@@ -242,18 +262,20 @@ fun estimateClcaAssertionRound(
     // val bettingFn = AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates) // diluted N
 
     val errorCounts = ClcaErrorCounts.fromPluralityErrorRates(errorRates, totalSamples = contestCards.size, noerror = cassorter.noerror(), upper = cassorter.assorter.upperBound())
-    val bettingFn = GeneralAdaptiveBetting(N = contestUA.Nb, errorCounts, d = clcaConfig.d, )
+    val bettingFn = GeneralAdaptiveBetting(N = contestUA.Nb, errorCounts, d = clcaConfig.d, ) */
 
     // TODO track down simulations and do initial permutation there; we want first trial to use the actual permutation
     // we need a permutation to get uniform distribution of errors, since some simulations put all the errors at the beginning
     // sampler.reset()
+
+    // class ClcaCardFuzzSampler( val fuzzPct: Double, val cards: List<AuditableCard>, val contest: ContestIF, val cassorter: ClcaAssorter
+    val sampler = ClcaCardFuzzSampler(config.simFuzzPct ?: 0.0, contestCards, contestUA.contest as Contest, cassorter) // TODO Raire ?
 
     // run the simulation ntrials (=config.nsimEst) times
     val result: RunTestRepeatedResult = runRepeatedBettingMart(
         config,
         sampler,
         bettingFn,
-        // cassorter.assorter().reportedMargin(),
         cassorter.noerror(),
         cassorter.upperBound(),
         contestUA.Nb,
@@ -266,7 +288,7 @@ fun estimateClcaAssertionRound(
         clcaConfig.strategy.name,
         fuzzPct = config.simFuzzPct,
         startingTestStatistic = startingTestStatistic,
-        startingRates = errorRates.errorRates(cassorter.noerror()),
+        startingRates = prevRounds.errorRates(),
         estimatedDistribution = makeDeciles(result.sampleCount),
         firstSample = if (result.sampleCount.isEmpty()) 0 else result.sampleCount[0],
     )
@@ -285,10 +307,13 @@ fun runRepeatedBettingMart(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
 
+    val tracker = if (config.clcaConfig.strategy == ClcaStrategyType.generalAdaptive)
+        ClcaErrorTracker(noerror) else PluralityErrorTracker(noerror)
+
     val testFn = BettingMart(
         bettingFn = bettingFn,
         N = N,
-        tracker = ClcaErrorTracker(noerror),
+        tracker = tracker,
         riskLimit = config.riskLimit,
         sampleUpperBound = upperBound,
     )
@@ -415,14 +440,15 @@ fun estimateOneAuditAssertionRound(
             ClcaErrorTable.getErrorRates(contestUA.ncandidates, clcaConfig.fuzzPct) // TODO do better
         }
         (clcaConfig.strategy == ClcaStrategyType.apriori) -> {
-            clcaConfig.errorRates!!
+            clcaConfig.pluralityErrorRates!!
         }
         else -> {
             PluralityErrorRates.Zero
         }
     }
 
-    //  estimation: use real cards, simulate cards with ClcaSimulatedErrorRates; the cards already have phantoms
+    // TODO should be ClcaCardFuzzSampler ??
+    //  estimation: use real cards, simulate cards with ClcaSimulatedErrorRates; the cards already have phantoms; TODO cant use with DHondt
     val sampler = ClcaCardSimulatedErrorRates(contestCards, contestUA.contest, oaCassorter, errorRates) // TODO why cant we use this with IRV?? I think we can
 
     // the minimum p2o is always the phantom rate.

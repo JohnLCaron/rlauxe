@@ -185,7 +185,7 @@ class CardPoolWithBallotStyle(
 }
 
 // When the pools have complete CVRS.
-open class CardPoolFromCvrs(
+class CardPoolFromCvrs(
     override val poolName: String,
     override val poolId: Int,
     val infos: Map<Int, ContestInfo>) : CardPoolIF
@@ -204,7 +204,7 @@ open class CardPoolFromCvrs(
     override fun ncards() = totalCards
 
     // this is when you have CVRs. (sfoa, sfoans)
-    open fun accumulateVotes(cvr : Cvr) {
+    fun accumulateVotes(cvr : Cvr) {
         cvr.votes.forEach { (contestId, candIds) ->
             if (infos[contestId] == null) {
                 logger.error { "cvr has unknown contest $contestId" }
@@ -269,6 +269,10 @@ open class CardPoolFromCvrs(
         result = 31 * result + poolName.hashCode()
         result = 31 * result + contestTabs.hashCode()
         return result
+    }
+
+    override fun toString(): String {
+        return "CardPoolFromCvrs(poolName='$poolName', poolId=$poolId, totalCards=$totalCards contests=${contests().contentToString()})"
     }
 
     companion object {

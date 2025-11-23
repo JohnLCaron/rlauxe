@@ -25,7 +25,7 @@ class TestClcaAuditNoStyles {
         val errorRates = PluralityErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val config = AuditConfig(
             AuditType.CLCA, hasStyle=false, seed=12356667890L, nsimEst=10,
-            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates)
+            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, pluralityErrorRates=errorRates)
         )
 
         testClcaWorkflow(config, testData)
@@ -44,7 +44,7 @@ class TestClcaAuditNoStyles {
         val errorRates = PluralityErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val config = AuditConfig(
             AuditType.CLCA, hasStyle=false, seed=12356667890L, nsimEst=10,
-            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates)
+            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, pluralityErrorRates=errorRates)
         )
 
         testClcaWorkflow(config, testData)
@@ -94,7 +94,7 @@ class TestClcaAuditNoStyles {
         val errorRates = PluralityErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val config = AuditConfig(
             AuditType.CLCA, hasStyle=false, nsimEst=10,
-            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates)
+            clcaConfig = ClcaConfig(ClcaStrategyType.apriori, pluralityErrorRates=errorRates)
         )
         testClcaWorkflow(config, testData)
     }

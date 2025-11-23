@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 
@@ -106,7 +107,7 @@ open class ClcaAssorter(
     // [2, (fol+1+1)/(fol+1), (2fol+2-1)/(fol+1),  1, (fol+1-1)/(fol+1), 1/(fol+1), 0] * noerror
     // [2, (fol+2)/(fol+1), (2*fol+1)/(fol+1),  1, fol/(fol+1), 1/(fol+1), 0] * noerror
 
-    open fun bassort(mvr: Cvr, cvr:Cvr, hasStyle: Boolean = this.hasStyle): Double {
+    open fun bassort(mvr: CardIF, cvr:CardIF, hasStyle: Boolean = this.hasStyle): Double {
         val overstatement = overstatementError(mvr, cvr, hasStyle && this.hasStyle) // ωi eq (1)
         val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
         return tau * noerror   // Bi eq (7)
@@ -153,7 +154,7 @@ open class ClcaAssorter(
     //                       = u-l, u-.5, 0
     // u-l, u-.5, .5-l,  0, .5-u, l-.5, -(u-l)
 
-    fun overstatementError(mvr: Cvr, cvr: Cvr, hasStyle: Boolean): Double {
+    fun overstatementError(mvr: CardIF, cvr: CardIF, hasStyle: Boolean): Double {
 
 
         //        # sanity check
@@ -170,14 +171,14 @@ open class ClcaAssorter(
         // not, treat the MVR as having a vote for the loser (assort()=0)
         // If not use_style, then if the CVR contains the contest but the MVR does not,
         // the MVR is considered to be a non-vote in the contest (assort()=1/2).
-        val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(info.id))) 0.0
+        val mvr_assort = if (mvr.isPhantom() || (hasStyle && !mvr.hasContest(info.id))) 0.0
             else this.assorter.assort(mvr, usePhantoms = false)
 
         //         cvr_assort = (
         //                int(cvr.phantom) / 2 + (1 - int(cvr.phantom)) * self.assort(cvr)
         //        )
         // so if they both agree its a phantom, its a p1o, if mvr cant find it and cvr doesnt think its a phantom, its a p2o
-        val cvr_assort = if (cvr.phantom) .5 else this.assorter.assort(cvr, usePhantoms = false)
+        val cvr_assort = if (cvr.isPhantom()) .5 else this.assorter.assort(cvr, usePhantoms = false)
         return cvr_assort - mvr_assort
     }
 

@@ -11,11 +11,11 @@ private val logger = KotlinLogging.logger("PollingAudit")
 fun runPollingAuditRound(
     config: AuditConfig,
     contests: List<ContestRound>,
-    mvrManager: MvrManagerPollingIF,
+    mvrManager: MvrManager,
     roundIdx: Int,
     quiet: Boolean = true
 ): Boolean {
-    val mvrs = mvrManager.makeMvrsForRound() // same over all contests!
+    val pairs = mvrManager.makeMvrCardPairsForRound()
 
     val contestsNotDone = contests.filter { !it.done }
     if (contestsNotDone.isEmpty()) {
@@ -30,7 +30,7 @@ fun runPollingAuditRound(
             if (!assertionRound.status.complete) {
                 val assertion = assertionRound.assertion
                 val assorter = assertion.assorter
-                val sampler = PollWithoutReplacement(contest.id, mvrs, assorter, allowReset = false)
+                val sampler = PollWithoutReplacement(contest.id, pairs, assorter, allowReset = false)
 
                 val testH0Result = auditPollingAssertion(config, contest.contestUA, assertionRound, sampler, roundIdx, quiet)
                 assertionRound.status = testH0Result.status

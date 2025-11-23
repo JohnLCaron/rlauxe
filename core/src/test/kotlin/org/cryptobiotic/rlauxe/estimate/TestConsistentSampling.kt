@@ -23,7 +23,7 @@ class TestConsistentSampling {
             ContestUnderAudit(it, isClca = true).addStandardAssertions()
         }
         val testCvrs = test.makeCvrsFromContests()
-        val mvrManager = MvrManagerClcaForTesting(testCvrs, testCvrs, Random.nextLong())
+        val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())
 
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
@@ -69,7 +69,7 @@ class TestConsistentSampling {
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
 
         val cvrs = test.makeCvrsFromContests()
-        val mvrManager = MvrManagerPollingForTesting(cvrs, cvrs, Random.nextLong())
+        val mvrManager = MvrManagerForTesting(cvrs, cvrs, Random.nextLong())
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
         consistentSampling(auditRound, mvrManager)
@@ -102,7 +102,7 @@ class TestConsistentSampling {
         contestRounds.forEach { it.estSampleSize = 100 + Random.nextInt(it.Nc/2) }
 
         val cvrs = test.makeCvrsFromContests()
-        val mvrManager = MvrManagerPollingForTesting(cvrs, cvrs, Random.nextLong())
+        val mvrManager = MvrManagerForTesting(cvrs, cvrs, Random.nextLong())
 
         val contestSampleCutoff = 10000
         val config = AuditConfig(AuditType.CLCA, true, contestSampleCutoff = contestSampleCutoff)

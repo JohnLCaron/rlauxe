@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.raire.*
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import kotlin.test.Test
 
 class TestRaireAudit {
@@ -24,7 +23,7 @@ class TestRaireAudit {
     fun testRaireWorkflow(auditConfig: AuditConfig) {
         val (rcontest, testCvrs) = simulateRaireTestContest(N=20000, contestId=111, ncands=3, minMargin=.04, quiet = true, hasStyle=true)
         val workflow = WorkflowTesterClca(auditConfig, emptyList(), listOf(rcontest),
-            MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed))
+            MvrManagerForTesting(testCvrs, testCvrs, auditConfig.seed))
         runTestAuditToCompletion("testRaireWorkflow", workflow)
     }
 
@@ -39,7 +38,7 @@ class TestRaireAudit {
         val (rcontest: RaireContestUnderAudit, testCvrs: List<Cvr>) = simulateRaireTestContest(N=20000, contestId=111, ncands=4, minMargin=.04, quiet = true, hasStyle=config.hasStyle)
         val testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrFuzzPct)
         val workflow = WorkflowTesterClca(config, emptyList(), listOf(rcontest),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, config.seed))
+            MvrManagerForTesting(testCvrs, testMvrs, config.seed))
         runTestAuditToCompletion("testRaireWorkflow", workflow)
     }
 

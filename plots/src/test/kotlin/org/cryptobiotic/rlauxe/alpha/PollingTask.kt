@@ -21,6 +21,7 @@ data class PollingTask(
     val theta = cvrMean + cvrMeanDiff
     val pollingAssorter = makeStandardPluralityAssorter(N)
     var eta0: Double = 0.0
+    val pairs = cvrs.zip(cvrs)
 
     init {
         require(N == cvrs.size)
@@ -28,7 +29,7 @@ data class PollingTask(
 
     override fun makeSampler(): Sampling {
         val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
-        return PollWithoutReplacement(contestUA.id, cvrs, pollingAssorter)
+        return PollWithoutReplacement(contestUA.id, pairs, pollingAssorter)
     }
 
     override fun makeTestFn(): RiskTestingFn {

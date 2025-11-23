@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsFrom
 import org.junit.jupiter.api.Test
 
 class TestFuzzedErrors {

@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.consistentSampling
 import org.cryptobiotic.rlauxe.util.Prng
-import org.cryptobiotic.rlauxe.workflow.MvrManagerClcaForTesting
+import org.cryptobiotic.rlauxe.workflow.MvrManagerForTesting
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,7 +19,7 @@ class TestAuditRound {
             ContestUnderAudit(it, isClca = true).addStandardAssertions()
         }
         val testCvrs = test.makeCvrsFromContests()
-        val mvrManager = MvrManagerClcaForTesting(testCvrs, testCvrs, Random.nextLong())
+        val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())
 
         val contestRounds = contestsUAs.map { contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random

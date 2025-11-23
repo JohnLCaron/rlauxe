@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 class WorkflowTesterPolling(
     val auditConfig: AuditConfig,
     contestsToAudit: List<ContestIF>, // the contests you want to audit
-    val mvrManager: MvrManagerPollingIF,
+    val mvrManager: MvrManager,
 ): AuditWorkflow() {
     private val contestsUA: List<ContestUnderAudit> = contestsToAudit.map { ContestUnderAudit(it, isClca=false, hasStyle=auditConfig.hasStyle).addStandardAssertions() }
     private val auditRounds = mutableListOf<AuditRound>()

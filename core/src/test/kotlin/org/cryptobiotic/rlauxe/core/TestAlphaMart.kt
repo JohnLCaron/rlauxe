@@ -36,7 +36,7 @@ class TestAlphaMart {
 
         val cvrs = test.makeCvrsFromContests()
         val config = AuditConfig(AuditType.POLLING, hasStyle=true, nsimEst=10)
-        val cvrSampler = PollWithoutReplacement(contestUA.contest.id, cvrs, assorter)
+        val cvrSampler = PollWithoutReplacement(contestUA.contest.id, cvrs.zip(cvrs), assorter)
 
         val eta0 = assorter.reportedMean()
         println("eta0=$eta0, margin=${mean2margin(eta0)}")

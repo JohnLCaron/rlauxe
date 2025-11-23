@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.dhondt
 
+import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -398,11 +399,11 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     }
 
     // [ 0, .5, ]
-    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
+    override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(info.id)) return 0.5
-        if (usePhantoms && mvr.phantom) return 0.0 // worst case
-        val cands = mvr.votes[info.id]!!
-        return if (cands.size == 1) h(cands.first()) else 0.5
+        if (usePhantoms && mvr.isPhantom()) return 0.0 // worst case
+        val cands = mvr.votes(info.id)
+        return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }
 
     override fun upperBound() = h2(upper)

@@ -34,6 +34,8 @@ class CompareAlphaPaper {
         val compareSrs = mutableListOf<SRT>()
         for (theta in thetas) {
             val cvrs = makeCvrsByExactMean(N, theta)
+            val pairs = cvrs.zip(cvrs)
+
             val contest = makeContestFromCvrs(info, cvrs)
             val contestUA = ContestUnderAudit(contest, isClca = false, hasStyle = true).addStandardAssertions()
             val pollingAssertion = contestUA.pollingAssertions.first()
@@ -53,7 +55,7 @@ class CompareAlphaPaper {
                 compareSrs.add(compareResult.makeSRT(theta, 0.0))
 
                 val pollingResult = runAlphaMartRepeated(
-                    drawSample = PollWithoutReplacement(contestUA.id, cvrs, pollingAssertion.assorter),
+                    drawSample = PollWithoutReplacement(contestUA.id, pairs, pollingAssertion.assorter),
                     N = N,
                     eta0 = eta, // use the reportedMean for the initial guess
                     d = d,

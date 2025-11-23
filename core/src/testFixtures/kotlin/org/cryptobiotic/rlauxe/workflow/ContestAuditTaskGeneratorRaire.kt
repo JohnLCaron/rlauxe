@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 
 class RaireContestAuditTaskGenerator(
@@ -37,7 +36,7 @@ class RaireContestAuditTaskGenerator(
 
         val clca = WorkflowTesterClca(
             useConfig, emptyList(), listOf(rcontest),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed),
+            MvrManagerForTesting(testCvrs, testMvrs, useConfig.seed),
         )
         return ContestAuditTask(
             name(),
@@ -83,7 +82,7 @@ class RaireSingleRoundAuditTaskGenerator(
 
         val raireAudit = WorkflowTesterClca(
             useConfig, emptyList(), listOf(rcontest),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed),
+            MvrManagerForTesting(testCvrs, testMvrs, useConfig.seed),
         )
 
         return ClcaSingleRoundSingleContestAuditTask(

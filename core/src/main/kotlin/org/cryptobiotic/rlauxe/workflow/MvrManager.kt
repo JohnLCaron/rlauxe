@@ -2,9 +2,8 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.audit.ContestRound
-import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.persist.csv.AuditableCardToCvrAdapter
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 
@@ -13,21 +12,12 @@ private val logger = KotlinLogging.logger("MvrManager")
 // use MvrManager for auditing, not creating an audit
 interface MvrManager {
     fun sortedCards(): CloseableIterable<AuditableCard>  // most uses will just need the first ? samples
-    fun sortedCvrs(): CloseableIterable<Cvr> = CloseableIterable { AuditableCardToCvrAdapter(sortedCards().iterator()) }
-}
-
-interface MvrManagerClcaIF : MvrManager {
-    // this is used for audit, not estimation.
-    fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>  // Pair(mvr, cvr)  TODO Pair<Cvr, AuditableCard> ?
-}
-
-interface MvrManagerPollingIF : MvrManager {
-    // this is used for audit, not estimation. need List so we can do mvrs[permutedIndex[idx]]
-    fun makeMvrsForRound(): List<Cvr> // TODO Pair<Cvr, AuditableCard> ?
+    // fun sortedCvrs(): CloseableIterable<CardIF> = CloseableIterable { AuditableCardToCvrAdapter(sortedCards().iterator()) }
+    fun makeMvrCardPairsForRound(): List<Pair<CardIF, CardIF>>  // Pair(mvr, cvr)
 }
 
 // when the MvrManager supplies the audited mvrs, its a test
-// calling this sets the internal state used by makeCvrPairsForRound(), makeMvrsForRound()
+// calling this sets the internal state used by makeMvrCardPairsForRound()
 interface MvrManagerTestIF : MvrManager {
     fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard>
 }

@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
 // simulated cvrs, mvrs for testing are sorted and kept here in memory
-class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerClcaIF, MvrManagerTestIF {
+class MvrManagerForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManager, MvrManagerTestIF {
     val sortedCards: List<AuditableCard>
     val mvrsUA: List<AuditableCard> // the mvrs in the same order as the sorted cards
     private var mvrsRound: List<AuditableCard> = emptyList()
@@ -22,9 +22,9 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
 
     override fun sortedCards() = CloseableIterable { Closer(sortedCards.iterator()) }
 
-    override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>  {
-        if (mvrsRound.isEmpty()) { // TODO filter ??
-            return mvrsUA.map { it.cvr() }.zip(sortedCards.map { it.cvr() }) // all of em, for SingleRoundAudit
+    override fun makeMvrCardPairsForRound(): List<Pair<CardIF, CardIF>>  {
+        if (mvrsRound.isEmpty()) {
+            return mvrsUA.zip(sortedCards) // all of em, for SingleRoundAudit
         }
 
         val sampleNumbers = mvrsRound.map { it.prn }
@@ -38,7 +38,7 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
             require(mvr.index == cvr.index)
             require(mvr.prn== cvr.prn)
         }
-        return mvrsRound.map{ it.cvr() }.zip(sampledCvrs.map{ it.cvr() })
+        return mvrsRound.zip(sampledCvrs)
     }
 
     // MvrManagerTest
@@ -57,46 +57,6 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
         return sampledMvrs
     }
 
-}
-
-// simulated cardLocations, mvrs for testing are sorted and kept here in memory
-class MvrManagerPollingForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerPollingIF, MvrManagerTestIF {
-    val sortedCards: List<AuditableCard>
-    val mvrsUA: List<AuditableCard>
-    var mvrsRound: List<AuditableCard> = emptyList()
-
-    init {
-        val prng = Prng(seed)
-        sortedCards = cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn}
-        mvrsUA = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
-    }
-
-    override fun sortedCards() = CloseableIterable { Closer(sortedCards.iterator()) }
-
-    override fun makeMvrsForRound(): List<Cvr> {
-        val sampledCvrs = if (mvrsRound.isEmpty())
-            mvrsUA.map { it.cvr() }
-        else
-            mvrsRound.map { it.cvr() }
-
-        return sampledCvrs
-    }
-
-    //MvrManagerTest
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {
-        val sampledMvrs = findSamples(sampleNumbers, Closer(mvrsUA.iterator())) // TODO use IteratorCvrsCsvFile?
-        require(sampledMvrs.size == sampleNumbers.size)
-
-        // debugging sanity check
-        var lastRN = 0L
-        sampledMvrs.forEach { mvr ->
-            require(mvr.prn > lastRN)
-            lastRN = mvr.prn
-        }
-
-        mvrsRound =  sampledMvrs
-        return sampledMvrs
-    }
 }
 
 // runs audit rounds until finished. return last audit round

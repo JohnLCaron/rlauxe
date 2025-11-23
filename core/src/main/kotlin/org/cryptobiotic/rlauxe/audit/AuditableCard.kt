@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.audit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
+import kotlin.collections.get
 import kotlin.sequences.plus
 
 // A generalization of Cvr, allowing votes to be null, eg for Polling or OneAudit pools.
@@ -17,6 +18,18 @@ import kotlin.sequences.plus
 
 // Polling: always need cardStyles
 
+interface CardIF {
+    fun hasContest(contestId: Int): Boolean
+    fun location(): String
+    fun isPhantom(): Boolean
+    fun poolId(): Int?
+
+    fun hasMarkFor(contestId: Int, candidateId:Int): Int
+    fun hasOneVoteFor(contestId: Int, candidates: List<Int>): Boolean
+    fun rankedChoices(contestId: Int): IntArray?
+    fun votes(contestId: Int): IntArray? // same?
+}
+
 data class AuditableCard (
     val location: String, // info to find the card for a manual audit. Aka ballot identifier.
     val index: Int,  // index into the original, canonical list of cards
@@ -30,7 +43,8 @@ data class AuditableCard (
                                                                                 // when IRV, ranked first to last
     val poolId: Int?, // for OneAudit, or for setting style from CVR (so tolerate non-OA poolId)
     val cardStyle: String? = null, // set style in a way that doesnt interfere with oneaudit pool. At the moment, informational.
-) {
+): CardIF {
+
     init {
         if (!phantom && (possibleContests.isEmpty() && votes == null)) {
             // you could make this case mean "all". But maybe its better to be explicit ??
@@ -42,7 +56,7 @@ data class AuditableCard (
     fun cvr() : Cvr {
         val useVotes = if (votes != null) votes else {
             possibleContests.mapIndexed { idx, contestId ->
-                Pair(contestId, votes?.get(idx) ?: intArrayOf())
+                Pair(contestId, votes?.get(idx) ?: intArrayOf()) // TODO WTF ??
             }.toMap()
         }
         return Cvr(location, useVotes, phantom, poolId)
@@ -56,7 +70,13 @@ data class AuditableCard (
         votes?.forEach { id, vote -> appendLine("   contest $id: ${vote.contentToString()}")}
     }
 
-    fun hasContest(contestId: Int): Boolean {
+    override fun isPhantom() = phantom
+    override fun location() = location
+    override fun poolId() = poolId
+    override fun votes(contestId: Int): IntArray? = votes?.get(contestId)
+    override fun rankedChoices(contestId: Int): IntArray? = votes?.get(contestId)
+
+    override fun hasContest(contestId: Int): Boolean {
         // if (possibleContests.isEmpty() && votes == null) return true // TODO seems to mean empty == "all"
         return contests().contains(contestId)
     }
@@ -65,6 +85,20 @@ data class AuditableCard (
         return if (possibleContests.isNotEmpty()) possibleContests
             else if (votes != null) votes.keys.toList().sorted().toIntArray()
             else intArrayOf()
+    }
+
+    // Let 1candidate(bi) = 1 if ballot i has a mark for candidate, and 0 if not; SHANGRLA section 2, page 4
+    override fun hasMarkFor(contestId: Int, candidateId: Int): Int {
+        val contestVotes = votes?.get(contestId)
+        return if (contestVotes == null) 0
+        else if (contestVotes.contains(candidateId)) 1 else 0
+    }
+
+    // Is there exactly one vote in the contest among the given candidates?
+    override fun hasOneVoteFor(contestId: Int, candidates: List<Int>): Boolean {
+        val contestVotes = votes?.get(contestId) ?: return false
+        val totalVotes = contestVotes.count { candidates.contains(it) }
+        return (totalVotes == 1)
     }
 
     // Kotlin data class doesnt handle IntArray and List<IntArray> correctly

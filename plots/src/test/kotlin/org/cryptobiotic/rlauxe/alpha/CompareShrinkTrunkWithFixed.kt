@@ -22,9 +22,11 @@ class CompareShrinkTrunkWithFixed {
         val N = 10000
         etas.forEach { eta ->
             val cvrs = makeCvrsByExactMean(N, eta)
+            val pairs = cvrs.zip(cvrs)
+
             val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
 
-            val sampleFn = PollWithoutReplacement(contestUA.id, cvrs, makeStandardPluralityAssorter(N))
+            val sampleFn = PollWithoutReplacement(contestUA.id, pairs, makeStandardPluralityAssorter(N))
 
             println("\neta0 = $eta")
             val fixResult = testAlphaMartFixed(eta, sampleFn)
@@ -62,9 +64,10 @@ class CompareShrinkTrunkWithFixed {
 
         etas.forEach { eta ->
             val cvrs = makeCvrsByExactMean(N, eta)
-            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
+            val pairs = cvrs.zip(cvrs)
 
-            val sampleFn = PollWithoutReplacement(contestUA.id, cvrs, makeStandardPluralityAssorter(N))
+            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
+            val sampleFn = PollWithoutReplacement(contestUA.id, pairs, makeStandardPluralityAssorter(N))
 
             println("\neta0 = $eta")
             val fixResult = runAlphaMartFixedRepeated(eta, sampleFn, ntrials)

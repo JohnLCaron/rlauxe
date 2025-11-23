@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsFrom
@@ -47,7 +46,7 @@ class OneAuditContestAuditTaskGenerator(
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA.contest), oaCvrs, mvrsFuzzPct)
 
         val oneaudit = WorkflowTesterOneAudit(auditConfig=config, listOf(contestOA),
-            MvrManagerClcaForTesting(oaCvrs, oaMvrs, config.seed))
+            MvrManagerForTesting(oaCvrs, oaMvrs, config.seed))
         return ContestAuditTask(
             name(),
             oneaudit,
@@ -95,7 +94,7 @@ class OneAuditSingleRoundAuditTaskGenerator(
             makeFuzzedCvrsFrom(listOf(contestOA.contest), oaCvrs, mvrsFuzzPct)
         }
 
-        val oneaudit = WorkflowTesterOneAudit(auditConfig=config, listOf(contestOA), MvrManagerClcaForTesting(oaCvrs, oaMvrs, config.seed))
+        val oneaudit = WorkflowTesterOneAudit(auditConfig=config, listOf(contestOA), MvrManagerForTesting(oaCvrs, oaMvrs, config.seed))
         return ClcaSingleRoundSingleContestAuditTask(
             name(),
             oneaudit,
@@ -190,7 +189,9 @@ class OneAuditSingleRoundMultipleContests(
     }
 }
 
-class MvrManagerClcaFromCards(val completeCards: CloseableIterable<AuditableCard>, val contestsUA: List<ContestUnderAudit>, val simFuzzPct: Double?, seed:Long) : MvrManagerClcaIF, MvrManagerTestIF {
+class MvrManagerClcaFromCards(val completeCards: CloseableIterable<AuditableCard>, val contestsUA: List<ContestUnderAudit>, val simFuzzPct: Double?, seed:Long)
+    : MvrManager {
+
     private var mvrsRound: List<AuditableCard> = emptyList()
     val sortedCards: List<AuditableCard>
 
@@ -204,7 +205,7 @@ class MvrManagerClcaFromCards(val completeCards: CloseableIterable<AuditableCard
 
     override fun sortedCards() = completeCards
 
-    override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>  {
+    override fun makeMvrCardPairsForRound(): List<Pair<CardIF, CardIF>>  {
         if (mvrsRound.isEmpty()) {  // for SingleRoundAudit. TODO do we need to filter ??
             val sampledMvrs = if (simFuzzPct == null) {
                 sortedCards // use the cvrs - ie, no errors
@@ -226,10 +227,10 @@ class MvrManagerClcaFromCards(val completeCards: CloseableIterable<AuditableCard
             require(mvr.prn== cvr.prn)
         }
 
-        return mvrsRound.map{ it.cvr() }.zip(sampledCvrs.map{ it.cvr() })
+        return mvrsRound.zip(sampledCvrs)
     }
 
-    // MvrManagerTest
+    /* MvrManagerTest
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {
         val sampledMvrs = findSamples(sampleNumbers, completeCards.iterator())
         require(sampledMvrs.size == sampleNumbers.size)
@@ -243,7 +244,7 @@ class MvrManagerClcaFromCards(val completeCards: CloseableIterable<AuditableCard
 
         mvrsRound = sampledMvrs
         return sampledMvrs
-    }
+    } */
 
 }
 

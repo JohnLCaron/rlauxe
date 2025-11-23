@@ -8,13 +8,12 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 class WorkflowTesterOneAudit(
     val auditConfig: AuditConfig,
     val contestsUA: List<ContestUnderAudit>, // the contests you want to audit
-    val mvrManager: MvrManagerClcaIF,
+    val mvrManager: MvrManager,
 ): AuditWorkflow() {
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
         require (auditConfig.auditType == AuditType.ONEAUDIT)
-
     }
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {

@@ -439,7 +439,7 @@ class AssertionRLA {
         }
         val contestRounds = contestUAs.map{ contest -> ContestRound(contest, 1) }
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
-        consistentSampling(auditRound, MvrManagerClcaForTesting(rcvrs, rcvrs, 999666L))
+        consistentSampling(auditRound, MvrManagerForTesting(rcvrs, rcvrs, 999666L))
         println("sampled = ${auditRound.samplePrns.size}")
 
 //n_sampled_phantoms = np.sum(sampled_cvr_indices > manifest_cards)

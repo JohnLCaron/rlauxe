@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.workflow.*
@@ -130,7 +129,7 @@ class TestAuditRoundJson {
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
         var clcaWorkflow = WorkflowTesterClca(config, contests, emptyList(),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, config.seed))
+            MvrManagerForTesting(testCvrs, testMvrs, config.seed))
         val lastRound = runTestAuditToCompletion("testComparisonWorkflow", clcaWorkflow, quiet = true)
         assertNotNull(lastRound)
 
@@ -186,7 +185,7 @@ class TestAuditRoundJson {
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
         var clcaWorkflow = WorkflowTesterClca(config, contests, listOf(rcontest),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, config.seed))
+            MvrManagerForTesting(testCvrs, testMvrs, config.seed))
         val nextRound = clcaWorkflow.startNewRound()
         clcaWorkflow.runAuditRound(nextRound)
 
@@ -235,7 +234,7 @@ class TestAuditRoundJson {
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
         val clcaWorkflow = WorkflowTesterClca(config, contests, emptyList(),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, config.seed))
+            MvrManagerForTesting(testCvrs, testMvrs, config.seed))
         val nextRound = clcaWorkflow.startNewRound()
         clcaWorkflow.runAuditRound(nextRound)
 

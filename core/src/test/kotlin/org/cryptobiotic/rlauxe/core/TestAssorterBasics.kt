@@ -146,7 +146,7 @@ class TestAssorterBasics {
 
             val assortAvg = cvrs.map { cvr ->
                 val usew1 = cvr.hasMarkFor(contest.id, assertion.assorter.winner())
-                val usew2 = cvr.hasOneVote(contest.id, contest.info.candidateIds)
+                val usew2 = cvr.hasOneVoteFor(contest.id, contest.info.candidateIds)
                 println("${cvr.id}: ${assertion.assorter.assort(cvr)} usew1=$usew1 usew2=$usew2")
                 assertion.assorter.assort(cvr)
             }.average()

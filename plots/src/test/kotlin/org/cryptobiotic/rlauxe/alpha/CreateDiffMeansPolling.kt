@@ -219,6 +219,7 @@ class CreatePollingDiffMeans {
         if (!silent) println(" N=${cvrs.size} theta=$theta withoutReplacement")
 
         val reportedMean = theta + reportedMeanDiff
+        val pairs = cvrs.zip(cvrs)
 
         val info = ContestInfo("contest0", 0, listToMap("A", "B"), choiceFunction = SocialChoiceFunction.PLURALITY)
         val contestUA = makeContestUAfromCvrs(info, cvrs, isComparison = false)
@@ -229,7 +230,7 @@ class CreatePollingDiffMeans {
             if (!silent && showContests) println("  ${assert}")
 
             val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
-            val cvrSampler = PollWithoutReplacement(contestUA.id,  cvrs, assert.assorter)
+            val cvrSampler = PollWithoutReplacement(contestUA.id,  pairs, assert.assorter)
 
             val result = runAlphaMartRepeated(
                 drawSample = cvrSampler,

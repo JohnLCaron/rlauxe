@@ -406,6 +406,11 @@ open class ContestUnderAudit(
         return if (minAssertion != null) makeDilutedMargin(minAssertion.assorter) else null
     }
 
+    fun minNoError(): Double? {
+        val minAssertion = minAssertion()
+        return if (minAssertion != null) minAssertion.assorter.noerror() else null
+    }
+
     fun minRecountMargin(): Double? {
         val minAssertion = minAssertion()
         return if (minAssertion != null)  contest.recountMargin(minAssertion.assorter) else null
@@ -416,7 +421,7 @@ open class ContestUnderAudit(
         return if (minAssertion != null)  contest.showAssertionDifficulty(minAssertion.assorter) else "N/A"
     }
 
-    override fun toString() = contest.toString()
+    override fun toString() = showShort()
 
     open fun show() = buildString {
         appendLine("${contest.javaClass.simpleName} ${contest.show()}")
@@ -432,7 +437,7 @@ open class ContestUnderAudit(
 
     open fun showShort() = buildString {
         val votes = contest.votes() ?: "N/A"
-        append("$name ($id) votes=${votes} Nc=$Nc minMargin=${df(minDilutedMargin())}")
+        append("$name ($id) votes=${votes} Nc=$Nc Nb=$Nb minDilutedMargin=${df(minDilutedMargin())}")
     }
 
     override fun equals(other: Any?): Boolean {

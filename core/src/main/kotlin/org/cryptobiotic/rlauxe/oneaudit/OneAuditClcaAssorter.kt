@@ -116,8 +116,10 @@ class OneAuditClcaAssorter(
     }
 
     fun overstatementPoolError(mvr: Cvr, poolAvgAssortValue: Double): Double {
-        val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(info.id))) 0.0
-                         else this.assorter.assort(mvr, usePhantoms = false)
+        val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(info.id)))
+            0.0
+        else
+            this.assorter.assort(mvr, usePhantoms = false)
 
         // for pooled data (i in Gg):
         //   A(ci) = poolAvg in [0..u]

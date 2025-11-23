@@ -71,7 +71,7 @@ class ClcaSingleRoundAuditTaskGenerator(
         return "ClcaSingleRoundAuditTaskGenerator"
     }
 
-    override fun generateNewTask(): ClcaSingleRoundAuditTask {
+    override fun generateNewTask(): ClcaSingleRoundSingleContestAuditTask {
         val useConfig = config ?:
         AuditConfig(
             AuditType.CLCA, true,
@@ -100,7 +100,7 @@ class ClcaSingleRoundAuditTaskGenerator(
             }
         } */
 
-        return ClcaSingleRoundAuditTask(
+        return ClcaSingleRoundSingleContestAuditTask(
             name(),
             clcaWorkflow,
             testMvrs,
@@ -111,7 +111,8 @@ class ClcaSingleRoundAuditTaskGenerator(
     }
 }
 
-class ClcaSingleRoundAuditTask(
+// assumes theres only one contest
+class ClcaSingleRoundSingleContestAuditTask(
     val name: String,
     val workflow: AuditWorkflow,
     val testMvrs: List<Cvr>,
@@ -126,12 +127,12 @@ class ClcaSingleRoundAuditTask(
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         val nmvrs = runClcaSingleRoundAudit(workflow, contestRounds, quiet = quiet, auditor)
 
-        val contest = contestRounds.first() // theres only one
+        val contest = contestRounds.first() // TODO theres only one contest
         val minAssertion = contest.minAssertion()!!
         val assorter = minAssertion.assertion.assorter
-        val mvrMargin = assorter.calcAssorterMargin(contest.id, testMvrs, usePhantoms = true) // TODO needed or debugging?
+        // val mvrMargin = assorter.calcAssorterMargin(contest.id, testMvrs, usePhantoms = true) // TODO needed for tracking the true margin of the mvrs, for plotting
 
-        return if (minAssertion.auditResult == null) { // TODO why might this this empty?
+        return if (minAssertion.auditResult == null) { // TODO why might this be empty?
             WorkflowResult(
                 name,
                 contest.Nc,
@@ -153,7 +154,7 @@ class ClcaSingleRoundAuditTask(
                 nmvrs.toDouble(),
                 otherParameters,
                 if (lastRound.status != TestH0Status.StatRejectNull) 100.0 else 0.0,
-                mvrMargin=mvrMargin,
+               //  mvrMargin=mvrMargin,
             )
         }
     }

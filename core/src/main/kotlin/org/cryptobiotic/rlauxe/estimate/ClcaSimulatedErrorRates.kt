@@ -72,7 +72,7 @@ class ClcaSimulatedErrorRates(
             val cvr = cvrs[permutedIndex[idx]]
             val mvr = mvrs[permutedIndex[idx]]
             idx++
-            if (cvr.hasContest(contest.id)) {
+            if (cvr.hasContest(contest.id)) { // TODO ??
                 val result = cassorter.bassort(mvr, cvr)
                 count++
                 return result

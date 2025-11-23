@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import kotlin.test.Test
 import kotlin.test.assertNotNull
-import kotlin.test.assertEquals
 
 class TestClcaAudit {
     val N = 10000
@@ -71,7 +70,7 @@ class TestClcaAudit {
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = PluralityErrorRates(0.0, phantomPct, 0.0, 0.0, ) // TODO automatic
-        val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
+        val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, pluralityErrorRates=errorRates))
 
         val finalRound = testClcaWorkflow(config, testData)
         assertNotNull(finalRound)

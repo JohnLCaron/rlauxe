@@ -22,9 +22,9 @@ fun runClcaAuditRound(
 
     // parallelize over contests
     val contestsNotDone = contests.filter{ !it.done }
-    val auditContestTasks = mutableListOf<RunContestTask>()
+    val auditContestTasks = mutableListOf<RunClcaContestTask>()
     contestsNotDone.forEach { contest ->
-        auditContestTasks.add(RunContestTask(config, contest, cvrPairs, auditor, roundIdx))
+        auditContestTasks.add(RunClcaContestTask(config, contest, cvrPairs, auditor, roundIdx))
     }
 
     // logger.debug { "runClcaAuditRound ($roundIdx) ${auditContestTasks.size} tasks for auditor ${auditor.javaClass.simpleName} " }
@@ -34,10 +34,10 @@ fun runClcaAuditRound(
     return if (complete.isEmpty()) true else complete.reduce { acc, b -> acc && b }
 }
 
-class RunContestTask(
+class RunClcaContestTask(
     val config: AuditConfig,
     val contest: ContestRound,
-    val cvrPairs: List<Pair<Cvr, Cvr>>,
+    val cvrPairs: List<Pair<Cvr, Cvr>>, // Pair(mvr, cvr)
     val auditor: ClcaAssertionAuditorIF,
     val roundIdx: Int): ConcurrentTaskG<Boolean> {
 
@@ -49,8 +49,7 @@ class RunContestTask(
             if (!assertionRound.status.complete) {
                 val cassertion = assertionRound.assertion as ClcaAssertion
                 val cassorter = cassertion.cassorter
-                val sampler =
-                    ClcaWithoutReplacement(contest.id, cvrPairs, cassorter, allowReset = false)
+                val sampler = ClcaWithoutReplacement(contest.id, cvrPairs, cassorter, allowReset = false)
 
                 val testH0Result = auditor.run(config, contest, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status
@@ -102,7 +101,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             GeneralAdaptiveBetting(N = contestUA.Nb, prevRounds = prevRounds, d = clcaConfig.d,)
 
         } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
-            AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.errorRates!!) // just stick with them
+            AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
 
         } else if (clcaConfig.strategy == ClcaStrategyType.fuzzPct) {
             val errorsP = ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct) // TODO do better

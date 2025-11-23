@@ -48,7 +48,12 @@ data class AuditConfig(
 
     override fun toString() = buildString {
         appendLine("AuditConfig(auditType=$auditType, hasStyle=$hasStyle, riskLimit=$riskLimit, seed=$seed version=$version" )
-        appendLine("  nsimEst=$nsimEst, quantile=$quantile, contestSampleCutoff=$contestSampleCutoff, auditSampleLimit=$auditSampleLimit, minRecountMargin=$minRecountMargin removeTooManyPhantoms=$removeTooManyPhantoms")
+        appendLine("  nsimEst=$nsimEst, quantile=$quantile, simFuzzPct=$simFuzzPct,")
+        append("  minRecountMargin=$minRecountMargin removeTooManyPhantoms=$removeTooManyPhantoms")
+        if (contestSampleCutoff != null) { append(" contestSampleCutoff=$contestSampleCutoff removeCutoffContests=$removeCutoffContests") }
+        if (auditSampleLimit != null) { append(" auditSampleLimit=$auditSampleLimit (risk measuring audit)") }
+        appendLine()
+
         if (skipContests.isNotEmpty()) { appendLine("  skipContests=$skipContests") }
         when (auditType) {
             AuditType.POLLING -> appendLine("  $pollingConfig")
@@ -84,14 +89,14 @@ data class PollingConfig(
 enum class ClcaStrategyType { generalAdaptive, apriori, fuzzPct, oracle  }
 data class ClcaConfig(
     val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
-    val fuzzPct: Double? = null, // use to generate apriori errorRates for simulation
-    val errorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker
+    val fuzzPct: Double? = null, // use to generate apriori errorRates for simulation, only used when ClcaStrategyType = fuzzPct
+    val pluralityErrorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker
     val d: Int = 100,  // shrinkTrunc weight for error rates
 )
 
 // reportedMean: eta0 = reportedMean, shrinkTrunk
 // bet99: eta0 = reportedMean, 99% max bet
-// eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk (default strategy)
+// eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk
 // optimalComparison = uses bettingMart with OptimalComparisonNoP1
 // note OneAudit uses ClcaConfig for error estimation
 enum class OneAuditStrategyType { reportedMean, bet99, eta0Eps, optimalComparison }

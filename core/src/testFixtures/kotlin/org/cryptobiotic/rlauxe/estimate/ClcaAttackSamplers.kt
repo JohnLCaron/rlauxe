@@ -70,7 +70,7 @@ data class ClcaAttackSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter,
 
 
 // generate mvr by starting with cvrs and flipping exact # votes (type 2 errors only) to make mvrs have mvrMean.
-// only used by compareAlphaPaperMasses
+// only used by compareAlphaPaperMasses and ClcaAttackSampler
 data class ClcaFlipErrorsSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter, val mvrMean: Double,
                                  val withoutReplacement: Boolean = true): Sampler {
     val maxSamples = cvrs.count { it.hasContest(cassorter.info.id) }

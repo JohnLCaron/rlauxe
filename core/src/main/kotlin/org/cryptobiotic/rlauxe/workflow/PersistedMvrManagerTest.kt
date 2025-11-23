@@ -16,20 +16,21 @@ private val logger = KotlinLogging.logger("PersistedMvrManagerTest")
 private val checkValidity = true
 private val checkFuzz = false
 
-class PersistedMvrManagerTest(auditDir: String, val config: AuditConfig, val contestsUA: List<ContestUnderAudit>) : MvrManagerTestIF, PersistedMvrManager(auditDir) {
+class PersistedMvrManagerTest(auditDir: String, val config: AuditConfig, val contestsUA: List<ContestUnderAudit>)
+    : MvrManagerTestIF, PersistedMvrManager(auditDir) {
 
     // extract the wanted cards from the cardManifest, optionally fuzz them, and write them to sampleMvrsFile
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {
         val cards = findSamples(sampleNumbers, auditableCards())
-        val fuzzPct = config.simFuzzPct()
-        val sampledMvrs = if (fuzzPct == null) {
+        val simFuzzPct = config.simFuzzPct()
+        val sampledMvrs = if (simFuzzPct == null) {
             cards // use the cvrs - ie, no errors
         } else { // fuzz the cvrs
-            makeFuzzedCardsFrom(contestsUA.map { it.contest }, cards, fuzzPct) // TODO, undervotes=false)
+            makeFuzzedCardsFrom(contestsUA.map { it.contest.info() }, cards, simFuzzPct) // TODO, undervotes=false)
         }
 
-        if (checkFuzz && fuzzPct != null) {
-            println("fuzzPct = $fuzzPct")
+        if (checkFuzz && simFuzzPct != null) {
+            println("fuzzPct = $simFuzzPct")
             val testPairs = sampledMvrs.zip(cards)
 
             contestsUA.forEach { contestUA ->

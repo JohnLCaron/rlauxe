@@ -220,10 +220,6 @@ data class AuditRoundResult(
     val startingRates: Map<Double, Double>? = null, // starting error rates (clca only)
     val measuredCounts: Map<Double, Int>? = null, // measured error counts (clca only)
 ) {
-    init {
-        if (measuredCounts == null)
-            println("AuditRoundResult no rates")
-    }
 
     override fun toString() = buildString {
         append("round=$roundIdx pvalue=${df(pvalue)} nmvrs=$nmvrs samplesUsed=$samplesUsed status=$status")

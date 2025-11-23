@@ -32,7 +32,7 @@ data class AuditableCard (
     val cardStyle: String? = null, // set style in a way that doesnt interfere with oneaudit pool. At the moment, informational.
 ) {
     init {
-        if (possibleContests.isEmpty() && votes == null) {
+        if (!phantom && (possibleContests.isEmpty() && votes == null)) {
             // you could make this case mean "all". But maybe its better to be explicit ??
             throw RuntimeException("AuditableCard must have votes or possibleContests")
         }
@@ -130,9 +130,10 @@ data class CardStyle(
     val id: Int,
     val contestNames: List<String>,
     val contestIds: List<Int>,
-    val numberOfCards: Int?, // TODO why do we want this?
 ): CardStyleIF {
-    val ncards = numberOfCards ?: 0
+    // used by MultiContestTestData
+    var ncards = 0
+    var poolId: Int? = null
 
     override fun name() = name
     override fun id() = id
@@ -144,8 +145,11 @@ data class CardStyle(
     }
 
     companion object {
-        fun make(styleId: Int, contestNames: List<String>, contestIds: List<Int>, numberBallots: Int?): CardStyle {
-            return CardStyle("style$styleId", styleId, contestNames, contestIds, numberBallots)
+        fun make(styleId: Int, contestNames: List<String>, contestIds: List<Int>, ncards: Int?, poolId: Int? ): CardStyle {
+            val cs = CardStyle("style$styleId", styleId, contestNames, contestIds)
+            if (ncards != null) cs.ncards = ncards
+            if (poolId != null) cs.poolId = poolId
+            return cs
         }
     }
 }

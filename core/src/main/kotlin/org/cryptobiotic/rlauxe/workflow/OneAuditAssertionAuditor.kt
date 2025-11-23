@@ -43,7 +43,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
                 cassorter,
                 sampler,
                 cassorter.upperBound(),
-                p2 = 0.0 // errorRates.p2o
+                p2 = 0.0 // errorRates.p2o TODO
             )
         } else {
             runAlpha(

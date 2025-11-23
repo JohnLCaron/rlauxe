@@ -8,16 +8,16 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
 class AuditsWithErrors {
-    val nruns = 100
-    val name = "AuditsWithErrors2"
+    val nruns = 10
+    val name = "AuditsWithErrors4"
     val dirName = "/home/stormy/rla/plots/workflows/$name"
     val N = 50000
-    val margin = .02
+    val margin = .04
 
     @Test
     fun genAuditWithFuzzPlots() {
         val fuzzPcts = listOf(.00, .001, .0025, .005, .0075, .01, .02, .03, .05)
-        val cvrPercents = listOf(0.5, 0.75, 0.83, 0.90, 0.96)
+        val cvrPercents = listOf(0.75, 0.83, 0.90, 0.96)
 
         val stopwatch = Stopwatch()
 
@@ -26,28 +26,22 @@ class AuditsWithErrors {
         fuzzPcts.forEach { fuzzPct ->
 
             val generalAdaptive = ClcaSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, 0.0, fuzzPct,
-                clcaConfigIn= ClcaConfig(ClcaStrategyType.generalAdaptive, fuzzPct),
+                N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct,
+                clcaConfigIn= ClcaConfig(ClcaStrategyType.generalAdaptive),
                 parameters=mapOf("nruns" to nruns, "fuzzPct" to fuzzPct, "cat" to "generalAdaptive")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, generalAdaptive))
 
-            val noerror = ClcaSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, 0.0, fuzzPct,
-                parameters=mapOf("nruns" to nruns, "fuzzPct" to fuzzPct, "cat" to "adaptive")
-            )
-            tasks.add(RepeatedWorkflowRunner(nruns, noerror))
-
-            /* val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, 0.0, fuzzPct, nsimEst=nsimEst,
-                parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
+            val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct,
+                parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "cat" to "polling")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, 0.0, fuzzPct, nsimEst=nsimEst,
+                N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct,
                 clcaConfigIn= ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
-                parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "cat" to "clca")
+                parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "cat" to "fuzzPct")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
@@ -55,7 +49,7 @@ class AuditsWithErrors {
                 val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
                     N, margin, 0.0, 0.0, cvrPercent, mvrsFuzzPct=fuzzPct,
                     auditConfigIn = AuditConfig(
-                        AuditType.ONEAUDIT, true, nsimEst = nsimEst,
+                        AuditType.ONEAUDIT, true,
                         oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.eta0Eps)
                     ),
                     parameters=mapOf("nruns" to nruns, "fuzzPct" to fuzzPct, "cvrPercent" to "${(100 * cvrPercent).toInt()}%"),
@@ -64,11 +58,11 @@ class AuditsWithErrors {
             }
 
             val raireGenerator = RaireSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, 0.0, fuzzPct, nsimEst=nsimEst,
+                N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct,
                 clcaConfigIn= ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct)
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, raireGenerator)) */
+            tasks.add(RepeatedWorkflowRunner(nruns, raireGenerator))
         }
 
         // run tasks concurrently and average the results

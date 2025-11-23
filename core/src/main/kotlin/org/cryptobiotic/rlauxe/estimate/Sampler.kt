@@ -16,7 +16,7 @@ interface Sampler: Iterator<Double> {
     fun nmvrs(): Int // total number mvrs
 }
 
-//// For polling audits.
+//// For polling audits. Production runPollingAuditRound
 class PollWithoutReplacement(
     val contestId: Int,
     val mvrs : List<Cvr>,
@@ -63,17 +63,16 @@ class PollWithoutReplacement(
     override fun next() = sample()
 }
 
-//// For clca audits
-// what about a function to fuzz the mvr on the fly ??
+//// For clca audits. Production RunClcaContestTask
 class ClcaWithoutReplacement(
     val contestId: Int,
-    val cvrPairs: List<Pair<Cvr, Cvr>>, // TODO List<Pair<Cvr, AuditableCard>> ??
+    val cvrPairs: List<Pair<Cvr, Cvr>>, // Pair(mvr, cvr) TODO List<Pair<Cvr, AuditableCard>> ??
     val cassorter: ClcaAssorter,
     val allowReset: Boolean,
     val trackStratum: Boolean = false, // debugging for oneaudit
 ): Sampler, Iterator<Double> {
     // TODO TIMING init taking 8%
-    val maxSamples = cvrPairs.count { it.first.hasContest(contestId) }
+    val maxSamples = cvrPairs.count { it.first.hasContest(contestId) } // TODO mvr vs cvr hasContest. should be cvr i think....??
     val permutedIndex = MutableList(cvrPairs.size) { it }
     private var idx = 0
     private var count = 0
@@ -87,7 +86,7 @@ class ClcaWithoutReplacement(
         while (idx < cvrPairs.size) {
             val (mvr, cvr) = cvrPairs[permutedIndex[idx]]
             idx++
-            if (mvr.hasContest(contestId)) {
+            if (mvr.hasContest(contestId)) { // TODO mvr vs cvr hasContest. should be cvr i think....??
                 val result = cassorter.bassort(mvr, cvr)
                 if (cvr.poolId != null) poolCount++
                 if (trackStratum) print("${sfn(cvr.id, 8)} ")
@@ -119,6 +118,7 @@ class ClcaWithoutReplacement(
     fun poolCount() = poolCount
 }
 
+// TODO move to test. TODO can we take the filter off ??
 fun makeClcaNoErrorSampler(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAssorter): Sampler {
     val cvrPairs = cvrs.zip(cvrs)
     return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, true, false)

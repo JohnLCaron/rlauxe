@@ -14,6 +14,7 @@ class WorkflowTesterOneAudit(
 
     init {
         require (auditConfig.auditType == AuditType.ONEAUDIT)
+
     }
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {

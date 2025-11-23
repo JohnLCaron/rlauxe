@@ -66,7 +66,7 @@ class TestHasStyle {
         }
 
         val cardStyles = if (hasStyle) null
-            else listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}, null))
+            else listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}))
 
         val topdir = "/home/stormy/rla/persist/testHasStyleClcaSingleCard"
         val auditRound = createAndRunTestAuditCards(topdir, false, contests, emptyList(), hasStyle, testCards, cardStyles)
@@ -162,7 +162,7 @@ class TestHasStyle {
         }
 
         val cardStyles = if (hasStyle) null
-            else listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}, null))
+            else listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}))
 
         val topdir = "/home/stormy/rla/persist/testHasStyleClcaMultiCard"
         val auditRound = createAndRunTestAuditCards(topdir, false, contests, listOf(3), hasStyle, allCards, cardStyles)
@@ -245,7 +245,7 @@ class TestHasStyle {
         } */
 
         // polling audits always must put in the possible contests
-        val cardStyles = listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}, null))
+        val cardStyles = listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}))
 
         val topdir = "/home/stormy/rla/persist/testHasStylePollingSingleCard"
         val auditRound = createAndRunTestAuditCvrs(topdir, true, contests, emptyList(), hasStyle, testCvrs, cardStyles)
@@ -329,7 +329,7 @@ class TestHasStyle {
         }
 
         // polling audits always must put in the possible contests
-        val cardStyles = listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}, null))
+        val cardStyles = listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}))
 
         // make the audit
         val topdir = "/home/stormy/rla/persist/testHasStylePollingMultiCard"
@@ -370,7 +370,7 @@ class TestHasStyle {
                 pollingConfig = PollingConfig())
         } else {
             AuditConfig(AuditType.CLCA, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
-                clcaConfig = ClcaConfig(strategy= ClcaStrategyType.apriori, errorRates=errorRates))
+                clcaConfig = ClcaConfig(strategy= ClcaStrategyType.apriori, pluralityErrorRates=errorRates))
         }
 
         val infos = contests.map{ it.info }.associateBy { it.id }
@@ -405,7 +405,7 @@ class TestHasStyle {
                 pollingConfig = PollingConfig())
         } else {
             AuditConfig(AuditType.CLCA, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
-                clcaConfig = ClcaConfig(strategy= ClcaStrategyType.apriori, errorRates=errorRates))
+                clcaConfig = ClcaConfig(strategy= ClcaStrategyType.apriori, pluralityErrorRates=errorRates))
         }
 
         val infos = contests.map{ it.info }.associateBy { it.id }

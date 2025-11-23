@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
+import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
 import kotlin.random.Random
 
 // CANDIDATE FOR REMOVAL; use MultiContestTestData

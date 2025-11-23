@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
+import org.cryptobiotic.rlauxe.workflow.ClcaWithoutReplacement
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.math.max

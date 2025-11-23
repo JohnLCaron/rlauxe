@@ -4,7 +4,7 @@ package org.cryptobiotic.rlauxe.corla
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.makePhantomCvrs
+import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolWithBallotStyle
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestIF

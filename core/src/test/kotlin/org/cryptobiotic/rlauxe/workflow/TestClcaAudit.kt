@@ -94,7 +94,7 @@ class TestClcaAudit {
         println(finalRound.show())
     }
 
-    @Test // TODO oracle disabled
+    // @Test // TODO oracle disabled
     fun testClcaOracle() {
         val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle))
         val testData = MultiContestTestData(11, 4, N, )

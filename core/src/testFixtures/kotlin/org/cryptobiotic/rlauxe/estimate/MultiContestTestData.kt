@@ -1,10 +1,16 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.CardLocationManifest
 import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.audit.CardsWithStylesToCards
+import org.cryptobiotic.rlauxe.audit.makePhantomCards
+import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
+import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -24,21 +30,26 @@ data class MultiContestTestData(
     val marginRange: ClosedFloatingPointRange<Double> = 0.01.. 0.03,
     val underVotePctRange: ClosedFloatingPointRange<Double> = 0.01.. 0.30, // needed to set Nc
     val phantomPctRange: ClosedFloatingPointRange<Double> = 0.00..  0.005, // needed to set Nc
-    val addStyle: Boolean = false, // add cardStyle info to cvr
-    val ncands: Int? = null
+    val addStyle: Boolean = false, // add cardStyle info to cvrs and cards
+    val ncands: Int? = null,
+    val poolPct: Double? = null,  // if not null, make a pool with this pct with two ballotStyles
 ) {
-    // generate with ballotStyles; but if hasStyle = false, then these are not visible to the audit
-    val ballotStylePartition = partition(totalBallots, nballotStyles).toMap() // Map bsidx -> ncards in each ballot style (bs)
+    val poolId = if (poolPct == null) null else 1
+    // generate with ballotStyles
+    val ballotStylePartition: Map<Int,Int>
 
     val contestTestBuilders: List<ContestTestDataBuilder>
     val contests: List<Contest>
-    val ballotStyles: List<CardStyle>
+    val cardStyles: List<CardStyle>
     var countBallots = 0
 
     init {
         require(ncontest > 0)
         require(nballotStyles > 0)
         require(totalBallots > nballotStyles * ncontest) // TODO
+
+        ballotStylePartition = if (poolPct == null) partition(totalBallots, nballotStyles).toMap() // Map bsidx -> ncards in each ballot style (bs)
+            else partitionWithPool(totalBallots, nballotStyles, poolPct).toMap()
 
         // between 2 and 4 candidates, margin is a random number in marginRange
         contestTestBuilders = List(ncontest) { it }.map {// id same as index
@@ -63,23 +74,28 @@ data class MultiContestTestData(
         }
 
         // partition totalBallots amongst the ballotStyles
-        ballotStyles = List(nballotStyles) { it }.map {
-            var contestsForThisBs = contestBstyles.filter{ (fc, bset) -> bset.contains( it ) }.map { (fc, _) -> fc }
+        cardStyles = List(nballotStyles) { it }.map { idx ->
+            var contestsForThisBs = contestBstyles.filter{ (fc, bset) -> bset.contains( idx ) }
+                .map { (fc, _) -> fc }
+
             // every ballot style needs at least one contest. just make it first contest I guess
             if (contestsForThisBs.isEmpty()) contestsForThisBs = listOf(contestTestBuilders.first())
             val contestList = contestsForThisBs.map { it.info.name }
             val contestIds = contestsForThisBs.map { it.info.id }
-            val ncards = ballotStylePartition[it]!!
+            val ncards = ballotStylePartition[idx]!!
             countBallots += ncards
-            CardStyle.make(it, contestList, contestIds, ncards)
+
+            val poolId = if ((poolPct != null) && idx < 2) 1 else null
+            CardStyle.make(idx, contestList, contestIds, ncards, poolId)
         }
         require(countBallots == totalBallots)
         countCards()
         contests = contestTestBuilders.map { it.makeContest() }
     }
 
+    // set contest.ncards
     fun countCards() {
-        ballotStyles.forEach { bs ->
+        cardStyles.forEach { bs ->
             bs.contestNames.forEach { contestName ->
                 val contest = contestTestBuilders.find { it.info.name == contestName }!!
                 contest.ncards += bs.ncards
@@ -87,9 +103,38 @@ data class MultiContestTestData(
         }
     }
 
+    fun makeCardPoolManifest(): Pair<CloseableIterable<AuditableCard>, List<CardPoolIF>> {
+        val cards = CloseableIterable { makeCardsFromContests().iterator() }
+        // these are the contest ids in the pool
+        val contestIds = (cardStyles[0].contestIds + cardStyles[1].contestIds).toSet().sorted()
+
+        val infos = contests.associate { it.id to it.info() }
+        val pool = CardPoolFromCvrs("pool", 1, infos)
+        contestIds.forEach { id -> pool.contestTabs[id] = ContestTabulation(infos[id]!!) }
+
+        val convertedCards: CloseableIterable<AuditableCard> = CloseableIterable {
+            CardsWithStylesToCards(
+                type = AuditType.ONEAUDIT,
+                cvrsAreComplete = true,
+                cards = cards.iterator(),
+                phantomCards = null,
+                listOf(pool),
+            )
+        }
+
+        convertedCards.iterator().use { cardIter ->
+            while (cardIter.hasNext()) {
+                val card: AuditableCard = cardIter.next()
+                if (card.poolId == 1) pool.accumulateVotes(card.cvr())
+            }
+        }
+
+        return Pair(convertedCards, listOf(pool))
+    }
+
     fun makeCardLocationManifest(): CardLocationManifest {
         val cards = CloseableIterable { makeCardsFromContests().iterator() }
-        return CardLocationManifest(cards, ballotStyles)
+        return CardLocationManifest(cards, cardStyles)
     }
 
     override fun toString() = buildString {
@@ -97,18 +142,18 @@ data class MultiContestTestData(
         appendLine(" marginRange=$marginRange underVotePct=$underVotePctRange phantomPct=$phantomPctRange")
         contestTestBuilders.forEach { fcontest ->
             append("  $fcontest")
-            val bs4id = ballotStyles.filter{ it.contestIds.contains(fcontest.contestId) }.map{ it.id }
+            val bs4id = cardStyles.filter{ it.contestIds.contains(fcontest.contestId) }.map{ it.id }
             appendLine(" ballotStyles=$bs4id")
         }
         appendLine("")
-        ballotStyles.forEach { appendLine("  $it") }
+        cardStyles.forEach { appendLine("  $it") }
     }
 
     fun makeCvrsFromContests(): List<Cvr> {
         contestTestBuilders.forEach { it.resetTracker() } // startFresh
         val cvrbs = CvrBuilders().addContests(contestTestBuilders.map { it.info })
         val result = mutableListOf<Cvr>()
-        ballotStyles.forEach { ballotStyle ->
+        cardStyles.forEach { ballotStyle ->
             val fcontests = contestTestBuilders.filter { ballotStyle.contestNames.contains(it.info.name) }
             repeat(ballotStyle.ncards) {
                 // add regular Cvrs including undervotes
@@ -150,17 +195,17 @@ data class MultiContestTestData(
 
         var nextCardId = startCvrId
         val result = mutableListOf<AuditableCard>()
-        ballotStyles.forEach { ballotStyle ->
-            val fcontests = contestTestBuilders.filter { ballotStyle.contestNames.contains(it.info.name) }
-            repeat(ballotStyle.ncards) {
+        cardStyles.forEach { cardStyle ->
+            val fcontests = contestTestBuilders.filter { cardStyle.contestNames.contains(it.info.name) }
+            repeat(cardStyle.ncards) {
                 if (addStyle)
-                    result.add(makeCard(nextCardId++, fcontests, poolId = ballotStyle.id, cardStyle=ballotStyle.name))
+                    result.add(makeCard(nextCardId++, fcontests, poolId = cardStyle.id, cardStyle=cardStyle.name))
                 else
-                    result.add(makeCard(nextCardId++, fcontests, null, null))
+                    result.add(makeCard(nextCardId++, fcontests, cardStyle.poolId, if (cardStyle.poolId == null) null else "pool"))
             }
         }
 
-        result.addAll(makePhantomCards(contests, startIdx=result.size))
+        result.addAll(makePhantomCards(contests, startIdx = result.size))
         result.shuffle(Random)
         return result
     }
@@ -287,7 +332,8 @@ data class ContestTestDataBuilder(
 }
 
 // partition nthings into npartitions randomly
-// return map partitionIdx -> nvotes, where sum(nvotes) = nthings NOTE partitionIdx not id!!
+// return map partitionIdx -> nthings in the partition, where sum(nthings in the partition) = nthings
+// NOTE partitionIdx not id!!
 fun partition(nthings: Int, npartitions: Int): List<Pair<Int, Int>> {
     val cutoffs = List(npartitions - 1) { it }.map { Pair(it, Random.nextInt(nthings)) }.toMutableList()
     cutoffs.add(Pair(npartitions - 1, nthings)) // add the end point
@@ -299,6 +345,28 @@ fun partition(nthings: Int, npartitions: Int): List<Pair<Int, Int>> {
     var last = 0
     val partition = mutableListOf<Pair<Int, Int>>()
     sortedCutoffs.forEach { ps ->
+        partition.add(Pair(ps.first, ps.second - last))
+        last = ps.second
+    }
+    return partition
+}
+
+fun partitionWithPool(nthings: Int, npartitions: Int, poolPct: Double): List<Pair<Int, Int>> {
+    val poolSize = roundToClosest(nthings * poolPct)
+    val thingsLeft = nthings - poolSize
+    val partitionsLeft = npartitions - 2
+
+    val cutpoints = List(partitionsLeft - 1) { it }.map { Pair(2 + it, poolSize + Random.nextInt(thingsLeft)) }.toMutableList()
+    cutpoints.add(Pair(partitionsLeft + 1, nthings)) // add the end point
+
+    // put the two pool partition in front, then get a list sorted by cutpoint
+    val sortedCutoffs =  cutpoints.sortedBy { it.second }
+    val allCutoffs = listOf(Pair(0, poolSize/2), Pair(1, poolSize)) + sortedCutoffs
+
+    // turn that into a partition, a list partitionIdx -> nthings in the partition
+    var last = 0
+    val partition = mutableListOf<Pair<Int, Int>>()
+    allCutoffs.forEach { ps ->
         partition.add(Pair(ps.first, ps.second - last))
         last = ps.second
     }

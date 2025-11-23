@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.core.ClcaErrorTable
+import org.cryptobiotic.rlauxe.workflow.ClcaSimulatedErrorRates
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -21,7 +22,8 @@ class TestClcaSimulationErrorRates {
             val contestUA = ContestUnderAudit(contest).addStandardAssertions()
             val compareAssorter = contestUA.clcaAssertions.first().cassorter
 
-            val sampler = ClcaSimulatedErrorRates(cvrs,
+            val sampler = ClcaSimulatedErrorRates(
+                cvrs,
                 contestUA.contest as Contest,
                 compareAssorter,
                 ClcaErrorTable.standard,

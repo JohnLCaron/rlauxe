@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.Sampling
 import kotlin.math.sqrt
 
 private const val showH0Result = false
@@ -12,7 +13,7 @@ private val logger = KotlinLogging.logger("runTestRepeated")
 // single threaded, used for estimating sample size
 // runs RiskTestingFn repeatedly, drawSample.reset() gives different permutation for each trial.
 fun runTestRepeated(
-    drawSample: Sampler,
+    drawSample: Sampling,
     ntrials: Int,
     testFn: RiskTestingFn,
     testParameters: Map<String, Double>,

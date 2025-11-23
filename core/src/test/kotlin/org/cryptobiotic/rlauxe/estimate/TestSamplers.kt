@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.audit
+package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.Assertion
 import org.cryptobiotic.rlauxe.core.ClcaAssorter
@@ -6,14 +6,12 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.estimate.ClcaNoErrorIterator
-import org.cryptobiotic.rlauxe.estimate.ClcaWithoutReplacement
-import org.cryptobiotic.rlauxe.estimate.OneAuditNoErrorIterator
-import org.cryptobiotic.rlauxe.estimate.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.estimate.makeCvr
-import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
+import org.cryptobiotic.rlauxe.workflow.ClcaNoErrorIterator
+import org.cryptobiotic.rlauxe.workflow.ClcaWithoutReplacement
+import org.cryptobiotic.rlauxe.workflow.OneAuditNoErrorIterator
+import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals

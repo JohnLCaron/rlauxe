@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.ContestRound
-import org.cryptobiotic.rlauxe.estimate.ClcaNoErrorIterator
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 

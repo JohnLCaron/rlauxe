@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.propTestFastConfig
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.workflow.ClcaSimulatedErrorRates
 import org.junit.jupiter.api.Test
 import kotlin.math.abs
 import kotlin.test.assertEquals

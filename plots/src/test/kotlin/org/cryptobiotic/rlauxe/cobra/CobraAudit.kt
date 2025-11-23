@@ -95,7 +95,7 @@ class AuditCobraAssertion(
         auditConfig: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampler: Sampler,
+        sampling: Sampling,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA
@@ -121,7 +121,7 @@ class AuditCobraAssertion(
             withoutReplacement = true
         )
 
-        val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
+        val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = true) { sampling.sample() }
         val samplesNeeded = testH0Result.sampleCount
 
         val measuredCounts = if (testH0Result.tracker is ClcaErrorRatesIF)
@@ -131,8 +131,8 @@ class AuditCobraAssertion(
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
-            nmvrs = sampler.nmvrs(),
-            maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
+            nmvrs = sampling.nmvrs(),
+            maxBallotIndexUsed = sampling.maxSampleIndexUsed(),
             pvalue = testH0Result.pvalueLast,
             samplesUsed = samplesNeeded,
             status = testH0Result.status,

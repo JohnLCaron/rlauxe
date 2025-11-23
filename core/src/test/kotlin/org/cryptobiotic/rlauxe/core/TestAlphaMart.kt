@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.estimate.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

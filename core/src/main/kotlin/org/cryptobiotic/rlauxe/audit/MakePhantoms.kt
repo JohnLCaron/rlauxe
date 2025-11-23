@@ -1,7 +1,5 @@
-package org.cryptobiotic.rlauxe.estimate
+package org.cryptobiotic.rlauxe.audit
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.Cvr
 

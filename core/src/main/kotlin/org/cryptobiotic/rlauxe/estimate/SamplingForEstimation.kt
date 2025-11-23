@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.Sampling
 import kotlin.random.Random
 
 private const val debug = false
@@ -14,7 +15,7 @@ class ClcaCardFuzzSampler(
     val cards: List<AuditableCard>,
     val contest: ContestIF,
     val cassorter: ClcaAssorter
-): Sampler, Iterator<Double> {
+): Sampling, Iterator<Double> {
     val maxSamples = cards.count { it.hasContest(contest.id) }
     val N = cards.size
     val permutedIndex = MutableList(N) { it }
@@ -67,7 +68,7 @@ class PollingCardFuzzSampler(
     val cards: List<AuditableCard>,
     val contest: Contest,
     val assorter: AssorterIF
-): Sampler, Iterator<Double> {
+): Sampling, Iterator<Double> {
     val maxSamples = cards.count { it.hasContest(contest.id) } // dont need this is its single contest
     val N = cards.size
     val welford = Welford()
@@ -111,6 +112,7 @@ class PollingCardFuzzSampler(
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
+// TODO can it be used with DHondt?
 fun makeFuzzedCardsFrom(infoList: List<ContestInfo>,
                         cards: List<AuditableCard>,
                         fuzzPct: Double,

@@ -23,7 +23,7 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
     override fun sortedCards() = CloseableIterable { Closer(sortedCards.iterator()) }
 
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>  {
-        if (mvrsRound.isEmpty()) {
+        if (mvrsRound.isEmpty()) { // TODO filter ??
             return mvrsUA.map { it.cvr() }.zip(sortedCards.map { it.cvr() }) // all of em, for SingleRoundAudit
         }
 

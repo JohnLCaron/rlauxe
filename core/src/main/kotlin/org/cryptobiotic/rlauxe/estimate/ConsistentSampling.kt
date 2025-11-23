@@ -99,34 +99,34 @@ fun consistentSampling(
     var newMvrs = 0
     val sampledCards = mutableListOf<AuditableCard>()
 
-    // threse only one partial iteration over sortedCards, until wantSamples foreach contest are fouond
+    // makes only one partial iteration over sortedCards, until wantSamples foreach contest are fouond
     var countSamples = 0
-    val sortedBorcIter = mvrManager.sortedCards().iterator()
+    val sortedCardIter = mvrManager.sortedCards().iterator()
     while (
         ((auditRound.auditorWantNewMvrs < 0) || (newMvrs < auditRound.auditorWantNewMvrs)) &&
             contestsIncluded.any { contestWantsMoreSamples(it) } &&
-            sortedBorcIter.hasNext()) {
+            sortedCardIter.hasNext()) {
 
         // get the next card in sorted order
-        val boc = sortedBorcIter.next()
+        val card = sortedCardIter.next()
         // does this contribute to one or more contests that need more samples?
-        if (contestsIncluded.any { contestRound -> contestWantsMoreSamples(contestRound) && boc.hasContest(contestRound.id) }) {
+        if (contestsIncluded.any { contestRound -> contestWantsMoreSamples(contestRound) && card.hasContest(contestRound.id) }) {
             // then use it
-            sampledCards.add(boc)
-            if (!previousSamples.contains(boc.prn)) {
+            sampledCards.add(card)
+            if (!previousSamples.contains(card.prn)) {
                 newMvrs++
             }
             // count only if included
             contestsIncluded.forEach { contest ->
-                if (boc.hasContest(contest.id)) {
+                if (card.hasContest(contest.id)) {
                     haveSampleSize[contest.id] = haveSampleSize[contest.id]?.plus(1) ?: 1
                 }
             }
             // track actual for all contests not done
             contestsNotDone.forEach { contest ->
-                if (boc.hasContest(contest.id)) {
+                if (card.hasContest(contest.id)) {
                     haveActualMvrs[contest.id] = haveActualMvrs[contest.id]?.plus(1) ?: 1
-                    if (!previousSamples.contains(boc.prn))
+                    if (!previousSamples.contains(card.prn))
                         haveNewSamples[contest.id] = haveNewSamples[contest.id]?.plus(1) ?: 1
                 }
             }
@@ -152,7 +152,7 @@ fun consistentSampling(
     auditRound.samplePrns = sampledCards.map { it.prn }
 }
 
-// TODO not needed anymore, estimation is now done with diluted margins
+//// TODO not needed anymore, estimation is now done with diluted margins
 fun adjustEstimates(
     auditRound: AuditRound,
     config: AuditConfig,

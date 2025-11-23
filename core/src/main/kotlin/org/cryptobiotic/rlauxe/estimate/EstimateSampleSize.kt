@@ -96,6 +96,8 @@ fun makeEstimationTasks(
     val tasks = mutableListOf<EstimateSampleSizeTask>()
 
     // TODO could do them for all contests in one pass; could be in one list
+    // TODO what if its a very large election, but a contest is very small? May not have enough.
+    //   assumes the cards are randomized
     val contestCards = ContestCardsLimited(contestRound.contestUA.id, config.contestSampleCutoff, cardManifest.iterator()).cards()
 
     contestRound.assertionRounds.map { assertionRound ->

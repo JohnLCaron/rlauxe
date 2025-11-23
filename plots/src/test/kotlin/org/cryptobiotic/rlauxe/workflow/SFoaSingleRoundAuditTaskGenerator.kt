@@ -2,9 +2,13 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.ContestRound
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.util.CloseableIterable
+import kotlin.use
 
 val skipPerRun = 8_000
 
@@ -95,52 +99,26 @@ class SfoaSingleRoundAuditTask(
     }
 }
 
-class SfoaSingleRoundAuditTaskContest18(
-    val run: Int,
-    val auditDir: String,
-    val otherParameters: Map<String, Any>,
-    val quiet: Boolean,
-) : ConcurrentTaskG<WorkflowResult> {
+// TODO do we need to filter the cvrs by contest? The sampler no longer does
+class MvrManagerClcaSingleRound(val sortedCards: CloseableIterable<AuditableCard>, val maxSamples: Int = -1) :
+    MvrManagerClcaIF {
 
-    override fun name() = "run$run"
+    override fun sortedCards() = sortedCards
 
-    override fun run(): WorkflowResult {
-        if (!quiet) println("SfoaSingleRoundAuditTask start ${name()}")
-
-        val rlauxAudit = PersistedWorkflow(auditDir, true)
-        val contest18 = rlauxAudit.contestsUA().find { it.contest.id == 18 }!!
-        val minAssertion = contest18.minClcaAssertion()!!
-        val assertionRound = AssertionRound(minAssertion, 1, null)
-        val contestRound = ContestRound(contest18, listOf(assertionRound), 1)
-
-        val mvrManager = MvrManagerClcaSingleRound(AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run))
-        val sampler =
-            ClcaNoErrorIterator(
-                contest18.id,
-                contest18.Nc,
-                minAssertion.cassorter,
-                mvrManager.sortedCvrs().iterator(),
-            )
-
-        val runner = OneAuditAssertionAuditor()
-        val result: TestH0Result = runner.run(
-            rlauxAudit.auditConfig(),
-            contestRound,
-            assertionRound,
-            sampler,
-            1,
-        )
-        if (!quiet) println("${name()} result $result")
-
-        return WorkflowResult(
-            name(),
-            contest18.Nc,
-            minAssertion.assorter.reportedMargin(),
-            result.status,
-            1.0,
-            result.sampleCount.toDouble(),
-            result.sampleCount.toDouble(),
-            otherParameters,
-        )
+    override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>> {
+        val cvrs = mutableListOf<Cvr>()
+        var count = 0
+        var countPool = 0
+        sortedCards().iterator().use { cardIter ->
+            while (cardIter.hasNext() && (maxSamples < 0 || count < maxSamples)) {
+                val cvr = cardIter.next().cvr()
+                cvrs.add(cvr)
+                count++
+                if (cvr.poolId != null) countPool++
+            }
+        }
+        println("makeCvrPairsForRound: count=$count poolCount=$countPool")
+        return cvrs.zip(cvrs)
     }
+
 }

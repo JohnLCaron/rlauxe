@@ -49,7 +49,7 @@ class TestSampler {
     fun testClcaWithoutReplacement() {
         val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasStyle=false, dilutedMargin=assertion.assorter.reportedMargin(), true)
         val cvrPairs = cvrs.zip( cvrs)
-        val target = ClcaWithoutReplacement(0, cvrPairs, cassorter, true)
+        val target = ClcaWithoutReplacement(0, cvrPairs, cassorter, true) // single contest OK
 
         var count = 0
         while (target.hasNext()) {

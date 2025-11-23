@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsFrom
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -206,7 +205,7 @@ class MvrManagerClcaFromCards(val completeCards: CloseableIterable<AuditableCard
     override fun sortedCards() = completeCards
 
     override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>  {
-        if (mvrsRound.isEmpty()) {  // wants all of em, for SingleRoundAudit
+        if (mvrsRound.isEmpty()) {  // for SingleRoundAudit. TODO do we need to filter ??
             val sampledMvrs = if (simFuzzPct == null) {
                 sortedCards // use the cvrs - ie, no errors
             } else { // fuzz the cvrs

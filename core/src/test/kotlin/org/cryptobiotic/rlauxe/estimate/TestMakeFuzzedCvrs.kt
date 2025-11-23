@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.workflow.ClcaWithoutReplacement
+import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsFrom
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.math.max
@@ -24,9 +25,8 @@ class TestMakeFuzzedCvrs {
         val contestUA = ContestUnderAudit(contest).addStandardAssertions()
         val assort = contestUA.clcaAssertions.first().cassorter
 
-        // fuzz
         val testMvrs = makeFuzzedCvrsFrom(listOf(contest), testCvrs, mvrsFuzzPct)
-        val sampler = ClcaWithoutReplacement(
+        val sampler = ClcaWithoutReplacement( // fuzz single contest OK
             contestUA.id,
             testMvrs.zip(testCvrs),
             assort,

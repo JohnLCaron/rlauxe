@@ -64,6 +64,7 @@ class PollWithoutReplacement(
 }
 
 //// For clca audits. Production RunClcaContestTask
+// TODO in what circumstances do you filter by contest ?? or should it be possibleContests ??
 class ClcaWithoutReplacement(
     val contestId: Int,
     val cvrPairs: List<Pair<Cvr, Cvr>>, // Pair(mvr, cvr) TODO List<Pair<Cvr, AuditableCard>> ??

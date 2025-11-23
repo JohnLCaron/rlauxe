@@ -66,7 +66,7 @@ class SfoaSingleRoundAuditTask(
                         contestUA.id,
                         contestUA.Nc,
                         cassertion.cassorter,
-                        mvrManager.sortedCvrs().iterator(),
+                        mvrManager.sortedCards().iterator(),
                     )
 
                 val runner = OneAuditAssertionAuditor()
@@ -99,13 +99,11 @@ class SfoaSingleRoundAuditTask(
     }
 }
 
-// TODO do we need to filter the cvrs by contest? The sampler no longer does
-class MvrManagerClcaSingleRound(val sortedCards: CloseableIterable<AuditableCard>, val maxSamples: Int = -1) :
-    MvrManagerClcaIF {
+class MvrManagerClcaSingleRound(val sortedCards: CloseableIterable<AuditableCard>, val maxSamples: Int = -1) : MvrManager {
 
     override fun sortedCards() = sortedCards
 
-    override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>> {
+    override fun makeMvrCardPairsForRound(): List<Pair<Cvr, Cvr>> {
         val cvrs = mutableListOf<Cvr>()
         var count = 0
         var countPool = 0

@@ -41,7 +41,9 @@ class TestAuditPolling {
         val assorter = contestUA.pollingAssertions.first().assorter
 
         val cvrs = test.makeCvrsFromContests()
-        val cvrSampler = PollWithoutReplacement(contestUA.id, cvrs, assorter)
+        val pairs = cvrs.zip(cvrs)
+
+        val cvrSampler = PollWithoutReplacement(contestUA.id, pairs, assorter)
 
         val d = 100
         val margin = assorter.reportedMargin()
@@ -114,7 +116,7 @@ class TestAuditPolling {
             contestUA.pollingAssertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
-                val cvrSampler = if (withoutReplacement) PollWithoutReplacement(contestUA.id, cvrs, it.assorter)
+                val cvrSampler = if (withoutReplacement) PollWithoutReplacement(contestUA.id, cvrs.zip(cvrs), it.assorter)
                     else PollWithReplacement(contestUA.contest as Contest, cvrs, it.assorter)
 
                 val result = runAlphaMartRepeated(

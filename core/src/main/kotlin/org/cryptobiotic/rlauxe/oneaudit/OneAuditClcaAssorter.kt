@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.core.*
 
 /** See OneAudit Section 2.3.
@@ -89,13 +90,13 @@ class OneAuditClcaAssorter(
 ) : ClcaAssorter(info, assorter, hasStyle = hasStyle, dilutedMargin=dilutedMargin) {
 
     // B(bi, ci)
-    override fun bassort(mvr: Cvr, cvr: Cvr, hasStyle: Boolean): Double {
+    override fun bassort(mvr: CardIF, cvr: CardIF, hasStyle: Boolean): Double {
         // println("mvr = $mvr cvr = $cvr")
-        if (cvr.poolId == null) {
+        if (cvr.poolId() == null) {
             return super.bassort(mvr, cvr, hasStyle) // here we use the standard assorter
         }
 
-        val poolAverage = poolAverages.assortAverage[cvr.poolId] ?: throw IllegalStateException("Dont have pool ${cvr.poolId} in contest ${info.id} assorter")
+        val poolAverage = poolAverages.assortAverage[cvr.poolId()] ?: throw IllegalStateException("Dont have pool ${cvr.poolId()} in contest ${info.id} assorter")
         val overstatement = overstatementPoolError(mvr, poolAverage) // ωi
         val tau = (1.0 - overstatement / this.assorter.upperBound())
 
@@ -115,8 +116,8 @@ class OneAuditClcaAssorter(
         return result
     }
 
-    fun overstatementPoolError(mvr: Cvr, poolAvgAssortValue: Double): Double {
-        val mvr_assort = if (mvr.phantom || (hasStyle && !mvr.hasContest(info.id)))
+    fun overstatementPoolError(mvr: CardIF, poolAvgAssortValue: Double): Double {
+        val mvr_assort = if (mvr.isPhantom() || (hasStyle && !mvr.hasContest(info.id)))
             0.0
         else
             this.assorter.assort(mvr, usePhantoms = false)

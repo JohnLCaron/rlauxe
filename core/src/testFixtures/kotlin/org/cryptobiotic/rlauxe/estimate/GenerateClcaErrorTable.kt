@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.workflow.ClcaFuzzSampler
 import kotlin.test.Test
 
 class GenerateClcaErrorTable {

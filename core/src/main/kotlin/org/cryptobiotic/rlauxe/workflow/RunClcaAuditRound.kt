@@ -12,11 +12,11 @@ private val logger = KotlinLogging.logger("ClcaAudit")
 fun runClcaAuditRound(
     config: AuditConfig,
     contests: List<ContestRound>,
-    mvrManager: MvrManagerClcaIF,
+    mvrManager: MvrManager,
     roundIdx: Int,
     auditor: ClcaAssertionAuditorIF,
 ): Boolean {
-    val cvrPairs = mvrManager.makeCvrPairsForRound()
+    val cvrPairs = mvrManager.makeMvrCardPairsForRound()
 
     // parallelize over contests
     val contestsNotDone = contests.filter{ !it.done }
@@ -35,7 +35,7 @@ fun runClcaAuditRound(
 class RunClcaContestTask(
     val config: AuditConfig,
     val contest: ContestRound,
-    val cvrPairs: List<Pair<Cvr, Cvr>>, // Pair(mvr, cvr)
+    val cvrPairs: List<Pair<CardIF, CardIF>>, // Pair(mvr, card)
     val auditor: ClcaAssertionAuditorIF,
     val roundIdx: Int): ConcurrentTaskG<Boolean> {
 

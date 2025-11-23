@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.sfn
 import kotlin.random.Random
@@ -16,27 +17,29 @@ interface Sampling: Iterator<Double> {
     fun nmvrs(): Int // total number mvrs
 }
 
+// TODO we're stuffing sampling logic into card.hasContest(contestId)
+
 //// For polling audits. Production runPollingAuditRound
 class PollWithoutReplacement(
     val contestId: Int,
-    val mvrs : List<Cvr>,
+    val cvrPairs: List<Pair<CardIF, CardIF>>, // Pair(mvr, card)
     val assorter: AssorterIF,
     val allowReset: Boolean = true,
 ): Sampling {
-    val maxSamples = mvrs.count { it.hasContest(contestId) }
-    private val permutedIndex = MutableList(mvrs.size) { it }
+    val maxSamples = cvrPairs.count { it.second.hasContest(contestId) }
+    val permutedIndex = MutableList(cvrPairs.size) { it }
     private var idx = 0
     private var count = 0
 
     init {
-        if (allowReset) reset()
+        cvrPairs.forEach { (mvr, card) -> require(mvr.location() == card.location())  }
     }
 
     override fun sample(): Double {
-        while (idx < mvrs.size) {
-            val mvr = mvrs[permutedIndex[idx]]
+        while (idx < cvrPairs.size) {
+            val (mvr, card) = cvrPairs[permutedIndex[idx]]
             idx++
-            if (mvr.hasContest(contestId)) {
+            if (card.hasContest(contestId)) {
                 count++
                 return assorter.assort(mvr, usePhantoms = true)
             }
@@ -57,38 +60,34 @@ class PollWithoutReplacement(
 
     override fun maxSamples() = maxSamples
     override fun maxSampleIndexUsed() = count
-    override fun nmvrs() = mvrs.size
+    override fun nmvrs() = cvrPairs.size
 
     override fun hasNext() = (count < maxSamples)
     override fun next() = sample()
 }
 
 //// For clca audits. Production RunClcaContestTask
-// TODO in what circumstances do you filter by contest ?? or should it be possibleContests ??
 class ClcaWithoutReplacement(
     val contestId: Int,
-    val cvrPairs: List<Pair<Cvr, Cvr>>, // Pair(mvr, cvr) TODO List<Pair<Cvr, AuditableCard>> ??
+    val cvrPairs: List<Pair<CardIF, CardIF>>, // Pair(mvr, card)
     val cassorter: ClcaAssorter,
     val allowReset: Boolean,
-    val trackStratum: Boolean = false, // debugging for oneaudit
 ): Sampling, Iterator<Double> {
-    // TODO TIMING init taking 8%
-    val maxSamples = cvrPairs.count { it.first.hasContest(contestId) } // TODO mvr vs cvr hasContest. should be cvr i think....??
+    val maxSamples = cvrPairs.count { it.second.hasContest(contestId) }
     val permutedIndex = MutableList(cvrPairs.size) { it }
     private var idx = 0
     private var count = 0
 
     init {
-        cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id)  }
+        cvrPairs.forEach { (mvr, card) -> require(mvr.location() == card.location())  }
     }
 
     override fun sample(): Double {
         while (idx < cvrPairs.size) {
-            val (mvr, cvr) = cvrPairs[permutedIndex[idx]]
+            val (mvr, card) = cvrPairs[permutedIndex[idx]]
             idx++
-            if (mvr.hasContest(contestId)) { // TODO mvr vs cvr hasContest. should be cvr i think....??
-                val result = cassorter.bassort(mvr, cvr)
-                if (trackStratum) print("${sfn(cvr.id, 8)} ")
+            if (card.hasContest(contestId)) {
+                val result = cassorter.bassort(mvr, card)
                 count++
                 return result
             }

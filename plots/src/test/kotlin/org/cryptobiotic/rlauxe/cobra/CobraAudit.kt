@@ -32,7 +32,7 @@ class CobraSingleRoundAuditTaskGenerator(
         val contest = makeContestFromCvrs(info, testCvrs)
 
         // TODO: chicken or the egg
-        val cobraWorkflow1 = CobraAudit(auditConfig, listOf(contest), MvrManagerClcaForTesting(testCvrs, testCvrs, auditConfig.seed), p2prior)
+        val cobraWorkflow1 = CobraAudit(auditConfig, listOf(contest), MvrManagerForTesting(testCvrs, testCvrs, auditConfig.seed), p2prior)
         val contestUA: ContestUnderAudit = cobraWorkflow1.contestsUA().first()
         val cassorter = contestUA.clcaAssertions.first().cassorter
 
@@ -42,7 +42,7 @@ class CobraSingleRoundAuditTaskGenerator(
 
         // maybe bogus
         val cobraWorkflow2 = CobraAudit(auditConfig, listOf(contest),
-            MvrManagerClcaForTesting(testCvrs, sampler.mvrs, auditConfig.seed),
+            MvrManagerForTesting(testCvrs, sampler.mvrs, auditConfig.seed),
             p2prior)
 
         return ClcaSingleRoundSingleContestAuditTask(
@@ -59,7 +59,7 @@ class CobraSingleRoundAuditTaskGenerator(
 class CobraAudit(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
-    val mvrManagerForTesting: MvrManagerClcaForTesting, // mutable
+    val mvrManagerForTesting: MvrManagerForTesting, // mutable
     val p2prior: Double,
 ) : AuditWorkflow() {
     private val contestsUA: List<ContestUnderAudit>

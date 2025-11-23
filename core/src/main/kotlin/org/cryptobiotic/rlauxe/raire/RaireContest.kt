@@ -4,6 +4,7 @@ import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.*
@@ -296,8 +297,8 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
         return rassertion.marginInVotes / N.toDouble()
     }
 
-    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
-        if (usePhantoms && mvr.phantom) return 0.5
+    override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
+        if (usePhantoms && mvr.isPhantom()) return 0.5
         return if (rassertion.assertionType == RaireAssertionType.winner_only) assortWinnerOnly(mvr)
             else  if (rassertion.assertionType == RaireAssertionType.irv_elimination) assortIrvElimination(mvr)
             else throw RuntimeException("unknown assertionType = ${rassertion.assertionType}")
@@ -309,7 +310,7 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
     //                    1 if v.get_vote_for(contest_id, winr) == 1 else 0
     //                )
     // aka NEB
-    fun assortWinnerOnly(rcvr: Cvr): Double {
+    fun assortWinnerOnly(rcvr: CardIF): Double {
         // CVR is a vote for the winner only if it has the winner as its first preference (rank == 1)
         val awinner = if (raire_get_rank(rcvr, contestId, rassertion.winnerId) == 1) 1 else 0
         // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
@@ -322,7 +323,7 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
     //                            - v.rcv_votefor_cand(contest.id, loser, remn)
     //                            + 1 ) / 2
     // aka NEN
-    fun assortIrvElimination(rcvr: Cvr): Double {
+    fun assortIrvElimination(rcvr: CardIF): Double {
         // Context is that all candidates in "already_eliminated" have been
         // eliminated and their votes distributed to later preferences
         val awinner = raire_votefor_elim(rcvr, contestId, rassertion.winnerId, remaining)
@@ -343,8 +344,8 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
 //        )
 
 // if candidate not ranked, return 0, else rank (1 based)
-fun raire_get_rank(cvr: Cvr, contest: Int, candidate: Int): Int {
-    val rankedChoices = cvr.votes[contest]
+fun raire_get_rank(cvr: CardIF, contest: Int, candidate: Int): Int {
+    val rankedChoices = cvr.rankedChoices(contest)
     return if (rankedChoices == null || !rankedChoices.contains(candidate)) 0
     else rankedChoices.indexOf(candidate) + 1
 }
@@ -362,7 +363,7 @@ fun raire_get_rank(cvr: Cvr, contest: Int, candidate: Int): Int {
 // Check whether vote is a vote for the loser with respect to a 'winner only' assertion.
 // Its a vote for the loser if they appear and the winner does not, or they appear before the winner
 // return 1 if the given vote is a vote for 'loser' and 0 otherwise
-fun raire_loser_vote_wo(cvr: Cvr, contest: Int, winner: Int, loser: Int): Int {
+fun raire_loser_vote_wo(cvr: CardIF, contest: Int, winner: Int, loser: Int): Int {
     val rank_winner = raire_get_rank(cvr, contest, winner)
     val rank_loser = raire_get_rank(cvr, contest, loser)
 
@@ -393,7 +394,7 @@ fun raire_loser_vote_wo(cvr: Cvr, contest: Int, winner: Int, loser: Int): Int {
  * @param remaining list of identifiers of candidates still standing
  * @return 1 if the given vote for the contest counts as a vote for 'cand' and 0 otherwise.
  */
-fun raire_votefor_elim(cvr: Cvr, contest: Int, cand: Int, remaining: List<Int>): Int {
+fun raire_votefor_elim(cvr: CardIF, contest: Int, cand: Int, remaining: List<Int>): Int {
     if (cand !in remaining) return 0
 
     val rank_cand = raire_get_rank(cvr, contest, cand)

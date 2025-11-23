@@ -13,13 +13,12 @@ private val logger = KotlinLogging.logger("PersistedMvrManager")
 private val checkValidity = true
 
 // assumes that the mvrs have been set externally into the election record, eg by EnterMvrsCli.
-open class PersistedMvrManager(val auditDir: String) : MvrManagerClcaIF, MvrManagerPollingIF {
+open class PersistedMvrManager(val auditDir: String): MvrManager {
     val publisher = Publisher(auditDir)
 
     override fun sortedCards() = CloseableIterable{ auditableCards() }
 
-    // Clca, OneAudit
-    override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>> {
+    override fun makeMvrCardPairsForRound(): List<Pair<CardIF, CardIF>>  { // Pair(mvr, card)
         val mvrsRound = readMvrsForRound()
         val sampleNumbers = mvrsRound.map { it.prn }
 
@@ -35,10 +34,10 @@ open class PersistedMvrManager(val auditDir: String) : MvrManagerClcaIF, MvrMana
                 require(mvr.prn == cvr.prn)
             }
         }
-        return mvrsRound.map{ it.cvr() }.zip(sampledCvrs.map{ it.cvr() })
+        return mvrsRound.zip(sampledCvrs)
     }
 
-    // Polling
+    /* Polling
     override fun makeMvrsForRound(): List<Cvr> {
         val mvrsRound = readMvrsForRound()
         val sampleNumbers = mvrsRound.map { it.prn }
@@ -47,7 +46,7 @@ open class PersistedMvrManager(val auditDir: String) : MvrManagerClcaIF, MvrMana
         require(sampledCvrs.size == mvrsRound.size)
 
         return sampledCvrs.map{ it.cvr() }
-    }
+    } */
 
     // the sampleMvrsFile is added externally for real audits, and by MvrManagerTestFromRecord for test audits
     // it is placed into publisher.sampleMvrsFile, and this just reads from that file.

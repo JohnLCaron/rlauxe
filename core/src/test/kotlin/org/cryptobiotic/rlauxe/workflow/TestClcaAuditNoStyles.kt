@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import kotlin.test.Test
 
 class TestClcaAuditNoStyles {
@@ -121,7 +120,7 @@ class TestClcaAuditNoStyles {
             else makeFuzzedCvrsFrom(contestsToAudit, testCvrs, config.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
         val workflow = WorkflowTesterClca(config, contestsToAudit, emptyList(),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, config.seed))
+            MvrManagerForTesting(testCvrs, testMvrs, config.seed))
         runTestAuditToCompletion("TestClcaWorkflowNoStyles", workflow)
     }
 

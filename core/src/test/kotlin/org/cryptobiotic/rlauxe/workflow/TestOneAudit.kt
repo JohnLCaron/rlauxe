@@ -19,7 +19,7 @@ class TestOneAudit {
 
         val config = AuditConfig(AuditType.ONEAUDIT, hasStyle=true, nsimEst=10)
         val workflow = WorkflowTesterOneAudit(config, listOf(contestOA),
-            MvrManagerClcaForTesting(testCvrs, testCvrs, config.seed))
+            MvrManagerForTesting(testCvrs, testCvrs, config.seed))
 
         runTestAuditToCompletion("testOneAuditContestSmall", workflow)
     }
@@ -36,7 +36,7 @@ class TestOneAudit {
         println(contestOA)
 
         val config = AuditConfig(AuditType.ONEAUDIT, hasStyle=true, nsimEst=10)
-        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerClcaForTesting(testCvrs, testCvrs, config.seed))
+        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.seed))
 
         runTestAuditToCompletion("testOneAuditContest", workflow)
     }
@@ -53,7 +53,7 @@ class TestOneAudit {
         println(contestOA)
 
         val config = AuditConfig(AuditType.ONEAUDIT, hasStyle=true, nsimEst=10)
-        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerClcaForTesting(testCvrs, testCvrs, config.seed))
+        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.seed))
 
         runTestAuditToCompletion("testOneAuditContest", workflow)
     }
@@ -74,7 +74,7 @@ class TestOneAudit {
             oaConfig = OneAuditConfig(OneAuditStrategyType.bet99)
         )
 
-        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerClcaForTesting(testCvrs, testCvrs, config.seed))
+        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.seed))
         runTestAuditToCompletion("testOneAuditContestSmall", workflow)
     }
 

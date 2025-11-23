@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.mean2margin
@@ -73,11 +74,11 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
         return if (h < doublePrecision) 0.0 else h
     }
 
-    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
+    override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(info.id)) return 0.5
-        if (usePhantoms && mvr.phantom) return 0.0 // worst case
-        val cands = mvr.votes[info.id]!!
-        return if (cands.size == 1) h(cands.first()) else 0.5
+        if (usePhantoms && mvr.isPhantom()) return 0.0 // worst case
+        val cands = mvr.votes(info.id)
+        return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }
 
     override fun upperBound() = h2(upperg)
@@ -255,11 +256,11 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
         return c * g + 0.5
     }
 
-    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
+    override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(info.id)) return 0.5
-        if (usePhantoms && mvr.phantom) return 0.0 // worst case
-        val cands = mvr.votes[info.id]!!
-        return if (cands.size == 1) h(cands.first()) else 0.5
+        if (usePhantoms && mvr.isPhantom()) return 0.0 // worst case
+        val cands = mvr.votes(info.id)
+        return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }
 
     //    // assort in {0, .5, u}, u > .5
@@ -396,11 +397,11 @@ data class AboveThresholdB(val info: ContestInfo, val winner: Int, val t: Double
         return c * g + 0.5
     }
 
-    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
+    override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(info.id)) return 0.5
-        if (usePhantoms && mvr.phantom) return 0.0 // worst case
-        val cands = mvr.votes[info.id]!!
-        return if (cands.size == 1) h(cands.first()) else 0.5
+        if (usePhantoms && mvr.isPhantom()) return 0.0 // worst case
+        val cands = mvr.votes(info.id)
+        return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }
 
     override fun upperBound() = h2(upperg)

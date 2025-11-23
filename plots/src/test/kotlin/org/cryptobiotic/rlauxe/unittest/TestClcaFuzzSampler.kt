@@ -2,11 +2,11 @@ package org.cryptobiotic.rlauxe.unittest
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.ClcaFuzzSampler
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.runRepeatedBettingMart
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.workflow.ClcaFuzzSampler
 import org.junit.jupiter.api.Test
 
 // TODO make into a test with asserts ?

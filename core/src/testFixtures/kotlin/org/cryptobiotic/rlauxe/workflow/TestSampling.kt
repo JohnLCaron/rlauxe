@@ -2,12 +2,14 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PluralityErrorRates
+import org.cryptobiotic.rlauxe.estimate.chooseNewCandidate
 import org.cryptobiotic.rlauxe.util.ContestVoteBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilders
@@ -26,7 +28,7 @@ private val logger = KotlinLogging.logger("TestSampling")
 // TODO move to test. TODO can we take the filter off ??
 fun makeClcaNoErrorSampler(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAssorter): Sampling {
     val cvrPairs = cvrs.zip(cvrs)
-    return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, true, false) // TODO
+    return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, true) // TODO
 }
 
 //// For clca audits with styles and no errors
@@ -34,7 +36,7 @@ class ClcaNoErrorIterator(
     val contestId: Int,
     val contestNc: Int,
     val cassorter: ClcaAssorter,
-    val cvrIterator: Iterator<Cvr>,
+    val cvrIterator: Iterator<CardIF>,
 ): Sampling, Iterator<Double> {
     private var idx = 0
     private var count = 0
@@ -861,35 +863,6 @@ fun makeFuzzedCvrsFrom(contests: List<ContestIF>,
     return cvrbs.map { it.build() }
 }
 
-fun chooseNewCandidate(currId: Int?, candidateIds: List<Int>, undervotes: Boolean): Int? {
-    return if (undervotes) chooseNewCandidateWithUndervotes(currId, candidateIds) else
-        chooseNewCandidateNoUndervotes(currId, candidateIds)
-}
-
-fun chooseNewCandidateWithUndervotes(currId: Int?, candidateIds: List<Int>): Int? {
-    val size = candidateIds.size
-    while (true) {
-        val ncandIdx = Random.nextInt(size + 1)
-        if (ncandIdx == size)
-            return null // choose none
-        val candId = candidateIds[ncandIdx]
-        if (candId != currId) {
-            return candId
-        }
-    }
-}
-
-fun chooseNewCandidateNoUndervotes(currId: Int?, candidateIds: List<Int>): Int? {
-    val size = candidateIds.size
-    while (true) {
-        val ncandIdx = Random.nextInt(size)
-        val candId = candidateIds[ncandIdx]
-        if (candId != currId) {
-            return candId
-        }
-    }
-}
-
 // for IRV
 fun switchCandidateRankings(cvb: ContestVoteBuilder, candidateIds: List<Int>) {
     val ncands = candidateIds.size
@@ -905,22 +878,5 @@ fun switchCandidateRankings(cvb: ContestVoteBuilder, candidateIds: List<Int>) {
         val save = cvb.votes[ncandIdx1]
         cvb.votes[ncandIdx1] = cvb.votes[ncandIdx2]
         cvb.votes[ncandIdx2] = save
-    }
-}
-
-fun switchCandidateRankings(votes: MutableList<Int>, candidateIds: List<Int>) {
-    val ncands = candidateIds.size
-    val size = votes.size
-    if (size == 0) { // no votes -> random one vote
-        val candIdx = Random.nextInt(ncands)
-        votes.add(candidateIds[candIdx])
-    } else if (size == 1) { // one vote -> no votes
-        votes.clear()
-    } else { // switch two randomly selected votes
-        val ncandIdx1 = Random.nextInt(size)
-        val ncandIdx2 = Random.nextInt(size)
-        val save = votes[ncandIdx1]
-        votes[ncandIdx1] = votes[ncandIdx2]
-        votes[ncandIdx2] = save
     }
 }

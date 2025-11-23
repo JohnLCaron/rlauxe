@@ -1,11 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doubleIsClose
-import org.cryptobiotic.rlauxe.util.doublePrecision
+import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsFrom
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -63,7 +61,7 @@ class CompareAdaptiveBetting {
             println("margin=$margin")
 
             val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=0.0, phantomPct=0.0)
-            var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
+            val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
             val testMvrs =  makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, .01)
 
             val contestUA = ContestUnderAudit(sim.contest, Nbin=Nc).addStandardAssertions()

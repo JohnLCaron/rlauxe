@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
@@ -27,7 +28,7 @@ import org.cryptobiotic.rlauxe.util.pfn
 interface AssorterIF {
     // usePhantoms=false for avgAssort = reportedMargin, and for the clca overstatement
     // usePhantoms=true for polling assort value
-    fun assort(mvr: Cvr, usePhantoms: Boolean = false) : Double
+    fun assort(mvr: CardIF, usePhantoms: Boolean = false) : Double
 
     fun lowerBound() = 0.0  // makes life easier; do an affine tranform if needed to make this true
     fun upperBound(): Double
@@ -78,9 +79,9 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     // assort in {0, .5, 1}
     // usePhantoms = true for polling, but when this is the "primitive assorter" in clca, usePhantoms = false so that
     //   clcaAssorter can handle the phantoms.
-    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
+    override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(info.id)) return 0.5
-        if (usePhantoms && mvr.phantom) return 0.0 // worst case
+        if (usePhantoms && mvr.isPhantom()) return 0.0 // worst case
         val w = mvr.hasMarkFor(info.id, winner)
         val l = mvr.hasMarkFor(info.id, loser)
         return (w - l + 1) * 0.5
@@ -144,11 +145,11 @@ data class SuperMajorityAssorter(val info: ContestInfo, val candId: Int, val min
     }
 
     // assort in {0, .5, u}, u > .5
-    override fun assort(mvr: Cvr, usePhantoms: Boolean): Double {
+    override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(info.id)) return 0.5
-        if (usePhantoms && mvr.phantom) return 0.0 // valid vote for every loser
+        if (usePhantoms && mvr.isPhantom()) return 0.0 // valid vote for every loser
         val w = mvr.hasMarkFor(info.id, candId)
-        return if (mvr.hasOneVote(info.id, info.candidateIds)) (w / (2 * minFraction)) else .5
+        return if (mvr.hasOneVoteFor(info.id, info.candidateIds)) (w / (2 * minFraction)) else .5
     }
 
     override fun upperBound() = upperBound

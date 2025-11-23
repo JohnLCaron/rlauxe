@@ -149,3 +149,50 @@ fun makeFuzzedCardsFrom(infoList: List<ContestInfo>,
 
     return cardBuilders.map { it.build() }
 }
+
+fun switchCandidateRankings(votes: MutableList<Int>, candidateIds: List<Int>) {
+    val ncands = candidateIds.size
+    val size = votes.size
+    if (size == 0) { // no votes -> random one vote
+        val candIdx = Random.nextInt(ncands)
+        votes.add(candidateIds[candIdx])
+    } else if (size == 1) { // one vote -> no votes
+        votes.clear()
+    } else { // switch two randomly selected votes
+        val ncandIdx1 = Random.nextInt(size)
+        val ncandIdx2 = Random.nextInt(size)
+        val save = votes[ncandIdx1]
+        votes[ncandIdx1] = votes[ncandIdx2]
+        votes[ncandIdx2] = save
+    }
+}
+
+
+fun chooseNewCandidate(currId: Int?, candidateIds: List<Int>, undervotes: Boolean): Int? {
+    return if (undervotes) chooseNewCandidateWithUndervotes(currId, candidateIds) else
+        chooseNewCandidateNoUndervotes(currId, candidateIds)
+}
+
+fun chooseNewCandidateWithUndervotes(currId: Int?, candidateIds: List<Int>): Int? {
+    val size = candidateIds.size
+    while (true) {
+        val ncandIdx = Random.nextInt(size + 1)
+        if (ncandIdx == size)
+            return null // choose none
+        val candId = candidateIds[ncandIdx]
+        if (candId != currId) {
+            return candId
+        }
+    }
+}
+
+fun chooseNewCandidateNoUndervotes(currId: Int?, candidateIds: List<Int>): Int? {
+    val size = candidateIds.size
+    while (true) {
+        val ncandIdx = Random.nextInt(size)
+        val candId = candidateIds[ncandIdx]
+        if (candId != currId) {
+            return candId
+        }
+    }
+}

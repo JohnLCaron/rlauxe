@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
 // simulated cvrs, mvrs for testing are sorted and kept here in memory
-class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerClcaIF, MvrManagerTestIF {
+class MvrManagerForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManager, MvrManagerTestIF {
     val sortedCards: List<AuditableCard>
     val mvrsUA: List<AuditableCard> // the mvrs in the same order as the sorted cards
     private var mvrsRound: List<AuditableCard> = emptyList()
@@ -22,9 +22,9 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
 
     override fun sortedCards() = CloseableIterable { Closer(sortedCards.iterator()) }
 
-    override fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>  {
-        if (mvrsRound.isEmpty()) { // TODO filter ??
-            return mvrsUA.map { it.cvr() }.zip(sortedCards.map { it.cvr() }) // all of em, for SingleRoundAudit
+    override fun makeMvrCardPairsForRound(): List<Pair<CardIF, CardIF>>  {
+        if (mvrsRound.isEmpty()) {
+            return mvrsUA.zip(sortedCards) // all of em, for SingleRoundAudit
         }
 
         val sampleNumbers = mvrsRound.map { it.prn }
@@ -38,7 +38,7 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
             require(mvr.index == cvr.index)
             require(mvr.prn== cvr.prn)
         }
-        return mvrsRound.map{ it.cvr() }.zip(sampledCvrs.map{ it.cvr() })
+        return mvrsRound.zip(sampledCvrs)
     }
 
     // MvrManagerTest
@@ -59,8 +59,8 @@ class MvrManagerClcaForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : M
 
 }
 
-// simulated cardLocations, mvrs for testing are sorted and kept here in memory
-class MvrManagerPollingForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerPollingIF, MvrManagerTestIF {
+/* simulated cardLocations, mvrs for testing are sorted and kept here in memory
+class MvrManagerForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerPollingIF, MvrManagerTestIF {
     val sortedCards: List<AuditableCard>
     val mvrsUA: List<AuditableCard>
     var mvrsRound: List<AuditableCard> = emptyList()
@@ -97,7 +97,7 @@ class MvrManagerPollingForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) 
         mvrsRound =  sampledMvrs
         return sampledMvrs
     }
-}
+} */
 
 // runs audit rounds until finished. return last audit round
 // Can only use this if the MvrManager implements MvrManagerTest

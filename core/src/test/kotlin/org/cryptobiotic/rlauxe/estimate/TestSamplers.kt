@@ -27,7 +27,7 @@ class TestSampler {
 
     @Test
     fun testPollWithoutReplacement() {
-        val target = PollWithoutReplacement(0, cvrs, assertion.assorter)
+        val target = PollWithoutReplacement(0, cvrs.zip(cvrs), assertion.assorter)
 
         var count = 0
         while (target.hasNext()) {

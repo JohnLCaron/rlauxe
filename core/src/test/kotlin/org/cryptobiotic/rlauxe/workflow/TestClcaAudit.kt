@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
@@ -124,7 +123,7 @@ class TestClcaAudit {
             else makeFuzzedCvrsFrom(contests, testCvrs, config.simFuzzPct!!) // mvrs fuzz = sim fuzz
 
         val workflow = WorkflowTesterClca(config, contests, emptyList(),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, config.seed))
+            MvrManagerForTesting(testCvrs, testMvrs, config.seed))
         return runTestAuditToCompletion("testClcaWorkflow", workflow)
     }
 }

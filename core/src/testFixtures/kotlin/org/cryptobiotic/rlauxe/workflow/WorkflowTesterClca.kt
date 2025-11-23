@@ -12,7 +12,7 @@ class WorkflowTesterClca(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>,
-    val mvrManager: MvrManagerClcaIF,
+    val mvrManager: MvrManager,
 ): AuditWorkflow() {
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()

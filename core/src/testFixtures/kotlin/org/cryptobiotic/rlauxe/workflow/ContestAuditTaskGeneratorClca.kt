@@ -42,7 +42,7 @@ class ClcaContestAuditTaskGenerator(
         }
 
         val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(sim.contest), emptyList(),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed))
+            MvrManagerForTesting(testCvrs, testMvrs, useConfig.seed))
 
         return ContestAuditTask(
             name(),
@@ -87,7 +87,7 @@ class ClcaSingleRoundAuditTaskGenerator(
         }
 
         val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(sim.contest), emptyList(),
-            MvrManagerClcaForTesting(testCvrs, testMvrs, useConfig.seed))
+            MvrManagerForTesting(testCvrs, testMvrs, useConfig.seed))
 
         /* make sure margins are below 0
         if (p2flips != null || p1flips != null) {
@@ -165,7 +165,7 @@ fun runClcaSingleRoundAudit(workflow: AuditWorkflow, contestRounds: List<Contest
                             auditor: ClcaAssertionAuditorIF
 ): Int {
     val stopwatch = Stopwatch()
-    runClcaAuditRound(workflow.auditConfig(), contestRounds, workflow.mvrManager() as MvrManagerClcaIF, 1, auditor = auditor)
+    runClcaAuditRound(workflow.auditConfig(), contestRounds, workflow.mvrManager(), 1, auditor = auditor)
     if (!quiet) println("runClcaSingleRoundAudittook ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
 
     var maxSamples = 0

@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.oneaudit.unpooled
 
 // core abstraction for both CVR and MVR
@@ -10,27 +11,33 @@ data class Cvr(
     val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
     val phantom: Boolean = false,
     val poolId: Int? = null,  // or cardStyle.id
-) {
+): CardIF {
     init {
         require(id.indexOf(',') < 0) { "cvr.id='$id' must not have commas"} // must not have nasty commas
     }
 
-    fun hasContest(contestId: Int): Boolean = votes[contestId] != null
+    override fun isPhantom() = phantom
+    override fun poolId() = poolId
+    override fun location() = id
+
+    override fun hasContest(contestId: Int): Boolean = votes[contestId] != null
+    override fun votes(contestId: Int): IntArray? = votes[contestId]
+    override fun rankedChoices(contestId: Int): IntArray? = votes[contestId]
+
     fun contests() = votes.keys.toList().sorted().toIntArray()
 
     constructor(oldCvr: Cvr, votes: Map<Int, IntArray>) : this(oldCvr.id, votes, oldCvr.phantom)
     constructor(contest: Int, ranks: List<Int>): this( "testing", mapOf(contest to ranks.toIntArray())) // for quick testing
-    // constructor(contest: Int, id: String, ranks: List<Int>, phantom: Boolean): this( id, mapOf(contest to ranks.toIntArray()), phantom) // for quick testing
 
     // Let 1candidate(bi) = 1 if ballot i has a mark for candidate, and 0 if not; SHANGRLA section 2, page 4
-    fun hasMarkFor(contestId: Int, candidateId: Int): Int {
+    override fun hasMarkFor(contestId: Int, candidateId: Int): Int {
         val contestVotes = votes[contestId]
         return if (contestVotes == null) 0
                else if (contestVotes.contains(candidateId)) 1 else 0
     }
 
     // Is there exactly one vote in the contest among the given candidates?
-    fun hasOneVote(contestId: Int, candidates: List<Int>): Boolean {
+    override fun hasOneVoteFor(contestId: Int, candidates: List<Int>): Boolean {
         val contestVotes = this.votes[contestId] ?: return false
         val totalVotes = contestVotes.count { candidates.contains(it) }
         return (totalVotes == 1)

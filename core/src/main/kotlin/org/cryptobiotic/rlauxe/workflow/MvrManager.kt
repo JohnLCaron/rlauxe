@@ -12,12 +12,12 @@ private val logger = KotlinLogging.logger("MvrManager")
 
 // use MvrManager for auditing, not creating an audit
 interface MvrManager {
-    fun sortedCards(): CloseableIterable<AuditableCard>
+    fun sortedCards(): CloseableIterable<AuditableCard>  // most uses will just need the first ? samples
     fun sortedCvrs(): CloseableIterable<Cvr> = CloseableIterable { AuditableCardToCvrAdapter(sortedCards().iterator()) }
 }
 
 interface MvrManagerClcaIF : MvrManager {
-    // this is used for audit, not estimation
+    // this is used for audit, not estimation.
     fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>  // Pair(mvr, cvr)  TODO Pair<Cvr, AuditableCard> ?
 }
 

@@ -26,7 +26,7 @@ private val logger = KotlinLogging.logger("TestSampling")
 // TODO move to test. TODO can we take the filter off ??
 fun makeClcaNoErrorSampler(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAssorter): Sampling {
     val cvrPairs = cvrs.zip(cvrs)
-    return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, true, false)
+    return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, true, false) // TODO
 }
 
 //// For clca audits with styles and no errors

@@ -37,17 +37,6 @@ open class PersistedMvrManager(val auditDir: String): MvrManager {
         return mvrsRound.zip(sampledCvrs)
     }
 
-    /* Polling
-    override fun makeMvrsForRound(): List<Cvr> {
-        val mvrsRound = readMvrsForRound()
-        val sampleNumbers = mvrsRound.map { it.prn }
-
-        val sampledCvrs = findSamples(sampleNumbers, auditableCards())
-        require(sampledCvrs.size == mvrsRound.size)
-
-        return sampledCvrs.map{ it.cvr() }
-    } */
-
     // the sampleMvrsFile is added externally for real audits, and by MvrManagerTestFromRecord for test audits
     // it is placed into publisher.sampleMvrsFile, and this just reads from that file.
     private fun readMvrsForRound(): List<AuditableCard> {

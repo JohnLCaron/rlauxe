@@ -16,19 +16,8 @@ interface MvrManager {
     fun makeMvrCardPairsForRound(): List<Pair<CardIF, CardIF>>  // Pair(mvr, cvr)
 }
 
-/*
-interface MvrManagerClcaIF : MvrManager {
-    // this is used for audit, not estimation.
-    fun makeCvrPairsForRound(): List<Pair<Cvr, Cvr>>  // Pair(mvr, cvr)  TODO Pair<Cvr, AuditableCard> ?
-}
-
-interface MvrManagerPollingIF : MvrManager {
-    // this is used for audit, not estimation. need List so we can do mvrs[permutedIndex[idx]]
-    fun makeMvrsForRound(): List<Cvr> // TODO Pair<Cvr, AuditableCard> ?
-} */
-
 // when the MvrManager supplies the audited mvrs, its a test
-// calling this sets the internal state used by makeCvrPairsForRound(), makeMvrsForRound()
+// calling this sets the internal state used by makeMvrCardPairsForRound()
 interface MvrManagerTestIF : MvrManager {
     fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard>
 }

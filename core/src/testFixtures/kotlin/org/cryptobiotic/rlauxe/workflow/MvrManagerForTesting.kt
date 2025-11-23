@@ -59,46 +59,6 @@ class MvrManagerForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrMa
 
 }
 
-/* simulated cardLocations, mvrs for testing are sorted and kept here in memory
-class MvrManagerForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManagerPollingIF, MvrManagerTestIF {
-    val sortedCards: List<AuditableCard>
-    val mvrsUA: List<AuditableCard>
-    var mvrsRound: List<AuditableCard> = emptyList()
-
-    init {
-        val prng = Prng(seed)
-        sortedCards = cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn}
-        mvrsUA = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
-    }
-
-    override fun sortedCards() = CloseableIterable { Closer(sortedCards.iterator()) }
-
-    override fun makeMvrsForRound(): List<Cvr> {
-        val sampledCvrs = if (mvrsRound.isEmpty())
-            mvrsUA.map { it.cvr() }
-        else
-            mvrsRound.map { it.cvr() }
-
-        return sampledCvrs
-    }
-
-    //MvrManagerTest
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {
-        val sampledMvrs = findSamples(sampleNumbers, Closer(mvrsUA.iterator())) // TODO use IteratorCvrsCsvFile?
-        require(sampledMvrs.size == sampleNumbers.size)
-
-        // debugging sanity check
-        var lastRN = 0L
-        sampledMvrs.forEach { mvr ->
-            require(mvr.prn > lastRN)
-            lastRN = mvr.prn
-        }
-
-        mvrsRound =  sampledMvrs
-        return sampledMvrs
-    }
-} */
-
 // runs audit rounds until finished. return last audit round
 // Can only use this if the MvrManager implements MvrManagerTest
 // otherwise run one round at a time with PersistentAudit

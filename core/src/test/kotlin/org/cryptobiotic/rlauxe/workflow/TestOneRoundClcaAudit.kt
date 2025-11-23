@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import kotlin.test.Test
 
 class TestOneRoundClcaAudit {
@@ -21,7 +20,7 @@ class TestOneRoundClcaAudit {
         val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = PluralityErrorRates(0.0, phantomPct, 0.0, 0.0, )
-        val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, errorRates=errorRates))
+        val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, pluralityErrorRates=errorRates))
 
         val contests: List<Contest> = testData.contests
         println("Start testOneRoundClcaWorkflow $testData")

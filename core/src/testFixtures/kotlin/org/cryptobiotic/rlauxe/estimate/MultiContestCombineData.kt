@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.makePhantomCards
+import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.shuffle
@@ -31,7 +33,7 @@ data class MultiContestCombineData(
             result.add(makeCard(nextCardId++, contestVoteTrackers, cardStyle))
         }
 
-        val phantoms = makePhantomCards(contests, startIdx=result.size)
+        val phantoms = makePhantomCards(contests, startIdx = result.size)
         return result + phantoms
     }
 

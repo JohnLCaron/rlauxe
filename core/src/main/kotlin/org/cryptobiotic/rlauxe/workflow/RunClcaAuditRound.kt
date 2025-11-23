@@ -3,10 +3,8 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.ClcaWithoutReplacement
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
-import org.cryptobiotic.rlauxe.estimate.Sampler
 
 private val logger = KotlinLogging.logger("ClcaAudit")
 
@@ -69,7 +67,7 @@ fun interface ClcaAssertionAuditorIF {
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampler: Sampler,
+        sampling: Sampling,
         roundIdx: Int,
     ): TestH0Result
 }
@@ -80,7 +78,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampler: Sampler,
+        sampling: Sampling,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA
@@ -131,13 +129,13 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         // testFn.setDebuggingSequences()
 
         val terminateOnNullReject = config.auditSampleLimit == null
-        val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = terminateOnNullReject) { sampler.sample() }
+        val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = terminateOnNullReject) { sampling.sample() }
 
         val measuredCounts = if (testH0Result.tracker is ClcaErrorRatesIF) testH0Result.tracker.errorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
-            nmvrs = sampler.maxSamples(),
-            maxBallotIndexUsed = sampler.maxSampleIndexUsed(), // TODO only for audit, not estimation I think
+            nmvrs = sampling.maxSamples(),
+            maxBallotIndexUsed = sampling.maxSampleIndexUsed(), // TODO only for audit, not estimation I think
             pvalue = testH0Result.pvalueLast,
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,

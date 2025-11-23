@@ -12,8 +12,9 @@ class TestAuditConfig {
         )
         val expected =
 """AuditConfig(auditType=CLCA, hasStyle=true, riskLimit=0.05, seed=-2417429242344992892 version=2.0
-  nsimEst=10, quantile=0.8, contestSampleCutoff=30000, auditSampleLimit=null, minRecountMargin=0.005 removeTooManyPhantoms=false
-  ClcaConfig(strategy=generalAdaptive, fuzzPct=null, errorRates=null, d=100)
+  nsimEst=10, quantile=0.8, simFuzzPct=null,
+  minRecountMargin=0.005 removeTooManyPhantoms=false contestSampleCutoff=30000 removeCutoffContests=false
+  ClcaConfig(strategy=generalAdaptive, fuzzPct=null, pluralityErrorRates=null, d=100)
 """
         assertEquals(expected, config.toString())
         assertEquals("generalAdaptive", config.strategy())
@@ -26,7 +27,8 @@ class TestAuditConfig {
         )
         val expected =
             """AuditConfig(auditType=POLLING, hasStyle=true, riskLimit=0.05, seed=-2417429242344992892 version=2.0
-  nsimEst=10, quantile=0.8, contestSampleCutoff=30000, auditSampleLimit=null, minRecountMargin=0.005 removeTooManyPhantoms=false
+  nsimEst=10, quantile=0.8, simFuzzPct=null,
+  minRecountMargin=0.005 removeTooManyPhantoms=false contestSampleCutoff=30000 removeCutoffContests=false
   PollingConfig(d=100)
 """
         assertEquals(expected, config.toString())
@@ -41,7 +43,8 @@ class TestAuditConfig {
         )
         val expected =
             """AuditConfig(auditType=ONEAUDIT, hasStyle=true, riskLimit=0.05, seed=-2417429242344992892 version=2.0
-  nsimEst=10, quantile=0.8, contestSampleCutoff=30000, auditSampleLimit=null, minRecountMargin=0.005 removeTooManyPhantoms=false
+  nsimEst=10, quantile=0.8, simFuzzPct=null,
+  minRecountMargin=0.005 removeTooManyPhantoms=false contestSampleCutoff=30000 removeCutoffContests=false
   OneAuditConfig(strategy=eta0Eps, d=100, useFirst=false)
 """
         assertEquals(expected, config.toString())

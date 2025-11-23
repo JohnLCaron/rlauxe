@@ -3,13 +3,11 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.estimate.Sampler
 import org.cryptobiotic.rlauxe.util.*
 
 private val logger = KotlinLogging.logger("PollingAudit")
 
-// TODO parallelize over contests
+// TODO parallelize over contests; see runClcaAuditRound
 fun runPollingAuditRound(
     config: AuditConfig,
     contests: List<ContestRound>,
@@ -51,7 +49,7 @@ fun auditPollingAssertion(
     config: AuditConfig,
     contestUA: ContestUnderAudit,
     assertionRound: AssertionRound,
-    sampler: Sampler,
+    sampling: Sampling,
     roundIdx: Int,
     quiet: Boolean = false
 ): TestH0Result {
@@ -75,11 +73,11 @@ fun auditPollingAssertion(
         upperBound = assorter.upperBound(),
     )
 
-    val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=true) { sampler.sample() }
+    val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject=true) { sampling.sample() }
 
     assertionRound.auditResult = AuditRoundResult(roundIdx,
-        nmvrs = sampler.nmvrs(),
-        maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
+        nmvrs = sampling.nmvrs(),
+        maxBallotIndexUsed = sampling.maxSampleIndexUsed(),
         pvalue = testH0Result.pvalueLast,
         samplesUsed = testH0Result.sampleCount,
         status = testH0Result.status,

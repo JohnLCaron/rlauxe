@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.Sampler
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 
 private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
@@ -15,7 +14,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampler: Sampler,
+        sampling: Sampling,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA
@@ -41,7 +40,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
                 config,
                 contestUA.Nb,
                 cassorter,
-                sampler,
+                sampling,
                 cassorter.upperBound(),
                 p2 = 0.0 // errorRates.p2o TODO
             )
@@ -50,7 +49,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
                 config,
                 contestUA.Nb,
                 cassorter,
-                sampler,
+                sampling,
                 cassorter.upperBound()
             )
         }
@@ -58,8 +57,8 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         val measuredCounts = if (testH0Result.tracker is ClcaErrorRatesIF) testH0Result.tracker.errorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
-            nmvrs = sampler.nmvrs(),
-            maxBallotIndexUsed = sampler.maxSampleIndexUsed(),
+            nmvrs = sampling.nmvrs(),
+            maxBallotIndexUsed = sampling.maxSampleIndexUsed(),
             pvalue = testH0Result.pvalueLast,
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
@@ -76,7 +75,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
          config: AuditConfig,
          N: Int,
          cassorter: OneAuditClcaAssorter,
-         sampler: Sampler,
+         sampling: Sampling,
          upperBound: Double,
     ): TestH0Result {
 
@@ -105,14 +104,14 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             riskLimit = config.riskLimit,
             upperBound = upperBound,
         )
-        return alpha.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
+        return alpha.testH0(sampling.maxSamples(), terminateOnNullReject = true) { sampling.sample() }
     }
 
     fun runBetting(
         config: AuditConfig,
         N: Int,
         cassorter: OneAuditClcaAssorter,
-        sampler: Sampler,
+        sampling: Sampling,
         upperBound: Double,
         p2: Double,
     ): TestH0Result {
@@ -128,6 +127,6 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             withoutReplacement = true
         )
 
-        return testFn.testH0(sampler.maxSamples(), terminateOnNullReject = true) { sampler.sample() }
+        return testFn.testH0(sampling.maxSamples(), terminateOnNullReject = true) { sampling.sample() }
     }
 }

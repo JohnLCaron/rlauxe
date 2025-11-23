@@ -7,8 +7,8 @@ import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.estimate.PollWithoutReplacement
-import org.cryptobiotic.rlauxe.estimate.Sampler
+import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.workflow.Sampling
 import kotlin.random.Random
 import kotlin.test.Test
 
@@ -156,7 +156,7 @@ class TestAuditPolling {
 
 }
 
-class PollWithReplacement(val contest: Contest, val mvrs : List<Cvr>, val assorter: AssorterIF): Sampler {
+class PollWithReplacement(val contest: Contest, val mvrs : List<Cvr>, val assorter: AssorterIF): Sampling {
     val maxSamples = mvrs.count { it.hasContest(contest.id) }
     private var count = 0
 

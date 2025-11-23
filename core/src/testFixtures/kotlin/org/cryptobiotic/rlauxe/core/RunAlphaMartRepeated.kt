@@ -1,14 +1,14 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.estimate.Sampler
+import org.cryptobiotic.rlauxe.workflow.Sampling
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
 import org.cryptobiotic.rlauxe.util.mean2margin
 
 // run AlphaMart with TrunkShrinkage in repeated trials
 // this creates the riskTestingFn for you
 fun runAlphaMartRepeated(
-    drawSample: Sampler,
+    drawSample: Sampling,
     N: Int,
     eta0: Double,
     d: Int = 500,

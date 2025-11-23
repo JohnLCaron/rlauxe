@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.unittest
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.ClcaSimulatedErrorRates
+import org.cryptobiotic.rlauxe.workflow.ClcaSimulatedErrorRates
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.mean2margin

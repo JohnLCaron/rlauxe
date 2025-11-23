@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.plots.plotNTsamples
 import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
-import org.cryptobiotic.rlauxe.estimate.Sampler
+import org.cryptobiotic.rlauxe.workflow.Sampling
 import org.cryptobiotic.rlauxe.util.mean2margin
 import kotlin.random.Random
 import kotlin.test.Test
@@ -99,7 +99,7 @@ class FixedMean(val eta0: Double): EstimFn {
 }
 
 // generate random values with given mean
-class GenSampleMeanWithReplacement(val N: Int, ratio: Double): Sampler {
+class GenSampleMeanWithReplacement(val N: Int, ratio: Double): Sampling {
     val samples = generateSampleWithMean(N, ratio)
     var count = 0
 
@@ -119,7 +119,7 @@ class GenSampleMeanWithReplacement(val N: Int, ratio: Double): Sampler {
     override fun next() = sample()
 }
 
-class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): Sampler {
+class GenSampleMeanWithoutReplacement(val N: Int, val ratio: Double): Sampling {
     private var samples = generateSampleWithMean(N, ratio)
     private var index = 0
     private var count = 0

@@ -18,13 +18,13 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
-import org.cryptobiotic.rlauxe.estimate.Sampler
+import org.cryptobiotic.rlauxe.workflow.Sampling
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
 interface RepeatedTask {
-    fun makeSampler() : Sampler
+    fun makeSampler() : Sampling
     fun makeTestFn() : RiskTestingFn
     fun makeTestParameters() : Map<String, Double>
     fun name() : String

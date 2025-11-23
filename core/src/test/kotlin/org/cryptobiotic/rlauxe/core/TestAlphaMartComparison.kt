@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.estimate.Sampler
+import org.cryptobiotic.rlauxe.workflow.Sampling
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.estimate.makeClcaNoErrorSampler
+import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -35,7 +35,7 @@ class TestAlphaMartComparison {
 }
 
 fun doOneAlphaMartRun(
-    drawSample: Sampler,
+    drawSample: Sampling,
     maxSamples: Int,
     eta0: Double,
     d: Int,

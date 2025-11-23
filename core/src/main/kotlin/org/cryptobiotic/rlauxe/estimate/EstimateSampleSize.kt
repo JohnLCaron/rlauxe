@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
+import org.cryptobiotic.rlauxe.workflow.Sampling
 import kotlin.collections.mutableListOf
 import kotlin.math.min
 
@@ -268,8 +269,7 @@ fun estimateClcaAssertionRound(
     // we need a permutation to get uniform distribution of errors, since some simulations put all the errors at the beginning
     // sampler.reset()
 
-    // class ClcaCardFuzzSampler( val fuzzPct: Double, val cards: List<AuditableCard>, val contest: ContestIF, val cassorter: ClcaAssorter
-    val sampler = ClcaCardFuzzSampler(config.simFuzzPct ?: 0.0, contestCards, contestUA.contest as Contest, cassorter) // TODO Raire ?
+    val sampler = ClcaCardFuzzSampler(config.simFuzzPct ?: 0.0, contestCards, contestUA.contest, cassorter)
 
     // run the simulation ntrials (=config.nsimEst) times
     val result: RunTestRepeatedResult = runRepeatedBettingMart(
@@ -298,7 +298,7 @@ fun estimateClcaAssertionRound(
 
 fun runRepeatedBettingMart(
     config: AuditConfig,
-    sampleFn: Sampler,
+    sampleFn: Sampling,
     bettingFn: BettingFn,
     noerror: Double,
     upperBound: Double,
@@ -378,7 +378,7 @@ fun estimatePollingAssertionRound(
 
 fun runRepeatedAlphaMart(
     config: AuditConfig,
-    sampleFn: Sampler,
+    sampleFn: Sampling,
     estimFn: EstimFn?, // if null use default TruncShrinkage
     eta0: Double,  // initial estimate of mean
     upperBound: Double,
@@ -447,9 +447,9 @@ fun estimateOneAuditAssertionRound(
         }
     }
 
-    // TODO should be ClcaCardFuzzSampler ??
-    //  estimation: use real cards, simulate cards with ClcaSimulatedErrorRates; the cards already have phantoms; TODO cant use with DHondt
-    val sampler = ClcaCardSimulatedErrorRates(contestCards, contestUA.contest, oaCassorter, errorRates) // TODO why cant we use this with IRV?? I think we can
+    //  TODO cant use with DHondt ??
+    val sampler = ClcaCardFuzzSampler(config.simFuzzPct ?: 0.0, contestCards, contestUA.contest, oaCassorter)
+    // TODO was val sampler = ClcaCardSimulatedErrorRates(contestCards, contestUA.contest, oaCassorter, errorRates) // TODO why cant we use this with IRV?? I think we can
 
     // the minimum p2o is always the phantom rate.
     // if (errorRates.p2o < contestUA.contest.phantomRate())

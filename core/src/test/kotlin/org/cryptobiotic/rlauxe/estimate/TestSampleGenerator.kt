@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
+import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.workflow.Sampling
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -71,19 +73,19 @@ class TestSampleGenerator {
 
 }
 
-fun testLimits(sampler: Sampler, nsamples: Int, upper: Double) {
+fun testLimits(sampling: Sampling, nsamples: Int, upper: Double) {
     repeat(nsamples) {
-        val ss = sampler.sample()
+        val ss = sampling.sample()
         assertTrue(ss >= 0)
         assertTrue(ss <= upper)
     }
 }
 
-fun countAssortValues(sampler: Sampler, nsamples: Int, assortValue: Double): Int {
-    sampler.reset()
+fun countAssortValues(sampling: Sampling, nsamples: Int, assortValue: Double): Int {
+    sampling.reset()
     var count = 0
     repeat(nsamples) {
-        val ss = sampler.sample()
+        val ss = sampling.sample()
         if (doubleIsClose(ss, assortValue))
             count++
     }

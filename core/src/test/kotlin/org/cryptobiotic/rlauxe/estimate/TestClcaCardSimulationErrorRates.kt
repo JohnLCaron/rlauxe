@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.core.ClcaErrorTable
+import org.cryptobiotic.rlauxe.workflow.ClcaCardSimulatedErrorRates
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

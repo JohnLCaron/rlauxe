@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.estimate.ClcaFlipErrorsSampler
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.doublePrecision
-import org.cryptobiotic.rlauxe.estimate.Sampler
+import org.cryptobiotic.rlauxe.workflow.Sampling
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import kotlin.test.Test
 import kotlin.math.abs
@@ -109,7 +109,7 @@ class CompareAlphaPaperUsingMasses {
     }
 }
 
-class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): Sampler {
+class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): Sampling {
     val maxSamples = assortValues.size
     val permutedIndex = MutableList(maxSamples) { it }
     private var idx = 0

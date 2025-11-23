@@ -4,12 +4,12 @@ import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.ClcaErrorTable
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.estimate.ClcaSimulatedErrorRates
 import org.cryptobiotic.rlauxe.rairejson.import
 import org.cryptobiotic.rlauxe.rairejson.readRaireBallotsCsv
 import org.cryptobiotic.rlauxe.rairejson.readRaireResultsJson
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.workflow.ClcaSimulatedErrorRates
 
 class TestComparisonSamplerWithRaire {
 

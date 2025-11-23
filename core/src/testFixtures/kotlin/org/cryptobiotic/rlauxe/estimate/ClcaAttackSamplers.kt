@@ -2,13 +2,14 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.workflow.Sampling
 import kotlin.random.Random
 
 // generate mvr by starting with cvrs and flipping (N * p2) votes (type 2 errors) and (N * p1) votes (type 1 errors)
 // this can be used to create an "attack" where outcome of election has been flipped
 data class ClcaAttackSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter,
                              val p2: Double, val p1: Double = 0.0,
-                             val withoutReplacement: Boolean = true): Sampler {
+                             val withoutReplacement: Boolean = true): Sampling {
     val maxSamples = cvrs.count { it.hasContest(cassorter.id()) }
     val N = cvrs.size
     val mvrs : List<Cvr>
@@ -72,7 +73,7 @@ data class ClcaAttackSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter,
 // generate mvr by starting with cvrs and flipping exact # votes (type 2 errors only) to make mvrs have mvrMean.
 // only used by compareAlphaPaperMasses and ClcaAttackSampler
 data class ClcaFlipErrorsSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter, val mvrMean: Double,
-                                 val withoutReplacement: Boolean = true): Sampler {
+                                 val withoutReplacement: Boolean = true): Sampling {
     val maxSamples = cvrs.count { it.hasContest(cassorter.info.id) }
     val mvrs : List<Cvr>
     val permutedIndex = MutableList(cvrs.size) { it }

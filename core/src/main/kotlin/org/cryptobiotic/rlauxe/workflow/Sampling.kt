@@ -1,14 +1,14 @@
-package org.cryptobiotic.rlauxe.estimate
+package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.sfn
 import kotlin.random.Random
 
-private val logger = KotlinLogging.logger("Sampler")
+private val logger = KotlinLogging.logger("Sampling")
 
-//// abstraction for creating a sequence of samples
-interface Sampler: Iterator<Double> {
+//// abstraction for creating a sequence of assort values
+interface Sampling: Iterator<Double> {
     fun sample(): Double // get next in sample
     fun maxSamples(): Int  // population size TODO wtf?
     fun reset()   // start over again with different permutation (may be prohibited)
@@ -22,7 +22,7 @@ class PollWithoutReplacement(
     val mvrs : List<Cvr>,
     val assorter: AssorterIF,
     val allowReset: Boolean = true,
-): Sampler {
+): Sampling {
     val maxSamples = mvrs.count { it.hasContest(contestId) }
     private val permutedIndex = MutableList(mvrs.size) { it }
     private var idx = 0
@@ -70,13 +70,12 @@ class ClcaWithoutReplacement(
     val cassorter: ClcaAssorter,
     val allowReset: Boolean,
     val trackStratum: Boolean = false, // debugging for oneaudit
-): Sampler, Iterator<Double> {
+): Sampling, Iterator<Double> {
     // TODO TIMING init taking 8%
     val maxSamples = cvrPairs.count { it.first.hasContest(contestId) } // TODO mvr vs cvr hasContest. should be cvr i think....??
     val permutedIndex = MutableList(cvrPairs.size) { it }
     private var idx = 0
     private var count = 0
-    private var poolCount = 0
 
     init {
         cvrPairs.forEach { (mvr, cvr) -> require(mvr.id == cvr.id)  }
@@ -88,7 +87,6 @@ class ClcaWithoutReplacement(
             idx++
             if (mvr.hasContest(contestId)) { // TODO mvr vs cvr hasContest. should be cvr i think....??
                 val result = cassorter.bassort(mvr, cvr)
-                if (cvr.poolId != null) poolCount++
                 if (trackStratum) print("${sfn(cvr.id, 8)} ")
                 count++
                 return result
@@ -114,116 +112,6 @@ class ClcaWithoutReplacement(
 
     override fun hasNext() = (count < maxSamples)
     override fun next() = sample()
-
-    fun poolCount() = poolCount
-}
-
-// TODO move to test. TODO can we take the filter off ??
-fun makeClcaNoErrorSampler(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAssorter): Sampler {
-    val cvrPairs = cvrs.zip(cvrs)
-    return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, true, false)
-}
-
-//// For clca audits with styles and no errors
-class ClcaNoErrorIterator(
-    val contestId: Int,
-    val contestNc: Int,
-    val cassorter: ClcaAssorter,
-    val cvrIterator: Iterator<Cvr>,
-): Sampler, Iterator<Double> {
-    private var idx = 0
-    private var count = 0
-    private var done = false
-
-    override fun sample(): Double {
-        while (cvrIterator.hasNext()) {
-            val cvr = cvrIterator.next()
-            idx++
-            if (cvr.hasContest(contestId)) {
-                val result = cassorter.bassort(cvr, cvr)
-                count++
-                return result
-            }
-        }
-        done = true
-        if (!warned) {
-            logger.warn { "ClcaNoErrorIterator no samples left for ${contestId} and ComparisonAssorter ${cassorter}" }
-            warned = true
-        }
-        return 0.0
-    }
-
-    override fun reset() {
-        logger.error{"ClcaNoErrorIterator reset not allowed"}
-        throw RuntimeException("ClcaNoErrorIterator reset not allowed")
-    }
-
-    override fun maxSamples() = contestNc
-    override fun maxSampleIndexUsed() = idx
-    override fun nmvrs() = contestNc
-
-    override fun hasNext() = !done && cvrIterator.hasNext()
-    override fun next() = sample()
-
-    companion object {
-        var warned = false
-    }
-}
-
-// what about a function to fuzz the cvr or mvr on the fly ??
-class OneAuditNoErrorIterator(
-    val contestId: Int,
-    val contestNc: Int,
-    val contestSampleCutoff: Int?,
-    val cassorter: ClcaAssorter,
-    cvrIter: Iterator<Cvr>,
-): Sampler, Iterator<Double> {
-    val cvrs = mutableListOf<Cvr>()
-    var permutedIndex = mutableListOf<Int>()
-
-    private var idx = 0
-    private var count = 0
-    private var done = false
-
-    init {
-        while ((contestSampleCutoff == null || cvrs.size < contestSampleCutoff) && cvrIter.hasNext()) {
-            val cvr = cvrIter.next()
-            if (cvr.hasContest(contestId)) cvrs.add(cvr)
-        }
-        permutedIndex = MutableList(cvrs.size) { it }
-    }
-
-    override fun sample(): Double {
-        while (idx < cvrs.size) {
-            val cvr = cvrs[permutedIndex[idx]]
-            idx++
-            val result = cassorter.bassort(cvr, cvr)
-            count++
-            return result
-        }
-        if (!warned) {
-            logger.warn { "OneAuditNoErrorIterator no samples left for ${contestId} and ComparisonAssorter ${cassorter}" }
-            warned = true
-        }
-        return 0.0
-    }
-
-    override fun reset() {
-        permutedIndex.shuffle(Random)
-        idx = 0
-        count = 0
-    }
-
-    override fun maxSamples() = contestNc
-    override fun maxSampleIndexUsed() = idx
-    override fun nmvrs() = contestNc
-
-    override fun hasNext() = !done && (count < contestNc)
-    override fun next() = sample()
-
-    companion object {
-        var warned = false
-    }
 }
 
 

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 
 private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
 
@@ -19,7 +19,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
     ): TestH0Result {
         val contestUA = contestRound.contestUA
         val cassertion = assertionRound.assertion as ClcaAssertion
-        val cassorter = cassertion.cassorter as OneAuditClcaAssorter
+        val cassorter = cassertion.cassorter as ClcaAssorterOneAudit
 
         val errorCounts = if (assertionRound.prevAuditResult != null) {
             assertionRound.accumulatedErrorCounts(contestRound).toPluralityErrorRates()
@@ -53,6 +53,9 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
                 cassorter.upperBound()
             )
         }
+        println(testH0Result)
+        println(testH0Result.tracker)
+        println()
 
         val measuredCounts = if (testH0Result.tracker is ClcaErrorRatesIF) testH0Result.tracker.errorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
@@ -74,7 +77,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
      fun runAlpha(
          config: AuditConfig,
          N: Int,
-         cassorter: OneAuditClcaAssorter,
+         cassorter: ClcaAssorterOneAudit,
          sampling: Sampling,
          upperBound: Double,
     ): TestH0Result {
@@ -110,7 +113,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
     fun runBetting(
         config: AuditConfig,
         N: Int,
-        cassorter: OneAuditClcaAssorter,
+        cassorter: ClcaAssorterOneAudit,
         sampling: Sampling,
         upperBound: Double,
         p2: Double,

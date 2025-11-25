@@ -11,6 +11,8 @@ import org.cryptobiotic.rlauxe.audit.makePhantomCards
 import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
+import kotlin.Int
+import kotlin.String
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -30,7 +32,7 @@ data class MultiContestTestData(
     val marginRange: ClosedFloatingPointRange<Double> = 0.01.. 0.03,
     val underVotePctRange: ClosedFloatingPointRange<Double> = 0.01.. 0.30, // needed to set Nc
     val phantomPctRange: ClosedFloatingPointRange<Double> = 0.00..  0.005, // needed to set Nc
-    val addStyle: Boolean = false, // add cardStyle info to cvrs and cards
+    val addPoolId: Boolean = false, // add cardStyle info to cvrs and cards
     val ncands: Int? = null,
     val poolPct: Double? = null,  // if not null, make a pool with this pct with two ballotStyles
 ) {
@@ -70,6 +72,7 @@ data class MultiContestTestData(
             while (bset.size < nbs) { // randomly choose nbs ballot styles
                 bset.add(Random.nextInt(nballotStyles))
             }
+            fcontest.ballotStyles = bset
             contestBstyles[fcontest] = bset
         }
 
@@ -103,33 +106,44 @@ data class MultiContestTestData(
         }
     }
 
-    fun makeCardPoolManifest(): Pair<CloseableIterable<AuditableCard>, List<CardPoolIF>> {
-        val cards = CloseableIterable { makeCardsFromContests().iterator() }
-        // these are the contest ids in the pool
-        val contestIds = (cardStyles[0].contestIds + cardStyles[1].contestIds).toSet().sorted()
+    // mvrs, cardPool, cardStyle
+    fun makeCardPoolManifest(): MvrCardAndPools {
+        // these are the mvr truth
+        val mvrs = makeCardsFromContests()
+
+        // the union of the first two styles
+        val expandedContestIds = (cardStyles[0].contestIds + cardStyles[1].contestIds).toSet().sorted()
 
         val infos = contests.associate { it.id to it.info() }
+
+        // expand the two cardStyles
+        val expandedCardStyles = listOf(
+            cardStyles[0].copy(contestIds = expandedContestIds),
+            cardStyles[1].copy(contestIds = expandedContestIds),
+        )
+
+        // here we put the pool data into a single pool, and combine their contestIds, to get a diluted margin for testing
+        val cards = mutableListOf<AuditableCard>()
+        val converter = CardsWithStylesToCards(
+            type = AuditType.ONEAUDIT,
+            cvrsAreComplete = true,
+            cards = Closer(mvrs.iterator()),
+            phantomCards = null,
+            expandedCardStyles,
+        )
+        converter.forEach { cards.add(it) }
+
+        // we need to populate the pool tab with the votes
         val pool = CardPoolFromCvrs("pool", 1, infos)
-        contestIds.forEach { id -> pool.contestTabs[id] = ContestTabulation(infos[id]!!) }
-
-        val convertedCards: CloseableIterable<AuditableCard> = CloseableIterable {
-            CardsWithStylesToCards(
-                type = AuditType.ONEAUDIT,
-                cvrsAreComplete = true,
-                cards = cards.iterator(),
-                phantomCards = null,
-                listOf(pool),
-            )
+        expandedContestIds.forEach { id -> pool.contestTabs[id] = ContestTabulation(infos[id]!!) }
+        mvrs.forEach { card ->
+            if (card.poolId == 1) pool.accumulateVotes(card.cvr())
         }
 
-        convertedCards.iterator().use { cardIter ->
-            while (cardIter.hasNext()) {
-                val card: AuditableCard = cardIter.next()
-                if (card.poolId == 1) pool.accumulateVotes(card.cvr())
-            }
-        }
+        // TODO kludge
+        val mvrsAsCvr = mvrs.map { it.cvr() }
 
-        return Pair(convertedCards, listOf(pool))
+        return MvrCardAndPools(mvrsAsCvr, cards, listOf(pool), cardStyles)
     }
 
     fun makeCardLocationManifest(): CardLocationManifest {
@@ -153,11 +167,11 @@ data class MultiContestTestData(
         contestTestBuilders.forEach { it.resetTracker() } // startFresh
         val cvrbs = CvrBuilders().addContests(contestTestBuilders.map { it.info })
         val result = mutableListOf<Cvr>()
-        cardStyles.forEach { ballotStyle ->
-            val fcontests = contestTestBuilders.filter { ballotStyle.contestNames.contains(it.info.name) }
-            repeat(ballotStyle.ncards) {
+        cardStyles.forEach { cardStyle ->
+            val fcontests = contestTestBuilders.filter { cardStyle.contestNames.contains(it.info.name) }
+            repeat(cardStyle.ncards) {
                 // add regular Cvrs including undervotes
-                result.add(makeCvr(cvrbs, fcontests, poolId = if (addStyle) ballotStyle.id else null))
+                result.add(makeCvr(cvrbs, fcontests, poolId = if (addPoolId) cardStyle.id else null))
             }
         }
 
@@ -171,25 +185,6 @@ data class MultiContestTestData(
         return cvrb.build(poolId)
     }
 
-    // multicontest cvrs
-    // create new partitions each time this is called
-    // includes undervotes and phantoms, size = totalBallots + phantom count
-    /* fun makeCardsFromContests(): List<AuditableCard> {
-        contestTestBuilders.forEach { it.resetTracker() } // startFresh
-        val cvrbs = CardBuilders().addContests(contestTestBuilders.map { it.info })
-        val result = mutableListOf<AuditableCard>()
-        ballotStyles.forEach { ballotStyle ->
-            val fcontests = contestTestBuilders.filter { ballotStyle.contestNames.contains(it.info.name) }
-            repeat(ballotStyle.ncards) {
-                // add regular Cvrs including undervotes
-                result.add(makeCard(cvrbs, fcontests))
-            }
-        }
-
-        val phantoms = makePhantomCards(contests, result.size)
-        return result + phantoms
-    } */
-
     fun makeCardsFromContests(startCvrId : Int = 0): List<AuditableCard> {
         contestTestBuilders.forEach { it.resetTracker() } // startFresh
 
@@ -198,10 +193,7 @@ data class MultiContestTestData(
         cardStyles.forEach { cardStyle ->
             val fcontests = contestTestBuilders.filter { cardStyle.contestNames.contains(it.info.name) }
             repeat(cardStyle.ncards) {
-                if (addStyle)
-                    result.add(makeCard(nextCardId++, fcontests, poolId = cardStyle.id, cardStyle=cardStyle.name))
-                else
-                    result.add(makeCard(nextCardId++, fcontests, cardStyle.poolId, if (cardStyle.poolId == null) null else "pool"))
+                result.add(makeCard(nextCardId++, fcontests, poolId = cardStyle.poolId, cardStyle=cardStyle.name))
             }
         }
 
@@ -217,6 +209,8 @@ data class MultiContestTestData(
     }
 }
 
+data class MvrCardAndPools(val mvrs: List<Cvr>, val cards: List<AuditableCard>, val pools: List<CardPoolIF>, val styles: List<CardStyle>)
+
 // This creates a multicandidate contest with the two closest candidates having exactly the given margin.
 // It can create cvrs that exactly reflect this contest's vote; so can be used in simulating the audit.
 // The cvrs are not multicontest.
@@ -231,6 +225,7 @@ data class ContestTestDataBuilder(
     val candidateNames: List<String> = List(ncands) { it }.map { "cand$it" }
     val info = ContestInfo("contest$contestId", contestId, candidateNames = listToMap(candidateNames), choiceFunction)
 
+    var ballotStyles: Set<Int> = emptySet()
     var ncards = 0 // sum of nvotes and underCount
     var underCount = 0
     var phantomCount = 0
@@ -327,7 +322,7 @@ data class ContestTestDataBuilder(
     }
 
     override fun toString() = buildString {
-        append("ContestTestData($contestId, ncands=$ncands, margin=${df(margin)}, $choiceFunction ncards=$ncards")
+        append("ContestTestData($contestId, ncands=$ncands, margin=${df(margin)}, $choiceFunction ncards=$ncards ballotStyles=$ballotStyles")
     }
 }
 

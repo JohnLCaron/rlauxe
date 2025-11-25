@@ -31,7 +31,7 @@ data class ClcaAssorterJson(
 )
 
 fun ClcaAssorter.publishJson() : ClcaAssorterJson {
-    return if (this is OneAuditClcaAssorter) {
+    return if (this is ClcaAssorterOneAudit) {
         ClcaAssorterJson(
             "OAClcaAssorter",
             this.assorter.publishJson(),
@@ -62,7 +62,7 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
             )
 
         "OAClcaAssorter" ->
-            OneAuditClcaAssorter(
+            ClcaAssorterOneAudit(
                 info,
                 this.assorter.import(info),
                 this.hasStyle,

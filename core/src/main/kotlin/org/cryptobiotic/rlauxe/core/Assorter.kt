@@ -88,7 +88,7 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     }
 
     override fun upperBound() = 1.0 // upper bound of assorter.assort()
-    override fun desc() = " winner=$winner loser=$loser reportedMargin=${pfn(reportedMargin())} reportedMean=${pfn(reportedMean)}"
+    override fun desc() = " Plurality winner=$winner loser=$loser reportedMargin=${pfn(reportedMargin())} reportedMean=${pfn(reportedMean)}"
     override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization
     override fun winner() = winner
     override fun loser() = loser

@@ -171,7 +171,7 @@ class TestMakeFuzzedCvrs {
                 assertEquals(vunder, contest.votesAndUndervotes())
                 assertEquals(Nc, cvrs.size)
 
-                val fuzzed = makeFuzzedCvrsFrom(listOf(contestOA.contest), cvrs, fuzzPct, welfordFromFuzz)
+                val fuzzed = makeFuzzedCvrsFrom(listOf(contestOA.contest.info()), cvrs, fuzzPct, welfordFromFuzz)
                 val mvrVotes = tabulateVotesWithUndervotes(fuzzed.iterator(), 0, ncands)
                 if (showOA) println("mvrVotes = ${mvrVotes}")
 

@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.BettingFn
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
@@ -427,7 +427,7 @@ fun estimateOneAuditAssertionRound(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val cassertion = assertionRound.assertion as ClcaAssertion
-    val oaCassorter = cassertion.cassorter as OneAuditClcaAssorter
+    val oaCassorter = cassertion.cassorter as ClcaAssorterOneAudit
     val oaConfig = config.oaConfig
     val clcaConfig = config.clcaConfig
 

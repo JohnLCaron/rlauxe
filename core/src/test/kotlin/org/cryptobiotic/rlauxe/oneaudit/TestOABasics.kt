@@ -50,7 +50,7 @@ class TestOABasics {
         println()
         assertEquals(contest.votes, cvrVotes[0])
 
-        val oaAssorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
+        val oaAssorter = contestUA.minClcaAssertion()!!.cassorter as ClcaAssorterOneAudit
         println(oaAssorter)
         val assorter = oaAssorter.assorter
         val assortAvgFromCvrs = assorter.calcAssortAvgFromCvrs(0, cvrs)

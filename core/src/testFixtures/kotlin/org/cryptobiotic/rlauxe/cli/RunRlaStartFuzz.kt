@@ -132,7 +132,7 @@ class TestPollingElection(
 
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
         cvrs = testData.makeCvrsFromContests()
-        testMvrs = makeFuzzedCvrsFrom(contests, cvrs, fuzzMvrsPct) // ??
+        testMvrs = makeFuzzedCvrsFrom(contests.map{ it.info() }, cvrs, fuzzMvrsPct) // ??
 
         val regularContests = testData.contests.map { ContestUnderAudit(it, isClca=true, hasStyle=config.hasStyle).addStandardAssertions() }
         contestsUA.addAll(regularContests)

@@ -287,7 +287,7 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
     override fun reportedMean() = reportedMean
 
     override fun desc() = buildString {
-        append("winner/loser=${rassertion.winnerId}/${rassertion.loserId} margin=${rassertion.marginInVotes} difficulty=${rassertion.difficulty}")
+        append("Raire winner/loser=${rassertion.winnerId}/${rassertion.loserId} margin=${rassertion.marginInVotes} difficulty=${rassertion.difficulty}")
         if (rassertion.assertionType == RaireAssertionType.irv_elimination) append(" eliminated=${rassertion.eliminated}")
         append(" votes=${rassertion.votes}")
     }
@@ -298,6 +298,7 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
     }
 
     override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
+        if (!mvr.hasContest(info.id)) return 0.5
         if (usePhantoms && mvr.isPhantom()) return 0.5
         return if (rassertion.assertionType == RaireAssertionType.winner_only) assortWinnerOnly(mvr)
             else  if (rassertion.assertionType == RaireAssertionType.irv_elimination) assortIrvElimination(mvr)

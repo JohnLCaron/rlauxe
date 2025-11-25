@@ -21,7 +21,7 @@ private val showBets = false
 // TODO what about OneAudit?? given pool sizes and avgs, could optimize....
 class GeneralAdaptiveBetting(
     val N: Int, // population size for this contest
-    val prevRounds: ClcaErrorCounts, // primitive assorter upper bound, is always > 1/2
+    val prevRounds: ClcaErrorCounts,
     val d: Int = 100,  // trunc weight
     val minRate: Double = .00001, // this bounds how close lam gets to 2.0; might be worth playing with
     val withoutReplacement: Boolean = true,
@@ -31,6 +31,11 @@ class GeneralAdaptiveBetting(
 
     override fun bet(prevSamples: SampleTracker): Double {
         val tracker = prevSamples as ClcaErrorTracker
+
+        if (tracker.valueCounter.keys != prevSamples.valueCounter.keys) {
+            println("tracker.valueCounter.keys = ${tracker.valueCounter.keys}")
+            println("prevSamples.valueCounter.keys = ${prevSamples.valueCounter.keys}")
+        }
 
         // estimated rates for each bassort value, minimum rate is minRate
         val sampleNumber = prevRounds.totalSamples + tracker.numberOfSamples()

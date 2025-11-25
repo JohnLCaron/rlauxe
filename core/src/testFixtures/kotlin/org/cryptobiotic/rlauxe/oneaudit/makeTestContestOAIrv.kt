@@ -56,7 +56,7 @@ fun makeTestContestOAIrv(): RaireContestUnderAudit {
             Pair(pool.poolId, 0.55)
         }
         val poolAvgs = AssortAvgsInPools(pairs.toMap())
-        val clcaAssertion = OneAuditClcaAssorter(assertion.info, passort, true, oaIrv.makeDilutedMargin(passort), poolAvgs)
+        val clcaAssertion = ClcaAssorterOneAudit(assertion.info, passort, true, oaIrv.makeDilutedMargin(passort), poolAvgs)
         ClcaAssertion(assertion.info, clcaAssertion)
     }
     oaIrv.clcaAssertions = clcaAssertions

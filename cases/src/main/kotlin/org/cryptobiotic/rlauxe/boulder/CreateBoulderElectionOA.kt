@@ -114,7 +114,8 @@ open class BoulderElectionOA(
                     redacted.contestVotes.filter{ (key, _) -> key != 12 }
                 } else redacted.contestVotes
 
-            val contestTabs = useContestVotes.mapValues{ ContestTabulation(infoMap[it.key]!!, it.value) }
+            // TODO what tis ncards here ??
+            val contestTabs = useContestVotes.mapValues{ ContestTabulation(infoMap[it.key]!!, it.value, ncards=0) }
             CardPoolWithBallotStyle(cleanCsvString(redacted.ballotType), redactedIdx, contestTabs, infoMap)
         }
     }

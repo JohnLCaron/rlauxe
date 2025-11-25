@@ -158,7 +158,8 @@ class TestAvgAssortValues {
         val underVotePct = 0.034..0.0345
         val phantomRange = 0.001..0.005
 
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange, addStyle = true)
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange,
+            addPoolId = true)
 
         println()
         test.cardStyles.forEach { println(it) }
@@ -204,7 +205,8 @@ class TestAvgAssortValues {
         val underVotePct = 0.034..0.0345
         val phantomRange = 0.001..0.005
 
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange, addStyle = true)
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange,
+            addPoolId = true)
 
         println()
         test.cardStyles.forEach { println(it) }

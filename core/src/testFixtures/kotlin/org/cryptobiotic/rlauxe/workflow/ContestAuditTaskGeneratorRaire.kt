@@ -62,7 +62,7 @@ class RaireSingleRoundAuditTaskGenerator(
 
     override fun name() = "ClcaSingleRoundAuditTaskGenerator"
 
-    override fun generateNewTask(): ClcaSingleRoundSingleContestAuditTask {
+    override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
         val useConfig = auditConfig ?: AuditConfig(
             AuditType.CLCA, true, nsimEst = nsimEst,
             clcaConfig = clcaConfigIn ?: ClcaConfig()
@@ -85,7 +85,7 @@ class RaireSingleRoundAuditTaskGenerator(
             MvrManagerForTesting(testCvrs, testMvrs, useConfig.seed),
         )
 
-        return ClcaSingleRoundSingleContestAuditTask(
+        return ClcaSingleRoundWorkflowTask(
             name(),
             raireAudit,
             testMvrs,

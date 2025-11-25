@@ -5,6 +5,8 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
 
+// CANDIDATE for removal
+
 fun makeOneContestUA(
     margin: Double,
     Nc: Int,
@@ -18,9 +20,8 @@ fun makeOneContestUA(
     return makeOneContestUA(winner, loser, cvrFraction, undervoteFraction, phantomFraction)
 }
 
-// two contest, specified total votes
+// two candidate contest, with specified total votes
 // divide into two stratum based on cvrPercent
-// skewVotesPercent positive: move winner votes to cvr stratum, else to nocvr stratum
 fun makeOneContestUA(
     winnerVotes: Int,
     loserVotes: Int,
@@ -75,7 +76,7 @@ fun makeOneContestUA(
     val pool = CardPoolWithBallotStyle(
             "noCvr",
             1, // poolId
-            voteTotals = mapOf(contestId to ContestTabulation(info, votesNoCvr)),
+            voteTotals = mapOf(contestId to ContestTabulation(info, votesNoCvr, ncards=noCvrSize)),
             infos = mapOf(contestId to info),
         )
     pool.adjustCards = poolUnderVotes

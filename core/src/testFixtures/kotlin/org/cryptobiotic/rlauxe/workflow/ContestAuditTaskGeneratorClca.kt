@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
+// Simulate single Contest, do regular audit
 class ClcaContestAuditTaskGenerator(
     val Nc: Int,
     val margin: Double,
@@ -32,7 +33,7 @@ class ClcaContestAuditTaskGenerator(
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
         var testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
-            makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+            makeFuzzedCvrsFrom(listOf(sim.contest.info()), testCvrs, mvrsFuzzPct)
 
         if (!useConfig.hasStyle && Nb > Nc) { // TODO wtf?
             val otherContestId = 42
@@ -52,7 +53,7 @@ class ClcaContestAuditTaskGenerator(
     }
 }
 
-// Do the audit in a single round, dont use estimateSampleSizes
+// Simulate single Contest, Do the audit in a single round (dont use estimateSampleSizes)
 class ClcaSingleRoundAuditTaskGenerator(
     val Nc: Int,
     val margin: Double,
@@ -71,7 +72,7 @@ class ClcaSingleRoundAuditTaskGenerator(
         return "ClcaSingleRoundAuditTaskGenerator"
     }
 
-    override fun generateNewTask(): ClcaSingleRoundSingleContestAuditTask {
+    override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
         val useConfig = config ?:
         AuditConfig(
             AuditType.CLCA, true,
@@ -83,7 +84,7 @@ class ClcaSingleRoundAuditTaskGenerator(
         val testMvrs =  if (p2flips != null || p1flips != null) {
             makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips)
         } else {
-            makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+            makeFuzzedCvrsFrom(listOf(sim.contest.info()), testCvrs, mvrsFuzzPct)
         }
 
         val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(sim.contest), emptyList(),
@@ -100,7 +101,7 @@ class ClcaSingleRoundAuditTaskGenerator(
             }
         } */
 
-        return ClcaSingleRoundSingleContestAuditTask(
+        return ClcaSingleRoundWorkflowTask(
             name(),
             clcaWorkflow,
             testMvrs,
@@ -111,8 +112,8 @@ class ClcaSingleRoundAuditTaskGenerator(
     }
 }
 
-// assumes theres only one contest
-class ClcaSingleRoundSingleContestAuditTask(
+// From AuditWorkflow, assumes theres only one contest, do audit in a single round
+class ClcaSingleRoundWorkflowTask(
     val name: String,
     val workflow: AuditWorkflow,
     val testMvrs: List<Cvr>,
@@ -166,7 +167,7 @@ fun runClcaSingleRoundAudit(workflow: AuditWorkflow, contestRounds: List<Contest
 ): Int {
     val stopwatch = Stopwatch()
     runClcaAuditRound(workflow.auditConfig(), contestRounds, workflow.mvrManager(), 1, auditor = auditor)
-    if (!quiet) println("runClcaSingleRoundAudittook ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
+    if (!quiet) println("runClcaSingleRoundAudit took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
 
     var maxSamples = 0
     contestRounds.forEach { contest->

@@ -120,7 +120,7 @@ class OaMarginAttack {
             config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle)),
             p1flips=flip1,
         )
-        val task: ClcaSingleRoundSingleContestAuditTask = taskgen.generateNewTask()
+        val task: ClcaSingleRoundWorkflowTask = taskgen.generateNewTask()
         val result =  task.run()
         println(result)
     }

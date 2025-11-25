@@ -187,7 +187,7 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
         }
 
         val noerror = (assertion as ClcaAssertion).cassorter.noerror()
-        val upper = (assertion as ClcaAssertion).cassorter.upperBound()
+        val upper = assertion.cassorter.assorter.upperBound()
         return ClcaErrorCounts(sumOfCounts, totalSamples, noerror, upper)
     }
 }

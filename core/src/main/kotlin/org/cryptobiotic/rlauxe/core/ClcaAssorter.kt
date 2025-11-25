@@ -69,6 +69,7 @@ open class ClcaAssorter(
     //                o is the overstatement
     //                u is the upper bound on the value the assorter assigns to any ballot
     //                v is the assorter margin
+    //                noerror = 1/(2-v/u)
     //
     // assort in [0, .5, u], u > .5, so overstatementError in
     //      [-1, -.5, 0, .5, 1] (plurality)
@@ -167,11 +168,13 @@ open class ClcaAssorter(
             throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
         }
 
-        // If use_style, then if the CVR contains the contest but the MVR does
-        // not, treat the MVR as having a vote for the loser (assort()=0)
-        // If not use_style, then if the CVR contains the contest but the MVR does not,
-        // the MVR is considered to be a non-vote in the contest (assort()=1/2).
-        val mvr_assort = if (mvr.isPhantom() || (hasStyle && !mvr.hasContest(info.id))) 0.0
+        // If use_style, then if the CVR contains the contest but the MVR does not, treat the MVR as having a vote for
+        // the loser, assort()=0.
+        // If not use_style, then if the CVR contains the contest but the MVR does not, the MVR is considered to be a
+        // non-vote in the contest, assort()=1/2.
+        val mvr_assort =
+            if (mvr.isPhantom()) 0.0
+            else if (!mvr.hasContest(info.id)) { if (hasStyle) 0.0 else 0.5 }
             else this.assorter.assort(mvr, usePhantoms = false)
 
         //         cvr_assort = (
@@ -179,6 +182,7 @@ open class ClcaAssorter(
         //        )
         // so if they both agree its a phantom, its a p1o, if mvr cant find it and cvr doesnt think its a phantom, its a p2o
         val cvr_assort = if (cvr.isPhantom()) .5 else this.assorter.assort(cvr, usePhantoms = false)
+
         return cvr_assort - mvr_assort
     }
 

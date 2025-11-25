@@ -1,10 +1,8 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardsWithStylesToCards
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
@@ -25,7 +23,7 @@ class TestMultiContestPoolData {
 
     init {
         test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct,
-            phantomRange, addStyle = false, poolPct=poolPct)
+            phantomRange, poolPct=poolPct)
         infos = test.contests.associate { it.id to it.info }
     }
 
@@ -51,12 +49,12 @@ class TestMultiContestPoolData {
 
     @Test
     fun testMakeCardPoolManifest() {
-        val (cards, pools) = test.makeCardPoolManifest()
+        val (mvrs: List<Cvr>, cards, pools) = test.makeCardPoolManifest()
         println(pools)
         println("poolPct = ${pfn(poolPct)}")
         println()
 
-        val manifestTabs = tabulateAuditableCards(cards.iterator(), infos).toSortedMap()
+        val manifestTabs = tabulateAuditableCards(Closer(cards.iterator()), infos).toSortedMap()
         manifestTabs.forEach { (contestId, tab) ->
             val contest = test.contests.find { it.id == contestId }!!
             println("contest $contest")

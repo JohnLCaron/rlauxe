@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
@@ -394,8 +394,8 @@ fun verifyOAassortAvg(
             contestsUA.forEach { contestUA ->
                 val avg = cardAssortAvgs.getOrPut(contestUA.id) { mutableMapOf() }
                 contestUA.clcaAssertions.forEach { cassertion ->
-                    if (cassertion.cassorter is OneAuditClcaAssorter) { //  may be Raire
-                        val oaCassorter = cassertion.cassorter as OneAuditClcaAssorter
+                    if (cassertion.cassorter is ClcaAssorterOneAudit) { //  may be Raire
+                        val oaCassorter = cassertion.cassorter as ClcaAssorterOneAudit
                         val passorter = oaCassorter.assorter
                         val assortAvg = avg.getOrPut(passorter) { AssortAvg() }
                         if (card.hasContest(contestUA.id)) {

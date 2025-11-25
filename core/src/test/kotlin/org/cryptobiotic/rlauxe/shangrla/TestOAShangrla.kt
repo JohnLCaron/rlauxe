@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.estimate.makeCvr
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.util.calcReportedMargin
@@ -54,7 +54,7 @@ class TestOAShangrla {
         // fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
         //val contestOA: OneAuditContest = makeContestOA(margin, N, cvrPercent = 0.33, undervotePercent = 0.0, phantomPercent = 0.0) // poolMargin = mean2margin(0.625))
         //val contestUA = contestOA.makeContestUnderAudit()
-        val cassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
+        val cassorter = contestUA.minClcaAssertion()!!.cassorter as ClcaAssorterOneAudit
 
         val assortMargin = cassorter.assorter.reportedMargin()
         val assortMean = margin2mean(assortMargin)
@@ -124,7 +124,7 @@ class TestOAShangrla {
         assertEquals(otherVoteNoCvr, cassorter.bassort(otherNoCvr, winnerNoCvr), .0001)
 
         val expect = """OneAuditClcaAssorter for contest ContestOA (0)
-  assorter= winner=0 loser=1 reportedMargin=65.7200% reportedMean=82.8600%
+  assorter= Plurality winner=0 loser=1 reportedMargin=65.7200% reportedMean=82.8600%
   dilutedMargin=0.6572 noerror=0.7447125409591897 upperBound=1.4894250819183794
 """
         assertEquals(expect, cassorter.toString())

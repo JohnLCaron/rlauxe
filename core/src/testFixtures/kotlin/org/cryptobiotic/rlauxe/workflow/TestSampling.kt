@@ -9,27 +9,13 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PluralityErrorRates
-import org.cryptobiotic.rlauxe.estimate.chooseNewCandidate
-import org.cryptobiotic.rlauxe.util.ContestVoteBuilder
-import org.cryptobiotic.rlauxe.util.CvrBuilder
-import org.cryptobiotic.rlauxe.util.CvrBuilders
-import org.cryptobiotic.rlauxe.util.CvrContest
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.pfn
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.forEach
 import kotlin.math.max
 import kotlin.random.Random
 
 private val logger = KotlinLogging.logger("TestSampling")
-
-// TODO move to test. TODO can we take the filter off ??
-fun makeClcaNoErrorSampler(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAssorter): Sampling {
-    val cvrPairs = cvrs.zip(cvrs)
-    return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, true) // TODO
-}
 
 //// For clca audits with styles and no errors
 class ClcaNoErrorIterator(
@@ -718,7 +704,6 @@ fun AuditableCard.votedForNeither(cassorter: ClcaAssorter): Boolean {
 }
 
 
-// TODO put in tests ?
 // for one contest, this takes a list of cvrs and fuzzes them
 class ClcaFuzzSampler(
     val fuzzPct: Double,
@@ -759,7 +744,7 @@ class ClcaFuzzSampler(
     }
 
     fun remakeFuzzed(): List<Cvr> {
-        return makeFuzzedCvrsFrom(listOf(contest), cvrs, fuzzPct)
+        return makeFuzzedCvrsFrom(listOf(contest.info()), cvrs, fuzzPct)
     }
 
     override fun maxSamples() = maxSamples
@@ -808,7 +793,7 @@ class PollingFuzzSampler(
     }
 
     fun remakeFuzzed(): List<Cvr> {
-        return makeFuzzedCvrsFrom(listOf(contest), cvrs, fuzzPct) // single contest
+        return makeFuzzedCvrsFrom(listOf(contest.info()), cvrs, fuzzPct) // single contest
     }
 
     override fun maxSamples() = maxSamples
@@ -817,66 +802,4 @@ class PollingFuzzSampler(
 
     override fun hasNext(): Boolean = (idx < N)
     override fun next(): Double = sample()
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// includes undervotes i think
-fun makeFuzzedCvrsFrom(contests: List<ContestIF>,
-                       cvrs: List<Cvr>,
-                       fuzzPct: Double,
-                       welford: Welford? = null,
-                       filter: ((CvrBuilder) -> Boolean)? = null,
-                       underVotes: Boolean = true,
-): List<Cvr> {
-    if (fuzzPct == 0.0) return cvrs
-
-    val isIRV = contests.associate { it.name to (it.isIrv()) }.toMap()
-    var count = 0
-    val cvrbs: List<CvrBuilder> = CvrBuilders.convertCvrsToBuilders(contests.map { it.info() }, cvrs)
-
-    cvrbs.filter { !it.phantom && (filter == null || filter(it)) }.forEach { cvrb: CvrBuilder ->
-        val r = Random.nextDouble(1.0)
-        cvrb.contests.forEach { (_, cvb) ->
-            if (r < fuzzPct) {
-                val ccontest: CvrContest = cvb.contest
-                if (isIRV[ccontest.name]!!) {
-                    switchCandidateRankings(cvb, ccontest.candidateIds)
-                } else {
-                    val currId: Int? = if (cvb.votes.size == 0) null else cvb.votes[0] // TODO only one vote allowed, cant use on Raire
-                    cvb.votes.clear()
-                    // choose a different candidate, or none.
-                    val ncandId = chooseNewCandidate(currId, ccontest.candidateIds, underVotes)
-                    if (ncandId != null) {
-                        cvb.votes.add(ncandId)
-                    }
-                }
-            }
-        }
-        if (r < fuzzPct) count++
-    }
-
-    val expect = (cvrs.size * fuzzPct).toInt()
-    val got = (count / cvrs.size.toDouble())
-    if (welford != null) { welford.update(fuzzPct - got) }
-    // println("   fuzzPct=$fuzzPct expect=$expect count: $count")
-    return cvrbs.map { it.build() }
-}
-
-// for IRV
-fun switchCandidateRankings(cvb: ContestVoteBuilder, candidateIds: List<Int>) {
-    val ncands = candidateIds.size
-    val size = cvb.votes.size
-    if (size == 0) { // no votes -> random one vote
-        val candIdx = Random.nextInt(ncands)
-        cvb.votes.add(candidateIds[candIdx])
-    } else if (size == 1) { // one votes -> no votes
-        cvb.votes.clear()
-    } else { // switch two randomly selected votes
-        val ncandIdx1 = Random.nextInt(size)
-        val ncandIdx2 = Random.nextInt(size)
-        val save = cvb.votes[ncandIdx1]
-        cvb.votes[ncandIdx1] = cvb.votes[ncandIdx2]
-        cvb.votes[ncandIdx2] = save
-    }
 }

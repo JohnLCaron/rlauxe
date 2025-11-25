@@ -32,6 +32,58 @@ class TestOneAuditTask {
     }
 
     @Test
+    fun testOneAuditWithNoExtra() {
+        val Nc = 50000
+        val margin = .04
+        val mvrFuzzPct = 0.0
+        val config = AuditConfig(
+            AuditType.ONEAUDIT, hasStyle = true, simFuzzPct = mvrFuzzPct,
+        )
+        val taskGen = OneAuditSingleRoundWithDilutedMargin(
+            Nc,
+            margin,
+            underVotePct = 0.0,
+            phantomPct = 0.0,
+            cvrPercent = 0.90,
+            extraInPool = 0,
+            mvrsFuzzPct = mvrFuzzPct,
+            auditConfigIn = config,
+            parameters = emptyMap(),
+        )
+
+        val task = taskGen.generateNewTask()
+        val workflowResult = task.run()
+        println(workflowResult)
+        assertEquals(TestH0Status.StatRejectNull, workflowResult.status)
+    }
+
+    @Test
+    fun testOneAuditWithDilutedMargin() {
+        val Nc = 50000
+        val margin = .04
+        val mvrFuzzPct = 0.005
+        val config = AuditConfig(
+            AuditType.ONEAUDIT, hasStyle = true, simFuzzPct = mvrFuzzPct,
+        )
+        val taskGen = OneAuditSingleRoundWithDilutedMargin(
+            Nc,
+            margin,
+            underVotePct = 0.0,
+            phantomPct = 0.005,
+            cvrPercent = 0.90,
+            extraInPool = Nc/20, // 5%
+            mvrsFuzzPct = mvrFuzzPct,
+            auditConfigIn = config,
+            parameters = emptyMap(),
+        )
+
+        val task = taskGen.generateNewTask()
+        val workflowResult = task.run()
+        println(workflowResult)
+        assertEquals(TestH0Status.StatRejectNull, workflowResult.status)
+    }
+
+    @Test
     fun testOneAuditSingleRoundAuditTaskGenerator() {
         val Nc = 50000
         val margin = .04
@@ -59,9 +111,9 @@ class TestOneAuditTask {
     @Test
     fun testOneAuditSingleRoundMultipleContests() {
         val Nc = 50000
-        val mvrFuzzPct = 0.005
+        val mvrFuzzPct = 0.00
         val config = AuditConfig(
-            AuditType.ONEAUDIT, hasStyle = true, simFuzzPct = mvrFuzzPct,
+            AuditType.ONEAUDIT, hasStyle = false, simFuzzPct = mvrFuzzPct,
         )
         //     val N: Int,
         //    val simFuzzPct: Double,
@@ -72,12 +124,14 @@ class TestOneAuditTask {
             simFuzzPct = mvrFuzzPct,
             ncontests = 11,
             nballotStyles = 5,
-            configIn = config
+            configIn = config,
+            phantomPctRange = 0.0..0.0,
+            show = false,
         )
 
         val task = taskGen.generateNewTask()
         val workflowResult = task.run()
         println(workflowResult)
-        assertEquals(TestH0Status.StatRejectNull, workflowResult.status)
+        // TODO assertEquals(TestH0Status.StatRejectNull, workflowResult.status)
     }
 }

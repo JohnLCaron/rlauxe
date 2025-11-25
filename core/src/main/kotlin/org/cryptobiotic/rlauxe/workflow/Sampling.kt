@@ -114,5 +114,9 @@ class ClcaWithoutReplacement(
     override fun next() = sample()
 }
 
+fun makeClcaNoErrorSampler(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAssorter): Sampling {
+    val cvrPairs = cvrs.zip(cvrs)
+    return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, true) // TODO
+}
 
 

@@ -42,8 +42,9 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
         candidateIdToIndex = if (isIrv) info.candidateIds.mapIndexed { idx, candidateId -> Pair(candidateId, idx) }.toMap() else emptyMap()
     }
 
-    constructor(info: ContestInfo, votes: Map<Int, Int>): this(info) {
+    constructor(info: ContestInfo, votes: Map<Int, Int>, ncards: Int): this(info) {
         votes.forEach{ this.addVote(it.key, it.value) }
+        this.ncards = ncards
     }
 
     override fun ncards() = ncards

@@ -19,7 +19,7 @@ import kotlin.sequences.plus
 // Polling: always need cardStyles
 
 interface CardIF {
-    fun hasContest(contestId: Int): Boolean
+    fun hasContest(contestId: Int): Boolean // "is in P_c".
     fun location(): String
     fun isPhantom(): Boolean
     fun poolId(): Int?

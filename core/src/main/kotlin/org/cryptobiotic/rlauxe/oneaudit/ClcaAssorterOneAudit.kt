@@ -23,7 +23,7 @@ import org.cryptobiotic.rlauxe.core.*
  *  B̄b = u /(2u − v)       (OA 9)
  */
 
-/* TODO OneAudit p.9
+/* TODO OneAudit p.9-12 affine transform
 This algorithm be made more efficient statistically and logistically in a variety
 of ways, for instance, by making an affine translation of the data so that the
 minimum possible value is 0 (by subtracting the minimum of the possible over-
@@ -45,7 +45,6 @@ But, eq (10) would be useful in the case where all the batches are pooled data, 
 all batches is non-zero. This use case I havent started to work with, but it sounds like I should, since
 OneAudit will be "far more efficient than BLCA"." 4/27/25 email
 
-TODO p.10-12
 Moving from tests about raw assorter values to tests about overstatements rel-
 ative to ONE CVRs derived from overall contest totals is just an affine trans-
 formation: no information is gained or lost. Thus, if we audited using an affine
@@ -81,7 +80,7 @@ constraint by subtracting the minimum possible value then re-scaling so that the
 null mean is 1/2 once again, which reproduces the original assorter, A:
  */
 
-class OneAuditClcaAssorter(
+class ClcaAssorterOneAudit(
     info: ContestInfo,
     assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs: plurality or IRV
     hasStyle: Boolean = true,
@@ -117,10 +116,10 @@ class OneAuditClcaAssorter(
     }
 
     fun overstatementPoolError(mvr: CardIF, poolAvgAssortValue: Double): Double {
-        val mvr_assort = if (mvr.isPhantom() || (hasStyle && !mvr.hasContest(info.id)))
-            0.0
-        else
-            this.assorter.assort(mvr, usePhantoms = false)
+        val mvr_assort =
+            if (mvr.isPhantom()) 0.0
+            else if (!mvr.hasContest(info.id)) 0.5  // hasStyle = false for pooled data
+            else this.assorter.assort(mvr, usePhantoms = false)
 
         // for pooled data (i in Gg):
         //   A(ci) = poolAvg in [0..u]
@@ -147,7 +146,7 @@ class OneAuditClcaAssorter(
         if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
 
-        other as OneAuditClcaAssorter
+        other as ClcaAssorterOneAudit
 
         return info == other.info
     }

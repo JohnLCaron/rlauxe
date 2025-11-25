@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.sf
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.belgium.toptopdir
 import org.cryptobiotic.rlauxe.cli.runRound
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
@@ -30,6 +31,25 @@ class TestCreateSfElection {
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
+    }
+
+    @Test
+    fun runElection() {
+        val topdir = "/home/stormy/rla/cases/sf2024/oa"
+        val auditdir = "$topdir/audit"
+        val stopRound = -1
+
+        var done = false
+        var finalRound: AuditRound? = null
+        while (!done) {
+            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
+            if (lastRound != null) finalRound = lastRound
+            done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx == stopRound
+        }
+
+        if (finalRound != null) {
+            println("$auditdir: ${finalRound.show()}")
+        }
     }
 
     @Test

@@ -467,7 +467,6 @@ open class ContestUnderAudit(
     }
 
     companion object {
-
         fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCard>, isClca: Boolean, hasStyle: Boolean): List<ContestUnderAudit> {
             val infos = contests.map { it.info() }.associateBy { it.id }
             val manifestTabs = tabulateAuditableCards(cards, infos)
@@ -481,7 +480,6 @@ open class ContestUnderAudit(
                 }
             }
         }
-
     }
 
 }

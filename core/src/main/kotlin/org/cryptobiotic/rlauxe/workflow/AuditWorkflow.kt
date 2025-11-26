@@ -24,7 +24,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         val auditRound = if (previousRound == null) {
             // first time, create the round
             val contestRounds = contestsUA()
-                .filter { !auditConfig().skipContests.contains(it.id) && !(auditConfig().isOA && it.contest.isIrv()) } // TODO
+                .filter { !auditConfig().skipContests.contains(it.id) } //  && !(auditConfig().isOA && it.contest.isIrv()) } // TODO
                 .map { ContestRound(it, roundIdx) }
             AuditRound(roundIdx, contestRounds = contestRounds, samplePrns = emptyList())
         } else {

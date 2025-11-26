@@ -93,6 +93,7 @@ class TestConsistentSampling {
         }
     }
 
+    /*
     @Test
     fun testUniformPollingSampling() {
         val N = 20000
@@ -137,5 +138,5 @@ class TestConsistentSampling {
             if (contest.estSampleSizeEligibleForRemoval() > contestSampleCutoff)
                 assertTrue(contest.done)
         }
-    }
+    } */
 }

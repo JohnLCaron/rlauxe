@@ -38,7 +38,6 @@ data class AuditRoundJson(
     val contestRounds: List<ContestRoundJson>,
     val auditWasDone: Boolean,
     val auditIsComplete: Boolean,
-    // val sampledIndices: List<Long>,
     val nmvrs: Int,
     var newmvrs: Int,
     var auditorWantNewMvrs: Int,
@@ -50,7 +49,6 @@ fun AuditRound.publishJson() : AuditRoundJson {
         contestRounds.map { it.publishJson() },
         this.auditWasDone,
         this.auditIsComplete,
-        // this.samplePrns,
         this.nmvrs,
         this.newmvrs,
         this.auditorWantNewMvrs,
@@ -91,8 +89,6 @@ fun AuditRoundJson.import(contestUAs: List<ContestUnderAudit>, samplePrns: List<
 
 @Serializable
 data class ContestRoundJson(
-    // val contestUA: ContestUnderAuditJson?,
-    // val raireContestUA: RaireContestUnderAuditJson?,
     val id: Int,
     var assertionRounds: List<AssertionRoundJson>,
     val roundIdx: Int,
@@ -101,7 +97,6 @@ data class ContestRoundJson(
     val actualNewMvrs: Int,  // Estimate of new sample size required to confirm the contest
     val estNewSamples: Int,
     val estSampleSize: Int,  // Estimate of total sample size required to confirm the contest
-    val estSampleSizeNoStyles: Int, // number of total samples estimated needed, uniformPolling (Polling, no style only)
     val auditorWantNewMvrs: Int,
 
     val done: Boolean,
@@ -111,8 +106,6 @@ data class ContestRoundJson(
 
 fun ContestRound.publishJson() : ContestRoundJson {
     return ContestRoundJson(
-        // if (!isRaire) this.contestUA.publishJson() else null,
-        // if (isRaire) (this.contestUA as RaireContestUnderAudit).publishRaireJson() else null,
         this.id,
         assertionRounds.map { it.publishJson() },
         this.roundIdx,
@@ -120,7 +113,6 @@ fun ContestRound.publishJson() : ContestRoundJson {
         this.actualNewMvrs,
         this.estNewSamples,
         this.estSampleSize,
-        this.estSampleSizeNoStyles,
         this.auditorWantNewMvrs,
         this.done,
         this.included,
@@ -130,8 +122,6 @@ fun ContestRound.publishJson() : ContestRoundJson {
 
 fun ContestRoundJson.import(contestUA: ContestUnderAudit): ContestRound {
     val assertionMap = contestUA.assertions().associateBy { it.assorter.hashcodeDesc() }
-    // contestUA.pollingAssertions.forEach{ println("  contestUA ${it.assorter} desc='${it.assorter.hashcodeDesc()}' info=${it.info}")}
-
     val assertionRounds = assertionRounds.map {
         val ref = assertionMap[it.assorterDesc]
         if (ref == null)
@@ -144,7 +134,6 @@ fun ContestRoundJson.import(contestUA: ContestUnderAudit): ContestRound {
     contestRound.actualNewMvrs = this.actualNewMvrs
     contestRound.estNewSamples = this.estNewSamples
     contestRound.estSampleSize = this.estSampleSize
-    contestRound.estSampleSizeNoStyles = this.estSampleSizeNoStyles
     contestRound.auditorWantNewMvrs = this.auditorWantNewMvrs
 
     contestRound.done = this.done

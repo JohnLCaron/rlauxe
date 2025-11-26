@@ -12,6 +12,7 @@ enum class AuditType { POLLING, CLCA, ONEAUDIT;
 data class AuditConfig(
     val auditType: AuditType,
     val hasStyle: Boolean, // has Card Style Data (CSD), i.e. we know which contests each card/ballot contains
+                           // I think all this means is "cvrs have undervotes" aka "cvrs are complete"
     val riskLimit: Double = 0.05,
     val seed: Long = secureRandom.nextLong(), // determines sample order. set carefully to ensure truly random.
 

@@ -11,12 +11,6 @@ import kotlin.test.assertNotNull
 
 class TestDHondtJson {
 
-    // data class RaireContestJson(
-    //    val info: ContestInfoJson,
-    //    val winners: List<Int>,
-    //    val Nc: Int,
-    //    val Np: Int,
-    //)
     @Test
     fun testContestRoundtrip() {
         val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
@@ -31,18 +25,13 @@ class TestDHondtJson {
         assertTrue(roundtrip.equals(target))
     }
 
-    // class RaireContestUnderAudit(
-    //    contest: RaireContest,
-    //    val winner: Int,  // the sum of winner and eliminated must be all the candiates in the contest
-    //    val rassertions: List<RaireAssertion>,
-    //): ContestUnderAudit(contest, isComparison=true, hasStyle=true) {
     @Test
     fun testContestUARoundtrip() {
         val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
         val dcontest = makeProtoContest("contest1", 1, parties, 8, 0, 0.01)
         val contest = dcontest.createContest(dcontest.validVotes, dcontest.validVotes)
 
-        val contestUA = ContestUnderAudit(contest, isClca=true, hasStyle=true).addAssertionsFromAssorters(dcontest.makeAssorters())
+        val contestUA = ContestUnderAudit(contest, isClca=true).addAssertionsFromAssorters(dcontest.makeAssorters())
 
         val json = contestUA.publishJson()
         val roundtrip = json.import()
@@ -56,7 +45,7 @@ class TestDHondtJson {
         val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
         val dcontest = makeProtoContest("contest1", 1, parties, 8, 0, 0.01)
         val contest = dcontest.createContest(dcontest.validVotes, dcontest.validVotes)
-        val contestUA = ContestUnderAudit(contest, isClca=true, hasStyle=true).addAssertionsFromAssorters(dcontest.makeAssorters())
+        val contestUA = ContestUnderAudit(contest, isClca=true).addAssertionsFromAssorters(dcontest.makeAssorters())
 
         val target = contestUA.minPollingAssertion()!!.assorter
 

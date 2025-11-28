@@ -45,6 +45,7 @@ fun makeOneAuditTestContests(
     }
     if (debug) println(showTabs("manifestTabs", manifestTabs))
 
+    // TODO calcCardPoolsFromCvrs()
     // The styles have the name, id, and contest list
     val poolsFromCvrs = cardStyles.map { style ->
         val poolFromCvr = CardPoolFromCvrs(style.name(), style.id(), infos)
@@ -75,7 +76,8 @@ fun makeOneAuditTestContests(
     return Pair(contestsUA, poolsFromCvrs.values.toList())
 }
 
-// TODO Raire OneAudit contest
+// TODO Raire OneAudit contest.
+// TODO try in SF?
 fun makeTestContestOAIrv(): RaireContestUnderAudit {
 
     val info = ContestInfo(

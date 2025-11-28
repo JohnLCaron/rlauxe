@@ -6,12 +6,9 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.RegVotes
 import org.cryptobiotic.rlauxe.util.RegVotesImpl
 import org.cryptobiotic.rlauxe.core.AssorterIF
-import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
-import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
@@ -294,39 +291,36 @@ class CardPoolFromCvrs(
     }
 }
 
-private const val debug = false
 
-// use dilutedMargin to set the pool assorter averages. can only use for non-IRV contests
-fun addOAClcaAssortersFromMargin(
-    oaContests: List<ContestUnderAudit>,
-    cardPools: List<CardPoolIF>, // poolId -> pool
-    hasStyle: Boolean,
-) {
-    // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
-    // create the clcaAssertions and add then to the oaContests
-    oaContests.filter { !it.isIrv}. forEach { oaContest ->
-        val contestId = oaContest.id
-        val clcaAssertions = oaContest.pollingAssertions.map { assertion ->
-            val assortAverages = mutableMapOf<Int, Double>() // poolId -> average assort value
-            cardPools.forEach { cardPool ->
-                if (cardPool.hasContest(contestId)) {
-                    val regVotes = cardPool.regVotes()[oaContest.id]!!
-                    if (cardPool.ncards() > 0) {
-                        // note: using cardPool.ncards(), this is the diluted count
-                        val poolMargin = assertion.assorter.calcMargin(regVotes.votes, cardPool.ncards())
-                        assortAverages[cardPool.poolId] = margin2mean(poolMargin)
-                        if (debug)
-                            println("contest ${oaContest.id} assertion=${assertion.assorter.shortName()} poolAverage = ${margin2mean(poolMargin)} " +
-                                "regVotes.votes=${regVotes.votes} cardPool.ncards=${cardPool.ncards()}")
-                    }
-                }
-            }
-            val clcaAssorter = ClcaAssorterOneAudit(assertion.info, assertion.assorter, hasStyle, poolAverages = AssortAvgsInPools(assortAverages),
-                dilutedMargin = oaContest.makeDilutedMargin(assertion.assorter))
-            ClcaAssertion(assertion.info, clcaAssorter)
-        }
-        oaContest.clcaAssertions = clcaAssertions
+fun calcCardPoolsFromCvrs(
+    infos: Map<Int, ContestInfo>,
+    cardStyles: List<CardStyleIF>,
+    mvrs: List<Cvr>,
+): List<CardPoolFromCvrs> {
+
+    // The styles have the name, id, and contest list
+    val poolsFromCvrs = cardStyles.map { style ->
+        val poolFromCvr = CardPoolFromCvrs(style.name(), style.id(), infos)
+        style.contests().forEach { poolFromCvr.contestTabs[it]  = ContestTabulation( infos[it]!!) }
+        poolFromCvr
+    }.associateBy { it.poolId }
+
+    // populate the pool counts from the mvrs
+    mvrs.filter{ it.poolId != null }.forEach {
+        val pool = poolsFromCvrs[it.poolId]
+        if (pool != null) pool.accumulateVotes(it)
     }
+    if (true) {
+        println("tabulatePooledMvrs")
+        poolsFromCvrs.forEach { (id, pool) ->
+            println(pool)
+            pool.contestTabs.forEach {
+                println(" $it")
+            }
+            println()
+        }
+    }
+    return poolsFromCvrs.values.toList()
 }
 
 //////////////////////////////////////////////////////////////////

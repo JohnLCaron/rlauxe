@@ -159,7 +159,7 @@ class CreateSfElection(
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
         val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPools.associate{ it.name() to it.id() } )
 
-        return CvrsWithStylesToCards(config.auditType, hasStyle,
+        return CvrsWithStylesToCardManifest(config.auditType, hasStyle,
             cvrIter,
             makePhantomCvrs(phantomCount),
             if (isOA) cardPools else null,

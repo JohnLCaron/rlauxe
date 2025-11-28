@@ -2,8 +2,8 @@ package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
 import org.cryptobiotic.rlauxe.util.calcReportedMargin
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -34,21 +34,18 @@ class TestOAShangrla {
 
     @Test // TODO match with SHANGRLA, make tests pass
     fun testOAShangrla() {
-        val winnerNoCvr = makeCvr(0, "noCvr", poolId = 1)
-        val loserNoCvr = makeCvr(1, "noCvr", poolId = 1)
-        val otherNoCvr = makeCvr(2, "noCvr", poolId = 1)
-
         val margin = .6571495728340697
         val Nc = 10000
 
-        val (contestUA, pools, _) = makeOneContestUA(
+        val (contestUA, _, _, pools) = makeOneAuditTest(
             margin,
             Nc,
             cvrFraction = 0.33,
             undervoteFraction = 0.0,
             phantomFraction = 0.0
         )
-
+        val contestId= contestUA.id
+        val poolId= pools.first().poolId
 
         // val contestOA: OneAuditContest = makeContestOA(N, margin, poolPct = 0.66, poolMargin = mean2margin(0.625))
         // fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
@@ -59,6 +56,10 @@ class TestOAShangrla {
         val assortMargin = cassorter.assorter.reportedMargin()
         val assortMean = margin2mean(assortMargin)
         assertEquals(margin2mean(margin), assortMean, .0001)
+
+        val winnerNoCvr = makeCvr(0, "noCvr", poolId = poolId, contestId=contestId)
+        val loserNoCvr = makeCvr(1, "noCvr", poolId = poolId, contestId=contestId)
+        val otherNoCvr = makeCvr(2, "noCvr", poolId = poolId, contestId=contestId)
 
         val winnerAssortValue = cassorter.assorter.assort(winnerNoCvr, usePhantoms = false)
         val loserAssortValue = cassorter.assorter.assort(loserNoCvr, usePhantoms = false)
@@ -123,7 +124,7 @@ class TestOAShangrla {
         assertEquals(loserVoteNoCvr, cassorter.bassort(loserNoCvr, winnerNoCvr), .0001)
         assertEquals(otherVoteNoCvr, cassorter.bassort(otherNoCvr, winnerNoCvr), .0001)
 
-        val expect = """OneAuditClcaAssorter for contest ContestOA (0)
+        val expect = """OneAuditClcaAssorter for contest OneAuditTest (1)
   assorter= Plurality winner=0 loser=1 reportedMargin=65.7200% reportedMean=82.8600%
   dilutedMargin=0.6572 noerror=0.7447125409591897 upperBound=1.4894250819183794
 """

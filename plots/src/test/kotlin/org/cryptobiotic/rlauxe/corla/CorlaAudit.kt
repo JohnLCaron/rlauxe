@@ -39,10 +39,10 @@ class CorlaSingleRoundAuditTaskGenerator(
         return ClcaSingleRoundWorkflowTask(
             name(),
             clcaWorkflow,
+            auditor = AuditCorlaAssertion(),
             testMvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0),
             quiet,
-            auditor = AuditCorlaAssertion(),
         )
     }
 }

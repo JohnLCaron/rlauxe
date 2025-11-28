@@ -83,15 +83,6 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
         if (candidateRanks.isEmpty()) undervotes++
     }
 
-    /* fun addJustVotes(other: ContestTabulation) {
-        require(info.id == other.info.id)
-        if (this.isIrv) {
-            this.irvVotes.addVotes(other.irvVotes)
-        } else {
-            other.votes.forEach { (candId, nvotes) -> addVote(candId, nvotes) }
-        }
-    } */
-
     // for summing multiple tabs into this one
     fun sum(other: ContestTabulation) {
         require (info.id == other.info.id)
@@ -112,20 +103,9 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
 
     fun nvotes() = votes.map { it.value}.sum()
 
-    /* fun toString2() = buildString {
-        // append("${votes.toList().sortedBy{ it.second }.reversed().toMap()} ncards=$ncards undervotes=$undervotes novote=$novote")
-        append("contest ${info.id} ${votes.toSortedMap()} nvotes=${nvotes()} ncards=$ncards undervotes=$undervotes overvotes=$overvotes novote=$novote")
-        if (voteForN != null) {
-            val nvotes = votes.map { it.value }.sum()
-            val underPct = (100.0 * undervotes / (nvotes + undervotes)).toInt()
-            append(" underPct= $underPct%")
-        }
-    } */
-
-
     override fun toString(): String {
         val sortedVotes = votes.entries.sortedBy { it.key }
-        return "ContestTabulation(isIrv=$isIrv, voteForN=$voteForN, votes=$sortedVotes, nvotes=${nvotes()} ncards=$ncards, novote=$novote, undervotes=$undervotes, overvotes=$overvotes)"
+        return "ContestTabulation(id=${info.id} isIrv=$isIrv, voteForN=$voteForN, votes=$sortedVotes, nvotes=${nvotes()} ncards=$ncards, novote=$novote, undervotes=$undervotes, overvotes=$overvotes)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -170,6 +150,7 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
 }
 
 // TODO only accumulates regular votes, not IRV
+// tabulates the pool.regVotes into ContestTabulation's
 fun tabulateCardPools(cardPools: List<CardPoolIF>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val poolSums = infos.mapValues { ContestTabulation(it.value) }
     cardPools.forEach { cardPool ->
@@ -240,4 +221,12 @@ fun tabulateCvr(cvr: Cvr, infos: Map<Int, ContestInfo>, result: MutableMap<Int, 
             tab.addVotes(conVotes, cvr.phantom)
         }
     }
+}
+
+fun showTabs(what: String, tabs: Map<Int, ContestTabulation>) = buildString {
+    appendLine(what)
+    tabs.forEach { (id, tab) ->
+        appendLine(" $tab")
+    }
+    appendLine()
 }

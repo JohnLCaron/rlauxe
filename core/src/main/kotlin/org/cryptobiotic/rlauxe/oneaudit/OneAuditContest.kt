@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.oneaudit
 import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.core.*
 
+import kotlin.collections.get
+
 /** See OneAudit Section 2.3.
  * Suppose we have a CVR ci for every ballot card whose index i is in C. The cardinality of C is |C|.
  * Ballot cards not in C are partitioned into G ≥ 1 disjoint groups {Gg} for which reported assorter subtotals are available.
@@ -79,6 +81,14 @@ statement assorter values can move them back to the endpoints of the support
 constraint by subtracting the minimum possible value then re-scaling so that the
 null mean is 1/2 once again, which reproduces the original assorter, A:
  */
+
+
+interface OneAuditContestIF {
+    val contestId: Int
+    fun poolTotalCards(): Int // total cards in all pools for this contest
+    fun expectedPoolNCards(): Int // expected total pool cards for this contest, making assumptions about missing undervotes
+    fun adjustPoolInfo(cardPools: List<CardPoolIF>)
+}
 
 class ClcaAssorterOneAudit(
     info: ContestInfo,
@@ -195,7 +205,6 @@ Audit.py line 2584
         """
         # sanity check
 
-        # TODO there is no cvr; assume that SHANGRLA doesnt deal with use_style = true (?)
         if use_style and not cvr.has_contest(self.contest.id):
             raise ValueError(
                 f"use_style==True but {cvr=} does not contain contest {self.contest.id}"
@@ -210,8 +219,6 @@ Audit.py line 2584
         )
         # assort the CVR
         cvr_assort = (
-           # TODO in case theres phantoms in the pool, I think this should be
-           # TODO int(cvr.phantom) / 2 + (1 - int(cvr.phantom)) * self.tally_pool_means[cvr.tally_pool]
             self.tally_pool_means[cvr.tally_pool]
             if
                 cvr.pool and self.tally_pool_means is not None

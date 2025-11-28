@@ -88,10 +88,10 @@ class RaireSingleRoundAuditTaskGenerator(
         return ClcaSingleRoundWorkflowTask(
             name(),
             raireAudit,
+            auditor = ClcaAssertionAuditor(),
             testMvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 4.0),
             quiet = true,
-            auditor = ClcaAssertionAuditor(),
         )
     }
 }

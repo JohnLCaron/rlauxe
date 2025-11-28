@@ -53,9 +53,9 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
                 cassorter.upperBound()
             )
         }
-        println(testH0Result)
-        println(testH0Result.tracker)
-        println()
+        //println(testH0Result)
+        //println(testH0Result.tracker)
+        //println()
 
         val measuredCounts = if (testH0Result.tracker is ClcaErrorRatesIF) testH0Result.tracker.errorCounts() else null
         assertionRound.auditResult = AuditRoundResult(

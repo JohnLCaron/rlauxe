@@ -30,7 +30,7 @@ class BelgiumClca (
     override fun cardManifest() = createCardIterator()
 
     fun createCardIterator(): CloseableIterator<AuditableCard> {
-        return CvrsWithStylesToCards(AuditType.CLCA, hasStyle,
+        return CvrsWithStylesToCardManifest(AuditType.CLCA, hasStyle,
             Closer(cvrs.iterator()),
             makePhantomCvrs(contestsUA().map { it.contest }),
             null,

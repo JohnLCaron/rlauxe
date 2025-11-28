@@ -58,6 +58,8 @@ data class ContestInfo(
         require(candidateIdSet.size == candidateIds.size) { "duplicate candidate id $candidateIds"}
     }
 
+    constructor(id: Int): this("", id, mapOf("name" to 1), SocialChoiceFunction.PLURALITY)
+
     fun desc() = buildString {
         append("'$name' ($id) candidates=${candidateIds} choiceFunction=$choiceFunction nwinners=$nwinners voteForN=${voteForN}")
     }
@@ -467,7 +469,6 @@ open class ContestUnderAudit(
     }
 
     companion object {
-
         fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCard>, isClca: Boolean, hasStyle: Boolean): List<ContestUnderAudit> {
             val infos = contests.map { it.info() }.associateBy { it.id }
             val manifestTabs = tabulateAuditableCards(cards, infos)
@@ -481,7 +482,6 @@ open class ContestUnderAudit(
                 }
             }
         }
-
     }
 
 }

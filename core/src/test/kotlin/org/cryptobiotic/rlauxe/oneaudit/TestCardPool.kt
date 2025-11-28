@@ -14,17 +14,19 @@ class TestCardPool {
 
     @Test
     fun testCardPoolFromCvrs() {
-        val (contestOA, cardPools, cvrs) = makeOneContestUA(
-            margin = .02,
-            Nc = 50000,
-            cvrFraction = .80,
-            undervoteFraction = 0.10,
-            phantomFraction = 0.005
-        )
+
+        val (contestOA, mvrs, cards, cardPools) =
+            makeOneAuditTest(
+                margin = .02,
+                Nc = 50000,
+                cvrFraction = .80,
+                undervoteFraction = 0.10,
+                phantomFraction = 0.005
+            )
 
         val info = contestOA.contest.info()
         val infos = mapOf(info.id to info)
-        val cvrTabs = tabulateCvrs(cvrs.iterator(), infos)
+        val cvrTabs = tabulateCvrs(mvrs.iterator(), infos)
         val cvrTab = cvrTabs[info.id]!!
 
         assertEquals(cvrTab.votes, contestOA.contest.votes())

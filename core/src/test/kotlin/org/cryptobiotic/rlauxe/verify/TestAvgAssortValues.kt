@@ -2,8 +2,8 @@ package org.cryptobiotic.rlauxe.verify
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardsWithStylesToCards
-import org.cryptobiotic.rlauxe.audit.CvrsWithStylesToCards
+import org.cryptobiotic.rlauxe.audit.CardsWithStylesToCardManifest
+import org.cryptobiotic.rlauxe.audit.CvrsWithStylesToCardManifest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -34,7 +34,7 @@ class TestAvgAssortValues {
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsWithStylesToCards(
+            CvrsWithStylesToCardManifest(
                 AuditType.CLCA, false, Closer(testCvrs.iterator()),
                 phantomCvrs=null, styles = null,
             )
@@ -82,7 +82,7 @@ class TestAvgAssortValues {
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsWithStylesToCards(
+            CvrsWithStylesToCardManifest(
                 AuditType.CLCA, false, Closer(testCvrs.iterator()),
                 phantomCvrs=null, styles = null,
             )
@@ -125,7 +125,7 @@ class TestAvgAssortValues {
         val testCvrs = test.makeCvrsFromContests()
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsWithStylesToCards(
+            CvrsWithStylesToCardManifest(
                 AuditType.CLCA, false, Closer(testCvrs.iterator()),
                 phantomCvrs=null, styles = null,
             )
@@ -168,7 +168,7 @@ class TestAvgAssortValues {
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeAuditableCardCsv(it)}") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CardsWithStylesToCards(
+            CardsWithStylesToCardManifest(
                 AuditType.CLCA, false, Closer(testCards.iterator()),
                 phantomCards = null, styles = test.cardStyles,
             )
@@ -217,7 +217,7 @@ class TestAvgAssortValues {
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeAuditableCardCsv(it)}") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CardsWithStylesToCards(
+            CardsWithStylesToCardManifest(
                 AuditType.CLCA, false, Closer(testCards.iterator()),
                 phantomCards = null, styles = modStyles,
             )

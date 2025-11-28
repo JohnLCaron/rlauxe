@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.cli.runRoundResult
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.persist.*
 import kotlin.test.Test
 import kotlin.test.fail
@@ -97,7 +97,7 @@ class TestPersistedWorkflow {
 
         val N = 5000
         // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
-        val (contestOA, cardPools, testCvrs) = makeOneContestUA(
+        val (contestOA, mvrs, cards, cardPools) = makeOneAuditTest(
             N + 100,
             N - 100,
             cvrFraction = .95,
@@ -107,7 +107,7 @@ class TestPersistedWorkflow {
 
         val contestsUA = listOf(contestOA)
 
-        val election = CreateElectionFromCvrs(contestsUA, testCvrs, cardPools, config=config)
+        val election = CreateElectionFromCvrs(contestsUA, mvrs, cardPools, config=config)
         CreateAudit("testPersistedAuditPolling", topdir, config, election, clear = true)
 
         runPersistedAudit(topdir)

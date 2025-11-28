@@ -53,7 +53,7 @@ class ClcaContestAuditTaskGenerator(
     }
 }
 
-// Simulate single Contest, Do the audit in a single round (dont use estimateSampleSizes)
+// Simulate single Contest with ContestSimulation.make2wayTestContest
 class ClcaSingleRoundAuditTaskGenerator(
     val Nc: Int,
     val margin: Double,
@@ -87,6 +87,7 @@ class ClcaSingleRoundAuditTaskGenerator(
             makeFuzzedCvrsFrom(listOf(sim.contest.info()), testCvrs, mvrsFuzzPct)
         }
 
+        // TODO not adding the Nbs...
         val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(sim.contest), emptyList(),
             MvrManagerForTesting(testCvrs, testMvrs, useConfig.seed))
 
@@ -104,22 +105,22 @@ class ClcaSingleRoundAuditTaskGenerator(
         return ClcaSingleRoundWorkflowTask(
             name(),
             clcaWorkflow,
+            auditor = ClcaAssertionAuditor(),
             testMvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0),
             quiet,
-            auditor = ClcaAssertionAuditor(),
         )
     }
 }
 
-// From AuditWorkflow, assumes theres only one contest, do audit in a single round
+// AuditWorkflow is given, audit one contest in a single round
 class ClcaSingleRoundWorkflowTask(
     val name: String,
     val workflow: AuditWorkflow,
-    val testMvrs: List<Cvr>,
-    val otherParameters: Map<String, Any>,
-    val quiet: Boolean,
-    val auditor: ClcaAssertionAuditorIF,
+    val auditor: ClcaAssertionAuditorIF, // can be used for both Clca and OneAudit
+    val testMvrs: List<Cvr>, // needed for tracking the true margin of the mvrs, for plotting
+    val otherParameters: Map<String, Any> = emptyMap(),
+    val quiet: Boolean = true,
 ) : ConcurrentTaskG<WorkflowResult> {
 
     override fun name() = name
@@ -128,10 +129,10 @@ class ClcaSingleRoundWorkflowTask(
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         val nmvrs = runClcaSingleRoundAudit(workflow, contestRounds, quiet = quiet, auditor)
 
-        val contest = contestRounds.first() // TODO theres only one contest
+        val contest = contestRounds.first()
         val minAssertion = contest.minAssertion()!!
         val assorter = minAssertion.assertion.assorter
-        // val mvrMargin = assorter.calcAssorterMargin(contest.id, testMvrs, usePhantoms = true) // TODO needed for tracking the true margin of the mvrs, for plotting
+        val mvrMargin = assorter.calcAssorterMargin(contest.id, testMvrs, usePhantoms = true)
 
         return if (minAssertion.auditResult == null) { // TODO why might this be empty?
             WorkflowResult(
@@ -155,7 +156,7 @@ class ClcaSingleRoundWorkflowTask(
                 nmvrs.toDouble(),
                 otherParameters,
                 if (lastRound.status != TestH0Status.StatRejectNull) 100.0 else 0.0,
-               //  mvrMargin=mvrMargin,
+               mvrMargin=mvrMargin,
             )
         }
     }

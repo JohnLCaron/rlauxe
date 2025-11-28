@@ -19,7 +19,7 @@ class CreateElectionFromCvrs (
     override fun cardManifest() = createCardIterator()
 
     fun createCardIterator(): CloseableIterator<AuditableCard> {
-        return CvrsWithStylesToCards(
+        return CvrsWithStylesToCardManifest(
             config.auditType, config.hasStyle,
             Closer(cvrs.iterator()),
             null,

@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.workflow.ClcaWithoutReplacement
 import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsFrom
 import org.junit.jupiter.api.Test
@@ -13,7 +13,7 @@ import kotlin.math.max
 
 class TestMakeFuzzedCvrs {
     val show = false
-    val showOA = false
+    val showOA = true
 
     @Test
     fun testFuzzTwoPersonContest() {
@@ -146,7 +146,6 @@ class TestMakeFuzzedCvrs {
         val fuzzPcts = listOf(0.001, .005, .01, .02, .05)
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
-        val contestId = 0
 
         val choiceChanges = mutableListOf<MutableMap<String, Int>>()
         fuzzPcts.forEach { fuzzPct ->
@@ -154,31 +153,33 @@ class TestMakeFuzzedCvrs {
             val welfordFromCvrs = Welford()
             val welfordFromFuzz = Welford()
             margins.forEach { margin ->
-                // fun makeContestOA(margin: Double, Nc: Int, cvrPercent: Double, skewVotesPercent: Double, undervotePercent: Double, phantomPercent: Double): OneAuditContest {
-                val (contestOA, _, cvrs) = makeOneContestUA(
+                val (contestOA, mvrs, cardManifest, pools) = makeOneAuditTest(
                     margin,
                     Nc,
                     cvrFraction = .70,
                     undervoteFraction = .01,
-                    phantomFraction = .01
-                ) // TODO no skew
+                    phantomFraction = .01,
+                    hasStyle=true,
+                    extraInPool=0,
+                )
                 val ncands = contestOA.ncandidates
                 val contest = contestOA.contest as Contest
+                val contestId = contest.id
                 if (showOA) println("ncands = $ncands fuzzPct = $fuzzPct, margin = $margin ${contest.votes}")
 
-                val vunder = tabulateVotesWithUndervotes(cvrs.iterator(), 0, ncands)
+                val vunder = tabulateVotesWithUndervotes(mvrs.iterator(), contestOA.id, ncands)
                 if (showOA) println("cvrVotes = ${vunder}  contestVotes = ${contest.votesAndUndervotes()}")
                 assertEquals(vunder, contest.votesAndUndervotes())
-                assertEquals(Nc, cvrs.size)
+                assertEquals(Nc, mvrs.size)
 
-                val fuzzed = makeFuzzedCvrsFrom(listOf(contestOA.contest.info()), cvrs, fuzzPct, welfordFromFuzz)
-                val mvrVotes = tabulateVotesWithUndervotes(fuzzed.iterator(), 0, ncands)
+                val fuzzed = makeFuzzedCvrsFrom(listOf(contestOA.contest.info()), mvrs, fuzzPct, welfordFromFuzz)
+                val mvrVotes = tabulateVotesWithUndervotes(fuzzed.iterator(), contestOA.id, ncands)
                 if (showOA) println("mvrVotes = ${mvrVotes}")
 
                 val choiceChange = mutableMapOf<String, Int>() // org-fuzz -> count
-                cvrs.zip(fuzzed).forEach { (cvr, fuzzedCvr) ->
-                    if (!cvr.phantom) {
-                        val orgChoice = cvr.votes[contestId]!!.firstOrNull() ?: ncands
+                mvrs.zip(fuzzed).forEach { (mvr, fuzzedCvr) ->
+                    if (!mvr.phantom) {
+                        val orgChoice = mvr.votes[contestId]!!.firstOrNull() ?: ncands
                         val fuzzChoice = fuzzedCvr.votes[contestId]!!.firstOrNull() ?: ncands
                         val changeKey = (orgChoice).toString() + fuzzChoice.toString()
                         val count = choiceChange[changeKey] ?: 0

@@ -15,10 +15,10 @@ class CreateElectionFromCards (
 
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
-    override fun cardManifest() = createCardIterator()
+    override fun cardManifest() = createCardManifest()
 
-    fun createCardIterator(): CloseableIterator<AuditableCard> {
-        return CardsWithStylesToCards(
+    fun createCardManifest(): CloseableIterator<AuditableCard> {
+        return CardsWithStylesToCardManifest(
             config.auditType, config.hasStyle,
             Closer(cards.iterator()),
             null,

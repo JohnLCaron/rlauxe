@@ -3,13 +3,12 @@ package org.cryptobiotic.rlauxe.oneaudit
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CvrsWithStylesToCards
+import org.cryptobiotic.rlauxe.audit.CvrsWithStylesToCardManifest
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 // TODO replace OneAuditTestData
 
@@ -17,41 +16,42 @@ data class ContestMvrCardAndPools(
     val contestUA: ContestUnderAudit,
     val mvrs: List<Cvr>,
     val cards: List<AuditableCard>,
+    val pools: List<CardPoolIF>,
 )
 
 // simulate OneAudit Contest with extra cards in pool, to get Nb > Nc, and test hasStyle
-fun makeOneContestWithExtraInPool(
+fun makeOneAuditTest(
     margin: Double,
     Nc: Int,
     cvrFraction: Double,
     undervoteFraction: Double,
     phantomFraction: Double,
-    hasStyle: Boolean,
-    extraInPool: Int,
+    hasStyle: Boolean = true,
+    extraInPool: Int = 0,
 ): ContestMvrCardAndPools {
     val nvotes = roundToClosest(Nc * (1.0 - undervoteFraction - phantomFraction))
     val winner = roundToClosest((margin * Nc + nvotes) / 2)
     val loser = nvotes - winner
-    return makeOneContestWithExtraInPool(winner, loser, cvrFraction, undervoteFraction, phantomFraction,
+    return makeOneAuditTest(winner, loser, cvrFraction, undervoteFraction, phantomFraction,
         hasStyle, extraInPool)
 }
 
 // two candidate contest, with specified total votes
 // divide into two stratum based on cvrPercent
-fun makeOneContestWithExtraInPool(
+fun makeOneAuditTest(
     winnerVotes: Int,
     loserVotes: Int,
     cvrFraction: Double,
     undervoteFraction: Double,
     phantomFraction: Double,
-    hasStyle: Boolean,
-    extraInPool: Int,
+    hasStyle: Boolean = true,
+    extraInPool: Int = 0,
 ): ContestMvrCardAndPools {
 
     require(cvrFraction > 0.0)
 
     val info1 = ContestInfo(
-        "OneContestWithCards", 1,
+        "OneAuditTest", 1,
         mapOf(
             "winner" to 0,
             "loser" to 1,
@@ -118,11 +118,23 @@ fun makeOneContestWithExtraInPool(
     val contest = Contest(info1, mapOf(0 to winnerVotes, 1 to loserVotes), Nc = Nc, Ncast = Nc - Np)
     info1.metadata["PoolPct"] = (100.0 * poolNcards / Nc).toInt()
 
-    val mvrs = makeMvrs(contest, cvrNc, cvrVotes, cvrUndervotes, pool, extraInPool)
-    val cards=  makeCardManifest(mvrs, pool)
-    val oaUA = makeContestUA(contest, cards, infos, listOf(pool), hasStyle)
+    // // fun makeOneAuditContests(
+    ////    config: AuditConfig,
+    ////    infos: Map<Int, ContestInfo>, // all the contests in the pools
+    ////    contestsToAudit: List<Contest>, // the contests you want to audit
+    ////    cardStyles: List<CardStyleIF>,
+    ////    cardManifest: List<AuditableCard>,
+    ////    mvrs: List<Cvr>,
+    ////): Pair<List<ContestUnderAudit>, List<CardPoolIF>> {
 
-    return ContestMvrCardAndPools(oaUA, mvrs, cards)
+    val mvrs = makeMvrs(contest, cvrNc, cvrVotes, cvrUndervotes, pool, extraInPool)
+    val cardManifest=  makeCardManifest(mvrs, pool)
+    // val oaUAold = makeContestUA(contest, cardManifest, infos, listOf(pool), hasStyle)
+
+    val (oaUA, cardPools) = makeOneAuditTestContests(
+        hasStyle, infos, listOf(contest), listOf(pool), cardManifest, mvrs)
+
+    return ContestMvrCardAndPools(oaUA.first(), mvrs, cardManifest, cardPools)
 }
 
 // these are the mvr truth
@@ -164,19 +176,6 @@ fun makeMvrs(
         mvrs.add( Cvr("extra$it", mapOf(extraContestId to intArrayOf()), false, poolId=pool.id()))
     }
 
-    /*
-    val possibleContests = intArrayOf(1,2)
-    val mvrCards = mutableListOf<AuditableCard>()
-
-    mvrs.forEachIndexed { idx, cvr ->
-        mvrCards.add(
-            if (cvr.poolId != null)
-                AuditableCard(cvr.id, idx, 0, cvr.phantom, possibleContests, cvr.votes, cvr.poolId, cardStyle = "cardPoolStyle")
-            else
-                AuditableCard.fromCvr(cvr, idx, 0)
-        )
-    } */
-
     mvrs.shuffle()
     return mvrs
 }
@@ -191,7 +190,7 @@ fun makeCardManifest(mvrs: List<Cvr>, pool: CardPoolWithBallotStyle): List<Audit
     val cardStyle = CardStyle("cardPoolStyle", pool.poolId, expandedContestNames, expandedContestIds)
 
     // make the cards with the expanded card style
-    val converter = CvrsWithStylesToCards(
+    val converter = CvrsWithStylesToCardManifest(
         type = AuditType.ONEAUDIT,
         cvrsAreComplete = true,
         cvrs = Closer(mvrs.iterator()),
@@ -209,14 +208,14 @@ fun makeCardManifest(mvrs: List<Cvr>, pool: CardPoolWithBallotStyle): List<Audit
     }
 
     // should be the same as pool, leave in as consistency check
-    assertEquals(pool.voteTotals[1], poolTabs.contestTabs[1])
+    assertEquals(pool.voteTotals[1]?.votes, poolTabs.contestTabs[1]?.votes)
 
     return cards
 }
 
 private val show = true
 
-// make the ContestUnderAudit adding the dilutedMargin to the contest and pool Averages to the assorters
+/* make the ContestUnderAudit adding the dilutedMargin to the contest and pool Averages to the assorters
 fun makeContestUA(contest: Contest, cards: List<AuditableCard>, infos: Map<Int, ContestInfo>, poolTabs: List<CardPoolIF>, hasStyle:Boolean): ContestUnderAudit {
     val manifestTabs = tabulateAuditableCards(Closer(cards.iterator()), infos)
     val Nbs = manifestTabs.mapValues { it.value.ncards }
@@ -239,4 +238,4 @@ fun makeContestUA(contest: Contest, cards: List<AuditableCard>, infos: Map<Int, 
     addOAClcaAssortersFromMargin(listOf(contestUA), poolTabs, hasStyle = hasStyle)
 
     return contestUA
-}
+} */

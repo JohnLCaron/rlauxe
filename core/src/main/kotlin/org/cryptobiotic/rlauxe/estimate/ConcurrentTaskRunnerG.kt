@@ -27,7 +27,7 @@ interface ConcurrentTaskG<T> {
     fun run() : T
 }
 
-// runs set of ConcurrentTaskG<T> concurrently, whose run() returns T. Used in estimateSampleSizes.
+// runs set of ConcurrentTaskG<T> concurrently, whose run() returns T. Used in estimateSampleSizes and plotting.
 class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Boolean = false) {
     private val mutex = Mutex()
     private val results = mutableListOf<T>()

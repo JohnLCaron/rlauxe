@@ -155,7 +155,7 @@ open class ColoradoOneAudit (
     override fun cardManifest() = createCardIterator()
 
     fun createCardIterator(): CloseableIterator<AuditableCard> {
-        return CvrsWithStylesToCards(config.auditType, hasStyle,
+        return CvrsWithStylesToCardManifest(config.auditType, hasStyle,
             Closer(CvrIteratorfromPools()),
             makePhantomCvrs(contests),
             if (config.isOA) cardPools else null,

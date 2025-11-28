@@ -149,7 +149,7 @@ class TestPollingElection(
     override fun contestsUA() = contestsUA
 
     override fun cardManifest() : CloseableIterator<AuditableCard> {
-        return CvrsWithStylesToCards(
+        return CvrsWithStylesToCardManifest(
             config.auditType, config.hasStyle,
             Closer(cvrs.iterator()),
             null,
@@ -230,7 +230,7 @@ class TestClcaElection(
     override fun contestsUA() = contestsUA
 
     override fun cardManifest() : CloseableIterator<AuditableCard> {
-        return CvrsWithStylesToCards(
+        return CvrsWithStylesToCardManifest(
             config.auditType, config.hasStyle,
             Closer(allCvrs.iterator()),
             null,

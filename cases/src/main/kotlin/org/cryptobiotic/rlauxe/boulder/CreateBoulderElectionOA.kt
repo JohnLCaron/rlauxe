@@ -265,7 +265,7 @@ open class BoulderElectionOA(
         return if (isClca) {
             val simulatedCvrs = makeRedactedCvrs()
             val cvrs =  exportCvrs + simulatedCvrs
-            CvrsWithStylesToCards(
+            CvrsWithStylesToCardManifest(
                 AuditType.CLCA, hasStyle,
                 Closer(cvrs.iterator()),
                 makePhantomCvrs(contests),
@@ -274,7 +274,7 @@ open class BoulderElectionOA(
         } else {
             val poolCards =  createCvrsFromPools()
             val cvrs =  exportCvrs + poolCards
-            CvrsWithStylesToCards(
+            CvrsWithStylesToCardManifest(
                 AuditType.CLCA, hasStyle,
                 Closer(cvrs.iterator()),
                 makePhantomCvrs(contests),

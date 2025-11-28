@@ -7,13 +7,10 @@ import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.io.path.Path
 
 object RunRlaCreateOneAudit {
@@ -61,11 +58,21 @@ object RunRlaCreateOneAudit {
             shortName = "rcands",
             description = "Number of candidates for raire contest"
         ).default(5)
+        val hasStyle by parser.option(
+            type = ArgType.Boolean,
+            shortName = "hasStyle",
+            description = "hasStyle"
+        ).default(true)
+        val extra by parser.option(
+            type = ArgType.Double,
+            shortName = "extraPct",
+            description = "add extra percent to simulate diluted margin"
+        ).default(.01)
 
         parser.parse(args)
         println(
-            "RunRlaCreateOneAudit on $inputDir minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
-                    " addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates"
+            "RunRlaCreateOneAudit on $inputDir minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards hasStyle=$hasStyle" +
+                    " extra=$extra"
         )
         startTestElectionOneAudit(
             inputDir,
@@ -73,9 +80,8 @@ object RunRlaCreateOneAudit {
             fuzzMvrs,
             pctPhantoms,
             ncards,
-            ncontests,
-            addRaireContest,
-            addRaireCandidates
+            hasStyle,
+            extra,
         )
     }
 
@@ -85,9 +91,8 @@ object RunRlaCreateOneAudit {
         fuzzMvrs: Double,
         pctPhantoms: Double?,
         ncards: Int,
-        ncontests: Int,
-        addRaire: Boolean,
-        addRaireCandidates: Int,
+        hasStyle: Boolean,
+        extraPct: Double,
     ) {
         val auditDir = "$topdir/audit"
         clearDirectory(Path(auditDir))
@@ -104,9 +109,9 @@ object RunRlaCreateOneAudit {
             minMargin,
             pctPhantoms,
             ncards,
-            ncontests,
-            addRaire,
-            addRaireCandidates)
+            hasStyle,
+            extraPct,
+        )
 
         CreateAudit("RunRlaStartOneAudit", topdir = topdir, config, election, clear = false)
     }
@@ -117,64 +122,30 @@ object RunRlaCreateOneAudit {
         minMargin: Double,
         pctPhantoms: Double?,
         ncards: Int,
-        ncontests: Int,
-        addRaire: Boolean,
-        addRaireCandidates: Int,
+        hasStyle: Boolean,
+        extraPct: Double,
     ): CreateElectionIF {
         val contestsUA = mutableListOf<ContestUnderAudit>()
-        val allCardPools: List<CardPoolIF>
-        val allCvrs: List<Cvr>
+        val cardPools: List<CardPoolIF>
+        val cardManifest: List<AuditableCard>
 
         init {
-            // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
-            // includes the pools votes
-            val (contestOA, cardPools, testCvrs) = makeOneContestUA(
+            val (contestOA, mvrs, cardManifest, pools) = makeOneAuditTest(
                 margin = minMargin,
                 Nc = ncards,
                 cvrFraction = .95,
                 undervoteFraction = .01,
-                phantomFraction = pctPhantoms ?: 0.0
+                phantomFraction = pctPhantoms ?: 0.0,
+                hasStyle=hasStyle,
+                extraInPool= (extraPct * ncards).toInt(),
             )
-            allCvrs = testCvrs
-            allCardPools = cardPools
-
             contestsUA.add(contestOA)
-            val infos = mapOf(contestOA.contest.info().id to contestOA.contest.info())
-
-            /*
-            if (addRaire) {
-                val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(
-                    N = ncards / 2,
-                    contestId = 111,
-                    addRaireCandidates,
-                    minMargin = .04,
-                    quiet = true
-                )
-                contestsUA.add(rcontest)
-                allCvrs = testCvrs + rcvrs
-            } */
-
-            val cvrTabs = tabulateCvrs(allCvrs.iterator(), infos)
-            println("allCvrs = ${cvrTabs}")
-
-            val allContests = contestsUA.map { it.contest }
-            println("contests")
-            allContests.forEach { println("  $it") }
-            println()
+            this.cardManifest = cardManifest
+            this.cardPools = pools
         }
 
-        override fun cardPools() = allCardPools
+        override fun cardPools() = cardPools
         override fun contestsUA() = contestsUA
-        override fun cardManifest() = createCardIterator()
-
-        fun createCardIterator(): CloseableIterator<AuditableCard> {
-            return CvrsWithStylesToCards(
-                config.auditType,
-                cvrsAreComplete = true, // not supporting !cvrsAreComplete
-                Closer(allCvrs.iterator()),
-                null,
-                styles = allCardPools,
-            )
-        }
+        override fun cardManifest() = Closer (cardManifest.iterator() )
     }
 }

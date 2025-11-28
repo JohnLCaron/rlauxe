@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.CardLocationManifest
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardsWithStylesToCards
+import org.cryptobiotic.rlauxe.audit.CardsWithStylesToCardManifest
 import org.cryptobiotic.rlauxe.audit.makePhantomCards
 import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
@@ -123,15 +123,15 @@ data class MultiContestTestData(
         )
 
         // here we put the pool data into a single pool, and combine their contestIds, to get a diluted margin for testing
-        val cards = mutableListOf<AuditableCard>()
-        val converter = CardsWithStylesToCards(
+        val cardManifest = mutableListOf<AuditableCard>()
+        val converter = CardsWithStylesToCardManifest(
             type = AuditType.ONEAUDIT,
             cvrsAreComplete = true,
             cards = Closer(mvrs.iterator()),
             phantomCards = null,
             expandedCardStyles,
         )
-        converter.forEach { cards.add(it) }
+        converter.forEach { cardManifest.add(it) }
 
         // we need to populate the pool tab with the votes
         val pool = CardPoolFromCvrs("pool", 1, infos)
@@ -143,7 +143,7 @@ data class MultiContestTestData(
         // TODO kludge
         val mvrsAsCvr = mvrs.map { it.cvr() }
 
-        return MvrCardAndPools(mvrsAsCvr, cards, listOf(pool), cardStyles)
+        return MvrCardAndPools(mvrsAsCvr, cardManifest, listOf(pool), cardStyles)
     }
 
     fun makeCardLocationManifest(): CardLocationManifest {
@@ -209,7 +209,7 @@ data class MultiContestTestData(
     }
 }
 
-data class MvrCardAndPools(val mvrs: List<Cvr>, val cards: List<AuditableCard>, val pools: List<CardPoolIF>, val styles: List<CardStyle>)
+data class MvrCardAndPools(val mvrs: List<Cvr>, val cardManifest: List<AuditableCard>, val pools: List<CardPoolIF>, val styles: List<CardStyle>)
 
 // This creates a multicandidate contest with the two closest candidates having exactly the given margin.
 // It can create cvrs that exactly reflect this contest's vote; so can be used in simulating the audit.

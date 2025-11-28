@@ -24,9 +24,9 @@ fun makeCvrsByExactCount(candCounts : List<Int>) : List<Cvr> {
 }
 
 /** make a Cvr (contest 0) that voted for candId */
-fun makeCvr(candId: Int, name:String?=null, poolId:Int?=null): Cvr {
+fun makeCvr(candId: Int, name:String?=null, poolId:Int?=null, contestId:Int=0): Cvr {
     val votes = mutableMapOf<Int, IntArray>()
-    votes[0] = intArrayOf(candId)
+    votes[contestId] = intArrayOf(candId)
     return Cvr(name?:"card", votes, poolId=poolId)
 }
 

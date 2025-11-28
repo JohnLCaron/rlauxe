@@ -39,7 +39,6 @@ data class AuditRound(
 fun List<AuditRound>.previousSamples(currentRoundIdx: Int): Set<Long> {
     val result = mutableSetOf<Long>()
     this.filter { it.roundIdx < currentRoundIdx }.forEach { auditRound ->
-        // result.addAll(auditRound.samplePrns.map { it })
         result.addAll(auditRound.samplePrns)
     }
     return result.toSet()
@@ -54,9 +53,8 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
     var actualNewMvrs = 0 // Actual number of new ballots with this contest contained in this round's sample.
 
     var estNewSamples = 0 // Estimate of the new sample size required to confirm the contest
-    var estSampleSize = 0 // number of total samples estimated needed, consistentSampling
-    var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformSampling
-    var auditorWantNewMvrs: Int = -1 // Auditor has set the new sample size for his audit round.
+    var estSampleSize = 0 // number of total samples estimated needed
+    var auditorWantNewMvrs: Int = -1 // Auditor has set the new sample size for this audit round.
 
     var done = false
     var included = true
@@ -74,13 +72,12 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
 
     fun wantSampleSize(prevCount: Int): Int {
         return if (auditorWantNewMvrs > 0) (auditorWantNewMvrs + prevCount)
-                else if (contestUA.hasStyle) estSampleSize else estSampleSizeNoStyles
+                else estSampleSize
     }
 
     fun estSampleSizeEligibleForRemoval(): Int {
         return if (!included || auditorWantNewMvrs >= 0 ) 0 // auditor excluded or set explicitly, not eligible
-               else if (contestUA.hasStyle) estSampleSize
-               else estSampleSizeNoStyles
+               else estSampleSize
     }
 
     fun minAssertion(): AssertionRound? {
@@ -117,7 +114,6 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
         if (actualNewMvrs != other.actualNewMvrs) return false
         if (estNewSamples != other.estNewSamples) return false
         if (estSampleSize != other.estSampleSize) return false
-        if (estSampleSizeNoStyles != other.estSampleSizeNoStyles) return false
         if (auditorWantNewMvrs != other.auditorWantNewMvrs) return false
         if (done != other.done) return false
         if (included != other.included) return false
@@ -134,7 +130,6 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
         result = 31 * result + actualNewMvrs
         result = 31 * result + estNewSamples
         result = 31 * result + estSampleSize
-        result = 31 * result + estSampleSizeNoStyles
         result = 31 * result + auditorWantNewMvrs
         result = 31 * result + done.hashCode()
         result = 31 * result + included.hashCode()

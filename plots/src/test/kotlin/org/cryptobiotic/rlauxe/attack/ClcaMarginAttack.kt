@@ -16,7 +16,6 @@ class ClcaMarginAttack {
 
     val N = 100000
     val nruns = 100
-    val nsimEst = 10
     val fuzzPct = .00
     var phantomPct = .00
 
@@ -94,7 +93,7 @@ class ClcaMarginAttack {
 
     @Test
     fun runOne() {
-        val config = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst)
+        val config = AuditConfig(AuditType.CLCA, true)
         val reportedMargin = .01
         val flip1 = .01
         val taskgen = ClcaSingleRoundAuditTaskGenerator(

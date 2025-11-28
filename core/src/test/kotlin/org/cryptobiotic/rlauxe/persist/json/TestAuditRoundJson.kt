@@ -41,7 +41,7 @@ class TestAuditRoundJson {
             cr.actualNewMvrs = 42
             cr.estNewSamples = 66
             cr.estSampleSize = 77
-            cr.estSampleSizeNoStyles = 88
+            // cr.estSampleSizeNoStyles = 88
             cr.auditorWantNewMvrs = 88
             cr.done = true
             cr.included = false
@@ -77,7 +77,7 @@ class TestAuditRoundJson {
             cr.actualNewMvrs = 42
             cr.estNewSamples = 66
             cr.estSampleSize = 77
-            cr.estSampleSizeNoStyles = 88
+            // cr.estSampleSizeNoStyles = 88
             cr.auditorWantNewMvrs = 88
             cr.done = true
             cr.included = false

@@ -1,14 +1,14 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import kotlin.test.Test
 
 class TestOneAudit {
 
     @Test
     fun testOneAuditContestSmall() {
-        val (contestOA, _, testCvrs) = makeOneContestUA(
+        val (contestOA, mvrs) = makeOneAuditTest(
             100,
             50,
             cvrFraction = .80,
@@ -19,14 +19,14 @@ class TestOneAudit {
 
         val config = AuditConfig(AuditType.ONEAUDIT, hasStyle=true, nsimEst=10)
         val workflow = WorkflowTesterOneAudit(config, listOf(contestOA),
-            MvrManagerForTesting(testCvrs, testCvrs, config.seed))
+            MvrManagerForTesting(mvrs, mvrs, config.seed))
 
         runTestAuditToCompletion("testOneAuditContestSmall", workflow)
     }
 
     @Test
     fun testOneAuditContest() {
-        val (contestOA, _, testCvrs) = makeOneContestUA(
+        val (contestOA, mvrs) = makeOneAuditTest(
             25000,
             20000,
             cvrFraction = .70,
@@ -36,14 +36,14 @@ class TestOneAudit {
         println(contestOA)
 
         val config = AuditConfig(AuditType.ONEAUDIT, hasStyle=true, nsimEst=10)
-        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.seed))
+        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(mvrs, mvrs, config.seed))
 
         runTestAuditToCompletion("testOneAuditContest", workflow)
     }
 
     @Test
     fun testMakeScaledMvrs() {
-        val (contestOA, _, testCvrs) = makeOneContestUA(
+        val (contestOA, testCvrs) = makeOneAuditTest(
             25000,
             20000,
             cvrFraction = .70,
@@ -60,7 +60,7 @@ class TestOneAudit {
 
     @Test
     fun testOneAuditContestMax99() {
-        val (contestOA, _, testCvrs) = makeOneContestUA(
+        val (contestOA, testCvrs) = makeOneAuditTest(
             100,
             50,
             cvrFraction = .80,

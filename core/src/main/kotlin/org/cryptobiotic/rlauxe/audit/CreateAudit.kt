@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.audit
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -43,17 +42,13 @@ class CreateAudit(val name: String, val topdir: String, val config: AuditConfig,
         writeAuditConfigJsonFile(config, publisher.auditConfigFile())
         logger.info{"writeAuditConfigJsonFile to ${publisher.auditConfigFile()}\n  $config"}
 
-        val cardPools = if (config.isOA) {
-                val pools = election.cardPools()!!
-                writeCardPoolsJsonFile(pools, publisher.cardPoolsFile())
-                logger.info { "write ${pools.size} cardPools, to ${publisher.cardPoolsFile()}" }
-                pools
-            } else null
+        if (config.isOA) {
+            val pools = election.cardPools()!!
+            writeCardPoolsJsonFile(pools, publisher.cardPoolsFile())
+            logger.info { "write ${pools.size} cardPools, to ${publisher.cardPoolsFile()}" }
+        }
 
         val contestsUA = election.contestsUA()
-        if (config.isOA) {
-            addOAClcaAssortersFromMargin(contestsUA, cardPools!!, config.hasStyle) // hmmm shouldnt these already be added ??
-        }
         logger.info { "added ClcaAssertions from reported margin " }
 
         val cards = election.cardManifest()

@@ -107,31 +107,4 @@ class TestOneAuditTask {
         println(workflowResult)
         assertEquals(TestH0Status.StatRejectNull, workflowResult.status)
     }
-
-    @Test
-    fun testOneAuditSingleRoundMultipleContests() {
-        val Nc = 50000
-        val mvrFuzzPct = 0.00
-        val config = AuditConfig(
-            AuditType.ONEAUDIT, hasStyle = false, simFuzzPct = mvrFuzzPct,
-        )
-        //     val N: Int,
-        //    val simFuzzPct: Double,
-        //    val ncontests: Int,
-        //    val nballotStyles: Int,
-        val taskGen = OneAuditSingleRoundMultipleContests(
-            Nc,
-            simFuzzPct = mvrFuzzPct,
-            ncontests = 11,
-            nballotStyles = 5,
-            configIn = config,
-            phantomPctRange = 0.0..0.0,
-            show = false,
-        )
-
-        val task = taskGen.generateNewTask()
-        val workflowResult = task.run()
-        println(workflowResult)
-        // TODO assertEquals(TestH0Status.StatRejectNull, workflowResult.status)
-    }
 }

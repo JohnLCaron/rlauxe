@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.dhondt.DHondtContest
+import org.cryptobiotic.rlauxe.util.margin2mean
 
 import kotlin.collections.get
 
@@ -90,6 +92,67 @@ interface OneAuditContestIF {
     fun adjustPoolInfo(cardPools: List<CardPoolIF>)
 }
 
+private const val debug = false
+
+fun makeOneAuditContests(
+    hasStyle: Boolean,
+    wantContests: List<ContestIF>, // the contests you want to audit
+    nbs: Map<Int,Int>,
+    cardPools: List<CardPoolIF>,
+): List<ContestUnderAudit> {
+
+    // The Nbs come from the cards
+    //val manifestTabs = tabulateAuditableCards(cardManifest, infos)
+    //val Nbs = manifestTabs.mapValues { it.value.ncards }
+
+    val contestsUA = wantContests.filter{ !it.isIrv() }.map { contest ->
+        val cua = ContestUnderAudit(contest, true, hasStyle = hasStyle, Nbin=nbs[contest.id]).addStandardAssertions()
+        if (contest is DHondtContest) {
+            cua.addAssertionsFromAssorters(contest.assorters)
+        } else {
+            cua.addStandardAssertions()
+        }
+        cua
+    }
+
+    // The OA assort averages come from the cardPools
+    addOAClcaAssortersFromMargin(contestsUA, cardPools, hasStyle)
+    return contestsUA
+}
+
+// use dilutedMargin to set the pool assorter averages. can only use for non-IRV contests
+fun addOAClcaAssortersFromMargin(
+    oaContests: List<ContestUnderAudit>,
+    cardPools: List<CardPoolIF>, // poolId -> pool
+    hasStyle: Boolean,
+) {
+    // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
+    // create the clcaAssertions and add then to the oaContests
+    oaContests.filter { !it.isIrv}. forEach { oaContest ->
+        val contestId = oaContest.id
+        val clcaAssertions = oaContest.pollingAssertions.map { assertion ->
+            val assortAverages = mutableMapOf<Int, Double>() // poolId -> average assort value
+            cardPools.forEach { cardPool ->
+                if (cardPool.hasContest(contestId)) {
+                    val regVotes = cardPool.regVotes()[oaContest.id]!!
+                    if (cardPool.ncards() > 0) {
+                        // note: using cardPool.ncards(), this is the diluted count
+                        val poolMargin = assertion.assorter.calcMargin(regVotes.votes, cardPool.ncards())
+                        assortAverages[cardPool.poolId] = margin2mean(poolMargin)
+                        if (debug)
+                            println("contest ${oaContest.id} assertion=${assertion.assorter.shortName()} poolAverage = ${margin2mean(poolMargin)} " +
+                                    "regVotes.votes=${regVotes.votes} cardPool.ncards=${cardPool.ncards()}")
+                    }
+                }
+            }
+            val clcaAssorter = ClcaAssorterOneAudit(assertion.info, assertion.assorter, hasStyle, poolAverages = AssortAvgsInPools(assortAverages),
+                dilutedMargin = oaContest.makeDilutedMargin(assertion.assorter))
+            ClcaAssertion(assertion.info, clcaAssorter)
+        }
+        oaContest.clcaAssertions = clcaAssertions
+    }
+}
+
 class ClcaAssorterOneAudit(
     info: ContestInfo,
     assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs: plurality or IRV
@@ -105,7 +168,10 @@ class ClcaAssorterOneAudit(
             return super.bassort(mvr, cvr, hasStyle) // here we use the standard assorter
         }
 
-        val poolAverage = poolAverages.assortAverage[cvr.poolId()] ?: throw IllegalStateException("Dont have pool ${cvr.poolId()} in contest ${info.id} assorter")
+        val poolAverage = poolAverages.assortAverage[cvr.poolId()]
+        if (poolAverage == null) return 0.0
+
+        //     throw IllegalStateException("Dont have pool ${cvr.poolId()} in contest ${info.id} assorter")
         val overstatement = overstatementPoolError(mvr, poolAverage) // ωi
         val tau = (1.0 - overstatement / this.assorter.upperBound())
 

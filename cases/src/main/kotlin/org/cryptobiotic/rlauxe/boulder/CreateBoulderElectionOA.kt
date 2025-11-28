@@ -62,9 +62,7 @@ open class BoulderElectionOA(
         val manifestTabs = tabulateAuditableCards(createCardIterator(), infoMap)
         val contestNbs = manifestTabs.mapValues { it.value.ncards }
 
-        contestsUA = contests.map { contest ->
-            ContestUnderAudit(contest, hasStyle=hasStyle, Nbin=contestNbs[contest.id]).addStandardAssertions()
-        }
+        contestsUA = makeOneAuditContests(hasStyle, contests, contestNbs, cardPools).sortedBy { it.id }
 
         val totalRedactedBallots = cardPools.sumOf { it.ncards() }
         logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPools.size} cardPools"}
@@ -301,36 +299,6 @@ open class BoulderElectionOA(
         }
         return cvrs
     }
-
-    /*
-    fun cardManifestClca(): CardLocationManifest {
-        val redactedCvrs = makeRedactedCvrs()
-        val phantoms = makePhantomCvrs(contests)
-        val cvrs =  exportCvrs + redactedCvrs + phantoms
-        return CardLocationManifest(ClcaCvrIterable(cvrs), emptyList())
-    }
-
-    data class ClcaCvrIterable(val cvrs : List<Cvr>): CloseableIterable<AuditableCard> {
-        override fun iterator(): CloseableIterator<AuditableCard> {
-            return CvrToAuditableCardClca(Closer(cvrs.iterator()))
-        }
-    }
-
-    fun cardManifestOA(): CardLocationManifest {
-        val poolCards =  createCardsFromPools(cardPools, this.exportCvrs.size)
-        val phantoms = makePhantomCards( contests, startIdx=this.exportCvrs.size + poolCards.size )
-        return CardLocationManifest(OACardIterable(poolCards, phantoms, this.exportCvrs), emptyList())
-    }
-
-    data class OACardIterable(val poolCards : List<AuditableCard>, val phantoms : List<AuditableCard>, val exportCvrs: List<Cvr>): CloseableIterable<AuditableCard> {
-        override fun iterator(): CloseableIterator<AuditableCard> {
-            val poolCards =  poolCards.asSequence()
-            val phantoms = phantoms.asSequence()
-            val exportedCards = CvrToAuditableCardClca(Closer(exportCvrs.iterator())).asSequence()
-            val cardSeq =  exportedCards + poolCards + phantoms
-            return Closer( cardSeq.iterator())
-        }
-    } */
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -418,43 +386,4 @@ fun parseIrvContestName(name: String) : Pair<String, Int> {
     val namet = tokens[0].trim()
     val ncand = tokens[1].substringBefore(",").toInt()
     return Pair(namet, ncand)
-}
-
-/////////////////////////////////////////////////////////////////
-
-
-// CANDIDATE for removal
-// The pooled cvrs dont have votes associated with them, used to make the Card Manifest
-fun createCardsFromPools(pools: List<CardPoolIF>, startIdx: Int) : List<AuditableCard> {
-    var idx = startIdx
-    val cards = mutableListOf<AuditableCard>()
-
-    pools.forEach { pool ->
-        val cleanName = cleanCsvString(pool.poolName)
-        repeat(pool.ncards()) { poolIndex ->
-            cards.add(
-                //     val location: String, // info to find the card for a manual audit. Aka ballot identifier.
-                //    val index: Int,  // index into the original, canonical list of cards
-                //    val prn: Long,   // psuedo random number
-                //    val phantom: Boolean,
-                //    val possibleContests: IntArray, // list of contests that might be on the ballot. TODO replace with cardStyle
-                //    val votes: Map<Int, IntArray>?, // for CLCA, a map of contest -> the candidate ids voted; must include undervotes (??)
-                //                                    // for IRV, ranked first to last; missing for pooled data or polling audits
-                //    val poolId: Int?, // for OneAudit
-                //    val cardStyle: String? = null,
-                AuditableCard(
-                    location = "pool${cleanName} card ${poolIndex + 1}",
-                    index=idx++,
-                    prn=0L,
-                    phantom = false,
-                    possibleContests=pool.contests(),
-                    votes = null,
-                    poolId = pool.poolId
-                )
-            )
-        }
-    }
-    val totalCards = pools.sumOf { it.ncards() }
-    require(cards.size == totalCards)
-    return cards
 }

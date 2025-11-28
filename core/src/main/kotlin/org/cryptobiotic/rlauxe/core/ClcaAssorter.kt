@@ -114,7 +114,6 @@ open class ClcaAssorter(
         return tau * noerror   // Bi eq (7)
     }
 
-
     // see Audit.py Assertion.overstatement_assorter()
     //         assorter that corresponds to normalized overstatement error for an assertion
     //

@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.shuffle
 import kotlin.random.Random
 
+// specifi the contests with exact number of votes
 data class MultiContestCombineData(
     val contests: List<Contest>,
     val totalBallots: Int, // including undervotes and phantoms
@@ -34,7 +35,9 @@ data class MultiContestCombineData(
         }
 
         val phantoms = makePhantomCards(contests, startIdx = result.size)
-        return result + phantoms
+        result.addAll(phantoms)
+        result.shuffle(Random)
+        return result
     }
 
     private fun makeCard(nextCardId: Int, fcontests: List<ContestVoteTracker>, cardStyle:String?): AuditableCard {
@@ -81,6 +84,7 @@ data class ContestVoteTracker(
     fun resetTracker() {
         trackVotesRemaining = mutableListOf()
         contest.votes.forEach{ (candId, votes) -> trackVotesRemaining.add( Pair(candIdToIdx[candId]!!, votes)) }
+        trackVotesRemaining.add( Pair(ncands, contest.Nundervotes()))
         votesLeft = contest.Ncast
     }
 
@@ -97,7 +101,8 @@ data class ContestVoteTracker(
 
     // choose Candidate, add contest, including undervote
     fun addContestToCard(cvrb: CardBuilder) {
-        if (votesLeft == 0) return
+        if (votesLeft == 0)
+            return
         val candidateIdx = chooseCandidate(Random.nextInt(votesLeft))
         if (candidateIdx == ncands) {
             cvrb.replaceContestVote(info.id, null) // undervote
@@ -124,6 +129,8 @@ data class ContestVoteTracker(
         votesLeft--
 
         val checkVoteCount = trackVotesRemaining.sumOf { it.second }
+        if (checkVoteCount != votesLeft)
+            print("etet")
         require(checkVoteCount == votesLeft)
         return candidateIdx
     }

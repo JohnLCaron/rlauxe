@@ -57,10 +57,11 @@ interface CardPoolIF: CardStyleIF {
 // When the pools do not have CVRS, but just pool vote count totals.
 // Assumes that all cards have the same BallotStyle.
 // TODO cant do IRVs?
+// TODO pool contests() should perhaps be explicitly set
 class CardPoolWithBallotStyle(
     override val poolName: String,
     override val poolId: Int,
-    val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes //
+    val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes; must include contests with no votes
     val infos: Map<Int, ContestInfo>, // all infos
 ) : CardPoolIF
 {
@@ -185,6 +186,7 @@ class CardPoolWithBallotStyle(
 }
 
 // When the pools have complete CVRS.
+// TODO pool contests() should probably be separately set
 class CardPoolFromCvrs(
     override val poolName: String,
     override val poolId: Int,
@@ -310,7 +312,7 @@ fun addOAClcaAssortersFromMargin(
                 if (cardPool.hasContest(contestId)) {
                     val regVotes = cardPool.regVotes()[oaContest.id]!!
                     if (cardPool.ncards() > 0) {
-                        // note: use cardPool.ncards(), this is the diluted count
+                        // note: using cardPool.ncards(), this is the diluted count
                         val poolMargin = assertion.assorter.calcMargin(regVotes.votes, cardPool.ncards())
                         assortAverages[cardPool.poolId] = margin2mean(poolMargin)
                         if (debug)
@@ -328,13 +330,6 @@ fun addOAClcaAssortersFromMargin(
 }
 
 //////////////////////////////////////////////////////////////////
-
-interface OneAuditContestIF {
-    val contestId: Int
-    fun poolTotalCards(): Int // total cards in all pools for this contest
-    fun expectedPoolNCards(): Int // expected total pool cards for this contest, making assumptions about missing undervotes
-    fun adjustPoolInfo(cardPools: List<CardPoolIF>)
-}
 
 fun distributeExpectedOvervotes(oaContest: OneAuditContestIF, cardPools: List<CardPoolWithBallotStyle>) {
     val contestId = oaContest.contestId

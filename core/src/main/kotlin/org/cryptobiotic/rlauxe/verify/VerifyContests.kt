@@ -452,7 +452,6 @@ fun verifyOApools(
         contestUA.pollingAssertions.forEach { assertion ->
             val passorter = assertion.assorter
             val assortAvg = AssortAvg()
-            val dilutedMargin = contestUA.makeDilutedMargin(passorter)
             pools.filter { it.name() != "unpooled" }.forEach { cardPool ->
                 if (cardPool.hasContest(contestId)) {
                     val regVotes = cardPool.regVotes()[contestId]!!
@@ -485,6 +484,8 @@ fun verifyOApools(
                 assortAvg.totalAssort += nonpoolTab.ncards() * poolAvg
                 // result.addMessage("  contest assortAvg = ${assortAvg.avg()} assortMargin = ${assortAvg.margin()} ncards = ${assortAvg.ncards}")
             }
+
+            val dilutedMargin = contestUA.makeDilutedMargin(passorter)
 
             if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
                 result.addError("  dilutedMargin does not agree for contest ${contestUA.id} assorter '$passorter'")

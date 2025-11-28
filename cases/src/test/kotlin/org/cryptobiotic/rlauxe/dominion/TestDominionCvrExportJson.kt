@@ -5,7 +5,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CvrsWithStylesToCards
+import org.cryptobiotic.rlauxe.audit.CvrsWithStylesToCardManifest
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
 import org.cryptobiotic.rlauxe.persist.csv.CvrExportCsvHeader
 import org.cryptobiotic.rlauxe.persist.csv.CvrExportToCvrAdapter
@@ -152,7 +152,7 @@ class TestDominionCvrExportJson {
 
         val cvrExportIter = cvrExportCsvIterator(cvrExportFilename)
         val cvrIter = CvrExportToCvrAdapter(cvrExportIter, null )
-        val cardIter = CvrsWithStylesToCards(AuditType.CLCA, cvrsAreComplete=true, cvrIter, null, null)
+        val cardIter = CvrsWithStylesToCardManifest(AuditType.CLCA, cvrsAreComplete=true, cvrIter, null, null)
 
         while (cardIter.hasNext()) {
             val card = cardIter.next()
@@ -168,7 +168,7 @@ class TestDominionCvrExportJson {
         val cardStyle = CardStyle("31-125", 2, emptyList(), listOf(0,1,2))
         val cvrExportIter2 = cvrExportCsvIterator(cvrExportFilename) // CvrExport
         val cvrIter2 = CvrExportToCvrAdapter(cvrExportIter2, pools= mapOf("31-125" to 2)) // Cvr
-        val cardIter2 = CvrsWithStylesToCards(AuditType.ONEAUDIT, cvrsAreComplete=false, cvrIter2, null, listOf(cardStyle) ) // AuditableCard
+        val cardIter2 = CvrsWithStylesToCardManifest(AuditType.ONEAUDIT, cvrsAreComplete=false, cvrIter2, null, listOf(cardStyle) ) // AuditableCard
 
         while (cardIter2.hasNext()) {
             val card = cardIter2.next()

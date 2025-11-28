@@ -58,6 +58,8 @@ data class ContestInfo(
         require(candidateIdSet.size == candidateIds.size) { "duplicate candidate id $candidateIds"}
     }
 
+    constructor(id: Int): this("", id, mapOf("name" to 1), SocialChoiceFunction.PLURALITY)
+
     fun desc() = buildString {
         append("'$name' ($id) candidates=${candidateIds} choiceFunction=$choiceFunction nwinners=$nwinners voteForN=${voteForN}")
     }

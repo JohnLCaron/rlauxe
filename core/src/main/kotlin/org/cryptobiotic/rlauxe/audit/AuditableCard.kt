@@ -153,7 +153,7 @@ data class CardLocationManifest(
 
 interface CardStyleIF {
     fun name(): String
-    fun id(): Int
+    fun id(): Int // TODO is this the poolId ??
     fun contests() : IntArray
     fun hasContest(contestId: Int): Boolean
 }
@@ -162,7 +162,7 @@ interface CardStyleIF {
 data class CardStyle(
     val name: String,
     val id: Int,
-    val contestNames: List<String>,
+    val contestNames: List<String>, // TODO remove?
     val contestIds: List<Int>,
 ): CardStyleIF {
     // used by MultiContestTestData
@@ -191,7 +191,8 @@ data class CardStyle(
 /////////////////////////////////////////////////////////////////////////////////////
 // CLCA or OneAudit or Polling
 
-class CvrsWithStylesToCards(
+// put cards into canonical form
+class CvrsWithStylesToCardManifest(
     val type: AuditType,
     val cvrsAreComplete: Boolean,       // TODO cvrsAreComplete == false means cardStyles != null and poolId != null;
                                         // unless theres some default behavior, esp with poolId; maybe "all"
@@ -238,7 +239,8 @@ class CvrsWithStylesToCards(
     override fun close() = cvrs.close()
 }
 
-class CardsWithStylesToCards(
+// put cards into canonical form
+class CardsWithStylesToCardManifest(
     val type: AuditType,
     val cvrsAreComplete: Boolean,
     val cards: CloseableIterator<AuditableCard>,
@@ -283,6 +285,13 @@ class CardsWithStylesToCards(
     }
 
     override fun close() = cards.close()
+}
+
+// TODO maybe go back to CardManifest include the pools ??
+fun makeCardManifest(converter: CardsWithStylesToCardManifest): List<AuditableCard> {
+    val cardManifest = mutableListOf<AuditableCard>()
+    converter.forEach { cardManifest.add(it) }
+    return cardManifest
 }
 
 

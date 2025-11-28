@@ -112,7 +112,6 @@ class TestHasStyle {
         val hasStyle = false
         val poolId = if (hasStyle) null else 1
 
-
         val contestB = Contest(
             ContestInfo("B", 1, mapOf("Wes" to 1, "Les" to 2), SocialChoiceFunction.PLURALITY),
             mapOf(1 to 5500, 2 to 4500),
@@ -374,7 +373,7 @@ class TestHasStyle {
         }
 
         val infos = contests.map{ it.info }.associateBy { it.id }
-        val cardIter = CvrsWithStylesToCards(config.auditType, hasStyle,
+        val cardIter = CvrsWithStylesToCardManifest(config.auditType, hasStyle,
             Closer(testCvrs.iterator()),
             null,
             styles = cardStyles,
@@ -409,7 +408,7 @@ class TestHasStyle {
         }
 
         val infos = contests.map{ it.info }.associateBy { it.id }
-        val cardIter = CardsWithStylesToCards(config.auditType, hasStyle,
+        val cardIter = CardsWithStylesToCardManifest(config.auditType, hasStyle,
             Closer(testCards.iterator()),
             null,
             styles = cardStyles,

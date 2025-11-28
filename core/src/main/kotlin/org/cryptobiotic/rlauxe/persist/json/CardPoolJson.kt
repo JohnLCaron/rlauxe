@@ -125,7 +125,12 @@ fun CardPoolFromCvrsJson.import(infos: Map<Int, ContestInfo>): CardPoolFromCvrs 
     )
 
     this.contestTabs.forEach { (key, value) ->
-        cardPool.contestTabs[key] = value.import(infos[key]!!)
+        val info = infos[key]
+        if (info != null)
+            cardPool.contestTabs[key] = value.import(info)
+        else
+            cardPool.contestTabs[key] = value.import(ContestInfo(key))
+
     }
     cardPool.totalCards = this.totalCards
     return cardPool

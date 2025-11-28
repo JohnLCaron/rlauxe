@@ -35,13 +35,13 @@ class TestCvrsWithStylesToCards {
         var hasPoolId = false
 
         var cvr = cvrr.copy(poolId=null)
-        var target = CvrsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=null, )
+        var target = CvrsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=null, )
         var card = target.next()
         testOneTarget("** clca complete cvrs", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, null)
 
         hasPoolId = true
         cvr = cvrr.copy(poolId=1)
-        target = CvrsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=null)
+        target = CvrsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=null)
         card = target.next()
         testOneTarget("clca hasStyle and poolIds", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = null)
 
@@ -51,7 +51,7 @@ class TestCvrsWithStylesToCards {
         hasCardStyles = true
         hasPoolId = true
         cvr = cvrr.copy(poolId=1)
-        target = CvrsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=listOf(cardStyle))
+        target = CvrsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=listOf(cardStyle))
         card = target.next()
         testOneTarget("clca hasStyle and poolIds and styles", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = cardStyle)
 
@@ -60,7 +60,7 @@ class TestCvrsWithStylesToCards {
         hasCardStyles = true
         hasPoolId = true
         cvr = cvrr.copy(poolId=1)
-        target = CvrsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=listOf(cardStyle))
+        target = CvrsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=listOf(cardStyle))
         card = target.next()
         testOneTarget("** clca incomplete cvrs", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = cardStyle)
 
@@ -69,7 +69,7 @@ class TestCvrsWithStylesToCards {
         hasCardStyles = true
         hasPoolId = false
         cvr = cvrr.copy(poolId=null)
-        target = CvrsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=listOf(cardStyle))
+        target = CvrsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=listOf(cardStyle))
         card = target.next()
         // testOneTarget("", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = cardStyle)
 
@@ -78,7 +78,7 @@ class TestCvrsWithStylesToCards {
         hasCardStyles = false
         hasPoolId = true
         cvr = cvrr.copy(poolId=1)
-        target = CvrsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=null)
+        target = CvrsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=null)
         card = target.next()
        //  testOneTarget("", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = null)
     }
@@ -93,13 +93,13 @@ class TestCvrsWithStylesToCards {
         var hasPoolId = false
 
         var cvr = cvrr.copy(poolId=null)
-        var target = CvrsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=null, )
+        var target = CvrsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=null, )
         var card = target.next()
         testOneTarget("polling hasStyle", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, null)
 
         hasPoolId = true
         cvr = cvrr.copy(poolId=1)
-        target = CvrsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=null)
+        target = CvrsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=null)
         card = target.next()
         testOneTarget("polling hasStyle and poolIds", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = null)
 
@@ -109,7 +109,7 @@ class TestCvrsWithStylesToCards {
         hasCardStyles = true
         hasPoolId = true
         cvr = cvrr.copy(poolId=1)
-        target = CvrsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=listOf(cardStyle))
+        target = CvrsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=listOf(cardStyle))
         card = target.next()
         testOneTarget("polling hasStyle and poolIds and styles", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = cardStyle)
 
@@ -118,7 +118,7 @@ class TestCvrsWithStylesToCards {
         hasCardStyles = true
         hasPoolId = true
         cvr = cvrr.copy(poolId=1)
-        target = CvrsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=listOf(cardStyle))
+        target = CvrsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCvrs=null, styles=listOf(cardStyle))
         card = target.next()
         testOneTarget("** poll noStyle", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = cardStyle)
 
@@ -128,7 +128,7 @@ class TestCvrsWithStylesToCards {
         hasPoolId = false
         cvr = cvrr.copy(poolId=null)
         assertFailsWith<RuntimeException> {
-            target = CvrsWithStylesToCards(
+            target = CvrsWithStylesToCardManifest(
                 auditType,
                 cvrsAreComplete = hasStyle,
                 Closer(listOf(cvr).iterator()),
@@ -144,7 +144,7 @@ class TestCvrsWithStylesToCards {
         hasPoolId = true
         cvr = cvrr.copy(poolId=1)
         assertFailsWith<RuntimeException> {
-            target = CvrsWithStylesToCards(
+            target = CvrsWithStylesToCardManifest(
                 auditType,
                 cvrsAreComplete = hasStyle,
                 Closer(listOf(cvr).iterator()),
@@ -168,7 +168,7 @@ class TestCvrsWithStylesToCards {
         var hasPoolId = true
 
         val cardStyle = CardStyle("oapool2", 2, emptyList(), listOf(0,1,2))
-        var target = CvrsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(cvrs.iterator()), phantomCvrs=null, styles=listOf(cardStyle), )
+        var target = CvrsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(cvrs.iterator()), phantomCvrs=null, styles=listOf(cardStyle), )
         testOneTarget("oa hasStyle", cvrc, target.next(), auditType, hasStyle, hasPoolId, hasCardStyles, null)
         testOneTarget("oa hasStyle pooled", cvrp, target.next(), auditType, hasStyle, hasPoolId, hasCardStyles, cardStyle)
 
@@ -176,7 +176,7 @@ class TestCvrsWithStylesToCards {
         hasStyle = false
         hasCardStyles = true
         hasPoolId = true
-        target = CvrsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(cvrs.iterator()), phantomCvrs=null, styles=listOf(cardStyle), )
+        target = CvrsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(cvrs.iterator()), phantomCvrs=null, styles=listOf(cardStyle), )
         testOneTarget("oa noStyle", cvrc, target.next(), auditType, hasStyle, hasPoolId, hasCardStyles, null)
         testOneTarget("oa noStyle pooled", cvrp, target.next(), auditType, hasStyle, hasPoolId, hasCardStyles, cardStyle)
     }

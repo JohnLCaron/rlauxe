@@ -41,13 +41,13 @@ class TestCardsWithStylesToCards {
         var hasPoolId = false
 
         var cvr = cardOrg.copy(cardStyle=null)
-        var target = CardsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=null, )
+        var target = CardsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=null, )
         var card = target.next()
         testOneTarget("** clca complete cvrs", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, null)
 
         hasPoolId = true
         cvr = cardOrg.copy(cardStyle="no")
-        target = CardsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=null)
+        target = CardsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=null)
         card = target.next()
         testOneTarget("clca hasStyle and poolIds", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = null)
 
@@ -58,7 +58,7 @@ class TestCardsWithStylesToCards {
         hasCardStyles = true
         hasPoolId = true
         cvr = cardOrg.copy(cardStyle=styleName)
-        target = CardsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=listOf(cardStyle))
+        target = CardsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=listOf(cardStyle))
         card = target.next()
         testOneTarget("clca hasStyle and poolIds and styles", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = cardStyle)
 
@@ -67,7 +67,7 @@ class TestCardsWithStylesToCards {
         hasCardStyles = true
         hasPoolId = true
         cvr = cardOrg.copy(cardStyle=styleName)
-        target = CardsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=listOf(cardStyle))
+        target = CardsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=listOf(cardStyle))
         card = target.next()
         testOneTarget("** clca incomplete cvrs", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = cardStyle)
 
@@ -76,7 +76,7 @@ class TestCardsWithStylesToCards {
         hasCardStyles = true
         hasPoolId = false
         cvr = cardOrg.copy(cardStyle=null)
-        target = CardsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=listOf(cardStyle))
+        target = CardsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=listOf(cardStyle))
         card = target.next()
         // testOneTarget("", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = cardStyle)
 
@@ -85,7 +85,7 @@ class TestCardsWithStylesToCards {
         hasCardStyles = false
         hasPoolId = true
         cvr = cardOrg.copy(cardStyle=styleName)
-        target = CardsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=null)
+        target = CardsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=null)
         card = target.next()
        //  testOneTarget("", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = null)
     }
@@ -101,13 +101,13 @@ class TestCardsWithStylesToCards {
         var hasPoolId = false
 
         var cvr = cardOrg.copy(poolId=null)
-        var target = CardsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=null, )
+        var target = CardsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=null, )
         var card = target.next()
         testOneTarget("polling hasStyle", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, null)
 
         hasPoolId = true
         cvr = cardOrg.copy(cardStyle="no")
-        target = CardsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=null)
+        target = CardsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=null)
         card = target.next()
         testOneTarget("polling hasStyle and poolIds", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = null)
 
@@ -118,7 +118,7 @@ class TestCardsWithStylesToCards {
         hasCardStyles = true
         hasPoolId = true
         cvr = cardOrg.copy(cardStyle=styleName)
-        target = CardsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=listOf(cardStyle))
+        target = CardsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=listOf(cardStyle))
         card = target.next()
         testOneTarget("polling hasStyle and poolIds and styles", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = cardStyle)
 
@@ -127,7 +127,7 @@ class TestCardsWithStylesToCards {
         hasCardStyles = true
         hasPoolId = true
         cvr = cardOrg.copy(cardStyle=styleName)
-        target = CardsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=listOf(cardStyle))
+        target = CardsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(listOf(cvr).iterator()), phantomCards=null, styles=listOf(cardStyle))
         card = target.next()
         testOneTarget("** poll noStyle", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = cardStyle)
 
@@ -137,7 +137,7 @@ class TestCardsWithStylesToCards {
         hasPoolId = false
         cvr = cardOrg.copy(cardStyle=null)
         assertFailsWith<RuntimeException> {
-            target = CardsWithStylesToCards(
+            target = CardsWithStylesToCardManifest(
                 auditType,
                 cvrsAreComplete = hasStyle,
                 Closer(listOf(cvr).iterator()),
@@ -153,7 +153,7 @@ class TestCardsWithStylesToCards {
         hasPoolId = true
         cvr = cardOrg.copy(cardStyle=styleName)
         assertFailsWith<RuntimeException> {
-            target = CardsWithStylesToCards(
+            target = CardsWithStylesToCardManifest(
                 auditType,
                 cvrsAreComplete = hasStyle,
                 Closer(listOf(cvr).iterator()),
@@ -185,7 +185,7 @@ class TestCardsWithStylesToCards {
         val cardStyles = listOf(cardStyle1, cardStyle2)
 
         // hasStyle means must supply the list of possibleContests only for pooled data
-        var target = CardsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(cvrs.iterator()), phantomCards=null, cardStyles, )
+        var target = CardsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(cvrs.iterator()), phantomCards=null, cardStyles, )
         testOneTarget("oa hasStyle", cvrc, target.next(), auditType, hasStyle, hasPoolId, hasCardStyles, null)
         testOneTarget("oa hasStyle pooled", cvrp, target.next(), auditType, hasStyle, hasPoolId, hasCardStyles, cardStyle1)
 
@@ -195,7 +195,7 @@ class TestCardsWithStylesToCards {
         hasPoolId = true
         val cvrp2 = cardOrg.copy(cardStyle = styleName2)
         val cvrs2 = listOf(cvrp, cvrp2)
-        target = CardsWithStylesToCards(auditType, cvrsAreComplete=hasStyle, Closer(cvrs2.iterator()), phantomCards=null, cardStyles, )
+        target = CardsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(cvrs2.iterator()), phantomCards=null, cardStyles, )
         testOneTarget("oa noStyle", cvrc, target.next(), auditType, hasStyle, hasPoolId, hasCardStyles, cardStyle1)
         testOneTarget("oa noStyle pooled", cvrp, target.next(), auditType, hasStyle, hasPoolId, hasCardStyles, cardStyle2)
     }

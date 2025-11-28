@@ -4,22 +4,20 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.computeBassortValues
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.MvrCardAndPools
 import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
 import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
-import org.cryptobiotic.rlauxe.oneaudit.makeOneContestUA
-import org.cryptobiotic.rlauxe.oneaudit.makeOneContestWithExtraInPool
-import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import kotlin.collections.map
 import kotlin.random.Random
 import kotlin.test.assertTrue
+
+// TODO use makeUAandPools()
 
 // Generate OA contest, do full audit
 class OneAuditContestAuditTaskGenerator(
@@ -41,7 +39,7 @@ class OneAuditContestAuditTaskGenerator(
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean)
         )
 
-        val (contestOA, _, oaCvrs) = makeOneContestUA(
+        val (contestOA, oaCvrs) = makeOneAuditTest(
             margin,
             Nc,
             cvrFraction = cvrPercent,
@@ -50,8 +48,11 @@ class OneAuditContestAuditTaskGenerator(
         )
         val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA.contest), oaCvrs, mvrsFuzzPct)
 
-        val oneaudit = WorkflowTesterOneAudit(auditConfig=config, listOf(contestOA),
+        val oneaudit = WorkflowTesterOneAudit(
+            config=config,
+            listOf(contestOA),
             MvrManagerForTesting(oaCvrs, oaMvrs, config.seed))
+
         return ContestAuditTask(
             name(),
             oneaudit,
@@ -84,8 +85,8 @@ class OneAuditSingleRoundAuditTaskGenerator(
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean, )
         )
 
-        val (contestOA, _, oaCvrs) =
-            makeOneContestUA(
+        val (contestOA, oaCvrs) =
+            makeOneAuditTest(
                 margin,
                 Nc,
                 cvrFraction = cvrPercent,
@@ -99,14 +100,14 @@ class OneAuditSingleRoundAuditTaskGenerator(
             makeFuzzedCvrsFrom(listOf(contestOA.contest), oaCvrs, mvrsFuzzPct)
         }
 
-        val oneaudit = WorkflowTesterOneAudit(auditConfig=config, listOf(contestOA), MvrManagerForTesting(oaCvrs, oaMvrs, config.seed))
+        val oneaudit = WorkflowTesterOneAudit(config=config, listOf(contestOA), MvrManagerForTesting(oaCvrs, oaMvrs, config.seed))
         return ClcaSingleRoundWorkflowTask(
             name(),
             oneaudit,
+            auditor = OneAuditAssertionAuditor(),
             oaMvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 1.0),
             quiet,
-            auditor = OneAuditAssertionAuditor(),
         )
     }
 }
@@ -135,7 +136,7 @@ class OneAuditSingleRoundWithDilutedMargin(
         )
 
         val (contestOA, mvrs, cards) =
-            makeOneContestWithExtraInPool(
+            makeOneAuditTest(
                 margin,
                 Nc,
                 cvrFraction = cvrPercent,
@@ -146,15 +147,15 @@ class OneAuditSingleRoundWithDilutedMargin(
             )
 
         // different seed each time
-        val manager =  MvrManagerOAFromManifest(cards, mvrs, listOf(contestOA.contest.info()), simFuzzPct= mvrsFuzzPct, Random.nextLong())
-        val oneaudit = WorkflowTesterOneAudit(auditConfig=config, listOf(contestOA), manager)
+        val manager =  MvrManagerFromManifest(cards, mvrs, listOf(contestOA.contest.info()), simFuzzPct= mvrsFuzzPct, Random.nextLong())
+        val oneaudit = WorkflowTesterOneAudit(config=config, listOf(contestOA), manager)
         return ClcaSingleRoundWorkflowTask(
             name(),
             oneaudit,
+            auditor = OneAuditAssertionAuditor(),
             mvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 1.0),
             quiet,
-            auditor = OneAuditAssertionAuditor(),
         )
     }
 }
@@ -204,7 +205,7 @@ class OneAuditSingleRoundMultipleContests(
         cardPoolManifest = test.makeCardPoolManifest()
         println(cardPoolManifest.pools)
 
-        val manifestTabs = tabulateAuditableCards(Closer(cardPoolManifest.cards.iterator()), infos)
+        val manifestTabs = tabulateAuditableCards(Closer(cardPoolManifest.cardManifest.iterator()), infos)
         val Nbs = manifestTabs.mapValues { it.value.ncards }
 
         val extras = mutableMapOf<Int, Int>()
@@ -245,68 +246,16 @@ class OneAuditSingleRoundMultipleContests(
     override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
         // different seed each time
         val auditContests = listOf(auditContest)
-        val mvrManager = MvrManagerOAFromManifest(cardPoolManifest.cards, cardPoolManifest.mvrs, auditContests.map { it.contest.info() }, simFuzzPct=simFuzzPct, Random.nextLong())
-        val oneaudit = WorkflowTesterOneAudit(auditConfig=config, auditContests, mvrManager)
+        val mvrManager = MvrManagerFromManifest(cardPoolManifest.cardManifest, cardPoolManifest.mvrs, auditContests.map { it.contest.info() }, simFuzzPct=simFuzzPct, Random.nextLong())
+        val oneaudit = WorkflowTesterOneAudit(config=config, auditContests, mvrManager)
 
         return ClcaSingleRoundWorkflowTask(
             name(),
             oneaudit,
+            auditor = OneAuditAssertionAuditor(),
             emptyList(), // TODO could get this from mvrManager
             mapOf("mvrsFuzzPct" to simFuzzPct, "auditType" to 1.0),
             quiet = false,
-            auditor = OneAuditAssertionAuditor(),
         )
     }
 }
-
-// this assumes that the cards and mvrs correspond one-to-one
-class MvrManagerOAFromManifest(cards: List<AuditableCard>, mvrs: List<Cvr>, val infos: List<ContestInfo>, val simFuzzPct: Double?, seed:Long)
-    : MvrManager {
-
-    private var mvrsRound: List<AuditableCard> = emptyList()
-    val sortedCards: List<AuditableCard>
-    val sortedMvrs: List<Cvr>
-
-    init {
-        require(cards.size == mvrs.size)
-
-        val pairs = cards.zip(mvrs)
-        val prng = Prng(seed)
-        val cardsWithPrn = mutableListOf<Pair<AuditableCard, Cvr>>()
-        pairs.forEach { cardsWithPrn.add(Pair(it.first.copy(prn=prng.next()), it.second)) }
-        val sortedPairs = pairs.sortedBy { it.first.prn }
-        sortedCards = sortedPairs.map { it.first }
-        sortedMvrs = sortedPairs.map { it.second }
-    }
-
-    override fun sortedCards() = CloseableIterable { sortedCards.iterator() }
-
-    override fun makeMvrCardPairsForRound(): List<Pair<CardIF, CardIF>>  {
-        if (mvrsRound.isEmpty()) {  // for SingleRoundAudit.
-            val sampledMvrs = if (simFuzzPct == null) {
-                sortedMvrs // use the mvrs as they are - ie, no errors
-            } else { // fuzz the mvrs
-                makeFuzzedCvrsFrom( infos, sortedMvrs, simFuzzPct) // TODO, undervotes=false)
-            }
-            return sampledMvrs.map{ it }.zip(sortedCards.map{ it })
-        }
-
-        val sampleNumbers = mvrsRound.map { it.prn }
-        val sampledCvrs = findSamples(sampleNumbers, Closer(sortedCards.iterator()))
-
-        // prove that sampledCvrs correspond to mvrs
-        require(sampledCvrs.size == mvrsRound.size)
-        val cvruaPairs: List<Pair<AuditableCard, AuditableCard>> = mvrsRound.zip(sampledCvrs)
-        cvruaPairs.forEach { (mvr, cvr) ->
-            require(mvr.location == cvr.location)
-            require(mvr.index == cvr.index)
-            require(mvr.prn== cvr.prn)
-        }
-
-        return mvrsRound.zip(sampledCvrs)
-    }
-
-}
-
-
-

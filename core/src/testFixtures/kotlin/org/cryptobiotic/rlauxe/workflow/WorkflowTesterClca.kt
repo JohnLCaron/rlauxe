@@ -3,16 +3,22 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
+import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 
+// TODO add the Nbs
 class WorkflowTesterClca(
     val auditConfig: AuditConfig,
     contestsToAudit: List<Contest>, // the contests you want to audit
     raireContests: List<RaireContestUnderAudit>,
     val mvrManager: MvrManager,
+    Nbs : Map<Int, Int> = emptyMap(), // TODO retrofit Nb
 ): AuditWorkflow() {
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
@@ -21,12 +27,14 @@ class WorkflowTesterClca(
         require (auditConfig.auditType == AuditType.CLCA)
 
         val regularContests = contestsToAudit.map {
+            val cua = ContestUnderAudit(it, true, hasStyle = auditConfig.hasStyle, Nbin=Nbs[it.id])
             if (it is DHondtContest) {
-                ContestUnderAudit(it, isClca = true, hasStyle = auditConfig.hasStyle).addAssertionsFromAssorters(it.assorters)
+                cua.addAssertionsFromAssorters(it.assorters)
             } else {
-                ContestUnderAudit(it, isClca = true, hasStyle = auditConfig.hasStyle).addStandardAssertions()
+                cua.addStandardAssertions()
             }
         }
+
         contestsUA = regularContests + raireContests
     }
 

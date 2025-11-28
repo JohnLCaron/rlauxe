@@ -34,7 +34,7 @@ class TestOABasics {
 
     @Test
     fun testMakeOneContestUA() {
-        val (contestUA, _, cvrs) = makeOneContestUA(
+        val (contestUA, mvrs, cards, cardPools) = makeOneAuditTest(
             20000,
             18000,
             cvrFraction = .66,
@@ -42,18 +42,21 @@ class TestOABasics {
             phantomFraction = .0,
         )
         println(contestUA)
-        val cvrVotes =  tabulateVotesFromCvrs(cvrs.iterator())
-        showPct("  cvrVotes", cvrVotes[0]!!, contestUA.Nc)
+        val contestId = contestUA.id
+        val poolId = cardPools.first().poolId
+
+        val cvrVotes =  tabulateVotesFromCvrs(mvrs.iterator())
+        showPct("  cvrVotes", cvrVotes[contestId]!!, contestUA.Nc)
 
         val contest = contestUA.contest as Contest
         showPct("  allVotes", contest.votes, contest.Nc)
         println()
-        assertEquals(contest.votes, cvrVotes[0])
+        assertEquals(contest.votes, cvrVotes[contestId]!!)
 
         val oaAssorter = contestUA.minClcaAssertion()!!.cassorter as ClcaAssorterOneAudit
         println(oaAssorter)
         val assorter = oaAssorter.assorter
-        val assortAvgFromCvrs = assorter.calcAssortAvgFromCvrs(0, cvrs)
+        val assortAvgFromCvrs = assorter.calcAssortAvgFromCvrs(contestUA.id, mvrs)
         val assorterMargin = mean2margin(assortAvgFromCvrs)
 
         val dilutedMargin = oaAssorter.dilutedMargin
@@ -63,9 +66,9 @@ class TestOABasics {
 
         val pools = oaAssorter.poolAverages
         pools.assortAverage.forEach{ println(" avg for pool $it") }
-        val poolAverage = pools.assortAverage[1]!!
+        val poolAverage = pools.assortAverage[poolId]!!
 
-        val poolAvgFromCvrs = assorter.calcAssortAvgFromCvrs(0, cvrs.filter { it.poolId == 1})
+        val poolAvgFromCvrs = assorter.calcAssortAvgFromCvrs(contestUA.id, mvrs.filter { it.poolId == 1})
         println("poolAvgFromCvrs = $poolAvgFromCvrs avgFromPools=$poolAverage")
         println()
 
@@ -83,11 +86,11 @@ class TestOABasics {
         // println("loserVoteAt=${at.trans(loserVote)}, otherVoteAt=${at.trans(otherVote)}, winnerVoteAt=${at.trans(winnerVote)} ")
         println()
 
-        val winnerPool = Cvr("winner", mapOf(0 to intArrayOf(0)), poolId=1)
-        val loserPool = Cvr("loser", mapOf(0 to intArrayOf(1)), poolId=1)
-        val otherPool = Cvr("other", mapOf(0 to intArrayOf(2)), poolId=1)
-        val underPool = Cvr("under", mapOf(0 to intArrayOf()), poolId=1)
-        val missingPool = Cvr("under", mapOf(1 to intArrayOf(2)), poolId=1)
+        val winnerPool = Cvr("winner", mapOf(contestId to intArrayOf(0)), poolId=poolId)
+        val loserPool = Cvr("loser", mapOf(contestId to intArrayOf(1)), poolId=poolId)
+        val otherPool = Cvr("other", mapOf(contestId to intArrayOf(2)), poolId=poolId)
+        val underPool = Cvr("under", mapOf(contestId to intArrayOf()), poolId=poolId)
+        val missingContest = Cvr("under", mapOf(99 to intArrayOf(2)), poolId=poolId)
 
         // it doesnt matter what the cvr is, it just matters that its in the pool, so cvr_assort always = poolAverage
         // bassort(mvr: Cvr, cvr: Cvr)
@@ -96,7 +99,7 @@ class TestOABasics {
         println(" bassort(otherVote, anyVote)=${oaAssorter.bassort(otherPool, winnerPool)} ")
         println(" bassort(loserVote, anyVote)=${oaAssorter.bassort(loserPool, winnerPool)} ")
         println(" bassort(underVote, anyVote)=${oaAssorter.bassort(underPool, winnerPool)} ")
-        println(" bassort(missingContest, anyVote)=${oaAssorter.bassort(missingPool, winnerPool)} ")
+        println(" bassort(missingContest, anyVote)=${oaAssorter.bassort(missingContest, winnerPool)} ")
         println("bassort = ([2, 1.5, 1] - poolAvg) / (2 - assorterMargin)} ")
 
         println()
@@ -114,9 +117,9 @@ class TestOABasics {
 
         //////////
 
-        val winnerCvr = Cvr("winner", mapOf(0 to intArrayOf(0)))
-        val loserCvr = Cvr("loser", mapOf(0 to intArrayOf(1)))
-        val otherCvr = Cvr("other", mapOf(0 to intArrayOf(2)))
+        val winnerCvr = Cvr("winner", mapOf(contestId to intArrayOf(0)))
+        val loserCvr = Cvr("loser", mapOf(contestId to intArrayOf(1)))
+        val otherCvr = Cvr("other", mapOf(contestId to intArrayOf(2)))
 
         println("CVR pool")
         println(" bassort(winnerCvr, winnerCvr)=${oaAssorter.bassort(winnerCvr, winnerCvr)} ")  // noerror

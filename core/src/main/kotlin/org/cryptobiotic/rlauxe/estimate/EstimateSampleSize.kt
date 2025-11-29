@@ -231,42 +231,6 @@ fun estimateClcaAssertionRound(
         throw RuntimeException("unsupported strategy ${clcaConfig.strategy}")
     }
 
-    /*
-    var errorRates: PluralityErrorRates = when {
-        // Subsequent rounds, always use measured rates.
-        (assertionRound.prevAuditResult != null) -> {
-            // TODO should be average of previous rates?
-            PluralityErrorRates.fromCounts(assertionRound.prevAuditResult!!.measuredCounts, cassorter.noerror(), assertionRound.prevAuditResult!!.samplesUsed)
-        }
-        (clcaConfig.strategy == ClcaStrategyType.fuzzPct)  -> {
-            ClcaErrorTable.getErrorRates(contest.ncandidates, config.simFuzzPct)
-        }
-        (clcaConfig.strategy == ClcaStrategyType.apriori) -> {
-            clcaConfig.errorRates!!
-        }
-        else -> {
-            ClcaErrorTable.getErrorRates(contest.ncandidates, config.clcaConfig.fuzzPct)  // TODO do better
-        }
-    }
-
-    //  estimation: use real cards, simulate cards with ClcaSimulatedErrorRates; the cards already have phantoms
-    val sampler = ClcaCardSimulatedErrorRates(contestCards, contest, cassorter, errorRates) // TODO why cant we use this with IRV?? I think we can
-
-    // Using errorRates in the bettingFn, make sure phantom rate is accounted for
-    if (errorRates.p1o < contest.phantomRate())
-        errorRates = errorRates.copy( p1o = contest.phantomRate())
-
-    /* val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.oracle) {
-        OracleComparison(a = cassorter.noerror(), errorRates = errorRates)
-    }  else if (clcaConfig.strategy == ClcaStrategyType.optimalComparison) {
-        OptimalComparisonNoP1(N = contestUA.Nb, withoutReplacement = true, upperBound = cassorter.upperBound, p2 = errorRates.p2o)
-    } else { */
-        //AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates)
-    // val bettingFn = AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates = errorRates) // diluted N
-
-    val errorCounts = ClcaErrorCounts.fromPluralityErrorRates(errorRates, totalSamples = contestCards.size, noerror = cassorter.noerror(), upper = cassorter.assorter.upperBound())
-    val bettingFn = GeneralAdaptiveBetting(N = contestUA.Nb, errorCounts, d = clcaConfig.d, ) */
-
     // TODO track down simulations and do initial permutation there; we want first trial to use the actual permutation
     // we need a permutation to get uniform distribution of errors, since some simulations put all the errors at the beginning
     // sampler.reset()

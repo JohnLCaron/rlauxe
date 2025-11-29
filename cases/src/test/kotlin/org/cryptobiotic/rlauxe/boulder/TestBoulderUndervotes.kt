@@ -43,12 +43,12 @@ class TestBoulderUndervotes {
                 } else {
                     Pair(value[1], value[0])
                 }
-                cardStyles[key + "-A"] = CardStyle(key + "-A", styleId, emptyList(), styleA)
-                cardStyles[key + "-B"] = CardStyle(key + "-B", styleId + 1, emptyList(), styleB)
+                cardStyles[key + "-A"] = CardStyle(key + "-A", styleId, styleA)
+                cardStyles[key + "-B"] = CardStyle(key + "-B", styleId + 1, styleB)
                 styleId += 2
             } else {
                 value.forEach { contestIds ->
-                    cardStyles[key] = CardStyle(key, styleId, emptyList(), contestIds)
+                    cardStyles[key] = CardStyle(key, styleId, contestIds)
                     styleId++
                 }
             }
@@ -98,7 +98,7 @@ class TestBoulderUndervotes {
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
 
-        val election2 = BoulderElectionOA(export, sovo, isClca=false)
+        val election2 = CreateBoulderElection(export, sovo, isClca=false)
         println()
         election2.oaContests.forEach { (_, oa) ->
             println(BoulderContestVotes.header)
@@ -118,7 +118,7 @@ class TestBoulderUndervotes {
 
         println("votes, undervotes")
 
-        val election2 = BoulderElectionOA(export, sovo, isClca=false)
+        val election2 = CreateBoulderElection(export, sovo, isClca=false)
         val contestIds = election2.infoList.map { it.id }
         showPoolVotes(contestIds, election2.cardPools)
     }
@@ -159,7 +159,7 @@ class TestBoulderUndervotes {
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
         // val election1 = BoulderElectionOAsim(export, sovo)
-        val election2 = BoulderElectionOA(export, sovo, isClca=false)
+        val election2 = CreateBoulderElection(export, sovo, isClca=false)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -228,7 +228,7 @@ class TestBoulderUndervotes {
         )
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
-        val election2 = BoulderElectionOA(export, sovo, isClca=false)
+        val election2 = CreateBoulderElection(export, sovo, isClca=false)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -302,7 +302,7 @@ class TestBoulderUndervotes {
         )
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
-        val election2 = BoulderElectionOA(export, sovo, isClca=false)
+        val election2 = CreateBoulderElection(export, sovo, isClca=false)
 
         val contestIds = election2.infoList.map { it.id }
 

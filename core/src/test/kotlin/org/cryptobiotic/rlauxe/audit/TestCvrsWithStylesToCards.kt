@@ -45,7 +45,7 @@ class TestCvrsWithStylesToCards {
         card = target.next()
         testOneTarget("clca hasStyle and poolIds", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = null)
 
-        val cardStyle = CardStyle("you", 1, emptyList(), listOf(0,1,2,3,4),)
+        val cardStyle = CardStyle("you", 1, listOf(0,1,2,3,4),)
         // doesnt make sense to use; hasStyle means use cvr
         hasStyle = true
         hasCardStyles = true
@@ -104,7 +104,7 @@ class TestCvrsWithStylesToCards {
         testOneTarget("polling hasStyle and poolIds", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = null)
 
         // what happens if the poolId doesnt match ??
-        val cardStyle = CardStyle("cardstyle1", 1, emptyList(), listOf(0,1,2,3,4))
+        val cardStyle = CardStyle("cardstyle1", 1, listOf(0,1,2,3,4))
         hasStyle = true
         hasCardStyles = true
         hasPoolId = true
@@ -167,7 +167,7 @@ class TestCvrsWithStylesToCards {
         var hasCardStyles = true
         var hasPoolId = true
 
-        val cardStyle = CardStyle("oapool2", 2, emptyList(), listOf(0,1,2))
+        val cardStyle = CardStyle("oapool2", 2, listOf(0,1,2))
         var target = CvrsWithStylesToCardManifest(auditType, cvrsAreComplete=hasStyle, Closer(cvrs.iterator()), phantomCvrs=null, styles=listOf(cardStyle), )
         testOneTarget("oa hasStyle", cvrc, target.next(), auditType, hasStyle, hasPoolId, hasCardStyles, null)
         testOneTarget("oa hasStyle pooled", cvrp, target.next(), auditType, hasStyle, hasPoolId, hasCardStyles, cardStyle)

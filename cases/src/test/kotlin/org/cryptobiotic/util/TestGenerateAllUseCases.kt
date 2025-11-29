@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.belgium.belgianElectionMap
 import org.cryptobiotic.rlauxe.belgium.createBelgiumElection
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
-import org.cryptobiotic.rlauxe.corla.createColoradoOneAudit
+import org.cryptobiotic.rlauxe.corla.createColoradoElection
 import org.cryptobiotic.rlauxe.corla.createColoradoPolling
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
@@ -30,7 +30,7 @@ class TestGenerateAllUseCases {
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = topdir,
-            isClca = false,
+            auditType = AuditType.ONEAUDIT,
         )
 
         val publisher = Publisher("$topdir/audit")
@@ -45,7 +45,7 @@ class TestGenerateAllUseCases {
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = "/home/stormy/rla/cases/boulder24/clca",
-            isClca = true,
+            auditType = AuditType.CLCA,
         )
 
         val publisher = Publisher("$topdir/audit")
@@ -60,7 +60,8 @@ class TestGenerateAllUseCases {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoOneAudit(topdir, detailXmlFile, contestRoundFile, precinctFile, isClca=false, clear=true)
+        createColoradoElection(topdir, detailXmlFile, contestRoundFile, precinctFile,
+            auditType = AuditType.ONEAUDIT, clear=true)
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
@@ -74,7 +75,8 @@ class TestGenerateAllUseCases {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoOneAudit(topdir, detailXmlFile, contestRoundFile, precinctFile, isClca=true, clear=true)
+        createColoradoElection(topdir, detailXmlFile, contestRoundFile, precinctFile,
+            auditType = AuditType.CLCA, clear=true)
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()

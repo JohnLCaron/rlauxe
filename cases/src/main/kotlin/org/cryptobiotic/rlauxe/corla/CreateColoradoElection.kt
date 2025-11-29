@@ -18,7 +18,7 @@ private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
 // making OneAudit pools from the precinct results
 // TODO vary percent cards in pools, show plot
-open class ColoradoOneAudit (
+open class CreateColoradoElection (
     electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
@@ -243,13 +243,13 @@ class OneAuditContestCorla(val info: ContestInfo, detailContest: ElectionDetailC
 
 ////////////////////////////////////////////////////////////////////
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
-fun createColoradoOneAudit(
+fun createColoradoElection(
     topdir: String,
     electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
     auditConfigIn: AuditConfig? = null,
-    isClca: Boolean,
+    auditType : AuditType,
     clear: Boolean = true)
 {
     val stopwatch = Stopwatch()
@@ -257,14 +257,14 @@ fun createColoradoOneAudit(
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
 
-        isClca -> AuditConfig(AuditType.CLCA, hasStyle = true, contestSampleCutoff = 20000, riskLimit = .03, nsimEst=10)
+        auditType.isClca() -> AuditConfig(AuditType.CLCA, hasStyle = true, contestSampleCutoff = 20000, riskLimit = .03, nsimEst=10)
 
         else -> AuditConfig( // TODO NOSTYLE
             AuditType.ONEAUDIT, hasStyle = false, riskLimit = .03, contestSampleCutoff = null, nsimEst = 1,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
     }
-    val election = ColoradoOneAudit(electionDetailXmlFile, contestRoundFile, precinctFile, config)
+    val election = CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, config)
 
     CreateAudit("corla", topdir, config, election, clear = clear)
     println("createColoradoOneAudit took $stopwatch")

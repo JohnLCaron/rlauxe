@@ -83,13 +83,12 @@ data class MultiContestTestData(
 
             // every ballot style needs at least one contest. just make it first contest I guess
             if (contestsForThisBs.isEmpty()) contestsForThisBs = listOf(contestTestBuilders.first())
-            val contestList = contestsForThisBs.map { it.info.name }
             val contestIds = contestsForThisBs.map { it.info.id }
             val ncards = ballotStylePartition[idx]!!
             countBallots += ncards
 
             val poolId = if ((poolPct != null) && idx < 2) 1 else null
-            CardStyle.make(idx, contestList, contestIds, ncards, poolId)
+            CardStyle.make(idx, contestIds, ncards, poolId)
         }
         require(countBallots == totalBallots)
         countCards()
@@ -99,8 +98,8 @@ data class MultiContestTestData(
     // set contest.ncards
     fun countCards() {
         cardStyles.forEach { bs ->
-            bs.contestNames.forEach { contestName ->
-                val contest = contestTestBuilders.find { it.info.name == contestName }!!
+            bs.contestIds.forEach { contestId ->
+                val contest = contestTestBuilders.find { it.info.id == contestId }!!
                 contest.ncards += bs.ncards
             }
         }
@@ -168,7 +167,7 @@ data class MultiContestTestData(
         val cvrbs = CvrBuilders().addContests(contestTestBuilders.map { it.info })
         val result = mutableListOf<Cvr>()
         cardStyles.forEach { cardStyle ->
-            val fcontests = contestTestBuilders.filter { cardStyle.contestNames.contains(it.info.name) }
+            val fcontests = contestTestBuilders.filter { cardStyle.contestIds.contains(it.info.id) }
             repeat(cardStyle.ncards) {
                 // add regular Cvrs including undervotes
                 result.add(makeCvr(cvrbs, fcontests, poolId = if (addPoolId) cardStyle.id else null))
@@ -191,7 +190,7 @@ data class MultiContestTestData(
         var nextCardId = startCvrId
         val result = mutableListOf<AuditableCard>()
         cardStyles.forEach { cardStyle ->
-            val fcontests = contestTestBuilders.filter { cardStyle.contestNames.contains(it.info.name) }
+            val fcontests = contestTestBuilders.filter { cardStyle.contestIds.contains(it.info.id) }
             repeat(cardStyle.ncards) {
                 result.add(makeCard(nextCardId++, fcontests, poolId = cardStyle.poolId, cardStyle=cardStyle.name))
             }

@@ -17,7 +17,7 @@ class TestBoulderElectionOneAudit {
         val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
 
-        val election = BoulderElectionOA(export, sovo, isClca=true)
+        val election = CreateBoulderElection(export, sovo, isClca=true)
         val infos = election.oaContests.mapValues { it.value.info }
         val cards = election.cardManifest()
         val allTab = tabulateAuditableCards(cards, infos).toSortedMap()

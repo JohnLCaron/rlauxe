@@ -204,7 +204,7 @@ fun showFalsePositivesVsMargin(dirName: String, name:String, subtitle: String) {
     val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
     wrsPlot(
-        titleS = "switchWinnerMin successPct",
+        titleS = "$name successPct",
         subtitleS = subtitle,
         writeFile = "$dirName/${name}FalsePositives",
         wrs = data,

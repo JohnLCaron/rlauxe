@@ -184,10 +184,9 @@ fun makeMvrs(
 fun makeCardManifest(mvrs: List<Cvr>, pool: CardPoolWithBallotStyle): List<AuditableCard> {
     // the union of the first two styles
     val expandedContestIds = pool.infos.keys.toList()
-    val expandedContestNames = pool.infos.values.map { it.name }
 
     // here we put the pool data into a single pool, and combine their contestIds, to get a diluted margin for testing
-    val cardStyle = CardStyle("cardPoolStyle", pool.poolId, expandedContestNames, expandedContestIds)
+    val cardStyle = CardStyle("cardPoolStyle", pool.poolId, expandedContestIds)
 
     // make the cards with the expanded card style
     val converter = CvrsWithStylesToCardManifest(
@@ -212,8 +211,6 @@ fun makeCardManifest(mvrs: List<Cvr>, pool: CardPoolWithBallotStyle): List<Audit
 
     return cards
 }
-
-private val show = true
 
 /* make the ContestUnderAudit adding the dilutedMargin to the contest and pool Averages to the assorters
 fun makeContestUA(contest: Contest, cards: List<AuditableCard>, infos: Map<Int, ContestInfo>, poolTabs: List<CardPoolIF>, hasStyle:Boolean): ContestUnderAudit {

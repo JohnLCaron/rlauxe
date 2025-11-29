@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.cli.RunRliRoundCli
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -49,7 +50,7 @@ class TestCreateBoulderElection {
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = topdir,
-            isClca = false,
+            auditType = AuditType.ONEAUDIT,
         )
 
         val publisher = Publisher("$topdir/audit")
@@ -64,7 +65,7 @@ class TestCreateBoulderElection {
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = topdir,
-            isClca = true,
+            auditType = AuditType.CLCA,
         )
 
         val publisher = Publisher("$topdir/audit")
@@ -109,7 +110,7 @@ class TestCreateBoulderElection {
                 "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
                 topdir = topdir,
                 auditDir = auditDir,
-                isClca = false,
+                auditType = AuditType.ONEAUDIT,
             )
         }
         runBoulderOArepeat()

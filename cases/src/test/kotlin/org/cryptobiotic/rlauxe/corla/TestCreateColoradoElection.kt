@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.corla
 
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -27,7 +28,7 @@ class TestCreateColoradoElection {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoOneAudit(topdir, detailXmlFile, contestRoundFile, precinctFile, isClca=false, clear=true)
+        createColoradoElection(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.ONEAUDIT, clear=true)
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
@@ -41,7 +42,7 @@ class TestCreateColoradoElection {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoOneAudit(topdir, detailXmlFile, contestRoundFile, precinctFile, isClca=true, clear=true)
+        createColoradoElection(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.CLCA, clear=true)
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()

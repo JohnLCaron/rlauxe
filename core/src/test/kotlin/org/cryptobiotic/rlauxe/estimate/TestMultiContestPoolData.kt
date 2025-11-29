@@ -38,18 +38,20 @@ class TestMultiContestPoolData {
 
     @Test
     fun testBallotStyles() {
-        val calcN = test.cardStyles.map { it.ncards }.sum()
+        val calcN = test.cardStyles.sumOf { it.ncards }
         assertEquals(N, calcN)
 
-        test.cardStyles.forEach { assertEquals(it.poolId, if (it.id < 2) 1 else null) }
+        test.cardStyles.forEachIndexed { idx, it ->
+            assertEquals(it.poolId, if (idx < 2) 1 else null)
+        }
 
-        val poolSize = test.cardStyles.filter { it.id < 2 }.sumOf { it.ncards }
+        val poolSize = test.cardStyles.filter { it.poolId != null }.sumOf { it.ncards }
         assertEquals(roundToClosest(N*poolPct), poolSize)
     }
 
     @Test
     fun testMakeCardPoolManifest() {
-        val (mvrs: List<Cvr>, cards, pools) = test.makeCardPoolManifest()
+        val (_, cards, pools) = test.makeCardPoolManifest()
         println(pools)
         println("poolPct = ${pfn(poolPct)}")
         println()

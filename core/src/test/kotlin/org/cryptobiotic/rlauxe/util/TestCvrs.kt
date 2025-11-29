@@ -38,6 +38,33 @@ class TestCvrs {
         val contestUA = makeContestUAfromCvrs(info, cvrs, true, true)
         assertEquals(1, contestUA.contest.winners().size)
         assertEquals(11, contestUA.Nc)
+
+        // can we replace with CvrBuilder2? not as convenient?
+        val cvrs2 = listOf(
+            CvrBuilder2.addSeq().addContest(0, intArrayOf()).build(),
+            CvrBuilder2.addSeq().addContest(0, intArrayOf(1)).build(),
+            CvrBuilder2.addSeq().addContest(0, intArrayOf(2)).build(),
+            CvrBuilder2.addSeq().addContest(0, intArrayOf(2)).build(),
+            CvrBuilder2.addSeq().addContest(0, intArrayOf(2)).build(),
+            CvrBuilder2.addSeq().addContest(0, intArrayOf(2)).build(),
+            CvrBuilder2.addSeq().addContest(0, intArrayOf()).build(),
+            CvrBuilder2.addSeq().addContest(0, intArrayOf(4)).build(),
+            CvrBuilder2.addSeq().addContest(0, intArrayOf(4)).build(),
+            CvrBuilder2.addSeq().addContest(0, intArrayOf(4)).build(),
+            CvrBuilder2.addSeq().addContest(0, intArrayOf(4)).build(),
+        )
+        cvrs.forEachIndexed { idx, it ->
+            assertEquals(it, cvrs2[idx])
+        }
+        assertEquals(cvrs, cvrs2)
+        val contestUA2 = makeContestUAfromCvrs(info, cvrs2, true, true)
+        assertEquals(1, contestUA2.contest.winners().size)
+        assertEquals(11, contestUA2.Nc)
+
+        val tab1 = tabulateCvrs(cvrs.iterator(), mapOf(0 to info))
+        val tab2 = tabulateCvrs(cvrs2.iterator(), mapOf(0 to info))
+        assertEquals(tab1, tab2)
+        println(tab1)
     }
 
     @Test

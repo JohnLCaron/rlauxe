@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.sfn
 import kotlin.random.Random
 
 private val logger = KotlinLogging.logger("Sampling")
@@ -11,13 +10,13 @@ private val logger = KotlinLogging.logger("Sampling")
 //// abstraction for creating a sequence of assort values
 interface Sampling: Iterator<Double> {
     fun sample(): Double // get next in sample
-    fun maxSamples(): Int  // population size TODO wtf?
+    fun maxSamples(): Int  // max samples available, needed by testFn
     fun reset()   // start over again with different permutation (may be prohibited)
     fun maxSampleIndexUsed(): Int // the largest cvr index used in the sampling
     fun nmvrs(): Int // total number mvrs
 }
 
-// TODO we're stuffing sampling logic into card.hasContest(contestId)
+// Note that we are stuffing the sampling logic into card.hasContest(contestId)
 
 //// For polling audits. Production runPollingAuditRound
 class PollWithoutReplacement(

@@ -59,7 +59,7 @@ open class CreateBoulderElection(
         // we need to know the diluted Nb before we can create the UAs
         contests = makeContests()
 
-        val manifestTabs = tabulateAuditableCards(createCardIterator(), infoMap)
+        val manifestTabs = tabulateAuditableCards(createCardManifest(), infoMap)
         val contestNbs = manifestTabs.mapValues { it.value.ncards }
 
         contestsUA = makeOneAuditContests(hasStyle, contests, contestNbs, cardPools).sortedBy { it.id }
@@ -257,9 +257,9 @@ open class CreateBoulderElection(
 
     override fun contestsUA() = contestsUA
     override fun cardPools() = cardPools
-    override fun cardManifest() = createCardIterator()
+    override fun cardManifest() = createCardManifest()
 
-    fun createCardIterator(): CloseableIterator<AuditableCard> {
+    fun createCardManifest(): CloseableIterator<AuditableCard> {
         return if (isClca) {
             val simulatedCvrs = makeRedactedCvrs()
             val cvrs =  exportCvrs + simulatedCvrs
@@ -273,7 +273,7 @@ open class CreateBoulderElection(
             val poolCards =  createCvrsFromPools()
             val cvrs =  exportCvrs + poolCards
             CvrsWithStylesToCardManifest(
-                AuditType.CLCA, hasStyle,
+                AuditType.ONEAUDIT, hasStyle,
                 Closer(cvrs.iterator()),
                 makePhantomCvrs(contests),
                 styles = cardPools

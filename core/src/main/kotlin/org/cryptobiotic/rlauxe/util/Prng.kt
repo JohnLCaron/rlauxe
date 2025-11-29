@@ -5,7 +5,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
-// TODO is java library HmacSHA256 secure enough ?
+// Is java library HmacSha256 secure enough ?
+// The key should be of sufficient length (at least 256 bits, or 32 bytes) and generated using a
+// cryptographically secure pseudo-random number generator (CSPRNG), not java.util.Random.
 
 class Prng(seed: Long) {
     val useSeed = if (seed > 0) seed else -seed

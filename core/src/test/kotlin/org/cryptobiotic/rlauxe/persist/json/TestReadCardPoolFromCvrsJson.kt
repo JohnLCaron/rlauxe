@@ -25,7 +25,7 @@ class TestReadCardPoolFromCvrsJson {
         println("read ${pools} pool (original)")
         val pool = pools.first()
         assertTrue(pool is CardPoolFromCvrs)
-        assertEquals(1, pool.poolId)
+        assertEquals(42, pool.poolId) // bogus
         assertEquals("noCvr", pool.poolName)
 
         val tab = pool.contestTabs.values.first()

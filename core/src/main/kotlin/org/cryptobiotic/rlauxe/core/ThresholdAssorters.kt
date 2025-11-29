@@ -118,19 +118,6 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 
         require(hmean == otherVotes * h2(t) / N)
         require(doubleIsClose(otherweight, 1/(2*(1-t)), doublePrecision))
-
-        if (compareBelgium) {
-           //  println("${shortName()} hmean=$hmean otherVotes=$otherVotes otherweight=$otherweight = h(t) = 1/(2*(1-t)) ratio=$ratio noerror=$noerror")
-            // fail_threshold_assorter_mean = float(max(.05 * num_votes, smallest_target) - party1.tally) / (num_votes * 2 * .95) + .5
-            // println("AboveThreshold '${info.candidateIdToName[winner()]}' \n          hmean=$hmean \n   belgium_mean=${winnerVotes/N.toDouble() +.45}\n")
-            println("${shortName()} reportedMean=${reportedMean} g= [$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}] ratio=$ratio noerror=$noerror")
-            // float(party1.tally) / num_votes - .05 + .5
-            calcMarginB(useVotes, N)
-            println()
-
-            // println("BelowThreshold '${info.candidateIdToName[winner()]}' \n          hmean=$hmean \n   belgium_mean=$bmean\n")
-        }
-
         return margin
     }
 
@@ -146,7 +133,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     #     h_bar = - g_bar / 2a + .5
     #           = - (.05 * T_L - T_A) / T_L * 2 * -.95 + .5
     #           = (.05 * T_L - T_A) / T_L * 2*.95 + .5
- */
+
     fun calcMarginB(useVotes: Map<Int, Int>, N: Int): Double {
         val a = (t - 1)
         val c = -1/(2*a)
@@ -168,7 +155,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
         println("Belgium ${shortName()} belgium_mean= $meanb g= [$lowerg .. $upperg] h = [${hb(lowerg)} .. ${hb(upperg)}] ratio=$ratio noerror=$noerror")
 
         return meanb
-    }
+    } */
 
     override fun toString() = desc()
 
@@ -309,14 +296,6 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
         // println("AboveThreshold $names hmean=$hmean winnerVotes=$winnerVotes winnerweight=$winnerweight = winnerVotes * h(1-t)/N =${h2(1-t)} 1/(2*t)=${1/(2*t)}")
         require(doubleIsClose(hmean, winnerVotes/N.toDouble() * h2(1-t), doublePrecision))
         require(doubleIsClose(hmean, winnerVotes/N.toDouble()/(2*t), doublePrecision))
-
-        if (compareBelgium) {
-            println("${shortName()}: reportedMean=${reportedMean} g= [$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}] ratio=$ratio noerror=$noerror")
-            calcMarginB(useVotes, N)
-            println()
-            // println("AboveThreshold $names \n          hmean=$hmean \n   belgium_mean=$bmean\n")
-        }
-
         return margin
     }
 
@@ -333,7 +312,7 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
     # Assorter mean:
     #     h_bar = g_bar + .5
     #           = T_A / T_L - .05 + .5
-     */
+
     fun calcMarginB(useVotes: Map<Int, Int>, N: Int): Double {
         val a = -t
         val c = 1
@@ -351,7 +330,7 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
 
         println("Belgium ${shortName()} mean= $meanb g= [$lowerg .. $upperg] h = [${hb(lowerg)} .. ${hb(upperg)}] ratio=$ratio noerror=$noerror")
         return meanb
-    }
+    } */
 
     override fun toString() = desc()
 
@@ -371,94 +350,3 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
         }
     }
 }
-
-// Belgium above threshhold, c == 1
-data class AboveThresholdB(val info: ContestInfo, val winner: Int, val t: Double): AssorterIF  {
-    val lowerg = -t
-    val upperg = (1.0 - t)
-    val c = 1
-    var reportedMean: Double = 0.0
-
-    fun setReportedMean(reportedMean: Double): AboveThresholdB {
-        this.reportedMean = reportedMean
-        return this
-    }
-
-    fun g (vote: Int): Double {
-        return if (vote == winner) (1.0 - t) else -t
-    }
-
-    fun h(partyVote: Int): Double {
-        return c * g(partyVote) + 0.5
-    }
-
-    // affine transform h = g/2t + 1/2
-    fun h2(g: Double): Double {
-        return c * g + 0.5
-    }
-
-    override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
-        if (!mvr.hasContest(info.id)) return 0.5
-        if (usePhantoms && mvr.isPhantom()) return 0.0 // worst case
-        val cands = mvr.votes(info.id)
-        return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
-    }
-
-    override fun upperBound() = h2(upperg)
-
-    override fun shortName() = "AboveThresholdB for ${info.candidateIdToName[winner()]}"
-
-    override fun desc() = buildString {
-        append("${shortName()}: reportedMean=${pfn(reportedMean)} reportedMargin=${pfn(reportedMargin() )} g= [$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
-    }
-
-    override fun hashcodeDesc() = "AboveThresholdB ${winLose()} ${info.name}" // must be unique for serialization
-
-    override fun winner() = winner
-    override fun loser() = -1
-
-    override fun reportedMean() = reportedMean
-    override fun reportedMargin() = mean2margin(reportedMean)
-
-    /* Olivia has:
-    # Assertion:
-    #     p_A > 0.05
-    #
-    # Linearises to:              Proto-asserter:                  Minimum for b_a = 0, b_T = 1
-    #     T_A - 0.05 * T_L > 0        => g(b) = b_A - 0.05 * b_T      => a = -.05
-
- difference is here:
-    # Minimum `a` of proto-assorter is > -.5 so we set `c = 1` and `h(b) = c * g(b) + .5 = b_A - 0.05 b_T + .5`.
-    #
-    # Assorter mean:
-    #     h_bar = g_bar + .5
-    #           = T_A / T_L - .05 + .5
-     */
-    override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
-        if (useVotes == null || N <= 0) {
-            return 0.0
-        } // shouldnt happen
-
-        val winnerVotes = useVotes[winner()] ?: 0
-        return winnerVotes/N.toDouble() + 0.45
-    }
-
-    override fun toString() = desc()
-
-    companion object {
-        fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int): AboveThresholdB {
-            val result = AboveThresholdB(info, partyId, minFraction)
-
-            val winnerVotes = votes[partyId] ?: 0
-            val otherVotes = votes.filter { it.key != partyId }.values.sum()
-            val nuetralVotes = Nc - winnerVotes - otherVotes
-
-            val winnerweight = result.h2(result.upperg)
-            val otherweight = result.h2(result.lowerg) // should be 0
-            val hmean = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotes * 0.5) / Nc.toDouble()
-            result.setReportedMean(hmean)
-            return result
-        }
-    }
-}
-

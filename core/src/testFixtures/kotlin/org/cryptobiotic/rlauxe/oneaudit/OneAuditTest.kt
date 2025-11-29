@@ -173,7 +173,7 @@ fun makeMvrs(
     // add the extra cvrs: these are also in the pool, and they cause the margin to be diluted
     val extraContestId = contest.id+1
     repeat(extraInPool) {
-        mvrs.add( Cvr("extra$it", mapOf(extraContestId to intArrayOf()), false, poolId=pool.id()))
+        mvrs.add( Cvr("extra$it", mapOf(extraContestId to intArrayOf()), false, poolId=pool.poolId()))
     }
 
     mvrs.shuffle()
@@ -186,7 +186,7 @@ fun makeCardManifest(mvrs: List<Cvr>, pool: CardPoolWithBallotStyle): List<Audit
     val expandedContestIds = pool.infos.keys.toList()
 
     // here we put the pool data into a single pool, and combine their contestIds, to get a diluted margin for testing
-    val cardStyle = CardStyle("cardPoolStyle", pool.poolId, expandedContestIds)
+    val cardStyle = CardStyle("cardPoolStyle", expandedContestIds, pool.poolId)
 
     // make the cards with the expanded card style
     val converter = CvrsWithStylesToCardManifest(

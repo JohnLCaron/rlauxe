@@ -24,18 +24,22 @@
 | 11/09/2025 | 90.7 % | 5494/6058       |
 | 11/20/2025 | 87.6 % | 5838/6667       |
 | 11/25/2025 | 89.0%  | 5460/6135       |
+| 11/28/2025 | 88.9%  | 5440/6119       |
 
 
  core 
-|------------|--------|-----------------|
-| 11/20/2025 | 84.0 % | 5602/6667     |
-| 11/25/2025 | 85.2 % | 5229/6136     |
+|------------|--------|-------------|
+| 11/20/2025 | 84.0 % | 5602/6667   |
+| 11/25/2025 | 85.2 % | 5229/6136   |
+| 11/28/2025 | 85.9 % | 5188/6039   |
 
-
+ cases
+|------------|--------|-------------|
+| 11/28/2025 | 79.3 % | 6417/8094   |
 
 ## Modules
 
-* **cases**: code to create case study audits
+* **cases**: code to create case studies
 * **core**: core library
 * **docs**: documentation
 * **libs**: local copy of raire-java library
@@ -49,4 +53,12 @@ last changed: 03/10/2025
 ![rlauxe Audit UML](images/rlauxeAuditUML.svg)
 
 ![rlauxe JSON UML](images/rlauxeJson.svg)
+
+# TODO 11/29/25
+
+* review strategies and fuzzing in estimation
+* review strategies and fuzzing in auditing
+* replace old plots
+* raire
+* dhondt, threshold assorters
 

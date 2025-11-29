@@ -66,7 +66,7 @@ class TestHasStyle {
         }
 
         val cardStyles = if (hasStyle) null
-            else listOf(CardStyle("all", 1, contests.map{ it.id}))
+            else listOf(CardStyle("all", contests.map{ it.id}, 1))
 
         val topdir = "/home/stormy/rla/persist/testHasStyleClcaSingleCard"
         val auditRound = createAndRunTestAuditCards(topdir, false, contests, emptyList(), hasStyle, testCards, cardStyles)
@@ -161,7 +161,7 @@ class TestHasStyle {
         }
 
         val cardStyles = if (hasStyle) null
-            else listOf(CardStyle("all", 1, contests.map{ it.id}))
+            else listOf(CardStyle("all", contests.map{ it.id}, 1))
 
         val topdir = "/home/stormy/rla/persist/testHasStyleClcaMultiCard"
         val auditRound = createAndRunTestAuditCards(topdir, false, contests, listOf(3), hasStyle, allCards, cardStyles)
@@ -227,7 +227,7 @@ class TestHasStyle {
         val contests = listOf(contestB, contestS)
 
         // polling audits always must put in the possible contests
-        val cardStyles = listOf(CardStyle("all", 1, contests.map{ it.id}))
+        val cardStyles = listOf(CardStyle("all", contests.map{ it.id}, 1))
 
         val topdir = "/home/stormy/rla/persist/testHasStylePollingSingleCard"
         val auditRound = createAndRunTestAuditCvrs(topdir, true, contests, emptyList(), hasStyle, testCvrs, cardStyles)
@@ -311,7 +311,7 @@ class TestHasStyle {
         }
 
         // polling audits always must put in the possible contests
-        val cardStyles = listOf(CardStyle("all", 1, contests.map{ it.id}))
+        val cardStyles = listOf(CardStyle("all", contests.map{ it.id}, 1))
 
         // make the audit
         val topdir = "/home/stormy/rla/persist/testHasStylePollingMultiCard"

@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.*
 
-// builds many cvrs. Assumes they all have the same set of possible contests on them, ie same CardStyle
+// TODO replace with CvrBuilder2
 class CvrBuilders(startCvrId: Int = 0) {
     val builders = mutableListOf<CvrBuilder>()
     var nextCvrId = startCvrId
@@ -180,5 +180,24 @@ class CvrBuilder2(
 
     fun build() : Cvr {
         return Cvr(id, allVotes, phantom, poolId=poolId)
+    }
+
+    companion object {
+        var count = 0
+
+        fun addSeq(): CvrBuilder2 {
+            count++
+            return CvrBuilder2("card$count")
+        }
+
+        fun fromCvr(cvr: Cvr): CvrBuilder2 {
+            val result = CvrBuilder2(cvr.id, cvr.phantom, cvr.poolId)
+            cvr.votes.forEach{ id, votes -> result.addContest(id, votes) }
+            return result
+        }
+
+        fun convertCvrsToBuilders(cvrs: List<Cvr>): List<CvrBuilder2> {
+            return cvrs.map { fromCvr(it) }
+        }
     }
 }

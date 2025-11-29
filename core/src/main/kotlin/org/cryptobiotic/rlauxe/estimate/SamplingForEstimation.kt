@@ -9,7 +9,7 @@ import kotlin.random.Random
 private const val debug = false
 
 // for one contest, this takes a list of cvrs and fuzzes them.
-// Only used for estimating the sample size, not auditing.
+// Only used for estimateClcaAssertionRound, estimateOneAuditAssertionRound, not auditing.
 class ClcaCardFuzzSampler(
     val fuzzPct: Double,
     val cards: List<AuditableCard>,
@@ -62,7 +62,7 @@ class ClcaCardFuzzSampler(
 }
 
 // for one contest, this takes a list of cvrs and fuzzes them
-// Only used for estimating the sample size, not auditing.
+// Only used for estimatePollingAssertionRound, not auditing.
 class PollingCardFuzzSampler(
     val fuzzPct: Double,
     val cards: List<AuditableCard>,
@@ -116,7 +116,7 @@ class PollingCardFuzzSampler(
 fun makeFuzzedCardsFrom(infoList: List<ContestInfo>,
                         cards: List<AuditableCard>,
                         fuzzPct: Double,
-                        undervotes: Boolean = true,
+                        undervotes: Boolean = true, // chooseNewCandidateWithUndervotes
 ) : List<AuditableCard> {
     if (fuzzPct == 0.0) return cards
     val infos = infoList.associate{ it.id to it }

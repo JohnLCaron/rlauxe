@@ -9,6 +9,8 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.util.CvrBuilder2
+import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import kotlin.math.abs
 import kotlin.math.round
 import kotlin.random.Random
@@ -55,12 +57,12 @@ class ContestSimulation(val contest: Contest, val Nb: Int) {
         votesLeft = voteCount
     }
 
-    // TODO replace with VotesAndUndervotes ??
     // makes a set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     // cvrs only contain this contest; hasStyle is ignored.
     // ncvrs = voteCount + underCount + phantomCount = Nc
-    fun makeCvrs(prefix: String = "card", poolId: Int?=null): List<Cvr> {
+    fun makeCvrsOld(prefix: String = "card", poolId: Int?=null): List<Cvr> {
         resetTracker()
+
         var count = 0
         val cvrbs = CvrBuilders().addContests(listOf(contest.info))
         val result = mutableListOf<Cvr>()
@@ -80,6 +82,34 @@ class ContestSimulation(val contest: Contest, val Nb: Int) {
             val cvrb = cvrbs.addPhantomCvr("$prefix-${count++}")
             cvrb.addContest(info.name).done()
             result.add(cvrb.build(poolId))
+        }
+        return result.toList()
+    }
+
+    // TODO replace with CvrBuilders2 ?? Yes, but cant compare unless you set Random seed
+    fun makeCvrs(prefix: String = "card", poolId: Int?=null): List<Cvr> {
+        resetTracker()
+        val contestId = info.id
+
+        var count = 0
+        val result = mutableListOf<Cvr>()
+        repeat(this.voteCount) {
+            val cvrb = CvrBuilder2("$prefix-${count++}", poolId=poolId)
+            val voteFor = chooseCandidate(Random.nextInt(votesLeft))
+            cvrb.addContest(contestId, intArrayOf(voteFor))
+            result.add(cvrb.build())
+        }
+        // add empty undervotes
+        repeat(underCount) {
+            val cvrb = CvrBuilder2("$prefix-${count++}", poolId=poolId)
+            cvrb.addContest(contestId, intArrayOf())
+            result.add(cvrb.build())
+        }
+        // add phantoms
+        repeat(phantomCount) {
+            val cvrb = CvrBuilder2("$prefix-${count++}", phantom=true)
+            cvrb.addContest(contestId, intArrayOf())
+            result.add(cvrb.build())
         }
         return result.toList()
     }

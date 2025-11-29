@@ -14,11 +14,8 @@ import org.cryptobiotic.rlauxe.raire.RaireAssertionType
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.showTabs
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
-import kotlin.collections.get
-
 
 private const val debug = false
 
@@ -45,10 +42,12 @@ fun makeOneAuditTestContests(
     }
     if (debug) println(showTabs("manifestTabs", manifestTabs))
 
-    // TODO calcCardPoolsFromCvrs()
-    // The styles have the name, id, and contest list
-    val poolsFromCvrs = cardStyles.map { style ->
-        val poolFromCvr = CardPoolFromCvrs(style.name(), style.id(), infos)
+    // create from cardStyles and populate the pool counts from the mvrs
+    val poolsFromCvrs = calcCardPoolsFromCvrs(infos, cardStyles, mvrs)
+
+    /* The styles have the name, id, and contest list
+    val poolsFromCvrsOld = cardStyles.map { style ->
+        val poolFromCvr = CardPoolFromCvrs(style.name(), style.poolId(), infos)
         style.contests().forEach { poolFromCvr.contestTabs[it]  = ContestTabulation( infos[it]!!) }
         poolFromCvr
     }.associateBy { it.poolId }
@@ -67,13 +66,13 @@ fun makeOneAuditTestContests(
             }
             println()
         }
-    }
+    } */
 
     // The OA assort averages come from the mvrs
-    addOAClcaAssortersFromMargin(contestsUA, poolsFromCvrs.values.toList(), hasStyle=true)
+    addOAClcaAssortersFromMargin(contestsUA, poolsFromCvrs, hasStyle=true)
 
     // poolsFromCvrs record the complete pool contests,
-    return Pair(contestsUA, poolsFromCvrs.values.toList())
+    return Pair(contestsUA, poolsFromCvrs)
 }
 
 // TODO Raire OneAudit contest.

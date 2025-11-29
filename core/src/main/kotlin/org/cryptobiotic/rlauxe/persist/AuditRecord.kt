@@ -37,8 +37,6 @@ class AuditRecord(
 
     // TODO new mvrs vs mvrs may confuse people. Build interface to manage this process?
     fun enterMvrs(mvrs: CloseableIterable<AuditableCard>, errs: ErrorMessages): Boolean {
-        // val mvrMap = mvrs.associateBy { it.prn }.toMap()
-
         val publisher = Publisher(location)
         val lastRoundIdx = if (rounds.isEmpty()) 1 else rounds.last().roundIdx
 
@@ -52,28 +50,7 @@ class AuditRecord(
         val sampledPrns = sampledPrnsResult.unwrap()
 
         val sampledMvrs = findSamples(sampledPrns, mvrs.iterator())
-        // wantedMvrs.forEach { previousMvrs[it.prn] = it }
-/*
-        val missingMvrs = mutableListOf<Long>()
-        sampledPrns.forEach { sampleNumber ->
-            var mvr = previousMvrs[sampleNumber]
-            if (mvr == null) {
-                mvr = mvrMap[sampleNumber]
-                if (mvr == null) {
-                    missingMvrs.add(sampleNumber)
-                } else {
-                    previousMvrs[sampleNumber] = mvr
-                }
-            }
-        }
-        if (missingMvrs.isNotEmpty()) {
-            errs.add("Cant find MVRs that match ${publisher.samplePrnsFile(lastRoundIdx)} ")
-            val useMissing = if (missingMvrs.size > 10) missingMvrs.subList(0, 10) else missingMvrs
-            errs.add(" missingMvs =  ${useMissing} ")
-            return false
-        } */
 
-        // val sampledMvrs = sampledPrns.map{ sampleNumber -> previousMvrs[sampleNumber]!! }
         // TODO only writing the mvrs that match samplePrnsFile for this round
         writeAuditableCardCsvFile(sampledMvrs , publisher.sampleMvrsFile(lastRoundIdx))
         logger.info{"enterMvrs write sampledMvrs to '${publisher.sampleMvrsFile(lastRoundIdx)}' for round $lastRoundIdx"}

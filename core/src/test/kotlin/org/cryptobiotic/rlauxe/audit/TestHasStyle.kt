@@ -66,7 +66,7 @@ class TestHasStyle {
         }
 
         val cardStyles = if (hasStyle) null
-            else listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}))
+            else listOf(CardStyle("all", 1, contests.map{ it.id}))
 
         val topdir = "/home/stormy/rla/persist/testHasStyleClcaSingleCard"
         val auditRound = createAndRunTestAuditCards(topdir, false, contests, emptyList(), hasStyle, testCards, cardStyles)
@@ -161,7 +161,7 @@ class TestHasStyle {
         }
 
         val cardStyles = if (hasStyle) null
-            else listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}))
+            else listOf(CardStyle("all", 1, contests.map{ it.id}))
 
         val topdir = "/home/stormy/rla/persist/testHasStyleClcaMultiCard"
         val auditRound = createAndRunTestAuditCards(topdir, false, contests, listOf(3), hasStyle, allCards, cardStyles)
@@ -226,25 +226,8 @@ class TestHasStyle {
         val testCvrs = testData.makeCvrsFromContests()
         val contests = listOf(contestB, contestS)
 
-        val config = AuditConfig(AuditType.POLLING, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, pollingConfig = PollingConfig())
-
-        /*
-        val cards = mutableListOf<AuditableCard>()
-        CvrsWithStylesToCards(config.auditType, hasStyle,
-            Closer(testCvrs.iterator()),
-            null,
-            styles = cardStyles,
-        ).forEach { cards.add(it)}
-
-        val infos = contests.map{ it.info }.associateBy { it.id }
-        val tabs = tabulateCvrs(testCvrs.iterator(), infos).toSortedMap()
-        if (showDetails) tabs.forEach { println(it) }
-        contests.forEach { contest ->
-            assertEquals(contest.votes, tabs[contest.id]!!.votes)
-        } */
-
         // polling audits always must put in the possible contests
-        val cardStyles = listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}))
+        val cardStyles = listOf(CardStyle("all", 1, contests.map{ it.id}))
 
         val topdir = "/home/stormy/rla/persist/testHasStylePollingSingleCard"
         val auditRound = createAndRunTestAuditCvrs(topdir, true, contests, emptyList(), hasStyle, testCvrs, cardStyles)
@@ -328,7 +311,7 @@ class TestHasStyle {
         }
 
         // polling audits always must put in the possible contests
-        val cardStyles = listOf(CardStyle("all", 1, contests.map{ it.name}, contests.map{ it.id}))
+        val cardStyles = listOf(CardStyle("all", 1, contests.map{ it.id}))
 
         // make the audit
         val topdir = "/home/stormy/rla/persist/testHasStylePollingMultiCard"

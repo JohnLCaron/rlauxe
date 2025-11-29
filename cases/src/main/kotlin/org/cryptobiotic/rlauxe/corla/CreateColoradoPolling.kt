@@ -15,7 +15,7 @@ class ColoradoPolling (
     contestRoundFile: String,
     precinctFile: String,
     config: AuditConfig,
-): ColoradoOneAudit(electionDetailXmlFile, contestRoundFile, precinctFile, config, true) {
+): CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, config, true) {
 
     val contestsPolling: List<ContestUnderAudit>
 

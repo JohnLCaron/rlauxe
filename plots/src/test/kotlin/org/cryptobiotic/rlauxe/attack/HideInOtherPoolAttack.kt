@@ -37,7 +37,7 @@ class HideInOtherPoolAttack {
 
     val N = 20000
     val Npool = 10000
-    val nruns = 1000
+    val nruns = 10000
     var phantomPct = .00
     var fuzzPct = .00
 
@@ -155,8 +155,8 @@ class OASingleRoundWorkflowTaskGeneratorG(
 
         // now divide the cards into pools and cvrs
         val cardStyles = listOf(
-            CardStyle("group1", 1, emptyList(), listOf(1,2)),
-            CardStyle("group2", 2, emptyList(), listOf(2)),
+            CardStyle("group1", 1, listOf(1,2)),
+            CardStyle("group2", 2, listOf(2)),
         )
 
         // cards with pools
@@ -201,7 +201,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
         if (debug) {
             val mvrTabs = tabulateCvrs(Closer(mvrs.iterator()), infos)
             println("mvrTabs")
-            mvrTabs.forEach { (id, tab) ->
+            mvrTabs.forEach { (_, tab) ->
                 println(" $tab")
             }
             println()

@@ -56,7 +56,7 @@ data class AuditableCard (
     fun cvr() : Cvr {
         val useVotes = if (votes != null) votes else {
             possibleContests.mapIndexed { idx, contestId ->
-                Pair(contestId, votes?.get(idx) ?: intArrayOf()) // TODO WTF ??
+                Pair(contestId, votes?.get(idx) ?: intArrayOf())
             }.toMap()
         }
         return Cvr(location, useVotes, phantom, poolId)
@@ -77,7 +77,6 @@ data class AuditableCard (
     override fun rankedChoices(contestId: Int): IntArray? = votes?.get(contestId)
 
     override fun hasContest(contestId: Int): Boolean {
-        // if (possibleContests.isEmpty() && votes == null) return true // TODO seems to mean empty == "all"
         return contests().contains(contestId)
     }
 
@@ -162,7 +161,6 @@ interface CardStyleIF {
 data class CardStyle(
     val name: String,
     val id: Int,
-    val contestNames: List<String>, // TODO remove?
     val contestIds: List<Int>,
 ): CardStyleIF {
     // used by MultiContestTestData
@@ -179,8 +177,8 @@ data class CardStyle(
     }
 
     companion object {
-        fun make(styleId: Int, contestNames: List<String>, contestIds: List<Int>, ncards: Int?, poolId: Int? ): CardStyle {
-            val cs = CardStyle("style$styleId", styleId, contestNames, contestIds)
+        fun make(styleId: Int, contestIds: List<Int>, ncards: Int?, poolId: Int? ): CardStyle {
+            val cs = CardStyle("style$styleId", styleId, contestIds)
             if (ncards != null) cs.ncards = ncards
             if (poolId != null) cs.poolId = poolId
             return cs

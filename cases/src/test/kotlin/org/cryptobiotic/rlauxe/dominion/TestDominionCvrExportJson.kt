@@ -165,7 +165,7 @@ class TestDominionCvrExportJson {
         val cardManifestWriter3 = FileOutputStream(cardManifestFilename3).writer()
         cardManifestWriter3.write(AuditableCardHeader)
 
-        val cardStyle = CardStyle("31-125", 2, emptyList(), listOf(0,1,2))
+        val cardStyle = CardStyle("31-125", 2, listOf(0,1,2))
         val cvrExportIter2 = cvrExportCsvIterator(cvrExportFilename) // CvrExport
         val cvrIter2 = CvrExportToCvrAdapter(cvrExportIter2, pools= mapOf("31-125" to 2)) // Cvr
         val cardIter2 = CvrsWithStylesToCardManifest(AuditType.ONEAUDIT, cvrsAreComplete=false, cvrIter2, null, listOf(cardStyle) ) // AuditableCard

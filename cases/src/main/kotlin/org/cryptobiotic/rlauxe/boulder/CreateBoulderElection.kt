@@ -24,7 +24,7 @@ private val logger = KotlinLogging.logger("BoulderElectionOA")
 // Use OneAudit; redacted ballots are in pools.
 // No redacted CVRs. Cant do IRV.
 // specific to 2025 election. TODO: generalize
-open class BoulderElectionOA(
+open class CreateBoulderElection(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
     val isClca: Boolean,
@@ -312,7 +312,7 @@ fun createBoulderElection(
     riskLimit: Double = 0.03,
     minRecountMargin: Double = .005,
     auditConfigIn: AuditConfig? = null,
-    isClca: Boolean,
+    auditType : AuditType,
     clear: Boolean = true)
 {
     val stopwatch = Stopwatch()
@@ -321,7 +321,7 @@ fun createBoulderElection(
     val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
 
     val config = if (auditConfigIn != null) auditConfigIn
-        else if (isClca)
+        else if (auditType.isClca())
             AuditConfig(
                 AuditType.CLCA,
                 hasStyle = true,
@@ -330,12 +330,14 @@ fun createBoulderElection(
                 minRecountMargin = minRecountMargin,
                 nsimEst = 10,
             )
-        else AuditConfig(
+        else if (auditType.isOA())
+            AuditConfig(
             AuditType.ONEAUDIT, hasStyle=true, riskLimit=riskLimit, contestSampleCutoff=20000, minRecountMargin=minRecountMargin, nsimEst=10,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
+    else throw RuntimeException("unsupported audit type $auditType")
 
-    val election = BoulderElectionOA(export, sovo, isClca = isClca, hasStyle=config.hasStyle)
+    val election = CreateBoulderElection(export, sovo, isClca = auditType.isClca(), hasStyle=config.hasStyle)
 
     CreateAudit("boulder", topdir, config, election, auditdir = auditDir, clear = clear)
     println("createBoulderElectionOAnew took $stopwatch")

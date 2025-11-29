@@ -88,7 +88,7 @@ data class MultiContestTestData(
             countBallots += ncards
 
             val poolId = if ((poolPct != null) && idx < 2) 1 else null
-            CardStyle.make(idx, contestIds, ncards, poolId)
+            CardStyle("style$idx", contestIds, poolId).setNcards(ncards)
         }
         require(countBallots == totalBallots)
         countCards()
@@ -155,7 +155,7 @@ data class MultiContestTestData(
         appendLine(" marginRange=$marginRange underVotePct=$underVotePctRange phantomPct=$phantomPctRange")
         contestTestBuilders.forEach { fcontest ->
             append("  $fcontest")
-            val bs4id = cardStyles.filter{ it.contestIds.contains(fcontest.contestId) }.map{ it.id }
+            val bs4id = cardStyles.filter{ it.contestIds.contains(fcontest.contestId) }.map{ it.name }
             appendLine(" ballotStyles=$bs4id")
         }
         appendLine("")
@@ -170,7 +170,7 @@ data class MultiContestTestData(
             val fcontests = contestTestBuilders.filter { cardStyle.contestIds.contains(it.info.id) }
             repeat(cardStyle.ncards) {
                 // add regular Cvrs including undervotes
-                result.add(makeCvr(cvrbs, fcontests, poolId = if (addPoolId) cardStyle.id else null))
+                result.add(makeCvr(cvrbs, fcontests, poolId = if (addPoolId) cardStyle.poolId else null)) // TODO always just add ??
             }
         }
 

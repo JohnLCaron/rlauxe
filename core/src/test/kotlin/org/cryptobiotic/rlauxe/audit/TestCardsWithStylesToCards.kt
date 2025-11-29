@@ -52,7 +52,7 @@ class TestCardsWithStylesToCards {
         testOneTarget("clca hasStyle and poolIds", cvr, card, auditType, hasStyle, hasPoolId, hasCardStyles, expectStyle = null)
 
         val styleName = "yes"
-        val cardStyle = CardStyle(styleName, 1, listOf(0,1,2,3,4))
+        val cardStyle = CardStyle(styleName, listOf(0,1,2,3,4), 1)
         // doesnt make sense to use; hasStyle means use cvr
         hasStyle = true
         hasCardStyles = true
@@ -113,7 +113,7 @@ class TestCardsWithStylesToCards {
 
         // what happens if the poolId doesnt match ??
         val styleName = "yes"
-        val cardStyle = CardStyle(styleName, 1, listOf(0,1,2,3,4))
+        val cardStyle = CardStyle(styleName, listOf(0,1,2,3,4), 1)
         hasStyle = true
         hasCardStyles = true
         hasPoolId = true
@@ -180,8 +180,8 @@ class TestCardsWithStylesToCards {
         var hasCardStyles = true
         var hasPoolId = true
 
-        val cardStyle1 = CardStyle(styleName1, 1, listOf(0,1,2))
-        val cardStyle2 = CardStyle(styleName2, 2, listOf(0,1,2,3,4,7))
+        val cardStyle1 = CardStyle(styleName1, listOf(0,1,2), 1)
+        val cardStyle2 = CardStyle(styleName2, listOf(0,1,2,3,4,7), 2)
         val cardStyles = listOf(cardStyle1, cardStyle2)
 
         // hasStyle means must supply the list of possibleContests only for pooled data

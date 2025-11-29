@@ -159,7 +159,7 @@ class CreateSfElection(
 
     fun createCardManifest(isOA: Boolean, phantomCount: Map<Int,Int>): CloseableIterator<AuditableCard> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
-        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPools.associate{ it.name() to it.id() } )
+        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPools.associate{ it.name() to it.poolId() } )
 
         return CvrsWithStylesToCardManifest(config.auditType, hasStyle,
             cvrIter,

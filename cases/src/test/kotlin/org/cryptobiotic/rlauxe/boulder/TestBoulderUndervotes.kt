@@ -43,12 +43,12 @@ class TestBoulderUndervotes {
                 } else {
                     Pair(value[1], value[0])
                 }
-                cardStyles[key + "-A"] = CardStyle(key + "-A", styleId, styleA)
-                cardStyles[key + "-B"] = CardStyle(key + "-B", styleId + 1, styleB)
+                cardStyles[key + "-A"] = CardStyle(key + "-A", styleA, styleId)
+                cardStyles[key + "-B"] = CardStyle(key + "-B", styleB, styleId+1)
                 styleId += 2
             } else {
                 value.forEach { contestIds ->
-                    cardStyles[key] = CardStyle(key, styleId, contestIds)
+                    cardStyles[key] = CardStyle(key, contestIds, styleId)
                     styleId++
                 }
             }

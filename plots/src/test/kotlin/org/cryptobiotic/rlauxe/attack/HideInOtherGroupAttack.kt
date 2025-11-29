@@ -145,8 +145,8 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
         }
         // now change the groups in the cardManifest
         val cardStyles = listOf(
-            CardStyle("group1", 1, listOf(1,2)),
-            CardStyle("group2", 2, listOf(2)),
+            CardStyle("group1", listOf(1,2), 1),
+            CardStyle("group2", listOf(2), 2),
         )
         val modifiedCards = mutableListOf<AuditableCard>()
         val cardAttacker = CardsWithStylesAttack(AuditType.CLCA, cards=Closer(cardsu.iterator()), styles=cardStyles, wantFlips=diff+1)

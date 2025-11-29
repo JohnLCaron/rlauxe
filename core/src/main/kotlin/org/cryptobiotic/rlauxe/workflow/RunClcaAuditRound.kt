@@ -135,7 +135,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampling.maxSamples(),
-            maxBallotIndexUsed = sampling.maxSampleIndexUsed(), // TODO only for audit, not estimation I think
+            maxBallotIndexUsed = sampling.maxSampleIndexUsed(),
             pvalue = testH0Result.pvalueLast,
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,

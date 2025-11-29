@@ -23,13 +23,16 @@ class TestCvrBuilders {
         val roundtrip: List<Cvr> = cvrsbs.build().map { it }
         // same order
         roundtrip.forEachIndexed { idx, it ->
-            val cvr2 = cvrs[idx]
-            if (it != cvr2)
-                println("cvr")
             assertEquals(cvrs[idx], it)
         }
 
-        cvrsbs.show()
+        // cvrsbs.show()
+
+        // can we replace with CvrBuilder2? yes
+        val cvrb2s = cvrs.map { CvrBuilder2.fromCvr(it)}
+        cvrb2s.forEachIndexed { idx, it ->
+            assertEquals(cvrs[idx], it.build())
+        }
     }
 
     @Test

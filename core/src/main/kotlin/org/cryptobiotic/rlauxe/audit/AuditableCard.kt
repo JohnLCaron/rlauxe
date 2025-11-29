@@ -152,37 +152,32 @@ data class CardLocationManifest(
 
 interface CardStyleIF {
     fun name(): String
-    fun id(): Int // TODO is this the poolId ??
     fun contests() : IntArray
     fun hasContest(contestId: Int): Boolean
+    fun poolId(): Int?
 }
 
 // essentially, CardStyle factors out the contestIds, which the CardLocation references, so its a form of normalization
 data class CardStyle(
     val name: String,
-    val id: Int,
     val contestIds: List<Int>,
+    val poolId: Int?,
 ): CardStyleIF {
     // used by MultiContestTestData
     var ncards = 0
-    var poolId: Int? = null
+
+    fun setNcards(ncards:Int): CardStyle {
+        this.ncards = ncards
+        return this
+    }
 
     override fun name() = name
-    override fun id() = id
+    override fun poolId() = poolId
     override fun hasContest(contestId: Int) = contestIds.contains(contestId)
     override fun contests() = contestIds.toIntArray()
 
     override fun toString() = buildString {
-        append("CardStyle('$name' ($id), contestIds=$contestIds")
-    }
-
-    companion object {
-        fun make(styleId: Int, contestIds: List<Int>, ncards: Int?, poolId: Int? ): CardStyle {
-            val cs = CardStyle("style$styleId", styleId, contestIds)
-            if (ncards != null) cs.ncards = ncards
-            if (poolId != null) cs.poolId = poolId
-            return cs
-        }
+        append("CardStyle('$name' contestIds=$contestIds poolId=$poolId")
     }
 }
 
@@ -199,7 +194,7 @@ class CvrsWithStylesToCardManifest(
     styles: List<CardStyleIF>?,
 ): CloseableIterator<AuditableCard> {
 
-    val poolMap = styles?.associateBy{ it.id() }
+    val poolMap = styles?.associateBy{ it.poolId() }
     val allCvrs: Iterator<Cvr>
     var cardIndex = 1
 

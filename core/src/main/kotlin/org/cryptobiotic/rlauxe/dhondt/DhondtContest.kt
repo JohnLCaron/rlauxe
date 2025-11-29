@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.AboveThreshold
-import org.cryptobiotic.rlauxe.core.AboveThresholdB
 import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
@@ -222,9 +221,6 @@ class DHondtContest(
             is AboveThreshold -> {
                 votes[assorter.winner()]!! / nvotes.toDouble() - assorter.t
             }
-            is AboveThresholdB -> {
-                votes[assorter.winner()]!! / nvotes.toDouble() - assorter.t
-            }
             else -> throw RuntimeException()
         }
     }
@@ -245,12 +241,6 @@ class DHondtContest(
                 "${assorter.shortName()} votesFor=$votesFor pct=${dfn(pct, 4)} diff=${dfn(diff, 6)} %"
             }
             is AboveThreshold -> {
-                val votesFor = votes[assorter.winner()]!!
-                val pct = 100.0 * votesFor / nvotes
-                val diff= pct - 100.0 * assorter.t
-                "${assorter.shortName()} votesFor=$votesFor pct=${dfn(pct, 4)} diff=${dfn(diff, 6)} %"
-            }
-            is AboveThresholdB -> {
                 val votesFor = votes[assorter.winner()]!!
                 val pct = 100.0 * votesFor / nvotes
                 val diff= pct - 100.0 * assorter.t

@@ -45,8 +45,7 @@ fun findSamples(samplePrns: List<Long>, sortedCards: CloseableIterator<Auditable
     return result
 }
 
-// TODO eliminate this
-//// TODO this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set
+//// TODO  this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set
 // for each contest, return map contestId -> wantSampleSize
 fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedCards : CloseableIterator<AuditableCard>, debug: Boolean = false): Map<Int, Int> {
     //// count how many samples each contest already has
@@ -60,7 +59,7 @@ fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Lon
                 val card = cardIter.next() // previousSamples must be in same order as sortedBorc
                 if (card.prn == prevNumber) {
                     contestsNotDone.forEach { contest ->
-                        if (card.hasContest(contest.id)) { // TODO assumes hasStyle = true
+                        if (card.hasContest(contest.id)) {
                             prevContestCounts[contest] = prevContestCounts[contest]?.plus(1) ?: 1
                         }
                     }

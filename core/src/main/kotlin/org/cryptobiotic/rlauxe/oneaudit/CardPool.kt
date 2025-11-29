@@ -46,7 +46,7 @@ interface CardPoolIF: CardStyleIF {
     fun votesAndUndervotes(contestId: Int): VotesAndUndervotes
 
     override fun name() = poolName
-    override fun id() = poolId
+    override fun poolId() = poolId
     override fun hasContest(contestId: Int) : Boolean // does the pool contain this contest ?
     override fun contests(): IntArray
 }
@@ -291,16 +291,15 @@ class CardPoolFromCvrs(
     }
 }
 
-
 fun calcCardPoolsFromCvrs(
     infos: Map<Int, ContestInfo>,
     cardStyles: List<CardStyleIF>,
     mvrs: List<Cvr>,
-): List<CardPoolFromCvrs> {
+): List<CardPoolFromCvrs> {  // poolId -> CardPoolFromCvrs
 
-    // The styles have the name, id, and contest list
+    // The styles have the name, poolId, and contest list
     val poolsFromCvrs = cardStyles.map { style ->
-        val poolFromCvr = CardPoolFromCvrs(style.name(), style.id(), infos)
+        val poolFromCvr = CardPoolFromCvrs(style.name(), style.poolId()!!, infos)
         style.contests().forEach { poolFromCvr.contestTabs[it]  = ContestTabulation( infos[it]!!) }
         poolFromCvr
     }.associateBy { it.poolId }
@@ -310,7 +309,7 @@ fun calcCardPoolsFromCvrs(
         val pool = poolsFromCvrs[it.poolId]
         if (pool != null) pool.accumulateVotes(it)
     }
-    if (true) {
+    if (false) {
         println("tabulatePooledMvrs")
         poolsFromCvrs.forEach { (id, pool) ->
             println(pool)

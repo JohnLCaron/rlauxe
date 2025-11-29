@@ -155,8 +155,8 @@ class OASingleRoundWorkflowTaskGeneratorG(
 
         // now divide the cards into pools and cvrs
         val cardStyles = listOf(
-            CardStyle("group1", 1, listOf(1,2)),
-            CardStyle("group2", 2, listOf(2)),
+            CardStyle("group1", listOf(1,2), 1),
+            CardStyle("group2", listOf(2), 2),
         )
 
         // cards with pools

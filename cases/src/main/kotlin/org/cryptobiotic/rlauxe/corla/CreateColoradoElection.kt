@@ -52,16 +52,8 @@ open class CreateColoradoElection (
             val undervote = undervotes.getOrPut(it.info.id) { mutableListOf() }
             undervote.add(it.poolUndervote(cardPools))
         }
-
-        // we need to know the diluted Nb before we can create the UAs
         contests = makeContests()
-
-        val manifestTabs = tabulateAuditableCards(createCardIterator(), infoMap)
-        val contestNbs = manifestTabs.mapValues { it.value.ncards }
-
-        contestsUA = contests.map { contest ->
-            ContestUnderAudit(contest, hasStyle=hasStyle, Nbin=contestNbs[contest.id]).addStandardAssertions()
-        }
+        contestsUA = ContestUnderAudit.make(contests, createCardManifest(), isClca=true, hasStyle)
     }
 
     private fun makeOneContestInfo(electionDetailXml: ElectionDetailXml, roundContests: List<CorlaContestRoundCsv>): List<OneAuditContestCorla> {
@@ -152,9 +144,9 @@ open class CreateColoradoElection (
 
     override fun cardPools(): List<CardPoolIF>?  = cardPools
     override fun contestsUA() = contestsUA
-    override fun cardManifest() = createCardIterator()
+    override fun cardManifest() = createCardManifest()
 
-    fun createCardIterator(): CloseableIterator<AuditableCard> {
+    fun createCardManifest(): CloseableIterator<AuditableCard> {
         return CvrsWithStylesToCardManifest(config.auditType, hasStyle,
             Closer(CvrIteratorfromPools()),
             makePhantomCvrs(contests),

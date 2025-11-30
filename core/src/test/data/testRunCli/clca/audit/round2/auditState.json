@@ -1,0 +1,95 @@
+{
+    "roundIdx": 2,
+    "contestRounds": [
+        {
+            "id": 4,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "1/0 contest4",
+                    "roundIdx": 2,
+                    "estSampleSize": 1484,
+                    "estNewSampleSize": 422,
+                    "estimationResult": {
+                        "roundIdx": 2,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.7213376791164345,
+                        "startingRates": {
+                            "0.25377675199328575": 0.006591337099811676,
+                            "0.0": 0.004708097928436911,
+                            "0.7613302559798573": 0.004708097928436911,
+                            "1.015107007973143": 0.0018832391713747645
+                        },
+                        "estimatedDistribution": [
+                            168,
+                            211,
+                            219,
+                            244,
+                            279,
+                            308,
+                            362,
+                            422,
+                            581,
+                            1759
+                        ],
+                        "firstSample": 260
+                    },
+                    "auditResult": {
+                        "desc": "round=2 pvalue=0.0498 nmvrs=1484 samplesUsed=481 status=StatRejectNull startingRates=0.0000=0.0047, 0.2538=0.0066, 0.7613=0.0047, 1.0151=0.0019,  measuredCounts=0.0000=1, 0.2538=4, 1.0151=1, ",
+                        "roundIdx": 2,
+                        "nmvrs": 1484,
+                        "maxBallotIndexUsed": 481,
+                        "pvalue": 0.04981454299268779,
+                        "samplesUsed": 481,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5054430944065859,
+                        "startingRates": {
+                            "0.25377675199328575": 0.006591337099811676,
+                            "0.0": 0.004708097928436911,
+                            "0.7613302559798573": 0.004708097928436911,
+                            "1.015107007973143": 0.0018832391713747645
+                        },
+                        "measuredCounts": {
+                            "0.25377675199328575": 4,
+                            "1.015107007973143": 1,
+                            "0.0": 1
+                        }
+                    },
+                    "prevAuditResult": {
+                        "desc": "round=1 pvalue=0.5809 nmvrs=1062 samplesUsed=1062 status=LimitReached startingRates= measuredCounts=0.0000=5, 0.2538=7, 0.7613=5, 1.0151=2, ",
+                        "roundIdx": 1,
+                        "nmvrs": 1062,
+                        "maxBallotIndexUsed": 2949,
+                        "pvalue": 0.5809435371874865,
+                        "samplesUsed": 1062,
+                        "status": "LimitReached",
+                        "measuredMean": 0.5056418147060194,
+                        "startingRates": {},
+                        "measuredCounts": {
+                            "0.25377675199328575": 7,
+                            "0.0": 5,
+                            "0.7613302559798573": 5,
+                            "1.015107007973143": 2
+                        }
+                    },
+                    "status": "StatRejectNull",
+                    "round": 2
+                }
+            ],
+            "roundIdx": 2,
+            "actualMvrs": 1484,
+            "actualNewMvrs": 422,
+            "estNewSamples": 422,
+            "estSampleSize": 1484,
+            "auditorWantNewMvrs": -1,
+            "done": true,
+            "included": true,
+            "status": "StatRejectNull"
+        }
+    ],
+    "auditWasDone": true,
+    "auditIsComplete": true,
+    "nmvrs": 1484,
+    "newmvrs": 422,
+    "auditorWantNewMvrs": -1
+}

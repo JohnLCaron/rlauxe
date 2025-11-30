@@ -75,7 +75,7 @@ fun makeOneAuditTestContests(
     return Pair(contestsUA, poolsFromCvrs)
 }
 
-// TODO Raire OneAudit contest.
+// TODO OAIrv
 // TODO try in SF?
 fun makeTestContestOAIrv(): RaireContestUnderAudit {
 

@@ -57,6 +57,7 @@ class GenBravoResults  {
             val estimFn = FixedMean(eta0)
             val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = 1.0, withoutReplacement = withoutReplacement)
             val sampler = if (withoutReplacement) GenSampleMeanWithoutReplacement(m, trueMean) else GenSampleMeanWithReplacement(m, trueMean)
+            val tracker = ClcaErrorTracker(0.0)
 
             val rr = runTestRepeated(
                 drawSample = sampler,
@@ -64,6 +65,7 @@ class GenBravoResults  {
                 ntrials = ntrials,
                 testFn=alpha,
                 N=N,
+                tracker=tracker,
             )
 
             //val rr = runBravo(N, m, eta0, it, withoutReplacement, nrepeat)

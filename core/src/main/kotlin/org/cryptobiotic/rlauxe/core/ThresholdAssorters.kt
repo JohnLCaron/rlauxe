@@ -160,28 +160,6 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 
     override fun toString() = desc()
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is BelowThreshold) return false
-
-        if (candId != other.candId) return false
-        if (t != other.t) return false
-        if (id != other.id) return false
-        if (reportedMean != other.reportedMean) return false
-        if (info != other.info) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = candId
-        result = 31 * result + t.hashCode()
-        result = 31 * result + id
-        result = 31 * result + reportedMean.hashCode()
-        result = 31 * result + info.hashCode()
-        return result
-    }
-
     companion object {
         fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int): BelowThreshold {
             val result = BelowThreshold(info, partyId, minFraction)
@@ -357,26 +335,6 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
     } */
 
     override fun toString() = desc()
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is AboveThreshold) return false
-
-        if (winner != other.winner) return false
-        if (t != other.t) return false
-        if (id != other.id) return false
-        if (reportedMean != other.reportedMean) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = winner
-        result = 31 * result + t.hashCode()
-        result = 31 * result + id
-        result = 31 * result + reportedMean.hashCode()
-        return result
-    }
 
     companion object {
         fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int): AboveThreshold {

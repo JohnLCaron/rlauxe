@@ -1,0 +1,23 @@
+{
+    "auditType": "ONEAUDIT",
+    "hasStyle": true,
+    "riskLimit": 0.05,
+    "seed": -5139959257837574834,
+    "nsimEst": 10,
+    "quantile": 0.8,
+    "contestSampleCutoff": 20000,
+    "removeCutoffContests": false,
+    "simFuzzPct": 0.001,
+    "minRecountMargin": 0.005,
+    "removeTooManyPhantoms": false,
+    "oaConfig": {
+        "strategy": "optimalComparison",
+        "d": 100,
+        "useFirst": true
+    },
+    "oaBettingStrategy": {
+        "strategy": "optimalComparison"
+    },
+    "version": 2.0,
+    "skipContests": []
+}

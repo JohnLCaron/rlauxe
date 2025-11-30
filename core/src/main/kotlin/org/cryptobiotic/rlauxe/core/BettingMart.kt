@@ -11,7 +11,6 @@ class BettingMart(
     val bettingFn : BettingFn,
     val N: Int,             // diluted number of cards for this contest, only used by populationMeanIfH0
     val withoutReplacement: Boolean = true,
-    val tracker: SampleTracker, // for comparison assorters who need rate counting. set to 0 for polling
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val sampleUpperBound: Double,  // the upper bound of the values of the sequence; bassort for CLCA
 ): RiskTestingFn {
@@ -27,6 +26,7 @@ class BettingMart(
     override fun testH0(maxSamples: Int,
                         terminateOnNullReject: Boolean,
                         startingTestStatistic: Double,
+                        tracker: SampleTracker,
                         drawSample : () -> Double) : TestH0Result {
         // require(!withoutReplacement || maxSamples <= Nc) TODO problems with redacted cvrs ? too many undervotes ??
 

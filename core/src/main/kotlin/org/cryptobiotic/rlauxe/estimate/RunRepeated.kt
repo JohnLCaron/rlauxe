@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
+import org.cryptobiotic.rlauxe.core.SampleTracker
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.Sampling
@@ -19,6 +20,7 @@ fun runTestRepeated(
     testParameters: Map<String, Double>,
     terminateOnNullReject: Boolean = true,
     startingTestStatistic: Double = 1.0,
+    tracker: SampleTracker,
     N:Int, // maximum cards in the contest (diluted)
 ): RunTestRepeatedResult {
     var totalSamplesNeeded = 0
@@ -30,10 +32,13 @@ fun runTestRepeated(
 
     repeat(ntrials) {
         if (it != 0) drawSample.reset() // this creates all the variation for the estimation
+        tracker.reset()
+
         val testH0Result = testFn.testH0(
             maxSamples=drawSample.maxSamples(),
             terminateOnNullReject=terminateOnNullReject,
-            startingTestStatistic = startingTestStatistic) { drawSample.sample() }
+            startingTestStatistic = startingTestStatistic,
+            tracker=tracker) { drawSample.sample() }
 
         val currCount = statusMap.getOrPut(testH0Result.status) { 0 }
         statusMap[testH0Result.status] = currCount + 1

@@ -629,12 +629,11 @@ fun replicate_p_values(
     )
 
     val betta = BettingMart(bettingFn = optimal, N = N,
-        tracker = ClcaErrorTracker(0.0),
         sampleUpperBound = cassorter.upperBound(),
         withoutReplacement = false)
 
     val debugSeq = betta.setDebuggingSequences()
-    val result = betta.testH0(sample_size, true) { sampling.sample() }
+    val result = betta.testH0(sample_size, true,  tracker = ClcaErrorTracker(0.0)) { sampling.sample() }
     println(result)
     println("pvalues=  ${debugSeq.pvalues()}")}
 
@@ -645,12 +644,6 @@ fun calc_sample_sizes(
 ): RunTestRepeatedResult {
 
     val N = cvrs.size
-    //val auditComparison = makeRaireComparisonAudit(contests, cvrs)
-    //val comparisonAssertions = auditComparison.assertions.values.first()
-    // val minAssorter = comparisonAssertions[1].assorter // the one with the smallest margin
-    //val minAssertion = comparisonAssertions.minBy { it.margin }
-    //val minAssorter = minAssertion.assorter
-
     val contest = contests.first().addStandardAssertions()
     val cassorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
@@ -664,7 +657,6 @@ fun calc_sample_sizes(
         PluralityErrorRates(.001, .01, 0.0, 0.0),
     )
     val betta = BettingMart(bettingFn = optimal, N = N,
-        tracker = PluralityErrorTracker(0.0),
         sampleUpperBound = cassorter.upperBound(), withoutReplacement = false)
 
     return runTestRepeated(
@@ -673,8 +665,8 @@ fun calc_sample_sizes(
         ntrials = ntrials,
         testFn = betta,
         testParameters = mapOf("p2o" to optimal.p2o, "margin" to cassorter.assorter().reportedMargin()),
-        // margin = minAssorter.assorter().reportedMargin(),
         N = N,
+        tracker = PluralityErrorTracker(0.0),
     )
 }
 

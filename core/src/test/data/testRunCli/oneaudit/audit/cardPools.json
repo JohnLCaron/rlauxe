@@ -1,0 +1,31 @@
+{
+    "cardsPools": [
+        {
+            "type": "CardPoolFromCvrs",
+            "cardPoolFromCvrs": {
+                "poolName": "noCvr",
+                "poolId": 42,
+                "contestTabs": {
+                    "1": {
+                        "votes": {
+                            "0": 250,
+                            "1": 245
+                        },
+                        "ncards": 500,
+                        "novote": 5,
+                        "undervotes": 5,
+                        "overvotes": 0
+                    },
+                    "2": {
+                        "votes": {},
+                        "ncards": 100,
+                        "novote": 100,
+                        "undervotes": 100,
+                        "overvotes": 0
+                    }
+                },
+                "totalCards": 600
+            }
+        }
+    ]
+}

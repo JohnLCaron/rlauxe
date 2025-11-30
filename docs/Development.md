@@ -58,9 +58,10 @@ last changed: 03/10/2025
 
 # TODO 11/29/25
 
+* hasStyle
+* raire, oaIrv
 * review strategies and fuzzing in estimation
 * review strategies and fuzzing in auditing
 * replace old plots
-* raire
 * dhondt, threshold assorters
 

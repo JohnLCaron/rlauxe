@@ -38,7 +38,7 @@ fun runAlphaMartRepeated(
         ntrials = ntrials,
         testFn = alpha,
         testParameters = mapOf("eta0" to eta0, "d" to d.toDouble(), "margin" to mean2margin(eta0)),
-        // margin = mean2margin(eta0),
         N=N,
-    )
+        tracker = ClcaErrorTracker(0.0),
+   )
 }

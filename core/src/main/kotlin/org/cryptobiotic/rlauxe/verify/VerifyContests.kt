@@ -338,7 +338,7 @@ fun verifyClcaAssortAvg(
     var allOk = true
 
     // sum all the assorter values in one pass across all the cvrs, including Pools
-    val cardAssortAvgs = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+    val cardAssortAvgs = mutableMapOf<Int, MutableMap<String, AssortAvg>>()  // contest -> assorter -> average
     cards.use { cardIter ->
         while (cardIter.hasNext()) {
             val card = cardIter.next()
@@ -347,7 +347,7 @@ fun verifyClcaAssortAvg(
                 val avg = cardAssortAvgs.getOrPut(contestUA.id) { mutableMapOf() }
                 contestUA.clcaAssertions.forEach { cassertion ->
                     val passorter = cassertion.assorter
-                    val assortAvg = avg.getOrPut(passorter) { AssortAvg() }
+                    val assortAvg = avg.getOrPut(passorter.hashcodeDesc()) { AssortAvg() }
                     if (card.hasContest(contestUA.id)) {
                         assortAvg.ncards++
                         assortAvg.totalAssort += passorter.assort(card.cvr(), usePhantoms = false)
@@ -362,7 +362,7 @@ fun verifyClcaAssortAvg(
         val cardAssortAvg = cardAssortAvgs[contestUA.id]!!
         contestUA.pollingAssertions.forEach { assertion ->
             val passorter = assertion.assorter
-            val assortAvg = cardAssortAvg[passorter]!!
+            val assortAvg = cardAssortAvg[passorter.hashcodeDesc()]!!
             val dilutedMargin = contestUA.makeDilutedMargin(passorter)
             if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
                 result.addError("  dilutedMargin does not agree for contest ${contestUA.id} assorter='$passorter'")

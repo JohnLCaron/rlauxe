@@ -97,26 +97,6 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
 
     override fun toString(): String = desc()
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is PluralityAssorter) return false
-
-        if (winner != other.winner) return false
-        if (loser != other.loser) return false
-        if (reportedMean != other.reportedMean) return false
-        if (info != other.info) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = winner
-        result = 31 * result + loser
-        result = 31 * result + reportedMean.hashCode()
-        result = 31 * result + info.hashCode()
-        return result
-    }
-
     companion object {
         fun makeWithVotes(contest: ContestIF, winner: Int, loser: Int, votes: Map<Int, Int>? = null): PluralityAssorter {
             val useVotes = votes ?: (contest as Contest).votes
@@ -161,28 +141,6 @@ data class SuperMajorityAssorter(val info: ContestInfo, val candId: Int, val min
 
     override fun toString(): String {
         return "SuperMajorityAssorter(candId=$candId, minFraction=$minFraction, reportedMargin=${pfn(reportedMargin())}, upperBound=$upperBound)"
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is SuperMajorityAssorter) return false
-
-        if (candId != other.candId) return false
-        if (minFraction != other.minFraction) return false
-        if (upperBound != other.upperBound) return false
-        if (reportedMean != other.reportedMean) return false
-        if (info != other.info) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = candId
-        result = 31 * result + minFraction.hashCode()
-        result = 31 * result + upperBound.hashCode()
-        result = 31 * result + reportedMean.hashCode()
-        result = 31 * result + info.hashCode()
-        return result
     }
 
     companion object {

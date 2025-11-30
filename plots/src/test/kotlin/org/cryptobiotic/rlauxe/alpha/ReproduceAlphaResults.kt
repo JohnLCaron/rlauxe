@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.plots.plotSRS
@@ -143,6 +144,7 @@ class ReproduceAlphaResults {
                     for (d in dl) {
                         val trunc = TruncShrinkage(N = N, upperBound = upperBound, d = d, eta0 = eta0, c = c)
                         val alpha = AlphaMart(estimFn = trunc, N = N, upperBound=upperBound)
+                        val tracker = ClcaErrorTracker(0.0)
 
                         print("  eta0=$eta0 d=$d")
                         val result =  runTestRepeated(
@@ -151,6 +153,7 @@ class ReproduceAlphaResults {
                             testFn = alpha,
                             testParameters = mapOf("eta0" to eta0, "d" to d.toDouble(), "margin" to mean2margin(eta0)),
                             N=N,
+                            tracker=tracker
                         )
                         println("  avgSamplesNeeded = ${result.avgSamplesNeeded()}")
                         al.add(result.makeSRT(theta, 0.0))

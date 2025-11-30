@@ -237,32 +237,6 @@ data class RaireAssertion(
 
     fun remaining(candidateIds: List<Int>) = candidateIds.filter { !eliminated.contains(it) }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is RaireAssertion) return false
-
-        if (winnerId != other.winnerId) return false
-        if (loserId != other.loserId) return false
-        if (difficulty != other.difficulty) return false
-        if (marginInVotes != other.marginInVotes) return false
-        if (assertionType != other.assertionType) return false
-        if (eliminated != other.eliminated) return false
-        if (votes != other.votes) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = winnerId
-        result = 31 * result + loserId
-        result = 31 * result + difficulty.hashCode()
-        result = 31 * result + marginInVotes
-        result = 31 * result + assertionType.hashCode()
-        result = 31 * result + eliminated.hashCode()
-        result = 31 * result + votes.hashCode()
-        return result
-    }
-
     companion object {
         // Note aand and votes are in index space
         fun convertAssertion(candidateIds: List<Int>, aandd: AssertionAndDifficulty, votes: Map<Int, Int>): RaireAssertion {
@@ -317,7 +291,7 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
         if (rassertion.assertionType == RaireAssertionType.irv_elimination) append(" eliminated=${rassertion.eliminated}")
         append(" votes=${rassertion.votes}")
     }
-    override fun hashcodeDesc() = "${winLose()} ${info.name} ${rassertion.hashCode()}" // must be unique for serialization
+    override fun hashcodeDesc() = "${winLose()} ${info.name} ${rassertion.marginInVotes}" // must be unique for serialization
 
     override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
         return rassertion.marginInVotes / N.toDouble()
@@ -359,28 +333,6 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
     }
 
     override fun toString() = desc()
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is RaireAssorter) return false
-
-        if (contestId != other.contestId) return false
-        if (reportedMean != other.reportedMean) return false
-        if (rassertion != other.rassertion) return false
-        if (remaining != other.remaining) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = contestId
-        result = 31 * result + reportedMean.hashCode()
-        result = 31 * result + rassertion.hashCode()
-        result = 31 * result + remaining.hashCode()
-        return result
-    }
-
-
 }
 
 /** Duplicating the math from SHANGRLA CVR in Audit.py */

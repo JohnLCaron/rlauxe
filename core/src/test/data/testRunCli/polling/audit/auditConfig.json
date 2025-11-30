@@ -1,0 +1,18 @@
+{
+    "auditType": "POLLING",
+    "hasStyle": true,
+    "riskLimit": 0.05,
+    "seed": -2777275270559684786,
+    "nsimEst": 100,
+    "quantile": 0.8,
+    "contestSampleCutoff": 30000,
+    "removeCutoffContests": false,
+    "minRecountMargin": 0.005,
+    "removeTooManyPhantoms": false,
+    "pollingConfig": {
+        "d": 100
+    },
+    "pollingErrorStrategy": {},
+    "version": 2.0,
+    "skipContests": []
+}

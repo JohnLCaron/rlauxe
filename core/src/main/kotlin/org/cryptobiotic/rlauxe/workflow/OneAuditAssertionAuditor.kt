@@ -107,7 +107,10 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             riskLimit = config.riskLimit,
             upperBound = upperBound,
         )
-        return alpha.testH0(sampling.maxSamples(), terminateOnNullReject = true) { sampling.sample() }
+
+         val tracker = ClcaErrorTracker(cassorter.noerror()) // track pool data; something better to do?
+
+         return alpha.testH0(sampling.maxSamples(), terminateOnNullReject = true, tracker=tracker) { sampling.sample() }
     }
 
     fun runBetting(
@@ -119,17 +122,19 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         p2: Double,
     ): TestH0Result {
 
+        // TODO something better ??
         val bettingFn: BettingFn = OptimalComparisonNoP1(N=N, true, upperBound, p2 = p2)
 
         val testFn = BettingMart(
             bettingFn = bettingFn,
             N = N,
-            tracker = ClcaErrorTracker(cassorter.noerror()), // track pool data; something better to do?
             sampleUpperBound = cassorter.upperBound(),
             riskLimit = config.riskLimit,
             withoutReplacement = true
         )
 
-        return testFn.testH0(sampling.maxSamples(), terminateOnNullReject = true) { sampling.sample() }
+        val tracker = ClcaErrorTracker(cassorter.noerror()) // track pool data; something better to do?
+
+        return testFn.testH0(sampling.maxSamples(), terminateOnNullReject = true, tracker=tracker) { sampling.sample() }
     }
 }

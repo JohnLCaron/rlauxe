@@ -16,7 +16,7 @@ class TestRunCli {
 
     @Test
     fun testCliRoundClca() {
-        val topdir = "/home/stormy/rla/persist/testCliRoundClca"
+        val topdir = "/home/stormy/rla/persist/testRunCli/clca"
         val auditdir = "$topdir/audit"
 
         RunRlaStartFuzz.main(
@@ -49,7 +49,7 @@ class TestRunCli {
 
     @Test
     fun testCliRoundPolling() {
-        val topdir = "/home/stormy/rla/persist/testCliRoundPolling"
+        val topdir = "/home/stormy/rla/persist/testRunCli/polling"
         val auditdir = "$topdir/audit"
 
         RunRlaStartFuzz.main(
@@ -87,7 +87,7 @@ class TestRunCli {
 
     @Test
     fun testCliRoundRaire() {
-        val topdir = "/home/stormy/rla/persist/testCliRoundRaire"
+        val topdir = "/home/stormy/rla/persist/testRunCli/raire"
         val auditdir = "$topdir/audit"
 
         RunRlaStartFuzz.main(
@@ -122,7 +122,7 @@ class TestRunCli {
 
     @Test
     fun testCliOneAudit() {
-        val topdir = "/home/stormy/rla/persist/testCliRoundOneAudit"
+        val topdir = "/home/stormy/rla/persist/testRunCli/oneaudit"
         val auditdir = "$topdir/audit"
 
         RunRlaCreateOneAudit.main(

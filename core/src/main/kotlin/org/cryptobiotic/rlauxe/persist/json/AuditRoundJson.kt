@@ -102,6 +102,7 @@ data class ContestRoundJson(
     val done: Boolean,
     val included: Boolean,
     val status: TestH0Status, // or its own enum ??
+    val estSampleSizeNoStyles: Int?=null, // TODO remove
 )
 
 fun ContestRound.publishJson() : ContestRoundJson {
@@ -124,8 +125,10 @@ fun ContestRoundJson.import(contestUA: ContestUnderAudit): ContestRound {
     val assertionMap = contestUA.assertions().associateBy { it.assorter.hashcodeDesc() }
     val assertionRounds = assertionRounds.map {
         val ref = assertionMap[it.assorterDesc]
-        if (ref == null)
-            throw RuntimeException("ContestRoundJson.assorterDesc '${it.assorterDesc}' is missing")
+        if (ref == null) {
+            assertionMap.forEach { key, value -> println("$key = ${value.assorter}") }
+            throw RuntimeException("ContestRoundJson.assorter desc='${it.assorterDesc}' is missing")
+        }
         it.import( ref )
     }
     val contestRound = ContestRound(contestUA, assertionRounds, this.roundIdx)

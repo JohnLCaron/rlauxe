@@ -27,6 +27,11 @@ The other place is maybe in bassort(hasStyle)?
 generalise haStyle: "all", "cvrsAreComplete", etc ??
 
 ==================
+if you have card style for a cvr then you know the undervotes. so you dont need to record it
+so possibleContests == poolContests OR possible contests in sample population
+OA pools vs sample populations
+
+=============================================
 
 Attacks
 

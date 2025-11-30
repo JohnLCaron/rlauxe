@@ -8,7 +8,7 @@ class TestEnterMvrsCli {
 
     @Test
     fun testEnterMvrsClca() {
-        val auditDir = "src/test/data/workflow/testCliRoundClca/audit"
+        val auditDir = "src/test/data/testRunCli/clca/audit"
         EnterMvrsCli.main(
             arrayOf(
                 "-in", auditDir,

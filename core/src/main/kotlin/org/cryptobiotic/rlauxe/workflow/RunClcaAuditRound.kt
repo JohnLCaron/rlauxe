@@ -121,7 +121,6 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val testFn = BettingMart(
             bettingFn = bettingFn,
             N = contestUA.Nb,
-            tracker = tracker,
             sampleUpperBound = cassorter.upperBound(),
             riskLimit = config.riskLimit,
             withoutReplacement = true
@@ -129,7 +128,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         // testFn.setDebuggingSequences()
 
         val terminateOnNullReject = config.auditSampleLimit == null
-        val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = terminateOnNullReject) { sampling.sample() }
+        val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = terminateOnNullReject, tracker=tracker) { sampling.sample() }
 
         val measuredCounts = if (testH0Result.tracker is ClcaErrorRatesIF) testH0Result.tracker.errorCounts() else null
         assertionRound.auditResult = AuditRoundResult(

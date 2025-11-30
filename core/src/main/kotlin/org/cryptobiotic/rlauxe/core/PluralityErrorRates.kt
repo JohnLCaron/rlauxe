@@ -163,7 +163,7 @@ class PluralityErrorTracker(val noerror: Double) : SampleTracker, ClcaErrorRates
     private val isClca = (noerror > 0.0)
     private var last = 0.0
     private var sum = 0.0
-    private val welford = Welford()
+    private var welford = Welford()
     private var countP0 = 0
     private var countP1o = 0
     private var countP2o = 0
@@ -193,6 +193,17 @@ class PluralityErrorTracker(val noerror: Double) : SampleTracker, ClcaErrorRates
             else if (doubleIsClose(sample, noerror * 1.5)) countP1u++
             else if (doubleIsClose(sample, noerror * 2.0)) countP2u++
         }
+    }
+
+    override fun reset() {
+        last = 0.0
+        sum = 0.0
+        welford = Welford()
+        countP0 = 0
+        countP1o = 0
+        countP2o = 0
+        countP2u = 0
+        countP1u = 0
     }
 
     override fun errorRates(): Map<Double, Double> {

@@ -15,6 +15,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
+import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.core.RiskTestingFn
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
@@ -78,6 +79,7 @@ class RunRepeatedTasks {
         silent: Boolean = false
     ): RunTestRepeatedResult {
         if (!silent) println(" runTask=${task.name()}")
+        val tracker = ClcaErrorTracker(0.0)
 
         return runTestRepeated(
             drawSample = task.makeSampler(),
@@ -85,6 +87,7 @@ class RunRepeatedTasks {
             testFn = task.makeTestFn(),
             testParameters = task.makeTestParameters(),
             N=task.N(),
+            tracker=tracker,
         )
     }
 

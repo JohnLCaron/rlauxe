@@ -73,7 +73,8 @@ fun auditPollingAssertion(
         upperBound = assorter.upperBound(),
     )
 
-    val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject=true) { sampling.sample() }
+    val tracker = ClcaErrorTracker(0.0)
+    val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject=true, tracker=tracker) { sampling.sample() }
 
     assertionRound.auditResult = AuditRoundResult(roundIdx,
         nmvrs = sampling.nmvrs(),

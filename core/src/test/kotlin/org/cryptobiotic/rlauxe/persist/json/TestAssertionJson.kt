@@ -26,7 +26,6 @@ class TestAssertionJson {
         val assertion = makeAssertion()
         val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasStyle=false, dilutedMargin=.111)
         val target = ClcaAssertion(assertion.info, cassorter)
-        // val fakeContest = Contest(target.info, emptyMap(), 0, 0)
 
         val json = target.publishJson()
         val roundtrip = json.import(assertion.info)
@@ -35,22 +34,6 @@ class TestAssertionJson {
     }
 
     fun makeAssertion(): Assertion {
-        // Assertion(
-        //    val contest: ContestIF,
-        //    val assorter: AssorterFunction,
-        //) {
-        //    val winner = assorter.winner()
-        //    val loser = assorter.loser()
-        //
-        //    // these values are set during estimateSampleSizes()
-        //    var estSampleSize = 0   // estimated sample size for current round
-        //    var estNewSamples = 0   // estimated new sample size for current round
-        //    val estRoundResults = mutableListOf<EstimationRoundResult>()
-        //
-        //    // these values are set during runAudit()
-        //    val roundResults = mutableListOf<AuditRoundResult>()
-        //    var status = TestH0Status.InProgress
-        //    var round = 0           // round when set to proved or disproved
         val info = ContestInfo(
             name = "AvB",
             id = 0,

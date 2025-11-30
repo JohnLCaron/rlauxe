@@ -43,9 +43,9 @@ class ClcaCardFuzzSampler(
     }
 
     override fun reset() {
-        val mvrs = remakeFuzzed()
+        val mvrs = remakeFuzzed() // refuzz each time
         cvrPairs = mvrs.zip(cards)
-        permutedIndex.shuffle(Random)
+        permutedIndex.shuffle(Random) // also, a new permutation....
         idx = 0
     }
 

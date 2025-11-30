@@ -120,8 +120,9 @@ class TestAlphaMart {
         val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
         val sampler = SampleFromArray(x.toDoubleArray())
+        val tracker = ClcaErrorTracker(0.0)
 
-        val result = alpha.testH0(x.size, false) { sampler.sample() }
+        val result = alpha.testH0(x.size, false, tracker=tracker) { sampler.sample() }
         println(" test_shrink_trunk_f1 = ${result}")
 
         val pvalues = dseq.pvalues()
@@ -157,8 +158,9 @@ class TestAlphaMart {
         val alpha = AlphaMart(estimFn = estimFn, N = N, withoutReplacement = false, upperBound = u)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
         val sampler = SampleFromArray(x.toDoubleArray())
+        val tracker = ClcaErrorTracker(0.0)
 
-        val result = alpha.testH0(x.size, false) { sampler.sample() }
+        val result = alpha.testH0(x.size, false, tracker=tracker) { sampler.sample() }
         println(" test_shrink_trunk_f1_wreplacement = ${result}")
 
         val pvalues = dseq.pvalues()
@@ -222,7 +224,9 @@ class TestAlphaMart {
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
 
         val sampler = SampleFromArray(x.toDoubleArray())
-        return Pair(alpha.testH0(x.size, true) { sampler.sample() }, dseq)
+        val tracker = ClcaErrorTracker(0.0)
+
+        return Pair(alpha.testH0(x.size, true, tracker=tracker) { sampler.sample() }, dseq)
     }
 
     fun testAlphaMartBatch(eta0: Double, x: List<Double>, u: Double = 1.0): Pair<TestH0Result, DebuggingSequences> {
@@ -235,7 +239,9 @@ class TestAlphaMart {
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
 
         val sampler = SampleFromArray(x.toDoubleArray())
-        return Pair(alpha.testH0(x.size, false) { sampler.sample() }, dseq)
+        val tracker = ClcaErrorTracker(0.0)
+
+        return Pair(alpha.testH0(x.size, false, tracker=tracker) { sampler.sample() }, dseq)
     }
 
     @Test

@@ -116,12 +116,11 @@ class AuditCobraAssertion(
         val testFn = BettingMart(
             bettingFn = adaptive,
             N = contestUA.Nb,
-            tracker = tracker,
             sampleUpperBound = cassorter.upperBound(),
             withoutReplacement = true
         )
 
-        val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = true) { sampling.sample() }
+        val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = true, tracker=tracker) { sampling.sample() }
         val samplesNeeded = testH0Result.sampleCount
 
         val measuredCounts = if (testH0Result.tracker is ClcaErrorRatesIF)

@@ -57,5 +57,6 @@ fun doOneAlphaMartRun(
         withoutReplacement = withoutReplacement,
     )
 
-    return alpha.testH0(maxSamples, terminateOnNullReject = true) { drawSample.sample() }
+    val tracker = ClcaErrorTracker(0.0)
+    return alpha.testH0(maxSamples, terminateOnNullReject = true, tracker=tracker) { drawSample.sample() }
 }

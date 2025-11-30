@@ -14,6 +14,7 @@ class RaireContestAuditTaskGenerator(
     val clcaConfigIn: ClcaConfig? = null,
     val nsimEst: Int = 100,
     ): ContestAuditTaskGenerator {
+
     override fun name() = "RaireWorkflowTaskGenerator"
 
     override fun generateNewTask(): ContestAuditTask {
@@ -36,7 +37,7 @@ class RaireContestAuditTaskGenerator(
 
         val clca = WorkflowTesterClca(
             useConfig, emptyList(), listOf(rcontest),
-            MvrManagerForTesting(testCvrs, testMvrs, useConfig.seed),
+            MvrManagerForTesting(cvrs=testCvrs, mvrs=testMvrs, useConfig.seed),
         )
         return ContestAuditTask(
             name(),

@@ -60,7 +60,7 @@ fun computeBassortValues(noerror: Double, upper: Double): List<Double> {
 class ClcaErrorTracker(val noerror: Double, val debug:Boolean=false) : SampleTracker, ClcaErrorRatesIF {
     private var last = 0.0
     private var sum = 0.0
-    private val welford = Welford()
+    private var welford = Welford()
 
     override fun last() = last
     override fun numberOfSamples() = welford.count
@@ -85,6 +85,14 @@ class ClcaErrorTracker(val noerror: Double, val debug:Boolean=false) : SampleTra
                 if (debug) println("--> error $sample")
             }
         }
+    }
+
+    override fun reset() {
+        last = 0.0
+        sum = 0.0
+        welford = Welford()
+        valueCounter.clear()
+        noerrorCount = 0
     }
 
     override fun errorRates() = valueCounter.mapValues { it.value / numberOfSamples().toDouble() }

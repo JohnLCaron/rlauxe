@@ -101,22 +101,6 @@ class TestMakeOneContestUA {
 
     @Test
     fun testProblem() {
-        //         RunRlaCreateOneAudit.main(
-        //            arrayOf(
-        //                "-in", topdir,
-        //                "-minMargin", "0.01",
-        //                "-fuzzMvrs", "0.001",
-        //                "-ncards", "10000",
-        //                "-ncontests", "10", // ignored
-        //                "--addRaireContest",
-        //                "--addRaireCandidates", "5",
-        //            )
-        //        )
-        //                 margin = minMargin,
-        //                Nc = ncards,
-        //                cvrFraction = .95,
-        //                undervoteFraction = .01,
-        //                phantomFraction = pctPhantoms ?: 0.0
         val margin = .01
         val cvrPercent = 0.95
         val phantomPercent = 0.0

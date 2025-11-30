@@ -207,16 +207,17 @@ class AlphaMart(
 
     init {
         val bettingFn = EstimAdapter(N, withoutReplacement, upperBound, estimFn)
-        betting = BettingMart(bettingFn, N, withoutReplacement, ClcaErrorTracker(0.0), riskLimit, upperBound)
+        betting = BettingMart(bettingFn, N, withoutReplacement, riskLimit, upperBound)
     }
 
     override fun testH0(
         maxSamples: Int,
         terminateOnNullReject: Boolean,
         startingTestStatistic: Double,
+        tracker: SampleTracker,
         drawSample: () -> Double,
     ): TestH0Result {
-        return betting.testH0(maxSamples, terminateOnNullReject, startingTestStatistic, drawSample)
+        return betting.testH0(maxSamples, terminateOnNullReject, startingTestStatistic, tracker, drawSample)
     }
 
     fun setDebuggingSequences(): DebuggingSequences {

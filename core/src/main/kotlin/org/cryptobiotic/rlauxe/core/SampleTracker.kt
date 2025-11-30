@@ -10,6 +10,7 @@ interface SampleTracker {
     fun mean(): Double   // average of samples so far
     fun variance(): Double   // variance of samples so far
     fun addSample(sample : Double)
+    fun reset()
 }
 
 /**
@@ -21,7 +22,7 @@ interface SampleTracker {
 class PrevSamples : SampleTracker {
     private var last = 0.0
     private var sum = 0.0
-    private val welford = Welford()
+    private var welford = Welford()
 
     override fun last() = last
     override fun numberOfSamples() = welford.count
@@ -33,5 +34,11 @@ class PrevSamples : SampleTracker {
         last = sample
         sum += sample
         welford.update(sample)
+    }
+
+    override fun reset() {
+        last = 0.0
+        sum = 0.0
+        welford = Welford()
     }
 }

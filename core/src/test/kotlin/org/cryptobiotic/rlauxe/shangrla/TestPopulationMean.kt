@@ -151,7 +151,7 @@ class TestPopulationMeanWithoutReplacement {
 
         val sampler = SampleFromArray(x.toDoubleArray())
         println("alphaTestH0")
-        alpha.testH0(x.size, false) { sampler.sample() }
+        alpha.testH0(x.size, false, tracker=ClcaErrorTracker(0.0)) { sampler.sample() }
 
         // alphaTestH0
         // 1: howAbout sum=0.0 result = 0.5
@@ -226,7 +226,9 @@ class TestPopulationMeanWithoutReplacement {
         override fun sum() = count * .5
         override fun mean() = 0.5
         override fun variance() = 0.0
-        override fun addSample(sample: Double) {
+        override fun addSample(sample: Double) {}
+        override fun reset() {
+            count = 0
         }
     }
 
@@ -247,12 +249,16 @@ class TestPopulationMeanWithoutReplacement {
     class ComparisonSamples(awinnerAvg: Double): SampleTracker {
         val noerror = 1.0 / (3 - 2 * awinnerAvg)
         var count = 0
+
         override fun last() = noerror
         override fun numberOfSamples() = count
         override fun sum() = count * noerror
         override fun mean() = noerror
         override fun variance() = 0.0
-        override fun addSample(sample: Double) {
+        override fun addSample(sample: Double) {}
+
+        override fun reset() {
+            count = 0
         }
     }
 }

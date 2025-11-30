@@ -12,19 +12,20 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
     val gamma = 1.03
 
     override fun testH0(
-        maxSample: Int,
+        maxSamples: Int,
         terminateOnNullReject: Boolean,
         startingTestStatistic: Double, // TODO ignore?
+        tracker: SampleTracker,
         drawSample: () -> Double
     ): TestH0Result {
-        require(maxSample <= N)
+        require(maxSamples <= N)
 
         var sampleNumber = 0        // – j ← 0: sample number
         val prevSamples = PluralityErrorTracker(noerror) // – S ← 0: sample sum
         var pvalue = 0.0
         var pvalueMin = 1.0
 
-        while (sampleNumber < maxSample) {
+        while (sampleNumber < maxSamples) {
             val xj: Double = drawSample()
             sampleNumber++ // j <- j + 1
             //xs.add(xj)

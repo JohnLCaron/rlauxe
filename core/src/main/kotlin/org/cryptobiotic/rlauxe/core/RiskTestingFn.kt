@@ -43,6 +43,7 @@ interface RiskTestingFn {
         maxSamples: Int,
         terminateOnNullReject: Boolean,
         startingTestStatistic: Double = 1.0,
+        tracker: SampleTracker,
         drawSample: () -> Double,
     ): TestH0Result
 }

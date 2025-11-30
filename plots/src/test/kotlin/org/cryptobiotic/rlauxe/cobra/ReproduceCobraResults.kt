@@ -38,12 +38,12 @@ class ReproduceCobraResults {
                 val sampler = makeClcaNoErrorSampler(cassorter.info.id,  cvrs, cassorter)
                 val upperBound = cassorter.upperBound()
                 println("testFigure1: alpha=${alpha} margin=${margin} a=${cassorter.noerror()}")
+                val tracker = ClcaErrorTracker(cassorter.noerror())
 
                 val fixed = FixedBet(2.0)
                 val betting =
                     BettingMart(
                         riskLimit = alpha, bettingFn = fixed, N = N, withoutReplacement = false,
-                        tracker = ClcaErrorTracker(cassorter.noerror()),
                         sampleUpperBound = upperBound
                     )
 
@@ -53,6 +53,7 @@ class ReproduceCobraResults {
                     testFn = betting,
                     testParameters = mapOf("alpha" to alpha, "margin" to margin),
                     N=N,
+                    tracker=tracker
                 )
                 println("  result = ${result.status} ${result.avgSamplesNeeded()}")
 
@@ -90,6 +91,7 @@ class ReproduceCobraResults {
                     ClcaAttackSampler(cvrs, cassorter, p2 = p2, p1 = 0.0, withoutReplacement = false)
                 val upperBound = cassorter.upperBound()
                 println("testTable1: margin=${margin} a=${cassorter.noerror()} p2=${p2}")
+                val tracker = ClcaErrorTracker(cassorter.noerror())
 
                 val oracle = OptimalComparisonNoP1(
                     N = N,
@@ -99,7 +101,6 @@ class ReproduceCobraResults {
                 )
                 val betting =
                     BettingMart(bettingFn = oracle, N = N,
-                        tracker = ClcaErrorTracker(cassorter.noerror()),
                         sampleUpperBound = upperBound, withoutReplacement = false)
 
                 val result = runTestRepeated(
@@ -108,6 +109,7 @@ class ReproduceCobraResults {
                     testFn = betting,
                     testParameters = mapOf("p2" to p2, "margin" to margin),
                     N=N,
+                    tracker=tracker,
                 )
                 println("  result = ${result.avgSamplesNeeded()} ${showDeciles(result.sampleCount)}")
 
@@ -161,6 +163,7 @@ class ReproduceCobraResults {
                             )
                         val upperBound = cassorter.upperBound()
                         println("testTable2OracleBets: p1=${p1}  p2=${p2}")
+                        val tracker = ClcaErrorTracker(cassorter.noerror())
 
                         val oracle = OracleComparison(
                             a = cassorter.noerror(),
@@ -168,7 +171,6 @@ class ReproduceCobraResults {
                         )
                         val betting =
                             BettingMart(bettingFn = oracle, N = N,
-                                tracker = ClcaErrorTracker(cassorter.noerror()),
                                 sampleUpperBound = upperBound, withoutReplacement = false)
 
                         val result = runTestRepeated(
@@ -179,6 +181,7 @@ class ReproduceCobraResults {
                             testParameters = mapOf("p1" to p1, "p2" to p2, "margin" to margin),
                             // margin = margin,
                             N=N,
+                            tracker=tracker,
                             )
                         println("  result = ${result.avgSamplesNeeded()} ${showDeciles(result.sampleCount)}")
                         val expected = findTable2Entry(p2 = p2, p1 = p1, p2prior = p2m, p1prior = p1m)
@@ -256,7 +259,6 @@ class ReproduceCobraResults {
 
                         val betting =
                             BettingMart(bettingFn = adaptive, N = N,
-                                tracker = tracker,
                                 sampleUpperBound = upperBound, withoutReplacement = false)
 
                         val result = runTestRepeated(
@@ -265,6 +267,7 @@ class ReproduceCobraResults {
                             testFn = betting,
                             testParameters = mapOf("p1" to p1o, "p2" to p2o, "margin" to margin),
                             N=N,
+                            tracker=tracker
                         )
                         println("  result = ${result.avgSamplesNeeded()} dist: ${showDeciles(result.sampleCount)}")
                         val expected = findTable2Entry(p2 = p2o, p1 = p1o, p2prior = p2prior, p1prior = p1prior)

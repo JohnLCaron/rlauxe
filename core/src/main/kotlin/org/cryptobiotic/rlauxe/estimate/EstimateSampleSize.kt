@@ -279,7 +279,6 @@ fun runRepeatedBettingMart(
     val testFn = BettingMart(
         bettingFn = bettingFn,
         N = N,
-        tracker = tracker,
         riskLimit = config.riskLimit,
         sampleUpperBound = upperBound,
     )
@@ -291,6 +290,7 @@ fun runRepeatedBettingMart(
         testFn = testFn,
         testParameters = moreParameters,
         startingTestStatistic = startingTestStatistic,
+        tracker = tracker,
         N = N,
     )
     return result
@@ -373,6 +373,7 @@ fun runRepeatedAlphaMart(
         testFn = testFn,
         testParameters = mapOf("ntrials" to config.nsimEst.toDouble(), "polling" to 1.0) + moreParameters,
         startingTestStatistic = startingTestStatistic,
+        tracker = ClcaErrorTracker(0.0),
         N = N,
     )
     return result

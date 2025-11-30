@@ -1,21 +1,22 @@
 {
-    "auditType": "CLCA",
+    "auditType": "ONEAUDIT",
     "hasStyle": true,
     "riskLimit": 0.05,
-    "seed": -3428848163266827270,
-    "nsimEst": 100,
+    "seed": 6066567160998948212,
+    "nsimEst": 10,
     "quantile": 0.8,
-    "contestSampleCutoff": 30000,
+    "contestSampleCutoff": 20000,
     "removeCutoffContests": false,
-    "simFuzzPct": 0.0123,
+    "simFuzzPct": 0.001,
     "minRecountMargin": 0.005,
     "removeTooManyPhantoms": false,
-    "clcaConfig": {
-        "strategy": "previous",
-        "d": 100
+    "oaConfig": {
+        "strategy": "optimalComparison",
+        "d": 100,
+        "useFirst": true
     },
-    "clcaBettingStrategy": {
-        "strategy": "noerrors"
+    "oaBettingStrategy": {
+        "strategy": "optimalComparison"
     },
     "version": 2.0,
     "skipContests": []

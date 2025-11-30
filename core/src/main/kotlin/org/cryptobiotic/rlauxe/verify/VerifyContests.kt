@@ -194,13 +194,17 @@ fun verifyManifest(
     }
 
     // 2. Given the seed and the PRNG, check that the PRNs are correct and are assigned sequentially by index.
+    var countErrs = 0
     val indexSorted = indexList.sortedBy { it.first }
     val prng = Prng(config.seed)
     indexSorted.forEach {
         val prn = prng.next()
-        require(it.second == prn) // TODO dont allow to barf, but return null maybe
+        if(it.second != prn) countErrs++
     }
-    results.addMessage("  verify $count cards in the Manifest have correct prn")
+    if (countErrs > 0)
+        results.addError("  verify $count cards in the Manifest have correct prn: there are $countErrs errors")
+    else
+      results.addMessage("  verify $count cards in the Manifest have correct prn")
 
     // check if tabulation agrees with diluted count
     contestsUA.forEach {
@@ -343,7 +347,7 @@ fun verifyClcaAssortAvg(
                 val avg = cardAssortAvgs.getOrPut(contestUA.id) { mutableMapOf() }
                 contestUA.clcaAssertions.forEach { cassertion ->
                     val passorter = cassertion.assorter
-                    val assortAvg = avg.getOrPut(passorter) { AssortAvg() } // TODO could we have a hash collision ?
+                    val assortAvg = avg.getOrPut(passorter) { AssortAvg() }
                     if (card.hasContest(contestUA.id)) {
                         assortAvg.ncards++
                         assortAvg.totalAssort += passorter.assort(card.cvr(), usePhantoms = false)

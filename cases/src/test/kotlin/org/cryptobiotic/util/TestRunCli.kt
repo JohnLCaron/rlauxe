@@ -141,7 +141,7 @@ class TestRunCli {
         writeSortedCardsInternalSort(publisher, config.seed)
 
         println("============================================================")
-        val resultsvc = RunVerifyContests.runVerifyContests(auditdir, 0, false)
+        val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)
         println()
         print(resultsvc)
         if (resultsvc.hasErrors) fail()

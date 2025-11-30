@@ -255,8 +255,6 @@ data class ContestsUnderAuditJson(
 fun List<ContestUnderAudit>.publishJson() : ContestsUnderAuditJson {
     val contests = mutableListOf<ContestUnderAuditJson>()
     val rcontests = mutableListOf<RaireContestUnderAuditJson>()
-    // val oacontests = mutableListOf<ContestUnderAuditJson>()
-    // val oarcontests = mutableListOf<OAIrvContestJson>()
     this.forEach {
         if (it is RaireContestUnderAudit) {
             rcontests.add( it.publishRaireJson())
@@ -270,8 +268,6 @@ fun List<ContestUnderAudit>.publishJson() : ContestsUnderAuditJson {
 fun ContestsUnderAuditJson.import() : List<ContestUnderAudit> {
     return this.contestsUnderAudit.map { it.import() } +
             this.rcontestsUnderAudit.map { it.import() }
-            // this.oacontestsUnderAudit.map { it.import(isOA = true) } +
-            // this.oarcontestsUnderAudit.map { it.import()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////

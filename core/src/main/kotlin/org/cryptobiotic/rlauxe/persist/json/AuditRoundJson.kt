@@ -249,7 +249,7 @@ fun EstimationRoundResultJson.import() : EstimationRoundResult {
 //    val pvalue: Double,       // last pvalue when testH0 terminates
 //    val samplesUsed: Int,     // sample count when testH0 terminates
 //    val status: TestH0Status, // testH0 status
-//    val measuredMean: Double, // measured population mean TODO used?
+//    val measuredMean: Double, // measured population mean
 //    val startingRates: Map<Double, Double>? = null, // starting error rates (clca only)
 //    val measuredCounts: Map<Double, Int>? = null, // measured error counts (clca only)
 //)
@@ -263,7 +263,7 @@ data class AuditRoundResultJson(
     val pvalue: Double,       // last pvalue when testH0 terminates
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
     val status: String, // testH0 status
-    val measuredMean: Double,     // measured population mean
+    val measuredMean: Double,     // measured population mean, used for polling?
     val startingRates: Map<Double, Double>?,
     val measuredCounts: Map<Double, Int>?,
 )

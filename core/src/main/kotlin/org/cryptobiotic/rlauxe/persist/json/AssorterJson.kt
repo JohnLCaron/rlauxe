@@ -24,7 +24,7 @@ import org.cryptobiotic.rlauxe.raire.RaireAssorter
 @Serializable
 data class ClcaAssorterJson(
     val className: String,
-    val assorter: AssorterIFJson, // TODO duplicate
+    val assorter: AssorterIFJson,
     val hasStyle: Boolean,
     val dilutedMargin: Double,
     val poolAverages: AssortAvgsInPoolsJson?,

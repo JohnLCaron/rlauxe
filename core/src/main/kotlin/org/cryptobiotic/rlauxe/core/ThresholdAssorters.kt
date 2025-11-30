@@ -48,6 +48,7 @@ import org.cryptobiotic.rlauxe.util.pfn
 const val compareBelgium = false
 
 data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double): AssorterIF  {
+    val id = info.id
     val lowerg = (t-1) // aka 'a'
     val upperg = t
     val c = -1.0 / (2 * lowerg)  // 1 / 2(1-t)
@@ -75,9 +76,9 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     }
 
     override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
-        if (!mvr.hasContest(info.id)) return 0.5
+        if (!mvr.hasContest(id)) return 0.5
         if (usePhantoms && mvr.isPhantom()) return 0.0 // worst case
-        val cands = mvr.votes(info.id)
+        val cands = mvr.votes(id)
         return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }
 
@@ -159,6 +160,28 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 
     override fun toString() = desc()
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is BelowThreshold) return false
+
+        if (candId != other.candId) return false
+        if (t != other.t) return false
+        if (id != other.id) return false
+        if (reportedMean != other.reportedMean) return false
+        if (info != other.info) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = candId
+        result = 31 * result + t.hashCode()
+        result = 31 * result + id
+        result = 31 * result + reportedMean.hashCode()
+        result = 31 * result + info.hashCode()
+        return result
+    }
+
     companion object {
         fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int): BelowThreshold {
             val result = BelowThreshold(info, partyId, minFraction)
@@ -218,6 +241,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 */
 
 data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double): AssorterIF  {
+    val id = info.id
     val lowerg = -t
     val upperg = (1.0 - t)
     val c = -1.0 / (2 * lowerg)  // = 1/(2t)
@@ -244,9 +268,9 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
     }
 
     override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
-        if (!mvr.hasContest(info.id)) return 0.5
+        if (!mvr.hasContest(id)) return 0.5
         if (usePhantoms && mvr.isPhantom()) return 0.0 // worst case
-        val cands = mvr.votes(info.id)
+        val cands = mvr.votes(id)
         return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }
 
@@ -333,6 +357,26 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
     } */
 
     override fun toString() = desc()
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is AboveThreshold) return false
+
+        if (winner != other.winner) return false
+        if (t != other.t) return false
+        if (id != other.id) return false
+        if (reportedMean != other.reportedMean) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = winner
+        result = 31 * result + t.hashCode()
+        result = 31 * result + id
+        result = 31 * result + reportedMean.hashCode()
+        return result
+    }
 
     companion object {
         fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int): AboveThreshold {

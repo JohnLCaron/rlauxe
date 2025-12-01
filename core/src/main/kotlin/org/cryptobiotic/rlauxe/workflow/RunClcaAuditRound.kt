@@ -96,7 +96,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         //  oracle: use actual measured error rates for first round. (violates martingale condition)
 
         val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-            GeneralAdaptiveBetting(N = contestUA.Nb, prevRounds = prevRounds, d = clcaConfig.d,)
+            GeneralAdaptiveBetting(N = contestUA.Nb, startingErrorRates = prevRounds, d = clcaConfig.d,)
 
         } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
             AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them

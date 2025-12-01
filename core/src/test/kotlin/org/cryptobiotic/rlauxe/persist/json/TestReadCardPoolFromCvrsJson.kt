@@ -13,10 +13,10 @@ class TestReadCardPoolFromCvrsJson {
 
     @Test
     fun testCardPoolFromCvrs() {
-        val auditDir = "/home/stormy/rla/persist/testCliRoundOneAudit/audit"
-        // val auditDir = "src/test/data/workflow/testCliRoundOneAudit/audit"
+        // val auditDir = "/home/stormy/rla/persist/testCliRoundOneAudit/audit"
+        val auditdir = "../core/src/test/data/testRunCli/oneaudit/audit"
 
-        val publisher = Publisher(auditDir)
+        val publisher = Publisher(auditdir)
         val poolFile = publisher.cardPoolsFile()
         val contests = readContestsJsonFile(publisher.contestsFile()).unwrap()
         val infos = contests.map { it.contest.info()}.associateBy { it.id }

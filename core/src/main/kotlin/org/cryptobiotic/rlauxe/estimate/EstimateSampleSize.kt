@@ -213,12 +213,12 @@ fun estimateClcaAssertionRound(
     val cassertion = assertionRound.assertion as ClcaAssertion
     val cassorter = cassertion.cassorter
 
-    // From ClcaAssertionAuditor
+    // duplicate from ClcaAssertionAuditor
     val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
     prevRounds.setPhantomRate(contest.phantomRate()) // the minimum p1o is always the phantom rate.
 
     val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-        GeneralAdaptiveBetting(N = contestUA.Nb, prevRounds = prevRounds, d = clcaConfig.d,)
+        GeneralAdaptiveBetting(N = contestUA.Nb, startingErrorRates = prevRounds, d = clcaConfig.d,)
 
     } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
         AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them

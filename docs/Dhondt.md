@@ -64,6 +64,12 @@ lower bound a = -t
 upper bound u = (1-t)
 c = -1/2a
 h = (g(b) - a)/-2a
+
+g lower bound is a = -t
+g upper bound is u = (1-t)
+c = -1/2a
+h = g * c + 1/2 = (g(b) - a)/-2a = (g(b) + t)/2t
+h upper bound is h(g upper) = h(1 - t) = (1 - t + t ) /  2t = 1/2t
 ````
 
 
@@ -88,8 +94,10 @@ so if vote is for A, g = (t-1)
 
 lower bound a = (t-1)
 upper bound u = t
-c = -1/2a
-h = (g(b) - a)/-2a
+c = -1/2a = 1/2(1-t)
+h = c * g + 1/2 = g/2(1-t) + 1/2 = (g + 1 - t)/2(1-t)
+h upper bound is h(g upper) = (t + 1 - t)/2(1-t) = 1/2(1-t)
+
 ````
 
 Step 2. For the given linear assertion, we define the following function on ballots, which we call a proto-assorter :
@@ -160,9 +168,14 @@ From this, we define the proto-assorter for any ballot b as
 
     or equivilantly, g_AB(b) = bA/d(WA) - bB/d(WB)
 
-The lower bound is -1/d(WB)
-The upper bound is 1/d(WA)
-  h upper bound is h(1/d(WA)) ?
+g lower bound is -1/d(WB) = -1/first (lowest winner)
+g upper bound is 1/d(WA)  = 1/last   (highest loser)
+c = -1.0 / (2 * lower) = first/2
+h upper bound is h(g upper) = h(1/last) * c + 1/2 = (1/last) * first/2 + 1/2 = (first/last+1)/2
+
+first and last both range from 1 to nseats, so 
+    min upper is (1/nseats + 1)/2 which is between 1/2 and 1
+    max upper is (nseats + 1)/2 which is >= 1
 
 5.3  More complex methods: Multi-candidate voting
 

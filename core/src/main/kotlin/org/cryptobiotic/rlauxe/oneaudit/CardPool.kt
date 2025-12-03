@@ -3,8 +3,8 @@ package org.cryptobiotic.rlauxe.oneaudit
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.RegVotesIF
 import org.cryptobiotic.rlauxe.util.RegVotes
-import org.cryptobiotic.rlauxe.util.RegVotesImpl
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -41,7 +41,7 @@ interface CardPoolIF: CardStyleIF {
     val poolName: String
     val poolId: Int
     val assortAvg: MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contestId -> assorter -> average in the pool
-    fun regVotes() : Map<Int, RegVotes> // contestId -> RegVotes, regular contests only
+    fun regVotes() : Map<Int, RegVotesIF> // contestId -> RegVotes, regular contests only
     fun ncards() : Int // total number of cards in the pool, including undervotes
     fun votesAndUndervotes(contestId: Int): VotesAndUndervotes
 
@@ -49,6 +49,21 @@ interface CardPoolIF: CardStyleIF {
     override fun poolId() = poolId
     override fun hasContest(contestId: Int) : Boolean // does the pool contain this contest ?
     override fun contests(): IntArray
+}
+
+data class CardPool(override val poolName: String, override val poolId: Int, val ncards: Int, val regVotes: Map<Int, RegVotes>) : CardPoolIF {
+    override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+    override fun regVotes() = regVotes
+    override fun hasContest(contestId: Int) = regVotes[contestId] != null
+    override fun ncards() = ncards
+
+    override fun contests() = regVotes.keys.toList().toIntArray()
+
+    override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
+        val regVotes = regVotes[contestId]!!
+        val poolUndervotes = ncards - regVotes.votes.values.sum()
+        return VotesAndUndervotes(regVotes.votes, poolUndervotes, 1)
+    }
 }
 
 // When the pools do not have CVRS, but just pool vote count totals.
@@ -82,8 +97,8 @@ class CardPoolWithBallotStyle(
     override fun hasContest(contestId: Int) = voteTotals.contains(contestId)
     override fun contests() = voteTotals.map { it.key }.toSortedSet().toIntArray()
 
-    override fun regVotes(): Map<Int, RegVotes> {
-        return voteTotals.mapValues { (id, contestTab) -> RegVotesImpl(contestTab.votes, ncards(), undervoteForContest(id)) }
+    override fun regVotes(): Map<Int, RegVotesIF> {
+        return voteTotals.mapValues { (id, contestTab) -> RegVotes(contestTab.votes, ncards(), undervoteForContest(id)) }
     }
     override fun ncards() = maxMinCardsNeeded + adjustCards
 
@@ -245,8 +260,11 @@ class CardPoolFromCvrs(
 
     fun addTo(sumTab: MutableMap<Int, ContestTabulation>) {
         this.contestTabs.forEach { (contestId, contestTab) ->
-            val contestSumTab = sumTab.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
-            contestSumTab.sum(contestTab)
+            val info = infos[contestId]
+            if (info != null) { // skip IRV
+                val contestSumTab = sumTab.getOrPut(contestId) { ContestTabulation(info) }
+                contestSumTab.sum(contestTab)
+            }
         }
     }
 
@@ -291,7 +309,7 @@ class CardPoolFromCvrs(
     }
 }
 
-fun calcCardPoolsFromCvrs(
+fun calcCardPoolsFromMvrs(
     infos: Map<Int, ContestInfo>,
     cardStyles: List<CardStyleIF>,
     mvrs: List<Cvr>,

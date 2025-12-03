@@ -1,8 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
-import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.core.*
@@ -26,7 +24,7 @@ class TestConsistentSampling {
         val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())
 
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
-        contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
+        contestRounds.forEach { it.estSampleSize = it.Nb / 11 } // random
 
         val prng = Prng(Random.nextLong())
         val cards = testCvrs.mapIndexed { idx, it -> AuditableCard.fromCvr( it, idx, prng.next()) }
@@ -66,7 +64,7 @@ class TestConsistentSampling {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isClca = false).addStandardAssertions() }
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
-        contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
+        contestRounds.forEach { it.estSampleSize = it.Nb / 11 } // random
 
         val cvrs = test.makeCvrsFromContests()
         val mvrManager = MvrManagerForTesting(cvrs, cvrs, Random.nextLong())

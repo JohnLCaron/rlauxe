@@ -98,7 +98,7 @@ class Taus(upper: Double) {
     }
 }
 
-class ClcaErrorTracker(val noerror: Double, val debug:Boolean=false) : SampleTracker, ClcaErrorRatesIF {
+class ClcaErrorTracker(val noerror: Double, val sequences: DebuggingSequences?=null, val debug:Boolean=false) : SampleTracker, ClcaErrorRatesIF {
     private var last = 0.0
     private var sum = 0.0
     private var welford = Welford()

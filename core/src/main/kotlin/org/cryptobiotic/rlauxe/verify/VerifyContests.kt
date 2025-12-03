@@ -134,6 +134,8 @@ fun verifyManifest(
     cards.iterator().use { cardIter ->
         while (cardIter.hasNext()) {
             val card = cardIter.next()
+            //if (card.index in 100..150)
+            //    print("")
 
             // 1. Check that all card locations and indices are unique, and the card prns are in ascending order
             if (!locationSet.add(card.location)) {
@@ -156,9 +158,10 @@ fun verifyManifest(
 
             // the same as tabulateAuditableCards()
             infos.forEach { (contestId, info) ->
-                if (card.hasContest(contestId)) {
-                    val allTab = allCvrVotes.getOrPut(contestId) { ContestTabulation(info) }
-                    allTab.ncards++
+                val allTab = allCvrVotes.getOrPut(contestId) { ContestTabulation(info) }
+                if (card.hasContest(contestId)) { // TODO heres the problem, believing possibleContests()
+                    allTab.ncards++ // how many cards are in the sample population?
+
                     if (card.phantom) allTab.nphantoms++
                     if (card.votes != null) {
                         val cands = card.votes[contestId]

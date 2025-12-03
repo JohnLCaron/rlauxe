@@ -1,0 +1,231 @@
+package org.cryptobiotic.rlauxe.audit
+
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.core.ClcaAssertion
+import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.core.TestH0Result
+import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.sfn
+import org.cryptobiotic.rlauxe.util.trunc
+import org.cryptobiotic.rlauxe.workflow.ClcaAssertionAuditor
+import org.cryptobiotic.rlauxe.workflow.ClcaWithoutReplacement
+import org.cryptobiotic.rlauxe.workflow.MvrManager
+import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
+import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.workflow.auditPollingAssertion
+import java.nio.file.Files.notExists
+import java.nio.file.Path
+import java.util.concurrent.TimeUnit
+
+private val logger = KotlinLogging.logger("RunAudit")
+
+// Called from rlaux-viewer
+fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
+    try {
+        if (notExists(Path.of(inputDir))) {
+            logger.warn { "RunRliRoundCli Audit Directory $inputDir does not exist" }
+            return null
+        }
+        logger.info { "runRound on Audit in $inputDir" }
+
+        var complete = false
+        var roundIdx = 0
+        val workflow = PersistedWorkflow(inputDir, useTest)
+
+        if (!workflow.auditRounds().isEmpty()) {
+            val auditRound = workflow.auditRounds().last()
+            roundIdx = auditRound.roundIdx
+
+            if (!auditRound.auditWasDone) {
+                logger.info { "Run audit round ${auditRound.roundIdx}" }
+                val roundStopwatch = Stopwatch()
+
+                // run the audit for this round
+                complete = workflow.runAuditRound(auditRound, quiet)
+                logger.info { "  complete=$complete took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms" }
+            } else {
+                complete = auditRound.auditIsComplete
+            }
+        }
+
+        if (!complete) {
+            roundIdx++
+            // start next round and estimate sample sizes
+            logger.info { "Start audit round $roundIdx using ${workflow}" }
+            val nextRound = workflow.startNewRound(quiet = false)
+            logger.info { "nextRound ${nextRound.show()}" }
+            return if (nextRound.auditIsComplete) null else nextRound // TODO dont return null
+        }
+
+        logger.info { "runRound $roundIdx complete = $complete" }
+        return null
+
+    } catch (t: Throwable) {
+        logger.error {t}
+        t.printStackTrace()
+        return null
+    }
+}
+
+fun runRoundResult(inputDir: String, useTest: Boolean, quiet: Boolean): Result<AuditRound, ErrorMessages> {
+    val errs = ErrorMessages("runRoundResult")
+
+    try {
+        if (notExists(Path.of(inputDir))) {
+            return errs.add( "RunRliRoundCli Audit Directory $inputDir does not exist" )
+        }
+        logger.info { "runRound on Audit in $inputDir" }
+        val rlauxAudit = PersistedWorkflow(inputDir, useTest)
+
+        var roundIdx = 0
+        var complete = false
+
+        if (!rlauxAudit.auditRounds().isEmpty()) {
+            val lastRound = rlauxAudit.auditRounds().last()
+            roundIdx = lastRound.roundIdx
+
+            if (!lastRound.auditWasDone) {
+                logger.info { "Run audit round ${lastRound.roundIdx}" }
+                val roundStopwatch = Stopwatch()
+                complete = rlauxAudit.runAuditRound(lastRound, quiet)
+                logger.info { "  complete=$complete took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms" }
+            }
+        }
+
+        if (!complete) {
+            roundIdx++
+            // start next round and estimate sample sizes
+            logger.info { "Start audit round $roundIdx using ${rlauxAudit}" }
+            val nextRound = rlauxAudit.startNewRound(quiet = false)
+            logger.info { "nextRound ${nextRound.show()}" }
+            return Ok(nextRound)
+
+        } else {
+            val lastRound = rlauxAudit.auditRounds().last()
+            logger.info { "runRound ${lastRound.roundIdx} complete = $complete" }
+            return Ok(lastRound)
+        }
+
+    } catch (t: Throwable) {
+        logger.error {t}
+        return errs.add( t.message ?: t.toString())
+    }
+}
+
+fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): String {
+    val contest = contestRound.contestUA.id
+    try {
+        if (notExists(Path.of(auditDir))) {
+            logger.warn { "Audit Directory $auditDir does not exist" }
+            return "Audit Directory $auditDir does not exist"
+        }
+        val roundIdx = auditRoundResult.roundIdx
+        val assertion = assertionRound.assertion
+        logger.info { "runAudit in $auditDir for round $roundIdx and assertion $assertion" }
+
+        val workflow = PersistedWorkflow(auditDir, useTest=false)
+        val cvrPairs = workflow.mvrManager().makeMvrCardPairsForRound()
+
+        val config = workflow.auditConfig()
+
+        val testH0Result =  when (config.auditType) {
+            AuditType.CLCA -> runClcaAudit(config, cvrPairs, contestRound, assertionRound, auditRoundResult)
+            AuditType.POLLING -> runPollingAudit(config, cvrPairs, contestRound, assertionRound, auditRoundResult)
+            AuditType.ONEAUDIT -> runOneAudit(config, cvrPairs, contestRound, assertionRound, auditRoundResult)
+        }
+
+        return if (testH0Result == null) "failed" else buildString {
+            appendLine("contest $contest assertion win/lose = ${assertion.assorter.winLose()} margin=${assertion.assorter.reportedMargin()}")
+            val tracker = testH0Result.tracker
+            if (tracker is ClcaErrorTracker && tracker.sequences != null) {
+                val seq = tracker.sequences
+                val pvalues = seq.pvalues()
+                val count = seq.xs.size
+                append(" i, ${sfn("xs", 6)}, ${sfn("bet", 6)}, ${sfn("tj", 6)}, ${sfn("Tj", 6)}, ${sfn("pvalue", 8)}, ")
+                appendLine("${sfn("location", 10)}, ${sfn("mvr votes", 10)}, ${sfn("card", 10)}")
+                repeat(count) {
+                    append("${nfn(it, 2)}, ${df(seq.xs[it])}, ${df(seq.bets[it])}, ${df(seq.tjs[it])}")
+                    append(", ${trunc(seq.testStatistics[it].toString(), 6)}, ${trunc(pvalues[it].toString(), 8)}")
+                    // TODO only works if single contest
+                    val pair = cvrPairs[it]
+                    val mvrVotes = pair.first.votes(contest)?.contentToString() ?: "missing"
+                    val cvr = pair.second
+                    val cvrVotes = cvr.votes(contest)?.contentToString() ?: "N/A"
+                    append(", ${sfn(pair.first.location(), 10)}")
+                    append(", ${sfn(mvrVotes, 10)}")
+                    append(", votes=${cvrVotes} possible=${cvr.hasContest(contest)} pool=${cvr.poolId()}, ")
+                    appendLine()
+                }
+            }
+        }
+
+    } catch (t: Throwable) {
+        logger.error {t}
+        t.printStackTrace()
+        return t.message ?: "none"
+    }
+}
+
+fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
+    try {
+        val auditor = ClcaAssertionAuditor()
+
+        val cassertion = assertionRound.assertion as ClcaAssertion
+        val cassorter = cassertion.cassorter
+        val sampler = ClcaWithoutReplacement(contestRound.id, cvrPairs, cassorter, allowReset = false)
+
+        val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
+
+        return testH0Result
+
+    } catch (t: Throwable) {
+        logger.error {t}
+        t.printStackTrace()
+        return null
+    }
+}
+
+fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
+    try {
+        val auditor = OneAuditAssertionAuditor()
+        val cassertion = assertionRound.assertion as ClcaAssertion
+        val cassorter = cassertion.cassorter
+        val sampler = ClcaWithoutReplacement(contestRound.id, cvrPairs, cassorter, allowReset = false)
+
+        val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
+
+        return testH0Result
+
+    } catch (t: Throwable) {
+        logger.error {t}
+        t.printStackTrace()
+        return null
+    }
+}
+
+fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
+    try {
+        val assertion = assertionRound.assertion
+        val assorter = assertion.assorter
+        val sampler = PollWithoutReplacement(contestRound.id, cvrPairs, assorter, allowReset = false)
+
+        val testH0Result = auditPollingAssertion(config, contestRound.contestUA, assertionRound, sampler, auditRoundResult.roundIdx)
+
+        return testH0Result
+
+    } catch (t: Throwable) {
+        logger.error {t}
+        t.printStackTrace()
+        return null
+    }
+}
+
+
+

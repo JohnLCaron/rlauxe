@@ -5,7 +5,7 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.cli.enterMvrs
-import org.cryptobiotic.rlauxe.cli.runRoundResult
+import org.cryptobiotic.rlauxe.audit.runRoundResult
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData

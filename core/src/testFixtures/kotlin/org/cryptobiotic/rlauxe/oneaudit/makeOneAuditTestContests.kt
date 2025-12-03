@@ -33,7 +33,7 @@ fun makeOneAuditTestContests(
     val Nbs = manifestTabs.mapValues { it.value.ncards }
 
     val contestsUA = contestsToAudit.map {
-        val cua = ContestUnderAudit(it, true, hasStyle = hasStyle, Nbin=Nbs[it.id]).addStandardAssertions()
+        val cua = ContestUnderAudit(it, true, hasStyle = hasStyle, Nbin=Nbs[it.id])
         if (it is DHondtContest) {
             cua.addAssertionsFromAssorters(it.assorters)
         } else {
@@ -43,7 +43,7 @@ fun makeOneAuditTestContests(
     if (debug) println(showTabs("manifestTabs", manifestTabs))
 
     // create from cardStyles and populate the pool counts from the mvrs
-    val poolsFromCvrs = calcCardPoolsFromCvrs(infos, cardStyles, mvrs)
+    val poolsFromCvrs = calcCardPoolsFromMvrs(infos, cardStyles, mvrs)
 
     /* The styles have the name, id, and contest list
     val poolsFromCvrsOld = cardStyles.map { style ->

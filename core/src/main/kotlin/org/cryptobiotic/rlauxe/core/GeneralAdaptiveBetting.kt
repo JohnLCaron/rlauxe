@@ -21,7 +21,7 @@ private val showBets = false
 // TODO what about OneAudit?? given pool sizes and avgs, could optimize....
 class GeneralAdaptiveBetting(
     val N: Int, // population size for this contest
-    val startingErrorRates: ClcaErrorCounts,
+    val startingErrorRates: ClcaErrorCounts, // note, not apriori
     val d: Int = 100,  // trunc weight
     val minRate: Double = .00001, // this bounds how close lam gets to 2.0; might be worth playing with
     val withoutReplacement: Boolean = true,

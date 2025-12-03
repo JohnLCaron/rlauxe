@@ -50,7 +50,7 @@ class ContestAuditTask(
         if (minAssertion == null) {
             return WorkflowResult(
                 name,
-                contest.Nb,
+                contest.Npop,
                 0.0,
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
@@ -64,7 +64,7 @@ class ContestAuditTask(
             logger.error { "minAssertion.auditResult is null, setting contest to ContestMisformed"}
             WorkflowResult(
                 name,
-                contest.Nb,
+                contest.Npop,
                 assorter.reportedMargin(),
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
@@ -75,7 +75,7 @@ class ContestAuditTask(
             val lastRound = minAssertion.auditResult!!
             WorkflowResult(
                 name,
-                contest.Nb,
+                contest.Npop,
                 assorter.reportedMargin(),
                 lastRound.status,
                 minAssertion.round.toDouble(),

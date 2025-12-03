@@ -105,7 +105,7 @@ class AuditCobraAssertion(
         // val sampler = ClcaWithoutReplacement(contest.id, cvrPairs, cassorter, allowReset = false)
 
         val adaptive = AdaptiveBetting(
-            N = contestUA.Nb,
+            N = contestUA.Npop,
             withoutReplacement = true,
             a = cassorter.noerror(),
             d = auditConfig.clcaConfig.d,
@@ -115,7 +115,7 @@ class AuditCobraAssertion(
 
         val testFn = BettingMart(
             bettingFn = adaptive,
-            N = contestUA.Nb,
+            N = contestUA.Npop,
             sampleUpperBound = cassorter.upperBound(),
             withoutReplacement = true
         )

@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.MultiContestCombineData
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -16,11 +15,9 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.roundToClosest
-import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.util.tabulateCloseableCvrs
 import org.cryptobiotic.rlauxe.workflow.*
-import kotlin.collections.get
 import kotlin.random.Random
 import kotlin.sequences.plus
 import kotlin.test.Test
@@ -195,7 +192,7 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
         val mvrManager =
             MvrManagerFromManifest(modifiedCards, mvrs, contests.map { it.info() }, simFuzzPct = fuzzPct, Random.nextLong())
         return Pair(
-            WorkflowTesterClca(config, listOf(contestB), emptyList(), mvrManager, Nbs = Nbs),
+            WorkflowTesterClca(config, listOf(contestB), emptyList(), mvrManager, Npops = Nbs),
             mvrManager
         )
     }

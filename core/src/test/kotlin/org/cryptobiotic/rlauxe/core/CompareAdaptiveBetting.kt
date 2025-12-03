@@ -64,7 +64,7 @@ class CompareAdaptiveBetting {
             val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
             val testMvrs =  makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, .01)
 
-            val contestUA = ContestUnderAudit(sim.contest, Nbin=Nc).addStandardAssertions()
+            val contestUA = ContestUnderAudit(sim.contest, NpopIn=Nc).addStandardAssertions()
             val cassorter = contestUA.minClcaAssertion()!!.cassorter
 
             val errorRates=PluralityErrorRates(0.0, 0.0, 0.0, 0.0)

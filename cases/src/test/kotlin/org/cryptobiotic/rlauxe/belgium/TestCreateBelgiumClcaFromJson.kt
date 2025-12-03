@@ -184,7 +184,7 @@ fun showBelgiumElection(electionName: String): Triple<Int, Int, AssorterIF> {
     println(contestUA.contest.showCandidates())
 
     val finalRound = auditRecord.rounds.last()
-    val Nb = finalRound.contestRounds.first().Nb
+    val Nb = finalRound.contestRounds.first().Npop
     return Triple(Nb, finalRound.nmvrs, minAssorter)
 }
 

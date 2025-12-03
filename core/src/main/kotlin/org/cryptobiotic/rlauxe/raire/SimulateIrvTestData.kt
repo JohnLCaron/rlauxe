@@ -24,10 +24,10 @@ data class SimulateIrvTestData(
         repeat(excess) {
             cvrs.add(makeCvrWithLeading0(count++))
         }
-        repeat(ncards - excess - contest.Np()) {
+        repeat(ncards - excess - contest.Nphantoms()) {
             cvrs.add(makeCvr(count++))
         }
-        repeat(contest.Np()) {
+        repeat(contest.Nphantoms()) {
             val pcvr = Cvr("pcvr$count", mapOf(contest.id to IntArray(0)), phantom = true)
             count++
             cvrs.add(pcvr)

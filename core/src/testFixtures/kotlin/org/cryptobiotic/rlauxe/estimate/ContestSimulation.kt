@@ -10,7 +10,6 @@ import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
-import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
 import kotlin.math.abs
 import kotlin.math.round
 import kotlin.random.Random
@@ -33,12 +32,12 @@ import kotlin.random.Random
 /**
  * Simulation of single Contest that reflects the exact votes and Nb (diluted), along with undervotes and phantoms, as specified in Contest.
  */
-class ContestSimulation(val contest: Contest, val Nb: Int) {
+class ContestSimulation(val contest: Contest, val Npop: Int) {
     val info = contest.info
     val ncands = info.candidateIds.size
     val voteCount = contest.votes.map { it.value }.sum() // V_c
-    val phantomCount = contest.Np() //  - underCount - voteCount // Np_c
-    val underCount = Nb * info.voteForN - contest.Np() - voteCount // U_c
+    val phantomCount = contest.Nphantoms() //  - underCount - voteCount // Np_c
+    val underCount = Npop * info.voteForN - contest.Nphantoms() - voteCount // U_c
 
     var trackVotesRemaining = mutableListOf<Pair<Int, Int>>()
     var votesLeft = 0
@@ -164,7 +163,7 @@ class ContestSimulation(val contest: Contest, val Nb: Int) {
 
             // otherwise scale everything
             val sNc = limit / contest.Nc.toDouble()
-            val sNp = roundToClosest(sNc * contest.Np())
+            val sNp = roundToClosest(sNc * contest.Nphantoms())
             val sNu = roundToClosest(sNc * contest.Nundervotes())
             val orgVoteCount = contest.votes.map { it.value }.sum() // V_c
             val svotes = contest.votes.map { (id, nvotes) -> id to roundToClosest(sNc * nvotes) }.toMap()
@@ -187,12 +186,12 @@ class ContestSimulation(val contest: Contest, val Nb: Int) {
         fun simulateCvrsDilutedMargin(contestUA: ContestUnderAudit, config: AuditConfig): List<Cvr> {
             val limit = config.contestSampleCutoff
             val contestOrg = contestUA.contest as Contest // TODO
-            if (limit == null || contestOrg.Nc <= limit) return ContestSimulation(contestOrg, contestUA.Nb).makeCvrs()
+            if (limit == null || contestOrg.Nc <= limit) return ContestSimulation(contestOrg, contestUA.Npop).makeCvrs()
 
             // otherwise scale everything
             val sNc = limit / contestOrg.Nc.toDouble()
-            val sNb = roundToClosest(sNc * contestUA.Nb)
-            val sNp = roundToClosest(sNc * contestOrg.Np())
+            val sNb = roundToClosest(sNc * contestUA.Npop)
+            val sNp = roundToClosest(sNc * contestOrg.Nphantoms())
             val sNu = roundToClosest(sNc * contestOrg.Nundervotes())
             val orgVoteCount = contestOrg.votes.map { it.value }.sum() // V_c
             val svotes = contestOrg.votes.map { (id, nvotes) -> id to roundToClosest(sNc * nvotes) }.toMap()

@@ -20,7 +20,7 @@ class TestPollingAuditTask {
             Nc, margin, 0.0, 0.0, 0.0,
             mapOf("cat" to "pollingWithStyles"),
             auditConfig = auditConfig,
-            Nb = Nc
+            Npop = Nc
         )
 
         val task = taskGen.generateNewTask()
@@ -41,7 +41,7 @@ class TestPollingAuditTask {
             Nc, margin, 0.0, 0.0, 0.0,
             mapOf("cat" to "pollingWithStyles"),
             auditConfig = auditConfig,
-            Nb = Nc
+            Npop = Nc
         )
 
         val task = taskGen.generateNewTask()

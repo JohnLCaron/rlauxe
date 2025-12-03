@@ -38,7 +38,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         val testH0Result = if (strategy == OneAuditStrategyType.optimalComparison) {
             runBetting(
                 config,
-                contestUA.Nb,
+                contestUA.Npop,
                 cassorter,
                 sampling,
                 cassorter.upperBound(),
@@ -47,7 +47,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         } else {
             runAlpha(
                 config,
-                contestUA.Nb,
+                contestUA.Npop,
                 cassorter,
                 sampling,
                 cassorter.upperBound()

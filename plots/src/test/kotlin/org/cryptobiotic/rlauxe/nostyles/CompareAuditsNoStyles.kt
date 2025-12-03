@@ -2,8 +2,6 @@ package org.cryptobiotic.rlauxe.nostyles
 
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.ClcaConfig
-import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -15,7 +13,7 @@ class CompareAuditsNoStyles {
     val nruns = 100
     val nsimEst = 100
     val Nc = 10000
-    val Nb = 20000
+    val Npop = 20000
 
     val dirName = "/home/stormy/rla/nostyle/compareWithStyle"
     val name = "compareWithStyle"
@@ -32,17 +30,17 @@ class CompareAuditsNoStyles {
             val pollingConfigNS = AuditConfig(AuditType.POLLING, false, nsimEst = nsimEst)
             val pollingGeneratorNS = PollingContestAuditTaskGenerator(
                 Nc, margin, 0.0, 0.0, 0.0,
-                mapOf("nruns" to nruns.toDouble(), "Nb" to Nb.toDouble(), "cat" to "pollingNoStyles"),
+                mapOf("nruns" to nruns.toDouble(), "Npop" to Npop.toDouble(), "cat" to "pollingNoStyles"),
                 auditConfig = pollingConfigNS,
-                Nb=Nb)
+                Npop=Npop)
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGeneratorNS))
 
             val pollingConfig = AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst)
             val pollingGenerator = PollingContestAuditTaskGenerator(
                 Nc, margin, 0.0, 0.0, 0.0,
-                mapOf("nruns" to nruns.toDouble(), "Nb" to Nb.toDouble(), "cat" to "pollingWithStyles"),
+                mapOf("nruns" to nruns.toDouble(), "Npop" to Npop.toDouble(), "cat" to "pollingWithStyles"),
                 auditConfig = pollingConfig,
-                Nb=Nc)
+                Npop=Nc)
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaConfigNS = AuditConfig(
@@ -51,7 +49,7 @@ class CompareAuditsNoStyles {
             val clcaGeneratorNS = ClcaContestAuditTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "clcaNoStyles"),
                 config = clcaConfigNS,
-                Nb=Nb
+                Npop=Npop
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGeneratorNS))
 
@@ -61,7 +59,7 @@ class CompareAuditsNoStyles {
             val clcaGenerator = ClcaContestAuditTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "clcaWithStyles"),
                 config = clcaConfig,
-                Nb=Nc
+                Npop=Nc
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
         }
@@ -78,7 +76,7 @@ class CompareAuditsNoStyles {
 
     @Test
     fun regenPlots() {
-        val subtitle = "Nb=${Nb} Nc=${Nc} nruns=${nruns}"
+        val subtitle = "Npop=${Npop} Nc=${Nc} nruns=${nruns}"
         showNmvrsByAuditType(name, dirName, subtitle, ScaleType.LogLinear)
         showNmvrsByAuditType(name, dirName, subtitle, ScaleType.LogLog)
     }

@@ -19,7 +19,7 @@ data class ContestMvrCardAndPools(
     val pools: List<CardPoolIF>,
 )
 
-// simulate OneAudit Contest with extra cards in pool, to get Nb > Nc, and test hasStyle
+// simulate OneAudit Contest with extra cards in pool, to get Npop > Nc, and test hasStyle
 fun makeOneAuditTest(
     margin: Double,
     Nc: Int,
@@ -165,7 +165,7 @@ fun makeMvrs(
     }
 
     // add phantoms
-    repeat(contest.Np()) {
+    repeat(contest.Nphantoms()) {
         mvrs.add(Cvr("phantom$it", mapOf(contest.info().id to intArrayOf()), phantom = true))
     }
     require(contest.Nc() == mvrs.size)

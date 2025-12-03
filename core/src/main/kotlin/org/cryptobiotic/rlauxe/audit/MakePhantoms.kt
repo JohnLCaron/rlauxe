@@ -120,7 +120,7 @@ fun makePhantomCvrs(
     val phantombs = mutableListOf<PhantomBuilder>()
 
     for (contest in contests) {
-        val phantoms_needed = contest.Np()
+        val phantoms_needed = contest.Nphantoms()
         while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
             phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}", 0))
         }
@@ -133,7 +133,7 @@ fun makePhantomCvrs(
 }
 
 fun makePhantomCvrs(
-    phantomCount: Map<Int, Int>, // contestId -> Np
+    phantomCount: Map<Int, Int>, // contestId -> Nphantoms
     prefix: String = "phantom-",
 ): List<Cvr> {
     val phantombs = mutableListOf<PhantomBuilder>()
@@ -158,7 +158,7 @@ fun makePhantomCards(
 
     val phantombs = mutableListOf<PhantomBuilder>()
     for (contest in contests) {
-        val phantoms_needed = contest.Np()
+        val phantoms_needed = contest.Nphantoms()
         while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
             phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}", idx++))
         }
@@ -171,7 +171,7 @@ fun makePhantomCards(
 }
 
 fun makePhantomCards(
-    phantomCount: Map<Int, Int>, // contestId -> Np
+    phantomCount: Map<Int, Int>, // contestId -> Nphantoms
     startIdx: Int,
     prefix: String = "phantom-",
 ): List<AuditableCard> {

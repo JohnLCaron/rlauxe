@@ -37,8 +37,8 @@ class WorkflowResultsPlotterOld(val dir: String, val filename: String) {
                 ScaleTypeOld.Linear -> it.nmvrs
                 ScaleTypeOld.Log -> log10(it.nmvrs)
                 ScaleTypeOld.Pct -> {
-                    val Nb = it.Dparam("Nb")
-                    (100*it.nmvrs/Nb)
+                    val Npop = it.Dparam("Npop")
+                    (100*it.nmvrs/Npop)
                 }
             }},
             catfld = catfld,

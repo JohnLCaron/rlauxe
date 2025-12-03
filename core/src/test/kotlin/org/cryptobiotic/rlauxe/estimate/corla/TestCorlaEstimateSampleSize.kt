@@ -56,7 +56,7 @@ class TestCorlaEstimateSampleSize {
         val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 1234567890L, quantile=.90)
 
         contestRounds.forEach { contestRound ->
-            val cn = contestRound.Nb
+            val cn = contestRound.Npop
             val estSizes = mutableListOf<Int>()
             val cvrs = ContestSimulation.simulateContestCvrsWithLimits(contestRound.contestUA.contest as Contest, config).makeCvrs()
             val cards = cvrs.map { AuditableCard.fromCvr(it, 0, 0L)}

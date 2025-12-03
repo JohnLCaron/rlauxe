@@ -14,7 +14,7 @@ class PollingContestAuditTaskGenerator(
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
     val auditConfig: AuditConfig? = null,
-    val Nb: Int,
+    val Npop: Int,
     val nsimEst: Int = 100,
     ) : ContestAuditTaskGenerator {
 
@@ -48,7 +48,7 @@ class PollingSingleRoundAuditTaskGenerator(
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
     val auditConfig: AuditConfig? = null,
-    val Nb: Int = Nc,
+    val Npop: Int = Nc,
     val quiet: Boolean = true,
     ): ContestAuditTaskGenerator {
 
@@ -106,7 +106,7 @@ class PollingSingleRoundAuditTask(
         return if (minAssertion.auditResult == null) { // TODO why might this this empty?
             WorkflowResult(
                 name,
-                contest.Nb,
+                contest.Npop,
                 assorter.reportedMargin(),
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
@@ -117,7 +117,7 @@ class PollingSingleRoundAuditTask(
             val lastRound = minAssertion.auditResult!!
             WorkflowResult(
                 name,
-                contest.Nb,
+                contest.Npop,
                 assorter.reportedMargin(),
                 lastRound.status,
                 minAssertion.round.toDouble(),

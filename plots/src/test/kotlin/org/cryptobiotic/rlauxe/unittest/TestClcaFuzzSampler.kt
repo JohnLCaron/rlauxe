@@ -62,7 +62,7 @@ private fun runWithComparisonFuzzSampler(
     val errorCounts = ClcaErrorCounts(emptyMap(), 0, noerror=cassorter.noerror(), upper=cassorter.assorter.upperBound())
 
     val optimal = GeneralAdaptiveBetting(
-        N = contestUA.Nb,
+        N = contestUA.Npop,
         errorCounts,
         d = 100
     )
@@ -74,7 +74,7 @@ private fun runWithComparisonFuzzSampler(
         // assorter.assorter().reportedMargin(),
         cassorter.noerror(),
         cassorter.upperBound(),
-        N=contestUA.Nb,
+        N=contestUA.Npop,
         moreParameters=moreParameters + mapOf("margin" to cassorter.assorter.reportedMargin()),
     )
 }

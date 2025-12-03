@@ -131,7 +131,7 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         // Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val noerror: Double,
         //    val p1: Double, val p2: Double, val p3: Double, val p4: Double): RiskTestingFn
         val testFn = Corla(
-            N = contestUA.Nb,
+            N = contestUA.Npop,
             riskLimit = auditConfig.riskLimit,
             reportedMargin = cassertion.assorter.reportedMargin(),
             noerror = cassorter.noerror(),

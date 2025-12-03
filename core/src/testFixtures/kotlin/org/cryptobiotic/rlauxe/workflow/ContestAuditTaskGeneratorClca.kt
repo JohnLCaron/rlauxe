@@ -17,7 +17,7 @@ class ClcaContestAuditTaskGenerator(
     val parameters : Map<String, Any>,
     val config: AuditConfig? = null,
     val clcaConfigIn: ClcaConfig? = null,
-    val Nb: Int = Nc,
+    val Npop: Int = Nc,
     val nsimEst: Int = 100,
     val p2flips: Double? = null,
 ): ContestAuditTaskGenerator {
@@ -35,9 +35,9 @@ class ClcaContestAuditTaskGenerator(
         var testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
             makeFuzzedCvrsFrom(listOf(sim.contest.info()), testCvrs, mvrsFuzzPct)
 
-        if (!useConfig.hasStyle && Nb > Nc) { // TODO wtf?
+        if (!useConfig.hasStyle && Npop > Nc) { // TODO wtf?
             val otherContestId = 42
-            val otherCvrs = List<Cvr>(Nb - Nc) { makeUndervoteForContest(otherContestId) }
+            val otherCvrs = List<Cvr>(Npop - Nc) { makeUndervoteForContest(otherContestId) }
             testCvrs = testCvrs + otherCvrs
             testMvrs = testMvrs + otherCvrs
         }
@@ -137,7 +137,7 @@ class ClcaSingleRoundWorkflowTask(
         return if (minAssertion.auditResult == null) { // TODO why might this be empty?
             WorkflowResult(
                 name,
-                contest.Nb,
+                contest.Npop,
                 assorter.reportedMargin(),
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
@@ -148,7 +148,7 @@ class ClcaSingleRoundWorkflowTask(
             val lastRound = minAssertion.auditResult!!
             WorkflowResult(
                 name,
-                contest.Nb,
+                contest.Npop,
                 assorter.reportedMargin(),
                 lastRound.status,
                 minAssertion.round.toDouble(),

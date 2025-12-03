@@ -187,7 +187,7 @@ class TestAvgAssortValues {
 
         val contestsUA = ContestUnderAudit.make(test.contests, cardIterable.iterator(), isClca=true, hasStyle=false)
         contestsUA.forEach {
-            println("$it : Nb diff = ${it.Nb != it.Nc}")
+            println("$it : Npop diff = ${it.Npop != it.Nc}")
         }
 
         val results = VerifyResults()
@@ -236,7 +236,7 @@ class TestAvgAssortValues {
 
         val contestsUA = ContestUnderAudit.make(test.contests, cardIterable.iterator(), isClca=true, hasStyle=false)
         contestsUA.forEach {
-            println("$it : Nb diff = ${it.Nb != it.Nc}")
+            println("$it : Nb diff = ${it.Npop != it.Nc}")
         }
 
         val results = VerifyResults()

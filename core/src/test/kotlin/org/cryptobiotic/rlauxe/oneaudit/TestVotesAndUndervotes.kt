@@ -123,7 +123,7 @@ class TestVotesAndUndervotes {
             val contest = contestMap[id]!!
             println("contest=${contest}")
             assertEquals(contest.Nc, tab.ncards)
-            assertEquals(contest.undervotes + contest.Np(), tab.undervotes)
+            assertEquals(contest.undervotes + contest.Nphantoms(), tab.undervotes)
             assertTrue(checkEquivilentVotes(contest.votes, tab.votes))
         }
     }
@@ -148,7 +148,7 @@ class TestVotesAndUndervotes {
             val contest = contestMap[id]!!
             println("contest=${contest}")
             assertEquals(contest.Nc, tab.ncards)
-            assertEquals(contest.undervotes + contest.Np() * contest.info.voteForN, tab.undervotes)
+            assertEquals(contest.undervotes + contest.Nphantoms() * contest.info.voteForN, tab.undervotes)
             assertTrue(checkEquivilentVotes(contest.votes, tab.votes))
             println()
         }

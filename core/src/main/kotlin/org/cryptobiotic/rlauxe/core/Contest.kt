@@ -80,8 +80,8 @@ interface ContestIF {
     val choiceFunction get() = info().choiceFunction
 
     fun Nc(): Int  // independent contest bound
-    fun Np(): Int  // number of phantoms
-    fun Ncast() = Nc() - Np()
+    fun Nphantoms(): Int  // number of phantoms
+    fun Ncast() = Nc() - Nphantoms()
     fun Nundervotes(): Int  // number of undervotes
     fun info(): ContestInfo
     fun winnerNames(): List<String>
@@ -89,7 +89,7 @@ interface ContestIF {
     fun losers(): List<Int>
 
     fun undervotePct() = roundToClosest(100.0 * Nundervotes() / (info().voteForN * Nc())) // for viewer
-    fun phantomRate() = Np() / Nc().toDouble()
+    fun phantomRate() = Nphantoms() / Nc().toDouble()
     fun isIrv() = choiceFunction == SocialChoiceFunction.IRV
     fun show() : String = toString()
     fun showCandidates(): String
@@ -107,7 +107,7 @@ interface ContestIF {
  * Immutable.
  * @parameter voteInput: candidateId -> reported number of votes. keys must be in info.candidateIds, though zeros may be omitted.
  * @parameter Nc: maximum ballots/cards that contain this contest, independently verified (not from cvrs).
- * @parameter Np: number of phantoms for this contest.
+ * @parameter Ncast: number of cards cast for this contest: Nphantoms() = Nc - Ncast
  */
 open class Contest(
         val info: ContestInfo,
@@ -117,7 +117,7 @@ open class Contest(
     ): ContestIF {
 
     override fun Nc() = Nc
-    override fun Np() = Nc - Ncast
+    override fun Nphantoms() = Nc - Ncast
     override fun Nundervotes() = undervotes
     override fun info() = info
     override fun winnerNames() = winnerNames
@@ -151,13 +151,13 @@ open class Contest(
         votes = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap() // sort by votes recieved
         votes.forEach { (candId, candVotes) ->
             require(candVotes <= Ncast) { // LOOK
-                "contest $id candidate= $candId votes = $candVotes must be <= (Nc - Np) = ${Nc - Np()}"
+                "contest $id candidate= $candId votes = $candVotes must be <= (Nc - Nphantoms) = ${Nc - Nphantoms()}"
             }
         }
         val nvotes = votes.values.sum()
        if (info.choiceFunction != SocialChoiceFunction.IRV) {
             require(nvotes <= info.voteForN * Ncast) {
-                "contest $id nvotes= $nvotes must be <= nwinners=${info.voteForN} * (Nc=$Nc - Np=${Np()}) = ${info.voteForN * (Nc - Np())}"
+                "contest $id nvotes= $nvotes must be <= nwinners=${info.voteForN} * (Nc=$Nc - Nphantoms=${Nphantoms()}) = ${info.voteForN * (Nc - Nphantoms())}"
             }
         }
         undervotes = info.voteForN * Ncast - nvotes   // C1
@@ -216,7 +216,7 @@ open class Contest(
 
     override fun show() = buildString {
         appendLine("'$name' ($id) $choiceFunction voteForN=${info.voteForN} ${votesAndUndervotes()}")
-        append("   winners=${winners()} Nc=${Nc()} Np=${Np()} Nu=${Nundervotes()} sumVotes=${votes.values.sum()}")
+        append("   winners=${winners()} Nc=${Nc()} Nphantoms=${Nphantoms()} Nu=${Nundervotes()} sumVotes=${votes.values.sum()}")
     }
 
     override fun showCandidates() = buildString {
@@ -236,7 +236,7 @@ open class Contest(
     }
 
     override fun toString() = buildString {
-        append("$name ($id) Nc=$Nc Np=${Np()} ${votesAndUndervotes()}")
+        append("$name ($id) Nc=$Nc Nphantoms=${Nphantoms()} ${votesAndUndervotes()}")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -280,15 +280,15 @@ open class ContestUnderAudit(
     val contest: ContestIF,
     val isClca: Boolean = true,
     val hasStyle: Boolean = true,
-    Nbin: Int? = null,
+    NpopIn: Int? = null,
 ) {
     val id = contest.id
     val name = contest.name
     val choiceFunction = contest.choiceFunction
     val ncandidates = contest.ncandidates
     val Nc = contest.Nc()
-    val Np = contest.Np()
-    val Nb: Int = Nbin ?: Nc
+    val Nphantoms = contest.Nphantoms()
+    val Npop: Int = NpopIn ?: Nc // "sample population size" for this contest, used to make diluted margins
     val isIrv = contest.info().isIrv
 
     var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms
@@ -362,7 +362,7 @@ open class ContestUnderAudit(
     }
 
     fun makeDilutedMargin(assorter: AssorterIF): Double {
-        val margin = assorter.calcMargin(contest.votes(), Nb)
+        val margin = assorter.calcMargin(contest.votes(), Npop)
         return margin
     }
 
@@ -431,7 +431,7 @@ open class ContestUnderAudit(
         if (minAssertion != null) {
             val minAssorter = minAssertion.assorter
             append("   ${contest.showAssertionDifficulty(minAssertion.assorter)}")
-            append(" Nb=$Nb dilutedMargin=${pfn(makeDilutedMargin(minAssorter))}")
+            append(" Npop=$Npop dilutedMargin=${pfn(makeDilutedMargin(minAssorter))}")
             appendLine(" reportedMargin=${pfn(minAssorter.reportedMargin())} recountMargin=${pfn(contest.recountMargin(minAssorter))} ")
         }
         append(contest.showCandidates())
@@ -439,7 +439,7 @@ open class ContestUnderAudit(
 
     open fun showShort() = buildString {
         val votes = contest.votes() ?: "N/A"
-        append("$name ($id) votes=${votes} Nc=$Nc Nb=$Nb minDilutedMargin=${df(minDilutedMargin())}")
+        append("$name ($id) votes=${votes} Nc=$Nc Npop=$Npop minDilutedMargin=${df(minDilutedMargin())}")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -474,7 +474,7 @@ open class ContestUnderAudit(
             val manifestTabs = tabulateAuditableCards(cards, infos)
             val Nbs = manifestTabs.mapValues { it.value.ncards }
             return contests.map {
-                val cua = ContestUnderAudit(it, isClca, hasStyle, Nbin=Nbs[it.id]).addStandardAssertions()
+                val cua = ContestUnderAudit(it, isClca, hasStyle, NpopIn=Nbs[it.id]).addStandardAssertions()
                 if (it is DHondtContest) {
                     cua.addAssertionsFromAssorters(it.assorters)
                 } else {

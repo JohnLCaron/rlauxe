@@ -106,7 +106,7 @@ fun makeOneAuditContests(
     //val Nbs = manifestTabs.mapValues { it.value.ncards }
 
     val contestsUA = wantContests.filter{ !it.isIrv() }.map { contest ->
-        val cua = ContestUnderAudit(contest, true, hasStyle = hasStyle, Nbin=nbs[contest.id]).addStandardAssertions()
+        val cua = ContestUnderAudit(contest, true, hasStyle = hasStyle, NpopIn=nbs[contest.id]).addStandardAssertions()
         if (contest is DHondtContest) {
             cua.addAssertionsFromAssorters(contest.assorters)
         } else {

@@ -11,7 +11,6 @@ import org.cryptobiotic.rlauxe.estimate.MultiContestCombineData
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.util.tabulateCloseableCvrs
@@ -172,7 +171,7 @@ class ClcaSingleRoundWorkflowTaskGeneratorU(
         val mvrManager =
             MvrManagerFromManifest(cards, mvrs, contests.map { it.info() }, simFuzzPct = fuzzPct, Random.nextLong())
         return Pair(
-            WorkflowTesterClca(config, listOf(contestB), emptyList(), mvrManager, Nbs = Nbs),
+            WorkflowTesterClca(config, listOf(contestB), emptyList(), mvrManager, Npops = Nbs),
             mvrManager
         )
     }

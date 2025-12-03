@@ -47,7 +47,7 @@ class TestAlphaMart {
             estimFn = null,
             eta0 = assorter.reportedMean(),
             upperBound = assorter.upperBound(),
-            N = contestUA.Nb,
+            N = contestUA.Npop,
             moreParameters = mapOf("eta0" to eta0),
         )
         println("simulateSampleSizeAlphaMart = $result")

@@ -173,7 +173,7 @@ class DHondtContest(
     val nvotes = votes.values.sum()
 
     override fun Nc() = Nc
-    override fun Np() = Nc - Ncast
+    override fun Nphantoms() = Nc - Ncast
     override fun Nundervotes() = undervotes
     override fun info() = info
     override fun winnerNames() = winnerNames
@@ -305,7 +305,7 @@ class DHondtContest(
             count++
             cvrs.add( Cvr("undervote$count", mapOf(id to IntArray(0))))
         }
-        repeat(Np()) {
+        repeat(Nphantoms()) {
             count++
             cvrs.add( Cvr("phantom$count", mapOf(id to IntArray(0)), phantom=true))
         }

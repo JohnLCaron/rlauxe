@@ -59,7 +59,7 @@ fun auditPollingAssertion(
     val eta0 = margin2mean(assorter.reportedMargin())
 
     val estimFn = TruncShrinkage(
-        N = contestUA.Nb,
+        N = contestUA.Npop,
         withoutReplacement = true,
         upperBound = assorter.upperBound(),
         d = config.pollingConfig.d,
@@ -67,7 +67,7 @@ fun auditPollingAssertion(
     )
     val testFn = AlphaMart(
         estimFn = estimFn,
-        N = contestUA.Nb,
+        N = contestUA.Npop,
         withoutReplacement = true,
         riskLimit = config.riskLimit,
         upperBound = assorter.upperBound(),

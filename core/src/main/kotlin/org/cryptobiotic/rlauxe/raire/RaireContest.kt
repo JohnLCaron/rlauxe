@@ -40,7 +40,7 @@ data class RaireContest(
     }
 
     override fun Nc() = Nc
-    override fun Np() = Nc - Ncast
+    override fun Nphantoms() = Nc - Ncast
     override fun Nundervotes() = undervotes
     override fun info() = info
     override fun winnerNames() = winnerNames
@@ -91,7 +91,7 @@ data class RaireContest(
     }
 
     override fun show() = buildString {
-        append("'$name' ($id) $choiceFunction voteForN=${info.voteForN} winners=${winners()} Nc=${Nc()} Np=${Np()} Ncast=$Ncast Nu=${Nundervotes()}")
+        append("'$name' ($id) $choiceFunction voteForN=${info.voteForN} winners=${winners()} Nc=${Nc()} Nphantoms=${Nphantoms()} Ncast=$Ncast Nu=${Nundervotes()}")
     }
 
     override fun showCandidates() = buildString {

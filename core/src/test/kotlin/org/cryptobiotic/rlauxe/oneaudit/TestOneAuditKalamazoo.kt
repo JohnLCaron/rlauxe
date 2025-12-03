@@ -170,7 +170,7 @@ fun makeTestMvrs(
     }
 
     // add phantoms
-    repeat(oaContest.Np()) {
+    repeat(oaContest.Nphantoms()) {
         cvrs.add(Cvr("phantom$it", mapOf(oaContest.info().id to intArrayOf()), phantom = true))
     }
 

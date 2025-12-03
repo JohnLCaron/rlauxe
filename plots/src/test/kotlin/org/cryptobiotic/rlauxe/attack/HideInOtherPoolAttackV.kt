@@ -28,7 +28,6 @@ import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.util.tabulateCardPools
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 // Vanessa's attack
 class HideInOtherPoolAttackV {
@@ -166,7 +165,7 @@ class HideInOtherPoolAttackV {
         val Nbs = manifestTabs.mapValues { it.value.ncards }
 
         val contestsUA = contests.map {
-            ContestUnderAudit(it, true, hasStyle = hasStyle, Nbin=Nbs[it.id]).addStandardAssertions()
+            ContestUnderAudit(it, true, hasStyle = hasStyle, NpopIn=Nbs[it.id]).addStandardAssertions()
         }
         // The OA assort averages come from the card Pools
         addOAClcaAssortersFromMargin(contestsUA, cardPools, hasStyle=hasStyle)

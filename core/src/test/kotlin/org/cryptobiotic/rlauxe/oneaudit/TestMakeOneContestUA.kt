@@ -152,7 +152,7 @@ class TestMakeOneContestUA {
         println("allCount = $allCount cvrCount=$cvrCount poolCount=$poolCount")
 
         val nphantom = testCvrs.count { it.hasContest(contestOA.id) && it.phantom }
-        assertEquals(contestOA.Np, nphantom)
+        assertEquals(contestOA.Nphantoms, nphantom)
         val phantomPct = nphantom / contestOA.Nc.toDouble()
         println(
             "  nphantom=$nphantom pct= $phantomPct =~ ${phantomPct} abs=${abs(phantomPct - phantomPercent)} " +

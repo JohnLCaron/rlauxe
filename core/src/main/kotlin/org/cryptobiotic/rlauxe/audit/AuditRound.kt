@@ -47,7 +47,7 @@ fun List<AuditRound>.previousSamples(currentRoundIdx: Int): Set<Long> {
 data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: List<AssertionRound>, val roundIdx: Int) {
     val id = contestUA.id
     val name = contestUA.name
-    val Nc = contestUA.Nc
+    val Npop = contestUA.Npop
 
     var actualMvrs = 0 // Actual number of ballots with this contest contained in this round's sample.
     var actualNewMvrs = 0 // Actual number of new ballots with this contest contained in this round's sample.
@@ -213,7 +213,7 @@ data class AuditRoundResult(
     val status: TestH0Status, // testH0 status
     val measuredMean: Double, // measured population mean TODO used?
     val startingRates: Map<Double, Double>? = null, // starting error rates (clca only)
-    val measuredCounts: Map<Double, Int>? = null, // measured error counts (clca only)
+    val measuredCounts: Map<Double, Int>? = null, // measured error counts (clca only) TODO CLcaErrorCounts
 ) {
 
     override fun toString() = buildString {

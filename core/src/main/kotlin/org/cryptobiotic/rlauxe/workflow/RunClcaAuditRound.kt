@@ -96,14 +96,14 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         //  oracle: use actual measured error rates for first round. (violates martingale condition)
 
         val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-            GeneralAdaptiveBetting(N = contestUA.Nb, startingErrorRates = prevRounds, d = clcaConfig.d,)
+            GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = prevRounds, d = clcaConfig.d,)
 
         } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
-            AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
+            AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
 
         } else if (clcaConfig.strategy == ClcaStrategyType.fuzzPct) {
             val errorsP = ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct) // TODO do better
-            AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates=errorsP) // just stick with them
+            AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=errorsP) // just stick with them
 
         // }  else if (clcaConfig.strategy == ClcaStrategyType.optimalComparison) {
         //    OptimalComparisonNoP1(N = contestUA.Nb, withoutReplacement = true, upperBound = cassorter.noerror(), p2 = errorRatesP.p2o)
@@ -120,7 +120,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
         val testFn = BettingMart(
             bettingFn = bettingFn,
-            N = contestUA.Nb,
+            N = contestUA.Npop,
             sampleUpperBound = cassorter.upperBound(),
             riskLimit = config.riskLimit,
             withoutReplacement = true

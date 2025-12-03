@@ -37,7 +37,7 @@ class TestContestTabulation {
 
             assertEquals(voteForNs[id], tab.voteForN)
             assertEquals(contest.Nc, tab.ncards)
-            assertEquals(contest.undervotes + contest.Np() * contest.info.voteForN, tab.undervotes)
+            assertEquals(contest.undervotes + contest.Nphantoms() * contest.info.voteForN, tab.undervotes)
             assertTrue(checkEquivilentVotes(candVotes[id], tab.votes))
             println()
         }

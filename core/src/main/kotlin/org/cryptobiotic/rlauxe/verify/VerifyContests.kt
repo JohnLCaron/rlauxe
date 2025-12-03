@@ -212,8 +212,8 @@ fun verifyManifest(
     // check if tabulation agrees with diluted count
     contestsUA.forEach {
         val tab = allCvrVotes[it.id]!!
-        if (tab.ncards != it.Nb) {
-            results.addError("contest ${it.id} Nb ${it.Nb} disagree with cards = ${tab.ncards}")
+        if (tab.ncards != it.Npop) {
+            results.addError("contest ${it.id} Npop ${it.Npop} disagree with cards = ${tab.ncards}")
         }
     }
 
@@ -235,8 +235,8 @@ fun verifyManifest(
                     allOk = false
                 }
                 // 4. If hasStyle, check that the count of phantom cards containing a contest = Contest.Nc - Contest.Ncast.
-                if (contestUA.Np != contestTab.nphantoms) {
-                    results.addError("contest ${contestUA.id} Np ${contestUA.Np} disagree with cards = ${contestTab.nphantoms}")
+                if (contestUA.Nphantoms != contestTab.nphantoms) {
+                    results.addError("contest ${contestUA.id} Nphantoms ${contestUA.Nphantoms} disagree with cards = ${contestTab.nphantoms}")
                     contestUA.preAuditStatus = TestH0Status.ContestMisformed
                     allOk = false
                 }

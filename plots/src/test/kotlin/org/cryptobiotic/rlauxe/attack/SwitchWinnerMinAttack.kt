@@ -178,7 +178,7 @@ class ClcaSingleRoundWorkflowTaskGenerator(
         val mvrManager =
             MvrManagerFromManifest(cards, mvrs, contests.map { it.info() }, simFuzzPct = fuzzPct, Random.nextLong())
         return Pair(
-            WorkflowTesterClca(config, listOf(contestB), emptyList(), mvrManager, Nbs = Nbs),
+            WorkflowTesterClca(config, listOf(contestB), emptyList(), mvrManager, Npops = Nbs),
             mvrManager
         )
     }

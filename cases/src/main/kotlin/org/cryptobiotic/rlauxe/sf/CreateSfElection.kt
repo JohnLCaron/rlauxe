@@ -177,7 +177,7 @@ fun makeClcaContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<I
 
         val contestUA: ContestUnderAudit = if (!cvrTab.isIrv) {
             val contest = Contest(info, cvrTab.votes, useNc, cvrTab.ncards)
-            ContestUnderAudit(contest, hasStyle=hasStyle, Nbin=contestNbs[info.id]).addStandardAssertions()
+            ContestUnderAudit(contest, hasStyle=hasStyle, NpopIn=contestNbs[info.id]).addStandardAssertions()
         } else {
             makeRaireContestUA(info, cvrTab, useNc, hasStyle=hasStyle, Nbin=contestNbs[info.id])
         }
@@ -214,7 +214,7 @@ fun makeOneAuditContestsOld(allCvrTabs: Map<Int, ContestTabulation>, contestNcs:
         if (useNc > 0) {
             val contestOA: ContestUnderAudit = if (!contestSumTab.isIrv) {
                 val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
-                ContestUnderAudit(contest, isClca = true, Nbin=contestNbs[info.id]).addStandardAssertions()
+                ContestUnderAudit(contest, isClca = true, NpopIn=contestNbs[info.id]).addStandardAssertions()
             } else {
                 makeRaireContestUA(contestSumTab.info, contestSumTab, useNc, hasStyle=hasStyle, Nbin=contestNbs[info.id])
             }
@@ -235,7 +235,7 @@ fun makePollingContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs: Map
         if (useNc > 0) {
             if (!contestSumTab.isIrv) { // cant do IRV
                 val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
-                val contestUA = ContestUnderAudit(contest, isClca = false, hasStyle=hasStyle, Nbin=contestNbs[contestId]).addStandardAssertions()
+                val contestUA = ContestUnderAudit(contest, isClca = false, hasStyle=hasStyle, NpopIn=contestNbs[contestId]).addStandardAssertions()
                 contestUA.contest.info().metadata["PoolPct"] = 0
                 contestsUAs.add(contestUA)
             }

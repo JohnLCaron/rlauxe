@@ -121,7 +121,7 @@ class TestAuditPolling {
 
                 val result = runAlphaMartRepeated(
                     drawSample = cvrSampler,
-                    N = contestUA.Nb,
+                    N = contestUA.Npop,
                     eta0 = margin2mean(margin),
                     d = d,
                     ntrials = 10,

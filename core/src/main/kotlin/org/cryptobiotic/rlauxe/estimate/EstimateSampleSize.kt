@@ -24,7 +24,7 @@ private val logger = KotlinLogging.logger("EstimateSampleSizes")
 
 // for CLCA and OA, take the first L=config.contestSampleCutoff values in the cardManifest (i.e. the actual cards)
 // For polling, use ContestSimulation.simulateCvrsDilutedMargin(contest as Contest, config).makeCvrs()
-//    using Nb and diluted margin.
+//    using Npop and diluted margin.
 
 // 1. _Estimation_: for each contest, estimate how many samples are needed for this AuditRound
 fun estimateSampleSizes(
@@ -53,7 +53,7 @@ fun estimateSampleSizes(
         val useFirst = config.auditType == AuditType.ONEAUDIT && config.oaConfig.useFirst // experimental
         val estNewSamples = if (useFirst) result.sampleCount[0] else result.findQuantile(config.quantile)
         task.assertionRound.estNewSampleSize = estNewSamples
-        task.assertionRound.estSampleSize = min(estNewSamples + task.prevSampleSize, task.contest.Nb)
+        task.assertionRound.estSampleSize = min(estNewSamples + task.prevSampleSize, task.contest.Npop)
 
         if (debug) println(result.showSampleDist(estResult.task.contest.id))
         if (debugSampleSmall && result.avgSamplesNeeded() < 10) {
@@ -106,7 +106,7 @@ fun makeEstimationTasks(
             var startingTestStatistic = 1.0
             if (roundIdx > 1) {
                 val prevAuditResult = assertionRound.prevAuditResult!!
-                if (prevAuditResult.samplesUsed == contestRound.Nb) {
+                if (prevAuditResult.samplesUsed == contestRound.Npop) {
                     logger.info{"***LimitReached $contestRound"}
                     contestRound.done = true
                     contestRound.status = TestH0Status.LimitReached
@@ -218,14 +218,14 @@ fun estimateClcaAssertionRound(
     prevRounds.setPhantomRate(contest.phantomRate()) // TODO ??
 
     val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-        GeneralAdaptiveBetting(N = contestUA.Nb, startingErrorRates = prevRounds, d = clcaConfig.d,)
+        GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = prevRounds, d = clcaConfig.d,)
 
     } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
-        AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
+        AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
 
     } else if (clcaConfig.strategy == ClcaStrategyType.fuzzPct) {
         val errorsP = ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct) // TODO do better
-        AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates=errorsP) // just stick with them
+        AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=errorsP) // just stick with them
 
     } else {
         throw RuntimeException("unsupported strategy ${clcaConfig.strategy}")
@@ -244,7 +244,7 @@ fun estimateClcaAssertionRound(
         bettingFn,
         cassorter.noerror(),
         cassorter.upperBound(),
-        contestUA.Nb,
+        contestUA.Npop,
         startingTestStatistic,
         moreParameters
     )
@@ -325,7 +325,7 @@ fun estimatePollingAssertionRound(
         null,
         eta0 = eta0,
         upperBound = assorter.upperBound(),
-        N = contestUA.Nb,
+        N = contestUA.Npop,
         startingTestStatistic = startingTestStatistic,
         moreParameters = moreParameters,
     )
@@ -427,7 +427,7 @@ fun estimateOneAuditAssertionRound(
     val strategy = config.oaConfig.strategy
     val result = if (strategy == OneAuditStrategyType.optimalComparison) {
 
-        val bettingFn: BettingFn = OptimalComparisonNoP1(contestUA.Nb, true, oaCassorter.upperBound, p2 = 0.0) // TODO errorRates.p2o) // diluted margin
+        val bettingFn: BettingFn = OptimalComparisonNoP1(contestUA.Npop, true, oaCassorter.upperBound, p2 = 0.0) // TODO errorRates.p2o) // diluted margin
 
         runRepeatedBettingMart(
             config,
@@ -435,7 +435,7 @@ fun estimateOneAuditAssertionRound(
             bettingFn,
             oaCassorter.noerror(),
             oaCassorter.upperBound(),
-            contestUA.Nb,
+            contestUA.Npop,
             startingTestStatistic,
             moreParameters
         )
@@ -464,7 +464,7 @@ fun estimateOneAuditAssertionRound(
             estimFn = estimFn,
             eta0 = eta0,
             upperBound = oaCassorter.upperBound(),
-            N = contestUA.Nb,
+            N = contestUA.Npop,
             startingTestStatistic = startingTestStatistic,
             moreParameters
         )

@@ -33,7 +33,7 @@ fun makeOneAuditTestContests(
     val Nbs = manifestTabs.mapValues { it.value.ncards }
 
     val contestsUA = contestsToAudit.map {
-        val cua = ContestUnderAudit(it, true, hasStyle = hasStyle, Nbin=Nbs[it.id])
+        val cua = ContestUnderAudit(it, true, hasStyle = hasStyle, NpopIn=Nbs[it.id])
         if (it is DHondtContest) {
             cua.addAssertionsFromAssorters(it.assorters)
         } else {

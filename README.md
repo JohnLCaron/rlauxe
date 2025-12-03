@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 11/18/2025_
+_last changed: 12/01/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is a independent implementation of the SHANGRLA framework, based on the
@@ -102,9 +102,7 @@ AdaptiveBetting needs estimates of the error rates between the Cvrs and the Mvrs
 
 See [CLCA Risk function](docs/BettingRiskFunction.md) for details on the BettingMart risk function.
 
-See [CLCA AdaptiveBetting](docs/AdaptiveBetting.md) for details on the AdaptiveBetting function.
-
-See [CLCA Error Rates](docs/ClcaErrorRates.md) for estimating error rates.
+See [Generalized Adaptive Betting for CLCA](docs/GeneralizedAdaptiveBetting.md) for details on the AdaptiveBetting function.
 
 
 ## Polling Audits

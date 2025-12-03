@@ -21,7 +21,7 @@ private val showBets = false
 // TODO what about OneAudit?? given pool sizes and avgs, could optimize....
 class GeneralAdaptiveBetting(
     val N: Int, // population size for this contest
-    val prevRounds: ClcaErrorCounts,
+    val startingErrorRates: ClcaErrorCounts, // note, not apriori
     val d: Int = 100,  // trunc weight
     val minRate: Double = .00001, // this bounds how close lam gets to 2.0; might be worth playing with
     val withoutReplacement: Boolean = true,
@@ -37,12 +37,12 @@ class GeneralAdaptiveBetting(
             println("prevSamples.valueCounter.keys = ${prevSamples.valueCounter.keys}")
         }
 
-        // estimated rates for each bassort value, minimum rate is minRate
-        val sampleNumber = prevRounds.totalSamples + tracker.numberOfSamples()
+        // estimated rates for each bassort value; minimum rate is minRate
+        val sampleNumber = startingErrorRates.totalSamples + tracker.numberOfSamples()
         val estRates =
-            prevRounds.bassortValues.associate { bassort -> // TODO could get in trouble over non-exact floating point
+            startingErrorRates.bassortValues.associate { bassort -> // TODO could get in trouble over non-exact floating point
                 val est = estimateRate(apriori=0.0,
-                    sampleCount=(tracker.valueCounter[bassort] ?: 0) + (prevRounds.errorCounts()[bassort] ?: 0),
+                    errorCount=(tracker.valueCounter[bassort] ?: 0) + (startingErrorRates.errorCounts()[bassort] ?: 0),
                     sampleNum=sampleNumber,
                 )
                 bassort to est
@@ -56,7 +56,7 @@ class GeneralAdaptiveBetting(
 
         called++
         val mui = populationMeanIfH0(N, withoutReplacement, tracker)
-        val kelly = GeneralOptimalLambda(noerror = prevRounds.noerror, tracker, mui, estRates)
+        val kelly = GeneralOptimalLambda(noerror = startingErrorRates.noerror, tracker, mui, estRates)
         val bet = kelly.solve()
         if (showBets && lastBet != 0.0 && bet < lastBet) {
             println("gggggeneral lastBet=$lastBet bet=$bet")
@@ -75,13 +75,11 @@ class GeneralAdaptiveBetting(
     // ease the first d sample in slowly
     fun estimateRate(
         apriori: Double,
-        sampleCount: Int,
+        errorCount: Int,
         sampleNum: Int,
     ): Double {
         if (sampleNum == 0) return minRate
-        // “shrink-trunc” estimator; measured error rate is sampleCount/N
-        //   (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ minRate  ; COBRA eq (4)
-        val est = (d * apriori + sampleCount) / (d + sampleNum - 1)
+        val est = (d * apriori + errorCount) / (d + sampleNum - 1)
         val boundedBelow = max(est, minRate) // lower bound on the estimated rate
         val boundedAbove = min(1.0, boundedBelow) // upper bound on the estimated rate
         return boundedAbove

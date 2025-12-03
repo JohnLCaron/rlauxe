@@ -389,17 +389,17 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     }
 
     // [ 0, .5, ]
-    override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
-        if (!mvr.hasContest(info.id)) return 0.5
-        if (usePhantoms && mvr.isPhantom()) return 0.0 // worst case
-        val cands = mvr.votes(info.id)
+    override fun assort(cvr: CardIF, usePhantoms: Boolean): Double {
+        if (!cvr.hasContest(info.id)) return 0.5
+        if (usePhantoms && cvr.isPhantom()) return 0.0 // worst case
+        val cands = cvr.votes(info.id)
         return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }
 
     override fun upperBound() = h2(upper)
 
     override fun desc() = buildString {
-        append("${shortName()}: reportedMean=${pfn(reportedMean)} reportedMargin=${pfn(reportedMargin())}")
+        append("${shortName()}: reportedMean=${pfn(reportedMean)} upperBound=${df(upperBound())}")
     }
 
     override fun shortName() = "DHondt w/l='${info.candidateIdToName[winner()]}'/'${info.candidateIdToName[loser()]}'"

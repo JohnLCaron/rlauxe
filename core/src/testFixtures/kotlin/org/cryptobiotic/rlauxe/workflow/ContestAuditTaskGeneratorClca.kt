@@ -137,7 +137,7 @@ class ClcaSingleRoundWorkflowTask(
         return if (minAssertion.auditResult == null) { // TODO why might this be empty?
             WorkflowResult(
                 name,
-                contest.Nc,
+                contest.Nb,
                 assorter.reportedMargin(),
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
@@ -148,7 +148,7 @@ class ClcaSingleRoundWorkflowTask(
             val lastRound = minAssertion.auditResult!!
             WorkflowResult(
                 name,
-                contest.Nc,
+                contest.Nb,
                 assorter.reportedMargin(),
                 lastRound.status,
                 minAssertion.round.toDouble(),

@@ -24,7 +24,7 @@ import org.cryptobiotic.rlauxe.util.pfn
 //
 //lower bound a = (t-1)
 //upper bound u = t
-//c = -1/2a
+//c = -1/2a = 1/2(1-t)
 //h = (g(b) - a)/-2a
 
 // h = (g(b) - a)/-2a
@@ -75,10 +75,10 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
         return if (h < doublePrecision) 0.0 else h
     }
 
-    override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
-        if (!mvr.hasContest(id)) return 0.5
-        if (usePhantoms && mvr.isPhantom()) return 0.0 // worst case
-        val cands = mvr.votes(id)
+    override fun assort(cvr: CardIF, usePhantoms: Boolean): Double {
+        if (!cvr.hasContest(id)) return 0.5
+        if (usePhantoms && cvr.isPhantom()) return 0.0 // worst case
+        val cands = cvr.votes(id)
         return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }
 
@@ -214,8 +214,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     #     h_bar = g_bar + .5
     #           = T_A / T_L - .05 + .5
 
- this seems to give slightly bigger margins, so is preferrable, eg:
-
+ this seems to give slightly bigger margins, so is preferrable
 */
 
 data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double): AssorterIF  {
@@ -245,10 +244,10 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
         return c * g + 0.5
     }
 
-    override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
-        if (!mvr.hasContest(id)) return 0.5
-        if (usePhantoms && mvr.isPhantom()) return 0.0 // worst case
-        val cands = mvr.votes(id)
+    override fun assort(cvr: CardIF, usePhantoms: Boolean): Double {
+        if (!cvr.hasContest(id)) return 0.5
+        if (usePhantoms && cvr.isPhantom()) return 0.0 // worst case
+        val cands = cvr.votes(id)
         return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }
 

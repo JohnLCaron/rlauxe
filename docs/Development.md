@@ -33,11 +33,13 @@
 | 11/25/2025 | 85.2 % | 5229/6136   |
 | 11/28/2025 | 85.9 % | 5188/6039   |
 | 11/29/2025 | 86.3 % | 5208/6034   |
+| 11/30/2025 | 86.7 % | 5255/6058   |
 
  cases
 |------------|--------|-------------|
 | 11/28/2025 | 79.3 % | 6417/8094   |
 | 11/29/2025 | 79.6 % | 6434/8087   |
+| 11/29/2025 | 81.4 % | 6479/7962   |
 
 ## Modules
 
@@ -63,5 +65,5 @@ last changed: 03/10/2025
 * review strategies and fuzzing in estimation
 * review strategies and fuzzing in auditing
 * replace old plots
-* dhondt, threshold assorters
+* test dhondt, threshold assorters
 

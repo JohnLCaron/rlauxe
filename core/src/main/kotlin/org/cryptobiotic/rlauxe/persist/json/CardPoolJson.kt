@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.persist.json
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
@@ -11,6 +12,7 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.util.RegVotes
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
@@ -19,7 +21,7 @@ import kotlin.Int
 
 @Serializable
 data class CardPoolsJson(
-    val cardsPools: List<CardPoolJson>,
+    val cardsPools: List<CardPoolIFJson>,
 )
 
 fun List<CardPoolIF>.publishJson() = CardPoolsJson(
@@ -31,35 +33,98 @@ fun CardPoolsJson.import(infos: Map<Int, ContestInfo>): List<CardPoolIF> {
 }
 
 @Serializable
-data class CardPoolJson(
+data class CardPoolIFJson(
     val type: String,
     val cardPoolWithBallotStyleJson: CardPoolWithBallotStyleJson?,
     val cardPoolFromCvrs: CardPoolFromCvrsJson?,
+    val cardPool: CardPoolJson?,
 )
 
-fun CardPoolIF.publishJson(): CardPoolJson {
+fun CardPoolIF.publishJson(): CardPoolIFJson {
     return if (this is CardPoolWithBallotStyle)
-        CardPoolJson(
+        CardPoolIFJson(
             "CardPoolWithBallotStyle",
             this.publishJson(),
             null,
+            null,
         ) else if (this is CardPoolFromCvrs)
-        CardPoolJson(
+        CardPoolIFJson(
             "CardPoolFromCvrs",
+            null,
+            this.publishJson(),
+            null,
+        ) else if (this is CardPool)
+        CardPoolIFJson(
+            "CardPool",
+            null,
             null,
             this.publishJson(),
         ) else throw IllegalArgumentException("serializing ${this.javaClass.getName()} is not supported")
 }
 
-fun CardPoolJson.import(infos: Map<Int, ContestInfo>): CardPoolIF {
+fun CardPoolIFJson.import(infos: Map<Int, ContestInfo>): CardPoolIF {
     return if (this.type == "CardPoolWithBallotStyle")
         this.cardPoolWithBallotStyleJson!!.import(infos)
     else if (this.type == "CardPoolFromCvrs")
         this.cardPoolFromCvrs!!.import(infos)
+    else if (this.type == "CardPool")
+        this.cardPool!!.import()
     else throw IllegalArgumentException("serializing ${this.type} is not supported")
 }
 
-// class CardPoolWithBallotStyle(
+// class CardPool(
+// override val poolName: String,
+// override val poolId: Int,
+// val ncards: Int,
+// val regVotes: Map<Int, RegVotes>) : CardPoolIF {
+@Serializable
+class CardPoolJson(
+    val poolName: String,
+    val poolId: Int,
+    val ncards: Int,
+    val regVotes: Map<Int, RegVotesJson>, // contestId -> candidateId -> nvotes
+)
+
+fun CardPool.publishJson() = CardPoolJson(
+    this.poolName,
+    this.poolId,
+    this.ncards,
+    this.regVotes.mapValues { it.value.publishJson() },
+)
+
+fun CardPoolJson.import(): CardPool {
+    val cardPool = CardPool(
+        this.poolName,
+        this.poolId,
+        this.ncards,
+        this.regVotes.mapValues { it.value.import() },
+    )
+    return cardPool
+}
+
+// data class RegVotes(override val votes: Map<Int, Int>, val ncards: Int, val undervotes: Int): RegVotesIF {
+@Serializable
+class RegVotesJson(
+    val votes: Map<Int, Int>, // cand -> votes
+    val ncards: Int,
+    val undervotes: Int,
+)
+
+fun RegVotes.publishJson() = RegVotesJson(
+    this.votes,
+    this.ncards,
+    this.undervotes,
+)
+
+fun RegVotesJson.import() = RegVotes(
+    this.votes,
+    this.ncards,
+    this.undervotes,
+)
+
+
+
+    // class CardPoolWithBallotStyle(
 //    override val poolName: String,
 //    override val poolId: Int,
 //    val voteTotals: Map<Int, Map<Int, Int>>, // contestId -> candidateId -> nvotes
@@ -182,6 +247,7 @@ fun ContestTabulationJson.import(info: ContestInfo): ContestTabulation {
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+@OptIn(ExperimentalSerializationApi::class)
 fun writeCardPoolsJsonFile(cardPools: List<CardPoolIF>, filename: String) {
     val json = cardPools.publishJson()
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
@@ -191,6 +257,7 @@ fun writeCardPoolsJsonFile(cardPools: List<CardPoolIF>, filename: String) {
     }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
 fun readCardPoolsJsonFile(filename: String, infos: Map<Int, ContestInfo>): Result<List<CardPoolIF>, ErrorMessages> {
     val errs = ErrorMessages("readCardPoolsJsonFile '${filename}'")
     val filepath = Path.of(filename)

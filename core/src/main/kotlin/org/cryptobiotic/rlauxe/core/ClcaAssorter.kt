@@ -154,6 +154,20 @@ open class ClcaAssorter(
     //                       = u-l, u-.5, 0
     // u-l, u-.5, .5-l,  0, .5-u, l-.5, -(u-l)
 
+    // o = cvr_assort - mvr_assort when l = 0:
+    // [0, .5, u] - [0, .5, u] = 0, -.5, -u
+    //                         = .5,  0, .5-u
+    //                         = u, u-.5, 0
+    // u, u-.5, .5,  0, .5-u, -.5, -u = (cvr - mvr) = (u-0), (u-.5), (.5-0), (cvr==mvr), (.5-u), (0-.5), (0-u)
+
+    // (u-0),       cvr has vote for winner, mvr has vote for loser : p2o = 2 vote overstatement
+    // (u-.5),      cvr has vote for winner, mvr has vote for other : p1o = 1 vote overstatement
+    // (.5-0),      cvr has vote for other, mvr has vote for loser : p1o = 1 vote overstatement
+    // (cvr==mvr),  no error
+    // (.5-u),      cvr has vote for other, mvr has vote for winner : p1u = 1 vote understatement
+    // (0-.5),      cvr has vote for loser, mvr has vote for other  : p1u = 1 vote understatement
+    // (0-u)        cvr has vote for loser, mvr has vote for winner : p2u = 2 vote understatement
+
     fun overstatementError(mvr: CardIF, cvr: CardIF, hasStyle: Boolean): Double {
 
 
@@ -171,6 +185,12 @@ open class ClcaAssorter(
         // the loser, assort()=0.
         // If not use_style, then if the CVR contains the contest but the MVR does not, the MVR is considered to be a
         // non-vote in the contest, assort()=1/2.
+
+        //         Phantom CVRs and MVRs are treated specially:
+        //            A phantom CVR is considered a non-vote in every contest (assort()=1/2).
+        //            A phantom MVR is considered a vote for the loser (i.e., assort()=0) in every
+        //            contest.
+
         val mvr_assort =
             if (mvr.isPhantom()) 0.0
             else if (!mvr.hasContest(info.id)) { if (hasStyle) 0.0 else 0.5 }
@@ -210,7 +230,7 @@ open class ClcaAssorter(
         appendLine("ClcaAssorter for contest ${info.name} (${info.id})")
         appendLine("  assorter=${assorter.desc()}")
         append("  assortMargin=${dfn(dilutedMargin, 8)} assortMean=${dfn(margin2mean(dilutedMargin), 8)}")
-        append(" upperBound=${dfn(assorter.upperBound(), 8)}")
+        append(" assortUpper=${dfn(assorter.upperBound(), 8)}")
         append(" noerror=${dfn(noerror, 8)}")
     }
 

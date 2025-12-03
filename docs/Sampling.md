@@ -31,6 +31,101 @@ if you have card style for a cvr then you know the undervotes. so you dont need 
 so possibleContests == poolContests OR possible contests in sample population
 OA pools vs sample populations
 
+````
+data class Cvr(
+    val id: String, // ballot identifier
+    val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
+    val phantom: Boolean = false,
+    val poolId: Int? = null,  // or cardStyle.id
+)
+````
+
+````
+data class AuditableCard (
+    val jurisdiction: String, ??
+    val location: String, // info to find the card for a manual audit. Aka ballot identifier.
+    val index: Int,       // index into the original, canonical list of cards
+    val prn: Long,        // psuedo random number
+    val phantom: Boolean,
+
+    val votes: Map<Int, IntArray>?, // for CLCA or OneAudit, a map of contest -> the candidate ids (when IRV, ranked first to last)
+                                    // when it includes undervotes then it doubles for possibleContests
+                                    // missing for pooled data or polling audits
+                                    
+    val poolId: Int?, // for OneAudit, or for setting style from CVR (so tolerate non-OA poolId)
+                      // what if poolid == the card style ?? then pools always have same card style.
+                      // but what about setting the card style without belonging to an OA pool? problem only affests OA nonpool when !cvrsAreComplete
+                      
+    val cardStyle: String? = null, // set style in a way that doesnt interfere with oneaudit pool.
+                                   // TODO cardStyle doesnt get serialized; perhaps only used when constructing ??
+                                   
+    val possibleContests: IntArray, // list of contests that might be on the ballot.
+                                    // card does not know cvrsAreComplete nor the cardPool. So always fill out possibleContests when cvrsAreComplete = false
+                                    // cvrsAreComplete && votes != null means can use votes.
+                                    // polling and oa pools need to fill out possibleContests always. unless you want to allow empty = all?
+    // or, always factor out cardStyles                               
+)
+````
+
+````
+interface CardStyleIF {
+    fun name(): String
+    fun contests() : IntArray
+    fun hasContest(contestId: Int): Boolean
+    fun poolId(): Int?
+}
+
+data class CardStyle(
+    val name: String,
+    val contestIds: List<Int>,
+    val poolId: Int?,
+)
+````
+
+````
+interface CardPoolIF: CardStyleIF {
+    val poolName: String
+    val poolId: Int
+    val assortAvg: MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contestId -> assorter -> average in the pool
+    fun regVotes() : Map<Int, RegVotes> // contestId -> RegVotes, regular contests only
+    fun ncards() : Int // total number of cards in the pool, including undervotes
+    fun votesAndUndervotes(contestId: Int): VotesAndUndervotes
+
+    override fun name() = poolName
+    override fun poolId() = poolId
+    override fun hasContest(contestId: Int) : Boolean // does the pool contain this contest ?
+    override fun contests(): IntArray
+}
+````
+
+TestRunCli
+- RunRlaStartFuzz.main
+  -- startTestElectionClca
+  --- CreateAudit(TestClcaElection)
+  ---- writeAuditConfigJsonFile
+  ---- writeCardPoolsJsonFile
+  ---- writeAuditableCardCsvFile
+  ---- checkContestsCorrectlyFormed
+  ---- writeContestsJsonFile
+
+- RunVerifyContests
+
+- RunRliRoundCli.runRound
+  -- if (auditRounds().isNotEmpty()) PersistedWorkflow.runAuditRound(auditRound)
+  -- if (!complete) workflow.startNewRound()
+  --- estimateSampleSizes
+  ---- makeEstimationTasks
+  ----- estimateClcaAssertionRound
+  ------ runRepeatedBettingMart
+
+---- ConcurrentTaskRunnerG.run(tasks)
+---- put results into assertionRounds, contestRounds
+
+--- sampleWithContestCutoff
+
+- runVerifyAuditRecord
+
+
 =============================================
 
 Attacks

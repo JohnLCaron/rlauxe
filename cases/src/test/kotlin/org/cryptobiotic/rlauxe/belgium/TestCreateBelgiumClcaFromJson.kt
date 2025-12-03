@@ -6,7 +6,7 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
-import org.cryptobiotic.rlauxe.cli.runRound
+import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
@@ -167,7 +167,7 @@ fun runBelgiumElection(electionName: String, stopRound:Int=0): Int {
 }
 
 
-// Nc, nmvrs, minAssorter
+// Npop, nmvrs, minAssorter
 fun showBelgiumElection(electionName: String): Triple<Int, Int, AssorterIF> {
     println("======================================================")
     println("showBelgiumElection $electionName")
@@ -184,8 +184,8 @@ fun showBelgiumElection(electionName: String): Triple<Int, Int, AssorterIF> {
     println(contestUA.contest.showCandidates())
 
     val finalRound = auditRecord.rounds.last()
-    val Nc = finalRound.contestRounds.first().Nc
-    return Triple(Nc, finalRound.nmvrs, minAssorter)
+    val Nb = finalRound.contestRounds.first().Nb
+    return Triple(Nb, finalRound.nmvrs, minAssorter)
 }
 
 /* UnderThreshold assertions only

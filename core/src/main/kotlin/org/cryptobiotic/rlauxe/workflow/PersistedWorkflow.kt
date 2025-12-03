@@ -15,7 +15,7 @@ private val logger = KotlinLogging.logger("PersistentAudit")
 /** AuditWorkflow with persistent state. */
 class PersistedWorkflow(
     val auditDir: String,
-    val useTest: Boolean,
+    val useTest: Boolean,  // TODO move to config ??
 ): AuditWorkflow() {
     val auditRecord: AuditRecord // only need auditConfig, contests from record
     val publisher = Publisher(auditDir)
@@ -38,7 +38,7 @@ class PersistedWorkflow(
         contestsUA = auditRecord.contests
 
         auditRounds.addAll(auditRecord.rounds)
-        mvrManager = if (useTest) { //  || existsOrZip(publisher.sortedMvrsFile())) {
+        mvrManager = if (useTest) {
             PersistedMvrManagerTest(auditRecord.location, config, contestsUA)
         } else {
             PersistedMvrManager(auditRecord.location)

@@ -133,7 +133,9 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             withoutReplacement = true
         )
 
-        val tracker = ClcaErrorTracker(cassorter.noerror()) // track pool data; something better to do?
+        // TODO make optional
+        val sequences = testFn.setDebuggingSequences()
+        val tracker = ClcaErrorTracker(cassorter.noerror(), sequences) // track pool data; something better to do?
 
         return testFn.testH0(sampling.maxSamples(), terminateOnNullReject = true, tracker=tracker) { sampling.sample() }
     }

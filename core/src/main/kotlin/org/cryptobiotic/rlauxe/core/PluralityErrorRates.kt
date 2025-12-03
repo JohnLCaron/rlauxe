@@ -156,7 +156,7 @@ object ClcaErrorTable {
 
 /**
  * CANDIDATE for removal
- * This also counts the under/overstatements for clca plurality audits.
+ * This counts the under/overstatements for clca plurality audits.
  * @param noerror for comparison assorters who need rate counting. set to 0 for polling
  */
 class PluralityErrorTracker(val noerror: Double) : SampleTracker, ClcaErrorRatesIF {

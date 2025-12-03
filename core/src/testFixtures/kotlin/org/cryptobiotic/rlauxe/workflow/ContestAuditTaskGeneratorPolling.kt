@@ -106,7 +106,7 @@ class PollingSingleRoundAuditTask(
         return if (minAssertion.auditResult == null) { // TODO why might this this empty?
             WorkflowResult(
                 name,
-                contest.Nc,
+                contest.Nb,
                 assorter.reportedMargin(),
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
@@ -117,7 +117,7 @@ class PollingSingleRoundAuditTask(
             val lastRound = minAssertion.auditResult!!
             WorkflowResult(
                 name,
-                contest.Nc,
+                contest.Nb,
                 assorter.reportedMargin(),
                 lastRound.status,
                 minAssertion.round.toDouble(),

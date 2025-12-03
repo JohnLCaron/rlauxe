@@ -97,11 +97,8 @@ class StaxReader {
 
         // Use a factory to get an instance of XMLEventReader
         val inputFactory: XMLInputFactory = XMLInputFactory.newInstance()
-
-        // Use a `use` block for safe and automatic resource handling
         FileInputStream(xmlFile).use { fileInputStream ->
             val eventReader: XMLEventReader = inputFactory.createXMLEventReader(fileInputStream)
-
 
             while (eventReader.hasNext()) {
                 val event: XMLEvent = eventReader.nextEvent()
@@ -150,7 +147,7 @@ class StaxReader {
                             }
                         }
                     }
-                    // If the event is an ending element for a book, create and store the object
+                    // If the event is an ending element for a group, create and store the object
                     event.isEndElement -> {
                         val endElement = event.asEndElement()
                         when (endElement.name.localPart) {

@@ -10,19 +10,19 @@ import kotlin.collections.component2
 import kotlin.collections.iterator
 
 // IRV have empty votes
-interface RegVotes {
+interface RegVotesIF {
     val votes: Map<Int, Int>
     fun ncards(): Int // including undervotes
     fun undervotes(): Int // including undervotes
 }
 
-data class RegVotesImpl(override val votes: Map<Int, Int>, val ncards: Int, val undervotes: Int): RegVotes {
+data class RegVotes(override val votes: Map<Int, Int>, val ncards: Int, val undervotes: Int): RegVotesIF {
     override fun ncards() = ncards
     override fun undervotes() = undervotes
 }
 
-// tabulate contest votes from CVRS; can handle both regular and irv voting
-class ContestTabulation(val info: ContestInfo): RegVotes {
+// tabulate contest votes from cards or cvrs; can handle both regular and irv voting
+class ContestTabulation(val info: ContestInfo): RegVotesIF {
     val isIrv = info.isIrv
     val voteForN = if (isIrv) 1 else info.voteForN
 
@@ -31,7 +31,7 @@ class ContestTabulation(val info: ContestInfo): RegVotes {
     val notfound = mutableMapOf<Int, Int>() // candidate -> nvotes; track candidates on the cvr but not in the contestInfo, for debugging
     val candidateIdToIndex: Map<Int, Int>
 
-    var ncards = 0
+    var ncards = 0 // TODO should be "how many cards are in the population"?
     var novote = 0  // how many cards had no vote for this contest?
     var undervotes = 0  // how many undervotes = voteForN - nvotes
     var overvotes = 0  // how many overvotes = (voteForN < cands.size)
@@ -154,7 +154,7 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
 fun tabulateCardPools(cardPools: List<CardPoolIF>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val poolSums = infos.mapValues { ContestTabulation(it.value) }
     cardPools.forEach { cardPool ->
-        cardPool.regVotes().forEach { (contestId, regVotes: RegVotes) ->
+        cardPool.regVotes().forEach { (contestId, regVotes: RegVotesIF) ->
             val poolSum = poolSums[contestId]
             if (poolSum != null) {
                 regVotes.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
@@ -194,7 +194,32 @@ fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<I
         while (cardIter.hasNext()) {
             val card = cardIter.next()
             infos.forEach { (contestId, info) ->
-                if (card.hasContest(contestId)) {
+                if (card.hasContest(contestId)) { // TODO note that we believe possibleContests ...
+                    val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
+                    tab.ncards++
+                    if (card.phantom) tab.nphantoms++
+                    if (card.votes != null) {
+                        val contestVote = card.votes[contestId]
+                        if (contestVote == null) {
+                            tab.undervotes++
+                        } else {
+                            contestVote.forEach { cand -> tab.addVote(cand, 1) }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return tabs
+}
+
+fun tabulatePooledCards(cards: CloseableIterator<AuditableCard>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+    val tabs = mutableMapOf<Int, ContestTabulation>()
+    cards.use { cardIter ->
+        while (cardIter.hasNext()) {
+            val card = cardIter.next()
+            infos.forEach { (contestId, info) ->
+                if (card.hasContest(contestId)) { // TODO note that we believe possibleContests ...
                     val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
                     tab.ncards++
                     if (card.phantom) tab.nphantoms++

@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.workflow.wantSampleSize
 private val debugConsistent = false
 private val logger = KotlinLogging.logger("ConsistentSampling")
 
+// called by viewer
 fun sampleWithContestCutoff(
     config: AuditConfig,
     mvrManager : MvrManager,

@@ -22,7 +22,7 @@ class TestAuditRound {
         val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())
 
         val contestRounds = contestsUAs.map { contest -> ContestRound(contest, 1) }
-        contestRounds.forEach { it.estSampleSize = it.Nc / 11 } // random
+        contestRounds.forEach { it.estSampleSize = it.Nb / 11 } // random
 
         val prng = Prng(Random.nextLong())
         testCvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }

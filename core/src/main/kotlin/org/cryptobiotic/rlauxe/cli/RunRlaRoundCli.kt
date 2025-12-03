@@ -1,21 +1,13 @@
 package org.cryptobiotic.rlauxe.cli
 
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
 import kotlinx.cli.default
-import org.cryptobiotic.rlauxe.audit.AuditRound
-import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.audit.runAudit
+import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
-import org.cryptobiotic.rlauxe.util.Stopwatch
-import java.nio.file.Files.notExists
-import java.nio.file.Path
-import java.util.concurrent.TimeUnit
-
-private val logger = KotlinLogging.logger("RunRliRoundCli")
+import kotlin.String
 
 /** Run one round of a PersistentAudit that has already been started. */
 // TODO break into initial estimate and the real run round ?
@@ -46,97 +38,42 @@ object RunRliRoundCli {
     }
 }
 
-// Called from rlaux-viewer
-fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
-    try {
-        if (notExists(Path.of(inputDir))) {
-            logger.warn { "RunRliRoundCli Audit Directory $inputDir does not exist" }
-            return null
-        }
-        logger.info { "runRound on Audit in $inputDir" }
+object RunAuditCli {
 
-        var complete = false
-        var roundIdx = 0
-        val workflow = PersistedWorkflow(inputDir, useTest)
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val parser = ArgParser("RunAudit")
+        val auditDir by parser.option(
+            ArgType.String,
+            shortName = "auditDir",
+            description = "Directory containing input election record"
+        ).required()
+        val round by parser.option(
+            ArgType.Int,
+            shortName = "round",
+            description = "audit round index"
+        ).default(1)
+        val contest by parser.option(
+            ArgType.Int,
+            shortName = "contest id",
+            description = ""
+        ).default(1)
+        val assertion by parser.option(
+            ArgType.String,
+            shortName = "assertion win/lose",
+            description = ""
+        ).default("first")
 
-        if (!workflow.auditRounds().isEmpty()) {
-            val auditRound = workflow.auditRounds().last()
-            roundIdx = auditRound.roundIdx
+        parser.parse(args)
 
-            if (!auditRound.auditWasDone) {
-                logger.info { "Run audit round ${auditRound.roundIdx}" }
-                val roundStopwatch = Stopwatch()
+        val pflow = PersistedWorkflow(auditDir, false)
+        val auditRecord = pflow.auditRecord
+        val auditRound = auditRecord.rounds.first()
+        val contestRound = auditRound.contestRounds.first()
+        val assertionRound = contestRound.assertionRounds.first() //  { it.assertion.assorter.winLose() == contest }!!
 
-                // run the audit for this round
-                complete = workflow.runAuditRound(auditRound, quiet)
-                logger.info { "  complete=$complete took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms" }
-            } else {
-                complete = auditRound.auditIsComplete
-            }
-        }
-
-        if (!complete) {
-            roundIdx++
-            // start next round and estimate sample sizes
-            logger.info { "Start audit round $roundIdx using ${workflow}" }
-            val nextRound = workflow.startNewRound(quiet = false)
-            logger.info { "nextRound ${nextRound.show()}" }
-            return if (nextRound.auditIsComplete) null else nextRound // TODO dont return null
-        }
-
-        logger.info { "runRound $roundIdx complete = $complete" }
-        return null
-
-    } catch (t: Throwable) {
-        logger.error {t}
-        t.printStackTrace()
-        return null
+        // fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): String {
+        val result = runAudit(auditDir, contestRound, assertionRound, assertionRound.auditResult!!)
+        println(result)
     }
 }
-
-
-fun runRoundResult(inputDir: String, useTest: Boolean, quiet: Boolean): Result<AuditRound, ErrorMessages> {
-    val errs = ErrorMessages("runRoundResult")
-
-    try {
-        if (notExists(Path.of(inputDir))) {
-            return errs.add( "RunRliRoundCli Audit Directory $inputDir does not exist" )
-        }
-        logger.info { "runRound on Audit in $inputDir" }
-        val rlauxAudit = PersistedWorkflow(inputDir, useTest)
-
-        var roundIdx = 0
-        var complete = false
-
-        if (!rlauxAudit.auditRounds().isEmpty()) {
-            val lastRound = rlauxAudit.auditRounds().last()
-            roundIdx = lastRound.roundIdx
-
-            if (!lastRound.auditWasDone) {
-                logger.info { "Run audit round ${lastRound.roundIdx}" }
-                val roundStopwatch = Stopwatch()
-                complete = rlauxAudit.runAuditRound(lastRound, quiet)
-                logger.info { "  complete=$complete took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms" }
-            }
-        }
-
-        if (!complete) {
-            roundIdx++
-            // start next round and estimate sample sizes
-            logger.info { "Start audit round $roundIdx using ${rlauxAudit}" }
-            val nextRound = rlauxAudit.startNewRound(quiet = false)
-            logger.info { "nextRound ${nextRound.show()}" }
-            return Ok(nextRound)
-
-        } else {
-            val lastRound = rlauxAudit.auditRounds().last()
-            logger.info { "runRound ${lastRound.roundIdx} complete = $complete" }
-            return Ok(lastRound)
-        }
-
-    } catch (t: Throwable) {
-        logger.error {t}
-        return errs.add( t.message ?: t.toString())
-    }
-}
-

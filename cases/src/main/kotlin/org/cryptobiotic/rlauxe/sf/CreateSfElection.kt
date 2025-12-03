@@ -27,7 +27,7 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 
-private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOA")
+private val logger = KotlinLogging.logger("CreateSfElection")
 
 // SanFrancisco 2024 General Election.
 class CreateSfElection(

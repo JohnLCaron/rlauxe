@@ -53,7 +53,7 @@ fun estimateSampleSizes(
         val useFirst = config.auditType == AuditType.ONEAUDIT && config.oaConfig.useFirst // experimental
         val estNewSamples = if (useFirst) result.sampleCount[0] else result.findQuantile(config.quantile)
         task.assertionRound.estNewSampleSize = estNewSamples
-        task.assertionRound.estSampleSize = min(estNewSamples + task.prevSampleSize, task.contest.Nc)
+        task.assertionRound.estSampleSize = min(estNewSamples + task.prevSampleSize, task.contest.Nb)
 
         if (debug) println(result.showSampleDist(estResult.task.contest.id))
         if (debugSampleSmall && result.avgSamplesNeeded() < 10) {
@@ -106,7 +106,7 @@ fun makeEstimationTasks(
             var startingTestStatistic = 1.0
             if (roundIdx > 1) {
                 val prevAuditResult = assertionRound.prevAuditResult!!
-                if (prevAuditResult.samplesUsed == contestRound.Nc) {
+                if (prevAuditResult.samplesUsed == contestRound.Nb) {
                     logger.info{"***LimitReached $contestRound"}
                     contestRound.done = true
                     contestRound.status = TestH0Status.LimitReached
@@ -213,12 +213,12 @@ fun estimateClcaAssertionRound(
     val cassertion = assertionRound.assertion as ClcaAssertion
     val cassorter = cassertion.cassorter
 
-    // From ClcaAssertionAuditor
+    // duplicate to ClcaAssertionAuditor
     val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
-    prevRounds.setPhantomRate(contest.phantomRate()) // the minimum p1o is always the phantom rate.
+    prevRounds.setPhantomRate(contest.phantomRate()) // TODO ??
 
     val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-        GeneralAdaptiveBetting(N = contestUA.Nb, prevRounds = prevRounds, d = clcaConfig.d,)
+        GeneralAdaptiveBetting(N = contestUA.Nb, startingErrorRates = prevRounds, d = clcaConfig.d,)
 
     } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
         AdaptiveBetting(N = contestUA.Nb, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
@@ -427,7 +427,7 @@ fun estimateOneAuditAssertionRound(
     val strategy = config.oaConfig.strategy
     val result = if (strategy == OneAuditStrategyType.optimalComparison) {
 
-        val bettingFn: BettingFn = OptimalComparisonNoP1(contestUA.Nb, true, oaCassorter.upperBound, p2 = errorRates.p2o) // diluted margin
+        val bettingFn: BettingFn = OptimalComparisonNoP1(contestUA.Nb, true, oaCassorter.upperBound, p2 = 0.0) // TODO errorRates.p2o) // diluted margin
 
         runRepeatedBettingMart(
             config,

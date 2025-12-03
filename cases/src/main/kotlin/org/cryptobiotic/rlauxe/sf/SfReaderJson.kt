@@ -15,6 +15,18 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
 // read ContestManifest.json
+// {
+//  "Version": "5.10.50.85",
+//  "List": [
+//    {
+//      "Description": "PRESIDENT AND VICE PRESIDENT",
+//      "Id": 1,
+//      "ExternalId": "110",
+//      "DistrictId": 101,
+//      "VoteFor": 1,
+//      "NumOfRanks": 0,
+//      "Disabled": 0
+//    },
 
 data class ContestManifest(val contests: Map<Int, ContestMJson>, val irvContests: Set<Int>)
 

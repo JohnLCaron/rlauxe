@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
-import org.cryptobiotic.rlauxe.cli.runRound
+import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.persist.Publisher

@@ -38,7 +38,7 @@ class Publisher(val auditDir: String) {
     fun sortedCardsFile() = "$auditDir/sortedCards.csv" // sorted cardManifest
     fun cardPoolsFile() = "$auditDir/cardPools.json"
     // fun testMvrsFile() = "$auditDir/private/testMvrs.csv"
-    // fun sortedMvrsFile() = "$auditDir/private/sortedMvrs.csv"
+    fun sortedMvrsFile() = "$auditDir/private/sortedMvrs.csv"
 
     fun samplePrnsFile(round: Int): String {
         val dir = "$auditDir/round$round"
@@ -46,6 +46,7 @@ class Publisher(val auditDir: String) {
         return "$dir/samplePrns.json"
     }
 
+    fun sampleCardsFile(round: Int) = "$auditDir/round$round/sampleCards.csv"
     fun sampleMvrsFile(round: Int): String {
         val dir = "$auditDir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("sampleMvrsFile"))

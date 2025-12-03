@@ -39,10 +39,15 @@ data class AuditableCard (
                                     // card does not know cvrsAreComplete nor the cardPool. So always fill out possibleContests when cvrsAreComplete = false
                                     // cvrsAreComplete && votes != null means can use votes.
                                     // polling and oa pools need to fill out possibleContests always. unless you want to allow empty = all?
-    val votes: Map<Int, IntArray>?, // for CLCA or OneAudit, a map of contest -> the candidate ids voted; must include undervotes; missing for pooled data or polling audits
-                                                                                // when IRV, ranked first to last
+    // or, always factor out cardStyles
+    val votes: Map<Int, IntArray>?, // for CLCA or OneAudit, a map of contest -> the candidate ids (when IRV, ranked first to last)
+                                    // when it includes undervotes then it doubles for possibleContests
+                                    // missing for pooled data or polling audits
     val poolId: Int?, // for OneAudit, or for setting style from CVR (so tolerate non-OA poolId)
-    val cardStyle: String? = null, // set style in a way that doesnt interfere with oneaudit pool. At the moment, informational.
+                      // what if poolid == the card style ?? then pools always have same card style.
+                      // but what about setting the card style without belonging to an OA pool? problem only affests OA nonpool when !cvrsAreComplete
+    val cardStyle: String? = null, // set style in a way that doesnt interfere with oneaudit pool.
+                                   // TODO cardStyle doesnt get serialized; perhaps only used when constructing ??
 ): CardIF {
 
     init {

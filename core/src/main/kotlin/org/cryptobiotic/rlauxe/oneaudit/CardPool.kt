@@ -64,6 +64,15 @@ data class CardPool(override val poolName: String, override val poolId: Int, val
         val poolUndervotes = ncards - regVotes.votes.values.sum()
         return VotesAndUndervotes(regVotes.votes, poolUndervotes, 1)
     }
+
+    fun show() = buildString {
+        appendLine("CardPool(poolName=$poolName, poolId=$poolId, ncards=$ncards")
+        regVotes.forEach{
+            // data class RegVotes(override val votes: Map<Int, Int>, val ncards: Int, val undervotes: Int): RegVotesIF {
+            appendLine("    contest ${it.key} votes= ${it.value.votes}, ncards= ${it.value.ncards}, undervotes= ${it.value.undervotes} ")
+        }
+        appendLine(")")
+    }
 }
 
 // When the pools do not have CVRS, but just pool vote count totals.

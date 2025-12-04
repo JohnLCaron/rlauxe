@@ -55,8 +55,8 @@ object RunAuditCli {
         ).default(1)
         val contest by parser.option(
             ArgType.Int,
-            shortName = "contest id",
-            description = ""
+            shortName = "contest",
+            description = "contest id"
         ).default(1)
         val assertion by parser.option(
             ArgType.String,
@@ -69,7 +69,7 @@ object RunAuditCli {
         val pflow = PersistedWorkflow(auditDir, false)
         val auditRecord = pflow.auditRecord
         val auditRound = auditRecord.rounds.first()
-        val contestRound = auditRound.contestRounds.first()
+        val contestRound = auditRound.contestRounds.find { it.id == contest }!!
         val assertionRound = contestRound.assertionRounds.first() //  { it.assertion.assorter.winLose() == contest }!!
 
         // fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): String {

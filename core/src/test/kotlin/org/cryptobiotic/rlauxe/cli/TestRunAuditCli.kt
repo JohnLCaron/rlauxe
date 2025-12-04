@@ -8,11 +8,12 @@ class TestRunAuditCli {
 
     @Test
     fun TestRunAuditCli() {
-        val auditDir = "/home/stormy/rla/attack/hideInOtherPoolAttackV/audit"
+        val auditDir = "/home/stormy/rla/attack/cardManifestAttack/audit"
 
         RunAuditCli.main(
             arrayOf(
                 "-auditDir", auditDir,
+                "-contest", "1"
             )
         )
     }

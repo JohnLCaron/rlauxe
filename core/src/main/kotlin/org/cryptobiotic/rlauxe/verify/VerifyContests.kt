@@ -29,8 +29,9 @@ import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.text.appendLine
 
+// pre audit verifaction; no access to mvrs.
 // for all audit types. Cards and CardPools must already be published, contests might not,
-// but only is you call cerify with the contests' note only then do you get contestUA.preAuditStatus saved
+// but only if you call cerify with the contests' note only then do you get contestUA.preAuditStatus saved
 class VerifyContests(val auditRecordLocation: String, val show: Boolean = false) {
     val config: AuditConfig
     val allContests: List<ContestUnderAudit>?
@@ -51,7 +52,6 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         allInfos = allContests?.map{ it.contest.info() }?.associateBy { it.id }
 
         cards = AuditableCardCsvReader(publisher.sortedCardsFile())
-        // mvrs = if (existsOrZip(publisher.sortedMvrsFile())) AuditableCardCsvReader(publisher.sortedMvrsFile()) else null
     }
 
     fun verify() = verify( allContests!!, show = show)

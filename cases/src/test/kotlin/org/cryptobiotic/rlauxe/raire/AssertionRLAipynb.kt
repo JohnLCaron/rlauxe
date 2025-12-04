@@ -664,7 +664,7 @@ fun calc_sample_sizes(
         // maxSamples = N,
         ntrials = ntrials,
         testFn = betta,
-        testParameters = mapOf("p2o" to optimal.p2o, "margin" to cassorter.assorter().reportedMargin()),
+        testParameters = mapOf("p2o" to optimal.p2o, "margin" to cassorter.assorter().dilutedMargin()),
         N = N,
         tracker = PluralityErrorTracker(0.0),
     )

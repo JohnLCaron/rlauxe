@@ -309,7 +309,7 @@ fun estimatePollingAssertionRound(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunTestRepeatedResult {
     val assorter = assertionRound.assertion.assorter
-    val eta0 = assorter.reportedMean()
+    val eta0 = assorter.dilutedMean()
 
     // optional fuzzing of the cvrs
     val useFuzz = config.simFuzzPct ?: 0.0

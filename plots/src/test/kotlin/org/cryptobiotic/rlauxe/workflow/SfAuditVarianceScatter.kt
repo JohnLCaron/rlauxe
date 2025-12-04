@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 
 import org.cryptobiotic.rlauxe.audit.AssertionRound
@@ -30,7 +29,7 @@ class SfAuditVarianceScatter {
     fun genSfAuditVarianceComparePlots() {
         val allAssertions = mutableListOf<AssertionAndCat>()
         val (totalClca, clcaAssertions) = readAssertionAndTotal("/home/stormy/rla/cases/sf2024/audit0", "CLCA")
-        val marginOverride = clcaAssertions.associate { it.assertion.assertion.id().hashCode() to it.assertion.assertion.assorter.reportedMargin() }
+        val marginOverride = clcaAssertions.associate { it.assertion.assertion.id().hashCode() to it.assertion.assertion.assorter.dilutedMargin() }
         allAssertions.addAll( clcaAssertions)
 
         val totalOA = mutableListOf<Int>()
@@ -91,7 +90,7 @@ fun readAssertionAndTotal(auditDir: String, cat: String, marginOverride:Map<Int,
     val contestRounds = auditRound.contestRounds
     contestRounds.forEach { contestRound ->
         contestRound.assertionRounds.forEach { assertionRound ->
-            val margin = if (marginOverride == null) assertionRound.assertion.assorter.reportedMargin() else
+            val margin = if (marginOverride == null) assertionRound.assertion.assorter.dilutedMargin() else
                 marginOverride[assertionRound.assertion.id().hashCode()] ?: 0.0
             if (assertionRound.auditResult != null) {
                 allAssertions.add(AssertionAndCat(assertionRound, cat, margin))

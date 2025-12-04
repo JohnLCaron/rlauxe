@@ -43,15 +43,15 @@ class TestAssertions {
             assertIs<Assertion>(it)
             assertIs<PluralityAssorter>(it.assorter)
             assertEquals(1.0, it.assorter.upperBound())
-            println("$it: ${it.assorter.reportedMargin()}")
-            assertEquals(if (it.loser == 3) 3.0/9.0 else 2.0/9.0, it.assorter.reportedMargin(), doublePrecision)
+            println("$it: ${it.assorter.dilutedMargin()}")
+            assertEquals(if (it.loser == 3) 3.0/9.0 else 2.0/9.0, it.assorter.dilutedMargin(), doublePrecision)
         }
 
         val firstAssertion = assertions.first()
         assertEquals("contest 0 winner: 4 loser: 0", firstAssertion.id())
 
         val expectShow = """ contestInfo: 'AvB' (0) candidates=[0, 1, 2, 3, 4] choiceFunction=PLURALITY nwinners=2 voteForN=2
-    assorter:  Plurality winner=4 loser=0 reportedMargin=22.2222% reportedMean=61.1111%
+    assorter:  Plurality winner=4 loser=0 dilutedMargin=22.2222% dilutedMean=61.1111%
 """
         assertEquals(expectShow, firstAssertion.show())
     }
@@ -91,17 +91,17 @@ class TestAssertions {
         assertEquals(contest.winners.size, assertions.size)
         assertions.forEach {
             assertIs<Assertion>(it)
-            assertIs<SuperMajorityAssorter>(it.assorter)
+            assertIs<AboveThreshold>(it.assorter)
             assertEquals(1.0 / (2.0 * contest.info.minFraction!!), it.assorter.upperBound())
-            println("$it: ${it.assorter.reportedMargin()}")
+            println("$it: ${it.assorter.dilutedMargin()}")
             val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr) }.average()
-            val mean = margin2mean(it.assorter.reportedMargin())
+            val mean = margin2mean(it.assorter.dilutedMargin())
             assertEquals(assortAvg, mean)
         }
         val firstAssertion = assertions.first()
         assertEquals(firstAssertion, firstAssertion)
         assertEquals(firstAssertion.hashCode(), firstAssertion.hashCode())
-        assertEquals("'AvB' (0) SuperMajorityAssorter winner=4 minFraction=0.4 margin=0.1429", firstAssertion.toString())
+        assertEquals("'AvB' (0) AboveThreshold for E: dilutedMean=57.1429% noerror=53.0303% g= [-0.4 .. 0.6] h = [0.0 .. 1.25] margin=0.1429", firstAssertion.toString())
     }
 
     @Test
@@ -131,12 +131,12 @@ class TestAssertions {
         val lastAssertion = assertions.last()
         assertNotEquals(firstAssertion, lastAssertion)
         assertNotEquals(firstAssertion.hashCode(), lastAssertion.hashCode())
-        assertEquals(" Plurality winner=4 loser=0 reportedMargin=24.9160% reportedMean=62.4580%", firstAssertion.toString())
+        assertEquals(" Plurality winner=4 loser=0 dilutedMargin=24.9160% dilutedMean=62.4580%", firstAssertion.toString())
         assertEquals("contest 0 winner: 4 loser: 0", firstAssertion.id())
 
         val expectShow = """ cassorter: ClcaAssorter for contest AvB (0)
-  assorter= Plurality winner=4 loser=0 reportedMargin=24.9160% reportedMean=62.4580%
-  assortMargin=0.24915951 assortMean=0.62457975 upperBound=1.00000000 noerror=0.57115426"""
+  assorter= Plurality winner=4 loser=0 dilutedMargin=24.9160% dilutedMean=62.4580%
+  assortMargin=0.24915951 assortMean=0.62457975 assortUpper=1.00000000 noerror=0.57115426"""
         assertEquals(expectShow, firstAssertion.show())
 
         assertTrue(firstAssertion.checkEquals(firstAssertion).isEmpty())
@@ -164,7 +164,7 @@ class TestAssertions {
         assertions.forEach {
             assertIs<ClcaAssertion>(it)
             assertIs<ClcaAssorter>(it.cassorter)
-            assertIs< SuperMajorityAssorter>(it.cassorter.assorter())
+            assertIs<AboveThreshold>(it.cassorter.assorter())
             assertEquals(1.0 / (2.0 * contest.info.minFraction!!), it.cassorter.assorter().upperBound())
         }
     }

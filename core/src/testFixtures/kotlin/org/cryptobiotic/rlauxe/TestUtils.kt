@@ -40,7 +40,7 @@ fun makeStandardContest(Nc: Int) =
 
 fun makeStandardPluralityAssorter(Nc: Int): PluralityAssorter {
     val contest = makeStandardContest(Nc)
-    return PluralityAssorter.makeWithVotes(contest, 0, 1, contest.votes)
+    return PluralityAssorter.makeWithVotes(contest, 0, 1, Nc)
 }
 
 

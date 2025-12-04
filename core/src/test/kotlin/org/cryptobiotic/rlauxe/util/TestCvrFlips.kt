@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.calcAssorterMargin
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
@@ -25,7 +24,7 @@ class TestCvrFlips {
         val cassorter = minClcaAssertion.cassorter
         val assorter = cassorter.assorter
         val calcAssorter = assorter.calcAssorterMargin(0, cvrs)
-        println("margin = $margin reportedMargin=${assorter.reportedMargin()} calcAssorterMargin=${calcAssorter}")
+        println("margin = $margin reportedMargin=${assorter.dilutedMargin()} calcAssorterMargin=${calcAssorter}")
 
         var p2o = .01
         var mvrs = makeFlippedMvrs(cvrs, cvrs.size, p2o, null)
@@ -79,7 +78,7 @@ class TestCvrFlips {
         val cassorter = minClcaAssertion.cassorter
         val assorter = cassorter.assorter
         val calcAssorter = assorter.calcAssorterMargin(0, cvrs)
-        println("margin = $margin reportedMargin=${assorter.reportedMargin()} calcAssorterMargin=${calcAssorter}")
+        println("margin = $margin reportedMargin=${assorter.dilutedMargin()} calcAssorterMargin=${calcAssorter}")
 
         var p2o = .01
         var mvrs = makeFlippedMvrs(cvrs, cvrs.size, p2o, null)

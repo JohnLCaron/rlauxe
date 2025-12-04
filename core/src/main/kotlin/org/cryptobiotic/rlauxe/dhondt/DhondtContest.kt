@@ -20,6 +20,8 @@ import kotlin.collections.mutableListOf
 private val showDetails = false
 private val useBt = false // always use Bt
 
+// Belgium does each contest seperately, so Npop = Nc. TODO generalize that
+
 data class DhondtCandidate(val name: String, val id: Int, val votes: Int) {
     var lastSeatWon: Int? = null // We
     var firstSeatLost: Int? = null // Le
@@ -357,17 +359,17 @@ private data class AssorterBuilder(val contest: ProtoContest, val winner: Dhondt
         loser.id,
         lastSeatWon = winner.lastSeatWon!!,
         firstSeatLost = loser.firstSeatLost!!)
-     .setReportedMean(hmean)
+     .setDilutedMean(hmean)
 }
 
 data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val lastSeatWon: Int, val firstSeatLost: Int): AssorterIF  {
     val upper = 1.0 / lastSeatWon  // upper bound of g
     val lower = -1.0 / firstSeatLost  // lower bound of g
     val c = -1.0 / (2 * lower)  // first/2
-    var reportedMean: Double = 0.0
+    var dilutedMean: Double = 0.0
 
-    fun setReportedMean(mean: Double): DHondtAssorter {
-        this.reportedMean = mean
+    fun setDilutedMean(mean: Double): DHondtAssorter {
+        this.dilutedMean = mean
         return this
     }
 
@@ -399,7 +401,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     override fun upperBound() = h2(upper)
 
     override fun desc() = buildString {
-        append("${shortName()}: reportedMean=${pfn(reportedMean)} upperBound=${df(upperBound())}")
+        append("${shortName()}: dilutedMean=${pfn(dilutedMean)} upperBound=${df(upperBound())}")
     }
 
     override fun shortName() = "DHondt w/l='${info.candidateIdToName[winner()]}'/'${info.candidateIdToName[loser()]}'"
@@ -410,8 +412,8 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
 
     override fun loser() = loser
 
-    override fun reportedMean() = reportedMean
-    override fun reportedMargin() = mean2margin(reportedMean)
+    override fun dilutedMean() = dilutedMean
+    override fun dilutedMargin() = mean2margin(dilutedMean)
 
     override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
         if (useVotes == null || N <= 0) {
@@ -439,7 +441,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         if (loser != other.loser) return false
         if (lastSeatWon != other.lastSeatWon) return false
         if (firstSeatLost != other.firstSeatLost) return false
-        if (reportedMean != other.reportedMean) return false
+        if (dilutedMean != other.dilutedMean) return false
         if (lower != other.lower) return false
         if (upper != other.upper) return false
         if (c != other.c) return false
@@ -453,7 +455,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         result = 31 * result + loser
         result = 31 * result + lastSeatWon
         result = 31 * result + firstSeatLost
-        result = 31 * result + reportedMean.hashCode()
+        result = 31 * result + dilutedMean.hashCode()
         result = 31 * result + lower.hashCode()
         result = 31 * result + upper.hashCode()
         result = 31 * result + c.hashCode()

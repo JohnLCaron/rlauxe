@@ -102,7 +102,7 @@ data class RaireContest(
 class RaireContestUnderAudit(
     contest: RaireContest,
     val rassertions: List<RaireAssertion>,
-    hasStyle: Boolean = true,  // TODO do we really support hasStyle == false?
+    hasStyle: Boolean = true,  // TODO do we really support hasStyle == false? // TODO should pass in Npop
 ): ContestUnderAudit(contest, isClca=true, hasStyle=hasStyle) {
     val candidates =  contest.info.candidateIds
 
@@ -116,8 +116,8 @@ class RaireContestUnderAudit(
 
     fun makeRairePollingAssertions(): List<Assertion> {
         return rassertions.map { rassertion ->
-            val reportedMean = margin2mean(rassertion.marginInVotes.toDouble() / contest.Nc())
-            val assorter = RaireAssorter(contest.info(), rassertion).setReportedMean(reportedMean)
+            val dilutedMean = margin2mean(rassertion.marginInVotes.toDouble() / contest.Nc()) // TODO should be Npop
+            val assorter = RaireAssorter(contest.info(), rassertion).setDilutedMean(dilutedMean)
             Assertion(contest.info(), assorter)
         }
     }
@@ -273,25 +273,25 @@ data class RaireAssertion(
 data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion): AssorterIF {
     val contestId = info.id
     val remaining = info.candidateIds.filter { !rassertion.eliminated.contains(it) }
-    var reportedMean: Double = 0.0
+    var dilutedMean: Double = 0.0
 
-    fun setReportedMean(mean: Double): RaireAssorter {
-        this.reportedMean = mean
+    fun setDilutedMean(mean: Double): RaireAssorter {
+        this.dilutedMean = mean
         return this
     }
 
     override fun upperBound() = 1.0
     override fun winner() = rassertion.winnerId // candidate id, not index
     override fun loser() = rassertion.loserId   // candidate id, not index
-    override fun reportedMargin() = mean2margin(reportedMean)
-    override fun reportedMean() = reportedMean
+    override fun dilutedMargin() = mean2margin(dilutedMean)
+    override fun dilutedMean() = dilutedMean
 
     override fun desc() = buildString {
         append("Raire winner/loser=${rassertion.winnerId}/${rassertion.loserId} margin=${rassertion.marginInVotes} difficulty=${rassertion.difficulty}")
         if (rassertion.assertionType == RaireAssertionType.irv_elimination) append(" eliminated=${rassertion.eliminated}")
         append(" votes=${rassertion.votes}")
     }
-    override fun hashcodeDesc() = "${winLose()} ${info.name} ${rassertion.marginInVotes}" // must be unique for serialization
+    override fun hashcodeDesc() = "${winLose()} ${info.name} ${rassertion.hashCode()}" // must be unique for serialization
 
     override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
         return rassertion.marginInVotes / N.toDouble()

@@ -142,7 +142,7 @@ fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: Asser
         }
 
         return if (testH0Result == null) "failed" else buildString {
-            appendLine("contest $contest assertion win/lose = ${assertion.assorter.winLose()} margin=${assertion.assorter.reportedMargin()}")
+            appendLine("contest $contest assertion win/lose = ${assertion.assorter.winLose()}")
             val tracker = testH0Result.tracker
             if (tracker is ClcaErrorTracker && tracker.sequences != null) {
                 val seq = tracker.sequences

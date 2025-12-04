@@ -21,8 +21,8 @@ class TestClcaAssortValues {
         )
         // val votes = mapOf(0 to 1010, 1 to 990) // Map<Int, Int>
         // data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val lastSeatWon: Int, val firstSeatLost: Int): AssorterIF  {
-        val assorter = DHondtAssorter(info, winner = 0, loser = 1, lastSeatWon=2, firstSeatLost=5).setReportedMean(.55)
-        val cassorter = ClcaAssorter(info, assorter, hasStyle=hasStyle, dilutedMargin=assorter.reportedMargin())
+        val assorter = DHondtAssorter(info, winner = 0, loser = 1, lastSeatWon=2, firstSeatLost=5).setDilutedMean(.55)
+        val cassorter = ClcaAssorter(info, assorter, hasStyle=hasStyle, dilutedMargin=assorter.dilutedMargin())
         println(cassorter)
 
         val winner = Cvr("winner", mapOf(0 to intArrayOf(0)))
@@ -85,7 +85,7 @@ class TestClcaAssortValues {
         val votes = mapOf(0 to 1010, 1 to 990) // Map<Int, Int>
         val contest =  Contest(info, votes, 2000, Ncast=2000)
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
-        val cassorter = ClcaAssorter(info, assorter, hasStyle=hasStyle, dilutedMargin=assorter.reportedMargin())
+        val cassorter = ClcaAssorter(info, assorter, hasStyle=hasStyle, dilutedMargin=assorter.dilutedMargin())
 
         val winner = Cvr("winner", mapOf(0 to intArrayOf(0)))
         val loser =  Cvr("loser", mapOf(0 to intArrayOf(1)))

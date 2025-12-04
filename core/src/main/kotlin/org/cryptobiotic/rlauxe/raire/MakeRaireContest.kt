@@ -16,6 +16,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 private val quiet = true
 private val logger = KotlinLogging.logger("MakeRaireContest")
 
+// TODO diluted margin
 // make RaireContestUnderAudit from ContestTabulation; get RaireAssertions from raire-java libray
 // note ivrRoundsPaths are filled in
 fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, hasStyle: Boolean, Nbin: Int? = null): RaireContestUnderAudit {

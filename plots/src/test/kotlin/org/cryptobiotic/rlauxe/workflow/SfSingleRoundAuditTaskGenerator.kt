@@ -78,7 +78,7 @@ class SfSingleRoundAuditTask(
                     WorkflowResult(
                         name(),
                         contestUA.Nc,
-                        cassertion.assorter.reportedMargin(),
+                        cassertion.assorter.dilutedMargin(),
                         result.status,
                         1.0,
                         result.sampleCount.toDouble(),

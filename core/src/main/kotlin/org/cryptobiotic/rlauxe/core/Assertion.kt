@@ -9,7 +9,7 @@ open class Assertion(
     val winner = assorter.winner()
     val loser = assorter.loser()
 
-    override fun toString() = "'${info.name}' (${info.id}) ${assorter.desc()} margin=${df(assorter.reportedMargin())}"
+    override fun toString() = "'${info.name}' (${info.id}) ${assorter.desc()} margin=${df(assorter.dilutedMargin())}"
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

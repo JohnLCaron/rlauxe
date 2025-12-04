@@ -94,7 +94,7 @@ class TestCreateBelgiumClcaFromJson {
             println("${sfn(it.key, 15)} | " +
                     "${sfn(minAssorter.shortName(), 42)} | " +
                     "${dfn(minAssorter.noerror(), 6)} | " +
-                    "${dfn(minAssorter.reportedMean(), 6)} | " +
+                    "${dfn(minAssorter.dilutedMean(), 6)} | " +
                     "${dfn(minAssorter.upperBound(), 6)} | " +
                     "${trunc(nmvrs.toString(), 6)} | " +
                     "${trunc(roundToClosest(minSamples).toString(), 7)} | " +

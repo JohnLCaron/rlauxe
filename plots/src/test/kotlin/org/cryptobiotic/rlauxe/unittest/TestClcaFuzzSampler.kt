@@ -35,8 +35,8 @@ class TestClcaFuzzSampler {
                 val size = result.findQuantile(auditConfig.quantile)
                 assertionRound.estSampleSize = size
                 val assertion = assertionRound.assertion as ClcaAssertion
-                sampleSizes.add(Pair(size, assertion.assorter.reportedMargin()))
-                println(" ${assertion.cassorter.assorter().desc()} margin=${df(assertion.assorter.reportedMargin())} estSize=${size}}")
+                sampleSizes.add(Pair(size, assertion.assorter.dilutedMargin()))
+                println(" ${assertion.cassorter.assorter().desc()} margin=${df(assertion.assorter.dilutedMargin())} estSize=${size}}")
 
             }
             // TODO use minAssertion()
@@ -75,6 +75,6 @@ private fun runWithComparisonFuzzSampler(
         cassorter.noerror(),
         cassorter.upperBound(),
         N=contestUA.Npop,
-        moreParameters=moreParameters + mapOf("margin" to cassorter.assorter.reportedMargin()),
+        moreParameters=moreParameters + mapOf("margin" to cassorter.assorter.dilutedMargin()),
     )
 }

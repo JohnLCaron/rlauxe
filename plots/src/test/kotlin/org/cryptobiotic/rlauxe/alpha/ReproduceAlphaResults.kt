@@ -485,7 +485,7 @@ class ReproduceAlphaResults {
                 val contestUA = ContestUnderAudit(contest).addStandardAssertions()
                 val assorter = contestUA.minClcaAssertion()!!.cassorter
 
-                val margin = assorter.assorter().reportedMargin()
+                val margin = assorter.assorter().dilutedMargin()
                 val compareUpper = 2.0/(2-margin)
                 val drawSample = makeClcaNoErrorSampler(contest.id, cvrs, assorter)
                 val etaActual =  assorter.noerror()
@@ -574,7 +574,7 @@ class ReproduceAlphaResults {
             val cvrs = makeCvrsByExactMean(N, theta)
             val contestUA = makeContestUAfromCvrs(info, cvrs)
             val compareAssorter = contestUA.minClcaAssertion()!!.cassorter
-            val margin = compareAssorter.assorter().reportedMargin()
+            val margin = compareAssorter.assorter().dilutedMargin()
             val drawSample = makeClcaNoErrorSampler(info.id, cvrs, compareAssorter)
             val etaActual = compareAssorter.noerror()
             val eta0 = factor / (2 - margin)

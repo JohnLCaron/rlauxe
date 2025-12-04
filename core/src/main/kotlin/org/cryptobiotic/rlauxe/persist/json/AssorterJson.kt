@@ -91,21 +91,21 @@ fun AssorterIF.publishJson() : AssorterIFJson {
         is PluralityAssorter ->
             AssorterIFJson(
                 "PluralityAssorter",
-                reportedMean = this.reportedMean(),
+                reportedMean = this.dilutedMean(),
                 this.winner,
                 this.loser,
             )
         is SuperMajorityAssorter ->
             AssorterIFJson(
                 "SuperMajorityAssorter",
-                reportedMean = this.reportedMean(),
+                reportedMean = this.dilutedMean(),
                 this.candId,
                 minFraction = this.minFraction,
             )
         is RaireAssorter ->
             AssorterIFJson(
                 "RaireAssorter",
-                reportedMean = this.reportedMean(),
+                reportedMean = this.dilutedMean(),
                 this.rassertion.winnerId,
                 this.rassertion.loserId,
                 rassertion = this.rassertion.publishJson(),
@@ -113,7 +113,7 @@ fun AssorterIF.publishJson() : AssorterIFJson {
         is DHondtAssorter ->
             AssorterIFJson(
                 "DHondtAssorter",
-                reportedMean = this.reportedMean(),
+                reportedMean = this.dilutedMean(),
                 this.winner,
                 this.loser,
                 lastSeatWon = this.lastSeatWon,
@@ -122,14 +122,14 @@ fun AssorterIF.publishJson() : AssorterIFJson {
         is AboveThreshold ->
             AssorterIFJson(
                 "AboveThreshold",
-                reportedMean = this.reportedMean(),
+                reportedMean = this.dilutedMean(),
                 winner = this.winner,
                 minFraction = this.t,
             )
         is BelowThreshold ->
             AssorterIFJson(
                 "UnderThreshold",
-                reportedMean = this.reportedMean(),
+                reportedMean = this.dilutedMean(),
                 winner = this.candId,
                 minFraction = this.t,
             )
@@ -144,7 +144,7 @@ fun AssorterIFJson.import(info: ContestInfo): AssorterIF {
                 info,
                 this.winner,
                 this.loser!!)
-            .setReportedMean(this.reportedMean)
+            .setDilutedMean(this.reportedMean)
 
         "SuperMajorityAssorter" ->
             SuperMajorityAssorter(
@@ -158,7 +158,7 @@ fun AssorterIFJson.import(info: ContestInfo): AssorterIF {
             RaireAssorter(
                 info,
                 this.rassertion!!.import())
-            .setReportedMean(this.reportedMean)
+            .setDilutedMean(this.reportedMean)
 
         "DHondtAssorterIF",
         "DHondtAssorter" ->
@@ -168,21 +168,21 @@ fun AssorterIFJson.import(info: ContestInfo): AssorterIF {
                 this.loser!!,
                 lastSeatWon = this.lastSeatWon!!,
                 firstSeatLost = this.firstSeatLost!!)
-            .setReportedMean(this.reportedMean)
+            .setDilutedMean(this.reportedMean)
 
         "AboveThreshold" ->
             AboveThreshold(
                 info,
                 this.winner,
                 this.minFraction!!)
-             .setReportedMean(this.reportedMean)
+             .setDilutedMean(this.reportedMean)
 
         "UnderThreshold" ->
             BelowThreshold(
                 info,
                 this.winner,
                 this.minFraction!!)
-            .setReportedMean(this.reportedMean)
+            .setDilutedMean(this.reportedMean)
 
         else -> throw RuntimeException()
     }

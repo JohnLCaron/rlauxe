@@ -404,5 +404,5 @@ fun optimal_comparison(alpha: Double, u: Double, rate_error_2: Double = 1e-4): D
 // deprecated
 private fun makeStandardComparisonAssorter(avgCvrAssortValue: Double, Nc: Int): ClcaAssorter {
     val assort = makeStandardPluralityAssorter(Nc)
-    return ClcaAssorter(makeStandardContest(Nc).info, assort, hasStyle=true, dilutedMargin=assort.reportedMargin(), check=false)
+    return ClcaAssorter(makeStandardContest(Nc).info, assort, hasStyle=true, dilutedMargin=assort.dilutedMargin(), check=false)
 }

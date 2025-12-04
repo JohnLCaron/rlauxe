@@ -46,7 +46,7 @@ class TestAuditPolling {
         val cvrSampler = PollWithoutReplacement(contestUA.id, pairs, assorter)
 
         val d = 100
-        val margin = assorter.reportedMargin()
+        val margin = assorter.dilutedMargin()
         val result = runAlphaMartRepeated(
             drawSample = cvrSampler,
             N = N,

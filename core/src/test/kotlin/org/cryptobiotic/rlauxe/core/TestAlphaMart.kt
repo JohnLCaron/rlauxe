@@ -38,14 +38,14 @@ class TestAlphaMart {
         val config = AuditConfig(AuditType.POLLING, hasStyle=true, nsimEst=10)
         val cvrSampler = PollWithoutReplacement(contestUA.contest.id, cvrs.zip(cvrs), assorter)
 
-        val eta0 = assorter.reportedMean()
+        val eta0 = assorter.dilutedMean()
         println("eta0=$eta0, margin=${mean2margin(eta0)}")
 
         val result = runRepeatedAlphaMart(
             config = config,
             sampleFn = cvrSampler,
             estimFn = null,
-            eta0 = assorter.reportedMean(),
+            eta0 = assorter.dilutedMean(),
             upperBound = assorter.upperBound(),
             N = contestUA.Npop,
             moreParameters = mapOf("eta0" to eta0),

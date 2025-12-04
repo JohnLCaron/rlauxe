@@ -384,7 +384,7 @@ open class ContestUnderAudit(
         return if (isClca) clcaAssertions else pollingAssertions
     }
 
-    // Pair(ClcaAssertion, noerror)
+    // assertion with the minimum noerror
     fun minClcaAssertion(): ClcaAssertion? {
         if (clcaAssertions.isEmpty()) return null
         val margins = clcaAssertions.map { Pair(it, it.cassorter.noerror())  }
@@ -392,10 +392,10 @@ open class ContestUnderAudit(
         return minMargin.first().first
     }
 
-    // Pair(ClcaAssertion, dilutedMargin)
+    // assertion with the minimum dilutedMargin
     fun minPollingAssertion(): Assertion? {
         if (pollingAssertions.isEmpty()) return null
-        val margins = pollingAssertions.map { Pair(it, makeDilutedMargin(it.assorter))  }
+        val margins = pollingAssertions.map { Pair(it, it.assorter.dilutedMargin())  }
         val minMargin = margins.sortedBy { it.second }
         return minMargin.first().first
     }
@@ -407,11 +407,6 @@ open class ContestUnderAudit(
     fun minDilutedMargin(): Double? {
         val minAssertion = minAssertion()
         return if (minAssertion != null) makeDilutedMargin(minAssertion.assorter) else null
-    }
-
-    fun minNoError(): Double? {
-        val minAssertion = minAssertion()
-        return if (minAssertion != null) minAssertion.assorter.noerror() else null
     }
 
     fun minRecountMargin(): Double? {

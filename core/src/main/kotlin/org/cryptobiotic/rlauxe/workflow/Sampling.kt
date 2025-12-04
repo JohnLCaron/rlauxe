@@ -78,6 +78,7 @@ class ClcaWithoutReplacement(
     private var count = 0
 
     init {
+        // TODO this may not be true ??
         cvrPairs.forEach { (mvr, card) -> require(mvr.location() == card.location())  }
     }
 

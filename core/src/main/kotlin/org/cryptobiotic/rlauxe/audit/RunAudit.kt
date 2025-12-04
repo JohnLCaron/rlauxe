@@ -9,13 +9,11 @@ import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import org.cryptobiotic.rlauxe.workflow.ClcaAssertionAuditor
 import org.cryptobiotic.rlauxe.workflow.ClcaWithoutReplacement
-import org.cryptobiotic.rlauxe.workflow.MvrManager
 import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
@@ -120,7 +118,7 @@ fun runRoundResult(inputDir: String, useTest: Boolean, quiet: Boolean): Result<A
 }
 
 fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): String {
-    val contest = contestRound.contestUA.id
+    val contestId = contestRound.contestUA.id
     try {
         if (notExists(Path.of(auditDir))) {
             logger.warn { "Audit Directory $auditDir does not exist" }
@@ -128,10 +126,11 @@ fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: Asser
         }
         val roundIdx = auditRoundResult.roundIdx
         val assertion = assertionRound.assertion
-        logger.info { "runAudit in $auditDir for round $roundIdx and assertion $assertion" }
+        logger.info { "runAudit in $auditDir for round $roundIdx, contest $contestId, and assertion $assertion" }
 
         val workflow = PersistedWorkflow(auditDir, useTest=false)
         val cvrPairs = workflow.mvrManager().makeMvrCardPairsForRound()
+        val sampler = PairSampler(contestId, cvrPairs)
 
         val config = workflow.auditConfig()
 
@@ -142,7 +141,7 @@ fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: Asser
         }
 
         return if (testH0Result == null) "failed" else buildString {
-            appendLine("contest $contest assertion win/lose = ${assertion.assorter.winLose()}")
+            appendLine("contest $contestId assertion win/lose = ${assertion.assorter.winLose()}")
             val tracker = testH0Result.tracker
             if (tracker is ClcaErrorTracker && tracker.sequences != null) {
                 val seq = tracker.sequences
@@ -154,13 +153,13 @@ fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: Asser
                     append("${nfn(it, 2)}, ${df(seq.xs[it])}, ${df(seq.bets[it])}, ${df(seq.tjs[it])}")
                     append(", ${trunc(seq.testStatistics[it].toString(), 6)}, ${trunc(pvalues[it].toString(), 8)}")
                     // TODO only works if single contest
-                    val pair = cvrPairs[it]
-                    val mvrVotes = pair.first.votes(contest)?.contentToString() ?: "missing"
-                    val cvr = pair.second
-                    val cvrVotes = cvr.votes(contest)?.contentToString() ?: "N/A"
+                    val pair = sampler.next()
+                    val mvrVotes = pair.first.votes(contestId)?.contentToString() ?: "missing"
+                    val card = pair.second
+                    val cardVotes = card.votes(contestId)?.contentToString() ?: "N/A"
                     append(", ${sfn(pair.first.location(), 10)}")
                     append(", ${sfn(mvrVotes, 10)}")
-                    append(", votes=${cvrVotes} possible=${cvr.hasContest(contest)} pool=${cvr.poolId()}, ")
+                    append(", votes=${cardVotes} possible=${card.hasContest(contestId)} pool=${card.poolId()}, ")
                     appendLine()
                 }
             }
@@ -225,6 +224,29 @@ fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, c
         t.printStackTrace()
         return null
     }
+}
+
+class PairSampler(
+    val contestId: Int,
+    val cvrPairs: List<Pair<CardIF, CardIF>>, // Pair(mvr, card)
+): Iterator<Pair<CardIF, CardIF>> {
+    val maxSamples = cvrPairs.count { it.second.hasContest(contestId) }
+    private var idx = 0
+    private var count = 0
+
+    override fun next(): Pair<CardIF, CardIF> {
+        while (idx < cvrPairs.size) {
+            val pair = cvrPairs[idx]
+            idx++
+            if (pair.second.hasContest(contestId)) {
+                count++
+                return pair
+            }
+        }
+        throw RuntimeException("PairSampler no samples left for ${contestId}")
+    }
+
+    override fun hasNext() = (count < maxSamples)
 }
 
 

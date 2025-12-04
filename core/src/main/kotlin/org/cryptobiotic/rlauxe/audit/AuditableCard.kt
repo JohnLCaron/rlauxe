@@ -55,6 +55,12 @@ data class AuditableCard (
             // you could make this case mean "all". But maybe its better to be explicit ??
             throw RuntimeException("AuditableCard must have votes or possibleContests")
         }
+        if (possibleContests.isNotEmpty() && votes != null) {
+            votes.keys.forEach { id ->
+                if (!possibleContests.contains(id))
+                    throw RuntimeException("possible contests must contain vote contest ${id}")
+            }
+        }
     }
 
     // if there are no votes, the IntArrays are all empty; looks like all undervotes

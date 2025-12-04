@@ -25,7 +25,7 @@ class SfAuditVarianceCompare {
         allAssertions.addAll( readAssertionAndTotal("/home/stormy/rla/cases/sf2024oa/audit", "OneAudit").second)
 
         // overrride the margins
-        val marginOverride = clcaAssertions.associate { it.assertion.assertion.id().hashCode() to it.assertion.assertion.assorter.reportedMargin() }
+        val marginOverride = clcaAssertions.associate { it.assertion.assertion.id().hashCode() to it.assertion.assertion.assorter.dilutedMargin() }
         allAssertions.addAll( readAssertionAndTotal("/home/stormy/rla/cases/sf2024oaNS/audit", "OneAuditNS", marginOverride).second)
 
         val title = "$name est nmvrs vs margin, no errors"

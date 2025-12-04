@@ -52,20 +52,44 @@ class TestAssertionJson {
     }
 
     @Test
-    fun testSuperAssertionRoundtrip() {
+    fun testAboveThresholdRoundtrip() {
         val info = ContestInfo(
             name = "AvB",
             id = 0,
             choiceFunction = SocialChoiceFunction.THRESHOLD,
             candidateNames = listToMap("A", "B", "C"),
-            minFraction = .67
+            minFraction = .55
         )
         val winnerCvr = makeCvr(0)
         val loserCvr = makeCvr(1)
         val otherCvr = makeCvr(2)
         val contest = makeContestFromCvrs(info, listOf(winnerCvr, winnerCvr, winnerCvr, loserCvr, otherCvr))
 
-        val assorter = SuperMajorityAssorter.makeWithVotes(contest, winner = 0, info.minFraction!!)
+        val assorter = AboveThreshold.makeFromVotes(contest, partyId = 0, contest.Nc)
+        val target = Assertion(info, assorter)
+
+        val json = target.publishIFJson()
+        val roundtrip = json.import(target.info)
+        assertNotNull(roundtrip)
+        assertEquals(roundtrip, target)
+    }
+
+    @Test
+    fun testBelowThresholdRoundtrip() {
+        val info = ContestInfo(
+            name = "AvB",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
+            candidateNames = listToMap("A", "B", "C"),
+            minFraction = .55
+        )
+        val winnerCvr = makeCvr(0)
+        val loserCvr = makeCvr(1)
+        val otherCvr = makeCvr(2)
+        val contest = makeContestFromCvrs(info, listOf(winnerCvr, winnerCvr, winnerCvr, loserCvr, otherCvr))
+
+        //         fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int): AboveThreshold {
+        val assorter = BelowThreshold.makeFromVotes(contest.info, partyId = 0, contest.votes()!!,  info.minFraction!!, contest.Nc)
         val target = Assertion(info, assorter)
 
         val json = target.publishIFJson()

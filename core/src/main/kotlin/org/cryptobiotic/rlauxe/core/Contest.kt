@@ -94,7 +94,7 @@ interface ContestIF {
     fun show() : String = toString()
     fun showCandidates(): String
 
-    fun recountMargin(assorter: AssorterIF): Double
+    fun recountMargin(assorter: AssorterIF): Double // (w-l)/w
     fun showAssertionDifficulty(assorter: AssorterIF): String
 
     fun votes() : Map<Int, Int>? {
@@ -185,13 +185,14 @@ open class Contest(
         losers = mlosers.toList()
     }
 
+    // TODO candidate for removal
     fun margin(winner: Int, loser: Int): Double {
         val winnerVotes = votes[winner] ?: 0
         val loserVotes = votes[loser] ?: 0
         return (winnerVotes - loserVotes) / Nc.toDouble()
     }
 
-    fun percent(cand: Int): Double {
+    fun percentForCand(cand: Int): Double {
         val candVotes = votes[cand] ?: 0
         return candVotes / Nc.toDouble()
     }
@@ -319,15 +320,14 @@ open class ContestUnderAudit(
     }
 
     fun addStandardAssertions(): ContestUnderAudit {
-        val useVotes = when (contest) {
-            is Contest -> contest.votes
-            else -> throw RuntimeException("contest type ${contest.javaClass.name} is not supported")
+        if (contest.votes() == null) {
+            throw RuntimeException("contest type ${contest.javaClass.simpleName} is not supported for addStandardAssertions")
         }
 
         this.pollingAssertions = when (choiceFunction) {
             SocialChoiceFunction.APPROVAL,
-            SocialChoiceFunction.PLURALITY -> makePluralityAssertions(useVotes)
-            SocialChoiceFunction.THRESHOLD -> makeThresholdAssertions(useVotes)
+            SocialChoiceFunction.PLURALITY -> makePluralityAssertions()
+            SocialChoiceFunction.THRESHOLD -> makeThresholdAssertions()
             else -> throw RuntimeException("choice function ${choiceFunction} is not supported")
         }
 
@@ -338,29 +338,30 @@ open class ContestUnderAudit(
         return this
     }
 
-    private fun makePluralityAssertions(votes: Map<Int, Int>): List<Assertion> {
+    private fun makePluralityAssertions(): List<Assertion> {
         // test that every winner beats every loser. SHANGRLA 2.1
         val assertions = mutableListOf<Assertion>()
         contest.winners().forEach { winner ->
             contest.losers().forEach { loser ->
-                val assorter = PluralityAssorter.makeWithVotes(contest, winner, loser, votes)
+                val assorter = PluralityAssorter.makeWithVotes(contest, winner, loser, Npop)
                 assertions.add(Assertion(contest.info(), assorter))
             }
         }
         return assertions
     }
 
-    private fun makeThresholdAssertions(votes: Map<Int, Int>): List<Assertion> {
+    private fun makeThresholdAssertions(): List<Assertion> {
         require(contest.info().minFraction != null)
         // each winner generates 1 assertion. SHANGRLA 2.3
         val assertions = mutableListOf<Assertion>()
         contest.winners().forEach { candId ->
-            val assorter = SuperMajorityAssorter.makeWithVotes(contest, candId, contest.info().minFraction!!, votes)
+            val assorter = AboveThreshold.makeFromVotes(contest as Contest, candId, Npop)
             assertions.add(Assertion(contest.info(), assorter))
         }
         return assertions
     }
 
+    // TODO check that assorters already have the diluted margin
     fun makeDilutedMargin(assorter: AssorterIF): Double {
         val margin = assorter.calcMargin(contest.votes(), Npop)
         return margin
@@ -432,7 +433,7 @@ open class ContestUnderAudit(
             val minAssorter = minAssertion.assorter
             append("   ${contest.showAssertionDifficulty(minAssertion.assorter)}")
             append(" Npop=$Npop dilutedMargin=${pfn(makeDilutedMargin(minAssorter))}")
-            appendLine(" reportedMargin=${pfn(minAssorter.reportedMargin())} recountMargin=${pfn(contest.recountMargin(minAssorter))} ")
+            appendLine(" reportedMargin=${pfn(minAssorter.dilutedMargin())} recountMargin=${pfn(contest.recountMargin(minAssorter))} ")
         }
         append(contest.showCandidates())
     }

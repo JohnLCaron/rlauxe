@@ -60,9 +60,9 @@ class TestOABasics {
         val assorterMargin = mean2margin(assortAvgFromCvrs)
 
         val dilutedMargin = oaAssorter.dilutedMargin
-        val reportedMean = margin2mean(dilutedMargin)
-        println("assortAvgFromCvrs = $assortAvgFromCvrs reportedMean=$reportedMean")
-        assertEquals(assortAvgFromCvrs, reportedMean, doublePrecision)
+        val dilutedMean = margin2mean(dilutedMargin)
+        println("assortAvgFromCvrs = $assortAvgFromCvrs dilutedMean=$dilutedMean")
+        assertEquals(assortAvgFromCvrs, dilutedMean, doublePrecision)
 
         val pools = oaAssorter.poolAverages
         pools.assortAverage.forEach{ println(" avg for pool $it") }

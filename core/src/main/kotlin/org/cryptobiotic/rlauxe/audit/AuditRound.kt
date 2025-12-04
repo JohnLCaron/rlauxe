@@ -81,7 +81,7 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
     }
 
     fun minAssertion(): AssertionRound? {
-        return assertionRounds.minByOrNull { it.assertion.assorter.reportedMargin() }
+        return assertionRounds.minByOrNull { contestUA.makeDilutedMargin(it.assertion.assorter) }
     }
 
     fun createNextRound() : ContestRound {

@@ -48,13 +48,13 @@ class TestAvgAssortValues {
             assertEquals(1.0, it.assorter.upperBound())
 
             val assortAvgMean = cvrs.map { cvr -> it.assorter.assort(cvr)}.average()
-            val reportedMean = margin2mean(it.assorter.reportedMargin())
+            val reportedMean = margin2mean(it.assorter.dilutedMargin())
             println("${it.assorter.shortName()}: assortAvgMean=${assortAvgMean} reportedMean=${reportedMean}")
             assertEquals(assortAvgMean, reportedMean, doublePrecision)
 
             val calcMargin = it.assorter.calcAssorterMargin(contest.id, cvrs)
             assertEquals(assortAvgMean, margin2mean(calcMargin), doublePrecision)
-            assertEquals(it.assorter.reportedMargin(), calcMargin, doublePrecision)
+            assertEquals(it.assorter.dilutedMargin(), calcMargin, doublePrecision)
         }
     }
 
@@ -94,13 +94,13 @@ class TestAvgAssortValues {
             assertEquals(1.0, it.assorter.upperBound())
 
             val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr, usePhantoms = false)}.average()
-            val mean = margin2mean(it.assorter.reportedMargin())
+            val mean = margin2mean(it.assorter.dilutedMargin())
             println("$it: assortAvg=${assortAvg} mean=${mean}")
             assertEquals(assortAvg, mean, doublePrecision)
 
             val calcMargin = it.assorter.calcAssorterMargin(contest.id, cvrs)
             assertEquals(assortAvg, margin2mean(calcMargin), doublePrecision)
-            assertEquals(it.assorter.reportedMargin(), calcMargin, doublePrecision)
+            assertEquals(it.assorter.dilutedMargin(), calcMargin, doublePrecision)
 
             val Ncd = contest.Nc.toDouble()
             val expectWithPhantoms = (assortAvg * Ncd - 0.5) / Ncd
@@ -149,14 +149,14 @@ class TestAvgAssortValues {
             assertEquals(1.0, it.assorter.upperBound())
 
             val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr, usePhantoms = false)}.average()
-            val reportedMean = margin2mean(it.assorter.reportedMargin())
+            val reportedMean = margin2mean(it.assorter.dilutedMargin())
             println("$it: assortAvg=${assortAvg} reportedMean=${reportedMean}")
             // assertEquals(assortAvg, reportedMean, doublePrecision)
 
             // this skips cvrs that dont have the contest
             val calcMargin = it.assorter.calcAssorterMargin(contest.id, cvrs)
             assertNotEquals(assortAvg, margin2mean(calcMargin), doublePrecision)
-            assertEquals(it.assorter.reportedMargin(), calcMargin, doublePrecision)
+            assertEquals(it.assorter.dilutedMargin(), calcMargin, doublePrecision)
 
             val Ncd = contest.Nc.toDouble()
             val expectWithPhantoms = (assortAvg * Ncd - 0.5) / Ncd

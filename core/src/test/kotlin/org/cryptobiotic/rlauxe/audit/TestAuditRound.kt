@@ -34,9 +34,9 @@ class TestAuditRound {
             assertEquals(contestRound.estSampleSize, contestRound.wantSampleSize(0))
             assertEquals(contestRound.estSampleSize, contestRound.estSampleSizeEligibleForRemoval())
 
-            val minAssertion = contestRound.minAssertion()!!
-            assertEquals(0, minAssertion.estSampleSize)
-            assertNotEquals(minAssertion.assertion.loser, minAssertion.assertion.winner)
+            val firstAssertion = contestRound.assertionRounds.first()
+            assertEquals(0, firstAssertion.estSampleSize)
+            assertNotEquals(firstAssertion.assertion.loser, firstAssertion.assertion.winner) // wtf?
         }
 
         assertEquals(0, auditRound.maxBallotsUsed())

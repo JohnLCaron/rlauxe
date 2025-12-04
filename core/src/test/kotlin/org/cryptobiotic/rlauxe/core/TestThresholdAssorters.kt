@@ -1,17 +1,21 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.util.mean2margin
+import org.cryptobiotic.rlauxe.util.pfn
 import org.junit.jupiter.api.Assertions.assertTrue
+import kotlin.collections.first
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 // See SHANGRLA 2.3
-class TestAssorterSuperMajority {
+class TestThresholdAssorters {
 
     @Test
     fun testBasics() {
@@ -19,7 +23,7 @@ class TestAssorterSuperMajority {
             name = "ABC",
             id = 0,
             choiceFunction = SocialChoiceFunction.THRESHOLD,
-            candidateNames = listToMap( "A", "B", "C"),
+            candidateNames = listToMap("A", "B", "C"),
             minFraction = 0.60,
         )
         val cvr0 = makeCvr(0)
@@ -28,12 +32,15 @@ class TestAssorterSuperMajority {
         val contest = makeContestFromCvrs(info, listOf(cvr0, cvr1, cvr2))
 
         val minFraction = contest.info.minFraction!!
-        val superAssorter = SuperMajorityAssorter.makeWithVotes(contest, winner = 1, minFraction)
+        val superAssorter = SuperMajorityAssorter.makeWithVotes(contest, winner = 1, minFraction, Npop = null)
         assertEquals(1.0 / (2 * superAssorter.minFraction), superAssorter.upperBound())
         println("minFraction = $minFraction upperBound=${superAssorter.upperBound()}")
 
         assertEquals(0.0, superAssorter.assort(cvr0)) // bi has a mark for exactly one candidate and not Alice
-        assertEquals(superAssorter.upperBound(), superAssorter.assort(cvr1)) // // bi has a mark for Alice and no one else
+        assertEquals(
+            superAssorter.upperBound(),
+            superAssorter.assort(cvr1)
+        ) // // bi has a mark for Alice and no one else
         assertEquals(0.0, superAssorter.assort(cvr2)) // // bi has a mark for exactly one candidate and not Alice
 
         val votes = mutableMapOf<Int, IntArray>()
@@ -50,7 +57,7 @@ class TestAssorterSuperMajority {
             name = "ABC",
             id = 0,
             choiceFunction = SocialChoiceFunction.THRESHOLD,
-            candidateNames = listToMap( "A", "B", "C"),
+            candidateNames = listToMap("A", "B", "C"),
             minFraction = 0.60,
         )
         val counts = listOf(1000, 980, 100)
@@ -67,10 +74,10 @@ class TestAssorterSuperMajority {
     }
 
     fun testNway(contest: Contest, cvrs: List<Cvr>, counts: List<Int>, winner: Int): Double {
-        val assort = SuperMajorityAssorter.makeWithVotes(contest, winner, contest.info.minFraction!!)
+        val assort = SuperMajorityAssorter.makeWithVotes(contest, winner, contest.info.minFraction!!, Npop = null)
         assertEquals(1.0 / (2 * assort.minFraction), assort.upperBound())
         val assortAvg = cvrs.map { assort.assort(it) }.average()
-        assertEquals(margin2mean(assort.reportedMargin()), assortAvg, doublePrecision)
+        assertEquals(margin2mean(assort.dilutedMargin()), assortAvg, doublePrecision)
 
         val n = counts.sum().toDouble()
         val p = counts[winner] / n
@@ -83,20 +90,20 @@ class TestAssorterSuperMajority {
     }
 
     @Test
-    fun testSuperMajorityAssorterValues() {
+    fun testAboveThresholdAssorterValues() {
         val f = 0.60
         val info = ContestInfo(
             name = "ABC",
             id = 0,
             choiceFunction = SocialChoiceFunction.THRESHOLD,
-            candidateNames = listToMap( "A", "B", "C"),
+            candidateNames = listToMap("A", "B", "C"),
             minFraction = f,
             nwinners = 1,
         )
-        val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc=100, Ncast=100)
+        val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc = 100, Ncast = 100)
         val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
         val assorter = contestUA.pollingAssertions.first().assorter
-        assertTrue(assorter is SuperMajorityAssorter)
+        assertTrue(assorter is AboveThreshold)
         assertEquals(1, assorter.winner())
         assertEquals(-1, assorter.loser())
 
@@ -127,11 +134,11 @@ class TestAssorterSuperMajority {
             name = "ABC",
             id = 0,
             choiceFunction = SocialChoiceFunction.THRESHOLD,
-            candidateNames = listToMap( "A", "B", "C"),
+            candidateNames = listToMap("A", "B", "C"),
             minFraction = f,
             nwinners = 1,
         )
-        val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc=100, Ncast=100)
+        val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc = 100, Ncast = 100)
 
         val assorter = AboveThreshold.makeFromVotes(info, 1, contest.votes, f, contest.Nc)
         assertEquals(1, assorter.winner())
@@ -164,11 +171,11 @@ class TestAssorterSuperMajority {
             name = "ABC",
             id = 0,
             choiceFunction = SocialChoiceFunction.THRESHOLD,
-            candidateNames = listToMap( "A", "B", "C"),
+            candidateNames = listToMap("A", "B", "C"),
             minFraction = f,
             nwinners = 1,
         )
-        val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc=100, Ncast=100)
+        val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc = 100, Ncast = 100)
 
         val massorter = BelowThreshold.makeFromVotes(info, 2, contest.votes, f, contest.Nc)
         println(massorter.desc())
@@ -178,9 +185,15 @@ class TestAssorterSuperMajority {
 
         val minFraction = contest.info.minFraction!!
         // assertEquals(1.0 / (2 * minFraction), tassorter.upperBound())
-        assertEquals(massorter.upperBound(), massorter.assort(makeCvr(0))) // bi has a mark for exactly one candidate and not Alice
+        assertEquals(
+            massorter.upperBound(),
+            massorter.assort(makeCvr(0))
+        ) // bi has a mark for exactly one candidate and not Alice
         assertEquals(massorter.upperBound(), massorter.assort(makeCvr(1))) // // bi has a mark for Alice and no one else
-        assertEquals(massorter.lowerBound(), massorter.assort(makeCvr(2))) // // bi has a mark for exactly one candidate and not Alice
+        assertEquals(
+            massorter.lowerBound(),
+            massorter.assort(makeCvr(2))
+        ) // // bi has a mark for exactly one candidate and not Alice
 
         // undervote
         assertEquals(0.5, massorter.assort(Cvr("id", mapOf(0 to IntArray(0)), phantom = false), usePhantoms = false))
@@ -195,5 +208,172 @@ class TestAssorterSuperMajority {
         assertEquals(0.5, massorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = true), usePhantoms = false))
         assertEquals(0.5, massorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = true), usePhantoms = true))
     }
+
+    @Test
+    fun compareSuperWithAboveThresholdLessHalf() {
+        val f = 0.40
+        val info = ContestInfo(
+            name = "ABC",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
+            candidateNames = listToMap("A", "B", "C"),
+            minFraction = f,
+            nwinners = 1,
+        )
+        val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc = 100, Ncast = 100)
+
+        // fun makeWithVotes(contest: ContestIF, winner: Int, minFraction: Double, Npop: Int?): SuperMajorityAssorter {
+
+        val superAssorter = SuperMajorityAssorter.makeWithVotes(contest, 1, f, contest.Nc)
+        val aboveAssorter = AboveThreshold.makeFromVotes(info, 1, contest.votes, f, contest.Nc)
+        val belgiumAssorter = AboveThresholdB.makeFromVotes(info, 1, contest.votes, f, contest.Nc)
+        assertEquals(superAssorter.winner(), aboveAssorter.winner())
+        assertEquals(superAssorter.loser(), aboveAssorter.loser())
+
+        val minFraction = contest.info.minFraction!!
+        assertEquals(superAssorter.upperBound(), aboveAssorter.upperBound())
+
+        // A vote for someone not in the candidate list
+        val testCvr = makeCvr(3)
+        println("superAssorter = ${superAssorter.assort(testCvr)}")
+        println("aboveAssorter = ${aboveAssorter.assort(testCvr)} ${aboveAssorter.desc()}")
+        println("belgiumAssorter = ${belgiumAssorter.assort(testCvr)} ${belgiumAssorter.desc()}")
+        assertEquals(
+            superAssorter.assort(testCvr),
+            aboveAssorter.assort(testCvr),
+            "wrong value for vote for invalid vote--Dan"
+        )
+    }
+
+    @Test
+    fun compareSuperWithAboveThresholdMoreThanHalf() {
+        val f = 0.60
+        val info = ContestInfo(
+            name = "ABC",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.THRESHOLD,
+            candidateNames = listToMap("A", "B", "C"),
+            minFraction = f,
+            nwinners = 1,
+        )
+        val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc = 100, Ncast = 100)
+
+        // fun makeWithVotes(contest: ContestIF, winner: Int, minFraction: Double, Npop: Int?): SuperMajorityAssorter {
+
+        val superAssorter = SuperMajorityAssorter.makeWithVotes(contest, 1, f, contest.Nc)
+        val aboveAssorter = AboveThreshold.makeFromVotes(info, 1, contest.votes, f, contest.Nc)
+        assertEquals(superAssorter.winner(), aboveAssorter.winner())
+        assertEquals(superAssorter.loser(), aboveAssorter.loser())
+
+        val minFraction = contest.info.minFraction!!
+        assertEquals(superAssorter.upperBound(), aboveAssorter.upperBound())
+
+        // A vote for someone not in the candidate list
+        // SHANGRLA restricts the "one vote" to the list of valid candidates.
+        //     def has_one_vote(self, contest_id: str, candidates: list) -> bool:
+        //        """
+        //        Is there exactly one vote among the candidates in the contest `contest_id`?
+        // But AboveThreshold does not.
+        // I guess the reasoning is that its an illegal vote, so ignore it.
+        val testCvr = makeCvr(3)
+        println("superAssorter = ${superAssorter.assort(testCvr)}")
+        println("aboveAssorter = ${aboveAssorter.assort(testCvr)} ${aboveAssorter.desc()}")
+        assertEquals(
+            superAssorter.assort(testCvr),
+            aboveAssorter.assort(testCvr),
+            "wrong value for vote for invalid vote--Dan"
+        )
+    }
 }
+
+// Belgium above threshhold, c == 1. Only works if -t > -.5, because h must be > 0. so t must be < .5
+data class AboveThresholdB(val info: ContestInfo, val winner: Int, val t: Double): AssorterIF  {
+    val lowerg = -t
+    val upperg = (1.0 - t)
+    val c = 1
+    var reportedMean: Double = 0.0
+
+    fun setReportedMean(reportedMean: Double): AboveThresholdB {
+        this.reportedMean = reportedMean
+        return this
+    }
+
+    fun g (vote: Int): Double {
+        return if (vote == winner) (1.0 - t) else -t
+    }
+
+    fun h(partyVote: Int): Double {
+        return c * g(partyVote) + 0.5
+    }
+
+    // affine transform h = g/2t + 1/2
+    fun h2(g: Double): Double {
+        return c * g + 0.5
+    }
+
+    override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
+        if (!mvr.hasContest(info.id)) return 0.5
+        if (usePhantoms && mvr.isPhantom()) return 0.0 // worst case
+        val cands = mvr.votes(info.id)
+        return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
+    }
+
+    override fun upperBound() = h2(upperg)
+
+    override fun shortName() = "AboveThresholdB for ${info.candidateIdToName[winner()]}"
+
+    override fun desc() = buildString {
+        append("${shortName()}: reportedMean=${pfn(reportedMean)} noerror=${pfn(noerror() )} g= [$lowerg .. $upperg] h = [${h2(lowerg)} .. ${h2(upperg)}]")
+    }
+
+    override fun hashcodeDesc() = "AboveThresholdB ${winLose()} ${info.name}" // must be unique for serialization
+
+    override fun winner() = winner
+    override fun loser() = -1
+
+    override fun dilutedMean() = reportedMean
+    override fun dilutedMargin() = mean2margin(reportedMean)
+
+    /* Olivia has:
+    # Assertion:
+    #     p_A > 0.05
+    #
+    # Linearises to:              Proto-asserter:                  Minimum for b_a = 0, b_T = 1
+    #     T_A - 0.05 * T_L > 0        => g(b) = b_A - 0.05 * b_T      => a = -.05
+
+ difference is here:
+    # Minimum `a` of proto-assorter is > -.5 so we set `c = 1` and `h(b) = c * g(b) + .5 = b_A - 0.05 b_T + .5`.
+    #
+    # Assorter mean:
+    #     h_bar = g_bar + .5
+    #           = T_A / T_L - .05 + .5
+     */
+    override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
+        if (useVotes == null || N <= 0) {
+            return 0.0
+        } // shouldnt happen
+
+        val winnerVotes = useVotes[winner()] ?: 0
+        return winnerVotes/N.toDouble() + 0.45
+    }
+
+    override fun toString() = desc()
+
+    companion object {
+        fun makeFromVotes(info: ContestInfo, partyId: Int, votes: Map<Int, Int>, minFraction: Double, Nc: Int): AboveThresholdB {
+            val result = AboveThresholdB(info, partyId, minFraction)
+
+            val winnerVotes = votes[partyId] ?: 0
+            val otherVotes = votes.filter { it.key != partyId }.values.sum()
+            val nuetralVotes = Nc - winnerVotes - otherVotes
+
+            val winnerweight = result.h2(result.upperg)
+            val otherweight = result.h2(result.lowerg) // should be 0
+            val hmean = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotes * 0.5) / Nc.toDouble()
+            result.setReportedMean(hmean)
+            return result
+        }
+    }
+}
+
 

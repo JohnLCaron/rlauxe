@@ -25,7 +25,7 @@ class TestClcaAttackSamplers {
             val cvrs = makeCvrsByExactMean(N, cvrMean)
             val contest = makeContestUAfromCvrs(info, cvrs)
             val cassorter = contest.clcaAssertions.first().cassorter
-            assertEquals(.02, cassorter.assorter().reportedMargin(), doublePrecision)
+            assertEquals(.02, cassorter.assorter().dilutedMargin(), doublePrecision)
             assertEquals(0.5050505050505051, cassorter.noerror(), doublePrecision)
             assertEquals(1.0101010101010102, cassorter.upperBound(), doublePrecision)
 

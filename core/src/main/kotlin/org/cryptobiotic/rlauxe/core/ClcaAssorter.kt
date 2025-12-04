@@ -48,7 +48,7 @@ open class ClcaAssorter(
     val upperBound: Double = 2.0 * noerror // upper bound of clca assorter; betting functions may need to know this
 
     init {
-        val reportedAssortAvg = assorter.reportedMean() // ?? what used for ??
+        val reportedAssortAvg = assorter.dilutedMean() // ?? what used for ??
         if (check) { // TODO suspend checking for some tests that expect to fail
             require(reportedAssortAvg > 0.5) {
                 "*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($reportedAssortAvg) must be > .5"

@@ -285,6 +285,11 @@ fun check(s1: AuditRound, s2: AuditRound) {
             assertEquals(a1, a2, "clcaAssertion ${a1}\n not ${a2}")
         }
         val ok = c1.equivalent(c2)
+        if (!ok) {
+            c1.equivalent(c2)
+        }
+        if (c1 != c2)
+            print("ho")
         assertEquals(c1, c2, "contestUA $c1\n not equal $c2")
     }
 }

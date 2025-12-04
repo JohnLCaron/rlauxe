@@ -70,14 +70,14 @@ class TestAssorterMeans {
 
             // val reportedMargin = (winnerVotes - loserVotes) / (contest.info.voteForN * contest.Nc.toDouble())
             // println("   assorter reportedMargin = ${assorter.reportedMargin()}")
-            println("   assorter reportedMean = ${margin2mean(assorter.reportedMargin())}")
+            println("   assorter reportedMean = ${margin2mean(assorter.dilutedMargin())}")
 
             val assortAvg = cvrs.map { assorter.assort(it, usePhantoms = false) }.average()
             println("   assorter assort mean = $assortAvg")
             // println("   assorter assort margin = ${mean2margin(assortAvg)}")
             // cvrs.forEach{ println(" $it == ${assorter.assort(it)}")}
 
-            assertEquals(assortAvg, margin2mean(assorter.reportedMargin()), doublePrecision)
+            assertEquals(assortAvg, margin2mean(assorter.dilutedMargin()), doublePrecision)
         }
     }
 }

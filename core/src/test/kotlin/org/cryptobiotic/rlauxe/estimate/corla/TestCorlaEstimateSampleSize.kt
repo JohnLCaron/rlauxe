@@ -63,14 +63,14 @@ class TestCorlaEstimateSampleSize {
             val sampleSizes = contestRound.assertionRounds.map { assertRound ->
                 val result = estimateClcaAssertionRound(1, config, contestRound, cards, assertRound)
                 val simSize = result.findQuantile(config.quantile)
-                val estSize = estimateSampleSizeSimple(config.riskLimit, assertRound.assertion.assorter.reportedMargin(), gamma,
+                val estSize = estimateSampleSizeSimple(config.riskLimit, assertRound.assertion.assorter.dilutedMargin(), gamma,
                     oneOver = roundUp(cn*p1), // p1
                     twoOver = roundUp(cn*p2), // p2
                     oneUnder = roundUp(cn*p3), // p3
                     twoUnder = roundUp(cn*p4), // p4
                     )
                 estSizes.add(estSize)
-                println("  ${contestRound.name} margin=${df(assertRound.assertion.assorter.reportedMargin())} est=$estSize sim=$simSize")
+                println("  ${contestRound.name} margin=${df(assertRound.assertion.assorter.dilutedMargin())} est=$estSize sim=$simSize")
                 simSize
             }
             val estSize = if (estSizes.isEmpty()) 0 else estSizes.max()

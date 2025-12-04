@@ -53,7 +53,7 @@ class TestOAShangrla {
         //val contestUA = contestOA.makeContestUnderAudit()
         val cassorter = contestUA.minClcaAssertion()!!.cassorter as ClcaAssorterOneAudit
 
-        val assortMargin = cassorter.assorter.reportedMargin()
+        val assortMargin = cassorter.assorter.dilutedMargin()
         val assortMean = margin2mean(assortMargin)
         assertEquals(margin2mean(margin), assortMean, .0001)
 
@@ -125,7 +125,7 @@ class TestOAShangrla {
         assertEquals(otherVoteNoCvr, cassorter.bassort(otherNoCvr, winnerNoCvr), .0001)
 
         val expect = """OneAuditClcaAssorter for contest OneAuditTest (1)
-  assorter= Plurality winner=0 loser=1 reportedMargin=65.7200% reportedMean=82.8600%
+  assorter= Plurality winner=0 loser=1 dilutedMargin=65.7200% dilutedMean=82.8600%
   dilutedMargin=0.6572 noerror=0.7447125409591897 upperBound=1.4894250819183794
 """
         assertEquals(expect, cassorter.toString())

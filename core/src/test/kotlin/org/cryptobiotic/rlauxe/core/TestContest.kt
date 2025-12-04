@@ -105,7 +105,7 @@ class TestContest {
         assertEquals(listOf(0, 2), contest.losers)
         assertEquals(listOf("cand1"), contest.winnerNames)
         assertEquals(
-            "testContestInfo (0) Nc=211 Np=1 votes={1=108, 0=100, 2=0} undervotes=2, voteForN=1",
+            "testContestInfo (0) Nc=211 Nphantoms=1 votes={1=108, 0=100, 2=0} undervotes=2, voteForN=1",
             contest.toString()
         )
 
@@ -124,15 +124,15 @@ class TestContest {
             Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Ncast=209)
         }.message
         assertNotNull(mess2)
-        assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Np=2) = 209", mess2)
+        assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Nphantoms=2) = 209", mess2)
 
         val contest2 = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211,Ncast=210)
         assertEquals(contest, contest2)
         assertEquals(contest.hashCode(), contest2.hashCode())
 
-        assertEquals("testContestInfo (0) Nc=211 Np=1 votes={1=108, 0=100, 2=0} undervotes=2, voteForN=1", contest.toString())
+        assertEquals("testContestInfo (0) Nc=211 Nphantoms=1 votes={1=108, 0=100, 2=0} undervotes=2, voteForN=1", contest.toString())
         assertEquals( """'testContestInfo' (0) PLURALITY voteForN=1 votes={1=108, 0=100, 2=0} undervotes=2, voteForN=1
-   winners=[1] Nc=211 Np=1 Nu=2 sumVotes=208""",
+   winners=[1] Nc=211 Nphantoms=1 Nu=2 sumVotes=208""",
             contest.show())
 
         // assertEquals((211-208-1)/211.toDouble(), contest.undervoteRate())
@@ -159,13 +159,13 @@ class TestContest {
         assertEquals(listOf(0, 2), contest.losers)
         assertEquals(listOf("cand1"), contest.winnerNames)
         assertEquals(
-            "testContestInfo (0) Nc=227 Np=2 votes={1=125, 0=100, 2=0} undervotes=0, voteForN=1",
+            "testContestInfo (0) Nc=227 Nphantoms=2 votes={1=125, 0=100, 2=0} undervotes=0, voteForN=1",
             contest.toString()
         )
         println("margin(1,0) = ${contest.margin(1,0)}")
         assertEquals(25/227.toDouble(), contest.margin(1,0))
 
-        assertTrue(contest.percent(1) > info.minFraction!!)
+        assertTrue(contest.percentForCand(1) > info.minFraction!!)
     }
 
     @Test
@@ -188,13 +188,13 @@ class TestContest {
         assertEquals(listOf(0, 1, 2), contest.losers)
         assertEquals(emptyList(), contest.winnerNames)
         assertEquals(
-            "testContestInfo (0) Nc=227 Np=2 votes={1=123, 0=100, 2=2} undervotes=0, voteForN=1",
+            "testContestInfo (0) Nc=227 Nphantoms=2 votes={1=123, 0=100, 2=2} undervotes=0, voteForN=1",
             contest.toString()
         )
         println("margin(1,0) = ${contest.margin(1,0)}")
         assertEquals(23/227.toDouble(), contest.margin(1,0))
 
-        assertTrue(contest.percent(1) < info.minFraction!!)
+        assertTrue(contest.percentForCand(1) < info.minFraction!!)
 
         val contestUAc = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
         contestUAc.clcaAssertions.forEach { println("  ${it.cassorter.assorter.desc()} ${it.cassorter}") }
@@ -214,7 +214,7 @@ class TestContest {
             Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Ncast=209)
         }.message
         assertNotNull(mess)
-        assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Np=2) = 209", mess)
+        assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Nphantoms=2) = 209", mess)
     }
 
     // @Test not allowed
@@ -241,16 +241,16 @@ class TestContest {
             "testContestInfo (0) Nc=227 Np=2 votes={1=123, 0=100, 2=2}",
             contest.toString()
         )
-        println("margin(1,0) = ${contest.margin(1,0)} percent(1) = ${contest.percent(1)}")
+        println("margin(1,0) = ${contest.margin(1,0)} percent(1) = ${contest.percentForCand(1)}")
         assertEquals(23/227.toDouble(), contest.margin(1,0))
-        println("margin(1,2) = ${contest.margin(1,2)} percent(2) = ${contest.percent(2)}")
+        println("margin(1,2) = ${contest.margin(1,2)} percent(2) = ${contest.percentForCand(2)}")
         assertEquals(121/227.toDouble(), contest.margin(1,2))
-        println("margin(0,2) = ${contest.margin(0,2)} percent(0) = ${contest.percent(0)}")
+        println("margin(0,2) = ${contest.margin(0,2)} percent(0) = ${contest.percentForCand(0)}")
         assertEquals(98/227.toDouble(), contest.margin(0,2))
 
-        assertTrue(contest.percent(0) >= info.minFraction!!)
-        assertTrue(contest.percent(1) >= info.minFraction!!)
-        assertTrue(contest.percent(2) < info.minFraction!!)
+        assertTrue(contest.percentForCand(0) >= info.minFraction!!)
+        assertTrue(contest.percentForCand(1) >= info.minFraction!!)
+        assertTrue(contest.percentForCand(2) < info.minFraction!!)
 
         val contestUAc = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
         contestUAc.clcaAssertions.forEach { println("  ${it.cassorter.assorter.desc()} ${it.cassorter}") }
@@ -283,8 +283,8 @@ class TestContest {
         assertEquals(expectedShowCandidates, contestUAc.contest.showCandidates())
 
         val expectedShow = """Contest 'testContestInfo' (0) PLURALITY voteForN=1 votes={1=108, 0=100, 2=0} undervotes=1, voteForN=1
-   winners=[1] Nc=211 Np=2 Nu=1 sumVotes=208
-   1/0 votes=108/100 diff=8 (w-l)/w =0.0741 Nb=211 dilutedMargin=3.7915% reportedMargin=3.7915% recountMargin=7.4074% 
+   winners=[1] Nc=211 Nphantoms=2 Nu=1 sumVotes=208
+   1/0 votes=108/100 diff=8 (w-l)/w =0.0741 Npop=211 dilutedMargin=3.7915% reportedMargin=3.7915% recountMargin=7.4074% 
    0 'cand0': votes=100 
    1 'cand1': votes=108  (winner)
    2 'cand2': votes=0 

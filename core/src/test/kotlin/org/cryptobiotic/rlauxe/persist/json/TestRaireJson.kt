@@ -79,7 +79,7 @@ class TestRaireJson {
         val rassertion = RaireAssertion(4, 2, 0.0,42, RaireAssertionType.irv_elimination,
             listOf(1,3,5),  mapOf(1 to 111, 2 to 222, 3 to 333))
         val mean = margin2mean(rassertion.marginInVotes.toDouble() / 1000)
-        val target = RaireAssorter(info, rassertion).setReportedMean(mean)
+        val target = RaireAssorter(info, rassertion).setDilutedMean(mean)
 
         val json = target.publishJson()
         val roundtrip = json.import(info)

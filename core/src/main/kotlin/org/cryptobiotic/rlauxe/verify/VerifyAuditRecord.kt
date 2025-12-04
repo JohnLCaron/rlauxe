@@ -36,9 +36,6 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
 
     fun verify(contest: ContestRound, result: VerifyResults) {
         result.addMessage("  verify contest = ${contest.id}")
-        val minAssertion = contest.minAssertion()
-        requireNotNull(minAssertion) {"    minAssertion = $minAssertion"}
-
         contest.assertionRounds.forEach { verify(it, result) }
 
         val contestUA = contest.contestUA

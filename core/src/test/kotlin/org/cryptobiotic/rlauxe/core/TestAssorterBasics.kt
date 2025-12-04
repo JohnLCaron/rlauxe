@@ -44,13 +44,13 @@ class TestAssorterBasics {
             assertEquals(1.0, it.assorter.upperBound())
 
             val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr)}.average()
-            val mean = margin2mean(it.assorter.reportedMargin())
+            val mean = margin2mean(it.assorter.dilutedMargin())
             println("$it: assortAvg=${assortAvg} mean=${mean}")
             assertEquals(assortAvg, mean, doublePrecision)
 
             val calcMargin = it.assorter.calcAssorterMargin(contest.id, cvrs)
             assertEquals(assortAvg, margin2mean(calcMargin), doublePrecision)
-            assertEquals(it.assorter.reportedMargin(), calcMargin, doublePrecision)
+            assertEquals(it.assorter.dilutedMargin(), calcMargin, doublePrecision)
         }
     }
 
@@ -90,13 +90,13 @@ class TestAssorterBasics {
             assertEquals(1.0, it.assorter.upperBound())
 
             val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr, usePhantoms = false)}.average()
-            val mean = margin2mean(it.assorter.reportedMargin())
+            val mean = margin2mean(it.assorter.dilutedMargin())
             println("$it: assortAvg=${assortAvg} mean=${mean}")
             assertEquals(assortAvg, mean, doublePrecision)
 
             val calcMargin = it.assorter.calcAssorterMargin(contest.id, cvrs)
             assertEquals(assortAvg, margin2mean(calcMargin), doublePrecision)
-            assertEquals(it.assorter.reportedMargin(), calcMargin, doublePrecision)
+            assertEquals(it.assorter.dilutedMargin(), calcMargin, doublePrecision)
 
             val Ncd = contest.Nc.toDouble()
             val expectWithPhantoms = (assortAvg * Ncd - 0.5) / Ncd
@@ -140,9 +140,9 @@ class TestAssorterBasics {
         assertEquals(contest.winners.size, assertions.size)
         assertions.forEach { assertion ->
             assertIs<Assertion>(assertion)
-            assertIs<SuperMajorityAssorter>(assertion.assorter)
+            assertIs<AboveThreshold>(assertion.assorter)
             val facc = 1.0 / (2.0 * contest.info.minFraction!!)
-            assertEquals(facc, assertion.assorter.upperBound())
+            assertEquals(facc, assertion.assorter.upperBound(), doublePrecision)
 
             val assortAvg = cvrs.map { cvr ->
                 val usew1 = cvr.hasMarkFor(contest.id, assertion.assorter.winner())
@@ -151,7 +151,7 @@ class TestAssorterBasics {
                 assertion.assorter.assort(cvr)
             }.average()
 
-            val mean = margin2mean(assertion.assorter.reportedMargin())
+            val mean = margin2mean(assertion.assorter.dilutedMargin())
             println("$assertion: facc=$facc assortAvg=${assortAvg} mean=${mean}")
 
             // we no longer expect these to be equal, when nwinners > 1

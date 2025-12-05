@@ -25,19 +25,27 @@ class OneAuditContestAuditTaskGenerator(
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean)
         )
 
-        val (contestOA, oaCvrs) = makeOneAuditTest(
+        // data class ContestMvrCardAndPools(
+        //    val contestUA: ContestUnderAudit,
+        //    val mvrs: List<Cvr>,
+        //    val cards: List<AuditableCard>,
+        //    val pools: List<CardPoolIF>,
+        //)
+        val (contestUA, mvrs, cards, pools) = makeOneAuditTest(
             margin,
             Nc,
             cvrFraction = cvrPercent,
             undervoteFraction = underVotePct,
             phantomFraction = phantomPct
         )
-        val oaMvrs = makeFuzzedCvrsFrom(listOf(contestOA.contest), oaCvrs, mvrsFuzzPct)
+        // TODO should be OneAuditPairFuzzer ??
+        val oaMvrs = makeFuzzedCvrsFrom(listOf(contestUA.contest), mvrs, mvrsFuzzPct)
 
         val oneaudit = WorkflowTesterOneAudit(
             config=config,
-            listOf(contestOA),
-            MvrManagerForTesting(oaCvrs, oaMvrs, config.seed))
+            listOf(contestUA),
+            MvrManagerForTesting(mvrs, oaMvrs, seed=config.seed, pools=pools)
+        )
 
         return ContestAuditTask(
             name(),
@@ -71,8 +79,7 @@ class OneAuditSingleRoundAuditTaskGenerator(
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean, )
         )
 
-        val (contestOA, oaCvrs) =
-            makeOneAuditTest(
+        val (contestUA, mvrs, cards, pools) = makeOneAuditTest(
                 margin,
                 Nc,
                 cvrFraction = cvrPercent,
@@ -80,13 +87,15 @@ class OneAuditSingleRoundAuditTaskGenerator(
                 phantomFraction = phantomPct
             )
 
+        // TODO should be OneAuditPairFuzzer ??
         val oaMvrs =  if (p2flips != null || p1flips != null) {
-            makeFlippedMvrs(oaCvrs, Nc, p2flips, p1flips)
+            makeFlippedMvrs(mvrs, Nc, p2flips, p1flips)
         } else {
-            makeFuzzedCvrsFrom(listOf(contestOA.contest), oaCvrs, mvrsFuzzPct)
+            makeFuzzedCvrsFrom(listOf(contestUA.contest), mvrs, mvrsFuzzPct)
         }
 
-        val oneaudit = WorkflowTesterOneAudit(config=config, listOf(contestOA), MvrManagerForTesting(oaCvrs, oaMvrs, config.seed))
+        val oneaudit = WorkflowTesterOneAudit(config=config, listOf(contestUA),
+            MvrManagerForTesting(mvrs, oaMvrs, seed=config.seed, pools=pools))
         return ClcaSingleRoundWorkflowTask(
             name(),
             oneaudit,
@@ -121,8 +130,7 @@ class OneAuditSingleRoundWithDilutedMargin(
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean, )
         )
 
-        val (contestOA, mvrs, cards) =
-            makeOneAuditTest(
+        val (contestUA, mvrs, cards, pools) = makeOneAuditTest(
                 margin,
                 Nc,
                 cvrFraction = cvrPercent,
@@ -132,9 +140,10 @@ class OneAuditSingleRoundWithDilutedMargin(
                 extraInPool = extraInPool
             )
 
+        // TODO should be OneAuditPairFuzzer ??
         // different seed each time
-        val manager =  MvrManagerFromManifest(cards, mvrs, listOf(contestOA.contest.info()), simFuzzPct= mvrsFuzzPct, Random.nextLong())
-        val oneaudit = WorkflowTesterOneAudit(config=config, listOf(contestOA), manager)
+        val manager =  MvrManagerFromManifest(cards, mvrs, listOf(contestUA.contest.info()), seed=Random.nextLong(), simFuzzPct=mvrsFuzzPct, pools=pools)
+        val oneaudit = WorkflowTesterOneAudit(config=config, listOf(contestUA), manager)
         return ClcaSingleRoundWorkflowTask(
             name(),
             oneaudit,

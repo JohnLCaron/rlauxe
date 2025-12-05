@@ -4,10 +4,13 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.BettingFn
+import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.VunderBar
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
+import org.cryptobiotic.rlauxe.workflow.ClcaSampling
 import org.cryptobiotic.rlauxe.workflow.Sampling
 import kotlin.collections.mutableListOf
 import kotlin.math.min
@@ -30,15 +33,22 @@ private val logger = KotlinLogging.logger("EstimateSampleSizes")
 fun estimateSampleSizes(
     config: AuditConfig,
     auditRound: AuditRound,
-    cardManifest: CloseableIterable<AuditableCard>, // Clca, OneAudit, ifnored for Polling
+    cardManifest: CloseableIterable<AuditableCard>, // Clca, OneAudit, ignored for Polling
+    cardPools: List<CardPoolIF>?, // Clca, OneAudit, ignored for Polling
     showTasks: Boolean = false,
     nthreads: Int = 32,
 ): List<RunTestRepeatedResult> {
 
+    // simulate the card pools for all contests
+    val infos = auditRound.contestRounds.map { it.contestUA.contest.info() }.associateBy { it.id }
+    val vunderFuzz = if (!config.isOA) null else {
+        OneAuditVunderBarFuzzer(VunderBar(cardPools!!), infos, config.simFuzzPct ?: 0.0)
+    }
+
     // create the estimation tasks
     val tasks = mutableListOf<EstimateSampleSizeTask>()
     auditRound.contestRounds.filter { !it.done }.forEach { contestRound ->
-        tasks.addAll(makeEstimationTasks(config, contestRound, auditRound.roundIdx, cardManifest))
+        tasks.addAll(makeEstimationTasks(config, contestRound, auditRound.roundIdx, cardManifest, vunderFuzz))
     }
 
     // run tasks concurrently
@@ -91,14 +101,17 @@ fun makeEstimationTasks(
     contestRound: ContestRound,
     roundIdx: Int,
     cardManifest: CloseableIterable<AuditableCard>,
+    vunderFuzz: OneAuditVunderBarFuzzer?,
     moreParameters: Map<String, Double> = emptyMap(),
 ): List<EstimateSampleSizeTask> {
+
     val tasks = mutableListOf<EstimateSampleSizeTask>()
 
     // TODO could do them for all contests in one pass; could be in one list
     // TODO what if its a very large election, but a contest is very small? May not have enough.
     //   assumes the cards are randomized
     val contestCards = ContestCardsLimited(contestRound.contestUA.id, config.contestSampleCutoff, cardManifest.iterator()).cards()
+    val oaFuzzedPairs: List<Pair<Cvr, AuditableCard>>? = vunderFuzz?.makePairsFromCards(contestCards)
 
     contestRound.assertionRounds.map { assertionRound ->
         if (!assertionRound.status.complete) {
@@ -123,6 +136,7 @@ fun makeEstimationTasks(
                         config,
                         contestRound,
                         contestCards = contestCards,
+                        oaFuzzedPairs,
                         assertionRound,
                         startingTestStatistic,
                         prevSampleSize,
@@ -141,6 +155,7 @@ class EstimateSampleSizeTask(
     val config: AuditConfig,
     val contest: ContestRound,
     val contestCards: List<AuditableCard>,
+    val oaFuzzedPairs: List<Pair<Cvr, AuditableCard>>?,
     val assertionRound: AssertionRound,
     val startingTestStatistic: Double,
     val prevSampleSize: Int,
@@ -177,7 +192,7 @@ class EstimateSampleSizeTask(
                     roundIdx,
                     config,
                     contest.contestUA,
-                    contestCards,
+                    oaFuzzedPairs!!,
                     assertionRound,
                     startingTestStatistic,
                     moreParameters=moreParameters,
@@ -311,6 +326,7 @@ fun estimatePollingAssertionRound(
     val assorter = assertionRound.assertion.assorter
     val eta0 = assorter.dilutedMean()
 
+    // TODO isnt this the same problam as OneAudit ??
     // optional fuzzing of the cvrs
     val useFuzz = config.simFuzzPct ?: 0.0
     val sampler = PollingCardFuzzSampler(useFuzz, contestCards, contestUA.contest as Contest, assorter) // cant use Raire
@@ -386,7 +402,7 @@ fun estimateOneAuditAssertionRound(
     roundIdx: Int,
     config: AuditConfig,
     contestUA: ContestUnderAudit,
-    contestCards: List<AuditableCard>,
+    oaFuzzedPairs: List<Pair<Cvr, AuditableCard>>,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
@@ -413,20 +429,15 @@ fun estimateOneAuditAssertionRound(
             PluralityErrorRates.Zero
         }
     }
-
-    //  TODO cant use with DHondt ??
-    val sampler = ClcaCardFuzzSampler(config.simFuzzPct ?: 0.0, contestCards, contestUA.contest, oaCassorter)
-    // TODO was val sampler = ClcaCardSimulatedErrorRates(contestCards, contestUA.contest, oaCassorter, errorRates) // TODO why cant we use this with IRV?? I think we can
-
+    // TODO track down simulations and do initial permutation there; we want first trial to use the actual permutation
     // the minimum p2o is always the phantom rate.
     // if (errorRates.p2o < contestUA.contest.phantomRate())
     //    errorRates = errorRates.copy( p2o = contestUA.contest.phantomRate())
 
-    // TODO track down simulations and do initial permutation there; we want first trial to use the actual permutation
+    val sampler = ClcaSampling(contestUA.contest.id, oaFuzzedPairs, oaCassorter, allowReset = true)
 
     val strategy = config.oaConfig.strategy
     val result = if (strategy == OneAuditStrategyType.optimalComparison) {
-
         val bettingFn: BettingFn = OptimalComparisonNoP1(contestUA.Npop, true, oaCassorter.upperBound, p2 = 0.0) // TODO errorRates.p2o) // diluted margin
 
         runRepeatedBettingMart(

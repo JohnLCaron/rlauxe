@@ -18,6 +18,7 @@ interface SampleTracker {
  * as required by "predictable function of the data X1 , . . . , Xi−1" requirement.
  * Its up to the method using this to make only "previous samples", by not adding the
  * current sample to it until the end of the iteration.
+ * TODO CANDIDATE for removal
  */
 class PrevSamples : SampleTracker {
     private var last = 0.0

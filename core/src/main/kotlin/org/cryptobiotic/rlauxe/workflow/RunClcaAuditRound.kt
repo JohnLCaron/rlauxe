@@ -47,7 +47,7 @@ class RunClcaContestTask(
             if (!assertionRound.status.complete) {
                 val cassertion = assertionRound.assertion as ClcaAssertion
                 val cassorter = cassertion.cassorter
-                val sampler = ClcaWithoutReplacement(contest.id, cvrPairs, cassorter, allowReset = false)
+                val sampler = ClcaSampling(contest.id, cvrPairs, cassorter, allowReset = false)
 
                 val testH0Result = auditor.run(config, contest, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status
@@ -87,10 +87,10 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val cassorter = cassertion.cassorter
         val clcaConfig = config.clcaConfig
 
-        // Subsequent rounds, always use measured rates.
         val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
-        prevRounds.setPhantomRate(contest.phantomRate()) // the minimum p1o is always the phantom rate.
+        prevRounds.setPhantomRate(contest.phantomRate()) // what effect does the the phantom rate have?
 
+        // enum class ClcaStrategyType { generalAdaptive, apriori, fuzzPct, oracle  }
         //  apriori: pass in apriori errorRates for first round.
         //  fuzzPct: ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct) for first round.
         //  oracle: use actual measured error rates for first round. (violates martingale condition)
@@ -125,7 +125,10 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             riskLimit = config.riskLimit,
             withoutReplacement = true
         )
-        // testFn.setDebuggingSequences()
+
+        // TODO make optional
+        // val sequences = testFn.setDebuggingSequences()
+        // val tracker = ClcaErrorTracker(cassorter.noerror(), sequences) // track pool data; something better to do?
 
         val terminateOnNullReject = config.auditSampleLimit == null
         val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = terminateOnNullReject, tracker=tracker) { sampling.sample() }

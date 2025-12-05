@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.persist.json
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.unwrap
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -276,3 +277,8 @@ fun readCardPoolsJsonFile(filename: String, infos: Map<Int, ContestInfo>): Resul
         errs.add("Exception= ${t.message} ${t.stackTraceToString()}")
     }
 }
+
+fun readCardPoolsJsonFileUnwrapped(filename: String, infos: Map<Int, ContestInfo>): List<CardPoolIF> {
+    return readCardPoolsJsonFile(filename, infos).unwrap()
+}
+

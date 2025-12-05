@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
-import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.workflow.PollingSampling
 import org.cryptobiotic.rlauxe.workflow.Sampling
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -57,7 +57,7 @@ class TestSampleGenerator {
             contestUA.pollingAssertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
-                PollWithoutReplacement(contestUA.id, cvrs.zip(cvrs), it.assorter)
+                PollingSampling(contestUA.id, cvrs.zip(cvrs), it.assorter)
             }
         }
     }

@@ -85,6 +85,7 @@ class PlotDistributions {
             config,
             auditRound,
             cardManifest = mvrManager.sortedCards(),
+            cardPools = mvrManager.cardPools(),
         )
     }
 
@@ -121,7 +122,7 @@ class PlotDistributions {
 
             val cassertion = assertionRound.assertion as ClcaAssertion
             val cassorter = cassertion.cassorter
-            val sampler = ClcaWithoutReplacement(contestUA.id, sortedPairs, cassorter, allowReset = false) // OK
+            val sampler = ClcaSampling(contestUA.id, sortedPairs, cassorter, allowReset = false) // OK
 
             val contestRound = ContestRound(contestUA, listOf(assertionRound), 1)
             ClcaAssertionAuditor().run(auditConfig, contestRound, assertionRound, sampler, 1)

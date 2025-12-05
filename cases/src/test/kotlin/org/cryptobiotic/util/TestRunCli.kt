@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.cli.RunRlaStartFuzz
 import org.cryptobiotic.rlauxe.cli.RunVerifyAuditRecord
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
+import org.cryptobiotic.rlauxe.audit.writeMvrsForRound
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import kotlin.test.Test
@@ -128,17 +129,15 @@ class TestRunCli {
         RunRlaCreateOneAudit.main(
             arrayOf(
                 "-in", topdir,
-                "-minMargin", "0.01",
-                "-fuzzMvrs", "0.001",
-                "-ncards", "10000",
-                "-ncontests", "10", // ignored
-                "--addRaireContest",
-                "--addRaireCandidates", "5",
+                "-minMargin", "0.04",
+                "-fuzzMvrs", "0.00",
+                "-ncards", "50000",
+                "-extraPct", "0.00"
             )
         )
         val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
+        // val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        // writeSortedCardsInternalSort(publisher, config.seed)
 
         println("============================================================")
         val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)
@@ -149,8 +148,9 @@ class TestRunCli {
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
+            val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
+            if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx)
         }
 
         println("============================================================")

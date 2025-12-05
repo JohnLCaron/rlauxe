@@ -71,6 +71,10 @@ object RunAuditCli {
         val auditRound = auditRecord.rounds.first()
         val contestRound = auditRound.contestRounds.find { it.id == contest }!!
         val assertionRound = contestRound.assertionRounds.first() //  { it.assertion.assorter.winLose() == contest }!!
+        if (assertionRound.auditResult == null) {
+            println("first round auditResult is null")
+            return
+        }
 
         // fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): String {
         val result = runAudit(auditDir, contestRound, assertionRound, assertionRound.auditResult!!)

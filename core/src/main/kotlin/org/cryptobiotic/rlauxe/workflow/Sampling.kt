@@ -19,7 +19,7 @@ interface Sampling: Iterator<Double> {
 // Note that we are stuffing the sampling logic into card.hasContest(contestId)
 
 //// For polling audits. Production runPollingAuditRound
-class PollWithoutReplacement(
+class PollingSampling(
     val contestId: Int,
     val cvrPairs: List<Pair<CardIF, CardIF>>, // Pair(mvr, card)
     val assorter: AssorterIF,
@@ -43,14 +43,14 @@ class PollWithoutReplacement(
                 return assorter.assort(mvr, usePhantoms = true)
             }
         }
-        logger.error{"PollWithoutReplacement no samples left for contest ${contestId} and Assorter ${assorter}"}
-        throw RuntimeException("PollWithoutReplacement no samples left for contest ${contestId} and assorter ${assorter}")
+        logger.error{"PollingSampling no samples left for contest ${contestId} and Assorter ${assorter}"}
+        throw RuntimeException("PollingSampling no samples left for contest ${contestId} and assorter ${assorter}")
     }
 
     override fun reset() {
         if (!allowReset) {
-            logger.error {"PollWithoutReplacement reset not allowed; contest ${contestId} assorter ${assorter}\""}
-            throw RuntimeException("PollWithoutReplacement reset not allowed")
+            logger.error {"PollingSampling reset not allowed; contest ${contestId} assorter ${assorter}\""}
+            throw RuntimeException("PollingSampling reset not allowed")
         }
         permutedIndex.shuffle(Random)
         idx = 0
@@ -66,7 +66,7 @@ class PollWithoutReplacement(
 }
 
 //// For clca audits. Production RunClcaContestTask
-class ClcaWithoutReplacement(
+class ClcaSampling(
     val contestId: Int,
     val cvrPairs: List<Pair<CardIF, CardIF>>, // Pair(mvr, card)
     val cassorter: ClcaAssorter,
@@ -79,7 +79,8 @@ class ClcaWithoutReplacement(
 
     init {
         // TODO this may not be true ??
-        cvrPairs.forEach { (mvr, card) -> require(mvr.location() == card.location())  }
+        cvrPairs.forEach { (mvr, card) ->
+            require(mvr.location() == card.location())  { "mvr location ${mvr.location()} != card.location ${card.location()}"}  }
     }
 
     override fun sample(): Double {
@@ -92,14 +93,14 @@ class ClcaWithoutReplacement(
                 return result
             }
         }
-        logger.error{"ClcaWithoutReplacement no samples left for ${contestId} and ComparisonAssorter ${cassorter}"}
-        throw RuntimeException("ClcaWithoutReplacement no samples left for ${contestId} and ComparisonAssorter ${cassorter}")
+        logger.error{"ClcaSampling no samples left for ${contestId} and ComparisonAssorter ${cassorter}"}
+        throw RuntimeException("ClcaSampling no samples left for ${contestId} and ComparisonAssorter ${cassorter}")
     }
 
     override fun reset() {
         if (!allowReset) {
-            logger.error{"ClcaWithoutReplacement reset not allowed"}
-            throw RuntimeException("ClcaWithoutReplacement reset not allowed")
+            logger.error{"ClcaSampling reset not allowed"}
+            throw RuntimeException("ClcaSampling reset not allowed")
         }
         permutedIndex.shuffle(Random)
         idx = 0
@@ -116,7 +117,7 @@ class ClcaWithoutReplacement(
 
 fun makeClcaNoErrorSampler(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAssorter): Sampling {
     val cvrPairs = cvrs.zip(cvrs)
-    return ClcaWithoutReplacement(contestId, cvrPairs, cassorter, true)
+    return ClcaSampling(contestId, cvrPairs, cassorter, true)
 }
 
 

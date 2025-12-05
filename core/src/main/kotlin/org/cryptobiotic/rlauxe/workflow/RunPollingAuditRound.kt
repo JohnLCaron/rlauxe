@@ -30,7 +30,7 @@ fun runPollingAuditRound(
             if (!assertionRound.status.complete) {
                 val assertion = assertionRound.assertion
                 val assorter = assertion.assorter
-                val sampler = PollWithoutReplacement(contest.id, pairs, assorter, allowReset = false)
+                val sampler = PollingSampling(contest.id, pairs, assorter, allowReset = false)
 
                 val testH0Result = auditPollingAssertion(config, contest.contestUA, assertionRound, sampler, roundIdx, quiet)
                 assertionRound.status = testH0Result.status

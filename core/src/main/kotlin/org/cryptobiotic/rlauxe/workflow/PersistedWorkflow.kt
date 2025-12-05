@@ -41,7 +41,7 @@ class PersistedWorkflow(
         mvrManager = if (useTest) {
             PersistedMvrManagerTest(auditRecord.location, config, contestsUA)
         } else {
-            PersistedMvrManager(auditRecord.location)
+            PersistedMvrManager(auditRecord.location, config, contestsUA)
         }
     }
 
@@ -100,6 +100,6 @@ class PersistedWorkflow(
     }
 
     override fun toString(): String {
-        return "PersistentAudit(auditDir='$auditDir', useTest=$useTest, mvrManager=$mvrManager)"
+        return "PersistentWorkflow(auditDir='$auditDir', useTest=$useTest, mvrManager=$mvrManager)"
     }
 }

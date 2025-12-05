@@ -13,7 +13,7 @@ import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
-import org.cryptobiotic.rlauxe.workflow.ClcaWithoutReplacement
+import org.cryptobiotic.rlauxe.workflow.ClcaSampling
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -212,7 +212,7 @@ class TestMultiContestTestData {
             val contestUA = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
             val cassorter = contestUA.minClcaAssertion()!!.cassorter
 
-            val sampler = ClcaWithoutReplacement(contest.id, testCvrs.zip(testCvrs), cassorter, true) // TODO
+            val sampler = ClcaSampling(contest.id, testCvrs.zip(testCvrs), cassorter, true) // TODO
             val tracker = PluralityErrorTracker(cassorter.noerror())
             while (sampler.hasNext()) { tracker.addSample(sampler.next()) }
             // println("   tracker.errorRates = ${tracker.errorRates()}")

@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.workflow.PollingSampling
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -36,7 +36,7 @@ class TestAlphaMart {
 
         val cvrs = test.makeCvrsFromContests()
         val config = AuditConfig(AuditType.POLLING, hasStyle=true, nsimEst=10)
-        val cvrSampler = PollWithoutReplacement(contestUA.contest.id, cvrs.zip(cvrs), assorter)
+        val cvrSampler = PollingSampling(contestUA.contest.id, cvrs.zip(cvrs), assorter)
 
         val eta0 = assorter.dilutedMean()
         println("eta0=$eta0, margin=${mean2margin(eta0)}")

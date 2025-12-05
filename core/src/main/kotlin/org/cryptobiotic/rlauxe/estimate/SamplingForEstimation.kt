@@ -136,7 +136,10 @@ fun makeFuzzedCardsFrom(infoList: List<ContestInfo>,
                     cardb.replaceContestVotes(contestId, currentVotes.toIntArray())
                 } else {
                     val votes = cardb.votes[contestId]
-                    val currId: Int? = if (votes == null || votes.size == 0) null else votes[0] // TODO only one vote allowed, cant use on Raire
+                    val currId: Int? = if (votes == null || votes.size == 0)
+                        null
+                    else
+                        votes[0] // TODO only one vote allowed, cant use on Raire
                     // choose a different candidate, or none.
                     val ncandId = chooseNewCandidate(currId, info.candidateIds, undervotes)
                     cardb.replaceContestVote(contestId, ncandId)
@@ -167,7 +170,6 @@ fun switchCandidateRankings(votes: MutableList<Int>, candidateIds: List<Int>) {
     }
 }
 
-
 fun chooseNewCandidate(currId: Int?, candidateIds: List<Int>, undervotes: Boolean): Int? {
     return if (undervotes) chooseNewCandidateWithUndervotes(currId, candidateIds) else
         chooseNewCandidateNoUndervotes(currId, candidateIds)
@@ -195,4 +197,60 @@ fun chooseNewCandidateNoUndervotes(currId: Int?, candidateIds: List<Int>): Int? 
             return candId
         }
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// OneAudit Estimation Sampling
+
+class OneAuditVunderBarFuzzer(
+    val vunderBar: VunderBar,
+    val infos: Map<Int, ContestInfo>,
+    val fuzzPct: Double,
+) {
+    val isIRV = infos.mapValues { it.value.isIrv }
+
+    fun makePairsFromCards(cards: List<AuditableCard>): List<Pair<Cvr, AuditableCard>> {
+        val mvrs = cards.map { card ->
+            if (card.poolId != null) {
+                vunderBar.simulatePooledCard(card)
+            } else if (card.votes != null ){
+                makeFuzzedCvrFromCard(infos, isIRV, card, fuzzPct)
+            } else {
+                throw RuntimeException("card must be pooled or have votes")
+            }
+        }
+        return mvrs.zip(cards)
+    }
+}
+
+fun makeFuzzedCvrFromCard(
+    infos: Map<Int, ContestInfo>,
+    isIRV: Map<Int, Boolean>,
+    card: AuditableCard, // must have votes, ie have a Cvr
+    fuzzPct: Double,
+    undervotes: Boolean = true, // chooseNewCandidateWithUndervotes
+) : Cvr {
+    if (fuzzPct == 0.0 || card.phantom) return card.cvr()
+    val r = Random.nextDouble(1.0)
+    if (r > fuzzPct) return card.cvr()
+
+    val cardb = CardBuilder.fromCard(card)
+        cardb.possibleContests.forEach { contestId ->
+        val info = infos[contestId]
+        if (info != null) {
+            if (isIRV[contestId] ?: false) {
+                val currentVotes = cardb.votes[contestId]?.toList()?.toMutableList() ?: mutableListOf<Int>()
+                switchCandidateRankings(currentVotes, info.candidateIds)
+                cardb.replaceContestVotes(contestId, currentVotes.toIntArray())
+            } else {
+                val votes = cardb.votes[contestId]
+                val currId: Int? = if (votes == null || votes.size == 0) null else votes[0] // only one vote allowed
+                // choose a different candidate, or none.
+                val ncandId = chooseNewCandidate(currId, info.candidateIds, undervotes)
+                cardb.replaceContestVote(contestId, ncandId)
+            }
+        }
+    }
+
+    return cardb.build().cvr()
 }

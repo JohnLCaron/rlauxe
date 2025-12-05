@@ -4,13 +4,21 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
 
 // this assumes that the cards and mvrs correspond one-to-one
 // these are the real mvrs
-class MvrManagerFromManifest(cardManifest: List<AuditableCard>, mvrs: List<Cvr>, val infoList: List<ContestInfo>, val simFuzzPct: Double?, seed:Long) : MvrManager {
+class MvrManagerFromManifest(
+    cardManifest: List<AuditableCard>,
+    mvrs: List<Cvr>,
+    val infoList: List<ContestInfo>,
+    seed:Long,
+    val simFuzzPct: Double?,
+    val pools: List<CardPoolIF>? = null,
+) : MvrManager {
 
     private var mvrsRound: List<AuditableCard> = emptyList()
     val sortedCards: List<AuditableCard>
@@ -29,6 +37,10 @@ class MvrManagerFromManifest(cardManifest: List<AuditableCard>, mvrs: List<Cvr>,
     }
 
     override fun sortedCards() = CloseableIterable { sortedCards.iterator() }
+
+    override fun cardPools(): List<CardPoolIF>? {
+        return pools
+    }
 
     override fun makeMvrCardPairsForRound(): List<Pair<CardIF, CardIF>>  {
         if (mvrsRound.isEmpty()) {  // for SingleRoundAudit.

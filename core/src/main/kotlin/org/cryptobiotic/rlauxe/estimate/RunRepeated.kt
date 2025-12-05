@@ -30,8 +30,8 @@ fun runTestRepeated(
     val welford = Welford()
     val sampleCounts = mutableListOf<Int>()
 
-    repeat(ntrials) {
-        if (it != 0) drawSample.reset() // this creates all the variation for the estimation
+    repeat(ntrials) { trial ->
+        if (trial != 0) drawSample.reset() // this creates all the variation for the estimation
         tracker.reset()
 
         val testH0Result = testFn.testH0(

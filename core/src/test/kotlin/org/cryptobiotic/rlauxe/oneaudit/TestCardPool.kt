@@ -14,7 +14,6 @@ class TestCardPool {
 
     @Test
     fun testCardPoolFromCvrs() {
-
         val (contestOA, mvrs, cards, cardPools) =
             makeOneAuditTest(
                 margin = .02,

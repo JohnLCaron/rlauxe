@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.util.doubleIsClose
 
 /**
  * The betting martingale for the hypothesis that the population mean is less than or equal to 1/2,
- * for a population of size Nc, based on a series of samples x.
+ * for a population of size N, based on a series of samples x.
  */
 class BettingMart(
     val bettingFn : BettingFn,
@@ -26,7 +26,7 @@ class BettingMart(
     override fun testH0(maxSamples: Int,
                         terminateOnNullReject: Boolean,
                         startingTestStatistic: Double,
-                        tracker: SampleTracker,
+                        tracker: SampleTracker, // TODO put back on constructor. too ugly
                         drawSample : () -> Double) : TestH0Result {
         // require(!withoutReplacement || maxSamples <= Nc) TODO problems with redacted cvrs ? too many undervotes ??
 

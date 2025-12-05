@@ -4,6 +4,7 @@ package org.cryptobiotic.rlauxe.persist.json
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.unwrap
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -298,4 +299,8 @@ fun readContestsJsonFile(filename: String): Result<List<ContestUnderAudit>, Erro
     } catch (t: Throwable) {
         errs.add("Exception= ${t.message} ${t.stackTraceToString()}")
     }
+}
+
+fun readContestsJsonFileUnwrapped(filename: String): List<ContestUnderAudit> {
+    return readContestsJsonFile(filename).unwrap()
 }

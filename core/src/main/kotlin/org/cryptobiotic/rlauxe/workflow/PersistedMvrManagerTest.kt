@@ -16,8 +16,8 @@ private val logger = KotlinLogging.logger("PersistedMvrManagerTest")
 private val checkValidity = true
 private val showErrorTracker = false
 
-class PersistedMvrManagerTest(auditDir: String, val config: AuditConfig, val contestsUA: List<ContestUnderAudit>)
-    : MvrManagerTestIF, PersistedMvrManager(auditDir) {
+class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA: List<ContestUnderAudit>)
+    : MvrManagerTestIF, PersistedMvrManager(auditDir, config, contestsUA) {
 
     // extract the wanted cards from the cardManifest, optionally fuzz them, and write them to sampleMvrsFile
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {

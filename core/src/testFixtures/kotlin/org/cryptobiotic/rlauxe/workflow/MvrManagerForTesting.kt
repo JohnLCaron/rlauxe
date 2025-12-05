@@ -2,13 +2,20 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
 // simulated cvrs, mvrs for testing are sorted and kept here in memory
-class MvrManagerForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrManager, MvrManagerTestIF {
+class MvrManagerForTesting(
+    cvrs: List<Cvr>,
+    mvrs: List<Cvr>,
+    seed: Long,
+    val pools: List<CardPoolIF>? = null,
+) : MvrManager, MvrManagerTestIF {
+
     val sortedCards: List<AuditableCard>
     val mvrsUA: List<AuditableCard> // the mvrs in the same order as the sorted cards
     private var mvrsRound: List<AuditableCard> = emptyList()
@@ -21,6 +28,10 @@ class MvrManagerForTesting(cvrs: List<Cvr>, mvrs: List<Cvr>, seed: Long) : MvrMa
     }
 
     override fun sortedCards() = CloseableIterable { Closer(sortedCards.iterator()) }
+
+    override fun cardPools(): List<CardPoolIF>? {
+        return pools
+    }
 
     override fun makeMvrCardPairsForRound(): List<Pair<CardIF, CardIF>>  {
         if (mvrsRound.isEmpty()) {

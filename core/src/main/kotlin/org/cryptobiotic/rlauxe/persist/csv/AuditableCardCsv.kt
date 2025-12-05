@@ -141,8 +141,8 @@ fun readAuditableCardCsv(line: String): AuditableCard {
 
 class AuditableCardCsvReader(filename: String): CloseableIterable<AuditableCard> {
     val useFilename: String = if (Files.exists(Path("$filename.zip"))) "$filename.zip"
-    else if (Files.exists(Path(filename))) filename
-    else throw RuntimeException("CardsCsvFile $filename or $filename.zip does not exist")
+        else if (Files.exists(Path(filename))) filename
+        else throw RuntimeException("CardsCsvFile $filename or $filename.zip does not exist")
 
     override fun iterator(): CloseableIterator<AuditableCard> {
         return readCardsCsvIterator(useFilename)
@@ -153,13 +153,13 @@ fun readAuditableCardCsvFile(filename: String): List<AuditableCard> {
     val reader: BufferedReader = File(filename).bufferedReader()
     reader.readLine() // get rid of header line
 
-    val pools = mutableListOf<AuditableCard>()
+    val cards = mutableListOf<AuditableCard>()
     while (true) {
         val line = reader.readLine() ?: break
-        pools.add(readAuditableCardCsv(line))
+        cards.add(readAuditableCardCsv(line))
     }
     reader.close()
-    return pools
+    return cards
 }
 
 fun readCardsCsvIterator(filename: String): CloseableIterator<AuditableCard> {

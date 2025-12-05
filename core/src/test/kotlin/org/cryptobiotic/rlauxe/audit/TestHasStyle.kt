@@ -440,6 +440,7 @@ fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestUnderAudit>): A
         config,
         auditRound,
         cardManifest = mvrManager.sortedCards(),
+        cardPools = null,
         // nthreads=1,
     )
 

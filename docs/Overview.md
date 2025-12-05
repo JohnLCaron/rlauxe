@@ -269,3 +269,19 @@ MoreStyles Section 5 shows that polling audits can have hasStyle = true.
         }
     }
 ````
+
+### contest is missing in the MVR
+
+When the contest is missing, we assign 0 to mvr_assort when hasStyle=true, and 0.5 when hasStyle=false.
+
+The first case tanks the audit, and the second allows attacks.
+
+One could keep track of the times when we audit a card with missing contest. We can calculate how many cards have missing contests there should be in the pool. Then we assign a value depending on the actual and expected values.
+
+OneAudit handles two someone distinct use cases:
+
+1. (SF2024) there are cvrs for all cards, but the precinct cvrs cant match the physical ballot. We know exactly how many cards a contest has in the pool. If there are multiple card styles per pool, then the sample size for a contest will be larger than the contest pool count.
+
+2.1 (Boulder24) We have a vote count for the "redacted" pools but no cvrs. Undervotes are not included. We do not not know how many cards contain the contest, but it is bounded by the pool size.
+
+2.2 (Boulder28?) Undervotes are included in the vote count for each contest and pool. We know exactly how many cards a contest has in the pool.

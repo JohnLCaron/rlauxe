@@ -9,9 +9,9 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.workflow.ClcaNoErrorIterator
-import org.cryptobiotic.rlauxe.workflow.ClcaWithoutReplacement
+import org.cryptobiotic.rlauxe.workflow.ClcaSampling
 import org.cryptobiotic.rlauxe.workflow.OneAuditNoErrorIterator
-import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.workflow.PollingSampling
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -26,8 +26,8 @@ class TestSampler {
     }
 
     @Test
-    fun testPollWithoutReplacement() {
-        val target = PollWithoutReplacement(0, cvrs.zip(cvrs), assertion.assorter)
+    fun testPollingSampling() {
+        val target = PollingSampling(0, cvrs.zip(cvrs), assertion.assorter)
 
         var count = 0
         while (target.hasNext()) {
@@ -42,14 +42,14 @@ class TestSampler {
         // deliberately try to read more that there are
         val failMess = assertFailsWith<RuntimeException> { target.next() }.message!!
         println(failMess)
-        assertTrue(failMess.startsWith("PollWithoutReplacement no samples left for contest 0"))
+        assertTrue(failMess.startsWith("PollingSampling no samples left for contest 0"), failMess)
     }
 
     @Test
-    fun testClcaWithoutReplacement() {
+    fun testClcaSampling() {
         val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasStyle=false, dilutedMargin=assertion.assorter.dilutedMargin(), true)
         val cvrPairs = cvrs.zip( cvrs)
-        val target = ClcaWithoutReplacement(0, cvrPairs, cassorter, true) // single contest OK
+        val target = ClcaSampling(0, cvrPairs, cassorter, true) // single contest OK
 
         var count = 0
         while (target.hasNext()) {
@@ -63,7 +63,7 @@ class TestSampler {
 
         // deliberately try to read more that there are
         val failMess = assertFailsWith<RuntimeException> { target.next() }.message!!
-        assertTrue(failMess.startsWith("ClcaWithoutReplacement no samples left for 0"))
+        assertTrue(failMess.startsWith("ClcaSampling no samples left for 0"), failMess)
     }
 
     @Test

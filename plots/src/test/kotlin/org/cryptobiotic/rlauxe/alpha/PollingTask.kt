@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.alpha
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
 import org.cryptobiotic.rlauxe.workflow.Sampling
-import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.workflow.PollingSampling
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.concur.RepeatedTask
 import org.cryptobiotic.rlauxe.util.mean2margin
@@ -29,7 +29,7 @@ data class PollingTask(
 
     override fun makeSampler(): Sampling {
         val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
-        return PollWithoutReplacement(contestUA.id, pairs, pollingAssorter)
+        return PollingSampling(contestUA.id, pairs, pollingAssorter)
     }
 
     override fun makeTestFn(): RiskTestingFn {

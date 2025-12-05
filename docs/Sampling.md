@@ -1,9 +1,9 @@
-Sampling
-11/23/2025
+# Sampling
+_11/23/2025_
 
-Each contest must have a known population P_c of cards it might be in. |P_c| is used for the diluted margin.
+Each contest must have a known population P_c of cards it might be in. |P_c| = Npop is used for the diluted margin.
 
-1. When theres one contest, or all ballots are in an undifferentiated pooll, then P_c = all.
+1. When theres one contest, or all ballots are in an undifferentiated pool, then P_c = all.
 2. In a CLCA where the Cvrs are complete, P_c = { cvrs with cvr.hasContest(id) }. Test cvr, not mvr.
 3. If the Cvrs are not complete because the undervotes are not recorded, fire your election vendor. Meanwhile, annotate cards.
 4. For Polling, there is no CVR. Annotate the cardManifest to indicate which cards might have that contest, using possibleContest field.
@@ -17,12 +17,12 @@ so card doesnt have to have a reference to the styles.
 
 =============
 
-In a production audit, the cards are selected to satisfy the P_c. An assertion audit must see only those cards in P_c.
+In a production audit, the cards are selected to satisfy membership in P_c. An assertion audit must see only those cards in P_c.
 So you have to compare <Mvr, Card> because only the Card has possibleContests(). Cvrs can be used for CLCA or all.
 OR you can pass a filter into the Sampling. In general the filter will need the card.
 
 So whats with hasStyle ?? Perhaps hasStyle is just used when constructing the card manifest ??
-The other place is maybe in bassort(hasStyle)?
+The other place is in bassort(hasStyle).
 
 generalise haStyle: "all", "cvrsAreComplete", etc ??
 
@@ -170,6 +170,21 @@ Attacks
 * the cardManifest tabulation fails for Clca, since the cvrs must be present.
 
 
+### contest is missing in the MVR
+
+When the contest is missing, we assign 0 to mvr_assort when hasStyle=true, and 0.5 when hasStyle=false.
+
+The first case tanks the audit, and the second allows attacks.
+
+One could keep track of the times when we audit a card with missing contest. We can calculate how many cards have missing contests there should be in the pool. Then we assign a value depending on the actual and expected values.
+
+OneAudit handles two someone distinct use cases:
+
+1. (SF2024) there are cvrs for all cards, but the precinct cvrs cant match the physical ballot. We know exactly how many cards a contest has in the pool. If there are multiple card styles per pool, then the sample size for a contest will be larger than the contest pool count.
+
+2.1 (Boulder24) We have a vote count for the "redacted" pools but no cvrs. Undervotes are not included. We do not not know how many cards contain the contest, but it is bounded by the pool size.
+
+2.2 (Boulder28?) Undervotes are included in the vote count for each contest and pool. We know exactly how many cards a contest has in the pool.
 
 
 

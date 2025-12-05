@@ -16,7 +16,7 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
 
     val bassortValues: List<Double> = computeBassortValues(noerror, upper)
 
-    // TODO what do phantom ballots do?
+    // TODO what do phantom ballots do to the error counts?
     fun setPhantomRate(phantomRate: Double): ClcaErrorCounts {
         return this // TODO
     }

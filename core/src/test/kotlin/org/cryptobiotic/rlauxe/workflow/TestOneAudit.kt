@@ -8,7 +8,7 @@ class TestOneAudit {
 
     @Test
     fun testOneAuditContestSmall() {
-        val (contestOA, mvrs) = makeOneAuditTest(
+        val (contestOA, mvrs, _, pools) = makeOneAuditTest(
             100,
             50,
             cvrFraction = .80,
@@ -19,14 +19,14 @@ class TestOneAudit {
 
         val config = AuditConfig(AuditType.ONEAUDIT, hasStyle=true, nsimEst=10)
         val workflow = WorkflowTesterOneAudit(config, listOf(contestOA),
-            MvrManagerForTesting(mvrs, mvrs, config.seed))
+            MvrManagerForTesting(mvrs, mvrs, config.seed, pools=pools))
 
         runTestAuditToCompletion("testOneAuditContestSmall", workflow)
     }
 
     @Test
     fun testOneAuditContest() {
-        val (contestOA, mvrs) = makeOneAuditTest(
+        val (contestOA, mvrs, _, pools) = makeOneAuditTest(
             25000,
             20000,
             cvrFraction = .70,
@@ -36,14 +36,14 @@ class TestOneAudit {
         println(contestOA)
 
         val config = AuditConfig(AuditType.ONEAUDIT, hasStyle=true, nsimEst=10)
-        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(mvrs, mvrs, config.seed))
+        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(mvrs, mvrs, config.seed, pools=pools))
 
         runTestAuditToCompletion("testOneAuditContest", workflow)
     }
 
     @Test
     fun testMakeScaledMvrs() {
-        val (contestOA, testCvrs) = makeOneAuditTest(
+        val (contestOA, testCvrs, _, pools) = makeOneAuditTest(
             25000,
             20000,
             cvrFraction = .70,
@@ -53,14 +53,14 @@ class TestOneAudit {
         println(contestOA)
 
         val config = AuditConfig(AuditType.ONEAUDIT, hasStyle=true, nsimEst=10)
-        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.seed))
+        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.seed, pools=pools))
 
         runTestAuditToCompletion("testOneAuditContest", workflow)
     }
 
     @Test
     fun testOneAuditContestMax99() {
-        val (contestOA, testCvrs) = makeOneAuditTest(
+        val (contestOA, testCvrs, _, pools) = makeOneAuditTest(
             100,
             50,
             cvrFraction = .80,
@@ -74,7 +74,7 @@ class TestOneAudit {
             oaConfig = OneAuditConfig(OneAuditStrategyType.bet99)
         )
 
-        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.seed))
+        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.seed, pools=pools))
         runTestAuditToCompletion("testOneAuditContestSmall", workflow)
     }
 

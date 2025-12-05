@@ -6,12 +6,22 @@ import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.estimate.OneAuditVunderBarFuzzer
 
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
+import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
+import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.json.readCardPoolsJsonFileUnwrapped
+import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
+import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.util.VunderBar
 import kotlin.io.path.Path
+import kotlin.test.assertEquals
 
 object RunRlaCreateOneAudit {
 
@@ -114,6 +124,23 @@ object RunRlaCreateOneAudit {
         )
 
         CreateAudit("RunRlaStartOneAudit", topdir = topdir, config, election, clear = false)
+
+        // write the cardManifest TODO why isnt this part of CreateAudit
+        val publisher = Publisher(auditDir)
+        writeSortedCardsInternalSort(publisher, config.seed)
+
+        // simulate the mvrs, write to private dir
+        val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
+        val infos = contests.map{ it.contest.info() }.associateBy { it.id }
+        val cardPools = readCardPoolsJsonFileUnwrapped(publisher.cardPoolsFile(), infos)
+        val cardIter = readCardsCsvIterator(publisher.cardManifestFile())
+        val cards = mutableListOf<AuditableCard>()
+        cardIter.forEach { cards.add(it) }
+
+        val vunderFuzz = OneAuditVunderBarFuzzer(VunderBar(cardPools), infos, fuzzMvrs)
+        val oaFuzzedPairs: List<Pair<Cvr, AuditableCard>> = vunderFuzz.makePairsFromCards(cards)
+        val fuzzedMvrs = oaFuzzedPairs.map { it.first }
+        writeSortedMvrs(publisher, fuzzedMvrs, config.seed)
     }
 
     class TestOneAuditElection(

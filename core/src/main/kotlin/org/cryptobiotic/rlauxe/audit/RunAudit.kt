@@ -13,10 +13,10 @@ import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import org.cryptobiotic.rlauxe.workflow.ClcaAssertionAuditor
-import org.cryptobiotic.rlauxe.workflow.ClcaWithoutReplacement
+import org.cryptobiotic.rlauxe.workflow.ClcaSampling
 import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
-import org.cryptobiotic.rlauxe.workflow.PollWithoutReplacement
+import org.cryptobiotic.rlauxe.workflow.PollingSampling
 import org.cryptobiotic.rlauxe.workflow.auditPollingAssertion
 import java.nio.file.Files.notExists
 import java.nio.file.Path
@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit
 private val logger = KotlinLogging.logger("RunAudit")
 
 // Called from rlaux-viewer
+// TODO add ErrorMessages ??
 fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
     try {
         if (notExists(Path.of(inputDir))) {
@@ -152,7 +153,6 @@ fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: Asser
                 repeat(count) {
                     append("${nfn(it, 2)}, ${df(seq.xs[it])}, ${df(seq.bets[it])}, ${df(seq.tjs[it])}")
                     append(", ${trunc(seq.testStatistics[it].toString(), 6)}, ${trunc(pvalues[it].toString(), 8)}")
-                    // TODO only works if single contest
                     val pair = sampler.next()
                     val mvrVotes = pair.first.votes(contestId)?.contentToString() ?: "missing"
                     val card = pair.second
@@ -178,7 +178,7 @@ fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, cont
 
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-        val sampler = ClcaWithoutReplacement(contestRound.id, cvrPairs, cassorter, allowReset = false)
+        val sampler = ClcaSampling(contestRound.id, cvrPairs, cassorter, allowReset = false)
 
         val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
 
@@ -196,7 +196,7 @@ fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, conte
         val auditor = OneAuditAssertionAuditor()
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-        val sampler = ClcaWithoutReplacement(contestRound.id, cvrPairs, cassorter, allowReset = false)
+        val sampler = ClcaSampling(contestRound.id, cvrPairs, cassorter, allowReset = false)
 
         val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
 
@@ -213,7 +213,7 @@ fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, c
     try {
         val assertion = assertionRound.assertion
         val assorter = assertion.assorter
-        val sampler = PollWithoutReplacement(contestRound.id, cvrPairs, assorter, allowReset = false)
+        val sampler = PollingSampling(contestRound.id, cvrPairs, assorter, allowReset = false)
 
         val testH0Result = auditPollingAssertion(config, contestRound.contestUA, assertionRound, sampler, auditRoundResult.roundIdx)
 

@@ -260,7 +260,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
         }
 
         // must be the real mvrs
-        val mvrManager = MvrManagerFromManifest(cardManifest, mvrs, infos.values.toList(), simFuzzPct = fuzzPct, Random.nextLong())
+        val mvrManager = MvrManagerFromManifest(cardManifest, mvrs, infos.values.toList(), seed=Random.nextLong(), simFuzzPct=fuzzPct)
 
         val workflow =  WorkflowTesterOneAudit(config, contestsUA, mvrManager)
 

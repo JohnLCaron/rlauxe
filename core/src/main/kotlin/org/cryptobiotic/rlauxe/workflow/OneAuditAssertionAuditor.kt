@@ -28,6 +28,7 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         //if (errorRates.p2o < contestUA.contest.phantomRate())
         //    errorRates = errorRates.copy( p2o = contestUA.contest.phantomRate())
 
+        // enum class OneAuditStrategyType { reportedMean, bet99, eta0Eps, optimalComparison }
         // // default: eta0 = reportedMean, shrinkTrunk
         //// bet99: eta0 = reportedMean, 99% max bet
         //// eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk

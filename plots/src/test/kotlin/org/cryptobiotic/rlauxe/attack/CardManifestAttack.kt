@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.audit.CreateAudit
 import org.cryptobiotic.rlauxe.audit.CreateElection
 import org.cryptobiotic.rlauxe.audit.OneAuditConfig
@@ -20,7 +19,6 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.oneaudit.CardPool
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.oneaudit.calcCardPoolsFromMvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -58,24 +56,27 @@ class CardManifestAttack {
         }
 
         // group B
+        var poolCount=0
         repeat(50) {
-            mvrs.add(Cvr("mvr$mvrCount", mapOf(1 to intArrayOf(1)), poolId = 1)) // Alice
-            mvrCount++
+            mvrs.add(Cvr("Pool1-$poolCount", mapOf(1 to intArrayOf(1)), poolId = 1)) // Alice
+            poolCount++
         }
         repeat(25) {
-            mvrs.add(Cvr("mvr$mvrCount", mapOf(1 to intArrayOf(2)), poolId = 1)) // Bob
-            mvrCount++
+            mvrs.add(Cvr("Pool1-$poolCount", mapOf(1 to intArrayOf(2)), poolId = 1)) // Bob
+            poolCount++
         }
         repeat(25) {
-            mvrs.add(Cvr("mvr$mvrCount", mapOf(2 to intArrayOf(2)), poolId = 1)) // doesnt contain contest 1
-            mvrCount++
+            mvrs.add(Cvr("Pool1-$poolCount", mapOf(2 to intArrayOf(2)), poolId = 1)) // doesnt contain contest 1
+            poolCount++
         }
 
         //// make the cards (lies)
         // Move the 50 cards containing Alice's votes into Group A, and swap into Group B 50 cards that do not contain the contest
         val groupBcontests = intArrayOf(1, 2)
 
+        var index=0
         mvrCount = 0
+        poolCount = 0
         val mcards = mutableListOf<AuditableCard>()
 
         //// group A, mvr index 0-50 match real mvrs.
@@ -83,7 +84,7 @@ class CardManifestAttack {
             mcards.add(
                 AuditableCard(
                     "mvr$mvrCount",
-                    mvrCount,
+                    index,
                     0L,
                     false,
                     intArrayOf(2),
@@ -92,6 +93,7 @@ class CardManifestAttack {
                 )
             )
             mvrCount++
+            index++
         }
 
         // swap into Group B the mvrs index 50-100 cards that do not contain the contest
@@ -99,8 +101,8 @@ class CardManifestAttack {
         repeat(50) {
             mcards.add(
                 AuditableCard(
-                    "mvr$mvrCount",
-                    mvrCount,
+                    "Pool1-$poolCount",
+                    index,
                     0L,
                     false,
                     groupBcontests,
@@ -108,7 +110,8 @@ class CardManifestAttack {
                     poolId = 1
                 )
             )
-            mvrCount++
+            poolCount++
+            index++
         }
 
         // Move the 50 cards containing Alice's votes into Group A
@@ -120,32 +123,34 @@ class CardManifestAttack {
 
             // substitute cards with contest 2 undervotes
             mcards.add(AuditableCard("mvr$mvrCount",
-                mvrCount,
+                index,
                 0L,
                 false,
                 intArrayOf(2),
                 votes = mapOf(2 to intArrayOf(1)),  // move the 50-100 votes to here
                 poolId=null))
             mvrCount++
+            index++
         }
 
         // these are Bobs pooled votes that match the mvrs
         repeat(25) {
             // mvr has Bob's votes
-            mcards.add(AuditableCard("mvr$mvrCount", mvrCount, 0L, false, groupBcontests, votes = null, poolId = 1))
-            mvrCount++
+            mcards.add(AuditableCard("Pool1-$poolCount", index, 0L, false, groupBcontests, votes = null, poolId = 1))
+            poolCount++
+            index++
         }
         // these are contestB pooled votes that match the mvrs
         repeat(25) {
             // mvr doesnt contain contest 1
-            mcards.add(AuditableCard("mvr$mvrCount", mvrCount, 0L, false, groupBcontests, votes = null, poolId = 1))
-            mvrCount++
+            mcards.add(AuditableCard("Pool1-$poolCount", index, 0L, false, groupBcontests, votes = null, poolId = 1))
+            poolCount++
+            index++
         }
         val cards = mcards.toList()
 
         require(mvrs.size == cards.size)
         ////////////////////////////////////////////////////////////////////////////////
-
 
         //// make the Contests with reported votes (lies)
         // - Claim Bob won the election with 25 of the votes in Group B, that 50 were blank, and (truthfully) that the rest of Group B do not contain the contest
@@ -180,7 +185,7 @@ class CardManifestAttack {
 
         val cardStyle = CardStyle("groupB", groupBcontests.toList(), 1)
         val realPools = calcCardPoolsFromMvrs(infos, listOf(cardStyle), mvrs)
-        realPools.forEach{ println(it.showSimple()) }
+        realPools.forEach{ println(it.show()) }
         println("--------------------- end truth")
         ////
 
@@ -212,7 +217,8 @@ class CardManifestAttack {
         println("false Contest totals")
         contestsUA.forEach { contestUA -> println(contestUA.showSimple())}
 
-        // val contestUA = contestsUA.find { it.id == contestA.id }!!
+        // TODO
+        val contestUA = contestsUA.find { it.id == contestA.id }!!
 
         // check that the card pools agree with the cards
         val poolSums = tabulateCardPools(cardPools, infos)
@@ -230,13 +236,12 @@ class CardManifestAttack {
         println()
 
         //// create a peristent audit
-        // TODO the cards in the pool need to be stripped of their votes I think? But probably doesnt affect anything....
-        val election = CreateElection(contestsUA, cardPools, cards)
+        val election = CreateElection(listOf(contestUA), cardPools, cards)
 
         val auditdir = "$topdir/audit"
         val config = AuditConfig(
             AuditType.ONEAUDIT, hasStyle = hasStyle, contestSampleCutoff = 20000, nsimEst = 10,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true) // TODO estimation failing
+            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
         CreateAudit("hideInOtherPoolAttack", topdir, config, election)
 
@@ -264,13 +269,4 @@ fun ContestUnderAudit.showSimple() = buildString {
     val contestWithVotes = contest as Contest
     val votesByName = contestWithVotes.votes.map{ (key, value) ->  Pair(contestWithVotes.info.candidateIdToName[key], value) }
     append("Contest ($id) votes=$votesByName Npop=${Npop} Nc=${contestWithVotes.Nc()} undervotes=${contestWithVotes.Nundervotes()}")
-}
-
-fun CardPoolFromCvrs.showSimple() = buildString {
-    appendLine("CardPoolFromCvrs(poolName='$poolName', poolId=$poolId, totalCards=$totalCards contests=${contests().contentToString()})")
-    contestTabs.forEach{
-        // data class RegVotes(override val votes: Map<Int, Int>, val ncards: Int, val undervotes: Int): RegVotesIF {
-        appendLine("    contest ${it.key} votes= ${it.value.votes}, ncards= ${it.value.ncards}, undervotes= ${it.value.undervotes} ")
-    }
-    appendLine(")")
 }

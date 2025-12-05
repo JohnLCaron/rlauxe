@@ -23,7 +23,7 @@ where
 Following COBRA, at each step, before sample X_i is drawn, we find the optimal value of lambda which maximizes the expected value of the log of T_i, and use that as the lamda bet for step i:
 
 ````
-log T_i = ln(1.0 + lam * (noerror - mui)) * p0  + Sum { ln(1.0 + lam * (assortValue_k - mui)) * p_k }
+log T_i = ln(1.0 + lamda * (noerror - mui)) * p0  + Sum { ln(1.0 + lamda * (assortValue_k - mui)) * p_k }
 
 where 
     p0 is the probability of no error (mvr matches the cvr)
@@ -31,7 +31,7 @@ where
     assortValue_k is the value of X when error type k occurs
 ````
 
-We use the BrentOptimizer from org.apache.commons.math3 library to find the optimal lam for this equaltion.
+We use the BrentOptimizer from _org.apache.commons.math3_ library to find the optimal lamda for this equation.
 
 ## Possible assort values
 
@@ -46,7 +46,7 @@ A CLCA overstatement error = cvr_assort - mvr_assort has one of 7 possible value
                              .5,  0, .5-u,
                               u, u-.5, 0
                               
-    = [-u, -.5, .5-u, 0, .5, u-.5, u]
+    = [-u, -.5, .5-u, 0, .5, u-.5, u]  
 ````
 
 The CLCA assorter (aka bassort) does an affine transformation of the overstatement error:
@@ -61,7 +61,7 @@ The CLCA assorter (aka bassort) does an affine transformation of the overstateme
 
 then the possible values of bassort = (1-o/u) * noerror are:
 
-    [0, 1/2u, 1-1/2u, noerror, 1+1/2u, 2-1/2u, 2] * noerror * noerror
+    [0, 1/2u, 1-1/2u, noerror, 1+1/2u, 2-1/2u, 2] * noerror (eq 1)
 ````
 
 For Plurality, u = 1, so the possible values are:
@@ -70,7 +70,7 @@ For Plurality, u = 1, so the possible values are:
 aka [p2o, p1o, noerror, p1u, p2u]
 ````
 
-In general, when u != 1, there are 7 possible value, for example, a Dhondt assorter with u = 1.75:
+In general, when u != 1, there are 7 possible values, for example, a Dhondt assorter with u = 1.75:
 
 ````
 DHondt upperBound=1.7500, noerror=0.51470588
@@ -120,8 +120,8 @@ each of the error types:
         if (sampleNum == 0) return minRate
         val est = (d * aprioriRate + errorCount) / (d + sampleNum - 1)
         val boundedBelow = max(est, minRate) // lower bound on the estimated rate
-        val boundedAbove = min(1.0, boundedBelow) // upper bound on the estimated rate
-        return boundedAbove
+        val boundedAboveAndBelow = min(1.0, boundedBelow) // upper bound on the estimated rate
+        return boundedAboveAndBelow
     
     where
       aprioriRate = user settable, default is 0.0
@@ -130,4 +130,26 @@ each of the error types:
       sampleNum = i      
 ````
 
-## Plots
+## OneAudit
+
+Consider a single pool and assorter a with upper bound u and avg assort value in the pool is poolAvg_a.
+poolAvg_a is used as the cvr_value, so then mvr_assort - mvr_assort has one of 3 possible overstatement values:
+
+    poolAvg_a - [0, .5, u] = [poolAvg_a, poolAvg_a -.5, poolAvg_a - u] for mvr loser, other and winner 
+
+then bassort = (1-o/u)/(2-v/u) in [0, 2] * noerror
+
+    bassort = [1-poolAvg_a/u, 1 - (poolAvg_a -.5)/u, 1 - (poolAvg_a - u)/u] * noerror
+    bassort = [1-poolAvg_a/u, (u - poolAvg_a + .5)/u, (2u - poolAvg_a)/u] * noerror
+
+when u = 1
+
+    bassort = [1 - poolAvg_a, 1.5 - poolAvg_a, 2 - poolAvg_a] * noerror,  for mvr loser, other and winner
+
+strategies
+
+1. each pool can keep track of its "error" rates and use Generalized Adaptive Betting. problem is one doesnt know what pool the next sample is from
+
+2. Given the pool votes, we can calculate the expected value of the entire pool.
+
+3. Also do the affine transform in order to make bassort start at 0.

@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
+import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
@@ -49,6 +50,22 @@ interface CardPoolIF: CardStyleIF {
     override fun poolId() = poolId
     override fun hasContest(contestId: Int) : Boolean // does the pool contain this contest ?
     override fun contests(): IntArray
+
+    fun show() = buildString {
+        appendLine("CardPool(poolName=$poolName, poolId=$poolId, ncards=${ncards()}")
+        regVotes().forEach{
+            // data class RegVotes(override val votes: Map<Int, Int>, val ncards: Int, val undervotes: Int): RegVotesIF {
+            appendLine("    contest ${it.key} votes= ${it.value.votes}, ncards= ${it.value.ncards()}, undervotes= ${it.value.undervotes()} ")
+        }
+        appendLine(")")
+    }
+
+    // simulate the pool mvrs.
+    fun simulateMvrsForPool (): List<Cvr> {
+        val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
+        contests().forEach { contestId  -> contestVotes[contestId] = votesAndUndervotes(contestId) }
+        return makeVunderCvrs(contestVotes, poolName, poolId = poolId)
+    }
 }
 
 data class CardPool(override val poolName: String, override val poolId: Int, val ncards: Int, val regVotes: Map<Int, RegVotes>) : CardPoolIF {
@@ -63,15 +80,6 @@ data class CardPool(override val poolName: String, override val poolId: Int, val
         val regVotes = regVotes[contestId]!!
         val poolUndervotes = ncards - regVotes.votes.values.sum()
         return VotesAndUndervotes(regVotes.votes, poolUndervotes, 1)
-    }
-
-    fun show() = buildString {
-        appendLine("CardPool(poolName=$poolName, poolId=$poolId, ncards=$ncards")
-        regVotes.forEach{
-            // data class RegVotes(override val votes: Map<Int, Int>, val ncards: Int, val undervotes: Int): RegVotesIF {
-            appendLine("    contest ${it.key} votes= ${it.value.votes}, ncards= ${it.value.ncards}, undervotes= ${it.value.undervotes} ")
-        }
-        appendLine(")")
     }
 }
 

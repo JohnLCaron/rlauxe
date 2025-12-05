@@ -213,7 +213,7 @@ data class AuditRoundResult(
     val status: TestH0Status, // testH0 status
     val measuredMean: Double, // measured population mean TODO used?
     val startingRates: Map<Double, Double>? = null, // starting error rates (clca only)
-    val measuredCounts: Map<Double, Int>? = null, // measured error counts (clca only) TODO CLcaErrorCounts
+    val measuredCounts: Map<Double, Int>? = null, // measured error counts (clca only) TODO use ClcaErrorCounts
 ) {
 
     override fun toString() = buildString {

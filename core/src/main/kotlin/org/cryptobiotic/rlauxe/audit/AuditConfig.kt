@@ -30,8 +30,8 @@ data class AuditConfig(
 
     // old config, replace by error strategies
     val pollingConfig: PollingConfig = PollingConfig(),
-    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.generalAdaptive),
-    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true),
+    val clcaConfig: ClcaConfig = ClcaConfig(),
+    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.clca, useFirst = true),
 
     // default error strategies
     val pollingErrorStrategy: PollingErrorStrategy = PollingErrorStrategy(),
@@ -91,18 +91,18 @@ enum class ClcaStrategyType { generalAdaptive, apriori, fuzzPct, oracle  }
 data class ClcaConfig(
     val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
     val fuzzPct: Double? = null, // use to generate apriori errorRates for simulation, only used when ClcaStrategyType = fuzzPct
-    val pluralityErrorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker
+    val pluralityErrorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker?
     val d: Int = 100,  // shrinkTrunc weight for error rates
 )
 
-// reportedMean: eta0 = reportedMean, shrinkTrunk
+// clca: use ClcaConfig and bettingMart
+// optimalComparison = uses bettingMart with OptimalComparisonNoP1
 // bet99: eta0 = reportedMean, 99% max bet
 // eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk
-// optimalComparison = uses bettingMart with OptimalComparisonNoP1
 // note OneAudit uses ClcaConfig for error estimation
-enum class OneAuditStrategyType { reportedMean, bet99, eta0Eps, optimalComparison }
+enum class OneAuditStrategyType { clca, optimalComparison, bet99, eta0Eps }
 data class OneAuditConfig(
-    val strategy: OneAuditStrategyType = OneAuditStrategyType.optimalComparison,
+    val strategy: OneAuditStrategyType = OneAuditStrategyType.optimalComparison, // TODO
     val d: Int = 100,  // shrinkTrunc weight
     val useFirst: Boolean = false, // use actual cvrs for estimation
 )

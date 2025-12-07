@@ -151,7 +151,7 @@ class TestPopulationMeanWithoutReplacement {
 
         val sampler = SampleFromArray(x.toDoubleArray())
         println("alphaTestH0")
-        alpha.testH0(x.size, false, tracker=ClcaErrorTracker(0.0)) { sampler.sample() }
+        alpha.testH0(x.size, false, tracker=ClcaErrorTracker(0.0, 1.0)) { sampler.sample() }
 
         // alphaTestH0
         // 1: howAbout sum=0.0 result = 0.5

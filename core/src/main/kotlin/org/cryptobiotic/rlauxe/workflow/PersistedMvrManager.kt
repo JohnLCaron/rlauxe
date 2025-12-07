@@ -36,8 +36,8 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
     }
 
 
-    override fun makeMvrCardPairsForRound(): List<Pair<CardIF, CardIF>>  { // Pair(mvr, card)
-        val mvrsRound = readMvrsForRound()
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CardIF, CardIF>>  { // Pair(mvr, card)
+        val mvrsRound = readMvrsForRound(round)
         val sampleNumbers = mvrsRound.map { it.prn }
 
         val sampledCvrs = findSamples(sampleNumbers, auditableCards())
@@ -53,10 +53,10 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
             }
         }
 
-        if (!nowrite) {
+        if (!nowrite) { // TODO
             val round = publisher.currentRound()
             val countCards = writeAuditableCardCsvFile(Closer(sampledCvrs.iterator()), publisher.sampleCardsFile(round))
-            logger.info { "write ${countCards} cards to ${publisher.sampleMvrsFile(round)}" }
+            logger.info { "write ${countCards} cards to ${publisher.sampleCardsFile(round)}" }
         }
 
         return mvrsRound.zip(sampledCvrs)
@@ -65,9 +65,9 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
     // the sampleMvrsFile is added externally for real audits, and by MvrManagerTestFromRecord for test audits
     // it must be in the same order as the sorted cards
     // it is placed into publisher.sampleMvrsFile, and this just reads from that file.
-    private fun readMvrsForRound(): List<AuditableCard> {
+    private fun readMvrsForRound(round: Int): List<AuditableCard> {
         val publisher = Publisher(auditDir)
-        return readAuditableCardCsvFile(publisher.sampleMvrsFile(publisher.currentRound()))
+        return readAuditableCardCsvFile(publisher.sampleMvrsFile(round))
     }
 
     fun auditableCards(): CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.sortedCardsFile())

@@ -150,8 +150,8 @@ class TestClcaAssortValues {
         val mvrValue = if (mvr.isPhantom()) 0.0 else cassorter.assorter.assort(mvr, usePhantoms=false)
         val expect = expectV(cvrAssort=cvrValue, mvrAssort=mvrValue, cassorter.assorter().upperBound())
         val actual = cassorter.bassort(mvr=mvr, cvr=cvr, hasStyle=hasStyle) / cassorter.noerror() // hasStyle ??
-        val tauName = taus.get(expect)
-        val tauDesc = taus.getDesc(expect)
+        val tauName = taus.name(expect)
+        val tauDesc = taus.desc(expect)
         println("  ${sfn(what, 15)} tau= ${df(actual)} '${sfn(tauName,7)}' (${tauDesc})")
         assertEquals( expect, actual)
     }

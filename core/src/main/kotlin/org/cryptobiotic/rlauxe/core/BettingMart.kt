@@ -1,7 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
+import org.cryptobiotic.rlauxe.util.doublePrecision
 
 /**
  * The betting martingale for the hypothesis that the population mean is less than or equal to 1/2,
@@ -37,24 +39,45 @@ class BettingMart(
         var pvalueLast = 1.0
         var pvalueMin = 1.0
 
-        if (showEachSample) println("  $sampleNumber: Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
+        if (showEachSample) println("** $sampleNumber: Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
 
         while (sampleNumber < maxSamples) {
+            // choose the bet before you sample
+            val lamj = bettingFn.bet(tracker)
+
             val xj: Double = drawSample()
             sampleNumber++
             require(xj >= 0.0)
             require(xj <= sampleUpperBound)
 
-            val lamj = bettingFn.bet(tracker)
-
             // population mean under the null hypothesis
             mj = populationMeanIfH0(N, withoutReplacement, tracker)  // approx .5
             val eta = lamToEta(lamj, mu=mj, upper=sampleUpperBound) // informational only
 
+            // rlabelgium Nonnegmean line 163
+            //         terms[m>u] = 0                                       # true mean is certainly less than hypothesized
+            //        terms[np.isclose(0, m, atol=atol)] = 1               # ignore
+            //        terms[np.isclose(u, m, atol=atol, rtol=rtol)] = 1    # ignore
+            //        terms[np.isclose(0, terms, atol=atol)] = 1           # martingale effectively vanishes; p-value 1
+            //        terms[m<0] = np.inf                                  # true mean certainly greater than hypothesized
+            //        terms[-1] = (np.inf if Stot > N*t else terms[-1])    # final sample makes the total greater than the null
+
+            // SHANGRLA NonnegMean line 226
+            // 1       terms[m > u] = 0                                   # true mean is certainly less than hypothesized
+            // 2       terms[np.isclose(0, m, atol=atol)] = 1             # ignore
+            // 3       terms[np.isclose(u, m, atol=atol, rtol=rtol)] = 1  # ignore
+            // 4       terms[np.isclose(0, terms, atol=atol)] = (
+            //            1                                             # martingale effectively vanishes; p-value 1
+            //        )
+            // 5       terms[m < 0] = np.inf                            # true mean certainly greater than hypothesized
+            // 6       terms[-1] = (
+            //            np.inf if Stot > N * t else terms[-1]
+            //        )                                                 # final sample makes the total greater than the null
+
             // 1           m[i] > u -> terms[i] = 0.0   # true mean is certainly less than 1/2
             // 2           isCloseToZero(m[i], atol) -> terms[i] = 1.0
             // 3           isCloseToU(m[i], u, atol, rtol) -> terms[i] = 1.0
-            // 4           isCloseToZero(terms[i], atol) -> terms[i] = 1.0
+            // 4           isCloseToZero(terms[i], atol) -> terms[i] = 1.0 TODO wtf ?? prevent stalls ??
             // 5           m[i] < 0 -> terms[i] = Double.POSITIVE_INFINITY # true mean certainly greater than 1/2
             // 6           else -> terms[i] = if (Stot > N * t) Double.POSITIVE_INFINITY else terms[i]
 
@@ -66,14 +89,19 @@ class BettingMart(
             } else {
                 // terms[i] = (1 + λi (Xi − µi )) ALPHA eq 10 // approx (1 + lam * (xj - .5))
                 val ttj = 1.0 + lamj * (xj - mj) // (1 + λi (Xi − µi )) ALPHA eq 10, SmithRamdas eq 34 (WoR)
-                if (doubleIsClose(ttj, 0.0)) 1.0 else ttj // 4
+                if (doubleIsClose(ttj, 0.0, doublePrecision)) {
+                    logger.warn {"stalled audit: assort=$xj, lamda=$lamj, tj=$ttj, Tj-1=$testStatistic Tj=${testStatistic * ttj}"}
+                }
+                // if (doubleIsClose(ttj, 0.0)) 1.0 else ttj // 4  TODO this is why optimalBet is working so well
+                ttj
             }
+
             testStatistic *= tj // Tj ← Tj-1 & tj
 
             if (sequences.isOn) {
                 sequences.add(xj, lamj, eta, tj, testStatistic)
             }
-            if (showEachSample) println("  $sampleNumber: $xj bet=${df(lamj)} tj=${df(tj)} Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
+            if (showEachSample) println("** $sampleNumber: ${df(xj)} bet=${df(lamj)} tj=${df(tj)} Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
             // if (sampleNumber % 1000 == 0)
             //    println(sampleNumber)
 
@@ -114,6 +142,10 @@ class BettingMart(
     fun setDebuggingSequences(): DebuggingSequences {
         this.sequences.isOn = true
         return this.sequences
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger("BettingMart")
     }
 }
 

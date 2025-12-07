@@ -174,7 +174,7 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
         auditRoundResults.forEach { auditRoundResult ->
             if (auditRoundResult.measuredCounts != null) {
                 totalSamples += auditRoundResult.samplesUsed
-                auditRoundResult.measuredCounts.forEach { (key, value) ->
+                auditRoundResult.measuredCounts.errorCounts.forEach { (key, value) ->
                     val sum =  sumOfCounts.getOrPut(key) { 0 }
                     sumOfCounts[key] = sum + value
                 }
@@ -212,8 +212,9 @@ data class AuditRoundResult(
     val samplesUsed: Int,     // sample count when testH0 terminates
     val status: TestH0Status, // testH0 status
     val measuredMean: Double, // measured population mean TODO used?
-    val startingRates: Map<Double, Double>? = null, // starting error rates (clca only)
-    val measuredCounts: Map<Double, Int>? = null, // measured error counts (clca only) TODO use ClcaErrorCounts
+    val startingRates: ClcaErrorCounts? = null, // starting error rates (clca only)
+    val measuredCounts: ClcaErrorCounts? = null, // measured error counts (clca only)
+    val params: Map<String, Double> = emptyMap(),
 ) {
 
     override fun toString() = buildString {
@@ -223,10 +224,19 @@ data class AuditRoundResult(
     }
 
     fun measuredCounts() = buildString {
-        measuredCounts?.toSortedMap()?.forEach { append( "${df(it.key)}=${it.value}, " ) } ?: append("empty")
+        if (measuredCounts == null) append("empty") else {
+            val poolAvg = params["poolAvg"]
+            append(measuredCounts.show(poolAvg))
+            // measuredCounts.errorCounts.toSortedMap().forEach { append( "${df(it.key)}=${it.value}, " ) }
+        }
     }
 
     fun startingRates() = buildString {
-        startingRates?.toSortedMap()?.forEach { append( "${df(it.key)}=${df(it.value)}, " ) } ?: append("empty")
+        if (startingRates == null) append("empty") else {
+            val poolAvg = params["poolAvg"]
+            append(startingRates.show(poolAvg))
+            // startingRates.errorCounts.toSortedMap().forEach { append("${df(it.key)}=${it.value}, ") }
+        }
     }
+
 }

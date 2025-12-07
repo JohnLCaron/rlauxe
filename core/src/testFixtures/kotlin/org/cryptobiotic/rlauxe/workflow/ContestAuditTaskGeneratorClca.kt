@@ -154,9 +154,12 @@ class ClcaSingleRoundWorkflowTask(
                 minAssertion.round.toDouble(),
                 lastRound.samplesUsed.toDouble(),
                 nmvrs.toDouble(),
-                otherParameters,
+                otherParameters + lastRound.params,
                 if (lastRound.status != TestH0Status.StatRejectNull) 100.0 else 0.0,
-               mvrMargin=mvrMargin,
+                mvrMargin=mvrMargin,
+
+                startingRates=lastRound.startingRates,
+                measuredCounts=lastRound.measuredCounts,
             )
         }
     }

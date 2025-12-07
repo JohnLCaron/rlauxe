@@ -15,7 +15,7 @@ interface MvrManager {
     fun sortedCards(): CloseableIterable<AuditableCard>  // most uses will just need the first n samples
     fun cardPools(): List<CardPoolIF>?  // only if OneAudit
     // fun sortedCvrs(): CloseableIterable<CardIF> = CloseableIterable { AuditableCardToCvrAdapter(sortedCards().iterator()) }
-    fun makeMvrCardPairsForRound(): List<Pair<CardIF, CardIF>>  // Pair(mvr, cvr)
+    fun makeMvrCardPairsForRound(round: Int): List<Pair<CardIF, CardIF>>  // Pair(mvr, cvr)
 }
 
 // when the MvrManager supplies the audited mvrs, its a test

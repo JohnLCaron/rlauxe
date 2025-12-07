@@ -39,7 +39,7 @@ class TestBettingMart {
         val u = 1.0
         val values = listOf(0.75, 0.9)
         val lams = listOf(0.25, 0.5)
-        val tracker = ClcaErrorTracker(0.0)
+        val tracker = ClcaErrorTracker(0.0, 1.0)
 
         for (value in values) {
             for (lam in lams) {
@@ -90,7 +90,7 @@ class TestBettingMart {
                 val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
-                val tracker = ClcaErrorTracker(0.0)
+                val tracker = ClcaErrorTracker(0.0, 1.0)
 
                 val result = betta.testH0(x.size, false, tracker=tracker) { sampler.sample() }
                 println("  ${result}")
@@ -131,7 +131,7 @@ class TestBettingMart {
                 val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
-                val tracker = ClcaErrorTracker(0.0)
+                val tracker = ClcaErrorTracker(0.0, 1.0)
 
                 val result = betta.testH0(x.size, false, tracker=tracker) { sampler.sample() }
                 println("  ${result}")
@@ -204,7 +204,7 @@ class TestBettingMart {
         val debugSeq = betta.setDebuggingSequences()
 
         val sampler = SampleFromList(x)
-        val tracker = ClcaErrorTracker(0.0)
+        val tracker = ClcaErrorTracker(0.0, 1.0)
 
         val result = betta.testH0(x.size, false, tracker=tracker) { sampler.sample() }
         println("  ${result}")

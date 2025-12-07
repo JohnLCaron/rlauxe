@@ -196,9 +196,9 @@ class TruncShrinkageProxy(
 ) : EstimArrayFn {
     val proxy = TruncShrinkage(N = N, upperBound = u, eta0 = mu, c = c, d = d)
 
-    override fun eta(samples: DoubleArray): DoubleArray {
+    override fun eta(prevSamples: DoubleArray): DoubleArray {
         val prevSample = PrevSamples()
-        val result: List<Double> = samples.map {
+        val result: List<Double> = prevSamples.map {
             val eta = proxy.eta(prevSample)
             prevSample.addSample(it)
             eta

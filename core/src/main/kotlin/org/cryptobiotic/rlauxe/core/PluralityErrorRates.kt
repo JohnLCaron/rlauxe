@@ -7,6 +7,8 @@ import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.sfn
 
+// TODO move to test, dont use in production?
+
 // CLCA assorter errors, where upper = 1 (as in plurality)
 data class PluralityErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u: Double) {
     init {

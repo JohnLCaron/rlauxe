@@ -98,7 +98,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.removeTooManyPhantoms,
             this.auditSampleLimit,
             clcaConfig = this.clcaConfig.publishJson(),
-            clcaBettingStrategy = this.clcaBettingStrategy.publishJson(),
+            clcaBettingStrategy = this.clcaBettingStrategy.publishJson(), // TODO needed?
 
             skipContests = skipContests,
             version = this.version,
@@ -119,7 +119,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.removeTooManyPhantoms,
             this.auditSampleLimit,
             pollingConfig = this.pollingConfig.publishJson(),
-            pollingErrorStrategy = this.pollingErrorStrategy.publishJson(),
+            pollingErrorStrategy = this.pollingErrorStrategy.publishJson(), // TODO needed?
 
             skipContests = skipContests,
             version = this.version,
@@ -139,8 +139,9 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.minRecountMargin,
             this.removeTooManyPhantoms,
             this.auditSampleLimit,
+            clcaConfig = this.clcaConfig.publishJson(),
             oaConfig = this.oaConfig.publishJson(),
-            oaBettingStrategy = this.oaBettingStrategy.publishJson(),
+            oaBettingStrategy = this.oaBettingStrategy.publishJson(), // TODO needed?
 
             skipContests = skipContests,
             version = this.version,
@@ -207,6 +208,7 @@ fun AuditConfigJson.import(): AuditConfig {
             this.minRecountMargin,
             this.removeTooManyPhantoms,
             auditSampleLimit = this.auditSampleLimit,
+            clcaConfig = this.clcaConfig?.import() ?: ClcaConfig(),
             oaConfig = this.oaConfig!!.import(),
             oaBettingStrategy = this.oaBettingStrategy?.import() ?: OneAuditBettingStrategy(),
 

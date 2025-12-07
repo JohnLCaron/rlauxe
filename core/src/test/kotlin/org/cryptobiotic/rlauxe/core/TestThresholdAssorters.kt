@@ -311,10 +311,10 @@ data class AboveThresholdB(val info: ContestInfo, val winner: Int, val t: Double
         return c * g + 0.5
     }
 
-    override fun assort(mvr: CardIF, usePhantoms: Boolean): Double {
-        if (!mvr.hasContest(info.id)) return 0.5
-        if (usePhantoms && mvr.isPhantom()) return 0.0 // worst case
-        val cands = mvr.votes(info.id)
+    override fun assort(cvr: CardIF, usePhantoms: Boolean): Double {
+        if (!cvr.hasContest(info.id)) return 0.5
+        if (usePhantoms && cvr.isPhantom()) return 0.0 // worst case
+        val cands = cvr.votes(info.id)
         return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }
 

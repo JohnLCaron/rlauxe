@@ -109,7 +109,7 @@ object RunRlaCreateOneAudit {
 
         val config = AuditConfig(
             AuditType.ONEAUDIT, hasStyle = true, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = fuzzMvrs,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
+            oaConfig = OneAuditConfig(OneAuditStrategyType.clca, useFirst = true)
         )
 
         clearDirectory(Path(auditDir))
@@ -140,7 +140,7 @@ object RunRlaCreateOneAudit {
         val vunderFuzz = OneAuditVunderBarFuzzer(VunderBar(cardPools), infos, fuzzMvrs)
         val oaFuzzedPairs: List<Pair<Cvr, AuditableCard>> = vunderFuzz.makePairsFromCards(cards)
         val fuzzedMvrs = oaFuzzedPairs.map { it.first }
-        writeSortedMvrs(publisher, fuzzedMvrs, config.seed)
+        writeSortedMvrs(publisher, fuzzedMvrs, config.seed) // TODO have to write this where you know the mvrs
     }
 
     class TestOneAuditElection(

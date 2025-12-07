@@ -45,7 +45,7 @@ class CompareShrinkTrunkWithFixed {
 
         val trunc = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
         val alpha = AlphaMart(estimFn = trunc, N = N)
-        val tracker = ClcaErrorTracker(0.0)
+        val tracker = ClcaErrorTracker(0.0, 1.0)
 
         return alpha.testH0(N, true, tracker=tracker) { sampling.sample() }
     }
@@ -53,7 +53,7 @@ class CompareShrinkTrunkWithFixed {
     fun testAlphaMartFixed(eta0: Double, sampling: Sampling): TestH0Result {
         val fixed = FixedEstimFn(eta0 = eta0)
         val alpha = AlphaMart(estimFn = fixed, N = sampling.maxSamples())
-        val tracker = ClcaErrorTracker(0.0)
+        val tracker = ClcaErrorTracker(0.0, 1.0)
 
         return alpha.testH0(sampling.maxSamples(), true, tracker=tracker) { sampling.sample() }
     }
@@ -119,7 +119,7 @@ class CompareShrinkTrunkWithFixed {
             testFn = alpha,
             testParameters = mapOf("eta0" to eta0, "d" to d.toDouble(), "margin" to mean2margin(eta0)),
             N=N,
-            tracker = ClcaErrorTracker(0.0),
+            tracker = ClcaErrorTracker(0.0, 1.0),
             )
     }
 
@@ -135,7 +135,7 @@ class CompareShrinkTrunkWithFixed {
             testFn = alpha,
             testParameters = mapOf("eta0" to eta0, "margin" to mean2margin(eta0)),
             N=N,
-            tracker = ClcaErrorTracker(0.0),
+            tracker = ClcaErrorTracker(0.0, 1.0),
             )
     }
 }

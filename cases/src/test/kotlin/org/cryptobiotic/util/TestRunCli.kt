@@ -26,7 +26,7 @@ class TestRunCli {
                 "-minMargin", "0.01",
                 "-fuzzMvrs", ".0123",
                 "-ncards", "10000",
-                "-ncontests", "25",
+                "-ncontests", "11",
             )
         )
         val publisher = Publisher(auditdir)
@@ -41,6 +41,7 @@ class TestRunCli {
         while (!done) {
             val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
+            // if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx) // TODO add this to runRound; dont need when useTest = true?
         }
 
         println("============================================================")
@@ -71,6 +72,7 @@ class TestRunCli {
         while (!done) {
             val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 7
+            // if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx) // TODO add this to runRound; dont need when useTest = true?
         }
 
         println("============================================================")
@@ -114,12 +116,20 @@ class TestRunCli {
         while (!done) {
             val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
+            // if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx) // TODO add this to runRound; dont need when useTest = true?
         }
 
         println("============================================================")
         val status = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir=auditdir)
         println(status)
     }
+
+    //         val Nc = 50000
+    //        val margin = .04
+    //        val fuzzPct = 0.0
+    //        val underVotePct = 0.0
+    //        val phantomPct = 0.00
+    //        val cvrPercent = 0.80
 
     @Test
     fun testCliOneAudit() {
@@ -130,7 +140,7 @@ class TestRunCli {
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.04",
-                "-fuzzMvrs", "0.00",
+                "-fuzzMvrs", "0.02",
                 "-ncards", "50000",
                 "-extraPct", "0.00"
             )
@@ -150,7 +160,7 @@ class TestRunCli {
         while (!done) {
             val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
-            if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx)
+            if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx) // RunRlaCreateOneAudit writes the mvrs
         }
 
         println("============================================================")

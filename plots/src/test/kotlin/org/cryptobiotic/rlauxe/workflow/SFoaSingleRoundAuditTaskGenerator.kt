@@ -108,7 +108,7 @@ class MvrManagerClcaSingleRound(val sortedCards: CloseableIterable<AuditableCard
         return null
     }
 
-    override fun makeMvrCardPairsForRound(): List<Pair<Cvr, Cvr>> {
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<Cvr, Cvr>> {
         val cvrs = mutableListOf<Cvr>()
         var count = 0
         var countPool = 0

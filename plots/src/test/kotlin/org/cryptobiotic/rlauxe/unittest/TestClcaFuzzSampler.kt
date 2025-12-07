@@ -73,6 +73,7 @@ private fun runWithComparisonFuzzSampler(
         optimal,
         // assorter.assorter().reportedMargin(),
         cassorter.noerror(),
+        cassorter.assorter.upperBound(),
         cassorter.upperBound(),
         N=contestUA.Npop,
         moreParameters=moreParameters + mapOf("margin" to cassorter.assorter.dilutedMargin()),

@@ -193,7 +193,7 @@ fun verifyManifest(
         }
     }
     if (!results.hasErrors) {
-        results.addMessage("  verify $count cards in the Manifest are ordered with no duplicate locatiosn or indices")
+        results.addMessage("  verify $count cards in the Manifest are ordered with no duplicate locations or indices")
     }
 
     // 2. Given the seed and the PRNG, check that the PRNs are correct and are assigned sequentially by index.

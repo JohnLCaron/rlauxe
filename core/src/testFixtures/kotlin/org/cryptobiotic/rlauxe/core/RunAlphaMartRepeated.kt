@@ -14,21 +14,22 @@ fun runAlphaMartRepeated(
     d: Int = 500,
     withoutReplacement: Boolean = true,
     ntrials: Int = 1,
-    upperBound: Double = 1.0,
+    upper: Double = 1.0,
+    sampleUpperBound: Double = 1.0,
     estimFn: EstimFn? = null, // if not supplied, use TruncShrinkage
 ): RunTestRepeatedResult {
 
     val useEstimFn = estimFn ?: TruncShrinkage(
         drawSample.maxSamples(),
         true,
-        upperBound = upperBound,
+        upperBound = sampleUpperBound,
         d = d,
         eta0 = eta0)
 
     val alpha = AlphaMart(
         estimFn = useEstimFn,
         N = drawSample.maxSamples(),
-        upperBound = upperBound,
+        upperBound = sampleUpperBound,
         withoutReplacement = withoutReplacement,
     )
 
@@ -39,6 +40,6 @@ fun runAlphaMartRepeated(
         testFn = alpha,
         testParameters = mapOf("eta0" to eta0, "d" to d.toDouble(), "margin" to mean2margin(eta0)),
         N=N,
-        tracker = ClcaErrorTracker(0.0),
+        tracker = ClcaErrorTracker(0.0, upper),
    )
 }

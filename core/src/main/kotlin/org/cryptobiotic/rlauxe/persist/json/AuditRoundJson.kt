@@ -252,9 +252,10 @@ fun EstimationRoundResultJson.import() : EstimationRoundResult {
 //    val pvalue: Double,       // last pvalue when testH0 terminates
 //    val samplesUsed: Int,     // sample count when testH0 terminates
 //    val status: TestH0Status, // testH0 status
-//    val measuredMean: Double, // measured population mean
-//    val startingRates: Map<Double, Double>? = null, // starting error rates (clca only)
-//    val measuredCounts: Map<Double, Int>? = null, // measured error counts (clca only)
+//    val measuredMean: Double, // measured population mean TODO used?
+//    val startingRates: ClcaErrorCounts? = null, // starting error rates (clca only)
+//    val measuredCounts: ClcaErrorCounts? = null, // measured error counts (clca only)
+//    val params: Map<String, Double> = emptyMap(),
 //)
 
 @Serializable
@@ -267,8 +268,9 @@ data class AuditRoundResultJson(
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
     val status: String, // testH0 status
     val measuredMean: Double,     // measured population mean, used for polling?
-    val startingRates: Map<Double, Double>?,
-    val measuredCounts: Map<Double, Int>?,
+    val startingRates: ClcaErrorCountsJson?,
+    val measuredCounts: ClcaErrorCountsJson?,
+    val params: Map<String, Double>
 )
 
 fun AuditRoundResult.publishJson() = AuditRoundResultJson(
@@ -280,8 +282,9 @@ fun AuditRoundResult.publishJson() = AuditRoundResultJson(
     this.samplesUsed,
     this.status.name,
     this.measuredMean,
-    this.startingRates,
-    this.measuredCounts,
+    this.startingRates?.publishJson(),
+    this.measuredCounts?.publishJson(),
+    params,
 )
 
 fun AuditRoundResultJson.import() : AuditRoundResult {
@@ -294,10 +297,35 @@ fun AuditRoundResultJson.import() : AuditRoundResult {
         this.samplesUsed,
         status,
         this.measuredMean,
-        this.startingRates,
-        this.measuredCounts,
+        this.startingRates?.import(),
+        this.measuredCounts?.import(),
+        params,
     )
 }
+
+//data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
+
+@Serializable
+data class ClcaErrorCountsJson(
+    val errorCounts: Map<Double, Int>,
+    val totalSamples: Int,
+    val noerror: Double,
+    val upper: Double
+)
+
+fun ClcaErrorCounts.publishJson() = ClcaErrorCountsJson(
+        errorCounts,
+        totalSamples,
+        noerror,
+        upper,
+    )
+
+fun ClcaErrorCountsJson.import() = ClcaErrorCounts(
+        errorCounts,
+        totalSamples,
+        noerror,
+        upper,
+    )
 
 /////////////////////////////////////////////////////////////////////////////////
 

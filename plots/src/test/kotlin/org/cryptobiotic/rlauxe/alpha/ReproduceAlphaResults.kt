@@ -144,7 +144,7 @@ class ReproduceAlphaResults {
                     for (d in dl) {
                         val trunc = TruncShrinkage(N = N, upperBound = upperBound, d = d, eta0 = eta0, c = c)
                         val alpha = AlphaMart(estimFn = trunc, N = N, upperBound=upperBound)
-                        val tracker = ClcaErrorTracker(0.0)
+                        val tracker = ClcaErrorTracker(0.0, 1.0)
 
                         print("  eta0=$eta0 d=$d")
                         val result =  runTestRepeated(
@@ -358,7 +358,8 @@ class ReproduceAlphaResults {
                     eta0 = eta,
                     d = d,
                     ntrials = reps,
-                    upperBound = u,
+                    upper = u,
+                    sampleUpperBound = u,
                 )
                 srs.add(mart.makeSRT(reportedMean=theta, reportedMeanDiff=0.0))
             }
@@ -499,7 +500,8 @@ class ReproduceAlphaResults {
                     eta0 = compareUpper - eps,
                     d = d,
                     ntrials = ntrials,
-                    upperBound = compareUpper,
+                    upper = compareUpper,
+                    sampleUpperBound = compareUpper,
                 )
                 srs.add(mart.makeSRT(theta, 0.0))
             }
@@ -586,7 +588,8 @@ class ReproduceAlphaResults {
                 eta0 = eta0,
                 d = d,
                 ntrials = ntrials,
-                upperBound = compareAssorter.upperBound(),
+                upper = compareAssorter.assorter.upperBound(),
+                sampleUpperBound = compareAssorter.upperBound(),
             )
             srs.add(mart.makeSRT(theta, 0.0))
 

@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.Welford
 
-/** keeps track of the latest sample, number of samples, and the sample sum. */
+/** keeps track of the latest sample, number of samples, and the sample sum, mean and variance. */
 interface SampleTracker {
     fun last(): Double  // latest sample
     fun numberOfSamples(): Int    // total number of samples so far

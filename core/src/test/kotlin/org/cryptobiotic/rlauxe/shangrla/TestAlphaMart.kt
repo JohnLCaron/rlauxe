@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.Bernoulli
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import kotlin.test.Test
-import kotlin.math.max
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -120,7 +119,7 @@ class TestAlphaMart {
         val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
         val sampler = SampleFromArray(x.toDoubleArray())
-        val tracker = ClcaErrorTracker(0.0)
+        val tracker = ClcaErrorTracker(0.0, 1.0)
 
         val result = alpha.testH0(x.size, false, tracker=tracker) { sampler.sample() }
         println(" test_shrink_trunk_f1 = ${result}")
@@ -158,7 +157,7 @@ class TestAlphaMart {
         val alpha = AlphaMart(estimFn = estimFn, N = N, withoutReplacement = false, upperBound = u)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
         val sampler = SampleFromArray(x.toDoubleArray())
-        val tracker = ClcaErrorTracker(0.0)
+        val tracker = ClcaErrorTracker(0.0, 1.0)
 
         val result = alpha.testH0(x.size, false, tracker=tracker) { sampler.sample() }
         println(" test_shrink_trunk_f1_wreplacement = ${result}")
@@ -224,7 +223,7 @@ class TestAlphaMart {
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
 
         val sampler = SampleFromArray(x.toDoubleArray())
-        val tracker = ClcaErrorTracker(0.0)
+        val tracker = ClcaErrorTracker(0.0, 1.0)
 
         return Pair(alpha.testH0(x.size, true, tracker=tracker) { sampler.sample() }, dseq)
     }
@@ -239,7 +238,7 @@ class TestAlphaMart {
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
 
         val sampler = SampleFromArray(x.toDoubleArray())
-        val tracker = ClcaErrorTracker(0.0)
+        val tracker = ClcaErrorTracker(0.0, 1.0)
 
         return Pair(alpha.testH0(x.size, false, tracker=tracker) { sampler.sample() }, dseq)
     }

@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
 
-// this assumes that the cards and mvrs correspond one-to-one
+// this checks that the cards and mvrs correspond one-to-one
 // these are the real mvrs
 class MvrManagerFromManifest(
     cardManifest: List<AuditableCard>,
@@ -42,7 +42,7 @@ class MvrManagerFromManifest(
         return pools
     }
 
-    override fun makeMvrCardPairsForRound(): List<Pair<CardIF, CardIF>>  {
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CardIF, CardIF>>  {
         if (mvrsRound.isEmpty()) {  // for SingleRoundAudit.
             val sampledMvrs = if (simFuzzPct == null) {
                 sortedMvrs // use the mvrs as they are - ie, no errors

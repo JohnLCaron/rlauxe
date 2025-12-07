@@ -4,7 +4,7 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import kotlin.test.*
 
-class TestPluralityErrorRates {
+class TestPluralityErrorCounts {
 
     @Test
     fun testBasics() {

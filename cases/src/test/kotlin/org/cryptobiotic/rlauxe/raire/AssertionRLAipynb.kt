@@ -615,7 +615,6 @@ fun replicate_p_values(
    // val comparisonAssertions = auditComparison.assertions.values.first()
     //val minAssorter = comparisonAssertions[1].assorter // the one with the smallest margin
 
-
     val contest = contests.first()
     val cassorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
@@ -633,7 +632,7 @@ fun replicate_p_values(
         withoutReplacement = false)
 
     val debugSeq = betta.setDebuggingSequences()
-    val result = betta.testH0(sample_size, true,  tracker = ClcaErrorTracker(0.0)) { sampling.sample() }
+    val result = betta.testH0(sample_size, true,  tracker = ClcaErrorTracker(0.0, 1.0)) { sampling.sample() }
     println(result)
     println("pvalues=  ${debugSeq.pvalues()}")}
 
@@ -648,15 +647,16 @@ fun calc_sample_sizes(
     val cassorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
     val sampling: Sampling = makeClcaNoErrorSampler(contest.id, cvrs, cassorter)
+    val pluralityErrorRates= PluralityErrorRates(.001, .01, 0.0, 0.0)
+    val startingErrorRates= ClcaErrorCounts.fromPluralityErrorRates(pluralityErrorRates,
+        cassorter.noerror(), totalSamples=0, upper=cassorter.assorter.upperBound())
 
-    val optimal = AdaptiveBetting(
+    val betFn = GeneralAdaptiveBetting(
         N = N,
-        withoutReplacement = true,
-        a = cassorter.noerror(),
+        startingErrorRates=startingErrorRates,
         d = 100,
-        PluralityErrorRates(.001, .01, 0.0, 0.0),
     )
-    val betta = BettingMart(bettingFn = optimal, N = N,
+    val betta = BettingMart(bettingFn = betFn, N = N,
         sampleUpperBound = cassorter.upperBound(), withoutReplacement = false)
 
     return runTestRepeated(
@@ -664,9 +664,9 @@ fun calc_sample_sizes(
         // maxSamples = N,
         ntrials = ntrials,
         testFn = betta,
-        testParameters = mapOf("p2o" to optimal.p2o, "margin" to cassorter.assorter().dilutedMargin()),
+        testParameters = mapOf("p2o" to pluralityErrorRates.p2o, "margin" to cassorter.assorter().dilutedMargin()),
         N = N,
-        tracker = PluralityErrorTracker(0.0),
+        tracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound()),
     )
 }
 

@@ -36,9 +36,19 @@ class OneAuditWithErrors {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
+            val oneauditGeneratorAdaptive = OneAuditSingleRoundAuditTaskGenerator(
+                Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
+                parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "adaptive"),
+                auditConfigIn = AuditConfig(
+                    AuditType.ONEAUDIT, true, simFuzzPct=fuzzPct,
+                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.clca),
+                )
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorAdaptive))
+
             val oneauditGeneratorReportedMean = OneAuditSingleRoundAuditTaskGenerator(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
-                parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "optimalComparison"),
+                parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "optimalBet"),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true,
                     oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.optimalComparison)

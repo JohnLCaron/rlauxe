@@ -79,7 +79,7 @@ class RunRepeatedTasks {
         silent: Boolean = false
     ): RunTestRepeatedResult {
         if (!silent) println(" runTask=${task.name()}")
-        val tracker = ClcaErrorTracker(0.0)
+        val tracker = ClcaErrorTracker(0.0, 1.0)
 
         return runTestRepeated(
             drawSample = task.makeSampler(),

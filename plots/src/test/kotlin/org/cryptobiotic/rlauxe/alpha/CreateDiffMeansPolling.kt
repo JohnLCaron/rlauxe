@@ -239,7 +239,8 @@ class CreatePollingDiffMeans {
                 d = d,
                 ntrials = nrepeat,
                 withoutReplacement = true,
-                upperBound = assert.assorter.upperBound()
+                upper = assert.assorter.upperBound(),
+                sampleUpperBound = assert.assorter.upperBound()
             )
             if (!silent) {
                 println(result)

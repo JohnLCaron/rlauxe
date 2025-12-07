@@ -8,12 +8,12 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
 class OneAuditNoErrors {
-    val name = "OneAuditNoErrors4"
+    val name = "OneAuditNoErrors"
     val dirName = "/home/stormy/rla/audits/$name" // you need to make this directory first
 
     val nruns = 100  // number of times to run workflow
     val N = 50000
-    val cvrPercent = 0.80
+    val cvrPercent = 0.95
     val fuzzPct = 0.0
 
     @Test
@@ -37,7 +37,19 @@ class OneAuditNoErrors {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            val oneauditGeneratorDefault = OneAuditSingleRoundAuditTaskGenerator(
+            // enum class OneAuditStrategyType { clca, optimalComparison, bet99, eta0Eps }
+
+            val oneauditGeneratorAdaptive = OneAuditSingleRoundAuditTaskGenerator(
+                Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
+                parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "adaptive"),
+                auditConfigIn = AuditConfig(
+                    AuditType.ONEAUDIT, true,
+                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.clca)
+                )
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorAdaptive))
+
+            val oneauditGeneratorOptimal = OneAuditSingleRoundAuditTaskGenerator(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "optimalBet"),
                 auditConfigIn = AuditConfig(
@@ -45,7 +57,7 @@ class OneAuditNoErrors {
                     oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.optimalComparison)
                 )
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorDefault))
+            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorOptimal))
 
             val oneauditGeneratorBet99 = OneAuditSingleRoundAuditTaskGenerator(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,

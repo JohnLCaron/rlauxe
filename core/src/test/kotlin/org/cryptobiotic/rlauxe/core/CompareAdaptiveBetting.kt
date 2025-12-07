@@ -26,7 +26,7 @@ class CompareAdaptiveBetting {
 
             val errorCounts = ClcaErrorCounts.fromPluralityErrorRates(errorRates, totalSamples = N, noerror = noerror, upper = 1.0)
             val bet2 = GeneralAdaptiveBetting(N, startingErrorRates = errorCounts, d=100)
-            val tracker2 = ClcaErrorTracker(noerror)
+            val tracker2 = ClcaErrorTracker(noerror, 1.0)
 
             var count = 0
                 var lam1 = 0.0
@@ -44,7 +44,7 @@ class CompareAdaptiveBetting {
                         tracker2.addSample(noerror)
                     }
                 }
-                println("FINAL lam1= $lam1, lam2=$lam2")
+                println("FINAL lambda: AdaptiveBetting= $lam1, GeneralAdaptiveBetting=$lam2")
                 assertEquals(lam1, lam2, .001)
             // }
         }
@@ -52,6 +52,7 @@ class CompareAdaptiveBetting {
 
     @Test
     fun compareSimulatedCvrs() {
+        val showSteps = false
         val Nc = 50000
         val margins = listOf(.025) // , .05, .1)
         // val p2s = listOf(.0001, .001, .01)
@@ -74,18 +75,20 @@ class CompareAdaptiveBetting {
 
             val errorCounts = ClcaErrorCounts.fromPluralityErrorRates(errorRates, totalSamples = 0, noerror = noerror, upper = 1.0)
             val bet2 = GeneralAdaptiveBetting(Nc, startingErrorRates = errorCounts, d=100)
-            val tracker2 = ClcaErrorTracker(noerror)
+            val tracker2 = ClcaErrorTracker(noerror, cassorter.assorter.upperBound())
             val risk2 = Risk(Nc, tracker2, bet2, cassorter.upperBound())
 
             var count = 0
             repeat(1000) {
                 val bassortValue = cassorter.bassort(testMvrs[count], testCvrs[count])
-                println("bassortValue ${dfn(bassortValue, 6)}")
 
                 val lam1 = risk1.addSample(bassortValue)
                 val lam2 = risk2.addSample(bassortValue)
-                println("lam ${dfn(lam1, 6)} ${dfn(lam2, 6)}")
-                println("pvalue ${dfn(risk1.pvalue(), 6)} ${dfn(risk2.pvalue(), 6)}")
+                if (showSteps) {
+                    println("bassortValue ${dfn(bassortValue, 6)}")
+                    println("lam ${dfn(lam1, 6)} ${dfn(lam2, 6)}")
+                    println("pvalue ${dfn(risk1.pvalue(), 6)} ${dfn(risk2.pvalue(), 6)}")
+                }
                 if (lam1/lam2 > 2.0 || lam2/lam1 > 2.0)
                     print(" hay ")
                 if (risk1.pvalue()/risk2.pvalue() > 2.0 || risk2.pvalue()/risk1.pvalue() > 2.0)
@@ -95,7 +98,7 @@ class CompareAdaptiveBetting {
 
                 count++
             }
-            println("FINAL pvalue1=${risk1.pvalue()} pvalue2=${risk2.pvalue()}")
+            println("FINAL pvalue: AdaptiveBetting=${risk1.pvalue()} GeneralAdaptiveBetting=${risk2.pvalue()}")
             assertTrue(doubleIsClose(risk1.pvalue(), risk2.pvalue(), .001))
         }
     }

@@ -60,7 +60,8 @@ class TestAlphaMart {
             eta0 = eta0,
             d = d,
             ntrials = 10,
-            upperBound = assorter.upperBound()
+            upper = assorter.upperBound(),
+            sampleUpperBound = assorter.upperBound(),
         )
         println("runAlphaMartRepeated = $result2")
     }

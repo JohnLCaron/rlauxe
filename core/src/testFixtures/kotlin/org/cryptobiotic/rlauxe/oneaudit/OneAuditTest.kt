@@ -98,7 +98,7 @@ fun makeOneAuditTest(
 
     val poolNcards = votesPoolSum + poolUnderVotes
     val pool = CardPoolWithBallotStyle(
-            "noCvr",
+            "pool42",
             42, // poolId
             voteTotals = mapOf(1 to ContestTabulation(info1, votesNoCvr, ncards=noCvrSize)),
             infos = infos,
@@ -153,7 +153,7 @@ fun makeMvrs(
     // add the regular cvrs
     if (cvrNcards > 0) {
         val vunderCvrs = VotesAndUndervotes(cvrVotes, cvrUndervotes, info.voteForN)
-        val cvrCvrs = makeVunderCvrs(mapOf(info.id to vunderCvrs), "regular", poolId = null)
+        val cvrCvrs = makeVunderCvrs(mapOf(info.id to vunderCvrs), "regularCvr", poolId = null)
         mvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     }
 

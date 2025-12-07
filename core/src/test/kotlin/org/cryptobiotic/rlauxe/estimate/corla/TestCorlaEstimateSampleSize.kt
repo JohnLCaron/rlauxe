@@ -61,7 +61,7 @@ class TestCorlaEstimateSampleSize {
             val cvrs = ContestSimulation.simulateContestCvrsWithLimits(contestRound.contestUA.contest as Contest, config).makeCvrs()
             val cards = cvrs.map { AuditableCard.fromCvr(it, 0, 0L)}
             val sampleSizes = contestRound.assertionRounds.map { assertRound ->
-                val result = estimateClcaAssertionRound(1, config, contestRound, cards, assertRound)
+                val result = estimateClcaAssertionRound(1, config,cards, contestRound, assertRound)
                 val simSize = result.findQuantile(config.quantile)
                 val estSize = estimateSampleSizeSimple(config.riskLimit, assertRound.assertion.assorter.dilutedMargin(), gamma,
                     oneOver = roundUp(cn*p1), // p1

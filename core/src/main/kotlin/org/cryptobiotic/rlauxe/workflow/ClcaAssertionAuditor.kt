@@ -16,7 +16,7 @@ fun runClcaAuditRound(
     roundIdx: Int,
     auditor: ClcaAssertionAuditorIF,
 ): Boolean {
-    val cvrPairs = mvrManager.makeMvrCardPairsForRound()
+    val cvrPairs = mvrManager.makeMvrCardPairsForRound(roundIdx)
 
     // parallelize over contests
     val contestsNotDone = contests.filter{ !it.done }
@@ -88,36 +88,27 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val clcaConfig = config.clcaConfig
 
         val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
-        prevRounds.setPhantomRate(contest.phantomRate()) // what effect does the the phantom rate have?
-
-        // enum class ClcaStrategyType { generalAdaptive, apriori, fuzzPct, oracle  }
-        //  apriori: pass in apriori errorRates for first round.
-        //  fuzzPct: ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct) for first round.
-        //  oracle: use actual measured error rates for first round. (violates martingale condition)
+        prevRounds.setPhantomRate(contest.phantomRate()) // TODO ??
 
         val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
             GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = prevRounds, d = clcaConfig.d,)
 
         } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
-            AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
+            //AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
+            val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(clcaConfig.pluralityErrorRates!!, prevRounds)
+            GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
 
         } else if (clcaConfig.strategy == ClcaStrategyType.fuzzPct) {
             val errorsP = ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct) // TODO do better
-            AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=errorsP) // just stick with them
+            val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(errorsP, prevRounds)
+            // AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=errorsP) // just stick with them
+            GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
 
-        // }  else if (clcaConfig.strategy == ClcaStrategyType.optimalComparison) {
-        //    OptimalComparisonNoP1(N = contestUA.Nb, withoutReplacement = true, upperBound = cassorter.noerror(), p2 = errorRatesP.p2o)
-
-        // } else if (clcaConfig.strategy == ClcaStrategyType.oracle) {
-        //    OracleComparison(a = cassorter.noerror(), errorRates = errorRatesP)  // TODO where do these come from ??
-            
         } else {
             throw RuntimeException("unsupported strategy ${clcaConfig.strategy}")
         }
 
-        val tracker = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) ClcaErrorTracker(cassorter.noerror())
-            else PluralityErrorTracker(cassorter.noerror())
-
+        // TODO put tracker back on bettingMart I think
         val testFn = BettingMart(
             bettingFn = bettingFn,
             N = contestUA.Npop,
@@ -127,13 +118,14 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         )
 
         // TODO make optional
-        // val sequences = testFn.setDebuggingSequences()
-        // val tracker = ClcaErrorTracker(cassorter.noerror(), sequences) // track pool data; something better to do?
+        val sequences = testFn.setDebuggingSequences()
+        val tracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound(), sequences) // track pool data; something better to do?
 
         val terminateOnNullReject = config.auditSampleLimit == null
+        // TODO remove tracker from testH0
         val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = terminateOnNullReject, tracker=tracker) { sampling.sample() }
 
-        val measuredCounts = if (testH0Result.tracker is ClcaErrorRatesIF) testH0Result.tracker.errorCounts() else null
+        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) testH0Result.tracker.measuredCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampling.maxSamples(),
@@ -142,7 +134,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),
-            startingRates = prevRounds.errorRates(),
+            startingRates = prevRounds,
             measuredCounts = measuredCounts,
         )
 

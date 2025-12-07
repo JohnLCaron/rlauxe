@@ -15,7 +15,7 @@ fun runPollingAuditRound(
     roundIdx: Int,
     quiet: Boolean = true
 ): Boolean {
-    val pairs = mvrManager.makeMvrCardPairsForRound()
+    val pairs = mvrManager.makeMvrCardPairsForRound(roundIdx)
 
     val contestsNotDone = contests.filter { !it.done }
     if (contestsNotDone.isEmpty()) {
@@ -73,7 +73,7 @@ fun auditPollingAssertion(
         upperBound = assorter.upperBound(),
     )
 
-    val tracker = ClcaErrorTracker(0.0)
+    val tracker = ClcaErrorTracker(0.0, assorter.upperBound())
     val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject=true, tracker=tracker) { sampling.sample() }
 
     assertionRound.auditResult = AuditRoundResult(roundIdx,

@@ -1,16 +1,17 @@
 # OneAudit version 4 
-_last changed 9/18/2025_
+_last changed 12/06/2025_
 
 ## Strategies
 
 We try different betting "strategies":
 
+* **adaptive**: use AdaptiveBetting exactly like CLCA.
+* **optimalBet**: Use betting mart with optimal_comparison betting from SHANGRLA.
 * **bet99**: Set eta0 = reportedMean, always bet 99% of the maximum allowed bet.
 * **eta0Eps**: Set eta0 = upper*(1 - eps), use shrinkTrunk for betting strategy.
-* **optimalBet**: Use betting mart with optimal_comparison betting from SHANGRLA.
 
 Here we compare these 3 strategies along with polling and clca audits, when there are no errors, as a function of margin. 
-The OneAudit has CVRs for 95% of its cards, and 5% are in a single pool without CVRS, but with Card Style Data.
+The OneAudit has CVRs for 95% of its cards, and 5% are in a single pool without CVRS, but with a single Card Style.
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/OneAuditNoErrors4/OneAuditNoErrors4LogLog.html" rel="OneAuditNoErrors4LogLog">![OneAuditNoErrors4LogLog](plots/oneaudit4/OneAuditNoErrors4/OneAuditNoErrors4LogLog.png)</a>
 

@@ -50,7 +50,8 @@ class CompareAlphaPaper {
                     eta0 = eta,
                     d = d,
                     ntrials = reps,
-                    upperBound = compareAssertion.cassorter.upperBound(),
+                    upper = compareAssertion.cassorter.assorter.upperBound(),
+                    sampleUpperBound = compareAssertion.cassorter.upperBound(),
                 )
                 compareSrs.add(compareResult.makeSRT(theta, 0.0))
 
@@ -61,7 +62,8 @@ class CompareAlphaPaper {
                     d = d,
                     ntrials = reps,
                     withoutReplacement = true,
-                    upperBound = pollingAssertion.assorter.upperBound()
+                    upper = compareAssertion.cassorter.assorter.upperBound(),
+                    sampleUpperBound = pollingAssertion.assorter.upperBound()
                 )
                 pollingSrs.add(pollingResult.makeSRT(theta, 0.0))
             }

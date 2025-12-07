@@ -33,7 +33,7 @@ class MvrManagerForTesting(
         return pools
     }
 
-    override fun makeMvrCardPairsForRound(): List<Pair<CardIF, CardIF>>  {
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CardIF, CardIF>>  {
         if (mvrsRound.isEmpty()) {
             return mvrsUA.zip(sortedCards) // all of em, for SingleRoundAudit
         }

@@ -32,7 +32,7 @@ class TestFuzzedErrors {
                 contestUA.clcaAssertions.forEach { cassertion ->
                     val cassorter = cassertion.cassorter
                     val samples = PluralityErrorTracker(cassorter.noerror())
-                    val samplet = ClcaErrorTracker(cassorter.noerror())
+                    val samplet = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound())
 
                     if (show) println("  contest = ${contestUA.id} assertion = ${cassorter.shortName()}")
 

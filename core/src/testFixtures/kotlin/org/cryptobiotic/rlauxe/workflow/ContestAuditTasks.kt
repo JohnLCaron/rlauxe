@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.core.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
 import org.cryptobiotic.rlauxe.core.TestH0Status
@@ -114,8 +115,20 @@ data class WorkflowResult(
     val failPct: Double = 100.0,
     val usedStddev: Double = 0.0, // success only
     val mvrMargin: Double = 0.0,
+
+    ////
+    val startingRates: ClcaErrorCounts? = null, // starting error rates (clca only)
+    val measuredCounts: ClcaErrorCounts? = null, // measured error counts (clca only)
 ) {
     fun Dparam(key: String) = (parameters[key]!! as String).toDouble()
+
+    fun show() = buildString {
+        val poolAvg = parameters["poolAvg"] as Double?
+        appendLine("WorkflowResult(name='$name', Nc=$Nc, margin=$margin, status=$status, nrounds=$nrounds, samplesUsed=$samplesUsed, nmvrs=$nmvrs, parameters=$parameters, failPct=$failPct, usedStddev=$usedStddev, mvrMargin=$mvrMargin")
+        if (startingRates != null) append("  startingRates=${startingRates.show(poolAvg)}")
+        if (measuredCounts != null) append("  measuredCounts=${measuredCounts.show(poolAvg)}")
+        appendLine(")")
+    }
 }
 
 fun avgWorkflowResult(runs: List<WorkflowResult>): WorkflowResult {

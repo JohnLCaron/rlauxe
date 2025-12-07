@@ -130,7 +130,7 @@ fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: Asser
         logger.info { "runAudit in $auditDir for round $roundIdx, contest $contestId, and assertion $assertion" }
 
         val workflow = PersistedWorkflow(auditDir, useTest=false)
-        val cvrPairs = workflow.mvrManager().makeMvrCardPairsForRound()
+        val cvrPairs = workflow.mvrManager().makeMvrCardPairsForRound(roundIdx)
         val sampler = PairSampler(contestId, cvrPairs)
 
         val config = workflow.auditConfig()

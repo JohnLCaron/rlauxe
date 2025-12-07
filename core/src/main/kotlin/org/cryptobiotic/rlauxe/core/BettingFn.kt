@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
@@ -129,7 +130,7 @@ class AgrapaBet(
 //        return (1 - self.u * (1 - p2)) / (2 - 2 * self.u) + self.u * (1 - p2) - 1 / 2
 
 /**
- * From SHANGRLA Nonneg_mean.optimal_comparison().
+ * From SHANGRLA Nonneg_mean.optimal_comparison(). line 390
  * When p1=0, can use closed form to solve for lambda.
  *
  * The value of eta corresponding to the "bet" that is optimal for ballot-level comparison audits,
@@ -145,33 +146,53 @@ class AgrapaBet(
  *
  *   eta = (1-u*(1-p2))/(2-2*u) + u*(1-p2) - 1/2.
  */
+// TODO just stop using it....
+// TODO check to see if this is correct, esp with assorter upper bound
+// CORBA has u := 2/(2 − v) = 2a, should be  clcaUpper := 2/(2 − v/assortUpper) = 2 * noerror
+// ALPHA has lam = (eta/mui - 1)/(u-mui) = etaToLam
 class OptimalComparisonNoP1(
     val N: Int,
     val withoutReplacement: Boolean = true,
     val upperBound: Double,   // bassort u = 2 * noerror, not assorter upper = 1.0
-    val p2: Double = 1.0e-4, // the rate of 2-vote overstatements
+    p2: Double = 1.0e-4, // the rate of 2-vote overstatements
 ): BettingFn {
+    // p2 = getattr(self, "error_rate_2", 1e-5)  # rate of 2-vote overstatement errors
+    val p2use = max(p2, 1.0e-5)
+    val eta: Double
+
     init {
         require(upperBound > 1.0)
-        // require(upperBound * (1.0 - p2) > 1.0)
-    }
-
-    override fun bet(prevSamples: SampleTracker): Double {
-        val mu = populationMeanIfH0(N, withoutReplacement, prevSamples)
+        if (upperBound * (1.0 - p2use) <= 1.0)
+            logger.warn{ "hmmmm ${upperBound * (1.0 - p2use)} should be > 1.0" }
 
         // note eta is a constant
         //        return (1 - self.u * (1 - p2)) / (2 - 2 * self.u) + self.u * (1 - p2) - 1 / 2
         //         eta = (1-u*(1-p2))/(2-2*u) + u*(1-p2) - 1/2.
-        val eta1 =  (1.0 - upperBound * (1.0 - p2))
-        val eta2 =  (2.0 - 2.0 * upperBound)
-        val eta12 = eta1 / eta2
-        val eta3 =  upperBound * (1.0 - p2) - 0.5
-        val eta4 =  eta12 + eta3
-        val result =  etaToLam(eta4, mu, upperBound)
-        //if (result <= 0.0) {
-        //    println("hmmmm ${upperBound * (1.0 - p2)} should be > 1.0")
-        //}
-        return result
+        val numer =  (1.0 - upperBound * (1.0 - p2use)) // (1-u*(1-p2))
+        val denom =  (2.0 - 2.0 * upperBound) // (2-2*u)
+        val eta3 =  upperBound * (1.0 - p2use) - 0.5 // u*(1-p2) - 1/2
+        eta =  numer/denom + eta3
     }
 
+    override fun bet(prevSamples: SampleTracker): Double {
+        // (N * 0.5 - sampleTracker.sum()) / (N - sampleNum) =~ 0.5
+        val mu = populationMeanIfH0(N, withoutReplacement, prevSamples)
+        // return (eta / mu - 1) / (upper - mu)
+        val lam =  etaToLam(eta, mu, upperBound)
+
+        // however, this is out of bounds in testing for plurality, assortUpper = 1
+        if (lam <= 0.0 || lam >= 2.0) {
+            val t1 = eta/mu
+            val t2 = eta/mu - 1
+            val t3 = upperBound - mu
+            val t4 = t2 / t3
+            logger.warn { "lam=$lam should be in (0..2); eta=$eta" }
+        }
+
+        return lam
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger("OptimalComparisonNoP1")
+    }
 }

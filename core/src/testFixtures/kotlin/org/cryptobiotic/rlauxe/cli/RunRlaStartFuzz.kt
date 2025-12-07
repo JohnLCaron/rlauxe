@@ -20,9 +20,7 @@ import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsFrom
 import kotlin.io.path.Path
 import kotlin.math.min
 
-/**
- * Create a multicontest audit, with fuzzed test data, stored in private record.
- */
+/** Create a multicontest audit, with fuzzed test data, TODO: stored in private record? */
 object RunRlaStartFuzz {
 
     @JvmStatic
@@ -81,6 +79,90 @@ object RunRlaStartFuzz {
             else startTestElectionPolling(topdir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests)
     }
 }
+
+///////////////////////////////////////////////////////
+fun startTestElectionClca(
+    topdir: String,
+    minMargin: Double,
+    fuzzMvrs: Double,
+    pctPhantoms: Double?,
+    ncards: Int,
+    ncontests: Int,
+    addRaire: Boolean,
+    addRaireCandidates: Int,
+) {
+    val auditDir = "$topdir/audit"
+    clearDirectory(Path(auditDir))
+
+    val config = AuditConfig(
+        AuditType.CLCA, hasStyle = true, nsimEst = 100, simFuzzPct = fuzzMvrs, quantile = .20,
+    )
+
+    clearDirectory(Path(auditDir))
+    val election = TestClcaElection(
+        config,
+        minMargin,
+        pctPhantoms,
+        ncards,
+        ncontests,
+        addRaire,
+        addRaireCandidates)
+
+    CreateAudit("startTestElectionClca", topdir = topdir, config, election, clear = false)
+}
+
+class TestClcaElection(
+    val config: AuditConfig,
+    minMargin: Double,
+    pctPhantoms: Double?,
+    ncards: Int,
+    ncontests: Int,
+    addRaire: Boolean,
+    addRaireCandidates: Int,
+): CreateElectionIF {
+    val contestsUA = mutableListOf<ContestUnderAudit>()
+    val allCvrs = mutableListOf<Cvr>()
+
+    init {
+        val maxMargin = .10
+        val useMin = min(minMargin, maxMargin)
+        val phantomPctRange: ClosedFloatingPointRange<Double> =
+            if (pctPhantoms == null) 0.00..0.005 else pctPhantoms..pctPhantoms
+
+        val testData =
+            MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
+        println("$testData")
+
+        // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
+        // includes phantom Cvrs
+        allCvrs.addAll(testData.makeCvrsFromContests())
+        println("ncvrs (not raire) = ${allCvrs.size}")
+
+        if (addRaire) {
+            val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N=ncards/2, contestId=111, addRaireCandidates, minMargin=.04, quiet = true, hasStyle=config.hasStyle)
+            contestsUA.add(rcontest)
+            allCvrs.addAll(rcvrs)
+        }
+
+        val regularContests = testData.contests.map { ContestUnderAudit(it, isClca=true, hasStyle=config.hasStyle).addStandardAssertions() }
+        contestsUA.addAll(regularContests)
+        contestsUA.forEach { println("  $it") }
+        println()
+    }
+    override fun cardPools() = null
+    override fun contestsUA() = contestsUA
+
+    override fun cardManifest() : CloseableIterator<AuditableCard> {
+        return CvrsWithStylesToCardManifest(
+            config.auditType, config.hasStyle,
+            Closer(allCvrs.iterator()),
+            null,
+            styles = null,
+        )
+    }
+}
+
+/////////////////////////////////////////////////////
 
 fun startTestElectionPolling(
     topdir: String,
@@ -157,86 +239,3 @@ class TestPollingElection(
         )
     }
 }
-
-fun startTestElectionClca(
-    topdir: String,
-    minMargin: Double,
-    fuzzMvrs: Double,
-    pctPhantoms: Double?,
-    ncards: Int,
-    ncontests: Int,
-    addRaire: Boolean,
-    addRaireCandidates: Int,
-) {
-    val auditDir = "$topdir/audit"
-    clearDirectory(Path(auditDir))
-
-    val config = AuditConfig(
-        AuditType.CLCA, hasStyle = true, nsimEst = 100, simFuzzPct = fuzzMvrs,
-    )
-
-    clearDirectory(Path(auditDir))
-    val election = TestClcaElection(
-        config,
-        minMargin,
-        pctPhantoms,
-        ncards,
-        ncontests,
-        addRaire,
-        addRaireCandidates)
-
-    CreateAudit("startTestElectionClca", topdir = topdir, config, election, clear = false)
-}
-
-class TestClcaElection(
-    val config: AuditConfig,
-    minMargin: Double,
-    pctPhantoms: Double?,
-    ncards: Int,
-    ncontests: Int,
-    addRaire: Boolean,
-    addRaireCandidates: Int,
-): CreateElectionIF {
-    val contestsUA = mutableListOf<ContestUnderAudit>()
-    val allCvrs = mutableListOf<Cvr>()
-
-    init {
-        val maxMargin = .10
-        val useMin = min(minMargin, maxMargin)
-        val phantomPctRange: ClosedFloatingPointRange<Double> =
-            if (pctPhantoms == null) 0.00..0.005 else pctPhantoms..pctPhantoms
-
-        val testData =
-            MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
-        println("$testData")
-
-        // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
-        // includes phantom Cvrs
-        allCvrs.addAll(testData.makeCvrsFromContests())
-        println("ncvrs (not raire) = ${allCvrs.size}")
-
-        if (addRaire) {
-            val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N=ncards/2, contestId=111, addRaireCandidates, minMargin=.04, quiet = true, hasStyle=config.hasStyle)
-            contestsUA.add(rcontest)
-            allCvrs.addAll(rcvrs)
-        }
-
-        val regularContests = testData.contests.map { ContestUnderAudit(it, isClca=true, hasStyle=config.hasStyle).addStandardAssertions() }
-        contestsUA.addAll(regularContests)
-        contestsUA.forEach { println("  $it") }
-        println()
-    }
-    override fun cardPools() = null
-    override fun contestsUA() = contestsUA
-
-    override fun cardManifest() : CloseableIterator<AuditableCard> {
-        return CvrsWithStylesToCardManifest(
-            config.auditType, config.hasStyle,
-            Closer(allCvrs.iterator()),
-            null,
-            styles = null,
-        )
-    }
-
-}
-

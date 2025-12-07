@@ -12,6 +12,8 @@ import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
 
+// TODO move to test, dont use in production?
+
 // betting functions that use Kelly optimization of lambda parameter for the BettingFn
 
 // https://github.com/spertus/comparison-RLA-betting/blob/main/comparison_audit_simulations.R

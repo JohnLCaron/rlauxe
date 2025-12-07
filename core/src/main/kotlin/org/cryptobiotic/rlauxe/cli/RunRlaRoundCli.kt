@@ -10,7 +10,6 @@ import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import kotlin.String
 
 /** Run one round of a PersistentAudit that has already been started. */
-// TODO break into initial estimate and the real run round ?
 
 object RunRliRoundCli {
 
@@ -48,31 +47,45 @@ object RunAuditCli {
             shortName = "auditDir",
             description = "Directory containing input election record"
         ).required()
-        val round by parser.option(
+        val roundIdx by parser.option(
             ArgType.Int,
             shortName = "round",
-            description = "audit round index"
+            description = "audit round index, last = -1"
         ).default(1)
         val contest by parser.option(
             ArgType.Int,
             shortName = "contest",
             description = "contest id"
         ).default(1)
-        val assertion by parser.option(
+        val assertionWinLose by parser.option(
             ArgType.String,
-            shortName = "assertion win/lose",
-            description = ""
+            shortName = "assertion",
+            description = "assertion win/lose"
         ).default("first")
 
         parser.parse(args)
 
         val pflow = PersistedWorkflow(auditDir, false)
         val auditRecord = pflow.auditRecord
-        val auditRound = auditRecord.rounds.first()
-        val contestRound = auditRound.contestRounds.find { it.id == contest }!!
-        val assertionRound = contestRound.assertionRounds.first() //  { it.assertion.assorter.winLose() == contest }!!
+        val auditRound = if (roundIdx == -1) auditRecord.rounds.last() else auditRecord.rounds.find { it.roundIdx == roundIdx }
+        if (auditRound == null) {
+            println("AuditRound $auditRound not found")
+            return
+        }
+        val contestRound = auditRound.contestRounds.find { it.id == contest }
+        if (contestRound == null) {
+            println("contestRound with contest id = $contest not found")
+            return
+        }
+        val assertionRound = if (assertionWinLose == "first") contestRound.assertionRounds.first() else {
+            contestRound.assertionRounds.find { it.assertion.assorter.winLose().contains(assertionWinLose) }
+        }
+        if (assertionRound == null) {
+            println("assertionRound with assertion.assorter.winLose() containing '$assertionWinLose' not found")
+            return
+        }
         if (assertionRound.auditResult == null) {
-            println("first round auditResult is null")
+            println("assertionRound.auditResult is null")
             return
         }
 

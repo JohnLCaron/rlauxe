@@ -38,7 +38,7 @@ class ReproduceCobraResults {
                 val sampler = makeClcaNoErrorSampler(cassorter.info.id,  cvrs, cassorter)
                 val upperBound = cassorter.upperBound()
                 println("testFigure1: alpha=${alpha} margin=${margin} a=${cassorter.noerror()}")
-                val tracker = ClcaErrorTracker(cassorter.noerror())
+                val tracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound())
 
                 val fixed = FixedBet(2.0)
                 val betting =
@@ -91,7 +91,7 @@ class ReproduceCobraResults {
                     ClcaAttackSampler(cvrs, cassorter, p2 = p2, p1 = 0.0, withoutReplacement = false)
                 val upperBound = cassorter.upperBound()
                 println("testTable1: margin=${margin} a=${cassorter.noerror()} p2=${p2}")
-                val tracker = ClcaErrorTracker(cassorter.noerror())
+                val tracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound())
 
                 val oracle = OptimalComparisonNoP1(
                     N = N,
@@ -163,7 +163,7 @@ class ReproduceCobraResults {
                             )
                         val upperBound = cassorter.upperBound()
                         println("testTable2OracleBets: p1=${p1}  p2=${p2}")
-                        val tracker = ClcaErrorTracker(cassorter.noerror())
+                        val tracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound())
 
                         val oracle = OracleComparison(
                             a = cassorter.noerror(),

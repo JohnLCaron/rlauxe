@@ -132,7 +132,7 @@ each of the error types:
 
 ## OneAudit
 
-Consider a single pool and assorter a with upper bound u and avg assort value in the pool is poolAvg_a.
+Consider a single pool and assorter a, with upper bound u and avg assort value in the pool is poolAvg_a.
 poolAvg_a is used as the cvr_value, so then mvr_assort - mvr_assort has one of 3 possible overstatement values:
 
     poolAvg_a - [0, .5, u] = [poolAvg_a, poolAvg_a -.5, poolAvg_a - u] for mvr loser, other and winner 

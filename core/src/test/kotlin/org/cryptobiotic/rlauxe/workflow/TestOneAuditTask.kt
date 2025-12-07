@@ -87,24 +87,30 @@ class TestOneAuditTask {
     fun testOneAuditSingleRoundAuditTaskGenerator() {
         val Nc = 50000
         val margin = .04
-        val mvrFuzzPct = 0.005
-        val config = AuditConfig(
-            AuditType.ONEAUDIT, hasStyle = true, simFuzzPct = mvrFuzzPct,
+        val fuzzPct = 0.0
+        val underVotePct = 0.0
+        val phantomPct = 0.00
+        val cvrPercent = 0.80
+
+        val auditConfigIn = AuditConfig(
+            AuditType.ONEAUDIT, true,
+            oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.clca)
         )
+
         val taskGen = OneAuditSingleRoundAuditTaskGenerator(
             Nc,
             margin,
-            underVotePct = 0.0,
-            phantomPct = 0.01,
-            cvrPercent = 0.90,
-            mvrsFuzzPct = mvrFuzzPct,
-            auditConfigIn = config,
+            underVotePct = underVotePct,
+            phantomPct = phantomPct,
+            cvrPercent = cvrPercent,
+            mvrsFuzzPct = fuzzPct,
+            auditConfigIn = auditConfigIn,
             parameters = emptyMap(),
         )
 
         val task = taskGen.generateNewTask()
         val workflowResult = task.run()
-        println(workflowResult)
+        println(workflowResult.show())
         assertEquals(TestH0Status.StatRejectNull, workflowResult.status)
     }
 }

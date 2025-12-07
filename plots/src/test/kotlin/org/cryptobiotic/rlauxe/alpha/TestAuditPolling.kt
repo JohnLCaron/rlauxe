@@ -53,7 +53,8 @@ class TestAuditPolling {
             eta0 = margin2mean(margin),
             d = d,
             ntrials = 10,
-            upperBound = assorter.upperBound()
+            upper = assorter.upperBound(),
+            sampleUpperBound = assorter.upperBound(),
         )
         println(result)
     }
@@ -126,7 +127,8 @@ class TestAuditPolling {
                     d = d,
                     ntrials = 10,
                     withoutReplacement = withoutReplacement,
-                    upperBound = it.assorter.upperBound()
+                    upper = it.assorter.upperBound(),
+                    sampleUpperBound = it.assorter.upperBound(),
                 )
                 if (!silent) println(result)
                 results.add(result)

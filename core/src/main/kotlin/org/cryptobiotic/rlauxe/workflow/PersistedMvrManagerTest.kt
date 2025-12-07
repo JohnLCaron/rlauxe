@@ -36,7 +36,7 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
             contestsUA.forEach { contestUA ->
                 contestUA.clcaAssertions.forEach { cassertion ->
                     val cassorter = cassertion.cassorter
-                    val samplet = ClcaErrorTracker(cassorter.noerror())
+                    val samplet = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound())
                     println("  contest = ${contestUA.id} assertion = ${cassorter.shortName()}")
 
                     testPairs.forEach { (fcard, card) ->

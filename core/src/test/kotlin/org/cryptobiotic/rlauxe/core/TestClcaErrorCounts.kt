@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 
+import org.cryptobiotic.rlauxe.oneaudit.TausOA
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import kotlin.test.*
 
@@ -92,7 +93,7 @@ class TestClcaErrorCounts {
         assertEquals(countedTotal, tracker.numberOfSamples())
         assertEquals(0, tracker.noerrorCount)
 
-        var errorCounts: ClcaErrorCounts = tracker.measuredCounts()
+        var errorCounts: ClcaErrorCounts = tracker.measuredErrorCounts()
         assertEquals(upper, errorCounts.upper)
         assertEquals(noerror, errorCounts.noerror)
         assertEquals(countedTotal, errorCounts.totalSamples)
@@ -104,9 +105,9 @@ class TestClcaErrorCounts {
         assertEquals(countedTotal+11, tracker.numberOfSamples())
         assertEquals(11, tracker.noerrorCount)
 
-        errorCounts = tracker.measuredCounts()
-        assertEquals(11, errorCounts.errorCounts[noerror])
-        assertEquals(countedTotal+11, errorCounts.totalSamples)
+        val allCounts = tracker.measuredAllCounts()
+        assertEquals(11, allCounts[noerror])
+        assertEquals(countedTotal+11, allCounts.values.sum())
     }
 
     @Test
@@ -136,10 +137,10 @@ class TestClcaErrorCounts {
             }
         }
 
-        var errorCounts: ClcaErrorCounts = tracker.measuredCounts()
+        var errorCounts: ClcaErrorCounts = tracker.measuredErrorCounts()
         println(errorCounts.show(poolAvg))
         assertContains(errorCounts.show(poolAvg), "loser=10, other=10, winner=10", )
-        assertContains(errorCounts.show(poolAvg), "win-oth=10, oth-los=20, noerror=0, oth-win=30, los-oth=40, los-win=50")
+        assertContains(errorCounts.show(poolAvg), "win-oth=10, oth-los=20, oth-win=30, los-oth=40, los-win=50")
 
         val countedTotal = tracker.valueCounter.values.sum()
         assertEquals(countedTotal, tracker.numberOfSamples())

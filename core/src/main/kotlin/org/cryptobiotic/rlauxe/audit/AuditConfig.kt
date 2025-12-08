@@ -59,7 +59,10 @@ data class AuditConfig(
         when (auditType) {
             AuditType.POLLING -> appendLine("  $pollingConfig")
             AuditType.CLCA -> appendLine("  $clcaConfig")
-            AuditType.ONEAUDIT -> appendLine("  $oaConfig")
+            AuditType.ONEAUDIT -> {
+                appendLine("  $oaConfig")
+                if (oaConfig.strategy== OneAuditStrategyType.clca) appendLine("  $clcaConfig")
+            }
         }
     }
     fun strategy() : String {
@@ -93,6 +96,7 @@ data class ClcaConfig(
     val fuzzPct: Double? = null, // use to generate apriori errorRates for simulation, only used when ClcaStrategyType = fuzzPct
     val pluralityErrorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker?
     val d: Int = 100,  // shrinkTrunc weight for error rates
+    val maxRisk: Double = 0.90,  // max risk on any one bet
 )
 
 // clca: use ClcaConfig and bettingMart

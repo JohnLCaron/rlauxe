@@ -143,7 +143,7 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val samplesNeeded = testH0Result.sampleCount
 
         val upper = cassorter.assorter.upperBound()
-        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) (testH0Result.tracker as ClcaErrorTracker).measuredCounts() else null
+        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) (testH0Result.tracker as ClcaErrorTracker).measuredErrorCounts() else null
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,

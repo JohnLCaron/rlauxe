@@ -4,12 +4,14 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditErrorsFromPools
 
 private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
 
 // allows to run OneAudit with runClcaAuditRound
-class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditorIF {
+class OneAuditAssertionAuditor(val pools: List<CardPoolIF>, val quiet: Boolean = true) : ClcaAssertionAuditorIF {
 
     override fun run(
         config: AuditConfig,
@@ -23,31 +25,29 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
         val oaCassorter = cassertion.cassorter as ClcaAssorterOneAudit
         val clcaConfig = config.clcaConfig
 
+        val oneAuditErrorsFromPools = OneAuditErrorsFromPools(pools)
+        val oaErrorRates = oneAuditErrorsFromPools.oaErrorRates(contestUA, oaCassorter)
 
-        // assume a single pool
-        val poolAvg = oaCassorter.poolAverages.assortAverage.toList().first().second
+        val accumErrorCounts: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
+        accumErrorCounts.setPhantomRate(contestUA.contest.phantomRate()) // TODO ??
 
-        // duplicate to estimateOneAuditAssertionRound
-        val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
-        prevRounds.setPhantomRate(contestUA.contest.phantomRate()) // TODO ??
+        val bettingFn: BettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
+            GeneralAdaptiveBetting(Npop = contestUA.Npop, oaErrorRates=oaErrorRates, d = clcaConfig.d, maxRisk=clcaConfig.maxRisk)
 
-        val clcaBettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-            GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = prevRounds, d = clcaConfig.d, poolAvg=poolAvg)
-
-        } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
-            val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(clcaConfig.pluralityErrorRates!!, prevRounds)
-            GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d, poolAvg=poolAvg)
+        /* } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
+            val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(clcaConfig.pluralityErrorRates!!, accumErrorCounts)
+            GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d)
 
         } else if (clcaConfig.strategy == ClcaStrategyType.fuzzPct) {
             val errorsP = ClcaErrorTable.getErrorRates(contestUA.contest.ncandidates, clcaConfig.fuzzPct) // TODO do better
-            val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(errorsP, prevRounds)
-            GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d, poolAvg=poolAvg)
+            val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(errorsP, accumErrorCounts)
+            GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d)
 
         } else {
             throw RuntimeException("unsupported strategy ${clcaConfig.strategy}")
-        }
+        } */
 
-        // enum class OneAuditStrategyType { reportedMean, bet99, eta0Eps, optimalComparison }
+        /* enum class OneAuditStrategyType { reportedMean, bet99, eta0Eps, optimalComparison }
         val strategy = config.oaConfig.strategy
         val testH0Result = if (strategy == OneAuditStrategyType.clca || strategy == OneAuditStrategyType.optimalComparison) {
             val bettingFn: BettingFn = if (strategy == OneAuditStrategyType.clca) clcaBettingFn else {
@@ -58,9 +58,11 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
 
         } else {
             runAlpha(config, contestUA.Npop, oaCassorter, sampling, oaCassorter.upperBound())
-        }
+        } */
 
-        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) testH0Result.tracker.measuredCounts() else null
+        val testH0Result = runBetting(config, contestUA.Npop, oaCassorter, sampling, bettingFn)
+
+        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) testH0Result.tracker.measuredErrorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampling.nmvrs(),
@@ -69,12 +71,12 @@ class OneAuditAssertionAuditor(val quiet: Boolean = true) : ClcaAssertionAuditor
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
             measuredMean = testH0Result.tracker.mean(),
-            startingRates = prevRounds,  // TODO only true when using strategy.clca
+            startingRates = accumErrorCounts,
             measuredCounts = measuredCounts,
-            params = mapOf("poolAvg" to poolAvg)
+            // params = mapOf("poolAvg" to poolAvg)
         )
 
-        if (!quiet) logger.debug{" ${contestUA.name} strategy=$strategy auditResult= ${assertionRound.auditResult}"}
+        if (!quiet) logger.debug{" ${contestUA.name} auditResult= ${assertionRound.auditResult}"}
         return testH0Result
     }
 

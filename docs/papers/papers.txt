@@ -35,6 +35,9 @@ RLA papers
 
 2020	Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA	Stark; 24 Mar 2020
 
+2020  	Estimating means of bounded random variables by betting. 	WAUDBY-SMITH and RAMDAS; Submitted on 19 Oct 2020, Aug 29, 2022 (revised)
+	https://arxiv.org/abs/2010.09686.
+
 2020	More style, less work: card-style data decrease risk-limiting audit sample sizes	Amanda K. Glazer, Jacob V. Spertus, and Philip B. Stark; 6 Dec 2020
 	consistent sampling, card-style data (CSD) tracks which contests are on which cards. I guess ballot styles ( which contests are on which ballots) are a given.
 	see chapter 7 "Implementation"
@@ -47,9 +50,6 @@ RLA papers
 
 2021	The ATHENA Class of Risk-Limiting Ballot Polling Audits		Filip Zagórski, Grant McClearn, Sarah Morin, Neal McBurnett, and Poorvi L. Vora. February 23, 2021
 	ATHENA class of R2 (round by round) stopping rules
-
-2021  	Estimating means of bounded random variables by betting. 	WAUDBY-SMITH and RAMDAS; Aug 29, 2022
-	https://arxiv.org/abs/2010.09686. 
 
 2021	RiLACS: Risk-Limiting Audits via Confidence Sequences		Ian Waudby-Smith, Philip B. Stark, Aaditya Ramdas; Jul 23, 2021
 	RLAs using confidence sequences

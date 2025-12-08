@@ -651,7 +651,7 @@ fun calc_sample_sizes(
     val startingErrorRates= ClcaErrorCounts.fromPluralityErrorRates(pluralityErrorRates,
         cassorter.noerror(), totalSamples=0, upper=cassorter.assorter.upperBound())
 
-    val betFn = GeneralAdaptiveBetting(
+    val betFn = GeneralAdaptiveBettingOld(
         N = N,
         startingErrorRates=startingErrorRates,
         d = 100,

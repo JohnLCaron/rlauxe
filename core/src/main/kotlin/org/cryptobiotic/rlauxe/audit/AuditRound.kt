@@ -146,6 +146,7 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
         val assertionsZip = this.assertionRounds.zip(other.assertionRounds)
         assertionsZip.forEach { (myAssertionRound, otherAssertionRound) ->
             if (!myAssertionRound.equals(otherAssertionRound)) {
+                val why = myAssertionRound.equals(otherAssertionRound)
                 println(myAssertionRound)
                 println(otherAssertionRound)
                 return false

@@ -70,7 +70,7 @@ class SfoaSingleRoundAuditTask(
                         mvrManager.sortedCards().iterator(),
                     )
 
-                val runner = OneAuditAssertionAuditor()
+                val runner = OneAuditAssertionAuditor(mvrManager.cardPools()!!)
                 val result: TestH0Result = runner.run(
                     rlauxAudit.auditConfig(),
                     contestRound,

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.oneaudit.TausOA
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
@@ -10,9 +11,10 @@ interface ClcaErrorRatesIF {
     fun errorCounts(): Map<Double, Int>
 }
 
+// TODO back out handling OneAudit?
 // primitive assorter upper bound, is always > 1/2
-data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
-    override fun errorRates() = errorCounts.mapValues { it.value / totalSamples.toDouble() }
+class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
+    override fun errorRates() = errorCounts.mapValues { if (totalSamples == 0) 0.0 else it.value / totalSamples.toDouble() }
     override fun errorCounts() = errorCounts
 
     fun bassortValues(poolAvg: Double?=null): List<Double> {
@@ -195,41 +197,6 @@ class Taus(upper: Double): TausIF {
     override fun toString(): String {
         return taus.toString()
     }
-
-}
-
-// Consider a single pool and assorter a, with upper bound u and avg assort value in the pool is poolAvg.
-// poolAvg_a is used as the cvr_value, so then mvr_assort - mvr_assort has one of 3 possible overstatement values:
-//
-//    poolAvg - [0, .5, u] = [poolAvg, poolAvg -.5, poolAvg - u] for mvr loser, other and winner
-//
-// then bassort = (1-o/u)/(2-v/u) in [0, 2] * noerror
-//
-//    bassort = [1-poolAvg/u, 1 - (poolAvg -.5)/u, 1 - (poolAvg - u)/u] * noerror
-//    bassort = [1-poolAvg/u, (u - poolAvg + .5)/u, (2u - poolAvg)/u] * noerror
-
-class TausOA(upper: Double, poolAvg: Double): TausIF {
-    val tausOA: List<Pair<Double, String>>
-
-    init {
-        // bassort = [1-poolAvg/u, (u - poolAvg + .5)/u, (2u - poolAvg)/u] * noerror, for mvr loser, other and winner
-        tausOA = mapOf(
-            (1 - poolAvg / upper) to "loser",
-            (upper - poolAvg + .5) / upper to "other",
-            (2 * upper - poolAvg) / upper to "winner"
-        ).toList()
-    }
-
-    override fun desc(want: Double): String? {
-        val pair = tausOA.find { doubleIsClose(it.first, want) }
-        return pair?.second
-    }
-
-    override fun values() = tausOA.map { it.first }.toList()
-
-    override fun toString(): String {
-        return tausOA.toString()
-    }
 }
 
 class ClcaErrorTracker(val noerror: Double, val upper: Double, val sequences: DebuggingSequences?=null, val debug:Boolean=false) : SampleTracker, ClcaErrorRatesIF {
@@ -271,10 +238,13 @@ class ClcaErrorTracker(val noerror: Double, val upper: Double, val sequences: De
     }
 
     // data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
-    fun measuredCounts(): ClcaErrorCounts {
-        // TODO why do we need complete ??
+    fun measuredErrorCounts(): ClcaErrorCounts {
+        return ClcaErrorCounts(valueCounter.toSortedMap(), numberOfSamples(), noerror, upper)
+    }
+
+    fun measuredAllCounts(): Map<Double, Int> {
         val complete = (valueCounter.toList() + Pair(noerror, noerrorCount)).toMap()
-        return ClcaErrorCounts(complete.toSortedMap(), numberOfSamples(), noerror, upper)
+        return complete.toSortedMap()
     }
 
     override fun errorRates() = valueCounter.mapValues { it.value / numberOfSamples().toDouble() }.toSortedMap()

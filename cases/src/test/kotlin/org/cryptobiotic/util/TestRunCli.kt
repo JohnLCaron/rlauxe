@@ -147,7 +147,7 @@ class TestRunCli {
         )
         val publisher = Publisher(auditdir)
         // val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        // writeSortedCardsInternalSort(publisher, config.seed)
+        // writeSortedCardsInternalSort(publisher, config.seed) happens now in RunRlaCreateOneAudit.startTestElectionOneAudit
 
         println("============================================================")
         val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)

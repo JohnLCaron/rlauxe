@@ -121,8 +121,8 @@ class BettingMart(
         } else {
             when {
                 (pvalueLast < riskLimit) -> TestH0Status.StatRejectNull
-                (mj < 0.0) -> TestH0Status.SampleSumRejectNull // 5
-                (mj > sampleUpperBound) -> TestH0Status.AcceptNull // 1
+                (mj > sampleUpperBound) -> TestH0Status.AcceptNull // 1  # true mean is certainly less than 1/2
+                (mj < 0.0) -> TestH0Status.SampleSumRejectNull     // 5 # true mean certainly greater than 1/2
                 else -> TestH0Status.LimitReached
             }
         }

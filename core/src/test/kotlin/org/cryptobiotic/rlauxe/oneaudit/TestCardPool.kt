@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
+import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -45,13 +45,13 @@ class TestCardPool {
             ContestUnderAudit(it, isClca = true).addStandardAssertions()
         }
 
-        val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
+        val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
         contestsUAs.forEach { contestUA ->
             val candVotes = contestUA.contest.votes()!!
             val voteForN = contestUA.contest.info().voteForN
             val sumVotes = candVotes.map { it.value }.sum()
             val underVotes = contestUA.contest.Ncast() * voteForN - sumVotes
-            contestVotes[contestUA.id] = VotesAndUndervotes(candVotes, underVotes, voteForN)
+            contestVotes[contestUA.id] = Vunder(candVotes, underVotes, voteForN)
         }
 
         val cvrs = makeVunderCvrs(contestVotes, "poolName", poolId = 42)
@@ -76,13 +76,13 @@ class TestCardPool {
             ContestUnderAudit(it, isClca = true).addStandardAssertions()
         }
 
-        val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
+        val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
         contestsUAs.forEach { contestUA ->
             val candVotes = contestUA.contest.votes()!!
             val voteForN = contestUA.contest.info().voteForN
             val sumVotes = candVotes.map { it.value }.sum()
             val underVotes = contestUA.contest.Ncast() * voteForN - sumVotes
-            contestVotes[contestUA.id] = VotesAndUndervotes(candVotes, underVotes, voteForN)
+            contestVotes[contestUA.id] = Vunder(candVotes, underVotes, voteForN)
         }
 
         val cvrs = makeVunderCvrs(contestVotes, "poolName", poolId = 42)

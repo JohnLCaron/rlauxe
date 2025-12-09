@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
+import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import kotlin.Int
 import kotlin.test.Test
@@ -137,9 +137,9 @@ class CardPoolSingleContest(override val poolName: String, override val poolId: 
 
     override fun contests() = intArrayOf(contestId)
 
-    override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
+    override fun votesAndUndervotes(contestId: Int): Vunder {
         val poolUndervotes = ncards() - regVotes.votes.values.sum()
-        return VotesAndUndervotes(regVotes.votes, poolUndervotes, 1)
+        return Vunder(regVotes.votes, poolUndervotes, 1)
     }
 }
 
@@ -155,7 +155,7 @@ fun makeTestMvrs(
 
     // add the regular cvrs
     if (cvrNcards > 0) {
-        val vunderCvrs = VotesAndUndervotes(cvrVotes, cvrUndervotes, info.voteForN)
+        val vunderCvrs = Vunder(cvrVotes, cvrUndervotes, info.voteForN)
         val cvrCvrs = makeVunderCvrs(mapOf(info.id to vunderCvrs), "regular", poolId = null)
         cvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     }

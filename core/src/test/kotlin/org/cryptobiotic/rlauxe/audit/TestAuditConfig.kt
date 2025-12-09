@@ -14,7 +14,7 @@ class TestAuditConfig {
 """AuditConfig(auditType=CLCA, hasStyle=true, riskLimit=0.05, seed=-2417429242344992892 version=2.0
   nsimEst=10, quantile=0.8, simFuzzPct=null,
   minRecountMargin=0.005 removeTooManyPhantoms=false contestSampleCutoff=30000 removeCutoffContests=false
-  ClcaConfig(strategy=generalAdaptive, fuzzPct=null, pluralityErrorRates=null, d=100)
+  ClcaConfig(strategy=generalAdaptive, fuzzPct=null, pluralityErrorRates=null, d=100, maxRisk=0.9)
 """
         assertEquals(expected, config.toString())
         assertEquals("generalAdaptive", config.strategy())

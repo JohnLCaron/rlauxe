@@ -18,7 +18,7 @@ class WorkflowTesterOneAudit(
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
         val complete = runClcaAuditRound(config, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
-            auditor = OneAuditAssertionAuditor()
+            auditor = OneAuditAssertionAuditor(mvrManager.cardPools()!!)
         )
         auditRound.auditWasDone = true
         auditRound.auditIsComplete = complete

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
+import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
@@ -198,8 +198,8 @@ open class Contest(
     }
 
     // put the undervotes into the candidate map.
-    fun votesAndUndervotes(): VotesAndUndervotes {
-        return VotesAndUndervotes(votes, undervotes, info.voteForN)
+    fun votesAndUndervotes(): Vunder {
+        return Vunder(votes, undervotes, info.voteForN)
     }
 
     override fun recountMargin(assorter: AssorterIF): Double  {

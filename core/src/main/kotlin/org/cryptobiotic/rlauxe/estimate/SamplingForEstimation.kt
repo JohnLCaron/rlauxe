@@ -170,6 +170,7 @@ fun switchCandidateRankings(votes: MutableList<Int>, candidateIds: List<Int>) {
     }
 }
 
+// randomly change a candidate to another
 fun chooseNewCandidate(currId: Int?, candidateIds: List<Int>, undervotes: Boolean): Int? {
     return if (undervotes) chooseNewCandidateWithUndervotes(currId, candidateIds) else
         chooseNewCandidateNoUndervotes(currId, candidateIds)
@@ -208,6 +209,10 @@ class OneAuditVunderBarFuzzer(
     val fuzzPct: Double,
 ) {
     val isIRV = infos.mapValues { it.value.isIrv }
+
+    fun reset() {
+        vunderBar.reset()
+    }
 
     fun makePairsFromCards(cards: List<AuditableCard>): List<Pair<Cvr, AuditableCard>> {
         val mvrs = cards.map { card ->

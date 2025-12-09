@@ -1,5 +1,5 @@
 # Rlauxe Implementation Overview
-_last changed 10/22/2025_
+_last changed 12/2082/2025_
 
 While Rlauxe is intended to be used in real elections, its primary use currently is to simulate elections for testing
 RLA algorithms.
@@ -62,23 +62,24 @@ Each audit type has specialized processing for creating the AuditableCards and t
 ## AuditRecord
 
     $auditdir/
-        auditConfig.json      // AuditConfigJson
-        cardPools.json        // CardPoolJson (OneAudit only)
-        contests.json         // ContestsUnderAuditJson
+        auditConfig.json      // AuditConfigJson     committment
         cardManifest.csv.zip  // AuditableCardCsv    cardManifst committment
+        cardPools.json        // CardPoolJson (OneAudit only) committment
+        contests.json         // ContestsUnderAuditJson committment
         sortedCards.csv.zip   // AuditableCardCsv    sorted by prn
     
     private/
-       sortedMvrs.csv.zip     // AuditableCardCsv, for tests only, sorted by prn
-       testMvrs.csv.zip       // AuditableCardCsv, for tests only, test mvrs
+       sortedMvrs.csv        // AuditableCardCsv, for tests only, sorted by prn
     
     roundX/
-        auditState.json     // AuditRoundJson
-        samplePrns.json     // SamplePrnsJson, the sample prns to be audited
+        auditState.json     // AuditRoundJson,  the state of the audit for this round
+        sampleCards.csv     // AuditableCardCsv, the cards used for the audit; matches samplePrns.csv
         sampleMvrs.csv      // AuditableCardCsv, the mvrs used for the audit; matches samplePrns.csv
+        samplePrns.json     // SamplePrnsJson, the sample prns to be audited
 
 For each round, the selected ballot prns are written into samplePrns.json in order. The mvrs are gathered or
-simulated and written to sampleMvrs.csv.
+simulated and written to sampleMvrs.csv. The matching cards are written to sampleCards.csv, for completeness and
+security.
 
 
 ## Cast Vote Records

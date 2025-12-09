@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.betting
 import org.cryptobiotic.rlauxe.core.AdaptiveBetting
 import org.cryptobiotic.rlauxe.core.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.core.PluralityErrorRates
-import org.cryptobiotic.rlauxe.core.GeneralAdaptiveBetting
+import org.cryptobiotic.rlauxe.core.GeneralAdaptiveBettingOld
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.util.dfn
@@ -55,7 +55,7 @@ class GenBettingPayoff {
                 val noerror = 1 / (2 - margin)
                 // ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
                 val errorCounts = ClcaErrorCounts(emptyMap(), 0, noerror, 1.0)
-                val optimal = GeneralAdaptiveBetting(N = N, errorCounts, d = 100)
+                val optimal = GeneralAdaptiveBettingOld(N = N, errorCounts, d = 100)
                 val samples = ClcaErrorTracker(noerror, 1.0)
                 repeat(100) { samples.addSample(noerror) }
                 println(" margin=$margin, noerror=$noerror bet = ${optimal.bet(samples)}")

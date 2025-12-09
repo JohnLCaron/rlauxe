@@ -95,10 +95,11 @@ class OneAuditSingleRoundAuditTaskGenerator(
 
         val oneaudit = WorkflowTesterOneAudit(config=config, listOf(contestUA),
             MvrManagerForTesting(mvrs, oaMvrs, seed=config.seed, pools=pools))
+
         return ClcaSingleRoundWorkflowTask(
             name(),
             oneaudit,
-            auditor = OneAuditAssertionAuditor(),
+            auditor = OneAuditAssertionAuditor(pools),
             oaMvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 1.0),
             quiet,
@@ -145,7 +146,7 @@ class OneAuditSingleRoundWithDilutedMargin(
         return ClcaSingleRoundWorkflowTask(
             name(),
             oneaudit,
-            auditor = OneAuditAssertionAuditor(),
+            auditor = OneAuditAssertionAuditor(pools),
             mvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 1.0),
             quiet,

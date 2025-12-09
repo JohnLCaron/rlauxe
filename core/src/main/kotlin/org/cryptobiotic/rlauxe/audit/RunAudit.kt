@@ -6,6 +6,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.core.TestH0Result
+import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
@@ -138,7 +139,7 @@ fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: Asser
         val testH0Result =  when (config.auditType) {
             AuditType.CLCA -> runClcaAudit(config, cvrPairs, contestRound, assertionRound, auditRoundResult)
             AuditType.POLLING -> runPollingAudit(config, cvrPairs, contestRound, assertionRound, auditRoundResult)
-            AuditType.ONEAUDIT -> runOneAudit(config, cvrPairs, contestRound, assertionRound, auditRoundResult)
+            AuditType.ONEAUDIT -> runOneAudit(config, cvrPairs, workflow.mvrManager().cardPools()!!, contestRound, assertionRound, auditRoundResult)
         }
 
         return if (testH0Result == null) "failed" else buildString {
@@ -191,9 +192,9 @@ fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, cont
     }
 }
 
-fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
+fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, pools: List<CardPoolIF>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
     try {
-        val auditor = OneAuditAssertionAuditor()
+        val auditor = OneAuditAssertionAuditor(pools)
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
         val sampler = ClcaSampling(contestRound.id, cvrPairs, cassorter, allowReset = false)

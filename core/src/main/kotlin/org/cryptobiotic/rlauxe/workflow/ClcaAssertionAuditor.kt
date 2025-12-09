@@ -91,18 +91,18 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         prevRounds.setPhantomRate(contest.phantomRate()) // TODO ??
 
         val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-            GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = prevRounds, d = clcaConfig.d,)
+            GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = prevRounds, d = clcaConfig.d,)
 
         } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
             //AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
             val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(clcaConfig.pluralityErrorRates!!, prevRounds)
-            GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
+            GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
 
         } else if (clcaConfig.strategy == ClcaStrategyType.fuzzPct) {
             val errorsP = ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct) // TODO do better
             val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(errorsP, prevRounds)
             // AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=errorsP) // just stick with them
-            GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
+            GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
 
         } else {
             throw RuntimeException("unsupported strategy ${clcaConfig.strategy}")
@@ -125,7 +125,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         // TODO remove tracker from testH0
         val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = terminateOnNullReject, tracker=tracker) { sampling.sample() }
 
-        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) testH0Result.tracker.measuredCounts() else null
+        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) testH0Result.tracker.measuredErrorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampling.maxSamples(),

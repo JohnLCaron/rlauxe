@@ -2,16 +2,19 @@ package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.BettingFn
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditErrorsFromPools
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.VunderBar
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.workflow.ClcaSampling
 import org.cryptobiotic.rlauxe.workflow.Sampling
+import kotlin.collections.List
 import kotlin.collections.mutableListOf
 import kotlin.math.min
 
@@ -38,16 +41,16 @@ fun estimateSampleSizes(
     nthreads: Int = 32,
 ): List<RunTestRepeatedResult> {
 
-    // simulate the card pools for all contests
+    // simulate the card pools for all OneAudit contests; here because its over all contests
     val infos = auditRound.contestRounds.map { it.contestUA.contest.info() }.associateBy { it.id }
     val vunderFuzz = if (!config.isOA) null else {
         OneAuditVunderBarFuzzer(VunderBar(cardPools!!), infos, config.simFuzzPct ?: 0.0)
     }
 
-    // create the estimation tasks
+    // create the estimation tasks for each contest
     val tasks = mutableListOf<EstimateSampleSizeTask>()
     auditRound.contestRounds.filter { !it.done }.forEach { contestRound ->
-        tasks.addAll(makeEstimationTasks(config, contestRound, auditRound.roundIdx, cardManifest, vunderFuzz))
+        tasks.addAll(makeEstimationTasks(config, contestRound, auditRound.roundIdx, cardManifest,  vunderFuzz))
     }
 
     // run tasks concurrently
@@ -106,11 +109,9 @@ fun makeEstimationTasks(
 
     val tasks = mutableListOf<EstimateSampleSizeTask>()
 
-    // TODO could do them for all contests in one pass; could be in one list
-    // TODO what if its a very large election, but a contest is very small? May not have enough.
-    //   assumes the cards are randomized
+    // get the first n cards for this contest
+    // assumes the cards are already randomized
     val contestCards = ContestCardsLimited(contestRound.contestUA.id, config.contestSampleCutoff, cardManifest.iterator()).cards()
-    val oaFuzzedPairs: List<Pair<Cvr, AuditableCard>>? = vunderFuzz?.makePairsFromCards(contestCards)
 
     contestRound.assertionRounds.map { assertionRound ->
         if (!assertionRound.status.complete) {
@@ -134,7 +135,7 @@ fun makeEstimationTasks(
                         roundIdx,
                         config,
                         contestCards = contestCards,
-                        oaFuzzedPairs,
+                        vunderFuzz,
                         contestRound,
                         assertionRound,
                         startingTestStatistic,
@@ -153,7 +154,7 @@ class EstimateSampleSizeTask(
     val roundIdx: Int,
     val config: AuditConfig,
     val contestCards: List<AuditableCard>,
-    val oaFuzzedPairs: List<Pair<Cvr, AuditableCard>>?,
+    val vunderFuzz: OneAuditVunderBarFuzzer?,
     val contestRound: ContestRound,
     val assertionRound: AssertionRound,
     val startingTestStatistic: Double,
@@ -190,7 +191,8 @@ class EstimateSampleSizeTask(
                 estimateOneAuditAssertionRound(
                     roundIdx,
                     config,
-                    oaFuzzedPairs!!,
+                    contestCards,
+                    vunderFuzz!!,
                     contestRound,
                     assertionRound,
                     startingTestStatistic,
@@ -232,18 +234,18 @@ fun estimateClcaAssertionRound(
     prevRounds.setPhantomRate(contest.phantomRate()) // TODO ??
 
     val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-        GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = prevRounds, d = clcaConfig.d,)
+        GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = prevRounds, d = clcaConfig.d,)
 
     } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
         //AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
         val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(clcaConfig.pluralityErrorRates!!, prevRounds)
-        GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
+        GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
 
     } else if (clcaConfig.strategy == ClcaStrategyType.fuzzPct) {
         val errorsP = ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct) // TODO do better
         val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(errorsP, prevRounds)
         // AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=errorsP) // just stick with them
-        GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
+        GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
 
     } else {
         throw RuntimeException("unsupported strategy ${clcaConfig.strategy}")
@@ -405,7 +407,8 @@ fun runRepeatedAlphaMart(
 fun estimateOneAuditAssertionRound(
     roundIdx: Int,
     config: AuditConfig,
-    oaFuzzedPairs: List<Pair<Cvr, AuditableCard>>,
+    contestCards: List<AuditableCard>,
+    vunderFuzz: OneAuditVunderBarFuzzer,
     contestRound: ContestRound,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
@@ -417,27 +420,66 @@ fun estimateOneAuditAssertionRound(
     val oaConfig = config.oaConfig
     val clcaConfig = config.clcaConfig
 
+    // TODO could pass the fuzzed mvrs in always, to simplify
+    // TODO wait we already wrote the fuzzed cards, I think.
+    // The estimation and the audit are using a different fuzz.
+    // TODO this doesnt maintain the right proportions when you dont fuzz the entire set, ie you just take the first 20K
+    // So can we grab the fuzzed cards?
+    vunderFuzz.reset()
+    val oaFuzzedPairs: List<Pair<Cvr, AuditableCard>> = vunderFuzz.makePairsFromCards(contestCards)
+    val pools = vunderFuzz.vunderBar.pools
+
+    /////////////////////////////////////////////////////////
+    /* for debugging, lets write these to disk so we can compare to the audited fuzzed cards
+    val fuzzedMvrs = oaFuzzedPairs.map { it.first }
+    val tempFile = "/home/stormy/rla/persist/testRunCli/oneaudit/audit/estMvrs${roundIdx}.csv"
+    writeUnsortedMvrs(fuzzedMvrs, tempFile)
+
+    val info2 = ContestInfo("contest2", 2,  mapOf("Wes" to 1), SocialChoiceFunction.PLURALITY)
+    val infos = mapOf(contestUA.id to contestUA.contest.info(), 2 to info2)
+     val fuzzedMvrTab = tabulateCvrs(fuzzedMvrs.iterator(), infos)
+    println("fuzzedMvrTab= ${fuzzedMvrTab[contestUA.id]}")
+
+    val fuzzedPool = calcCardPoolsFromMvrs(
+        infos,
+        cardStyles = listOf(CardStyle("pool42", listOf(1,2), 42)),
+        fuzzedMvrs,
+    )
+    println("pool= ${pools.first().show()}")
+    println("fuzzedPool= ${fuzzedPool.first().show()}")
+    // require(pools == fuzzedPool)
+    println()
+    ////////////////////////////////////////////////////////////////////
+     */
+
     // duplicate to OneAuditAssertionAuditor
     val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
     prevRounds.setPhantomRate(contestUA.contest.phantomRate()) // TODO ??
 
+    // could also get from the vunderFuzz
+    val oneAuditErrorsFromPools = OneAuditErrorsFromPools(pools)
+    val oaErrorRates = oneAuditErrorsFromPools.oaErrorRates(contestUA, oaCassorter)
+
+    val bettingFn: BettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
+        GeneralAdaptiveBetting(Npop = contestUA.Npop, oaErrorRates=oaErrorRates, d = clcaConfig.d, maxRisk=clcaConfig.maxRisk)
+
+    /*
     val clcaBettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-        GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = prevRounds, d = clcaConfig.d,)
+        GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = prevRounds, d = clcaConfig.d,)
 
     } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
         val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(clcaConfig.pluralityErrorRates!!, prevRounds)
-        GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
+        GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
 
     } else if (clcaConfig.strategy == ClcaStrategyType.fuzzPct) {
         val errorsP = ClcaErrorTable.getErrorRates(contestUA.contest.ncandidates, clcaConfig.fuzzPct) // TODO do better
         val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(errorsP, prevRounds)
-        GeneralAdaptiveBetting(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
+        GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
 
     } else {
         throw RuntimeException("unsupported strategy ${clcaConfig.strategy}")
     }
 
-    val sampler = ClcaSampling(contestUA.contest.id, oaFuzzedPairs, oaCassorter, allowReset = true)
 
     // enum class OneAuditStrategyType { reportedMean, bet99, eta0Eps, optimalComparison }
     val strategy = config.oaConfig.strategy
@@ -445,9 +487,11 @@ fun estimateOneAuditAssertionRound(
         val bettingFn: BettingFn = if (strategy == OneAuditStrategyType.clca) clcaBettingFn else {
             // TODO p2o = clcaBettingFn.startingErrorRates.get("p2o")
             OptimalComparisonNoP1(contestUA.Npop, true, oaCassorter.upperBound)
-        }
+        } */
 
-        runRepeatedBettingMart(
+    val sampler = ClcaSampling(contestUA.contest.id, oaFuzzedPairs, oaCassorter, allowReset = true)
+
+    val result = runRepeatedBettingMart(
             config,
             sampler,
             bettingFn,
@@ -459,7 +503,7 @@ fun estimateOneAuditAssertionRound(
             moreParameters
         )
 
-    } else {
+    /* } else {
         val eta0 = if (strategy == OneAuditStrategyType.eta0Eps)
             oaCassorter.upperBound() * (1.0 - eps)
         else
@@ -487,7 +531,7 @@ fun estimateOneAuditAssertionRound(
             startingTestStatistic = startingTestStatistic,
             moreParameters
         )
-    }
+    } */
 
     assertionRound.estimationResult = EstimationRoundResult(
         roundIdx,

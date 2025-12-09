@@ -90,6 +90,8 @@ class CreateAudit(val name: String, val topdir: String, val config: AuditConfig,
         // write contests
         writeContestsJsonFile(contestsUA, publisher.contestsFile())
         logger.info{"write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
+
+        // cant write the cardManifest until after seed is generated after committment to cardManifest
     }
 }
 
@@ -153,4 +155,15 @@ fun writeMvrsForRound(publisher: Publisher, round: Int) {
 
     val countCards = writeAuditableCardCsvFile(Closer(sampledMvrs.iterator()), publisher.sampleMvrsFile(round))
     logger.info{"write ${countCards} cards to ${publisher.sampleMvrsFile(round)}"}
+}
+
+fun writeUnsortedMvrs(unsortedMvrs: List<Cvr>, filename: String) {
+    val mvrCards = unsortedMvrs.mapIndexed { index, mvr ->
+        AuditableCard.fromCvr(mvr, index, 0)
+    }
+    val sortedMvrs = mvrCards.sortedBy { it.prn }
+
+    validateOutputDirOfFile(filename)
+    val countMvrs = writeAuditableCardCsvFile(Closer(sortedMvrs.iterator()), filename)
+    logger.info{"write ${countMvrs} mvrs to ${filename}"}
 }

@@ -232,14 +232,22 @@ data class ClcaConfigJson(
     val fuzzPct: Double?,
     val errorRates: List<Double>?,
     val d: Int,
+    val maxRisk: Double?
 )
 
-fun ClcaConfig.publishJson() = ClcaConfigJson(this.strategy.name, this.fuzzPct, this.pluralityErrorRates?.toList(), this.d)
+fun ClcaConfig.publishJson() = ClcaConfigJson(
+    this.strategy.name,
+    this.fuzzPct,
+    this.pluralityErrorRates?.toList(),
+    this.d,
+    this.maxRisk)
+
 fun ClcaConfigJson.import() = ClcaConfig(
         enumValueOf(this.strategy, ClcaStrategyType.entries) ?: ClcaStrategyType.generalAdaptive,
         this.fuzzPct,
         if (this.errorRates != null) PluralityErrorRates.fromList(this.errorRates) else null,
         this.d,
+        this.maxRisk ?: 0.90, // TODO
     )
 
 @Serializable

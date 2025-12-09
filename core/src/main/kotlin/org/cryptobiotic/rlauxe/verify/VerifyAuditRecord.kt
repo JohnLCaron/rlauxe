@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.existsOrZip
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -116,6 +117,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
             val nextRound = auditRecord.rounds[nextRoundIdx]
             val nextContestRound = nextRound.contestRounds.find { it.id == contest.contest.id }
             if (nextContestRound == null) break
+            if (!existsOrZip(publisher.sampleCardsFile(nextRound.roundIdx))) return
             val nextCards = readAuditableCardCsvFile(publisher.sampleCardsFile(nextRound.roundIdx))
             result.addMessage("   verify sampling for contest ${contest.id} round ${firstRound.roundIdx} vs round ${nextRound.roundIdx}")
             verifySamplingForContest(contest, cards,  nextCards, result)
@@ -126,6 +128,8 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
     fun verifySamplingForContest(contest: ContestUnderAudit, cards: List<AuditableCard>, nextCards: List<AuditableCard>, result: VerifyResults): Boolean {
         val mycards = cards.filter { it.contests().contains(contest.id)}.iterator()
         val nextcards = nextCards.filter { it.contests().contains(contest.id)}.iterator()
+
+        // TODO need to know how many cards were chosen for this contest and round, and stop there...
 
         mycards.forEach { mycard ->
             val nextcard = nextcards.next()

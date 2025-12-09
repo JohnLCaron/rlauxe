@@ -97,8 +97,8 @@ class ContestTabulation(val info: ContestInfo): RegVotesIF {
         this.overvotes += other.overvotes
     }
 
-     fun votesAndUndervotes(): VotesAndUndervotes {
-        return VotesAndUndervotes(votes, undervotes, info.voteForN)
+     fun votesAndUndervotes(): Vunder {
+        return Vunder(votes, undervotes, info.voteForN)
     }
 
     fun nvotes() = votes.map { it.value}.sum()

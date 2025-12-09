@@ -1,12 +1,11 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import kotlin.random.Random
 
+// CANDIDATE for replacement, use Vunder
+
 // This is a way to create test Cvrs that match known vote totals and undervotes for one contest
-class VotesAndUndervotes(candVotes: Map<Int, Int>, val undervotes: Int, val voteForN: Int) {
+class VotesAndUndervotes(val candVotes: Map<Int, Int>, val undervotes: Int, val voteForN: Int) {
     val candVotesSorted: Map<Int, Int> = candVotes.toList().sortedBy{ it.second }.reversed().toMap() // reverse sort by largest vote
     private val candidateIds = candVotesSorted.keys.toList()
 
@@ -23,6 +22,7 @@ class VotesAndUndervotes(candVotes: Map<Int, Int>, val undervotes: Int, val vote
         return votes.any { it != 0 } || (undervotesUsed < undervotes)
     }
 
+    // assumes you will run all cards then shuffle, so just exhausts cand0, then cand1, etc
     fun pickRandomCandidatesAndDecrement() : List<Int> {
         val result = mutableListOf<Int>()
 
@@ -86,7 +86,7 @@ class VotesAndUndervotes(candVotes: Map<Int, Int>, val undervotes: Int, val vote
         return result.map { candidateIds[it] }
     }
 
-    // think of varr as a partition of votes
+    // think of varr as a partition of votes; this makes the choice proportional to the vote count
     private fun pickOneCandidate(varr: IntArray) : Int {
         val nvotes = varr.sum()
         // pick a number from 0 to number of votes unchosen
@@ -131,6 +131,8 @@ class VotesAndUndervotes(candVotes: Map<Int, Int>, val undervotes: Int, val vote
 
 }
 
+/*
+// requires that you generate all cvrs
 // combines VotesAndUndervotes for multiple contests into cvrs for one pool
 // make cvrs until we exhaust the votes
 // this algorithm puts as many contests as possible on each cvr
@@ -159,40 +161,4 @@ fun makeVunderCvrs(contestVotes: Map<Int, VotesAndUndervotes>, poolName: String,
 
     rcvrs.shuffle()
     return rcvrs
-}
-
-class VunderBar(val pools: List<CardPoolIF>) {
-    val vunderPools: Map<Int, VunderPool>
-
-    init {
-         vunderPools = pools.map { pool ->
-            val vunders = pool.contests().associate { contestId -> Pair(contestId, pool.votesAndUndervotes(contestId)) }
-            VunderPool(vunders, pool.poolName, pool.poolId)
-        }.associateBy { it.poolId }
-    }
-
-    fun simulatePooledCard(card: AuditableCard): Cvr {
-        val poolId = card.poolId!!
-        val vunderPool = vunderPools[poolId]!!
-        return vunderPool.simulatePooledCard(card)
-    }
-}
-
-// for one pool
-class VunderPool(val vunders: Map<Int, VotesAndUndervotes>, val poolName: String, val poolId: Int ) {
-
-    fun simulatePooledCard(card: AuditableCard): Cvr {
-        val cvrb = CvrBuilder2(card.location, phantom = false, poolId = poolId)
-        card.possibleContests.forEach { contestId ->
-            val vunders = vunders[contestId]
-            if (vunders == null || vunders.isEmpty())
-                cvrb.addContest(contestId, intArrayOf())
-            else {
-                val useCandidates = vunders.pickRandomCandidatesAndDecrement()
-                cvrb.addContest(contestId, useCandidates.toIntArray())
-            }
-        }
-        return cvrb.build()
-    }
-
-}
+} */

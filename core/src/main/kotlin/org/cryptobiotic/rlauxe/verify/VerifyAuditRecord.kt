@@ -129,6 +129,8 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         val mycards = cards.filter { it.contests().contains(contest.id)}.iterator()
         val nextcards = nextCards.filter { it.contests().contains(contest.id)}.iterator()
 
+        // TODO need to know how many cards were chosen for this contest and round, and stop there...
+
         mycards.forEach { mycard ->
             val nextcard = nextcards.next()
             if (mycard != nextcard) {

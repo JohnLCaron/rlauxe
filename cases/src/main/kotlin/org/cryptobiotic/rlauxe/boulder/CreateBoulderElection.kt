@@ -147,12 +147,12 @@ open class CreateBoulderElection(
     // the redacted Cvrs simulate the real CVRS that are in the pools, for testing and estimation
     private fun makeRedactedCvrs(cardPool: CardPoolWithBallotStyle, show: Boolean) : List<Cvr> { // contestId -> candidateId -> nvotes
 
-        val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
+        val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
         cardPool.voteTotals.forEach { (contestId, contestTab) ->
             val oaContest: OneAuditContestBoulder = oaContests[contestId]!!
             val sumVotes = contestTab.nvotes()
             val underVotes = cardPool.ncards() * oaContest.info.voteForN - sumVotes
-            contestVotes[contestId] = VotesAndUndervotes(contestTab.votes, underVotes, oaContest.info.voteForN)
+            contestVotes[contestId] = Vunder(contestTab.votes, underVotes, oaContest.info.voteForN)
         }
 
         val cvrs = makeVunderCvrs(contestVotes, cardPool.poolName, poolId = cardPool.poolId) // TODO test

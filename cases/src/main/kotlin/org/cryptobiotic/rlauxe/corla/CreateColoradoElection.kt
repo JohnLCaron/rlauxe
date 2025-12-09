@@ -183,12 +183,12 @@ open class CreateColoradoElection (
         val cvrs: Iterator<Cvr>
 
         init {
-            val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
+            val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
             cardPool.voteTotals.forEach { (contestId, contestTab) ->
                 val oaContest: OneAuditContestCorla = oaContestMap[contestId]!!
                 val sumVotes = contestTab.nvotes()
                 val underVotes = cardPool.ncards() * oaContest.info.voteForN - sumVotes
-                contestVotes[contestId] = VotesAndUndervotes(contestTab.votes, underVotes, oaContest.info.voteForN)
+                contestVotes[contestId] = Vunder(contestTab.votes, underVotes, oaContest.info.voteForN)
             }
 
             cvrs = makeVunderCvrs(contestVotes, cardPool.poolName, poolId = if (config.isClca) null else cardPool.poolId).iterator()

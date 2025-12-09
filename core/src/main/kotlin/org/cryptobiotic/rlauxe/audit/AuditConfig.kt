@@ -9,6 +9,7 @@ enum class AuditType { POLLING, CLCA, ONEAUDIT;
     fun isPolling() = (this == POLLING)
 }
 
+// TODO seems like config should know what directory it lives in ??
 data class AuditConfig(
     val auditType: AuditType,
     val hasStyle: Boolean, // has Card Style Data (CSD), i.e. we know which contests each card/ballot contains

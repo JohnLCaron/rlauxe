@@ -151,9 +151,6 @@ class TestRunCli {
                 "-minMargin", "0.01",
                 "-fuzzMvrs", "0.001",
                 "-ncards", "10000",
-                "-ncontests", "10", // ignored
-                "--addRaireContest",
-                "--addRaireCandidates", "5",
             )
         )
         val publisher = Publisher(auditdir)

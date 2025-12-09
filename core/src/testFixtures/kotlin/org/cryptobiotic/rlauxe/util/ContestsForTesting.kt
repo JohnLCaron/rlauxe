@@ -126,10 +126,10 @@ fun makeContestsWithUndervotesAndPhantoms(
     val candsMap = candsv.mapIndexed { idx, it -> Pair(idx, it ) }.toMap()
     val phantomMap = phantoms.mapIndexed { idx, it -> Pair(idx, it ) }.toMap()
 
-    val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
+    val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
     candsv.forEachIndexed { idx: Int, cands: Map<Int, Int> ->  // use the idx as the Id
         val voteForN = if (voteForNs == null) 1 else voteForNs[idx]
-        contestVotes[idx] = VotesAndUndervotes(cands, undervotes[idx], voteForN = voteForN)
+        contestVotes[idx] = Vunder(cands, undervotes[idx], voteForN = voteForN)
     }
 
     val cvrs = makeVunderCvrs(contestVotes, "ballot", null)
@@ -172,7 +172,7 @@ fun tabulateVotesFromCvrs(cvrs: Iterator<Cvr>): Map<Int, Map<Int, Int>> {
     return votes
 }
 
-fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int, voteForN: Int = 1): VotesAndUndervotes {
+fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int, voteForN: Int = 1): Vunder {
     val result = mutableMapOf<Int, Int>()
     var undervotes = 0
     cvrs.forEach{ cvr ->
@@ -189,5 +189,5 @@ fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int
             }
         }
     }
-    return VotesAndUndervotes(result, undervotes, voteForN)
+    return Vunder(result, undervotes, voteForN)
 }

@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.RegVotes
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.VotesAndUndervotes
+import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
@@ -44,7 +44,7 @@ interface CardPoolIF: CardStyleIF {
     val assortAvg: MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contestId -> assorter -> average in the pool
     fun regVotes() : Map<Int, RegVotesIF> // contestId -> RegVotes, regular contests only
     fun ncards() : Int // total number of cards in the pool, including undervotes
-    fun votesAndUndervotes(contestId: Int): VotesAndUndervotes
+    fun votesAndUndervotes(contestId: Int): Vunder
 
     override fun name() = poolName
     override fun poolId() = poolId
@@ -62,7 +62,7 @@ interface CardPoolIF: CardStyleIF {
 
     // simulate the pool mvrs.
     fun simulateMvrsForPool (): List<Cvr> {
-        val contestVotes = mutableMapOf<Int, VotesAndUndervotes>() // contestId -> VotesAndUndervotes
+        val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
         contests().forEach { contestId  -> contestVotes[contestId] = votesAndUndervotes(contestId) }
         return makeVunderCvrs(contestVotes, poolName, poolId = poolId)
     }
@@ -76,10 +76,10 @@ data class CardPool(override val poolName: String, override val poolId: Int, val
 
     override fun contests() = regVotes.keys.toList().toIntArray()
 
-    override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
+    override fun votesAndUndervotes(contestId: Int): Vunder {
         val regVotes = regVotes[contestId]!!
         val poolUndervotes = ncards - regVotes.votes.values.sum()
-        return VotesAndUndervotes(regVotes.votes, poolUndervotes, 1)
+        return Vunder(regVotes.votes, poolUndervotes, 1)
     }
 }
 
@@ -168,10 +168,10 @@ class CardPoolWithBallotStyle(
         return ncards() * info.voteForN - voteSum
     }
 
-    override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
+    override fun votesAndUndervotes(contestId: Int): Vunder {
         val poolUndervotes = undervoteForContest(contestId)
         val votesForContest = voteTotals[contestId]!!
-        return VotesAndUndervotes(votesForContest.votes, poolUndervotes, votesForContest.voteForN)
+        return Vunder(votesForContest.votes, poolUndervotes, votesForContest.voteForN)
     }
 
     override fun toString(): String {
@@ -248,7 +248,7 @@ class CardPoolFromCvrs(
     }
 
 
-    override fun votesAndUndervotes(contestId: Int): VotesAndUndervotes {
+    override fun votesAndUndervotes(contestId: Int): Vunder {
         val contestTab = contestTabs[contestId]!!
         return contestTab.votesAndUndervotes() // good reason for cardPool to always have contestTabs
     }

@@ -41,13 +41,13 @@ fun estimateSampleSizes(
     nthreads: Int = 32,
 ): List<RunTestRepeatedResult> {
 
-    // simulate the card pools for all contests
+    // simulate the card pools for all OneAudit contests; here because its over all contests
     val infos = auditRound.contestRounds.map { it.contestUA.contest.info() }.associateBy { it.id }
     val vunderFuzz = if (!config.isOA) null else {
         OneAuditVunderBarFuzzer(VunderBar(cardPools!!), infos, config.simFuzzPct ?: 0.0)
     }
 
-    // create the estimation tasks
+    // create the estimation tasks for each contest
     val tasks = mutableListOf<EstimateSampleSizeTask>()
     auditRound.contestRounds.filter { !it.done }.forEach { contestRound ->
         tasks.addAll(makeEstimationTasks(config, contestRound, auditRound.roundIdx, cardManifest,  vunderFuzz))
@@ -109,9 +109,8 @@ fun makeEstimationTasks(
 
     val tasks = mutableListOf<EstimateSampleSizeTask>()
 
-    // TODO could do them for all contests in one pass; could be in one list
-    // TODO what if its a very large election, but a contest is very small? May not have enough.
-    //   assumes the cards are randomized
+    // get the first n cards for this contest
+    // assumes the cards are already randomized
     val contestCards = ContestCardsLimited(contestRound.contestUA.id, config.contestSampleCutoff, cardManifest.iterator()).cards()
 
     contestRound.assertionRounds.map { assertionRound ->
@@ -421,8 +420,37 @@ fun estimateOneAuditAssertionRound(
     val oaConfig = config.oaConfig
     val clcaConfig = config.clcaConfig
 
+    // TODO could pass the fuzzed mvrs in always, to simplify
+    // TODO wait we already wrote the fuzzed cards, I think.
+    // The estimation and the audit are using a different fuzz.
+    // TODO this doesnt maintain the right proportions when you dont fuzz the entire set, ie you just take the first 20K
+    // So can we grab the fuzzed cards?
+    vunderFuzz.reset()
     val oaFuzzedPairs: List<Pair<Cvr, AuditableCard>> = vunderFuzz.makePairsFromCards(contestCards)
     val pools = vunderFuzz.vunderBar.pools
+
+    /////////////////////////////////////////////////////////
+    /* for debugging, lets write these to disk so we can compare to the audited fuzzed cards
+    val fuzzedMvrs = oaFuzzedPairs.map { it.first }
+    val tempFile = "/home/stormy/rla/persist/testRunCli/oneaudit/audit/estMvrs${roundIdx}.csv"
+    writeUnsortedMvrs(fuzzedMvrs, tempFile)
+
+    val info2 = ContestInfo("contest2", 2,  mapOf("Wes" to 1), SocialChoiceFunction.PLURALITY)
+    val infos = mapOf(contestUA.id to contestUA.contest.info(), 2 to info2)
+     val fuzzedMvrTab = tabulateCvrs(fuzzedMvrs.iterator(), infos)
+    println("fuzzedMvrTab= ${fuzzedMvrTab[contestUA.id]}")
+
+    val fuzzedPool = calcCardPoolsFromMvrs(
+        infos,
+        cardStyles = listOf(CardStyle("pool42", listOf(1,2), 42)),
+        fuzzedMvrs,
+    )
+    println("pool= ${pools.first().show()}")
+    println("fuzzedPool= ${fuzzedPool.first().show()}")
+    // require(pools == fuzzedPool)
+    println()
+    ////////////////////////////////////////////////////////////////////
+     */
 
     // duplicate to OneAuditAssertionAuditor
     val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
@@ -462,6 +490,7 @@ fun estimateOneAuditAssertionRound(
         } */
 
     val sampler = ClcaSampling(contestUA.contest.id, oaFuzzedPairs, oaCassorter, allowReset = true)
+
     val result = runRepeatedBettingMart(
             config,
             sampler,

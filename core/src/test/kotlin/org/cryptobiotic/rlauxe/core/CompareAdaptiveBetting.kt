@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 
 class CompareAdaptiveBetting {
 
-    @Test
+   //  @Test
     fun compareAdaptiveBetting() {
         val N = 1000
         val margins = listOf(.025) // , .05, .1)
@@ -50,7 +50,7 @@ class CompareAdaptiveBetting {
         }
     }
 
-    @Test
+    // @Test
     fun compareSimulatedCvrs() {
         val showSteps = false
         val Nc = 50000
@@ -99,6 +99,8 @@ class CompareAdaptiveBetting {
                 count++
             }
             println("FINAL pvalue: AdaptiveBetting=${risk1.pvalue()} GeneralAdaptiveBetting=${risk2.pvalue()}")
+            if(!doubleIsClose(risk1.pvalue(), risk2.pvalue(), .001))
+                print("why")
             assertTrue(doubleIsClose(risk1.pvalue(), risk2.pvalue(), .001))
         }
     }

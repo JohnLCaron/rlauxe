@@ -125,7 +125,7 @@ object RunRlaCreateOneAudit {
 
         CreateAudit("RunRlaStartOneAudit", topdir = topdir, config, election, clear = false)
 
-        // write the cardManifest TODO why isnt this part of CreateAudit
+        // write the cardManifest TODO why isnt this part of CreateAudit? Because seed must be generated after committment to cardManifest
         val publisher = Publisher(auditDir)
         writeSortedCardsInternalSort(publisher, config.seed)
 
@@ -137,11 +137,12 @@ object RunRlaCreateOneAudit {
         val cards = mutableListOf<AuditableCard>()
         cardIter.forEach { cards.add(it) }
 
-        // TODO test
+        // TODO test OneAuditVunderBarFuzzer
         val vunderFuzz = OneAuditVunderBarFuzzer(VunderBar(cardPools), infos, fuzzMvrs)
         val oaFuzzedPairs: List<Pair<Cvr, AuditableCard>> = vunderFuzz.makePairsFromCards(cards)
         val fuzzedMvrs = oaFuzzedPairs.map { it.first }
-        writeSortedMvrs(publisher, fuzzedMvrs, config.seed) // TODO have to write this where you know the mvrs
+        // have to write this here, where we know the mvrs
+        writeSortedMvrs(publisher, fuzzedMvrs, config.seed) // permutes
     }
 
     class TestOneAuditElection(
@@ -158,6 +159,7 @@ object RunRlaCreateOneAudit {
         val cardManifest: List<AuditableCard>
 
         init {
+            // one contest
             val (contestOA, mvrs, cardManifest, pools) = makeOneAuditTest(
                 margin = minMargin,
                 Nc = ncards,

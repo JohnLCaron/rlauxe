@@ -90,10 +90,10 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
         prevRounds.setPhantomRate(contest.phantomRate()) // TODO ??
 
-        val bettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-            GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = prevRounds, d = clcaConfig.d,)
+        val bettingFn: BettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
+            GeneralAdaptiveBetting(contestUA.Npop, oaErrorRates = null, d = clcaConfig.d, maxRisk=clcaConfig.maxRisk)
 
-        } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
+        /* } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
             //AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
             val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(clcaConfig.pluralityErrorRates!!, prevRounds)
             GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
@@ -106,7 +106,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
         } else {
             throw RuntimeException("unsupported strategy ${clcaConfig.strategy}")
-        }
+        } */
 
         // TODO put tracker back on bettingMart I think
         val testFn = BettingMart(

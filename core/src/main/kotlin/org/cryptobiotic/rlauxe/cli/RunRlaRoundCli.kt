@@ -4,7 +4,7 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
 import kotlinx.cli.default
-import org.cryptobiotic.rlauxe.audit.runAudit
+import org.cryptobiotic.rlauxe.audit.runRoundAgain
 import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import kotlin.String
@@ -90,7 +90,7 @@ object RunAuditCli {
         }
 
         // fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): String {
-        val result = runAudit(auditDir, contestRound, assertionRound, assertionRound.auditResult!!)
+        val result = runRoundAgain(auditDir, contestRound, assertionRound, assertionRound.auditResult!!)
         println(result)
     }
 }

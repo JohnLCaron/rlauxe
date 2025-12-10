@@ -59,18 +59,16 @@ private fun runWithComparisonFuzzSampler(
     val cassorter = cassertion.cassorter
 
     val sampler = ClcaFuzzSampler(auditConfig.simFuzzPct!!, cvrs, contestUA.contest as Contest, cassorter)
-    val errorCounts = ClcaErrorCounts(emptyMap(), 0, noerror=cassorter.noerror(), upper=cassorter.assorter.upperBound())
 
-    val optimal = GeneralAdaptiveBettingOld(
-        N = contestUA.Npop,
-        errorCounts,
-        d = 100
-    )
+    //val errorCounts = ClcaErrorCounts(emptyMap(), 0, noerror=cassorter.noerror(), upper=cassorter.assorter.upperBound())
+    val betFn = GeneralAdaptiveBetting(contestUA.Npop, oaErrorRates = null, d = 100, maxRisk=.99)
+
+    // val optimal = GeneralAdaptiveBettingOld(N = contestUA.Npop, errorCounts, d = 100)
 
     return runRepeatedBettingMart(
         auditConfig,
         sampler,
-        optimal,
+        betFn,
         // assorter.assorter().reportedMargin(),
         cassorter.noerror(),
         cassorter.assorter.upperBound(),

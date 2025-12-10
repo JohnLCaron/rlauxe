@@ -651,13 +651,9 @@ fun calc_sample_sizes(
     val startingErrorRates= ClcaErrorCounts.fromPluralityErrorRates(pluralityErrorRates,
         cassorter.noerror(), totalSamples=0, upper=cassorter.assorter.upperBound())
 
-    val betFn = GeneralAdaptiveBettingOld(
-        N = N,
-        startingErrorRates=startingErrorRates,
-        d = 100,
-    )
-    val betta = BettingMart(bettingFn = betFn, N = N,
-        sampleUpperBound = cassorter.upperBound(), withoutReplacement = false)
+    val betFn = GeneralAdaptiveBetting(N, oaErrorRates = null, d = 100, maxRisk=.99)
+    // GeneralAdaptiveBettingOld(N = N, startingErrorRates=startingErrorRates, d = 100)
+    val betta = BettingMart(bettingFn = betFn, N = N, sampleUpperBound = cassorter.upperBound(), withoutReplacement = false)
 
     return runTestRepeated(
         drawSample = sampling,

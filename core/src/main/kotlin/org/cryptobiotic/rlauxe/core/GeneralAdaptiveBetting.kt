@@ -25,7 +25,7 @@ private val showBets = false
 class GeneralAdaptiveBetting(
     val Npop: Int, // population size for this contest
     // val accumErrorCounts: ClcaErrorCounts, // propable illegal to do (cant use prior knowlege of the sample)
-    val oaErrorRates: OneAuditErrorRates,
+    val oaErrorRates: OneAuditErrorRates?,
     val d: Int = 100,  // trunc weight
     val maxRisk: Double, // this bounds how close lam gets to 2.0; TODO study effects of
     val withoutReplacement: Boolean = true,
@@ -41,7 +41,7 @@ class GeneralAdaptiveBetting(
         prevErrors = trackerErrors
 
         // estimated rates for each clca bassort value
-        val scaled = (Npop - oaErrorRates.totalInPools) / Npop.toDouble()
+        val scaled = if (oaErrorRates == null) 1.0 else (Npop - oaErrorRates.totalInPools) / Npop.toDouble()
         val sampleNumber = tracker.numberOfSamples()
         val estRates = trackerErrors.errorCounts.mapValues {
             scaled * shrinkTruncEstimateRate(
@@ -57,7 +57,7 @@ class GeneralAdaptiveBetting(
         }
 
         val mui = populationMeanIfH0(Npop, withoutReplacement, tracker)
-        val kelly = OneAuditOptimalLambda(tracker.noerror, estRates, oaErrorRates.rates, mui, debug = debug)
+        val kelly = OneAuditOptimalLambda(tracker.noerror, estRates, oaErrorRates?.rates, mui, debug = debug)
 
         // limit the bet to the maximum risk we are willing to take
         val bet = min(kelly.solve(), 2*maxRisk)
@@ -93,11 +93,13 @@ class GeneralAdaptiveBetting(
     }
 }
 
-class OneAuditOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, Double>, val oaErrorRates: Map<Double, Double>, val mui: Double, val debug: Boolean=false) {
+class OneAuditOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, Double>, val oaErrorRates: Map<Double, Double>?, val mui: Double, val debug: Boolean=false) {
     val p0: Double
 
     init {
-        p0 = 1.0 - clcaErrorRates.map{ it.value }.sum() - oaErrorRates.map{ it.value }.sum()
+        val oasum = if (oaErrorRates == null) 0.0 else oaErrorRates.map{ it.value }.sum()
+        p0 = 1.0 - clcaErrorRates.map{ it.value }.sum() - oasum
+
         require (p0 >= 0.0)
         if (debug) {
             print("OneAuditOptimalLambda init: ")
@@ -145,11 +147,13 @@ class OneAuditOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double,
             sumClcaTerm += ln(1.0 + lam * (sampleValue - mui)) * rate
         }
 
-        var sumOneAuditTerm = 0.0
-        oaErrorRates.filter { it.value != 0.0 }.forEach { (sampleValue: Double, rate: Double) ->
-            sumOneAuditTerm += ln(1.0 + lam * (sampleValue - mui)) * rate
-        }
 
+        var sumOneAuditTerm = 0.0
+        if (oaErrorRates != null) {
+            oaErrorRates.filter { it.value != 0.0 }.forEach { (sampleValue: Double, rate: Double) ->
+                sumOneAuditTerm += ln(1.0 + lam * (sampleValue - mui)) * rate
+            }
+        }
         val total = noerrorTerm + sumClcaTerm + sumOneAuditTerm
 
         if (debug) println("  lam=$lam, noerrorTerm=${df(noerrorTerm)} sumClcaTerm=${df(sumClcaTerm)} " +

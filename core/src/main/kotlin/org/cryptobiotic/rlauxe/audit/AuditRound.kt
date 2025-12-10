@@ -10,7 +10,7 @@ data class AuditRound(
 
     var auditWasDone: Boolean = false,
     var auditIsComplete: Boolean = false,
-    var samplePrns: List<Long>, // card prns to sample for this round
+    var samplePrns: List<Long>, // card prns to sample for this round (complete, not just new)
     var nmvrs: Int = 0,
     var newmvrs: Int = 0,
     var auditorWantNewMvrs: Int = -1,
@@ -36,6 +36,7 @@ data class AuditRound(
     }
 }
 
+// called from rlauxe-viewer
 fun List<AuditRound>.previousSamples(currentRoundIdx: Int): Set<Long> {
     val result = mutableSetOf<Long>()
     this.filter { it.roundIdx < currentRoundIdx }.forEach { auditRound ->
@@ -54,7 +55,7 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
 
     var estNewSamples = 0 // Estimate of the new sample size required to confirm the contest
     var estSampleSize = 0 // number of total samples estimated needed
-    var auditorWantNewMvrs: Int = -1 // Auditor has set the new sample size for this audit round.
+    var auditorWantNewMvrs: Int = -1 // Auditor has set the new sample size for this audit round. rlauxe-viewer
 
     var done = false
     var included = true

@@ -16,6 +16,7 @@ private val logger = KotlinLogging.logger("PersistentAudit")
 class PersistedWorkflow(
     val auditDir: String,
     val useTest: Boolean,  // TODO move to config ??
+    val mvrWrite: Boolean = true,
 ): AuditWorkflow() {
     val auditRecord: AuditRecord // only need auditConfig, contests from record
     val publisher = Publisher(auditDir)
@@ -41,7 +42,7 @@ class PersistedWorkflow(
         mvrManager = if (useTest) {
             PersistedMvrManagerTest(auditRecord.location, config, contestsUA)
         } else {
-            PersistedMvrManager(auditRecord.location, config, contestsUA)
+            PersistedMvrManager(auditRecord.location, config, contestsUA, mvrWrite=mvrWrite)
         }
     }
 
@@ -59,13 +60,15 @@ class PersistedWorkflow(
             nextRound.auditIsComplete = true
         } else {
             // heres where we limit the number of samples we are willing to audit
+            // TODO NEXTASK is this all prns or just new? depends on round.samplePrns
             if (config.auditSampleLimit != null ) {
                 nextRound.samplePrns = nextRound.samplePrns.subList(0, config.auditSampleLimit)
             }
 
-            writeAuditRoundJsonFile(nextRound, publisher.auditRoundFile(nextRound.roundIdx))
-            logger.info {"   writeAuditStateJsonFile ${publisher.auditRoundFile(nextRound.roundIdx)}"}
+            writeAuditRoundJsonFile(nextRound, publisher.auditStateFile(nextRound.roundIdx))
+            logger.info {"   writeAuditStateJsonFile ${publisher.auditStateFile(nextRound.roundIdx)}"}
 
+            // TODO NEXTASK is this all prns or just new? depends on round.samplePrns
             writeSamplePrnsJsonFile(nextRound.samplePrns, publisher.samplePrnsFile(nextRound.roundIdx))
             logger.info {"   writeSampleIndicesJsonFile ${publisher.samplePrnsFile(nextRound.roundIdx)}"}
         }
@@ -94,8 +97,8 @@ class PersistedWorkflow(
         auditRound.auditIsComplete = complete
 
         val publisher = Publisher(auditDir)
-        writeAuditRoundJsonFile(auditRound, publisher.auditRoundFile(roundIdx))
-        logger.info {"writeAuditRoundJsonFile to '${publisher.auditRoundFile(roundIdx)}'"}
+        writeAuditRoundJsonFile(auditRound, publisher.auditStateFile(roundIdx)) // replace auditState
+        logger.info {"writeAuditRoundJsonFile to '${publisher.auditStateFile(roundIdx)}'"}
 
         return complete
     }

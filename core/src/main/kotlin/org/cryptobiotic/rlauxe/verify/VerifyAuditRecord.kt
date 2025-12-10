@@ -109,6 +109,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         val firstRound = auditRecord.rounds.first()
         val contestRound = firstRound.contestRounds.find { it.id == contest.contest.id }
         if (contestRound == null) return
+        val estCards = contestRound.estSampleSize
 
         result.addMessage(" verify sampling for contest ${contest.id}")
         val cards = readAuditableCardCsvFile(publisher.sampleCardsFile(firstRound.roundIdx))
@@ -117,26 +118,39 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
             val nextRound = auditRecord.rounds[nextRoundIdx]
             val nextContestRound = nextRound.contestRounds.find { it.id == contest.contest.id }
             if (nextContestRound == null) break
+            val estCardsNext = nextContestRound.estSampleSize
+
             if (!existsOrZip(publisher.sampleCardsFile(nextRound.roundIdx))) return
             val nextCards = readAuditableCardCsvFile(publisher.sampleCardsFile(nextRound.roundIdx))
-            result.addMessage("   verify sampling for contest ${contest.id} round ${firstRound.roundIdx} vs round ${nextRound.roundIdx}")
-            verifySamplingForContest(contest, cards,  nextCards, result)
+
+            result.addMessage("   verify sampling for contest ${contest.id} round ${firstRound.roundIdx} estCards=${estCards} " +
+                    "vs round ${nextRound.roundIdx} estCards=${estCardsNext} ")
+
+            verifySamplingForContest(contest, cards,  nextCards, nextRound.roundIdx, estCards, result)
             nextRoundIdx++
         }
     }
 
-    fun verifySamplingForContest(contest: ContestUnderAudit, cards: List<AuditableCard>, nextCards: List<AuditableCard>, result: VerifyResults): Boolean {
+    // TODO check mvrs
+    fun verifySamplingForContest(contest: ContestUnderAudit, cards: List<AuditableCard>, nextCards: List<AuditableCard>,
+                                 round:Int, estCards: Int, result: VerifyResults): Boolean {
         val mycards = cards.filter { it.contests().contains(contest.id)}.iterator()
         val nextcards = nextCards.filter { it.contests().contains(contest.id)}.iterator()
 
         // TODO need to know how many cards were chosen for this contest and round, and stop there...
-
-        mycards.forEach { mycard ->
+        var count = 0
+        while (mycards.hasNext() && count < estCards) {
+            val mycard = mycards.next()
             val nextcard = nextcards.next()
+            if (mycard.location == "card9835" && round == 3 && contest.id == 9) {
+                val wwtf = mycard.equals(nextcard)
+            }
+
             if (mycard != nextcard) {
                 result.addError("  failed ${mycard.location()} != ${nextcard.location}")
                 return false
             }
+            count++
         }
         return true
     }

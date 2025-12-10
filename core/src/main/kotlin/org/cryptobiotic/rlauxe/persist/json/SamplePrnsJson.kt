@@ -4,6 +4,8 @@ package org.cryptobiotic.rlauxe.persist.json
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.unwrap
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -15,6 +17,8 @@ import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+
+private val logger = KotlinLogging.logger("SamplePrnsJson")
 
 @Serializable
 data class SamplePrnsJson(
@@ -54,4 +58,11 @@ fun readSamplePrnsJsonFile(filename: String): Result<List<Long>, ErrorMessages> 
     } catch (t: Throwable) {
         errs.add("Exception= ${t.message} ${t.stackTraceToString()}")
     }
+}
+
+fun readSamplePrns(filename: String): List<Long> {
+    val resultSamples = readSamplePrnsJsonFile(filename)
+    if (resultSamples is Err) logger.error{"$resultSamples"}
+    require(resultSamples is Ok)
+    return resultSamples.unwrap() // these are the samples we are going to audit.
 }

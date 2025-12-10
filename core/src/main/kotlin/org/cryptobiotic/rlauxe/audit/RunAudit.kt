@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger("RunAudit")
 
-// Called from rlaux-viewer
 // TODO add ErrorMessages ??
 fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
     try {
@@ -119,7 +118,8 @@ fun runRoundResult(inputDir: String, useTest: Boolean, quiet: Boolean): Result<A
     }
 }
 
-fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): String {
+// for debugging, transparency. rlauxe-viewer
+fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): String {
     val contestId = contestRound.contestUA.id
     try {
         if (notExists(Path.of(auditDir))) {
@@ -130,7 +130,7 @@ fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: Asser
         val assertion = assertionRound.assertion
         logger.info { "runAudit in $auditDir for round $roundIdx, contest $contestId, and assertion $assertion" }
 
-        val workflow = PersistedWorkflow(auditDir, useTest=false)
+        val workflow = PersistedWorkflow(auditDir, useTest=false, mvrWrite=false)
         val cvrPairs = workflow.mvrManager().makeMvrCardPairsForRound(roundIdx)
         val sampler = PairSampler(contestId, cvrPairs)
 

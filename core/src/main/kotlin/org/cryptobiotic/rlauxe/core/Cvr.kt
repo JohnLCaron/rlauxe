@@ -73,6 +73,7 @@ data class Cvr(
     }
 }
 
+// TODO somewhere else ? cases/src/main/kotlin/org/cryptobiotic/rlauxe/dominion/ ??
 // intermediate CVR representation for DominionCvrSummary
 data class CvrExport(val id: String, val group: Int, val votes: Map<Int, IntArray>) {
     // constructor(cvr: Cvr) : this(cvr.id, 0, cvr.votes) // TODO the group id is lost when converting to Cvr and back

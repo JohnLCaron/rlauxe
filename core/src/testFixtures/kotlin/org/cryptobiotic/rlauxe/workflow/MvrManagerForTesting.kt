@@ -53,7 +53,7 @@ class MvrManagerForTesting(
     }
 
     // MvrManagerTest
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard> {
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCard> {
         val sampledMvrs = findSamples(sampleNumbers, Closer(mvrsUA.iterator()))
         require(sampledMvrs.size == sampleNumbers.size)
 
@@ -67,7 +67,6 @@ class MvrManagerForTesting(
         mvrsRound = sampledMvrs
         return sampledMvrs
     }
-
 }
 
 // runs audit rounds until finished. return last audit round
@@ -87,7 +86,8 @@ fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boole
             stopwatch.start()
 
             // workflow MvrManager must implement MvrManagerTest, else Exception
-            (workflow.mvrManager() as MvrManagerTestIF).setMvrsBySampleNumber(nextRound.samplePrns)
+            // TODO NEXTASK is this all prns or just new? depends on round.samplePrns
+            (workflow.mvrManager() as MvrManagerTestIF).setMvrsBySampleNumber(nextRound.samplePrns, nextRound.roundIdx)
 
             if (!quiet) println("\nrunAudit $name ${nextRound.roundIdx}")
             complete = workflow.runAuditRound(nextRound, quiet)

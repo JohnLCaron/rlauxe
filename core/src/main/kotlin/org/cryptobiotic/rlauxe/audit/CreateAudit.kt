@@ -49,6 +49,7 @@ class CreateElection(
 
 private val logger = KotlinLogging.logger("CreateAudit")
 
+// TODO dont need topdir
 class CreateAudit(val name: String, val topdir: String, val config: AuditConfig, election: CreateElectionIF, auditdir: String? = null, clear: Boolean = true) {
 
     val auditDir = auditdir ?: "$topdir/audit"
@@ -67,15 +68,14 @@ class CreateAudit(val name: String, val topdir: String, val config: AuditConfig,
             logger.info { "write ${pools.size} cardPools, to ${publisher.cardPoolsFile()}" }
         }
 
-        val contestsUA = election.contestsUA()
-        logger.info { "added ClcaAssertions from reported margin " }
-
         val cards = election.cardManifest()
         val countCvrs = writeAuditableCardCsvFile(cards, publisher.cardManifestFile())
         createZipFile(publisher.cardManifestFile(), delete = true)
         logger.info { "write ${countCvrs} cards to ${publisher.cardManifestFile()}" }
 
         // this may change the auditStatus to misformed
+        val contestsUA = election.contestsUA()
+
         val results = VerifyResults()
         checkContestsCorrectlyFormed(config, contestsUA, results)
         if (results.hasErrors) {
@@ -142,6 +142,8 @@ fun writeSortedMvrs(publisher: Publisher, unsortedMvrs: List<Cvr>, seed: Long) {
     logger.info{"write ${countMvrs} mvrs to ${publisher.sortedMvrsFile()}"}
 }
 
+// TODO NEXTASK is this all prns or just new? depends on round.samplePrns
+// uses private/sortedMvrs.cvs
 fun writeMvrsForRound(publisher: Publisher, round: Int) {
     val resultSamples = readSamplePrnsJsonFile(publisher.samplePrnsFile(round))
     if (resultSamples is Err) logger.error{"$resultSamples"}

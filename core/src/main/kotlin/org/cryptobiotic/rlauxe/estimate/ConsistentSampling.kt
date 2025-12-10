@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.workflow.wantSampleSize
 private val debugConsistent = false
 private val logger = KotlinLogging.logger("ConsistentSampling")
 
-// called by viewer
+// also called by rlauxe-viewer
 fun sampleWithContestCutoff(
     config: AuditConfig,
     mvrManager : MvrManager,
@@ -67,7 +67,7 @@ fun consistentSampling(
     if (contestsNotDone.isEmpty()) return
 
     // calculate how many samples are wanted for each contest.
-    // TODO eliminate
+    // TODO eliminate?
     val wantSampleSizeMap = wantSampleSize(contestsNotDone, previousSamples, mvrManager.sortedCards().iterator())
     require(wantSampleSizeMap.values.all { it >= 0 }) { "wantSampleSize must be >= 0" }
 
@@ -81,7 +81,7 @@ fun consistentSampling(
     val contestsIncluded = contestsNotDone.filter { it.included }
     val haveActualMvrs = mutableMapOf<Int, Int>() // contestId -> new nmvrs in sample
 
-    var newMvrs = 0
+    var newMvrs = 0 // count when this card not in previous samples
     val sampledCards = mutableListOf<AuditableCard>()
 
     // makes only one partial iteration over sortedCards, until wantSamples foreach contest are fouond

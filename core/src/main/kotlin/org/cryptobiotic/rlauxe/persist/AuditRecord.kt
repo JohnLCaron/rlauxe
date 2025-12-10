@@ -35,12 +35,14 @@ class AuditRecord(
         mvrs.forEach { previousMvrs[it.prn] = it } // cumulative
     }
 
+    // TODO NEXTASK is this all prns or just new? humans want just new
     // TODO new mvrs vs mvrs may confuse people. Build interface to manage this process?
     fun enterMvrs(mvrs: CloseableIterable<AuditableCard>, errs: ErrorMessages): Boolean {
         val publisher = Publisher(location)
         val lastRoundIdx = if (rounds.isEmpty()) 1 else rounds.last().roundIdx
 
         // get complete match with sampleNums in last round
+        // TODO NEXTASK is this all prns or just new? all prns here; PROBLEM
         val sampledPrnsResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(lastRoundIdx))
         if (sampledPrnsResult is Err) {
             logger.error{ "$sampledPrnsResult" } // needed?
@@ -51,7 +53,7 @@ class AuditRecord(
 
         val sampledMvrs = findSamples(sampledPrns, mvrs.iterator())
 
-        // TODO only writing the mvrs that match samplePrnsFile for this round
+        // TODO NEXTASK is this all prns or just new? humans want just new
         writeAuditableCardCsvFile(sampledMvrs , publisher.sampleMvrsFile(lastRoundIdx))
         logger.info{"enterMvrs write sampledMvrs to '${publisher.sampleMvrsFile(lastRoundIdx)}' for round $lastRoundIdx"}
 
@@ -110,7 +112,7 @@ class AuditRecord(
                 sampledMvrsAll.addAll(sampledMvrs) // cumulative
 
                 // may not exist yet
-                val auditRoundFile = publisher.auditRoundFile(roundIdx)
+                val auditRoundFile = publisher.auditStateFile(roundIdx)
                 if (Files.exists(Path.of(auditRoundFile))) {
                     val auditRoundResult = readAuditRoundJsonFile(
                         auditRoundFile,

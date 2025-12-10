@@ -21,7 +21,7 @@ interface MvrManager {
 // when the MvrManager supplies the audited mvrs, its a test
 // calling this sets the internal state used by makeMvrCardPairsForRound()
 interface MvrManagerTestIF : MvrManager {
-    fun setMvrsBySampleNumber(sampleNumbers: List<Long>): List<AuditableCard>
+    fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCard>
 }
 
 ////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@ fun findSamples(samplePrns: List<Long>, sortedCards: CloseableIterator<Auditable
 }
 
 //// TODO  this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set
-// for each contest, return map contestId -> wantSampleSize
+// for each contest, return map contestId -> wantSampleSize. used in ConsistentSampling
 fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedCards : CloseableIterator<AuditableCard>, debug: Boolean = false): Map<Int, Int> {
     //// count how many samples each contest already has
     val prevContestCounts = mutableMapOf<ContestRound, Int>()

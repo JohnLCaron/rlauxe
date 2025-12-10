@@ -10,21 +10,24 @@ import kotlin.io.path.Path
 const val cvrExportCsvFile = "cvrExport.csv"
 private val logger = KotlinLogging.logger("Publisher")
 
-/*
-$topdir/
-  auditConfig.json      // AuditConfigJson
-  contests.json         // ContestsUnderAuditJson
-  sortedCards.csv       // AuditableCardCsv (or)
-  sortedCards.zip       // AuditableCardCsv
-  cardPools.json        // CardPoolJson (OneAudit only)
+/* see docs/Overview.md
 
-  private/
-    testMvrs.csv        // AuditableCardCsv, for tests only
+    $auditdir/
+        auditConfig.json      // AuditConfigJson
+        auditSeed.json        // PrnJson
+        cardManifest.csv      // AuditableCardCsv, may be zipped
+        cardPools.json        // CardPoolJson (OneAudit only)
+        contests.json         // ContestsUnderAuditJson
+        sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
 
-  roundX/
-    auditState.json     // AuditRoundJson
-    samplePrns.json     // SamplePrnsJson, the sample prns to be audited
-    sampleMvrs.csv      // AuditableCardCsv, the mvrs used for the audit; matches samplePrns.csv
+        roundX/
+            auditStateX.json     // AuditRoundJson,  the state of the audit for this round
+            sampleCardsX.csv     // AuditableCardCsv, complete cards used for this round; matches samplePrnsX.csv
+            sampleMvrsX.csv      // AuditableCardCsv, complete mvrs used for this round; matches samplePrnsX.csv
+            samplePrnsX.json     // SamplePrnsJson, complete sample prns for this round, in order
+
+        private/
+            sortedMvrs.csv       // AuditableCardCsv, sorted by prn, matches sortedCards.csv, may be zipped
  */
 
 class Publisher(val auditDir: String) {
@@ -33,30 +36,35 @@ class Publisher(val auditDir: String) {
     }
 
     fun auditConfigFile() = "$auditDir/auditConfig.json"
-    fun contestsFile() = "$auditDir/contests.json"
+    fun auditSeedFile() = "$auditDir/auditSeed.json"
     fun cardManifestFile() = "$auditDir/cardManifest.csv" // cardManifest
-    fun sortedCardsFile() = "$auditDir/sortedCards.csv" // sorted cardManifest
     fun cardPoolsFile() = "$auditDir/cardPools.json"
-    // fun testMvrsFile() = "$auditDir/private/testMvrs.csv"
+    fun contestsFile() = "$auditDir/contests.json"
+    fun sortedCardsFile() = "$auditDir/sortedCards.csv" // sorted cardManifest
     fun sortedMvrsFile() = "$auditDir/private/sortedMvrs.csv"
+
+    fun auditStateFile(round: Int): String {
+        val dir = "$auditDir/round$round"
+        validateOutputDir(Path.of(dir), ErrorMessages("auditStateFile"))
+        return "$dir/auditState$round.json"
+    }
 
     fun samplePrnsFile(round: Int): String {
         val dir = "$auditDir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("samplePrnsFile"))
-        return "$dir/samplePrns.json"
+        return "$dir/samplePrns$round.json"
     }
 
-    fun sampleCardsFile(round: Int) = "$auditDir/round$round/sampleCards.csv"
+    fun sampleCardsFile(round: Int): String {
+        val dir = "$auditDir/round$round"
+        validateOutputDir(Path.of(dir), ErrorMessages("sampleCards"))
+        return "$dir/sampleCards$round.csv"
+    }
+
     fun sampleMvrsFile(round: Int): String {
         val dir = "$auditDir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("sampleMvrsFile"))
-        return "$dir/sampleMvrs.csv"
-    }
-
-    fun auditRoundFile(round: Int): String {
-        val dir = "$auditDir/round$round"
-        validateOutputDir(Path.of(dir), ErrorMessages("auditRoundFile"))
-        return "$dir/auditState.json"
+        return "$dir/sampleMvrs$round.csv"
     }
 
     // what round are we on?

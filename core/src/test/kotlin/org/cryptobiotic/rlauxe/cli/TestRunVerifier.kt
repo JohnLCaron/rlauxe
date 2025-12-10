@@ -15,11 +15,11 @@ class TestRunVerifyContests {
         val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
         println()
         print(results)
-        if (results.hasErrors) fail()
 
         val results2 = runVerifyAuditRecord(auditdir)
         println()
         print(results2)
+        if (results.hasErrors) fail()
         if (results2.hasErrors) fail()
     }
 
@@ -30,7 +30,12 @@ class TestRunVerifyContests {
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
+
+        val results2 = runVerifyAuditRecord(auditdir)
+        println()
+        print(results2)
         if (results.hasErrors) fail()
+        if (results2.hasErrors) fail()
     }
 
     @Test
@@ -40,7 +45,12 @@ class TestRunVerifyContests {
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
+
+        val results2 = runVerifyAuditRecord(auditdir)
+        println()
+        print(results2)
         if (results.hasErrors) fail()
+        if (results2.hasErrors) fail()
     }
 
     @Test
@@ -50,6 +60,11 @@ class TestRunVerifyContests {
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
+
+        val results2 = runVerifyAuditRecord(auditdir)
+        println()
+        print(results2)
         if (results.hasErrors) fail()
+        if (results2.hasErrors) fail()
     }
 }

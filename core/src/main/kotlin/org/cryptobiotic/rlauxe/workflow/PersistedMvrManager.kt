@@ -16,10 +16,11 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 
 private val logger = KotlinLogging.logger("PersistedMvrManager")
-private val checkValidity = false
+private val checkValidity = true
 
 // assumes that the mvrs have been set externally into the election record, eg by EnterMvrsCli.
-open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, val contestsUA: List<ContestUnderAudit>, val nowrite: Boolean = false): MvrManager {
+// skip writing when doing runRoundAgain
+open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, val contestsUA: List<ContestUnderAudit>, val mvrWrite: Boolean = true): MvrManager {
     val publisher = Publisher(auditDir)
 
     override fun sortedCards() = CloseableIterable{ auditableCards() }
@@ -36,16 +37,17 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
     }
 
 
-    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CardIF, CardIF>>  { // Pair(mvr, card)
-        val mvrsRound = readMvrsForRound(round)
-        val sampleNumbers = mvrsRound.map { it.prn }
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CardIF, CardIF>>  {
+        // TODO NEXTASK is this all prns or just new? depends on round.sampleMvrs
+        val mvrsForRound = readMvrsForRound(round)
+        val sampleNumbers = mvrsForRound.map { it.prn }
 
-        val sampledCvrs = findSamples(sampleNumbers, auditableCards())
-        require(sampledCvrs.size == mvrsRound.size)
+        val sampledCards = findSamples(sampleNumbers, auditableCards())
+        require(sampledCards.size == mvrsForRound.size)
 
         if (checkValidity) {
             // prove that sampledCvrs correspond to mvrs
-            val cvruaPairs: List<Pair<AuditableCard, AuditableCard>> = mvrsRound.zip(sampledCvrs)
+            val cvruaPairs: List<Pair<AuditableCard, AuditableCard>> = mvrsForRound.zip(sampledCards)
             cvruaPairs.forEach { (mvr, card) ->
                 require(mvr.location == card.location) { "mvr location ${mvr.location} != card.location ${card.location}"}
                 require(mvr.index == card.index)  { "mvr index ${mvr.index} != card.index ${card.index}"}
@@ -53,13 +55,13 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
             }
         }
 
-        if (!nowrite) { // TODO
-            val round = publisher.currentRound()
-            val countCards = writeAuditableCardCsvFile(Closer(sampledCvrs.iterator()), publisher.sampleCardsFile(round))
+        if (mvrWrite) {
+            // TODO NEXTASK is this all prns or just new? depends on round.sampleMvrs
+            val countCards = writeAuditableCardCsvFile(Closer(sampledCards.iterator()), publisher.sampleCardsFile(round)) // sampleCards
             logger.info { "write ${countCards} cards to ${publisher.sampleCardsFile(round)}" }
         }
 
-        return mvrsRound.zip(sampledCvrs)
+        return mvrsForRound.zip(sampledCards)
     }
 
     // the sampleMvrsFile is added externally for real audits, and by MvrManagerTestFromRecord for test audits
@@ -67,6 +69,7 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
     // it is placed into publisher.sampleMvrsFile, and this just reads from that file.
     private fun readMvrsForRound(round: Int): List<AuditableCard> {
         val publisher = Publisher(auditDir)
+        // TODO NEXTASK is this all prns or just new? depends on round.sampleMvrs
         return readAuditableCardCsvFile(publisher.sampleMvrsFile(round))
     }
 

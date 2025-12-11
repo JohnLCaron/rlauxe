@@ -47,13 +47,13 @@ class TestCreateBelgiumClcaFromSpreadsheet {
         }
         println()
 
-        createBelgiumClca(topdir, dcontest.createContest())
+        val auditdir = "$topdir/audit"
+        createBelgiumClca(auditdir, dcontest.createContest())
 
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsExternalSort(topdir, publisher, config.seed)
 
-        val auditdir = "$topdir/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
         println()
         print(results)

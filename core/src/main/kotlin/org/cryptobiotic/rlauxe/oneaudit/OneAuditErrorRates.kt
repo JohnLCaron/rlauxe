@@ -34,25 +34,6 @@ class OneAuditErrorsFromPools(val pools: List<CardPoolIF>) {
     }
 }
 
-// stand alone calcultor; do we need?
-fun oaErrorRatesFromPool(contestId: Int, Npop: Int, oaCassorter: ClcaAssorterOneAudit, pool: CardPoolIF): Map<Double, Double> { // sampleValue -> rate
-    val result = mutableListOf<Pair<Double, Double>>()
-    val poolAvg = oaCassorter.poolAverages.assortAverage[pool.poolId]!!
-    val taus = TausOA(oaCassorter.assorter.upperBound(), poolAvg)
-    val votes = pool.regVotes()[contestId]!!
-    val winnerCounts: Int = votes.votes[ oaCassorter.assorter.winner()] ?: 0
-    val loserCounts: Int = votes.votes[ oaCassorter.assorter.loser()] ?: 0
-    val otherCounts = pool.ncards() - winnerCounts - loserCounts
-    val dcards = Npop.toDouble()
-
-    // sampleValue -> rate
-    result.add(Pair(taus.tausOA[0].first * oaCassorter.noerror(), loserCounts / dcards))
-    result.add(Pair(taus.tausOA[1].first * oaCassorter.noerror(), otherCounts / dcards))
-    result.add(Pair(taus.tausOA[2].first * oaCassorter.noerror(), winnerCounts / dcards))
-    return result.toMap().toSortedMap()  // could also return a string description
-}
-
-
 // Consider a single pool and an assorter a, with upper bound u and avg assort value in the pool poolAvg.
 // poolAvg is used as the cvr_value, so then mvr_assort - mvr_assort has one of 3 possible overstatement values:
 //

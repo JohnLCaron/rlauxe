@@ -12,7 +12,6 @@ import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.unpooled
-import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.raire.makeRaireContestUA
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
@@ -204,30 +203,6 @@ fun makeContests(allCvrTabs: Map<Int, ContestTabulation>, unpooledPool: CardPool
         }
     }
     return contests
-}
-
-fun makeOneAuditContestsOld(allCvrTabs: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, unpooled: CardPoolFromCvrs, contestNbs: Map<Int, Int>, hasStyle:Boolean): List<ContestUnderAudit> {
-    val contestsUAs = mutableListOf<ContestUnderAudit>()
-    allCvrTabs.map { (contestId, contestSumTab)  ->
-        val info = contestSumTab.info
-        val unpooledTab: ContestTabulation = unpooled.contestTabs[contestId]!! // does not have the diluted count
-
-        val useNc = contestNcs[info.id] ?: contestSumTab.ncards
-        if (useNc > 0) {
-            val contestOA: ContestUnderAudit = if (!contestSumTab.isIrv) {
-                val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
-                ContestUnderAudit(contest, isClca = true, NpopIn=contestNbs[info.id]).addStandardAssertions()
-            } else {
-                makeRaireContestUA(contestSumTab.info, contestSumTab, useNc, hasStyle=hasStyle, Nbin=contestNbs[info.id])
-            }
-            // annotate with the pool %
-            val unpooledPct = 100.0 * unpooledTab.ncards / contestSumTab.ncards
-            val poolPct = (100 - unpooledPct).toInt()
-            contestOA.contest.info().metadata["PoolPct"] = poolPct
-            contestsUAs.add(contestOA)
-        }
-    }
-    return contestsUAs
 }
 
 fun makePollingContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, contestNbs: Map<Int, Int>, hasStyle:Boolean): List<ContestUnderAudit> {

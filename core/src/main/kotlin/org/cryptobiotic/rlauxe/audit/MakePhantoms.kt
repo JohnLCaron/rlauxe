@@ -170,26 +170,6 @@ fun makePhantomCards(
     return phantombs.map { it.buildCard() }
 }
 
-fun makePhantomCards(
-    phantomCount: Map<Int, Int>, // contestId -> Nphantoms
-    startIdx: Int,
-    prefix: String = "phantom-",
-): List<AuditableCard> {
-    var idx = startIdx
-
-    val phantombs = mutableListOf<PhantomBuilder>()
-    phantomCount.forEach { (contestId, phantoms_needed) ->
-        while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
-            phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}", idx++))
-        }
-        // include this contest on the first n phantom CVRs
-        repeat(phantoms_needed) {
-            phantombs[it].contests.add(contestId)
-        }
-    }
-    return phantombs.map { it.buildCard() }
-}
-
 class PhantomBuilder(val id: String, val idx: Int) {
     val contests = mutableListOf<Int>()
 

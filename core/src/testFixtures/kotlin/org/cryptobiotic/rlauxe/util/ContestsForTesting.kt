@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
 import kotlin.random.Random
 
-// CANDIDATE FOR REMOVAL; use MultiContestTestData
+// CANDIDATE FOR REMOVAL; use MultiContestTestData, Vunder
 
 fun makeContestFromCvrs(
     info: ContestInfo,
@@ -116,6 +116,7 @@ fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyle: Bo
     }
 }
 
+// replace with Vunder ??
 // candsv: candidate votes for each contest
 // undervotes: undervotes for each contest
 // phantoms: phantoms for each contest

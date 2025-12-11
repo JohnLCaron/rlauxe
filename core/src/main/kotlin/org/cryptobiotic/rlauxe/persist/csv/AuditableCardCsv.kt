@@ -205,13 +205,5 @@ class IteratorCardsCsvStream(input: InputStream): CloseableIterator<AuditableCar
     }
 }
 
-class AuditableCardToCvrAdapter(val cardIterator: CloseableIterator<AuditableCard>) : CloseableIterator<Cvr> {
-    override fun hasNext() = cardIterator.hasNext()
-    override fun next() = cardIterator.next().cvr()
-    override fun close() {
-        cardIterator.close()
-    }
-}
-
 
 

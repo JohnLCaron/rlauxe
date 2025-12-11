@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -280,7 +281,7 @@ open class Contest(
 open class ContestUnderAudit(
     val contest: ContestIF,
     val isClca: Boolean = true,
-    val hasStyle: Boolean = true,
+    hasStyle: Boolean = true,
     NpopIn: Int? = null,
 ) {
     val id = contest.id
@@ -291,6 +292,7 @@ open class ContestUnderAudit(
     val Nphantoms = contest.Nphantoms()
     val Npop: Int = NpopIn ?: Nc // "sample population size" for this contest, used to make diluted margins
     val isIrv = contest.info().isIrv
+    val hasCompleteCvrs = Npop == contest.Nc() // cvrs include undervotes; only matters for clcaAssorter TODO seems dicey
 
     var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms
     var pollingAssertions: List<Assertion> = emptyList() // mutable needed for Raire override and serialization
@@ -302,6 +304,8 @@ open class ContestUnderAudit(
         } else if (contest.winners().size == 0) {
             preAuditStatus = TestH0Status.NoWinners
         }
+        if (hasStyle != hasCompleteCvrs)
+            logger.warn { "$hasStyle != ($Npop == ${contest.Nc()}" }
     }
 
     // dhondt
@@ -377,7 +381,7 @@ open class ContestUnderAudit(
     }
 
     open fun makeClcaAssorter(assertion: Assertion): ClcaAssorter {
-        return ClcaAssorter(contest.info(), assertion.assorter, hasStyle=hasStyle, dilutedMargin=makeDilutedMargin(assertion.assorter))
+        return ClcaAssorter(contest.info(), assertion.assorter, hasCompleteCvrs=hasCompleteCvrs, dilutedMargin=makeDilutedMargin(assertion.assorter))
     }
 
     fun assertions(): List<Assertion> {
@@ -445,7 +449,7 @@ open class ContestUnderAudit(
         other as ContestUnderAudit
 
         if (isClca != other.isClca) return false
-        if (hasStyle != other.hasStyle) return false
+        if (hasCompleteCvrs != other.hasCompleteCvrs) return false
         if (!contest.equals(other.contest)) return false
         if (preAuditStatus != other.preAuditStatus) return false
         if (pollingAssertions != other.pollingAssertions) return false
@@ -456,7 +460,7 @@ open class ContestUnderAudit(
 
     override fun hashCode(): Int {
         var result = isClca.hashCode()
-        result = 31 * result + hasStyle.hashCode()
+        result = 31 * result + hasCompleteCvrs.hashCode()
         result = 31 * result + contest.hashCode()
         result = 31 * result + preAuditStatus.hashCode()
         result = 31 * result + pollingAssertions.hashCode()
@@ -465,6 +469,7 @@ open class ContestUnderAudit(
     }
 
     companion object {
+        private val logger = KotlinLogging.logger("ContestUnderAudit")
         fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCard>, isClca: Boolean, hasStyle: Boolean): List<ContestUnderAudit> {
             val infos = contests.map { it.info() }.associateBy { it.id }
             val manifestTabs = tabulateAuditableCards(cards, infos)

@@ -58,7 +58,6 @@ class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId
 // This is a way to create test Cvrs that match known vote totals and undervotes for one contest or pool
 // pass2, make choices random, dont assume that you will exhaust votes and then shuffle
 // ok for voteForN > 1, but not IRV
-// TODO replace VotesAndUndervotes
 data class Vunder(val candVotes: Map<Int, Int>, val undervotes: Int, val voteForN: Int) {
     val candVotesSorted: Map<Int, Int> = candVotes.toList().sortedBy{ it.second }.reversed().toMap() // reverse sort by largest vote
 

@@ -22,7 +22,7 @@ class TestClcaAssortValues {
         // val votes = mapOf(0 to 1010, 1 to 990) // Map<Int, Int>
         // data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val lastSeatWon: Int, val firstSeatLost: Int): AssorterIF  {
         val assorter = DHondtAssorter(info, winner = 0, loser = 1, lastSeatWon=2, firstSeatLost=5).setDilutedMean(.55)
-        val cassorter = ClcaAssorter(info, assorter, hasStyle=hasStyle, dilutedMargin=assorter.dilutedMargin())
+        val cassorter = ClcaAssorter(info, assorter, hasCompleteCvrs=hasStyle, dilutedMargin=assorter.dilutedMargin())
         println(cassorter)
 
         val winner = Cvr("winner", mapOf(0 to intArrayOf(0)))
@@ -85,7 +85,7 @@ class TestClcaAssortValues {
         val votes = mapOf(0 to 1010, 1 to 990) // Map<Int, Int>
         val contest =  Contest(info, votes, 2000, Ncast=2000)
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
-        val cassorter = ClcaAssorter(info, assorter, hasStyle=hasStyle, dilutedMargin=assorter.dilutedMargin())
+        val cassorter = ClcaAssorter(info, assorter, hasCompleteCvrs=hasStyle, dilutedMargin=assorter.dilutedMargin())
 
         val winner = Cvr("winner", mapOf(0 to intArrayOf(0)))
         val loser =  Cvr("loser", mapOf(0 to intArrayOf(1)))
@@ -133,7 +133,7 @@ class TestClcaAssortValues {
         val triples = mutableListOf<Triple<Double, Cvr, Cvr>>()
         cvrs.forEach { cvr ->
             cvrs.forEach { mvr ->
-                val bassort = cassorter.bassort(mvr=mvr, cvr=cvr, hasStyle=hasStyle)
+                val bassort = cassorter.bassort(mvr=mvr, cvr=cvr)
                 triples.add(Triple(bassort, cvr, mvr))
             }
         }
@@ -149,7 +149,7 @@ class TestClcaAssortValues {
         val cvrValue = if (cvr.isPhantom()) 0.5 else cassorter.assorter.assort(cvr, usePhantoms=false)
         val mvrValue = if (mvr.isPhantom()) 0.0 else cassorter.assorter.assort(mvr, usePhantoms=false)
         val expect = expectV(cvrAssort=cvrValue, mvrAssort=mvrValue, cassorter.assorter().upperBound())
-        val actual = cassorter.bassort(mvr=mvr, cvr=cvr, hasStyle=hasStyle) / cassorter.noerror() // hasStyle ??
+        val actual = cassorter.bassort(mvr=mvr, cvr=cvr) / cassorter.noerror() // hasStyle ??
         val tauName = taus.name(expect)
         val tauDesc = taus.desc(expect)
         println("  ${sfn(what, 15)} tau= ${df(actual)} '${sfn(tauName,7)}' (${tauDesc})")

@@ -217,41 +217,6 @@ fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<I
     return tabs
 }
 
-fun tabulatePooledCards(cards: CloseableIterator<AuditableCard>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
-    val tabs = mutableMapOf<Int, ContestTabulation>()
-    cards.use { cardIter ->
-        while (cardIter.hasNext()) {
-            val card = cardIter.next()
-            infos.forEach { (contestId, info) ->
-                if (card.hasContest(contestId)) { // TODO note that we believe possibleContests ...
-                    val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
-                    tab.ncards++
-                    if (card.phantom) tab.nphantoms++
-                    if (card.votes != null) {
-                        val contestVote = card.votes[contestId]
-                        if (contestVote == null) {
-                            tab.undervotes++
-                        } else {
-                            contestVote.forEach { cand -> tab.addVote(cand, 1) }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return tabs
-}
-
-fun tabulateCvr(cvr: Cvr, infos: Map<Int, ContestInfo>, result: MutableMap<Int, ContestTabulation>) {
-    for ((contestId, conVotes) in cvr.votes) {
-        val info = infos[contestId]
-        if (info != null) {
-            val tab = result.getOrPut(contestId) { ContestTabulation(info) }
-            tab.addVotes(conVotes, cvr.phantom)
-        }
-    }
-}
-
 fun showTabs(what: String, tabs: Map<Int, ContestTabulation>) = buildString {
     appendLine(what)
     tabs.forEach { (id, tab) ->

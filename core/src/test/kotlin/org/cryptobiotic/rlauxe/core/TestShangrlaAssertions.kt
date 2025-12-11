@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -195,71 +194,71 @@ class TestShangrlaAssertions {
         //                        - CVR.as_vote(c.get_vote_for("AvB", losr))
         //                        + 1)/2), upper_bound=1))
         val aliceVsBob = PluralityAssorter.makeWithVotes(plur_con_test, winner = 0, loser = 1)
-        val cassorter = ClcaAssorter(plur_con_test.info, aliceVsBob, hasStyle=true, dilutedMargin=aliceVsBob.dilutedMargin() )
+        val cassorter = ClcaAssorter(plur_con_test.info, aliceVsBob, hasCompleteCvrs=true, dilutedMargin=aliceVsBob.dilutedMargin() )
 
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=True) == 0
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=False) == 0
-        assertEquals(0.0, cassorter.overstatementError(mvr0, cvr0, hasStyle = true))
-        assertEquals(0.0, cassorter.overstatementError(mvr0, cvr0, hasStyle = false))
+        assertEquals(0.0, cassorter.overstatementError(mvr0, cvr0, hasCompleteCvrs = true))
+        assertEquals(0.0, cassorter.overstatementError(mvr0, cvr0, hasCompleteCvrs = false))
 
         //
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[1], use_style=True) == -1
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[1], use_style=False) == -1
-        assertEquals(-1.0, cassorter.overstatementError(mvr0, cvr1, hasStyle = true))
-        assertEquals(-1.0, cassorter.overstatementError(mvr0, cvr1, hasStyle = false))
+        assertEquals(-1.0, cassorter.overstatementError(mvr0, cvr1, hasCompleteCvrs = true))
+        assertEquals(-1.0, cassorter.overstatementError(mvr0, cvr1, hasCompleteCvrs = false))
 
         //
         //        assert aVb.assorter.overstatement(mvrs[2], cvrs[0], use_style=True) == 1/2
         //        assert aVb.assorter.overstatement(mvrs[2], cvrs[0], use_style=False) == 1/2
-        assertEquals(0.5, cassorter.overstatementError(mvr2, cvr0, hasStyle = true))
-        assertEquals(0.5, cassorter.overstatementError(mvr2, cvr0, hasStyle = false))
+        assertEquals(0.5, cassorter.overstatementError(mvr2, cvr0, hasCompleteCvrs = true))
+        assertEquals(0.5, cassorter.overstatementError(mvr2, cvr0, hasCompleteCvrs = false))
 
         //
         //        assert aVb.assorter.overstatement(mvrs[2], cvrs[1], use_style=True) == -1/2
         //        assert aVb.assorter.overstatement(mvrs[2], cvrs[1], use_style=False) == -1/2
-        assertEquals(-0.5, cassorter.overstatementError(mvr2, cvr1, hasStyle = true))
-        assertEquals(-0.5, cassorter.overstatementError(mvr2, cvr1, hasStyle = false))
+        assertEquals(-0.5, cassorter.overstatementError(mvr2, cvr1, hasCompleteCvrs = true))
+        assertEquals(-0.5, cassorter.overstatementError(mvr2, cvr1, hasCompleteCvrs = false))
 
         //
         //
         //        assert aVb.assorter.overstatement(mvrs[1], cvrs[0], use_style=True) == 1
         //        assert aVb.assorter.overstatement(mvrs[1], cvrs[0], use_style=False) == 1
-        assertEquals(1.0, cassorter.overstatementError(mvr1, cvr0, hasStyle = true))
-        assertEquals(1.0, cassorter.overstatementError(mvr1, cvr0, hasStyle = false))
+        assertEquals(1.0, cassorter.overstatementError(mvr1, cvr0, hasCompleteCvrs = true))
+        assertEquals(1.0, cassorter.overstatementError(mvr1, cvr0, hasCompleteCvrs = false))
 
         //
         //        assert aVb.assorter.overstatement(mvrs[2], cvrs[0], use_style=True) == 1/2
         //        assert aVb.assorter.overstatement(mvrs[2], cvrs[0], use_style=False) == 1/2
-        assertEquals(0.5, cassorter.overstatementError(mvr2, cvr0, hasStyle = true))
-        assertEquals(0.5, cassorter.overstatementError(mvr2, cvr0, hasStyle = false))
+        assertEquals(0.5, cassorter.overstatementError(mvr2, cvr0, hasCompleteCvrs = true))
+        assertEquals(0.5, cassorter.overstatementError(mvr2, cvr0, hasCompleteCvrs = false))
 
         //
         //        assert aVb.assorter.overstatement(mvrs[3], cvrs[0], use_style=True) == 1
         //        assert aVb.assorter.overstatement(mvrs[3], cvrs[0], use_style=False) == 1/2
-        assertEquals(1.0, cassorter.overstatementError(wrongContestMvr, cvr0, hasStyle = true))
-        assertEquals(0.5, cassorter.overstatementError(wrongContestMvr, cvr0, hasStyle = false))
+        assertEquals(1.0, cassorter.overstatementError(wrongContestMvr, cvr0, hasCompleteCvrs = true))
+        assertEquals(0.5, cassorter.overstatementError(wrongContestMvr, cvr0, hasCompleteCvrs = false))
 
-        assertEquals(0.0, cassorter.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = false))
+        assertEquals(0.0, cassorter.overstatementError(wrongContestMvr, wrongContestMvr, hasCompleteCvrs = false))
         val mess = assertFailsWith<RuntimeException>{
-            cassorter.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = true)
+            cassorter.overstatementError(wrongContestMvr, wrongContestMvr, hasCompleteCvrs = true)
         }.message
-        assertEquals("use_style==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess)
+        assertEquals("hasCompleteCvrs==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess)
 
         //
         //        assert aVb.assorter.overstatement(mvrs[4], cvrs[4], use_style=True) == 1/2
         //        assert aVb.assorter.overstatement(mvrs[4], cvrs[4], use_style=False) == 1/2
-        assertEquals(0.5, cassorter.overstatementError(mvr4, cvr4, hasStyle = true))
-        assertEquals(0.5, cassorter.overstatementError(mvr4, cvr4, hasStyle = false))
+        assertEquals(0.5, cassorter.overstatementError(mvr4, cvr4, hasCompleteCvrs = true))
+        assertEquals(0.5, cassorter.overstatementError(mvr4, cvr4, hasCompleteCvrs = false))
 
         //        assert aVb.assorter.overstatement(mvrs[4], cvrs[0], use_style=True) == 1
         //        assert aVb.assorter.overstatement(mvrs[4], cvrs[0], use_style=False) == 1
-        assertEquals(1.0, cassorter.overstatementError(mvr4, cvr0, hasStyle = true))
-        assertEquals(1.0, cassorter.overstatementError(mvr4, cvr0, hasStyle = false))
+        assertEquals(1.0, cassorter.overstatementError(mvr4, cvr0, hasCompleteCvrs = true))
+        assertEquals(1.0, cassorter.overstatementError(mvr4, cvr0, hasCompleteCvrs = false))
 
         //        assert aVb.assorter.overstatement(mvrs[4], cvrs[1], use_style=True) == 0
         //        assert aVb.assorter.overstatement(mvrs[4], cvrs[1], use_style=False) == 0
-        assertEquals(0.0, cassorter.overstatementError(mvr4, cvr1, hasStyle = true))
-        assertEquals(0.0, cassorter.overstatementError(mvr4, cvr1, hasStyle = false))
+        assertEquals(0.0, cassorter.overstatementError(mvr4, cvr1, hasCompleteCvrs = true))
+        assertEquals(0.0, cassorter.overstatementError(mvr4, cvr1, hasCompleteCvrs = false))
     }
 
     // plurality assort = {1, 0, .5} if vote is for { winner, loser, neither}
@@ -295,189 +294,135 @@ class TestShangrlaAssertions {
     fun test_overstatement_plurality() { // agrees with SHANGRLA
         // winner = alice, loser = bob
         val aliceVsBobP = PluralityAssorter(plur_con_test.info, winner = 0, loser = 1).setDilutedMean(margin2mean(0.2))
-        val aliceVsBob = ClcaAssorter(plur_con_test.info, aliceVsBobP, hasStyle=true, dilutedMargin=aliceVsBobP.dilutedMargin())
+        val cassorterHasStyle = ClcaAssorter(plur_con_test.info, aliceVsBobP, hasCompleteCvrs=true, dilutedMargin=aliceVsBobP.dilutedMargin())
 
         // mvr == cvr, always get noerror
-        assertEquals(0.0, aliceVsBob.overstatementError(aliceMvr, aliceMvr, hasStyle = true)) // 1
-        assertEquals(0.0, aliceVsBob.overstatementError(bobMvr, bobMvr, hasStyle = true))
-        assertEquals(0.0, aliceVsBob.overstatementError(candyMvr, candyMvr, hasStyle = true))
-        assertEquals(0.0, aliceVsBob.overstatementError(undervoteMvr, undervoteMvr, hasStyle = true))
+        assertEquals(0.0, cassorterHasStyle.overstatementError(aliceMvr, aliceMvr, hasCompleteCvrs = true)) // 1
+        assertEquals(0.0, cassorterHasStyle.overstatementError(bobMvr, bobMvr, hasCompleteCvrs = true))
+        assertEquals(0.0, cassorterHasStyle.overstatementError(candyMvr, candyMvr, hasCompleteCvrs = true))
+        assertEquals(0.0, cassorterHasStyle.overstatementError(undervoteMvr, undervoteMvr, hasCompleteCvrs = true))
 
-        assertEquals(0.0, aliceVsBob.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = false))
-        assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(wrongContestMvr, wrongContestMvr, hasStyle = false))
-        val mess = assertFailsWith<RuntimeException>{
-            aliceVsBob.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = true)
+        assertEquals(0.0, cassorterHasStyle.overstatementError(wrongContestMvr, wrongContestMvr, hasCompleteCvrs = false))
+        val mess1 = assertFailsWith<RuntimeException>{
+            assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(wrongContestMvr, wrongContestMvr)) // ??, hasCompleteCvrs = false))
         }.message
-        assertEquals("use_style==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess)
+        assertEquals("hasCompleteCvrs==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess1)
 
-        assertEquals(1.0, aliceVsBob.overstatementError(bobMvr, aliceMvr, hasStyle = true)) // 2
-        assertEquals(0.5, aliceVsBob.overstatementError(bobMvr, candyMvr, hasStyle = true))
-        assertEquals(0.5, aliceVsBob.overstatementError(bobMvr, undervoteMvr, hasStyle = true))
-        assertEquals(-1.0, aliceVsBob.overstatementError(aliceMvr, bobMvr, hasStyle = true))
-        assertEquals(-0.5, aliceVsBob.overstatementError(aliceMvr, candyMvr, hasStyle = true))
-        assertEquals(-0.5, aliceVsBob.overstatementError(aliceMvr, undervoteMvr, hasStyle = true))
-        assertEquals(-0.5, aliceVsBob.overstatementError(candyMvr, bobMvr, hasStyle = true))
-        assertEquals(0.5, aliceVsBob.overstatementError(candyMvr, aliceMvr, hasStyle = true))
-        assertEquals(0.0, aliceVsBob.overstatementError(candyMvr, danMvr, hasStyle = true))
-        assertEquals(-0.5, aliceVsBob.overstatementError(undervoteMvr, bobMvr, hasStyle = true)) // none = other
-        assertEquals(0.5, aliceVsBob.overstatementError(undervoteMvr, aliceMvr, hasStyle = true))
-        assertEquals(0.0, aliceVsBob.overstatementError(undervoteMvr, danMvr, hasStyle = true))
+        val mess = assertFailsWith<RuntimeException>{
+            cassorterHasStyle.overstatementError(wrongContestMvr, wrongContestMvr, hasCompleteCvrs = true)
+        }.message
+        assertEquals("hasCompleteCvrs==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess)
+
+        assertEquals(1.0, cassorterHasStyle.overstatementError(bobMvr, aliceMvr, hasCompleteCvrs = true)) // 2
+        assertEquals(0.5, cassorterHasStyle.overstatementError(bobMvr, candyMvr, hasCompleteCvrs = true))
+        assertEquals(0.5, cassorterHasStyle.overstatementError(bobMvr, undervoteMvr, hasCompleteCvrs = true))
+        assertEquals(-1.0, cassorterHasStyle.overstatementError(aliceMvr, bobMvr, hasCompleteCvrs = true))
+        assertEquals(-0.5, cassorterHasStyle.overstatementError(aliceMvr, candyMvr, hasCompleteCvrs = true))
+        assertEquals(-0.5, cassorterHasStyle.overstatementError(aliceMvr, undervoteMvr, hasCompleteCvrs = true))
+        assertEquals(-0.5, cassorterHasStyle.overstatementError(candyMvr, bobMvr, hasCompleteCvrs = true))
+        assertEquals(0.5, cassorterHasStyle.overstatementError(candyMvr, aliceMvr, hasCompleteCvrs = true))
+        assertEquals(0.0, cassorterHasStyle.overstatementError(candyMvr, danMvr, hasCompleteCvrs = true))
+        assertEquals(-0.5, cassorterHasStyle.overstatementError(undervoteMvr, bobMvr, hasCompleteCvrs = true)) // none = other
+        assertEquals(0.5, cassorterHasStyle.overstatementError(undervoteMvr, aliceMvr, hasCompleteCvrs = true))
+        assertEquals(0.0, cassorterHasStyle.overstatementError(undervoteMvr, danMvr, hasCompleteCvrs = true))
 
         // exaclty the same as above, since hasStyle only has an effect when the contest is not in the MVR or CVR
-        assertEquals(1.0, aliceVsBob.overstatementError(bobMvr, aliceMvr, hasStyle = false)) // 3
-        assertEquals(0.5, aliceVsBob.overstatementError(bobMvr, candyMvr, hasStyle = false))
-        assertEquals(0.5, aliceVsBob.overstatementError(bobMvr, undervoteMvr, hasStyle = false))
-        assertEquals(-1.0, aliceVsBob.overstatementError(aliceMvr, bobMvr, hasStyle = false))
-        assertEquals(-0.5, aliceVsBob.overstatementError(aliceMvr, candyMvr, hasStyle = false))
-        assertEquals(-0.5, aliceVsBob.overstatementError(aliceMvr, undervoteMvr, hasStyle = false))
-        assertEquals(-0.5, aliceVsBob.overstatementError(candyMvr, bobMvr, hasStyle = false))
-        assertEquals(0.5, aliceVsBob.overstatementError(candyMvr, aliceMvr, hasStyle = false))
-        assertEquals(0.0, aliceVsBob.overstatementError(candyMvr, danMvr, hasStyle = false))
-        assertEquals(-0.5, aliceVsBob.overstatementError(undervoteMvr, bobMvr, hasStyle = false))
-        assertEquals(0.5, aliceVsBob.overstatementError(undervoteMvr, aliceMvr, hasStyle = false))
-        assertEquals(0.0, aliceVsBob.overstatementError(undervoteMvr, danMvr, hasStyle = false))
+        assertEquals(1.0, cassorterHasStyle.overstatementError(bobMvr, aliceMvr, hasCompleteCvrs = false)) // 3
+        assertEquals(0.5, cassorterHasStyle.overstatementError(bobMvr, candyMvr, hasCompleteCvrs = false))
+        assertEquals(0.5, cassorterHasStyle.overstatementError(bobMvr, undervoteMvr, hasCompleteCvrs = false))
+        assertEquals(-1.0, cassorterHasStyle.overstatementError(aliceMvr, bobMvr, hasCompleteCvrs = false))
+        assertEquals(-0.5, cassorterHasStyle.overstatementError(aliceMvr, candyMvr, hasCompleteCvrs = false))
+        assertEquals(-0.5, cassorterHasStyle.overstatementError(aliceMvr, undervoteMvr, hasCompleteCvrs = false))
+        assertEquals(-0.5, cassorterHasStyle.overstatementError(candyMvr, bobMvr, hasCompleteCvrs = false))
+        assertEquals(0.5, cassorterHasStyle.overstatementError(candyMvr, aliceMvr, hasCompleteCvrs = false))
+        assertEquals(0.0, cassorterHasStyle.overstatementError(candyMvr, danMvr, hasCompleteCvrs = false))
+        assertEquals(-0.5, cassorterHasStyle.overstatementError(undervoteMvr, bobMvr, hasCompleteCvrs = false))
+        assertEquals(0.5, cassorterHasStyle.overstatementError(undervoteMvr, aliceMvr, hasCompleteCvrs = false))
+        assertEquals(0.0, cassorterHasStyle.overstatementError(undervoteMvr, danMvr, hasCompleteCvrs = false))
 
         //// contest does not appear on the MVR, hasStyle = true
         // we get an overstatementError of {1, 0, 1/2} depending if the CVR showed a vote for the {winner, loser, other}
-        assertEquals(1.0, aliceVsBob.overstatementError(wrongContestMvr, aliceMvr, hasStyle = true)) // 4
-        assertEquals(0.0, aliceVsBob.overstatementError(wrongContestMvr, bobMvr, hasStyle = true))
-        assertEquals(0.5, aliceVsBob.overstatementError(wrongContestMvr, candyMvr, hasStyle = true))
-        assertEquals(0.5, aliceVsBob.overstatementError(wrongContestMvr, undervoteMvr, hasStyle = true)) // none = other
+        assertEquals(1.0, cassorterHasStyle.overstatementError(wrongContestMvr, aliceMvr, hasCompleteCvrs = true)) // 4
+        assertEquals(0.0, cassorterHasStyle.overstatementError(wrongContestMvr, bobMvr, hasCompleteCvrs = true))
+        assertEquals(0.5, cassorterHasStyle.overstatementError(wrongContestMvr, candyMvr, hasCompleteCvrs = true))
+        assertEquals(0.5, cassorterHasStyle.overstatementError(wrongContestMvr, undervoteMvr, hasCompleteCvrs = true)) // none = other
 
         //// contest does not appear on the MVR, hasStyle = false
         // we get an overstatementError of {1/2, -1/2, 0} depending if the CVR showed a vote for the {winner, loser, other}
-        assertEquals(0.5, aliceVsBob.overstatementError(wrongContestMvr, aliceMvr, hasStyle = false)) // 5
-        assertEquals(-0.5, aliceVsBob.overstatementError(wrongContestMvr, bobMvr, hasStyle = false))
-        assertEquals(0.0, aliceVsBob.overstatementError(wrongContestMvr, candyMvr, hasStyle = false))
-        assertEquals(0.0, aliceVsBob.overstatementError(wrongContestMvr, undervoteMvr, hasStyle = false)) // none = other
+        assertEquals(0.5, cassorterHasStyle.overstatementError(wrongContestMvr, aliceMvr, hasCompleteCvrs = false)) // 5
+        assertEquals(-0.5, cassorterHasStyle.overstatementError(wrongContestMvr, bobMvr, hasCompleteCvrs = false))
+        assertEquals(0.0, cassorterHasStyle.overstatementError(wrongContestMvr, candyMvr, hasCompleteCvrs = false))
+        assertEquals(0.0, cassorterHasStyle.overstatementError(wrongContestMvr, undervoteMvr, hasCompleteCvrs = false)) // none = other
 
         //// contest does not appear on the CVR, hasStyle = false
         // we get an overstatementError of {-1/2, 1/2, 0} depending if the MVR showed a vote for the {winner, loser, other}
-        assertEquals(-0.5, aliceVsBob.overstatementError(aliceMvr, wrongContestMvr, hasStyle = false)) // 6
-        assertEquals(0.5, aliceVsBob.overstatementError(bobMvr, wrongContestMvr, hasStyle = false))
-        assertEquals(0.0, aliceVsBob.overstatementError(candyMvr, wrongContestMvr, hasStyle = false))
-        assertEquals(0.0, aliceVsBob.overstatementError(undervoteMvr, wrongContestMvr, hasStyle = false)) // none = other
+        assertEquals(-0.5, cassorterHasStyle.overstatementError(aliceMvr, wrongContestMvr, hasCompleteCvrs = false)) // 6
+        assertEquals(0.5, cassorterHasStyle.overstatementError(bobMvr, wrongContestMvr, hasCompleteCvrs = false))
+        assertEquals(0.0, cassorterHasStyle.overstatementError(candyMvr, wrongContestMvr, hasCompleteCvrs = false))
+        assertEquals(0.0, cassorterHasStyle.overstatementError(undervoteMvr, wrongContestMvr, hasCompleteCvrs = false)) // none = other
     }
 
     @Test
     fun test_overstatement_plurality_assort() { // agrees with SHANGRLA
         // winner = alice, loser = bob
         val aliceVsBobP = PluralityAssorter(plur_con_test.info, winner = 0, loser = 1).setDilutedMean(margin2mean(0.2))
-        val aliceVsBob = ClcaAssorter(plur_con_test.info, aliceVsBobP, hasStyle=true, dilutedMargin=aliceVsBobP.dilutedMargin())
+        val cassorterHasStyle = ClcaAssorter(plur_con_test.info, aliceVsBobP, hasCompleteCvrs=true, dilutedMargin=aliceVsBobP.dilutedMargin())
 
         // mvr == cvr, always get noerror
-        assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(aliceMvr, aliceMvr, hasStyle = true)) // 1
-        assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(bobMvr, bobMvr, hasStyle = true))
-        assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(candyMvr, candyMvr, hasStyle = true))
+        assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(aliceMvr, aliceMvr)) // 1
+        assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(bobMvr, bobMvr))
+        assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(candyMvr, candyMvr))
 
-        // You have cvrs but use_style = false, which must mean that undervotes werent recorded. Now we examine an mvr
-        // that doesnt have that contest on it, and neither does the cvr. Seems like you should just skip it? meaning 1/2, not noerror.
-        assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(wrongContestMvr, wrongContestMvr, hasStyle = false))
-        val mess = assertFailsWith<RuntimeException>{
-            aliceVsBob.bassort(wrongContestMvr, wrongContestMvr, hasStyle = true)
-        }.message
-        assertEquals("use_style==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess)
-
-        assertEquals(0.0 * aliceVsBob.noerror, aliceVsBob.bassort(bobMvr, aliceMvr, hasStyle = true)) // 2
-        assertEquals(0.5 * aliceVsBob.noerror, aliceVsBob.bassort(bobMvr, candyMvr, hasStyle = true))
-        assertEquals(2.0 * aliceVsBob.noerror, aliceVsBob.bassort(aliceMvr, bobMvr, hasStyle = true))
-        assertEquals(1.5 * aliceVsBob.noerror, aliceVsBob.bassort(aliceMvr, candyMvr, hasStyle = true))
-        assertEquals(1.5 * aliceVsBob.noerror, aliceVsBob.bassort(candyMvr, bobMvr, hasStyle = true))
-        assertEquals(0.5 * aliceVsBob.noerror, aliceVsBob.bassort(candyMvr, aliceMvr, hasStyle = true))
-        assertEquals(1.0 * aliceVsBob.noerror, aliceVsBob.bassort(candyMvr, danMvr, hasStyle = true))
-
-        assertEquals(0.0 * aliceVsBob.noerror, aliceVsBob.bassort(bobMvr, aliceMvr, hasStyle = false)) // 3
-        assertEquals(0.5 * aliceVsBob.noerror, aliceVsBob.bassort(bobMvr, candyMvr, hasStyle = false))
-        assertEquals(2.0 * aliceVsBob.noerror, aliceVsBob.bassort(aliceMvr, bobMvr, hasStyle = false))
-        assertEquals(1.5 * aliceVsBob.noerror, aliceVsBob.bassort(aliceMvr, candyMvr, hasStyle = false))
-        assertEquals(1.5 * aliceVsBob.noerror, aliceVsBob.bassort(candyMvr, bobMvr, hasStyle = false))
-        assertEquals(0.5 * aliceVsBob.noerror, aliceVsBob.bassort(candyMvr, aliceMvr, hasStyle = false))
-        assertEquals(1.0 * aliceVsBob.noerror, aliceVsBob.bassort(candyMvr, danMvr, hasStyle = false))
+        assertEquals(0.0 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(bobMvr, aliceMvr)) // 2
+        assertEquals(0.5 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(bobMvr, candyMvr))
+        assertEquals(2.0 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(aliceMvr, bobMvr))
+        assertEquals(1.5 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(aliceMvr, candyMvr))
+        assertEquals(1.5 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(candyMvr, bobMvr))
+        assertEquals(0.5 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(candyMvr, aliceMvr))
+        assertEquals(1.0 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(candyMvr, danMvr))
 
         //// contest does not appear on the MVR
         // we get an assort value of {0, noerror, noerror/2} depending if the CVR showed a vote for the {winner, loser, other},
-        assertEquals(0.0, aliceVsBob.bassort(wrongContestMvr, aliceMvr, hasStyle = true)) // 4
-        assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(wrongContestMvr, bobMvr, hasStyle = true))
-        assertEquals(aliceVsBob.noerror/2, aliceVsBob.bassort(wrongContestMvr, candyMvr, hasStyle = true))
+        assertEquals(0.0, cassorterHasStyle.bassort(wrongContestMvr, aliceMvr)) // 4
+        assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(wrongContestMvr, bobMvr))
+        assertEquals(cassorterHasStyle.noerror/2, cassorterHasStyle.bassort(wrongContestMvr, candyMvr))
+
+        assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(wrongContestMvr, bobMvr))
+        assertEquals(cassorterHasStyle.noerror/2, cassorterHasStyle.bassort(wrongContestMvr, candyMvr))
+        assertEquals(0.0, cassorterHasStyle.bassort(wrongContestMvr, aliceMvr)) // 4
+
+        val mess = assertFailsWith<RuntimeException>{
+            cassorterHasStyle.bassort(wrongContestMvr, wrongContestMvr)
+        }.message
+        assertEquals("hasCompleteCvrs==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess)
+
+        /////////////
+        val cassorterNoStyle = ClcaAssorter(plur_con_test.info, aliceVsBobP, hasCompleteCvrs=false, dilutedMargin=aliceVsBobP.dilutedMargin())
+
+        // You have cvrs but use_style = false, which must mean that undervotes werent recorded. Now we examine an mvr
+        // that doesnt have that contest on it, and neither does the cvr.
+        assertEquals(cassorterNoStyle.noerror, cassorterNoStyle.bassort(wrongContestMvr, wrongContestMvr))
+
+        assertEquals(0.0 * cassorterNoStyle.noerror, cassorterNoStyle.bassort(bobMvr, aliceMvr)) // 3
+        assertEquals(0.5 * cassorterNoStyle.noerror, cassorterNoStyle.bassort(bobMvr, candyMvr))
+        assertEquals(2.0 * cassorterNoStyle.noerror, cassorterNoStyle.bassort(aliceMvr, bobMvr))
+        assertEquals(1.5 * cassorterNoStyle.noerror, cassorterNoStyle.bassort(aliceMvr, candyMvr))
+        assertEquals(1.5 * cassorterNoStyle.noerror, cassorterNoStyle.bassort(candyMvr, bobMvr))
+        assertEquals(0.5 * cassorterNoStyle.noerror, cassorterNoStyle.bassort(candyMvr, aliceMvr))
+        assertEquals(1.0 * cassorterNoStyle.noerror, cassorterNoStyle.bassort(candyMvr, danMvr))
+
+        //// contest does not appear on the MVR
+        // we get an assort value of {0, noerror, noerror/2} depending if the CVR showed a vote for the {winner, loser, other},
 
         // we get an assort value of {noerror/2, 1.5 * noerror, noerror} depending if the CVR showed a vote for the {winner, loser, other},
-        assertEquals(aliceVsBob.noerror/2, aliceVsBob.bassort(wrongContestMvr, aliceMvr, hasStyle = false)) // 5
-        assertEquals(1.5 * aliceVsBob.noerror, aliceVsBob.bassort(wrongContestMvr, bobMvr, hasStyle = false))
-        assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(wrongContestMvr, candyMvr, hasStyle = false))
+        assertEquals(cassorterNoStyle.noerror/2, cassorterNoStyle.bassort(wrongContestMvr, aliceMvr)) // 5
+        assertEquals(1.5 * cassorterNoStyle.noerror, cassorterNoStyle.bassort(wrongContestMvr, bobMvr))
+        assertEquals(cassorterNoStyle.noerror, cassorterNoStyle.bassort(wrongContestMvr, candyMvr))
 
         // we get an assort value of {1.5, noerror/2, noerror} depending if the MVR showed a vote for the {winner, loser, other},
-        assertEquals(1.5 * aliceVsBob.noerror, aliceVsBob.bassort(aliceMvr, wrongContestMvr, hasStyle = false))
-        assertEquals(0.5 * aliceVsBob.noerror, aliceVsBob.bassort(bobMvr, wrongContestMvr, hasStyle = false))
-        assertEquals(aliceVsBob.noerror, aliceVsBob.bassort(candyMvr, wrongContestMvr, hasStyle = false))
-    }
-
-    // the SHANGRLA test is with the supermajority contest. blah
-    @Test
-    fun test_overstatement_assorter() {
-        val mvr0 = aliceMvr
-        val mvr1 = bobMvr
-        wrongContestMvr
-        val cvr0 = aliceMvr
-        val cvr1 = bobMvr
-
-        //
-        //        winner = ["Alice"]
-        //        loser = ["Bob", "Candy"]
-        //
-        // problem is con_test is supermajority, so u != 1, but here it is set to 1. jeesh
-        // LOOK correct the upper bound
-        //        aVb = Assertion(contest=self.con_test, assorter=Assorter(contest=self.con_test,
-        //                        assort = (lambda c, contest_id="AvB", winr="Alice", losr="Bob":
-        //                        ( CVR.as_vote(c.get_vote_for("AvB", winr))
-        //                        - CVR.as_vote(c.get_vote_for("AvB", losr))
-        //                        + 1)/2), upper_bound=1/(2 * self.con_test.share_to_win))
-        //        aVb.margin=0.2
-        // data class SuperMajorityAssorter(val info: ContestInfo, val candId: Int, val minFraction: Double): AssorterIF {
-        // data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double): AssorterIF  {
-
-        var aliceVsBob = AboveThreshold(sm_con_test.info, winner = 0, sm_con_test.info.minFraction!!).setDilutedMean(margin2mean(0.2))
-        var cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob, hasStyle=true, dilutedMargin=aliceVsBob.dilutedMargin())
-
-        assertEquals(cassorter.noerror, cassorter.bassort(mvr0, cvr0, hasStyle = true))
-        assertEquals(cassorter.noerror, cassorter.bassort(mvr1, cvr1, hasStyle = true))
-
-        //
-        //        assert aVb.overstatement_assorter(mvrs[1], cvrs[0], use_style=True) == 0
-        //        assert aVb.overstatement_assorter(mvrs[1], cvrs[0], use_style=False) == 0
-        assertEquals(0.0, cassorter.bassort(mvr1, cvr0, hasStyle = true))
-        assertEquals(0.0, cassorter.bassort(mvr1, cvr0, hasStyle = false))
-
-        //        aVb.margin=0.3
-        //        assert aVb.overstatement_assorter(mvrs[0], cvrs[1], use_style=True) == 2/1.7
-        //        assert aVb.overstatement_assorter(mvrs[0], cvrs[1], use_style=False) == 2/1.7
-        aliceVsBob = AboveThreshold(sm_con_test.info, winner = 0, sm_con_test.info.minFraction).setDilutedMean(margin2mean(0.3))
-        cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob, hasStyle=true, dilutedMargin=aliceVsBob.dilutedMargin())
-        assertEquals(cassorter.noerror, cassorter.bassort(mvr0, cvr0, hasStyle = true))
-        assertEquals(2 * cassorter.noerror, cassorter.bassort(mvr0, cvr1, hasStyle = true))
-        assertEquals(2 * cassorter.noerror, cassorter.bassort(mvr0, cvr1, hasStyle = false))
-
-        // assertEquals(1/1.7, cassorter.noerror) // starts failing here
-        assertEquals(2 * cassorter.noerror, cassorter.bassort(mvr0, cvr1, hasStyle = true))
-        assertEquals(2  * cassorter.noerror, cassorter.bassort(mvr0, cvr1, hasStyle = false))
-
-        //
-        //        aVb.margin=0.1
-        //        assert aVb.overstatement_assorter(mvrs[2], cvrs[0], use_style=True) == 0.5/1.9
-        //        assert aVb.overstatement_assorter(mvrs[2], cvrs[0], use_style=False) == 0.5/1.9
-        aliceVsBob = AboveThreshold(sm_con_test.info, winner = 0, sm_con_test.info.minFraction).setDilutedMean(margin2mean(0.1))
-        assertEquals(3/4.0, aliceVsBob.upperBound())
-        cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob, hasStyle=true, dilutedMargin=aliceVsBob.dilutedMargin())
-        // noerror = 1.0 / (2.0 - reportedAssortMargin / assorter.upperBound()) = 1/ (2 - .1 / .75)
-        assertEquals(1 / (2 - .1 / .75), cassorter.noerror, doublePrecision)
-        assertEquals(2 * cassorter.noerror, cassorter.upperBound)
-
-        assertEquals(0.0, cassorter.bassort(wrongContestMvr, aliceMvr, hasStyle = true))
-
-        // bassort = (1.0 - overstatement / this.assorter.upperBound()) * noerror
-        val oerror = cassorter.overstatementError(wrongContestMvr, aliceMvr, hasStyle = false)
-        val expect = (1 - oerror/aliceVsBob.upperBound() ) * cassorter.noerror
-        println("wrongContestMvr, aliceMvr, hasStyle = false: upperBound = ${aliceVsBob.upperBound()} oerror = $oerror bassort=${(1 - oerror/aliceVsBob.upperBound() )}*noerror")
-        assertEquals(expect, cassorter.bassort(wrongContestMvr, aliceMvr, hasStyle = false))
+        assertEquals(1.5 * cassorterNoStyle.noerror, cassorterNoStyle.bassort(aliceMvr, wrongContestMvr))
+        assertEquals(0.5 * cassorterNoStyle.noerror, cassorterNoStyle.bassort(bobMvr, wrongContestMvr))
+        assertEquals(cassorterNoStyle.noerror, cassorterNoStyle.bassort(candyMvr, wrongContestMvr))
     }
 
 }

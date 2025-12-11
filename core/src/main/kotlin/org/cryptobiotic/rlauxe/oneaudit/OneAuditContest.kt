@@ -156,16 +156,15 @@ fun addOAClcaAssortersFromMargin(
 class ClcaAssorterOneAudit(
     info: ContestInfo,
     assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs: plurality or IRV
-    hasStyle: Boolean = true,
+    hasCompleteCvrs: Boolean = true,
     dilutedMargin: Double,
     val poolAverages: AssortAvgsInPools,
-) : ClcaAssorter(info, assorter, hasStyle = hasStyle, dilutedMargin=dilutedMargin) {
+) : ClcaAssorter(info, assorter, hasCompleteCvrs = hasCompleteCvrs, dilutedMargin=dilutedMargin) {
 
     // B(bi, ci)
-    override fun bassort(mvr: CardIF, cvr: CardIF, hasStyle: Boolean): Double {
-        // println("mvr = $mvr cvr = $cvr")
+    override fun bassort(mvr: CardIF, cvr: CardIF): Double {
         if (cvr.poolId() == null) {
-            return super.bassort(mvr, cvr, hasStyle) // here we use the standard assorter
+            return super.bassort(mvr, cvr) // here we use the standard assorter
         }
 
         val poolAverage = poolAverages.assortAverage[cvr.poolId()]
@@ -194,7 +193,7 @@ class ClcaAssorterOneAudit(
     fun overstatementPoolError(mvr: CardIF, poolAvgAssortValue: Double): Double {
         val mvr_assort =
             if (mvr.isPhantom()) 0.0
-            else if (!mvr.hasContest(info.id)) 0.5  // hasStyle = false for pooled data
+            else if (!mvr.hasContest(info.id)) 0.5  // TODO investigate this: we could have Nc == Npop if each pool has a single card style
             else this.assorter.assort(mvr, usePhantoms = false)
 
         // for pooled data (i in Gg):

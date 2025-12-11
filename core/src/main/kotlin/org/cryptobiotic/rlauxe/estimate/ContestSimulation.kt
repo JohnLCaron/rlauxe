@@ -33,6 +33,8 @@ import kotlin.random.Random
  * Simulation of single Contest that reflects the exact votes and Nb (diluted), along with undervotes and phantoms, as specified in Contest.
  */
 // ressurected 12/4/25; probably dont need
+// TODO CANDIDATE for removal
+
 class ContestSimulation(val contest: Contest, val Npop: Int) {
     val info = contest.info
     val ncands = info.candidateIds.size
@@ -55,35 +57,6 @@ class ContestSimulation(val contest: Contest, val Npop: Int) {
         trackVotesRemaining = mutableListOf()
         trackVotesRemaining.addAll(contest.votes.toList())
         votesLeft = voteCount
-    }
-
-    // makes a set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
-    // cvrs only contain this contest; hasStyle is ignored.
-    // ncvrs = voteCount + underCount + phantomCount = Nc
-    fun makeCvrsOld(prefix: String = "card", poolId: Int?=null): List<Cvr> {
-        resetTracker()
-
-        var count = 0
-        val cvrbs = CvrBuilders().addContests(listOf(contest.info))
-        val result = mutableListOf<Cvr>()
-        repeat(this.voteCount) {
-            val cvrb = cvrbs.addCvr("$prefix-${count++}", poolId)
-            cvrb.addContest(info.name, chooseCandidate(Random.nextInt(votesLeft))).done()
-            result.add(cvrb.build(poolId))
-        }
-        // add empty undervotes
-        repeat(underCount) {
-            val cvrb = cvrbs.addCvr("$prefix-${count++}", poolId)
-            cvrb.addContest(info.name).done()
-            result.add(cvrb.build(poolId))
-        }
-        // add phantoms
-        repeat(phantomCount) {
-            val cvrb = cvrbs.addPhantomCvr("$prefix-${count++}")
-            cvrb.addContest(info.name).done()
-            result.add(cvrb.build(poolId))
-        }
-        return result.toList()
     }
 
     // TODO replace with CvrBuilders2 ?? Yes, but cant compare unless you set Random seed
@@ -158,6 +131,7 @@ class ContestSimulation(val contest: Contest, val Npop: Int) {
             return ContestSimulation(contest, Nc)
         }
 
+        // TODO CANDIDATE for removal
         fun simulateContestCvrsWithLimits(contest: Contest, config: AuditConfig): ContestSimulation {
             val limit = config.contestSampleCutoff
             if (limit == null || contest.Nc <= limit) return ContestSimulation(contest, contest.Nc)
@@ -184,6 +158,7 @@ class ContestSimulation(val contest: Contest, val Npop: Int) {
             return ContestSimulation(contest, contest.Nc)
         }
 
+        // TODO CANDIDATE for removal
         fun simulateCvrsDilutedMargin(contestUA: ContestUnderAudit, config: AuditConfig): List<Cvr> {
             val limit = config.contestSampleCutoff
             val contestOrg = contestUA.contest as Contest // TODO

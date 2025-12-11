@@ -295,11 +295,4 @@ class CardsWithStylesToCardManifest(
     override fun close() = cards.close()
 }
 
-// TODO maybe go back to CardManifest include the pools ??
-fun makeCardManifest(converter: CardsWithStylesToCardManifest): List<AuditableCard> {
-    val cardManifest = mutableListOf<AuditableCard>()
-    converter.forEach { cardManifest.add(it) }
-    return cardManifest
-}
-
 

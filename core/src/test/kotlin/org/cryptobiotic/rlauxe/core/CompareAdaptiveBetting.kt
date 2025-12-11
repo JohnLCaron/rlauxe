@@ -24,7 +24,7 @@ class CompareAdaptiveBetting {
             val tracker1 = PluralityErrorTracker(noerror)
 
             val errorCounts = ClcaErrorCounts.fromPluralityErrorRates(errorRates, totalSamples = N, noerror = noerror, upper = 1.0)
-            val bet2 = GeneralAdaptiveBettingOld(N, startingErrorRates = errorCounts, d=100)
+            val bet2 = GeneralAdaptiveBetting(N, oaErrorRates=null, d=100, maxRisk = 1.0)
             val tracker2 = ClcaErrorTracker(noerror, 1.0)
 
             var count = 0
@@ -73,7 +73,7 @@ class CompareAdaptiveBetting {
             val risk1 = Risk(Nc, tracker1, bet1, cassorter.upperBound())
 
             val errorCounts = ClcaErrorCounts.fromPluralityErrorRates(errorRates, totalSamples = 0, noerror = noerror, upper = 1.0)
-            val bet2 = GeneralAdaptiveBettingOld(Nc, startingErrorRates = errorCounts, d=100)
+            val bet2 = GeneralAdaptiveBetting(Nc, oaErrorRates=null, d=100, maxRisk = 1.0)
             val tracker2 = ClcaErrorTracker(noerror, cassorter.assorter.upperBound())
             val risk2 = Risk(Nc, tracker2, bet2, cassorter.upperBound())
 

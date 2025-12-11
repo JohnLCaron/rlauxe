@@ -27,54 +27,6 @@ import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger("RunAudit")
 
-// TODO add ErrorMessages ??
-fun runRoundOld(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
-    try {
-        if (notExists(Path.of(inputDir))) {
-            logger.warn { "RunRliRoundCli Audit Directory $inputDir does not exist" }
-            return null
-        }
-        logger.info { "runRound on Audit in $inputDir" }
-
-        var complete = false
-        var roundIdx = 0
-        val workflow = PersistedWorkflow(inputDir, useTest)
-
-        if (!workflow.auditRounds().isEmpty()) {
-            val auditRound = workflow.auditRounds().last()
-            roundIdx = auditRound.roundIdx
-
-            if (!auditRound.auditWasDone) {
-                logger.info { "Run audit round ${auditRound.roundIdx}" }
-                val roundStopwatch = Stopwatch()
-
-                // run the audit for this round
-                complete = workflow.runAuditRound(auditRound, quiet)
-                logger.info { "  complete=$complete took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms" }
-            } else {
-                complete = auditRound.auditIsComplete
-            }
-        }
-
-        if (!complete) {
-            roundIdx++
-            // start next round and estimate sample sizes
-            logger.info { "Start audit round $roundIdx using ${workflow}" }
-            val nextRound = workflow.startNewRound(quiet = false)
-            logger.info { "nextRound ${nextRound.show()}" }
-            return if (nextRound.auditIsComplete) null else nextRound // TODO dont return null
-        }
-
-        logger.info { "runRound $roundIdx complete = $complete" }
-        return null
-
-    } catch (t: Throwable) {
-        logger.error {t}
-        t.printStackTrace()
-        return null
-    }
-}
-
 fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
     val roundResult = runRoundResult(inputDir, useTest, quiet)
     if (roundResult is Err) {

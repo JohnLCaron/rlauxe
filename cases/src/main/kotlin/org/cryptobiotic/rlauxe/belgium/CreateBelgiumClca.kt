@@ -40,7 +40,7 @@ class BelgiumClca (
 
 ////////////////////////////////////////////////////////////////////
 fun createBelgiumClca(
-    topdir: String,
+    auditdir: String,
     contestd: DHondtContest,
     auditConfigIn: AuditConfig? = null,
     clear: Boolean = true)
@@ -55,7 +55,7 @@ fun createBelgiumClca(
     }
     val election = BelgiumClca(contestd, config.hasStyle)
 
-    CreateAudit("belgiumClca", config, election, topdir, clear = clear)
+    CreateAudit("belgiumClca", config, election, auditdir, clear = clear)
     println("createBelgiumClca took $stopwatch")
 }
 

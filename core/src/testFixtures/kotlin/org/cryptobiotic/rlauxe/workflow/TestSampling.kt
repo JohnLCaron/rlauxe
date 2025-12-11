@@ -480,8 +480,7 @@ class ClcaCardSimulatedErrorRates(
             val mvr = mvrs[permutedIndex[idx]]
             idx++
             if (card.hasContest(contest.id)) {
-                val hasStyle = card.poolId == null // TODO may not be right
-                val result = cassorter.bassort(mvr.cvr(), card.cvr(), hasStyle)
+                val result = cassorter.bassort(mvr.cvr(), card.cvr())
                 count++
                 return result
             }

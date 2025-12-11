@@ -112,12 +112,9 @@ class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, 
     val p0: Double
 
     init {
-        if (mui < 0.0) // TODO mj can go up to the sampleUpperBound, not 1.0
+        if (mui < 0.0)
             print("wtf")
         require (mui > 0.0)
-
-        if (maxBet < 0.0)
-            print("wtf")
         require (maxBet > 0.0)
 
         val oasum = if (oaErrorRates == null) 0.0 else oaErrorRates.map{ it.value }.sum()

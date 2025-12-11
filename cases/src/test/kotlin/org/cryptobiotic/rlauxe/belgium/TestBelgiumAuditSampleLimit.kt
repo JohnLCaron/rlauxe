@@ -57,13 +57,14 @@ fun createBelgiumElectionLimited(electionName: String)  {
         minRecountMargin = 0.0,
     )
     val topdir = "$toptopdir/${electionName}Limited"
-    createBelgiumClca(topdir, contestd, auditConfigIn = config)
+    val auditdir = "$topdir/audit"
+    createBelgiumClca(auditdir, contestd, auditConfigIn = config)
 
-    val publisher = Publisher("$topdir/audit")
+    val publisher = Publisher(auditdir)
     writeSortedCardsExternalSort(topdir, publisher, config.seed)
 
     // get estimate, set up first round
-    runRound(inputDir = "$topdir/audit", useTest = true, quiet = true)
+    runRound(inputDir = auditdir, useTest = true, quiet = true)
 }
 
 fun runAudit(auditdir: String): AuditRound? {

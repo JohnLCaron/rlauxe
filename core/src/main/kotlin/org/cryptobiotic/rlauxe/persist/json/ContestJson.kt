@@ -229,7 +229,7 @@ fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
         this.contest.info().publishJson(),
         this.contest.publishJson(),
         this.isClca,
-        this.hasStyle,
+        this.hasCompleteCvrs,
         this.pollingAssertions.map { it.publishIFJson() },
         this.clcaAssertions.map { it.publishJson() },
         this.preAuditStatus,

@@ -121,13 +121,13 @@ fun createBelgiumElection(electionName: String, stopRound:Int=0, showVerify:Bool
     val contestd = dcontest.createContest(Nc = totalVotes, Ncast = totalVotes)
 
     val topdir = "$toptopdir/$electionName"
-    createBelgiumClca(topdir, contestd)
+    val auditdir = "$topdir/audit"
+    createBelgiumClca(auditdir, contestd)
 
-    val publisher = Publisher("$topdir/audit")
+    val publisher = Publisher(auditdir)
     val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
     writeSortedCardsExternalSort(topdir, publisher, config.seed)
 
-    val auditdir = "$topdir/audit"
     val results = RunVerifyContests.runVerifyContests(auditdir, null, show = showVerify)
     println()
     print(results)

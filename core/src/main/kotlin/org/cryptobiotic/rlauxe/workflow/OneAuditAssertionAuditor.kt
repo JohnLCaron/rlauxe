@@ -80,6 +80,7 @@ class OneAuditAssertionAuditor(val pools: List<CardPoolIF>, val quiet: Boolean =
         return testH0Result
     }
 
+    // CANDIDATE for removal
      fun runAlpha(
          config: AuditConfig,
          N: Int,

@@ -1,8 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardIF
-import org.cryptobiotic.rlauxe.oneaudit.unpooled
 
 // core abstraction for both CVR and MVR
 // assumes that a vote is 0 or 1.

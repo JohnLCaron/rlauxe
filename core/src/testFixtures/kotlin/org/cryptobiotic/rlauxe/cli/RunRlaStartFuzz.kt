@@ -108,7 +108,7 @@ fun startTestElectionClca(
         addRaire,
         addRaireCandidates)
 
-    CreateAudit("startTestElectionClca", topdir = topdir, config, election, clear = false)
+    CreateAudit("startTestElectionClca", config, election, auditDir = "$topdir/audit", clear = false)
 }
 
 class TestClcaElection(
@@ -185,7 +185,7 @@ fun startTestElectionPolling(
         ncards,
         ncontests,
     )
-    CreateAudit("startTestElectionPolling", topdir = topdir, config, election, clear = false)
+    CreateAudit("startTestElectionPolling", config, election, auditDir = "$topdir/audit", clear = false)
 }
 
 class TestPollingElection(

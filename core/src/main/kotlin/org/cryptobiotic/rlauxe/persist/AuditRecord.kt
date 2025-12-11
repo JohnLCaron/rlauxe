@@ -35,7 +35,6 @@ class AuditRecord(
         mvrs.forEach { previousMvrs[it.prn] = it } // cumulative
     }
 
-    // TODO NEXTASK is this all prns or just new? humans want just new
     // TODO new mvrs vs mvrs may confuse people. Build interface to manage this process?
     fun enterMvrs(mvrs: CloseableIterable<AuditableCard>, errs: ErrorMessages): Boolean {
         val publisher = Publisher(location)

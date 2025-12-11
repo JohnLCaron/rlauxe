@@ -432,7 +432,10 @@ class TestShangrlaAssertions {
         //                        - CVR.as_vote(c.get_vote_for("AvB", losr))
         //                        + 1)/2), upper_bound=1/(2 * self.con_test.share_to_win))
         //        aVb.margin=0.2
-        var aliceVsBob = SuperMajorityAssorter(sm_con_test.info, candId = 0, sm_con_test.info.minFraction!!).setReportedMean(margin2mean(0.2))
+        // data class SuperMajorityAssorter(val info: ContestInfo, val candId: Int, val minFraction: Double): AssorterIF {
+        // data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double): AssorterIF  {
+
+        var aliceVsBob = AboveThreshold(sm_con_test.info, winner = 0, sm_con_test.info.minFraction!!).setDilutedMean(margin2mean(0.2))
         var cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob, hasStyle=true, dilutedMargin=aliceVsBob.dilutedMargin())
 
         assertEquals(cassorter.noerror, cassorter.bassort(mvr0, cvr0, hasStyle = true))
@@ -447,7 +450,7 @@ class TestShangrlaAssertions {
         //        aVb.margin=0.3
         //        assert aVb.overstatement_assorter(mvrs[0], cvrs[1], use_style=True) == 2/1.7
         //        assert aVb.overstatement_assorter(mvrs[0], cvrs[1], use_style=False) == 2/1.7
-        aliceVsBob = SuperMajorityAssorter(sm_con_test.info, candId = 0, sm_con_test.info.minFraction).setReportedMean(margin2mean(0.3))
+        aliceVsBob = AboveThreshold(sm_con_test.info, winner = 0, sm_con_test.info.minFraction).setDilutedMean(margin2mean(0.3))
         cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob, hasStyle=true, dilutedMargin=aliceVsBob.dilutedMargin())
         assertEquals(cassorter.noerror, cassorter.bassort(mvr0, cvr0, hasStyle = true))
         assertEquals(2 * cassorter.noerror, cassorter.bassort(mvr0, cvr1, hasStyle = true))
@@ -461,7 +464,7 @@ class TestShangrlaAssertions {
         //        aVb.margin=0.1
         //        assert aVb.overstatement_assorter(mvrs[2], cvrs[0], use_style=True) == 0.5/1.9
         //        assert aVb.overstatement_assorter(mvrs[2], cvrs[0], use_style=False) == 0.5/1.9
-        aliceVsBob = SuperMajorityAssorter(sm_con_test.info, candId = 0, sm_con_test.info.minFraction).setReportedMean(margin2mean(0.1))
+        aliceVsBob = AboveThreshold(sm_con_test.info, winner = 0, sm_con_test.info.minFraction).setDilutedMean(margin2mean(0.1))
         assertEquals(3/4.0, aliceVsBob.upperBound())
         cassorter = ClcaAssorter(sm_con_test.info, aliceVsBob, hasStyle=true, dilutedMargin=aliceVsBob.dilutedMargin())
         // noerror = 1.0 / (2.0 - reportedAssortMargin / assorter.upperBound()) = 1/ (2 - .1 / .75)

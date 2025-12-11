@@ -32,8 +32,8 @@ class TestThresholdAssorters {
         val contest = makeContestFromCvrs(info, listOf(cvr0, cvr1, cvr2))
 
         val minFraction = contest.info.minFraction!!
-        val superAssorter = SuperMajorityAssorter.makeWithVotes(contest, winner = 1, minFraction, Npop = null)
-        assertEquals(1.0 / (2 * superAssorter.minFraction), superAssorter.upperBound())
+        val superAssorter = AboveThreshold.makeFromVotes(info, 1, contest.votes, minFraction, contest.Nc)
+        assertEquals(1.0 / (2 * superAssorter.t), superAssorter.upperBound())
         println("minFraction = $minFraction upperBound=${superAssorter.upperBound()}")
 
         assertEquals(0.0, superAssorter.assort(cvr0)) // bi has a mark for exactly one candidate and not Alice
@@ -74,8 +74,8 @@ class TestThresholdAssorters {
     }
 
     fun testNway(contest: Contest, cvrs: List<Cvr>, counts: List<Int>, winner: Int): Double {
-        val assort = SuperMajorityAssorter.makeWithVotes(contest, winner, contest.info.minFraction!!, Npop = null)
-        assertEquals(1.0 / (2 * assort.minFraction), assort.upperBound())
+        val assort = AboveThreshold.makeFromVotes(contest.info, winner, contest.votes, contest.info.minFraction!!, contest.Nc)
+        assertEquals(1.0 / (2 * assort.t), assort.upperBound())
         val assortAvg = cvrs.map { assort.assort(it) }.average()
         assertEquals(margin2mean(assort.dilutedMargin()), assortAvg, doublePrecision)
 
@@ -207,82 +207,6 @@ class TestThresholdAssorters {
         assertEquals(0.5, massorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = false), usePhantoms = true))
         assertEquals(0.5, massorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = true), usePhantoms = false))
         assertEquals(0.5, massorter.assort(Cvr("id", mapOf(1 to IntArray(0)), phantom = true), usePhantoms = true))
-    }
-
-    @Test
-    fun compareSuperWithAboveThresholdLessHalf() {
-        val f = 0.40
-        val info = ContestInfo(
-            name = "ABC",
-            id = 0,
-            choiceFunction = SocialChoiceFunction.THRESHOLD,
-            candidateNames = listToMap("A", "B", "C"),
-            minFraction = f,
-            nwinners = 1,
-        )
-        val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc = 100, Ncast = 100)
-
-        // fun makeWithVotes(contest: ContestIF, winner: Int, minFraction: Double, Npop: Int?): SuperMajorityAssorter {
-
-        val superAssorter = SuperMajorityAssorter.makeWithVotes(contest, 1, f, contest.Nc)
-        val aboveAssorter = AboveThreshold.makeFromVotes(info, 1, contest.votes, f, contest.Nc)
-        val belgiumAssorter = AboveThresholdB.makeFromVotes(info, 1, contest.votes, f, contest.Nc)
-        assertEquals(superAssorter.winner(), aboveAssorter.winner())
-        assertEquals(superAssorter.loser(), aboveAssorter.loser())
-
-        val minFraction = contest.info.minFraction!!
-        assertEquals(superAssorter.upperBound(), aboveAssorter.upperBound())
-
-        // A vote for someone not in the candidate list
-        val testCvr = makeCvr(3)
-        println("superAssorter = ${superAssorter.assort(testCvr)}")
-        println("aboveAssorter = ${aboveAssorter.assort(testCvr)} ${aboveAssorter.desc()}")
-        println("belgiumAssorter = ${belgiumAssorter.assort(testCvr)} ${belgiumAssorter.desc()}")
-        assertEquals(
-            superAssorter.assort(testCvr),
-            aboveAssorter.assort(testCvr),
-            "wrong value for vote for invalid vote--Dan"
-        )
-    }
-
-    @Test
-    fun compareSuperWithAboveThresholdMoreThanHalf() {
-        val f = 0.60
-        val info = ContestInfo(
-            name = "ABC",
-            id = 0,
-            choiceFunction = SocialChoiceFunction.THRESHOLD,
-            candidateNames = listToMap("A", "B", "C"),
-            minFraction = f,
-            nwinners = 1,
-        )
-        val contest = Contest(info, mapOf(1 to 66, 2 to 33), Nc = 100, Ncast = 100)
-
-        // fun makeWithVotes(contest: ContestIF, winner: Int, minFraction: Double, Npop: Int?): SuperMajorityAssorter {
-
-        val superAssorter = SuperMajorityAssorter.makeWithVotes(contest, 1, f, contest.Nc)
-        val aboveAssorter = AboveThreshold.makeFromVotes(info, 1, contest.votes, f, contest.Nc)
-        assertEquals(superAssorter.winner(), aboveAssorter.winner())
-        assertEquals(superAssorter.loser(), aboveAssorter.loser())
-
-        val minFraction = contest.info.minFraction!!
-        assertEquals(superAssorter.upperBound(), aboveAssorter.upperBound())
-
-        // A vote for someone not in the candidate list
-        // SHANGRLA restricts the "one vote" to the list of valid candidates.
-        //     def has_one_vote(self, contest_id: str, candidates: list) -> bool:
-        //        """
-        //        Is there exactly one vote among the candidates in the contest `contest_id`?
-        // But AboveThreshold does not.
-        // I guess the reasoning is that its an illegal vote, so ignore it.
-        val testCvr = makeCvr(3)
-        println("superAssorter = ${superAssorter.assort(testCvr)}")
-        println("aboveAssorter = ${aboveAssorter.assort(testCvr)} ${aboveAssorter.desc()}")
-        assertEquals(
-            superAssorter.assort(testCvr),
-            aboveAssorter.assort(testCvr),
-            "wrong value for vote for invalid vote--Dan"
-        )
     }
 }
 

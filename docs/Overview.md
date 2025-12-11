@@ -56,8 +56,8 @@ Note that Npop is independent of Nupper and Ncast. It differs when we dont know 
 In general, Npop >= Nupper >= Ncast.
 
 When all the cards in the manifest have "possible contests" that equal the actual contests on the physical card, 
-then Npop == Nupper and the audit's hasStyle flag is set to true. This will be true for example when we have complete CVRs, 
-in a one contest election, if the physical cards are kept in batches with a single card style, or in other cases.
+then Npop == Nupper and the audit's hasStyle flag is set to true. This will be true, for example, when we have complete CVRs, 
+in a one contest election, if the physical cards are kept in batches with a single card style, or other cases.
 
 
 ## The AuditRecord

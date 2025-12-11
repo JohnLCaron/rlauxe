@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.core.CvrExport
-import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
+import org.cryptobiotic.rlauxe.dominion.CvrExport
+import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
+import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 
 class TestCardSortMerge {
     val tempDir = createTempDirectory()
-    val cvrExportFile = "src/test/data/$cvrExportCsvFile"
+    val cvrExportFile = "src/test/data/${cvrExportCsvFile}"
     val pools = mapOf("3065846003" to 1)
 
     @OptIn(ExperimentalPathApi::class)
@@ -27,7 +27,12 @@ class TestCardSortMerge {
     @Test
     fun testSortMergeRun() {
         val outputFile = "$tempDir/testSortMergeRun/testSortMergeRun.csv"
-        val sorter = SortMerge<CvrExport>("$tempDir/testSortMergeRun", outputFile = outputFile, seed = Random.nextLong(), maxChunk = 100)
+        val sorter = SortMerge<CvrExport>(
+            "$tempDir/testSortMergeRun",
+            outputFile = outputFile,
+            seed = Random.Default.nextLong(),
+            maxChunk = 100
+        )
         sorter.run(
             cardIter = cvrExportCsvIterator(filename = cvrExportFile),
             cvrs = emptyList(),
@@ -51,9 +56,9 @@ class TestCardSortMerge {
         val sorter = SortMerge<CvrExport>(
             "$tempDir/testSortMergeRunZip",
             outputFile = outputFile,
-            seed = Random.nextLong(),
+            seed = Random.Default.nextLong(),
             maxChunk = 100,
-            )
+        )
 
         sorter.run(
             cardIter = cvrExportCsvIterator(filename = "$cvrExportFile.zip"),
@@ -78,7 +83,7 @@ class TestCardSortMerge {
         val sorter = SortMerge<CvrExport>(
             "$tempDir/testSortMergeRunZipTree",
             outputFile = outputFile,
-            seed = Random.nextLong(),
+            seed = Random.Default.nextLong(),
             maxChunk = 100,
         )
 

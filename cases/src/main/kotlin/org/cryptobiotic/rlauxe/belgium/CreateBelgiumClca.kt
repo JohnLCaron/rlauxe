@@ -55,7 +55,7 @@ fun createBelgiumClca(
     }
     val election = BelgiumClca(contestd, config.hasStyle)
 
-    CreateAudit("belgiumClca", topdir, config, election, clear = clear)
+    CreateAudit("belgiumClca", config, election, topdir, clear = clear)
     println("createBelgiumClca took $stopwatch")
 }
 

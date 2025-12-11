@@ -123,7 +123,7 @@ object RunRlaCreateOneAudit {
             extraPct,
         )
 
-        CreateAudit("RunRlaStartOneAudit", topdir = topdir, config, election, clear = false)
+        CreateAudit("RunRlaStartOneAudit", config, election, auditDir = "$topdir/audit", clear = false)
 
         // write the cardManifest TODO why isnt this part of CreateAudit? Because seed must be generated after committment to cardManifest
         val publisher = Publisher(auditDir)

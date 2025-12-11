@@ -38,7 +38,6 @@ open class ClcaAssorter(
     val check: Boolean = true,
 ) {
     // Define v ≡ 2Ā − 1, the assorter margin
-    // reportedAssortMargin = assorter.reportedMargin() // (0, 1) // TODO
     // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
     val noerror: Double = 1.0 / (2.0 - dilutedMargin / assorter.upperBound()) // clca assort value when no error
 
@@ -176,7 +175,7 @@ open class ClcaAssorter(
         //            raise ValueError(
         //                f"use_style==True but {cvr=} does not contain contest {self.contest.id}"
         //            )
-        if (hasStyle and !cvr.hasContest(info.id)) { // TODO SHANGRLA throws exception
+        if (hasStyle and !cvr.hasContest(info.id)) {
             logger.error { "use_style==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})" }
             throw RuntimeException("use_style==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
         }

@@ -38,7 +38,6 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
 
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CardIF, CardIF>>  {
-        // TODO NEXTASK is this all prns or just new? depends on round.sampleMvrs
         val mvrsForRound = readMvrsForRound(round)
         val sampleNumbers = mvrsForRound.map { it.prn }
 
@@ -56,7 +55,6 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
         }
 
         if (mvrWrite) {
-            // TODO NEXTASK is this all prns or just new? depends on round.sampleMvrs
             val countCards = writeAuditableCardCsvFile(Closer(sampledCards.iterator()), publisher.sampleCardsFile(round)) // sampleCards
             logger.info { "write ${countCards} cards to ${publisher.sampleCardsFile(round)}" }
         }
@@ -69,7 +67,6 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
     // it is placed into publisher.sampleMvrsFile, and this just reads from that file.
     private fun readMvrsForRound(round: Int): List<AuditableCard> {
         val publisher = Publisher(auditDir)
-        // TODO NEXTASK is this all prns or just new? depends on round.sampleMvrs
         return readAuditableCardCsvFile(publisher.sampleMvrsFile(round))
     }
 

@@ -86,7 +86,6 @@ fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boole
             stopwatch.start()
 
             // workflow MvrManager must implement MvrManagerTest, else Exception
-            // TODO NEXTASK is this all prns or just new? depends on round.samplePrns
             (workflow.mvrManager() as MvrManagerTestIF).setMvrsBySampleNumber(nextRound.samplePrns, nextRound.roundIdx)
 
             if (!quiet) println("\nrunAudit $name ${nextRound.roundIdx}")

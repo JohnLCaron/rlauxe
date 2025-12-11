@@ -258,7 +258,7 @@ fun createColoradoElection(
     }
     val election = CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, config)
 
-    CreateAudit("corla", topdir, config, election, clear = clear)
+    CreateAudit("corla", config, election, auditDir = "$topdir/audit", clear = clear)
     println("createColoradoOneAudit took $stopwatch")
 }
 

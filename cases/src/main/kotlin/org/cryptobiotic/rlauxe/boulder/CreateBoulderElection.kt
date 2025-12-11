@@ -308,7 +308,7 @@ fun createBoulderElection(
     cvrExportFile: String,
     sovoFile: String,
     topdir: String,
-    auditDir: String? = null,
+    auditDir: String = "$topdir/audit",
     riskLimit: Double = 0.03,
     minRecountMargin: Double = .005,
     auditConfigIn: AuditConfig? = null,
@@ -339,7 +339,7 @@ fun createBoulderElection(
 
     val election = CreateBoulderElection(export, sovo, isClca = auditType.isClca(), hasStyle=config.hasStyle)
 
-    CreateAudit("boulder", topdir, config, election, auditdir = auditDir, clear = clear)
+    CreateAudit("boulder", config, election, auditDir = auditDir, clear = clear)
     println("createBoulderElectionOAnew took $stopwatch")
 }
 

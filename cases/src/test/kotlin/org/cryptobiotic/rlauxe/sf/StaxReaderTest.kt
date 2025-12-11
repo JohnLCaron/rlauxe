@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.sf
 
-import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
+import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import kotlin.test.Test
 
 class StaxReaderTest {

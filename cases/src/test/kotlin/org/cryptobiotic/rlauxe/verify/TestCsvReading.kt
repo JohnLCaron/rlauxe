@@ -1,11 +1,11 @@
 package org.cryptobiotic.rlauxe.verify
 
+import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
+import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
+import org.cryptobiotic.rlauxe.dominion.writeCvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
-import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.writeCvrExportCsvFile
-import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
 import org.junit.jupiter.api.Assertions
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test

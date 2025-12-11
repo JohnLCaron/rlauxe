@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.core.CvrExport
+import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.unpooled
@@ -17,6 +17,8 @@ import org.cryptobiotic.rlauxe.raire.makeRaireContestUA
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
+import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
+import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -159,7 +161,7 @@ class CreateSfElection(
 
     fun createCardManifest(isOA: Boolean, phantomCount: Map<Int,Int>): CloseableIterator<AuditableCard> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
-        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPools.associate{ it.name() to it.poolId() } )
+        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPools.associate { it.name() to it.poolId() })
 
         return CvrsWithStylesToCardManifest(config.auditType, hasStyle,
             cvrIter,
@@ -334,6 +336,6 @@ fun createSfElection(
         hasStyle = hasStyle,
     )
 
-    CreateAudit("sf2024", topdir, config, election)
+    CreateAudit("sf2024", config, election, auditDir = "$topdir/audit", )
     println("createSfElection took $stopwatch")
 }

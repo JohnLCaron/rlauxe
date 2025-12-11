@@ -198,39 +198,6 @@ class TestClcaAssorter {
     //////////////////////////////////////////////////////////////////////////////////
 
     @Test
-    fun testSupermajorityNoMajority() {
-        val info = ContestInfo(
-            name = "ABC",
-            id = 0,
-            choiceFunction = SocialChoiceFunction.THRESHOLD,
-            candidateNames = listToMap( "A", "B", "C"),
-            minFraction = 0.60,
-        )
-        val counts = listOf(1000, 980, 100)
-        val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
-        val contest = makeContestFromCvrs(info, cvrs)
-
-        repeat(3) { winner ->
-            val assortAvg = testNwaySupermajority(contest, cvrs, winner)
-            assertTrue(assortAvg < .5)
-        }
-        //  (0)= 0.44673539518899164
-        // (1)= 0.4429301533219812
-        // (2)= 0.3221809169764444
-    }
-
-    fun testNwaySupermajority(contest : Contest, cvrs: List<Cvr>, winner: Int): Double {
-        val assort = SuperMajorityAssorter.makeWithVotes(contest, winner, contest.info.minFraction!!, null)
-        val assortAvg = cvrs.map { assort.assort(it) }.average()
-        val cwinner = ClcaAssorter(contest.info, assort, hasStyle=true, check=false, dilutedMargin=assort.dilutedMargin())
-        val cwinnerAvg = cvrs.map { cwinner.bassort(it, it) }.average()
-        assertEquals(assortAvg, margin2mean(cwinner.dilutedMargin), doublePrecision)
-
-        println(" ($winner)= $cwinnerAvg")
-        return cwinnerAvg
-    }
-
-    @Test
     fun testBvsV() {
         val thetas = listOf(.501, .5025, .505, .51, .52, .53, .54, .55, .575, .6, .65, .7)
         val ff = "%8.4f"

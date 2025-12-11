@@ -34,7 +34,7 @@ class TestPersistedWorkflow {
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs(contestsUA, testCvrs, config=config)
-        CreateAudit("testPersistedSingleClca", topdir, config, election, clear = true)
+        CreateAudit("testPersistedSingleClca", config, election, auditDir = "$topdir/audit", clear = true)
 
         runPersistedAudit(topdir)
     }
@@ -56,7 +56,7 @@ class TestPersistedWorkflow {
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs(contestsUA, testCvrs, config=config)
-        CreateAudit("testPersistedAuditClca", topdir, config, election, clear = true)
+        CreateAudit("testPersistedAuditClca",  config, election, auditDir = "$topdir/audit",  clear = true)
 
         runPersistedAudit(topdir)
     }
@@ -80,7 +80,7 @@ class TestPersistedWorkflow {
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs(contestsUA, testCvrs, config=config)
-        CreateAudit("testPersistedAuditPolling", topdir, config, election, clear = true)
+        CreateAudit("testPersistedAuditPolling", config, election, auditDir = "$topdir/audit", clear = true)
 
         runPersistedAudit(topdir)
     }
@@ -108,7 +108,7 @@ class TestPersistedWorkflow {
         val contestsUA = listOf(contestOA)
 
         val election = CreateElectionFromCvrs(contestsUA, mvrs, cardPools, config=config)
-        CreateAudit("testPersistedAuditPolling", topdir, config, election, clear = true)
+        CreateAudit("testPersistedAuditPolling", config, election, auditDir = "$topdir/audit", clear = true)
 
         runPersistedAudit(topdir)
     }

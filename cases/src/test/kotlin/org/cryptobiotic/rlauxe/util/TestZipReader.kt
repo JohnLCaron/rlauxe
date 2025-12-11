@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.core.CvrExport
-import org.cryptobiotic.rlauxe.persist.csv.IteratorCvrExportStream
+import org.cryptobiotic.rlauxe.dominion.CvrExport
+import org.cryptobiotic.rlauxe.dominion.IteratorCvrExportStream
 import java.io.InputStream
 import kotlin.collections.mutableSetOf
 import kotlin.test.Test

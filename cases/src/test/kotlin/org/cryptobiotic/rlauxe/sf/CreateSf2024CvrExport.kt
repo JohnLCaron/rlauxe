@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.sf
 
+import org.cryptobiotic.rlauxe.dominion.CvrExportCsvHeader
 import org.cryptobiotic.rlauxe.dominion.DominionCvrSummary
 import org.cryptobiotic.rlauxe.dominion.convertCvrExportJsonToCsv
-import org.cryptobiotic.rlauxe.persist.csv.CvrExportCsvHeader
-import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
+import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.ZipReaderTour
 import java.io.FileOutputStream

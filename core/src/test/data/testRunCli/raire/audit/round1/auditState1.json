@@ -1,0 +1,2032 @@
+{
+    "roundIdx": 1,
+    "contestRounds": [
+        {
+            "id": 0,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "1/0 contest0",
+                    "roundIdx": 1,
+                    "estSampleSize": 16,
+                    "estNewSampleSize": 16,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            16,
+                            16,
+                            16,
+                            16,
+                            16,
+                            16,
+                            16,
+                            16,
+                            19,
+                            30
+                        ],
+                        "firstSample": 16
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0457 nmvrs=443 samplesUsed=16 status=StatRejectNull startingRates=totalSamples=0, noerror=0.6180474283954419, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=16, noerror=0.6180474283954419, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 443,
+                        "maxBallotIndexUsed": 32,
+                        "pvalue": 0.04571440719605781,
+                        "samplesUsed": 16,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.6180474283954419,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.6180474283954419,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 16,
+                            "noerror": 0.6180474283954419,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "1/2 contest0",
+                    "roundIdx": 1,
+                    "estSampleSize": 16,
+                    "estNewSampleSize": 16,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            16,
+                            16,
+                            16,
+                            16,
+                            16,
+                            16,
+                            16,
+                            16,
+                            19,
+                            20
+                        ],
+                        "firstSample": 16
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0414 nmvrs=443 samplesUsed=16 status=StatRejectNull startingRates=totalSamples=0, noerror=0.6221863954858312, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=16, noerror=0.6221863954858312, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 443,
+                        "maxBallotIndexUsed": 32,
+                        "pvalue": 0.04144261945284854,
+                        "samplesUsed": 16,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.6221863954858312,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.6221863954858312,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 16,
+                            "noerror": 0.6221863954858312,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "1/3 contest0",
+                    "roundIdx": 1,
+                    "estSampleSize": 73,
+                    "estNewSampleSize": 73,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            64,
+                            73,
+                            73,
+                            73,
+                            73,
+                            78,
+                            88,
+                            88,
+                            130,
+                            195
+                        ],
+                        "firstSample": 64
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0486 nmvrs=443 samplesUsed=88 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5232855280312907, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=88, noerror=0.5232855280312907, upper=1.0 poolAvg=null\n    cvr counts= [oth-los=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 443,
+                        "maxBallotIndexUsed": 143,
+                        "pvalue": 0.04855471961258928,
+                        "samplesUsed": 88,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.52031231480384,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5232855280312907,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.26164276401564535": 1
+                            },
+                            "totalSamples": 88,
+                            "noerror": 0.5232855280312907,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                }
+            ],
+            "roundIdx": 1,
+            "actualMvrs": 443,
+            "actualNewMvrs": 443,
+            "estNewSamples": 73,
+            "estSampleSize": 73,
+            "auditorWantNewMvrs": -1,
+            "done": true,
+            "included": true,
+            "status": "StatRejectNull"
+        },
+        {
+            "id": 1,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "0/1 contest1",
+                    "roundIdx": 1,
+                    "estSampleSize": 78,
+                    "estNewSampleSize": 78,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            62,
+                            78,
+                            79,
+                            79,
+                            79,
+                            95,
+                            100,
+                            142,
+                            153,
+                            396
+                        ],
+                        "firstSample": 145
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0482 nmvrs=393 samplesUsed=95 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5215616375344986, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=95, noerror=0.5215616375344986, upper=1.0 poolAvg=null\n    cvr counts= [oth-los=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 393,
+                        "maxBallotIndexUsed": 168,
+                        "pvalue": 0.048228974400243166,
+                        "samplesUsed": 95,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5188165762843172,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5215616375344986,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.2607808187672493": 1
+                            },
+                            "totalSamples": 95,
+                            "noerror": 0.5215616375344986,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                }
+            ],
+            "roundIdx": 1,
+            "actualMvrs": 393,
+            "actualNewMvrs": 393,
+            "estNewSamples": 78,
+            "estSampleSize": 78,
+            "auditorWantNewMvrs": -1,
+            "done": true,
+            "included": true,
+            "status": "StatRejectNull"
+        },
+        {
+            "id": 2,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "3/0 contest2",
+                    "roundIdx": 1,
+                    "estSampleSize": 36,
+                    "estNewSampleSize": 36,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            36,
+                            36,
+                            36,
+                            36,
+                            36,
+                            36,
+                            43,
+                            43,
+                            50,
+                            72
+                        ],
+                        "firstSample": 36
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0460 nmvrs=219 samplesUsed=36 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5493283927744327, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=36, noerror=0.5493283927744327, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 219,
+                        "maxBallotIndexUsed": 187,
+                        "pvalue": 0.04603212354941867,
+                        "samplesUsed": 36,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5493283927744327,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5493283927744327,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 36,
+                            "noerror": 0.5493283927744327,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "3/1 contest2",
+                    "roundIdx": 1,
+                    "estSampleSize": 182,
+                    "estNewSampleSize": 182,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            162,
+                            182,
+                            197,
+                            216,
+                            222,
+                            253,
+                            272,
+                            344,
+                            404,
+                            538
+                        ],
+                        "firstSample": 182
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0512 nmvrs=219 samplesUsed=219 status=LimitReached startingRates=totalSamples=0, noerror=0.5088672768878719, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=219, noerror=0.5088672768878719, upper=1.0 poolAvg=null\n    cvr counts= [oth-los=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 219,
+                        "maxBallotIndexUsed": 593,
+                        "pvalue": 0.0512139047655029,
+                        "samplesUsed": 219,
+                        "status": "LimitReached",
+                        "measuredMean": 0.5077054794520547,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5088672768878719,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.25443363844393596": 1
+                            },
+                            "totalSamples": 219,
+                            "noerror": 0.5088672768878719,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "LimitReached",
+                    "round": 0
+                },
+                {
+                    "assorterDesc": "3/2 contest2",
+                    "roundIdx": 1,
+                    "estSampleSize": 22,
+                    "estNewSampleSize": 22,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            22,
+                            22,
+                            22,
+                            22,
+                            22,
+                            22,
+                            22,
+                            26,
+                            26,
+                            44
+                        ],
+                        "firstSample": 22
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0452 nmvrs=219 samplesUsed=22 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5836614173228347, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=22, noerror=0.5836614173228347, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 219,
+                        "maxBallotIndexUsed": 120,
+                        "pvalue": 0.04522923209659383,
+                        "samplesUsed": 22,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5836614173228347,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5836614173228347,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 22,
+                            "noerror": 0.5836614173228347,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                }
+            ],
+            "roundIdx": 1,
+            "actualMvrs": 219,
+            "actualNewMvrs": 219,
+            "estNewSamples": 182,
+            "estSampleSize": 182,
+            "auditorWantNewMvrs": -1,
+            "done": false,
+            "included": true,
+            "status": "LimitReached"
+        },
+        {
+            "id": 3,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "0/1 contest3",
+                    "roundIdx": 1,
+                    "estSampleSize": 270,
+                    "estNewSampleSize": 270,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            226,
+                            270,
+                            337,
+                            447,
+                            573,
+                            709,
+                            1016,
+                            1329,
+                            1633,
+                            2329
+                        ],
+                        "firstSample": 1797
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0499 nmvrs=443 samplesUsed=352 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5056276182304548, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=352, noerror=0.5056276182304548, upper=1.0 poolAvg=null\n    cvr counts= [oth-los=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 443,
+                        "maxBallotIndexUsed": 502,
+                        "pvalue": 0.04988525174156811,
+                        "samplesUsed": 352,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5049093971818324,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5056276182304548,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.2528138091152274": 1
+                            },
+                            "totalSamples": 352,
+                            "noerror": 0.5056276182304548,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                }
+            ],
+            "roundIdx": 1,
+            "actualMvrs": 443,
+            "actualNewMvrs": 443,
+            "estNewSamples": 270,
+            "estSampleSize": 270,
+            "auditorWantNewMvrs": -1,
+            "done": true,
+            "included": true,
+            "status": "StatRejectNull"
+        },
+        {
+            "id": 4,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "3/0 contest4",
+                    "roundIdx": 1,
+                    "estSampleSize": 45,
+                    "estNewSampleSize": 45,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            45,
+                            45,
+                            45,
+                            45,
+                            45,
+                            45,
+                            45,
+                            54,
+                            54,
+                            91
+                        ],
+                        "firstSample": 45
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0493 nmvrs=219 samplesUsed=45 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5381818181818182, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=45, noerror=0.5381818181818182, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 219,
+                        "maxBallotIndexUsed": 232,
+                        "pvalue": 0.04926533811259471,
+                        "samplesUsed": 45,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5381818181818182,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5381818181818182,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 45,
+                            "noerror": 0.5381818181818182,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "3/1 contest4",
+                    "roundIdx": 1,
+                    "estSampleSize": 79,
+                    "estNewSampleSize": 79,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            78,
+                            79,
+                            90,
+                            90,
+                            90,
+                            107,
+                            107,
+                            125,
+                            162,
+                            259
+                        ],
+                        "firstSample": 90
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0484 nmvrs=219 samplesUsed=90 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5187673433620564, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=90, noerror=0.5187673433620564, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 219,
+                        "maxBallotIndexUsed": 374,
+                        "pvalue": 0.048365328505316475,
+                        "samplesUsed": 90,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5187673433620564,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5187673433620564,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 90,
+                            "noerror": 0.5187673433620564,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "3/2 contest4",
+                    "roundIdx": 1,
+                    "estSampleSize": 26,
+                    "estNewSampleSize": 26,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            26,
+                            26,
+                            26,
+                            26,
+                            26,
+                            26,
+                            26,
+                            31,
+                            31,
+                            53
+                        ],
+                        "firstSample": 23
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0467 nmvrs=219 samplesUsed=26 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5692307692307692, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=26, noerror=0.5692307692307692, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 219,
+                        "maxBallotIndexUsed": 137,
+                        "pvalue": 0.046650946523019696,
+                        "samplesUsed": 26,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5692307692307692,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5692307692307692,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 26,
+                            "noerror": 0.5692307692307692,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                }
+            ],
+            "roundIdx": 1,
+            "actualMvrs": 219,
+            "actualNewMvrs": 219,
+            "estNewSamples": 79,
+            "estSampleSize": 79,
+            "auditorWantNewMvrs": -1,
+            "done": true,
+            "included": true,
+            "status": "StatRejectNull"
+        },
+        {
+            "id": 5,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "0/1 contest5",
+                    "roundIdx": 1,
+                    "estSampleSize": 69,
+                    "estNewSampleSize": 69,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            61,
+                            69,
+                            70,
+                            70,
+                            70,
+                            75,
+                            84,
+                            84,
+                            126,
+                            150
+                        ],
+                        "firstSample": 68
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0490 nmvrs=229 samplesUsed=70 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5243247575538992, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=70, noerror=0.5243247575538992, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 229,
+                        "maxBallotIndexUsed": 160,
+                        "pvalue": 0.04899355121976003,
+                        "samplesUsed": 70,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5243247575538992,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5243247575538992,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 70,
+                            "noerror": 0.5243247575538992,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "0/2 contest5",
+                    "roundIdx": 1,
+                    "estSampleSize": 16,
+                    "estNewSampleSize": 16,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            16,
+                            16,
+                            16,
+                            16,
+                            16,
+                            16,
+                            16,
+                            16,
+                            19,
+                            33
+                        ],
+                        "firstSample": 16
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0469 nmvrs=229 samplesUsed=16 status=StatRejectNull startingRates=totalSamples=0, noerror=0.6169370049038099, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=16, noerror=0.6169370049038099, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 229,
+                        "maxBallotIndexUsed": 44,
+                        "pvalue": 0.04687394845415528,
+                        "samplesUsed": 16,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.6169370049038099,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.6169370049038099,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 16,
+                            "noerror": 0.6169370049038099,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                }
+            ],
+            "roundIdx": 1,
+            "actualMvrs": 229,
+            "actualNewMvrs": 229,
+            "estNewSamples": 69,
+            "estSampleSize": 69,
+            "auditorWantNewMvrs": -1,
+            "done": true,
+            "included": true,
+            "status": "StatRejectNull"
+        },
+        {
+            "id": 6,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "1/0 contest6",
+                    "roundIdx": 1,
+                    "estSampleSize": 19,
+                    "estNewSampleSize": 19,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            19,
+                            19,
+                            19,
+                            19,
+                            19,
+                            19,
+                            19,
+                            19,
+                            23,
+                            40
+                        ],
+                        "firstSample": 19
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0492 nmvrs=393 samplesUsed=19 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5952913323688018, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=19, noerror=0.5952913323688018, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 393,
+                        "maxBallotIndexUsed": 37,
+                        "pvalue": 0.04923749196420026,
+                        "samplesUsed": 19,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5952913323688018,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5952913323688018,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 19,
+                            "noerror": 0.5952913323688018,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "1/2 contest6",
+                    "roundIdx": 1,
+                    "estSampleSize": 28,
+                    "estNewSampleSize": 28,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            28,
+                            28,
+                            28,
+                            28,
+                            28,
+                            28,
+                            28,
+                            28,
+                            34,
+                            58
+                        ],
+                        "firstSample": 25
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0479 nmvrs=393 samplesUsed=34 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5627603357165061, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=34, noerror=0.5627603357165061, upper=1.0 poolAvg=null\n    cvr counts= [oth-los=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 393,
+                        "maxBallotIndexUsed": 57,
+                        "pvalue": 0.04790151074900184,
+                        "samplesUsed": 34,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5544844484265574,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5627603357165061,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.28138016785825304": 1
+                            },
+                            "totalSamples": 34,
+                            "noerror": 0.5627603357165061,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "1/3 contest6",
+                    "roundIdx": 1,
+                    "estSampleSize": 315,
+                    "estNewSampleSize": 315,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            280,
+                            315,
+                            351,
+                            403,
+                            430,
+                            529,
+                            655,
+                            831,
+                            1112,
+                            2604
+                        ],
+                        "firstSample": 315
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.1258 nmvrs=393 samplesUsed=393 status=LimitReached startingRates=totalSamples=0, noerror=0.5045707915273132, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=393, noerror=0.5045707915273132, upper=1.0 poolAvg=null\n    cvr counts= [oth-los=2, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 393,
+                        "maxBallotIndexUsed": 593,
+                        "pvalue": 0.12575888168430108,
+                        "samplesUsed": 393,
+                        "status": "LimitReached",
+                        "measuredMean": 0.5032868963834779,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5045707915273132,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.2522853957636566": 2
+                            },
+                            "totalSamples": 393,
+                            "noerror": 0.5045707915273132,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "LimitReached",
+                    "round": 0
+                }
+            ],
+            "roundIdx": 1,
+            "actualMvrs": 393,
+            "actualNewMvrs": 393,
+            "estNewSamples": 315,
+            "estSampleSize": 315,
+            "auditorWantNewMvrs": -1,
+            "done": false,
+            "included": true,
+            "status": "LimitReached"
+        },
+        {
+            "id": 7,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "1/0 contest7",
+                    "roundIdx": 1,
+                    "estSampleSize": 64,
+                    "estNewSampleSize": 64,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            57,
+                            64,
+                            72,
+                            72,
+                            72,
+                            86,
+                            92,
+                            116,
+                            146,
+                            246
+                        ],
+                        "firstSample": 86
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0484 nmvrs=219 samplesUsed=72 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5236064127077511, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=72, noerror=0.5236064127077511, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 219,
+                        "maxBallotIndexUsed": 317,
+                        "pvalue": 0.04844910774780688,
+                        "samplesUsed": 72,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5236064127077511,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5236064127077511,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 72,
+                            "noerror": 0.5236064127077511,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                }
+            ],
+            "roundIdx": 1,
+            "actualMvrs": 219,
+            "actualNewMvrs": 219,
+            "estNewSamples": 64,
+            "estSampleSize": 64,
+            "auditorWantNewMvrs": -1,
+            "done": true,
+            "included": true,
+            "status": "StatRejectNull"
+        },
+        {
+            "id": 8,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "1/0 contest8",
+                    "roundIdx": 1,
+                    "estSampleSize": 143,
+                    "estNewSampleSize": 143,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            123,
+                            143,
+                            160,
+                            163,
+                            195,
+                            228,
+                            352,
+                            454,
+                            551,
+                            967
+                        ],
+                        "firstSample": 240
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0493 nmvrs=229 samplesUsed=143 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5101945160534334, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=143, noerror=0.5101945160534334, upper=1.0 poolAvg=null\n    cvr counts= [oth-win=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 229,
+                        "maxBallotIndexUsed": 349,
+                        "pvalue": 0.04928286904516839,
+                        "samplesUsed": 143,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5119784129627112,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5101945160534334,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.76529177408015": 1
+                            },
+                            "totalSamples": 143,
+                            "noerror": 0.5101945160534334,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                }
+            ],
+            "roundIdx": 1,
+            "actualMvrs": 229,
+            "actualNewMvrs": 229,
+            "estNewSamples": 143,
+            "estSampleSize": 143,
+            "auditorWantNewMvrs": -1,
+            "done": true,
+            "included": true,
+            "status": "StatRejectNull"
+        },
+        {
+            "id": 9,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "3/0 contest9",
+                    "roundIdx": 1,
+                    "estSampleSize": 27,
+                    "estNewSampleSize": 27,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            27,
+                            27,
+                            27,
+                            27,
+                            27,
+                            27,
+                            27,
+                            33,
+                            33,
+                            50
+                        ],
+                        "firstSample": 24
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0485 nmvrs=165 samplesUsed=27 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5654894948591864, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=27, noerror=0.5654894948591864, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 165,
+                        "maxBallotIndexUsed": 190,
+                        "pvalue": 0.04853804042577821,
+                        "samplesUsed": 27,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5654894948591864,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5654894948591864,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 27,
+                            "noerror": 0.5654894948591864,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "3/1 contest9",
+                    "roundIdx": 1,
+                    "estSampleSize": 37,
+                    "estNewSampleSize": 37,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            37,
+                            37,
+                            37,
+                            37,
+                            37,
+                            37,
+                            40,
+                            45,
+                            52,
+                            97
+                        ],
+                        "firstSample": 37
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0494 nmvrs=165 samplesUsed=37 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5466724286949006, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=37, noerror=0.5466724286949006, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 165,
+                        "maxBallotIndexUsed": 261,
+                        "pvalue": 0.04942883617387195,
+                        "samplesUsed": 37,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5466724286949006,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5466724286949006,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 37,
+                            "noerror": 0.5466724286949006,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "3/2 contest9",
+                    "roundIdx": 1,
+                    "estSampleSize": 165,
+                    "estNewSampleSize": 165,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            135,
+                            165,
+                            177,
+                            185,
+                            197,
+                            215,
+                            221,
+                            261,
+                            350,
+                            671
+                        ],
+                        "firstSample": 165
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0733 nmvrs=165 samplesUsed=165 status=LimitReached startingRates=totalSamples=0, noerror=0.5105953582240161, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=165, noerror=0.5105953582240161, upper=1.0 poolAvg=null\n    cvr counts= [oth-los=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 165,
+                        "maxBallotIndexUsed": 593,
+                        "pvalue": 0.07326307882152014,
+                        "samplesUsed": 165,
+                        "status": "LimitReached",
+                        "measuredMean": 0.5090480995627311,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5105953582240161,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.25529767911200807": 1
+                            },
+                            "totalSamples": 165,
+                            "noerror": 0.5105953582240161,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "LimitReached",
+                    "round": 0
+                }
+            ],
+            "roundIdx": 1,
+            "actualMvrs": 165,
+            "actualNewMvrs": 165,
+            "estNewSamples": 165,
+            "estSampleSize": 165,
+            "auditorWantNewMvrs": -1,
+            "done": false,
+            "included": true,
+            "status": "LimitReached"
+        },
+        {
+            "id": 111,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "0/1 rcontest111 -1678970438",
+                    "roundIdx": 1,
+                    "estSampleSize": 150,
+                    "estNewSampleSize": 150,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            137,
+                            150,
+                            150,
+                            150,
+                            180,
+                            180,
+                            210,
+                            211,
+                            281,
+                            548
+                        ],
+                        "firstSample": 181
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.7512 nmvrs=150 samplesUsed=150 status=LimitReached startingRates=totalSamples=0, noerror=0.5110384300899428, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=150, noerror=0.5110384300899428, upper=1.0 poolAvg=null\n    cvr counts= [win-los=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 150,
+                        "maxBallotIndexUsed": 439,
+                        "pvalue": 0.7512399969719433,
+                        "samplesUsed": 150,
+                        "status": "LimitReached",
+                        "measuredMean": 0.5076315072226767,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5110384300899428,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.0": 1
+                            },
+                            "totalSamples": 150,
+                            "noerror": 0.5110384300899428,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "LimitReached",
+                    "round": 0
+                },
+                {
+                    "assorterDesc": "0/2 rcontest111 853695994",
+                    "roundIdx": 1,
+                    "estSampleSize": 108,
+                    "estNewSampleSize": 108,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            108,
+                            108,
+                            108,
+                            108,
+                            108,
+                            130,
+                            130,
+                            138,
+                            152,
+                            285
+                        ],
+                        "firstSample": 108
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0499 nmvrs=150 samplesUsed=108 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5154639175257733, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=108, noerror=0.5154639175257733, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 150,
+                        "maxBallotIndexUsed": 304,
+                        "pvalue": 0.04989473817670891,
+                        "samplesUsed": 108,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5154639175257733,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5154639175257733,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 108,
+                            "noerror": 0.5154639175257733,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "0/3 rcontest111 -1351265056",
+                    "roundIdx": 1,
+                    "estSampleSize": 135,
+                    "estNewSampleSize": 135,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            122,
+                            135,
+                            135,
+                            135,
+                            135,
+                            155,
+                            163,
+                            163,
+                            190,
+                            430
+                        ],
+                        "firstSample": 135
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0500 nmvrs=150 samplesUsed=135 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5122950819672131, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=135, noerror=0.5122950819672131, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 150,
+                        "maxBallotIndexUsed": 385,
+                        "pvalue": 0.049987042406109024,
+                        "samplesUsed": 135,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5122950819672131,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5122950819672131,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 135,
+                            "noerror": 0.5122950819672131,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "0/4 rcontest111 405529720",
+                    "roundIdx": 1,
+                    "estSampleSize": 122,
+                    "estNewSampleSize": 122,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            112,
+                            122,
+                            122,
+                            122,
+                            122,
+                            146,
+                            147,
+                            147,
+                            195,
+                            276
+                        ],
+                        "firstSample": 122
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0497 nmvrs=150 samplesUsed=122 status=StatRejectNull startingRates=totalSamples=0, noerror=0.513663447709061, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=122, noerror=0.513663447709061, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 150,
+                        "maxBallotIndexUsed": 339,
+                        "pvalue": 0.04972767785466563,
+                        "samplesUsed": 122,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.513663447709061,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.513663447709061,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 122,
+                            "noerror": 0.513663447709061,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "0/1 rcontest111 -1615155308",
+                    "roundIdx": 1,
+                    "estSampleSize": 106,
+                    "estNewSampleSize": 106,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            106,
+                            106,
+                            106,
+                            106,
+                            126,
+                            127,
+                            127,
+                            148,
+                            169,
+                            278
+                        ],
+                        "firstSample": 93
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.1858 nmvrs=150 samplesUsed=150 status=LimitReached startingRates=totalSamples=0, noerror=0.5158893933140735, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=150, noerror=0.5158893933140735, upper=1.0 poolAvg=null\n    cvr counts= [win-los=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 150,
+                        "maxBallotIndexUsed": 439,
+                        "pvalue": 0.1857848899359445,
+                        "samplesUsed": 150,
+                        "status": "LimitReached",
+                        "measuredMean": 0.5124501306919801,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5158893933140735,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.0": 1
+                            },
+                            "totalSamples": 150,
+                            "noerror": 0.5158893933140735,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "LimitReached",
+                    "round": 0
+                },
+                {
+                    "assorterDesc": "0/1 rcontest111 1870653723",
+                    "roundIdx": 1,
+                    "estSampleSize": 103,
+                    "estNewSampleSize": 103,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            93,
+                            103,
+                            103,
+                            103,
+                            124,
+                            124,
+                            124,
+                            144,
+                            152,
+                            250
+                        ],
+                        "firstSample": 124
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.1670 nmvrs=150 samplesUsed=150 status=LimitReached startingRates=totalSamples=0, noerror=0.5162622612287042, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=150, noerror=0.5162622612287042, upper=1.0 poolAvg=null\n    cvr counts= [win-los=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 150,
+                        "maxBallotIndexUsed": 439,
+                        "pvalue": 0.1669548335375068,
+                        "samplesUsed": 150,
+                        "status": "LimitReached",
+                        "measuredMean": 0.5128205128205126,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5162622612287042,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.0": 1
+                            },
+                            "totalSamples": 150,
+                            "noerror": 0.5162622612287042,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "LimitReached",
+                    "round": 0
+                },
+                {
+                    "assorterDesc": "0/3 rcontest111 -1290662574",
+                    "roundIdx": 1,
+                    "estSampleSize": 120,
+                    "estNewSampleSize": 120,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            105,
+                            120,
+                            120,
+                            120,
+                            129,
+                            143,
+                            144,
+                            167,
+                            191,
+                            378
+                        ],
+                        "firstSample": 120
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0500 nmvrs=150 samplesUsed=143 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5139802631578947, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=143, noerror=0.5139802631578947, upper=1.0 poolAvg=null\n    cvr counts= [oth-los=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 150,
+                        "maxBallotIndexUsed": 412,
+                        "pvalue": 0.04998511673267849,
+                        "samplesUsed": 143,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5121831293706294,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5139802631578947,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.25699013157894735": 1
+                            },
+                            "totalSamples": 143,
+                            "noerror": 0.5139802631578947,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "0/3 rcontest111 1454937318",
+                    "roundIdx": 1,
+                    "estSampleSize": 106,
+                    "estNewSampleSize": 106,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            105,
+                            106,
+                            106,
+                            106,
+                            114,
+                            127,
+                            127,
+                            148,
+                            169,
+                            248
+                        ],
+                        "firstSample": 93
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0492 nmvrs=150 samplesUsed=106 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5158361704322707, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=106, noerror=0.5158361704322707, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 150,
+                        "maxBallotIndexUsed": 298,
+                        "pvalue": 0.049215048522011556,
+                        "samplesUsed": 106,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5158361704322707,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5158361704322707,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 106,
+                            "noerror": 0.5158361704322707,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "0/4 rcontest111 1687797214",
+                    "roundIdx": 1,
+                    "estSampleSize": 98,
+                    "estNewSampleSize": 98,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            98,
+                            98,
+                            98,
+                            98,
+                            106,
+                            118,
+                            118,
+                            125,
+                            137,
+                            225
+                        ],
+                        "firstSample": 98
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0496 nmvrs=150 samplesUsed=98 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5171165580721895, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=98, noerror=0.5171165580721895, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 150,
+                        "maxBallotIndexUsed": 264,
+                        "pvalue": 0.049610487313013575,
+                        "samplesUsed": 98,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5171165580721895,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5171165580721895,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 98,
+                            "noerror": 0.5171165580721895,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "0/4 rcontest111 854445840",
+                    "roundIdx": 1,
+                    "estSampleSize": 113,
+                    "estNewSampleSize": 113,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            113,
+                            113,
+                            113,
+                            113,
+                            133,
+                            135,
+                            135,
+                            157,
+                            180,
+                            273
+                        ],
+                        "firstSample": 99
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0487 nmvrs=150 samplesUsed=113 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5148800329523221, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=113, noerror=0.5148800329523221, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 150,
+                        "maxBallotIndexUsed": 314,
+                        "pvalue": 0.048738280606440795,
+                        "samplesUsed": 113,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5148800329523221,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5148800329523221,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 113,
+                            "noerror": 0.5148800329523221,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "0/1 rcontest111 -296719652",
+                    "roundIdx": 1,
+                    "estSampleSize": 99,
+                    "estNewSampleSize": 99,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            99,
+                            99,
+                            99,
+                            99,
+                            119,
+                            119,
+                            119,
+                            126,
+                            139,
+                            227
+                        ],
+                        "firstSample": 99
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.1369 nmvrs=150 samplesUsed=150 status=LimitReached startingRates=totalSamples=0, noerror=0.5169561621174524, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=150, noerror=0.5169561621174524, upper=1.0 poolAvg=null\n    cvr counts= [win-los=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 150,
+                        "maxBallotIndexUsed": 439,
+                        "pvalue": 0.13687184462994603,
+                        "samplesUsed": 150,
+                        "status": "LimitReached",
+                        "measuredMean": 0.5135097877033359,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5169561621174524,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.0": 1
+                            },
+                            "totalSamples": 150,
+                            "noerror": 0.5169561621174524,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "LimitReached",
+                    "round": 0
+                },
+                {
+                    "assorterDesc": "0/1 rcontest111 216673200",
+                    "roundIdx": 1,
+                    "estSampleSize": 88,
+                    "estNewSampleSize": 88,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            88,
+                            88,
+                            88,
+                            88,
+                            88,
+                            106,
+                            106,
+                            106,
+                            123,
+                            202
+                        ],
+                        "firstSample": 88
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0730 nmvrs=150 samplesUsed=150 status=LimitReached startingRates=totalSamples=0, noerror=0.5191568892119198, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=150, noerror=0.5191568892119198, upper=1.0 poolAvg=null\n    cvr counts= [win-los=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 150,
+                        "maxBallotIndexUsed": 439,
+                        "pvalue": 0.07301212544670335,
+                        "samplesUsed": 150,
+                        "status": "LimitReached",
+                        "measuredMean": 0.5156958432838408,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5191568892119198,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.0": 1
+                            },
+                            "totalSamples": 150,
+                            "noerror": 0.5191568892119198,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "LimitReached",
+                    "round": 0
+                },
+                {
+                    "assorterDesc": "0/3 rcontest111 -1496207473",
+                    "roundIdx": 1,
+                    "estSampleSize": 107,
+                    "estNewSampleSize": 107,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            107,
+                            107,
+                            107,
+                            107,
+                            128,
+                            128,
+                            128,
+                            150,
+                            171,
+                            303
+                        ],
+                        "firstSample": 107
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0498 nmvrs=150 samplesUsed=128 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5156765676567656, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=128, noerror=0.5156765676567656, upper=1.0 poolAvg=null\n    cvr counts= [oth-los=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 150,
+                        "maxBallotIndexUsed": 361,
+                        "pvalue": 0.04980652277869371,
+                        "samplesUsed": 128,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5136622060643564,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5156765676567656,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.2578382838283828": 1
+                            },
+                            "totalSamples": 128,
+                            "noerror": 0.5156765676567656,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "0/4 rcontest111 -1731961904",
+                    "roundIdx": 1,
+                    "estSampleSize": 96,
+                    "estNewSampleSize": 96,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            96,
+                            96,
+                            96,
+                            96,
+                            103,
+                            115,
+                            115,
+                            134,
+                            173,
+                            277
+                        ],
+                        "firstSample": 96
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0491 nmvrs=150 samplesUsed=96 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5175447676223993, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=96, noerror=0.5175447676223993, upper=1.0 poolAvg=null\n",
+                        "roundIdx": 1,
+                        "nmvrs": 150,
+                        "maxBallotIndexUsed": 253,
+                        "pvalue": 0.049089029492780746,
+                        "samplesUsed": 96,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.5175447676223993,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5175447676223993,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 96,
+                            "noerror": 0.5175447676223993,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                },
+                {
+                    "assorterDesc": "0/1 rcontest111 -1817736229",
+                    "roundIdx": 1,
+                    "estSampleSize": 90,
+                    "estNewSampleSize": 90,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "generalAdaptive",
+                        "fuzzPct": 0.0123,
+                        "startingTestStatistic": 1.0,
+                        "startingRates": {},
+                        "estimatedDistribution": [
+                            90,
+                            90,
+                            90,
+                            90,
+                            90,
+                            108,
+                            108,
+                            108,
+                            126,
+                            204
+                        ],
+                        "firstSample": 108
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0838 nmvrs=150 samplesUsed=150 status=LimitReached startingRates=totalSamples=0, noerror=0.5186721991701245, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=150, noerror=0.5186721991701245, upper=1.0 poolAvg=null\n    cvr counts= [win-los=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 150,
+                        "maxBallotIndexUsed": 439,
+                        "pvalue": 0.08383146535487773,
+                        "samplesUsed": 150,
+                        "status": "LimitReached",
+                        "measuredMean": 0.5152143845089899,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5186721991701245,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.0": 1
+                            },
+                            "totalSamples": 150,
+                            "noerror": 0.5186721991701245,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "LimitReached",
+                    "round": 0
+                }
+            ],
+            "roundIdx": 1,
+            "actualMvrs": 150,
+            "actualNewMvrs": 150,
+            "estNewSamples": 150,
+            "estSampleSize": 150,
+            "auditorWantNewMvrs": -1,
+            "done": false,
+            "included": true,
+            "status": "LimitReached"
+        }
+    ],
+    "auditWasDone": true,
+    "auditIsComplete": false,
+    "nmvrs": 593,
+    "newmvrs": 593,
+    "auditorWantNewMvrs": -1
+}

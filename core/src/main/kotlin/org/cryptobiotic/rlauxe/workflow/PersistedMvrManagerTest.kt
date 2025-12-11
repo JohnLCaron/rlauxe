@@ -29,7 +29,10 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
         val simFuzzPct = config.simFuzzPct()
         val sampledMvrs = if (simFuzzPct == null) {
             cards // use the cvrs - ie, no errors
-        } else { // fuzz the new cvrs only
+        } else { // fuzz the new cvrs only; doesnt work for polling since we dont have cvrs
+            if (config.isPolling) {
+                throw RuntimeException("cant fuzz polling audit; no cvrs!")
+            }
             val wantSet = sampleNumbers.toSet()
             val wantPrevious = previousMvrs.filter{ wantSet.contains(it.prn) }
             val newCards = cards.filter{ !previousPrnsSet.contains(it.prn) }
@@ -42,12 +45,16 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
             require(sampledMvrs.size == sampleNumbers.size)
             var lastRN = 0L
             sampledMvrs.forEachIndexed { idx, mvr ->
-                if (mvr.prn <= lastRN)
-                    print("hey")
-                if (mvr.location != cards[idx].location)
-                    print("there")
-
+                if (mvr.prn <= lastRN) {
+                    logger.error { "setMvrsBySampleNumberout of order prn" }
+                    throw RuntimeException("setMvrsBySampleNumberout of order prn")
+                }
                 lastRN = mvr.prn
+                val card = cards[idx]
+                if (mvr.location != card.location) {
+                    logger.error { "setMvrsBySampleNumberout bad location mvr=${mvr.location} card=${card.location} " }
+                    throw RuntimeException("setMvrsBySampleNumberout bad location mvr=${mvr.location} card=${card.location} ")
+                }
             }
         }
 

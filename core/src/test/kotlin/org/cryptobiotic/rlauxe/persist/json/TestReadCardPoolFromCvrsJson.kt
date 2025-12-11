@@ -26,13 +26,13 @@ class TestReadCardPoolFromCvrsJson {
         val pool = pools.first()
         assertTrue(pool is CardPoolFromCvrs)
         assertEquals(42, pool.poolId) // bogus
-        assertEquals("noCvr", pool.poolName)
+        assertEquals("pool42", pool.poolName)
 
         val tab = pool.contestTabs.values.first()
         val votes = tab.votes
-        assertEquals(mapOf(0 to 250, 1 to 245), votes)
-        assertEquals(500, tab.ncards)
-        assertEquals(5, tab.undervotes)
+        assertEquals(mapOf(0 to 1288, 1 to 1187), votes)
+        assertEquals(2500, tab.ncards)
+        assertEquals(25, tab.undervotes)
         assertEquals(1, tab.info.voteForN)
         assertEquals(false, tab.isIrv)
 

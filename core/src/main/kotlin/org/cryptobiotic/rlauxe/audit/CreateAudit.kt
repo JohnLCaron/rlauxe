@@ -58,18 +58,18 @@ class CreateAudit(val name: String, val config: AuditConfig, election: CreateEle
 
         val publisher = Publisher(auditDir)
         writeAuditConfigJsonFile(config, publisher.auditConfigFile())
-        logger.info{"writeAuditConfigJsonFile to ${publisher.auditConfigFile()}\n  $config"}
+        logger.info{"CreateAudit writeAuditConfigJsonFile to ${publisher.auditConfigFile()}\n  $config"}
 
         if (config.isOA) {
             val pools = election.cardPools()!!
             writeCardPoolsJsonFile(pools, publisher.cardPoolsFile())
-            logger.info { "write ${pools.size} cardPools, to ${publisher.cardPoolsFile()}" }
+            logger.info { "CreateAudit write ${pools.size} cardPools, to ${publisher.cardPoolsFile()}" }
         }
 
         val cards = election.cardManifest()
         val countCvrs = writeAuditableCardCsvFile(cards, publisher.cardManifestFile())
         createZipFile(publisher.cardManifestFile(), delete = true)
-        logger.info { "write ${countCvrs} cards to ${publisher.cardManifestFile()}" }
+        logger.info { "CreateAudit write ${countCvrs} cards to ${publisher.cardManifestFile()}" }
 
         // this may change the auditStatus to misformed
         val contestsUA = election.contestsUA()
@@ -87,9 +87,9 @@ class CreateAudit(val name: String, val config: AuditConfig, election: CreateEle
 
         // write contests
         writeContestsJsonFile(contestsUA, publisher.contestsFile())
-        logger.info{"write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
+        logger.info{"CreateAudit write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
 
-        // cant write the cardManifest until after seed is generated after committment to cardManifest
+        // cant write the sorted cards until after seed is generated, after committment to cardManifest
     }
 }
 
@@ -98,7 +98,7 @@ fun writeSortedCardsInternalSort(publisher: Publisher, seed: Long) {
     val sortedCards = createSortedCards(unsortedCards, seed)
     val countCards = writeAuditableCardCsvFile(Closer(sortedCards.iterator()), publisher.sortedCardsFile())
     createZipFile(publisher.sortedCardsFile(), delete = true)
-    logger.info{"write ${countCards} cards to ${publisher.sortedCardsFile()}"}
+    logger.info{"writeSortedCardsInternalSort ${countCards} cards to ${publisher.sortedCardsFile()}"}
 }
 
 fun createSortedCards(unsortedCards: CloseableIterator<AuditableCard>, seed: Long) : List<AuditableCard> {
@@ -128,18 +128,6 @@ fun writeExternalSortedCards(topdir: String, outputFile: String, unsortedCards: 
     createZipFile(outputFile, delete = true)
 }
 
-fun writeSortedMvrs(publisher: Publisher, unsortedMvrs: List<Cvr>, seed: Long) {
-    val prng = Prng(seed)
-    val mvrCards = unsortedMvrs.mapIndexed { index, mvr ->
-        AuditableCard.fromCvr(mvr, index, prng.next())
-    }
-    val sortedMvrs = mvrCards.sortedBy { it.prn }
-
-    validateOutputDirOfFile(publisher.sortedMvrsFile())
-    val countMvrs = writeAuditableCardCsvFile(Closer(sortedMvrs.iterator()), publisher.sortedMvrsFile())
-    logger.info{"write ${countMvrs} mvrs to ${publisher.sortedMvrsFile()}"}
-}
-
 // uses private/sortedMvrs.cvs
 fun writeMvrsForRound(publisher: Publisher, round: Int) {
     val resultSamples = readSamplePrnsJsonFile(publisher.samplePrnsFile(round))
@@ -152,17 +140,25 @@ fun writeMvrsForRound(publisher: Publisher, round: Int) {
     val sampledMvrs = findSamples(sampleNumbers, Closer(sortedMvrs.iterator()))
     require(sampledMvrs.size == sampleNumbers.size)
 
+    sampledMvrs.forEachIndexed { index, mvr ->
+        require(mvr.prn == sampleNumbers[index])
+    }
+
     val countCards = writeAuditableCardCsvFile(Closer(sampledMvrs.iterator()), publisher.sampleMvrsFile(round))
-    logger.info{"write ${countCards} cards to ${publisher.sampleMvrsFile(round)}"}
+    logger.info{"writeMvrsForRound ${countCards} cards to ${publisher.sampleMvrsFile(round)}"}
 }
 
-fun writeUnsortedMvrs(unsortedMvrs: List<Cvr>, filename: String) {
+fun writeSortedMvrs(publisher: Publisher, sortedMvrs: List<AuditableCard>) {
+    validateOutputDirOfFile(publisher.sortedMvrsFile())
+    val countMvrs = writeAuditableCardCsvFile(Closer(sortedMvrs.iterator()), publisher.sortedMvrsFile())
+    logger.info{"writeSortedMvrs ${countMvrs} mvrs to ${publisher.sortedMvrsFile()}"}
+}
+
+fun writeUnsortedMvrs(publisher: Publisher, unsortedMvrs: List<Cvr>, seed: Long) {
+    val prng = Prng(seed)
     val mvrCards = unsortedMvrs.mapIndexed { index, mvr ->
-        AuditableCard.fromCvr(mvr, index, 0)
+        AuditableCard.fromCvr(mvr, index, prng.next())
     }
     val sortedMvrs = mvrCards.sortedBy { it.prn }
-
-    validateOutputDirOfFile(filename)
-    val countMvrs = writeAuditableCardCsvFile(Closer(sortedMvrs.iterator()), filename)
-    logger.info{"write ${countMvrs} mvrs to ${filename}"}
+    writeSortedMvrs(publisher, sortedMvrs)
 }

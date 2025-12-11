@@ -214,11 +214,11 @@ class OneAuditVunderBarFuzzer(
         vunderBar.reset()
     }
 
-    fun makePairsFromCards(cards: List<AuditableCard>): List<Pair<Cvr, AuditableCard>> {
+    fun makePairsFromCards(cards: List<AuditableCard>): List<Pair<AuditableCard, AuditableCard>> {
         val mvrs = cards.map { card ->
             if (card.poolId != null) {
                 vunderBar.simulatePooledCard(card)
-            } else if (card.votes != null ){
+            } else if (card.votes != null) {
                 makeFuzzedCvrFromCard(infos, isIRV, card, fuzzPct)
             } else {
                 throw RuntimeException("card must be pooled or have votes")
@@ -234,10 +234,10 @@ fun makeFuzzedCvrFromCard(
     card: AuditableCard, // must have votes, ie have a Cvr
     fuzzPct: Double,
     undervotes: Boolean = true, // chooseNewCandidateWithUndervotes
-) : Cvr {
-    if (fuzzPct == 0.0 || card.phantom) return card.cvr()
+) : AuditableCard {
+    if (fuzzPct == 0.0 || card.phantom) return card
     val r = Random.nextDouble(1.0)
-    if (r > fuzzPct) return card.cvr()
+    if (r > fuzzPct) return card
 
     val cardb = CardBuilder.fromCard(card)
         cardb.possibleContests.forEach { contestId ->
@@ -257,5 +257,5 @@ fun makeFuzzedCvrFromCard(
         }
     }
 
-    return cardb.build().cvr()
+    return cardb.build()
 }

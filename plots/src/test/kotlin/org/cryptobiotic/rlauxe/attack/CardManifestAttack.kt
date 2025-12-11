@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.audit.writeSortedMvrs
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
+import org.cryptobiotic.rlauxe.audit.writeUnsortedMvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
@@ -24,6 +25,7 @@ import org.cryptobiotic.rlauxe.oneaudit.calcCardPoolsFromMvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.RegVotes
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.showTabs
@@ -247,7 +249,13 @@ class CardManifestAttack {
 
         val publisher = Publisher(auditdir)
         writeSortedCardsInternalSort(publisher, config.seed)
-        writeSortedMvrs(publisher, mvrs, config.seed)
+
+        val prng = Prng(config.seed)
+        val mvrCards = mvrs.mapIndexed { index, mvr ->
+            AuditableCard.fromCvr(mvr, index, prng.next())
+        }
+        val sortedMvrs = mvrCards.sortedBy { it.prn }
+        writeUnsortedMvrs(publisher, mvrs, config.seed)
 
         println("============================================================")
         val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, true)

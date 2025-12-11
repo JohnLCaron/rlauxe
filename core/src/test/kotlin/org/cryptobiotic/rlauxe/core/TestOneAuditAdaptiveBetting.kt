@@ -47,7 +47,7 @@ class TestOneAuditAdaptiveBetting {
         //val tracker2 = ClcaErrorTracker(noerror, 1.0)
 
         val mui = .5
-        val solver = OneAuditOptimalLambda(oaCassorter.noerror(), clcaErrors.errorRates(), oaErrorRates.rates, mui, debug=true)
+        val solver = GeneralOptimalLambda(oaCassorter.noerror(), clcaErrors.errorRates(), oaErrorRates.rates, mui, 2.0, debug=true)
         val lam = solver.solve()
         println("lamda = $lam")
         println()

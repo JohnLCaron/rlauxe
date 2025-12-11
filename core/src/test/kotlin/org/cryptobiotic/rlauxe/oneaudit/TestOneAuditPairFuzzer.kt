@@ -14,6 +14,7 @@ import org.cryptobiotic.rlauxe.util.VunderBar
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.mergeReduceS
+import org.cryptobiotic.rlauxe.util.tabulateCards
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.util.tabulateVotesWithUndervotes
 import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsFrom
@@ -147,14 +148,14 @@ class TestOneAuditPairFuzzer {
 
         val vunderBar = VunderBar(pools)
         val vunderFuzz = OneAuditVunderBarFuzzer(vunderBar, infos, fuzzPct)
-        val oaFuzzedPairs: List<Pair<Cvr, AuditableCard>> = vunderFuzz.makePairsFromCards(cards)
+        val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.makePairsFromCards(cards)
         assertEquals(cards.size, oaFuzzedPairs.size)
 
         val countPoolCards2 = oaFuzzedPairs.count { it.second.poolId == cardPool.poolId }
         assertEquals(countPoolCards, countPoolCards2)
 
         val fuzzedMvrs = oaFuzzedPairs.map { it.first }
-        val fuzzedMvrTab = tabulateCvrs(fuzzedMvrs.iterator(), infos)
+        val fuzzedMvrTab = tabulateCards(fuzzedMvrs.iterator(), infos)
         println("fuzzedMvrTab= ${fuzzedMvrTab[info.id]}")
 
         val countPoolCards3 = fuzzedMvrs.count { it.poolId == cardPool.poolId }
@@ -163,7 +164,7 @@ class TestOneAuditPairFuzzer {
         val fuzzedPool = calcCardPoolsFromMvrs(
             infos,
             cardStyles = listOf(CardStyle("fuzzedPool", listOf(1,2), 42)),
-            fuzzedMvrs,
+            fuzzedMvrs.map { it.cvr() },
         )
         println("fuzzedPool= ${fuzzedPool.first().show()}")
         println()

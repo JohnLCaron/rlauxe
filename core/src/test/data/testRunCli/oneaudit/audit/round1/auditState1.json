@@ -1,0 +1,80 @@
+{
+    "roundIdx": 1,
+    "contestRounds": [
+        {
+            "id": 1,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "0/1 OneAuditTest",
+                    "roundIdx": 1,
+                    "estSampleSize": 360,
+                    "estNewSampleSize": 360,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "clca",
+                        "fuzzPct": 0.02,
+                        "startingTestStatistic": 1.0,
+                        "estimatedDistribution": [
+                            102,
+                            247,
+                            360,
+                            528,
+                            645,
+                            651,
+                            746,
+                            1090,
+                            1676,
+                            1677
+                        ],
+                        "firstSample": 360
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pvalue=0.0466 nmvrs=360 samplesUsed=259 status=StatRejectNull startingRates=totalSamples=0, noerror=0.5102040816326531, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=259, noerror=0.5102040816326531, upper=1.0 poolAvg=null\n    cvr counts= [oth-los=5, oth-win=1, los-win=1, ]\n",
+                        "roundIdx": 1,
+                        "nmvrs": 360,
+                        "maxBallotIndexUsed": 259,
+                        "pvalue": 0.04663226201087274,
+                        "samplesUsed": 259,
+                        "status": "StatRejectNull",
+                        "measuredMean": 0.511935229690332,
+                        "startingRates": {
+                            "errorCounts": {},
+                            "totalSamples": 0,
+                            "noerror": 0.5102040816326531,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.24479591836734696": 1,
+                                "0.25510204081632654": 5,
+                                "0.755": 5,
+                                "0.7653061224489797": 1,
+                                "1.0204081632653061": 1
+                            },
+                            "totalSamples": 259,
+                            "noerror": 0.5102040816326531,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "round": 1
+                }
+            ],
+            "roundIdx": 1,
+            "actualMvrs": 360,
+            "actualNewMvrs": 360,
+            "estNewSamples": 360,
+            "estSampleSize": 360,
+            "auditorWantNewMvrs": -1,
+            "done": true,
+            "included": true,
+            "status": "StatRejectNull"
+        }
+    ],
+    "auditWasDone": true,
+    "auditIsComplete": true,
+    "nmvrs": 360,
+    "newmvrs": 360,
+    "auditorWantNewMvrs": -1
+}

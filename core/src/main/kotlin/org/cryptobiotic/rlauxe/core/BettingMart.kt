@@ -42,6 +42,16 @@ class BettingMart(
         if (showEachSample) println("** $sampleNumber: Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
 
         while (sampleNumber < maxSamples) {
+            // population mean under the null hypothesis
+            mj = populationMeanIfH0(N, withoutReplacement, tracker)  // approx .5
+            // println("$sampleNumber: mj = $mj numer= ${(N * 0.5 - tracker.sum())} denom = ${(N - tracker.numberOfSamples())} ")
+
+            // make sure mj is in bounds
+            if (mj > sampleUpperBound || mj < 0.0) { // 1, 5
+                populationMeanIfH0(N, withoutReplacement, tracker)
+                break
+            }
+
             // choose the bet before you sample
             val lamj = bettingFn.bet(tracker)
 
@@ -50,9 +60,7 @@ class BettingMart(
             require(xj >= 0.0)
             require(xj <= sampleUpperBound)
 
-            // population mean under the null hypothesis
-            mj = populationMeanIfH0(N, withoutReplacement, tracker)  // approx .5
-            val eta = lamToEta(lamj, mu=mj, upper=sampleUpperBound) // informational only
+            // val eta = lamToEta(lamj, mu=mj, upper=sampleUpperBound) // informational only
 
             // rlabelgium Nonnegmean line 163
             //         terms[m>u] = 0                                       # true mean is certainly less than hypothesized
@@ -81,9 +89,7 @@ class BettingMart(
             // 5           m[i] < 0 -> terms[i] = Double.POSITIVE_INFINITY # true mean certainly greater than 1/2
             // 6           else -> terms[i] = if (Stot > N * t) Double.POSITIVE_INFINITY else terms[i]
 
-            if (mj > sampleUpperBound || mj < 0.0) { // 1, 5
-                break
-            }
+
             val tj = if (doubleIsClose(0.0, mj) || doubleIsClose(sampleUpperBound, mj)) { // 2, 3
                 1.0
             } else {
@@ -99,7 +105,7 @@ class BettingMart(
             testStatistic *= tj // Tj ← Tj-1 & tj
 
             if (sequences.isOn) {
-                sequences.add(xj, lamj, eta, tj, testStatistic)
+                sequences.add(xj, lamj, mj, tj, testStatistic)
             }
             if (showEachSample) println("** $sampleNumber: ${df(xj)} bet=${df(lamj)} tj=${df(tj)} Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
             // if (sampleNumber % 1000 == 0)
@@ -153,14 +159,14 @@ class DebuggingSequences {
     var isOn = false
     val xs = mutableListOf<Double>()
     val bets = mutableListOf<Double>()
-    val etas = mutableListOf<Double>()
+    val mjs = mutableListOf<Double>()
     val tjs = mutableListOf<Double>()
     val testStatistics = mutableListOf<Double>()
 
-    fun add(x: Double, bet: Double, eta: Double, tj: Double, testStatistic: Double) {
+    fun add(x: Double, bet: Double, mj: Double, tj: Double, testStatistic: Double) {
         this.xs.add(x)
         this.bets.add(bet)
-        this.etas.add(eta)
+        this.mjs.add(mj)
         this.tjs.add(tj)
         this.testStatistics.add(testStatistic)
     }

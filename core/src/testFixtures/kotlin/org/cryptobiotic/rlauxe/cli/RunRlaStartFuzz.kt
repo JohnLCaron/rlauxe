@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
@@ -167,31 +168,34 @@ class TestClcaElection(
 fun startTestElectionPolling(
     topdir: String,
     minMargin: Double,
-    fuzzMvrsPct: Double,
+    fuzzMvrs: Double,
     pctPhantoms: Double?,
     ncards: Int,
     ncontests: Int = 11,
 ) {
     val auditDir = "$topdir/audit"
     clearDirectory(Path(auditDir))
-    val config = AuditConfig(AuditType.POLLING, hasStyle = true, nsimEst = 100)
+    val config = AuditConfig(AuditType.POLLING, hasStyle = true, nsimEst = 100, simFuzzPct = fuzzMvrs)
 
     clearDirectory(Path(auditDir))
     val election = TestPollingElection(
+        auditDir,
         config,
         minMargin,
-        fuzzMvrsPct,
+        fuzzMvrs,
         pctPhantoms,
         ncards,
         ncontests,
     )
-    CreateAudit("startTestElectionPolling", config, election, auditDir = "$topdir/audit", clear = false)
+
+    CreateAudit("startTestElectionPolling", config, election, auditDir = auditDir)
 }
 
 class TestPollingElection(
+    val auditdir: String,
     val config: AuditConfig,
     minMargin: Double,
-    fuzzMvrsPct: Double,
+    fuzzMvrs: Double,
     pctPhantoms: Double?,
     ncards: Int,
     ncontests: Int,
@@ -214,7 +218,7 @@ class TestPollingElection(
 
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
         cvrs = testData.makeCvrsFromContests()
-        testMvrs = makeFuzzedCvrsFrom(contests.map{ it.info() }, cvrs, fuzzMvrsPct) // ??
+        testMvrs = makeFuzzedCvrsFrom(contests.map{ it.info() }, cvrs, fuzzMvrs) // ??
 
         val regularContests = testData.contests.map { ContestUnderAudit(it, isClca=true, hasStyle=config.hasStyle).addStandardAssertions() }
         contestsUA.addAll(regularContests)
@@ -225,6 +229,9 @@ class TestPollingElection(
         val mvrTabs = tabulateCvrs(testMvrs.iterator(), infos)
         println("testMvrs = ${mvrTabs}")
         println()
+
+        // have to write this here, where we know the mvrs
+        writeUnsortedMvrs(Publisher(auditdir), testMvrs, seed=config.seed)
     }
 
     override fun cardPools() = null

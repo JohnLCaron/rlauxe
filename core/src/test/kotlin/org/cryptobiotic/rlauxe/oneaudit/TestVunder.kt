@@ -15,6 +15,7 @@ import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.VunderBar
 import org.cryptobiotic.rlauxe.util.makeVunderCvrs
+import org.cryptobiotic.rlauxe.util.tabulateCards
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.collections.List
 import kotlin.test.Test
@@ -141,16 +142,16 @@ class TestVunder {
         val infos = mapOf(contestOA.id to contestOA.contest.info(), 2 to info2)
         val vunderFuzz = OneAuditVunderBarFuzzer( VunderBar(cardPools), infos, .00)
 
-        val oaFuzzedPairs: List<Pair<Cvr, AuditableCard>> = vunderFuzz.makePairsFromCards(cards)
+        val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.makePairsFromCards(cards)
         val fuzzedMvrs = oaFuzzedPairs.map { it.first }
 
-        val fuzzedMvrTab = tabulateCvrs(fuzzedMvrs.iterator(), infos)
+        val fuzzedMvrTab = tabulateCards(fuzzedMvrs.iterator(), infos)
         println("fuzzedMvrTab= ${fuzzedMvrTab[contestOA.id]}")
 
         val fuzzedPool = calcCardPoolsFromMvrs(
             infos,
             cardStyles = listOf(CardStyle("pool42", listOf(1,2), 42)),
-            fuzzedMvrs,
+            fuzzedMvrs.map { it.cvr() },
         )
         println("fuzzedPool= ${fuzzedPool.first().show()}")
 
@@ -158,10 +159,10 @@ class TestVunder {
         val limit = 1000
         val limitedCards = cards.subList(0, limit)
         vunderFuzz.reset()
-        val limitedPairs: List<Pair<Cvr, AuditableCard>> = vunderFuzz.makePairsFromCards(limitedCards)
+        val limitedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.makePairsFromCards(limitedCards)
         val limitedMvrs = limitedPairs.map { it.first }
 
-        val limitedMvrTab = tabulateCvrs(limitedMvrs.iterator(), infos)
+        val limitedMvrTab = tabulateCards(limitedMvrs.iterator(), infos)
         // TODO ContestTabulation(id=1 isIrv=false, voteForN=1, votes=[0=403, 1=392], nvotes=795 ncards=1000, novote=205, undervotes=205, overvotes=0)
         // TODO why so many undervotes ??
         println("cardlimit=$limit limitedMvrTab= ${limitedMvrTab[contestOA.id]}")
@@ -169,7 +170,7 @@ class TestVunder {
         val limitedPool = calcCardPoolsFromMvrs(
             infos,
             cardStyles = listOf(CardStyle(cardPool.name(), listOf(1,2), cardPool.poolId)),
-            limitedMvrs,
+            limitedMvrs.map { it.cvr() },
         )
         println("limitedPool= ${limitedPool.first().show()}")
     }

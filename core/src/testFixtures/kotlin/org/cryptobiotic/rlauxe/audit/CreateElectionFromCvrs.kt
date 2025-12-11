@@ -20,7 +20,8 @@ class CreateElectionFromCvrs (
 
     fun createCardIterator(): CloseableIterator<AuditableCard> {
         return CvrsWithStylesToCardManifest(
-            config.auditType, config.hasStyle,
+            config.auditType,
+            config.hasStyle,
             Closer(cvrs.iterator()),
             null,
             styles = cardPools ?: cardStyles,

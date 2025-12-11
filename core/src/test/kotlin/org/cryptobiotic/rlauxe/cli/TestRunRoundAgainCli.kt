@@ -4,13 +4,13 @@ import kotlin.io.path.ExperimentalPathApi
 import kotlin.test.Test
 
 @OptIn(ExperimentalPathApi::class)
-class TestRunAuditCli {
+class TestRunRoundAgainCli {
 
     @Test
-    fun TestRunAuditCli() {
+    fun testRunRoundAgainCli() {
         val auditDir = "/home/stormy/rla/persist/testRunCli/oneaudit/audit"
 
-        RunAuditCli.main(
+        RunRoundAgainCli.main(
             arrayOf(
                 "-auditDir", auditDir,
                 "-contest", "1",

@@ -420,11 +420,7 @@ fun estimateOneAuditAssertionRound(
     val oaConfig = config.oaConfig
     val clcaConfig = config.clcaConfig
 
-    // TODO could pass the fuzzed mvrs in always, to simplify
-    // TODO wait we already wrote the fuzzed cards, I think.
     // The estimation and the audit are using a different fuzz.
-    // TODO this doesnt maintain the right proportions when you dont fuzz the entire set, ie you just take the first 20K
-    // So can we grab the fuzzed cards?
     vunderFuzz.reset()
     val oaFuzzedPairs: List<Pair<Cvr, AuditableCard>> = vunderFuzz.makePairsFromCards(contestCards)
     val pools = vunderFuzz.vunderBar.pools

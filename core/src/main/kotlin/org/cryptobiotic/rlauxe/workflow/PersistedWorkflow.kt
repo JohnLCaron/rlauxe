@@ -60,7 +60,6 @@ class PersistedWorkflow(
             nextRound.auditIsComplete = true
         } else {
             // heres where we limit the number of samples we are willing to audit
-            // TODO NEXTASK is this all prns or just new? depends on round.samplePrns
             if (config.auditSampleLimit != null ) {
                 nextRound.samplePrns = nextRound.samplePrns.subList(0, config.auditSampleLimit)
             }
@@ -68,7 +67,6 @@ class PersistedWorkflow(
             writeAuditRoundJsonFile(nextRound, publisher.auditStateFile(nextRound.roundIdx))
             logger.info {"   writeAuditStateJsonFile ${publisher.auditStateFile(nextRound.roundIdx)}"}
 
-            // TODO NEXTASK is this all prns or just new? depends on round.samplePrns
             writeSamplePrnsJsonFile(nextRound.samplePrns, publisher.samplePrnsFile(nextRound.roundIdx))
             logger.info {"   writeSampleIndicesJsonFile ${publisher.samplePrnsFile(nextRound.roundIdx)}"}
         }

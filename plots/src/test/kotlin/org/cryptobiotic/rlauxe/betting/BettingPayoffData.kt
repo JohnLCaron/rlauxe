@@ -1,8 +1,7 @@
 package org.cryptobiotic.rlauxe.betting
 
+import org.cryptobiotic.rlauxe.core.sampleSize
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
-import kotlin.math.log10
-import kotlin.math.ln
 
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.util.df
@@ -74,7 +73,7 @@ class PlotBettingPayoffData(val dir: String, val filename: String) {
             "$dir/BettingPayoffSampleSize",
             useData,
             xname = "margin", xfld = { it.margin },
-            yname="sampleSize", yfld = { org.cryptobiotic.rlauxe.core.sampleSize(risk, it.payoff) },
+            yname="sampleSize", yfld = { sampleSize(risk, it.payoff) },
             catName="error", catfld = { df(it.error) },
             scaleType = ScaleType.LogLog,
         )

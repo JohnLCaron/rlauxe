@@ -95,13 +95,6 @@ fun AssorterIF.publishJson() : AssorterIFJson {
                 this.winner,
                 this.loser,
             )
-        is SuperMajorityAssorter ->
-            AssorterIFJson(
-                "SuperMajorityAssorter",
-                reportedMean = this.dilutedMean(),
-                this.candId,
-                minFraction = this.minFraction,
-            )
         is RaireAssorter ->
             AssorterIFJson(
                 "RaireAssorter",
@@ -145,13 +138,6 @@ fun AssorterIFJson.import(info: ContestInfo): AssorterIF {
                 this.winner,
                 this.loser!!)
             .setDilutedMean(this.reportedMean)
-
-        "SuperMajorityAssorter" ->
-            SuperMajorityAssorter(
-                info,
-                this.winner,
-                this.minFraction!!)
-            .setReportedMean(this.reportedMean)
 
         "RaireAssorter" ->
             // data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion): AssorterIF {

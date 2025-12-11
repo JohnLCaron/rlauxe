@@ -7,7 +7,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.Path
 
-const val cvrExportCsvFile = "cvrExport.csv"
 private val logger = KotlinLogging.logger("Publisher")
 
 /* see docs/Overview.md

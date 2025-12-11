@@ -1,11 +1,13 @@
-package org.cryptobiotic.rlauxe.persist.csv
+package org.cryptobiotic.rlauxe.dominion
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.core.CvrExport
 import org.cryptobiotic.rlauxe.util.createZipFile
+import kotlin.io.path.createTempFile
+
+const val cvrExportCsvFile = "cvrExport.csv"
 
 class TestCvrExportCsv {
 
@@ -29,7 +31,7 @@ class TestCvrExportCsv {
         val roundtrip = readCvrExportCsv(csv)
         assertEquals(target, roundtrip)
 
-        val tempFile = kotlin.io.path.createTempFile().toString()
+        val tempFile = createTempFile().toString()
         writeCvrExportCsvFile(listOf(target).iterator(), tempFile)
 
         cvrExportCsvIterator(tempFile).use { csvIter ->

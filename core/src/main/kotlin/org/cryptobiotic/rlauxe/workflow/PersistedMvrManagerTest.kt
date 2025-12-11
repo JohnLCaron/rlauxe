@@ -26,8 +26,6 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
         require(previousPrns.size == previousMvrs.size)
         require(previousPrnsSet.size == previousMvrs.size)
 
-        // TODO NEXTASK is this all prns or just new? depends on round.samplePrns
-        // TODO NEXTASK each round gets a different fuzz PROBLEM
         val simFuzzPct = config.simFuzzPct()
         val sampledMvrs = if (simFuzzPct == null) {
             cards // use the cvrs - ie, no errors
@@ -54,7 +52,6 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
         }
 
         val publisher = Publisher(auditDir)
-        // TODO NEXTASK is this all prns or just new? depends on round.sampledMvrs
         writeAuditableCardCsvFile(sampledMvrs, publisher.sampleMvrsFile(roundIdx)) // test sampleMvrs
         logger.info{"setMvrsBySampleNumber write sampledMvrs to '${publisher.sampleMvrsFile(roundIdx)}"}
         return sampledMvrs
@@ -65,7 +62,6 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
         val publisher = Publisher(auditDir)
         val sampleNumbers = readSamplePrns(publisher.samplePrnsFile(roundIdx))
 
-        // TODO NEXTASK is this all prns or just new? depends on round.samplePrns
         return if (sampleNumbers.isEmpty()) {
             logger.error{"***Error sampled Indices are empty for round $roundIdx"}
             emptyList()

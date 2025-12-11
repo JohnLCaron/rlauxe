@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.core.GeneralAdaptiveBetting
+import org.cryptobiotic.rlauxe.core.sampleSize
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
 
@@ -162,7 +163,7 @@ class GenBettingPayoff {
             repeat(10) { samples.addSample(noerror) }
             val bet = bettingFn.bet(samples)
             val payoff = 1.0 + bet * (noerror - .5)
-            val sampleSize = org.cryptobiotic.rlauxe.core.sampleSize(risk, payoff)
+            val sampleSize = sampleSize(risk, payoff)
             println("margin=$margin, noerror=$noerror bet = $bet payoff=$payoff sampleSize=$sampleSize")
         }
     }

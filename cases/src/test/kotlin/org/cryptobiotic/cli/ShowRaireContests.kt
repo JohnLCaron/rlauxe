@@ -3,10 +3,10 @@ package org.cryptobiotic.cli
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
+import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
+import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.CvrExportToCvrAdapter
-import org.cryptobiotic.rlauxe.persist.csv.cvrExportCsvIterator
-import org.cryptobiotic.rlauxe.persist.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.raire.IrvCount
 import org.cryptobiotic.rlauxe.raire.RaireContest

@@ -49,10 +49,8 @@ class CreateElection(
 
 private val logger = KotlinLogging.logger("CreateAudit")
 
-// TODO dont need topdir
-class CreateAudit(val name: String, val topdir: String, val config: AuditConfig, election: CreateElectionIF, auditdir: String? = null, clear: Boolean = true) {
+class CreateAudit(val name: String, val config: AuditConfig, election: CreateElectionIF, val auditDir: String, clear: Boolean = true) {
 
-    val auditDir = auditdir ?: "$topdir/audit"
     val stopwatch = Stopwatch()
 
     init {
@@ -142,7 +140,6 @@ fun writeSortedMvrs(publisher: Publisher, unsortedMvrs: List<Cvr>, seed: Long) {
     logger.info{"write ${countMvrs} mvrs to ${publisher.sortedMvrsFile()}"}
 }
 
-// TODO NEXTASK is this all prns or just new? depends on round.samplePrns
 // uses private/sortedMvrs.cvs
 fun writeMvrsForRound(publisher: Publisher, round: Int) {
     val resultSamples = readSamplePrnsJsonFile(publisher.samplePrnsFile(round))

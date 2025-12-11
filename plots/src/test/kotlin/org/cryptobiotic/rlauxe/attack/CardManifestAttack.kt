@@ -243,7 +243,7 @@ class CardManifestAttack {
             AuditType.ONEAUDIT, hasStyle = hasStyle, contestSampleCutoff = 20000, nsimEst = 10,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
-        CreateAudit("hideInOtherPoolAttack", topdir, config, election)
+        CreateAudit("hideInOtherPoolAttack", config, election, auditDir = "$topdir/audit", )
 
         val publisher = Publisher(auditdir)
         writeSortedCardsInternalSort(publisher, config.seed)

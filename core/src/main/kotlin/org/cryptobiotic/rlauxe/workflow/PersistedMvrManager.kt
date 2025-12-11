@@ -45,12 +45,12 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
         require(sampledCards.size == mvrsForRound.size)
 
         if (checkValidity) {
-            // prove that sampledCvrs correspond to mvrs
-            val cvruaPairs: List<Pair<AuditableCard, AuditableCard>> = mvrsForRound.zip(sampledCards)
-            cvruaPairs.forEach { (mvr, card) ->
+            // prove that sampledCvrs correspond to mvrsForRound
+            mvrsForRound.forEachIndexed { index, mvr ->
+                val card = sampledCards[index]
                 require(mvr.location == card.location) { "mvr location ${mvr.location} != card.location ${card.location}"}
-                require(mvr.index == card.index)  { "mvr index ${mvr.index} != card.index ${card.index}"}
                 require(mvr.prn == card.prn)  { "mvr prn ${mvr.prn} != card.prn ${card.prn}"}
+                require(mvr.index == card.index)  { "mvr index ${mvr.index} != card.index ${card.index}"}
             }
         }
 

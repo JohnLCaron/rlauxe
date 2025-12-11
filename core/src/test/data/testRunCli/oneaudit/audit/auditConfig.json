@@ -2,16 +2,21 @@
     "auditType": "ONEAUDIT",
     "hasStyle": true,
     "riskLimit": 0.05,
-    "seed": 644864666126312200,
+    "seed": -5204489232987655024,
     "nsimEst": 10,
     "quantile": 0.8,
     "contestSampleCutoff": 20000,
     "removeCutoffContests": false,
-    "simFuzzPct": 0.001,
+    "simFuzzPct": 0.02,
     "minRecountMargin": 0.005,
     "removeTooManyPhantoms": false,
+    "clcaConfig": {
+        "strategy": "generalAdaptive",
+        "d": 100,
+        "maxRisk": 0.9
+    },
     "oaConfig": {
-        "strategy": "optimalComparison",
+        "strategy": "clca",
         "d": 100,
         "useFirst": true
     },

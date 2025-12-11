@@ -5,7 +5,6 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.cli.enterMvrs
-import org.cryptobiotic.rlauxe.audit.runRoundResult
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -19,7 +18,8 @@ class TestPersistedWorkflow {
     @Test
     fun testPersistedSingleClca() {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
-        val topdir = "/home/stormy/rla/persist/testPersistedSingleClca"
+        val topdir = "/home/stormy/rla/persist/persistWorkflow/singleClca"
+        val auditdir = "$topdir/audit"
 
         val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01)
 
@@ -30,19 +30,22 @@ class TestPersistedWorkflow {
         println("Start testPersistedSingleClca $testData")
 
         // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
-        val testCvrs = testData.makeCvrsFromContests()
+        val testMvrs = testData.makeCvrsFromContests()
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
-        val election = CreateElectionFromCvrs(contestsUA, testCvrs, config=config)
-        CreateAudit("testPersistedSingleClca", config, election, auditDir = "$topdir/audit", clear = true)
+        val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
+        CreateAudit("testPersistedSingleClca", config, election, auditDir = auditdir, clear = true)
 
-        runPersistedAudit(topdir)
+        writeUnsortedMvrs(Publisher(auditdir), testMvrs, config.seed)
+
+        runPersistedAudit(topdir, test=false)
     }
 
     @Test
     fun testPersistedAuditClca() {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
-        val topdir = "/home/stormy/rla/persist/testPersistedAuditClca"
+        val topdir = "/home/stormy/rla/persist/persistWorkflow/clca"
+        val auditdir = "$topdir/audit"
 
         val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01)
         val N = 50000
@@ -52,19 +55,23 @@ class TestPersistedWorkflow {
         println("Start testPersistedAuditClca $testData")
 
         // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
-        val testCvrs = testData.makeCvrsFromContests()
+        val testMvrs = testData.makeCvrsFromContests()
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
-        val election = CreateElectionFromCvrs(contestsUA, testCvrs, config=config)
-        CreateAudit("testPersistedAuditClca",  config, election, auditDir = "$topdir/audit",  clear = true)
+        val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
+        CreateAudit("testPersistedAuditClca",  config, election, auditDir = auditdir,  clear = true)
 
-        runPersistedAudit(topdir)
+        // have to write this here, where we know the mvrs
+        writeUnsortedMvrs(Publisher(auditdir), testMvrs, config.seed)
+
+        runPersistedAudit(topdir, test=false)
     }
 
     @Test
     fun testPersistedAuditPolling() {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
-        val topdir = "/home/stormy/rla/persist/testPersistedAuditPolling"
+        val topdir = "/home/stormy/rla/persist/persistWorkflow/polling"
+        val auditdir = "$topdir/audit"
 
         val config = AuditConfig(AuditType.POLLING, hasStyle=true, seed = 12356667890L, nsimEst=10, simFuzzPct = .01)
 
@@ -75,20 +82,23 @@ class TestPersistedWorkflow {
         println("Start testPersistedAuditPolling $testData")
 
         // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
-        val testCvrs = testData.makeCvrsFromContests()
+        val testMvrs = testData.makeCvrsFromContests()
+
+        // have to write this here, where we know the mvrs
+        writeUnsortedMvrs(Publisher(auditdir), testMvrs, config.seed)
 
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
+        val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
+        CreateAudit("testPersistedAuditPolling", config, election, auditDir = auditdir, clear = true)
 
-        val election = CreateElectionFromCvrs(contestsUA, testCvrs, config=config)
-        CreateAudit("testPersistedAuditPolling", config, election, auditDir = "$topdir/audit", clear = true)
-
-        runPersistedAudit(topdir)
+        runPersistedAudit(topdir, test=false)
     }
 
     @Test
     fun testPersistedOneAudit() {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
-        val topdir = "/home/stormy/rla/persist/testPersistedOneAudit"
+        val topdir = "/home/stormy/rla/persist/persistWorkflow/oneaudit"
+        val auditdir = "$topdir/audit"
 
         val config = AuditConfig(
             AuditType.ONEAUDIT, hasStyle = true, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = .01,
@@ -110,11 +120,11 @@ class TestPersistedWorkflow {
         val election = CreateElectionFromCvrs(contestsUA, mvrs, cardPools, config=config)
         CreateAudit("testPersistedAuditPolling", config, election, auditDir = "$topdir/audit", clear = true)
 
-        runPersistedAudit(topdir)
+        runPersistedAudit(topdir, test=false)
     }
 }
 
-fun runPersistedAudit(topdir: String) {
+fun runPersistedAudit(topdir: String, test:Boolean) {
     val auditdir = "$topdir/audit"
     val publisher = Publisher(auditdir)
     val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
@@ -130,13 +140,10 @@ fun runPersistedAudit(topdir: String) {
     var lastRound: AuditRound? = null
 
     while (!done) {
-        val roundResult = runRoundResult(inputDir = auditdir, useTest = true, quiet = true)
-        if (roundResult is Err) {
-            println("runRoundResult failed ${roundResult.error}")
-            fail()
-        }
-        lastRound = roundResult.unwrap()
+        lastRound = runRound(inputDir = auditdir, useTest = test, quiet = true)
+        if (lastRound == null) fail()
 
+        // TODO!!
         val enterResult = enterMvrs(auditdir, publisher.sortedCardsFile())
         if (enterResult is Err) {
             println("enterMvrs failed ${enterResult.error}")

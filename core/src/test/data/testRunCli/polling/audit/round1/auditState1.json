@@ -1,0 +1,146 @@
+{
+    "roundIdx": 1,
+    "contestRounds": [
+        {
+            "id": 0,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "2/0 contest0",
+                    "roundIdx": 1,
+                    "estSampleSize": 442,
+                    "estNewSampleSize": 442,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "default",
+                        "fuzzPct": 0.0023,
+                        "startingTestStatistic": 1.0,
+                        "estimatedDistribution": [
+                            441,
+                            442,
+                            442,
+                            442,
+                            442,
+                            442,
+                            442,
+                            442,
+                            442,
+                            443
+                        ],
+                        "firstSample": 442
+                    },
+                    "status": "InProgress",
+                    "round": 0
+                },
+                {
+                    "assorterDesc": "2/1 contest0",
+                    "roundIdx": 1,
+                    "estSampleSize": 442,
+                    "estNewSampleSize": 442,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "default",
+                        "fuzzPct": 0.0023,
+                        "startingTestStatistic": 1.0,
+                        "estimatedDistribution": [
+                            441,
+                            442,
+                            442,
+                            442,
+                            442,
+                            442,
+                            442,
+                            442,
+                            442,
+                            443
+                        ],
+                        "firstSample": 442
+                    },
+                    "status": "InProgress",
+                    "round": 0
+                },
+                {
+                    "assorterDesc": "2/3 contest0",
+                    "roundIdx": 1,
+                    "estSampleSize": 442,
+                    "estNewSampleSize": 442,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "default",
+                        "fuzzPct": 0.0023,
+                        "startingTestStatistic": 1.0,
+                        "estimatedDistribution": [
+                            441,
+                            442,
+                            442,
+                            442,
+                            442,
+                            442,
+                            442,
+                            442,
+                            442,
+                            443
+                        ],
+                        "firstSample": 442
+                    },
+                    "status": "InProgress",
+                    "round": 0
+                }
+            ],
+            "roundIdx": 1,
+            "actualMvrs": 442,
+            "actualNewMvrs": 442,
+            "estNewSamples": 442,
+            "estSampleSize": 442,
+            "auditorWantNewMvrs": -1,
+            "done": false,
+            "included": true,
+            "status": "InProgress"
+        },
+        {
+            "id": 1,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "0/1 contest1",
+                    "roundIdx": 1,
+                    "estSampleSize": 20006,
+                    "estNewSampleSize": 20006,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "default",
+                        "fuzzPct": 0.0023,
+                        "startingTestStatistic": 1.0,
+                        "estimatedDistribution": [
+                            19992,
+                            19995,
+                            19998,
+                            19999,
+                            20001,
+                            20002,
+                            20004,
+                            20006,
+                            20008,
+                            20014
+                        ],
+                        "firstSample": 19998
+                    },
+                    "status": "InProgress",
+                    "round": 0
+                }
+            ],
+            "roundIdx": 1,
+            "actualMvrs": 20009,
+            "actualNewMvrs": 20009,
+            "estNewSamples": 20006,
+            "estSampleSize": 20006,
+            "auditorWantNewMvrs": -1,
+            "done": false,
+            "included": true,
+            "status": "InProgress"
+        }
+    ],
+    "auditWasDone": false,
+    "auditIsComplete": false,
+    "nmvrs": 20009,
+    "newmvrs": 20009,
+    "auditorWantNewMvrs": -1
+}

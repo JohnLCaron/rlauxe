@@ -25,7 +25,7 @@ class VunderBar(val pools: List<CardPoolIF>) {
         vunderPools.forEach{ it.value.reset() }
     }
 
-    fun simulatePooledCard(card: AuditableCard): Cvr {
+    fun simulatePooledCard(card: AuditableCard): AuditableCard {
         val poolId = card.poolId!!
         val vunderPool = vunderPools[poolId]!!
         return vunderPool.simulatePooledCard(card)
@@ -39,18 +39,18 @@ class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId
         vunders.forEach{ it.value.reset() }
     }
 
-    fun simulatePooledCard(card: AuditableCard): Cvr {
-        val cvrb = CvrBuilder2(card.location, phantom = false, poolId = poolId)
+    fun simulatePooledCard(card: AuditableCard): AuditableCard {
+        val cardb = CardBuilder.fromCard(card)
         card.possibleContests.forEach { contestId ->
             val vunders = vunders[contestId]
             if (vunders == null || vunders.isEmpty())
-                cvrb.addContest(contestId, intArrayOf())
+                cardb.replaceContestVotes(contestId, intArrayOf())
             else {
                 val cands = vunders.pickRandomCandidatesAndDecrement()
-                cvrb.addContest(contestId, cands)
+                cardb.replaceContestVotes(contestId, cands)
             }
         }
-        return cvrb.build()
+        return cardb.build()
     }
 
 }

@@ -1,7 +1,9 @@
 package org.cryptobiotic.rlauxe.audit
 
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
@@ -26,7 +28,7 @@ import java.util.concurrent.TimeUnit
 private val logger = KotlinLogging.logger("RunAudit")
 
 // TODO add ErrorMessages ??
-fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
+fun runRoundOld(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
     try {
         if (notExists(Path.of(inputDir))) {
             logger.warn { "RunRliRoundCli Audit Directory $inputDir does not exist" }
@@ -73,16 +75,25 @@ fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
     }
 }
 
+fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
+    val roundResult = runRoundResult(inputDir, useTest, quiet)
+    if (roundResult is Err) {
+        logger.error{"runRoundResult failed ${roundResult.error}"}
+        return null
+    }
+    return roundResult.unwrap()
+}
+
 fun runRoundResult(inputDir: String, useTest: Boolean, quiet: Boolean): Result<AuditRound, ErrorMessages> {
     val errs = ErrorMessages("runRoundResult")
 
     try {
         if (notExists(Path.of(inputDir))) {
-            return errs.add( "RunRliRoundCli Audit Directory $inputDir does not exist" )
+            return errs.add( "runRoundResult Audit Directory $inputDir does not exist" )
         }
         logger.info { "runRound on Audit in $inputDir" }
-        val rlauxAudit = PersistedWorkflow(inputDir, useTest)
 
+        val rlauxAudit = PersistedWorkflow(inputDir, useTest)
         var roundIdx = 0
         var complete = false
 
@@ -93,8 +104,12 @@ fun runRoundResult(inputDir: String, useTest: Boolean, quiet: Boolean): Result<A
             if (!lastRound.auditWasDone) {
                 logger.info { "Run audit round ${lastRound.roundIdx}" }
                 val roundStopwatch = Stopwatch()
+                // run the audit for this round
                 complete = rlauxAudit.runAuditRound(lastRound, quiet)
                 logger.info { "  complete=$complete took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms" }
+
+            } else {
+                complete = lastRound.auditIsComplete
             }
         }
 

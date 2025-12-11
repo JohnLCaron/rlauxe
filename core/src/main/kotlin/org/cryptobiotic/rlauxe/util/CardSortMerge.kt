@@ -86,7 +86,7 @@ private class ChunkSorter<T>(val workingDirectory: String, val prng: Prng, val m
     }
 
     fun add(cvr: Cvr) {
-        val card = AuditableCard.fromCvr(cvr, index=index, sampleNum=prng.next())
+        val card = AuditableCard.fromCvr(cvr, index=index, prn=prng.next())
         cards.add(card)
         index++
         count++

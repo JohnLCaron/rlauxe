@@ -51,6 +51,7 @@ class TestBettingMart {
     }
 
 
+    // when is ttj == 0?
     // val ttj = 1.0 + lamj * (xj - mj)
     // 0 = 1 + lamj * (xj - mj)
     // lamj * (mj - xj) = 1
@@ -70,11 +71,15 @@ class TestBettingMart {
     // ttj = 1 - lamj * mj when x == 0
     // ttj ~= 0            when x == 0, m ~ 1/2, lam ~= 2
 
-    // suppose you want 1 - lamj * mj > minp; so 1 - minp > lamj * mj; lamj < (1-minp) / mj
+    // suppose you want 1 - lamj * mj > mint; so 1 - mint > lamj * mj;
+    // then lamj < (1-mint) / mj
 
+    // (" i, ${sfn("xs", 6)}, ${sfn("bet", 6)}, ${sfn("tj", 6)}, ${sfn("Tj", 6)}, ${sfn("pvalue", 8)}, ")
+    //     x       lam=bet, tj   , Tj    ,p
     // 54, 0.0000, 1.9990, 0.0005, 0.0010, 947.0993, regularCvr-2637,        [1], votes=[0] possible=true pool=null,
-    // tj = 1 - 1.9990 / 2 = .0005    // just lost bet/2 = .9995 of winnings.
-    // suppose you want to only lose .95, then max bet = .95*2 = lamda = 1.9
+    // tj = 1 - 1.9990 * mj = .0005 for mj ~ 1/2   // just lost bet * mui ~ bet/2 = .9995 of winnings.
+
+    // suppose you want to only lose .95 = maxRisk, then max bet = maxRisk*mui ~ .95*2 = lamda = 1.9
     // i see why you focus on p2 errors
 
     @Test
@@ -124,21 +129,22 @@ class TestBettingMart {
     }
 }
 
-fun findSamplesNeeded(N:Int, margin: Double, upper: Double, maxRisk: Double, show: Boolean = false) {
+fun findSamplesNeeded(N:Int, margin: Double, upper: Double, maxRisk: Double, mui: Double = 0.5, show: Boolean = false) {
     val noerror: Double = 1.0 / (2.0 - margin / upper) // clca assort value when no error
-    val lamda = 2 * maxRisk
-    val tj: Double = 1.0 + lamda * (noerror - 0.5)// clca assort value when no error
+    val maxLambda = maxRisk / mui
+    val maxtj: Double = 1.0 + maxLambda * (noerror - mui)
     val tracker = ClcaErrorTracker(noerror, upper)
     var T: Double = 1.0
     var sample = 0
 
-    while(T < 20.0) {
+    while (T < 20.0) {
         tracker.addSample(noerror)
         val mj = populationMeanIfH0(N = N, withoutReplacement = true, sampleTracker = tracker)
+        val lamda = maxRisk / mj
         val ttj = 1.0 + lamda * (noerror - mj)
         T *= ttj
         sample++
         if (show) println("${nfn(tracker.numberOfSamples(), 3)}: ttj=${dfn(ttj, 6)} Tj=${dfn(T, 6)}")
     }
-    println("maxRisk: ${df(maxRisk)} N=$N, margin=$margin, upper=$upper noerror:${df(noerror)} tj: ${df(tj)}: needed $sample samples" )
+    println("maxRisk: ${df(maxRisk)} N=$N, margin=$margin, upper=$upper noerror:${df(noerror)} maxtj: ${df(maxtj)}: needed $sample samples" )
 }

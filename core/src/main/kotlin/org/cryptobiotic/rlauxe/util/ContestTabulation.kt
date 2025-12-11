@@ -188,6 +188,10 @@ fun tabulateCloseableCvrs(cvrs: CloseableIterator<Cvr>, infos: Map<Int, ContestI
     return votes
 }
 
+fun tabulateCards(cards: Iterator<AuditableCard>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+    return tabulateAuditableCards(Closer(cards), infos)
+}
+
 fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val tabs = mutableMapOf<Int, ContestTabulation>()
     cards.use { cardIter ->

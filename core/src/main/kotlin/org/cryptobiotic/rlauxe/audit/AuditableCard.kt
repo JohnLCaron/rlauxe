@@ -150,10 +150,10 @@ data class AuditableCard (
     }
 
     companion object {
-        fun fromCvr(cvr: Cvr, index: Int, sampleNum: Long): AuditableCard {
+        fun fromCvr(cvr: Cvr, index: Int, prn: Long): AuditableCard {
             val sortedVotes = cvr.votes.toSortedMap()
             val contests = sortedVotes.keys.toList()
-            return AuditableCard(cvr.id, index, sampleNum, cvr.phantom, contests.toIntArray(), cvr.votes, cvr.poolId)
+            return AuditableCard(cvr.id, index, prn=prn, cvr.phantom, contests.toIntArray(), cvr.votes, cvr.poolId)
         }
     }
 }

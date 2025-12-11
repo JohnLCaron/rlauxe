@@ -422,7 +422,7 @@ fun estimateOneAuditAssertionRound(
 
     // The estimation and the audit are using a different fuzz.
     vunderFuzz.reset()
-    val oaFuzzedPairs: List<Pair<Cvr, AuditableCard>> = vunderFuzz.makePairsFromCards(contestCards)
+    val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.makePairsFromCards(contestCards)
     val pools = vunderFuzz.vunderBar.pools
 
     /////////////////////////////////////////////////////////

@@ -13,7 +13,6 @@ import org.cryptobiotic.rlauxe.util.df
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.ln
-import kotlin.math.min
 
 // generalize AdaptiveBetting for any clca assorter, including OneAudit
 // Kelly optimization of lambda parameter with estimated error rates
@@ -27,7 +26,7 @@ class GeneralAdaptiveBetting(
     // val accumErrorCounts: ClcaErrorCounts, // propable illegal to do (cant use prior knowlege of the sample)
     val oaErrorRates: OneAuditErrorRates?,
     val d: Int = 100,  // trunc weight
-    val maxRisk: Double, // this bounds how close lam gets to 2.0; TODO study effects of
+    val maxRisk: Double, // this bounds how close lam gets to 2.0; TODO study effects of this
     val withoutReplacement: Boolean = true,
     val debug: Boolean = false,
 ) : BettingFn {
@@ -36,6 +35,7 @@ class GeneralAdaptiveBetting(
     private var prevErrors: ClcaErrorCounts? = null
 
     override fun bet(prevSamples: SampleTracker): Double {
+        // prevSamples not updated for the sample that this bet is for
         val tracker = prevSamples as ClcaErrorTracker
         val trackerErrors = tracker.measuredErrorCounts()
         prevErrors = trackerErrors
@@ -57,10 +57,24 @@ class GeneralAdaptiveBetting(
         }
 
         val mui = populationMeanIfH0(Npop, withoutReplacement, tracker)
-        val kelly = OneAuditOptimalLambda(tracker.noerror, estRates, oaErrorRates?.rates, mui, debug = debug)
+
+        // limit your bets so at most you lose maxRisk for any one bet
+
+        // ttj is how much you win or lose
+        // ttj = 1 + lamj * (xj - mj)
+        // ttj = 1 - lamj * mj when x == 0
+        // ttj ~= 0            when x == 0, m ~ 1/2, lam ~= 2
+
+        // let mint = (1 - maxRisk); maxRisk = (1 - mint)
+        // make sure tj > mint
+        // ttj = 1 - lamj * mj > mint
+        // 1 - mint > lamj * mj
+        // lamj < (1-mint) / mj = maxRisk / mj
 
         // limit the bet to the maximum risk we are willing to take
-        val bet = min(kelly.solve(), 2*maxRisk)
+        val maxBet = maxRisk / mui
+        val kelly = GeneralOptimalLambda(tracker.noerror, estRates, oaErrorRates?.rates, mui, maxBet, debug = debug)
+        val bet = kelly.solve()
 
         if (showBets && lastBet != 0.0 && bet < lastBet) {
             println("lastBet=$lastBet bet=$bet")
@@ -93,10 +107,19 @@ class GeneralAdaptiveBetting(
     }
 }
 
-class OneAuditOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, Double>, val oaErrorRates: Map<Double, Double>?, val mui: Double, val debug: Boolean=false) {
+class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, Double>, val oaErrorRates: Map<Double, Double>?,
+                           val mui: Double, val maxBet: Double, val debug: Boolean=false) {
     val p0: Double
 
     init {
+        if (mui < 0.0) // TODO mj can go up to the sampleUpperBound, not 1.0
+            print("wtf")
+        require (mui > 0.0)
+
+        if (maxBet < 0.0)
+            print("wtf")
+        require (maxBet > 0.0)
+
         val oasum = if (oaErrorRates == null) 0.0 else oaErrorRates.map{ it.value }.sum()
         p0 = 1.0 - clcaErrorRates.map{ it.value }.sum() - oasum
 
@@ -123,7 +146,7 @@ class OneAuditOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double,
 
         // Optimize the function within the given range [start, end]
         val start = 0.0
-        val end = 2.0
+        val end = maxBet
         val result: UnivariatePointValuePair = optimizer.optimize(
             UnivariateObjectiveFunction(function),
             SearchInterval(start, end),

@@ -33,7 +33,7 @@ private val logger = KotlinLogging.logger("ClcaAssorter")
 open class ClcaAssorter(
     val info: ContestInfo,
     val assorter: AssorterIF,   // A
-    val hasCompleteCvrs: Boolean, // cvrs include undervotes
+    val hasUndervotes: Boolean, // cvrs include undervotes
     val dilutedMargin: Double, // dilutedMargin of the primitive assorter; note its only used in dilutedMargin / assorter.upperBound()
     val check: Boolean = true,
 ) {
@@ -109,7 +109,7 @@ open class ClcaAssorter(
 
     // open fun bassort(mvr: CardIF, cvr:CardIF, hasCompleteCvrs: Boolean = this.hasCompleteCvrs): Double {
     open fun bassort(mvr: CardIF, cvr:CardIF): Double {
-        val overstatement = overstatementError(mvr, cvr, this.hasCompleteCvrs) // ωi eq (1)
+        val overstatement = overstatementError(mvr, cvr, this.hasUndervotes) // ωi eq (1)
         val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
         return tau * noerror   // Bi eq (7)
     }
@@ -168,7 +168,8 @@ open class ClcaAssorter(
     // (0-.5),      cvr has vote for loser, mvr has vote for other  : p1u = 1 vote understatement
     // (0-u)        cvr has vote for loser, mvr has vote for winner : p2u = 2 vote understatement
 
-    fun overstatementError(mvr: CardIF, cvr: CardIF, hasCompleteCvrs: Boolean): Double {
+    // could just use this.undervotes
+    fun overstatementError(mvr: CardIF, cvr: CardIF, hasUndervotes: Boolean): Double {
 
 
         //        # sanity check
@@ -176,9 +177,11 @@ open class ClcaAssorter(
         //            raise ValueError(
         //                f"use_style==True but {cvr=} does not contain contest {self.contest.id}"
         //            )
-        // TODO why would hasCompleteCvrs matter here ??
-        if (hasCompleteCvrs and !cvr.hasContest(info.id)) {
-            logger.error { "hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})" }
+        // if hasU = hasStyle, we use the cvr as the pcontests, so how did this happen?
+        // if !hasU && !cvr.hasContest, passorter returns 0.5.
+        if (hasUndervotes and !cvr.hasContest(info.id)) {
+            logger.error { "hasUndervotes==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})" }
+            // TODO core dump not a good option.
             throw RuntimeException("hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
         }
 
@@ -198,13 +201,13 @@ open class ClcaAssorter(
         // OTOH, pooled data could also have Nc == Npop
         val mvr_assort =
             if (mvr.isPhantom()) 0.0
-            else if (!mvr.hasContest(info.id)) { if (hasCompleteCvrs) 0.0 else 0.5 }
+            else if (!mvr.hasContest(info.id)) { if (hasUndervotes) 0.0 else 0.5 }
             else this.assorter.assort(mvr, usePhantoms = false)
 
         //         cvr_assort = (
         //                int(cvr.phantom) / 2 + (1 - int(cvr.phantom)) * self.assort(cvr)
         //        )
-        // so if they both agree its a phantom, its a p1o, if mvr cant find it and cvr doesnt think its a phantom, its a p2o
+        // so if they both agree its a phantom, its a p1o. if mvr cant find it and cvr doesnt think its a phantom, its a p2o
         val cvr_assort = if (cvr.isPhantom()) .5 else this.assorter.assort(cvr, usePhantoms = false)
 
         return cvr_assort - mvr_assort
@@ -216,7 +219,7 @@ open class ClcaAssorter(
 
         other as ClcaAssorter
 
-        if (hasCompleteCvrs != other.hasCompleteCvrs) return false
+        if (hasUndervotes != other.hasUndervotes) return false
         if (info != other.info) return false
         if (assorter != other.assorter) return false
 
@@ -225,7 +228,7 @@ open class ClcaAssorter(
 
     override fun hashCode(): Int {
         var result = 0
-        result = 31 * result + hasCompleteCvrs.hashCode()
+        result = 31 * result + hasUndervotes.hashCode()
         result = 31 * result + info.hashCode()
         result = 31 * result + assorter.hashCode()
         return result

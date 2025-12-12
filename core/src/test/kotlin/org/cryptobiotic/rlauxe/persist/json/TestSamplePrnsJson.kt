@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.persist.json
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -10,7 +11,7 @@ import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
 
 class TestSamplePrnsJson {
-    val filename = "/home/stormy/rla/tests/scratch/TestSampleIndices.json"
+    val filename = "$testdataDir/tests/scratch/TestSampleIndices.json"
 
     @Test
     fun testRoundtrip() {

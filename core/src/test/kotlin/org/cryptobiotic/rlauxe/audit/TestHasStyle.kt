@@ -14,6 +14,7 @@ import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.estimate.MultiContestCombineData
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sampleWithContestCutoff
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import kotlin.random.Random
@@ -68,7 +69,7 @@ class TestHasStyle {
         val cardStyles = if (hasStyle) null
             else listOf(CardStyle("all", contests.map{ it.id}, 1))
 
-        val topdir = "/home/stormy/rla/persist/testHasStyleClcaSingleCard"
+        val topdir = "$testdataDir/persist/testHasStyleClcaSingleCard"
         val auditRound = createAndRunTestAuditCards(topdir, false, contests, emptyList(), hasStyle, testCards, cardStyles)
 
         println("==========================")
@@ -163,7 +164,7 @@ class TestHasStyle {
         val cardStyles = if (hasStyle) null
             else listOf(CardStyle("all", contests.map{ it.id}, 1))
 
-        val topdir = "/home/stormy/rla/persist/testHasStyleClcaMultiCard"
+        val topdir = "$testdataDir/persist/testHasStyleClcaMultiCard"
         val auditRound = createAndRunTestAuditCards(topdir, false, contests, listOf(3), hasStyle, allCards, cardStyles)
 
         println("==========================")
@@ -229,7 +230,7 @@ class TestHasStyle {
         // polling audits always must put in the possible contests
         val cardStyles = listOf(CardStyle("all", contests.map{ it.id}, 1))
 
-        val topdir = "/home/stormy/rla/persist/testHasStylePollingSingleCard"
+        val topdir = "$testdataDir/persist/testHasStylePollingSingleCard"
         val auditRound = createAndRunTestAuditCvrs(topdir, true, contests, emptyList(), hasStyle, testCvrs, cardStyles)
 
         println("==========================")
@@ -314,7 +315,7 @@ class TestHasStyle {
         val cardStyles = listOf(CardStyle("all", contests.map{ it.id}, 1))
 
         // make the audit
-        val topdir = "/home/stormy/rla/persist/testHasStylePollingMultiCard"
+        val topdir = "$testdataDir/persist/testHasStylePollingMultiCard"
         val auditRound = createAndRunTestAuditCards(topdir, true, contests, listOf(3), hasStyle, allCvrs, cardStyles)
 
         // run the audit rounds

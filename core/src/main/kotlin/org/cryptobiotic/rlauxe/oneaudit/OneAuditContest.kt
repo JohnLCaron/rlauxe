@@ -159,7 +159,7 @@ class ClcaAssorterOneAudit(
     hasCompleteCvrs: Boolean = true,
     dilutedMargin: Double,
     val poolAverages: AssortAvgsInPools,
-) : ClcaAssorter(info, assorter, hasCompleteCvrs = hasCompleteCvrs, dilutedMargin=dilutedMargin) {
+) : ClcaAssorter(info, assorter, hasUndervotes = hasCompleteCvrs, dilutedMargin=dilutedMargin) {
 
     // B(bi, ci)
     override fun bassort(mvr: CardIF, cvr: CardIF): Double {

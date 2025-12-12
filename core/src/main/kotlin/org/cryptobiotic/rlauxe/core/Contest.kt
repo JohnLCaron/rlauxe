@@ -381,7 +381,7 @@ open class ContestUnderAudit(
     }
 
     open fun makeClcaAssorter(assertion: Assertion): ClcaAssorter {
-        return ClcaAssorter(contest.info(), assertion.assorter, hasCompleteCvrs=hasCompleteCvrs, dilutedMargin=makeDilutedMargin(assertion.assorter))
+        return ClcaAssorter(contest.info(), assertion.assorter, hasUndervotes=hasCompleteCvrs, dilutedMargin=makeDilutedMargin(assertion.assorter))
     }
 
     fun assertions(): List<Assertion> {

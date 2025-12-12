@@ -202,7 +202,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
 //   = g/-2a + 1/2
 //   = g/-2a + -a/-2a  =  (g(b) - a)/-2a
 
-/* Olivia has:
+/* Olivier has:
     # Assertion:
     #     p_A > 0.05
     #
@@ -286,7 +286,7 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
         return mean2margin(hmean)
     }
 
-    /* Olivia has:
+    /* Olivier has:
     # Assertion:
     #     p_A > 0.05
     #

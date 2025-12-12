@@ -1,16 +1,16 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 12/01/2025_
+_last changed: 12/12/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
-The Rlauxe library is a independent implementation of the SHANGRLA framework, based on the
+The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
 [published papers](#reference-papers) of Stark et al.
 
 The [SHANGRLA python library](https://github.com/pbstark/SHANGRLA) is the work of Philip Stark and collaborators, released under the AGPL-3.0 license.
-Also see [OneAudit example python code](https://github.com/spertus/UI-TS)
 
 Also see:
+* [Developer Notes](docs/Development.md)
 * [Rlauxe Implementation Overview](docs/Overview.md)
 * [Implementation Specificaton](docs/RlauxeSpec.md)
 * [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer)
@@ -599,6 +599,5 @@ Also See:
 * [Verification](docs/Verification.md)
 * [Implementation Specificaton](docs/RlauxeSpec.md)
 * [Case Studies](docs/CaseStudies.md)
-* [Developer Notes](docs/Development.md)
 * [Corla Notes](docs/Corla.md)
 

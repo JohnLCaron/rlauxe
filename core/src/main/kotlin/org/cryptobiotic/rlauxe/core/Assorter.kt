@@ -80,6 +80,7 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     // usePhantoms = true for polling, but when this is the "primitive assorter" in clca, usePhantoms = false so that
     //   clcaAssorter can handle the phantoms.
     override fun assort(cvr: CardIF, usePhantoms: Boolean): Double {
+        // if (!cvr.hasContest(info.id)) return if (hasStyle) 0.0 else 0.5 TODO
         if (!cvr.hasContest(info.id)) return 0.5
         if (usePhantoms && cvr.isPhantom()) return 0.0 // worst case
         val w = cvr.hasMarkFor(info.id, winner)

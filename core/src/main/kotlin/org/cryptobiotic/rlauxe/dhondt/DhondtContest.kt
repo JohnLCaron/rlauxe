@@ -187,7 +187,6 @@ class DHondtContest(
     val assorters = mutableListOf<AssorterIF>()
 
     init {
-
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
         val useMin = info.minFraction ?: 0.0
         val belowMinPctM= mutableListOf<Int>()
@@ -363,10 +362,10 @@ private data class AssorterBuilder(val contest: ProtoContest, val winner: Dhondt
 }
 
 data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val lastSeatWon: Int, val firstSeatLost: Int): AssorterIF  {
-    val upper = 1.0 / lastSeatWon  // upper bound of g
-    val lower = -1.0 / firstSeatLost  // lower bound of g
-    val c = -1.0 / (2 * lower)  // first/2
-    var dilutedMean: Double = 0.0
+    val upperg = 1.0 / lastSeatWon  // upper bound of g
+    val lowerg = -1.0 / firstSeatLost  // lower bound of g
+    val c = -1.0 / (2 * lowerg)  // first/2
+    private var dilutedMean: Double = 0.0
 
     fun setDilutedMean(mean: Double): DHondtAssorter {
         this.dilutedMean = mean
@@ -374,8 +373,8 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     }
 
     fun g(partyVote: Int): Double {
-        return if (partyVote == winner) upper
-            else if (partyVote == loser) lower
+        return if (partyVote == winner) upperg
+            else if (partyVote == loser) lowerg
             else 0.0
     }
 
@@ -390,7 +389,14 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         return c * g + 0.5
     }
 
-    // [ 0, .5, ]
+    // (first/last+1)/2
+    override fun upperBound() = h2(upperg)
+    override fun winner() = winner
+    override fun loser() = loser
+    override fun dilutedMean() = dilutedMean
+    override fun dilutedMargin() = mean2margin(dilutedMean)
+
+    // [ 0, .5, u]
     override fun assort(cvr: CardIF, usePhantoms: Boolean): Double {
         if (!cvr.hasContest(info.id)) return 0.5
         if (usePhantoms && cvr.isPhantom()) return 0.0 // worst case
@@ -398,22 +404,11 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         return if (cands != null && cands.size == 1) h(cands.first()) else 0.5
     }
 
-    override fun upperBound() = h2(upper)
-
     override fun desc() = buildString {
         append("${shortName()}: dilutedMean=${pfn(dilutedMean)} upperBound=${df(upperBound())}")
     }
-
     override fun shortName() = "DHondt w/l='${info.candidateIdToName[winner()]}'/'${info.candidateIdToName[loser()]}'"
-
     override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization
-
-    override fun winner() = winner
-
-    override fun loser() = loser
-
-    override fun dilutedMean() = dilutedMean
-    override fun dilutedMargin() = mean2margin(dilutedMean)
 
     override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
         if (useVotes == null || N <= 0) {
@@ -442,8 +437,8 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         if (lastSeatWon != other.lastSeatWon) return false
         if (firstSeatLost != other.firstSeatLost) return false
         if (dilutedMean != other.dilutedMean) return false
-        if (lower != other.lower) return false
-        if (upper != other.upper) return false
+        if (lowerg != other.lowerg) return false
+        if (upperg != other.upperg) return false
         if (c != other.c) return false
         if (info != other.info) return false
 
@@ -456,8 +451,8 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
         result = 31 * result + lastSeatWon
         result = 31 * result + firstSeatLost
         result = 31 * result + dilutedMean.hashCode()
-        result = 31 * result + lower.hashCode()
-        result = 31 * result + upper.hashCode()
+        result = 31 * result + lowerg.hashCode()
+        result = 31 * result + upperg.hashCode()
         result = 31 * result + c.hashCode()
         result = 31 * result + info.hashCode()
         return result

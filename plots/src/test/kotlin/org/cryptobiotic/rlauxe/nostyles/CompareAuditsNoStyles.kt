@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.nostyles
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
@@ -15,7 +16,7 @@ class CompareAuditsNoStyles {
     val Nc = 10000
     val Npop = 20000
 
-    val dirName = "/home/stormy/rla/nostyle/compareWithStyle"
+    val dirName = "$testdataDir/nostyle/compareWithStyle"
     val name = "compareWithStyle"
 
     // Used in Polling Vs CLCA with/out CSD Estimated Sample sizes

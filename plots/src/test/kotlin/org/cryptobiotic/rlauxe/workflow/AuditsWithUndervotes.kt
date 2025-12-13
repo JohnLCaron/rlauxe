@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
@@ -12,7 +13,7 @@ class AuditsWithUndervotes {
     val nruns = 100  // number of times to run workflow
     val nsimEst = 10  // number of times to run simulation
     val name = "AuditsWithUndervotes"
-    val dirName = "/home/stormy/rla/audits/$name"
+    val dirName = "$testdataDir/audits/$name"
     val mvrFuzzPct = .01
     val margin = .04
     val N = 50000

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericScatter
@@ -12,7 +13,7 @@ class BoulderAuditVarianceScatter {
     val nruns = 10 // no variance when there are no errors
 
     val name = "Boulder2024AuditVarianceScatter"
-    val dirName = "/home/stormy/rla/plots/boulder2024/$name"
+    val dirName = "$testdataDir/plots/boulder2024/$name"
 
     init {
         validateOutputDir(Path(dirName))
@@ -21,12 +22,12 @@ class BoulderAuditVarianceScatter {
     @Test
     fun genAuditVarianceComparePlots() {
         val allAssertions = mutableListOf<AssertionAndCat>()
-        val (totalClca, clcaAssertions) = readAssertionAndTotal("/home/stormy/rla/cases/boulder24clca", "CLCA")
+        val (totalClca, clcaAssertions) = readAssertionAndTotal("$testdataDir/cases/boulder24clca", "CLCA")
         allAssertions.addAll( clcaAssertions)
 
         val totalOA = mutableListOf<Int>()
         repeat(10) { run ->
-            val (total, clcaAssertions) = readAssertionAndTotal("/home/stormy/rla/cases/boulder24oa/audit$run", "OneAudit")
+            val (total, clcaAssertions) = readAssertionAndTotal("$testdataDir/cases/boulder24oa/audit$run", "OneAudit")
             allAssertions.addAll(clcaAssertions)
             totalOA.add(total)
         }

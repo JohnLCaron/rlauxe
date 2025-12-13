@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.cli
 
 import org.cryptobiotic.rlauxe.cli.RunVerifyAuditRecord.runVerifyAuditRecord
+import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 import kotlin.test.fail
 
@@ -11,7 +12,7 @@ class TestRunVerifyContests {
     @Test
     fun testRunVerifyClca() {
         // val auditdir = "../core/src/test/data/testRunCli/clca/audit"
-        val auditdir = "/home/stormy/rla/persist/testRunCli/clca/audit"
+        val auditdir = "$testdataDir/persist/testRunCli/clca/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
         println()
         print(results)
@@ -26,7 +27,7 @@ class TestRunVerifyContests {
     @Test
     fun testRunVerifyOA() {
         val auditdir = "../core/src/test/data/testRunCli/oneaudit/audit"
-        // val auditdir = "/home/stormy/rla/persist/testCliRoundOneAudit/audit"
+        // val auditdir = "$testdataDir/persist/testCliRoundOneAudit/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
@@ -41,7 +42,7 @@ class TestRunVerifyContests {
     @Test
     fun testRunVerifyPolling() {
         val auditdir = "../core/src/test/data/testRunCli/polling/audit"
-        // val auditdir = "/home/stormy/rla/persist/testCliRoundPolling/audit"
+        // val auditdir = "$testdataDir/persist/testCliRoundPolling/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
@@ -56,7 +57,7 @@ class TestRunVerifyContests {
     @Test
     fun testRunVerifyRaire() {
         val auditdir = "../core/src/test/data/testRunCli/raire/audit"
-        // val auditdir = "/home/stormy/rla/persist/testCliRoundRaire/audit"
+        // val auditdir = "$testdataDir/persist/testCliRoundRaire/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)

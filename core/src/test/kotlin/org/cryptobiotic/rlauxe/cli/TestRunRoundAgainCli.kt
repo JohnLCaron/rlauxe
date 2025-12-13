@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.cli
 
+import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.test.Test
 
@@ -8,7 +9,7 @@ class TestRunRoundAgainCli {
 
     @Test
     fun testRunRoundAgainCli() {
-        val auditDir = "/home/stormy/rla/persist/testRunCli/oneaudit/audit"
+        val auditDir = "$testdataDir/persist/testRunCli/oneaudit/audit"
 
         RunRoundAgainCli.main(
             arrayOf(

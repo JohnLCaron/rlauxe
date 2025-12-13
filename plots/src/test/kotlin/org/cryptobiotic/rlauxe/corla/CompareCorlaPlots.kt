@@ -1,9 +1,8 @@
 package org.cryptobiotic.rlauxe.corla
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.ClcaConfig
-import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -17,7 +16,7 @@ class CompareCorlaPlots {
     val nruns = 100
     val nsimEst = 100
     val name = "corlaWithPhantoms2"
-    val dirName = "/home/stormy/rla/corla/$name"
+    val dirName = "$testdataDir/corla/$name"
     val N = 100000
 
     @Test

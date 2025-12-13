@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.belgium
 
 
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.dhondt.ProtoContest
@@ -13,9 +14,9 @@ import kotlin.test.Test
 import kotlin.test.fail
 
 class TestCreateBelgiumClcaFromSpreadsheet {
-    val Afile = "/home/stormy/rla/cases/belgium/2024/CK_K_2024.xlsx"
-    val Bfile = "/home/stormy/rla/cases/belgium/2024/CK_CEListes_2024.xlsx"
-    val topdir = "/home/stormy/rla/cases/belgium/2024"
+    val Afile = "$testdataDir/cases/belgium/2024/CK_K_2024.xlsx"
+    val Bfile = "$testdataDir/cases/belgium/2024/CK_CEListes_2024.xlsx"
+    val topdir = "$testdataDir/cases/belgium/2024"
 
     @Test
     fun createBelgium2024() {

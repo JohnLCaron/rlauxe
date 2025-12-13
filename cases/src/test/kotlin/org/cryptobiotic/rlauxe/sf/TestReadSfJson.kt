@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.sf
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
@@ -29,7 +30,7 @@ class TestReadSfJson {
 
     @Test
     fun makeContestInfo() {
-        val topDir = "/home/stormy/rla/cases/sf2024"
+        val topDir = "$testdataDir/cases/sf2024"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
 
         val resultContestM: Result<ContestManifestJson, ErrorMessages> =  readContestManifestJsonFromZip(zipFilename, "ContestManifest.json")
@@ -54,7 +55,7 @@ class TestReadSfJson {
             else throw RuntimeException("Cannot read BallotTypeContestManifest from ${filename} err = $result")
         println(manifest1)
 
-        val topDir = "/home/stormy/rla/cases/sf2024"
+        val topDir = "$testdataDir/cases/sf2024"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val ifilename = "BallotTypeContestManifest.json"
         val result2: Result<BallotTypeContestManifest, ErrorMessages> = readBallotTypeContestManifestJsonFromZip(zipFilename, ifilename)

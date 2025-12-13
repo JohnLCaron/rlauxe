@@ -5,7 +5,9 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.*
+import java.nio.file.Files
 import kotlin.collections.joinToString
+import kotlin.io.path.Path
 
 const val CvrExportCsvHeader = "id, group, contests, candidates0, candidates1, ...\n"
 
@@ -37,8 +39,10 @@ fun readCvrExportCsv(line: String): CvrExport {
 }
 
 fun cvrExportCsvIterator(filename: String): CloseableIterator<CvrExport> {
-    return if (filename.endsWith("zip")) {
-        val reader = ZipReader(filename)
+    val useFilename = if (Files.exists(Path("$filename.zip"))) "$filename.zip" else filename
+
+    return if (useFilename.endsWith("zip")) {
+        val reader = ZipReader(useFilename)
         val input = reader.inputStream()
         IteratorCvrExportStream(input)
     } else {

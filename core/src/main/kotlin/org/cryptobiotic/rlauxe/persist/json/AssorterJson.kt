@@ -35,7 +35,7 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
         ClcaAssorterJson(
             "OAClcaAssorter",
             this.assorter.publishJson(),
-            this.hasCompleteCvrs,
+            this.hasUndervotes,
             this.dilutedMargin,
             poolAverages.publishJson()
         )
@@ -44,7 +44,7 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
         ClcaAssorterJson(
             "ClcaAssorter",
             this.assorter.publishJson(),
-            this.hasCompleteCvrs,
+            this.hasUndervotes,
             this.dilutedMargin,
             null,
         )

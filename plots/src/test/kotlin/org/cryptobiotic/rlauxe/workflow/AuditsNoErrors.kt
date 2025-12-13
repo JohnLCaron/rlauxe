@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
@@ -12,7 +13,7 @@ import kotlin.test.Test
 
 class AuditsNoErrors {
     val name = "AuditsNoErrors4"
-    val dirName = "/home/stormy/rla/plots/oneaudit4/$name" // you need to make this directory first
+    val dirName = "$testdataDir/plots/oneaudit4/$name" // you need to make this directory first
 
     val nruns = 100  // number of times to run workflow
     val nsimEst = 10
@@ -92,7 +93,7 @@ class AuditsNoErrors {
     @Test
     fun clcaNoErrorsPlots() {
         val name = "clcaNoErrors"
-        val dirName = "/home/stormy/rla/plots/workflows/$name"
+        val dirName = "$testdataDir/plots/workflows/$name"
         validateOutputDir(Path(dirName))
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
@@ -128,7 +129,7 @@ class AuditsNoErrors {
     @Test
     fun pollingNoErrorsPlots() {
         val name = "pollingNoErrors"
-        val dir = "/home/stormy/rla/plots/workflows/$name"
+        val dir = "$testdataDir/plots/workflows/$name"
         validateOutputDir(Path(dir))
         val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .10)
         val stopwatch = Stopwatch()

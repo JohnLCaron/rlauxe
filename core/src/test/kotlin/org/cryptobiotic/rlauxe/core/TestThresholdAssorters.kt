@@ -14,7 +14,6 @@ import kotlin.collections.first
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-// See SHANGRLA 2.3
 class TestThresholdAssorters {
 
     @Test
@@ -258,7 +257,7 @@ data class AboveThresholdB(val info: ContestInfo, val winner: Int, val t: Double
     override fun dilutedMean() = reportedMean
     override fun dilutedMargin() = mean2margin(reportedMean)
 
-    /* Olivia has:
+    /* Olivier has:
     # Assertion:
     #     p_A > 0.05
     #

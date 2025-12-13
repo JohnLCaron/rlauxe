@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.cli
 
+import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
@@ -33,7 +34,7 @@ class TestEnterMvrsCli {
 
     @Test
     fun testEnterMvrsError2() {
-        val auditDir = "/home/stormy/rla/persist/testPersistentWorkflowClca"
+        val auditDir = "$testdataDir/persist/testPersistentWorkflowClca"
         assertFailsWith<IllegalArgumentException> {
             EnterMvrsCli.main(
                 arrayOf(

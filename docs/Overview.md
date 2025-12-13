@@ -338,9 +338,76 @@ Each audit type has specialized processing for creating the AuditableCards and t
 
 4. **Polling audit**: we create simulated CVRs that exactly match the reported vote count, ncards and undervotes to use as the test MVRs.
 
+## Audit Types and hasStyle (1)
 
 
-## Audit Types and hasStyle
+|               | hasVotes | hasUndervotes | hasStyle | singleStylePools |
+|---------------|----------|---------------|----------|------------------|
+| CLCA          | true     | ?             | if hasU  | -                |
+| Polling       | false    | -             | ?        | -                |
+| OneAudit CVR  | true     | ?             | if hasU  | -                |
+| OneAudit pool | false    | -             | ?        | ?                |
+
+hasVotes: every card (except phantoms) has a CVR
+
+hasUndervotes: the votes include undervotes. aka cvrsAreComplete. aka hasStyle.
+    user must supply this info? or is Npop == Nc sufficient? sufficient but not necessary?
+
+hasStyle: "we know exactly what contests are on each card". 
+    could be true even when we dont know the votes. 
+    Npop == Nc ?
+    if false, then we expect to see mvrs (and cvrs?) in the clca assorter without the contest.
+    if true, then we dont expect to see mvrs (and cvrs?) in the clca assorter without the contest.
+    single contest election; all cards have a card style; 
+
+CardStyle is the full and exact list of contests on a card. 
+  (The EA knows this, goddammit. We should insist on it for all types of audits, and put them on the CardManifest.)
+  (So, the CardStyle exists and is known by the EA, but the info may not be available at the audit.)
+  Privacy: Card styles that could identify voters are called RedactedCardStyles. 
+  The RedactedCardStyle must include all contests on the card, even if there are no votes for the contest.
+  Put all cards (and only those cards) with a RedactedCardStyle into a OneAudit pool. 
+
+Batch describes a distinct population of cards.
+    
+    batchName: String
+    batchSize: Int (?)
+    possibleContests: IntArray() are the list of possible contests.
+    hasStyle: Boolean = if all cards have exactly the contests in PossibleContests
+
+OneAuditPool is a Batch with vote totals for the batch.
+
+    hasStyle is true when all cards have a single CardStyle.
+    regVotes: Map<Int, IntArray> total votes for non-IRV
+    irvVotes: VoteConsolidator votes for IRV 
+
+PoolContests are the list of possible contests on any card in a OneAudit pool, used when cards in a pool have more than one CardStyle.
+
+SamplePopulationContests are the list of possible contests in a sample population. Same as PoolContests where the sample population = OneAudit.
+
+### hasStyle for Polling 
+
+Suppose each precinct has one CardStyle, and you keep the ballots for each precinct in a seperate pile.
+You hand count each ballot, but keep all cards for one ballot in the same ballot envelope.
+Then it doesnt matter how many cards are in the ballot. Since we know the exact contests on all cards, we 
+have hasStyle = true. The contest audit can sample only from the batches that contain the contest, and Npop = Nc.
+
+Suppose you audit a ballot that turns out not to have that contest? Seems like its a 0, not a 0.5, when hasStyle = true.
+   `if (!cvr.hasContest(info.id)) return if (hasStyle) 0.0 else 0.5`
+Thats in the code for ClcaAssorter, but not for the primitive assorters.
+
+Same scenario, but the cards are seperated and all are kept in the same pile. 
+This is the example of MoreStyle section 5.
+So each ballot puts n cards in the pile, and the card's pcontests = BallotStyle, and hasStyle = false.
+We expect to see (n-1)/n cards without the contest, and 1/n with the contest, so !cvs.contest = 0.5.
+
+Without changing the CardManifest, could you claim hasStyles = false, in order to get a 0.5 score? 
+Could you use that for an attack?
+
+What if some precincts have ballots with one card, and some have > 1 card
+Could each batch have a different value of hasStyle ??
+
+
+## Audit Types and hasStyle (2)
 
 1. Physical card has location id that is recorded on the CVR. (CLCA)
    1. CVR has complete info (or references a card style). (hasStyle)

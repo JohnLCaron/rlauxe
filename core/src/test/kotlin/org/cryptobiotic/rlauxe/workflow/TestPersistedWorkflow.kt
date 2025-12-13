@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.persist.*
+import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 import kotlin.test.fail
 
@@ -18,7 +19,7 @@ class TestPersistedWorkflow {
     @Test
     fun testPersistedSingleClca() {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
-        val topdir = "/home/stormy/rla/persist/persistWorkflow/singleClca"
+        val topdir = "$testdataDir/persist/persistWorkflow/singleClca"
         val auditdir = "$topdir/audit"
 
         val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01)
@@ -44,7 +45,7 @@ class TestPersistedWorkflow {
     @Test
     fun testPersistedAuditClca() {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
-        val topdir = "/home/stormy/rla/persist/persistWorkflow/clca"
+        val topdir = "$testdataDir/persist/persistWorkflow/clca"
         val auditdir = "$topdir/audit"
 
         val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01)
@@ -70,7 +71,7 @@ class TestPersistedWorkflow {
     @Test
     fun testPersistedAuditPolling() {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
-        val topdir = "/home/stormy/rla/persist/persistWorkflow/polling"
+        val topdir = "$testdataDir/persist/persistWorkflow/polling"
         val auditdir = "$topdir/audit"
 
         val config = AuditConfig(AuditType.POLLING, hasStyle=true, seed = 12356667890L, nsimEst=10, simFuzzPct = .01)
@@ -97,7 +98,7 @@ class TestPersistedWorkflow {
     @Test
     fun testPersistedOneAudit() {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
-        val topdir = "/home/stormy/rla/persist/persistWorkflow/oneaudit"
+        val topdir = "$testdataDir/persist/persistWorkflow/oneaudit"
         val auditdir = "$topdir/audit"
 
         val config = AuditConfig(

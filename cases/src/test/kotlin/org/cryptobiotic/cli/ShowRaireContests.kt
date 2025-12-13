@@ -2,6 +2,7 @@ package org.cryptobiotic.cli
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
@@ -21,7 +22,7 @@ class ShowRaireContests {
     fun showRaireContests() {
         val stopwatch = Stopwatch()
 
-        val topDir = "/home/stormy/rla/cases/sf2024"
+        val topDir = "$testdataDir/cases/sf2024"
         val publisher = Publisher("$topDir/clca/audit")
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
         val contestsUA = if (contestsResults is Ok) contestsResults.unwrap()

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.attack
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
@@ -22,7 +23,7 @@ import kotlin.test.assertTrue
 
 class HideInUndervotesAttack {
     val name = "hideInUndervotesAttack"
-    var dirName = "/home/stormy/rla/attack/$name"
+    var dirName = "$testdataDir/attack/$name"
 
     val N = 10000
     val nruns = 10000

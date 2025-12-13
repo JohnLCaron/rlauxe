@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.betting
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.core.AdaptiveBetting
 import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
@@ -137,7 +138,7 @@ class GenBettingPayoff {
             }
         }
 
-        val plotter = PlotBettingPayoffData("/home/stormy/rla/betting/", "bettingPayoff.csv")
+        val plotter = PlotBettingPayoffData("$testdataDir/betting/", "bettingPayoff.csv")
         errorRates.forEach { error ->
             plotter.plotOneErrorRate(results, error)
         }

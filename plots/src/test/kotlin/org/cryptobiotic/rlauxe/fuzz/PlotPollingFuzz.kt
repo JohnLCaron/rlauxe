@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.fuzz
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
@@ -11,7 +12,7 @@ import kotlin.test.Test
 
 class PlotPollingFuzz {
     val name = "pollByMvrFuzzPct"
-    val dirName = "/home/stormy/rla/fuzz"
+    val dirName = "$testdataDir/fuzz"
     val N = 10000
     val nruns = 100
 

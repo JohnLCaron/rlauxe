@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -16,11 +17,11 @@ class SFoaAuditVariance {
     val nsimEst = 10
     val mvrsFuzzPct = .00
 
-    val topDir = "/home/stormy/rla/cases/sf2024oa"
+    val topDir = "$testdataDir/cases/sf2024oa"
     val auditDir = "$topDir/audit"
 
     val name = "sf2024oaAuditVariance"
-    val dirName = "/home/stormy/rla/plots/sf2024/$name"
+    val dirName = "$testdataDir/plots/sf2024/$name"
 
     init {
         validateOutputDir(Path(dirName))

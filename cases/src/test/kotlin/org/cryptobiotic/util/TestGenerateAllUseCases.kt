@@ -1,6 +1,7 @@
 package org.cryptobiotic.util
 
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
@@ -19,12 +20,12 @@ import org.cryptobiotic.rlauxe.util.trunc
 import org.junit.jupiter.api.Test
 
 class TestGenerateAllUseCases {
-    val sfDir = "/home/stormy/rla/cases/sf2024"
+    val sfDir = "$testdataDir/cases/sf2024"
     val sfZipFile = "$sfDir/CVR_Export_20241202143051.zip"
 
     @Test
     fun createBoulder24oa() {
-        val topdir = "/home/stormy/rla/cases/boulder24/oa"
+        val topdir = "$testdataDir/cases/boulder24/oa"
 
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
@@ -40,11 +41,11 @@ class TestGenerateAllUseCases {
 
     @Test
     fun createBoulder24clca() { // simulate CVRs
-        val topdir = "/home/stormy/rla/cases/boulder24/clca"
+        val topdir = "$testdataDir/cases/boulder24/clca"
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            topdir = "/home/stormy/rla/cases/boulder24/clca",
+            topdir = "$testdataDir/cases/boulder24/clca",
             auditType = AuditType.CLCA,
         )
 
@@ -55,7 +56,7 @@ class TestGenerateAllUseCases {
 
     @Test
     fun createColoradoOneAudit() {
-        val topdir = "/home/stormy/rla/cases/corla/oneaudit"
+        val topdir = "$testdataDir/cases/corla/oneaudit"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
@@ -70,7 +71,7 @@ class TestGenerateAllUseCases {
 
     @Test
     fun createColoradoClca() {
-        val topdir = "/home/stormy/rla/cases/corla/clca"
+        val topdir = "$testdataDir/cases/corla/clca"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
@@ -85,7 +86,7 @@ class TestGenerateAllUseCases {
 
     // @Test
     fun testCreateColoradoPolling() {
-        val topdir = "/home/stormy/rla/cases/corla/polling"
+        val topdir = "$testdataDir/cases/corla/polling"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
@@ -99,7 +100,7 @@ class TestGenerateAllUseCases {
 
     @Test
     fun createSFElectionOA() {
-        val topdir = "/home/stormy/rla/cases/sf2024/oa"
+        val topdir = "$testdataDir/cases/sf2024/oa"
 
         createSfElection(
             topdir,
@@ -118,7 +119,7 @@ class TestGenerateAllUseCases {
 
     @Test
     fun createSFElectionClca() {
-        val topdir = "/home/stormy/rla/cases/sf2024/clca"
+        val topdir = "$testdataDir/cases/sf2024/clca"
 
         createSfElection(
             topdir,
@@ -134,42 +135,6 @@ class TestGenerateAllUseCases {
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
     }
-
-    /* @Test
-    fun createSFElectionOneAuditPoolStyles() {
-        val topdir = "/home/stormy/rla/cases/sf2024/oans"
-
-        createSfElectionPoolStyle(
-            topdir,
-            sfZipFile,
-            "ContestManifest.json",
-            "CandidateManifest.json",
-            cvrExportCsv = "$sfDir/$cvrExportCsvFile",
-            isPolling = false
-        )
-
-        val publisher = Publisher("$topdir/audit")
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
-    }
-
-    // @Test
-    fun createSFElectionPolling() {
-        val topdir = "/home/stormy/rla/cases/sf2024/polling"
-
-        createSfElectionPoolStyle(
-            topdir,
-            sfZipFile,
-            "ContestManifest.json",
-            "CandidateManifest.json",
-            cvrExportCsv = "$sfDir/$cvrExportCsvFile",
-            isPolling = true
-        )
-
-        val publisher = Publisher("$topdir/audit")
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
-    } */
 
     @Test
     fun createAllBelgiumElections() {

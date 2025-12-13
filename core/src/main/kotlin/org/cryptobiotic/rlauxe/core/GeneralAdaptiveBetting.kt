@@ -62,8 +62,9 @@ class GeneralAdaptiveBetting(
 
         // ttj is how much you win or lose
         // ttj = 1 + lamj * (xj - mj)
-        // ttj = 1 - lamj * mj when x == 0
-        // ttj ~= 0            when x == 0, m ~ 1/2, lam ~= 2
+        // ttj = 1 - lamj * mj when x == 0 (smallest value x can be)
+        // ttj = 0 when x == 0, lam = 1 / mj
+        // so to prevent stalls when xj = 0, 1 - lamj * mj > 0; 1 > lam / mj; lam < 1 / mj
 
         // let mint = (1 - maxRisk); maxRisk = (1 - mint)
         // make sure tj > mint

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.attack
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
@@ -10,7 +11,6 @@ import org.cryptobiotic.rlauxe.audit.OneAuditConfig
 import org.cryptobiotic.rlauxe.audit.OneAuditStrategyType
 import org.cryptobiotic.rlauxe.audit.writeMvrsForRound
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
-import org.cryptobiotic.rlauxe.audit.writeSortedMvrs
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.audit.writeUnsortedMvrs
@@ -38,7 +38,7 @@ import kotlin.test.Test
 // Vanessa's attack
 class CardManifestAttack {
     val name = "cardManifestAttack"
-    var topdir = "/home/stormy/rla/attack/$name"
+    var topdir = "$testdataDir/attack/$name"
     val hasStyle = false
 
     @Test

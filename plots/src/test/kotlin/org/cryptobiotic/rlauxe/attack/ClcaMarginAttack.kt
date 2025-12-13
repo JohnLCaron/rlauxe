@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.attack
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
@@ -12,7 +13,7 @@ import kotlin.test.Test
 
 class ClcaMarginAttack {
     val name = "clcaMarginAttack"
-    var dirName = "/home/stormy/rla/attack/$name"
+    var dirName = "$testdataDir/attack/$name"
 
     val N = 100000
     val nruns = 100

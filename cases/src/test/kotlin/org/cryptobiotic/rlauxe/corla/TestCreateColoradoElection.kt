@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.corla
 
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
@@ -23,7 +24,7 @@ class TestCreateColoradoElection {
 
     @Test
     fun testCreateColoradoOneAudit() {
-        val topdir = "/home/stormy/rla/cases/corla/oneaudit"
+        val topdir = "$testdataDir/cases/corla/oneaudit"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
@@ -37,7 +38,7 @@ class TestCreateColoradoElection {
 
     @Test
     fun testCreateColoradoClca() {
-        val topdir = "/home/stormy/rla/cases/corla/clca"
+        val topdir = "$testdataDir/cases/corla/clca"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
@@ -51,7 +52,7 @@ class TestCreateColoradoElection {
 
     // @Test
     fun testCreateColoradoPolling() {
-        val topdir = "/home/stormy/rla/cases/corla/polling"
+        val topdir = "$testdataDir/cases/corla/polling"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
@@ -65,7 +66,7 @@ class TestCreateColoradoElection {
 
     @Test
     fun testPrecinctTree() {
-        val cvrsDir = "/home/stormy/rla/cases/corla/old/cvrexport"
+        val cvrsDir = "$testdataDir/cases/corla/old/cvrexport"
         val tour = TreeReaderTour(cvrsDir, silent = false) { path -> precinctLine(path) }
         println("county, precinct")
         val total = tour.tourFiles()
@@ -85,7 +86,7 @@ class TestCreateColoradoElection {
     fun testCountySampleLists() {
         val countyPrecincts = mutableListOf<CountyAndPrecinct>()
 
-        val topDir = "/home/stormy/rla/cases/corla/old"
+        val topDir = "$testdataDir/cases/corla/old"
         val tour = TreeReaderTour("$topDir/cvrexport") { path -> countyPrecincts.add(precinctLine(path)) }
         tour.tourFiles()
 

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.sf
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.dominion.CvrExportCsvHeader
 import org.cryptobiotic.rlauxe.dominion.DominionCvrSummary
 import org.cryptobiotic.rlauxe.dominion.convertCvrExportJsonToCsv
@@ -17,7 +18,7 @@ class CreateSf2024CvrExport {
     // only need to do this once, all the SF variants can use.
     @Test
     fun createSf2024CvrExport() {
-        val topDir = "/home/stormy/rla/cases/sf2024"
+        val topDir = "$testdataDir/cases/sf2024"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val manifestFile = "ContestManifest.json"
         val summary = createCvrExportCsvFile(topDir, zipFilename, manifestFile) // write to "$topDir/cvrExport.csv"

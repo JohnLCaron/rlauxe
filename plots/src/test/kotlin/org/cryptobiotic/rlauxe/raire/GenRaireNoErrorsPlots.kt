@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.raire
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
@@ -19,7 +20,7 @@ class GenRaireNoErrorsPlots {
     val nsimEst = 100
     val N = 20000
     val name = "raireNoErrors"
-    val dirName = "/home/stormy/rla/$name"
+    val dirName = "$testdataDir/$name"
 
     @Test
     fun raireNoErrorsPlots() {

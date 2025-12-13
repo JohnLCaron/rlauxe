@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.nostyles
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.concur.*
@@ -11,7 +12,7 @@ import kotlin.test.Test
 
 class GenPollingNoStyles {
     val name = "pollingNoStyle"
-    val dirName = "/home/stormy/rla/nostyle/$name"
+    val dirName = "$testdataDir/nostyle/$name"
 
     val Nc = 10000
     val nruns = 100

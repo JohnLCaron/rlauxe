@@ -25,8 +25,8 @@ interface CardIF {
     fun poolId(): Int?
 
     fun hasMarkFor(contestId: Int, candidateId:Int): Int
-    fun hasOneVoteFor(contestId: Int, candidates: List<Int>): Boolean
-    fun rankedChoices(contestId: Int): IntArray?
+    fun hasOneVoteFor(contestId: Int, candidates: List<Int>): Boolean // TODO not used
+    fun rankedChoices(contestId: Int): IntArray? // TODO same as votes
     fun votes(contestId: Int): IntArray? // same?
 }
 

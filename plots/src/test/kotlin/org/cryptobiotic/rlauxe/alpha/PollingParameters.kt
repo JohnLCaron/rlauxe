@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.alpha
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.concur.RunRepeatedTasks
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
@@ -32,7 +33,7 @@ class PollingParameters {
             }
         }
 
-        val writer = SRTcsvWriter("/home/stormy/rla/sim/pollingAlpha.csv")
+        val writer = SRTcsvWriter("$testdataDir/sim/pollingAlpha.csv")
 
         val runner = RunRepeatedTasks()
         val results =  runner.run(tasks, ntrials)
@@ -73,7 +74,7 @@ class PollingParameters {
             }
         }
 
-        val writer = SRTcsvWriter("/home/stormy/rla/sim/pollingBravo.csv")
+        val writer = SRTcsvWriter("$testdataDir/sim/pollingBravo.csv")
 
         val runner = RunRepeatedTasks()
         val results =  runner.run(tasks, ntrials)

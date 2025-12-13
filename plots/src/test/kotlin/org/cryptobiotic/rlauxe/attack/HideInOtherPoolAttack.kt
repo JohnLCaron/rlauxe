@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.attack
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.audit.CardsWithStylesToCardManifest
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.core.Contest
@@ -13,7 +13,6 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.MultiContestCombineData
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTestContests
 import org.cryptobiotic.rlauxe.rlaplots.*
-import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -27,13 +26,12 @@ import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.random.Random
-import kotlin.sequences.plus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class HideInOtherPoolAttack {
     val name = "hideInOtherPoolAttack"
-    var dirName = "/home/stormy/rla/attack/$name"
+    var dirName = "$testdataDir/attack/$name"
 
     val N = 20000
     val Npool = 10000

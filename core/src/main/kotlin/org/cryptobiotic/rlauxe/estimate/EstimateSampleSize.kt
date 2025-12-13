@@ -425,29 +425,6 @@ fun estimateOneAuditAssertionRound(
     val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.makePairsFromCards(contestCards)
     val pools = vunderFuzz.vunderBar.pools
 
-    /////////////////////////////////////////////////////////
-    /* for debugging, lets write these to disk so we can compare to the audited fuzzed cards
-    val fuzzedMvrs = oaFuzzedPairs.map { it.first }
-    val tempFile = "/home/stormy/rla/persist/testRunCli/oneaudit/audit/estMvrs${roundIdx}.csv"
-    writeUnsortedMvrs(fuzzedMvrs, tempFile)
-
-    val info2 = ContestInfo("contest2", 2,  mapOf("Wes" to 1), SocialChoiceFunction.PLURALITY)
-    val infos = mapOf(contestUA.id to contestUA.contest.info(), 2 to info2)
-     val fuzzedMvrTab = tabulateCvrs(fuzzedMvrs.iterator(), infos)
-    println("fuzzedMvrTab= ${fuzzedMvrTab[contestUA.id]}")
-
-    val fuzzedPool = calcCardPoolsFromMvrs(
-        infos,
-        cardStyles = listOf(CardStyle("pool42", listOf(1,2), 42)),
-        fuzzedMvrs,
-    )
-    println("pool= ${pools.first().show()}")
-    println("fuzzedPool= ${fuzzedPool.first().show()}")
-    // require(pools == fuzzedPool)
-    println()
-    ////////////////////////////////////////////////////////////////////
-     */
-
     // duplicate to OneAuditAssertionAuditor
     val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
     prevRounds.setPhantomRate(contestUA.contest.phantomRate()) // TODO ??

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ClcaErrorTable
@@ -18,7 +19,7 @@ class PlotDistributions {
     val simFuzzPct = .02
 
     val name = "estErrorRatesEqual"
-    val dirName = "/home/stormy/rla/dist/distSamplesNeeded"
+    val dirName = "$testdataDir/dist/distSamplesNeeded"
 
     // Used in docs: Under/Over estimating CLCA sample sizes, show distributions
 

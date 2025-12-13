@@ -76,9 +76,11 @@ class CreateSfElection(
         println("contestNbs= ${contestNbs}")
 
         // make contests based on cvr tabulations
-        val contests = makeContests(allCvrTabs, unpooledPool, contestNcs)
         contestsUA = if (config.isClca) makeClcaContests(allCvrTabs, contestNcs, contestNbs, hasStyle).sortedBy { it.id }
-            else if (config.isOA) makeOneAuditContests(hasStyle, contests, contestNbs, cardPools).sortedBy { it.id }
+            else if (config.isOA) {
+                val contests = makeContests(allCvrTabs, unpooledPool, contestNcs) // TODO leave out IRV
+                makeOneAuditContests(hasStyle, contests, contestNbs, cardPools).sortedBy { it.id }
+            }
             else makePollingContests(allCvrTabs, contestNcs, contestNbs, hasStyle).sortedBy { it.id }
     }
 
@@ -97,6 +99,7 @@ class CreateSfElection(
             while (cvrIter.hasNext()) {
                 cardCount++
                 val cvrExport: CvrExport = cvrIter.next()
+                val wtf =  cvrExport.poolKey()
                 val pool = allCardPools.getOrPut(cvrExport.poolKey()) {
                     CardPoolFromCvrs(cvrExport.poolKey(), allCardPools.size + 1, contestInfos)
                 }
@@ -193,7 +196,7 @@ fun makeContests(allCvrTabs: Map<Int, ContestTabulation>, unpooledPool: CardPool
     allCvrTabs.map { (contestId, contestSumTab)  ->
         val info = contestSumTab.info
         val useNc = contestNcs[info.id] ?: contestSumTab.ncards
-        if (useNc > 0) {
+        if (useNc > 0 && !info.isIrv) {
             val unpooledTab = unpooledPool.contestTabs[info.id]!!
             val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
             val unpooledPct = 100.0 * unpooledTab.ncards / contestSumTab.ncards

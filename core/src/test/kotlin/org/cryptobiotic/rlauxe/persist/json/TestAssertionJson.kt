@@ -24,7 +24,7 @@ class TestAssertionJson {
     @Test
     fun testClcaAssertionRoundtrip() {
         val assertion = makeAssertion()
-        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasCompleteCvrs=false, dilutedMargin=.111)
+        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasUndervotes=false, dilutedMargin=.111)
         val target = ClcaAssertion(assertion.info, cassorter)
 
         val json = target.publishJson()

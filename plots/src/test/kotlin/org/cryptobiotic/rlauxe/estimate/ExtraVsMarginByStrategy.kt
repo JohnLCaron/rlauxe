@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -15,7 +16,7 @@ class ExtraVsMarginByStrategy {
     val nruns = 10
     val nsimEst = 100
     val name = "extraVsMarginByStrategy"
-    val dirName = "/home/stormy/rla/extra/$name"
+    val dirName = "$testdataDir/extra/$name"
     val fuzzMvrs = .01
     var phantomPct = .01
 

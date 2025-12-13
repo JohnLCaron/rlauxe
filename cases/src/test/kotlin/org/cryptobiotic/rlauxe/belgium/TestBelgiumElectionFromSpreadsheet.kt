@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.belgium
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.util.df
@@ -9,8 +10,8 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class TestBelgiumElectionFromSpreadsheet {
-    val Afile = "/home/stormy/rla/cases/belgium/2024/CK_K_2024.xlsx"
-    val Bfile = "/home/stormy/rla/cases/belgium/2024/CK_CEListes_2024.xlsx"
+    val Afile = "$testdataDir/cases/belgium/2024/CK_K_2024.xlsx"
+    val Bfile = "$testdataDir/cases/belgium/2024/CK_CEListes_2024.xlsx"
 
     @Test
     fun testBelgiumA() {

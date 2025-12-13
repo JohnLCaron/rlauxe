@@ -175,7 +175,7 @@ open class Contest(
         winnerNames = winners.map { mapIdToName[it]!! }
         if (winners.isEmpty()) {
             val pct = votes.toList().associate { it.first to it.second.toDouble() / nvotes }.toMap()
-            println("*** there are no winners for minFraction=$useMin vote% = $pct")
+            println("*** there are no winners for $info nvotes=$nvotes votes=$pct")
         }
 
         // find losers
@@ -304,8 +304,8 @@ open class ContestUnderAudit(
         } else if (contest.winners().size == 0) {
             preAuditStatus = TestH0Status.NoWinners
         }
-        if (hasStyle != hasCompleteCvrs)
-            logger.warn { "$hasStyle != ($Npop == ${contest.Nc()}" }
+         if (hasStyle != hasCompleteCvrs)
+            logger.warn { "ContestUnderAudit $id hasStyle $hasStyle != ($Npop == ${contest.Nc()}" }
     }
 
     // dhondt

@@ -1,9 +1,8 @@
 package org.cryptobiotic.rlauxe.cobra
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.ClcaConfig
-import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -11,7 +10,7 @@ import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
 class GenCobraPlots {
-    val dirName = "/home/stormy/rla/corba"
+    val dirName = "$testdataDir/corba"
     val name = "corba"
 
     val N = 10000

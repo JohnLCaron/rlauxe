@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.util.df
@@ -39,7 +40,7 @@ class TestPollingSimulationData {
             }
         }
 
-        val plotter = PlotPollingSimulationData("/home/stormy/rla/polling/", "pollingSimulation")
+        val plotter = PlotPollingSimulationData("$testdataDir/polling/", "pollingSimulation")
         plotter.plotData(results, Nc, underVotePct)
     }
 }

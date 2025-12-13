@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericScatter
@@ -11,7 +12,7 @@ class SfAuditVarianceCompare {
     val nruns = 500 // no variance when there are no errors
 
     val name = "sf2024AuditVarianceCompare"
-    val dirName = "/home/stormy/rla/plots/sf2024/$name"
+    val dirName = "$testdataDir/plots/sf2024/$name"
 
     init {
         validateOutputDir(Path(dirName))
@@ -20,13 +21,13 @@ class SfAuditVarianceCompare {
     @Test
     fun genSfAuditVarianceComparePlots() {
         val allAssertions = mutableListOf<AssertionAndCat>()
-        val clcaAssertions = readAssertionAndTotal("/home/stormy/rla/cases/sf2024/audit", "CLCA").second
+        val clcaAssertions = readAssertionAndTotal("$testdataDir/cases/sf2024/audit", "CLCA").second
         allAssertions.addAll( clcaAssertions)
-        allAssertions.addAll( readAssertionAndTotal("/home/stormy/rla/cases/sf2024oa/audit", "OneAudit").second)
+        allAssertions.addAll( readAssertionAndTotal("$testdataDir/cases/sf2024oa/audit", "OneAudit").second)
 
         // overrride the margins
         val marginOverride = clcaAssertions.associate { it.assertion.assertion.id().hashCode() to it.assertion.assertion.assorter.dilutedMargin() }
-        allAssertions.addAll( readAssertionAndTotal("/home/stormy/rla/cases/sf2024oaNS/audit", "OneAuditNS", marginOverride).second)
+        allAssertions.addAll( readAssertionAndTotal("$testdataDir/cases/sf2024oaNS/audit", "OneAuditNS", marginOverride).second)
 
         val title = "$name est nmvrs vs margin, no errors"
         val subtitle = "compare SF 2024 audit variances, Ntrials=$nruns quantile=80%"

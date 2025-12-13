@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.sf
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import kotlin.test.Test
 
@@ -17,7 +18,7 @@ class StaxReaderTest {
 
     @Test
     fun checkSfElectionTotals() {
-        val sfDir = "/home/stormy/rla/cases/sf2024"
+        val sfDir = "$testdataDir/cases/sf2024"
         val zipFilename = "$sfDir/CVR_Export_20241202143051.zip"
         val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
         val summaryFile = "src/test/data/SF2024/summary.xml"

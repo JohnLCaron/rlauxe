@@ -1,6 +1,7 @@
 package org.cryptobiotic.util
 
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.cli.RunRlaCreateOneAudit
 import org.cryptobiotic.rlauxe.cli.RunRlaStartFuzz
@@ -17,7 +18,7 @@ class TestRunCli {
 
     @Test
     fun testCliRoundClca() {
-        val topdir = "/home/stormy/rla/persist/testRunCli/clca"
+        val topdir = "$testdataDir/persist/testRunCli/clca"
         val auditdir = "$topdir/audit"
 
         RunRlaStartFuzz.main(
@@ -51,7 +52,7 @@ class TestRunCli {
 
     @Test
     fun testCliRoundPolling() {
-        val topdir = "/home/stormy/rla/persist/testRunCli/polling"
+        val topdir = "$testdataDir/persist/testRunCli/polling"
         val auditdir = "$topdir/audit"
 
         RunRlaStartFuzz.main(
@@ -90,7 +91,7 @@ class TestRunCli {
 
     @Test
     fun testCliRoundRaire() {
-        val topdir = "/home/stormy/rla/persist/testRunCli/raire"
+        val topdir = "$testdataDir/persist/testRunCli/raire"
         val auditdir = "$topdir/audit"
 
         RunRlaStartFuzz.main(
@@ -133,7 +134,7 @@ class TestRunCli {
 
     @Test
     fun testCliOneAudit() {
-        val topdir = "/home/stormy/rla/persist/testRunCli/oneaudit"
+        val topdir = "$testdataDir/persist/testRunCli/oneaudit"
         val auditdir = "$topdir/audit"
 
         RunRlaCreateOneAudit.main(

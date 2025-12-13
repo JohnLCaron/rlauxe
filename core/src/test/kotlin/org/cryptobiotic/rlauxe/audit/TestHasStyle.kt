@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.audit
 
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.core.Contest
@@ -14,7 +15,6 @@ import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.estimate.MultiContestCombineData
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sampleWithContestCutoff
-import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import kotlin.random.Random

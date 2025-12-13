@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.attack
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
@@ -15,6 +16,7 @@ import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.util.tabulateCloseableCvrs
 import org.cryptobiotic.rlauxe.workflow.*
+
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -22,7 +24,7 @@ import kotlin.test.assertTrue
 
 class SwitchWinnerMinAttack {
     val name = "switchWinnerMinAttack"
-    var dirName = "/home/stormy/rla/attack/$name"
+    var dirName = "$testdataDir/attack/$name"
 
     val N = 10000
     val nruns = 10000

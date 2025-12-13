@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.cli.RunRliRoundCli
@@ -38,14 +39,14 @@ class TestCreateBoulderElection {
         createBoulderElectionOA(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "/home/stormy/rla/cases/boulder24oa/audit",
+            auditDir = "$testdataDir/cases/boulder24oa/audit",
             clear = true,
         )
     } */
 
     @Test
     fun createBoulder24oa() {
-        val topdir = "/home/stormy/rla/cases/boulder24/oa"
+        val topdir = "$testdataDir/cases/boulder24/oa"
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
@@ -60,7 +61,7 @@ class TestCreateBoulderElection {
 
     @Test
     fun createBoulder24clca() { // simulate CVRs
-        val topdir = "/home/stormy/rla/cases/boulder24/clca"
+        val topdir = "$testdataDir/cases/boulder24/clca"
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
@@ -79,7 +80,7 @@ class TestCreateBoulderElection {
         createBoulderElectionOAsim(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "/home/stormy/rla/cases/boulder24oasim",
+            auditDir = "$testdataDir/cases/boulder24oasim",
             clca=false,
             clear = true,
         )
@@ -91,7 +92,7 @@ class TestCreateBoulderElection {
         createBoulderElectionOAsim(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "/home/stormy/rla/cases/boulder24clca",
+            auditDir = "$testdataDir/cases/boulder24clca",
             clca=true,
             clear = true,
         )
@@ -100,7 +101,7 @@ class TestCreateBoulderElection {
 
     // @Test
     fun createBoulderOArepeat() {
-        val topdir = "/home/stormy/rla/cases/boulder24oa"
+        val topdir = "$testdataDir/cases/boulder24oa"
 
         repeat(10) { run ->
             val auditDir = "$topdir/audit$run"
@@ -118,7 +119,7 @@ class TestCreateBoulderElection {
 
     // @Test
     fun runBoulderOArepeat() {
-        val topDir = "/home/stormy/rla/cases/boulder24oa"
+        val topDir = "$testdataDir/cases/boulder24oa"
 
         repeat(10) { run ->
             val auditDir = "$topDir/audit$run"
@@ -144,7 +145,7 @@ class TestCreateBoulderElection {
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "/home/stormy/rla/cases/boulder24",
+            auditDir = "$testdataDir/cases/boulder24",
         )
     }
 
@@ -153,7 +154,7 @@ class TestCreateBoulderElection {
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Recount-Redacted-Cast-Vote-Record.csv",
             "src/test/data/Boulder2024/2024G-Boulder-County-Amended-Statement-of-Votes.csv",
-            auditDir = "/home/stormy/rla/cases/boulder24recount",
+            auditDir = "$testdataDir/cases/boulder24recount",
             minRecountMargin = 0.0,
         )
     }
@@ -168,7 +169,7 @@ class TestCreateBoulderElection {
 
         createBoulderElectionWithSov(
             "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv",
-            "/home/stormy/rla/cases/boulder23",
+            "$testdataDir/cases/boulder23",
             combined,
         )
     }
@@ -179,7 +180,7 @@ class TestCreateBoulderElection {
             "src/test/data/Boulder2023/2023C-Boulder-County-Official-Statement-of-Votes-Recount.csv", "Boulder2023")
         createBoulderElectionWithSov(
             "src/test/data/Boulder2023/Redacted-2023Coordinated-CVR.csv",
-            "/home/stormy/rla/cases/boulder23recount",
+            "$testdataDir/cases/boulder23recount",
             sovo,
             minRecountMargin = 0.0,
         )
@@ -191,7 +192,7 @@ class TestCreateBoulderElection {
         createBoulderElectionOneAudit(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "/home/stormy/rla/cases/boulder24blca",
+            auditDir = "$testdataDir/cases/boulder24blca",
             includeCvrs = false,
         )
     }

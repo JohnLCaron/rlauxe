@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
@@ -10,7 +11,7 @@ import kotlin.test.Test
 
 class AuditsWithPhantoms {
     val name = "AuditsWithPhantoms"
-    val dirName = "/home/stormy/rla/audits/$name"
+    val dirName = "$testdataDir/audits/$name"
 
     val mvrFuzzPct = .01
     val nruns = 500  // number of times to run workflow
@@ -111,7 +112,7 @@ class AuditsWithPhantoms {
         println(stopwatch.took())
 
         val name = "phantomMarginShift"
-        val dirName = "/home/stormy/rla/samples/$name"
+        val dirName = "$testdataDir/samples/$name"
 
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
@@ -122,7 +123,7 @@ class AuditsWithPhantoms {
     @Test
     fun regenMarginShiftPlots() {
         val name = "phantomMarginShift"
-        val dirName = "/home/stormy/rla/samples/$name"
+        val dirName = "$testdataDir/samples/$name"
 
         val subtitle = "margin=${df(.045)} Nc=${N} nruns=${300} mvrFuzz=${mvrFuzzPct}"
         showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType")

@@ -97,9 +97,6 @@ data class Vunder(val candVotes: Map<Int, Int>, val undervotes: Int, val voteFor
         } else {
             chooseCandidatesAndDecrement(voteForN)
         }
-
-        // TODO old version working in index space .... need candidate ids from info ... convert to Ids
-        // return result.map { candidateIds[it] }
         return result
     }
 
@@ -132,10 +129,10 @@ data class Vunder(val candVotes: Map<Int, Int>, val undervotes: Int, val voteFor
     fun chooseCandidatesAndDecrement(voteForN: Int): IntArray {
         var needVotes = voteForN
         val result = mutableListOf<Int>()
-        var useRemaining = mutableListOf<Pair<Int, Int>>()
+        val useRemaining = mutableListOf<Pair<Int, Int>>()
         useRemaining.addAll(vunderRemaining)
 
-        while (needVotes > 0 && useRemaining.size > 0) {
+        while (needVotes > 0) {
             val (candId, candIdx) = chooseFromRemaining(useRemaining)
             if (candId == undervoteId) { // multiple undervotes ok, undervote adds nothing to result
                 needVotes--
@@ -146,15 +143,17 @@ data class Vunder(val candVotes: Map<Int, Int>, val undervotes: Int, val voteFor
                 needVotes--
             }
         }
-
+        if (needVotes != 0)
+            print("checkit")
         return result.toIntArray()
     }
 
+    // return cardId, candIdx
     private fun chooseFromRemaining(remaining: List<Pair<Int, Int>>) : Pair<Int, Int> {
         val nvotes = remaining.map { it.second }.sum()
-        if (nvotes == 0) {
+        if (nvotes <= 0) {
             // weve run out of votes, including undervotes, only choice is to add another undervote
-            return Pair(undervoteId, nvunder - 1) // undervote aleays last
+            return Pair(undervoteId, remaining.size - 1) // undervote idx always last one in remaining; not actually used
         }
         // pick a number from 0 to number of votes unchosen
         val randomChoice = Random.nextInt(nvotes)
@@ -163,14 +162,14 @@ data class Vunder(val candVotes: Map<Int, Int>, val undervotes: Int, val voteFor
         var sum = 0
         var nvotesLeft = 0
         var idx = 0
-        while (idx < nvunder) {
+        while (idx < remaining.size) {
             nvotesLeft = remaining[idx].second // votes left for this candidate
             sum += nvotesLeft
             if (randomChoice < sum) break
             idx++
         }
         require(nvotesLeft > 0)
-        require(idx < nvunder)
+        require(idx < remaining.size)
 
         val candidateId = remaining[idx].first
         decrementCandidateById(candidateId)
@@ -204,7 +203,7 @@ data class Vunder(val candVotes: Map<Int, Int>, val undervotes: Int, val voteFor
 // make cvrs until we exhaust the votes
 // this algorithm puts as many contests as possible on each cvr
 // the number of cvrs can vary when there are multiple contests
-fun makeVunderCvrs(contestVotes: Map<Int, Vunder>, poolName: String, poolId: Int?, ): List<Cvr> {
+fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, ): List<Cvr> {
     val rcvrs = mutableListOf<Cvr>()
 
     var count = 1
@@ -213,10 +212,10 @@ fun makeVunderCvrs(contestVotes: Map<Int, Vunder>, poolName: String, poolId: Int
         usedOne = false
         val cvrId = "${poolName}-${count}"
         val cvb2 = CvrBuilder2(cvrId, phantom = false, poolId = poolId)
-        contestVotes.entries.forEach { (contestId, vunders) ->
-            if (vunders.isNotEmpty()) {
+        vunders.entries.forEach { (contestId, vunder) ->
+            if (vunder.isNotEmpty()) {
                 // pick random candidates for the contest
-                val useCandidates = vunders.pickRandomCandidatesAndDecrement()
+                val useCandidates = vunder.pickRandomCandidatesAndDecrement()
                 // add it to cvr
                 cvb2.addContest(contestId, useCandidates)
                 usedOne = true
@@ -224,6 +223,10 @@ fun makeVunderCvrs(contestVotes: Map<Int, Vunder>, poolName: String, poolId: Int
         }
         if (usedOne) rcvrs.add(cvb2.build())
         count++
+    }
+    vunders.values.forEach { vunder ->
+        if (!vunder.isEmpty())
+            println(vunder)
     }
 
     rcvrs.shuffle()

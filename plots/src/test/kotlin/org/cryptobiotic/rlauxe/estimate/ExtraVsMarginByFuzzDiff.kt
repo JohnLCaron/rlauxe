@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
@@ -15,7 +16,7 @@ class ExtraVsMarginByFuzzDiff {
     val nruns = 100
     val nsimEst = 100
     val name = "extraVsMarginByFuzzDiff"
-    val dirName = "/home/stormy/rla/extra/$name"
+    val dirName = "$testdataDir/extra/$name"
     val fuzzMvrs = .02
 
     // Used in docs

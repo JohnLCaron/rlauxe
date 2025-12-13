@@ -13,8 +13,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-
 import kotlinx.coroutines.yield
+
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.plots.createPctRatio
 import org.cryptobiotic.rlauxe.plots.plotPctRatio
@@ -118,7 +119,7 @@ class CreatePollingDiffMeans {
         val reportedMeanDiffs = listOf(0.2, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0, -.005, -.01, -.025, -.05, -0.1, -0.2)
         val dl = listOf(10, 50, 250, 1250)
 
-        val writer = SRTcsvWriter("/home/stormy/rla/PollingDiffMeans/SRT$nrepeat.csv")
+        val writer = SRTcsvWriter("$testdataDir/PollingDiffMeans/SRT$nrepeat.csv")
         var totalCalculations = 0
 
         reportedMeanDiffs.forEach { reportedMeanDiff ->

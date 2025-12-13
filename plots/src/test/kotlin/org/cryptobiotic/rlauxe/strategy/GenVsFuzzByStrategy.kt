@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.strategy
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
@@ -13,7 +14,7 @@ import kotlin.test.Test
 
 class GenVsFuzzByStrategy {
     val name = "clcaVsFuzzByStrategy2"
-    val dirName = "/home/stormy/rla/strategy"
+    val dirName = "$testdataDir/strategy"
 
     val N = 50000
     val margin = .02

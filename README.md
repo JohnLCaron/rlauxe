@@ -10,7 +10,7 @@ The Rlauxe library is an independent implementation of the SHANGRLA framework, b
 The [SHANGRLA python library](https://github.com/pbstark/SHANGRLA) is the work of Philip Stark and collaborators, released under the AGPL-3.0 license.
 
 Also see:
-* [Developer Notes](docs/Development.md)
+* [Developer Notes](docs/Developer.md)
 * [Rlauxe Implementation Overview](docs/Overview.md)
 * [Implementation Specificaton](docs/RlauxeSpec.md)
 * [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer)

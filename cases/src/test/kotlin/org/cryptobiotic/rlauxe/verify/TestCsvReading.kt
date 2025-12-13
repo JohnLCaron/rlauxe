@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.verify
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.dominion.writeCvrExportCsvFile
@@ -16,7 +17,7 @@ class TestCsvReading {
 
     @Test
     fun testAuditableCardCsvFile() {
-        val filenameIn = "/home/stormy/rla/cases/sf2024/oa/audit/sortedCards.csv"
+        val filenameIn = "$testdataDir/cases/sf2024/oa/audit/sortedCards.csv"
         val original = AuditableCardCsvReader(filenameIn).iterator().asSequence().toList()
         val filenameOut = "$tempDir/sfCards.csv"
 
@@ -27,7 +28,7 @@ class TestCsvReading {
 
     // @Test // slow TODO get smaller test file
     fun testCvrExportCsvFile() {
-        val filenameIn = "/home/stormy/rla/cases/sf2024/${cvrExportCsvFile}"
+        val filenameIn = "$testdataDir/cases/sf2024/${cvrExportCsvFile}"
         val filenameOut = "$tempDir/${cvrExportCsvFile}"
         writeCvrExportCsvFile(cvrExportCsvIterator(filenameIn), filenameOut)
         Assertions.assertTrue(areIteratorsEqual(cvrExportCsvIterator(filenameIn), cvrExportCsvIterator(filenameOut)))
@@ -46,7 +47,7 @@ class TestCsvReading {
     /*
     @Test
     fun testMakeCardPoolsFromAuditRecord() {
-        val topDir = "/home/stormy/rla/cases/boulder24oa/audit"
+        val topDir = "$testdataDir/cases/boulder24oa/audit"
         val auditRecord = readFrom(topDir)
 
         val cardPools = makeCardPoolsFromAuditRecord(auditRecord)

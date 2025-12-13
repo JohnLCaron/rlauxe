@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.testdataDir
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.unwrap
 
@@ -19,7 +20,7 @@ class SfAuditVarianceScatter {
     val nruns = 10 // no variance when there are no errors
 
     val name = "sf2024AuditVarianceScatter"
-    val dirName = "/home/stormy/rla/plots/sf2024/$name"
+    val dirName = "$testdataDir/plots/sf2024/$name"
 
     init {
         validateOutputDir(Path(dirName))
@@ -28,13 +29,13 @@ class SfAuditVarianceScatter {
     @Test
     fun genSfAuditVarianceComparePlots() {
         val allAssertions = mutableListOf<AssertionAndCat>()
-        val (totalClca, clcaAssertions) = readAssertionAndTotal("/home/stormy/rla/cases/sf2024/audit0", "CLCA")
+        val (totalClca, clcaAssertions) = readAssertionAndTotal("$testdataDir/cases/sf2024/audit0", "CLCA")
         val marginOverride = clcaAssertions.associate { it.assertion.assertion.id().hashCode() to it.assertion.assertion.assorter.dilutedMargin() }
         allAssertions.addAll( clcaAssertions)
 
         val totalOA = mutableListOf<Int>()
         repeat(10) { run ->
-            val (total, clcaAssertions) = readAssertionAndTotal("/home/stormy/rla/cases/sf2024oa/audit$run", "OneAudit")
+            val (total, clcaAssertions) = readAssertionAndTotal("$testdataDir/cases/sf2024oa/audit$run", "OneAudit")
             allAssertions.addAll(clcaAssertions)
             totalOA.add(total)
         }
@@ -42,7 +43,7 @@ class SfAuditVarianceScatter {
         val totalOANS = mutableListOf<Int>()
         repeat(10) { run ->
             // overrride the margins
-            val (total, clcaAssertions) = readAssertionAndTotal("/home/stormy/rla/cases/sf2024oaNS/audit$run", "OneAuditNS", marginOverride)
+            val (total, clcaAssertions) = readAssertionAndTotal("$testdataDir/cases/sf2024oaNS/audit$run", "OneAuditNS", marginOverride)
             allAssertions.addAll(clcaAssertions)
             totalOANS.add(total)
         }

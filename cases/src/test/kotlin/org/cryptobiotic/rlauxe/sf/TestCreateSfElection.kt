@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.sf
 
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -9,13 +10,13 @@ import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import kotlin.test.Test
 
 class TestCreateSfElection {
-    val sfDir = "/home/stormy/rla/cases/sf2024"
+    val sfDir = "$testdataDir/cases/sf2024"
     val zipFilename = "$sfDir/CVR_Export_20241202143051.zip"
     val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
 
     @Test
     fun createSFElectionOA() {
-        val topdir = "/home/stormy/rla/cases/sf2024/oa"
+        val topdir = "$testdataDir/cases/sf2024/oa"
 
         createSfElection(
             topdir,
@@ -34,7 +35,7 @@ class TestCreateSfElection {
 
     @Test
     fun runElection() {
-        val topdir = "/home/stormy/rla/cases/sf2024/oa"
+        val topdir = "$testdataDir/cases/sf2024/oa"
         val auditdir = "$topdir/audit"
         val stopRound = -1
 
@@ -53,7 +54,7 @@ class TestCreateSfElection {
 
     @Test
     fun createSFElectionClca() {
-        val topdir = "/home/stormy/rla/cases/sf2024/clca"
+        val topdir = "$testdataDir/cases/sf2024/clca"
 
         createSfElection(
             topdir,
@@ -71,7 +72,7 @@ class TestCreateSfElection {
 
     /* @Test
     fun createSFElectionOneAuditNostyles() {
-        val topdir = "/home/stormy/rla/cases/sf2024/oans"
+        val topdir = "$testdataDir/cases/sf2024/oans"
 
         createSfElectionPoolStyle(
             topdir,
@@ -89,7 +90,7 @@ class TestCreateSfElection {
 
    // @Test
     fun createSFElectionPollingNostyles() {
-        val topdir = "/home/stormy/rla/cases/sf2024/polling"
+        val topdir = "$testdataDir/cases/sf2024/polling"
 
         createSfElectionPoolStyle(
             topdir,
@@ -107,7 +108,7 @@ class TestCreateSfElection {
 
     @Test
     fun runSFElectionPollingNostyles() {
-        val topdir = "/home/stormy/rla/cases/sf2024/polling"
+        val topdir = "$testdataDir/cases/sf2024/polling"
         runRound(inputDir = "$topdir/audit", useTest = true, quiet = false)
     }
 

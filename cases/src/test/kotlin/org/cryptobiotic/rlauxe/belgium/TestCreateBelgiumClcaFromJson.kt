@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.belgium
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
@@ -22,20 +23,21 @@ import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.fail
 
+val belgiumData = "src/test/data/belgium2024"
 val belgianElectionMap = mapOf(
-    "Anvers" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription d'Anvers.json",
-    "Bruxelles" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Bruxelles-Capitale.json",
-    "FlandreWest" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Flandre occidentale.json",
-    "FlandreEast" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Flandre orientale.json",
-    "Hainaut" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Hainaut.json",
-    "Liège" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Liège.json",
-    "Limbourg" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Limbourg.json",
-    "Luxembourg" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Luxembourg.json",
-    "Namur" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription de Namur.json",
-    "BrabantFlamant" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription du Brabant flamand.json",
-    "BrabantWallon" to "/home/stormy/rla/cases/belgium/2024/2024_chambre-des-représentants_Circonscription du Brabant wallon.json",
+    "Anvers" to "$belgiumData/2024_chambre-des-représentants_Circonscription d'Anvers.json",
+    "Bruxelles" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Bruxelles-Capitale.json",
+    "FlandreWest" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Flandre occidentale.json",
+    "FlandreEast" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Flandre orientale.json",
+    "Hainaut" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Hainaut.json",
+    "Liège" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Liège.json",
+    "Limbourg" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Limbourg.json",
+    "Luxembourg" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Luxembourg.json",
+    "Namur" to "$belgiumData/2024_chambre-des-représentants_Circonscription de Namur.json",
+    "BrabantFlamant" to "$belgiumData/2024_chambre-des-représentants_Circonscription du Brabant flamand.json",
+    "BrabantWallon" to "$belgiumData/2024_chambre-des-représentants_Circonscription du Brabant wallon.json",
 )
-val toptopdir = "/home/stormy/rla/cases/belgium/2024"
+val toptopdir = "$testdataDir/cases/belgium/2024"
 
 class TestCreateBelgiumClcaFromJson {
     @Test

@@ -1,9 +1,9 @@
 # Developer Notes
-_12/12/2025_
+_12/13/2025_
 
 ## Prerequisites
 
-1. Install a git client compatible with github
+1. A git client that is compatible with github.
 2. **Java 21+**. Install as needed, and make it your default Java when working with rlauxe.
 3. The correct version of gradle and kotlin will be installed when you invoke a gradle command.
 
@@ -96,12 +96,18 @@ There's lots of online help for using IntelliJ.
 
 ## Test Cases
 
-The test case generators are in the cases module:
+The repo contains all the test case data, except for San Francisco. Download
 
-* Belgium: _cases/src/main/kotlin/org/cryptobiotic/rlauxe/belgium/CreateBelgiumClca.kt_
-* Boulder County: _cases/src/main/kotlin/org/cryptobiotic/rlauxe/boulder/CreateBoulderElection.kt_
-* Colorado State: _cases/src/main/kotlin/org/cryptobiotic/rlauxe/corla/CreateColoradoElection.kt_
-* San Francisco County: _cases/src/main/kotlin/org/cryptobiotic/rlauxe/sf/CreateSfElection.kt_
+  https://www.sfelections.org/results/20241105/data/20241203/CVR_Export_20241202143051.zip
+
+into $testdataDir/cases/sf2024.
+
+Then run _createSf2024CvrExport()_ in _cases/src/test/kotlin/org/cryptobiotic/rlauxe/sf/CreateSf2024CvrExport.kt_
+to generate crvExport.csv into testdataDir/cases/sf2024. This only needs to be done one time.
+
+All the test cases can be generated from:
+
+_cases/src/test/kotlin/org/cryptobiotic/util/TestGenerateAllUseCases.kt_.
 
 ## rlauxe viewer
 

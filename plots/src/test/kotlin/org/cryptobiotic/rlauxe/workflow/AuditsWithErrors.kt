@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
@@ -10,7 +11,7 @@ import kotlin.test.Test
 class AuditsWithErrors {
     val nruns = 10
     val name = "AuditsWithErrors4"
-    val dirName = "/home/stormy/rla/plots/workflows/$name"
+    val dirName = "$testdataDir/plots/workflows/$name"
     val N = 50000
     val margin = .04
 

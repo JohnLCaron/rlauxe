@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.attack
 
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -9,7 +10,7 @@ import kotlin.test.Test
 
 class OaPhantomAttack {
     var name = "oaPhantomAttack"
-    var dirName = "/home/stormy/rla/attack/$name"
+    var dirName = "$testdataDir/attack/$name"
     var phantomPct = 0.02
 
     val N = 100000

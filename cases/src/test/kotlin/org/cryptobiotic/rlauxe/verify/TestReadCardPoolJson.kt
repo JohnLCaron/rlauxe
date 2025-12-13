@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.verify
 
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolWithBallotStyle
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -20,7 +21,7 @@ class TestReadCardPoolJson {
 
     @Test
     fun testCardPoolWithBallotStyle() {
-        val auditdir = "/home/stormy/rla/cases/boulder24/oa/audit"
+        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
 
         val publisher = Publisher(auditdir)
         val contests = readContestsJsonFile(publisher.contestsFile()).unwrap()
@@ -55,7 +56,7 @@ class TestReadCardPoolJson {
 
     @Test
     fun testCardPoolFromCvrs() {
-        val auditdir = "/home/stormy/rla/cases/sf2024/oa/audit"
+        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
 
         val publisher = Publisher(auditdir)
         val contests = readContestsJsonFile(publisher.contestsFile()).unwrap()
@@ -90,7 +91,7 @@ class TestReadCardPoolJson {
 
     @Test
     fun testCardPoolFromCvrsNS() {
-        val auditdir = "/home/stormy/rla/cases/sf2024/oans/audit"
+        val auditdir = "$testdataDir/cases/sf2024/oans/audit"
 
         val publisher = Publisher(auditdir)
         val contests = readContestsJsonFile(publisher.contestsFile()).unwrap()
@@ -124,8 +125,8 @@ class TestReadCardPoolJson {
 
     @Test
     fun compareContestTabs() {
-        val oa = readContestTabs("/home/stormy/rla/cases/sf2024/oa/audit")
-        val clca = readContestTabs("/home/stormy/rla/cases/sf2024/clca/audit")
+        val oa = readContestTabs("$testdataDir/cases/sf2024/oa/audit")
+        val clca = readContestTabs("$testdataDir/cases/sf2024/clca/audit")
         println("  oa[18] = ${oa[18]}")
         println("clca[18] = ${clca[18]}")
         println("clca[18] == oa18: ${clca[18] == oa[18]}")

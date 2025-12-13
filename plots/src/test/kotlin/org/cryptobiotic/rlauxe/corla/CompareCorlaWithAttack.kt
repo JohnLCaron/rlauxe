@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.audit.ClcaConfig
-import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -17,7 +16,7 @@ class CompareCorlaWithAttack {
     val nruns = 10  // number of times to run workflow
     val N = 100000
     val name = "corlaWithAttack"
-    val dirName = "/home/stormy/rla/corla/$name"
+    val dirName = "$testdataDir/corla/$name"
 
     @Test
     fun corlaWithAttack() {

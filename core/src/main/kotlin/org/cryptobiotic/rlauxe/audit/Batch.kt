@@ -42,7 +42,7 @@ interface BatchIF {
     fun ncards(): Int
 }
 
-data class Batch(
+data class PopulationBatch(
     override val name: String,
     override val id: Int,
     override val possibleContests: IntArray, // the list of possible contests.

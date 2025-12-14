@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.dominion
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.cryptobiotic.rlauxe.boulder.isEmpty
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.ZipReader
@@ -136,6 +137,7 @@ data class CastVoteRecord(
 
 }
 
+// contestIdx = contestId. Need to cross reference with contest name in the header to get that right
 // use colIdx to eliminate write-ins.
 data class ContestVotes(val contestId: Int, val candVotes: List<Int>)
 
@@ -280,7 +282,7 @@ fun readDominionCvrExportCsv(filename: String, countyId: String): DominionCvrExp
     var rcvRedacted = 0
     while (records.hasNext()) {
         val line = records.next()
-        // showLine("line", line)
+        if (line.isEmpty()) break
         if (line.get(0).startsWith("Redacted")) { // but not "RCV Redacted ..." which can be treated like a normal CVR
             val isA =  line.get(0).contains("A cards")
             val ballotStyle = line.get(ballotTypeIdx) + if (isA) "-A" else "-B"
@@ -299,6 +301,12 @@ fun readDominionCvrExportCsv(filename: String, countyId: String): DominionCvrExp
             cvrs.add(cvr.addVotes(schema, line))  // IRV redacted vote
 
         } else {
+            try {
+                line.get(0).toInt()
+            } catch (e: Exception) {
+                // println(line) // assume thats the end
+                break
+            }
             val cvr = CastVoteRecord(
                 cvrNumber = line.get(0).toInt(),
                 tabulatorNum = line.get(1).toInt(),

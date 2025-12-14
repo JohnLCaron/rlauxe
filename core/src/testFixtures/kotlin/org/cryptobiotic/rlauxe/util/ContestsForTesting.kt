@@ -162,8 +162,8 @@ fun makeContestsWithUndervotesAndPhantoms(
 fun tabulateVotesFromCvrs(cvrs: Iterator<Cvr>): Map<Int, Map<Int, Int>> {
     val votes = mutableMapOf<Int, MutableMap<Int, Int>>()
     for (cvr in cvrs) {
-        for ((con, conVotes) in cvr.votes) {
-            val accumVotes = votes.getOrPut(con) { mutableMapOf() }
+        for ((contestId, conVotes) in cvr.votes) {
+            val accumVotes = votes.getOrPut(contestId) { mutableMapOf() }
             for (cand in conVotes) {
                 val accum = accumVotes.getOrPut(cand) { 0 }
                 accumVotes[cand] = accum + 1

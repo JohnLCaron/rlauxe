@@ -111,19 +111,25 @@ data class BoulderStatementLine(
     val totalOverVotes: Int,
 ) {
     companion object {
+        // (2025) "Precinct Code","Precinct Number","Contest Title","Choice Name","Active Voters*","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
         // (2024) "Precinct Code","Precinct Number","Contest Title","Choice Name","Active Voters","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
         fun make2024(line: CSVRecord): BoulderStatementLine {
-            return BoulderStatementLine(
-                line.get(0),
-                line.get(1),
-                line.get(2),
-                line.get(3),
-                line.get(4).convertToInteger(),
-                line.get(5).convertToInteger(),
-                line.get(6).convertToInteger(),
-                line.get(7).convertToInteger(),
-                line.get(8).convertToInteger(),
-            )
+            try {
+                return BoulderStatementLine(
+                    line.get(0),
+                    line.get(1),
+                    line.get(2),
+                    line.get(3),
+                    line.get(4).convertToInteger(),
+                    line.get(5).convertToInteger(),
+                    line.get(6).convertToInteger(),
+                    line.get(7).convertToInteger(),
+                    line.get(8).convertToInteger(),
+                )
+            } catch (e: Exception) {
+                println(line)
+                throw e
+            }
         }
 
         // (2023) "Precinct Code","Precinct Number","Active Voters","Contest Title","Choice Name","Total Ballots","Total Votes","Total Undervotes","Total Overvotes"
@@ -175,7 +181,8 @@ fun readBoulderStatementOfVotes(filename: String, variation: String): BoulderSta
     try {
         while (records.hasNext()) {
             line = records.next()
-            val bmi = when (variation) {
+            if (line.isEmpty()) break // assume done when we see a blank line
+            val bmi: BoulderStatementLine = when (variation) {
                 "Boulder2024" -> BoulderStatementLine.make2024(line)
                 "Boulder2023" -> BoulderStatementLine.make2023(line)
                 "Boulder2023Rcv" -> BoulderStatementLine.make2023Rcv(line)
@@ -218,4 +225,13 @@ fun String.convertToInteger(): Int {
     }
     val s = String(cs.toCharArray())
     return s.toInt()
+}
+
+fun CSVRecord.isEmpty(): Boolean {
+    val iter = this.iterator()
+    while (iter.hasNext()) {
+        val value = iter.next()
+        if (!value.isEmpty()) return false
+    }
+    return true
 }

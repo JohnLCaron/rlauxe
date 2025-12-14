@@ -14,10 +14,10 @@ import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestBelgiumElectionJson {
+class TestBelgiumElection {
 
     @Test
-    fun testReadBelgiumElectionJson() {
+    fun testReadBelgiumElection() {
         val filename = belgianElectionMap["Namur"]!!
         val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumElectionJson(filename)
         val belgiumElection = if (result is Ok) result.unwrap()

@@ -28,6 +28,7 @@ open class CreateBoulderElection(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
     val isClca: Boolean,
+    val distributeOvervotes: List<Int> = listOf(0, 63),
     val hasStyle: Boolean = true,
     val quiet: Boolean = true,
 ): CreateElectionIF {
@@ -46,15 +47,14 @@ open class CreateBoulderElection(
     init {
         oaContests.values.forEach { it.adjustPoolInfo(cardPools)}
 
+        // 2024
         // first even up with contest 0, since it has the fewest undervotes
-        val oaContest0 = oaContests[0]!!
-        distributeExpectedOvervotes(oaContest0, cardPools)
-        oaContests.values.forEach { it.adjustPoolInfo(cardPools)}
-
-        // contest 63 has fewest undervotes for card Bs
-        val oaContest63 = oaContests[63]!!
-        distributeExpectedOvervotes(oaContest63, cardPools)
-        oaContests.values.forEach { it.adjustPoolInfo(cardPools)}
+        // then contest 63 has fewest undervotes for card Bs
+        distributeOvervotes.forEach { contestId ->
+            val oaContest = oaContests[contestId]!!
+            distributeExpectedOvervotes(oaContest, cardPools)
+            oaContests.values.forEach { it.adjustPoolInfo(cardPools)}
+        }
 
         // we need to know the diluted Nb before we can create the UAs
         contests = makeContests()
@@ -309,7 +309,7 @@ fun createBoulderElection(
     clear: Boolean = true)
 {
     val stopwatch = Stopwatch()
-    val variation = if (sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
+    val variation = if (sovoFile.contains("2025") || sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
     val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
 

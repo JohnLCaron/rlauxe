@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolWithBallotStyle
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.mergeReduce
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.trunc
@@ -15,11 +16,18 @@ import kotlin.test.Test
 import kotlin.text.appendLine
 
 class TestBoulderUndervotes {
+    // val cvrFilename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
+    // val sovoFilename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
+
+    val datadir = "$testdataDir/cases/boulder2025"
+    val cvrFilename = "$datadir/Redacted-CVR-PUBLIC.utf8.csv"
+    val sovoFilename = "$datadir/2025C-Boulder-County-Official-Statement-of-Votes.utf8.csv"
+
+    val sovo = readBoulderStatementOfVotes(sovoFilename, "Boulder2024")
 
     @Test
     fun testBoulderBallotType() {
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
+        val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
         // println(export.summary())
 
         var count = 0
@@ -90,13 +98,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showSovoContestDetail2() {
-        val sovo = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            "Boulder2024"
-        )
-
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
+        val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
 
         val election2 = CreateBoulderElection(export, sovo, isClca=false)
         println()
@@ -108,13 +110,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showPoolVotes() {
-        val sovo = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            "Boulder2024"
-        )
-
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
+        val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
 
         println("votes, undervotes")
 
@@ -134,30 +130,9 @@ class TestBoulderUndervotes {
         }
     }
 
-    /*
-    @Test
-    fun combinePoolVotes() {
-        val sovo = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            "Boulder2024"
-        )
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
-        val election2 = BoulderElectionOA(export, sovo)
-
-        val cardPoolsAB = convertRedactedToCardPoolPaired(export.redacted, election2.infoMap)
-        val contestIds = election2.infoList.map { it.id }
-        showPoolVotes(contestIds, cardPoolsAB)
-    } */
-
     @Test
     fun showRedactedUndervotes2() {
-        val sovo: BoulderStatementOfVotes = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            "Boulder2024"
-        )
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
+        val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
         // val election1 = BoulderElectionOAsim(export, sovo)
         val election2 = CreateBoulderElection(export, sovo, isClca=false)
 
@@ -222,12 +197,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showRedactedNcards() {
-        val sovo: BoulderStatementOfVotes = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            "Boulder2024"
-        )
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
+        val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
         val election2 = CreateBoulderElection(export, sovo, isClca=false)
 
         val contestIds = election2.infoList.map { it.id }
@@ -296,12 +266,7 @@ class TestBoulderUndervotes {
 
     @Test
     fun showNcards() {
-        val sovo: BoulderStatementOfVotes = readBoulderStatementOfVotes(
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            "Boulder2024"
-        )
-        val filename = "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip"
-        val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
+        val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
         val election2 = CreateBoulderElection(export, sovo, isClca=false)
 
         val contestIds = election2.infoList.map { it.id }

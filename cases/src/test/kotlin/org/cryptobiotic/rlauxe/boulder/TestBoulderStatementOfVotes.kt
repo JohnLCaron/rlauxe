@@ -1,8 +1,19 @@
 package org.cryptobiotic.rlauxe.boulder
 
+import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 
 class TestBoulderStatementOfVotes {
+
+    //             "$datadir/2025C-Boulder-County-Official-Statement-of-Votes.utf8.csv",
+
+    @Test
+    fun testBoulder2025() {
+        val datadir = "$testdataDir/cases/boulder2025"
+        val filename = "$datadir/2025C-Boulder-County-Official-Statement-of-Votes.utf8.csv"
+        val sovo = readBoulderStatementOfVotes(filename, "Boulder2024")
+        println(sovo.show())
+    }
 
     @Test
     fun testBoulder2024() {

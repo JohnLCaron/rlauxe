@@ -4,8 +4,9 @@ _12/13/2025_
 ## Prerequisites
 
 1. A git client that is compatible with github.
-2. **Java 21+**. Install as needed, and make it your default Java when working with rlauxe.
+2. **Java 21+**. Install as needed, and make it your default JVM when working with rlauxe.
 3. The correct version of gradle and kotlin will be installed when you invoke a gradle command.
+4. You need internet access to download the dependencies.
 
 
 ## Download the git repository
@@ -52,24 +53,29 @@ val testdataDir = "/home/stormy/rla"
 
 to some directory on your system. Make sure the directory exists.
 
-### Run the tests using gradle
+### Run the core tests using gradle
 
-To build the complete library and run the standard tests:
+To build the complete library and run the core tests:
 
 ```
     cd <devhome>/rlauxe
-    ./gradlew build
+    ./gradlew clean assemble
+    ./gradlew core:test
 ```
 
 ## Using IntelliJ
 
-We recommend that you use the IntelliJ IDE if you plan on doing any Java/Kotlin coding.
+We recommend using the IntelliJ IDE if you plan on doing Java/Kotlin coding, or even if you are just building and running.
 
-Do steps 1 and 2 of the prerequisites. Then, in the IntelliJ top menu:
+* Make sure the prerequisites are satisfied, as above.
+* Download the git repository as above.
+* Install IntelliJ. The community version probably works fine, but an individual license for the Ultimate Edition is well worth it.
+
+Start up IntelliJ, and in the top menu:
 
 1. File / New / "Project from existing sources"
-2. in popup window, navigate to _devhome/rlauxe_ and select that directory
-3. choose "Import project from existing model" / Gradle
+2. In the popup window, navigate to _devhome/rlauxe_ and select that directory
+3. Choose "Import project from existing model" / Gradle
 
 IntelliJ will create and populate an IntelliJ project with the rlauxe sources. 
 
@@ -79,8 +85,8 @@ To run the core tests, from the left Project Panel source tree, navigate to the 
 directory, right click on the directory name, choose "Run tests in ...". If that menu option isnt shown, check if you're in the 
 main source tree instead of the test source tree.
 
-To run individual tests, go to the test source, IntelliJ will place a clickable green button in the left margin wherever theres a 
-runnable test.
+To run individual tests, go to the test source; IntelliJ will place a clickable green button in the left margin wherever 
+there is a runnable test.
 
 There's lots of online help for using IntelliJ.
 
@@ -100,10 +106,10 @@ The repo contains all the test case data, except for San Francisco. Download
 
   https://www.sfelections.org/results/20241105/data/20241203/CVR_Export_20241202143051.zip
 
-into $testdataDir/cases/sf2024.
+into testdataDir/cases/sf2024. (_testdataDir_ as you chose in "Set the test data directory" step above.)
 
-Then run _createSf2024CvrExport()_ in _cases/src/test/kotlin/org/cryptobiotic/rlauxe/sf/CreateSf2024CvrExport.kt_
-to generate crvExport.csv into testdataDir/cases/sf2024. This only needs to be done one time.
+Then run _createSf2024CvrExport()_ test in _cases/src/test/kotlin/org/cryptobiotic/rlauxe/sf/CreateSf2024CvrExport.kt_
+to generate _testdataDir/cases/sf2024/crvExport.csv_. This only needs to be done one time.
 
 All the test cases can be generated from:
 
@@ -111,10 +117,10 @@ _cases/src/test/kotlin/org/cryptobiotic/util/TestGenerateAllUseCases.kt_.
 
 ## rlauxe viewer
 
-Download the rlauxe-viewer repo and follow instructions there to view Audit Records and run audits on them, in particular any of the
-test cases.
+Download the [rlauxe-viewer repo](https://github.com/JohnLCaron/rlauxe-viewer) and follow instructions there to view 
+Audit Records and run audits on them, in particular, any of the test cases.
 
-**Caveat Emptor**: The serialization formats are undergoing rapid changes, and no backwards compatibility (yet). Expect that
+**Caveat Emptor**: The serialization formats are undergoing rapid changes, with no backwards compatibility (yet). Expect that
 if you download a new version of the library, you will have to regenerate audit records, and download the latest rlauxe viewer
 to view them.
 
@@ -123,7 +129,7 @@ to view them.
 
 ## Code Coverage (Lines of Codes)
 
- core tests
+ **core test coverage**
 
 | date       | pct    | cover/total LOC |
 |------------|--------|-----------------|
@@ -134,9 +140,9 @@ to view them.
 | 11/30/2025 | 86.7 % | 5255/6058       |
 | 12/04/2025 | 85.0 % | 5327/6265       |
 | 12/10/2025 | 80.5 % | 5338/6634       |
-| 12/10/2025 | 82.8 % | 5310/6411       |
+| 12/13/2025 | 82.8 % | 5341/6449       |
 
- core + cases tests 
+ **core + cases test coverage** 
 
 | date       | pct    | cover/total LOC |
 |------------|--------|-----------------|
@@ -145,9 +151,7 @@ to view them.
 | 11/29/2025 | 81.4 % | 6479/7962       |
 | 12/04/2025 | 81.7 % | 6530/7994       |
 | 12/10/2025 | 78.4 % | 6597/8412       |
-| 12/10/2025 | 78.4 % | 6597/8412       |
-
-
+| 12/13/2025 | 80.7 % | 6606/8187       |
 
 
 ## UML
@@ -168,13 +172,16 @@ last changed: 03/10/2025
 * replace old plots
 * test dhondt, threshold assorters
 
-
 # TODO 12/11/25 (Belgium)
 
 * consolidate over counties
 * include undervotes
-* assertions that look at collections of parties. (Vaness)
+* assertions that look at coalitions of parties. (Vanessa)
 * choose an audit size and measure the risk.
+
+# TODO 12/13/25
+
+* hasStyle/CardManifest refactor
 * get code stable for review
-* remove /home/stormy
+
 

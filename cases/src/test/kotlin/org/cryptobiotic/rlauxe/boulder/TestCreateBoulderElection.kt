@@ -74,6 +74,22 @@ class TestCreateBoulderElection {
         writeSortedCardsInternalSort(publisher, config.seed)
     }
 
+    @Test
+    fun createBoulder25clca() { // simulate CVRs
+        val datadir = "$testdataDir/cases/boulder2025"
+        val topdir = "$testdataDir/cases/boulder2025/clca"
+        createBoulderElection(
+            "$datadir/Redacted-CVR-PUBLIC.utf8.csv",
+            "$datadir/2025C-Boulder-County-Official-Statement-of-Votes.utf8.csv",
+            topdir = topdir,
+            auditType = AuditType.CLCA,
+        )
+
+        val publisher = Publisher("$topdir/audit")
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
+    }
+
     /*
     @Test
     fun createBoulder24oasim() { // simulate CVRs

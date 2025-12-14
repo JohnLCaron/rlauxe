@@ -12,7 +12,7 @@ import kotlin.collections.component2
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestBoulderCvrs {
+class TestBoulder2024Cvrs {
 
     @Test
     fun parseBoulder24cvrs() {

@@ -426,7 +426,11 @@ fun verifyOAassortAvg(
             val passorter = assertion.assorter
             if (cardAssortAvg[passorter] != null) {  //  may be Raire
                 val assortAvg = cardAssortAvg[passorter]!!
-                val dilutedMargin = contestUA.makeDilutedMargin(passorter)
+                val reportedMargin = passorter.calcMargin(contestUA.contest.votes(), contestUA.contest.Nc())
+                val dilutedMargin = passorter.calcMargin(contestUA.contest.votes(), contestUA.Npop)
+                if (!doubleIsClose(dilutedMargin, reportedMargin)) {
+                    println("dilutedMargin=$dilutedMargin, reportedMargin=$reportedMargin")
+                }
                 if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
                     result.addError("  dilutedMargin does not agree for contest ${contestUA.id} assorter '$passorter'")
                     result.addError("     dilutedMargin= ${pfn(dilutedMargin)} cvrs.assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards}")

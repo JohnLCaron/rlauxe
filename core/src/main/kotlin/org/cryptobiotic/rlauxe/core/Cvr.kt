@@ -20,7 +20,6 @@ data class Cvr(
 
     override fun hasContest(contestId: Int): Boolean = votes[contestId] != null
     override fun votes(contestId: Int): IntArray? = votes[contestId]
-    override fun rankedChoices(contestId: Int): IntArray? = votes[contestId]
 
     fun contests() = votes.keys.toList().sorted().toIntArray()
 
@@ -34,12 +33,12 @@ data class Cvr(
                else if (contestVotes.contains(candidateId)) 1 else 0
     }
 
-    // Is there exactly one vote in the contest among the given candidates?
+    /* Is there exactly one vote in the contest among the given candidates?
     override fun hasOneVoteFor(contestId: Int, candidates: List<Int>): Boolean {
         val contestVotes = this.votes[contestId] ?: return false
         val totalVotes = contestVotes.count { candidates.contains(it) }
         return (totalVotes == 1)
-    }
+    } */
 
     override fun toString() = buildString {
         append("$id ($phantom) ")

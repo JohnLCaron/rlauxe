@@ -24,10 +24,12 @@ interface CardIF {
     fun isPhantom(): Boolean
     fun poolId(): Int?
 
+    fun votes(contestId: Int): IntArray?
     fun hasMarkFor(contestId: Int, candidateId:Int): Int
-    fun hasOneVoteFor(contestId: Int, candidates: List<Int>): Boolean // TODO not used
-    fun rankedChoices(contestId: Int): IntArray? // TODO same as votes
-    fun votes(contestId: Int): IntArray? // same?
+
+    // fun hasOneVoteFor(contestId: Int, candidates: List<Int>): Boolean
+    //     // val cands = cvr.votes(contest.id)
+    //    //   val usew2 =  (cands != null && cands.size == 1)
 }
 
 data class AuditableCard (
@@ -89,7 +91,6 @@ data class AuditableCard (
     override fun location() = location
     override fun poolId() = poolId
     override fun votes(contestId: Int): IntArray? = votes?.get(contestId)
-    override fun rankedChoices(contestId: Int): IntArray? = votes?.get(contestId)
 
     override fun hasContest(contestId: Int): Boolean {
         return contests().contains(contestId)
@@ -108,12 +109,12 @@ data class AuditableCard (
         else if (contestVotes.contains(candidateId)) 1 else 0
     }
 
-    // Is there exactly one vote in the contest among the given candidates?
+    /* Is there exactly one vote in the contest among the given candidates?
     override fun hasOneVoteFor(contestId: Int, candidates: List<Int>): Boolean {
         val contestVotes = votes?.get(contestId) ?: return false
         val totalVotes = contestVotes.count { candidates.contains(it) }
         return (totalVotes == 1)
-    }
+    } */
 
     // Kotlin data class doesnt handle IntArray and List<IntArray> correctly
     override fun equals(other: Any?): Boolean {

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.audit.CardIF
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.calcAssorterMargin
 import org.cryptobiotic.rlauxe.util.*
@@ -146,7 +147,14 @@ class TestAssorterBasics {
 
             val assortAvg = cvrs.map { cvr ->
                 val usew1 = cvr.hasMarkFor(contest.id, assertion.assorter.winner())
-                val usew2 = cvr.hasOneVoteFor(contest.id, contest.info.candidateIds)
+
+                // was
+                // val usew2old = cvr.hasOneVoteFor(contest.id, contest.info.candidateIds)
+                // but now
+                val cands = cvr.votes(contest.id)
+                val usew2 =  (cands != null && cands.size == 1)
+                // require (usew2 == usew22)
+
                 println("${cvr.id}: ${assertion.assorter.assort(cvr)} usew1=$usew1 usew2=$usew2")
                 assertion.assorter.assort(cvr)
             }.average()

@@ -346,7 +346,7 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
 
 // if candidate not ranked, return 0, else rank (1 based)
 fun raire_get_rank(cvr: CardIF, contest: Int, candidate: Int): Int {
-    val rankedChoices = cvr.rankedChoices(contest)
+    val rankedChoices = cvr.votes(contest)
     return if (rankedChoices == null || !rankedChoices.contains(candidate)) 0
     else rankedChoices.indexOf(candidate) + 1
 }

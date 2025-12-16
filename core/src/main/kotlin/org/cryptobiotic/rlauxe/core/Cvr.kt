@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.audit.CardIF
+import org.cryptobiotic.rlauxe.audit.CvrIF
 
 // core abstraction for both CVR and MVR
 // assumes that a vote is 0 or 1.
@@ -9,7 +9,7 @@ data class Cvr(
     val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
     val phantom: Boolean = false,
     val poolId: Int? = null,  // or cardStyle.id
-): CardIF {
+): CvrIF {
     init {
         require(id.indexOf(',') < 0) { "cvr.id='$id' must not have commas"} // must not have nasty commas
     }

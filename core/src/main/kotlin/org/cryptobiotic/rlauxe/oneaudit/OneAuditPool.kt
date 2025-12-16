@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.RegVotesIF
 import org.cryptobiotic.rlauxe.util.RegVotes
@@ -9,11 +10,9 @@ import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.Vunder
-import org.cryptobiotic.rlauxe.util.makeVunderCvrs
-import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.roundUp
-import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -21,50 +20,85 @@ import kotlin.math.max
 import kotlin.random.Random
 
 
-private val logger = KotlinLogging.logger("CardPool")
+private val logger = KotlinLogging.logger("OneAuditPool")
 
-interface CardPoolIF: CardStyleIF, OneAuditPoolIF {
-    override val poolName: String
-    override val poolId: Int
-    val assortAvg: MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contestId -> assorter -> average in the pool
+const val unpooled = "unpooled"
 
-    override fun regVotes() : Map<Int, RegVotesIF> // contestId -> RegVotes, regular contests only
-    override fun ncards() : Int // total number of cards in the pool, including undervotes
+// for calculating average from running total, see addOAClcaAssorters
+class AssortAvg() {
+    var ncards = 0
+    var totalAssort = 0.0
+    fun avg() : Double = if (ncards == 0) 0.0 else totalAssort / ncards
+    fun margin() : Double = mean2margin(avg())
 
-    override fun name() = poolName
-    override fun poolId() = poolId
-    override fun hasContest(contestId: Int) : Boolean // does the pool contain this contest ?
-    override fun contests(): IntArray
+    override fun toString(): String {
+        return "AssortAvg(ncards=$ncards, totalAssort=$totalAssort avg=${avg()})"
+    }
+}
 
-    override fun show() = buildString {
-        appendLine("CardPool(poolName=$poolName, poolId=$poolId, ncards=${ncards()}")
+interface OneAuditPoolIF: PopulationIF {
+    val poolName: String
+    val poolId: Int
+    fun assortAvg(): MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contestId -> assorter -> average in the pool
+    fun regVotes(): Map<Int, RegVotesIF> // contestId -> RegVotes, regular contests only
+    fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder  // candidate for removal
+    // fun contestTab(contestId: Int): ContestTabulation?
+
+    fun show() = buildString {
+        appendLine("OneAuditPool(poolName=$poolName, poolId=$poolId, ncards=${ncards()}")
         regVotes().forEach{
-            // data class RegVotes(override val votes: Map<Int, Int>, val ncards: Int, val undervotes: Int): RegVotesIF {
             appendLine("    contest ${it.key} votes= ${it.value.votes}, ncards= ${it.value.ncards()}, undervotes= ${it.value.undervotes()} ")
         }
         appendLine(")")
     }
 
-    /* simulate the pool mvrs.
-    fun simulateMvrsForPool (): List<Cvr> {
-        val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
-        contests().forEach { contestId  -> contestVotes[contestId] = votesAndUndervotes(contestId) }
-        return makeVunderCvrs(contestVotes, poolName, poolId = poolId)
+
+    // OneAuditPool(override val poolName: String, override val poolId: Int, val exactContests: Boolean,
+    //  val ncards: Int, val regVotes: Map<Int, RegVotes>)
+    fun toOneAuditPool() = OneAuditPool(poolName, poolId, exactContests(), ncards(), regVotes())
+
+    /* fun showVotes(contestIds: Collection<Int>, width: Int=4) = buildString {
+        append("${trunc(name(), 9)}:")
+
+        contestIds.forEach { id ->
+            // (val candVotes: Map<Int, Int>, val undervotes: Int, val voteForN: Int)
+            val tab = contestTab(id)
+            if (tab == null)
+                append("    |")
+            else {
+                append("${nfn(tab.nvotes(), width)}|")
+            }
+        }
+        appendLine()
+
+        append("${trunc("", 9)}:")
+        contestIds.forEach { id ->
+            val tab = contestTab(id)
+            if (tab == null)
+                append("    |")
+            else {
+                append("${nfn(tab.undervotes, width)}|")
+            }
+        }
+        appendLine()
     } */
 }
 
-data class CardPool(override val poolName: String, override val poolId: Int, val ncards: Int, val regVotes: Map<Int, RegVotes>) : CardPoolIF {
-    override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+data class OneAuditPool(override val poolName: String, override val poolId: Int, val exactContests: Boolean,
+                        val ncards: Int, val regVotes: Map<Int, RegVotesIF>) : OneAuditPoolIF {
+    val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+    override fun name() = poolName
+    override fun id() = poolId
+    override fun exactContests() = exactContests
+
     override fun regVotes() = regVotes
     override fun hasContest(contestId: Int) = regVotes[contestId] != null
     override fun ncards() = ncards
 
     override fun contests() = regVotes.keys.toList().toIntArray()
     override fun assortAvg() = assortAvg
-    override fun id() = poolId
-    override fun exactContests() = false // TODO dunno
 
-    // candidate for removal, assumes voteForN == 1
+    // candidate for removal, assumes voteForN == 1, perhaps we need to save that ??
     override fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder {
         val regVotes = regVotes[contestId]!!
         val poolUndervotes = ncards * voteForN - regVotes.votes.values.sum()
@@ -72,23 +106,21 @@ data class CardPool(override val poolName: String, override val poolId: Int, val
     }
 }
 
-// When the pools do not have CVRS, but just pool vote count totals.
-// Assumes that all cards have the same BallotStyle.
-// TODO cant do IRVs?
-// TODO pool contests() should perhaps be explicitly set
-class CardPoolWithBallotStyle(
+// this might be specialized for Boulder, perhaps shouldnt be in the general code ??
+data class OneAuditPoolWithBallotStyle(
     override val poolName: String,
     override val poolId: Int,
+    val exactContests: Boolean,
     val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes; must include contests with no votes
     val infos: Map<Int, ContestInfo>, // all infos
-) : CardPoolIF
-{
+): OneAuditPoolIF {
+
     val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
     val maxMinCardsNeeded: Int
     var adjustCards = 0 // TODO simplify relationship with undervotes
 
     // a convenient place to keep this, used in addOAClcaAssortersFromCvrs()
-    override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+    val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
 
     init {
         voteTotals.forEach { (contestId, contestTab) ->
@@ -100,16 +132,18 @@ class CardPoolWithBallotStyle(
         maxMinCardsNeeded = minCardsNeeded.values.max()
     }
 
+    override fun name() = poolName
+    override fun id() = poolId
+    override fun exactContests() = exactContests
+
+    override fun assortAvg() = assortAvg
     override fun hasContest(contestId: Int) = voteTotals.contains(contestId)
     override fun contests() = voteTotals.map { it.key }.toSortedSet().toIntArray()
-    override fun assortAvg() = assortAvg
-    override fun id() = poolId
-    override fun exactContests() = false // TODO dunno
-    fun contestTab(contestId: Int) = voteTotals[contestId]
 
     override fun regVotes(): Map<Int, RegVotesIF> {
         return voteTotals.mapValues { (id, contestTab) -> RegVotes(contestTab.votes, ncards(), undervoteForContest(id)) }
     }
+
     override fun ncards() = maxMinCardsNeeded + adjustCards
 
     fun adjustCards(adjust: Int, contestId : Int) {
@@ -117,32 +151,7 @@ class CardPoolWithBallotStyle(
         adjustCards = max( adjust, adjustCards)
     }
 
-    fun showVotes(contestIds: Collection<Int>, width: Int=4) = buildString {
-        append("${trunc(poolName, 9)}:")
-        contestIds.forEach { id ->
-            val contestTab = voteTotals[id]
-            if (contestTab == null)
-                append("    |")
-            else {
-                val voteSum = contestTab.nvotes()
-                append("${nfn(voteSum, width)}|")
-            }
-        }
-        appendLine()
-
-        val undervotes = undervotes()
-        append("${trunc("", 9)}:")
-        contestIds.forEach { id ->
-            val contestVote = voteTotals[id]
-            if (contestVote == null)
-                append("    |")
-            else {
-                val undervote = undervotes[id]!!
-                append("${nfn(undervote, width)}|")
-            }
-        }
-        appendLine()
-    }
+    fun contestTab(contestId: Int) = voteTotals[contestId]
 
     // undervotes per contest when single BallotStyle, no blanks
     fun undervotes(): Map<Int, Int> {  // contest -> undervote
@@ -168,14 +177,14 @@ class CardPoolWithBallotStyle(
     }
 
     override fun toString(): String {
-        return "CardPoolWithBallotStyle(poolName='$poolName', poolId=$poolId, voteTotals=$voteTotals, maxMinCardsNeeded=$maxMinCardsNeeded)"
+        return "OneAuditPoolWithBallotStyle(poolName='$poolName', poolId=$poolId, voteTotals=$voteTotals, maxMinCardsNeeded=$maxMinCardsNeeded)"
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as CardPoolWithBallotStyle
+        other as OneAuditPoolWithBallotStyle
 
         if (poolId != other.poolId) return false
         if (adjustCards != other.adjustCards) return false
@@ -192,43 +201,36 @@ class CardPoolWithBallotStyle(
         result = 31 * result + voteTotals.hashCode()
         return result
     }
-
-    companion object {
-        fun showVotes(contestIds: List<Int>, cardPools: List<CardPoolWithBallotStyle>, width:Int = 4) {
-            println("votes, undervotes")
-            print("${trunc("poolName", 9)}:")
-            contestIds.forEach {  print("${nfn(it, width)}|") }
-            println()
-
-            cardPools.forEach {
-                println(it.showVotes(contestIds, width))
-            }
-        }
-    }
 }
 
-// When the pools have complete CVRS.
-// TODO pool contests() should probably be separately set
-class CardPoolFromCvrs(
+// class CardPoolFromCvrs(
+//    override val poolName: String,
+//    override val poolId: Int,
+//    val infos: Map<Int, ContestInfo>) : CardPoolIF
+data class OneAuditPoolFromCvrs(
     override val poolName: String,
     override val poolId: Int,
-    val infos: Map<Int, ContestInfo>) : CardPoolIF
-{
-    // TODO mutable
+    val exactContests: Boolean,
+    val infos: Map<Int, ContestInfo>,
+): OneAuditPoolIF {
+
     val contestTabs = mutableMapOf<Int, ContestTabulation>()  // contestId -> ContestTabulation
     var totalCards = 0
 
     // a convenient place to keep this, calculated in addOAClcaAssorters()
-    override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+    val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
 
+    override fun name() = poolName
+    override fun id() = poolId
+    override fun exactContests() = exactContests
+
+    override fun assortAvg() = assortAvg
     override fun hasContest(contestId: Int) = contestTabs.contains(contestId)
     override fun contests() = (contestTabs.map { it.key }).toSortedSet().toIntArray()
+    fun contestTab(contestId: Int) = contestTabs[contestId]
 
     override fun regVotes() = contestTabs
     override fun ncards() = totalCards
-    override fun assortAvg() = assortAvg
-    override fun id() = poolId
-    override fun exactContests() = false // TODO dunno
 
     // this is when you have CVRs. (sfoa, sfoans)
     fun accumulateVotes(cvr : Cvr) {
@@ -243,7 +245,6 @@ class CardPoolFromCvrs(
         totalCards++
     }
 
-    fun contestTab(contestId: Int) = contestTabs[contestId]
 
     override fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder {
         val contestTab = contestTabs[contestId]!!
@@ -284,7 +285,7 @@ class CardPoolFromCvrs(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is CardPoolFromCvrs) return false
+        if (other !is OneAuditPoolFromCvrs) return false
 
         if (poolId != other.poolId) return false
         if (totalCards != other.totalCards) return false
@@ -303,7 +304,7 @@ class CardPoolFromCvrs(
     }
 
     override fun toString(): String {
-        return "CardPoolFromCvrs(poolName='$poolName', poolId=$poolId, totalCards=$totalCards contests=${contests().contentToString()})"
+        return "OneAuditPoolFromCvrs(poolName='$poolName', poolId=$poolId, totalCards=$totalCards contests=${contests().contentToString()})"
     }
 
     companion object {
@@ -323,7 +324,7 @@ class CardPoolFromCvrs(
     }
 }
 
-fun calcCardPoolsFromMvrs(
+fun calcOneAuditPoolsFromMvrs(
     infos: Map<Int, ContestInfo>,
     cardStyles: List<CardStyleIF>,
     mvrs: List<Cvr>,
@@ -356,7 +357,7 @@ fun calcCardPoolsFromMvrs(
 
 //////////////////////////////////////////////////////////////////
 
-fun distributeExpectedOvervotes(oaContest: OneAuditContestIF, cardPools: List<CardPoolWithBallotStyle>) {
+fun distributeExpectedOvervotes(oaContest: OneAuditContestIF, cardPools: List<OneAuditPoolWithBallotStyle>) {
     val contestId = oaContest.contestId
     val poolCards = oaContest.poolTotalCards()
     val expectedCards = oaContest.expectedPoolNCards()

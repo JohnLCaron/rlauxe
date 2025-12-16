@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import kotlin.random.Random
@@ -9,13 +10,13 @@ import kotlin.random.Random
 private val logger = KotlinLogging.logger("VunderBar")
 
 // simulate pooled data from the pool values; not for IRV
-class VunderBar(val pools: List<CardPoolIF>) {
+class VunderBar(val pools: List<CardPoolIF>, infos: Map<Int, ContestInfo>) {
     val vunderPools: Map<Int, VunderPool>
 
     init {
         vunderPools = pools.map { pool ->
             val vunders = pool.contests().associate { contestId ->
-                Pair( contestId, pool.votesAndUndervotes(contestId))
+                Pair( contestId, pool.votesAndUndervotes(contestId, infos[contestId]?.voteForN ?: 1))
             }
             VunderPool(vunders, pool.poolName, pool.poolId)
         }.associateBy { it.poolId }

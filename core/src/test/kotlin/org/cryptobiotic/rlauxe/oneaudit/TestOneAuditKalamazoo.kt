@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import kotlin.Int
@@ -136,10 +137,13 @@ class CardPoolSingleContest(override val poolName: String, override val poolId: 
     override fun ncards() = regVotes.ncards()
 
     override fun contests() = intArrayOf(contestId)
+    override fun assortAvg() = assortAvg
+    override fun id() = poolId
+    override fun exactContests() = false // TODO dunno
 
-    override fun votesAndUndervotes(contestId: Int): Vunder {
-        val poolUndervotes = ncards() - regVotes.votes.values.sum()
-        return Vunder(regVotes.votes, poolUndervotes, 1)
+    override fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder {
+        val poolUndervotes = ncards() * voteForN - regVotes.votes.values.sum()
+        return Vunder(regVotes.votes, poolUndervotes, voteForN)
     }
 }
 
@@ -163,7 +167,7 @@ fun makeTestMvrs(
     // add the pooled cvrs
     pools.forEach { pool ->
         pool.contests().forEach { contestId ->
-            val vunderPool = pool.votesAndUndervotes(contestId)
+            val vunderPool = pool.votesAndUndervotes(contestId, 1)
             val poolCvrs = makeVunderCvrs(mapOf(info.id to vunderPool), pool.poolName, poolId = pool.poolId)
             cvrs.addAll(poolCvrs)
         }

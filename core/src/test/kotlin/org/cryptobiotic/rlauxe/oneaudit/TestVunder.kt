@@ -140,7 +140,7 @@ class TestVunder {
 
         val info2 = ContestInfo("contest2", 2,  mapOf("Wes" to 1), SocialChoiceFunction.PLURALITY)
         val infos = mapOf(contestOA.id to contestOA.contest.info(), 2 to info2)
-        val vunderFuzz = OneAuditVunderBarFuzzer( VunderBar(cardPools), infos, .00)
+        val vunderFuzz = OneAuditVunderBarFuzzer( VunderBar(cardPools, infos), infos, .00)
 
         val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.makePairsFromCards(cards)
         val fuzzedMvrs = oaFuzzedPairs.map { it.first }

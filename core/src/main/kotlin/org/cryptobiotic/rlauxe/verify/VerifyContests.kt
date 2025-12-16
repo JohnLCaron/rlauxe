@@ -10,10 +10,9 @@ import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
-import org.cryptobiotic.rlauxe.persist.json.readCardPoolsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -24,6 +23,7 @@ import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateCardPools
+import org.cryptobiotic.rlauxe.workflow.readCardManifest
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -36,7 +36,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
     val config: AuditConfig
     val allContests: List<ContestUnderAudit>?
     val allInfos: Map<Int, ContestInfo>?
-    val cards: CloseableIterable<AuditableCard>
+    val cardManifest: CardManifest
     val publisher: Publisher
 
     init {
@@ -51,7 +51,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         }
         allInfos = allContests?.map{ it.contest.info() }?.associateBy { it.id }
 
-        cards = AuditableCardCsvReader(publisher.sortedCardsFile())
+        cardManifest = readCardManifest(publisher, allInfos!!)
     }
 
     fun verify() = verify( allContests!!, show = show)
@@ -66,20 +66,19 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         // all
         val infos = allInfos ?: contests.associate { it.id to it.contest.info() }
         checkContestsCorrectlyFormed(config, contests, results)
-        val contestSummary = verifyManifest(config, contests, cards, infos, results, show = show)
+        val contestSummary = verifyManifest(config, contests, cardManifest.cards, infos, results, show = show)
 
         // OA
         if (config.isOA) {
-            val cardPools = readCardPoolsJsonFile(publisher.cardPoolsFile(), infos).unwrap()
-            verifyOAagainstCards(contests, contestSummary, cardPools, infos, results, show = show)
-            verifyOAassortAvg(contests, cards.iterator(), results, show = show)
-            verifyOApools(contests, contestSummary, cardPools, results, show = show)
+            verifyOAagainstCards(contests, contestSummary, cardManifest, infos, results, show = show)
+            verifyOAassortAvg(contests, cardManifest.cards.iterator(), results, show = show)
+            verifyOApools(contests, contestSummary, cardManifest, results, show = show)
         }
 
         // CLCA
         if (config.isClca) {
             verifyClcaAgainstCards(contests, contestSummary, results, show = show)
-            verifyClcaAssortAvg(contests, cards.iterator(), results, show = show)
+            verifyClcaAssortAvg(contests, cardManifest.cards.iterator(), results, show = show)
         }
         return results
     }
@@ -250,13 +249,13 @@ fun verifyManifest(
 fun verifyOAagainstCards(
     contests: List<ContestUnderAudit>,
     contestSummary: ContestSummary,
-    cardPools: List<CardPoolIF>,
+    cardManifest: CardManifest,
     infos: Map<Int, ContestInfo>,
     result: VerifyResults,
     show: Boolean = false
 ) {
     val nonpoolCvrVotes = contestSummary.nonpooled
-    val poolSums = tabulateCardPools(cardPools, infos)
+    val poolSums = tabulateCardPools(cardManifest, infos)
     val sumWithPools = mutableMapOf<Int, ContestTabulation>()
     sumWithPools.sumContestTabulations(nonpoolCvrVotes)
     sumWithPools.sumContestTabulations(poolSums)
@@ -421,16 +420,20 @@ fun verifyOAassortAvg(
 
     // compare the assortAverage with the contest's reportedMargin in passorter.
     contestsUA.forEach { contestUA ->
-        val cardAssortAvg = cardAssortAvgs[contestUA.id]!!
+        val cardAssortAvg = cardAssortAvgs[contestUA.id]
+        if (cardAssortAvg == null) {
+            print("${contestUA.id}")
+            throw RuntimeException()
+        }
         contestUA.pollingAssertions.forEach { assertion ->
             val passorter = assertion.assorter
             if (cardAssortAvg[passorter] != null) {  //  may be Raire
                 val assortAvg = cardAssortAvg[passorter]!!
                 val reportedMargin = passorter.calcMargin(contestUA.contest.votes(), contestUA.contest.Nc())
                 val dilutedMargin = passorter.calcMargin(contestUA.contest.votes(), contestUA.Npop)
-                if (!doubleIsClose(dilutedMargin, reportedMargin)) {
-                    println("dilutedMargin=$dilutedMargin, reportedMargin=$reportedMargin")
-                }
+                //if (!doubleIsClose(dilutedMargin, reportedMargin)) {
+                //    println("dilutedMargin=$dilutedMargin, reportedMargin=$reportedMargin")
+                //}
                 if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
                     result.addError("  dilutedMargin does not agree for contest ${contestUA.id} assorter '$passorter'")
                     result.addError("     dilutedMargin= ${pfn(dilutedMargin)} cvrs.assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards}")
@@ -450,7 +453,7 @@ fun verifyOAassortAvg(
 fun verifyOApools(
     contestsUA: List<ContestUnderAudit>,
     contestSummary: ContestSummary,
-    pools: List<CardPoolIF>,
+    cardManifest: CardManifest,
     result: VerifyResults,
     show: Boolean = false
 ): VerifyResults {
@@ -463,8 +466,10 @@ fun verifyOApools(
         contestUA.pollingAssertions.forEach { assertion ->
             val passorter = assertion.assorter
             val assortAvg = AssortAvg()
-            pools.filter { it.name() != "unpooled" }.forEach { cardPool ->
-                if (cardPool.hasContest(contestId)) {
+            cardManifest.populations.filter { it.name() != "unpooled" }.forEach {
+                if (it.hasContest(contestId)) {
+                    val cardPool = it as OneAuditPoolIF
+
                     val regVotes = cardPool.regVotes()[contestId]!!
                     if (cardPool.ncards() > 0) {
                         // note: use cardPool.ncards(), this is the diluted count

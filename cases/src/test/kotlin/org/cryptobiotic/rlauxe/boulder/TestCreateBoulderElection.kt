@@ -5,10 +5,12 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.cli.RunRliRoundCli
+import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.fail
 
 class TestCreateBoulderElection {
 
@@ -43,6 +45,54 @@ class TestCreateBoulderElection {
             clear = true,
         )
     } */
+
+    @Test
+    fun createBoulder24oap() {
+        val topdir = "$testdataDir/cases/boulder24/oap"
+        createBoulderElectionP(
+            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
+            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+            topdir = topdir,
+            auditType = AuditType.ONEAUDIT,
+        )
+
+        val publisher = Publisher("$topdir/audit")
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
+    }
+
+    @Test
+    fun testRunVerifyBoulder24oap() {
+        val auditdir = "$testdataDir/cases/boulder24/oap/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
+        println()
+        print(results)
+        if (results.hasErrors) fail()
+    }
+
+    @Test
+    fun createBoulder24clcap() { // simulate CVRs
+        val topdir = "$testdataDir/cases/boulder24/clcap"
+        createBoulderElectionP(
+            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
+            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+            topdir = topdir,
+            auditType = AuditType.CLCA,
+        )
+
+        val publisher = Publisher("$topdir/audit")
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
+    }
+
+    @Test
+    fun testRunVerifyBoulder24clcap() {
+        val auditdir = "$testdataDir/cases/boulder24/clcap/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
+        println()
+        print(results)
+        if (results.hasErrors) fail()
+    }
 
     @Test
     fun createBoulder24oa() {

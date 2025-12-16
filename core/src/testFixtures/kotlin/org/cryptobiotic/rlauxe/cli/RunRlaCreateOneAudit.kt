@@ -134,7 +134,7 @@ object RunRlaCreateOneAudit {
         scardIter.forEach { sortedCards.add(it) }
 
         // TODO test OneAuditVunderBarFuzzer
-        val vunderFuzz = OneAuditVunderBarFuzzer(VunderBar(cardPools), infos, fuzzMvrs)
+        val vunderFuzz = OneAuditVunderBarFuzzer(VunderBar(cardPools, infos), infos, fuzzMvrs)
         val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.makePairsFromCards(sortedCards)
         val sortedMvrs = oaFuzzedPairs.map { it.first }
         // have to write this here, where we know the mvrs

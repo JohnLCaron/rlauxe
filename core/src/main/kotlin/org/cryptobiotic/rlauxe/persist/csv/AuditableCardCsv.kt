@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.persist.csv
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ZipReader
@@ -17,21 +16,24 @@ private val logger = KotlinLogging.logger("AuditableCardCsv")
 //    val index: Int,  // index into the original, canonical list of cards
 //    val prn: Long,   // psuedo random number
 //    val phantom: Boolean,
-//    val contests: IntArray, // list of contests on this ballot.
-//    val votes: List<IntArray>?, // contest -> list of candidates voted for; for IRV, ranked first to last; missing for pooled data
-//    val poolId: Int?, // for OneAudit
-//    val cardStyle: String? = null, // TODO cardStyle doesnt get serialized
-//)
+//    val possibleContests: IntArray, // remove
+//    val votes: Map<Int, IntArray>?, // must have this and/or population
+//    val poolId: Int?,
+//    val cardStyle: String? = null, // remove
+//    val population: PopulationIF? = null, // not needed if hasStyle ?
+//): CvrIF {
 
 val AuditableCardHeader = "location, index, prn, phantom, poolId, style, cvr contests, candidates0, candidates1, ...\n"
 
 fun writeAuditableCardCsv(card: AuditableCard) = buildString {
     append("${card.location}, ${card.index}, ${card.prn}, ${if(card.phantom) "yes," else ","} ")
     if (card.poolId == null) append(", ") else append("${card.poolId}, ")
-    // if (card.cardStyle != null)  TODO
-    //        append("\"${card.cardStyle}\", ")  // either the pool name or the possible contests
-    //    else
-    append("${card.possibleContests.joinToString(" ")}, ")
+    if (card.cardStyle != null) {
+        append("${card.cardStyle}, ")
+    } else if (card.population != null)
+        append("P${card.population.id()}, ")
+    else
+        append("${card.possibleContests.joinToString(" ")}, ")
 
     if (card.votes != null) {
         val contests = card.votes.map { it.key }.toIntArray()
@@ -90,7 +92,7 @@ fun readAuditableCardCsv(line: String): AuditableCard {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
 
-    var cardStyle : String? = null
+    var popId : String? = null
     var pcontests = intArrayOf()
 
     var idx = 0
@@ -101,13 +103,13 @@ fun readAuditableCardCsv(line: String): AuditableCard {
     val poolIdToken = ttokens[idx++]
     val poolId = if (poolIdToken.isEmpty()) null else poolIdToken.toInt()
 
-    // possible contests or style name
-    val pcontestsStr = ttokens[idx++]
-    if (pcontestsStr.startsWith("\"")) {
-        cardStyle=pcontestsStr.removePrefix("\"").removeSuffix("\"").trim()
+    // style = possible contests or population id
+    val styleStr = ttokens[idx++]
+    if (styleStr.startsWith("P")) {
+        popId=styleStr
     } else {
-        pcontests = if (pcontestsStr.trim().isEmpty()) intArrayOf() else {
-            val pcontestsTokens = pcontestsStr.split(" ")
+        pcontests = if (styleStr.trim().isEmpty()) intArrayOf() else {
+            val pcontestsTokens = styleStr.split(" ")
             pcontestsTokens.map { it.trim().toInt() }.toIntArray()
         }
     }
@@ -133,9 +135,9 @@ fun readAuditableCardCsv(line: String): AuditableCard {
             require(contests.size == work.size) { "contests.size (${contests.size}) != votes.size (${work.size})" }
             contests.zip(work).toMap()
         }
-        AuditableCard(desc, index, sampleNum, phantom, pcontests, votes, poolId, cardStyle)
+        AuditableCard(desc, index, sampleNum, phantom, pcontests, votes, poolId, cardStyle=popId)
     } else {
-        AuditableCard(desc, index, sampleNum, phantom, pcontests, null, poolId, cardStyle)
+        AuditableCard(desc, index, sampleNum, phantom, pcontests, null, poolId, cardStyle=popId)
     }
 }
 

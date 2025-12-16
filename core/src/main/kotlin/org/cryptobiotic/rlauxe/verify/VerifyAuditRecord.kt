@@ -134,8 +134,8 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
     // TODO check mvrs
     fun verifySamplingForContest(contest: ContestUnderAudit, cards: List<AuditableCard>, nextCards: List<AuditableCard>,
                                  round:Int, estCards: Int, result: VerifyResults): Boolean {
-        val mycards = cards.filter { it.contests().contains(contest.id)}.iterator()
-        val nextcards = nextCards.filter { it.contests().contains(contest.id)}.iterator()
+        val mycards = cards.filter { it.hasContest(contest.id) }.iterator()
+        val nextcards = nextCards.filter { it.hasContest(contest.id) }.iterator()
 
         // TODO need to know how many cards were chosen for this contest and round, and stop there...
         var count = 0

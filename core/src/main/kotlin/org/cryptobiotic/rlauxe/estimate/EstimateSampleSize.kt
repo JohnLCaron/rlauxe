@@ -44,7 +44,7 @@ fun estimateSampleSizes(
     // simulate the card pools for all OneAudit contests; here because its over all contests
     val infos = auditRound.contestRounds.map { it.contestUA.contest.info() }.associateBy { it.id }
     val vunderFuzz = if (!config.isOA) null else {
-        OneAuditVunderBarFuzzer(VunderBar(cardPools!!), infos, config.simFuzzPct ?: 0.0)
+        OneAuditVunderBarFuzzer(VunderBar(cardPools!!, infos), infos, config.simFuzzPct ?: 0.0)
     }
 
     // create the estimation tasks for each contest

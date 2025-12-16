@@ -14,6 +14,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.RegVotes
+import org.cryptobiotic.rlauxe.util.RegVotesIF
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
@@ -111,10 +112,10 @@ class RegVotesJson(
     val undervotes: Int,
 )
 
-fun RegVotes.publishJson() = RegVotesJson(
+fun RegVotesIF.publishJson() = RegVotesJson(
     this.votes,
-    this.ncards,
-    this.undervotes,
+    this.ncards(),
+    this.undervotes(),
 )
 
 fun RegVotesJson.import() = RegVotes(
@@ -122,8 +123,6 @@ fun RegVotesJson.import() = RegVotes(
     this.ncards,
     this.undervotes,
 )
-
-
 
     // class CardPoolWithBallotStyle(
 //    override val poolName: String,

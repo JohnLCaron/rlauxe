@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.audit.CardIF
+import org.cryptobiotic.rlauxe.audit.CvrIF
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -89,7 +89,7 @@ interface OneAuditContestIF {
     val contestId: Int
     fun poolTotalCards(): Int // total cards in all pools for this contest
     fun expectedPoolNCards(): Int // expected total pool cards for this contest, making assumptions about missing undervotes
-    fun adjustPoolInfo(cardPools: List<CardPoolIF>)
+    fun adjustPoolInfo(cardPools: List<OneAuditPoolIF>)
 }
 
 private const val debug = false
@@ -98,7 +98,7 @@ fun makeOneAuditContests(
     hasStyle: Boolean,
     wantContests: List<ContestIF>, // the contests you want to audit
     nbs: Map<Int,Int>,
-    cardPools: List<CardPoolIF>,
+    cardPools: List<OneAuditPoolIF>,
 ): List<ContestUnderAudit> {
 
     // The Nbs come from the cards
@@ -123,7 +123,7 @@ fun makeOneAuditContests(
 // use dilutedMargin to set the pool assorter averages. can only use for non-IRV contests
 fun addOAClcaAssortersFromMargin(
     oaContests: List<ContestUnderAudit>,
-    cardPools: List<CardPoolIF>, // poolId -> pool
+    cardPools: List<OneAuditPoolIF>, // poolId -> pool
     hasStyle: Boolean,
 ) {
     // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
@@ -162,7 +162,7 @@ class ClcaAssorterOneAudit(
 ) : ClcaAssorter(info, assorter, hasUndervotes = hasCompleteCvrs, dilutedMargin=dilutedMargin) {
 
     // B(bi, ci)
-    override fun bassort(mvr: CardIF, cvr: CardIF): Double {
+    override fun bassort(mvr: CvrIF, cvr: CvrIF): Double {
         if (cvr.poolId() == null) {
             return super.bassort(mvr, cvr) // here we use the standard assorter
         }
@@ -190,7 +190,7 @@ class ClcaAssorterOneAudit(
         return result
     }
 
-    fun overstatementPoolError(mvr: CardIF, poolAvgAssortValue: Double): Double {
+    fun overstatementPoolError(mvr: CvrIF, poolAvgAssortValue: Double): Double {
         val mvr_assort =
             if (mvr.isPhantom()) 0.0
             else if (!mvr.hasContest(info.id)) 0.5  // TODO investigate this: we could have Nc == Npop if each pool has a single card style

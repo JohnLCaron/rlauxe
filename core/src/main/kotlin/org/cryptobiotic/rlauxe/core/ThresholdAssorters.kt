@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.audit.CardIF
+import org.cryptobiotic.rlauxe.audit.CvrIF
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.mean2margin
@@ -76,7 +76,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
         return if (h < doublePrecision) 0.0 else h
     }
 
-    override fun assort(cvr: CardIF, usePhantoms: Boolean): Double {
+    override fun assort(cvr: CvrIF, usePhantoms: Boolean): Double {
         if (!cvr.hasContest(id)) return 0.5
         if (usePhantoms && cvr.isPhantom()) return 0.0 // worst case
         val cands = cvr.votes(id)
@@ -247,7 +247,7 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
         return c * g + 0.5
     }
 
-    override fun assort(cvr: CardIF, usePhantoms: Boolean): Double {
+    override fun assort(cvr: CvrIF, usePhantoms: Boolean): Double {
         if (!cvr.hasContest(id)) return 0.5
         if (usePhantoms && cvr.isPhantom()) return 0.0 // worst case
         val cands = cvr.votes(id)

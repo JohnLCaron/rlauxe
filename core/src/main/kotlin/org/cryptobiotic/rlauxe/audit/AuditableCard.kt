@@ -18,7 +18,7 @@ import kotlin.sequences.plus
 
 // Polling: always need cardStyles
 
-interface CardIF {
+interface CvrIF {
     fun hasContest(contestId: Int): Boolean // "is in P_c".
     fun location(): String
     fun isPhantom(): Boolean
@@ -37,29 +37,18 @@ data class AuditableCard (
     val index: Int,  // index into the original, canonical list of cards
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
-    val possibleContests: IntArray, // list of contests that might be on the ballot.
-                                    // card does not know cvrsAreComplete nor the cardPool. So always fill out possibleContests when cvrsAreComplete = false
-                                    // cvrsAreComplete && votes != null means can use votes.
-                                    // polling and oa pools need to fill out possibleContests always. unless you want to allow empty = all?
-                                    // or, always factor out cardStyles
+    val possibleContests: IntArray, // remove
 
-    val votes: Map<Int, IntArray>?, // for CLCA or OneAudit, a map of contest -> the candidate ids (when IRV, ranked first to last)
-                                    // when it includes undervotes then it doubles for possibleContests
-                                    // missing for pooled data or polling audits
-
-    val poolId: Int?,   // for OneAudit, or for setting style from CVR (so tolerate non-OA poolId)
-                        // what if poolid == the card style ?? then pools always have same card style.
-                        // but what about setting the card style without belonging to an OA pool? problem only affests OA nonpool when !cvrsAreComplete
-                        // TODO maybe this should be "PoolName", or we need another field in location
-
-    val cardStyle: String? = null, // set style in a way that doesnt interfere with oneaudit pool.
-                                   // TODO cardStyle doesnt get serialized; perhaps only used when constructing ??
-): CardIF {
+    val votes: Map<Int, IntArray>?, // must have this and/or population
+    val poolId: Int?,
+    val cardStyle: String? = null, // remove
+    val population: PopulationIF? = null, // not needed if hasStyle ?
+): CvrIF {
 
     init {
-        if (!phantom && (possibleContests.isEmpty() && votes == null)) {
+        if (!phantom && (possibleContests.isEmpty() && population == null && cardStyle == null && votes == null)) {
             // you could make this case mean "all". But maybe its better to be explicit ??
-            throw RuntimeException("AuditableCard must have votes or possibleContests")
+            throw RuntimeException("AuditableCard must have votes, possibleContests, or population")
         }
         if (possibleContests.isNotEmpty() && votes != null) {
             votes.keys.forEach { id ->
@@ -93,9 +82,13 @@ data class AuditableCard (
     override fun votes(contestId: Int): IntArray? = votes?.get(contestId)
 
     override fun hasContest(contestId: Int): Boolean {
-        return contests().contains(contestId)
+        return if (population != null) population.hasContest(contestId)
+            else if (possibleContests.isNotEmpty()) possibleContests.contains(contestId)
+            else if (votes != null) votes[contestId] != null
+            else false
     }
 
+    // TODO deprecated?
     fun contests(): IntArray {
         return if (possibleContests.isNotEmpty()) possibleContests
             else if (votes != null) votes.keys.toList().sorted().toIntArray()
@@ -109,14 +102,8 @@ data class AuditableCard (
         else if (contestVotes.contains(candidateId)) 1 else 0
     }
 
-    /* Is there exactly one vote in the contest among the given candidates?
-    override fun hasOneVoteFor(contestId: Int, candidates: List<Int>): Boolean {
-        val contestVotes = votes?.get(contestId) ?: return false
-        val totalVotes = contestVotes.count { candidates.contains(it) }
-        return (totalVotes == 1)
-    } */
-
     // Kotlin data class doesnt handle IntArray and List<IntArray> correctly
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is AuditableCard) return false
@@ -127,6 +114,9 @@ data class AuditableCard (
         if (poolId != other.poolId) return false
         if (location != other.location) return false
         if (!possibleContests.contentEquals(other.possibleContests)) return false
+        if (cardStyle != other.cardStyle) return false
+        if (population != other.population) return false
+
         if ((votes == null) != (other.votes == null)) return false
 
         if (votes != null) {
@@ -146,6 +136,8 @@ data class AuditableCard (
         result = 31 * result + (poolId ?: 0)
         result = 31 * result + location.hashCode()
         result = 31 * result + possibleContests.contentHashCode()
+        result = 31 * result + (cardStyle?.hashCode() ?: 0)
+        result = 31 * result + (population?.hashCode() ?: 0)
         votes?.forEach { (contestId, candidates) -> result = 31 * result + contestId.hashCode() + candidates.contentHashCode() }
         return result
     }
@@ -242,7 +234,8 @@ class CvrsWithStylesToCardManifest(
             contests ?: intArrayOf(),
             votes,
             org.poolId,
-            style?.name())
+            null, //style?.name())
+        )
     }
 
     override fun close() = cvrs.close()
@@ -289,11 +282,91 @@ class CardsWithStylesToCardManifest(
             contests ?: intArrayOf(),
             votes,
             org.poolId,
-            style?.name(),
+            null, // style?.name(),
         )
     }
 
     override fun close() = cards.close()
 }
+
+
+// put cards into canonical form
+class CvrsWithPopulationsToCardManifest(
+    val type: AuditType,
+    // val cvrsAreComplete: Boolean,       // TODO cvrsAreComplete == false means cardStyles != null and poolId != null;
+    // unless theres some default behavior, esp with poolId; maybe "all"
+    val cvrs: CloseableIterator<Cvr>,
+    val phantomCvrs : List<Cvr>?,
+    populations: List<PopulationIF>?,
+): CloseableIterator<AuditableCard> {
+
+    val popMap = populations?.associateBy{ it.id() }
+    val allCvrs: Iterator<Cvr>
+    var cardIndex = 1
+
+    init {
+        allCvrs = if (phantomCvrs == null) {
+            cvrs
+        } else {
+            val cardSeq = cvrs.iterator().asSequence()
+            val phantomSeq = phantomCvrs.asSequence()
+            (cardSeq + phantomSeq).iterator()
+        }
+    }
+
+    override fun hasNext() = allCvrs.hasNext()
+
+    override fun next(): AuditableCard {
+        val org = allCvrs.next()
+        val pop = if (popMap == null) null else popMap[org.poolId] // hijack poolId
+        val hasCvr = type.isClca() || (type.isOA() && org.poolId == null)
+        val votes = if (hasCvr) org.votes else null
+        if (pop != null)
+            print("")
+
+        // data class AuditableCard (
+        //    val location: String, // info to find the card for a manual audit. Aka ballot identifier.
+        //    val index: Int,  // index into the original, canonical list of cards
+        //    val prn: Long,   // psuedo random number
+        //    val phantom: Boolean,
+        //    val possibleContests: IntArray, // remove
+        //
+        //    val votes: Map<Int, IntArray>?, // must have this and/or population
+        //
+        //    val poolId: Int?,
+        //
+        //    val cardStyle: String? = null, // remove
+        //    val population: PopulationIF? = null, // not needed if hasStyle ?
+        //)
+        return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
+            intArrayOf(),
+            votes,
+            org.poolId,
+            population = pop,
+        )
+    }
+
+    override fun close() = cvrs.close()
+}
+
+class CardsWithPopulationsToCardManifest(
+    val type: AuditType,
+    val cards: CloseableIterator<AuditableCard>,
+    populations: List<PopulationIF>?,
+): CloseableIterator<AuditableCard> {
+
+    val popMap = populations?.associateBy{ "P${it.id()}" }
+
+    override fun hasNext() = cards.hasNext()
+
+    override fun next(): AuditableCard {
+        val org = cards.next()
+        val pop = if (popMap == null) null else popMap[org.cardStyle]
+        return org.copy(population = pop)
+    }
+
+    override fun close() = cards.close()
+}
+
 
 

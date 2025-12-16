@@ -4,6 +4,7 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -12,8 +13,12 @@ import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readCardPoolsJsonFile
+import org.cryptobiotic.rlauxe.persist.json.readCardPoolsJsonFileUnwrapped
+import org.cryptobiotic.rlauxe.persist.json.readPopulationsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
+import java.nio.file.Files
+import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("PersistedMvrManager")
 private val checkValidity = true
@@ -36,8 +41,7 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
         return cardPoolResult.unwrap()
     }
 
-
-    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CardIF, CardIF>>  {
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, CvrIF>>  {
         val mvrsForRound = readMvrsForRound(round)
         val sampleNumbers = mvrsForRound.map { it.prn }
 
@@ -71,4 +75,26 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
     }
 
     fun auditableCards(): CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.sortedCardsFile())
+}
+
+fun readCardManifest(publisher: Publisher, infos: Map<Int, ContestInfo>): CardManifest {
+
+    return if (Files.exists(Path(publisher.populationsFile()))) {
+        val populations = readPopulationsJsonFileUnwrapped(publisher.populationsFile())
+        // merge population references into the Card
+        val mergedCards = CloseableIterable {
+            CardsWithPopulationsToCardManifest(
+                type = AuditType.ONEAUDIT, // TODO
+                readCardsCsvIterator(publisher.sortedCardsFile()),
+                populations,
+            )
+        }
+
+        CardManifest(mergedCards, populations)
+
+    } else {
+        val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
+        val cardPools = readCardPoolsJsonFileUnwrapped(publisher.cardPoolsFile(), infos)
+        CardManifest(CloseableIterable { sortedCards.iterator() }, cardPools)
+    }
 }

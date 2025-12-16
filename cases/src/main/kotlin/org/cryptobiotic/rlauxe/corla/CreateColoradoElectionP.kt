@@ -5,10 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolWithBallotStyle
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestIF
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolWithBallotStyle
 import org.cryptobiotic.rlauxe.oneaudit.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.util.*
@@ -20,40 +17,43 @@ private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
 // making OneAudit pools from the precinct results
 // TODO vary percent cards in pools, show plot
-open class CreateColoradoElection (
+open class CreateColoradoElectionP (
     electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
     val config: AuditConfig,
     val hasStyle: Boolean = true,
-): CreateElectionIF {
+): CreateElectionPIF {
     val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
 
     val oaContests = makeOneContestInfo(electionDetailXml, roundContests)
     val infoMap = oaContests.associate { it.info.id to it.info }
-    val cardPools: List<CardPoolWithBallotStyle> = convertPrecinctsToCardPools(precinctFile, infoMap)
+    val cardPoolBuilders: List<OneAuditPoolWithBallotStyle> = convertPrecinctsToCardPools(precinctFile, infoMap)
 
+    val cardPools: List<OneAuditPool>
     val contests: List<ContestIF>
     val contestsUA: List<ContestUnderAudit>
 
     init {
         // add pool counts into contests
-        oaContests.forEach { it.adjustPoolInfo(cardPools) }
+        oaContests.forEach { it.adjustPoolInfo(cardPoolBuilders) }
         val undervotes = mutableMapOf<Int, MutableList<Int>>()
         oaContests.forEach {
             val undervote = undervotes.getOrPut(it.info.id) { mutableListOf() }
-            undervote.add(it.poolUndervote(cardPools))
+            undervote.add(it.oapoolUndervote(cardPoolBuilders))
         }
 
         // first do contest 0, since it likely has the fewest undervotes
-        distributeExpectedOvervotes(oaContests[0], cardPools)
-        oaContests.forEach { it.adjustPoolInfo(cardPools) }
+        distributeExpectedOvervotes(oaContests[0], cardPoolBuilders)
+        oaContests.forEach { it.adjustPoolInfo(cardPoolBuilders) }
 
         oaContests.forEach {
             val undervote = undervotes.getOrPut(it.info.id) { mutableListOf() }
-            undervote.add(it.poolUndervote(cardPools))
+            undervote.add(it.oapoolUndervote(cardPoolBuilders))
         }
+
+        cardPools = cardPoolBuilders.map { it.toOneAuditPool() }
         contests = makeContests()
         contestsUA = ContestUnderAudit.make(contests, createCardManifest(), isClca=true, hasStyle)
     }
@@ -100,7 +100,7 @@ open class CreateColoradoElection (
         return contests
     }
 
-    private fun convertPrecinctsToCardPools(precinctFile: String, infoMap: Map<Int, ContestInfo>): List<CardPoolWithBallotStyle> {
+    private fun convertPrecinctsToCardPools(precinctFile: String, infoMap: Map<Int, ContestInfo>): List<OneAuditPoolWithBallotStyle> {
         val reader = ZipReader(precinctFile)
         val input = reader.inputStream("2024GeneralPrecinctLevelResults.csv")
         val precincts = readColoradoPrecinctLevelResults(input)
@@ -125,7 +125,7 @@ open class CreateColoradoElection (
                     }
                 }
             }
-            CardPoolWithBallotStyle("${precinct.county}-${precinct.precinct}", idx, contestTabs, infoMap)
+            OneAuditPoolWithBallotStyle("${precinct.county}-${precinct.precinct}", idx, true,contestTabs, infoMap)
         }
     }
 
@@ -144,22 +144,23 @@ open class CreateColoradoElection (
         }
     }
 
-    override fun cardPools(): List<CardPoolIF>?  = cardPools
+    override fun populations() = if (config.isClca) emptyList() else cardPools
+    // override fun cardPools(): List<CardPoolIF>?  = cardPools
     override fun contestsUA() = contestsUA
     override fun cardManifest() = createCardManifest()
 
     fun createCardManifest(): CloseableIterator<AuditableCard> {
-        return CvrsWithStylesToCardManifest(config.auditType, hasStyle,
+        return CvrsWithPopulationsToCardManifest(config.auditType,
             Closer(CvrIteratorfromPools()),
             makePhantomCvrs(contests),
-            if (config.isOA) cardPools else null,
+            if (config.isOA) cardPoolBuilders else null,
         )
     }
 
     // dont load into memory all at once, just one pool at a time
     inner class CvrIteratorfromPools(): Iterator<Cvr> {
         val oaContestMap = oaContests.associateBy { it.info.id }
-        val cardPoolIter = cardPools.iterator()
+        val cardPoolIter = cardPoolBuilders.iterator()
         var innerIter: CardsFromPool
 
         init {
@@ -181,7 +182,7 @@ open class CreateColoradoElection (
     }
 
     // these are chosen randomly, so in order for mvrs and cvrs to match, the cvrs have to be made from the mvrs.
-    inner class CardsFromPool(val cardPool: CardPoolWithBallotStyle, val oaContestMap: Map<Int, OneAuditContestCorla>) : Iterator<Cvr> {
+    inner class CardsFromPool(val cardPool: OneAuditPoolWithBallotStyle, val oaContestMap: Map<Int, OneAuditContestCorla>) : Iterator<Cvr> {
         val cvrs: Iterator<Cvr>
 
         init {
@@ -201,47 +202,9 @@ open class CreateColoradoElection (
     }
 }
 
-class OneAuditContestCorla(val info: ContestInfo, detailContest: ElectionDetailContest, contestRound: CorlaContestRoundCsv): OneAuditContestIF {
-    override val contestId = info.id
-    val Nc: Int
-    val candidateVotes: Map<Int, Int>
-    var poolTotalCards: Int = 0
-
-    init {
-        val candidates = detailContest.choices
-        candidateVotes = candidates.mapIndexed { idx, choice -> Pair(idx, choice.totalVotes) }.toMap()
-
-        val totalVotes = candidateVotes.map { it.value }.sum() / info.voteForN
-        var useNc = contestRound.contestBallotCardCount
-        if (useNc < totalVotes) {
-            println("*** Contest ${info.name} has $totalVotes total votes, but contestBallotCardCount is ${contestRound.contestBallotCardCount} - using totalVotes")
-            useNc = totalVotes // contestRound.ballotCardCount
-        }
-        Nc = useNc
-    }
-
-    // total cards in all pools for this contest
-    override fun poolTotalCards(): Int  = poolTotalCards
-
-    override fun adjustPoolInfo(cardPools: List<OneAuditPoolIF>){
-        poolTotalCards = cardPools.filter{ it.hasContest(info.id) }.sumOf { it.ncards() }
-    }
-
-    fun poolUndervote(cardPools: List<CardPoolWithBallotStyle>): Int {
-        return cardPools.sumOf { it.undervoteForContest(contestId) }
-    }
-
-    fun oapoolUndervote(cardPools: List<OneAuditPoolWithBallotStyle>): Int {
-        return cardPools.sumOf { it.undervoteForContest(contestId) }
-    }
-
-    // expected total poolcards for this contest, making assumptions about missing undervotes
-    override fun expectedPoolNCards() = Nc
-}
-
 ////////////////////////////////////////////////////////////////////
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
-fun createColoradoElection(
+fun createColoradoElectionP(
     topdir: String,
     electionDetailXmlFile: String,
     contestRoundFile: String,
@@ -262,9 +225,9 @@ fun createColoradoElection(
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
     }
-    val election = CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, config)
+    val election = CreateColoradoElectionP(electionDetailXmlFile, contestRoundFile, precinctFile, config)
 
-    CreateAudit("corla", config, election, auditDir = "$topdir/audit", clear = clear)
+    CreateAuditP("corla", config, election, auditDir = "$topdir/audit", clear = clear)
     println("createColoradoOneAudit took $stopwatch")
 }
 

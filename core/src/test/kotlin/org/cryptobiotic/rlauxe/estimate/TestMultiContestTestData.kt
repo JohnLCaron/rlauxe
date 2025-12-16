@@ -75,7 +75,7 @@ class TestMultiContestTestData {
     fun testMakeCardLocationManifest() {
         val cardManifest = test.makeCardLocationManifest()
         val testCards = mutableListOf<AuditableCard>()
-        cardManifest.cardLocations.iterator().forEach { testCards.add(it) }
+        cardManifest.cards().iterator().forEach { testCards.add(it) }
 
         val tabs = tabulateAuditableCards(Closer(testCards.iterator()), infos).toSortedMap() // contestId -> candidateId -> nvotes
         tabs.forEach { id, tab ->
@@ -196,7 +196,7 @@ class TestMultiContestTestData {
     fun testPhantomCvrs() {
         val cardManifest = test.makeCardLocationManifest()
         val testCvrs = mutableListOf<Cvr>()
-        cardManifest.cardLocations.iterator().forEach { testCvrs.add(it.cvr()) }
+        cardManifest.cards().iterator().forEach { testCvrs.add(it.cvr()) }
 
         test.contests.forEachIndexed { idx, contest ->
             val fcontest = test.contestTestBuilders[idx]

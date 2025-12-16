@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.audit.CardIF
+import org.cryptobiotic.rlauxe.audit.CvrIF
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
@@ -234,7 +234,7 @@ data class AboveThresholdB(val info: ContestInfo, val winner: Int, val t: Double
         return c * g + 0.5
     }
 
-    override fun assort(cvr: CardIF, usePhantoms: Boolean): Double {
+    override fun assort(cvr: CvrIF, usePhantoms: Boolean): Double {
         if (!cvr.hasContest(info.id)) return 0.5
         if (usePhantoms && cvr.isPhantom()) return 0.0 // worst case
         val cands = cvr.votes(info.id)

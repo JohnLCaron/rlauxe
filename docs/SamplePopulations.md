@@ -76,16 +76,16 @@ The diluted margin is (nwinners - nlosers) / Npopulation, where Npopulation > Nu
 Philip's "More style, less work" paper uses diluted margins. (Paper shows how Npop is smaller when hasStyle = true. 
 Could also say that Npop is smaller when you know which cards have the contest, and can sample from just those.)
 
-In TestAvgAssortValues, testAvgAssortWithDilutedMargin() tests that dilutedMargin, not reportedMarggin, agrees with cvrs.assortMargin
-Use diluted margin for nerror.
+In TestAvgAssortValues, testAvgAssortWithDilutedMargin() tests that dilutedMargin, not reportedMargin, agrees with cvrs.assortMargin.
+
+Conclusion: use diluted margin for nerror.
 
 # Populations
 
 Each contest has a known population P_c of cards it might be in. |P_c| = Npopulation = Npop is used for the diluted margin. 
 When auditing, we sample consistently over P_c.
 
-In the best case, we are running a CLCA audit where the CVRs record the undervotes. Then, the CVR records the exact contests on the card,
-and Npop = Nc.
+In the best case, we are running a CLCA audit where the CVRs record the undervotes. Then, the CVR records the exact contests on the card, and Npop = Nc.
 
 There are other scenarios besides CLCA with undervotes where we know exactly which contests are on each card (even for polling):
 
@@ -97,7 +97,7 @@ In the case that "we know exactly what contests are on all cards", SHANGRLA sets
 of hasStyle.
 
 When we dont know the exact list of contests on all the cards, it is worth narrowing the population size down as much as possible,
-to minimize samlpe sizes.
+to minimize sample sizes.
 
 Define:
 

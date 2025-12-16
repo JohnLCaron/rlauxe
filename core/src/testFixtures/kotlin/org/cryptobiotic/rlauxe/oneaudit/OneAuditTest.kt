@@ -149,6 +149,7 @@ fun makeMvrs(
 
     val mvrs = mutableListOf<Cvr>()
     val info = contest.info()
+    val infos = mapOf( contest.id to info)
 
     // add the regular cvrs
     if (cvrNcards > 0) {
@@ -159,7 +160,7 @@ fun makeMvrs(
 
     // add the pooled cvrs
     pool.contests().forEach { contestId ->
-        val vunderPool = pool.votesAndUndervotes(contestId)
+        val vunderPool = pool.votesAndUndervotes(contestId, infos[contestId]?.voteForN ?: 1)
         val poolCvrs = makeVunderCvrs(mapOf(info.id to vunderPool), pool.poolName, poolId = pool.poolId)
         mvrs.addAll(poolCvrs)
     }

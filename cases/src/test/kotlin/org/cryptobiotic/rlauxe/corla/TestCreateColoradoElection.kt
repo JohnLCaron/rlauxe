@@ -4,6 +4,7 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
+import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
@@ -11,6 +12,7 @@ import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.fail
 
 class TestCreateColoradoElection {
 
@@ -20,6 +22,43 @@ class TestCreateColoradoElection {
         val electionResultXml: ElectionDetailXml = readColoradoElectionDetail(detailXmlFile)
         println(electionResultXml)
         println("  number of contests = ${electionResultXml.contests.size}")
+    }
+
+    @Test
+    fun testCreateColoradoOneAuditP() {
+        val topdir = "$testdataDir/cases/corla/oneauditp"
+        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
+        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
+        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
+
+        createColoradoElectionP(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.ONEAUDIT, clear=true)
+
+        val publisher = Publisher("$topdir/audit")
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsExternalSort(topdir, publisher, config.seed)
+    }
+
+    @Test
+    fun testRunVerifyColoradoOneAuditP() {
+        val auditdir = "$testdataDir/cases/corla/oneauditp/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
+        println()
+        print(results)
+        if (results.hasErrors) fail()
+    }
+
+    @Test
+    fun testCreateColoradoClcaP() {
+        val topdir = "$testdataDir/cases/corla/clcap"
+        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
+        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
+        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
+
+        createColoradoElectionP(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.CLCA, clear=true)
+
+        val publisher = Publisher("$topdir/audit")
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsExternalSort(topdir, publisher, config.seed)
     }
 
     @Test

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardIF
+import org.cryptobiotic.rlauxe.audit.CvrIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
@@ -42,7 +42,7 @@ class MvrManagerFromManifest(
         return pools
     }
 
-    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CardIF, CardIF>>  {
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, CvrIF>>  {
         if (mvrsRound.isEmpty()) {  // for SingleRoundAudit.
             val sampledMvrs = if (simFuzzPct == null) {
                 sortedMvrs // use the mvrs as they are - ie, no errors

@@ -140,7 +140,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
     }
 }
 
-fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
+fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, CvrIF>>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
     try {
         val auditor = ClcaAssertionAuditor()
 
@@ -159,7 +159,7 @@ fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, cont
     }
 }
 
-fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, pools: List<CardPoolIF>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
+fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, CvrIF>>, pools: List<CardPoolIF>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
     try {
         val auditor = OneAuditAssertionAuditor(pools)
         val cassertion = assertionRound.assertion as ClcaAssertion
@@ -177,7 +177,7 @@ fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, pools
     }
 }
 
-fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
+fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, CvrIF>>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
     try {
         val assertion = assertionRound.assertion
         val assorter = assertion.assorter
@@ -196,13 +196,13 @@ fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CardIF, CardIF>>, c
 
 class PairSampler(
     val contestId: Int,
-    val cvrPairs: List<Pair<CardIF, CardIF>>, // Pair(mvr, card)
-): Iterator<Pair<CardIF, CardIF>> {
+    val cvrPairs: List<Pair<CvrIF, CvrIF>>, // Pair(mvr, card)
+): Iterator<Pair<CvrIF, CvrIF>> {
     val maxSamples = cvrPairs.count { it.second.hasContest(contestId) }
     private var idx = 0
     private var count = 0
 
-    override fun next(): Pair<CardIF, CardIF> {
+    override fun next(): Pair<CvrIF, CvrIF> {
         while (idx < cvrPairs.size) {
             val pair = cvrPairs[idx]
             idx++

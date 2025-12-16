@@ -146,7 +146,7 @@ class TestOneAuditPairFuzzer {
         val countPoolCards = cards.count { it.poolId == cardPool.poolId }
         assertEquals(countPoolCards, cardPool.ncards())
 
-        val vunderBar = VunderBar(pools)
+        val vunderBar = VunderBar(pools, infos)
         val vunderFuzz = OneAuditVunderBarFuzzer(vunderBar, infos, fuzzPct)
         val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.makePairsFromCards(cards)
         assertEquals(cards.size, oaFuzzedPairs.size)

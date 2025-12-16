@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.CardIF
+import org.cryptobiotic.rlauxe.audit.CvrIF
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 
@@ -108,7 +108,7 @@ open class ClcaAssorter(
     // [2, (fol+2)/(fol+1), (2*fol+1)/(fol+1),  1, fol/(fol+1), 1/(fol+1), 0] * noerror
 
     // open fun bassort(mvr: CardIF, cvr:CardIF, hasCompleteCvrs: Boolean = this.hasCompleteCvrs): Double {
-    open fun bassort(mvr: CardIF, cvr:CardIF): Double {
+    open fun bassort(mvr: CvrIF, cvr:CvrIF): Double {
         val overstatement = overstatementError(mvr, cvr, this.hasUndervotes) // ωi eq (1)
         val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
         return tau * noerror   // Bi eq (7)
@@ -169,7 +169,7 @@ open class ClcaAssorter(
     // (0-u)        cvr has vote for loser, mvr has vote for winner : p2u = 2 vote understatement
 
     // could just use this.undervotes
-    fun overstatementError(mvr: CardIF, cvr: CardIF, hasUndervotes: Boolean): Double {
+    fun overstatementError(mvr: CvrIF, cvr: CvrIF, hasUndervotes: Boolean): Double {
 
 
         //        # sanity check

@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardIF
+import org.cryptobiotic.rlauxe.audit.CvrIF
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.Contest
@@ -22,7 +22,7 @@ class ClcaNoErrorIterator(
     val contestId: Int,
     val contestNc: Int,
     val cassorter: ClcaAssorter,
-    val cvrIterator: Iterator<CardIF>,
+    val cvrIterator: Iterator<CvrIF>,
 ): Sampling, Iterator<Double> {
     private var idx = 0
     private var count = 0

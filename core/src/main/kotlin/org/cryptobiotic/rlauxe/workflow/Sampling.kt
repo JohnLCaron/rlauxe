@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.CardIF
+import org.cryptobiotic.rlauxe.audit.CvrIF
 import org.cryptobiotic.rlauxe.core.*
 import kotlin.random.Random
 
@@ -21,7 +21,7 @@ interface Sampling: Iterator<Double> {
 //// For polling audits. Production runPollingAuditRound
 class PollingSampling(
     val contestId: Int,
-    val cvrPairs: List<Pair<CardIF, CardIF>>, // Pair(mvr, card)
+    val cvrPairs: List<Pair<CvrIF, CvrIF>>, // Pair(mvr, card)
     val assorter: AssorterIF,
     val allowReset: Boolean = true,
 ): Sampling {
@@ -68,7 +68,7 @@ class PollingSampling(
 //// For clca audits. Production RunClcaContestTask
 class ClcaSampling(
     val contestId: Int,
-    val cvrPairs: List<Pair<CardIF, CardIF>>, // Pair(mvr, card)
+    val cvrPairs: List<Pair<CvrIF, CvrIF>>, // Pair(mvr, card)
     val cassorter: ClcaAssorter,
     val allowReset: Boolean,
 ): Sampling, Iterator<Double> {

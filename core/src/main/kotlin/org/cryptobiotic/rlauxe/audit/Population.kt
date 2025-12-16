@@ -18,44 +18,28 @@ data class NamedCardStyle(
 )
 
 interface PopulationIF {
-    val name: String
-    val id: Int
-    val possibleContests: IntArray // the list of possible contests.
-    val exactContests: Boolean     // if all cards have exactly the contests in possibleContests
-
+    fun name(): String
+    fun id(): Int
+    fun exactContests(): Boolean
     fun ncards(): Int
-    fun hasContest(contestId: Int) = possibleContests.contains(contestId)
+    fun hasContest(contestId: Int): Boolean
+    fun contests(): IntArray
 }
 
 data class Population(
-    override val name: String,
-    override val id: Int,
-    override val possibleContests: IntArray, // the list of possible contests.
-    override val exactContests: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
+    val name: String,
+    val id: Int,
+    val possibleContests: IntArray, // the list of possible contests.
+    val exactContests: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
 ) : PopulationIF {
     var ncards = 0
+
+    override fun name() = name
+    override fun id() = id
+    override fun exactContests() = exactContests
     override fun ncards() = ncards
-}
-
-data class OneAuditPool(
-    override val name: String,
-    override val id: Int,
-    override val possibleContests: IntArray,
-    override val exactContests: Boolean,
-    val poolId: Int,
-): PopulationIF {
-    var ncards = 0
-    override fun ncards() = ncards
-}
-
-interface CvrIF {
-    fun hasContest(contestId: Int): Boolean // "is in P_c".
-    fun location(): String
-    fun isPhantom(): Boolean
-    fun poolId(): Int?
-
-    fun votes(contestId: Int): IntArray?
-    fun hasMarkFor(contestId: Int, candidateId:Int): Int
+    override fun hasContest(contestId: Int) = possibleContests.contains(contestId)
+    override fun contests() = possibleContests
 }
 
 data class AuditCard(
@@ -65,7 +49,7 @@ data class AuditCard(
     val phantom: Boolean,
     val poolId: Int?, // if not null, this is in a OneAuditPool
 
-    // must have at least one:
+    // must have at least one of:
     val votes: Map<Int, IntArray>?,
     val population: PopulationIF?, // not needed if hasStyle ?
 ): CvrIF {
@@ -82,13 +66,9 @@ data class AuditCard(
     }
 
     override fun hasContest(contestId: Int): Boolean {
-        return contests().contains(contestId)
-    }
-
-    fun contests(): IntArray {
-        return if (population != null) population.possibleContests
-        else if (votes != null) votes.keys.toList().sorted().toIntArray()
-        else intArrayOf()
+        return if (population != null) population.hasContest(contestId)
+        else if (votes != null) votes[contestId] != null
+        else false
     }
 }
 
@@ -99,8 +79,9 @@ data class Cvr2 (
     val poolId: Int? = null,
 )
 
-interface CardManifestIF {
-    fun cards(): CloseableIterable<AuditCard>
-    fun batch(populationId: Int): PopulationIF
+class CardManifest(val cards: CloseableIterable<AuditableCard>, val populations: List<PopulationIF>) {
+    val popMap = populations.associateBy{ it.id() }
+    fun cards() = cards
+    fun population(populationId: Int) = popMap[populationId]
 }
 

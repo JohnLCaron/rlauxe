@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.audit.CardLocationManifest
+import org.cryptobiotic.rlauxe.audit.CardManifest
 import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.CardsWithStylesToCardManifest
 import org.cryptobiotic.rlauxe.audit.makePhantomCards
@@ -145,9 +145,9 @@ data class MultiContestTestData(
         return MvrCardAndPools(mvrsAsCvr, cardManifest, listOf(pool), cardStyles)
     }
 
-    fun makeCardLocationManifest(): CardLocationManifest {
+    fun makeCardLocationManifest(): CardManifest {
         val cards = CloseableIterable { makeCardsFromContests().iterator() }
-        return CardLocationManifest(cards, cardStyles)
+        return CardManifest(cards, emptyList())
     }
 
     override fun toString() = buildString {

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.dhondt
 
-import org.cryptobiotic.rlauxe.audit.CardIF
+import org.cryptobiotic.rlauxe.audit.CvrIF
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -397,7 +397,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     override fun dilutedMargin() = mean2margin(dilutedMean)
 
     // [ 0, .5, u]
-    override fun assort(cvr: CardIF, usePhantoms: Boolean): Double {
+    override fun assort(cvr: CvrIF, usePhantoms: Boolean): Double {
         if (!cvr.hasContest(info.id)) return 0.5
         if (usePhantoms && cvr.isPhantom()) return 0.0 // worst case
         val cands = cvr.votes(info.id)

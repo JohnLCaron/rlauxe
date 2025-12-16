@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.util.mergeReduce
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -13,8 +14,10 @@ import kotlin.collections.get
 
 private val logger = KotlinLogging.logger("OneAuditContestBoulder")
 
-class OneAuditContestBoulder(val info: ContestInfo, val sovoContest: BoulderContestVotes,
-                             val cvr: ContestTabulation, val red: ContestTabulation): OneAuditContestIF {
+class OneAuditContestBoulder(val info: ContestInfo,
+                             val sovoContest: BoulderContestVotes,
+                             val cvrTab: ContestTabulation,
+                             val redTab: ContestTabulation): OneAuditContestIF {
 
     // there are no overvotes in the Cvrs; we treat them as blanks (not divided by voteForN)
     val sovoCards = (sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes
@@ -23,19 +26,19 @@ class OneAuditContestBoulder(val info: ContestInfo, val sovoContest: BoulderCont
     // sovo gives us an expected undervote for each contest
     val sovoUndervotes = sovoContest.totalUnderVotes + sovoContest.totalOverVotes * info.voteForN
     // missing undervotes we assume are in the redacted pools
-    val redUndervotes = sovoUndervotes  - cvr.undervotes
-    val redVotes = red.nvotes()
+    val redUndervotes = sovoUndervotes  - cvrTab.undervotes
+    val redVotes = redTab.nvotes()
     // then this is the total cards in the pools
     val redNcards = (redVotes + redUndervotes) / info.voteForN
     // then this is the total cards in the cvrs and the pools
-    val totalCards= redNcards + cvr.ncards
+    val totalCards= redNcards + cvrTab.ncards
     override val contestId: Int = info.id
 
     var poolTotalCards: Int = 0
 
     fun candVoteTotals(): Map<Int, Int> {
         val sum = mutableMapOf<Int, Int>()
-        sum.mergeReduce(listOf(cvr.votes, red.votes))
+        sum.mergeReduce(listOf(cvrTab.votes, redTab.votes))
         return sum
     }
 
@@ -48,8 +51,8 @@ class OneAuditContestBoulder(val info: ContestInfo, val sovoContest: BoulderCont
         appendLine(info)
         appendLine(" sovoContest=$sovoContest")
         // appendLine(" allTabulation=$all3")
-        appendLine(" cvrTabulation=$cvr")
-        appendLine(" redTabulation=$red")
+        appendLine(" cvrTabulation=$cvrTab")
+        appendLine(" redTabulation=$redTab")
 
         appendLine("  sovoCards= $sovoCards = (sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes")
         appendLine("  phantoms= $phantoms  = sovoContest.totalBallots - sovoCards")
@@ -57,7 +60,7 @@ class OneAuditContestBoulder(val info: ContestInfo, val sovoContest: BoulderCont
 
         val redUnderPct = 100.0 * redUndervotes / (redVotes + redUndervotes)
         appendLine("  sovoUndervotes= ${sovoUndervotes} = sovoContest.totalUnderVotes + sovoContest.totalOverVotes * info.voteForN")
-        appendLine("  cvrUndervotes= ${cvr.undervotes}")
+        appendLine("  cvrUndervotes= ${cvrTab.undervotes}")
         appendLine("  redUndervotes= $redUndervotes  = sovoUndervotes - cvr.undervotes")
         appendLine("  redVotes= $redVotes = redacted.votes.map { it.value }.sum()")
         appendLine("  redNcards= $redNcards = (redVotes + redUndervotes) / info.voteForN")
@@ -108,7 +111,7 @@ class OneAuditContestBoulder(val info: ContestInfo, val sovoContest: BoulderCont
     // total number of cards for this contest in the pools. this is dynamic because the pools get adjusted
     override fun poolTotalCards() = poolTotalCards
 
-    override fun adjustPoolInfo(cardPools: List<CardPoolIF>) {
+    override fun adjustPoolInfo(cardPools: List<OneAuditPoolIF>) {
         poolTotalCards = cardPools.filter{ it.hasContest(info.id)}.sumOf { it.ncards() }
     }
 
@@ -117,7 +120,7 @@ class OneAuditContestBoulder(val info: ContestInfo, val sovoContest: BoulderCont
 
     // ncards
     fun sumAllCards() : Int {
-        return poolTotalCards() + cvr.ncards
+        return poolTotalCards() + cvrTab.ncards
     }
 
     fun checkCvrs(contestTab: ContestTabulation) {

@@ -200,6 +200,8 @@ class TestCvrsWithStylesToCards {
         assertEquals(cvr.id, card.location)
         assertEquals(cvr.phantom, card.phantom)
         assertEquals(cvr.poolId, card.poolId, "poolId")
+        if (expectStyle?.name() != card.cardStyle)
+            print("why")
         assertEquals(expectStyle?.name(), card.cardStyle, "cardStyle")
 
         val expectPossibleContests = when (auditType) {
@@ -225,22 +227,3 @@ class TestCvrsWithStylesToCards {
     }
 }
 
-fun Cvr.show() = buildString {
-    append("$id phantom=$phantom votes={")
-    votes.toSortedMap().forEach { (id, cands) -> append("$id: ${cands.contentToString()}, ") }
-    append("} poolId=$poolId")
-}
-
-fun AuditableCard.show() = buildString {
-    append("$location phantom=$phantom")
-    if (votes != null) {
-        append(" votes={")
-        votes.toSortedMap().forEach { (id, cands) -> append("$id: ${cands.contentToString()}, ") }
-        append("}")
-    }
-    append(" poolId=$poolId")
-    append(" possibleContests=${possibleContests.contentToString()}")
-    append(" contests=${contests().contentToString()}")
-    append(" cardStyle=$cardStyle")
-
-}

@@ -4,15 +4,45 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.audit.runRound
+import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import kotlin.test.Test
+import kotlin.test.fail
 
 class TestCreateSfElection {
     val sfDir = "$testdataDir/cases/sf2024"
     val zipFilename = "$sfDir/CVR_Export_20241202143051.zip"
     val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
+
+    @Test
+    fun createSFElectionOAP() {
+        val topdir = "$testdataDir/cases/sf2024/oap"
+
+        createSfElectionP(
+            topdir,
+            zipFilename,
+            "ContestManifest.json",
+            "CandidateManifest.json",
+            cvrExportCsv = cvrExportCsv,
+            hasStyle = false,
+            auditType = AuditType.ONEAUDIT,
+        )
+
+        val publisher = Publisher("$topdir/audit")
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
+    }
+
+    @Test
+    fun testRunVerifySFoap() {
+        val auditdir = "$testdataDir/cases/sf2024/oap/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
+        println()
+        print(results)
+        if (results.hasErrors) fail()
+    }
 
     @Test
     fun createSFElectionOA() {

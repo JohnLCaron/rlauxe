@@ -1,28 +1,27 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 
 class CreateElectionFromCards (
     val contestsUA: List<ContestUnderAudit>,
     val cards: List<AuditableCard>, // includes phantoms
-    val cardPools: List<CardPoolIF>? = null,
-    val cardStyles: List<CardStyleIF>? = null,
+    val cardPools: List<OneAuditPoolIF>? = null,
+    val cardStyles: List<PopulationIF>? = null,
     val config: AuditConfig,
-): CreateElectionIF {
+): CreateElectionPIF {
 
-    override fun cardPools() = cardPools
+    override fun populations() = cardPools
     override fun contestsUA() = contestsUA
     override fun cardManifest() = createCardManifest()
 
     fun createCardManifest(): CloseableIterator<AuditableCard> {
-        return CardsWithStylesToCardManifest(
-            config.auditType, config.hasStyle,
+        return CardsWithPopulationsToCardManifest(
+            config.auditType,
             Closer(cards.iterator()),
-            null,
-            styles = cardPools ?: cardStyles,
+            populations = cardPools ?: cardStyles,
         )
     }
 }

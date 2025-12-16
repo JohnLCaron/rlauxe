@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.cli.enterMvrs
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.persist.*
 import org.cryptobiotic.rlauxe.testdataDir
@@ -25,7 +25,7 @@ class TestPersistedWorkflow {
         val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01)
 
         val N = 50000
-        val testData = MultiContestTestData(1, 1, N, marginRange=0.03..0.03, ncands=2)
+        val testData = MultiContestTestDataP(1, 1, N, marginRange=0.03..0.03, ncands=2)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistedSingleClca $testData")
@@ -35,7 +35,7 @@ class TestPersistedWorkflow {
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
-        CreateAudit("testPersistedSingleClca", config, election, auditDir = auditdir, clear = true)
+        CreateAuditP("testPersistedSingleClca", config, election, auditDir = auditdir, clear = true)
 
         writeUnsortedMvrs(Publisher(auditdir), testMvrs, config.seed)
 
@@ -50,7 +50,7 @@ class TestPersistedWorkflow {
 
         val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01)
         val N = 50000
-        val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
+        val testData = MultiContestTestDataP(11, 4, N, marginRange=0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistedAuditClca $testData")
@@ -60,7 +60,7 @@ class TestPersistedWorkflow {
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
-        CreateAudit("testPersistedAuditClca",  config, election, auditDir = auditdir,  clear = true)
+        CreateAuditP("testPersistedAuditClca",  config, election, auditDir = auditdir,  clear = true)
 
         // have to write this here, where we know the mvrs
         writeUnsortedMvrs(Publisher(auditdir), testMvrs, config.seed)
@@ -77,7 +77,7 @@ class TestPersistedWorkflow {
         val config = AuditConfig(AuditType.POLLING, hasStyle=true, seed = 12356667890L, nsimEst=10, simFuzzPct = .01)
 
         val N = 50000
-        val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
+        val testData = MultiContestTestDataP(11, 4, N, marginRange=0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistedAuditPolling $testData")
@@ -90,7 +90,7 @@ class TestPersistedWorkflow {
 
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
         val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
-        CreateAudit("testPersistedAuditPolling", config, election, auditDir = auditdir, clear = true)
+        CreateAuditP("testPersistedAuditPolling", config, election, auditDir = auditdir, clear = true)
 
         runPersistedAudit(topdir, test=false)
     }
@@ -119,7 +119,7 @@ class TestPersistedWorkflow {
         val contestsUA = listOf(contestOA)
 
         val election = CreateElectionFromCvrs(contestsUA, mvrs, cardPools, config=config)
-        CreateAudit("testPersistedAuditPolling", config, election, auditDir = "$topdir/audit", clear = true)
+        CreateAuditP("testPersistedAuditPolling", config, election, auditDir = "$topdir/audit", clear = true)
 
         runPersistedAudit(topdir, test=false)
     }

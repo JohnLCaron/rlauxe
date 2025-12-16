@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import kotlin.use
 
@@ -70,7 +70,8 @@ class SfoaSingleRoundAuditTask(
                         mvrManager.sortedCards().iterator(),
                     )
 
-                val runner = OneAuditAssertionAuditor(mvrManager.cardPools()!!)
+                val runner = OneAuditAssertionAuditor(mvrManager.populations()!!, true)
+
                 val result: TestH0Result = runner.run(
                     rlauxAudit.auditConfig(),
                     contestRound,
@@ -104,9 +105,7 @@ class MvrManagerClcaSingleRound(val sortedCards: CloseableIterable<AuditableCard
 
     override fun sortedCards() = sortedCards
 
-    override fun cardPools(): List<CardPoolIF>? {
-        return null
-    }
+    override fun populations() = null
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<Cvr, Cvr>> {
         val cvrs = mutableListOf<Cvr>()

@@ -19,7 +19,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class TestMultiContestTestData {
+class TestMultiContestTestDataP {
     val N = 50000
     val ncontests = 40
     val nbs = 11
@@ -27,11 +27,11 @@ class TestMultiContestTestData {
     val underVotePct = 0.234..0.345
     val phantomRange = 0.001..0.01
 
-    val test: MultiContestTestData
+    val test: MultiContestTestDataP
     val infos: Map<Int, ContestInfo>
 
     init {
-        test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
+        test = MultiContestTestDataP(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
         infos = test.contests.associate { it.id to it.info }
     }
 
@@ -166,7 +166,7 @@ class TestMultiContestTestData {
         val underVotePct = 0.20..0.20
         val phantomPct = .05
         val phantomRange = phantomPct..phantomPct
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
+        val test = MultiContestTestDataP(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
         val calcN = test.ballotStylePartition.map { it.value }.sum()
         assertEquals(N, calcN)
         println(test)

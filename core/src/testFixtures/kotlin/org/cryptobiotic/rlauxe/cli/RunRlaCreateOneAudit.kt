@@ -8,8 +8,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.OneAuditVunderBarFuzzer
 
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTestP
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -119,7 +118,7 @@ object RunRlaCreateOneAudit {
             extraPct,
         )
 
-        CreateAudit("RunRlaStartOneAudit", config, election, auditDir = "$topdir/audit", clear = false)
+        CreateAuditP("RunRlaStartOneAudit", config, election, auditDir = "$topdir/audit", clear = false)
 
         // write the sorted cards: why isnt this part of CreateAudit? Because seed must be generated after committment to cardManifest
         val publisher = Publisher(auditDir)
@@ -149,14 +148,14 @@ object RunRlaCreateOneAudit {
         ncards: Int,
         hasStyle: Boolean,
         extraPct: Double,
-    ): CreateElectionIF {
+    ): CreateElectionPIF {
         val contestsUA = mutableListOf<ContestUnderAudit>()
-        val cardPools: List<CardPoolIF>
+        val cardPools: List<PopulationIF>
         val cardManifest: List<AuditableCard>
 
         init {
             // one contest
-            val (contestOA, mvrs, cardManifest, pools) = makeOneAuditTest(
+            val (contestOA, mvrs, cardManifest, pools) = makeOneAuditTestP(
                 margin = minMargin,
                 Nc = ncards,
                 cvrFraction = .95,
@@ -170,7 +169,7 @@ object RunRlaCreateOneAudit {
             this.cardPools = pools
         }
 
-        override fun cardPools() = cardPools
+        override fun populations() = cardPools
         override fun contestsUA() = contestsUA
         override fun cardManifest() = Closer (cardManifest.iterator() )
     }

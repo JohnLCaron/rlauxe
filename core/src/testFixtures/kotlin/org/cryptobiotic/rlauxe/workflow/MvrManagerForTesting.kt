@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
@@ -13,7 +13,7 @@ class MvrManagerForTesting(
     cvrs: List<Cvr>,
     mvrs: List<Cvr>,
     seed: Long,
-    val pools: List<CardPoolIF>? = null,
+    val pools: List<OneAuditPoolIF>? = null,
 ) : MvrManager, MvrManagerTestIF {
 
     val sortedCards: List<AuditableCard>
@@ -29,7 +29,7 @@ class MvrManagerForTesting(
 
     override fun sortedCards() = CloseableIterable { Closer(sortedCards.iterator()) }
 
-    override fun cardPools(): List<CardPoolIF>? {
+    override fun populations(): List<OneAuditPoolIF>? {
         return pools
     }
 

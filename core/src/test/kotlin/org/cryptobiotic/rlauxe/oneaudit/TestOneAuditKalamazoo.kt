@@ -74,7 +74,7 @@ class TestOneAuditKalamazoo {
 }
 
 // from oa_polling.ipynb
-fun makeContestKalamazoo(nwinners:Int = 1): Triple<ContestUnderAudit, List<CardPoolIF>, List<Cvr>> {
+fun makeContestKalamazoo(nwinners:Int = 1): Triple<ContestUnderAudit, List<OneAuditPoolIF>, List<Cvr>> {
 
     // the candidates
     val info = ContestInfo(
@@ -130,14 +130,16 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<ContestUnderAudit, List<CardP
 }
 
 // single contest, for testing
-class CardPoolSingleContest(override val poolName: String, override val poolId: Int, val contestId: Int, val regVotes: RegVotesIF) : CardPoolIF {
-    override val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+class CardPoolSingleContest(override val poolName: String, override val poolId: Int, val contestId: Int, val regVotes: RegVotesIF) : OneAuditPoolIF {
+    val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
     override fun regVotes() = mapOf(contestId to regVotes)
     override fun hasContest(contestId: Int) = contestId == this.contestId
     override fun ncards() = regVotes.ncards()
 
     override fun contests() = intArrayOf(contestId)
     override fun assortAvg() = assortAvg
+    override fun name() = poolName
+
     override fun id() = poolId
     override fun exactContests() = false // TODO dunno
 
@@ -152,7 +154,7 @@ fun makeTestMvrs(
     cvrNcards: Int,
     cvrVotes:Map<Int, Int>,
     cvrUndervotes: Int,
-    pools: List<CardPoolIF>): List<Cvr> {
+    pools: List<OneAuditPoolIF>): List<Cvr> {
 
     val cvrs = mutableListOf<Cvr>()
     val info = oaContest.info()

@@ -213,27 +213,6 @@ open class ClcaAssorter(
         return cvr_assort - mvr_assort
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as ClcaAssorter
-
-        if (hasUndervotes != other.hasUndervotes) return false
-        if (info != other.info) return false
-        if (assorter != other.assorter) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = 0
-        result = 31 * result + hasUndervotes.hashCode()
-        result = 31 * result + info.hashCode()
-        result = 31 * result + assorter.hashCode()
-        return result
-    }
-
     override fun toString() = buildString {
         appendLine("ClcaAssorter for contest ${info.name} (${info.id})")
         appendLine("  assorter=${assorter.desc()}")
@@ -243,6 +222,26 @@ open class ClcaAssorter(
     }
 
     fun shortName() = assorter.shortName()
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ClcaAssorter) return false
+
+        if (hasUndervotes != other.hasUndervotes) return false
+        if (dilutedMargin != other.dilutedMargin) return false
+        if (info != other.info) return false
+        if (assorter != other.assorter) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = hasUndervotes.hashCode()
+        result = 31 * result + dilutedMargin.hashCode()
+        result = 31 * result + info.hashCode()
+        result = 31 * result + assorter.hashCode()
+        return result
+    }
 }
 
 /*

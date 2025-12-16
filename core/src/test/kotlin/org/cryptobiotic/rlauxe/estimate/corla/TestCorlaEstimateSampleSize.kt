@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
 import org.cryptobiotic.rlauxe.estimate.estimateClcaAssertionRound
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundUp
@@ -17,7 +17,7 @@ class TestCorlaEstimateSampleSize {
 
     @Test
     fun testFindSampleSizePolling() {
-        val test = MultiContestTestData(20, 11, 20000)
+        val test = MultiContestTestDataP(20, 11, 20000)
         val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isClca = false, hasStyle = true).addStandardAssertions() } // CORLA does polling?
 
         contestsUA.forEach { contest ->
@@ -30,7 +30,7 @@ class TestCorlaEstimateSampleSize {
 
     @Test
     fun testFindSampleSize() {
-        val test = MultiContestTestData(20, 11, 20000)
+        val test = MultiContestTestDataP(20, 11, 20000)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit( it, isClca = true, hasStyle = true).addStandardAssertions() }
         val cvrs = test.makeCvrsFromContests()
 

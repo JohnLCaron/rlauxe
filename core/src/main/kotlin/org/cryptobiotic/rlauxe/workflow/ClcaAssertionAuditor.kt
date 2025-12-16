@@ -51,7 +51,7 @@ class RunClcaContestTask(
 
                 val testH0Result = auditor.run(config, contest, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status
-                if (testH0Result.status.complete) assertionRound.round = roundIdx
+                if (testH0Result.status.complete) assertionRound.roundProved = roundIdx
             }
             contestAssertionStatus.add(assertionRound.status)
         }

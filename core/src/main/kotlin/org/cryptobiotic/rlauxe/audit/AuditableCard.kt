@@ -7,7 +7,7 @@ import kotlin.collections.get
 import kotlin.sequences.plus
 
 // A generalization of Cvr, allowing votes to be null, eg for Polling or OneAudit pools.
-// Also, possibleContests/cardStyle represents the sample population information.
+// Also, cardStyle/population represents the sample population information.
 //
 // hasStyle -> cvrsAreComplete
 // CLCA and cvrsAreComplete: dont need cardStyles
@@ -41,14 +41,14 @@ data class AuditableCard (
 
     val votes: Map<Int, IntArray>?, // must have this and/or population
     val poolId: Int?,
-    val cardStyle: String? = null, // remove
+    val cardStyle: String? = null, // hijacked for population name
     val population: PopulationIF? = null, // not needed if hasStyle ?
 ): CvrIF {
 
     init {
         if (!phantom && (possibleContests.isEmpty() && population == null && cardStyle == null && votes == null)) {
             // you could make this case mean "all". But maybe its better to be explicit ??
-            throw RuntimeException("AuditableCard must have votes, possibleContests, or population")
+            throw RuntimeException("AuditableCard must have votes, possibleContests, cardStyle, or population")
         }
         if (possibleContests.isNotEmpty() && votes != null) {
             votes.keys.forEach { id ->
@@ -90,7 +90,8 @@ data class AuditableCard (
 
     // TODO deprecated?
     fun contests(): IntArray {
-        return if (possibleContests.isNotEmpty()) possibleContests
+        return if (population != null) population.contests()
+            else if (possibleContests.isNotEmpty()) possibleContests
             else if (votes != null) votes.keys.toList().sorted().toIntArray()
             else intArrayOf()
     }
@@ -151,12 +152,81 @@ data class AuditableCard (
     }
 }
 
-// Can derive the Find and CVR committments of Verifiable paper, p.8 and section 4.7 ("the prover’s initial declaration about the cards")
-// Using the sorted cards, can verify that the sampled cards are the correct ones.
-data class CardLocationManifest(
-    val cardLocations: CloseableIterable<AuditableCard>,
-    val cardStyles: List<CardStyle>
-)
+// put cards into canonical form
+class CvrsWithPopulationsToCardManifest(
+    val type: AuditType,
+    // val cvrsAreComplete: Boolean,       // TODO cvrsAreComplete == false means cardStyles != null and poolId != null;
+    // unless theres some default behavior, esp with poolId; maybe "all"
+    val cvrs: CloseableIterator<Cvr>,
+    val phantomCvrs : List<Cvr>?,
+    populations: List<PopulationIF>?,
+): CloseableIterator<AuditableCard> {
+
+    val popMap = populations?.associateBy{ it.id() }
+    val allCvrs: Iterator<Cvr>
+    var cardIndex = 1
+
+    init {
+        allCvrs = if (phantomCvrs == null) {
+            cvrs
+        } else {
+            val cardSeq = cvrs.iterator().asSequence()
+            val phantomSeq = phantomCvrs.asSequence()
+            (cardSeq + phantomSeq).iterator()
+        }
+    }
+
+    override fun hasNext() = allCvrs.hasNext()
+
+    override fun next(): AuditableCard {
+        val org = allCvrs.next()
+        val pop = if (popMap == null) null else popMap[org.poolId] // hijack poolId
+        val hasCvr = type.isClca() || (type.isOA() && org.poolId == null)
+        val votes = if (hasCvr) org.votes else null
+
+        // TODO make user get this right?
+        // if you havent specified a population or votes, then the population = all contests
+        // val cardStyle = if (votes == null && pop == null) "all" else pop?.name()
+
+        return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
+            intArrayOf(),
+            votes,
+            org.poolId,
+            cardStyle = pop?.name(),
+            population = pop,
+        )
+    }
+
+    override fun close() = cvrs.close()
+}
+
+class CardsWithPopulationsToCardManifest(
+    val type: AuditType,
+    val cards: CloseableIterator<AuditableCard>,
+    populations: List<PopulationIF>?,
+): CloseableIterator<AuditableCard> {
+
+    val popMap = populations?.associateBy{ "P${it.id()}" }
+
+    override fun hasNext() = cards.hasNext()
+
+    override fun next(): AuditableCard {
+        val org = cards.next()
+        val pop = if (popMap == null) null else popMap[org.cardStyle]
+
+        // TODO make user get this right?
+        // if you havent specified a cardStyle, population or votes, then the population = all contests
+        // val cardStyle = if (org.cardStyle == null && org.votes == null && pop == null) "all" else org.cardStyle
+
+        return org.copy(population = pop)
+    }
+
+    override fun close() = cards.close()
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////
+// CANDIDATE for removal
 
 interface CardStyleIF {
     fun name(): String
@@ -189,10 +259,7 @@ data class CardStyle(
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
-// CLCA or OneAudit or Polling
-
-// put cards into canonical form
+// deprecated usew CvrsWithPopulationsToCardManifest
 class CvrsWithStylesToCardManifest(
     val type: AuditType,
     val cvrsAreComplete: Boolean,       // TODO cvrsAreComplete == false means cardStyles != null and poolId != null;
@@ -241,7 +308,7 @@ class CvrsWithStylesToCardManifest(
     override fun close() = cvrs.close()
 }
 
-// put cards into canonical form
+// deprecated use CardsWithPopulationsToCardManifest
 class CardsWithStylesToCardManifest(
     val type: AuditType,
     val cvrsAreComplete: Boolean,
@@ -288,85 +355,5 @@ class CardsWithStylesToCardManifest(
 
     override fun close() = cards.close()
 }
-
-
-// put cards into canonical form
-class CvrsWithPopulationsToCardManifest(
-    val type: AuditType,
-    // val cvrsAreComplete: Boolean,       // TODO cvrsAreComplete == false means cardStyles != null and poolId != null;
-    // unless theres some default behavior, esp with poolId; maybe "all"
-    val cvrs: CloseableIterator<Cvr>,
-    val phantomCvrs : List<Cvr>?,
-    populations: List<PopulationIF>?,
-): CloseableIterator<AuditableCard> {
-
-    val popMap = populations?.associateBy{ it.id() }
-    val allCvrs: Iterator<Cvr>
-    var cardIndex = 1
-
-    init {
-        allCvrs = if (phantomCvrs == null) {
-            cvrs
-        } else {
-            val cardSeq = cvrs.iterator().asSequence()
-            val phantomSeq = phantomCvrs.asSequence()
-            (cardSeq + phantomSeq).iterator()
-        }
-    }
-
-    override fun hasNext() = allCvrs.hasNext()
-
-    override fun next(): AuditableCard {
-        val org = allCvrs.next()
-        val pop = if (popMap == null) null else popMap[org.poolId] // hijack poolId
-        val hasCvr = type.isClca() || (type.isOA() && org.poolId == null)
-        val votes = if (hasCvr) org.votes else null
-        if (pop != null)
-            print("")
-
-        // data class AuditableCard (
-        //    val location: String, // info to find the card for a manual audit. Aka ballot identifier.
-        //    val index: Int,  // index into the original, canonical list of cards
-        //    val prn: Long,   // psuedo random number
-        //    val phantom: Boolean,
-        //    val possibleContests: IntArray, // remove
-        //
-        //    val votes: Map<Int, IntArray>?, // must have this and/or population
-        //
-        //    val poolId: Int?,
-        //
-        //    val cardStyle: String? = null, // remove
-        //    val population: PopulationIF? = null, // not needed if hasStyle ?
-        //)
-        return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
-            intArrayOf(),
-            votes,
-            org.poolId,
-            population = pop,
-        )
-    }
-
-    override fun close() = cvrs.close()
-}
-
-class CardsWithPopulationsToCardManifest(
-    val type: AuditType,
-    val cards: CloseableIterator<AuditableCard>,
-    populations: List<PopulationIF>?,
-): CloseableIterator<AuditableCard> {
-
-    val popMap = populations?.associateBy{ "P${it.id()}" }
-
-    override fun hasNext() = cards.hasNext()
-
-    override fun next(): AuditableCard {
-        val org = cards.next()
-        val pop = if (popMap == null) null else popMap[org.cardStyle]
-        return org.copy(population = pop)
-    }
-
-    override fun close() = cards.close()
-}
-
 
 

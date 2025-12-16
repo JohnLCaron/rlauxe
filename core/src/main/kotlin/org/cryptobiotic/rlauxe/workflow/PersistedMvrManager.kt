@@ -1,18 +1,14 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.json.readCardPoolsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readCardPoolsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.persist.json.readPopulationsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -30,15 +26,8 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
 
     override fun sortedCards() = CloseableIterable{ auditableCards() }
 
-    override fun cardPools(): List<CardPoolIF>?  {
-        if (!config.isOA) return null
-        val infos = contestsUA.associate{ it.id to it.contest.info() }
-        val cardPoolResult = readCardPoolsJsonFile(publisher.cardPoolsFile(), infos)
-        if (cardPoolResult is Err) {
-            logger.error{ "$cardPoolResult" }
-            return null
-        }
-        return cardPoolResult.unwrap()
+    override fun populations(): List<PopulationIF>?  {
+        return readPopulations(publisher)
     }
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, CvrIF>>  {
@@ -79,7 +68,7 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
 
 fun readCardManifest(publisher: Publisher, infos: Map<Int, ContestInfo>): CardManifest {
 
-    return if (Files.exists(Path(publisher.populationsFile()))) {
+    if (Files.exists(Path(publisher.populationsFile()))) {
         val populations = readPopulationsJsonFileUnwrapped(publisher.populationsFile())
         // merge population references into the Card
         val mergedCards = CloseableIterable {
@@ -89,12 +78,18 @@ fun readCardManifest(publisher: Publisher, infos: Map<Int, ContestInfo>): CardMa
                 populations,
             )
         }
-
-        CardManifest(mergedCards, populations)
-
-    } else {
-        val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
-        val cardPools = readCardPoolsJsonFileUnwrapped(publisher.cardPoolsFile(), infos)
-        CardManifest(CloseableIterable { sortedCards.iterator() }, cardPools)
+        return CardManifest(mergedCards, populations)
     }
+
+    val cardPools = if (!Files.exists(Path(publisher.cardPoolsFile()))) emptyList()
+        else readCardPoolsJsonFileUnwrapped(publisher.cardPoolsFile(), infos)
+
+    val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
+    return CardManifest(CloseableIterable { sortedCards.iterator() }, cardPools)
+}
+
+fun readPopulations(publisher: Publisher): List<PopulationIF>? {
+    return if (!Files.exists(Path(publisher.populationsFile()))) null else
+        readPopulationsJsonFileUnwrapped(publisher.populationsFile())
+
 }

@@ -87,7 +87,7 @@ class GenerateClcaErrorTable {
         val show = false
         val ncontests = 11
         val phantomPct = 0.02
-        val test = MultiContestTestData(ncontests, 1, 50000, phantomPctRange=phantomPct..phantomPct)
+        val test = MultiContestTestDataP(ncontests, 1, 50000, phantomPctRange=phantomPct..phantomPct)
         val contestsUA = test.contests.map { ContestUnderAudit(it).addStandardAssertions() }
         val cards = test.makeCardsFromContests()
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)

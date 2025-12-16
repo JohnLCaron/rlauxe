@@ -41,7 +41,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
             auditConfig(),
             auditRound,
             cardManifest = mvrManager().sortedCards(),
-            cardPools = mvrManager().cardPools(),
+            cardPools = mvrManager().oapools(),
             // nthreads=1,
         )
         logger.info{"Estimate round ${roundIdx} took ${stopwatch}"}

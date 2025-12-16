@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
 import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.random.Random
@@ -28,7 +28,7 @@ class TestPollingAudit {
         val marginRange= 0.05 .. 0.10
         val underVotePct= 0.02..0.02
         val phantomPct= 0.005..0.005
-        val multiContestTest = MultiContestTestData(
+        val multiContestTest = MultiContestTestDataP(
             ncontests,
             nbs,
             N,
@@ -66,7 +66,7 @@ class TestPollingAudit {
         val marginRange= 0.05 .. 0.10
         val underVotePct= 0.02 .. 0.02
         val phantomPct= 0.005 .. 0.005
-        val test = MultiContestTestData(
+        val test = MultiContestTestDataP(
             ncontests,
             nbs,
             N,
@@ -110,7 +110,7 @@ class TestPollingAudit {
         val marginRange= 0.05 .. 0.10
         val underVotePct= 0.02 .. 0.02
         val phantomPct= 0.005 .. 0.005
-        val test = MultiContestTestData(
+        val test = MultiContestTestDataP(
             ncontests,
             nbs,
             N,
@@ -138,7 +138,7 @@ class TestPollingAudit {
         val marginRange= 0.05 .. 0.05
         val underVotePct= 0.05 .. 0.05
         val phantomPct= 0.005 .. 0.005
-        val multiContestTest = MultiContestTestData(
+        val multiContestTest = MultiContestTestDataP(
             ncontests,
             nbs,
             Nc,

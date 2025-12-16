@@ -4,14 +4,14 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditErrorsFromPools
 
 private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
 
 // allows to run OneAudit with runClcaAuditRound
-class OneAuditAssertionAuditor(val pools: List<CardPoolIF>, val quiet: Boolean = true) : ClcaAssertionAuditorIF {
+class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boolean = true) : ClcaAssertionAuditorIF {
 
     override fun run(
         config: AuditConfig,

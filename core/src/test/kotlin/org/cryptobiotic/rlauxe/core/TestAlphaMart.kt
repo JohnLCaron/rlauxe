@@ -1,10 +1,11 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.util.doublePrecision
-import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
+import org.cryptobiotic.rlauxe.estimate.runRepeatedAlphaMart
 import org.cryptobiotic.rlauxe.workflow.PollingSampling
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -28,7 +29,7 @@ class TestAlphaMart {
         val marginRange= 0.01 .. 0.01
         val underVotePct= 0.20 .. 0.20
         val phantomRange= 0.005 .. 0.005
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
+        val test = MultiContestTestDataP(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
 
         val contest = test.contests.first()
         val contestUA = ContestUnderAudit(contest, isClca = false, hasStyle = true).addStandardAssertions()

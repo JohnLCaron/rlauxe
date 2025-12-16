@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.unittest
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
 import org.cryptobiotic.rlauxe.estimate.runRepeatedBettingMart
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
@@ -15,7 +15,7 @@ class TestClcaFuzzSampler {
 
     @Test
     fun testComparisonFuzzed() {
-        val test = MultiContestTestData(20, 11, 20000)
+        val test = MultiContestTestDataP(20, 11, 20000)
         val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it).addStandardAssertions() }
         val cvrs = test.makeCvrsFromContests()
         println("total ncvrs = ${cvrs.size}\n")

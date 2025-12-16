@@ -34,7 +34,7 @@ fun runPollingAuditRound(
 
                 val testH0Result = auditPollingAssertion(config, contest.contestUA, assertionRound, sampler, roundIdx, quiet)
                 assertionRound.status = testH0Result.status
-                if (testH0Result.status.complete) assertionRound.round = roundIdx
+                if (testH0Result.status.complete) assertionRound.roundProved = roundIdx
             }
             contestAssertionStatus.add(assertionRound.status)
         }

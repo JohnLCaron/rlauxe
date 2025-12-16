@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.Vunder
-import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.roundUp
@@ -20,6 +19,7 @@ import kotlin.collections.forEach
 import kotlin.math.max
 import kotlin.random.Random
 
+// CANDIDATE for removal
 
 private val logger = KotlinLogging.logger("CardPool")
 

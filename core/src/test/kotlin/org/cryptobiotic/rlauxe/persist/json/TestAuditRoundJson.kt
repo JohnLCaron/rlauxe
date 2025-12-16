@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.workflow.*
@@ -22,7 +22,7 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtrip() {
-        val testData = MultiContestTestData(11, 4, 50000)
+        val testData = MultiContestTestDataP(11, 4, 50000)
         val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, isClca=false, hasStyle=false).addStandardAssertions()}
         val contestRounds = contestsUAs.map{ contest ->
             val cr = ContestRound(contest, 1,)
@@ -68,8 +68,7 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtripIO() {
-
-        val testData = MultiContestTestData(11, 4, 50000)
+        val testData = MultiContestTestDataP(11, 4, 50000)
         val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, isClca=false, hasStyle=false).addStandardAssertions()}
         val contestRounds = contestsUAs.map{ contest ->
             val cr = ContestRound(contest, 1)
@@ -115,7 +114,7 @@ class TestAuditRoundJson {
             AuditType.CLCA, hasStyle = true, seed = 12356667890L, nsimEst = 10,
         )
         val N = 5000
-        val testData = MultiContestTestData(11, 4, N, marginRange = 0.03..0.05)
+        val testData = MultiContestTestDataP(11, 4, N, marginRange = 0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testComparisonWorkflow $testData")
@@ -128,7 +127,7 @@ class TestAuditRoundJson {
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
-        var clcaWorkflow = WorkflowTesterClca(config, contests, emptyList(),
+        val clcaWorkflow = WorkflowTesterClca(config, contests, emptyList(),
             MvrManagerForTesting(testCvrs, testMvrs, config.seed))
         val lastRound = runTestAuditToCompletion("testComparisonWorkflow", clcaWorkflow, quiet = true)
         assertNotNull(lastRound)
@@ -169,7 +168,7 @@ class TestAuditRoundJson {
         )
 
         val N = 5000
-        val testData = MultiContestTestData(11, 4, N, marginRange = 0.03..0.05)
+        val testData = MultiContestTestDataP(11, 4, N, marginRange = 0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testComparisonWorkflow $testData")
@@ -184,7 +183,7 @@ class TestAuditRoundJson {
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
             else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
 
-        var clcaWorkflow = WorkflowTesterClca(config, contests, listOf(rcontest),
+        val clcaWorkflow = WorkflowTesterClca(config, contests, listOf(rcontest),
             MvrManagerForTesting(testCvrs, testMvrs, config.seed))
         val nextRound = clcaWorkflow.startNewRound()
         clcaWorkflow.runAuditRound(nextRound)
@@ -266,6 +265,15 @@ class TestAuditRoundJson {
     }
 }
 
+// data class AuditRoundJson(
+//    val roundIdx: Int,
+//    val contestRounds: List<ContestRoundJson>,
+//    val auditWasDone: Boolean,
+//    val auditIsComplete: Boolean,
+//    val nmvrs: Int,
+//    var newmvrs: Int,
+//    var auditorWantNewMvrs: Int,
+//)
 fun check(s1: AuditRound, s2: AuditRound) {
     assertEquals(s1.roundIdx, s2.roundIdx)
     assertEquals(s1.auditWasDone, s2.auditWasDone)
@@ -278,18 +286,106 @@ fun check(s1: AuditRound, s2: AuditRound) {
     assertEquals(s1.contestRounds.size, s2.contestRounds.size)
     s1.contestRounds.forEachIndexed { idx, c1 ->
         val c2 = s2.contestRounds[idx]
-        assertEquals(c1.contestUA.contest, c2.contestUA.contest, "contest ${c1.contestUA.contest.show()}\n not ${c2.contestUA.contest.show()}")
-        c1.contestUA.clcaAssertions.forEachIndexed { asnIdx, a1 ->
-            val a2 = c2.contestUA.clcaAssertions[asnIdx]
-            assertEquals(a1.cassorter, a2.cassorter, "clcaAssertion.cassorter ${a1.cassorter}\n not ${a2.cassorter}")
-            assertEquals(a1, a2, "clcaAssertion ${a1}\n not ${a2}")
-        }
-        val ok = c1.equivalent(c2)
-        if (!ok) {
-            c1.equivalent(c2)
-        }
-        if (c1 != c2)
-            print("ho")
-        assertEquals(c1, c2, "contestUA $c1\n not equal $c2")
+        assertTrue(check(c1, c2), "contestUA $c1\n not equal $c2")
     }
+
+    assertEquals(s1, s2)
+
+}
+
+// data class ContestRoundJson(
+//    val id: Int,
+//    var assertionRounds: List<AssertionRoundJson>,
+//    val roundIdx: Int,
+//
+//    val actualMvrs: Int,
+//    val actualNewMvrs: Int,  // Estimate of new sample size required to confirm the contest
+//    val estNewSamples: Int,
+//    val estSampleSize: Int,  // Estimate of total sample size required to confirm the contest
+//    val auditorWantNewMvrs: Int,
+//
+//    val done: Boolean,
+//    val included: Boolean,
+//    val status: TestH0Status, // or its own enum ??
+//    val estSampleSizeNoStyles: Int?=null, // TODO remove
+//)
+fun check(c1: ContestRound, c2: ContestRound): Boolean {
+    assertEquals(c1.id, c2.id)
+    assertEquals(c1.roundIdx, c2.roundIdx)
+    assertEquals(c1.actualNewMvrs, c2.actualNewMvrs)
+    assertEquals(c1.estNewSamples, c2.estNewSamples)
+    assertEquals(c1.estSampleSize, c2.estSampleSize)
+    assertEquals(c1.auditorWantNewMvrs, c2.auditorWantNewMvrs)
+    assertEquals(c1.done, c2.done)
+    assertEquals(c1.included, c2.included)
+    assertEquals(c1.status, c2.status)
+
+    assertEquals(c1.assertionRounds.size, c2.assertionRounds.size)
+
+    c1.assertionRounds.forEachIndexed { asnIdx, a1 ->
+        val a2 = c2.assertionRounds[asnIdx]
+        assertTrue(check(a1, a2), "assertionRound $a1\n not equal $a2")
+    }
+    return true
+}
+
+// data class AssertionRoundJson(
+//    val assorterDesc: String,
+//    val roundIdx: Int,
+//    val estSampleSize: Int,
+//    val estNewSampleSize: Int,
+//    val estimationResult: EstimationRoundResultJson?,
+//    val auditResult: AuditRoundResultJson?,
+//    val prevAuditResult: AuditRoundResultJson?,
+//
+//    val status: TestH0Status, // or its own enum ??
+//    val round: Int,
+//)
+fun check(a1: AssertionRound, a2: AssertionRound): Boolean {
+    assertEquals(a1.assertion.assorter.hashcodeDesc(), a2.assertion.assorter.hashcodeDesc())
+    assertEquals(a1.roundIdx, a2.roundIdx)
+    assertEquals(a1.estSampleSize, a2.estSampleSize)
+    assertEquals(a1.estNewSampleSize, a2.estNewSampleSize)
+    assertEquals(a1.estimationResult, a2.estimationResult)
+    assertEquals(a1.status, a2.status)
+    assertEquals(a1.roundProved, a2.roundProved)
+
+    assertEquals(a1.auditResult == null, a2.auditResult == null)
+    if (a1.auditResult != null )
+        check(a1.auditResult!!, a2.auditResult!!)
+
+    assertEquals(a1.prevAuditResult == null, a2.prevAuditResult == null)
+    if (a1.prevAuditResult != null )
+        check(a1.prevAuditResult!!, a2.prevAuditResult!!)
+    return true
+}
+
+// data class AuditRoundResultJson(
+//    val desc: String,
+//    val roundIdx: Int,
+//    val nmvrs: Int,   // estimated sample size
+//    val maxBallotIndexUsed: Int,   // max index used
+//    val pvalue: Double,       // last pvalue when testH0 terminates
+//    val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
+//    val status: String, // testH0 status
+//    val measuredMean: Double,     // measured population mean, used for polling?
+//    val startingRates: ClcaErrorCountsJson?,
+//    val measuredCounts: ClcaErrorCountsJson?,
+//    val params: Map<String, Double>
+//)
+fun check(a1: AuditRoundResult, a2: AuditRoundResult): Boolean {
+    assertEquals(a1.toString(), a2.toString())
+    assertEquals(a1.roundIdx, a2.roundIdx)
+    assertEquals(a1.nmvrs, a2.nmvrs)
+    assertEquals(a1.maxBallotIndexUsed, a2.maxBallotIndexUsed)
+    assertEquals(a1.pvalue, a2.pvalue)
+    assertEquals(a1.samplesUsed, a2.samplesUsed)
+    assertEquals(a1.status, a2.status)
+    assertEquals(a1.measuredMean, a2.measuredMean)
+    assertEquals(a1.startingRates, a2.startingRates)
+    assertEquals(a1.measuredCounts, a2.measuredCounts)
+    assertEquals(a1.params, a2.params)
+
+    assertEquals(a1, a2)
+    return true
 }

@@ -3,7 +3,7 @@ _12/15/25_
 
 # TL;DR
 
-The best case is to have CVRS that record undervotes. Then things are simple and as efficent as possible.
+The best case is to have CVRs that record undervotes. Then things are simple and as efficent as possible.
 
 config.hasStyles -> config.cvrsHaveUndervotes (aka cvrsAreComplete)
 

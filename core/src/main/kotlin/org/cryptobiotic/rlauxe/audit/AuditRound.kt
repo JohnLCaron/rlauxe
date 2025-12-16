@@ -140,21 +140,6 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
         return result
     }
 
-    fun equivalent(other: ContestRound): Boolean {
-        if (!this.contestUA.equals(other.contestUA)) {
-            return false
-        }
-        val assertionsZip = this.assertionRounds.zip(other.assertionRounds)
-        assertionsZip.forEach { (myAssertionRound, otherAssertionRound) ->
-            if (!myAssertionRound.equals(otherAssertionRound)) {
-                val why = myAssertionRound.equals(otherAssertionRound)
-                println(myAssertionRound)
-                println(otherAssertionRound)
-                return false
-            }
-        }
-        return true
-    }
 }
 
 data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevAuditResult: AuditRoundResult?) {
@@ -166,7 +151,7 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     // these values are set during runAudit()
     var auditResult: AuditRoundResult? = null
     var status = TestH0Status.InProgress
-    var round = 0           // round when set to proved or disproved
+    var roundProved = 0           // round when set to proved or disproved
 
     fun accumulatedErrorCounts(contestRound: ContestRound): ClcaErrorCounts {
         val (_, auditRoundResults) = contestRound.resultsForAssertion(assertion.assorter.hashcodeDesc())

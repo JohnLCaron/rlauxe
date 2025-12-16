@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.RegVotesIF
@@ -306,33 +305,17 @@ data class OneAuditPoolFromCvrs(
     override fun toString(): String {
         return "OneAuditPoolFromCvrs(poolName='$poolName', poolId=$poolId, totalCards=$totalCards contests=${contests().contentToString()})"
     }
-
-    companion object {
-        // poolId -> CardPoolIF
-        fun makeCardPools(cvrs: Iterator<Cvr>, infos: Map<Int, ContestInfo>): Map<Int, CardPoolFromCvrs> {
-            val cardPools: MutableMap<Int, CardPoolFromCvrs> = mutableMapOf()
-            cvrs.forEach { cvr ->
-                if (cvr.poolId != null) {
-                    val pool = cardPools.getOrPut(cvr.poolId) {
-                        CardPoolFromCvrs( "pool${cvr.poolId}", cvr.poolId, infos)
-                    }
-                    pool.accumulateVotes(cvr)
-                }
-            }
-           return cardPools
-        }
-    }
 }
 
 fun calcOneAuditPoolsFromMvrs(
     infos: Map<Int, ContestInfo>,
-    cardStyles: List<CardStyleIF>,
+    populations: List<PopulationIF>,
     mvrs: List<Cvr>,
-): List<CardPoolFromCvrs> {  // poolId -> CardPoolFromCvrs
+): List<OneAuditPoolFromCvrs> {  // poolId -> CardPoolFromCvrs
 
     // The styles have the name, poolId, and contest list
-    val poolsFromCvrs = cardStyles.map { style ->
-        val poolFromCvr = CardPoolFromCvrs(style.name(), style.poolId()!!, infos)
+    val poolsFromCvrs = populations.map { style ->
+        val poolFromCvr = OneAuditPoolFromCvrs(style.name(), style.id(), style.exactContests(), infos)
         style.contests().forEach { poolFromCvr.contestTabs[it]  = ContestTabulation( infos[it]!!) }
         poolFromCvr
     }.associateBy { it.poolId }

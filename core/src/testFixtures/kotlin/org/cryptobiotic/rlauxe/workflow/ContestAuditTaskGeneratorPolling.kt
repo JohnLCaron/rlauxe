@@ -120,7 +120,7 @@ class PollingSingleRoundAuditTask(
                 contest.Npop,
                 assorter.dilutedMargin(),
                 lastRound.status,
-                minAssertion.round.toDouble(),
+                minAssertion.roundProved.toDouble(),
                 lastRound.samplesUsed.toDouble(),
                 nmvrs.toDouble(),
                 otherParameters,

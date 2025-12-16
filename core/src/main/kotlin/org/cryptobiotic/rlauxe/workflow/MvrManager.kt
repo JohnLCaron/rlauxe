@@ -4,7 +4,8 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CvrIF
 import org.cryptobiotic.rlauxe.audit.ContestRound
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
+import org.cryptobiotic.rlauxe.audit.PopulationIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 
@@ -13,9 +14,18 @@ private val logger = KotlinLogging.logger("MvrManager")
 // use MvrManager for auditing, not creating an audit
 interface MvrManager {
     fun sortedCards(): CloseableIterable<AuditableCard>  // most uses will just need the first n samples
-    fun cardPools(): List<CardPoolIF>?  // only if OneAudit
+    fun populations(): List<PopulationIF>?
     // fun sortedCvrs(): CloseableIterable<CardIF> = CloseableIterable { AuditableCardToCvrAdapter(sortedCards().iterator()) }
     fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, CvrIF>>  // Pair(mvr, cvr)
+
+    fun oapools(): List<OneAuditPoolIF>? {
+        val pop = populations()
+        if (pop != null && pop.size > 0 && pop[0] is OneAuditPoolIF) {
+            return pop as List<OneAuditPoolIF>
+        }
+        return null
+    }
+
 }
 
 // when the MvrManager supplies the audited mvrs, its a test

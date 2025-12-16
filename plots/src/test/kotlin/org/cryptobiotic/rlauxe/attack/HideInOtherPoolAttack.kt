@@ -102,7 +102,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
         return ClcaSingleRoundWorkflowTask(
             name(),
             workflow,
-            auditor = OneAuditAssertionAuditor(workflow.mvrManager().cardPools()!!),
+            auditor = OneAuditAssertionAuditor(workflow.mvrManager().oapools()!!),
             manager.sortedMvrs,
             otherParameters,
         )

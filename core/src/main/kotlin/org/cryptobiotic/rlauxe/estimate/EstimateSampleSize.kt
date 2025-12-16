@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.BettingFn
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditErrorsFromPools
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -36,7 +36,7 @@ fun estimateSampleSizes(
     config: AuditConfig,
     auditRound: AuditRound,
     cardManifest: CloseableIterable<AuditableCard>, // Clca, OneAudit, ignored for Polling
-    cardPools: List<CardPoolIF>?, // Clca, OneAudit, ignored for Polling
+    cardPools: List<OneAuditPoolIF>?, // Clca, OneAudit, ignored for Polling
     showTasks: Boolean = false,
     nthreads: Int = 32,
 ): List<RunTestRepeatedResult> {

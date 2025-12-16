@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
 import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsFrom
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -10,7 +10,7 @@ class TestCvrBuilders {
 
     @Test
     fun testConvertCvrsRoundtrip() {
-        val test = MultiContestTestData(20, 11, 20000)
+        val test = MultiContestTestDataP(20, 11, 20000)
         val contests: List<Contest> = test.contests
         val cvrs = test.makeCvrsFromContests()
 
@@ -38,7 +38,7 @@ class TestCvrBuilders {
     @Test
     fun testFuzzedCvrs() {
         val ncontests = 20
-        val test = MultiContestTestData(ncontests, 11, 50000)
+        val test = MultiContestTestDataP(ncontests, 11, 50000)
         val contests: List<Contest> = test.contests
         val cvrs = test.makeCvrsFromContests()
         val detail = false

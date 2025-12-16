@@ -168,7 +168,22 @@ fun tabulateCardPools(cardPools: List<CardPoolIF>, infos: Map<Int, ContestInfo>)
     return poolSums
 }
 
-fun tabulateCardPools(cardManifest: CardManifest, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+fun tabulateOneAuditPools(cardPools: List<OneAuditPoolIF>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+    val poolSums = infos.mapValues { ContestTabulation(it.value) }
+    cardPools.forEach { cardPool ->
+        cardPool.regVotes().forEach { (contestId, regVotes: RegVotesIF) ->
+            val poolSum = poolSums[contestId]
+            if (poolSum != null) {
+                regVotes.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
+                poolSum.ncards += regVotes.ncards()
+                poolSum.undervotes += regVotes.undervotes()
+            }
+        }
+    }
+    return poolSums
+}
+
+fun tabulateCardManifest(cardManifest: CardManifest, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val poolSums = infos.mapValues { ContestTabulation(it.value) }
     cardManifest.populations.forEach {
         val cardPool = it as OneAuditPoolIF

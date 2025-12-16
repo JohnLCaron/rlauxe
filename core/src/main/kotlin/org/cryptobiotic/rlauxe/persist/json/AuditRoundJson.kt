@@ -168,7 +168,7 @@ data class AssertionRoundJson(
     val prevAuditResult: AuditRoundResultJson?,
 
     val status: TestH0Status, // or its own enum ??
-    val round: Int,
+    val roundProved: Int,
 )
 
 fun AssertionRound.publishJson() : AssertionRoundJson {
@@ -181,7 +181,7 @@ fun AssertionRound.publishJson() : AssertionRoundJson {
         this.auditResult?.publishJson(),
         this.prevAuditResult?.publishJson(),
         this.status,
-        this.round,
+        this.roundProved,
     )
 }
 
@@ -197,7 +197,7 @@ fun AssertionRoundJson.import(assertion: Assertion): AssertionRound {
     assertionRound.auditResult = this.auditResult?.import()
     assertionRound.prevAuditResult = this.prevAuditResult?.import()
     assertionRound.status = this.status
-    assertionRound.round = this.round
+    assertionRound.roundProved = this.roundProved
 
     return assertionRound
 }

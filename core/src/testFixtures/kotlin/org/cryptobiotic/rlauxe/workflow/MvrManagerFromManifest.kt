@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CvrIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
@@ -17,7 +17,7 @@ class MvrManagerFromManifest(
     val infoList: List<ContestInfo>,
     seed:Long,
     val simFuzzPct: Double?,
-    val pools: List<CardPoolIF>? = null,
+    val pools: List<OneAuditPoolIF>? = null,
 ) : MvrManager {
 
     private var mvrsRound: List<AuditableCard> = emptyList()
@@ -38,7 +38,7 @@ class MvrManagerFromManifest(
 
     override fun sortedCards() = CloseableIterable { sortedCards.iterator() }
 
-    override fun cardPools(): List<CardPoolIF>? {
+    override fun populations(): List<OneAuditPoolIF>? {
         return pools
     }
 

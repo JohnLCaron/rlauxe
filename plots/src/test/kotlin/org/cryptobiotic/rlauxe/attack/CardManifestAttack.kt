@@ -5,8 +5,8 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CreateAudit
-import org.cryptobiotic.rlauxe.audit.CreateElection
+import org.cryptobiotic.rlauxe.audit.CreateAuditP
+import org.cryptobiotic.rlauxe.audit.CreateElectionP
 import org.cryptobiotic.rlauxe.audit.OneAuditConfig
 import org.cryptobiotic.rlauxe.audit.OneAuditStrategyType
 import org.cryptobiotic.rlauxe.audit.writeMvrsForRound
@@ -19,7 +19,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.oneaudit.CardPool
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.oneaudit.calcCardPoolsFromMvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -31,8 +31,8 @@ import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.showTabs
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
-import org.cryptobiotic.rlauxe.util.tabulateCardPools
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
+import org.cryptobiotic.rlauxe.util.tabulateOneAuditPools
 import kotlin.test.Test
 
 // Vanessa's attack
@@ -195,9 +195,10 @@ class CardManifestAttack {
         print(showTabs("manifestTabs", manifestTabs))
 
         //// make the CardPool with reported votes (lies)
-        // data class RegVotes(override val votes: Map<Int, Int>, val ncards: Int, val undervotes: Int): RegVotesIF {
-        val cardPool = CardPool(
-            "groupB", 1, 100,
+        // OneAuditPool(override val poolName: String, override val poolId: Int, val exactContests: Boolean,
+        //                        val ncards: Int, val regVotes: Map<Int, RegVotesIF>)
+        val cardPool = OneAuditPool(
+            "groupB", 1, false, 100,
             regVotes = mapOf(
                 1 to RegVotes(mapOf(1 to 0, 2 to 25), 75, undervotes = 50), // false
                 // 1 to RegVotes(mapOf(1 to 50, 2 to 25), 75, undervotes = 0), // true
@@ -223,7 +224,7 @@ class CardManifestAttack {
         val contestUA = contestsUA.find { it.id == contestA.id }!!
 
         // check that the card pools agree with the cards
-        val poolSums = tabulateCardPools(cardPools, infos)
+        val poolSums = tabulateOneAuditPools(cardPools, infos)
         print(showTabs("poolSums", poolSums))
 
         // check that the contests agree with the cards
@@ -238,14 +239,14 @@ class CardManifestAttack {
         println()
 
         //// create a peristent audit
-        val election = CreateElection(listOf(contestUA), cardPools, cards)
+        val election = CreateElectionP(listOf(contestUA), cardPools, cards)
 
         val auditdir = "$topdir/audit"
         val config = AuditConfig(
             AuditType.ONEAUDIT, hasStyle = hasStyle, contestSampleCutoff = 20000, nsimEst = 10,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
-        CreateAudit("hideInOtherPoolAttack", config, election, auditDir = "$topdir/audit", )
+        CreateAuditP("hideInOtherPoolAttack", config, election, auditDir = "$topdir/audit",)
 
         val publisher = Publisher(auditdir)
         writeSortedCardsInternalSort(publisher, config.seed)

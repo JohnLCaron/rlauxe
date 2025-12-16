@@ -86,7 +86,7 @@ class PlotDistributions {
             config,
             auditRound,
             cardManifest = mvrManager.sortedCards(),
-            cardPools = mvrManager.cardPools(),
+            cardPools = mvrManager.oapools(),
         )
     }
 

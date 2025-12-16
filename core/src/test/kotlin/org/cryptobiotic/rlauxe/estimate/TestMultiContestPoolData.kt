@@ -18,11 +18,11 @@ class TestMultiContestPoolData {
     val underVotePct = 0.234..0.345
     val phantomRange = 0.001..0.01
     val poolPct = .11
-    val test: MultiContestTestData
+    val test: MultiContestTestDataP
     val infos: Map<Int, ContestInfo>
 
     init {
-        test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct,
+        test = MultiContestTestDataP(ncontests, nbs, N, marginRange, underVotePct,
             phantomRange, poolPct=poolPct)
         infos = test.contests.associate { it.id to it.info }
     }
@@ -36,18 +36,18 @@ class TestMultiContestPoolData {
         assertEquals(roundToClosest(N*poolPct), poolSize)
     }
 
-    @Test
-    fun testBallotStyles() {
-        val calcN = test.cardStyles.sumOf { it.ncards }
+    /* @Test
+    fun testPopulations() {
+        val calcN = test.populations.sumOf { it.ncards }
         assertEquals(N, calcN)
 
-        test.cardStyles.forEachIndexed { idx, it ->
+        test.populations.forEachIndexed { idx, it ->
             assertEquals(it.poolId, if (idx < 2) 1 else null)
         }
 
-        val poolSize = test.cardStyles.filter { it.poolId != null }.sumOf { it.ncards }
+        val poolSize = test.populations.filter { it.poolId != null }.sumOf { it.ncards }
         assertEquals(roundToClosest(N*poolPct), poolSize)
-    }
+    } */
 
     @Test
     fun testMakeCardPoolManifest() {

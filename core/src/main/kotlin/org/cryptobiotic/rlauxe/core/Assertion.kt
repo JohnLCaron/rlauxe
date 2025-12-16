@@ -61,12 +61,12 @@ class ClcaAssertion(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        if (other !is ClcaAssertion) return false
         if (!super.equals(other)) return false
 
-        other as ClcaAssertion
+        if (cassorter != other.cassorter) return false
 
-        return cassorter == other.cassorter
+        return true
     }
 
     override fun hashCode(): Int {

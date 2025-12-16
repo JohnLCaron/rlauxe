@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -22,7 +21,7 @@ import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
-import org.cryptobiotic.rlauxe.util.tabulateCardPools
+import org.cryptobiotic.rlauxe.util.tabulateCardManifest
 import org.cryptobiotic.rlauxe.workflow.readCardManifest
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -255,7 +254,7 @@ fun verifyOAagainstCards(
     show: Boolean = false
 ) {
     val nonpoolCvrVotes = contestSummary.nonpooled
-    val poolSums = tabulateCardPools(cardManifest, infos)
+    val poolSums = tabulateCardManifest(cardManifest, infos)
     val sumWithPools = mutableMapOf<Int, ContestTabulation>()
     sumWithPools.sumContestTabulations(nonpoolCvrVotes)
     sumWithPools.sumContestTabulations(poolSums)

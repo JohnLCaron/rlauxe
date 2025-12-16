@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.util.doubleIsClose
 data class OneAuditErrorRates(val name: String, val rates: Map<Double, Double>, val totalInPools: Int)
 
 // we know exactly the return values and their frequency
-class OneAuditErrorsFromPools(val pools: List<CardPoolIF>) {
+class OneAuditErrorsFromPools(val pools: List<OneAuditPoolIF>) {
     // could also contain the ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double) ??
 
     fun oaErrorRates(contestUA: ContestUnderAudit, oaCassorter: ClcaAssorterOneAudit): OneAuditErrorRates { // sampleValue -> rate

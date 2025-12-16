@@ -20,10 +20,10 @@ data class NamedCardStyle(
 interface PopulationIF {
     fun name(): String
     fun id(): Int
-    fun exactContests(): Boolean
+    fun contests(): IntArray // each card may have any of these contests
+    fun exactContests(): Boolean // each card has exactly these contests on it
     fun ncards(): Int
     fun hasContest(contestId: Int): Boolean
-    fun contests(): IntArray
 }
 
 data class Population(
@@ -33,6 +33,10 @@ data class Population(
     val exactContests: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
 ) : PopulationIF {
     var ncards = 0
+    fun setNcards(ncards: Int): Population {
+        this.ncards = ncards
+        return this
+    }
 
     override fun name() = name
     override fun id() = id
@@ -42,46 +46,8 @@ data class Population(
     override fun contests() = possibleContests
 }
 
-data class AuditCard(
-    val location: String, // info to find the card for a manual audit. Aka ballot identifier.
-    val index: Int,  // index into the original, canonical list of cards
-    val prn: Long,   // psuedo random number
-    val phantom: Boolean,
-    val poolId: Int?, // if not null, this is in a OneAuditPool
-
-    // must have at least one of:
-    val votes: Map<Int, IntArray>?,
-    val population: PopulationIF?, // not needed if hasStyle ?
-): CvrIF {
-    override fun location() = location
-    override fun isPhantom() = phantom
-    override fun poolId() = poolId
-
-    override fun votes(contestId: Int) = votes?.get(contestId)
-
-    override fun hasMarkFor(contestId: Int, candidateId: Int): Int {
-        val contestVotes = votes?.get(contestId)
-        return if (contestVotes == null) 0
-        else if (contestVotes.contains(candidateId)) 1 else 0
-    }
-
-    override fun hasContest(contestId: Int): Boolean {
-        return if (population != null) population.hasContest(contestId)
-        else if (votes != null) votes[contestId] != null
-        else false
-    }
-}
-
-data class Cvr2 (
-    val location: String, // ballot identifier
-    val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
-    val phantom: Boolean = false, // only on Card ??
-    val poolId: Int? = null,
-)
-
 class CardManifest(val cards: CloseableIterable<AuditableCard>, val populations: List<PopulationIF>) {
     val popMap = populations.associateBy{ it.id() }
-    fun cards() = cards
     fun population(populationId: Int) = popMap[populationId]
 }
 

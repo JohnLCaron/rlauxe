@@ -67,7 +67,7 @@ class TestHasStyle {
         }
 
         val cardStyles = if (hasStyle) null
-            else listOf(CardStyle("all", contests.map{ it.id}, 1))
+            else listOf(Population("all",  1, contests.map{ it.id }.toIntArray(), false))
 
         val topdir = "$testdataDir/persist/testHasStyleClcaSingleCard"
         val auditRound = createAndRunTestAuditCards(topdir, false, contests, emptyList(), hasStyle, testCards, cardStyles)
@@ -162,7 +162,7 @@ class TestHasStyle {
         }
 
         val cardStyles = if (hasStyle) null
-            else listOf(CardStyle("all", contests.map{ it.id}, 1))
+            else listOf(Population("all",  1, contests.map{ it.id }.toIntArray(), false))
 
         val topdir = "$testdataDir/persist/testHasStyleClcaMultiCard"
         val auditRound = createAndRunTestAuditCards(topdir, false, contests, listOf(3), hasStyle, allCards, cardStyles)
@@ -228,7 +228,7 @@ class TestHasStyle {
         val contests = listOf(contestB, contestS)
 
         // polling audits always must put in the possible contests
-        val cardStyles = listOf(CardStyle("all", contests.map{ it.id}, 1))
+        val cardStyles = listOf(Population("all", 1, contests.map{ it.id}.toIntArray(), false))
 
         val topdir = "$testdataDir/persist/testHasStylePollingSingleCard"
         val auditRound = createAndRunTestAuditCvrs(topdir, true, contests, emptyList(), hasStyle, testCvrs, cardStyles)
@@ -312,7 +312,7 @@ class TestHasStyle {
         }
 
         // polling audits always must put in the possible contests
-        val cardStyles = listOf(CardStyle("all", contests.map{ it.id}, 1))
+        val cardStyles = listOf(Population("all",  1, contests.map{ it.id }.toIntArray(), false))
 
         // make the audit
         val topdir = "$testdataDir/persist/testHasStylePollingMultiCard"
@@ -344,7 +344,7 @@ class TestHasStyle {
     }
 
     fun createAndRunTestAuditCvrs(topdir: String, isPolling: Boolean, contests: List<Contest>, skipContests: List<Int>, hasStyle: Boolean,
-                                  testCvrs: List<Cvr>, cardStyles:List<CardStyleIF>?): AuditRound {
+                                  testCvrs: List<Cvr>, cardStyles:List<PopulationIF>?): AuditRound {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
@@ -357,10 +357,10 @@ class TestHasStyle {
         }
 
         val infos = contests.map{ it.info }.associateBy { it.id }
-        val cardIter = CvrsWithStylesToCardManifest(config.auditType, hasStyle,
+        val cardIter = CvrsWithPopulationsToCardManifest(config.auditType,
             Closer(testCvrs.iterator()),
             null,
-            styles = cardStyles,
+            populations = cardStyles,
         )
         val tabs = tabulateAuditableCards(cardIter, infos).toSortedMap()
         if (showDetails) tabs.forEach { println(it) }
@@ -373,13 +373,13 @@ class TestHasStyle {
         val election =
             CreateElectionFromCvrs(contestsUA, testCvrs, cardPools = null, cardStyles = cardStyles, config = config)
 
-        CreateAudit("testOneCardBallots", config, election, auditDir = "$topdir/audit", clear = true)
+        CreateAuditP("testOneCardBallots", config, election, auditDir = "$topdir/audit", clear = true)
 
         return runTestPersistedAudit(topdir, contestsUA)
     }
 
     fun createAndRunTestAuditCards(topdir: String, isPolling: Boolean, contests: List<Contest>, skipContests: List<Int>, hasStyle: Boolean,
-                                   testCards: List<AuditableCard>, cardStyles:List<CardStyleIF>?): AuditRound {
+                                   testCards: List<AuditableCard>, cardStyles:List<PopulationIF>?): AuditRound {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
@@ -392,10 +392,9 @@ class TestHasStyle {
         }
 
         val infos = contests.map{ it.info }.associateBy { it.id }
-        val cardIter = CardsWithStylesToCardManifest(config.auditType, hasStyle,
+        val cardIter = CardsWithPopulationsToCardManifest(config.auditType,
             Closer(testCards.iterator()),
-            null,
-            styles = cardStyles,
+            populations = cardStyles,
         )
         val tabs = tabulateAuditableCards(cardIter, infos)
         if (showDetails) tabs.forEach { println(it) }
@@ -415,7 +414,7 @@ class TestHasStyle {
         val election =
             CreateElectionFromCards(contestsUA, testCards, cardPools = null, cardStyles = cardStyles, config = config)
 
-        CreateAudit("testOneCardBallots", config, election, auditDir = "$topdir/audit", clear = true)
+        CreateAuditP("testOneCardBallots", config, election, auditDir = "$topdir/audit", clear = true)
 
         return runTestPersistedAudit(topdir, contestsUA)
     }
@@ -441,7 +440,7 @@ fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestUnderAudit>): A
         config,
         auditRound,
         cardManifest = mvrManager.sortedCards(),
-        cardPools = null,
+        cardPools = mvrManager.oapools(),
         // nthreads=1,
     )
 

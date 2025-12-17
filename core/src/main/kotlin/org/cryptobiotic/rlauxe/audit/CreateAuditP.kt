@@ -1,20 +1,31 @@
 package org.cryptobiotic.rlauxe.audit
 
 
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
+import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writePopulationsJsonFile
+import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.util.Prng
+import org.cryptobiotic.rlauxe.util.SortMerge
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.createZipFile
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
+import org.cryptobiotic.rlauxe.workflow.findSamples
 import kotlin.io.path.Path
 
 interface CreateElectionPIF {
@@ -79,4 +90,75 @@ class CreateAuditP(val name: String, val config: AuditConfig, election: CreateEl
 
         // cant write the sorted cards until after seed is generated, after committment to cardManifest
     }
+}
+
+fun writeSortedCardsInternalSort(publisher: Publisher, seed: Long) {
+    val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile())
+    val sortedCards = createSortedCards(unsortedCards, seed)
+    val countCards = writeAuditableCardCsvFile(Closer(sortedCards.iterator()), publisher.sortedCardsFile())
+    createZipFile(publisher.sortedCardsFile(), delete = true)
+    logger.info{"writeSortedCardsInternalSort ${countCards} cards to ${publisher.sortedCardsFile()}"}
+}
+
+fun createSortedCards(unsortedCards: CloseableIterator<AuditableCard>, seed: Long) : List<AuditableCard> {
+    val prng = Prng(seed)
+    val cards = mutableListOf<AuditableCard>()
+    unsortedCards.use { cardIter ->
+        while (cardIter.hasNext()) {
+            cards.add( cardIter.next().copy(prn = prng.next()))
+        }
+    }
+    return cards.sortedBy { it.prn }
+}
+
+fun writeSortedCardsExternalSort(topdir: String, publisher: Publisher, seed: Long) {
+    val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile())
+    writeExternalSortedCards(topdir, publisher.sortedCardsFile(), unsortedCards, seed)
+    // logger.info{"write ${unsortedCards.size} cards to ${publisher.sortedCardsFile()}"}
+}
+
+fun writeExternalSortedCards(topdir: String, outputFile: String, unsortedCards: CloseableIterator<AuditableCard>, seed: Long) {
+    val sorter = SortMerge<AuditableCard>("$topdir/sortChunks", outputFile = outputFile, seed = seed)
+    sorter.run(
+        cardIter = unsortedCards,
+        cvrs = emptyList(),
+        toAuditableCard = { from: AuditableCard, index: Int, prn: Long -> from.copy(index = index, prn = prn) }
+    )
+    createZipFile(outputFile, delete = true)
+}
+
+// uses private/sortedMvrs.cvs
+fun writeMvrsForRound(publisher: Publisher, round: Int) {
+    val resultSamples = readSamplePrnsJsonFile(publisher.samplePrnsFile(round))
+    if (resultSamples is Err) logger.error{"$resultSamples"}
+    require(resultSamples is Ok)
+    val sampleNumbers = resultSamples.unwrap()
+
+    val sortedMvrs = readAuditableCardCsvFile(publisher.privateMvrsFile())
+
+    val sampledMvrs = findSamples(sampleNumbers, Closer(sortedMvrs.iterator()))
+    require(sampledMvrs.size == sampleNumbers.size)
+
+    sampledMvrs.forEachIndexed { index, mvr ->
+        require(mvr.prn == sampleNumbers[index])
+    }
+
+    val countCards = writeAuditableCardCsvFile(Closer(sampledMvrs.iterator()), publisher.sampleMvrsFile(round))
+    logger.info{"writeMvrsForRound ${countCards} cards to ${publisher.sampleMvrsFile(round)}"}
+}
+
+fun writePrivateMvrs(publisher: Publisher, sortedMvrs: List<AuditableCard>) {
+    validateOutputDirOfFile(publisher.privateMvrsFile())
+    val countMvrs = writeAuditableCardCsvFile(Closer(sortedMvrs.iterator()), publisher.privateMvrsFile())
+    logger.info{"writeSortedMvrs ${countMvrs} mvrs to ${publisher.privateMvrsFile()}"}
+}
+
+fun writeUnsortedPrivateMvrs(publisher: Publisher, unsortedMvrs: List<Cvr>, seed: Long) {
+    val prng = Prng(seed)
+    // 0 based index
+    val mvrCards = unsortedMvrs.mapIndexed { index, mvr ->
+        AuditableCard.fromCvr(mvr, index, prng.next())
+    }
+    val sortedMvrs = mvrCards.sortedBy { it.prn }
+    writePrivateMvrs(publisher, sortedMvrs)
 }

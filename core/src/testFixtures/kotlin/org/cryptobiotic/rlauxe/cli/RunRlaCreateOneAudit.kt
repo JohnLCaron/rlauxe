@@ -5,7 +5,6 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.OneAuditVunderBarFuzzer
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
@@ -13,11 +12,11 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTestP
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.json.readCardPoolsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.VunderBar
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import org.cryptobiotic.rlauxe.workflow.readCardManifest
 import kotlin.io.path.Path
 
@@ -107,6 +106,7 @@ object RunRlaCreateOneAudit {
 
         val config = AuditConfig(
             AuditType.ONEAUDIT, hasStyle = true, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = fuzzMvrs,
+            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
             oaConfig = OneAuditConfig(OneAuditStrategyType.clca, useFirst = true)
         )
 
@@ -140,7 +140,7 @@ object RunRlaCreateOneAudit {
         val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.makePairsFromCards(sortedCards)
         val sortedMvrs = oaFuzzedPairs.map { it.first }
         // have to write this here, where we know the mvrs
-        writeSortedMvrs(publisher, sortedMvrs)
+        writePrivateMvrs(publisher, sortedMvrs)
     }
 
     class TestOneAuditElection(

@@ -2,7 +2,7 @@
     "auditType": "ONEAUDIT",
     "hasStyle": true,
     "riskLimit": 0.05,
-    "seed": -3952749455485903357,
+    "seed": -4629439695907909475,
     "nsimEst": 10,
     "quantile": 0.8,
     "contestSampleCutoff": 20000,
@@ -23,6 +23,7 @@
     "oaBettingStrategy": {
         "strategy": "optimalComparison"
     },
+    "persistedWorkflowMode": "testPrivateMvrs",
     "version": 2.0,
     "skipContests": []
 }

@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.enumValueOf
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 
 import java.io.FileOutputStream
 import java.nio.file.Files
@@ -77,6 +78,7 @@ data class AuditConfigJson(
     val clcaBettingStrategy: ClcaBettingStrategyJson? = null,
     val oaBettingStrategy: OneAuditBettingStrategyJson?  = null,
 
+    val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
     val version : Double,
     val skipContests: List<Int>?  = null,
 )
@@ -100,6 +102,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             clcaConfig = this.clcaConfig.publishJson(),
             clcaBettingStrategy = this.clcaBettingStrategy.publishJson(), // TODO needed?
 
+            persistedWorkflowMode = this.persistedWorkflowMode,
             skipContests = skipContests,
             version = this.version,
         )
@@ -121,6 +124,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             pollingConfig = this.pollingConfig.publishJson(),
             pollingErrorStrategy = this.pollingErrorStrategy.publishJson(), // TODO needed?
 
+            persistedWorkflowMode = this.persistedWorkflowMode,
             skipContests = skipContests,
             version = this.version,
         )
@@ -143,6 +147,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             oaConfig = this.oaConfig.publishJson(),
             oaBettingStrategy = this.oaBettingStrategy.publishJson(), // TODO needed?
 
+            persistedWorkflowMode = this.persistedWorkflowMode,
             skipContests = skipContests,
             version = this.version,
         )
@@ -169,6 +174,7 @@ fun AuditConfigJson.import(): AuditConfig {
             clcaConfig = this.clcaConfig!!.import(),
             clcaBettingStrategy = this.clcaBettingStrategy?.import() ?: ClcaBettingStrategy(),
 
+            persistedWorkflowMode = this.persistedWorkflowMode,
             skipContests = skipContests?: emptyList(),
             version = this.version,
         )
@@ -190,6 +196,7 @@ fun AuditConfigJson.import(): AuditConfig {
             pollingConfig = this.pollingConfig!!.import(),
             pollingErrorStrategy = this.pollingErrorStrategy?.import() ?: PollingErrorStrategy(),
 
+            persistedWorkflowMode = this.persistedWorkflowMode,
             skipContests = skipContests?: emptyList(),
             version = this.version,
         )
@@ -212,6 +219,7 @@ fun AuditConfigJson.import(): AuditConfig {
             oaConfig = this.oaConfig!!.import(),
             oaBettingStrategy = this.oaBettingStrategy?.import() ?: OneAuditBettingStrategy(),
 
+            persistedWorkflowMode = this.persistedWorkflowMode,
             skipContests = skipContests?: emptyList(),
             version = this.version,
         )

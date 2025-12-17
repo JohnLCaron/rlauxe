@@ -4,14 +4,14 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.oneaudit.CardStyle
-import org.cryptobiotic.rlauxe.oneaudit.CardsWithStylesToCardManifest
+import org.cryptobiotic.rlauxe.audit.CardsWithPopulationsToCardManifest
+import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.MultiContestCombineData
-import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTestContests
+import org.cryptobiotic.rlauxe.estimate.makeOneAuditTestContestsP
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -20,8 +20,8 @@ import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.showTabs
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
-import org.cryptobiotic.rlauxe.util.tabulateCardPools
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
+import org.cryptobiotic.rlauxe.util.tabulateOneAuditPools
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -153,8 +153,8 @@ class OASingleRoundWorkflowTaskGeneratorG(
 
         // now divide the cards into pools and cvrs
         val cardStyles = listOf(
-            CardStyle("group1", listOf(1,2), 1),
-            CardStyle("group2", listOf(2), 2),
+            Population("group1", 1, intArrayOf(1, 2), false),
+            Population("group2", 2, intArrayOf(2), false),
         )
 
         // cards with pools
@@ -218,11 +218,9 @@ class OASingleRoundWorkflowTaskGeneratorG(
             assertEquals(contest.votes, mtabs[contest.id]!!.votes)
         }
 
-        val converter = CardsWithStylesToCardManifest(
+        val converter = CardsWithPopulationsToCardManifest(
             type = AuditType.ONEAUDIT,
-            cvrsAreComplete = true,
             cards = Closer(modifiedCards.iterator()),
-            phantomCards = null,
             cardStyles,
         )
         val cardManifest = mutableListOf<AuditableCard>()
@@ -236,7 +234,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
         val fakeMvrs = cardsp.map { it.cvr() }
         val config = AuditConfig(AuditType.ONEAUDIT, hasStyle = hasStyle, seed = 12356667890L)
         val (contestsUA, cardPools) =
-            makeOneAuditTestContests(
+            makeOneAuditTestContestsP(
                 config.hasStyle,
                 infos,
                 listOf(contestB),
@@ -245,7 +243,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
                 fakeMvrs
             )
 
-        val poolSums = tabulateCardPools(cardPools, infos)
+        val poolSums = tabulateOneAuditPools(cardPools, infos)
         if (debug) println(showTabs("poolSums", poolSums))
 
         val sumWithPools = mutableMapOf<Int, ContestTabulation>()

@@ -1,5 +1,5 @@
 # What does hasStyle mean?
-_12/15/25_
+_12/17/25_
 
 # TL;DR
 
@@ -7,9 +7,10 @@ The best case is to have CVRs that record undervotes. Then things are simple and
 
 config.hasStyles -> config.cvrsHaveUndervotes (aka cvrsAreComplete)
 
-Otherwise, we need to create Population containers that know which contests are in it, and use these 
+Otherwise, we need to create "Population" containers that know which contests are in it, and use these 
 when choosing audit samples. Set hasStyle independently on each population (rather than globally on the audit),
-and use those when deciding the clca assort value when an MVR is missing a contest. 
+and use those when deciding the assort value when an MVR is missing a contest. This should be done for Polling assorters
+as well as Clca an OneAudit assorters.
 
 population.hasStyles -> population.knowExactContests = "we know exactly what contests are on all the cards in this population".
 

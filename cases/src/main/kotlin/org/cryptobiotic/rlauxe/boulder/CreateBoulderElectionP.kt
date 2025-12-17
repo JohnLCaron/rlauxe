@@ -274,8 +274,8 @@ class CreateBoulderElectionP(
         return if (isClca) { // TODO and hasUndervotes
             val simulatedCvrs = makeRedactedCvrs()
             val cvrs =  exportCvrs + simulatedCvrs
-            CvrsWithStylesToCardManifest(
-                AuditType.CLCA, hasStyle,
+            CvrsWithPopulationsToCardManifest(
+                AuditType.CLCA,
                 Closer(cvrs.iterator()),
                 makePhantomCvrs(contests),
                 null

@@ -2,7 +2,7 @@
     "auditType": "POLLING",
     "hasStyle": true,
     "riskLimit": 0.05,
-    "seed": 6685017560367965536,
+    "seed": -4284934043003482852,
     "nsimEst": 100,
     "quantile": 0.8,
     "contestSampleCutoff": 30000,
@@ -14,6 +14,7 @@
         "d": 100
     },
     "pollingErrorStrategy": {},
+    "persistedWorkflowMode": "testPrivateMvrs",
     "version": 2.0,
     "skipContests": []
 }

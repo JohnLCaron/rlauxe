@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
-import org.cryptobiotic.rlauxe.oneaudit.CvrsWithStylesToCardManifest
 import org.cryptobiotic.rlauxe.util.*
 
 private val logger = KotlinLogging.logger("BelgiumClca")
@@ -13,7 +12,7 @@ private val logger = KotlinLogging.logger("BelgiumClca")
 class BelgiumClca (
     contestd: DHondtContest,
     val hasStyle: Boolean,
-): CreateElectionIF {
+): CreateElectionPIF {
 
     val infoMap: Map<Int, ContestInfo>
     val contestsUA: List<ContestUnderAudit>
@@ -26,13 +25,13 @@ class BelgiumClca (
         cvrs = contestd.createSimulatedCvrs()
     }
 
-    override fun cardPools() = null
+    override fun populations() = null
     override fun contestsUA() = contestsUA
     override fun cardManifest() = createCardManifest()
 
     fun createCardManifest(): CloseableIterator<AuditableCard> {
-        return CvrsWithStylesToCardManifest(
-            AuditType.CLCA, hasStyle,
+        return CvrsWithPopulationsToCardManifest(
+            AuditType.CLCA,
             Closer(cvrs.iterator()),
             makePhantomCvrs(contestsUA().map { it.contest }),
             null,
@@ -57,7 +56,7 @@ fun createBelgiumClca(
     }
     val election = BelgiumClca(contestd, config.hasStyle)
 
-    CreateAudit("belgiumClca", config, election, auditdir, clear = clear)
+    CreateAuditP("belgiumClca", config, election, auditdir, clear = clear)
     println("createBelgiumClca took $stopwatch")
 }
 

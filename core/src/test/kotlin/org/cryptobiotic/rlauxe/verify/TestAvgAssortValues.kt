@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.verify
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardsWithPopulationsToCardManifest
-import org.cryptobiotic.rlauxe.oneaudit.CvrsWithStylesToCardManifest
+import org.cryptobiotic.rlauxe.audit.CvrsWithPopulationsToCardManifest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
@@ -34,9 +34,9 @@ class TestAvgAssortValues {
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsWithStylesToCardManifest(
-                AuditType.CLCA, false, Closer(testCvrs.iterator()),
-                phantomCvrs=null, styles = null,
+            CvrsWithPopulationsToCardManifest(
+                AuditType.CLCA, Closer(testCvrs.iterator()),
+                phantomCvrs=null, populations = null,
             )
         }
 
@@ -82,9 +82,9 @@ class TestAvgAssortValues {
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsWithStylesToCardManifest(
-                AuditType.CLCA, false, Closer(testCvrs.iterator()),
-                phantomCvrs=null, styles = null,
+            CvrsWithPopulationsToCardManifest(
+                AuditType.CLCA, Closer(testCvrs.iterator()),
+                phantomCvrs=null, populations = null,
             )
         }
 
@@ -125,9 +125,9 @@ class TestAvgAssortValues {
         val testCvrs = test.makeCvrsFromContests()
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsWithStylesToCardManifest(
-                AuditType.CLCA, false, Closer(testCvrs.iterator()),
-                phantomCvrs=null, styles = null,
+            CvrsWithPopulationsToCardManifest(
+                AuditType.CLCA,Closer(testCvrs.iterator()),
+                phantomCvrs=null, populations = null,
             )
         }
 

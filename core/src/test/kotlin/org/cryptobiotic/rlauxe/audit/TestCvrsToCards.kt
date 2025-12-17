@@ -6,10 +6,8 @@ import org.junit.jupiter.api.Test
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 // data class AuditableCard (
 //    val location: String, // info to find the card for a manual audit. Aka ballot identifier.
@@ -50,14 +48,14 @@ class TestCvrsToCards {
         cvr = cvrr.copy(poolId=1)
         target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=listOf(cardStyle))
         card = target.next()
-        testOneTarget("clca hasStyle and poolIds and styles", cvr, card, auditType, hasCardStyles, expectStyle = cardStyle)
+        testOneTarget("clca hasStyle and poolIds and styles", cvr, card, auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
 
         // noStyle means votes isnt complete, so you need cardStyles and poolIds. should test if votes cubset of cardpool contests
         hasCardStyles = true
         cvr = cvrr.copy(poolId=1)
         target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=listOf(cardStyle))
         card = target.next()
-        testOneTarget("** clca incomplete cvrs", cvr, card, auditType, hasCardStyles, expectStyle = cardStyle)
+        testOneTarget("** clca incomplete cvrs", cvr, card, auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
 
         // what if you dont supply the poolId?
         cvr = cvrr.copy(poolId=null)
@@ -82,24 +80,23 @@ class TestCvrsToCards {
         val expectedMessage = "AuditableCard must have votes, possibleContests, cardStyle, or population"
         var cvr = cvrr.copy(poolId=null)  // no poolId
         var target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null, )
-        assertEquals( assertFailsWith<RuntimeException> { target.next() }.message, expectedMessage)
+        testOneTarget("** poll with no pools", cvr, target.next(), auditType, hasCardStyles, "all")
 
         cvr = cvrr.copy(poolId=1) // poolId but no pools
         target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null)
-        assertEquals( assertFailsWith<RuntimeException> { target.next() }.message, expectedMessage)
+        testOneTarget("** poll with poolid but no pool", cvr, target.next(), auditType, hasCardStyles, expectStyle = "all")
 
         // what happens if the poolId doesnt match ??
         val cardStyle = Population("cardstyle1", 1,intArrayOf(0,1,2,3,4), false)
         cvr = cvrr.copy(poolId=2) // poolId doesnt match
         target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null)
-        assertEquals( assertFailsWith<RuntimeException> { target.next() }.message, expectedMessage)
+        testOneTarget("** poll with pools but wrong poolid", cvr, target.next(), auditType, hasCardStyles, expectStyle = "all")
 
         // successfully use pool 1
         hasCardStyles = true
         cvr = cvrr.copy(poolId=1)
         target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=listOf(cardStyle))
-        var card = target.next()
-        testOneTarget("** poll with pool", cvr, card, auditType, hasCardStyles, expectStyle = cardStyle)
+        testOneTarget("** poll with pool", cvr, target.next(), auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
     }
 
     @Test
@@ -115,16 +112,16 @@ class TestCvrsToCards {
         val cardStyle = Population("oapool2", 2,intArrayOf(0,1,2), false)
         var target = CvrsWithPopulationsToCardManifest(auditType, Closer(cvrs.iterator()), phantomCvrs=null, populations=listOf(cardStyle), )
         testOneTarget("oa hasStyle", cvrc, target.next(), auditType, hasCardStyles, null)
-        testOneTarget("oa hasStyle pooled", cvrp, target.next(), auditType, hasCardStyles, cardStyle)
+        testOneTarget("oa hasStyle pooled", cvrp, target.next(), auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
 
         // noStyle means must supply the list of possibleContests for pooled data and cvrs
         hasCardStyles = true
         target = CvrsWithPopulationsToCardManifest(auditType, Closer(cvrs.iterator()), phantomCvrs=null, populations=listOf(cardStyle), )
         testOneTarget("oa noStyle", cvrc, target.next(), auditType, hasCardStyles, null)
-        testOneTarget("oa noStyle pooled", cvrp, target.next(), auditType, hasCardStyles, cardStyle)
+        testOneTarget("oa noStyle pooled", cvrp, target.next(), auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
     }
 
-    fun testOneTarget(what: String, cvr: Cvr, card: AuditableCard, auditType: AuditType, hasCardStyles: Boolean, expectStyle:Population?) {
+    fun testOneTarget(what: String, cvr: Cvr, card: AuditableCard, auditType: AuditType, hasCardStyles: Boolean, expectStyle:String?, expectPop:Population?=null) {
         println("$what [$auditType hasCardStyles:$hasCardStyles]:")
         println("  ${cvr.show()}")
         println("  ${card.show()}")
@@ -142,9 +139,9 @@ class TestCvrsToCards {
         assertEquals(cvr.id, card.location)
         assertEquals(cvr.phantom, card.phantom)
         assertEquals(cvr.poolId, card.poolId, "poolId")
-        assertEquals(expectStyle?.name(), card.cardStyle, "cardStyle")
+        assertEquals(expectStyle, card.cardStyle, "cardStyle")
 
-        val styleContests = expectStyle?.possibleContests?.toList()?.toSet() ?: emptySet()
+        val styleContests = expectPop?.possibleContests?.toList()?.toSet() ?: emptySet()
         val expectContests = when (auditType) {
             AuditType.ONEAUDIT -> {
                 if (card.votes != null)
@@ -155,7 +152,7 @@ class TestCvrsToCards {
                     styleContests
             }
             AuditType.CLCA -> if (hasCardStyles) styleContests else card.votes!!.keys.toSet()
-            AuditType.POLLING -> expectStyle?.contests()?.toSet() ?: cvr.contests().toSet()
+            AuditType.POLLING -> expectPop?.contests()?.toSet() ?: emptySet()
         }
         if (expectContests != card.contests().toSet())
             print("${card.contests()}")

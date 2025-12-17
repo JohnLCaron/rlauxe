@@ -12,10 +12,11 @@ import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
 
 private val logger = KotlinLogging.logger("PersistentAudit")
 
+enum class PersistedWorkflowMode { real, testSimulated, testPrivateMvrs }
+
 /** AuditWorkflow with persistent state. */
 class PersistedWorkflow(
     val auditDir: String,
-    val useTest: Boolean,  // TODO move to config ??
     val mvrWrite: Boolean = true,
 ): AuditWorkflow() {
     val auditRecord: AuditRecord // only need auditConfig, contests from record
@@ -25,6 +26,7 @@ class PersistedWorkflow(
     private val contestsUA: List<ContestUnderAudit>
     private val auditRounds = mutableListOf<AuditRound>()
     private val mvrManager: MvrManager
+    private val mode: PersistedWorkflowMode
 
     init {
         val auditRecordResult = AuditRecord.readFromResult(auditDir)
@@ -36,10 +38,11 @@ class PersistedWorkflow(
         }
 
         config = auditRecord.config
+        mode = config.persistedWorkflowMode
         contestsUA = auditRecord.contests
 
         auditRounds.addAll(auditRecord.rounds)
-        mvrManager = if (useTest) {
+        mvrManager = if (mode == PersistedWorkflowMode.testSimulated) {
             PersistedMvrManagerTest(auditRecord.location, config, contestsUA)
         } else {
             PersistedMvrManager(auditRecord.location, config, contestsUA, mvrWrite=mvrWrite)
@@ -102,6 +105,6 @@ class PersistedWorkflow(
     }
 
     override fun toString(): String {
-        return "PersistentWorkflow(auditDir='$auditDir', useTest=$useTest, mvrManager=$mvrManager)"
+        return "PersistentWorkflow(auditDir='$auditDir', mode=$mode, mvrManager=$mvrManager)"
     }
 }

@@ -10,7 +10,6 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.json.readCardPoolsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.persist.json.readPopulationsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
@@ -82,11 +81,8 @@ fun readCardManifest(publisher: Publisher, infos: Map<Int, ContestInfo>): CardMa
         return CardManifest(mergedCards, populations)
     }
 
-    val cardPools = if (!Files.exists(Path(publisher.cardPoolsFile()))) emptyList()
-        else readCardPoolsJsonFileUnwrapped(publisher.cardPoolsFile(), infos)
-
     val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
-    return CardManifest(CloseableIterable { sortedCards.iterator() }, cardPools)
+    return CardManifest(CloseableIterable { sortedCards.iterator() }, emptyList())
 }
 
 fun readPopulations(publisher: Publisher): List<PopulationIF>? {

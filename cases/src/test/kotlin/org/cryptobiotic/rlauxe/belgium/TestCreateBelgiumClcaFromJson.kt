@@ -139,7 +139,7 @@ fun createBelgiumElection(electionName: String, stopRound:Int=0, showVerify:Bool
     var done = false
     var finalRound: AuditRound? = null
     while (!done) {
-        val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
+        val lastRound = runRound(inputDir = auditdir)
         if (lastRound != null) finalRound = lastRound
         done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx == stopRound
     }
@@ -157,7 +157,7 @@ fun runBelgiumElection(electionName: String, stopRound:Int=0): Int {
     var done = false
     var finalRound: AuditRound? = null
     while (!done) {
-        val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
+        val lastRound = runRound(inputDir = auditdir)
         if (lastRound != null) finalRound = lastRound
         done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx == stopRound
     }
@@ -176,7 +176,7 @@ fun showBelgiumElection(electionName: String): Triple<Int, Int, AssorterIF> {
     val topdir = "$toptopdir/$electionName"
     val auditdir = "$topdir/audit"
 
-    val auditRecord = PersistedWorkflow(auditdir, useTest=true).auditRecord
+    val auditRecord = PersistedWorkflow(auditdir).auditRecord
     val contestUA = auditRecord.contests.first()
     println(contestUA.show())
     val minAssertion = contestUA.minAssertion()

@@ -38,6 +38,7 @@ class TestAuditableCardsCsv {
             // intArrayOf(19, 23, 99, 123456),
             null,
             null,
+            cardStyle = "all",
         )
 
         val csv = writeAuditableCardCsv(target)

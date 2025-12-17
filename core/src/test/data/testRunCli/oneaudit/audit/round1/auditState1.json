@@ -7,36 +7,36 @@
                 {
                     "assorterDesc": "0/1 OneAuditTest",
                     "roundIdx": 1,
-                    "estSampleSize": 94,
-                    "estNewSampleSize": 94,
+                    "estSampleSize": 634,
+                    "estNewSampleSize": 634,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "clca",
                         "fuzzPct": 0.02,
                         "startingTestStatistic": 1.0,
                         "estimatedDistribution": [
-                            94,
-                            107,
-                            124,
-                            130,
-                            144,
-                            198,
-                            198,
-                            614,
-                            718,
-                            719
+                            258,
+                            420,
+                            425,
+                            503,
+                            532,
+                            552,
+                            634,
+                            763,
+                            904,
+                            905
                         ],
-                        "firstSample": 94
+                        "firstSample": 634
                     },
                     "auditResult": {
-                        "desc": "round=1 pvalue=0.1804 nmvrs=94 samplesUsed=94 status=LimitReached startingRates=totalSamples=0, noerror=0.5102040816326531, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=94, noerror=0.5102040816326531, upper=1.0 poolAvg=null\n",
+                        "desc": "round=1 pvalue=0.1317 nmvrs=634 samplesUsed=634 status=LimitReached startingRates=totalSamples=0, noerror=0.5102040816326531, upper=1.0 poolAvg=null\n measuredCounts=totalSamples=634, noerror=0.5102040816326531, upper=1.0 poolAvg=null\n    cvr counts= [win-los=6, oth-los=4, oth-win=4, los-win=5, ]\n",
                         "roundIdx": 1,
-                        "nmvrs": 94,
-                        "maxBallotIndexUsed": 94,
-                        "pvalue": 0.18041922623418324,
-                        "samplesUsed": 94,
+                        "nmvrs": 634,
+                        "maxBallotIndexUsed": 634,
+                        "pvalue": 0.13171359431501178,
+                        "samplesUsed": 634,
                         "status": "LimitReached",
-                        "measuredMean": 0.5102040816326531,
+                        "measuredMean": 0.509399343333548,
                         "startingRates": {
                             "errorCounts": {},
                             "totalSamples": 0,
@@ -44,8 +44,13 @@
                             "upper": 1.0
                         },
                         "measuredCounts": {
-                            "errorCounts": {},
-                            "totalSamples": 94,
+                            "errorCounts": {
+                                "0.0": 6,
+                                "0.25510204081632654": 4,
+                                "0.7653061224489797": 4,
+                                "1.0204081632653061": 5
+                            },
+                            "totalSamples": 634,
                             "noerror": 0.5102040816326531,
                             "upper": 1.0
                         },
@@ -56,10 +61,10 @@
                 }
             ],
             "roundIdx": 1,
-            "actualMvrs": 94,
-            "actualNewMvrs": 94,
-            "estNewSamples": 94,
-            "estSampleSize": 94,
+            "actualMvrs": 634,
+            "actualNewMvrs": 634,
+            "estNewSamples": 634,
+            "estSampleSize": 634,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -68,7 +73,7 @@
     ],
     "auditWasDone": true,
     "auditIsComplete": false,
-    "nmvrs": 94,
-    "newmvrs": 94,
+    "nmvrs": 634,
+    "newmvrs": 634,
     "auditorWantNewMvrs": -1
 }

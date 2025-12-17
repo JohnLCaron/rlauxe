@@ -1,34 +1,67 @@
 {
-    "roundIdx": 3,
+    "roundIdx": 4,
     "contestRounds": [
         {
             "id": 1,
             "assertionRounds": [
                 {
                     "assorterDesc": "0/1 OneAuditTest",
-                    "roundIdx": 3,
-                    "estSampleSize": 701,
-                    "estNewSampleSize": 34,
+                    "roundIdx": 4,
+                    "estSampleSize": 749,
+                    "estNewSampleSize": 48,
                     "estimationResult": {
-                        "roundIdx": 3,
+                        "roundIdx": 4,
                         "strategy": "clca",
                         "fuzzPct": 0.02,
-                        "startingTestStatistic": 10.807018024418033,
+                        "startingTestStatistic": 8.377637381253221,
                         "estimatedDistribution": [
-                            34,
-                            34,
-                            34,
-                            34,
-                            34,
-                            34,
-                            34,
-                            209,
-                            281,
-                            282
+                            28,
+                            36,
+                            48,
+                            48,
+                            48,
+                            48,
+                            184,
+                            239,
+                            588,
+                            589
                         ],
-                        "firstSample": 34
+                        "firstSample": 48
                     },
                     "auditResult": {
+                        "desc": "round=4 pvalue=0.1233 nmvrs=749 samplesUsed=749 status=LimitReached startingRates=totalSamples=701, noerror=0.5102040816326531, upper=1.0 poolAvg=null\n    cvr counts= [win-los=6, oth-los=6, oth-win=4, los-win=5, ]\n measuredCounts=totalSamples=749, noerror=0.5102040816326531, upper=1.0 poolAvg=null\n    cvr counts= [win-los=7, oth-los=6, oth-win=5, los-win=5, ]\n",
+                        "roundIdx": 4,
+                        "nmvrs": 749,
+                        "maxBallotIndexUsed": 749,
+                        "pvalue": 0.12325638420717294,
+                        "samplesUsed": 749,
+                        "status": "LimitReached",
+                        "measuredMean": 0.5085011307593801,
+                        "startingRates": {
+                            "errorCounts": {
+                                "0.0": 6,
+                                "0.25510204081632654": 6,
+                                "0.7653061224489797": 4,
+                                "1.0204081632653061": 5
+                            },
+                            "totalSamples": 701,
+                            "noerror": 0.5102040816326531,
+                            "upper": 1.0
+                        },
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.0": 7,
+                                "0.25510204081632654": 6,
+                                "0.7653061224489797": 5,
+                                "1.0204081632653061": 5
+                            },
+                            "totalSamples": 749,
+                            "noerror": 0.5102040816326531,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "prevAuditResult": {
                         "desc": "round=3 pvalue=0.1194 nmvrs=701 samplesUsed=701 status=LimitReached startingRates=totalSamples=667, noerror=0.5102040816326531, upper=1.0 poolAvg=null\n    cvr counts= [win-los=6, oth-los=4, oth-win=4, los-win=5, ]\n measuredCounts=totalSamples=701, noerror=0.5102040816326531, upper=1.0 poolAvg=null\n    cvr counts= [win-los=6, oth-los=6, oth-win=4, los-win=5, ]\n",
                         "roundIdx": 3,
                         "nmvrs": 701,
@@ -61,48 +94,15 @@
                         },
                         "params": {}
                     },
-                    "prevAuditResult": {
-                        "desc": "round=2 pvalue=0.0925 nmvrs=667 samplesUsed=667 status=LimitReached startingRates=totalSamples=634, noerror=0.5102040816326531, upper=1.0 poolAvg=null\n    cvr counts= [win-los=6, oth-los=4, oth-win=4, los-win=5, ]\n measuredCounts=totalSamples=667, noerror=0.5102040816326531, upper=1.0 poolAvg=null\n    cvr counts= [win-los=6, oth-los=4, oth-win=4, los-win=5, ]\n",
-                        "roundIdx": 2,
-                        "nmvrs": 667,
-                        "maxBallotIndexUsed": 667,
-                        "pvalue": 0.09253246341780307,
-                        "samplesUsed": 667,
-                        "status": "LimitReached",
-                        "measuredMean": 0.5094391579720347,
-                        "startingRates": {
-                            "errorCounts": {
-                                "0.0": 6,
-                                "0.25510204081632654": 4,
-                                "0.7653061224489797": 4,
-                                "1.0204081632653061": 5
-                            },
-                            "totalSamples": 634,
-                            "noerror": 0.5102040816326531,
-                            "upper": 1.0
-                        },
-                        "measuredCounts": {
-                            "errorCounts": {
-                                "0.0": 6,
-                                "0.25510204081632654": 4,
-                                "0.7653061224489797": 4,
-                                "1.0204081632653061": 5
-                            },
-                            "totalSamples": 667,
-                            "noerror": 0.5102040816326531,
-                            "upper": 1.0
-                        },
-                        "params": {}
-                    },
                     "status": "LimitReached",
                     "roundProved": 0
                 }
             ],
-            "roundIdx": 3,
-            "actualMvrs": 701,
-            "actualNewMvrs": 34,
-            "estNewSamples": 34,
-            "estSampleSize": 701,
+            "roundIdx": 4,
+            "actualMvrs": 749,
+            "actualNewMvrs": 48,
+            "estNewSamples": 48,
+            "estSampleSize": 749,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -111,7 +111,7 @@
     ],
     "auditWasDone": true,
     "auditIsComplete": false,
-    "nmvrs": 701,
-    "newmvrs": 34,
+    "nmvrs": 749,
+    "newmvrs": 48,
     "auditorWantNewMvrs": -1
 }

@@ -18,6 +18,7 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.io.path.Path
 import kotlin.math.min
 
@@ -174,7 +175,8 @@ fun startTestElectionPolling(
 ) {
     val auditDir = "$topdir/audit"
     clearDirectory(Path(auditDir))
-    val config = AuditConfig(AuditType.POLLING, hasStyle = true, nsimEst = 100, simFuzzPct = fuzzMvrs)
+    val config = AuditConfig(AuditType.POLLING, hasStyle = true, nsimEst = 100, simFuzzPct = fuzzMvrs,
+        persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs)
 
     clearDirectory(Path(auditDir))
     val election = TestPollingElection(
@@ -187,7 +189,7 @@ fun startTestElectionPolling(
         ncontests,
     )
 
-    // dont clear, weve already started writing
+    // dont clear, we've already started writing
     CreateAuditP("startTestElectionPolling", config, election, auditDir = auditDir, clear=false)
 }
 
@@ -238,7 +240,7 @@ class TestPollingElection(
         println()
 
         // have to write this here, where we know the mvrs
-        writeUnsortedMvrs(Publisher(auditdir), testMvrs, seed=config.seed)
+        writeUnsortedPrivateMvrs(Publisher(auditdir), testMvrs, seed=config.seed)
     }
 
     override fun populations() = pops

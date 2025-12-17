@@ -33,7 +33,7 @@ object RunRliRoundCli {
         ).default(false)
 
         parser.parse(args)
-        runRound(inputDir, useTest, quiet)
+        runRound(inputDir)
     }
 }
 

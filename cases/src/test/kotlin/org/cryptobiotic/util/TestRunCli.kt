@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.audit.writeMvrsForRound
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.test.Test
 import kotlin.test.fail
 
@@ -40,7 +41,7 @@ class TestRunCli {
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
+            val lastRound = runRound(inputDir = auditdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
             // if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx) // TODO add this to runRound; dont need when useTest = true?
         }
@@ -68,12 +69,13 @@ class TestRunCli {
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
+        val writeMvrs = config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs
 
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
+            val lastRound = runRound(inputDir = auditdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 7
-            if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx) // cabt use test for polling because cards dont have the votes
+            if (!done && writeMvrs) writeMvrsForRound(publisher, lastRound!!.roundIdx) // cabt use test for polling because cards dont have the votes
         }
 
         println("============================================================")
@@ -115,7 +117,7 @@ class TestRunCli {
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
+            val lastRound = runRound(inputDir = auditdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
             // if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx) // TODO add this to runRound; dont need when useTest = true?
         }
@@ -147,7 +149,8 @@ class TestRunCli {
             )
         )
         val publisher = Publisher(auditdir)
-        // val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        val writeMvrs = config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs
         // writeSortedCardsInternalSort(publisher, config.seed) happens now in RunRlaCreateOneAudit.startTestElectionOneAudit
 
         println("============================================================")
@@ -159,9 +162,9 @@ class TestRunCli {
         println("============================================================")
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
+            val lastRound = runRound(inputDir = auditdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
-            if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx) // RunRlaCreateOneAudit writes the mvrs
+            if (!done && writeMvrs) writeMvrsForRound(publisher, lastRound!!.roundIdx) // RunRlaCreateOneAudit writes the mvrs
         }
 
         println("============================================================")

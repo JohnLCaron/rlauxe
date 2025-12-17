@@ -64,11 +64,11 @@ fun createBelgiumElectionLimited(electionName: String)  {
     writeSortedCardsExternalSort(topdir, publisher, config.seed)
 
     // get estimate, set up first round
-    runRound(inputDir = auditdir, useTest = true, quiet = true)
+    runRound(inputDir = auditdir)
 }
 
 fun runAudit(auditdir: String): AuditRound? {
     println("============================================================")
-    val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
+    val lastRound = runRound(inputDir = auditdir)
     return lastRound
 }

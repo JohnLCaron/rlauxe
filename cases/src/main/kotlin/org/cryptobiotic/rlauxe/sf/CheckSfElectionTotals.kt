@@ -11,7 +11,6 @@ import kotlin.collections.component2
 
 private val logger = KotlinLogging.logger("checkSfElectionTotals")
 
-
 fun checkSfElectionTotals(
     auditDir: String,
     castVoteRecordZip: String,
@@ -19,7 +18,7 @@ fun checkSfElectionTotals(
     summaryFile: String
 ) {
 
-    val workflow = PersistedWorkflow(auditDir, useTest=false)
+    val workflow = PersistedWorkflow(auditDir)
     val config = workflow.auditConfig()
     val contestsUA = workflow.contestsUA()
     val infos = contestsUA.associate { it.id to it.contest.info() }

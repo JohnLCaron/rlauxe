@@ -38,7 +38,7 @@ class TestPersistedWorkflow {
         val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
         CreateAuditP("testPersistedSingleClca", config, election, auditDir = auditdir, clear = true)
 
-        writeUnsortedMvrs(Publisher(auditdir), testMvrs, config.seed)
+        writeUnsortedPrivateMvrs(Publisher(auditdir), testMvrs, config.seed)
 
         runPersistedAudit(topdir, test=false)
     }
@@ -64,7 +64,7 @@ class TestPersistedWorkflow {
         CreateAuditP("testPersistedAuditClca",  config, election, auditDir = auditdir,  clear = true)
 
         // have to write this here, where we know the mvrs
-        writeUnsortedMvrs(Publisher(auditdir), testMvrs, config.seed)
+        writeUnsortedPrivateMvrs(Publisher(auditdir), testMvrs, config.seed)
 
         runPersistedAudit(topdir, test=false)
     }
@@ -142,6 +142,7 @@ fun runPersistedAudit(topdir: String, test:Boolean) {
     val publisher = Publisher(auditdir)
     val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
     writeSortedCardsExternalSort(topdir, publisher, config.seed)
+    val writeMvrs = config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs
 
     val verifyResults = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
     println()
@@ -153,7 +154,7 @@ fun runPersistedAudit(topdir: String, test:Boolean) {
     var lastRound: AuditRound? = null
 
     while (!done) {
-        lastRound = runRound(inputDir = auditdir, useTest = test, quiet = true)
+        lastRound = runRound(inputDir = auditdir)
         if (lastRound == null) fail()
 
         // TODO!!
@@ -164,7 +165,7 @@ fun runPersistedAudit(topdir: String, test:Boolean) {
         }
 
         done = lastRound.auditIsComplete || lastRound.roundIdx > 5
-        if (!done && !test) writeMvrsForRound(publisher, lastRound!!.roundIdx) // RunRlaCreateOneAudit writes the mvrs
+        if (!done && writeMvrs) writeMvrsForRound(publisher, lastRound!!.roundIdx) // RunRlaCreateOneAudit writes the mvrs
     }
 
     if (lastRound != null) {

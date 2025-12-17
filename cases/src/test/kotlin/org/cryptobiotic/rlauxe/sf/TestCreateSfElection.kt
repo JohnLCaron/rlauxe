@@ -72,7 +72,7 @@ class TestCreateSfElection {
         var done = false
         var finalRound: AuditRound? = null
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
+            val lastRound = runRound(inputDir = auditdir)
             if (lastRound != null) finalRound = lastRound
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx == stopRound
         }
@@ -139,7 +139,7 @@ class TestCreateSfElection {
     @Test
     fun runSFElectionPollingNostyles() {
         val topdir = "$testdataDir/cases/sf2024/polling"
-        runRound(inputDir = "$topdir/audit", useTest = true, quiet = false)
+        runRound(inputDir = "$topdir/audit")
     }
 
     /*

@@ -148,18 +148,18 @@ fun writeMvrsForRound(publisher: Publisher, round: Int) {
     logger.info{"writeMvrsForRound ${countCards} cards to ${publisher.sampleMvrsFile(round)}"}
 }
 
-fun writeSortedMvrs(publisher: Publisher, sortedMvrs: List<AuditableCard>) {
+fun writePrivateMvrs(publisher: Publisher, sortedMvrs: List<AuditableCard>) {
     validateOutputDirOfFile(publisher.privateMvrsFile())
     val countMvrs = writeAuditableCardCsvFile(Closer(sortedMvrs.iterator()), publisher.privateMvrsFile())
     logger.info{"writeSortedMvrs ${countMvrs} mvrs to ${publisher.privateMvrsFile()}"}
 }
 
-fun writeUnsortedMvrs(publisher: Publisher, unsortedMvrs: List<Cvr>, seed: Long) {
+fun writeUnsortedPrivateMvrs(publisher: Publisher, unsortedMvrs: List<Cvr>, seed: Long) {
     val prng = Prng(seed)
     // 0 based index
     val mvrCards = unsortedMvrs.mapIndexed { index, mvr ->
         AuditableCard.fromCvr(mvr, index, prng.next())
     }
     val sortedMvrs = mvrCards.sortedBy { it.prn }
-    writeSortedMvrs(publisher, sortedMvrs)
+    writePrivateMvrs(publisher, sortedMvrs)
 }

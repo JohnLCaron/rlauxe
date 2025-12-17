@@ -28,8 +28,9 @@ import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger("RunAudit")
 
-fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
-    val roundResult = runRoundResult(inputDir, useTest, quiet)
+// from rlauxe-viewer
+fun runRound(inputDir: String): AuditRound? {
+    val roundResult = runRoundResult(inputDir)
     if (roundResult is Err) {
         logger.error{"runRoundResult failed ${roundResult.error}"}
         return null
@@ -37,7 +38,7 @@ fun runRound(inputDir: String, useTest: Boolean, quiet: Boolean): AuditRound? {
     return roundResult.unwrap()
 }
 
-fun runRoundResult(inputDir: String, useTest: Boolean, quiet: Boolean): Result<AuditRound, ErrorMessages> {
+fun runRoundResult(inputDir: String): Result<AuditRound, ErrorMessages> {
     val errs = ErrorMessages("runRoundResult")
 
     try {
@@ -46,7 +47,7 @@ fun runRoundResult(inputDir: String, useTest: Boolean, quiet: Boolean): Result<A
         }
         logger.info { "runRound on Audit in $inputDir" }
 
-        val rlauxAudit = PersistedWorkflow(inputDir, useTest)
+        val rlauxAudit = PersistedWorkflow(inputDir)
         var roundIdx = 0
         var complete = false
 
@@ -58,7 +59,7 @@ fun runRoundResult(inputDir: String, useTest: Boolean, quiet: Boolean): Result<A
                 logger.info { "Run audit round ${lastRound.roundIdx}" }
                 val roundStopwatch = Stopwatch()
                 // run the audit for this round
-                complete = rlauxAudit.runAuditRound(lastRound, quiet)
+                complete = rlauxAudit.runAuditRound(lastRound)
                 logger.info { "  complete=$complete took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms" }
 
             } else {
@@ -98,7 +99,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         val assertion = assertionRound.assertion
         logger.info { "runAudit in $auditDir for round $roundIdx, contest $contestId, and assertion $assertion" }
 
-        val workflow = PersistedWorkflow(auditDir, useTest=false, mvrWrite=false)
+        val workflow = PersistedWorkflow(auditDir, mvrWrite=false)
         val cvrPairs = workflow.mvrManager().makeMvrCardPairsForRound(roundIdx)
         val sampler = PairSampler(contestId, cvrPairs)
 

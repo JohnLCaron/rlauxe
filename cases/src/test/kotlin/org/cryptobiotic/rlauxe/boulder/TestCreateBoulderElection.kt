@@ -192,13 +192,11 @@ class TestCreateBoulderElection {
             RunRliRoundCli.main(
                 arrayOf(
                     "-in", auditDir,
-                    "-test",
                 )
             )
             RunRliRoundCli.main(
                 arrayOf(
                     "-in", auditDir,
-                    "-test",
                 )
             )
         }

@@ -15,7 +15,7 @@ class TestAuditableCardsCsv {
             42,
             43L,
             true,
-            intArrayOf(19, 23, 99, 123456),
+            //intArrayOf(19, 23, 99, 123456),
             mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
             11
         )
@@ -35,7 +35,7 @@ class TestAuditableCardsCsv {
             42,
             43L,
             false,
-            intArrayOf(19, 23, 99, 123456),
+            // intArrayOf(19, 23, 99, 123456),
             null,
             null,
         )
@@ -51,11 +51,11 @@ class TestAuditableCardsCsv {
     @Test
     fun testRoundtripIO() {
         val target = listOf(
-            AuditableCard ("deets", 42, 43L, false, intArrayOf(19, 23, 99, 123456), null, 111),
-            AuditableCard ("deets", 42, 43L, false, intArrayOf(19, 23, 99, 123456), null, null),
-            AuditableCard ("info to find card", 42, 43L, true, intArrayOf(19, 23, 99, 123456),
+            AuditableCard ("deets", 42, 43L, false, null, 111),
+            AuditableCard ("deets", 42, 43L, false, null, null, cardStyle="all"),
+            AuditableCard ("info to find card", 42, 43L, true,
                 mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), 11),
-            AuditableCard ("info to find card", 42, 43L, true, intArrayOf(19, 23, 99, 123456),
+            AuditableCard ("info to find card", 42, 43L, true,
                 mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), null),
         )
 

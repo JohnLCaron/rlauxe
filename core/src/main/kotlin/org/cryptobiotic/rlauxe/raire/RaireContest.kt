@@ -4,7 +4,6 @@ import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.CvrIF
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.*

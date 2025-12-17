@@ -109,9 +109,16 @@ fun makeEstimationTasks(
 
     val tasks = mutableListOf<EstimateSampleSizeTask>()
 
+    val mvrs = if (!config.isPolling) null
+        // contestCards: List<AuditableCard>, cant use the card manifest - there are no votes!
+        // simulate the cvrs once for all the assertions for this contest
+        else ContestSimulation.simulateCvrsDilutedMargin(contestRound.contestUA, config)
+
+
     // get the first n cards for this contest
     // assumes the cards are already randomized
-    val contestCards = ContestCardsLimited(contestRound.contestUA.id, config.contestSampleCutoff, cardManifest.iterator()).cards()
+    val contestCards = if (config.isPolling) null
+        else ContestCardsLimited(contestRound.contestUA.id, config.contestSampleCutoff, cardManifest.iterator()).cards()
 
     contestRound.assertionRounds.map { assertionRound ->
         if (!assertionRound.status.complete) {
@@ -135,6 +142,7 @@ fun makeEstimationTasks(
                         roundIdx,
                         config,
                         contestCards = contestCards,
+                        mvrs = mvrs,
                         vunderFuzz,
                         contestRound,
                         assertionRound,
@@ -153,7 +161,8 @@ fun makeEstimationTasks(
 class EstimateSampleSizeTask(
     val roundIdx: Int,
     val config: AuditConfig,
-    val contestCards: List<AuditableCard>,
+    val contestCards: List<AuditableCard>?,
+    val mvrs: List<Cvr>?,
     val vunderFuzz: OneAuditVunderBarFuzzer?,
     val contestRound: ContestRound,
     val assertionRound: AssertionRound,
@@ -172,7 +181,7 @@ class EstimateSampleSizeTask(
                 estimateClcaAssertionRound(
                     roundIdx,
                     config,
-                    contestCards,
+                    contestCards!!,
                     contestRound,
                     assertionRound,
                     startingTestStatistic
@@ -182,7 +191,7 @@ class EstimateSampleSizeTask(
                     roundIdx,
                     config,
                     contestRound.contestUA,
-                    contestCards,
+                    mvrs!!,
                     assertionRound,
                     startingTestStatistic,
                     moreParameters=moreParameters,
@@ -191,7 +200,7 @@ class EstimateSampleSizeTask(
                 estimateOneAuditAssertionRound(
                     roundIdx,
                     config,
-                    contestCards,
+                    contestCards!!,
                     vunderFuzz!!,
                     contestRound,
                     assertionRound,
@@ -324,7 +333,8 @@ fun estimatePollingAssertionRound(
     roundIdx: Int,
     config: AuditConfig,
     contestUA: ContestUnderAudit,
-    contestCards: List<AuditableCard>,
+    // contestCards: List<AuditableCard>, cant use the card manifest - there are no votes!
+    mvrs: List<Cvr>,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
@@ -332,10 +342,13 @@ fun estimatePollingAssertionRound(
     val assorter = assertionRound.assertion.assorter
     val eta0 = assorter.dilutedMean()
 
+    // optional fuzzing of the mvrs
+    val useFuzz = config.simFuzzPct ?: 0.0
+    val sampler = PollingFuzzSampler(useFuzz, mvrs, contestUA.contest as Contest, assorter) // TODO cant use Raire
+
     // TODO isnt this the same problam as OneAudit ??
     // optional fuzzing of the cvrs
-    val useFuzz = config.simFuzzPct ?: 0.0
-    val sampler = PollingCardFuzzSampler(useFuzz, contestCards, contestUA.contest as Contest, assorter) // cant use Raire
+    // val sampler = PollingCardFuzzSampler(useFuzz, contestCards, contestUA.contest as Contest, assorter) // cant use Raire
 
     // was
     // makeFuzzedCardsFrom(contestsUA: List<ContestUnderAudit>, cards: List<AuditableCard>, fuzzPct: Double)

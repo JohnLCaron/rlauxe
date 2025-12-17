@@ -206,14 +206,14 @@ fun makeCardManifest(mvrs: List<Cvr>, pool: OneAuditPoolWithBallotStyle): List<A
     val expandedContestIds = pool.infos.keys.toList().toIntArray()
 
     // here we put the pool data into a single pool, and combine their contestIds, to get a diluted margin for testing
-    val cardStyle = Population("cardPoolStyle", pool.poolId, expandedContestIds, false)
+    // val cardStyle = Population("cardPoolStyle", pool.poolId, expandedContestIds, false)
 
     // make the cards with the expanded card style
     val converter = CvrsWithPopulationsToCardManifest(
         type = AuditType.ONEAUDIT,
         cvrs = Closer(mvrs.iterator()),
         phantomCvrs = null,
-        listOf(cardStyle),
+        listOf(pool),
     )
     val cards = mutableListOf<AuditableCard>()
     converter.forEach { cards.add(it) }

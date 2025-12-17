@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
-import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.random.Random
 import kotlin.test.Test

@@ -231,7 +231,7 @@ fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<I
         while (cardIter.hasNext()) {
             val card = cardIter.next()
             infos.forEach { (contestId, info) ->
-                if (card.hasContest(contestId)) { // TODO note that we believe possibleContests ...
+                if (card.hasContest(contestId)) { // TODO note that here, we believe possibleContests ...
                     val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
                     tab.ncards++
                     if (card.phantom) tab.nphantoms++

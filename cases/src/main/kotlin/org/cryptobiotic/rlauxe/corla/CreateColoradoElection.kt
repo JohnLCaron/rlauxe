@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolWithBallotStyle
+import org.cryptobiotic.rlauxe.oneaudit.CvrsWithStylesToCardManifest
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolWithBallotStyle
@@ -149,7 +150,8 @@ open class CreateColoradoElection (
     override fun cardManifest() = createCardManifest()
 
     fun createCardManifest(): CloseableIterator<AuditableCard> {
-        return CvrsWithStylesToCardManifest(config.auditType, hasStyle,
+        return CvrsWithStylesToCardManifest(
+            config.auditType, hasStyle,
             Closer(CvrIteratorfromPools()),
             makePhantomCvrs(contests),
             if (config.isOA) cardPools else null,

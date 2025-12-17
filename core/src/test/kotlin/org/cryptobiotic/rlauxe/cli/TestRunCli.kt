@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.cli
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.audit.runRound
+import org.cryptobiotic.rlauxe.audit.writeMvrsForRound
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import kotlin.io.path.ExperimentalPathApi
@@ -82,8 +83,9 @@ class TestRunCli {
 
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
+            val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 7
+            if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx) // cant use test for polling because cards dont have the votes
         }
 
         println("============================================================")

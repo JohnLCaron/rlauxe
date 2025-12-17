@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import kotlin.collections.get
 import kotlin.sequences.plus
@@ -18,60 +18,42 @@ import kotlin.sequences.plus
 
 // Polling: always need cardStyles
 
-interface CvrIF {
-    fun hasContest(contestId: Int): Boolean // "is in P_c".
-    fun location(): String
-    fun isPhantom(): Boolean
-    fun poolId(): Int?
-
-    fun votes(contestId: Int): IntArray?
-    fun hasMarkFor(contestId: Int, candidateId:Int): Int
-
-    // fun hasOneVoteFor(contestId: Int, candidates: List<Int>): Boolean
-    //     // val cands = cvr.votes(contest.id)
-    //    //   val usew2 =  (cands != null && cands.size == 1)
-}
-
 data class AuditableCard (
     val location: String, // info to find the card for a manual audit. Aka ballot identifier.
     val index: Int,  // index into the original, canonical list of cards
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
-    val possibleContests: IntArray, // remove
+    // val possibleContests: IntArray, // remove
 
     val votes: Map<Int, IntArray>?, // must have this and/or population
     val poolId: Int?,
     val cardStyle: String? = null, // hijacked for population name
-    val population: PopulationIF? = null, // not needed if hasStyle ?
+    val population: PopulationIF? = null,
 ): CvrIF {
 
     init {
-        if (!phantom && (possibleContests.isEmpty() && population == null && cardStyle == null && votes == null)) {
+        if (population == null && cardStyle == null && votes == null && poolId == null) {
             // you could make this case mean "all". But maybe its better to be explicit ??
-            throw RuntimeException("AuditableCard must have votes, possibleContests, cardStyle, or population")
-        }
-        if (possibleContests.isNotEmpty() && votes != null) {
-            votes.keys.forEach { id ->
-                if (!possibleContests.contains(id))
-                    throw RuntimeException("possible contests must contain vote contest ${id}")
-            }
+            throw RuntimeException("AuditableCard must have poolId, votes, cardStyle, or population")
         }
     }
 
+    // Deprecated
     // if there are no votes, the IntArrays are all empty; looks like all undervotes
     fun cvr() : Cvr {
-        val useVotes = if (votes != null) votes else {
+        /*val useVotes = if (votes != null) votes else {
             possibleContests.mapIndexed { idx, contestId ->
                 Pair(contestId, votes?.get(idx) ?: intArrayOf())
             }.toMap()
-        }
-        return Cvr(location, useVotes, phantom, poolId)
+        } */
+        return Cvr(location, votes ?: emptyMap(), phantom, poolId)
     }
 
     override fun toString() = buildString {
-        append("AuditableCard(desc='$location', index=$index, sampleNum=$prn, phantom=$phantom, possibleContests=${possibleContests.contentToString()}")
+        append("AuditableCard(desc='$location', index=$index, sampleNum=$prn, phantom=$phantom")
         if (poolId != null) append(", poolId=$poolId")
         if (cardStyle != null) append(", cardStyle=$cardStyle")
+        if (population != null) append(", population=${population.name()}")
         appendLine(")")
         votes?.forEach { id, vote -> appendLine("   contest $id: ${vote.contentToString()}")}
     }
@@ -82,16 +64,17 @@ data class AuditableCard (
     override fun votes(contestId: Int): IntArray? = votes?.get(contestId)
 
     override fun hasContest(contestId: Int): Boolean {
-        return if (population != null) population.hasContest(contestId)
-            else if (possibleContests.isNotEmpty()) possibleContests.contains(contestId)
+        return if (cardStyle == "all") true
+            else if (population != null) population.hasContest(contestId)
+            // else if (possibleContests.isNotEmpty()) possibleContests.contains(contestId)
             else if (votes != null) votes[contestId] != null
             else false
     }
 
-    // TODO deprecated?
+    // TODO deprecated? Dont have a list of "all"
     fun contests(): IntArray {
         return if (population != null) population.contests()
-            else if (possibleContests.isNotEmpty()) possibleContests
+            // else if (possibleContests.isNotEmpty()) possibleContests
             else if (votes != null) votes.keys.toList().sorted().toIntArray()
             else intArrayOf()
     }
@@ -114,7 +97,7 @@ data class AuditableCard (
         if (phantom != other.phantom) return false
         if (poolId != other.poolId) return false
         if (location != other.location) return false
-        if (!possibleContests.contentEquals(other.possibleContests)) return false
+        // if (!possibleContests.contentEquals(other.possibleContests)) return false
         if (cardStyle != other.cardStyle) return false
         if (population != other.population) return false
 
@@ -136,7 +119,7 @@ data class AuditableCard (
         result = 31 * result + phantom.hashCode()
         result = 31 * result + (poolId ?: 0)
         result = 31 * result + location.hashCode()
-        result = 31 * result + possibleContests.contentHashCode()
+        // result = 31 * result + possibleContests.contentHashCode()
         result = 31 * result + (cardStyle?.hashCode() ?: 0)
         result = 31 * result + (population?.hashCode() ?: 0)
         votes?.forEach { (contestId, candidates) -> result = 31 * result + contestId.hashCode() + candidates.contentHashCode() }
@@ -145,9 +128,9 @@ data class AuditableCard (
 
     companion object {
         fun fromCvr(cvr: Cvr, index: Int, prn: Long): AuditableCard {
-            val sortedVotes = cvr.votes.toSortedMap()
-            val contests = sortedVotes.keys.toList()
-            return AuditableCard(cvr.id, index, prn=prn, cvr.phantom, contests.toIntArray(), cvr.votes, cvr.poolId)
+            // val sortedVotes = cvr.votes.toSortedMap()
+            // val contests = sortedVotes.keys.toList()
+            return AuditableCard(cvr.id, index, prn=prn, cvr.phantom, cvr.votes, cvr.poolId)
         }
     }
 }
@@ -164,7 +147,7 @@ class CvrsWithPopulationsToCardManifest(
 
     val popMap = populations?.associateBy{ it.id() }
     val allCvrs: Iterator<Cvr>
-    var cardIndex = 1
+    var cardIndex = 0 // 0 based index
 
     init {
         allCvrs = if (phantomCvrs == null) {
@@ -186,13 +169,13 @@ class CvrsWithPopulationsToCardManifest(
 
         // TODO make user get this right?
         // if you havent specified a population or votes, then the population = all contests
-        // val cardStyle = if (votes == null && pop == null) "all" else pop?.name()
+        val cardStyle = if (votes == null && pop == null) "all" else pop?.name()
 
         return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
-            intArrayOf(),
+            // intArrayOf(),
             votes,
             org.poolId,
-            cardStyle = pop?.name(),
+            cardStyle = cardStyle,
             population = pop,
         )
     }
@@ -206,7 +189,7 @@ class CardsWithPopulationsToCardManifest(
     populations: List<PopulationIF>?,
 ): CloseableIterator<AuditableCard> {
 
-    val popMap = populations?.associateBy{ "P${it.id()}" }
+    val popMap = populations?.associateBy{ it.name() }
 
     override fun hasNext() = cards.hasNext()
 
@@ -223,137 +206,3 @@ class CardsWithPopulationsToCardManifest(
 
     override fun close() = cards.close()
 }
-
-
-/////////////////////////////////////////////////////////////////////////////////////
-// CANDIDATE for removal
-
-interface CardStyleIF {
-    fun name(): String
-    fun contests() : IntArray
-    fun hasContest(contestId: Int): Boolean
-    fun poolId(): Int?
-}
-
-// essentially, CardStyle factors out the contestIds, which the CardLocation references, so its a form of normalization
-data class CardStyle(
-    val name: String,
-    val contestIds: List<Int>,
-    val poolId: Int?,
-): CardStyleIF {
-    // used by MultiContestTestData
-    var ncards = 0
-
-    fun setNcards(ncards:Int): CardStyle {
-        this.ncards = ncards
-        return this
-    }
-
-    override fun name() = name
-    override fun poolId() = poolId
-    override fun hasContest(contestId: Int) = contestIds.contains(contestId)
-    override fun contests() = contestIds.toIntArray()
-
-    override fun toString() = buildString {
-        append("CardStyle('$name' contestIds=$contestIds poolId=$poolId")
-    }
-}
-
-// deprecated usew CvrsWithPopulationsToCardManifest
-class CvrsWithStylesToCardManifest(
-    val type: AuditType,
-    val cvrsAreComplete: Boolean,       // TODO cvrsAreComplete == false means cardStyles != null and poolId != null;
-                                        // unless theres some default behavior, esp with poolId; maybe "all"
-    val cvrs: CloseableIterator<Cvr>,
-    val phantomCvrs : List<Cvr>?,
-    styles: List<CardStyleIF>?,
-): CloseableIterator<AuditableCard> {
-
-    val poolMap = styles?.associateBy{ it.poolId() }
-    val allCvrs: Iterator<Cvr>
-    var cardIndex = 1
-
-    init {
-        allCvrs = if (phantomCvrs == null) {
-            cvrs
-        } else {
-            val cardSeq = cvrs.iterator().asSequence()
-            val phantomSeq = phantomCvrs.asSequence()
-            (cardSeq + phantomSeq).iterator()
-        }
-    }
-
-    override fun hasNext() = allCvrs.hasNext()
-
-    override fun next(): AuditableCard {
-        val org = allCvrs.next()
-        val style = if (poolMap == null) null else poolMap[org.poolId] // hijack poolId
-        val hasCvr = type.isClca() || (type.isOA() && style == null)
-        val contests = when {
-            (hasCvr && cvrsAreComplete) -> null
-            (style != null) -> style.contests()
-            cvrsAreComplete -> org.contests()
-            else -> null
-        }
-        val votes = if (hasCvr) org.votes else null
-
-        return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
-            contests ?: intArrayOf(),
-            votes,
-            org.poolId,
-            null, //style?.name())
-        )
-    }
-
-    override fun close() = cvrs.close()
-}
-
-// deprecated use CardsWithPopulationsToCardManifest
-class CardsWithStylesToCardManifest(
-    val type: AuditType,
-    val cvrsAreComplete: Boolean,
-    val cards: CloseableIterator<AuditableCard>,
-    phantomCards : List<AuditableCard>?,
-    styles: List<CardStyleIF>?,
-): CloseableIterator<AuditableCard> {
-
-    val poolMap = styles?.associateBy{ it.name() }
-    val allCards: Iterator<AuditableCard>
-    var cardIndex = 1
-
-    init {
-        allCards = if (phantomCards == null) {
-            cards
-        } else {
-            val cardSeq = cards.iterator().asSequence()
-            val phantomSeq = phantomCards.asSequence()
-            (cardSeq + phantomSeq).iterator()
-        }
-    }
-
-    override fun hasNext() = allCards.hasNext()
-
-    override fun next(): AuditableCard {
-        val org = allCards.next()
-        val style = if (poolMap == null) null else poolMap[org.cardStyle]
-        val hasCvr = type.isClca() || (type.isOA() && style == null)
-        val contests = when {
-            (hasCvr && cvrsAreComplete) -> null
-            (style != null) -> style.contests()
-            cvrsAreComplete -> org.contests()
-            else -> null
-        }
-        val votes = if (hasCvr) org.votes else null
-
-        return AuditableCard(org.location, cardIndex++, 0, phantom=org.phantom,
-            contests ?: intArrayOf(),
-            votes,
-            org.poolId,
-            null, // style?.name(),
-        )
-    }
-
-    override fun close() = cards.close()
-}
-
-

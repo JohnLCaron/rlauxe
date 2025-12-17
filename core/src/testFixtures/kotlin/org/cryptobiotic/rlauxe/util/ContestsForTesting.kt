@@ -152,7 +152,7 @@ fun makeContestsWithUndervotesAndPhantoms(
     }
 
     // add the phantoms
-    val phantoms =  makePhantomCvrs(contests)
+    val phantoms = makePhantomCvrs(contests)
 
     return Pair(contests, cvrs + phantoms)
 }

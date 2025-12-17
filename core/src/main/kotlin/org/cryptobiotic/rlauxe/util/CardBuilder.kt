@@ -37,12 +37,12 @@ class CardBuilder(
         //    val index: Int,  // index into the original, canonical list of cards
         //    val prn: Long,   // psuedo random number
         //    val phantom: Boolean,
-        //    val possibleContests: IntArray, // list of contests that might be on the ballot.
+        //    // val possibleContests: IntArray, // list of contests that might be on the ballot.
         //    val votes: Map<Int, IntArray>?, // for CLCA, a map of contest -> the candidate ids voted; must include undervotes (??)
         //                                    // for IRV, ranked first to last; missing for pooled data or polling audits
         //    val poolId: Int?, // for OneAudit
         //    val cardStyle: String? = null,
-        return AuditableCard(location, index, prn, phantom, possibleContests,
+        return AuditableCard(location, index, prn, phantom,
             votes= if (votes.isEmpty()) null else votes,
             poolId=poolId ?: this.poolId,
             cardStyle=cardStyle)

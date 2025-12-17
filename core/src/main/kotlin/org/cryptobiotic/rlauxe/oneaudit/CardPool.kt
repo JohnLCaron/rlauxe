@@ -1,13 +1,15 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.RegVotesIF
 import org.cryptobiotic.rlauxe.util.RegVotes
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
@@ -16,12 +18,45 @@ import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
+import kotlin.collections.get
 import kotlin.math.max
 import kotlin.random.Random
+import kotlin.sequences.plus
 
-// CANDIDATE for removal
+// all CANDIDATE for removal
 
 private val logger = KotlinLogging.logger("CardPool")
+
+interface CardStyleIF {
+    fun name(): String
+    fun contests() : IntArray
+    fun hasContest(contestId: Int): Boolean
+    fun poolId(): Int?
+}
+
+// essentially, CardStyle factors out the contestIds, which the CardLocation references, so its a form of normalization
+data class CardStyle(
+    val name: String,
+    val contestIds: List<Int>,
+    val poolId: Int?,
+): CardStyleIF {
+    // used by MultiContestTestData
+    var ncards = 0
+
+    fun setNcards(ncards:Int): CardStyle {
+        this.ncards = ncards
+        return this
+    }
+
+    override fun name() = name
+    override fun poolId() = poolId
+    override fun hasContest(contestId: Int) = contestIds.contains(contestId)
+    override fun contests() = contestIds.toIntArray()
+
+    override fun toString() = buildString {
+        append("CardStyle('$name' contestIds=$contestIds poolId=$poolId")
+    }
+}
 
 interface CardPoolIF: CardStyleIF, OneAuditPoolIF {
     override val poolName: String
@@ -405,3 +440,106 @@ fun distributeExpectedOvervotes(oaContest: OneAuditContestIF, cardPools: List<Ca
         cardPoolMap[poolId]!!.adjustCards(adjust, contestId)
     }
 }
+
+
+/////////////////////////////////////////////////////////////////////////////////////
+// CANDIDATE for removal
+
+// deprecated usew CvrsWithPopulationsToCardManifest
+class CvrsWithStylesToCardManifest(
+    val type: AuditType,
+    val cvrsAreComplete: Boolean,       // TODO cvrsAreComplete == false means cardStyles != null and poolId != null;
+    // unless theres some default behavior, esp with poolId; maybe "all"
+    val cvrs: CloseableIterator<Cvr>,
+    val phantomCvrs : List<Cvr>?,
+    styles: List<CardStyleIF>?,
+): CloseableIterator<AuditableCard> {
+
+    val poolMap = styles?.associateBy{ it.poolId() }
+    val allCvrs: Iterator<Cvr>
+    var cardIndex = 0 // 0 index
+
+    init {
+        allCvrs = if (phantomCvrs == null) {
+            cvrs
+        } else {
+            val cardSeq = cvrs.iterator().asSequence()
+            val phantomSeq = phantomCvrs.asSequence()
+            (cardSeq + phantomSeq).iterator()
+        }
+    }
+
+    override fun hasNext() = allCvrs.hasNext()
+
+    override fun next(): AuditableCard {
+        val org = allCvrs.next()
+        val style = if (poolMap == null) null else poolMap[org.poolId] // hijack poolId
+        val hasCvr = type.isClca() || (type.isOA() && style == null)
+        val contests = when {
+            (hasCvr && cvrsAreComplete) -> null
+            (style != null) -> style.contests()
+            cvrsAreComplete -> org.contests()
+            else -> null
+        }
+        val votes = if (hasCvr) org.votes else null
+
+        return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
+            // contests ?: intArrayOf(),
+            votes,
+            org.poolId,
+            null, //style?.name())
+        )
+    }
+
+    override fun close() = cvrs.close()
+}
+
+// deprecated use CardsWithPopulationsToCardManifest
+class CardsWithStylesToCardManifest(
+    val type: AuditType,
+    val cvrsAreComplete: Boolean,
+    val cards: CloseableIterator<AuditableCard>,
+    phantomCards : List<AuditableCard>?,
+    styles: List<CardStyleIF>?,
+): CloseableIterator<AuditableCard> {
+
+    val poolMap = styles?.associateBy{ it.name() }
+    val allCards: Iterator<AuditableCard>
+    var cardIndex = 0 // 0 index
+
+    init {
+        allCards = if (phantomCards == null) {
+            cards
+        } else {
+            val cardSeq = cards.iterator().asSequence()
+            val phantomSeq = phantomCards.asSequence()
+            (cardSeq + phantomSeq).iterator()
+        }
+    }
+
+    override fun hasNext() = allCards.hasNext()
+
+    override fun next(): AuditableCard {
+        val org = allCards.next()
+        val style = if (poolMap == null) null else poolMap[org.cardStyle]
+        val hasCvr = type.isClca() || (type.isOA() && style == null)
+        val contests = when {
+            (hasCvr && cvrsAreComplete) -> null
+            (style != null) -> style.contests()
+            cvrsAreComplete -> org.contests()
+            else -> null
+        }
+        val votes = if (hasCvr) org.votes else null
+
+        return AuditableCard(org.location, cardIndex++, 0, phantom=org.phantom,
+            // contests ?: intArrayOf(),
+            votes,
+            org.poolId,
+            null, // style?.name(),
+        )
+    }
+
+    override fun close() = cards.close()
+}
+
+

@@ -225,18 +225,21 @@ fun makeOneAuditTestContestsP(
 ): Pair<List<ContestUnderAudit>, List<OneAuditPoolIF>> {
 
     // The Nbs come from the cards
-    val manifestTabs = tabulateAuditableCards(Closer(cardManifest.iterator()), infos)
-    val Nbs = manifestTabs.mapValues { it.value.ncards }
+    //val manifestTabs = tabulateAuditableCards(Closer(cardManifest.iterator()), infos)
+    //val Nbs = manifestTabs.mapValues { it.value.ncards }
+    //     val contestsUA = contestsToAudit.map {
+    //        val cua = ContestUnderAudit(it, true, hasStyle = hasStyle, NpopIn=Nbs[it.id])
+    //        if (it is DHondtContest) {
+    //            cua.addAssertionsFromAssorters(it.assorters)
+    //        } else {
+    //            cua.addStandardAssertions()
+    //        }
+    //    }
+    //     if (debug) println(showTabs("manifestTabs", manifestTabs))
 
-    val contestsUA = contestsToAudit.map {
-        val cua = ContestUnderAudit(it, true, hasStyle = hasStyle, NpopIn=Nbs[it.id])
-        if (it is DHondtContest) {
-            cua.addAssertionsFromAssorters(it.assorters)
-        } else {
-            cua.addStandardAssertions()
-        }
-    }
-    if (debug) println(showTabs("manifestTabs", manifestTabs))
+    // TODO why  is this differrent ?
+    val cards = Closer(cardManifest.iterator())
+    val contestsUA = ContestUnderAudit.make(contestsToAudit, cards, isClca=true, hasStyle=false)
 
     // create from cardStyles and populate the pool counts from the mvrs
     val poolsFromCvrs = calcOneAuditPoolsFromMvrs(infos, cardStyles, mvrs)

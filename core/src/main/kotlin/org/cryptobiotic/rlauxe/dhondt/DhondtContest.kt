@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.dhondt
 
-import org.cryptobiotic.rlauxe.audit.CvrIF
+import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo

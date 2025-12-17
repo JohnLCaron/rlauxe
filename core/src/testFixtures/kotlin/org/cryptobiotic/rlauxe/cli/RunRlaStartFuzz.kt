@@ -17,7 +17,7 @@ import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import kotlin.io.path.Path
 import kotlin.math.min
 
@@ -187,7 +187,8 @@ fun startTestElectionPolling(
         ncontests,
     )
 
-    CreateAuditP("startTestElectionPolling", config, election, auditDir = auditDir)
+    // dont clear, weve already started writing
+    CreateAuditP("startTestElectionPolling", config, election, auditDir = auditDir, clear=false)
 }
 
 class TestPollingElection(
@@ -202,6 +203,7 @@ class TestPollingElection(
     val contestsUA = mutableListOf<ContestUnderAudit>()
     val cvrs: List<Cvr>
     val testMvrs: List<Cvr>
+    val pops: List<Population>
 
     init {
         val maxMargin = .08
@@ -214,13 +216,19 @@ class TestPollingElection(
         println("Start testPersistentWorkflowPolling $testData")
         contests.forEach { println("  $it") }
         println()
+        val pop = Population("all", 1, contests.map { it.id }.toIntArray(), exactContests=false)
+        pops = listOf(pop)
 
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
         cvrs = testData.makeCvrsFromContests()
         testMvrs = makeFuzzedCvrsFrom(contests.map{ it.info() }, cvrs, fuzzMvrs) // ??
 
-        val regularContests = testData.contests.map { ContestUnderAudit(it, isClca=true, hasStyle=config.hasStyle).addStandardAssertions() }
-        contestsUA.addAll(regularContests)
+        val makum = ContestUnderAudit.make(testData.contests, cardManifest(), isClca=false, hasStyle=false)
+        // not setting Npop, so it defaults to Nc
+        //val regularContests = testData.contests.map {
+        //    ContestUnderAudit(it, isClca=true, hasStyle=config.hasStyle).addStandardAssertions()
+        //}
+        contestsUA.addAll(makum)
         contestsUA.forEach { println("  $it") }
         println()
 
@@ -233,7 +241,7 @@ class TestPollingElection(
         writeUnsortedMvrs(Publisher(auditdir), testMvrs, seed=config.seed)
     }
 
-    override fun populations() = null
+    override fun populations() = pops
     override fun contestsUA() = contestsUA
 
     override fun cardManifest() : CloseableIterator<AuditableCard> {
@@ -241,7 +249,7 @@ class TestPollingElection(
             config.auditType,
             Closer(cvrs.iterator()),
             null,
-            null,
+            populations(),
         )
     }
 }

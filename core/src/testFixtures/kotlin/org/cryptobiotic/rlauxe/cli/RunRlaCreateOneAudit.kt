@@ -5,8 +5,10 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.OneAuditVunderBarFuzzer
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTestP
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -16,6 +18,7 @@ import org.cryptobiotic.rlauxe.persist.json.readCardPoolsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.VunderBar
+import org.cryptobiotic.rlauxe.workflow.readCardManifest
 import kotlin.io.path.Path
 
 object RunRlaCreateOneAudit {
@@ -127,13 +130,13 @@ object RunRlaCreateOneAudit {
         // simulate the mvrs, write to private dir
         val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
         val infos = contests.map{ it.contest.info() }.associateBy { it.id }
-        val cardPools = readCardPoolsJsonFileUnwrapped(publisher.cardPoolsFile(), infos)
-        val scardIter = readCardsCsvIterator(publisher.sortedCardsFile())
+        val cardManifest = readCardManifest(publisher, infos)
+        val scardIter = cardManifest.cards.iterator()
         val sortedCards = mutableListOf<AuditableCard>()
         scardIter.forEach { sortedCards.add(it) }
 
         // TODO test OneAuditVunderBarFuzzer
-        val vunderFuzz = OneAuditVunderBarFuzzer(VunderBar(cardPools, infos), infos, fuzzMvrs)
+        val vunderFuzz = OneAuditVunderBarFuzzer(VunderBar(cardManifest.populations as List<OneAuditPoolIF>, infos), infos, fuzzMvrs)
         val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.makePairsFromCards(sortedCards)
         val sortedMvrs = oaFuzzedPairs.map { it.first }
         // have to write this here, where we know the mvrs

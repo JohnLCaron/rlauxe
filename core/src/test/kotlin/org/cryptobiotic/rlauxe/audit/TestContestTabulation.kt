@@ -12,6 +12,11 @@ import kotlin.test.assertNotEquals
 class TestContestTabulation {
 
     @Test
+    fun testContestTabulationRepeat() {
+        repeat(100) { testContestTabulation() }
+    }
+
+    @Test
     fun testContestTabulation() {
         val candVotes = mutableListOf<Map<Int, Int>>()
         candVotes.add(mapOf(0 to 200, 1 to 123, 2 to 17))
@@ -30,15 +35,15 @@ class TestContestTabulation {
 
         assertEquals(3, contestTabs.size)
         contestTabs.forEach { (id, tab) ->
-            println("contestTab=${tab}")
+            //println("contestTab=${tab}")
             val contest = contestMap[id]!!
-            println("contest=${contest}")
-
+            //println("contest=${contest}")
 
             assertEquals(voteForNs[id], tab.voteForN)
             assertEquals(contest.Nc, tab.ncards)
             assertEquals(contest.undervotes + contest.Nphantoms() * contest.info.voteForN, tab.undervotes)
-            assertTrue(checkEquivilentVotes(candVotes[id], tab.votes))
+            assertTrue(checkEquivilentVotes(candVotes[id], tab.votes),
+                "${candVotes[id].toSortedMap()} != ${tab.votes.toSortedMap()}")
             println()
         }
 

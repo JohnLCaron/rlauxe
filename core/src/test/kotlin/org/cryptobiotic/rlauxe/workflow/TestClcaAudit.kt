@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
@@ -118,7 +119,7 @@ class TestClcaAudit {
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
-        val testMvrs = if (mvrFuzzPct != null)  makeFuzzedCvrsFrom(contests, testCvrs, mvrFuzzPct)
+        val testMvrs = if (mvrFuzzPct != null) makeFuzzedCvrsFrom(contests, testCvrs, mvrFuzzPct)
             else if (config.clcaConfig.strategy != ClcaStrategyType.fuzzPct) testCvrs
             else makeFuzzedCvrsFrom(contests, testCvrs, config.simFuzzPct!!) // mvrs fuzz = sim fuzz
 

@@ -3,8 +3,7 @@ package org.cryptobiotic.rlauxe.verify
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardsWithPopulationsToCardManifest
-import org.cryptobiotic.rlauxe.audit.CardsWithStylesToCardManifest
-import org.cryptobiotic.rlauxe.audit.CvrsWithStylesToCardManifest
+import org.cryptobiotic.rlauxe.oneaudit.CvrsWithStylesToCardManifest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP

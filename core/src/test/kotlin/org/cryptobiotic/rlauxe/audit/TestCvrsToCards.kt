@@ -144,8 +144,6 @@ class TestCvrsToCards {
         assertEquals(cvr.poolId, card.poolId, "poolId")
         assertEquals(expectStyle?.name(), card.cardStyle, "cardStyle")
 
-        assertTrue(card.possibleContests.isEmpty(), "possibleContests")
-
         val styleContests = expectStyle?.possibleContests?.toList()?.toSet() ?: emptySet()
         val expectContests = when (auditType) {
             AuditType.ONEAUDIT -> {
@@ -180,7 +178,6 @@ fun AuditableCard.show() = buildString {
         append("}")
     }
     append(" poolId=$poolId")
-    append(" possibleContests=${possibleContests.contentToString()}")
     append(" contests=${contests().contentToString()}")
     append(" cardStyle=$cardStyle")
 

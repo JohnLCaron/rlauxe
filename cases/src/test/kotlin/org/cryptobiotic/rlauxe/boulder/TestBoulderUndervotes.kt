@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.boulder
 
-import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.oneaudit.CardStyle
 import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv

@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import kotlin.random.Random
 
 private val logger = KotlinLogging.logger("VunderBar")
@@ -42,7 +43,7 @@ class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId
 
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
         val cardb = CardBuilder.fromCard(card)
-        card.possibleContests.forEach { contestId ->
+        card.contests().forEach { contestId ->
             val vunders = vunders[contestId]
             if (vunders == null || vunders.isEmpty())
                 cardb.replaceContestVotes(contestId, intArrayOf())
@@ -82,7 +83,7 @@ data class Vunder(val candVotes: Map<Int, Int>, val undervotes: Int, val voteFor
         vunderLeft = vunder.sumOf { it.second }
     }
 
-    fun isEmpty() = vunderLeft == 0
+    fun isEmpty() = vunderLeft <= 0
     fun isNotEmpty() = vunderLeft > 0
 
     fun pickRandomCandidatesAndDecrement() : IntArray {
@@ -144,8 +145,8 @@ data class Vunder(val candVotes: Map<Int, Int>, val undervotes: Int, val voteFor
                 needVotes--
             }
         }
-        if (needVotes != 0)
-            print("checkit")
+        //if (needVotes != 0)
+        //    print("checkit")
         return result.toIntArray()
     }
 
@@ -180,8 +181,10 @@ data class Vunder(val candVotes: Map<Int, Int>, val undervotes: Int, val voteFor
     fun decrementCandidate(candIdx: Int): Int {
         val candidateId = vunderRemaining[candIdx].first
         val nvotesLeft = vunderRemaining[candIdx].second
-        vunderRemaining[candIdx] = Pair(candidateId, nvotesLeft-1)
-        vunderLeft--
+        if (nvotesLeft > 0) {
+            vunderRemaining[candIdx] = Pair(candidateId, nvotesLeft - 1)
+            vunderLeft--
+        }
         return candidateId
     }
 
@@ -190,8 +193,10 @@ data class Vunder(val candVotes: Map<Int, Int>, val undervotes: Int, val voteFor
         val vunder = vunderRemaining[idx]
         val candidateId = vunder.first
         val nvotesLeft = vunder.second
-        vunderRemaining[idx] = Pair(candidateId, nvotesLeft-1) // decr and replace
-        vunderLeft--
+        if (nvotesLeft > 0) {
+            vunderRemaining[idx] = Pair(candidateId, nvotesLeft - 1) // decr and replace
+            vunderLeft--
+        }
         return candidateId
     }
 
@@ -204,7 +209,7 @@ data class Vunder(val candVotes: Map<Int, Int>, val undervotes: Int, val voteFor
 // make cvrs until we exhaust the votes
 // this algorithm puts as many contests as possible on each cvr
 // the number of cvrs can vary when there are multiple contests
-fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, ): List<Cvr> {
+fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): List<Cvr> {
     val rcvrs = mutableListOf<Cvr>()
 
     var count = 1
@@ -225,11 +230,38 @@ fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, ):
         if (usedOne) rcvrs.add(cvb2.build())
         count++
     }
-    vunders.values.forEach { vunder ->
-        if (!vunder.isEmpty())
+
+    // find bug
+    val votesFromCvrs =  tabulateVotesFromCvrs(rcvrs.iterator())
+    votesFromCvrs.forEach { (id, voteFromCvrs) ->
+        val vunder = vunders[id]!!
+        if (!checkEquivilentVotes(vunder.candVotes, voteFromCvrs)) {
+            println("candVotes ${vunder.candVotes.toSortedMap()} != ${voteFromCvrs.toSortedMap()} voteFromCvrs")
             println(vunder)
+            println()
+            throw RuntimeException("candVotes ${vunder.candVotes.toSortedMap()} != ${voteFromCvrs.toSortedMap()} voteFromCvrs")
+        }
     }
+
+    //vunders.values.forEach { vunder ->
+        // if (!vunder.isEmpty())
+    //        println(vunder)
+    //}
 
     rcvrs.shuffle()
     return rcvrs
+}
+
+fun tabulateVotesFromCvrs(cvrs: Iterator<Cvr>): Map<Int, Map<Int, Int>> {
+    val votes = mutableMapOf<Int, MutableMap<Int, Int>>()
+    for (cvr in cvrs) {
+        for ((contestId, conVotes) in cvr.votes) {
+            val accumVotes = votes.getOrPut(contestId) { mutableMapOf() }
+            for (cand in conVotes) {
+                val accum = accumVotes.getOrPut(cand) { 0 }
+                accumVotes[cand] = accum + 1
+            }
+        }
+    }
+    return votes
 }

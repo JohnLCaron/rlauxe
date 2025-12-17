@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.util
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
-import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -17,7 +17,7 @@ class TestCardBuilders {
 
         val cardbs = mutableListOf<CardBuilder>()
         cards.forEach {
-            val cb = CardBuilder(it.location, it.index, it.prn, it.phantom, it.possibleContests, null, it.poolId, it.cardStyle)
+            val cb = CardBuilder(it.location, it.index, it.prn, it.phantom, it.contests(), null, it.poolId, it.cardStyle)
             if (it.votes != null) {
                 it.votes.forEach{ (contestId, votes) -> cb.replaceContestVotes(contestId, votes) }
             }

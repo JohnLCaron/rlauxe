@@ -135,7 +135,7 @@ fun writeMvrsForRound(publisher: Publisher, round: Int) {
     require(resultSamples is Ok)
     val sampleNumbers = resultSamples.unwrap()
 
-    val sortedMvrs = readAuditableCardCsvFile(publisher.sortedMvrsFile())
+    val sortedMvrs = readAuditableCardCsvFile(publisher.privateMvrsFile())
 
     val sampledMvrs = findSamples(sampleNumbers, Closer(sortedMvrs.iterator()))
     require(sampledMvrs.size == sampleNumbers.size)
@@ -149,13 +149,14 @@ fun writeMvrsForRound(publisher: Publisher, round: Int) {
 }
 
 fun writeSortedMvrs(publisher: Publisher, sortedMvrs: List<AuditableCard>) {
-    validateOutputDirOfFile(publisher.sortedMvrsFile())
-    val countMvrs = writeAuditableCardCsvFile(Closer(sortedMvrs.iterator()), publisher.sortedMvrsFile())
-    logger.info{"writeSortedMvrs ${countMvrs} mvrs to ${publisher.sortedMvrsFile()}"}
+    validateOutputDirOfFile(publisher.privateMvrsFile())
+    val countMvrs = writeAuditableCardCsvFile(Closer(sortedMvrs.iterator()), publisher.privateMvrsFile())
+    logger.info{"writeSortedMvrs ${countMvrs} mvrs to ${publisher.privateMvrsFile()}"}
 }
 
 fun writeUnsortedMvrs(publisher: Publisher, unsortedMvrs: List<Cvr>, seed: Long) {
     val prng = Prng(seed)
+    // 0 based index
     val mvrCards = unsortedMvrs.mapIndexed { index, mvr ->
         AuditableCard.fromCvr(mvr, index, prng.next())
     }

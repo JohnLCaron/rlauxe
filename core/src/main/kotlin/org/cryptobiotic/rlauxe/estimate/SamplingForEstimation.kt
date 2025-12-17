@@ -84,7 +84,7 @@ class PollingCardFuzzSampler(
             val mvr = mvrs[permutedIndex[idx]]
             idx++
             if (mvr.hasContest(contest.id)) {
-                val result = assorter.assort(mvr.cvr(), usePhantoms = true)
+                val result = assorter.assort(mvr, usePhantoms = true)
                 welford.update(result)
                 return result
             }
@@ -100,6 +100,55 @@ class PollingCardFuzzSampler(
 
     fun remakeFuzzed(): List<AuditableCard> {
         return makeFuzzedCardsFrom(listOf(contest.info()), cards, fuzzPct) // single contest
+    }
+
+    override fun maxSamples() = maxSamples
+    override fun maxSampleIndexUsed() = idx
+    override fun nmvrs() = mvrs.size
+
+    override fun hasNext(): Boolean = (idx < N)
+    override fun next(): Double = sample()
+}
+
+// for one contest, this takes a list of cvrs and fuzzes them
+class PollingFuzzSampler(
+    val fuzzPct: Double,
+    val cvrs: List<Cvr>,
+    val contest: Contest,
+    val assorter: AssorterIF
+): Sampling, Iterator<Double> {
+    val maxSamples = cvrs.count { it.hasContest(contest.id) } // dont need this is its single contest
+    val N = cvrs.size
+    val welford = Welford()
+    val permutedIndex = MutableList(N) { it }
+    private var mvrs: List<Cvr>
+    private var idx = 0
+
+    init {
+        mvrs = remakeFuzzed() // TODO could do fuzzing on the fly ??
+    }
+
+    override fun sample(): Double {
+        while (idx < N) {
+            val mvr = mvrs[permutedIndex[idx]]
+            idx++
+            if (mvr.hasContest(contest.id)) {
+                val result = assorter.assort(mvr, usePhantoms = true)
+                welford.update(result)
+                return result
+            }
+        }
+        throw RuntimeException("no samples left for ${contest.id} and Assorter ${assorter}")
+    }
+
+    override fun reset() {
+        mvrs = remakeFuzzed()
+        permutedIndex.shuffle(Random)
+        idx = 0
+    }
+
+    fun remakeFuzzed(): List<Cvr> {
+        return makeFuzzedCvrsFrom(listOf(contest.info()), cvrs, fuzzPct) // single contest
     }
 
     override fun maxSamples() = maxSamples

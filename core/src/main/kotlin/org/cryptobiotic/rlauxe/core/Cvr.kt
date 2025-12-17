@@ -1,6 +1,18 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.audit.CvrIF
+interface CvrIF {
+    fun hasContest(contestId: Int): Boolean // "is in P_c".
+    fun location(): String
+    fun isPhantom(): Boolean
+    fun poolId(): Int?
+
+    fun votes(contestId: Int): IntArray?
+    fun hasMarkFor(contestId: Int, candidateId: Int): Int
+
+    // fun hasOneVoteFor(contestId: Int, candidates: List<Int>): Boolean
+    //     // val cands = cvr.votes(contest.id)
+    //    //   val usew2 =  (cands != null && cands.size == 1)
+}
 
 // core abstraction for both CVR and MVR
 // assumes that a vote is 0 or 1.

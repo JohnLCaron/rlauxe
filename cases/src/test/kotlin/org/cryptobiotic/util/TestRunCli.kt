@@ -71,9 +71,9 @@ class TestRunCli {
 
         var done = false
         while (!done) {
-            val lastRound = runRound(inputDir = auditdir, useTest = true, quiet = true)
+            val lastRound = runRound(inputDir = auditdir, useTest = false, quiet = true)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 7
-            // if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx) // TODO add this to runRound; dont need when useTest = true?
+            if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx) // cabt use test for polling because cards dont have the votes
         }
 
         println("============================================================")

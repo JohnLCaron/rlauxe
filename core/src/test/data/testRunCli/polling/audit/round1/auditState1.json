@@ -5,92 +5,38 @@
             "id": 0,
             "assertionRounds": [
                 {
-                    "assorterDesc": "2/0 contest0",
+                    "assorterDesc": "0/1 contest0",
                     "roundIdx": 1,
-                    "estSampleSize": 442,
-                    "estNewSampleSize": 442,
+                    "estSampleSize": 20011,
+                    "estNewSampleSize": 20011,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "default",
                         "fuzzPct": 0.0023,
                         "startingTestStatistic": 1.0,
                         "estimatedDistribution": [
-                            441,
-                            442,
-                            442,
-                            442,
-                            442,
-                            442,
-                            442,
-                            442,
-                            442,
-                            443
+                            20011,
+                            20011,
+                            20011,
+                            20011,
+                            20011,
+                            20011,
+                            20011,
+                            20011,
+                            20011,
+                            20012
                         ],
-                        "firstSample": 442
+                        "firstSample": 20011
                     },
                     "status": "InProgress",
-                    "round": 0
-                },
-                {
-                    "assorterDesc": "2/1 contest0",
-                    "roundIdx": 1,
-                    "estSampleSize": 442,
-                    "estNewSampleSize": 442,
-                    "estimationResult": {
-                        "roundIdx": 1,
-                        "strategy": "default",
-                        "fuzzPct": 0.0023,
-                        "startingTestStatistic": 1.0,
-                        "estimatedDistribution": [
-                            441,
-                            442,
-                            442,
-                            442,
-                            442,
-                            442,
-                            442,
-                            442,
-                            442,
-                            443
-                        ],
-                        "firstSample": 442
-                    },
-                    "status": "InProgress",
-                    "round": 0
-                },
-                {
-                    "assorterDesc": "2/3 contest0",
-                    "roundIdx": 1,
-                    "estSampleSize": 442,
-                    "estNewSampleSize": 442,
-                    "estimationResult": {
-                        "roundIdx": 1,
-                        "strategy": "default",
-                        "fuzzPct": 0.0023,
-                        "startingTestStatistic": 1.0,
-                        "estimatedDistribution": [
-                            441,
-                            442,
-                            442,
-                            442,
-                            442,
-                            442,
-                            442,
-                            442,
-                            442,
-                            443
-                        ],
-                        "firstSample": 442
-                    },
-                    "status": "InProgress",
-                    "round": 0
+                    "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "actualMvrs": 442,
-            "actualNewMvrs": 442,
-            "estNewSamples": 442,
-            "estSampleSize": 442,
+            "actualMvrs": 20011,
+            "actualNewMvrs": 20011,
+            "estNewSamples": 20011,
+            "estSampleSize": 20011,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -100,38 +46,38 @@
             "id": 1,
             "assertionRounds": [
                 {
-                    "assorterDesc": "0/1 contest1",
+                    "assorterDesc": "1/0 contest1",
                     "roundIdx": 1,
-                    "estSampleSize": 20006,
-                    "estNewSampleSize": 20006,
+                    "estSampleSize": 20011,
+                    "estNewSampleSize": 20011,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "default",
                         "fuzzPct": 0.0023,
                         "startingTestStatistic": 1.0,
                         "estimatedDistribution": [
-                            19992,
-                            19995,
-                            19998,
-                            19999,
-                            20001,
-                            20002,
-                            20004,
-                            20006,
-                            20008,
-                            20014
+                            20011,
+                            20011,
+                            20011,
+                            20011,
+                            20011,
+                            20011,
+                            20011,
+                            20011,
+                            20011,
+                            20012
                         ],
-                        "firstSample": 19998
+                        "firstSample": 20011
                     },
                     "status": "InProgress",
-                    "round": 0
+                    "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "actualMvrs": 20009,
-            "actualNewMvrs": 20009,
-            "estNewSamples": 20006,
-            "estSampleSize": 20006,
+            "actualMvrs": 20011,
+            "actualNewMvrs": 20011,
+            "estNewSamples": 20011,
+            "estSampleSize": 20011,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -140,7 +86,7 @@
     ],
     "auditWasDone": false,
     "auditIsComplete": false,
-    "nmvrs": 20009,
-    "newmvrs": 20009,
+    "nmvrs": 20011,
+    "newmvrs": 20011,
     "auditorWantNewMvrs": -1
 }

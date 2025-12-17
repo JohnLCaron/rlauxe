@@ -18,6 +18,7 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
 import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
+import org.cryptobiotic.rlauxe.oneaudit.CvrsWithStylesToCardManifest
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -165,7 +166,8 @@ class CreateSfElection(
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
         val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPools.associate { it.name() to it.poolId() })
 
-        return CvrsWithStylesToCardManifest(config.auditType, hasStyle,
+        return CvrsWithStylesToCardManifest(
+            config.auditType, hasStyle,
             cvrIter,
             makePhantomCvrs(phantomCount),
             if (isOA) cardPools else null,

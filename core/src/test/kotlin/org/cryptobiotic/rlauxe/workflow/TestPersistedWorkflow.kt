@@ -5,6 +5,7 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.cli.enterMvrs
+import org.cryptobiotic.rlauxe.cli.startTestElectionPolling
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
@@ -70,14 +71,25 @@ class TestPersistedWorkflow {
 
     @Test
     fun testPersistedAuditPolling() {
-        // val topdir = kotlin.io.path.createTempDirectory().toString()
+            // val topdir = kotlin.io.path.createTempDirectory().toString()
         val topdir = "$testdataDir/persist/persistWorkflow/polling"
         val auditdir = "$topdir/audit"
+        val N = 50000
 
+        // fun startTestElectionPolling(
+        //    topdir: String,
+        //    minMargin: Double,
+        //    fuzzMvrs: Double,
+        //    pctPhantoms: Double?,
+        //    ncards: Int,
+        //    ncontests: Int = 11,
+        //)
+        startTestElectionPolling(topdir, minMargin = .03, fuzzMvrs = .00, pctPhantoms = 0.00, ncards = N, ncontests = 1)
+
+/*
         val config = AuditConfig(AuditType.POLLING, hasStyle=true, seed = 12356667890L, nsimEst=10, simFuzzPct = .01)
 
-        val N = 50000
-        val testData = MultiContestTestDataP(11, 4, N, marginRange=0.03..0.05)
+        val testData = MultiContestTestDataP(1, 4, N, marginRange=0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistedAuditPolling $testData")
@@ -90,7 +102,7 @@ class TestPersistedWorkflow {
 
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
         val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
-        CreateAuditP("testPersistedAuditPolling", config, election, auditDir = auditdir, clear = true)
+        CreateAuditP("testPersistedAuditPolling", config, election, auditDir = auditdir, clear = true) */
 
         runPersistedAudit(topdir, test=false)
     }
@@ -152,6 +164,7 @@ fun runPersistedAudit(topdir: String, test:Boolean) {
         }
 
         done = lastRound.auditIsComplete || lastRound.roundIdx > 5
+        if (!done && !test) writeMvrsForRound(publisher, lastRound!!.roundIdx) // RunRlaCreateOneAudit writes the mvrs
     }
 
     if (lastRound != null) {

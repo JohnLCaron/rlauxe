@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.oneaudit.CardStyle
 import org.cryptobiotic.rlauxe.audit.CreateAuditP
 import org.cryptobiotic.rlauxe.audit.CreateElectionP
 import org.cryptobiotic.rlauxe.audit.OneAuditConfig
@@ -89,7 +89,7 @@ class CardManifestAttack {
                     index,
                     0L,
                     false,
-                    intArrayOf(2),
+                    // intArrayOf(2),
                     votes = mapOf(2 to intArrayOf(1)),
                     poolId = null
                 )
@@ -107,7 +107,7 @@ class CardManifestAttack {
                     index,
                     0L,
                     false,
-                    groupBcontests,
+                    //groupBcontests,
                     votes = null, // no votes when pooled
                     poolId = 1
                 )
@@ -128,7 +128,7 @@ class CardManifestAttack {
                 index,
                 0L,
                 false,
-                intArrayOf(2),
+                //intArrayOf(2),
                 votes = mapOf(2 to intArrayOf(1)),  // move the 50-100 votes to here
                 poolId=null))
             mvrCount++
@@ -138,14 +138,14 @@ class CardManifestAttack {
         // these are Bobs pooled votes that match the mvrs
         repeat(25) {
             // mvr has Bob's votes
-            mcards.add(AuditableCard("Pool1-$poolCount", index, 0L, false, groupBcontests, votes = null, poolId = 1))
+            mcards.add(AuditableCard("Pool1-$poolCount", index, 0L, false, votes = null, poolId = 1))
             poolCount++
             index++
         }
         // these are contestB pooled votes that match the mvrs
         repeat(25) {
             // mvr doesnt contain contest 1
-            mcards.add(AuditableCard("Pool1-$poolCount", index, 0L, false, groupBcontests, votes = null, poolId = 1))
+            mcards.add(AuditableCard("Pool1-$poolCount", index, 0L, false, votes = null, poolId = 1))
             poolCount++
             index++
         }

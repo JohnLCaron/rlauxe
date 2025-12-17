@@ -5,12 +5,12 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.CardManifest
-import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardsWithStylesToCardManifest
+import org.cryptobiotic.rlauxe.oneaudit.CardStyle
 import org.cryptobiotic.rlauxe.audit.makePhantomCards
 import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.CardPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.CardsWithStylesToCardManifest
 import kotlin.Int
 import kotlin.String
 import kotlin.math.abs

@@ -4,8 +4,8 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.oneaudit.CardStyle
+import org.cryptobiotic.rlauxe.oneaudit.CardStyleIF
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -240,7 +240,7 @@ class CardsWithStylesAttack(
         val votes = if (hasCvr) org.votes else null
 
         return AuditableCard(org.location, cardIndex++, 0, phantom=org.phantom,
-            contests,
+            //contests,
             votes,
             poolId=null,
             style.name(),

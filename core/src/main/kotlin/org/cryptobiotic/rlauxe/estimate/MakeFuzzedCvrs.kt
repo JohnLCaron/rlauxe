@@ -1,9 +1,8 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.estimate.chooseNewCandidate
 import org.cryptobiotic.rlauxe.util.ContestVoteBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilders
@@ -39,7 +38,7 @@ fun makeFuzzedCvrsFrom(infoList: List<ContestInfo>,
     cvrbs.filter { !it.phantom && (filter == null || filter(it)) }.forEach { cvrb: CvrBuilder ->
         val r = Random.nextDouble(1.0)
         cvrb.contests.forEach { (_, cvb) ->
-            if (r < fuzzPct) {
+        if (r < fuzzPct) {
                 val ccontest: CvrContest = cvb.contest
                 if (isIRV[ccontest.name]!!) {
                     switchCandidateRankings(cvb, ccontest.candidateIds)

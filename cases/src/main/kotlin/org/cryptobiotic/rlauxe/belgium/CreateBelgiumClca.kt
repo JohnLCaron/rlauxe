@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
+import org.cryptobiotic.rlauxe.oneaudit.CvrsWithStylesToCardManifest
 import org.cryptobiotic.rlauxe.util.*
 
 private val logger = KotlinLogging.logger("BelgiumClca")
@@ -30,7 +31,8 @@ class BelgiumClca (
     override fun cardManifest() = createCardManifest()
 
     fun createCardManifest(): CloseableIterator<AuditableCard> {
-        return CvrsWithStylesToCardManifest(AuditType.CLCA, hasStyle,
+        return CvrsWithStylesToCardManifest(
+            AuditType.CLCA, hasStyle,
             Closer(cvrs.iterator()),
             makePhantomCvrs(contestsUA().map { it.contest }),
             null,

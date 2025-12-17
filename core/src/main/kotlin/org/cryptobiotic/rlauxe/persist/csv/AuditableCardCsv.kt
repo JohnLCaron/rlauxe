@@ -31,9 +31,9 @@ fun writeAuditableCardCsv(card: AuditableCard) = buildString {
     if (card.cardStyle != null) {
         append("${card.cardStyle}, ")
     } else if (card.population != null)
-        append("P${card.population.id()}, ")
+        append("${card.population.name()}, ")
     else
-        append("${card.possibleContests.joinToString(" ")}, ")
+        append(", ")
 
     if (card.votes != null) {
         val contests = card.votes.map { it.key }.toIntArray()
@@ -92,8 +92,8 @@ fun readAuditableCardCsv(line: String): AuditableCard {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
 
-    var popId : String? = null
-    var pcontests = intArrayOf()
+    // var popId : String? = null
+    // var pcontests = intArrayOf()
 
     var idx = 0
     val desc = ttokens[idx++]
@@ -104,15 +104,16 @@ fun readAuditableCardCsv(line: String): AuditableCard {
     val poolId = if (poolIdToken.isEmpty()) null else poolIdToken.toInt()
 
     // style = possible contests or population id
-    val styleStr = ttokens[idx++]
-    if (styleStr.startsWith("P")) {
+    val cardStyleToken = ttokens[idx++].trim()
+    val cardStyle = if (cardStyleToken.isEmpty()) null else cardStyleToken
+    /* if (styleStr.startsWith("P")) {
         popId=styleStr
     } else {
         pcontests = if (styleStr.trim().isEmpty()) intArrayOf() else {
             val pcontestsTokens = styleStr.split(" ")
             pcontestsTokens.map { it.trim().toInt() }.toIntArray()
         }
-    }
+    } */
 
     // if clca, list of actual contests and their votes
     return if (idx < ttokens.size-1) {
@@ -135,9 +136,9 @@ fun readAuditableCardCsv(line: String): AuditableCard {
             require(contests.size == work.size) { "contests.size (${contests.size}) != votes.size (${work.size})" }
             contests.zip(work).toMap()
         }
-        AuditableCard(desc, index, sampleNum, phantom, pcontests, votes, poolId, cardStyle=popId)
+        AuditableCard(desc, index, sampleNum, phantom, votes, poolId, cardStyle=cardStyle)
     } else {
-        AuditableCard(desc, index, sampleNum, phantom, pcontests, null, poolId, cardStyle=popId)
+        AuditableCard(desc, index, sampleNum, phantom, null, poolId, cardStyle=cardStyle)
     }
 }
 

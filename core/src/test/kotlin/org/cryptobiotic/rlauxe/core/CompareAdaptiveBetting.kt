@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doubleIsClose
-import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.assertEquals
 

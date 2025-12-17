@@ -1,0 +1,23 @@
+{
+    "populations": [
+        {
+            "type": "OneAuditPoolIF",
+            "oneauditPool": {
+                "poolName": "pool42",
+                "poolId": 42,
+                "exactContests": false,
+                "ncards": 2500,
+                "regVotes": {
+                    "1": {
+                        "votes": {
+                            "0": 1288,
+                            "1": 1187
+                        },
+                        "ncards": 2500,
+                        "undervotes": 25
+                    }
+                }
+            }
+        }
+    ]
+}

@@ -21,7 +21,7 @@ data class CvrExport(val id: String, val group: Int, val votes: Map<Int, IntArra
         val poolId = if (pools == null || group != 1) null else pools[ poolKey() ]  // TODO not general
         // TODO if you want to delete the votes, add an adapter
         val useVotes = if (poolId == null || showPoolVotes) votes else null
-        return AuditableCard(id, index, prn, phantom, contests, useVotes, poolId)
+        return AuditableCard(id, index, prn, phantom, useVotes, poolId)
     }
 
     fun toCvr(phantom: Boolean = false, pools: Map<String, Int>? = null) : Cvr {

@@ -1,0 +1,17 @@
+{
+    "populations": [
+        {
+            "type": "Population",
+            "population": {
+                "name": "all",
+                "id": 1,
+                "ncards": 0,
+                "possibleContests": [
+                    0,
+                    1
+                ],
+                "exactContests": false
+            }
+        }
+    ]
+}

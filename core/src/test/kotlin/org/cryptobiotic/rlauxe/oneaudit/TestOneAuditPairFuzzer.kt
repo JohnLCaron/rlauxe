@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.estimate.OneAuditVunderBarFuzzer
@@ -15,7 +14,7 @@ import org.cryptobiotic.rlauxe.util.mergeReduceS
 import org.cryptobiotic.rlauxe.util.tabulateCards
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.util.tabulateVotesWithUndervotes
-import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

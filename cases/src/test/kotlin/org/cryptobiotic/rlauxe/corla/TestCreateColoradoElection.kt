@@ -25,8 +25,8 @@ class TestCreateColoradoElection {
     }
 
     @Test
-    fun testCreateColoradoOneAuditP() {
-        val topdir = "$testdataDir/cases/corla/oneauditp"
+    fun testCreateColoradoOneAudit() {
+        val topdir = "$testdataDir/cases/corla/oneaudit"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
@@ -40,39 +40,11 @@ class TestCreateColoradoElection {
 
     @Test
     fun testRunVerifyColoradoOneAuditP() {
-        val auditdir = "$testdataDir/cases/corla/oneauditp/audit"
+        val auditdir = "$testdataDir/cases/corla/oneaudit/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
         println()
         print(results)
         if (results.hasErrors) fail()
-    }
-
-    @Test
-    fun testCreateColoradoClcaP() {
-        val topdir = "$testdataDir/cases/corla/clcap"
-        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
-
-        createColoradoElectionP(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.CLCA, clear=true)
-
-        val publisher = Publisher("$topdir/audit")
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsExternalSort(topdir, publisher, config.seed)
-    }
-
-    @Test
-    fun testCreateColoradoOneAudit() {
-        val topdir = "$testdataDir/cases/corla/oneaudit"
-        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
-        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
-        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
-
-        createColoradoElection(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.ONEAUDIT, clear=true)
-
-        val publisher = Publisher("$topdir/audit")
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsExternalSort(topdir, publisher, config.seed)
     }
 
     @Test
@@ -82,7 +54,7 @@ class TestCreateColoradoElection {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoElection(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.CLCA, clear=true)
+        createColoradoElectionP(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.CLCA, clear=true)
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()

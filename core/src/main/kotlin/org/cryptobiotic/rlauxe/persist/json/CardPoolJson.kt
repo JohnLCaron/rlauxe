@@ -277,7 +277,3 @@ fun readCardPoolsJsonFile(filename: String, infos: Map<Int, ContestInfo>): Resul
     }
 }
 
-fun readCardPoolsJsonFileUnwrapped(filename: String, infos: Map<Int, ContestInfo>): List<CardPoolIF> {
-    return readCardPoolsJsonFile(filename, infos).unwrap()
-}
-

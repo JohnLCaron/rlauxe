@@ -47,57 +47,9 @@ class TestCreateBoulderElection {
     } */
 
     @Test
-    fun createBoulder24oap() {
-        val topdir = "$testdataDir/cases/boulder24/oap"
-        createBoulderElectionP(
-            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            topdir = topdir,
-            auditType = AuditType.ONEAUDIT,
-        )
-
-        val publisher = Publisher("$topdir/audit")
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
-    }
-
-    @Test
-    fun testRunVerifyBoulder24oap() {
-        val auditdir = "$testdataDir/cases/boulder24/oap/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
-        println()
-        print(results)
-        if (results.hasErrors) fail()
-    }
-
-    @Test
-    fun createBoulder24clcap() { // simulate CVRs
-        val topdir = "$testdataDir/cases/boulder24/clcap"
-        createBoulderElectionP(
-            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            topdir = topdir,
-            auditType = AuditType.CLCA,
-        )
-
-        val publisher = Publisher("$topdir/audit")
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
-    }
-
-    @Test
-    fun testRunVerifyBoulder24clcap() {
-        val auditdir = "$testdataDir/cases/boulder24/clcap/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
-        println()
-        print(results)
-        if (results.hasErrors) fail()
-    }
-
-    @Test
     fun createBoulder24oa() {
         val topdir = "$testdataDir/cases/boulder24/oa"
-        createBoulderElection(
+        createBoulderElectionP(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = topdir,
@@ -107,12 +59,21 @@ class TestCreateBoulderElection {
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
+    }
+
+    @Test
+    fun testRunVerifyBoulder24oa() {
+        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
+        println()
+        print(results)
+        if (results.hasErrors) fail()
     }
 
     @Test
     fun createBoulder24clca() { // simulate CVRs
         val topdir = "$testdataDir/cases/boulder24/clca"
-        createBoulderElection(
+        createBoulderElectionP(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = topdir,
@@ -122,6 +83,15 @@ class TestCreateBoulderElection {
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
+    }
+
+    @Test
+    fun testRunVerifyBoulder24clca() {
+        val auditdir = "$testdataDir/cases/boulder24/clca/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
+        println()
+        print(results)
+        if (results.hasErrors) fail()
     }
 
     @Test
@@ -139,31 +109,6 @@ class TestCreateBoulderElection {
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
     }
-
-    /*
-    @Test
-    fun createBoulder24oasim() { // simulate CVRs
-        createBoulderElectionOAsim(
-            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "$testdataDir/cases/boulder24oasim",
-            clca=false,
-            clear = true,
-        )
-    }
-
-
-    @Test
-    fun createBoulder24clca() { // simulate CVRs
-        createBoulderElectionOAsim(
-            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "$testdataDir/cases/boulder24clca",
-            clca=true,
-            clear = true,
-        )
-    } */
-
 
     // @Test
     fun createBoulderOArepeat() {

@@ -34,6 +34,7 @@ class TestRunCli {
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
+        val writeMvrs = config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs
 
         println("============================================================")
         RunVerifyContests.main(arrayOf("-in", auditdir))
@@ -43,7 +44,7 @@ class TestRunCli {
         while (!done) {
             val lastRound = runRound(inputDir = auditdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
-            // if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx) // TODO add this to runRound; dont need when useTest = true?
+            if (!done && writeMvrs) writeMvrsForRound(publisher, lastRound!!.roundIdx)
         }
 
         println("============================================================")
@@ -110,6 +111,7 @@ class TestRunCli {
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
+        val writeMvrs = config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs
 
         println("============================================================")
         RunVerifyContests.main(arrayOf("-in", auditdir))
@@ -119,7 +121,7 @@ class TestRunCli {
         while (!done) {
             val lastRound = runRound(inputDir = auditdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
-            // if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx) // TODO add this to runRound; dont need when useTest = true?
+            if (!done && writeMvrs) writeMvrsForRound(publisher, lastRound!!.roundIdx) // TODO add this to runRound; dont need when useTest = true?
         }
 
         println("============================================================")
@@ -151,7 +153,6 @@ class TestRunCli {
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         val writeMvrs = config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs
-        // writeSortedCardsInternalSort(publisher, config.seed) happens now in RunRlaCreateOneAudit.startTestElectionOneAudit
 
         println("============================================================")
         val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)

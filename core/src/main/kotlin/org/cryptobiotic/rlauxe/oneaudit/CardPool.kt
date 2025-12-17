@@ -445,7 +445,7 @@ fun distributeExpectedOvervotes(oaContest: OneAuditContestIF, cardPools: List<Ca
 /////////////////////////////////////////////////////////////////////////////////////
 // CANDIDATE for removal
 
-// deprecated usew CvrsWithPopulationsToCardManifest
+// deprecated use CvrsWithPopulationsToCardManifest
 class CvrsWithStylesToCardManifest(
     val type: AuditType,
     val cvrsAreComplete: Boolean,       // TODO cvrsAreComplete == false means cardStyles != null and poolId != null;

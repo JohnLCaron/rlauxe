@@ -2,6 +2,8 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CvrsWithPopulationsToCardManifest
+import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
@@ -182,15 +184,14 @@ fun makeMvrs(
 // make the card manifest
 fun makeCardManifest(mvrs: List<Cvr>, pool: CardPoolWithBallotStyle): List<AuditableCard> {
     // the union of the first two styles
-    val expandedContestIds = pool.infos.keys.toList()
+    val expandedContestIds = pool.infos.keys.toList().toIntArray()
 
     // here we put the pool data into a single pool, and combine their contestIds, to get a diluted margin for testing
-    val cardStyle = CardStyle("cardPoolStyle", expandedContestIds, pool.poolId)
+    val cardStyle = Population("cardPoolStyle", pool.poolId,  expandedContestIds, false)
 
     // make the cards with the expanded card style
-    val converter = CvrsWithStylesToCardManifest(
+    val converter = CvrsWithPopulationsToCardManifest(
         type = AuditType.ONEAUDIT,
-        cvrsAreComplete = true,
         cvrs = Closer(mvrs.iterator()),
         phantomCvrs = null,
         listOf(cardStyle),

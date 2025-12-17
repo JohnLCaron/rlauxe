@@ -17,8 +17,8 @@ class TestCreateSfElection {
     val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
 
     @Test
-    fun createSFElectionOAP() {
-        val topdir = "$testdataDir/cases/sf2024/oap"
+    fun createSFElectionOA() {
+        val topdir = "$testdataDir/cases/sf2024/oa"
 
         createSfElectionP(
             topdir,
@@ -36,8 +36,8 @@ class TestCreateSfElection {
     }
 
     @Test
-    fun testRunVerifySFoap() {
-        val auditdir = "$testdataDir/cases/sf2024/oap/audit"
+    fun testRunVerifySFoa() {
+        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
         println()
         print(results)
@@ -45,48 +45,10 @@ class TestCreateSfElection {
     }
 
     @Test
-    fun createSFElectionOA() {
-        val topdir = "$testdataDir/cases/sf2024/oa"
-
-        createSfElection(
-            topdir,
-            zipFilename,
-            "ContestManifest.json",
-            "CandidateManifest.json",
-            cvrExportCsv = cvrExportCsv,
-            hasStyle = true, // hasStyle = cvrs are complete
-            auditType = AuditType.ONEAUDIT,
-        )
-
-        val publisher = Publisher("$topdir/audit")
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
-    }
-
-    @Test
-    fun runElection() {
-        val topdir = "$testdataDir/cases/sf2024/oa"
-        val auditdir = "$topdir/audit"
-        val stopRound = -1
-
-        var done = false
-        var finalRound: AuditRound? = null
-        while (!done) {
-            val lastRound = runRound(inputDir = auditdir)
-            if (lastRound != null) finalRound = lastRound
-            done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx == stopRound
-        }
-
-        if (finalRound != null) {
-            println("$auditdir: ${finalRound.show()}")
-        }
-    }
-
-    @Test
     fun createSFElectionClca() {
         val topdir = "$testdataDir/cases/sf2024/clca"
 
-        createSfElection(
+        createSfElectionP(
             topdir,
             zipFilename,
             "ContestManifest.json",
@@ -134,14 +96,14 @@ class TestCreateSfElection {
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
-    } */
+    }
 
     @Test
     fun runSFElectionPollingNostyles() {
         val topdir = "$testdataDir/cases/sf2024/polling"
         runRound(inputDir = "$topdir/audit")
     }
-
+    */
     /*
     fun createSF2024OArepeat() {
 

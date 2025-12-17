@@ -4,8 +4,7 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.oneaudit.CardStyle
-import org.cryptobiotic.rlauxe.oneaudit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -143,8 +142,8 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
         }
         // now change the groups in the cardManifest
         val cardStyles = listOf(
-            CardStyle("group1", listOf(1,2), 1),
-            CardStyle("group2", listOf(2), 2),
+            Population("group1",  1,intArrayOf(1,2), false),
+            Population("group2", 2, intArrayOf(2), false),
         )
         val modifiedCards = mutableListOf<AuditableCard>()
         val cardAttacker = CardsWithStylesAttack(AuditType.CLCA, cards=Closer(cardsu.iterator()), styles=cardStyles, wantFlips=diff+1)
@@ -204,7 +203,7 @@ class CardsWithStylesAttack(
     val cvrsAreComplete: Boolean = true,
     val cards: CloseableIterator<AuditableCard>,
     phantomCards : List<AuditableCard>? = null,
-    styles: List<CardStyleIF>,
+    styles: List<Population>,
     val wantFlips: Int
 ): CloseableIterator<AuditableCard> {
 

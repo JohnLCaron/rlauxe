@@ -4,11 +4,11 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.oneaudit.CardStyle
 import org.cryptobiotic.rlauxe.audit.CreateAuditP
 import org.cryptobiotic.rlauxe.audit.CreateElectionP
 import org.cryptobiotic.rlauxe.audit.OneAuditConfig
 import org.cryptobiotic.rlauxe.audit.OneAuditStrategyType
+import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.audit.writeMvrsForRound
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
@@ -21,7 +21,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
-import org.cryptobiotic.rlauxe.oneaudit.calcCardPoolsFromMvrs
+import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -184,8 +184,8 @@ class CardManifestAttack {
         println("true Contest totals")
         realcontestUA.forEach { contestUA -> println(contestUA.showSimple())}
 
-        val cardStyle = CardStyle("groupB", groupBcontests.toList(), 1)
-        val realPools = calcCardPoolsFromMvrs(infos, listOf(cardStyle), mvrs)
+        val cardStyle = Population("groupB", 1, groupBcontests, false)
+        val realPools = calcOneAuditPoolsFromMvrs(infos, listOf(cardStyle), mvrs)
         realPools.forEach{ println(it.show()) }
         println("--------------------- end truth")
         ////

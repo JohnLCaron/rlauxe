@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -19,7 +20,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.collections.List
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
 
 class TestVunder {
 
@@ -146,9 +146,9 @@ class TestVunder {
         val fuzzedMvrTab = tabulateCards(fuzzedMvrs.iterator(), infos)
         println("fuzzedMvrTab= ${fuzzedMvrTab[contestOA.id]}")
 
-        val fuzzedPool = calcCardPoolsFromMvrs(
+        val fuzzedPool = calcOneAuditPoolsFromMvrs(
             infos,
-            listOf(CardStyle("pool42", listOf(1,2), 42)),
+            listOf(Population("pool42", 42, intArrayOf(1, 2), false)),
             fuzzedMvrs.map { it.cvr() },
         )
         println("fuzzedPool= ${fuzzedPool.first().show()}")
@@ -165,9 +165,9 @@ class TestVunder {
         // TODO why so many undervotes ??
         println("cardlimit=$limit limitedMvrTab= ${limitedMvrTab[contestOA.id]}")
 
-        val limitedPool = calcCardPoolsFromMvrs(
+        val limitedPool = calcOneAuditPoolsFromMvrs(
             infos,
-            cardStyles = listOf(CardStyle(cardPool.name(), listOf(1,2), cardPool.poolId)),
+            listOf(Population(cardPool.name(), cardPool.poolId, intArrayOf(1,2), false )),
             limitedMvrs.map { it.cvr() },
         )
         println("limitedPool= ${limitedPool.first().show()}")

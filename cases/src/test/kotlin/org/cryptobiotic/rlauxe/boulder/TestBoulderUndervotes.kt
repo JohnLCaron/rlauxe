@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.boulder
 
-import org.cryptobiotic.rlauxe.oneaudit.CardStyle
+import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
-import org.cryptobiotic.rlauxe.oneaudit.CardPoolWithBallotStyle
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolWithBallotStyle
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.mergeReduce
 import org.cryptobiotic.rlauxe.util.nfn
@@ -43,7 +43,7 @@ class TestBoulderUndervotes {
         println("processed $count CastVoteRecords")
 
         var styleId = 1
-        val cardStyles = mutableMapOf<String, CardStyle>()
+        val cardStyles = mutableMapOf<String, Population>()
         ballotTypes.toSortedMap().forEach { (key, value) ->
             if (value.size == 2) {
                 val (styleA, styleB) = if (value[0].size > value[1].size) {
@@ -51,12 +51,12 @@ class TestBoulderUndervotes {
                 } else {
                     Pair(value[1], value[0])
                 }
-                cardStyles[key + "-A"] = CardStyle(key + "-A", styleA, styleId)
-                cardStyles[key + "-B"] = CardStyle(key + "-B", styleB, styleId+1)
+                cardStyles[key + "-A"] = Population(key + "-A", styleId, styleA.toIntArray(), true)
+                cardStyles[key + "-B"] = Population(key + "-B", styleId+1, styleB.toIntArray(), true)
                 styleId += 2
             } else {
                 value.forEach { contestIds ->
-                    cardStyles[key] = CardStyle(key, contestIds, styleId)
+                    cardStyles[key] = Population(key, styleId, contestIds.toIntArray(), true)
                     styleId++
                 }
             }
@@ -73,9 +73,9 @@ class TestBoulderUndervotes {
             val gcardStyle = extractBallotType(rgroup.ballotType) + "-" + if (isA) "A" else "B"
             val cardStyle = cardStyles[gcardStyle]
             if (cardStyle != null) {
-                val gids = rgroup.contestVotes.map { it.key }.sorted()
-                if (cardStyle.contestIds != gids)
-                    println("*** rgroup '${rgroup.ballotType}'\n $gids !=\n ${cardStyle.contestIds} (${gcardStyle})")
+                val gids = rgroup.contestVotes.map { it.key }.sorted().toIntArray()
+                if (cardStyle.contests().contentEquals(gids))
+                    println("*** rgroup '${rgroup.ballotType}'\n $gids !=\n ${cardStyle.contests()} (${gcardStyle})")
             } else {
                 println("***dont have cardStyle ${gcardStyle}")
             }
@@ -100,7 +100,7 @@ class TestBoulderUndervotes {
     fun showSovoContestDetail2() {
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
 
-        val election2 = CreateBoulderElection(export, sovo, isClca=false)
+        val election2 = CreateBoulderElectionP(export, sovo, isClca=false)
         println()
         election2.oaContests.forEach { (_, oa) ->
             println(BoulderContestVotes.header)
@@ -114,12 +114,12 @@ class TestBoulderUndervotes {
 
         println("votes, undervotes")
 
-        val election2 = CreateBoulderElection(export, sovo, isClca=false)
+        val election2 = CreateBoulderElectionP(export, sovo, isClca=false)
         val contestIds = election2.infoList.map { it.id }
-        showPoolVotes(contestIds, election2.cardPools)
+        showPoolVotes(contestIds, election2.cardPoolBuilders)
     }
 
-    fun showPoolVotes(contestIds: List<Int>, cardPools: List<CardPoolWithBallotStyle>, width:Int = 4) {
+    fun showPoolVotes(contestIds: List<Int>, cardPools: List<OneAuditPoolWithBallotStyle>, width:Int = 4) {
         println("votes, undervotes")
         print("${trunc("poolName", 9)}:")
         contestIds.forEach {  print("${nfn(it, width)}|") }
@@ -134,13 +134,13 @@ class TestBoulderUndervotes {
     fun showRedactedUndervotes2() {
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
         // val election1 = BoulderElectionOAsim(export, sovo)
-        val election2 = CreateBoulderElection(export, sovo, isClca=false)
+        val election2 = CreateBoulderElectionP(export, sovo, isClca=false)
 
         val contestIds = election2.infoList.map { it.id }
 
         // show the sums and compare to sovo
         // val list1 = election1.cardPools.map { it.undervotes() }
-        val list2 = election2.cardPools.map { it.undervotes() }
+        val list2 = election2.cardPoolBuilders.map { it.undervotes() }
 
         //val sum1 = mutableMapOf<Int, Int>()
         //sum1.mergeReduce(list1)
@@ -156,7 +156,7 @@ class TestBoulderUndervotes {
             appendLine()
 
             contestIds.forEach { id ->
-                val oaContest = election2.oaContests[id]!!
+                val oaContest = election2.oaContests[id]
                 if (oaContest == null)
                     ("     |")
                 else {
@@ -177,7 +177,7 @@ class TestBoulderUndervotes {
 
             contestIds.forEach { id ->
                 val undervote2 = sum2[id]!!
-                val oaContest = election2.oaContests[id]!!
+                val oaContest = election2.oaContests[id]
                 if (oaContest == null)
                     ("     |")
                 else {
@@ -198,11 +198,11 @@ class TestBoulderUndervotes {
     @Test
     fun showRedactedNcards() {
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
-        val election2 = CreateBoulderElection(export, sovo, isClca=false)
+        val election2 = CreateBoulderElectionP(export, sovo, isClca=false)
 
         val contestIds = election2.infoList.map { it.id }
 
-        val list2 = election2.cardPools.map { pool ->
+        val list2 = election2.cardPoolBuilders.map { pool ->
             pool.minCardsNeeded.keys.associate{ it to pool.ncards() }
         }
         val sum2 = mutableMapOf<Int, Int>()
@@ -267,12 +267,13 @@ class TestBoulderUndervotes {
     @Test
     fun showNcards() {
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
-        val election2 = CreateBoulderElection(export, sovo, isClca=false)
+        val election2 = CreateBoulderElectionP(export, sovo, isClca=false)
 
         val contestIds = election2.infoList.map { it.id }
 
         val list2 = election2.cardPools.map { pool ->
-            pool.minCardsNeeded.keys.associate{ it to pool.ncards() }
+            val oapool = pool as OneAuditPoolWithBallotStyle
+            oapool.minCardsNeeded.keys.associate{ it to pool.ncards() }
         }
         val sum2 = mutableMapOf<Int, Int>()
         sum2.mergeReduce(list2)
@@ -356,4 +357,30 @@ class TestBoulderUndervotes {
     //      2|      0|      1|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      2|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|      0|
     // 198884| 198884| 198884| 198884|  87437|  94990|  44771|  49033|  56294|  19085|  29701| 198884|  71448| 198884| 198884| 198884|   4267|  10009|   8515|   1494|   8252| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 198884| 197371| 197371| 197371| 197371| 197371|  57129|  57129|  57129|  18694|  55395|   9951|   1573|   8152|  72485|    157|    157|    174|    169|    320|    320| 197371|  67636|
     //      2|      2|      2|      2|     -5|     -3|     -1|      5|      4|     -2|     -4|      2|      4|      2|      2|      2|      0|     -5|     -3|     -2|    233|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      0|      0|      0|      0|      0|     11|     11|     11|     14|      3|    -13|     -7|     13|    -40|     -1|     -1|      2|      2|      7|      7|      0|    -10|
+}
+
+fun OneAuditPoolWithBallotStyle.showVotes(contestIds: Collection<Int>, width: Int=4) = buildString {
+    append("${trunc(name(), 9)}:")
+
+    contestIds.forEach { id ->
+        // (val candVotes: Map<Int, Int>, val undervotes: Int, val voteForN: Int)
+        val tab = contestTab(id)
+        if (tab == null)
+            append("    |")
+        else {
+            append("${nfn(tab.nvotes(), width)}|")
+        }
+    }
+    appendLine()
+
+    append("${trunc("", 9)}:")
+    contestIds.forEach { id ->
+        val tab = contestTab(id)
+        if (tab == null)
+            append("    |")
+        else {
+            append("${nfn(tab.undervotes, width)}|")
+        }
+    }
+    appendLine()
 }

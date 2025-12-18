@@ -5,10 +5,8 @@ _12/18/25_
 
 The best case is to have CVRs that record undervotes. Then things are simple and as efficent as possible.
 
-config.hasStyles -> config.cvrsHaveUndervotes (aka cvrsAreComplete)
-
 Otherwise, we need to create "Population" containers that know which contests may be in it, and use these 
-when choosing audit samples. Set hasStyle (aka exactContests) = true if all cards int population have one ContestType. 
+when choosing audit samples. Set hasStyle (aka hasSingleCardStyle) = true if all cards int population have one ContestType. 
 This is set independently on each population (rather than globally on the audit), and used when deciding the 
 assort value when an MVR is missing a contest on Clca and OneAudit assorters.
 

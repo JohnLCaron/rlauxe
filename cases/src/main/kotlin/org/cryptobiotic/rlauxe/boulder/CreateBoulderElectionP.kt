@@ -28,7 +28,7 @@ class CreateBoulderElectionP(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
     val isClca: Boolean,
-    val poolsHaveOneCardStyle: Boolean,
+    val poolsHaveOneCardStyle: Boolean = true,
     val distributeOvervotes: List<Int> = listOf(0, 63),
 ): CreateElectionPIF {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convertToCvr() }
@@ -38,6 +38,7 @@ class CreateBoulderElectionP(
     val countCvrVotes = countCvrVotes()
     val countRedactedVotes = countRedactedVotes() // wrong
     val oaContests: Map<Int, OneAuditContestBoulder> = makeOAContests().associate { it.info.id to it}
+    val cardPoolBuilders = convertRedactedToCardPool()
 
     val contests: List<ContestIF>
     val contestsUA : List<ContestUnderAudit>
@@ -45,7 +46,6 @@ class CreateBoulderElectionP(
 
     init {
         //// the redacted groups dont have undervotes, so we do some fancy dancing to generate reasonable undervote counts
-        val cardPoolBuilders = convertRedactedToCardPool()
         // todo this seems to depend on ncards, which we set to 0
         oaContests.values.forEach { it.adjustPoolInfo(cardPoolBuilders)}
         // 2024
@@ -349,4 +349,54 @@ fun createBoulderElectionP(
 
     CreateAuditP("boulder", config, election, auditDir = auditDir, clear = clear)
     println("createBoulderElectionOAnew took $stopwatch")
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+fun checkVotesVsSovo(contests: List<Contest>, sovo: BoulderStatementOfVotes, mustAgree: Boolean = true) {
+    // we are making the contest votes from the cvrs. how does it compare with official tally ??
+    contests.forEach { contest ->
+        val sovoContest: BoulderContestVotes? = sovo.contests.find { it.contestTitle == contest.name }
+        if (sovoContest == null) {
+            print("*** ${contest.name} not found in BoulderStatementOfVotes")
+        } else {
+            //println("sovoContest = ${sovoContest!!.candidateVotes}")
+            //println("    contest = ${contest.votes}")
+            sovoContest.candidateVotes.forEach { (sovoCandidate, sovoVote) ->
+                val candidateId = contest.info.candidateNames[sovoCandidate]
+                if (candidateId == null) {
+                    print("*** $sovoCandidate not in ${contest.info.candidateNames}")
+                }
+                val contestVote = contest.votes[candidateId]!!
+                if (contestVote != sovoVote) {
+                    println("*** ${contest.name} '$sovoCandidate' $contestVote != $sovoVote")
+                }
+                // createBoulder23 doesnt agree on contest "City of Louisville City Council Ward 2 (4-year term)"
+                // see ColbertDiscrepency.csv, FaheyDiscrepency.csv
+                if (mustAgree) require(contestVote == sovoVote)
+            }
+        }
+    }
+}
+
+fun parseContestName(name: String) : Pair<String, Int> {
+    if (!name.contains("(Vote For=")) return Pair(name.trim(), 1)
+
+    val tokens = name.split("(Vote For=")
+    require(tokens.size == 2) { "unexpected contest name $name" }
+    val namet = tokens[0].trim()
+    val ncand = tokens[1].substringBefore(")").toInt()
+    return Pair(namet, ncand)
+}
+
+// City of Boulder Mayoral Candidates (Number of positions=1, Number of ranks=4)
+fun parseIrvContestName(name: String) : Pair<String, Int> {
+    if (!name.contains("(Number of positions=")) return Pair(name.trim(), 1)
+
+    val tokens = name.split("(Number of positions=")
+    require(tokens.size == 2) { "unexpected contest name $name" }
+    val namet = tokens[0].trim()
+    val ncand = tokens[1].substringBefore(",").toInt()
+    return Pair(namet, ncand)
 }

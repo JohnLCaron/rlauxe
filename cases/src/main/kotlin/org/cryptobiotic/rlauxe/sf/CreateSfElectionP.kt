@@ -1,5 +1,8 @@
 package org.cryptobiotic.rlauxe.sf
 
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.Contest
@@ -10,12 +13,15 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.unpooled
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
+import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
+import org.cryptobiotic.rlauxe.raire.makeRaireContestUA
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
+import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import kotlin.Boolean
 import kotlin.collections.component1
@@ -184,6 +190,96 @@ fun makeContests(allCvrTabs: Map<Int, ContestTabulation>, unpooledPool: OneAudit
         }
     }
     return contests
+}
+
+
+fun makeClcaContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestUnderAudit> {
+    val contestsUAs = mutableListOf<ContestUnderAudit>()
+    allCvrTabs.map { (contestId, cvrTab)  ->
+        val info = cvrTab.info
+        val useNc = contestNcs[info.id] ?: cvrTab.ncards
+
+        val contestUA: ContestUnderAudit = if (!cvrTab.isIrv) {
+            val contest = Contest(info, cvrTab.votes, useNc, cvrTab.ncards)
+            ContestUnderAudit(contest, NpopIn=contestNbs[info.id]).addStandardAssertions()
+        } else {
+            makeRaireContestUA(info, cvrTab, useNc, Nbin=contestNbs[info.id])
+        }
+        contestUA.contest.info().metadata["PoolPct"] = 0
+        contestsUAs.add(contestUA)
+    }
+    return contestsUAs
+}
+
+fun makePollingContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestUnderAudit> {
+    val contestsUAs = mutableListOf<ContestUnderAudit>()
+    allCvrTabs.map { (contestId, contestSumTab)  ->
+        val useNc = contestNcs[contestId] ?: contestSumTab.ncards
+        if (useNc > 0) {
+            if (!contestSumTab.isIrv) { // cant do IRV
+                val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
+                val contestUA = ContestUnderAudit(contest, isClca = false, NpopIn=contestNbs[contestId]).addStandardAssertions()
+                contestUA.contest.info().metadata["PoolPct"] = 0
+                contestsUAs.add(contestUA)
+            }
+        }
+    }
+    return contestsUAs
+}
+
+fun makeContestInfos(
+    castVoteRecordZip: String,
+    contestManifestFilename: String,
+    candidateManifestFile: String,
+    show: Boolean = false
+): Pair<Map<Int, Int>, List<ContestInfo>> {
+
+    val contestManifest = readContestManifestFromZip(castVoteRecordZip, contestManifestFilename)
+    if (show) println("contestManifest = $contestManifest")
+
+    val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJsonFromZip(castVoteRecordZip, candidateManifestFile)
+    val candidateManifest = if (resultCandidateM is Ok) resultCandidateM.unwrap()
+    else throw RuntimeException("Cannot read CandidateManifestJson from ${candidateManifestFile} err = $resultCandidateM")
+
+    val contestInfos = makeContestInfos(contestManifest, candidateManifest).sortedBy { it.id }
+    if (show) contestInfos.forEach { println("   ${it} nwinners = ${it.nwinners} choiceFunction = ${it.choiceFunction}") }
+
+    // The contest Ncs come from the contestManifest
+    val contestNcs: Map<Int, Int> = makeContestNcs(contestManifest, contestInfos) // contestId -> Nc
+    return Pair(contestNcs, contestInfos)
+}
+
+fun makeContestInfos(contestManifest: ContestManifest, candidateManifest: CandidateManifestJson): List<ContestInfo> {
+    return contestManifest.contests.values.map { contestM: ContestMJson ->
+        val candidateNames =
+            candidateManifest.List.filter { it.ContestId == contestM.Id }.associate { candidateM: CandidateM ->
+                Pair(candidateM.Description, candidateM.Id)
+            }
+        val isIrv = (contestM.NumOfRanks > 0)
+        ContestInfo(
+            contestM.Description,
+            contestM.Id,
+            candidateNames,
+            if (!isIrv) SocialChoiceFunction.PLURALITY else SocialChoiceFunction.IRV,
+            if (!isIrv) contestM.VoteFor else 1,
+            if (!isIrv) contestM.VoteFor else candidateNames.size,
+        )
+    }
+}
+
+fun makeContestNcs(contestManifest: ContestManifest, contestInfos: List<ContestInfo>): Map<Int, Int> { // contestId -> Nc
+    val staxContests: List<StaxReader.StaxContest> = StaxReader().read("src/test/data/SF2024/summary.xml") // sketchy
+    val contestNcs= mutableMapOf<Int, Int>()
+    contestInfos.forEach { info ->
+        val contestM = contestManifest.contests.values.find { it.Description == info.name }
+        if (contestM != null) {
+            val staxContest = staxContests.find { it.id == info.name }
+            if (staxContest != null) contestNcs[info.id] = staxContest.ncards()!!
+            else println("*** cant find contest '${info.name}' in summary.xml")
+
+        } else println("*** cant find contest '${info.name}' in ContestManifest")
+    }
+    return contestNcs
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

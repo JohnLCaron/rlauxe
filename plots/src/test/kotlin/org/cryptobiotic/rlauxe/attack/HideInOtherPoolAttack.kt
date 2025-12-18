@@ -235,7 +235,6 @@ class OASingleRoundWorkflowTaskGeneratorG(
         val config = AuditConfig(AuditType.ONEAUDIT, hasStyle = hasStyle, seed = 12356667890L)
         val (contestsUA, cardPools) =
             makeOneAuditTestContestsP(
-                config.hasStyle,
                 infos,
                 listOf(contestB),
                 cardStyles,

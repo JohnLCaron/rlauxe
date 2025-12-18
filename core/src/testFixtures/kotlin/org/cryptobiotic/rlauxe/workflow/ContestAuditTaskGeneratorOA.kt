@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTestP
 import kotlin.random.Random
 
 // Generate OA contest, do full audit
@@ -31,7 +31,7 @@ class OneAuditContestAuditTaskGenerator(
         //    val cards: List<AuditableCard>,
         //    val pools: List<CardPoolIF>,
         //)
-        val (contestUA, mvrs, cards, pools) = makeOneAuditTest(
+        val (contestUA, mvrs, cards, pools) = makeOneAuditTestP(
             margin,
             Nc,
             cvrFraction = cvrPercent,
@@ -79,7 +79,7 @@ class OneAuditSingleRoundAuditTaskGenerator(
             // use default strategy
         )
 
-        val (contestUA, mvrs, cards, pools) = makeOneAuditTest(
+        val (contestUA, mvrs, cards, pools) = makeOneAuditTestP(
                 margin,
                 Nc,
                 cvrFraction = cvrPercent,
@@ -130,7 +130,7 @@ class OneAuditSingleRoundWithDilutedMargin(
             simFuzzPct = mvrsFuzzPct,
         )
 
-        val (contestUA, mvrs, cards, pools) = makeOneAuditTest(
+        val (contestUA, mvrs, cards, pools) = makeOneAuditTestP(
                 margin,
                 Nc,
                 cvrFraction = cvrPercent,

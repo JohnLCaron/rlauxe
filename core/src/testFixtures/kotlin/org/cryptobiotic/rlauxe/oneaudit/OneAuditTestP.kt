@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.oneaudit
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CvrsWithPopulationsToCardManifest
-import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.makeOneAuditTestContestsP
@@ -17,40 +16,22 @@ data class ContestMvrCardAndPops(
     val contestUA: ContestUnderAudit,
     val mvrs: List<Cvr>,
     val cards: List<AuditableCard>,
-    val pools: List<PopulationIF>,
+    val pools: List<OneAuditPoolIF>,
 )
 
 // simulate OneAudit Contest with extra cards in pool, to get Npop > Nc, and test hasStyle
-fun ContestMvrCardAndPops(
-    margin: Double,
-    Nc: Int,
-    cvrFraction: Double,
-    undervoteFraction: Double,
-    phantomFraction: Double,
-    hasStyle: Boolean = true,
-    extraInPool: Int = 0,
-): ContestMvrCardAndPops {
-    val nvotes = roundToClosest(Nc * (1.0 - undervoteFraction - phantomFraction))
-    val winner = roundToClosest((margin * Nc + nvotes) / 2)
-    val loser = nvotes - winner
-    return makeOneAuditTestP(winner, loser, cvrFraction, undervoteFraction, phantomFraction,
-        hasStyle, extraInPool)
-}
-
 fun makeOneAuditTestP(
     margin: Double,
     Nc: Int,
     cvrFraction: Double,
     undervoteFraction: Double,
     phantomFraction: Double,
-    hasStyle: Boolean = true,
     extraInPool: Int = 0,
 ): ContestMvrCardAndPops {
     val nvotes = roundToClosest(Nc * (1.0 - undervoteFraction - phantomFraction))
     val winner = roundToClosest((margin * Nc + nvotes) / 2)
     val loser = nvotes - winner
-    return makeOneAuditTestP(winner, loser, cvrFraction, undervoteFraction, phantomFraction,
-        hasStyle, extraInPool)
+    return makeOneAuditTestP(winner, loser, cvrFraction, undervoteFraction, phantomFraction, extraInPool)
 }
 
 // two candidate contest, with specified total votes
@@ -61,7 +42,6 @@ fun makeOneAuditTestP(
     cvrFraction: Double,
     undervoteFraction: Double,
     phantomFraction: Double,
-    hasStyle: Boolean = true,
     extraInPool: Int = 0,
 ): ContestMvrCardAndPops {
 
@@ -150,7 +130,7 @@ fun makeOneAuditTestP(
     // val oaUAold = makeContestUA(contest, cardManifest, infos, listOf(pool), hasStyle)
 
     val (oaUA, cardPools) = makeOneAuditTestContestsP(
-        hasStyle, infos, listOf(contest), listOf(pool), cardManifest, mvrs)
+        infos, listOf(contest), listOf(pool), cardManifest, mvrs)
 
     return ContestMvrCardAndPops(oaUA.first(), mvrs, cardManifest, cardPools)
 }

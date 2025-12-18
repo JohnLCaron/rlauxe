@@ -23,7 +23,7 @@ import kotlin.math.max
 import kotlin.random.Random
 import kotlin.sequences.plus
 
-// all CANDIDATE for removal
+// CANDIDATE for removal
 
 private val logger = KotlinLogging.logger("CardPool")
 

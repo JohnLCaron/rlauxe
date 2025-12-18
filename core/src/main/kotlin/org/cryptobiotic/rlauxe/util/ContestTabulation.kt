@@ -152,22 +152,6 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
 }
 
 // TODO only accumulates regular votes, not IRV
-// tabulates the pool.regVotes into ContestTabulation's
-fun tabulateCardPools(cardPools: List<CardPoolIF>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
-    val poolSums = infos.mapValues { ContestTabulation(it.value) }
-    cardPools.forEach { cardPool ->
-        cardPool.regVotes().forEach { (contestId, regVotes: RegVotesIF) ->
-            val poolSum = poolSums[contestId]
-            if (poolSum != null) {
-                regVotes.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
-                poolSum.ncards += regVotes.ncards()
-                poolSum.undervotes += regVotes.undervotes()
-            }
-        }
-    }
-    return poolSums
-}
-
 fun tabulateOneAuditPools(cardPools: List<OneAuditPoolIF>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val poolSums = infos.mapValues { ContestTabulation(it.value) }
     cardPools.forEach { cardPool ->

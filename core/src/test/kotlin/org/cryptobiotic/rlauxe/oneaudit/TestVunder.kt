@@ -130,7 +130,7 @@ class TestVunder {
         val Nc = 10000
         val cvrFraction = 0.80
         val (contestOA, mvrs, cards, cardPools) =
-            makeOneAuditTest(margin, Nc, cvrFraction = cvrFraction, undervoteFraction = 0.0, phantomFraction = 0.0)
+            makeOneAuditTestP(margin, Nc, cvrFraction = cvrFraction, undervoteFraction = 0.0, phantomFraction = 0.0)
 
         val cardPool = cardPools.first()
         val votes = cardPool.regVotes()[contestOA.id]!!

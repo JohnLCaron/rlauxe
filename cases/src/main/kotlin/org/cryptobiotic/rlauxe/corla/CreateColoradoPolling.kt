@@ -15,8 +15,7 @@ class ColoradoPolling (
     contestRoundFile: String,
     precinctFile: String,
     config: AuditConfig,
-    var poolsHaveOneCardStyle: Boolean,
-): CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, config, true) {
+): CreateColoradoElectionP(electionDetailXmlFile, contestRoundFile, precinctFile, config) {
 
     val contestsPolling: List<ContestUnderAudit>
 
@@ -45,7 +44,6 @@ class ColoradoPolling (
         return regContests
     }
 
-    override fun cardPools() = null // TODO
     override fun contestsUA() = contestsPolling
 }
 
@@ -58,7 +56,7 @@ fun createColoradoPolling(
     precinctFile: String,
     auditConfigIn: AuditConfig? = null,
     clear: Boolean = true,
-    poolsHaveOneCardStyle: Boolean=false)
+)
 {
     val stopwatch = Stopwatch()
 
@@ -69,9 +67,9 @@ fun createColoradoPolling(
             pollingConfig = PollingConfig()
         )
     }
-    val election = ColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile, config, poolsHaveOneCardStyle)
+    val election = ColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile, config)
 
-    CreateAudit("corla", config, election, auditDir = "$topdir/audit", clear = clear)
+    CreateAuditP("corla", config, election, auditDir = "$topdir/audit", clear = clear)
     println("createColoradoPolling took $stopwatch")
 }
 

@@ -10,13 +10,13 @@ import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.audit.makePhantomCards
 import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
-import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import kotlin.Int
 import kotlin.String
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
@@ -214,14 +214,172 @@ data class MultiContestTestDataP(
     }
 }
 
+
+// This creates a multicandidate contest with the two closest candidates having exactly the given margin.
+// It can create cvrs that exactly reflect this contest's vote; so can be used in simulating the audit.
+// The cvrs are not multicontest.
+data class ContestTestDataBuilder(
+    val contestId: Int,
+    val ncands: Int,
+    val margin: Double, // margin of top highest vote getters, not counting undervotePct, phantomPct
+    val undervotePct: Double, // needed to set Nc
+    val phantomPct: Double, // needed to set Nc
+    val choiceFunction: SocialChoiceFunction = SocialChoiceFunction.PLURALITY,
+) {
+    val candidateNames: List<String> = List(ncands) { it }.map { "cand$it" }
+    val info = ContestInfo("contest$contestId", contestId, candidateNames = listToMap(candidateNames), choiceFunction)
+
+    var ballotStyles: Set<Int> = emptySet()
+    var ncards = 0 // sum of nvotes and underCount
+    var underCount = 0
+    var phantomCount = 0
+    var adjustedVotes: List<Pair<Int, Int>> = emptyList() // (cand, nvotes) includes undervotes
+    var trackVotesRemaining = mutableListOf<Pair<Int, Int>>()
+    var votesLeft = 0
+
+    fun resetTracker() {
+        trackVotesRemaining = mutableListOf()
+        trackVotesRemaining.addAll(adjustedVotes)
+        votesLeft = ncards
+    }
+
+    fun makeContest(): Contest {
+        this.underCount = (this.ncards * undervotePct).toInt()
+        this.phantomCount = (this.ncards * phantomPct).toInt()
+        val Nc = this.ncards + this.phantomCount
+
+        val nvotes = this.ncards - underCount
+        if (nvotes == 0) {
+            return Contest(this.info, emptyMap(), Nc, this.ncards)
+        }
+        val votes: List<Pair<Int, Int>> = partition(nvotes, ncands)
+        var svotes = votes.sortedBy { it.second }.reversed().toMutableList()
+
+        // adjust the margin between the first and second highest votes.
+        var adjust = 100
+        while (abs(adjust) > 2) {
+            if (debugAdjust) println("${this.info.name} before=$svotes")
+            adjust = adjust(svotes, Nc)
+            if (debugAdjust) println("${this.info.name} after=$svotes adjust=$adjust")
+            svotes = svotes.sortedBy { it.second }.reversed().toMutableList()
+            if (debugAdjust) println()
+        }
+        val contest = Contest(this.info, svotes.toMap(), Nc, this.ncards)
+
+        svotes.add(Pair(ncands, underCount)) // the adjusted votes include the undervotes TODO check this
+        this.adjustedVotes = svotes // includes the undervotes
+        return contest
+    }
+
+    // maybe adjust doesnt need the undervotes?
+    fun adjust(svotes: MutableList<Pair<Int, Int>>, Nc: Int): Int {
+        val winner = svotes[0]
+        val loser = svotes[1]
+        val wantMarginDiff = roundUp(margin * Nc)
+        val haveMarginDiff = (winner.second - loser.second)
+        val adjust: Int = roundUp((wantMarginDiff - haveMarginDiff) * 0.5) // can be positive or negetive
+        svotes[0] = Pair(winner.first, winner.second + adjust)
+        svotes[1] = Pair(loser.first, loser.second - adjust)
+        return adjust // will be 0 when done
+    }
+
+    // choose Candidate, add contest, including undervote
+    fun addContestToCard(cvrb: CardBuilder) {
+        val candidateIdx = chooseCandidate(Random.nextInt(votesLeft))
+        if (candidateIdx == ncands) {
+            cvrb.replaceContestVote(info.id, null) // undervote
+        } else {
+            cvrb.replaceContestVote(info.id, info.candidateIds[candidateIdx])
+        }
+    }
+
+    // choose Candidate, add contest, including undervote
+    fun addContestToCvr(cvrb: CvrBuilder) {
+        val candidateIdx = chooseCandidate(Random.nextInt(votesLeft))
+        if (candidateIdx == ncands) {
+            cvrb.addContest(info.name) // undervote
+        } else {
+            cvrb.addContest(info.name, info.candidateIds[candidateIdx])
+        }
+    }
+
+    // choice is a number from 0..votesLeft
+    // shrink the partition as votes are taken from it
+    fun chooseCandidate(choice: Int): Int {
+        var sum = 0
+        var nvotes = 0
+        var idx = 0
+        while (idx <= ncands) {
+            nvotes = trackVotesRemaining[idx].second
+            sum += nvotes
+            if (choice < sum) break
+            idx++
+        }
+        val candidateIdx = trackVotesRemaining[idx].first
+        require(nvotes > 0)
+        trackVotesRemaining[idx] = Pair(candidateIdx, nvotes - 1)
+        votesLeft--
+
+        val checkVoteCount = trackVotesRemaining.sumOf { it.second }
+        require(checkVoteCount == votesLeft)
+        return candidateIdx
+    }
+
+    override fun toString() = buildString {
+        append("ContestTestData($contestId, ncands=$ncands, margin=${df(margin)}, $choiceFunction ncards=$ncards ballotStyles=$ballotStyles")
+    }
+}
+
+// partition nthings into npartitions randomly
+// return map partitionIdx -> nthings in the partition, where sum(nthings in the partition) = nthings
+// NOTE partitionIdx not id!!
+fun partition(nthings: Int, npartitions: Int): List<Pair<Int, Int>> {
+    val cutoffs = List(npartitions - 1) { it }.map { Pair(it, Random.nextInt(nthings)) }.toMutableList()
+    cutoffs.add(Pair(npartitions - 1, nthings)) // add the end point
+
+    // put in order
+    val sortedCutoffs = cutoffs.sortedBy { it.second }
+
+    // turn that into a partition
+    var last = 0
+    val partition = mutableListOf<Pair<Int, Int>>()
+    sortedCutoffs.forEach { ps ->
+        partition.add(Pair(ps.first, ps.second - last))
+        last = ps.second
+    }
+    return partition
+}
+
+fun partitionWithPool(nthings: Int, npartitions: Int, poolPct: Double): List<Pair<Int, Int>> {
+    val poolSize = roundToClosest(nthings * poolPct)
+    val thingsLeft = nthings - poolSize
+    val partitionsLeft = npartitions - 2
+
+    val cutpoints = List(partitionsLeft - 1) { it }.map { Pair(2 + it, poolSize + Random.nextInt(thingsLeft)) }.toMutableList()
+    cutpoints.add(Pair(partitionsLeft + 1, nthings)) // add the end point
+
+    // put the two pool partition in front, then get a list sorted by cutpoint
+    val sortedCutoffs =  cutpoints.sortedBy { it.second }
+    val allCutoffs = listOf(Pair(0, poolSize/2), Pair(1, poolSize)) + sortedCutoffs
+
+    // turn that into a partition, a list partitionIdx -> nthings in the partition
+    var last = 0
+    val partition = mutableListOf<Pair<Int, Int>>()
+    allCutoffs.forEach { ps ->
+        partition.add(Pair(ps.first, ps.second - last))
+        last = ps.second
+    }
+    return partition
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 fun makeOneAuditTestContestsP(
-    hasStyle: Boolean,
     infos: Map<Int, ContestInfo>, // all the contests in the pools
     contestsToAudit: List<Contest>, // the contests you want to audit
     cardStyles: List<PopulationIF>,
     cardManifest: List<AuditableCard>,
     mvrs: List<Cvr>, // this must be just for tests
-    debug: Boolean = false,
 ): Pair<List<ContestUnderAudit>, List<OneAuditPoolIF>> {
 
     // The Nbs come from the cards

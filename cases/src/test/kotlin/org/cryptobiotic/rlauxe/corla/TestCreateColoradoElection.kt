@@ -70,8 +70,7 @@ class TestCreateColoradoElection {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoPolling(topdir, detailXmlFile, contestRoundFile, precinctFile,
-            poolsHaveOneCardStyle=false)
+        createColoradoPolling(topdir, detailXmlFile, contestRoundFile, precinctFile)
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()

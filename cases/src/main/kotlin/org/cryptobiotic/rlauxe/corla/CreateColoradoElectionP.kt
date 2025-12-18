@@ -5,7 +5,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolWithBallotStyle
 import org.cryptobiotic.rlauxe.oneaudit.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.util.*
@@ -22,7 +24,7 @@ open class CreateColoradoElectionP (
     contestRoundFile: String,
     precinctFile: String,
     val config: AuditConfig,
-    val poolsHaveOneCardStyle:Boolean,
+    val poolsHaveOneCardStyle:Boolean = false,
 ): CreateElectionPIF {
     val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
@@ -201,6 +203,42 @@ open class CreateColoradoElectionP (
         override fun hasNext() = cvrs.hasNext()
     }
 }
+
+
+class OneAuditContestCorla(val info: ContestInfo, detailContest: ElectionDetailContest, contestRound: CorlaContestRoundCsv): OneAuditContestIF {
+    override val contestId = info.id
+    val Nc: Int
+    val candidateVotes: Map<Int, Int>
+    var poolTotalCards: Int = 0
+
+    init {
+        val candidates = detailContest.choices
+        candidateVotes = candidates.mapIndexed { idx, choice -> Pair(idx, choice.totalVotes) }.toMap()
+
+        val totalVotes = candidateVotes.map { it.value }.sum() / info.voteForN
+        var useNc = contestRound.contestBallotCardCount
+        if (useNc < totalVotes) {
+            println("*** Contest ${info.name} has $totalVotes total votes, but contestBallotCardCount is ${contestRound.contestBallotCardCount} - using totalVotes")
+            useNc = totalVotes // contestRound.ballotCardCount
+        }
+        Nc = useNc
+    }
+
+    // total cards in all pools for this contest
+    override fun poolTotalCards(): Int  = poolTotalCards
+
+    override fun adjustPoolInfo(cardPools: List<OneAuditPoolIF>){
+        poolTotalCards = cardPools.filter{ it.hasContest(info.id) }.sumOf { it.ncards() }
+    }
+
+    fun oapoolUndervote(cardPools: List<OneAuditPoolWithBallotStyle>): Int {
+        return cardPools.sumOf { it.undervoteForContest(contestId) }
+    }
+
+    // expected total poolcards for this contest, making assumptions about missing undervotes
+    override fun expectedPoolNCards() = Nc
+}
+
 
 ////////////////////////////////////////////////////////////////////
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit

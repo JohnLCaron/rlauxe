@@ -15,7 +15,6 @@ import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.VunderBar
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import org.cryptobiotic.rlauxe.workflow.readCardManifest
 import kotlin.io.path.Path
@@ -164,7 +163,6 @@ object RunRlaCreateOneAudit {
                 cvrFraction = .95,
                 undervoteFraction = .01,
                 phantomFraction = pctPhantoms ?: 0.0,
-                hasStyle=hasStyle,
                 extraInPool= (extraPct * ncards).toInt(),
             )
             contestsUA.add(contestOA)

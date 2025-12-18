@@ -36,7 +36,7 @@ class TestOneAuditPairFuzzer {
             val welfordFromCvrs = Welford()
             val welfordFromFuzz = Welford()
             margins.forEach { margin ->
-                val (contestOA, mvrs, cardManifest, pools) = makeOneAuditTest(
+                val (contestOA, mvrs, cardManifest, pools) = makeOneAuditTestP(
                     margin,
                     Nc,
                     cvrFraction = .70,
@@ -112,7 +112,7 @@ class TestOneAuditPairFuzzer {
         val Nc = 10000
 
         val (contestOA, mvrs, cards, pools) =
-            makeOneAuditTest(
+            makeOneAuditTestP(
                 margin = .01,
                 Nc = Nc,
                 cvrFraction = .95,
@@ -167,7 +167,7 @@ class TestOneAuditPairFuzzer {
         val poolMvrs: Map<Int, List<Cvr>> = pools.associate { it.poolId to it.simulateMvrsForPool() }
         poolMvrs.forEach { println("pool ${it.key} has ncards= ${cardPool.ncards()} and ${it.value.size} simulatedMvrsForPool") }
 
-        // makeOneAuditTest adds separate cards for "extra"; simulateMvrsForPool combines them.
+        // makeOneAuditTestP adds separate cards for "extra"; simulateMvrsForPool combines them.
         // so we dont have enough simulatedMvrsForPoolfor the fuzzing
 
         // what about a real contest? simulateMvrsForPool has to match whatever ncards has.

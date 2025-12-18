@@ -441,10 +441,6 @@ fun distributeExpectedOvervotes(oaContest: OneAuditContestIF, cardPools: List<Ca
     }
 }
 
-
-/////////////////////////////////////////////////////////////////////////////////////
-// CANDIDATE for removal
-
 // deprecated use CvrsWithPopulationsToCardManifest
 class CvrsWithStylesToCardManifest(
     val type: AuditType,
@@ -493,53 +489,3 @@ class CvrsWithStylesToCardManifest(
 
     override fun close() = cvrs.close()
 }
-
-// deprecated use CardsWithPopulationsToCardManifest
-class CardsWithStylesToCardManifest(
-    val type: AuditType,
-    val cvrsAreComplete: Boolean,
-    val cards: CloseableIterator<AuditableCard>,
-    phantomCards : List<AuditableCard>?,
-    styles: List<CardStyleIF>?,
-): CloseableIterator<AuditableCard> {
-
-    val poolMap = styles?.associateBy{ it.name() }
-    val allCards: Iterator<AuditableCard>
-    var cardIndex = 0 // 0 index
-
-    init {
-        allCards = if (phantomCards == null) {
-            cards
-        } else {
-            val cardSeq = cards.iterator().asSequence()
-            val phantomSeq = phantomCards.asSequence()
-            (cardSeq + phantomSeq).iterator()
-        }
-    }
-
-    override fun hasNext() = allCards.hasNext()
-
-    override fun next(): AuditableCard {
-        val org = allCards.next()
-        val style = if (poolMap == null) null else poolMap[org.cardStyle]
-        val hasCvr = type.isClca() || (type.isOA() && style == null)
-        val contests = when {
-            (hasCvr && cvrsAreComplete) -> null
-            (style != null) -> style.contests()
-            cvrsAreComplete -> org.contests()
-            else -> null
-        }
-        val votes = if (hasCvr) org.votes else null
-
-        return AuditableCard(org.location, cardIndex++, 0, phantom=org.phantom,
-            // contests ?: intArrayOf(),
-            votes,
-            org.poolId,
-            null, // style?.name(),
-        )
-    }
-
-    override fun close() = cards.close()
-}
-
-

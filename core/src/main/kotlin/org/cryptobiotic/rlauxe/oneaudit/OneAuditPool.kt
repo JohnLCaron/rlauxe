@@ -55,32 +55,6 @@ interface OneAuditPoolIF: PopulationIF {
     // OneAuditPool(override val poolName: String, override val poolId: Int, val exactContests: Boolean,
     //  val ncards: Int, val regVotes: Map<Int, RegVotes>)
     fun toOneAuditPool() = OneAuditPool(poolName, poolId, hasSingleCardStyle(), ncards(), regVotes())
-
-    /* fun showVotes(contestIds: Collection<Int>, width: Int=4) = buildString {
-        append("${trunc(name(), 9)}:")
-
-        contestIds.forEach { id ->
-            // (val candVotes: Map<Int, Int>, val undervotes: Int, val voteForN: Int)
-            val tab = contestTab(id)
-            if (tab == null)
-                append("    |")
-            else {
-                append("${nfn(tab.nvotes(), width)}|")
-            }
-        }
-        appendLine()
-
-        append("${trunc("", 9)}:")
-        contestIds.forEach { id ->
-            val tab = contestTab(id)
-            if (tab == null)
-                append("    |")
-            else {
-                append("${nfn(tab.undervotes, width)}|")
-            }
-        }
-        appendLine()
-    } */
 }
 
 data class OneAuditPool(override val poolName: String, override val poolId: Int, val hasSingleCardStyle: Boolean,

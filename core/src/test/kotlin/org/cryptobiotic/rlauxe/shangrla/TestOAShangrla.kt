@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
-import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTestP
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.calcReportedMargin
 import kotlin.test.Test
@@ -37,7 +37,7 @@ class TestOAShangrla {
         val margin = .6571495728340697
         val Nc = 10000
 
-        val (contestUA, _, _, pools) = makeOneAuditTest(
+        val (contestUA, _, _, pools) = makeOneAuditTestP(
             margin,
             Nc,
             cvrFraction = 0.33,

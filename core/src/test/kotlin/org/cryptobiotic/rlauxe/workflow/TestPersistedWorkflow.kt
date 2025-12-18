@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.cli.startTestElectionPolling
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
-import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTestP
 import org.cryptobiotic.rlauxe.persist.*
 import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
@@ -120,7 +120,7 @@ class TestPersistedWorkflow {
 
         val N = 5000
         // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
-        val (contestOA, mvrs, cards, cardPools) = makeOneAuditTest(
+        val (contestOA, mvrs, cards, cardPools) = makeOneAuditTestP(
             N + 100,
             N - 100,
             cvrFraction = .95,

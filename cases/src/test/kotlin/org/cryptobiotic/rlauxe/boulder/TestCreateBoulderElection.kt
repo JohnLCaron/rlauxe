@@ -100,12 +100,13 @@ class TestCreateBoulderElection {
     fun createBoulder25clca() { // simulate CVRs
         val datadir = "$testdataDir/cases/boulder2025"
         val topdir = "$testdataDir/cases/boulder2025/clca"
-        createBoulderElection(
+        createBoulderElectionP(
             "$datadir/Redacted-CVR-PUBLIC.utf8.csv",
             "$datadir/2025C-Boulder-County-Official-Statement-of-Votes.utf8.csv",
             topdir = topdir,
             auditType = AuditType.CLCA,
-        )
+            poolsHaveOneCardStyle=true,
+            )
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
@@ -119,13 +120,14 @@ class TestCreateBoulderElection {
         repeat(10) { run ->
             val auditDir = "$topdir/audit$run"
 
-            createBoulderElection(
+            createBoulderElectionP(
                 "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
                 "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
                 topdir = topdir,
                 auditDir = auditDir,
                 auditType = AuditType.ONEAUDIT,
-            )
+                poolsHaveOneCardStyle=true,
+                )
         }
         runBoulderOArepeat()
     }

@@ -32,7 +32,7 @@ fun makeTestContestOAIrv(): RaireContestUnderAudit {
 
     val oaIrv = RaireContestUnderAudit(rcontest, rassertions = listOf(assert1, assert2))
 
-    // add pools
+    /* add pools
 
     // val contestOA = OneAuditContest.make(contest, cvrVotes, cvrPercent = cvrPercent, undervotePercent = undervotePercent, phantomPercent = phantomPercent)
     //val cvrVotes = mapOf(0 to 100, 1 to 200, 2 to 42, 3 to 7, 4 to 0) // worthless?
@@ -49,7 +49,7 @@ fun makeTestContestOAIrv(): RaireContestUnderAudit {
         val clcaAssertion = ClcaAssorterOneAudit(assertion.info, passort, oaIrv.makeDilutedMargin(passort), poolAvgs)
         ClcaAssertion(assertion.info, clcaAssertion)
     }
-    oaIrv.clcaAssertions = clcaAssertions
+    oaIrv.clcaAssertions = clcaAssertions */
 
     return oaIrv
 }

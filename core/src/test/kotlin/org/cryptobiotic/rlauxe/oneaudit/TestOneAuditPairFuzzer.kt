@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.estimate.OneAuditVunderBarFuzzer
@@ -155,9 +156,9 @@ class TestOneAuditPairFuzzer {
         val countPoolCards3 = fuzzedMvrs.count { it.poolId == cardPool.poolId }
         assertEquals(countPoolCards, countPoolCards3)
 
-        val fuzzedPool = calcCardPoolsFromMvrs(
+        val fuzzedPool = calcOneAuditPoolsFromMvrs(
             infos,
-            cardStyles = listOf(CardStyle("fuzzedPool", listOf(1,2), 42)),
+            populations = listOf(Population("fuzzedPool", 42, intArrayOf(1, 2), false)),
             fuzzedMvrs.map { it.cvr() },
         )
         println("fuzzedPool= ${fuzzedPool.first().show()}")

@@ -13,6 +13,8 @@ import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.util.RegVotes
+import org.cryptobiotic.rlauxe.util.RegVotesIF
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
@@ -141,7 +143,7 @@ fun OneAuditPoolWithBallotStyleJson.import(infos: Map<Int, ContestInfo>): OneAud
 class OneAuditPoolJson(
     val poolName: String,
     val poolId: Int,
-    val exactContests: Boolean,
+    val hasSingleCardStyle: Boolean,
     val ncards: Int,
     val regVotes: Map<Int, RegVotesJson>,
 )
@@ -157,10 +159,31 @@ fun OneAuditPool.publishJson() = OneAuditPoolJson(
 fun OneAuditPoolJson.import() = OneAuditPool(
         this.poolName,
         this.poolId,
-        this.exactContests,
+        this.hasSingleCardStyle,
         this.ncards,
         this.regVotes.mapValues { it.value.import() },
     )
+
+
+// data class RegVotes(override val votes: Map<Int, Int>, val ncards: Int, val undervotes: Int): RegVotesIF {
+@Serializable
+class RegVotesJson(
+    val votes: Map<Int, Int>, // cand -> votes
+    val ncards: Int,
+    val undervotes: Int,
+)
+
+fun RegVotesIF.publishJson() = RegVotesJson(
+    this.votes,
+    this.ncards(),
+    this.undervotes(),
+)
+
+fun RegVotesJson.import() = RegVotes(
+    this.votes,
+    this.ncards,
+    this.undervotes,
+)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -113,9 +113,10 @@ class PlotDistributions {
             // heres the ConsistentSample permutation
             //             val sortedIndices = cvrsUA.indices.sortedBy { cvrsUA[it].sampleNumber() }
             val sortedIndices = ballotCards.sortedCards.indices.sortedBy { ballotCards.sortedCards[it].prn } // TODO?
-            val sortedCvrs = sortedIndices.map { testCvrs[it] }
+            val sortedCards = sortedIndices.map { AuditableCard.fromCvr(testCvrs[it], it, 0) }
             val sortedMvrs = sortedIndices.map { testMvrs[it] }
-            val sortedPairs: List<Pair<Cvr, Cvr>> = sortedMvrs.zip(sortedCvrs)
+
+            val sortedPairs: List<Pair<Cvr, AuditableCard>> = sortedMvrs.zip(sortedCards)
 
             // "oracle" audit
             val contestUA = workflow.contestsUA().first()

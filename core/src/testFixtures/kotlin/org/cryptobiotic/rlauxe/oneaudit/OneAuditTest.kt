@@ -26,14 +26,12 @@ fun makeOneAuditTest(
     cvrFraction: Double,
     undervoteFraction: Double,
     phantomFraction: Double,
-    hasStyle: Boolean = true,
     extraInPool: Int = 0,
 ): ContestMvrCardAndPools {
     val nvotes = roundToClosest(Nc * (1.0 - undervoteFraction - phantomFraction))
     val winner = roundToClosest((margin * Nc + nvotes) / 2)
     val loser = nvotes - winner
-    return makeOneAuditTest(winner, loser, cvrFraction, undervoteFraction, phantomFraction,
-        hasStyle, extraInPool)
+    return makeOneAuditTest(winner, loser, cvrFraction, undervoteFraction, phantomFraction, extraInPool)
 }
 
 // two candidate contest, with specified total votes
@@ -44,7 +42,6 @@ fun makeOneAuditTest(
     cvrFraction: Double,
     undervoteFraction: Double,
     phantomFraction: Double,
-    hasStyle: Boolean = true,
     extraInPool: Int = 0,
 ): ContestMvrCardAndPools {
 
@@ -132,7 +129,7 @@ fun makeOneAuditTest(
     // val oaUAold = makeContestUA(contest, cardManifest, infos, listOf(pool), hasStyle)
 
     val (oaUA, cardPools) = makeOneAuditTestContests(
-        hasStyle, infos, listOf(contest), listOf(pool), cardManifest, mvrs)
+        infos, listOf(contest), listOf(pool), cardManifest, mvrs)
 
     return ContestMvrCardAndPools(oaUA.first(), mvrs, cardManifest, cardPools)
 }

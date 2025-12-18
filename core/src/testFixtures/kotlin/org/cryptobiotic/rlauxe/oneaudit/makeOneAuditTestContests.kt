@@ -19,7 +19,6 @@ import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 private const val debug = false
 
 fun makeOneAuditTestContests(
-    hasStyle: Boolean,
     infos: Map<Int, ContestInfo>, // all the contests in the pools
     contestsToAudit: List<Contest>, // the contests you want to audit
     cardStyles: List<CardStyleIF>,
@@ -32,7 +31,7 @@ fun makeOneAuditTestContests(
     val Nbs = manifestTabs.mapValues { it.value.ncards }
 
     val contestsUA = contestsToAudit.map {
-        val cua = ContestUnderAudit(it, true, hasStyle = hasStyle, NpopIn=Nbs[it.id])
+        val cua = ContestUnderAudit(it, true, NpopIn=Nbs[it.id])
         if (it is DHondtContest) {
             cua.addAssertionsFromAssorters(it.assorters)
         } else {
@@ -68,7 +67,7 @@ fun makeOneAuditTestContests(
     } */
 
     // The OA assort averages come from the mvrs
-    addOAClcaAssortersFromMargin(contestsUA, poolsFromCvrs, hasStyle=true)
+    addOAClcaAssortersFromMargin(contestsUA, poolsFromCvrs)
 
     // poolsFromCvrs record the complete pool contests,
     return Pair(contestsUA, poolsFromCvrs)
@@ -96,7 +95,7 @@ fun makeTestContestOAIrv(): RaireContestUnderAudit {
         listOf(2), mapOf(1 to 1, 2 to 2, 3 to 3)
     )
 
-    val oaIrv = RaireContestUnderAudit(rcontest, hasStyle = true, rassertions = listOf(assert1, assert2))
+    val oaIrv = RaireContestUnderAudit(rcontest, rassertions = listOf(assert1, assert2))
 
     // add pools
 
@@ -124,7 +123,7 @@ fun makeTestContestOAIrv(): RaireContestUnderAudit {
             Pair(pool.poolId, 0.55)
         }
         val poolAvgs = AssortAvgsInPools(pairs.toMap())
-        val clcaAssertion = ClcaAssorterOneAudit(assertion.info, passort, true, oaIrv.makeDilutedMargin(passort), poolAvgs)
+        val clcaAssertion = ClcaAssorterOneAudit(assertion.info, passort, oaIrv.makeDilutedMargin(passort), poolAvgs)
         ClcaAssertion(assertion.info, clcaAssertion)
     }
     oaIrv.clcaAssertions = clcaAssertions

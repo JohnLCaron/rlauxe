@@ -101,8 +101,7 @@ data class RaireContest(
 class RaireContestUnderAudit(
     contest: RaireContest,
     val rassertions: List<RaireAssertion>,
-    hasStyle: Boolean = true,  // TODO do we really support hasStyle == false? // TODO should pass in Npop
-): ContestUnderAudit(contest, isClca=true, hasStyle=hasStyle) {
+): ContestUnderAudit(contest, isClca=true) {
     val candidates =  contest.info.candidateIds
 
     init {
@@ -153,7 +152,6 @@ class RaireContestUnderAudit(
                  Ncast: Int,
                  undervotes: Int,
                  assertions: List<RaireAssertion>,
-                 hasStyle: Boolean,
          ): RaireContestUnderAudit {
 
             val winnerId = info.candidateIds[winnerIndex]
@@ -164,7 +162,7 @@ class RaireContestUnderAudit(
                 Ncast = Ncast,
                 undervotes = undervotes,
             )
-            return RaireContestUnderAudit(contest, assertions, hasStyle=hasStyle)
+            return RaireContestUnderAudit(contest, assertions)
         }
     }
 }

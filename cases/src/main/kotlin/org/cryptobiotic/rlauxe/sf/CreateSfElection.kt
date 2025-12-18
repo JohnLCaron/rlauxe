@@ -77,12 +77,12 @@ class CreateSfElection(
         println("contestNbs= ${contestNbs}")
 
         // make contests based on cvr tabulations
-        contestsUA = if (config.isClca) makeClcaContests(allCvrTabs, contestNcs, contestNbs, hasStyle).sortedBy { it.id }
+        contestsUA = if (config.isClca) makeClcaContests(allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
             else if (config.isOA) {
                 val contests = makeContests(allCvrTabs, unpooledPool, contestNcs) // TODO leave out IRV
-                makeOneAuditContests(hasStyle, contests, contestNbs, cardPools).sortedBy { it.id }
+                makeOneAuditContests(contests, contestNbs, cardPools).sortedBy { it.id }
             }
-            else makePollingContests(allCvrTabs, contestNcs, contestNbs, hasStyle).sortedBy { it.id }
+            else makePollingContests(allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
     }
 
     fun createCardPools(
@@ -175,7 +175,7 @@ class CreateSfElection(
     }
 }
 
-fun makeClcaContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>, hasStyle:Boolean): List<ContestUnderAudit> {
+fun makeClcaContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestUnderAudit> {
     val contestsUAs = mutableListOf<ContestUnderAudit>()
     allCvrTabs.map { (contestId, cvrTab)  ->
         val info = cvrTab.info
@@ -183,9 +183,9 @@ fun makeClcaContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<I
 
         val contestUA: ContestUnderAudit = if (!cvrTab.isIrv) {
             val contest = Contest(info, cvrTab.votes, useNc, cvrTab.ncards)
-            ContestUnderAudit(contest, hasStyle=hasStyle, NpopIn=contestNbs[info.id]).addStandardAssertions()
+            ContestUnderAudit(contest, NpopIn=contestNbs[info.id]).addStandardAssertions()
         } else {
-            makeRaireContestUA(info, cvrTab, useNc, hasStyle=hasStyle, Nbin=contestNbs[info.id])
+            makeRaireContestUA(info, cvrTab, useNc, Nbin=contestNbs[info.id])
         }
         contestUA.contest.info().metadata["PoolPct"] = 0
         contestsUAs.add(contestUA)
@@ -210,14 +210,14 @@ fun makeContests(allCvrTabs: Map<Int, ContestTabulation>, unpooledPool: CardPool
     return contests
 }
 
-fun makePollingContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, contestNbs: Map<Int, Int>, hasStyle:Boolean): List<ContestUnderAudit> {
+fun makePollingContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestUnderAudit> {
     val contestsUAs = mutableListOf<ContestUnderAudit>()
     allCvrTabs.map { (contestId, contestSumTab)  ->
         val useNc = contestNcs[contestId] ?: contestSumTab.ncards
         if (useNc > 0) {
             if (!contestSumTab.isIrv) { // cant do IRV
                 val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
-                val contestUA = ContestUnderAudit(contest, isClca = false, hasStyle=hasStyle, NpopIn=contestNbs[contestId]).addStandardAssertions()
+                val contestUA = ContestUnderAudit(contest, isClca = false, NpopIn=contestNbs[contestId]).addStandardAssertions()
                 contestUA.contest.info().metadata["PoolPct"] = 0
                 contestsUAs.add(contestUA)
             }

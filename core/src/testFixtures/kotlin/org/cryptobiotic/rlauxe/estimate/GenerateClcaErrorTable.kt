@@ -44,7 +44,7 @@ class GenerateClcaErrorTable {
 
                     repeat(auditConfig.nsimEst) {
                         val cvrs = sim.makeCvrs()
-                        val contestUA = ContestUnderAudit(contest, true, hasStyle = true).addStandardAssertions()
+                        val contestUA = ContestUnderAudit(contest, true).addStandardAssertions()
                         val minAssert = contestUA.minClcaAssertion()!!
                         val minAssort = minAssert.cassorter
 
@@ -108,7 +108,7 @@ class GenerateClcaErrorTable {
 
                     testPairs.forEach { (fcard, card) ->
                         if (card.hasContest(contestUA.id)) {
-                            samples.addSample(cassorter.bassort(fcard.cvr(), card.cvr()))
+                            samples.addSample(cassorter.bassort(fcard.cvr(), card.cvr(), card.exactContests()))
                         }
                     }
                     if (show) println("    errorCounts = ${samples.pluralityErrorCounts()}")
@@ -152,7 +152,7 @@ class GenerateClcaErrorTable {
 
                     repeat(auditConfig.nsimEst) {
                         val cvrs = sim.makeCvrs()
-                        val contestUA = ContestUnderAudit(contest, true, hasStyle = true).addStandardAssertions()
+                        val contestUA = ContestUnderAudit(contest, true).addStandardAssertions()
                         val minAssert = contestUA.minClcaAssertion()!!
                         val minAssort = minAssert.cassorter
 

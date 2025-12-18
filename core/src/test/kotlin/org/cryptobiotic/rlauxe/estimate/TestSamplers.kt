@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.Assertion
 import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -47,8 +48,9 @@ class TestSampler {
 
     @Test
     fun testClcaSampling() {
-        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasUndervotes=false, dilutedMargin=assertion.assorter.dilutedMargin(), true)
-        val cvrPairs = cvrs.zip( cvrs)
+        // was hasUndervotes=false
+        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, dilutedMargin=assertion.assorter.dilutedMargin(), true)
+        val cvrPairs = cvrs.zip( AuditableCard.fromCvrs(cvrs))
         val target = ClcaSampling(0, cvrPairs, cassorter, true) // single contest OK
 
         var count = 0
@@ -68,7 +70,8 @@ class TestSampler {
 
     @Test
     fun testClcaNoErrorIterator() {
-        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasUndervotes=false, dilutedMargin=assertion.assorter.dilutedMargin(), true)
+        // was hasUndervotes=false
+        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, dilutedMargin=assertion.assorter.dilutedMargin(), true)
 
         val target = ClcaNoErrorIterator(0, cvrs.size, cassorter, cvrs.iterator())
 
@@ -88,7 +91,8 @@ class TestSampler {
 
     @Test
     fun testOneAuditNoErrorIterator() {
-        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, hasUndervotes=false, dilutedMargin=assertion.assorter.dilutedMargin(), true)
+        // was hasUndervotes=false
+        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, dilutedMargin=assertion.assorter.dilutedMargin(), true)
 
         val target = OneAuditNoErrorIterator(0, cvrs.size, null, cassorter, cvrs.iterator())
 

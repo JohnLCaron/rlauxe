@@ -179,7 +179,7 @@ class CardManifestAttack {
         val realContests = makeContestsFromCvrs(mvrs)
         val realNps = mvrTabs.mapValues { it.value.ncards }
         val realcontestUA = realContests.map {
-            ContestUnderAudit(it, true, hasStyle = hasStyle, NpopIn=realNps[it.id]).addStandardAssertions()
+            ContestUnderAudit(it, true, NpopIn=realNps[it.id]).addStandardAssertions()
         }
         println("true Contest totals")
         realcontestUA.forEach { contestUA -> println(contestUA.showSimple())}
@@ -211,10 +211,10 @@ class CardManifestAttack {
         val Npops = manifestTabs.mapValues { it.value.ncards }
 
         val contestsUA = contests.map {
-            ContestUnderAudit(it, true, hasStyle = hasStyle, NpopIn=Npops[it.id]).addStandardAssertions()
+            ContestUnderAudit(it, true, NpopIn=Npops[it.id]).addStandardAssertions()
         }
         // The OA assort averages come from the card Pools
-        addOAClcaAssortersFromMargin(contestsUA, cardPools, hasStyle=hasStyle)
+        addOAClcaAssortersFromMargin(contestsUA, cardPools)
 
         println("false Contest totals")
         contestsUA.forEach { contestUA -> println(contestUA.showSimple())}

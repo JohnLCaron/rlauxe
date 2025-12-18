@@ -136,7 +136,6 @@ class OneAuditSingleRoundWithDilutedMargin(
                 cvrFraction = cvrPercent,
                 undervoteFraction = underVotePct,
                 phantomFraction = phantomPct,
-                hasStyle = config.hasStyle,
                 extraInPool = extraInPool
             )
 

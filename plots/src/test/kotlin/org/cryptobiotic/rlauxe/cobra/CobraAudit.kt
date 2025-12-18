@@ -67,7 +67,7 @@ class CobraAudit(
 
     init {
         require(auditConfig.auditType == AuditType.CLCA)
-        contestsUA = contestsToAudit.map { ContestUnderAudit(it, isClca = true, hasStyle=auditConfig.hasStyle).addStandardAssertions() }
+        contestsUA = contestsToAudit.map { ContestUnderAudit(it, isClca = true,).addStandardAssertions() }
     }
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {

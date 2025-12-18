@@ -24,7 +24,7 @@ class TestAuditRoundJson {
     @Test
     fun testRoundtrip() {
         val testData = MultiContestTestDataP(11, 4, 50000)
-        val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, isClca=false, hasStyle=false).addStandardAssertions()}
+        val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, isClca=false, ).addStandardAssertions()}
         val contestRounds = contestsUAs.map{ contest ->
             val cr = ContestRound(contest, 1,)
             //     var actualMvrs = 0 // Actual number of ballots with this contest contained in this round's sample.
@@ -70,7 +70,7 @@ class TestAuditRoundJson {
     @Test
     fun testRoundtripIO() {
         val testData = MultiContestTestDataP(11, 4, 50000)
-        val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, isClca=false, hasStyle=false).addStandardAssertions()}
+        val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, isClca=false).addStandardAssertions()}
         val contestRounds = contestsUAs.map{ contest ->
             val cr = ContestRound(contest, 1)
             cr.actualMvrs = 420

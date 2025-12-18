@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import kotlin.Int
@@ -123,8 +122,8 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<ContestUnderAudit, List<OneAu
     val cvrUndervotes = cvrNcards - cvrVotes.values.sum()
 
     val cvrs = makeTestMvrs(contest, cvrNcards = cvrNcards, cvrVotes, cvrUndervotes, listOf(cardPool))
-    val contestUA = ContestUnderAudit(contest, hasStyle=true).addStandardAssertions()
-    addOAClcaAssortersFromMargin(listOf(contestUA), listOf(cardPool), hasStyle=true)
+    val contestUA = ContestUnderAudit(contest, ).addStandardAssertions()
+    addOAClcaAssortersFromMargin(listOf(contestUA), listOf(cardPool))
 
     return Triple(contestUA, listOf(cardPool), cvrs)
 }

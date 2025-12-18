@@ -25,7 +25,6 @@ import org.cryptobiotic.rlauxe.raire.RaireAssorter
 data class ClcaAssorterJson(
     val className: String,
     val assorter: AssorterIFJson,
-    val hasStyle: Boolean,
     val dilutedMargin: Double,
     val poolAverages: AssortAvgsInPoolsJson?,
 )
@@ -35,7 +34,6 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
         ClcaAssorterJson(
             "OAClcaAssorter",
             this.assorter.publishJson(),
-            this.hasUndervotes,
             this.dilutedMargin,
             poolAverages.publishJson()
         )
@@ -44,7 +42,6 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
         ClcaAssorterJson(
             "ClcaAssorter",
             this.assorter.publishJson(),
-            this.hasUndervotes,
             this.dilutedMargin,
             null,
         )
@@ -57,7 +54,6 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
             ClcaAssorter(
                 info,
                 this.assorter.import(info),
-                this.hasStyle,
                 this.dilutedMargin,
             )
 
@@ -65,7 +61,6 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
             ClcaAssorterOneAudit(
                 info,
                 this.assorter.import(info),
-                this.hasStyle,
                 this.dilutedMargin,
                 poolAverages!!.import()
             )

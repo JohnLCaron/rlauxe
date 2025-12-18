@@ -146,7 +146,7 @@ class TestClcaElection(
             allCvrs.addAll(rcvrs)
         }
 
-        val regularContests = testData.contests.map { ContestUnderAudit(it, isClca=true, hasStyle=config.hasStyle).addStandardAssertions() }
+        val regularContests = testData.contests.map { ContestUnderAudit(it, isClca=true).addStandardAssertions() }
         contestsUA.addAll(regularContests)
         contestsUA.forEach { println("  $it") }
         println()
@@ -225,7 +225,7 @@ class TestPollingElection(
         cvrs = testData.makeCvrsFromContests()
         testMvrs = makeFuzzedCvrsFrom(contests.map{ it.info() }, cvrs, fuzzMvrs) // ??
 
-        val makum = ContestUnderAudit.make(testData.contests, cardManifest(), isClca=false, hasStyle=false)
+        val makum = ContestUnderAudit.make(testData.contests, cardManifest(), isClca=false)
         // not setting Npop, so it defaults to Nc
         //val regularContests = testData.contests.map {
         //    ContestUnderAudit(it, isClca=true, hasStyle=config.hasStyle).addStandardAssertions()

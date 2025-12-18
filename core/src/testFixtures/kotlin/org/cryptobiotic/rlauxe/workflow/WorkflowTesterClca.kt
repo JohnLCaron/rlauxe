@@ -3,8 +3,11 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 
@@ -23,7 +26,7 @@ class WorkflowTesterClca(
         require (auditConfig.auditType == AuditType.CLCA)
 
         val regularContests = contestsToAudit.map {
-            val cua = ContestUnderAudit(it, true, hasStyle = auditConfig.hasStyle, NpopIn=Npops[it.id])
+            val cua = ContestUnderAudit(it, true, NpopIn=Npops[it.id])
             if (it is DHondtContest) {
                 cua.addAssertionsFromAssorters(it.assorters)
             } else {
@@ -47,4 +50,10 @@ class WorkflowTesterClca(
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestUnderAudit> = contestsUA
     override fun mvrManager() = mvrManager
+}
+
+fun makeClcaNoErrorSampler(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAssorter): Sampling {
+    val cards = cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, 0) }
+    val cvrPairs = cvrs.zip(cards)
+    return ClcaSampling(contestId, cvrPairs, cassorter, true)
 }

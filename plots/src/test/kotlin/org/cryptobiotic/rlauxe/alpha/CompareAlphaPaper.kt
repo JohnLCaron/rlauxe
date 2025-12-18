@@ -37,10 +37,10 @@ class CompareAlphaPaper {
             val pairs = cvrs.zip(cvrs)
 
             val contest = makeContestFromCvrs(info, cvrs)
-            val contestUA = ContestUnderAudit(contest, isClca = false, hasStyle = true).addStandardAssertions()
+            val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
             val pollingAssertion = contestUA.pollingAssertions.first()
 
-            val contestUAc = ContestUnderAudit(contest, isClca = true, hasStyle = true).addStandardAssertions()
+            val contestUAc = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
             val compareAssertion = contestUAc.clcaAssertions.first()
 
             for (eta in etas) {

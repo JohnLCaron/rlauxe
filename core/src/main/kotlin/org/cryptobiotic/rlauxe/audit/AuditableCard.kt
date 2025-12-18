@@ -79,6 +79,14 @@ data class AuditableCard (
             else intArrayOf()
     }
 
+    // better if every card has a population
+    fun exactContests(): Boolean {
+        return if (population != null) population.exactContests()
+        else if (cardStyle == "all") false
+        else true // else config.cvrsHaveUndervotes
+
+    }
+
     // Let 1candidate(bi) = 1 if ballot i has a mark for candidate, and 0 if not; SHANGRLA section 2, page 4
     override fun hasMarkFor(contestId: Int, candidateId: Int): Int {
         val contestVotes = votes?.get(contestId)
@@ -131,6 +139,11 @@ data class AuditableCard (
             // val sortedVotes = cvr.votes.toSortedMap()
             // val contests = sortedVotes.keys.toList()
             return AuditableCard(cvr.id, index, prn=prn, cvr.phantom, cvr.votes, cvr.poolId)
+        }
+        fun fromCvrs(cvrs: List<Cvr>): List<AuditableCard> {
+            // val sortedVotes = cvr.votes.toSortedMap()
+            // val contests = sortedVotes.keys.toList()
+            return cvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0) }
         }
     }
 }

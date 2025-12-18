@@ -30,7 +30,7 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
         return readPopulations(publisher)
     }
 
-    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, CvrIF>>  {
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
         val mvrsForRound = readMvrsForRound(round)
         val sampleNumbers = mvrsForRound.map { it.prn }
 
@@ -66,7 +66,7 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
     fun auditableCards(): CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.sortedCardsFile())
 }
 
-fun readCardManifest(publisher: Publisher, infos: Map<Int, ContestInfo>): CardManifest {
+fun readCardManifest(publisher: Publisher): CardManifest {
 
     if (Files.exists(Path(publisher.populationsFile()))) {
         val populations = readPopulationsJsonFileUnwrapped(publisher.populationsFile())

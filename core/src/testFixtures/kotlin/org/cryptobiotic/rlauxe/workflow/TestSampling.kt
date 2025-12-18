@@ -34,7 +34,7 @@ class ClcaNoErrorIterator(
             val cvr = cvrIterator.next()
             idx++
             if (cvr.hasContest(contestId)) {
-                val result = cassorter.bassort(cvr, cvr)
+                val result = cassorter.bassort(cvr, cvr, hasStyle=true)
                 count++
                 return result
             }
@@ -91,7 +91,7 @@ class OneAuditNoErrorIterator(
         while (idx < cvrs.size) {
             val cvr = cvrs[permutedIndex[idx]]
             idx++
-            val result = cassorter.bassort(cvr, cvr)
+            val result = cassorter.bassort(cvr, cvr, hasStyle=true)
             count++
             return result
         }
@@ -187,7 +187,7 @@ class ClcaSimulatedErrorRates(
             val mvr = mvrs[permutedIndex[idx]]
             idx++
             if (cvr.hasContest(contest.id)) { // TODO ??
-                val result = cassorter.bassort(mvr, cvr)
+                val result = cassorter.bassort(mvr, cvr, hasStyle=true)
                 count++
                 return result
             }
@@ -235,7 +235,7 @@ class ClcaSimulatedErrorRates(
                 if (bassort != 0.0 * cassorter.noerror()) { // p1
                     cassorter.bassort(alteredMvr, cvr)
                 } */
-                require(cassorter.bassort(alteredMvr, cvr) == 0.0 * cassorter.noerror())
+                require(cassorter.bassort(alteredMvr, cvr, hasStyle=true) == 0.0 * cassorter.noerror())
                 changed++
             }
             cardIdx++
@@ -274,7 +274,7 @@ class ClcaSimulatedErrorRates(
                 if (bassort != 2.0 * cassorter.noerror()) { // p1
                     cassorter.bassort(alteredMvr, cvr) // mvr, cvr
                 } */
-                require(cassorter.bassort(alteredMvr, cvr) == 2.0 * cassorter.noerror())
+                require(cassorter.bassort(alteredMvr, cvr, hasStyle=true) == 2.0 * cassorter.noerror())
                 changed++
             }
             cardIdx++
@@ -314,7 +314,7 @@ class ClcaSimulatedErrorRates(
                 if (bassort != 0.5 * cassorter.noerror()) { // p1
                     cassorter.bassort(alteredMvr, cvr)
                 } */
-                require(cassorter.bassort(alteredMvr, cvr) == 0.5 * cassorter.noerror())
+                require(cassorter.bassort(alteredMvr, cvr, hasStyle=true) == 0.5 * cassorter.noerror())
                 changed++
             }
             cardIdx++
@@ -344,11 +344,11 @@ class ClcaSimulatedErrorRates(
                 val alteredMvr = makeNewCvr(cvr, votes)
                 mcvrs[cardIdx] = alteredMvr
                 require(cassorter.assorter().assort(alteredMvr) == 1.0)
-                val bassort = cassorter.bassort(alteredMvr, cvr)
+                val bassort = cassorter.bassort(alteredMvr, cvr, hasStyle=true)
                 if (bassort != 1.5 * cassorter.noerror()) { // p3
-                    cassorter.bassort(alteredMvr, cvr)
+                    cassorter.bassort(alteredMvr, cvr, hasStyle=true)
                 }
-                require(cassorter.bassort(alteredMvr, cvr) == 1.5 * cassorter.noerror())
+                require(cassorter.bassort(alteredMvr, cvr, hasStyle=true) == 1.5 * cassorter.noerror())
                 changed++
             }
             cardIdx++
@@ -377,11 +377,11 @@ class ClcaSimulatedErrorRates(
 
                 val alteredCvr = makeNewCvr(mvr, votes)
                 require(cassorter.assorter().assort(alteredCvr) == 0.5)
-                val bassort = cassorter.bassort(mvr, alteredCvr)
+                val bassort = cassorter.bassort(mvr, alteredCvr, hasStyle=true)
                 if (bassort != 1.5 * cassorter.noerror()) { // p3
-                    cassorter.bassort(mvr, alteredCvr)
+                    cassorter.bassort(mvr, alteredCvr, hasStyle=true)
                 }
-                require(cassorter.bassort(mvr, alteredCvr) == 1.5 * cassorter.noerror())
+                require(cassorter.bassort(mvr, alteredCvr, hasStyle=true) == 1.5 * cassorter.noerror())
                 cvrs[cardIdx] = alteredCvr // Note we are changing the cvr, not the mvr
                 changed++
             }
@@ -481,7 +481,7 @@ class ClcaCardSimulatedErrorRates(
             val mvr = mvrs[permutedIndex[idx]]
             idx++
             if (card.hasContest(contest.id)) {
-                val result = cassorter.bassort(mvr.cvr(), card.cvr())
+                val result = cassorter.bassort(mvr.cvr(), card.cvr(), card.exactContests())
                 count++
                 return result
             }
@@ -728,7 +728,7 @@ class ClcaFuzzSampler(
             val (mvr, cvr) = cvrPairs[permutedIndex[idx]]
             idx++
             if (cvr.hasContest(contest.id)) {
-                val result = cassorter.bassort(mvr, cvr)
+                val result = cassorter.bassort(mvr, cvr, hasStyle=true)
                 welford.update(result)
                 return result
             }

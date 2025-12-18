@@ -1,5 +1,5 @@
 # What does hasStyle mean?
-_12/17/25_
+_12/18/25_
 
 # TL;DR
 
@@ -105,9 +105,11 @@ Define:
 * CardStyle = the full and exact list of contests on a card.
 * card.exactContests = list of contests that are on this card = CardStyle = "we know exactly what contests are on this card".
 * card.possibleContests = list of contests that might be on this card.
+
 * "population" = a distinct container of cards, from which we can retreive named cards (even if its just by an index into a ordered list).
 * population.possibleContests = list of contests that are in this population.
 * population.hasCardStyle = true if all cards in the population have a single known CardStyle = "we know exactly what contests are on each card".
+* population.exactContests = population.hasCardStyle
 
 Populations describe the containers that the physical cards are kept in.
 

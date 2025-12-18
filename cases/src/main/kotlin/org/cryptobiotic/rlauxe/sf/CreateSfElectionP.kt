@@ -31,7 +31,6 @@ class CreateSfElectionP(
     candidateManifestFile: String,
     val cvrExportCsv: String,
     val config: AuditConfig,
-    val hasStyle:Boolean,
 ): CreateElectionPIF {
     val cardPoolMapByName: Map<String, OneAuditPoolIF>
     val cardPools: List<OneAuditPoolIF>
@@ -70,12 +69,12 @@ class CreateSfElectionP(
         println("contestNbs= ${contestNbs}")
 
         // make contests based on cvr tabulations
-        contestsUA = if (config.isClca) makeClcaContests(allCvrTabs, contestNcs, contestNbs, hasStyle).sortedBy { it.id }
+        contestsUA = if (config.isClca) makeClcaContests(allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
             else if (config.isOA) {
                 val contests = makeContests(allCvrTabs, unpooledPool, contestNcs) // TODO leave out IRV
-                makeOneAuditContests(hasStyle, contests, contestNbs, cardPools).sortedBy { it.id }
+                makeOneAuditContests(contests, contestNbs, cardPools).sortedBy { it.id }
             }
-            else makePollingContests(allCvrTabs, contestNcs, contestNbs, hasStyle).sortedBy { it.id }
+            else makePollingContests(allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
     }
 
     fun createCardPools(
@@ -216,7 +215,6 @@ fun createSfElectionP(
         candidateManifestFile,
         cvrExportCsv,
         config = config,
-        hasStyle = hasStyle,
     )
 
     CreateAuditP("sf2024", config, election, auditDir = "$topdir/audit", )

@@ -50,7 +50,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         }
         allInfos = allContests?.map{ it.contest.info() }?.associateBy { it.id }
 
-        cardManifest = readCardManifest(publisher, allInfos!!)
+        cardManifest = readCardManifest(publisher)
     }
 
     fun verify() = verify( allContests!!, show = show)
@@ -400,7 +400,7 @@ fun verifyOAassortAvg(
                 val avg = cardAssortAvgs.getOrPut(contestUA.id) { mutableMapOf() }
                 contestUA.clcaAssertions.forEach { cassertion ->
                     if (cassertion.cassorter is ClcaAssorterOneAudit) { //  may be Raire
-                        val oaCassorter = cassertion.cassorter as ClcaAssorterOneAudit
+                        val oaCassorter = cassertion.cassorter
                         val passorter = oaCassorter.assorter
                         val assortAvg = avg.getOrPut(passorter) { AssortAvg() }
                         if (card.hasContest(contestUA.id)) {

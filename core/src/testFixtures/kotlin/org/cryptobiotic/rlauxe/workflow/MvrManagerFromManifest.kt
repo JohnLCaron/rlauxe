@@ -43,7 +43,7 @@ class MvrManagerFromManifest(
         return pools
     }
 
-    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, CvrIF>>  {
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
         if (mvrsRound.isEmpty()) {  // for SingleRoundAudit.
             val sampledMvrs = if (simFuzzPct == null) {
                 sortedMvrs // use the mvrs as they are - ie, no errors

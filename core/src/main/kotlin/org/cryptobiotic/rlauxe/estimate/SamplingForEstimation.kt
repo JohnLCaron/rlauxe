@@ -33,7 +33,7 @@ class ClcaCardFuzzSampler(
             val (mvr, card) = cvrPairs[permutedIndex[idx]]
             idx++
             if (card.hasContest(contest.id)) {
-                val result = cassorter.bassort(mvr.cvr(), card.cvr())
+                val result = cassorter.bassort(mvr.cvr(), card.cvr(), card.exactContests())
                 welford.update(result)
                 return result
             }

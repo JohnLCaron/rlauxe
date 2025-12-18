@@ -8,10 +8,10 @@ class TestAuditConfig {
     @Test
     fun testClcaAudit() {
         val config = AuditConfig(
-            AuditType.CLCA, hasStyle = true, nsimEst = 10, seed=-2417429242344992892,
+            AuditType.CLCA, nsimEst = 10, seed=-2417429242344992892,
         )
         val expected =
-"""AuditConfig(auditType=CLCA, hasStyle=true, riskLimit=0.05, seed=-2417429242344992892 version=2.0
+"""AuditConfig(auditType=CLCA, riskLimit=0.05, seed=-2417429242344992892 version=2.0
   nsimEst=10, quantile=0.8, simFuzzPct=null,
   minRecountMargin=0.005 removeTooManyPhantoms=false contestSampleCutoff=30000 removeCutoffContests=false
   ClcaConfig(strategy=generalAdaptive, fuzzPct=null, pluralityErrorRates=null, d=100, maxRisk=0.9)
@@ -23,10 +23,10 @@ class TestAuditConfig {
     @Test
     fun testPollingAudit() {
         val config = AuditConfig(
-            AuditType.POLLING, hasStyle = true, nsimEst = 10, seed=-2417429242344992892,
+            AuditType.POLLING, nsimEst = 10, seed=-2417429242344992892,
         )
         val expected =
-            """AuditConfig(auditType=POLLING, hasStyle=true, riskLimit=0.05, seed=-2417429242344992892 version=2.0
+            """AuditConfig(auditType=POLLING, riskLimit=0.05, seed=-2417429242344992892 version=2.0
   nsimEst=10, quantile=0.8, simFuzzPct=null,
   minRecountMargin=0.005 removeTooManyPhantoms=false contestSampleCutoff=30000 removeCutoffContests=false
   PollingConfig(d=100)
@@ -38,11 +38,11 @@ class TestAuditConfig {
     @Test
     fun testOneAudit() {
         val config = AuditConfig(
-            AuditType.ONEAUDIT, hasStyle = true, nsimEst = 10, seed=-2417429242344992892,
+            AuditType.ONEAUDIT, nsimEst = 10, seed=-2417429242344992892,
             oaConfig = OneAuditConfig(OneAuditStrategyType.eta0Eps)
         )
         val expected =
-            """AuditConfig(auditType=ONEAUDIT, hasStyle=true, riskLimit=0.05, seed=-2417429242344992892 version=2.0
+            """AuditConfig(auditType=ONEAUDIT, riskLimit=0.05, seed=-2417429242344992892 version=2.0
   nsimEst=10, quantile=0.8, simFuzzPct=null,
   minRecountMargin=0.005 removeTooManyPhantoms=false contestSampleCutoff=30000 removeCutoffContests=false
   OneAuditConfig(strategy=eta0Eps, d=100, useFirst=false)

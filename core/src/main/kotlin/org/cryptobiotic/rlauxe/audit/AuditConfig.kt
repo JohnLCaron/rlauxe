@@ -13,8 +13,7 @@ enum class AuditType { POLLING, CLCA, ONEAUDIT;
 // TODO seems like config should know what directory it lives in ??
 data class AuditConfig(
     val auditType: AuditType,
-    val hasStyle: Boolean, // has Card Style Data (CSD), i.e. we know which contests each card/ballot contains
-                           // 'we know exactly what contests are on each card'
+    val hasStyle: Boolean = true, // TODO deprecated
     val riskLimit: Double = 0.05,
     val seed: Long = secureRandom.nextLong(), // determines sample order. set carefully to ensure truly random.
 
@@ -51,7 +50,7 @@ data class AuditConfig(
     fun simFuzzPct() = simFuzzPct
 
     override fun toString() = buildString {
-        appendLine("AuditConfig(auditType=$auditType, hasStyle=$hasStyle, riskLimit=$riskLimit, seed=$seed version=$version" )
+        appendLine("AuditConfig(auditType=$auditType, riskLimit=$riskLimit, seed=$seed version=$version" )
         appendLine("  nsimEst=$nsimEst, quantile=$quantile, simFuzzPct=$simFuzzPct,")
         append("  minRecountMargin=$minRecountMargin removeTooManyPhantoms=$removeTooManyPhantoms")
         if (contestSampleCutoff != null) { append(" contestSampleCutoff=$contestSampleCutoff removeCutoffContests=$removeCutoffContests") }
@@ -93,6 +92,7 @@ data class PollingConfig(
 //  apriori: pass in apriori errorRates for first round.
 //  fuzzPct: ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct) for first round.
 //  oracle: use actual measured error rates for first round. (violates martingale condition)
+
 enum class ClcaStrategyType { generalAdaptive, apriori, fuzzPct, oracle  }
 data class ClcaConfig(
     val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
@@ -100,6 +100,7 @@ data class ClcaConfig(
     val pluralityErrorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker?
     val d: Int = 100,  // shrinkTrunc weight for error rates
     val maxRisk: Double = 0.90,  // max risk on any one bet
+    val cvrsContainUndervotes: Boolean = true,
 )
 
 // clca: use ClcaConfig and bettingMart

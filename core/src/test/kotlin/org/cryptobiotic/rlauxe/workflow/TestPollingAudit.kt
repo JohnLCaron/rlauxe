@@ -18,7 +18,7 @@ class TestPollingAudit {
     }
 
     @Test
-    fun testPollingNoStyle() {
+    fun testPollingNoStyle() { // TODO hasStyle=false
         val auditConfig = AuditConfig(AuditType.POLLING, hasStyle = false, nsimEst = 10)
 
         // each contest has a specific margin between the top two vote getters.
@@ -57,7 +57,7 @@ class TestPollingAudit {
 
     @Test
     fun testPollingWithStyle() {
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyle = true, nsimEst = 10)
+        val auditConfig = AuditConfig(AuditType.POLLING, nsimEst = 10)
 
         // each contest has a specific margin between the top two vote getters.
         val N = 50000
@@ -100,7 +100,7 @@ class TestPollingAudit {
     fun testPollingWithFuzz() {
         val mvrFuzzPct = .0123
         val auditConfig = AuditConfig(
-            AuditType.POLLING, hasStyle = true, nsimEst = 10, simFuzzPct = mvrFuzzPct
+            AuditType.POLLING, nsimEst = 10, simFuzzPct = mvrFuzzPct
         )
 
         // each contest has a specific margin between the top two vote getters.
@@ -158,7 +158,7 @@ class TestPollingAudit {
             assertEquals(contest.Nc, fcontest.phantomCount + fcontest.underCount + nvotes)
         }
 
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyle = true, nsimEst = 10)
+        val auditConfig = AuditConfig(AuditType.POLLING, nsimEst = 10)
         val cvrs = multiContestTest.makeCvrsFromContests()
         val mvrManager = MvrManagerForTesting(cvrs, cvrs, Random.nextLong())
         val workflow = WorkflowTesterPolling(auditConfig, multiContestTest.contests, mvrManager)

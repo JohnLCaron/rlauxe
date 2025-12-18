@@ -23,7 +23,6 @@ class TestClcaFuzzSampler {
 
         val auditConfig = AuditConfig(
             AuditType.CLCA,
-            hasStyle = true,
             nsimEst=10,
             simFuzzPct = .011
         )

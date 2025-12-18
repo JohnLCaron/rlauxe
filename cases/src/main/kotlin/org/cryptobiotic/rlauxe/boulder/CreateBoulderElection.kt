@@ -318,7 +318,6 @@ fun createBoulderElection(
         else if (auditType.isClca())
             AuditConfig(
                 AuditType.CLCA,
-                hasStyle = true,
                 riskLimit = riskLimit,
                 contestSampleCutoff = 20000,
                 minRecountMargin = minRecountMargin,
@@ -326,9 +325,9 @@ fun createBoulderElection(
             )
         else if (auditType.isOA())
             AuditConfig(
-            AuditType.ONEAUDIT, hasStyle=true, riskLimit=riskLimit, contestSampleCutoff=20000, minRecountMargin=minRecountMargin, nsimEst=10,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
-        )
+                AuditType.ONEAUDIT, riskLimit=riskLimit, contestSampleCutoff=20000, minRecountMargin=minRecountMargin, nsimEst=10,
+                oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
+            )
     else throw RuntimeException("unsupported audit type $auditType")
 
     val election = CreateBoulderElection(export, sovo, isClca = auditType.isClca(), hasStyle=config.hasStyle)

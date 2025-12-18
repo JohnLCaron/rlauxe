@@ -31,7 +31,8 @@ class TestCreateColoradoElection {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoElectionP(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.ONEAUDIT, clear=true)
+        createColoradoElectionP(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.ONEAUDIT,
+            poolsHaveOneCardStyle=false)
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
@@ -54,7 +55,8 @@ class TestCreateColoradoElection {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoElectionP(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.CLCA, clear=true)
+        createColoradoElectionP(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.CLCA,
+            poolsHaveOneCardStyle=false)
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
@@ -68,7 +70,8 @@ class TestCreateColoradoElection {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoPolling(topdir, detailXmlFile, contestRoundFile, precinctFile, clear=true)
+        createColoradoPolling(topdir, detailXmlFile, contestRoundFile, precinctFile,
+            poolsHaveOneCardStyle=false)
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()

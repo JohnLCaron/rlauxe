@@ -7,12 +7,12 @@ The best case is to have CVRs that record undervotes. Then things are simple and
 
 config.hasStyles -> config.cvrsHaveUndervotes (aka cvrsAreComplete)
 
-Otherwise, we need to create "Population" containers that know which contests are in it, and use these 
-when choosing audit samples. Set hasStyle independently on each population (rather than globally on the audit),
-and use those when deciding the assort value when an MVR is missing a contest. This should be done for Polling assorters
-as well as Clca an OneAudit assorters.
+Otherwise, we need to create "Population" containers that know which contests may be in it, and use these 
+when choosing audit samples. Set hasStyle (aka exactContests) = true if all cards int population have one ContestType. 
+This is set independently on each population (rather than globally on the audit), and used when deciding the 
+assort value when an MVR is missing a contest on Clca and OneAudit assorters.
 
-population.hasStyles -> population.knowExactContests = "we know exactly what contests are on all the cards in this population".
+I think hasStyle should be used for Polling assorters as well, which is not explicitly in SHANGRLA.
 
 ## Preliminaries
 
@@ -108,10 +108,11 @@ Define:
 
 * "population" = a distinct container of cards, from which we can retreive named cards (even if its just by an index into a ordered list).
 * population.possibleContests = list of contests that are in this population.
-* population.hasCardStyle = true if all cards in the population have a single known CardStyle = "we know exactly what contests are on each card".
-* population.exactContests = population.hasCardStyle
+* population.hasSingleCardStyle = true if all cards in the population have a single known CardStyle = "we know exactly what contests are on each card".
+* population.exactContests = hasSingleCardStyle
 
-Populations describe the containers that the physical cards are kept in.
+Populations describe the containers that the physical cards are kept in. They are needed to do uniform sampling when its not 
+CLCA with undervotes. Using populations decrease the diluted count (and so increase the margins) as much as we know how to. 
 
 For the same audit and contest, you could have different populations with different values of hasCardStyle. For example, one precinct has a
 single CardStyle containing contest c, and another has multiple card styles, not all of which contain contest c.
@@ -123,7 +124,7 @@ Its worth noting that the EA (election authority) knows the card style for every
 So we are dealing with the limitations of associating CardStyles with the anonymous physical ballots and scanned cvrs.
 
 The point is that one has to deal with the specifics of how each election stores their ballots. 
-Possibly influence how ballots are handled to make the audit more efficient.
+Possibly try to influence how ballots are handled to make the audit more efficient.
 
 ## Examples
 
@@ -140,20 +141,27 @@ population.possibleContests = all contests on the ballot (aka ballot style). pop
 
 ### CLCA without undervotes
 
-We have CVRs but dont record the undervotes. We dont know which cards have undervotes.
-To do that, we need populations.
+We have CVRs but dont record the undervotes. 
+Then we need to use populations to specify where the undervotes might be.
 
 ### OneAudit
 
 OneAudit handles two somewhat distinct use cases:
 
 1. There are cvrs for all cards, but the precinct cvrs cant match the physical ballot. We know exactly how many cards a contest has in the pool,
-and the vote count. SanFrancisco 2024.
+and the pool's vote count. This is the SanFrancisco 2024 test case.
 
-2. We have a vote count for the "redacted" pools but no cvrs. Undervotes need to be included in the vote count. (Boulder 2024 does not
+2. We have cvrs from some cards, but not all. The remaining cards are in pools with pooled cote counts. 
+Undervotes need to be included in the vote count. This is the Boulder 2024 test case. (Boulder 2024 does not
 record the undervotes for the redacted pools, so we guess what they are for the simulation.)
 
-In both cases we know the vote totals for the population. Is the vote count needed for non-OA populations?
+The OneAudit pools are the populations that we need for the audit.
+
+In San Francisco, the pools do not appear to have one CardStyle, so population.exactContests = false.
+In Boulder, each pool appeasr to have one CardStyle, so population.exactContests = true.
+
+For OneAudit, we know the vote totals for the population. Is the general case we dont necissarily know the vote counts
+for each population. But see Ncast section below.
 
 ## Contest is missing in the MVR
 
@@ -161,7 +169,14 @@ When the contest is missing, we assign 0 to mvr_assort when hasStyle=true, and 0
 
 The first case tanks the audit, and the second may allow attacks(?)
 
-Could this assignment use population.hasCardStyle? Does that solve the problem?
+Using population.exactContests instead of global hasStyles should be better. TODO investigate the effect of that change.
+
+But still, note that population.exactContests requires all cards to have the same CardStyle in a population. 
+So it = false, even if theres only one card thats different.
+That could have a big effect on the assort values, but it only increases the diluted count by 1. Seems fishy.
+
+An attacker could claim exactContests=false, could we detect that?
+Lets rename the flag to population.hasSingleCardStyle. Then we ask a trusted auditor to validate is 
 
 
 ### Contest is missing for Polling
@@ -180,21 +195,18 @@ Each ballot puts n cards in the pile, and the card's pcontests = BallotStyle, an
 We expect to see (n-1)/n cards without the contest, and 1/n with the contest, so we cant tolerate setting
 assort = 0 when mvr doesnt have the contest, since that will happen a lot. 
 
-It seems that using population.hasCardStyle would solve this problem?
+It seems that using population.exactContests might help this problem?
 
 
 ## What about Ncast and Nphantom?
 
 When hasStyles = true, we can count the cards and see how many each contest has. Use that as Ncast, then add phantoms as needed.
 
-When hasStyles = false, where so we getr Ncast? Perhaps we have to assume that both Nc and Ncast are given by the EA?
+When hasStyles = false, where so we get Ncast? If the populations all have vote totals that include undervotes, we can get Ncast from them.
+Otherwise we have to assume that both Nc and Ncast are given by the EA.
 
-Or do we only need phantoms when hasStyle = true ??  Can we assume that Npop > Nc,and so we dont need phantoms??
 
-## So many questions
 
-Without changing the CardManifest, could you claim hasStyles = false, in order to get a 0.5 score?
-Could you use that for an attack?
 
 
 

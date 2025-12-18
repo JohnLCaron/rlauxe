@@ -21,7 +21,7 @@ interface PopulationIF {
     fun name(): String
     fun id(): Int
     fun contests(): IntArray // any card may have any of these contests
-    fun exactContests(): Boolean // each card has exactly these contests on it
+    fun hasSingleCardStyle(): Boolean // aka hasStyle: if all cards have exactly the contests in possibleContests
     fun ncards(): Int
     fun hasContest(contestId: Int): Boolean
 }
@@ -30,7 +30,7 @@ data class Population(
     val name: String,
     val id: Int,
     val possibleContests: IntArray, // the list of possible contests.
-    val exactContests: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
+    val hasSingleCardStyle: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
 ) : PopulationIF {
     var ncards = 0
     fun setNcards(ncards: Int): Population {
@@ -40,7 +40,7 @@ data class Population(
 
     override fun name() = name
     override fun id() = id
-    override fun exactContests() = exactContests
+    override fun hasSingleCardStyle() = hasSingleCardStyle
     override fun ncards() = ncards
     override fun hasContest(contestId: Int) = possibleContests.contains(contestId)
     override fun contests() = possibleContests

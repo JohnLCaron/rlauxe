@@ -97,7 +97,7 @@ data class CardPool(override val poolName: String, override val poolId: Int, val
     override fun contests() = regVotes.keys.toList().toIntArray()
     override fun assortAvg() = assortAvg
     override fun id() = poolId
-    override fun exactContests() = false // TODO dunno
+    override fun hasSingleCardStyle() = false // TODO dunno
 
     // candidate for removal, assumes voteForN == 1
     override fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder {
@@ -139,7 +139,7 @@ class CardPoolWithBallotStyle(
     override fun contests() = voteTotals.map { it.key }.toSortedSet().toIntArray()
     override fun assortAvg() = assortAvg
     override fun id() = poolId
-    override fun exactContests() = false // TODO dunno
+    override fun hasSingleCardStyle() = false // TODO dunno
     fun contestTab(contestId: Int) = voteTotals[contestId]
 
     override fun regVotes(): Map<Int, RegVotesIF> {
@@ -263,7 +263,7 @@ class CardPoolFromCvrs(
     override fun ncards() = totalCards
     override fun assortAvg() = assortAvg
     override fun id() = poolId
-    override fun exactContests() = false // TODO dunno
+    override fun hasSingleCardStyle() = false // TODO dunno
 
     // this is when you have CVRs. (sfoa, sfoans)
     fun accumulateVotes(cvr : Cvr) {

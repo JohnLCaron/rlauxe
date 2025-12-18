@@ -22,6 +22,7 @@ open class CreateColoradoElectionP (
     contestRoundFile: String,
     precinctFile: String,
     val config: AuditConfig,
+    val poolsHaveOneCardStyle:Boolean,
 ): CreateElectionPIF {
     val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
@@ -124,7 +125,7 @@ open class CreateColoradoElectionP (
                     }
                 }
             }
-            OneAuditPoolWithBallotStyle("${precinct.county}-${precinct.precinct}", idx, true,contestTabs, infoMap)
+            OneAuditPoolWithBallotStyle("${precinct.county}-${precinct.precinct}", idx, poolsHaveOneCardStyle,contestTabs, infoMap)
         }
     }
 
@@ -210,21 +211,23 @@ fun createColoradoElectionP(
     precinctFile: String,
     auditConfigIn: AuditConfig? = null,
     auditType : AuditType,
-    clear: Boolean = true)
+    poolsHaveOneCardStyle:Boolean,
+    clear: Boolean = true,
+    )
 {
     val stopwatch = Stopwatch()
 
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
 
-        auditType.isClca() -> AuditConfig(AuditType.CLCA, hasStyle = true, contestSampleCutoff = 20000, riskLimit = .03, nsimEst=10)
+        auditType.isClca() -> AuditConfig(AuditType.CLCA, contestSampleCutoff = 20000, riskLimit = .03, nsimEst=10)
 
-        else -> AuditConfig( // TODO NOSTYLE
+        else -> AuditConfig( // // TODO hasStyle=false
             AuditType.ONEAUDIT, hasStyle = false, riskLimit = .03, contestSampleCutoff = null, nsimEst = 1,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
     }
-    val election = CreateColoradoElectionP(electionDetailXmlFile, contestRoundFile, precinctFile, config)
+    val election = CreateColoradoElectionP(electionDetailXmlFile, contestRoundFile, precinctFile, config, poolsHaveOneCardStyle)
 
     CreateAuditP("corla", config, election, auditDir = "$topdir/audit", clear = clear)
     println("createColoradoOneAudit took $stopwatch")

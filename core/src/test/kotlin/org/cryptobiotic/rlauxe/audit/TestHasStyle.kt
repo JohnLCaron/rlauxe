@@ -34,7 +34,7 @@ class TestHasStyle {
         // B, there are 5,500 reported votes for the winner and 4,500 reported votes for the loser; for
         // contest S there are 550 votes for the winner and 450 votes for the loser.
 
-        val hasStyle = false
+        val hasStyle = false // TODO hasStyle=false
 
         val contestB = Contest(
             ContestInfo("B", 1, mapOf("Wes" to 1, "Les" to 2), SocialChoiceFunction.PLURALITY),

@@ -77,7 +77,7 @@ class HideInOtherGroupAttack {
 
 class ClcaSingleRoundWorkflowTaskGeneratorG(
     val N: Int,
-    val hasStyle: Boolean,
+    val hasStyle: Boolean, // TODO hasStyle=false
     val fuzzPct: Double,
     val margin: Double,
     val otherParameters: Map<String, Any> = emptyMap(),

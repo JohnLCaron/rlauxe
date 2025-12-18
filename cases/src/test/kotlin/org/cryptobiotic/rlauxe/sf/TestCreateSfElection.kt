@@ -26,8 +26,8 @@ class TestCreateSfElection {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
-            hasStyle = false,
             auditType = AuditType.ONEAUDIT,
+            poolsHaveOneCardStyle=false,
         )
 
         val publisher = Publisher("$topdir/audit")
@@ -54,8 +54,9 @@ class TestCreateSfElection {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
-            hasStyle = true,
-            auditType = AuditType.CLCA,        )
+            auditType = AuditType.CLCA,
+            poolsHaveOneCardStyle=false,
+        )
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()

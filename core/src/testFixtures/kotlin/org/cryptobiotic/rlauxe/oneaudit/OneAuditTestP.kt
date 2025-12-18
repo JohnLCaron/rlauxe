@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.oneaudit
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CvrsWithPopulationsToCardManifest
-import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
@@ -119,7 +118,7 @@ fun makeOneAuditTestP(
             "pool42",
             42, // poolId
             voteTotals = mapOf(1 to ContestTabulation(info1, votesNoCvr, ncards=noCvrSize)),
-            exactContests = false,
+            hasSingleCardStyle = false,
             infos = infos,
         )
     pool.adjustCards = poolUnderVotes

@@ -112,7 +112,7 @@ class TestAuditRoundJson {
     fun testRoundtripWithRounds() {
         val fuzzMvrs = .01
         val config = AuditConfig(
-            AuditType.CLCA, hasStyle = true, seed = 12356667890L, nsimEst = 10,
+            AuditType.CLCA, seed = 12356667890L, nsimEst = 10,
         )
         val N = 5000
         val testData = MultiContestTestDataP(11, 4, N, marginRange = 0.03..0.05)
@@ -165,7 +165,7 @@ class TestAuditRoundJson {
     fun testRoundtripWithRaire() {
         val fuzzMvrs = .01
         val config = AuditConfig(
-            AuditType.CLCA, hasStyle = true, seed = 12356667890L, nsimEst = 10,
+            AuditType.CLCA, seed = 12356667890L, nsimEst = 10,
         )
 
         val N = 5000
@@ -226,7 +226,7 @@ class TestAuditRoundJson {
 
         val fuzzMvrs = .01
         val config = AuditConfig(
-            AuditType.CLCA, hasStyle = true, seed = 12356667890L, nsimEst = 10,
+            AuditType.CLCA, seed = 12356667890L, nsimEst = 10,
         )
 
         val testCvrs = contestd.createSimulatedCvrs()

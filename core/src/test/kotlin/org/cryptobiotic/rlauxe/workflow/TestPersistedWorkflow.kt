@@ -23,7 +23,7 @@ class TestPersistedWorkflow {
         val topdir = "$testdataDir/persist/persistWorkflow/singleClca"
         val auditdir = "$topdir/audit"
 
-        val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01)
+        val config = AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01)
 
         val N = 50000
         val testData = MultiContestTestDataP(1, 1, N, marginRange=0.03..0.03, ncands=2)
@@ -49,7 +49,7 @@ class TestPersistedWorkflow {
         val topdir = "$testdataDir/persist/persistWorkflow/clca"
         val auditdir = "$topdir/audit"
 
-        val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01)
+        val config = AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01)
         val N = 50000
         val testData = MultiContestTestDataP(11, 4, N, marginRange=0.03..0.05)
 
@@ -114,7 +114,7 @@ class TestPersistedWorkflow {
         val auditdir = "$topdir/audit"
 
         val config = AuditConfig(
-            AuditType.ONEAUDIT, hasStyle = true, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = .01,
+            AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = .01,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
 

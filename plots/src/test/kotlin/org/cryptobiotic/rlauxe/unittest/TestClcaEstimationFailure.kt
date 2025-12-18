@@ -26,7 +26,6 @@ class TestClcaEstimationFailure {
 
         val auditConfig = AuditConfig(
             AuditType.CLCA,
-            hasStyle = true,
             quantile = .50,     // TODO review
             contestSampleCutoff = 5000,
         )

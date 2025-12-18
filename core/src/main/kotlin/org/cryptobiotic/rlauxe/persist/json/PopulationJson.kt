@@ -81,7 +81,7 @@ fun Population.publishJson() = PopulationJson(
     this.id,
     this.ncards,
     this.possibleContests,
-    this.exactContests
+    this.hasSingleCardStyle
 )
 
 fun PopulationJson.import(): Population {
@@ -149,7 +149,7 @@ class OneAuditPoolJson(
 fun OneAuditPool.publishJson() = OneAuditPoolJson(
     this.poolName,
     this.poolId,
-    this.exactContests,
+    this.hasSingleCardStyle,
     this.ncards,
     this.regVotes().mapValues { it.value.publishJson() },
 )

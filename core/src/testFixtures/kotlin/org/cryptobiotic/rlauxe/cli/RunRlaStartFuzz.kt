@@ -97,7 +97,7 @@ fun startTestElectionClca(
     clearDirectory(Path(auditDir))
 
     val config = AuditConfig(
-        AuditType.CLCA, hasStyle = true, nsimEst = 100, simFuzzPct = fuzzMvrs, quantile = .20,
+        AuditType.CLCA, nsimEst = 100, simFuzzPct = fuzzMvrs, quantile = .20,
     )
 
     clearDirectory(Path(auditDir))
@@ -175,7 +175,7 @@ fun startTestElectionPolling(
 ) {
     val auditDir = "$topdir/audit"
     clearDirectory(Path(auditDir))
-    val config = AuditConfig(AuditType.POLLING, hasStyle = true, nsimEst = 100, simFuzzPct = fuzzMvrs,
+    val config = AuditConfig(AuditType.POLLING, nsimEst = 100, simFuzzPct = fuzzMvrs,
         persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs)
 
     clearDirectory(Path(auditDir))
@@ -218,7 +218,7 @@ class TestPollingElection(
         println("Start testPersistentWorkflowPolling $testData")
         contests.forEach { println("  $it") }
         println()
-        val pop = Population("all", 1, contests.map { it.id }.toIntArray(), exactContests=false)
+        val pop = Population("all", 1, contests.map { it.id }.toIntArray(), hasSingleCardStyle=false)
         pops = listOf(pop)
 
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.

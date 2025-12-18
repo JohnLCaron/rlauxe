@@ -234,13 +234,23 @@ data class PollingConfigJson(
 fun PollingConfig.publishJson() = PollingConfigJson(this.d)
 fun PollingConfigJson.import() = PollingConfig(this.d)
 
+// enum class ClcaStrategyType { generalAdaptive, apriori, fuzzPct, oracle  }
+//data class ClcaConfig(
+//    val cvrsContainUndervotes: Boolean = true,
+//    val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
+//    val fuzzPct: Double? = null, // use to generate apriori errorRates for simulation, only used when ClcaStrategyType = fuzzPct
+//    val pluralityErrorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker?
+//    val d: Int = 100,  // shrinkTrunc weight for error rates
+//    val maxRisk: Double = 0.90,  // max risk on any one bet
+//)
 @Serializable
 data class ClcaConfigJson(
     val strategy: String,
     val fuzzPct: Double?,
     val errorRates: List<Double>?,
     val d: Int,
-    val maxRisk: Double?
+    val maxRisk: Double?,
+    val cvrsContainUndervotes: Boolean=true,
 )
 
 fun ClcaConfig.publishJson() = ClcaConfigJson(
@@ -248,7 +258,9 @@ fun ClcaConfig.publishJson() = ClcaConfigJson(
     this.fuzzPct,
     this.pluralityErrorRates?.toList(),
     this.d,
-    this.maxRisk)
+    this.maxRisk,
+    this.cvrsContainUndervotes,
+)
 
 fun ClcaConfigJson.import() = ClcaConfig(
         enumValueOf(this.strategy, ClcaStrategyType.entries) ?: ClcaStrategyType.generalAdaptive,
@@ -256,6 +268,7 @@ fun ClcaConfigJson.import() = ClcaConfig(
         if (this.errorRates != null) PluralityErrorRates.fromList(this.errorRates) else null,
         this.d,
         this.maxRisk ?: 0.90, // TODO
+        this.cvrsContainUndervotes,
     )
 
 @Serializable

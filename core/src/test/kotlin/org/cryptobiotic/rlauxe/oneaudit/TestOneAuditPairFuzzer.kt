@@ -42,7 +42,6 @@ class TestOneAuditPairFuzzer {
                     cvrFraction = .70,
                     undervoteFraction = .01,
                     phantomFraction = .01,
-                    hasStyle=true,
                     extraInPool=0,
                 )
                 val ncands = contestOA.ncandidates
@@ -111,7 +110,6 @@ class TestOneAuditPairFuzzer {
         val fuzzPct = 0.001
         val extraPct = 0.01
         val Nc = 10000
-        val hasStyle = true
 
         val (contestOA, mvrs, cards, pools) =
             makeOneAuditTest(
@@ -120,7 +118,6 @@ class TestOneAuditPairFuzzer {
                 cvrFraction = .95,
                 undervoteFraction = 0.01,
                 phantomFraction = 0.005,
-                hasStyle=hasStyle,
                 extraInPool= (extraPct * Nc).toInt(), // this creates a second contest with only undervotes
             )
 

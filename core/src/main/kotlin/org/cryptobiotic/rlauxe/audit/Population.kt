@@ -20,7 +20,7 @@ data class NamedCardStyle(
 interface PopulationIF {
     fun name(): String
     fun id(): Int
-    fun contests(): IntArray // each card may have any of these contests
+    fun contests(): IntArray // any card may have any of these contests
     fun exactContests(): Boolean // each card has exactly these contests on it
     fun ncards(): Int
     fun hasContest(contestId: Int): Boolean

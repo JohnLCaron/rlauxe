@@ -27,7 +27,7 @@ class ShowPoolSizes {
         val allContests = if (contestsResults is Ok) contestsResults.unwrap().sortedBy { it.id } else null
         val infos = allContests?.map{ it.contest.info() }?.associateBy { it.id }
 
-        val cardManifest = readCardManifest(publisher, infos!!)
+        val cardManifest = readCardManifest(publisher)
         val ncards = cardManifest.populations.map { it.ncards() }
         val deciles = makeDeciles(ncards)
         println(" $what ncards deciles = $deciles npools= ${cardManifest.populations.size}")

@@ -50,7 +50,7 @@ class TestAvgAssortValues {
             println()
         }
 
-        val contestsUA = ContestUnderAudit.make(listOf(contest), cardIterable.iterator(), isClca=true, hasStyle=true)
+        val contestsUA = ContestUnderAudit.make(listOf(contest), cardIterable.iterator(), isClca=true)
         val contestUA= contestsUA.first()
         println("contestUA = ${contestUA.show()}")
 
@@ -98,7 +98,7 @@ class TestAvgAssortValues {
             println()
         }
 
-        val contestsUA = ContestUnderAudit.make(listOf(contest), cardIterable.iterator(), isClca=true, hasStyle=true)
+        val contestsUA = ContestUnderAudit.make(listOf(contest), cardIterable.iterator(), isClca=true)
         val contestUA= contestsUA.first()
         println("contestUA = ${contestUA.show()}")
 
@@ -141,7 +141,7 @@ class TestAvgAssortValues {
             println()
         }
 
-        val contestsUA = ContestUnderAudit.make(test.contests, cardIterable.iterator(), isClca=true, hasStyle=true)
+        val contestsUA = ContestUnderAudit.make(test.contests, cardIterable.iterator(), isClca=true)
 
         val results = VerifyResults()
         verifyClcaAssortAvg(contestsUA, cardIterable.iterator(), results, show = false)
@@ -185,7 +185,7 @@ class TestAvgAssortValues {
             println()
         }
 
-        val contestsUA = ContestUnderAudit.make(test.contests, cardIterable.iterator(), isClca=true, hasStyle=false)
+        val contestsUA = ContestUnderAudit.make(test.contests, cardIterable.iterator(), isClca=true)
         contestsUA.forEach {
             println("$it : Npop diff = ${it.Npop != it.Nc}")
         }
@@ -234,7 +234,7 @@ class TestAvgAssortValues {
             println()
         }
 
-        val contestsUA = ContestUnderAudit.make(test.contests, cardIterable.iterator(), isClca=true, hasStyle=false)
+        val contestsUA = ContestUnderAudit.make(test.contests, cardIterable.iterator(), isClca=true)
         contestsUA.forEach {
             println("$it : Nb diff = ${it.Npop != it.Nc}")
         }

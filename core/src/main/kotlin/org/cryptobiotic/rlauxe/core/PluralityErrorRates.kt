@@ -116,7 +116,7 @@ object ClcaErrorTable {
     ) : PluralityErrorRates {
         require(cvrPairs.size > 0)
         val samples = PluralityErrorTracker(cassorter.noerror()) // accumulate error counts here
-        cvrPairs.filter { it.first.hasContest(contestId) }.forEach { samples.addSample(cassorter.bassort(it.first, it.second)) }
+        cvrPairs.filter { it.first.hasContest(contestId) }.forEach { samples.addSample(cassorter.bassort(it.first, it.second, true)) }
         // require( samples.errorCounts().sum() ==  cvrPairs.size)
         return samples.pluralityErrorRates()
     }

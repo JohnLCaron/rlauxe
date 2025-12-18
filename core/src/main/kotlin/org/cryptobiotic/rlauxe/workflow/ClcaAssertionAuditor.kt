@@ -35,7 +35,7 @@ fun runClcaAuditRound(
 class RunClcaContestTask(
     val config: AuditConfig,
     val contest: ContestRound,
-    val cvrPairs: List<Pair<CvrIF, CvrIF>>, // Pair(mvr, card)
+    val cvrPairs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
     val auditor: ClcaAssertionAuditorIF,
     val roundIdx: Int): ConcurrentTaskG<Boolean> {
 

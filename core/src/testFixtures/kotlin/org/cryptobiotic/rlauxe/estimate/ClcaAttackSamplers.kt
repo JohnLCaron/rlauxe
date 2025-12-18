@@ -21,6 +21,7 @@ data class ClcaAttackSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter,
 
     private var idx = 0
     private var count = 0
+    val hasStyle = true
 
     init {
         reset()
@@ -34,7 +35,8 @@ data class ClcaAttackSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter,
         }
         mvrs = mmvrs.toList()
 
-        sampleCount = cvrs.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it)}.sum()
+        // TODO hasStyle ??
+        sampleCount = cvrs.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it, hasStyle=hasStyle)}.sum()
         sampleMean = sampleCount / N
     }
 
@@ -44,12 +46,12 @@ data class ClcaAttackSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssorter,
             val cvr = cvrs[permutedIndex[idx]]
             val mvr = mvrs[permutedIndex[idx]]
             idx++
-            cassorter.bassort(mvr, cvr)
+            cassorter.bassort(mvr, cvr, hasStyle=hasStyle)
         } else {
             val chooseIdx = Random.nextInt(N) // with Replacement
             val cvr = cvrs[chooseIdx]
             val mvr = mvrs[chooseIdx]
-            cassorter.bassort(mvr, cvr)
+            cassorter.bassort(mvr, cvr, hasStyle=hasStyle)
         }
         count++
         return assortVal
@@ -83,6 +85,7 @@ data class ClcaFlipErrorsSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssort
 
     private var idx = 0
     private var count = 0
+    val hasStyle = true
 
     init {
         reset()
@@ -93,7 +96,7 @@ data class ClcaFlipErrorsSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssort
         flippedVotes = flipExactVotes(mmvrs, mvrMean)
         mvrs = mmvrs.toList()
 
-        sampleCount = cvrs.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it)}.sum()
+        sampleCount = cvrs.mapIndexed { idx, it -> cassorter.bassort(mvrs[idx], it, hasStyle=hasStyle)}.sum()
         sampleMean = sampleCount / cvrs.size
     }
 
@@ -103,12 +106,12 @@ data class ClcaFlipErrorsSampler(val cvrs : List<Cvr>, val cassorter: ClcaAssort
             val cvr = cvrs[permutedIndex[idx]]
             val mvr = mvrs[permutedIndex[idx]]
             idx++
-            cassorter.bassort(mvr, cvr)
+            cassorter.bassort(mvr, cvr, hasStyle=hasStyle)
         } else {
             val chooseIdx = Random.nextInt(cvrs.size) // with Replacement
             val cvr = cvrs[chooseIdx]
             val mvr = mvrs[chooseIdx]
-            cassorter.bassort(mvr, cvr)
+            cassorter.bassort(mvr, cvr, hasStyle=hasStyle)
         }
         count++
         return assortVal

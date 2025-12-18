@@ -34,7 +34,6 @@ fun RaireContestUnderAuditJson.import(): RaireContestUnderAudit {
     val result = RaireContestUnderAudit(
         raireContest as RaireContest,
         this.rassertions.map { it.import() },
-        hasStyle=contestUA.hasCompleteCvrs,
     )
     result.clcaAssertions = contestUA.clcaAssertions // TODO wonky
     return result

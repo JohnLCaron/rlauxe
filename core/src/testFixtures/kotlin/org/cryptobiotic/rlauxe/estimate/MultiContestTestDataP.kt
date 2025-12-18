@@ -239,13 +239,13 @@ fun makeOneAuditTestContestsP(
 
     // TODO why  is this differrent ?
     val cards = Closer(cardManifest.iterator())
-    val contestsUA = ContestUnderAudit.make(contestsToAudit, cards, isClca=true, hasStyle=false)
+    val contestsUA = ContestUnderAudit.make(contestsToAudit, cards, isClca=true)
 
     // create from cardStyles and populate the pool counts from the mvrs
     val poolsFromCvrs = calcOneAuditPoolsFromMvrs(infos, cardStyles, mvrs)
 
     // The OA assort averages come from the mvrs
-    addOAClcaAssortersFromMargin(contestsUA, poolsFromCvrs, hasStyle=true)
+    addOAClcaAssortersFromMargin(contestsUA, poolsFromCvrs)
 
     // poolsFromCvrs record the complete pool contests,
     return Pair(contestsUA, poolsFromCvrs)

@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import kotlin.random.Random
 
@@ -67,7 +68,7 @@ class PollingSampling(
 //// For clca audits. Production RunClcaContestTask
 class ClcaSampling(
     val contestId: Int,
-    val cvrPairs: List<Pair<CvrIF, CvrIF>>, // Pair(mvr, card)
+    val cvrPairs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
     val cassorter: ClcaAssorter,
     val allowReset: Boolean,
 ): Sampling, Iterator<Double> {
@@ -87,7 +88,7 @@ class ClcaSampling(
             val (mvr, card) = cvrPairs[permutedIndex[idx]]
             idx++
             if (card.hasContest(contestId)) {
-                val result = cassorter.bassort(mvr, card)
+                val result = cassorter.bassort(mvr, card, card.exactContests())
                 count++
                 return result
             }
@@ -113,10 +114,4 @@ class ClcaSampling(
     override fun hasNext() = (count < maxSamples)
     override fun next() = sample()
 }
-
-fun makeClcaNoErrorSampler(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAssorter): Sampling {
-    val cvrPairs = cvrs.zip(cvrs)
-    return ClcaSampling(contestId, cvrPairs, cassorter, true)
-}
-
 

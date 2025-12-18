@@ -22,7 +22,6 @@ open class CreateColoradoElectionP (
     contestRoundFile: String,
     precinctFile: String,
     val config: AuditConfig,
-    val hasStyle: Boolean = true,
 ): CreateElectionPIF {
     val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
@@ -55,7 +54,7 @@ open class CreateColoradoElectionP (
 
         cardPools = cardPoolBuilders.map { it.toOneAuditPool() }
         contests = makeContests()
-        contestsUA = ContestUnderAudit.make(contests, createCardManifest(), isClca=true, hasStyle)
+        contestsUA = ContestUnderAudit.make(contests, createCardManifest(), isClca=true, )
     }
 
     private fun makeOneContestInfo(electionDetailXml: ElectionDetailXml, roundContests: List<CorlaContestRoundCsv>): List<OneAuditContestCorla> {

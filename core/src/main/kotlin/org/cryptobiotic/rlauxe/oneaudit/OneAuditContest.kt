@@ -94,7 +94,6 @@ interface OneAuditContestIF {
 private const val debug = false
 
 fun makeOneAuditContests(
-    hasStyle: Boolean,
     wantContests: List<ContestIF>, // the contests you want to audit
     nbs: Map<Int,Int>,
     cardPools: List<OneAuditPoolIF>,
@@ -105,7 +104,7 @@ fun makeOneAuditContests(
     //val Nbs = manifestTabs.mapValues { it.value.ncards }
 
     val contestsUA = wantContests.filter{ !it.isIrv() }.map { contest ->
-        val cua = ContestUnderAudit(contest, true, hasStyle = hasStyle, NpopIn=nbs[contest.id]).addStandardAssertions()
+        val cua = ContestUnderAudit(contest, true, NpopIn=nbs[contest.id]).addStandardAssertions()
         if (contest is DHondtContest) {
             cua.addAssertionsFromAssorters(contest.assorters)
         } else {
@@ -115,7 +114,7 @@ fun makeOneAuditContests(
     }
 
     // The OA assort averages come from the cardPools
-    addOAClcaAssortersFromMargin(contestsUA, cardPools, hasStyle)
+    addOAClcaAssortersFromMargin(contestsUA, cardPools)
     return contestsUA
 }
 
@@ -123,7 +122,7 @@ fun makeOneAuditContests(
 fun addOAClcaAssortersFromMargin(
     oaContests: List<ContestUnderAudit>,
     cardPools: List<OneAuditPoolIF>, // poolId -> pool
-    hasStyle: Boolean,
+    // hasStyle: Boolean,
 ) {
     // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
     // create the clcaAssertions and add then to the oaContests
@@ -144,8 +143,9 @@ fun addOAClcaAssortersFromMargin(
                     }
                 }
             }
-            val clcaAssorter = ClcaAssorterOneAudit(assertion.info, assertion.assorter, hasStyle, poolAverages = AssortAvgsInPools(assortAverages),
-                dilutedMargin = oaContest.makeDilutedMargin(assertion.assorter))
+            val clcaAssorter = ClcaAssorterOneAudit(assertion.info, assertion.assorter,
+                dilutedMargin = oaContest.makeDilutedMargin(assertion.assorter),
+                poolAverages = AssortAvgsInPools(assortAverages))
             ClcaAssertion(assertion.info, clcaAssorter)
         }
         oaContest.clcaAssertions = clcaAssertions
@@ -155,15 +155,14 @@ fun addOAClcaAssortersFromMargin(
 class ClcaAssorterOneAudit(
     info: ContestInfo,
     assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs: plurality or IRV
-    hasCompleteCvrs: Boolean = true,
     dilutedMargin: Double,
     val poolAverages: AssortAvgsInPools,
-) : ClcaAssorter(info, assorter, hasUndervotes = hasCompleteCvrs, dilutedMargin=dilutedMargin) {
+) : ClcaAssorter(info, assorter, dilutedMargin=dilutedMargin) {
 
     // B(bi, ci)
-    override fun bassort(mvr: CvrIF, cvr: CvrIF): Double {
+    override fun bassort(mvr: CvrIF, cvr: CvrIF, hasStyle: Boolean): Double {
         if (cvr.poolId() == null) {
-            return super.bassort(mvr, cvr) // here we use the standard assorter
+            return super.bassort(mvr, cvr, hasStyle) // here we use the standard assorter
         }
 
         val poolAverage = poolAverages.assortAverage[cvr.poolId()]

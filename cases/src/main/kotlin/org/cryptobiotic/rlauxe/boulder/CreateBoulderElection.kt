@@ -63,7 +63,7 @@ class CreateBoulderElection(
         val manifestTabs = tabulateAuditableCards(createCardManifest(), infoMap)
         val contestNbs = manifestTabs.mapValues { it.value.ncards }
 
-        contestsUA = makeOneAuditContests(hasStyle, contests, contestNbs, cardPools).sortedBy { it.id }
+        contestsUA = makeOneAuditContests(contests, contestNbs, cardPools).sortedBy { it.id }
 
         val totalRedactedBallots = cardPools.sumOf { it.ncards() }
         logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPools.size} cardPools"}

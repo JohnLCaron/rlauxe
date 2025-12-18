@@ -18,7 +18,7 @@ class TestCorlaEstimateSampleSize {
     @Test
     fun testFindSampleSizePolling() {
         val test = MultiContestTestDataP(20, 11, 20000)
-        val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isClca = false, hasStyle = true).addStandardAssertions() } // CORLA does polling?
+        val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isClca = false).addStandardAssertions() } // CORLA does polling?
 
         contestsUA.forEach { contest ->
             println("contest = $contest")
@@ -31,7 +31,7 @@ class TestCorlaEstimateSampleSize {
     @Test
     fun testFindSampleSize() {
         val test = MultiContestTestDataP(20, 11, 20000)
-        val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit( it, isClca = true, hasStyle = true).addStandardAssertions() }
+        val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit( it, isClca = true).addStandardAssertions() }
         val cvrs = test.makeCvrsFromContests()
 
         contestsUAs.forEach { contest ->

@@ -33,7 +33,7 @@ class TestPersistedWorkflow {
 
         // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
         val testMvrs = testData.makeCvrsFromContests()
-        val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
+        val contestsUA = contests.map { ContestUnderAudit(it, isClca = true).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
         CreateAuditP("testPersistedSingleClca", config, election, auditDir = auditdir, clear = true)
@@ -58,7 +58,7 @@ class TestPersistedWorkflow {
 
         // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
         val testMvrs = testData.makeCvrsFromContests()
-        val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
+        val contestsUA = contests.map { ContestUnderAudit(it, isClca = true).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
         CreateAuditP("testPersistedAuditClca",  config, election, auditDir = auditdir,  clear = true)

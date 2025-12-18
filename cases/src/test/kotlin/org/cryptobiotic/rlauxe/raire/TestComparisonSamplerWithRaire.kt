@@ -47,7 +47,7 @@ class TestComparisonSamplerWithRaire {
         val sampleMvrs = sampler.mvrs.map { cassorter.assorter().assort(it) }.average()
         println(" orgCvrs=${df(orgCvrs)} sampleCvrs=${df(sampleCvrs)} sampleMvrs=${df(sampleMvrs)}")
 
-        val before = cvrs.map { cassorter.bassort(it, it) }.average()
+        val before = cvrs.map { cassorter.bassort(it, it, hasStyle=true) }.average()
         sampler.reset()
         val welford = Welford()
         repeat(cvrs.size) {

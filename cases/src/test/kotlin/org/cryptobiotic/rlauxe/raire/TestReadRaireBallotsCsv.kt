@@ -37,8 +37,8 @@ class TestReadRaireBallotsCsv {
             assertTrue(0.5 < margin2mean(cassertion.assorter.dilutedMargin()))
             cvrs.forEach {
                 assertTrue(cassertion.cassorter.assorter().assort(it) in 0.0..cassertion.cassorter.assorter().upperBound())
-                if (!it.phantom) assertEquals(cassertion.cassorter.noerror(), cassertion.cassorter.bassort(it, it))
-                else assertEquals(cassertion.cassorter.noerror()/2, cassertion.cassorter.bassort(it, it))
+                if (!it.phantom) assertEquals(cassertion.cassorter.noerror(), cassertion.cassorter.bassort(it, it, hasStyle=true))
+                else assertEquals(cassertion.cassorter.noerror()/2, cassertion.cassorter.bassort(it, it, hasStyle=true))
             }
         }
     }

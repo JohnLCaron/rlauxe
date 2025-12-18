@@ -29,7 +29,6 @@ class CreateBoulderElectionP(
     val sovo: BoulderStatementOfVotes,
     val isClca: Boolean,
     val distributeOvervotes: List<Int> = listOf(0, 63),
-    val hasStyle: Boolean = true,
     val quiet: Boolean = true,
 ): CreateElectionPIF {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convertToCvr() }
@@ -65,7 +64,7 @@ class CreateBoulderElectionP(
         val manifestTabs = tabulateAuditableCards(createCardManifest(), infoMap)
         val contestNbs = manifestTabs.mapValues { it.value.ncards }
 
-        contestsUA = makeOneAuditContests(hasStyle, contests, contestNbs, cardPools).sortedBy { it.id }
+        contestsUA = makeOneAuditContests(contests, contestNbs, cardPools).sortedBy { it.id }
 
         val totalRedactedBallots = cardPools.sumOf { it.ncards() }
         logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPools.size} cardPools"}
@@ -348,7 +347,7 @@ fun createBoulderElectionP(
         )
     else throw RuntimeException("unsupported audit type $auditType")
 
-    val election = CreateBoulderElectionP(export, sovo, isClca = auditType.isClca(), hasStyle=config.hasStyle)
+    val election = CreateBoulderElectionP(export, sovo, isClca = auditType.isClca())
 
     CreateAuditP("boulder", config, election, auditDir = auditDir, clear = clear)
     println("createBoulderElectionOAnew took $stopwatch")

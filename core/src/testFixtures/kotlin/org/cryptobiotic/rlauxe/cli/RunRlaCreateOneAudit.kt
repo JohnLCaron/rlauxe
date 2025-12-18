@@ -130,7 +130,7 @@ object RunRlaCreateOneAudit {
         // simulate the mvrs, write to private dir
         val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
         val infos = contests.map{ it.contest.info() }.associateBy { it.id }
-        val cardManifest = readCardManifest(publisher, infos)
+        val cardManifest = readCardManifest(publisher)
         val scardIter = cardManifest.cards.iterator()
         val sortedCards = mutableListOf<AuditableCard>()
         scardIter.forEach { sortedCards.add(it) }

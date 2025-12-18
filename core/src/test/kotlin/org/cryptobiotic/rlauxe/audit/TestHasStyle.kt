@@ -367,7 +367,7 @@ class TestHasStyle {
 
         val contestsUA = contests.map {
             val Nb = tabs[it.id]?.ncards ?: throw RuntimeException("Contest ${it.id} not found")
-            ContestUnderAudit(it, true, hasStyle, NpopIn=Nb).addStandardAssertions()
+            ContestUnderAudit(it, true, NpopIn=Nb).addStandardAssertions()
         }
 
         val election =
@@ -402,7 +402,7 @@ class TestHasStyle {
         val contestsUA = contests.map {
             val Nb = tabs[it.id]?.ncards ?:
                 throw RuntimeException("Contest ${it.id} not found")
-            ContestUnderAudit(it, isClca=true, hasStyle=hasStyle, NpopIn=Nb).addStandardAssertions()
+            ContestUnderAudit(it, isClca=true, NpopIn=Nb).addStandardAssertions()
         }
 
         // class TestCreateElection (

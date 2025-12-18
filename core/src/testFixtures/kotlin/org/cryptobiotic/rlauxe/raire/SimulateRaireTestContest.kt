@@ -113,7 +113,6 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
         Ncast = testContest.Nc - testContest.phantomCount,
         undervotes=testContest.underCount,
         raireAssertions,
-        hasStyle,
     )
 
     return Pair(rcontestUA, testCvrs)

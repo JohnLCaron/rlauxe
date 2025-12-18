@@ -56,7 +56,7 @@ open class CreateColoradoElection (
             undervote.add(it.poolUndervote(cardPools))
         }
         contests = makeContests()
-        contestsUA = ContestUnderAudit.make(contests, createCardManifest(), isClca=true, hasStyle)
+        contestsUA = ContestUnderAudit.make(contests, createCardManifest(), isClca=true)
     }
 
     private fun makeOneContestInfo(electionDetailXml: ElectionDetailXml, roundContests: List<CorlaContestRoundCsv>): List<OneAuditContestCorla> {

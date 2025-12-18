@@ -53,7 +53,7 @@ class TestCorlaEstimateSampleSize {
         //println("computeSize = $computeSize")
 
         val gamma = 1.2
-        val config = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 1234567890L, quantile=.90)
+        val config = AuditConfig(AuditType.CLCA, seed = 1234567890L, quantile=.90)
 
         contestRounds.forEach { contestRound ->
             val cn = contestRound.Npop

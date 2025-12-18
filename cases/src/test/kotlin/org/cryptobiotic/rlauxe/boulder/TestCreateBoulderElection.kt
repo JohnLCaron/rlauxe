@@ -54,6 +54,7 @@ class TestCreateBoulderElection {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = topdir,
             auditType = AuditType.ONEAUDIT,
+            poolsHaveOneCardStyle=true,
         )
 
         val publisher = Publisher("$topdir/audit")
@@ -78,6 +79,7 @@ class TestCreateBoulderElection {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = topdir,
             auditType = AuditType.CLCA,
+            poolsHaveOneCardStyle=true,
         )
 
         val publisher = Publisher("$topdir/audit")

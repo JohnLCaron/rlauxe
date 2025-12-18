@@ -49,7 +49,6 @@ fun createBelgiumElectionLimited(electionName: String)  {
 
     val config = AuditConfig(
         AuditType.CLCA,
-        hasStyle = true,
         removeCutoffContests = false,
         auditSampleLimit = 1000,
         riskLimit = .05,

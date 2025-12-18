@@ -36,7 +36,7 @@ class TestAlphaMart {
         val assorter = contestUA.minPollingAssertion()!!.assorter
 
         val cvrs = test.makeCvrsFromContests()
-        val config = AuditConfig(AuditType.POLLING, hasStyle=true, nsimEst=10)
+        val config = AuditConfig(AuditType.POLLING, nsimEst=10)
         val cvrSampler = PollingSampling(contestUA.contest.id, cvrs.zip(cvrs), assorter)
 
         val eta0 = assorter.dilutedMean()

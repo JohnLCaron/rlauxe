@@ -81,7 +81,7 @@ data class AuditableCard (
 
     // better if every card has a population
     fun exactContests(): Boolean {
-        return if (population != null) population.exactContests()
+        return if (population != null) population.hasSingleCardStyle()
         else if (cardStyle == "all") false
         else true // else config.cvrsHaveUndervotes
 

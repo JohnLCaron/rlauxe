@@ -28,8 +28,8 @@ class CreateBoulderElectionP(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
     val isClca: Boolean,
+    val poolsHaveOneCardStyle: Boolean,
     val distributeOvervotes: List<Int> = listOf(0, 63),
-    val quiet: Boolean = true,
 ): CreateElectionPIF {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convertToCvr() }
     val infoList = makeContestInfo().sortedBy{ it.id }
@@ -127,10 +127,7 @@ class CreateBoulderElectionP(
             //    var ncards = 0
             val name = cleanCsvString(redacted.ballotType)
             val id = redactedIdx
-            // TODO what is ncards here ??
-            OneAuditPoolWithBallotStyle(name, id, exactContests=true, contestTabs, infoMap)
-            // CardPoolWithBallotStyle(cleanCsvString(redacted.ballotType), redactedIdx, contestTabs, infoMap)
-
+            OneAuditPoolWithBallotStyle(name, id, hasSingleCardStyle=poolsHaveOneCardStyle, contestTabs, infoMap)
         }
     }
 
@@ -253,7 +250,7 @@ class CreateBoulderElectionP(
     }
 
     fun makeContests(): List<ContestIF> {
-        if (!quiet) println("ncontests with info = ${infoList.size}")
+        println("ncontests with info = ${infoList.size}")
 
         return infoList.filter { !it.isIrv }.map { info ->
             val oaContest = oaContests[info.id]!!
@@ -323,7 +320,9 @@ fun createBoulderElectionP(
     minRecountMargin: Double = .005,
     auditConfigIn: AuditConfig? = null,
     auditType : AuditType,
-    clear: Boolean = true)
+    poolsHaveOneCardStyle: Boolean,
+    clear: Boolean = true,
+    )
 {
     val stopwatch = Stopwatch()
     val variation = if (sovoFile.contains("2025") || sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
@@ -334,20 +333,19 @@ fun createBoulderElectionP(
         else if (auditType.isClca())
             AuditConfig(
                 AuditType.CLCA,
-                hasStyle = true,
                 riskLimit = riskLimit,
                 contestSampleCutoff = 20000,
                 minRecountMargin = minRecountMargin,
                 nsimEst = 10,
             )
         else if (auditType.isOA())
-            AuditConfig(
-            AuditType.ONEAUDIT, hasStyle=true, riskLimit=riskLimit, contestSampleCutoff=20000, minRecountMargin=minRecountMargin, nsimEst=10,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
-        )
+            AuditConfig( // TODO hasStyle=false ?
+                AuditType.ONEAUDIT, riskLimit=riskLimit, contestSampleCutoff=20000, minRecountMargin=minRecountMargin, nsimEst=10,
+                oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
+            )
     else throw RuntimeException("unsupported audit type $auditType")
 
-    val election = CreateBoulderElectionP(export, sovo, isClca = auditType.isClca())
+    val election = CreateBoulderElectionP(export, sovo, isClca = auditType.isClca(), poolsHaveOneCardStyle)
 
     CreateAuditP("boulder", config, election, auditDir = auditDir, clear = clear)
     println("createBoulderElectionOAnew took $stopwatch")

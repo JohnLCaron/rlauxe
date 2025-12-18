@@ -32,6 +32,7 @@ class TestGenerateAllUseCases {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = topdir,
             auditType = AuditType.ONEAUDIT,
+            poolsHaveOneCardStyle=true,
         )
 
         val publisher = Publisher("$topdir/audit")
@@ -47,6 +48,7 @@ class TestGenerateAllUseCases {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = "$testdataDir/cases/boulder24/clca",
             auditType = AuditType.CLCA,
+            poolsHaveOneCardStyle=true,
         )
 
         val publisher = Publisher("$topdir/audit")
@@ -62,7 +64,7 @@ class TestGenerateAllUseCases {
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         createColoradoElectionP(topdir, detailXmlFile, contestRoundFile, precinctFile,
-            auditType = AuditType.ONEAUDIT, clear=true)
+            auditType = AuditType.ONEAUDIT, poolsHaveOneCardStyle=false)
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
@@ -77,7 +79,7 @@ class TestGenerateAllUseCases {
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         createColoradoElectionP(topdir, detailXmlFile, contestRoundFile, precinctFile,
-            auditType = AuditType.CLCA, clear=true)
+            auditType = AuditType.CLCA, poolsHaveOneCardStyle=false)
 
         val publisher = Publisher("$topdir/audit")
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
@@ -108,8 +110,8 @@ class TestGenerateAllUseCases {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
-            hasStyle = true,
             auditType = AuditType.ONEAUDIT,
+            poolsHaveOneCardStyle=false,
         )
 
         val publisher = Publisher("$topdir/audit")
@@ -127,8 +129,8 @@ class TestGenerateAllUseCases {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
-            hasStyle = true,
             auditType = AuditType.CLCA,
+            poolsHaveOneCardStyle=false,
         )
 
         val publisher = Publisher("$topdir/audit")

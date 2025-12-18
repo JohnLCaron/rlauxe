@@ -16,7 +16,7 @@ class GenerateClcaErrorTable {
 
     @Test
     fun generateErrorTableFromContestTestDataBuilder() {
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyle = true, seed = 12356667890L, nsimEst = 10)
+        val auditConfig = AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst = 10)
         val N = 100000
 
         // TODO how much do the rates depend on the margin?
@@ -124,7 +124,7 @@ class GenerateClcaErrorTable {
 
     @Test
     fun generateErrorTable() {
-        val auditConfig = AuditConfig(AuditType.CLCA, hasStyle = true, seed = 12356667890L, nsimEst = 1000)
+        val auditConfig = AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst = 1000)
         val N = 100000
 
         // TODO how much do the rates depend on the margin?

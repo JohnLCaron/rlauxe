@@ -105,7 +105,7 @@ object RunRlaCreateOneAudit {
         clearDirectory(Path(auditDir))
 
         val config = AuditConfig(
-            AuditType.ONEAUDIT, hasStyle = true, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = fuzzMvrs,
+            AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = fuzzMvrs,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
             oaConfig = OneAuditConfig(OneAuditStrategyType.clca, useFirst = true)
         )

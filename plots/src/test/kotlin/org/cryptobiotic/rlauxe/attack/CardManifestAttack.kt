@@ -38,7 +38,7 @@ import kotlin.test.Test
 class CardManifestAttack {
     val name = "cardManifestAttack"
     var topdir = "$testdataDir/attack/$name"
-    val hasStyle = false
+    val hasStyle = false // TODO hasStyle=false
 
     @Test
     fun cardManifestAttack() {

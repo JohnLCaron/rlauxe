@@ -11,7 +11,7 @@ class TestClcaAudit {
     val N = 10000
 
     val config = AuditConfig(
-        AuditType.CLCA, hasStyle=true, nsimEst=10, simFuzzPct=0.05,
+        AuditType.CLCA, nsimEst=10, simFuzzPct=0.05,
     )
 
     @Test

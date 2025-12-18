@@ -14,16 +14,15 @@ class TestAuditConfigJson {
 
     @Test
     fun testRoundtrip() {
-        testRoundtrips(AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L))
-        testRoundtrips(AuditConfig(AuditType.POLLING, hasStyle=true, seed = 12356667890L))
-        testRoundtrips(AuditConfig(AuditType.ONEAUDIT, hasStyle=true, seed = 12356667890L))
+        testRoundtrips(AuditConfig(AuditType.CLCA, seed = 12356667890L))
+        testRoundtrips(AuditConfig(AuditType.POLLING, seed = 12356667890L))
+        testRoundtrips(AuditConfig(AuditType.ONEAUDIT, seed = 12356667890L))
 
         testRoundtrips(
             AuditConfig(
-                AuditType.CLCA, hasStyle=true, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50, simFuzzPct=.111,
-            contestSampleCutoff=10000,  version=2.0,
-            clcaConfig= ClcaConfig(ClcaStrategyType.fuzzPct,  pluralityErrorRates = PluralityErrorRates(.01, .02, .03, .04), d = 99)
-        )
+                AuditType.CLCA, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50, simFuzzPct=.111, contestSampleCutoff=10000,  version=2.0,
+                clcaConfig= ClcaConfig(strategy=ClcaStrategyType.fuzzPct, pluralityErrorRates=PluralityErrorRates(.01, .02, .03, .04), d = 99)
+            )
         )
         testRoundtrips(
             AuditConfig(
@@ -57,7 +56,7 @@ class TestAuditConfigJson {
     fun testRoundtripIO(target: AuditConfig) {
         val scratchFile = kotlin.io.path.createTempFile().toFile()
 
-        val target = AuditConfig(AuditType.CLCA, hasStyle=true, seed = 12356667890L)
+        val target = AuditConfig(AuditType.CLCA, seed = 12356667890L)
         writeAuditConfigJsonFile(target, scratchFile.toString())
 
         val result = readAuditConfigJsonFile(scratchFile.toString())

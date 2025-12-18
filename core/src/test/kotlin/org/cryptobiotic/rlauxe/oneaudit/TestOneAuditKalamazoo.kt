@@ -140,7 +140,7 @@ class CardPoolSingleContest(override val poolName: String, override val poolId: 
     override fun name() = poolName
 
     override fun id() = poolId
-    override fun exactContests() = false // TODO dunno
+    override fun hasSingleCardStyle() = false // TODO dunno
 
     override fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder {
         val poolUndervotes = ncards() * voteForN - regVotes.votes.values.sum()

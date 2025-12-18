@@ -26,12 +26,13 @@ private val logger = KotlinLogging.logger("CreateSfElection")
 
 // SanFrancisco 2024 General Election.
 class CreateSfElectionP(
-    castVoteRecordZip: String,
-    contestManifestFilename: String,
-    candidateManifestFile: String,
-    val cvrExportCsv: String,
-    val config: AuditConfig,
-): CreateElectionPIF {
+        castVoteRecordZip: String,
+        contestManifestFilename: String,
+        candidateManifestFile: String,
+        val cvrExportCsv: String,
+        val config: AuditConfig,
+        poolsHaveOneCardStyle: Boolean,
+    ): CreateElectionPIF {
     val cardPoolMapByName: Map<String, OneAuditPoolIF>
     val cardPools: List<OneAuditPoolIF>
     val phantomCount: Map<Int, Int>
@@ -53,6 +54,7 @@ class CreateSfElectionP(
             castVoteRecordZip,
             contestManifestFilename,
             cvrExportCsv,
+            poolsHaveOneCardStyle,
         )
 
         cardPoolMapByName = allCardPools.filter { it.value.poolName != unpooled } // exclude the unpooled
@@ -83,6 +85,7 @@ class CreateSfElectionP(
         castVoteRecordZip: String,
         contestManifestFilename: String,
         cvrExportCsv: String,
+        poolsHaveOneCardStyle: Boolean,
     ): Triple<Map<String, OneAuditPoolFromCvrs>, Map<Int, ContestTabulation>, Int> {
 
         val allCardPools: MutableMap<String, OneAuditPoolFromCvrs> = mutableMapOf()
@@ -94,7 +97,7 @@ class CreateSfElectionP(
                 val cvrExport: CvrExport = cvrIter.next()
                 val wtf =  cvrExport.poolKey()
                 val pool = allCardPools.getOrPut(cvrExport.poolKey()) {
-                    OneAuditPoolFromCvrs(cvrExport.poolKey(), allCardPools.size + 1, false, contestInfos)
+                    OneAuditPoolFromCvrs(cvrExport.poolKey(), allCardPools.size + 1, poolsHaveOneCardStyle, contestInfos)
                 }
                 pool.accumulateVotes(cvrExport.toCvr())
 
@@ -192,21 +195,21 @@ fun createSfElectionP(
     candidateManifestFile: String,
     cvrExportCsv: String,
     auditConfigIn: AuditConfig? = null,
-    hasStyle: Boolean,
+    poolsHaveOneCardStyle: Boolean,
     auditType : AuditType,
 ) {
     val stopwatch = Stopwatch()
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
 
-        (auditType ==  AuditType.CLCA) -> AuditConfig(AuditType.CLCA, hasStyle = hasStyle, contestSampleCutoff = 20000, riskLimit = .05, nsimEst=10)
+        (auditType ==  AuditType.CLCA) -> AuditConfig(AuditType.CLCA, contestSampleCutoff = 20000, riskLimit = .05, nsimEst=10)
 
         (auditType ==  AuditType.ONEAUDIT) -> AuditConfig(
-            AuditType.ONEAUDIT, hasStyle = hasStyle, riskLimit = .05, contestSampleCutoff = 20000, nsimEst = 1,
+            AuditType.ONEAUDIT, riskLimit = .05, contestSampleCutoff = 20000, nsimEst = 1,
             oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
         )
 
-        else -> AuditConfig(AuditType.POLLING, hasStyle = hasStyle, riskLimit = .05, contestSampleCutoff = 10000, nsimEst = 100)
+        else -> AuditConfig(AuditType.POLLING, riskLimit = .05, contestSampleCutoff = 10000, nsimEst = 100)
     }
 
     val election = CreateSfElectionP(
@@ -215,6 +218,7 @@ fun createSfElectionP(
         candidateManifestFile,
         cvrExportCsv,
         config = config,
+        poolsHaveOneCardStyle=poolsHaveOneCardStyle,
     )
 
     CreateAuditP("sf2024", config, election, auditDir = "$topdir/audit", )

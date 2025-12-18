@@ -59,7 +59,7 @@ class TestClcaAuditNoStyles {
     }
 
     @Test
-    fun noErrorsNoPhantoms() {
+    fun noErrorsNoPhantoms() { // TODO hasStyle=false
         val config = AuditConfig(AuditType.CLCA, hasStyle=false, nsimEst=10)
         val ncontests = 11
         val nbs = 4
@@ -71,7 +71,7 @@ class TestClcaAuditNoStyles {
     }
 
     @Test
-    fun noErrorsWithPhantoms() {
+    fun noErrorsWithPhantoms() { // TODO hasStyle=false
         val config = AuditConfig(AuditType.CLCA, hasStyle=false, nsimEst=10)
         val ncontests = 42
         val nbs = 11

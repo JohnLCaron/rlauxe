@@ -54,7 +54,7 @@ interface OneAuditPoolIF: PopulationIF {
 
     // OneAuditPool(override val poolName: String, override val poolId: Int, val exactContests: Boolean,
     //  val ncards: Int, val regVotes: Map<Int, RegVotes>)
-    fun toOneAuditPool() = OneAuditPool(poolName, poolId, exactContests(), ncards(), regVotes())
+    fun toOneAuditPool() = OneAuditPool(poolName, poolId, hasSingleCardStyle(), ncards(), regVotes())
 
     /* fun showVotes(contestIds: Collection<Int>, width: Int=4) = buildString {
         append("${trunc(name(), 9)}:")
@@ -83,12 +83,12 @@ interface OneAuditPoolIF: PopulationIF {
     } */
 }
 
-data class OneAuditPool(override val poolName: String, override val poolId: Int, val exactContests: Boolean,
+data class OneAuditPool(override val poolName: String, override val poolId: Int, val hasSingleCardStyle: Boolean,
                         val ncards: Int, val regVotes: Map<Int, RegVotesIF>) : OneAuditPoolIF {
     val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
     override fun name() = poolName
     override fun id() = poolId
-    override fun exactContests() = exactContests
+    override fun hasSingleCardStyle() = hasSingleCardStyle
 
     override fun regVotes() = regVotes
     override fun hasContest(contestId: Int) = regVotes[contestId] != null
@@ -109,7 +109,7 @@ data class OneAuditPool(override val poolName: String, override val poolId: Int,
 data class OneAuditPoolWithBallotStyle(
     override val poolName: String,
     override val poolId: Int,
-    val exactContests: Boolean,
+    val hasSingleCardStyle: Boolean,
     val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes; must include contests with no votes
     val infos: Map<Int, ContestInfo>, // all infos
 ): OneAuditPoolIF {
@@ -133,7 +133,7 @@ data class OneAuditPoolWithBallotStyle(
 
     override fun name() = poolName
     override fun id() = poolId
-    override fun exactContests() = exactContests
+    override fun hasSingleCardStyle() = hasSingleCardStyle
 
     override fun assortAvg() = assortAvg
     override fun hasContest(contestId: Int) = voteTotals.contains(contestId)
@@ -209,7 +209,7 @@ data class OneAuditPoolWithBallotStyle(
 data class OneAuditPoolFromCvrs(
     override val poolName: String,
     override val poolId: Int,
-    val exactContests: Boolean,
+    val hasSingleCardStyle: Boolean,
     val infos: Map<Int, ContestInfo>,
 ): OneAuditPoolIF {
 
@@ -221,7 +221,7 @@ data class OneAuditPoolFromCvrs(
 
     override fun name() = poolName
     override fun id() = poolId
-    override fun exactContests() = exactContests
+    override fun hasSingleCardStyle() = hasSingleCardStyle
 
     override fun assortAvg() = assortAvg
     override fun hasContest(contestId: Int) = contestTabs.contains(contestId)
@@ -315,7 +315,7 @@ fun calcOneAuditPoolsFromMvrs(
 
     // The styles have the name, poolId, and contest list
     val poolsFromCvrs = populations.map { style ->
-        val poolFromCvr = OneAuditPoolFromCvrs(style.name(), style.id(), style.exactContests(), infos)
+        val poolFromCvr = OneAuditPoolFromCvrs(style.name(), style.id(), style.hasSingleCardStyle(), infos)
         style.contests().forEach { poolFromCvr.contestTabs[it]  = ContestTabulation( infos[it]!!) }
         poolFromCvr
     }.associateBy { it.poolId }

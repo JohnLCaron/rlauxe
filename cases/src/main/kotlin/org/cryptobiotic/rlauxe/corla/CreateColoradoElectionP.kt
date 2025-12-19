@@ -249,7 +249,7 @@ fun createColoradoElectionP(
     precinctFile: String,
     auditConfigIn: AuditConfig? = null,
     auditType : AuditType,
-    poolsHaveOneCardStyle:Boolean,
+    poolsHaveOneCardStyle:Boolean = false,
     clear: Boolean = true,
     )
 {
@@ -261,13 +261,13 @@ fun createColoradoElectionP(
         auditType.isClca() -> AuditConfig(AuditType.CLCA, contestSampleCutoff = 20000, riskLimit = .03, nsimEst=10)
 
         else -> AuditConfig( // // TODO hasStyle=false
-            AuditType.ONEAUDIT, hasStyle = false, riskLimit = .03, contestSampleCutoff = null, nsimEst = 1,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
+            AuditType.ONEAUDIT, riskLimit = .03, contestSampleCutoff = null, nsimEst = 1,
+            oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = true)
         )
     }
     val election = CreateColoradoElectionP(electionDetailXmlFile, contestRoundFile, precinctFile, config, poolsHaveOneCardStyle)
 
-    CreateAuditP("corla", config, election, auditDir = "$topdir/audit", clear = clear)
+    CreateAudit("corla", config, election, auditDir = "$topdir/audit", clear = clear)
     println("createColoradoOneAudit took $stopwatch")
 }
 

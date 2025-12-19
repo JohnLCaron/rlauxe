@@ -302,7 +302,7 @@ fun createSfElectionP(
 
         (auditType ==  AuditType.ONEAUDIT) -> AuditConfig(
             AuditType.ONEAUDIT, riskLimit = .05, contestSampleCutoff = 20000, nsimEst = 1,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
+            oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = true)
         )
 
         else -> AuditConfig(AuditType.POLLING, riskLimit = .05, contestSampleCutoff = 10000, nsimEst = 100)
@@ -317,6 +317,6 @@ fun createSfElectionP(
         poolsHaveOneCardStyle=poolsHaveOneCardStyle,
     )
 
-    CreateAuditP("sf2024", config, election, auditDir = "$topdir/audit", )
+    CreateAudit("sf2024", config, election, auditDir = "$topdir/audit", )
     println("createSfElection took $stopwatch")
 }

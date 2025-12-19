@@ -67,51 +67,6 @@ class TruncShrinkage(
     }
 }
 
-//        x: np.array
-//            input data
-//        attributes used:
-//             eta: float in (t, u) (default u*(1-eps))
-//                initial alternative hypothethesized value for the population mean
-//            c: positive float
-//                scale factor in constraints to keep the estimator of the mean from getting too close to t or u before
-//                the empirical mean is stable
-//            d: positive float
-//                relative weight of eta compared to an observation, in updating the alternative for each term
-//            f: positive float
-//                relative weight of the upper bound u (normalized by the sample standard deviation)
-//            minsd: positive float
-//                lower threshold for the standard deviation of the sample, to avoid divide-by-zero errors and
-//                to limit the weight of u
-
-// see recent (12/3/24, 1/24/25) changes to shrink_trunc in SHANGRLA, possibly for oneaudit
-// old way:
-//             c: positive float
-//                scale factor for allowing the estimated mean to approach t from above
-//
-//        c = getattr(self, "c", 1 / 2)
-//        d = getattr(self, "d", 100)
-//        f = getattr(self, "f", 0)
-//        minsd = getattr(self, "minsd", 10**-6)
-//          ..
-//         return np.minimum(
-//            u * (1 - np.finfo(float).eps),
-//            np.maximum(weighted, m + c / np.sqrt(d + j - 1)),
-//        )
-// new way:
-//            c: positive float
-//                scale factor in constraints to keep the estimator of the mean from getting too close to t or u before
-//                the empirical mean is stable
-//        c = getattr(self, "c", (eta-t)/2-np.finfo(float).eps)
-//        if u-c < t+c: # constraints could be inconsistent
-//            new_c = (u-c)/2
-//            warnings.warn(f'{c=} is too large: resetting to {new_c}')
-//            c = new_c
-// ...
-//         tol = c / np.sqrt(d + j - 1))
-//        return np.minimum(
-//            u * (1 - np.finfo(float).eps) - tol,
-//            np.maximum(weighted, m * (1 + np.finfo(float).eps) + tol)
-//        )
 // TODO test against TruncShrinkage
 /* class TruncShrinkageNew(
     val N: Int,

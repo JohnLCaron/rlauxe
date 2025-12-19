@@ -74,10 +74,6 @@ data class AuditConfigJson(
     val clcaConfig: ClcaConfigJson? = null,
     val oaConfig: OneAuditConfigJson?  = null,
 
-    val pollingErrorStrategy: PollingErrorStrategyJson? = null,
-    val clcaBettingStrategy: ClcaBettingStrategyJson? = null,
-    val oaBettingStrategy: OneAuditBettingStrategyJson?  = null,
-
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
     val version : Double,
     val skipContests: List<Int>?  = null,
@@ -100,7 +96,6 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.removeTooManyPhantoms,
             this.auditSampleLimit,
             clcaConfig = this.clcaConfig.publishJson(),
-            clcaBettingStrategy = this.clcaBettingStrategy.publishJson(), // TODO needed?
 
             persistedWorkflowMode = this.persistedWorkflowMode,
             skipContests = skipContests,
@@ -122,7 +117,6 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.removeTooManyPhantoms,
             this.auditSampleLimit,
             pollingConfig = this.pollingConfig.publishJson(),
-            pollingErrorStrategy = this.pollingErrorStrategy.publishJson(), // TODO needed?
 
             persistedWorkflowMode = this.persistedWorkflowMode,
             skipContests = skipContests,
@@ -145,7 +139,6 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.auditSampleLimit,
             clcaConfig = this.clcaConfig.publishJson(),
             oaConfig = this.oaConfig.publishJson(),
-            oaBettingStrategy = this.oaBettingStrategy.publishJson(), // TODO needed?
 
             persistedWorkflowMode = this.persistedWorkflowMode,
             skipContests = skipContests,
@@ -172,7 +165,6 @@ fun AuditConfigJson.import(): AuditConfig {
             this.removeTooManyPhantoms,
             auditSampleLimit = this.auditSampleLimit,
             clcaConfig = this.clcaConfig!!.import(),
-            clcaBettingStrategy = this.clcaBettingStrategy?.import() ?: ClcaBettingStrategy(),
 
             persistedWorkflowMode = this.persistedWorkflowMode,
             skipContests = skipContests?: emptyList(),
@@ -194,7 +186,6 @@ fun AuditConfigJson.import(): AuditConfig {
             this.removeTooManyPhantoms,
             auditSampleLimit = this.auditSampleLimit,
             pollingConfig = this.pollingConfig!!.import(),
-            pollingErrorStrategy = this.pollingErrorStrategy?.import() ?: PollingErrorStrategy(),
 
             persistedWorkflowMode = this.persistedWorkflowMode,
             skipContests = skipContests?: emptyList(),
@@ -217,7 +208,6 @@ fun AuditConfigJson.import(): AuditConfig {
             auditSampleLimit = this.auditSampleLimit,
             clcaConfig = this.clcaConfig?.import() ?: ClcaConfig(),
             oaConfig = this.oaConfig!!.import(),
-            oaBettingStrategy = this.oaBettingStrategy?.import() ?: OneAuditBettingStrategy(),
 
             persistedWorkflowMode = this.persistedWorkflowMode,
             skipContests = skipContests?: emptyList(),
@@ -280,53 +270,10 @@ data class OneAuditConfigJson(
 
 fun OneAuditConfig.publishJson() = OneAuditConfigJson(this.strategy.name, this.d, this.useFirst)
 fun OneAuditConfigJson.import() = OneAuditConfig(
-        enumValueOf(this.strategy, OneAuditStrategyType.entries) ?: OneAuditStrategyType.optimalComparison,
+        enumValueOf(this.strategy, OneAuditStrategyType.entries) ?: OneAuditStrategyType.generalAdaptive,
         this.d,
         this.useFirst
     )
-
-@Serializable
-data class PollingErrorStrategyJson(
-    val d: Int = 100,
-)
-
-fun PollingErrorStrategy.publishJson() = PollingErrorStrategyJson(this.d)
-fun PollingErrorStrategyJson.import() = PollingErrorStrategy(this.d)
-
-@Serializable
-data class ClcaBettingStrategyJson(
-    val strategy: String,
-    val fuzzPct: Double? = null, // use to generate apriori errorRates, (if null use simFuzzPct?)
-    val errorRates: List<Double>?, // use as apriori errorRates for simulation and audit
-    val d: Int = 100,  // shrinkTrunc weight for error rates
-)
-
-fun ClcaBettingStrategy.publishJson() = ClcaBettingStrategyJson(this.strategy.name, this.fuzzPct, this.errorRates?.toList(), this.d)
-fun ClcaBettingStrategyJson.import() = ClcaBettingStrategy(
-    enumValueOf(this.strategy, ClcaBettingStrategyType.entries) ?: ClcaBettingStrategyType.noerrors,
-    this.fuzzPct,
-    if (this.errorRates != null) PluralityErrorRates.fromList(this.errorRates) else null,
-    this.d,
-)
-
-// TODO ClcaStrategy for simulation
-// reportedMean: eta0 = reportedMean, shrinkTrunk
-// bet99: eta0 = reportedMean, 99% max bet
-// eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk
-// optimalComparison = uses bettingMart with OptimalComparisonNoP1
-@Serializable
-data class OneAuditBettingStrategyJson(
-    val strategy: String,
-    val d: Int = 100,  // shrinkTrunc weight
-    val useFirst: Boolean = true, // use actual cvrs for estimation
-)
-
-fun OneAuditBettingStrategy.publishJson() = OneAuditBettingStrategyJson(this.strategy.name, this.d, this.useFirst)
-fun OneAuditBettingStrategyJson.import() = OneAuditBettingStrategy(
-    enumValueOf(this.strategy, OneAuditBettingStrategyType.entries) ?: OneAuditBettingStrategyType.optimalComparison,
-    this.d,
-    this.useFirst
-)
 
 /////////////////////////////////////////////////////////////////////////////////
 

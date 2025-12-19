@@ -49,7 +49,7 @@ class CreateElectionP(
 
 private val logger = KotlinLogging.logger("CreateAudit")
 
-class CreateAuditP(val name: String, val config: AuditConfig, election: CreateElectionPIF, val auditDir: String, clear: Boolean = true) {
+class CreateAudit(val name: String, val config: AuditConfig, election: CreateElectionPIF, val auditDir: String, clear: Boolean = true) {
 
     val stopwatch = Stopwatch()
 

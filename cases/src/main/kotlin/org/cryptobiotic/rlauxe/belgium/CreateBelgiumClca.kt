@@ -55,7 +55,7 @@ fun createBelgiumClca(
     }
     val election = BelgiumClca(contestd)
 
-    CreateAuditP("belgiumClca", config, election, auditdir, clear = clear)
+    CreateAudit("belgiumClca", config, election, auditdir, clear = clear)
     println("createBelgiumClca took $stopwatch")
 }
 

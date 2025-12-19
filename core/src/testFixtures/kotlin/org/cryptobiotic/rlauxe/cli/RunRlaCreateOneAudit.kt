@@ -120,7 +120,7 @@ object RunRlaCreateOneAudit {
             extraPct,
         )
 
-        CreateAuditP("RunRlaStartOneAudit", config, election, auditDir = "$topdir/audit", clear = false)
+        CreateAudit("RunRlaStartOneAudit", config, election, auditDir = "$topdir/audit", clear = false)
 
         // write the sorted cards: why isnt this part of CreateAudit? Because seed must be generated after committment to cardManifest
         val publisher = Publisher(auditDir)

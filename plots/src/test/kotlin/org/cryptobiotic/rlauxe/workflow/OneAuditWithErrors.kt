@@ -52,7 +52,7 @@ class OneAuditWithErrors {
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "optimalBet"),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true,
-                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.optimalComparison)
+                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.generalAdaptive)
                 )
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorReportedMean))

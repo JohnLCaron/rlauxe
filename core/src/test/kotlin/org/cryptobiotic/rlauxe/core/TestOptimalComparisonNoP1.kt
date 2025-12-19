@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.core
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+// CANDIDATE for removal
+
 class TestOptimalComparisonNoP1 {
 
     @Test

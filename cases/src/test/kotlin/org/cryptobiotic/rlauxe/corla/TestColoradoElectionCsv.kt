@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.core.AdaptiveBetting
+import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.core.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.core.populationMeanIfH0
@@ -56,13 +58,28 @@ fun betPayoffSamples(N: Int, risk: Double, assorterMargin: Double, error: Double
     val assorterMargin2 = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin, not clca margin
     // val noerror = 1.0 / (2.0 - assorterMargin / assorter.upperBound())
     val noerror = 1 / (2 - assorterMargin2) // assumes upperBound = 1.0
-    val bettingFn = AdaptiveBetting(
+    val bettingFnOld = AdaptiveBetting(
         N = N,
         a = noerror,
         d = 100,
         errorRates = PluralityErrorRates(error, error, error, error),
     )
-    val samples = PluralityErrorTracker(noerror)
+    // class GeneralAdaptiveBetting(
+    //    val Npop: Int, // population size for this contest
+    //    // val accumErrorCounts: ClcaErrorCounts, // propable illegal to do (cant use prior knowlege of the sample)
+    //    val oaErrorRates: OneAuditErrorRates?,
+    //    val d: Int = 100,  // trunc weight
+    //    val maxRisk: Double, // this bounds how close lam gets to 2.0; TODO study effects of this
+    //    val withoutReplacement: Boolean = true,
+    //    val debug: Boolean = false,
+    val bettingFn = GeneralAdaptiveBetting(
+        Npop = N,
+        oaErrorRates = null,
+        d = 100,
+        maxRisk = .99,
+    )
+
+    val samples = ClcaErrorTracker(noerror, 1.0)
     repeat(10) { samples.addSample(noerror) }
     val bet = bettingFn.bet(samples)
     val mj = populationMeanIfH0(N=N, true, samples)

@@ -36,7 +36,7 @@ class TestPersistedWorkflow {
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
-        CreateAuditP("testPersistedSingleClca", config, election, auditDir = auditdir, clear = true)
+        CreateAudit("testPersistedSingleClca", config, election, auditDir = auditdir, clear = true)
 
         writeUnsortedPrivateMvrs(Publisher(auditdir), testMvrs, config.seed)
 
@@ -61,7 +61,7 @@ class TestPersistedWorkflow {
         val contestsUA = contests.map { ContestUnderAudit(it, isClca = true).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
-        CreateAuditP("testPersistedAuditClca",  config, election, auditDir = auditdir,  clear = true)
+        CreateAudit("testPersistedAuditClca",  config, election, auditDir = auditdir,  clear = true)
 
         // have to write this here, where we know the mvrs
         writeUnsortedPrivateMvrs(Publisher(auditdir), testMvrs, config.seed)
@@ -115,7 +115,7 @@ class TestPersistedWorkflow {
 
         val config = AuditConfig(
             AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = .01,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
+            oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = true)
         )
 
         val N = 5000
@@ -131,7 +131,7 @@ class TestPersistedWorkflow {
         val contestsUA = listOf(contestOA)
 
         val election = CreateElectionFromCvrs(contestsUA, mvrs, cardPools, config=config)
-        CreateAuditP("testPersistedAuditPolling", config, election, auditDir = "$topdir/audit", clear = true)
+        CreateAudit("testPersistedAuditPolling", config, election, auditDir = "$topdir/audit", clear = true)
 
         runPersistedAudit(topdir, test=false)
     }

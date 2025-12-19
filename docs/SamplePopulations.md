@@ -1,96 +1,54 @@
 # What does hasStyle mean?
-_12/18/25_
+_12/19/25_
 
 # TL;DR
 
 The best case is to have CVRs that record undervotes. Then things are simple and as efficent as possible.
 
 Otherwise, we need to create "Population" containers that know which contests may be in it, and use these 
-when choosing audit samples. Set hasStyle (aka hasSingleCardStyle) = true if all cards int population have one ContestType. 
+when choosing audit samples. Set hasStyle (aka hasSingleCardStyle) = true if all cards in the population have one CardType
+(i.e all cards in the population have the same contests).
 This is set independently on each population (rather than globally on the audit), and used when deciding the 
 assort value when an MVR is missing a contest on Clca and OneAudit assorters.
 
-I think hasStyle should be used for Polling assorters as well, which is not explicitly in SHANGRLA.
+I think hasStyle should be used for Polling assorters as well, which is not explicitly done in SHANGRLA.
 
-## Preliminaries
+## Definitions
 
-Define:
+* physical card = pcard: the physical ballot or physical card if the ballot has multiple cards and the cards are scanned and stored seperately.
+* CVR: scanned electronic record of a physical card
+* MVR: human audited physical card
+* auditable card = card:  internal computer representation of a physical card; contains the CVR if there is one. At minimum a card has a _location_ which allows a human auditor to locate the physical card, and a _population_ that it belongs to.
 
-* physical card = pcard = the physical ballot or a physical card if the ballot has multiple cards and the cards are scanned and stored seperately
-* CVR = scanned electronic record of a physical card
-* MVR = human audited physical card
-* auditable card = card = internal computer representation of a physical card. contains the CVR if there is one. 
-At minimum it has a _location_ which allows a human auditor to locate the physical card.
-* phantom card = auditable card added to ensure number of cards = Nc.
-* card manifest = complete list of auditable cards, one for each physical card and phantom; size = Nupper.
+* CardStyle: the full and exact list of contests on a card.
+* population: a distinct container of pcards, from which we can retreive named cards (even if its just by an index into a ordered list).
+* population.possibleContests: list of contests that are in this population.
+* population.hasSingleCardStyle: is true if all cards in the population have a single known CardStyle, so that "we think we know exactly what contests are on each card".
 
-**The upper limit.** We have a trusted upper limit Nc = Nupper, for each contest. The card manifest must have Nc cards; add phantoms until you do. 
-Sample over those Npop > Nc cards, and if you find an MVR that doesnt contain the contest,  give it an assort value of 0.
-That ensures that you cant fool the audit by adding bogus CVRs. You have to point to enough legitimate mvrs to pass the statistical test. 
-Call this claim the "failNc claim".
+* contest upper limit: For each contest, we have a trusted upper limit Nc = Nupper, of the number of cards containing the contest.
+* phantom card = auditable card added to ensure number of cards = Nc. Phantom cards arent in a population; they have a list of contests they contain.
+* card manifest = complete list of auditable cards, one for each physical card and phantom card.
 
-**The reported margin**. The reported margin is (nwinners - nlosers) / N, where N = Nc is the trusted upper limit, or Npop (see below). 
-For CLCA we can read the CVRs and verify there are nwinners and nlosers, ie the vote totals from the CVRs match the reported contest totals.
-When auditing, if not enough CVRs match MVRs that have the contest, then the audit will fail due to the failNc claim. 
-Claim that one cant manipulate the margin because of this = "failMargin claim".
+* Contest population = P_c: For each contest, the set of cards that may have the contest on it. This is the sample population for the contest. 
+* Contest population size = |P_c| = Npop: The size of the contest's population. Npop >= Nc. If hasStyle = true for all populations containing the contest, then Nc = Npop.
 
-**Clca noerror**. When an MVR matches the card, you get a clca assort value of 
+* Reported margin: Each assorter has a reported margin with Nc as denominator; For Plurality it is (nwinners - nlosers) / Nc.
+  Other assorters are somewhat different.
+* Diluted margin:  Each assorter has a diluted margin with Npop as denominator; for Plurality it is (nwinners - nlosers) / Npop.
+  Other assorters are somewhat different.
 
-    noerror = 1.0 / (2.0 - margin / assorter.upperBound()).
-    (reportedMargin or dilutedMargin? Jeesh.)
-
-The question is, could an attacker manipulate the audit by making noerror larger than it really is?
-
-````
-    v = margin must be in (0, 1]. 
-    u = upperBound() must be > 0.5, so 1/u < 2, then v / u in (0..2)
-    so noerror = 1 / (2 - v/u) -> 1/2 as v/u -> 0, -> inf as v/u -> 2
-    
-    if every vote is for the winner, and there are no phantoms, v = 1.
-    theres no upper bound on u, eg 
-        above threshold u = 1 / 2t, where t in (0..1), so u -> inf as t -> 0, u in (0.5..inf)
-        below threshold u = 1/2(1-t), where t in (0..1), so u -> inf as t -> 1, u in (0.5..inf)
-        dhondt u = (first/last+1)/2; first and last go from 1 to nseats, so u could go from (1/nseats + 1)/2 to (nseats + 1)/2 -> (0.5..inf) as nseats -> inf
-    so v/u -> 2 when u -> min u
-    
-    plurality u = 1, so v / u in (0..1)
-    so noerror = 1 / (2 - v/u) -> 1/2 as v -> 0, -> 1 as v -> 1
-    so plurality is well behaved
-````
-
-So could an attacker manipulate noerror by making it larger than it really is?
-If you beleive the failMargin claim, then you cant change v. What about u?
-The assorter upperBound (= u) are fixed in code. 
-Plurality u always = 1. (Could limit the other assorters by bounding min t or max nseats).
-Make t and nseats part of the public config, that can be checked by the verifier.
-Claim this is sufficent to prevent noerror manipulation = "failNoerror claim".
-
-**Diluted or Reported margin** Should noerror use reported or diluted margin?
-
-Noerror is the credit you get when the mvr matchs the cvr. Using diluted margin will decrease the credit when Npop > Nc.
-
-The reported margin is (nwinners - nlosers) / Nupper, where Nupper is trusted.
-The diluted margin is (nwinners - nlosers) / Npopulation, where Npopulation > Nupper. (discussed next)
-
-Philip's "More style, less work" paper uses diluted margins. (Paper shows how Npop is smaller when hasStyle = true. 
-Could also say that Npop is smaller when you know which cards have the contest, and can sample from just those.)
-
-In TestAvgAssortValues, testAvgAssortWithDilutedMargin() tests that dilutedMargin, not reportedMargin, agrees with cvrs.assortMargin.
-
-Conclusion: use diluted margin for nerror.
 
 # Populations
 
 Each contest has a known population P_c of cards it might be in. |P_c| = Npopulation = Npop is used for the diluted margin. 
 When auditing, we sample consistently over P_c.
 
-In the best case, we are running a CLCA audit where the CVRs record the undervotes. Then, the CVR records the exact contests on the card, and Npop = Nc.
+In the best case, we are running a CLCA audit where the CVRs record the undervotes. Then, the CVRs record the exact contests on the card, and Npop = Nc.
 
 There are other scenarios besides CLCA with undervotes where we know exactly which contests are on each card (even for polling):
 
 1. When theres only one contest.
-2. When the cards are divided into "containers", and each container has only one CardStyle.
-3. what else?
+2. When the cards are divided into populations that have only one CardStyle.
    
 In the case that "we know exactly what contests are on all cards", SHANGRLA sets hasStyle = true. So we will take that as the meaning
 of hasStyle.
@@ -98,21 +56,10 @@ of hasStyle.
 When we dont know the exact list of contests on all the cards, it is worth narrowing the population size down as much as possible,
 to minimize sample sizes.
 
-Define:
-
-* CardStyle = the full and exact list of contests on a card.
-* card.exactContests = list of contests that are on this card = CardStyle = "we know exactly what contests are on this card".
-* card.possibleContests = list of contests that might be on this card.
-
-* "population" = a distinct container of cards, from which we can retreive named cards (even if its just by an index into a ordered list).
-* population.possibleContests = list of contests that are in this population.
-* population.hasSingleCardStyle = true if all cards in the population have a single known CardStyle = "we know exactly what contests are on each card".
-* population.exactContests = hasSingleCardStyle
-
 Populations describe the containers that the physical cards are kept in. They are needed to do uniform sampling when its not 
-CLCA with undervotes. Using populations decrease the diluted count (and so increase the margins) as much as we know how to. 
+CLCA with undervotes. Using populations minimizes the diluted count (and so maximizes the margins) as much as we know how to. 
 
-For the same audit and contest, you could have different populations with different values of hasCardStyle. For example, one precinct has a
+For the same audit and contest, you could have different populations with different values of hasSingleCardStyle. For example, one precinct has a
 single CardStyle containing contest c, and another has multiple card styles, not all of which contain contest c.
 
 The calculation of Npop must be transparent so verifiers (or just humans?) can verify it.
@@ -120,9 +67,6 @@ The Population list should be published / committed to.
 
 Its worth noting that the EA (election authority) knows the card style for every voter and ballot. 
 So we are dealing with the limitations of associating CardStyles with the anonymous physical ballots and scanned cvrs.
-
-The point is that one has to deal with the specifics of how each election stores their ballots. 
-Possibly try to influence how ballots are handled to make the audit more efficient.
 
 ## Examples
 
@@ -135,7 +79,7 @@ the cards in the container will have contest S; otherwise, none of the cards in 
 Suppose a ballot has c cards to it. Suppose all ballots of the same style are kept in the same container, but the cards are
 scanned and separately addressable. If there are c cards, we know that only 1/c have the contest.
 
-population.possibleContests = all contests on the ballot (aka ballot style). population.hasCardStyle = false, because there are c distinct CardStyles.
+population.possibleContests = all contests on the ballot (aka ballot style). population.hasSingleCardStyle = false, because there are c distinct CardStyles.
 
 ### CLCA without undervotes
 
@@ -155,10 +99,10 @@ record the undervotes for the redacted pools, so we guess what they are for the 
 
 The OneAudit pools are the populations that we need for the audit.
 
-In San Francisco, the pools do not appear to have one CardStyle, so population.exactContests = false.
-In Boulder, each pool appeasr to have one CardStyle, so population.exactContests = true.
+In San Francisco, the pools do not appear to have one CardStyle, so population.hasSingleCardStyle = false.
+In Boulder, each pool appear to have one CardStyle, so population.hasSingleCardStyle = true.
 
-For OneAudit, we know the vote totals for the population. Is the general case we dont necissarily know the vote counts
+For OneAudit, we know the vote totals for the population. Is the general case we dont necessarily know the vote counts
 for each population. But see Ncast section below.
 
 ## Contest is missing in the MVR
@@ -167,14 +111,13 @@ When the contest is missing, we assign 0 to mvr_assort when hasStyle=true, and 0
 
 The first case tanks the audit, and the second may allow attacks(?)
 
-Using population.exactContests instead of global hasStyles should be better. TODO investigate the effect of that change.
+Using population.hasSingleCardStyle instead of global hasStyles should be better. TODO investigate the effect of that change.
 
-But still, note that population.exactContests requires all cards to have the same CardStyle in a population. 
-So it = false, even if theres only one card thats different.
+But still, note that population.hasSingleCardStyle requires all cards to have the same CardStyle in a population. 
+So it is false even if theres only one card thats different.
 That could have a big effect on the assort values, but it only increases the diluted count by 1. Seems fishy.
 
-An attacker could claim exactContests=false, could we detect that?
-Lets rename the flag to population.hasSingleCardStyle. Then we ask a trusted auditor to validate is 
+An attacker could falsely claim hasSingleCardStyle=false; could we detect that?
 
 
 ### Contest is missing for Polling
@@ -202,6 +145,63 @@ When hasStyles = true, we can count the cards and see how many each contest has.
 
 When hasStyles = false, where so we get Ncast? If the populations all have vote totals that include undervotes, we can get Ncast from them.
 Otherwise we have to assume that both Nc and Ncast are given by the EA.
+
+# Claims
+
+The card manifest must have Nc cards; add phantoms until you do.
+Sample over those Npop > Nc cards, and if you find an MVR that doesnt contain the contest,  give it an assort value of 0.
+That ensures that you cant fool the audit by adding bogus CVRs. You have to point to enough legitimate mvrs to pass the statistical test.
+Call this claim the "failNc claim".
+
+**The reported margin**. The reported margin is (nwinners - nlosers) / N, where N = Nc is the trusted upper limit, or Npop (see below).
+For CLCA we can read the CVRs and verify there are nwinners and nlosers, ie the vote totals from the CVRs match the reported contest totals.
+When auditing, if not enough CVRs match MVRs that have the contest, then the audit will fail due to the failNc claim.
+Claim that one cant manipulate the margin because of this = "failMargin claim".
+
+**Clca noerror**. When an MVR matches the card, you get a clca assort value of
+
+    noerror = 1.0 / (2.0 - margin / assorter.upperBound()).
+    (reportedMargin or dilutedMargin? Jeesh.)
+
+The question is, could an attacker manipulate the audit by making noerror larger than it really is?
+
+````
+    v = margin must be in (0, 1]. 
+    u = upperBound() must be > 0.5, so 1/u < 2, then v / u in (0..2)
+    so noerror = 1 / (2 - v/u) -> 1/2 as v/u -> 0, -> inf as v/u -> 2
+    
+    if every vote is for the winner, and there are no phantoms, v = 1.
+    theres no upper bound on u, eg 
+        above threshold u = 1 / 2t, where t in (0..1), so u -> inf as t -> 0, u in (0.5..inf)
+        below threshold u = 1/2(1-t), where t in (0..1), so u -> inf as t -> 1, u in (0.5..inf)
+        dhondt u = (first/last+1)/2; first and last go from 1 to nseats, so u could go from (1/nseats + 1)/2 to (nseats + 1)/2 -> (0.5..inf) as nseats -> inf
+    so v/u -> 2 when u -> min u
+    
+    plurality u = 1, so v / u in (0..1)
+    so noerror = 1 / (2 - v/u) -> 1/2 as v -> 0, -> 1 as v -> 1
+    so plurality is well behaved
+````
+
+So could an attacker manipulate noerror by making it larger than it really is?
+If you beleive the failMargin claim, then you cant change v. What about u?
+The assorter upperBound (= u) are fixed in code.
+Plurality u always = 1. (Could limit the other assorters by bounding min t or max nseats).
+Make t and nseats part of the public config, that can be checked by the verifier.
+Claim this is sufficent to prevent noerror manipulation = "failNoerror claim".
+
+**Diluted or Reported margin** Should noerror use reported or diluted margin?
+
+Noerror is the credit you get when the mvr matchs the cvr. Using diluted margin will decrease the credit when Npop > Nc.
+
+The reported margin is (nwinners - nlosers) / Nupper, where Nupper is trusted.
+The diluted margin is (nwinners - nlosers) / Npopulation, where Npopulation > Nupper. (discussed next)
+
+Philip's "More style, less work" paper uses diluted margins. (Paper shows how Npop is smaller when hasStyle = true.
+Could also say that Npop is smaller when you know which cards have the contest, and can sample from just those.)
+
+In TestAvgAssortValues, testAvgAssortWithDilutedMargin() tests that dilutedMargin, not reportedMargin, agrees with cvrs.assortMargin.
+
+Conclusion: use diluted margin for nerror.
 
 
 

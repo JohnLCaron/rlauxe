@@ -14,7 +14,8 @@ import kotlin.test.Test
 import kotlin.test.fail
 
 @OptIn(ExperimentalPathApi::class)
-class TestRunCli {
+// test RunCli in temp directory
+class TestRunCliInTemp {
 
     @Test
     fun testCliRoundClca() {

@@ -341,13 +341,13 @@ fun createBoulderElectionP(
         else if (auditType.isOA())
             AuditConfig( // TODO hasStyle=false ?
                 AuditType.ONEAUDIT, riskLimit=riskLimit, contestSampleCutoff=20000, minRecountMargin=minRecountMargin, nsimEst=10,
-                oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true)
+                oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = true)
             )
     else throw RuntimeException("unsupported audit type $auditType")
 
     val election = CreateBoulderElectionP(export, sovo, isClca = auditType.isClca(), poolsHaveOneCardStyle)
 
-    CreateAuditP("boulder", config, election, auditDir = auditDir, clear = clear)
+    CreateAudit("boulder", config, election, auditDir = auditDir, clear = clear)
     println("createBoulderElectionOAnew took $stopwatch")
 }
 

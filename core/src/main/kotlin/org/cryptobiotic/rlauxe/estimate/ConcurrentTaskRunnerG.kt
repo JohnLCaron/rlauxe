@@ -48,7 +48,6 @@ class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Bo
 
         // doesnt return until all tasks are done
         if (logRuns) logger.info{"took $stopwatch"}
-        // println("that ${stopwatch.tookPer(tasks.size, "task")}")
         return results
     }
 

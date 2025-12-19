@@ -12,11 +12,6 @@ import kotlin.collections.contains
 * batch.hasCardStyle = true if all cards in the batch have a single known CardStyle = "we know exactly what contests are on each card".
 */
 
-data class NamedCardStyle(
-    val name: String,
-    val contests: IntArray,
-)
-
 interface PopulationIF {
     fun name(): String
     fun id(): Int

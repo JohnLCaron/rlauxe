@@ -8,8 +8,50 @@ import kotlin.test.Test
 class TestRunRoundAgainCli {
 
     @Test
-    fun testRunRoundAgainCli() {
+    fun testRunRoundAgainOneAudit() {
         val auditDir = "$testdataDir/persist/testRunCli/oneaudit/audit"
+
+        RunRoundAgainCli.main(
+            arrayOf(
+                "-auditDir", auditDir,
+                "-contest", "1",
+                "-round", "1",
+                "-assertion", "0/1",
+            )
+        )
+    }
+
+    @Test
+    fun testRunRoundAgainClca() {
+        val auditDir = "$testdataDir/persist/testRunCli/clca/audit"
+
+        RunRoundAgainCli.main(
+            arrayOf(
+                "-auditDir", auditDir,
+                "-contest", "1",
+                "-round", "1",
+                "-assertion", "0/1",
+            )
+        )
+    }
+
+    @Test
+    fun testRunRoundAgainPolling() {
+        val auditDir = "$testdataDir/persist/testRunCli/polling/audit"
+
+        RunRoundAgainCli.main(
+            arrayOf(
+                "-auditDir", auditDir,
+                "-contest", "1",
+                "-round", "1",
+                "-assertion", "0/1",
+            )
+        )
+    }
+
+    // @Test TODO
+    fun testRunRoundAgainRaire() {
+        val auditDir = "$testdataDir/persist/testRunCli/raire/audit"
 
         RunRoundAgainCli.main(
             arrayOf(

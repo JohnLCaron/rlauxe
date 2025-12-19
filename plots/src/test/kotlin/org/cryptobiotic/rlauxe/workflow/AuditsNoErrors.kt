@@ -46,7 +46,7 @@ class AuditsNoErrors {
                     N, margin, 0.0, 0.0, cvrPercent, 0.0,
                     auditConfigIn = AuditConfig(
                         AuditType.ONEAUDIT, true, nsimEst = nsimEst,
-                        oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.optimalComparison)
+                        oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.generalAdaptive)
                     ),
                     parameters=mapOf("nruns" to nruns, "cat" to "oneaudit-${(100 * cvrPercent).toInt()}%"),
                 )

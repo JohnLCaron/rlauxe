@@ -8,22 +8,12 @@ import kotlin.sequences.plus
 
 // A generalization of Cvr, allowing votes to be null, eg for Polling or OneAudit pools.
 // Also, cardStyle/population represents the sample population information.
-//
-// hasStyle -> cvrsAreComplete
-// CLCA and cvrsAreComplete: dont need cardStyles
-// CLCA and !cvrsAreComplete: always need cardStyles
-
-// OA and cvrsAreComplete: cardStyles only for pooled data.
-// OA and !cvrsAreComplete: always need cardStyles; cant use CvrsWithStylesToCards since poolId has been hijacked
-
-// Polling: always need cardStyles
 
 data class AuditableCard (
     val location: String, // info to find the card for a manual audit. Aka ballot identifier.
     val index: Int,  // index into the original, canonical list of cards
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
-    // val possibleContests: IntArray, // remove
 
     val votes: Map<Int, IntArray>?, // must have this and/or population
     val poolId: Int?,
@@ -38,14 +28,8 @@ data class AuditableCard (
         }
     }
 
-    // Deprecated
     // if there are no votes, the IntArrays are all empty; looks like all undervotes
     fun cvr() : Cvr {
-        /*val useVotes = if (votes != null) votes else {
-            possibleContests.mapIndexed { idx, contestId ->
-                Pair(contestId, votes?.get(idx) ?: intArrayOf())
-            }.toMap()
-        } */
         return Cvr(location, votes ?: emptyMap(), phantom, poolId)
     }
 
@@ -136,13 +120,9 @@ data class AuditableCard (
 
     companion object {
         fun fromCvr(cvr: Cvr, index: Int, prn: Long): AuditableCard {
-            // val sortedVotes = cvr.votes.toSortedMap()
-            // val contests = sortedVotes.keys.toList()
             return AuditableCard(cvr.id, index, prn=prn, cvr.phantom, cvr.votes, cvr.poolId)
         }
         fun fromCvrs(cvrs: List<Cvr>): List<AuditableCard> {
-            // val sortedVotes = cvr.votes.toSortedMap()
-            // val contests = sortedVotes.keys.toList()
             return cvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0) }
         }
     }
@@ -151,8 +131,6 @@ data class AuditableCard (
 // put cards into canonical form
 class CvrsWithPopulationsToCardManifest(
     val type: AuditType,
-    // val cvrsAreComplete: Boolean,       // TODO cvrsAreComplete == false means cardStyles != null and poolId != null;
-    // unless theres some default behavior, esp with poolId; maybe "all"
     val cvrs: CloseableIterator<Cvr>,
     val phantomCvrs : List<Cvr>?,
     populations: List<PopulationIF>?,

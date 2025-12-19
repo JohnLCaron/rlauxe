@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.sfn
 
+// CANDIDATE for removal
 // TODO move to test, dont use in production?
 
 // CLCA assorter errors, where upper = 1 (as in plurality)

@@ -13,6 +13,8 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.min
 
+private val logger = KotlinLogging.logger("Contest")
+
 // For a Contest; Assertions may be mixed.
 enum class SocialChoiceFunction(val hasMinPct: Boolean) {
     PLURALITY(false),
@@ -166,6 +168,7 @@ open class Contest(
         //// find winners, check that the minimum value is satisfied
         // This works for PLURALITY, APPROVAL, THRESHOLD.  IRV handled by RaireContest, DHONDT by DHondtContest
 
+        // TODO not sure we should be declaring winners ourselves ???
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
         val useMin = info.minFraction ?: 0.0
         val overTheMin = votes.toList().filter{ it.second.toDouble()/nvotes >= useMin }
@@ -175,7 +178,7 @@ open class Contest(
         winnerNames = winners.map { mapIdToName[it]!! }
         if (winners.isEmpty()) {
             val pct = votes.toList().associate { it.first to it.second.toDouble() / nvotes }.toMap()
-            println("*** there are no winners for $info nvotes=$nvotes votes=$pct")
+            logger.info {"*** there are no winners for $info" }
         }
 
         // find losers
@@ -186,7 +189,7 @@ open class Contest(
         losers = mlosers.toList()
     }
 
-    // TODO candidate for removal
+    // TODO candidate for removal? or call it reportedMargin()
     fun margin(winner: Int, loser: Int): Double {
         val winnerVotes = votes[winner] ?: 0
         val loserVotes = votes[loser] ?: 0
@@ -291,8 +294,6 @@ open class ContestUnderAudit(
     val Nphantoms = contest.Nphantoms()
     val Npop: Int = NpopIn ?: Nc // "sample population size" for this contest, used to make diluted margins
     val isIrv = contest.info().isIrv
-    // TODO doubt it
-    // val hasCompleteCvrs = Npop == contest.Nc() // cvrs include undervotes; only matters for clcaAssorter TODO seems dicey
 
     var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms
     var pollingAssertions: List<Assertion> = emptyList() // mutable needed for Raire override and serialization
@@ -304,8 +305,6 @@ open class ContestUnderAudit(
         } else if (contest.winners().size == 0) {
             preAuditStatus = TestH0Status.NoWinners
         }
-        // if (hasStyle != hasCompleteCvrs)
-        //    logger.warn { "ContestUnderAudit $id hasStyle $hasStyle2 != ($Npop == ${contest.Nc()}" }
     }
 
     // dhondt

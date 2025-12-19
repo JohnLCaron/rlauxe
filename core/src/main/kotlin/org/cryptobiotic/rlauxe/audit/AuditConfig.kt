@@ -29,15 +29,9 @@ data class AuditConfig(
     val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
     val auditSampleLimit: Int? = null, // limit audit sample size; audit all samples, ignore risk limit
 
-    // old config, replace by error strategies
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(),
     val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.clca, useFirst = true),
-
-    // default error strategies
-    val pollingErrorStrategy: PollingErrorStrategy = PollingErrorStrategy(),
-    val clcaBettingStrategy: ClcaBettingStrategy = ClcaBettingStrategy(),
-    val oaBettingStrategy: OneAuditBettingStrategy = OneAuditBettingStrategy(),
 
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
     val skipContests: List<Int> = emptyList(),
@@ -93,6 +87,7 @@ data class PollingConfig(
 //  fuzzPct: ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct) for first round.
 //  oracle: use actual measured error rates for first round. (violates martingale condition)
 
+// TODO only generalAdaptive is currently used
 enum class ClcaStrategyType { generalAdaptive, apriori, fuzzPct, oracle  }
 data class ClcaConfig(
     val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
@@ -108,60 +103,11 @@ data class ClcaConfig(
 // bet99: eta0 = reportedMean, 99% max bet
 // eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk
 // note OneAudit uses ClcaConfig for error estimation
-enum class OneAuditStrategyType { clca, optimalComparison, bet99, eta0Eps }
+// TODO only generalAdaptive is currently used
+enum class OneAuditStrategyType { clca, generalAdaptive, bet99, eta0Eps }
 data class OneAuditConfig(
-    val strategy: OneAuditStrategyType = OneAuditStrategyType.optimalComparison, // TODO
+    val strategy: OneAuditStrategyType = OneAuditStrategyType.generalAdaptive, // TODO
     val d: Int = 100,  // shrinkTrunc weight
     val useFirst: Boolean = false, // use actual cvrs for estimation
 )
-
-////////////////////////////////////////////////////////////
-// not used yet
-// uses AlphaMart with TruncShrinkage
-data class PollingErrorStrategy(
-    val d: Int = 100,  // shrinkTrunc weight TODO study what this should be, eg for noerror assumption?
-)
-
-// Error Rates: the minimum p2o is always the phantom rate. Subsequent rounds, always use measured rates.
-//  apriori: pass in apriori errorRates for first round.
-//  fuzzPct: ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct) for first round.
-//  noerrors: assume noerrors on first round.
-//  oracle: use actual measured error rates for first round. (violates martingale condition)
-// optimalComparison:  OptimalComparisonNoP1, assume P1 = 0, closed form solution for lamda.
-enum class ClcaBettingStrategyType { apriori, fuzzPct, noerrors, oracle, optimalComparison }
-data class ClcaBettingStrategy(
-    val strategy: ClcaBettingStrategyType = ClcaBettingStrategyType.noerrors,
-    val fuzzPct: Double? = null, // use to generate apriori errorRates, (if null use simFuzzPct?)
-    val errorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit
-    val d: Int = 100,  // shrinkTrunc weight for error rates
-)
-
-// reportedMean: eta0 = reportedMean, shrinkTrunk
-// bet99: eta0 = reportedMean, 99% max bet
-// eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk
-// optimalComparison = uses bettingMart with OptimalComparisonNoP1
-enum class OneAuditBettingStrategyType { reportedMean, bet99, eta0Eps, optimalComparison }
-data class OneAuditBettingStrategy(
-    val strategy: OneAuditBettingStrategyType = OneAuditBettingStrategyType.optimalComparison,
-    val d: Int = 100,  // shrinkTrunc weight
-    val useFirst: Boolean = true, // use actual cvrs for estimation
-)
-
-//// clca
-//  use selected ClcaBettingStrategy
-//  estimation: use real cards, simulate cards with ClcaCardSimulatedErrorRates
-//  auditing: simulate mvrs with simFuzzPct or ClcaSimulatedErrorRates? if simFuzzPct, see how it compares or ClcaSimulatedErrorRates
-
-/// polling
-//  use AlphaMart/TruncShrink
-//  estimation: use real cards: simulate cards with PollingCardFuzzSampler with simFuzzPct. done
-//  auditing: simulate mvrs with simFuzzPct
-
-/// OneAudit
-//  use OneAuditBettingStrategy and ClcaBettingStrategy
-//  estimation: use real cards, simulate cards with ClcaBettingStrategy/ClcaCardSimulatedErrorRates, dont touch pool cards
-//  auditing: simulate mvrs with simFuzzPct
-
-
-
 

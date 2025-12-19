@@ -158,7 +158,7 @@ class ContestSimulation(val contest: Contest, val Npop: Int) {
             return ContestSimulation(contest, contest.Nc)
         }
 
-        // TODO CANDIDATE for removal
+        // Needed for Polling estimation
         fun simulateCvrsDilutedMargin(contestUA: ContestUnderAudit, config: AuditConfig): List<Cvr> {
             val limit = config.contestSampleCutoff
             val contestOrg = contestUA.contest as Contest // TODO

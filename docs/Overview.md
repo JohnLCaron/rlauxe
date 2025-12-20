@@ -1,5 +1,5 @@
 # Rlauxe Implementation Overview
-_last changed 12/10/2025_
+_last changed 12/20/2025_
 
 While Rlauxe is intended to be used in real elections, its primary use currently is to simulate elections for testing
 RLA algorithms.
@@ -59,6 +59,7 @@ When all the cards in the manifest have "possible contests" that equal the actua
 then Npop == Nupper and the audit's hasStyle flag is set to true. This will be true, for example, when we have complete CVRs, 
 in a one contest election, if the physical cards are kept in batches with a single card style, or other cases.
 
+See Sample Population for more details.
 
 ## The AuditRecord
 
@@ -227,9 +228,6 @@ _AuditWorkflow_ and its subclasses (esp _PersistedWorkflow_) implement auditing 
 mvrManager abstracts the handling of mvrs.
 
 
-
-
-
 ///////////////////////////////////////////////////////////////////////////
 TODO rewrite
 
@@ -337,213 +335,3 @@ Each audit type has specialized processing for creating the AuditableCards and t
       OneAudit with styles=true, where the margin adjustment is zero.
 
 4. **Polling audit**: we create simulated CVRs that exactly match the reported vote count, ncards and undervotes to use as the test MVRs.
-
-## Audit Types and hasStyle (1)
-
-
-|               | hasVotes | hasUndervotes | hasStyle | singleStylePools |
-|---------------|----------|---------------|----------|------------------|
-| CLCA          | true     | ?             | if hasU  | -                |
-| Polling       | false    | -             | ?        | -                |
-| OneAudit CVR  | true     | ?             | if hasU  | -                |
-| OneAudit pool | false    | -             | ?        | ?                |
-
-hasVotes: every card (except phantoms) has a CVR
-
-hasUndervotes: the votes include undervotes. aka cvrsAreComplete. aka hasStyle.
-    user must supply this info? or is Npop == Nc sufficient? sufficient but not necessary?
-
-hasStyle: "we know exactly what contests are on each card". 
-    could be true even when we dont know the votes. 
-    Npop == Nc ?
-    if false, then we expect to see mvrs (and cvrs?) in the clca assorter without the contest.
-    if true, then we dont expect to see mvrs (and cvrs?) in the clca assorter without the contest.
-    single contest election; all cards have a card style; 
-
-CardStyle is the full and exact list of contests on a card. 
-  (The EA knows this, goddammit. We should insist on it for all types of audits, and put them on the CardManifest.)
-  (So, the CardStyle exists and is known by the EA, but the info may not be available at the audit.)
-  Privacy: Card styles that could identify voters are called RedactedCardStyles. 
-  The RedactedCardStyle must include all contests on the card, even if there are no votes for the contest.
-  Put all cards (and only those cards) with a RedactedCardStyle into a OneAudit pool. 
-
-Batch describes a distinct population of cards.
-    
-    batchName: String
-    batchSize: Int (?)
-    possibleContests: IntArray() are the list of possible contests.
-    hasStyle: Boolean = if all cards have exactly the contests in PossibleContests
-
-OneAuditPool is a Batch with vote totals for the batch.
-
-    hasStyle is true when all cards have a single CardStyle.
-    regVotes: Map<Int, IntArray> total votes for non-IRV
-    irvVotes: VoteConsolidator votes for IRV 
-
-PoolContests are the list of possible contests on any card in a OneAudit pool, used when cards in a pool have more than one CardStyle.
-
-SamplePopulationContests are the list of possible contests in a sample population. Same as PoolContests where the sample population = OneAudit.
-
-### hasStyle for Polling 
-
-Suppose each precinct has one CardStyle, and you keep the ballots for each precinct in a seperate pile.
-You hand count each ballot, but keep all cards for one ballot in the same ballot envelope.
-Then it doesnt matter how many cards are in the ballot. Since we know the exact contests on all cards, we 
-have hasStyle = true. The contest audit can sample only from the batches that contain the contest, and Npop = Nc.
-
-Suppose you audit a ballot that turns out not to have that contest? Seems like its a 0, not a 0.5, when hasStyle = true.
-   `if (!cvr.hasContest(info.id)) return if (hasStyle) 0.0 else 0.5`
-Thats in the code for ClcaAssorter, but not for the primitive assorters.
-
-Same scenario, but the cards are seperated and all are kept in the same pile. 
-This is the example of MoreStyle section 5.
-So each ballot puts n cards in the pile, and the card's pcontests = BallotStyle, and hasStyle = false.
-We expect to see (n-1)/n cards without the contest, and 1/n with the contest, so !cvs.contest = 0.5.
-
-Without changing the CardManifest, could you claim hasStyles = false, in order to get a 0.5 score? 
-Could you use that for an attack?
-
-What if some precincts have ballots with one card, and some have > 1 card
-Could each batch have a different value of hasStyle ??
-
-
-## Audit Types and hasStyle (2)
-
-1. Physical card has location id that is recorded on the CVR. (CLCA)
-   1. CVR has complete info (or references a card style). (hasStyle)
-   2. CVR does not have undervotes, does not reference a card style. (noStyle) TODO
-
-2. Some/all ballots are in pools where CVR does not exist or CVR id is not recorded on the physical card. (OneAudit)
-   1. CVR exists and has complete info (or references a card style), but id not recorded. (hasStyle) 
-      * If ncards > 1, and physical card location knows which card it is, divide pool so each has one card style. (SF OneAudit)
-      * Otherwise, form the union of contests == pool card style. (SF OneAudit)
-   2. CVR exists but does not record undervotes or reference a card style. (noStyle) TODO
-   3. CVR does not exist, only Pool totals. Pool cardStyle is the Union of all contests in the precinct. (noStyle) (Boulder OneAudit?)
-
-3. There are no CVRs (Polling)
-
-    When polling, you can reduce the sample size by
-    choosing ballots that contain the contests you want. So then the diluted margin comes back in when estimating.
-
-   1. Theres only 1 pool of cards, unknow card styles. (noStyle)
-   2. There are multiple pools and each pool has one card style. (hasStyle) (Boulder Polling?)
-   3. There are multiple pools that can be used to narrow the population size. (OneAudit noStyle vs Polling?)
-
-* In all variants, for each card, the list of possible contests that are on it is recorded (and made as tight as possible). Card
-  styles can be factored out or not. The diluted margin of a contest is calculated by summing over the cards.
-
-In ClcaAssorter.overstatementError(), hasStyle penalises MVR not having the contest, but noStyle treats it as a non-vote,
-since you are sampling a population where you expect non-votes.
-
-Otherwise, hasStyle only affects the calculation of the dilutedMargin.
-
-When hasStyle, margin = dilutedMargin, else margin > dilutedMargin.
-always use dilutedMargin when estimating the sample size.
-
-Ballot vs Card : If the physical cards are stored and processed separately (common case), then everything is done with cards. 
-If the cards are kept together, we can pretend the ballot is one card.
-The only exception (possibly) is if the card style can be used in forming the CardManifest, see p.13 below.
-
-From MoreStyle
-
-p.6 (c = 1)
-There are N ballots cast in the jurisdiction, of which N_B = N contain contest B and
-N_S = p * N < N contain contest S, where p ∈ (0, 1).
-
-The reported margin of contest B is M_B votes and the reported margin of contest S is M_S votes. 
-Let m_B ≡ M_b /N_B and m_S ≡ M_S /N_S be the two _partially diluted margins_.
-
-p.9 (c > 1)
-Now suppose that each ballot consists of c > 1 cards. For simplicity, suppose that every
-voter casts all c cards of their ballot. Contest B is on all N ballots and on N of the N * c cards.
-Contest S is on N * p of the N * c cards.
-
-fully diluted margin (noStyle) = 
-
-    for B: M_B/(N*c) = (1/c) * m_B, B assumed to be on all ballots
-    for S: M_S/(N*c) = (p/c) * m_S, p is proportion of ballot containing S
-
-p. 13 (polling audit)
-
-Suppose for each precinct, we know which ballots contain S but not which particular cards contain S, and
-that the c cards comprising each ballot are kept in the same container. (This is an idealization
-of precinct-based voting where each voter in a precinct gets the same ballot style and casts
-all c cards of the ballot.) 
-
-So we have a set of precinct pools, and when auditing S, we dont sample pools that dont contain S.
-
-We can reduce the sampling universe for contest S from the original population of N * c cards to a smaller
-population of p * N * c cards, of which p * N actually contain contest S.
-
-
-Notes
-
-1. Keep the CardLocationManifest -> CardManifest. May include a CardStyles record.
-2. Add CardStyle reference to AuditableCard I think. Used when card style is used. Maybe "all" always returns contains(contest) = true ??
-3. Pools are used for both OA and Polling.
-4. Have to use diluted margin in estimation and audit, and in the ClcaAssorter..
-
-
-Where is hasStyle used? 
-
-ClcaAssorter.overstatementError()  // needed
-ContestSimulation.makeBallotManifest()  // needed
-
-MultiContestTestData ??
-AuditRound estSampleSize else estSampleSizeNoStyles // maybe can get rid of estSampleSizeNoStyles?
-
-not needed in:
-ClcaWithoutReplacement
-PollWithoutReplacement
-
-======================
-
-For use_style=true, the contest is sampled from just the cards claiming to contain that contest. If the MVR does not contain the contest, the overstatement_error() penalizes by assuming a vote for the loser.
-
-For use_style=false, the contest is sampled from all cards that might contain that contest, and we use the fully diluted margin to account for this (and match the assorter mean). We expect some of the MVRs to not have the contest, so the MVR is considered to be a non-vote in the contest
-
-For OneAudit, the contest is sampled from all CVRs that claim to have that contest, plus all the cards in pools that might contain the contest.
-
-So when calculating the overstatement_error, use hasStyles=true if the card has a CVR, and hasStyles=false if the card is from a pool.
-
-If using CSD, the Prover must commit to the CSD before the PRN is chosen.
-A verifier needs to check that cards are chosen in order of smallest PRN, and satisfy the CSD if used.
-
-MoreStyles Section 5 shows that polling audits can have hasStyle = true.
-
-==========================
-
-````
-    data class AuditableCard (
-        val location: String, // info to find the card for a manual audit. Aka ballot identifier.
-        val index: Int,  // index into the original, canonical list of cards
-        val prn: Long,   // psuedo random number
-        val phantom: Boolean,
-        val possibleContests: IntArray, // list of contests that might be on the ballot. TODO replace with cardStyle?
-        val votes: Map<Int, IntArray>?, // for CLCA or OneAudit, a map of contest -> the candidate ids voted; must include undervotes; missing for pooled data or polling audits
-        
-        val poolId: Int?, // for OneAudit
-        val cardStyle: String? = null, // not used yet
-    ) {
-        fun hasContest(contestId: Int): Boolean {
-            if (possibleContests.isEmpty() && votes == null) return true
-            return contests().contains(contestId)
-        }
-    }
-````
-
-### contest is missing in the MVR
-
-When the contest is missing, we assign 0 to mvr_assort when hasStyle=true, and 0.5 when hasStyle=false.
-
-The first case tanks the audit, and the second allows attacks.
-
-One could keep track of the times when we audit a card with missing contest. We can calculate how many cards have missing contests there should be in the pool. Then we assign a value depending on the actual and expected values.
-
-OneAudit handles two someone distinct use cases:
-
-1. (SF2024) there are cvrs for all cards, but the precinct cvrs cant match the physical ballot. We know exactly how many cards a contest has in the pool. If there are multiple card styles per pool, then the sample size for a contest will be larger than the contest pool count.
-
-2.1 (Boulder24) We have a vote count for the "redacted" pools but no cvrs. Undervotes are not included. We do not not know how many cards contain the contest, but it is bounded by the pool size.
-
-2.2 (Boulder28?) Undervotes are included in the vote count for each contest and pool. We know exactly how many cards a contest has in the pool.

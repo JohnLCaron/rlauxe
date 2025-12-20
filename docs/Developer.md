@@ -1,5 +1,5 @@
 # Developer Notes
-_12/13/2025_
+_12/20/2025_
 
 ## Prerequisites
 
@@ -164,14 +164,6 @@ last changed: 03/10/2025
 
 ![rlauxe JSON UML](images/rlauxeJson.svg)
 
-# TODO 11/29/25
-
-* hasStyle
-* raire, oaIrv
-* review strategies and fuzzing in estimation
-* review strategies and fuzzing in auditing
-* replace old plots
-* test dhondt, threshold assorters
 
 # TODO 12/11/25 (Belgium)
 
@@ -180,9 +172,12 @@ last changed: 03/10/2025
 * assertions that look at coalitions of parties. (Vanessa)
 * choose an audit size and measure the risk.
 
-# TODO 12/13/25
+# TODO 12/20/25
 
-* hasStyle/CardManifest refactor
-* get code stable for review
+* rlauxe / irv review
+* investigate the effect of population.hasSingleCardStyle = hasStyle.
+* investigate possible attacks with mvr_assort = 0.5 when the mvr is missing the contest.
+* review strategies and fuzzing in estimation and auditing
+* replace old plots
 
 

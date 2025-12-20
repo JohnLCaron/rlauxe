@@ -67,7 +67,7 @@ fun PopulationIFJson.import(): PopulationIF {
 //    val name: String,
 //    val id: Int,
 //    val possibleContests: IntArray, // the list of possible contests.
-//    val exactContests: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
+//    val hasSingleCardStyle: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
 //)
 @Serializable
 class PopulationJson(
@@ -75,7 +75,7 @@ class PopulationJson(
     val id: Int,
     val ncards: Int,
     val possibleContests: IntArray,
-    val exactContests: Boolean
+    val hasSingleCardStyle: Boolean
 )
 
 fun Population.publishJson() = PopulationJson(
@@ -91,7 +91,7 @@ fun PopulationJson.import(): Population {
         this.name,
         this.id,
         this.possibleContests,
-        this.exactContests,
+        this.hasSingleCardStyle,
     )
     cardPool.ncards = this.ncards
     return cardPool

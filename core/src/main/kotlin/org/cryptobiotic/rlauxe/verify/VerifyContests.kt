@@ -340,16 +340,16 @@ fun verifyClcaAssortAvg(
 
     // sum all the assorter values in one pass across all the cvrs, including Pools
     val cardAssortAvgs = mutableMapOf<Int, MutableMap<String, AssortAvg>>()  // contest -> assorter -> average
+
     cards.use { cardIter ->
         while (cardIter.hasNext()) {
             val card = cardIter.next()
-
             contestsUA.forEach { contestUA ->
-                val avg = cardAssortAvgs.getOrPut(contestUA.id) { mutableMapOf() }
-                contestUA.clcaAssertions.forEach { cassertion ->
-                    val passorter = cassertion.assorter
-                    val assortAvg = avg.getOrPut(passorter.hashcodeDesc()) { AssortAvg() }
-                    if (card.hasContest(contestUA.id)) {
+                if (card.hasContest(contestUA.id)) {
+                    val assorters = cardAssortAvgs.getOrPut(contestUA.id) { mutableMapOf() }
+                    contestUA.clcaAssertions.forEach { cassertion ->
+                        val passorter = cassertion.assorter
+                        val assortAvg = assorters.getOrPut(passorter.hashcodeDesc()) { AssortAvg() }
                         assortAvg.ncards++
                         assortAvg.totalAssort += passorter.assort(card.cvr(), usePhantoms = false)
                     }

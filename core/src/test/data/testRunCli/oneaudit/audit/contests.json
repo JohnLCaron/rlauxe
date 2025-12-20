@@ -25,7 +25,6 @@
                 "Ncast": 50000
             },
             "isComparison": true,
-            "hasStyle": true,
             "pollingAssertions": [
                 {
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
@@ -47,7 +46,6 @@
                             "winner": 0,
                             "loser": 1
                         },
-                        "hasStyle": true,
                         "dilutedMargin": 0.04,
                         "poolAverages": {
                             "assortAverage": {

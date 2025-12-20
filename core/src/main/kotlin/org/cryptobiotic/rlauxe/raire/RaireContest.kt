@@ -101,7 +101,8 @@ data class RaireContest(
 class RaireContestUnderAudit(
     contest: RaireContest,
     val rassertions: List<RaireAssertion>,
-): ContestUnderAudit(contest, isClca=true) {
+    NpopIn: Int,
+): ContestUnderAudit(contest, isClca=true, NpopIn) {
     val candidates =  contest.info.candidateIds
 
     init {
@@ -114,14 +115,14 @@ class RaireContestUnderAudit(
 
     fun makeRairePollingAssertions(): List<Assertion> {
         return rassertions.map { rassertion ->
-            val dilutedMean = margin2mean(rassertion.marginInVotes.toDouble() / contest.Nc()) // TODO should be Npop
+            val dilutedMean = margin2mean(rassertion.marginInVotes.toDouble() / Npop)
             val assorter = RaireAssorter(contest.info(), rassertion).setDilutedMean(dilutedMean)
             Assertion(contest.info(), assorter)
         }
     }
 
     override fun showShort() = buildString {
-        append("${name} ($id) Nc=$Nc winner ${contest.winners().first()} losers ${contest.losers()} minMargin=${df(minDilutedMargin())}") //  est=$estMvrs status=$status")
+        append("${name} ($id) Nc=$Nc Npop=$Npop winner ${contest.winners().first()} losers ${contest.losers()} minMargin=${df(minDilutedMargin())}")
     }
 
     override fun equals(other: Any?): Boolean {
@@ -152,6 +153,7 @@ class RaireContestUnderAudit(
                  Ncast: Int,
                  undervotes: Int,
                  assertions: List<RaireAssertion>,
+                 Npop: Int,
          ): RaireContestUnderAudit {
 
             val winnerId = info.candidateIds[winnerIndex]
@@ -162,7 +164,7 @@ class RaireContestUnderAudit(
                 Ncast = Ncast,
                 undervotes = undervotes,
             )
-            return RaireContestUnderAudit(contest, assertions)
+            return RaireContestUnderAudit(contest, assertions, Npop)
         }
     }
 }
@@ -202,7 +204,7 @@ NEN(irv_elimination): ci > ck if only {S} remain
   NEN two vote understatement: cvr has loser as first pref among remaining (0), mvr has winner as first pref among remaining (1)
   NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
  */
-enum class RaireAssertionType(val aname: String) {
+enum class RaireAssertionType(val shortName: String) {
     winner_only("NEB"),
     irv_elimination("NEN");
 
@@ -284,11 +286,11 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
     override fun dilutedMean() = dilutedMean
 
     override fun desc() = buildString {
-        append("Raire winner/loser=${rassertion.winnerId}/${rassertion.loserId} margin=${rassertion.marginInVotes} difficulty=${rassertion.difficulty}")
+        append("Raire ${rassertion.assertionType.shortName} winner/loser=${rassertion.winnerId}/${rassertion.loserId} marginInVotes=${rassertion.marginInVotes} difficulty=${rassertion.difficulty}")
         if (rassertion.assertionType == RaireAssertionType.irv_elimination) append(" eliminated=${rassertion.eliminated}")
         append(" votes=${rassertion.votes}")
     }
-    override fun hashcodeDesc() = "${winLose()} ${info.name} ${rassertion.hashCode()}" // must be unique for serialization
+    override fun hashcodeDesc() = "${rassertion.assertionType.shortName} ${winLose()} ${rassertion.eliminated}" // must be unique for serialization
 
     override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
         return rassertion.marginInVotes / N.toDouble()

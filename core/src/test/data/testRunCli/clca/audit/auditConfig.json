@@ -2,7 +2,7 @@
     "auditType": "CLCA",
     "hasStyle": true,
     "riskLimit": 0.05,
-    "seed": 9204783373455090564,
+    "seed": -2010631112418277797,
     "nsimEst": 100,
     "quantile": 0.2,
     "contestSampleCutoff": 30000,
@@ -14,9 +14,6 @@
         "strategy": "generalAdaptive",
         "d": 100,
         "maxRisk": 0.9
-    },
-    "clcaBettingStrategy": {
-        "strategy": "noerrors"
     },
     "version": 2.0,
     "skipContests": []

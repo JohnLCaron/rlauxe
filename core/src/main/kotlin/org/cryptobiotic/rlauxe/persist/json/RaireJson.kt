@@ -9,10 +9,9 @@ import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 
 // class RaireContestUnderAudit(
 //    contest: RaireContest,
-//    val winner: Int,
 //    val rassertions: List<RaireAssertion>,
-//    hasStyle: Boolean = true,  // TODO do we really support hasStyle == false?
-//): ContestUnderAudit(contest, isComparison=true, hasStyle=hasStyle) {
+//    NpopIn: Int,
+//): ContestUnderAudit(contest, isClca=true, NpopIn) {
 
 @Serializable
 data class RaireContestUnderAuditJson(
@@ -34,6 +33,7 @@ fun RaireContestUnderAuditJson.import(): RaireContestUnderAudit {
     val result = RaireContestUnderAudit(
         raireContest as RaireContest,
         this.rassertions.map { it.import() },
+        contestUA.Npop,
     )
     result.clcaAssertions = contestUA.clcaAssertions // TODO wonky
     return result

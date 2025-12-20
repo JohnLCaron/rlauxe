@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.persist.json
 
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.workflow.readPopulations
 import kotlin.io.path.createTempFile
 import kotlin.test.Test
@@ -13,8 +14,8 @@ class TestReadPopulations {
 
     @Test
     fun testReadOneAuditPools() {
-        // val auditDir = "$testdataDir/persist/testCliRoundOneAudit/audit"
-        val auditdir = "../core/src/test/data/testRunCli/oneaudit/audit"
+        val auditdir = "$testdataDir/persist/testRunCli/oneaudit/audit"
+        // val auditdir = "../core/src/test/data/testRunCli/oneaudit/audit"
 
         val publisher = Publisher(auditdir)
         val pools = readPopulations(publisher)!!

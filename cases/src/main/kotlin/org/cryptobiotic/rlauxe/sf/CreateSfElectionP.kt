@@ -203,7 +203,7 @@ fun makeClcaContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<I
             val contest = Contest(info, cvrTab.votes, useNc, cvrTab.ncards)
             ContestUnderAudit(contest, NpopIn=contestNbs[info.id]).addStandardAssertions()
         } else {
-            makeRaireContestUA(info, cvrTab, useNc, Nbin=contestNbs[info.id])
+            makeRaireContestUA(info, cvrTab, useNc, Nbin=contestNbs[info.id]!!)
         }
         contestUA.contest.info().metadata["PoolPct"] = 0
         contestsUAs.add(contestUA)

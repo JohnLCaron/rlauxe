@@ -5,13 +5,13 @@
             "oneauditPool": {
                 "poolName": "pool42",
                 "poolId": 42,
-                "exactContests": false,
+                "hasSingleCardStyle": false,
                 "ncards": 2500,
                 "regVotes": {
                     "1": {
                         "votes": {
-                            "0": 1288,
-                            "1": 1187
+                            "1": 1187,
+                            "0": 1288
                         },
                         "ncards": 2500,
                         "undervotes": 25

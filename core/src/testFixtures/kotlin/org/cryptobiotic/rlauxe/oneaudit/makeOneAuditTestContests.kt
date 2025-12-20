@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.raire.RaireAssertion
@@ -30,7 +29,7 @@ fun makeTestContestOAIrv(): RaireContestUnderAudit {
         listOf(2), mapOf(1 to 1, 2 to 2, 3 to 3)
     )
 
-    val oaIrv = RaireContestUnderAudit(rcontest, rassertions = listOf(assert1, assert2))
+    val oaIrv = RaireContestUnderAudit(rcontest, rassertions = listOf(assert1, assert2), Nc)
 
     /* add pools
 

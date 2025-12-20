@@ -3,20 +3,15 @@ _12/20/25_
 
 ## TL;DR
 
-The most efficient audit has CVRs (that include undervotes) for all ballots. 
+The most efficient audit has CVRs (that include undervotes) for all ballots.
 
-Otherwise, we need to create "Population" card containers that know which contests are in it, and use these 
-when choosing audit samples. 
+Otherwise, we need to create "Population" card containers that know which contests are in it, and use these when choosing audit samples.
 
-Each population sets hasSingleCardStyle = true if all cards in the population have one CardType
-(i.e all cards in the population have the same contests).
-This is set independently on each population, and replaces the global hasStyle flag.
+Each population sets "hasSingleCardStyle" = true if all cards in the population have one CardType (i.e all cards in the population have the same contests).  This is set independently on each population, and replaces the global hasStyle (aka use_style) flag.
 
-The population.hasSingleCardStyle is used when deciding the 
-assort value when an MVR is missing a contest, for all audits including Polling.
+The population.hasSingleCardStyle field is used when deciding the assort value when an MVR is missing a contest, for all audits including Polling.
 
-The use of populations is implicit in the "More Styles, less work" paper. Setting hasStyle by population
-and using hasStyle in Polling audits is new, I think.
+The use of populations is implicit in the "More styles, less work" paper. Setting hasStyle by population and using hasStyle in Polling audits is new, I think. These complexities arise in multi-contest audits and multi-card ballots.
 
 ## Definitions
 
@@ -107,7 +102,7 @@ The OneAudit pools are the populations.
 In San Francisco, the pools do not appear to have one CardStyle, so population.hasSingleCardStyle = false.
 In Boulder, each pool appears to have one CardStyle, so population.hasSingleCardStyle = true.
 
-For OneAudit, we know the vote totals for the population. Is the general case we dont necessarily know the vote counts
+For OneAudit, we know the vote totals for the population. In the general case we dont necessarily know the vote counts
 for each population. Also see Ncast section below.
 
 ## Contest is missing in the MVR

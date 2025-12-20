@@ -108,5 +108,5 @@ fun makeRaireUA(): RaireContestUnderAudit {
     val assert2 = RaireAssertion(1, 2, 0.0,22, RaireAssertionType.irv_elimination,
         listOf(2), mapOf(1 to 1, 2 to 2, 3 to 3))
 
-    return RaireContestUnderAudit(contest, rassertions=listOf(assert1, assert2))
+    return RaireContestUnderAudit(contest, rassertions=listOf(assert1, assert2), contest.Nc)
 }

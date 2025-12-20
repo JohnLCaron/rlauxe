@@ -6,13 +6,13 @@ import kotlin.test.Test
 import kotlin.test.fail
 
 class TestRunVerifyContests {
-
     val show = true
+    val useLocal = true
 
     @Test
     fun testRunVerifyClca() {
-        // val auditdir = "../core/src/test/data/testRunCli/clca/audit"
-        val auditdir = "$testdataDir/persist/testRunCli/clca/audit"
+        val auditdir = if (useLocal) "../core/src/test/data/testRunCli/clca/audit"
+            else "$testdataDir/persist/testRunCli/clca/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
         println()
         print(results)
@@ -26,8 +26,8 @@ class TestRunVerifyContests {
 
     @Test
     fun testRunVerifyOA() {
-        val auditdir = "../core/src/test/data/testRunCli/oneaudit/audit"
-        // val auditdir = "$testdataDir/persist/testCliRoundOneAudit/audit"
+        val auditdir = if (useLocal) "../core/src/test/data/testRunCli/oneaudit/audit"
+            else "$testdataDir/persist/testRunCli/oneaudit/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
@@ -41,8 +41,8 @@ class TestRunVerifyContests {
 
     @Test
     fun testRunVerifyPolling() {
-        val auditdir = "../core/src/test/data/testRunCli/polling/audit"
-        // val auditdir = "$testdataDir/persist/testCliRoundPolling/audit"
+        val auditdir = if (useLocal) "../core/src/test/data/testRunCli/polling/audit"
+            else "$testdataDir/persist/testRunCli/polling/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)
@@ -56,8 +56,8 @@ class TestRunVerifyContests {
 
     @Test
     fun testRunVerifyRaire() {
-        val auditdir = "../core/src/test/data/testRunCli/raire/audit"
-        // val auditdir = "$testdataDir/persist/testCliRoundRaire/audit"
+        val auditdir = if (useLocal) "../core/src/test/data/testRunCli/raire/audit"
+            else "$testdataDir/persist/testRunCli/raire/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
         println()
         print(results)

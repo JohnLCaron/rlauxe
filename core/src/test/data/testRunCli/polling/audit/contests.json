@@ -6,45 +6,6 @@
                 "id": 0,
                 "candidateNames": {
                     "cand0": 0,
-                    "cand1": 1
-                },
-                "choiceFunction": "PLURALITY",
-                "nwinners": 1,
-                "voteForN": 1,
-                "metadata": {}
-            },
-            "contest": {
-                "className": "Contest",
-                "votes": {
-                    "1": 9948,
-                    "0": 8953
-                },
-                "Nc": 20083,
-                "Ncast": 20000
-            },
-            "isComparison": false,
-            "hasStyle": true,
-            "pollingAssertions": [
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.5247721953891351,
-                        "winner": 1,
-                        "loser": 0
-                    }
-                }
-            ],
-            "clcaAssertions": [],
-            "status": "InProgress",
-            "Npop": 20083
-        },
-        {
-            "info": {
-                "name": "contest1",
-                "id": 1,
-                "candidateNames": {
-                    "cand0": 0,
                     "cand1": 1,
                     "cand2": 2,
                     "cand3": 3
@@ -57,23 +18,22 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "2": 1618,
-                    "1": 1411,
-                    "0": 809,
-                    "3": 48
+                    "3": 5613,
+                    "0": 4557,
+                    "2": 1383,
+                    "1": 768
                 },
-                "Nc": 3988,
-                "Ncast": 3987
+                "Nc": 15959,
+                "Ncast": 15882
             },
             "isComparison": false,
-            "hasStyle": false,
             "pollingAssertions": [
                 {
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5201414131354877,
-                        "winner": 2,
+                        "reportedMean": 0.5262987498132191,
+                        "winner": 3,
                         "loser": 0
                     }
                 },
@@ -81,8 +41,8 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5051536125080914,
-                        "winner": 2,
+                        "reportedMean": 0.6206604572396275,
+                        "winner": 3,
                         "loser": 1
                     }
                 },
@@ -90,15 +50,53 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5390877856893891,
-                        "winner": 2,
-                        "loser": 3
+                        "reportedMean": 0.6053444239677243,
+                        "winner": 3,
+                        "loser": 2
                     }
                 }
             ],
             "clcaAssertions": [],
             "status": "InProgress",
-            "Npop": 20083
+            "Npop": 20077
+        },
+        {
+            "info": {
+                "name": "contest1",
+                "id": 1,
+                "candidateNames": {
+                    "cand0": 0,
+                    "cand1": 1
+                },
+                "choiceFunction": "PLURALITY",
+                "nwinners": 1,
+                "voteForN": 1,
+                "metadata": {}
+            },
+            "contest": {
+                "className": "Contest",
+                "votes": {
+                    "1": 1697,
+                    "0": 1420
+                },
+                "Nc": 4134,
+                "Ncast": 4118
+            },
+            "isComparison": false,
+            "pollingAssertions": [
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.5068984410021418,
+                        "winner": 1,
+                        "loser": 0
+                    }
+                }
+            ],
+            "clcaAssertions": [],
+            "status": "InProgress",
+            "Npop": 20077
         }
     ],
     "rcontestsUnderAudit": []

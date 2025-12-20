@@ -50,7 +50,7 @@ class TestRaireContest {
         assertNotEquals(rcontestUA.hashCode(), rcontestUA2.hashCode())
 
         println(rcontestUA.showShort())
-        assertTrue(rcontestUA.showShort().startsWith("rcontest111 (111) Nc=5000 winner 0 losers [1, 2] minMargin="))
+        assertTrue(rcontestUA.showShort().startsWith("rcontest111 (111) Nc=5000 Npop=5000 winner 0 losers [1, 2]"))
         println("show='${rcontestUA.show()}'")
         assertTrue(rcontestUA.show().contains(rcontestUA.contest.showCandidates()), rcontestUA.show())
         assertTrue(rcontestUA.minRecountMargin()!! > 0.0 && rcontestUA.minRecountMargin()!! < 1.0)

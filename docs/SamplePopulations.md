@@ -1,46 +1,51 @@
-# What does hasStyle mean?
-_12/19/25_
+# Sample Populations
+_12/20/25_
 
-# TL;DR
+## TL;DR
 
-The best case is to have CVRs that record undervotes. Then things are simple and as efficent as possible.
+The most efficient audit has CVRs (that include undervotes) for all ballots. 
 
-Otherwise, we need to create "Population" containers that know which contests may be in it, and use these 
-when choosing audit samples. Set hasStyle (aka hasSingleCardStyle) = true if all cards in the population have one CardType
+Otherwise, we need to create "Population" card containers that know which contests are in it, and use these 
+when choosing audit samples. 
+
+Each population sets hasSingleCardStyle = true if all cards in the population have one CardType
 (i.e all cards in the population have the same contests).
-This is set independently on each population (rather than globally on the audit), and used when deciding the 
-assort value when an MVR is missing a contest on Clca and OneAudit assorters.
+This is set independently on each population, and replaces the global hasStyle flag.
 
-I think hasStyle should be used for Polling assorters as well, which is not explicitly done in SHANGRLA.
+The population.hasSingleCardStyle is used when deciding the 
+assort value when an MVR is missing a contest, for all audits including Polling.
+
+The use of populations is implicit in the "More Styles, less work" paper. Setting hasStyle by population
+and using hasStyle in Polling audits is new, I think.
 
 ## Definitions
 
-* physical card = pcard: the physical ballot or physical card if the ballot has multiple cards and the cards are scanned and stored seperately.
-* CVR: scanned electronic record of a physical card
-* MVR: human audited physical card
-* auditable card = card:  internal computer representation of a physical card; contains the CVR if there is one. At minimum a card has a _location_ which allows a human auditor to locate the physical card, and a _population_ that it belongs to.
+* **physical card** = pcard: the physical ballot or physical card if the ballot has multiple cards and the cards are scanned and stored seperately.
+* **CVR**: scanned electronic record of a physical card
+* **MVR**: human audited physical card
+* **auditable card** = card:  internal computer representation of a physical card; contains the CVR if there is one. At minimum a card has a _location_ which allows a human auditor to locate the physical card, and a _population_ that it belongs to.
 
-* CardStyle: the full and exact list of contests on a card.
-* population: a distinct container of pcards, from which we can retreive named cards (even if its just by an index into a ordered list).
-* population.possibleContests: list of contests that are in this population.
-* population.hasSingleCardStyle: is true if all cards in the population have a single known CardStyle, so that "we think we know exactly what contests are on each card".
+* **CardStyle**: the full and exact list of contests on a card.
+* **population**: a distinct container of pcards, from which we can retreive named cards (even if its just by an index into an ordered list).
+* **population.possibleContests**: list of contests that are in this population.
+* **population.hasSingleCardStyle**: is true if all cards in the population have a single known CardStyle, so that "we think we know exactly what contests are on each card".
 
-* contest upper limit: For each contest, we have a trusted upper limit Nc = Nupper, of the number of cards containing the contest.
-* phantom card = auditable card added to ensure number of cards = Nc. Phantom cards arent in a population; they have a list of contests they contain.
-* card manifest = complete list of auditable cards, one for each physical card and phantom card.
+* **contest upper limit**: For each contest, we have a trusted upper limit Nc = Nupper, of the number of cards containing the contest.
+* **phantom card** = auditable card added to ensure number of cards = Nc. Phantom cards arent in a population; they have a list of contests they contain.
+* **card manifest** = complete list of auditable cards, one for each physical card and phantom card.
 
-* Contest population = P_c: For each contest, the set of cards that may have the contest on it. This is the sample population for the contest. 
-* Contest population size = |P_c| = Npop: The size of the contest's population. Npop >= Nc. If hasStyle = true for all populations containing the contest, then Nc = Npop.
+* **Contest population** = P_c: For each contest, the set of cards that may contain the contest. This is the sample population for the contest. 
+* **Contest population size** = |P_c| = Npop: The size of the contest's population. Npop >= Nc. If hasStyle = true for all populations containing the contest, then Nc = Npop.
 
-* Reported margin: Each assorter has a reported margin with Nc as denominator; For Plurality it is (nwinners - nlosers) / Nc.
-  Other assorters are somewhat different.
-* Diluted margin:  Each assorter has a diluted margin with Npop as denominator; for Plurality it is (nwinners - nlosers) / Npop.
-  Other assorters are somewhat different.
+* **Reported margin**: Each assorter has a reported margin with Nc as denominator; For Plurality it is (nwinners - nlosers) / Nc.
+  Other assorters have numerators somewhat different.
+* **Diluted margin**:  Each assorter has a diluted margin with Npop as denominator; for Plurality it is (nwinners - nlosers) / Npop.
+  Other assorters have numerators somewhat different.
 
 
-# Populations
+## Populations
 
-Each contest has a known population P_c of cards it might be in. |P_c| = Npopulation = Npop is used for the diluted margin. 
+Each contest has a known population P_c of cards that might contain it. |P_c| = Npopulation = Npop is used for the diluted margin. 
 When auditing, we sample consistently over P_c.
 
 In the best case, we are running a CLCA audit where the CVRs record the undervotes. Then, the CVRs record the exact contests on the card, and Npop = Nc.
@@ -53,11 +58,11 @@ There are other scenarios besides CLCA with undervotes where we know exactly whi
 In the case that "we know exactly what contests are on all cards", SHANGRLA sets hasStyle = true. So we will take that as the meaning
 of hasStyle.
 
-When we dont know the exact list of contests on all the cards, it is worth narrowing the population size down as much as possible,
+When we dont know the exact list of contests on all the cards, it is still worth narrowing the population size down as much as possible,
 to minimize sample sizes.
 
-Populations describe the containers that the physical cards are kept in. They are needed to do uniform sampling when its not 
-CLCA with undervotes. Using populations minimizes the diluted count (and so maximizes the margins) as much as we know how to. 
+Populations describe the containers that the physical cards are kept in. 
+Using populations minimizes the diluted count (and so maximizes the margins) as much as possible. 
 
 For the same audit and contest, you could have different populations with different values of hasSingleCardStyle. For example, one precinct has a
 single CardStyle containing contest c, and another has multiple card styles, not all of which contain contest c.
@@ -90,24 +95,24 @@ Then we need to use populations to specify where the undervotes might be.
 
 OneAudit handles two somewhat distinct use cases:
 
-1. There are cvrs for all cards, but the precinct cvrs cant match the physical ballot. We know exactly how many cards a contest has in the pool,
+1. There are cvrs for all cards, but the precinct cvrs cant be matched to the physical ballot. We know exactly how many cards a contest has in the pool,
 and the pool's vote count. This is the SanFrancisco 2024 test case.
 
-2. We have cvrs from some cards, but not all. The remaining cards are in pools with pooled cote counts. 
+2. We have cvrs from some cards, but not all. The remaining cards are in pools with pooled vote counts. 
 Undervotes need to be included in the vote count. This is the Boulder 2024 test case. (Boulder 2024 does not
 record the undervotes for the redacted pools, so we guess what they are for the simulation.)
 
-The OneAudit pools are the populations that we need for the audit.
+The OneAudit pools are the populations.
 
 In San Francisco, the pools do not appear to have one CardStyle, so population.hasSingleCardStyle = false.
-In Boulder, each pool appear to have one CardStyle, so population.hasSingleCardStyle = true.
+In Boulder, each pool appears to have one CardStyle, so population.hasSingleCardStyle = true.
 
 For OneAudit, we know the vote totals for the population. Is the general case we dont necessarily know the vote counts
-for each population. But see Ncast section below.
+for each population. Also see Ncast section below.
 
 ## Contest is missing in the MVR
 
-When the contest is missing, we assign 0 to mvr_assort when hasStyle=true, and 0.5 when hasStyle=false.
+When the contest is missing on th MVR, we assign 0 to mvr_assort when hasStyle=true, and 0.5 when hasStyle=false.
 
 The first case tanks the audit, and the second may allow attacks(?)
 
@@ -120,45 +125,45 @@ That could have a big effect on the assort values, but it only increases the dil
 An attacker could falsely claim hasSingleCardStyle=false; could we detect that?
 
 
-### Contest is missing for Polling
+### Contest is missing in the MVR for Polling
 
-Suppose each precinct has one CardStyle, and each precinct stores its own ballot.
-You hand count each ballot, but keep all cards for one ballot in the same ballot envelope.
+Suppose each precinct has one CardStyle, and each precinct stores its own ballots, and we are doing a Polling audit.
+You hand count the ballots, and keep all cards for a ballot in the same ballot envelope.
 Then it doesnt matter how many cards are in the ballot. Since we know the exact contests on all cards, we
-have hasStyle = true. The contest audit can sample only from the populations that contain the contest, and Npop = Nc.
+have hasSingleCardStyle = true. The contest audit can sample only from the populations that contain the contest, and Npop = Nc.
 
-Suppose you audit a ballot that turns out not to have that contest? Seems like its a 0, not a 0.5, when hasStyle = true.
+Suppose you audit a ballot that turns out not to have that contest? Seems like mvr_assort should be 0, not a 0.5, when hasSingleCardStyle = true.
 `if (!cvr.hasContest(info.id)) return if (hasStyle) 0.0 else 0.5`
-Thats in the code for ClcaAssorter, but not for the primitive assorters.
+is in the code for ClcaAssorter, but not for the primitive assorters.
 
-If in the same scenario, but with the cards seperated, we have the example of MoreStyle section 5.
-Each ballot puts n cards in the pile, and the card's pcontests = BallotStyle, and hasStyle = false.
+If in the same scenario, but with the cards separated (the example of MoreStyle section 5).
+Each ballot puts n seperate cards in the pile, and hasSingleCardStyle = false.
 We expect to see (n-1)/n cards without the contest, and 1/n with the contest, so we cant tolerate setting
-assort = 0 when mvr doesnt have the contest, since that will happen a lot. 
+mvr_assort = 0 when mvr doesnt have the contest, since that will happen a lot. We need to set it to 0.5.
 
-It seems that using population.exactContests might help this problem?
+So we need to set mvr_assort based on hasSingleCardStyle, just as with CLCA and OneAudit.
 
 
 ## What about Ncast and Nphantom?
 
 When hasStyles = true, we can count the cards and see how many each contest has. Use that as Ncast, then add phantoms as needed.
 
-When hasStyles = false, where so we get Ncast? If the populations all have vote totals that include undervotes, we can get Ncast from them.
+When hasStyles = false, where do we get Ncast? If the populations all have vote totals that include undervotes, we can get Ncast from them.
 Otherwise we have to assume that both Nc and Ncast are given by the EA.
 
 # Claims
 
-The card manifest must have Nc cards; add phantoms until you do.
-Sample over those Npop > Nc cards, and if you find an MVR that doesnt contain the contest,  give it an assort value of 0.
+**failNc claim** The card manifest must have Nc cards; add phantoms until you do.
+Sample over those Npop > Nc cards, and if you find an MVR that doesnt contain the contest, give it an assort value of 0.
 That ensures that you cant fool the audit by adding bogus CVRs. You have to point to enough legitimate mvrs to pass the statistical test.
 Call this claim the "failNc claim".
 
-**The reported margin**. The reported margin is (nwinners - nlosers) / N, where N = Nc is the trusted upper limit, or Npop (see below).
+**failMargin claim**. The reported margin is (nwinners - nlosers) / N, where N = Nc is the trusted upper limit, or Npop (see below).
 For CLCA we can read the CVRs and verify there are nwinners and nlosers, ie the vote totals from the CVRs match the reported contest totals.
 When auditing, if not enough CVRs match MVRs that have the contest, then the audit will fail due to the failNc claim.
 Claim that one cant manipulate the margin because of this = "failMargin claim".
 
-**Clca noerror**. When an MVR matches the card, you get a clca assort value of
+**failNoerror claim**. When an MVR matches the card, you get a clca assort value of
 
     noerror = 1.0 / (2.0 - margin / assorter.upperBound()).
     (reportedMargin or dilutedMargin? Jeesh.)
@@ -189,19 +194,22 @@ Plurality u always = 1. (Could limit the other assorters by bounding min t or ma
 Make t and nseats part of the public config, that can be checked by the verifier.
 Claim this is sufficent to prevent noerror manipulation = "failNoerror claim".
 
-**Diluted or Reported margin** Should noerror use reported or diluted margin?
+
+## Should noerror use reported or diluted margin?
 
 Noerror is the credit you get when the mvr matchs the cvr. Using diluted margin will decrease the credit when Npop > Nc.
+Noerror uses v/u, where v is the margin. Is it the reported margin or the diluted margin?
 
 The reported margin is (nwinners - nlosers) / Nupper, where Nupper is trusted.
-The diluted margin is (nwinners - nlosers) / Npopulation, where Npopulation > Nupper. (discussed next)
+The diluted margin is (nwinners - nlosers) / Npopulation, where Npopulation > Nupper. 
 
 Philip's "More style, less work" paper uses diluted margins. (Paper shows how Npop is smaller when hasStyle = true.
 Could also say that Npop is smaller when you know which cards have the contest, and can sample from just those.)
 
-In TestAvgAssortValues, testAvgAssortWithDilutedMargin() tests that dilutedMargin, not reportedMargin, agrees with cvrs.assortMargin.
+Rlauxe's TestAvgAssortValues.testAvgAssortWithDilutedMargin() shows that dilutedMargin, not reportedMargin, agrees with the
+average cvrs assortMargin.
 
-Conclusion: use diluted margin for nerror.
+Conclusion: use diluted margin for noerror calculation
 
 
 

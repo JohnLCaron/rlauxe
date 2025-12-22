@@ -243,7 +243,7 @@ class CreateBoulderElectionP(
                 val info = infoMap[contestId]
 
                 // TODO approx
-                tab.ncards += contestVote.map { it.value }.sum() / info!!.voteForN // wrong, dont use
+                tab.ncards += contestVote.map { it.value }.sum() / info!!.voteForN // TODO wrong, dont use
             }
         }
         return votes

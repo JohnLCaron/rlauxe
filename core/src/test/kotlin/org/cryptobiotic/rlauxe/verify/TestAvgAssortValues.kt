@@ -2,11 +2,11 @@ package org.cryptobiotic.rlauxe.verify
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardsWithPopulationsToCardManifest
+import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCardManifest
 import org.cryptobiotic.rlauxe.audit.CvrsWithPopulationsToCardManifest
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -56,7 +56,7 @@ class TestAvgAssortValues {
 
         val minassert = contestUA.minPollingAssertion()
         println(minassert)
-        assertEquals(contestUA.makeDilutedMargin(minassert!!.assorter), contestUA.minDilutedMargin())
+        assertEquals(minassert!!.assorter.dilutedMargin(), contestUA.minDilutedMargin())
 
         //     cards: CloseableIterator<AuditableCard>,
         //    result: VerifyResults,
@@ -104,7 +104,7 @@ class TestAvgAssortValues {
 
         val minassert = contestUA.minPollingAssertion()
         println(minassert)
-        assertEquals(contestUA.makeDilutedMargin(minassert!!.assorter), contestUA.minDilutedMargin())
+        assertEquals(minassert!!.assorter.dilutedMargin(), contestUA.minDilutedMargin())
 
         val results = VerifyResults()
         verifyClcaAssortAvg(contestsUA, cardIterable.iterator(), results, show = true)
@@ -121,7 +121,7 @@ class TestAvgAssortValues {
         val underVotePct = 0.234..0.345
         val phantomRange = 0.001..0.01
 
-        val test = MultiContestTestDataP(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
         val testCvrs = test.makeCvrsFromContests()
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
@@ -158,7 +158,7 @@ class TestAvgAssortValues {
         val underVotePct = 0.034..0.0345
         val phantomRange = 0.001..0.005
 
-        val test = MultiContestTestDataP(ncontests, nbs, N, marginRange, underVotePct, phantomRange,
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange,
             addPoolId = true)
 
         println()
@@ -168,8 +168,8 @@ class TestAvgAssortValues {
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeAuditableCardCsv(it)}") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CardsWithPopulationsToCardManifest(
-                AuditType.CLCA, Closer(testCards.iterator()),
+            MergePopulationsIntoCardManifest(
+                Closer(testCards.iterator()),
                 populations = test.populations,
             )
         }
@@ -205,7 +205,7 @@ class TestAvgAssortValues {
         val underVotePct = 0.034..0.0345
         val phantomRange = 0.001..0.005
 
-        val test = MultiContestTestDataP(ncontests, nbs, N, marginRange, underVotePct, phantomRange,
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange,
             addPoolId = true)
 
         println()
@@ -217,8 +217,8 @@ class TestAvgAssortValues {
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeAuditableCardCsv(it)}") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CardsWithPopulationsToCardManifest(
-                AuditType.CLCA, Closer(testCards.iterator()),
+            MergePopulationsIntoCardManifest(
+                Closer(testCards.iterator()),
                 populations = modStyles,
             )
         }

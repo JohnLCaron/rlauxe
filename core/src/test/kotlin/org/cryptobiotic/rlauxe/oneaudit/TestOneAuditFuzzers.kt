@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.estimate.OneAuditVunderBarFuzzer
+import org.cryptobiotic.rlauxe.util.OneAuditVunderBarFuzzer
 import org.cryptobiotic.rlauxe.estimate.showChangeMatrix
 import org.cryptobiotic.rlauxe.estimate.sumDiagonal
 import org.cryptobiotic.rlauxe.estimate.sumOffDiagonal
@@ -21,11 +21,11 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
-class TestOneAuditPairFuzzer {
+class TestOneAuditFuzzers {
     val showOA = true
 
     @Test
-    fun testMakeFuzzedCvrsFromContestOA() {
+    fun testMakeFuzzedCvrsFrom() {
         val Nc = 10000
         val fuzzPcts = listOf(0.001, .005, .01, .02, .05)
         val margins =
@@ -37,7 +37,7 @@ class TestOneAuditPairFuzzer {
             val welfordFromCvrs = Welford()
             val welfordFromFuzz = Welford()
             margins.forEach { margin ->
-                val (contestOA, mvrs, cardManifest, pools) = makeOneAuditTestP(
+                val (contestOA, mvrs, cardManifest, pools) = makeOneAuditTest(
                     margin,
                     Nc,
                     cvrFraction = .70,
@@ -113,7 +113,7 @@ class TestOneAuditPairFuzzer {
         val Nc = 10000
 
         val (contestOA, mvrs, cards, pools) =
-            makeOneAuditTestP(
+            makeOneAuditTest(
                 margin = .01,
                 Nc = Nc,
                 cvrFraction = .95,

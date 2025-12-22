@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.unittest
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.workflow.ClcaSimulatedErrorRates
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.workflow.*
@@ -21,7 +21,7 @@ class TestClcaEstimationFailure {
     @Test
     fun testClcaEstimationFailure() {
         // TODO margin not accounting for phantoms
-        val test = MultiContestTestDataP(50, 25, 50000) // , phantomPctRange = 0.0 .. 0.0)
+        val test = MultiContestTestData(50, 25, 50000) // , phantomPctRange = 0.0 .. 0.0)
         val testCvrs = test.makeCvrsFromContests()
 
         val auditConfig = AuditConfig(

@@ -18,7 +18,7 @@ Non goals: create full voting systems. Our libraries are used by the vendors tha
 interoperable/conformance
 standardized error reporting / logging.
 
-3 languages: python (maybe), rust, kotlin/java.
+3 languages: python (maybe), rust, kotlin/JVM.
 
 Arlo
 Shangrla

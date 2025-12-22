@@ -5,7 +5,9 @@ import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.min
 import kotlin.random.Random
 
-// called from estimateSampleSize
+// simulate cvrs for a RaireContest
+// TODO not called from estimateSampleSize.
+//     also see simulateRaireTestContest
 data class SimulateIrvTestData(
     val contest: RaireContest,
     val minMargin: Double,

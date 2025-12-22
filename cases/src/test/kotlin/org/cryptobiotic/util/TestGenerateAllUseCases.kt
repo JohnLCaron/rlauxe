@@ -13,7 +13,7 @@ import org.cryptobiotic.rlauxe.corla.createColoradoPolling
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
-import org.cryptobiotic.rlauxe.sf.createSfElectionP
+import org.cryptobiotic.rlauxe.sf.createSfElection
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
@@ -104,7 +104,7 @@ class TestGenerateAllUseCases {
     fun createSFElectionOA() {
         val topdir = "$testdataDir/cases/sf2024/oa"
 
-        createSfElectionP(
+        createSfElection(
             topdir,
             sfZipFile,
             "ContestManifest.json",
@@ -123,7 +123,7 @@ class TestGenerateAllUseCases {
     fun createSFElectionClca() {
         val topdir = "$testdataDir/cases/sf2024/clca"
 
-        createSfElectionP(
+        createSfElection(
             topdir,
             sfZipFile,
             "ContestManifest.json",

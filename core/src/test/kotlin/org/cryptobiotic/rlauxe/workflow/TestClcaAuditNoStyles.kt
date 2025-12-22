@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import kotlin.test.Test
 
@@ -21,7 +21,7 @@ class TestClcaAuditNoStyles {
         val underVotePct= 0.02 .. 0.12
         val phantomPct= 0.005
         val phantomRange= phantomPct .. phantomPct
-        val testData = MultiContestTestDataP(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = PluralityErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val config = AuditConfig(
@@ -40,7 +40,7 @@ class TestClcaAuditNoStyles {
         val underVotePct= 0.02 .. 0.12
         val phantomPct= 0.005
         val phantomRange= phantomPct .. phantomPct
-        val testData = MultiContestTestDataP(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = PluralityErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val config = AuditConfig(
@@ -66,7 +66,7 @@ class TestClcaAuditNoStyles {
         val marginRange= 0.015 .. 0.05
         val underVotePct= 0.02 .. 0.12
         val phantomPct= 0.00 .. 0.00
-        val testData = MultiContestTestDataP(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
         testClcaWorkflow(config, testData)
     }
 
@@ -78,7 +78,7 @@ class TestClcaAuditNoStyles {
         val marginRange= 0.01 .. 0.05
         val underVotePct= 0.02 .. 0.22
         val phantomPct= 0.005 .. 0.005
-        val testData = MultiContestTestDataP(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
         testClcaWorkflow(config, testData)
     }
 
@@ -90,7 +90,7 @@ class TestClcaAuditNoStyles {
         val underVotePct= 0.02 .. 0.22
         val phantomPct= 0.005
         val phantomRange= phantomPct .. phantomPct
-        val testData = MultiContestTestDataP(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = PluralityErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val config = AuditConfig(
@@ -108,11 +108,11 @@ class TestClcaAuditNoStyles {
         )
 
         val N = 50000
-        val testData = MultiContestTestDataP(11, 4, N)
+        val testData = MultiContestTestData(11, 4, N)
         testClcaWorkflow(config, testData)
     }
 
-    fun testClcaWorkflow(config: AuditConfig, testData: MultiContestTestDataP) {
+    fun testClcaWorkflow(config: AuditConfig, testData: MultiContestTestData) {
         val contestsToAudit: List<Contest> = testData.contests
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.

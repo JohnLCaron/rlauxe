@@ -647,12 +647,7 @@ fun calc_sample_sizes(
     val cassorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
     val sampling: Sampling = makeClcaNoErrorSampler(contest.id, cvrs, cassorter)
-    val pluralityErrorRates= PluralityErrorRates(.001, .01, 0.0, 0.0)
-    val startingErrorRates= ClcaErrorCounts.fromPluralityErrorRates(pluralityErrorRates,
-        cassorter.noerror(), totalSamples=0, upper=cassorter.assorter.upperBound())
-
     val betFn = GeneralAdaptiveBetting(N, oaErrorRates = null, d = 100, maxRisk=.99)
-    // GeneralAdaptiveBettingOld(N = N, startingErrorRates=startingErrorRates, d = 100)
     val betta = BettingMart(bettingFn = betFn, N = N, sampleUpperBound = cassorter.upperBound(), withoutReplacement = false)
 
     return runTestRepeated(
@@ -660,7 +655,7 @@ fun calc_sample_sizes(
         // maxSamples = N,
         ntrials = ntrials,
         testFn = betta,
-        testParameters = mapOf("p2o" to pluralityErrorRates.p2o, "margin" to cassorter.assorter().dilutedMargin()),
+        testParameters = mapOf("margin" to cassorter.assorter().dilutedMargin()),
         N = N,
         tracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound()),
     )

@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.sf
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
@@ -20,7 +19,7 @@ class TestCreateSfElection {
     fun createSFElectionOA() {
         val topdir = "$testdataDir/cases/sf2024/oa"
 
-        createSfElectionP(
+        createSfElection(
             topdir,
             zipFilename,
             "ContestManifest.json",
@@ -48,7 +47,7 @@ class TestCreateSfElection {
     fun createSFElectionClca() {
         val topdir = "$testdataDir/cases/sf2024/clca"
 
-        createSfElectionP(
+        createSfElection(
             topdir,
             zipFilename,
             "ContestManifest.json",

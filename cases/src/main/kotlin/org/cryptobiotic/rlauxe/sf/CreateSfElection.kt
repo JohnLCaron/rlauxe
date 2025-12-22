@@ -18,6 +18,8 @@ import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
+import org.cryptobiotic.rlauxe.raire.RaireContest
+import org.cryptobiotic.rlauxe.raire.makeRaireContestIrv
 import org.cryptobiotic.rlauxe.raire.makeRaireContestUA
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -31,7 +33,7 @@ import kotlin.collections.forEach
 private val logger = KotlinLogging.logger("CreateSfElection")
 
 // SanFrancisco 2024 General Election.
-class CreateSfElectionP(
+class CreateSfElection(
         castVoteRecordZip: String,
         contestManifestFilename: String,
         candidateManifestFile: String,
@@ -39,8 +41,8 @@ class CreateSfElectionP(
         val config: AuditConfig,
         poolsHaveOneCardStyle: Boolean,
     ): CreateElectionPIF {
-    val cardPoolMapByName: Map<String, OneAuditPoolIF>
-    val cardPools: List<OneAuditPoolIF>
+    val cardPoolMapByName: Map<String, OneAuditPoolFromCvrs>
+    val cardPools: List<OneAuditPoolFromCvrs>
     val phantomCount: Map<Int, Int>
     val contestsUA: List<ContestUnderAudit>
     val cardCount: Int
@@ -72,17 +74,18 @@ class CreateSfElectionP(
         phantomCount = countPhantoms(allCvrTabs, contestNcs)
 
         // we need to know the diluted Nb before we can create the UAs: another pass through the cvrExports
-        val manifestTabs = tabulateAuditableCards(createCardManifest(config.isOA, phantomCount), infos)
+        val manifestTabs = tabulateAuditableCards(createCardManifest(phantomCount), infos)
         val contestNbs = manifestTabs.mapValues { it.value.ncards }
         println("contestNbs= ${contestNbs}")
 
         // make contests based on cvr tabulations
-        contestsUA = if (config.isClca) makeClcaContests(allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
-            else if (config.isOA) {
-                val contests = makeContests(allCvrTabs, unpooledPool, contestNcs) // TODO leave out IRV
-                makeOneAuditContests(contests, contestNbs, cardPools).sortedBy { it.id }
-            }
-            else makePollingContests(allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
+        contestsUA = if (config.isClca) {
+            makeClcaContests(allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
+        } else if (config.isOA) {
+            makeOneAuditContests(allCvrTabs, contestNcs, contestNbs, unpooledPool, cardPools).sortedBy { it.id }
+        } else {
+            makePollingContests(allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
+        }
     }
 
     fun createCardPools(
@@ -161,37 +164,26 @@ class CreateSfElectionP(
 
     override fun populations() = if (config.isClca) emptyList() else cardPools
     override fun contestsUA() = contestsUA
-    override fun cardManifest() = createCardManifest(config.isOA, phantomCount)
+    override fun cardManifest() = createCardManifest(phantomCount)
 
-    fun createCardManifest(isOA: Boolean, phantomCount: Map<Int,Int>): CloseableIterator<AuditableCard> {
+    // these are the same cvrs for CLCA and OneAudit
+    fun createCardManifest(phantomCount: Map<Int,Int>): CloseableIterator<AuditableCard> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
         val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPools.associate { it.name() to it.id() })
 
-        return CvrsWithPopulationsToCardManifest(config.auditType,
+        return if (config.isOA) CvrsWithPopulationsToCardManifest(
+            config.auditType,
             cvrIter,
             makePhantomCvrs(phantomCount),
-            if (isOA) cardPools else null,
-        )
+            cardPools)
+        else
+            CvrsWithPopulationsToCardManifest(
+                config.auditType,
+                cvrIter,
+                makePhantomCvrs(phantomCount),
+                null)
     }
 }
-
-fun makeContests(allCvrTabs: Map<Int, ContestTabulation>, unpooledPool: OneAuditPoolFromCvrs, contestNcs: Map<Int, Int>): List<Contest> {
-    val contests = mutableListOf<Contest>()
-    allCvrTabs.map { (contestId, contestSumTab)  ->
-        val info = contestSumTab.info
-        val useNc = contestNcs[info.id] ?: contestSumTab.ncards
-        if (useNc > 0 && !info.isIrv) {
-            val unpooledTab = unpooledPool.contestTabs[info.id]!!
-            val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
-            val unpooledPct = 100.0 * unpooledTab.ncards / contestSumTab.ncards
-            val poolPct = (100 - unpooledPct).toInt()
-            contest.info().metadata["PoolPct"] = poolPct
-            contests.add(contest)
-        }
-    }
-    return contests
-}
-
 
 fun makeClcaContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestUnderAudit> {
     val contestsUAs = mutableListOf<ContestUnderAudit>()
@@ -211,6 +203,29 @@ fun makeClcaContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<I
     return contestsUAs
 }
 
+fun makeOneAuditContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>,
+                         unpooledPool: OneAuditPoolFromCvrs, oneAuditPools: List<OneAuditPoolFromCvrs>): List<ContestUnderAudit> {
+    val contestsUAs = mutableListOf<ContestUnderAudit>()
+
+    val regularContests = makeRegularContests(allCvrTabs, unpooledPool, contestNcs)
+    val regularOAcontests = makeOneAuditContests(regularContests, contestNbs, oneAuditPools).sortedBy { it.id }
+    contestsUAs.addAll(regularOAcontests)
+
+    // now make the IRV contests
+    allCvrTabs.filter{ it.value.isIrv }. map { (contestId, cvrTab)  ->
+        val info = cvrTab.info
+        val useNc = contestNcs[info.id] ?: cvrTab.ncards
+        val contestUA = makeRaireContestIrv(info, cvrTab, useNc, Nbin=contestNbs[info.id]!!, oneAuditPools)
+
+        val unpooledTab = unpooledPool.contestTabs[info.id]!!
+        val unpooledPct = 100.0 * unpooledTab.ncards / cvrTab.ncards
+        val poolPct = (100 - unpooledPct).toInt()
+        contestUA.contest.info().metadata["PoolPct"] = poolPct
+        contestsUAs.add(contestUA)
+    }
+    return contestsUAs
+}
+
 fun makePollingContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestUnderAudit> {
     val contestsUAs = mutableListOf<ContestUnderAudit>()
     allCvrTabs.map { (contestId, contestSumTab)  ->
@@ -225,6 +240,23 @@ fun makePollingContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs: Map
         }
     }
     return contestsUAs
+}
+
+fun makeRegularContests(allCvrTabs: Map<Int, ContestTabulation>, unpooledPool: OneAuditPoolFromCvrs, contestNcs: Map<Int, Int>): List<Contest> {
+    val contests = mutableListOf<Contest>()
+    allCvrTabs.map { (contestId, contestSumTab)  ->
+        val info = contestSumTab.info
+        val useNc = contestNcs[info.id] ?: contestSumTab.ncards
+        if (useNc > 0 && !info.isIrv) {
+            val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
+            val unpooledTab = unpooledPool.contestTabs[info.id]!!
+            val unpooledPct = 100.0 * unpooledTab.ncards / contestSumTab.ncards
+            val poolPct = (100 - unpooledPct).toInt()
+            contest.info().metadata["PoolPct"] = poolPct
+            contests.add(contest)
+        }
+    }
+    return contests
 }
 
 fun makeContestInfos(
@@ -249,6 +281,7 @@ fun makeContestInfos(
     return Pair(contestNcs, contestInfos)
 }
 
+// TODO eliminate write-ins
 fun makeContestInfos(contestManifest: ContestManifest, candidateManifest: CandidateManifestJson): List<ContestInfo> {
     return contestManifest.contests.values.map { contestM: ContestMJson ->
         val candidateNames =
@@ -284,7 +317,7 @@ fun makeContestNcs(contestManifest: ContestManifest, contestInfos: List<ContestI
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-fun createSfElectionP(
+fun createSfElection(
     topdir: String,
     castVoteRecordZip: String,
     contestManifestFilename: String,
@@ -308,7 +341,7 @@ fun createSfElectionP(
         else -> AuditConfig(AuditType.POLLING, riskLimit = .05, contestSampleCutoff = 10000, nsimEst = 100)
     }
 
-    val election = CreateSfElectionP(
+    val election = CreateSfElection(
         castVoteRecordZip,
         contestManifestFilename,
         candidateManifestFile,

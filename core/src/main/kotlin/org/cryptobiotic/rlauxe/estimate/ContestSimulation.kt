@@ -32,8 +32,7 @@ import kotlin.random.Random
 /**
  * Simulation of single Contest that reflects the exact votes and Nb (diluted), along with undervotes and phantoms, as specified in Contest.
  */
-// ressurected 12/4/25; probably dont need
-// TODO CANDIDATE for removal
+// ressurected 12/4/25; used for polling estimation
 
 class ContestSimulation(val contest: Contest, val Npop: Int) {
     val info = contest.info
@@ -158,6 +157,13 @@ class ContestSimulation(val contest: Contest, val Npop: Int) {
             return ContestSimulation(contest, contest.Nc)
         }
 
+        // TODO compare to PollingCardFuzzSampler
+        // class PollingCardFuzzSampler(
+        //    val fuzzPct: Double,
+        //    val cards: List<AuditableCard>,
+        //    val contest: Contest,
+        //    val assorter: AssorterIF
+        //): Sampling, Iterator<Double>
         // Needed for Polling estimation
         fun simulateCvrsDilutedMargin(contestUA: ContestUnderAudit, config: AuditConfig): List<Cvr> {
             val limit = config.contestSampleCutoff
@@ -188,48 +194,4 @@ class ContestSimulation(val contest: Contest, val Npop: Int) {
             return sim.makeCvrs()
         }
     }
-
 }
-
-/*
-
-
-// used by simulateSampleSizeOneAuditAssorter()
-fun OneAuditContest.makeTestMvrs(prefix: String = "card"): List<Cvr> {
-    val cvrs = mutableListOf<Cvr>()
-
-    // add the regular cvrs
-    if (this.cvrNc > 0) { // blca has cvrNc == 0
-        val contestCvrs = Contest(this.info, voteInput = this.cvrVotes, iNc = this.cvrNc, Np = 0)
-        val sim = ContestSimulation(contestCvrs)
-        val cvrCvrs = sim.makeCvrs(prefix)
-        cvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
-        cvrs.forEach { require(it.poolId == null) }
-    }
-
-    // TODO multiwinner contests
-    this.pools.values.forEach { pool ->
-        val contestPool = Contest(this.info, pool.votes, iNc = pool.ncards, Np = 0)
-        val poolSim = ContestSimulation(contestPool)
-        val poolCvrs = poolSim.makeCvrs("${prefix}P", pool.poolId)
-
-        if (pool.ncards != poolCvrs.size) {
-            println("why")
-        }
-        poolCvrs.forEach { require (it.poolId != null) }
-        cvrs.addAll(poolCvrs)
-    }
-
-    // add phantoms
-    repeat(this.Np) {
-        cvrs.add(Cvr("phantom$it", mapOf(info.id to intArrayOf()), phantom = true))
-    }
-
-    if (this.Nc != cvrs.size) {
-        println("why")
-    }
-    require(this.Nc == cvrs.size)
-    cvrs.shuffle()
-    return cvrs
-}
- */

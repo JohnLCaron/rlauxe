@@ -1,10 +1,7 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.core.AdaptiveBetting
 import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.core.GeneralAdaptiveBetting
-import org.cryptobiotic.rlauxe.core.PluralityErrorRates
-import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.core.populationMeanIfH0
 import org.cryptobiotic.rlauxe.core.sampleSize
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -58,12 +55,6 @@ fun betPayoffSamples(N: Int, risk: Double, assorterMargin: Double, error: Double
     val assorterMargin2 = 2.0 * avgCvrAssortValue - 1.0 // reported assorter margin, not clca margin
     // val noerror = 1.0 / (2.0 - assorterMargin / assorter.upperBound())
     val noerror = 1 / (2 - assorterMargin2) // assumes upperBound = 1.0
-    val bettingFnOld = AdaptiveBetting(
-        N = N,
-        a = noerror,
-        d = 100,
-        errorRates = PluralityErrorRates(error, error, error, error),
-    )
     // class GeneralAdaptiveBetting(
     //    val Npop: Int, // population size for this contest
     //    // val accumErrorCounts: ClcaErrorCounts, // propable illegal to do (cant use prior knowlege of the sample)

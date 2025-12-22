@@ -57,7 +57,7 @@ data class AuditableCard (
 
     // TODO deprecated? Dont have a list of "all"
     fun contests(): IntArray {
-        return if (population != null) population.contests()
+        return if (population != null) population.contests().toList().sorted().toIntArray()
             // else if (possibleContests.isNotEmpty()) possibleContests
             else if (votes != null) votes.keys.toList().sorted().toIntArray()
             else intArrayOf()
@@ -158,14 +158,12 @@ class CvrsWithPopulationsToCardManifest(
         val hasCvr = type.isClca() || (type.isOA() && org.poolId == null)
         val votes = if (hasCvr) org.votes else null
 
-        // TODO make user get this right?
         // if you havent specified a population or votes, then the population = all contests
         val cardStyle = if (votes == null && pop == null) "all" else pop?.name()
 
         return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
-            // intArrayOf(),
             votes,
-            org.poolId,
+            if (type.isClca()) null else org.poolId,
             cardStyle = cardStyle,
             population = pop,
         )
@@ -174,8 +172,7 @@ class CvrsWithPopulationsToCardManifest(
     override fun close() = cvrs.close()
 }
 
-class CardsWithPopulationsToCardManifest(
-    val type: AuditType,
+class MergePopulationsIntoCardManifest(
     val cards: CloseableIterator<AuditableCard>,
     populations: List<PopulationIF>?,
 ): CloseableIterator<AuditableCard> {
@@ -184,14 +181,10 @@ class CardsWithPopulationsToCardManifest(
 
     override fun hasNext() = cards.hasNext()
 
+    // merges the populations into the cards
     override fun next(): AuditableCard {
         val org = cards.next()
         val pop = if (popMap == null) null else popMap[org.cardStyle]
-
-        // TODO make user get this right?
-        // if you havent specified a cardStyle, population or votes, then the population = all contests
-        // val cardStyle = if (org.cardStyle == null && org.votes == null && pop == null) "all" else org.cardStyle
-
         return org.copy(population = pop)
     }
 

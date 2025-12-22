@@ -8,7 +8,7 @@ import kotlin.random.Random
 
 private const val debug = false
 
-// for one contest, this takes a list of cvrs and fuzzes them.
+// for one contest, this takes a list of cards and fuzzes them for the mvrs.
 // Only used for estimateClcaAssertionRound, estimateOneAuditAssertionRound, not auditing.
 class ClcaCardFuzzSampler(
     val fuzzPct: Double,
@@ -246,64 +246,4 @@ fun chooseNewCandidateNoUndervotes(currId: Int?, candidateIds: List<Int>): Int? 
             return candId
         }
     }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// OneAudit Estimation Sampling
-
-class OneAuditVunderBarFuzzer(
-    val vunderBar: VunderBar,
-    val infos: Map<Int, ContestInfo>,
-    val fuzzPct: Double,
-) {
-    val isIRV = infos.mapValues { it.value.isIrv }
-
-    fun reset() {
-        vunderBar.reset()
-    }
-
-    fun makePairsFromCards(cards: List<AuditableCard>): List<Pair<AuditableCard, AuditableCard>> {
-        val mvrs = cards.map { card ->
-            if (card.poolId != null) {
-                vunderBar.simulatePooledCard(card)
-            } else if (card.votes != null) {
-                makeFuzzedCvrFromCard(infos, isIRV, card, fuzzPct)
-            } else {
-                throw RuntimeException("card must be pooled or have votes")
-            }
-        }
-        return mvrs.zip(cards)
-    }
-}
-
-fun makeFuzzedCvrFromCard(
-    infos: Map<Int, ContestInfo>,
-    isIRV: Map<Int, Boolean>,
-    card: AuditableCard, // must have votes, ie have a Cvr
-    fuzzPct: Double,
-    undervotes: Boolean = true, // chooseNewCandidateWithUndervotes
-) : AuditableCard {
-    if (fuzzPct == 0.0 || card.phantom) return card
-    val r = Random.nextDouble(1.0)
-    if (r > fuzzPct) return card
-
-    val cardb = CardBuilder.fromCard(card)
-        cardb.possibleContests.forEach { contestId ->
-        val info = infos[contestId]
-        if (info != null) {
-            if (isIRV[contestId] ?: false) {
-                val currentVotes = cardb.votes[contestId]?.toList()?.toMutableList() ?: mutableListOf<Int>()
-                switchCandidateRankings(currentVotes, info.candidateIds)
-                cardb.replaceContestVotes(contestId, currentVotes.toIntArray())
-            } else {
-                val votes = cardb.votes[contestId]
-                val currId: Int? = if (votes == null || votes.size == 0) null else votes[0] // only one vote allowed
-                // choose a different candidate, or none.
-                val ncandId = chooseNewCandidate(currId, info.candidateIds, undervotes)
-                cardb.replaceContestVote(contestId, ncandId)
-            }
-        }
-    }
-
-    return cardb.build()
 }

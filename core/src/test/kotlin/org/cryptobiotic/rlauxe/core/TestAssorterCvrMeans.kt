@@ -106,7 +106,7 @@ class TestAssorterCvrMeans {
 
 private val show = false
 
-class MeanMarginTracker(val contestId: Int, val assorter: AssorterIF) {
+private class MeanMarginTracker(val contestId: Int, val assorter: AssorterIF) {
     val welford = Welford()
     val winner = assorter.winner()
     val loser = assorter.loser()

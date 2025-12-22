@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
@@ -23,7 +23,7 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtrip() {
-        val testData = MultiContestTestDataP(11, 4, 50000)
+        val testData = MultiContestTestData(11, 4, 50000)
         val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, isClca=false, ).addStandardAssertions()}
         val contestRounds = contestsUAs.map{ contest ->
             val cr = ContestRound(contest, 1,)
@@ -69,7 +69,7 @@ class TestAuditRoundJson {
 
     @Test
     fun testRoundtripIO() {
-        val testData = MultiContestTestDataP(11, 4, 50000)
+        val testData = MultiContestTestData(11, 4, 50000)
         val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, isClca=false).addStandardAssertions()}
         val contestRounds = contestsUAs.map{ contest ->
             val cr = ContestRound(contest, 1)
@@ -115,7 +115,7 @@ class TestAuditRoundJson {
             AuditType.CLCA, seed = 12356667890L, nsimEst = 10,
         )
         val N = 5000
-        val testData = MultiContestTestDataP(11, 4, N, marginRange = 0.03..0.05)
+        val testData = MultiContestTestData(11, 4, N, marginRange = 0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testComparisonWorkflow $testData")
@@ -169,13 +169,13 @@ class TestAuditRoundJson {
         )
 
         val N = 5000
-        val testData = MultiContestTestDataP(11, 4, N, marginRange = 0.03..0.05)
+        val testData = MultiContestTestData(11, 4, N, marginRange = 0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testComparisonWorkflow $testData")
         contests.forEach { println("  $it") }
 
-        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N/2, contestId=111, ncands=5, minMargin=.04, quiet = true, hasStyle=config.hasStyle)
+        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N/2, contestId=111, ncands=5, minMargin=.04, quiet = true)
         println(rcontest)
         println()
 

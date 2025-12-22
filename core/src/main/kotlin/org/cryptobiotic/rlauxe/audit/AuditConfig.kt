@@ -44,7 +44,7 @@ data class AuditConfig(
     fun simFuzzPct() = simFuzzPct
 
     override fun toString() = buildString {
-        appendLine("AuditConfig(auditType=$auditType, riskLimit=$riskLimit, seed=$seed version=$version" )
+        appendLine("AuditConfig(auditType=$auditType, riskLimit=$riskLimit, seed=$seed persistedWorkflowMode=$persistedWorkflowMode" )
         appendLine("  nsimEst=$nsimEst, quantile=$quantile, simFuzzPct=$simFuzzPct,")
         append("  minRecountMargin=$minRecountMargin removeTooManyPhantoms=$removeTooManyPhantoms")
         if (contestSampleCutoff != null) { append(" contestSampleCutoff=$contestSampleCutoff removeCutoffContests=$removeCutoffContests") }

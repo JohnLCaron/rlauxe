@@ -39,13 +39,13 @@ interface OneAuditPoolIF: PopulationIF {
     val poolName: String
     val poolId: Int
     fun assortAvg(): MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contestId -> assorter -> average in the pool
-    fun regVotes(): Map<Int, RegVotesIF> // contestId -> RegVotes, regular contests only
+    fun regVotes(): Map<Int, RegVotesIF> // contestId -> RegVotes, regular contests only, not IRV
     fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder  // candidate for removal
-    // fun contestTab(contestId: Int): ContestTabulation?
+    // fun contestTab(contestId: Int): ContestTabulation? need this for IRV
 
     fun show() = buildString {
         appendLine("OneAuditPool(poolName=$poolName, poolId=$poolId, ncards=${ncards()}")
-        regVotes().forEach{
+        regVotes().toSortedMap().forEach{
             appendLine("    contest ${it.key} votes= ${it.value.votes}, ncards= ${it.value.ncards()}, undervotes= ${it.value.undervotes()} ")
         }
         appendLine(")")
@@ -57,6 +57,7 @@ interface OneAuditPoolIF: PopulationIF {
     fun toOneAuditPool() = OneAuditPool(poolName, poolId, hasSingleCardStyle(), ncards(), regVotes())
 }
 
+// TODO keeping regVotes but not irvVotes. Because VoteConsolidator can be large
 data class OneAuditPool(override val poolName: String, override val poolId: Int, val hasSingleCardStyle: Boolean,
                         val ncards: Int, val regVotes: Map<Int, RegVotesIF>) : OneAuditPoolIF {
     val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
@@ -68,7 +69,7 @@ data class OneAuditPool(override val poolName: String, override val poolId: Int,
     override fun hasContest(contestId: Int) = regVotes[contestId] != null
     override fun ncards() = ncards
 
-    override fun contests() = regVotes.keys.toList().toIntArray()
+    override fun contests() = regVotes.keys.toList().sorted().toIntArray()
     override fun assortAvg() = assortAvg
 
     // candidate for removal, assumes voteForN == 1, perhaps we need to save that ??

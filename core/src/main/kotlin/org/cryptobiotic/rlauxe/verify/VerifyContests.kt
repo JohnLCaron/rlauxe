@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.verify
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.TestH0Status
@@ -13,20 +12,25 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
+import org.cryptobiotic.rlauxe.raire.RaireAssorter
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
+import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.util.tabulateCardManifest
 import org.cryptobiotic.rlauxe.workflow.readCardManifest
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
+import kotlin.math.roundToInt
 import kotlin.text.appendLine
+import kotlin.use
 
 // pre audit verifaction; no access to mvrs.
 // for all audit types. Cards and CardPools must already be published, contests might not,
@@ -127,6 +131,8 @@ fun verifyManifest(
     val indexSet = mutableSetOf<Int>()
     val indexList = mutableListOf<Pair<Int, Long>>()
 
+    val cardsTab = tabulateAuditableCards(cards.iterator(), infos)
+
     var count = 0
     var lastCard: AuditableCard? = null
     cards.iterator().use { cardIter ->
@@ -154,33 +160,26 @@ fun verifyManifest(
             lastCard = card
             count++
 
-            // the same as tabulateAuditableCards()
+            // the same as tabulateAuditableCards(), replicate so we can do allCvrVotes, nonpooled, pooled
             infos.forEach { (contestId, info) ->
                 val allTab = allCvrVotes.getOrPut(contestId) { ContestTabulation(info) }
                 if (card.hasContest(contestId)) { // TODO heres the problem, believing possibleContests()
-                    allTab.ncards++ // how many cards are in the sample population?
-
-                    if (card.phantom) allTab.nphantoms++
-                    if (card.votes != null) {
-                        val cands = card.votes[contestId]
-                        if (cands == null) {
-                            allTab.undervotes++
-                        } else {
-                            cands.forEach { cand -> allTab.addVote(cand, 1) }
-                        }
+                    if (card.votes != null && card.votes[contestId] != null) { // happens when cardStyle == all
+                        val cands = card.votes[contestId]!!
+                            allTab.addVotes(cands, card.phantom)
+                    } else {
+                        if (card.phantom) allTab.nphantoms++
+                        allTab.ncards++
                     }
 
                     if (card.poolId == null) {
                         val nonpoolTab = nonpooled.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
-                        nonpoolTab.ncards++
-                        if (card.phantom) nonpoolTab.nphantoms++
-                        if (card.votes != null) { // I  think this is always true
-                            val cands = card.votes[contestId]
-                            if (cands == null) {
-                                nonpoolTab.undervotes++
-                            } else {
-                                cands.forEach { cand -> nonpoolTab.addVote(cand, 1) }
-                            }
+                        if (card.votes != null && card.votes[contestId] != null) { // happens when cardStyle == all
+                            val cands = card.votes[contestId]!!
+                                nonpoolTab.addVotes(cands, card.phantom)  // for IRV
+                        } else {
+                            if (card.phantom) nonpoolTab.nphantoms++
+                            nonpoolTab.ncards++
                         }
                     } else {
                         val poolTab = pooled.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
@@ -271,8 +270,10 @@ fun verifyOAagainstCards(
             result.addMessage("      sumWithPools = ${sumWithPools[id]}")
         }
     }
+    // pooled + nonpooled = nPop
+    // sumWithPools = nonpooled + poolSums = Nc
 
-    // check contest.votes == cvrTab.votes (non-IRV)
+    // check non-IRV contest.votes == cvrTab.votes
     var allOk = true
     contests.filter { it.preAuditStatus == TestH0Status.InProgress && !it.isIrv }.forEach { contestUA ->
         val contestVotes = contestUA.contest.votes()!!
@@ -364,9 +365,9 @@ fun verifyClcaAssortAvg(
         contestUA.pollingAssertions.forEach { assertion ->
             val passorter = assertion.assorter
             val assortAvg = cardAssortAvg[passorter.hashcodeDesc()]!!
-            val dilutedMargin = contestUA.makeDilutedMargin(passorter)
+            val dilutedMargin = passorter.dilutedMargin()
             if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
-                result.addError("  dilutedMargin does not agree for contest ${contestUA.id} assorter='$passorter'")
+                result.addError("  verifyClcaAssortAvg dilutedMargin does not agree for contest ${contestUA.id} assorter='$passorter'")
                 result.addError("     dilutedMargin= ${pfn(dilutedMargin)} cvrs.assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards}")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
                 allOk = false
@@ -390,8 +391,8 @@ fun verifyOAassortAvg(
 
     var allOk = true
 
-    // sum all the assorter values in one pass across all the cvrs, including Pools
-    val cardAssortAvgs = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+    // sum all the assorter values in one pass across all the cards, usinmg PoolAverage when card is in a pool
+    val cardAssortAvgs = mutableMapOf<Int, MutableMap<String, AssortAvg>>()  // contest -> assorter -> average
     cards.use { cardIter ->
         while (cardIter.hasNext()) {
             val card = cardIter.next()
@@ -402,7 +403,7 @@ fun verifyOAassortAvg(
                     if (cassertion.cassorter is ClcaAssorterOneAudit) { //  may be Raire
                         val oaCassorter = cassertion.cassorter
                         val passorter = oaCassorter.assorter
-                        val assortAvg = avg.getOrPut(passorter) { AssortAvg() }
+                        val assortAvg = avg.getOrPut(passorter.hashcodeDesc()) { AssortAvg() }
                         if (card.hasContest(contestUA.id)) {
                             val assortVal = if (card.poolId != null)
                                 oaCassorter.poolAverages.assortAverage[card.poolId]!!
@@ -417,7 +418,7 @@ fun verifyOAassortAvg(
         }
     }
 
-    // compare the assortAverage with the contest's reportedMargin in passorter.
+    // compare the assortAverage with the contest's dilutedMargin in passorter.
     contestsUA.forEach { contestUA ->
         val cardAssortAvg = cardAssortAvgs[contestUA.id]
         if (cardAssortAvg == null) {
@@ -426,16 +427,12 @@ fun verifyOAassortAvg(
         }
         contestUA.pollingAssertions.forEach { assertion ->
             val passorter = assertion.assorter
-            if (cardAssortAvg[passorter] != null) {  //  may be Raire
-                val assortAvg = cardAssortAvg[passorter]!!
-                val reportedMargin = passorter.calcMargin(contestUA.contest.votes(), contestUA.contest.Nc())
-                val dilutedMargin = passorter.calcMargin(contestUA.contest.votes(), contestUA.Npop)
-                //if (!doubleIsClose(dilutedMargin, reportedMargin)) {
-                //    println("dilutedMargin=$dilutedMargin, reportedMargin=$reportedMargin")
-                //}
+            if (cardAssortAvg[passorter.hashcodeDesc()] != null) {  //  may be Raire
+                val assortAvg = cardAssortAvg[passorter.hashcodeDesc()]!!
+                val dilutedMargin = passorter.dilutedMargin()
                 if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
-                    result.addError("  dilutedMargin does not agree for contest ${contestUA.id} assorter '$passorter'")
-                    result.addError("     dilutedMargin= ${pfn(dilutedMargin)} cvrs.assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards}")
+                    result.addError("  verifyOAassortAvg dilutedMargin does not agree for contest ${contestUA.id} assorter '$passorter'")
+                    result.addError("     dilutedMargin= ${pfn(dilutedMargin)} cvrs.assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards} Npop=${contestUA.Npop}")
                     contestUA.preAuditStatus = TestH0Status.ContestMisformed
                     allOk = false
                 } else {
@@ -448,7 +445,26 @@ fun verifyOAassortAvg(
     return result
 }
 
-// calculate diluted margin from cardPools
+//         var sumMarginInVotes = 0.0
+//        cardManifest.populations.forEach { pop ->
+//            val pool = pop as OneAuditPoolIF
+//            val poolAvg = cassorter.poolAverages.assortAverage[pool.poolId]
+//            if (poolAvg != null) {
+//                val marginInVotes = mean2margin(poolAvg) * pool.ncards()
+//                sumMarginInVotes += marginInVotes
+//            }
+//        }
+//        println("sumMarginInVotes= ${sumMarginInVotes.roundToInt()}")
+//        val poolMarginInVotes = sumMarginInVotes.roundToInt()
+//
+//        // whats the margin in votes for the cvrs ??
+//        // the cards in the pools dont have votes
+//        val cvrTab = tabulateAuditableCards(cardManifest.cards.iterator(), infos24).values.first()
+//        val cvrVotes = cvrTab.irvVotes.makeVotes(rcontestUA.ncandidates)
+//        println("  cvrVotes calcMarginInVotes= ${rassorter.calcMarginInVotes(cvrVotes)}")
+//        val cvrMarginInVotes = rassorter.calcMarginInVotes(cvrVotes)
+
+// verify assorter diluted margin from cvrs and cardPools
 fun verifyOApools(
     contestsUA: List<ContestUnderAudit>,
     contestSummary: ContestSummary,
@@ -459,52 +475,46 @@ fun verifyOApools(
     result.addMessage("verifyOApools")
     var allOk = true
 
+    val cvrTabs = contestSummary.nonpooled
+
     contestsUA.forEach { contestUA ->
         val contestId = contestUA.id
 
-        contestUA.pollingAssertions.forEach { assertion ->
-            val passorter = assertion.assorter
+        // the cvrs
+        contestUA.clcaAssertions.forEach { cassertion ->
+            val cassorter = cassertion.cassorter as ClcaAssorterOneAudit
+            val passorter = cassertion.assorter
             val assortAvg = AssortAvg()
-            cardManifest.populations.filter { it.name() != "unpooled" }.forEach {
-                if (it.hasContest(contestId)) {
-                    val cardPool = it as OneAuditPoolIF
+            val cvrTab = cvrTabs[contestId]!!
 
-                    val regVotes = cardPool.regVotes()[contestId]!!
-                    if (cardPool.ncards() > 0) {
-                        // note: use cardPool.ncards(), this is the diluted count
-                        val poolMargin = assertion.assorter.calcMargin(regVotes.votes, cardPool.ncards())
-                        val poolAvg = margin2mean(poolMargin)
-                        assortAvg.ncards += cardPool.ncards()
-                        assortAvg.totalAssort += cardPool.ncards() * poolAvg
-                    }
+            // the cvrs
+            val cvrMargin = if (contestUA.isIrv) {
+                val rassorter = passorter as RaireAssorter
+                val cvrVotes = cvrTab.irvVotes.makeVotes(contestUA.ncandidates)
+                rassorter.calcMargin(cvrVotes, cvrTab.ncards)
+            } else {
+                val regVotes = cvrTab.votes
+                passorter.calcMarginFromRegVotes(regVotes, cvrTab.ncards)
+            }
+            val cvrMean = margin2mean(cvrMargin)
+            assortAvg.ncards += cvrTab.ncards
+            assortAvg.totalAssort += cvrTab.ncards * cvrMean
+
+            // the pools
+            cardManifest.populations.forEach { pop ->
+                val pool = pop as OneAuditPoolIF
+                val poolAvg = cassorter.poolAverages.assortAverage[pool.poolId]
+                if (poolAvg != null) {
+                    assortAvg.totalAssort += poolAvg * pool.ncards()
+                    assortAvg.ncards += pool.ncards()
                 }
             }
-            // result.addMessage("  cardPools assortAvg = ${assortAvg.avg()} assortMargin = ${assortAvg.margin()} ncards = ${assortAvg.ncards}")
 
-            /* this part may not be needed
-            if (contestSummary.pooled[contestId] != null) {
-                val pooled = contestSummary.pooled[contestId]!!
-                val extra = pooled.ncards() - assortAvg.ncards
-                assortAvg.ncards += extra
-                assortAvg.totalAssort += extra * 0.5 // this says that the extra get counted as 1/2; but i think they get counted as assortAverage[card.poolId]
-                // result.addMessage("  diluted extra votes = ${extra}")
-            } */
-
-            if (contestSummary.nonpooled[contestId] != null) {
-                val nonpoolTab = contestSummary.nonpooled[contestId]!!
-                // result.addMessage("  nonpoolCvrVotes = ${nonpoolTab}")
-                val poolMargin = assertion.assorter.calcMargin(nonpoolTab.votes, nonpoolTab.ncards())
-                val poolAvg = margin2mean(poolMargin)
-                assortAvg.ncards += nonpoolTab.ncards()
-                assortAvg.totalAssort += nonpoolTab.ncards() * poolAvg
-                // result.addMessage("  contest assortAvg = ${assortAvg.avg()} assortMargin = ${assortAvg.margin()} ncards = ${assortAvg.ncards}")
-            }
-
-            val dilutedMargin = contestUA.makeDilutedMargin(passorter)
-
+            val dilutedMargin = passorter.dilutedMargin()
             if (!doubleIsClose(dilutedMargin, assortAvg.margin())) {
-                result.addError("  dilutedMargin does not agree for contest ${contestUA.id} assorter '$passorter'")
-                result.addError("     dilutedMargin= ${pfn(dilutedMargin)} cardPools assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards}")
+                result.addError("  verifyOApools dilutedMargin does not agree for contest ${contestUA.id} assorter '$passorter'")
+                result.addError("     dilutedMargin= ${pfn(dilutedMargin)} cardPools assortMargin= ${pfn(assortAvg.margin())} ncards=${assortAvg.ncards} Npop=${contestUA.Npop}")
+
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
                 allOk = false
             } else {
@@ -512,7 +522,7 @@ fun verifyOApools(
             }
         }
     }
-    result.addMessage("  verifyOAassortAvg allOk = $allOk")
+    result.addMessage("  verifyOApools allOk = $allOk")
     return result
 }
 

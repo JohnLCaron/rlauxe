@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -15,7 +15,7 @@ class TestOneAuditPool {
     @Test
     fun testCardPoolFromCvrs() {
         val (contestOA, mvrs, cards, cardPools) =
-            makeOneAuditTestP(
+            makeOneAuditTest(
                 margin = .02,
                 Nc = 50000,
                 cvrFraction = .80,
@@ -40,7 +40,7 @@ class TestOneAuditPool {
 
     @Test
     fun testAddUndervotes() {
-        val test = MultiContestTestDataP(20, 11, 20000)
+        val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map {
             ContestUnderAudit(it, isClca = true).addStandardAssertions()
         }
@@ -72,7 +72,7 @@ class TestOneAuditPool {
 
     @Test
     fun testCardPool() {
-        val test = MultiContestTestDataP(20, 11, 20000)
+        val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map {
             ContestUnderAudit(it, isClca = true).addStandardAssertions()
         }

@@ -4,14 +4,14 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardsWithPopulationsToCardManifest
+import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCardManifest
 import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.MultiContestCombineData
-import org.cryptobiotic.rlauxe.estimate.makeOneAuditTestContestsP
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTestContests
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -218,8 +218,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
             assertEquals(contest.votes, mtabs[contest.id]!!.votes)
         }
 
-        val converter = CardsWithPopulationsToCardManifest(
-            type = AuditType.ONEAUDIT,
+        val converter = MergePopulationsIntoCardManifest(
             cards = Closer(modifiedCards.iterator()),
             cardStyles,
         )
@@ -234,7 +233,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
         val fakeMvrs = cardsp.map { it.cvr() }
         val config = AuditConfig(AuditType.ONEAUDIT, hasStyle = hasStyle, seed = 12356667890L)
         val (contestsUA, cardPools) =
-            makeOneAuditTestContestsP(
+            makeOneAuditTestContests(
                 infos,
                 listOf(contestB),
                 cardStyles,

@@ -19,3 +19,36 @@ class Closer<out T>(val iter: Iterator<T>) : CloseableIterator<T> {
     override fun next() = iter.next()
     override fun close() {}
 }
+
+class NoCloser<T>(proxy: CloseableIterator<T>) : Iterator<T> {
+    private val iterator = proxy.iterator()
+    override fun next(): T {
+        return iterator.next()
+    }
+
+    override fun hasNext(): Boolean {
+        return iterator.hasNext()
+    }
+}
+
+class SubsetIterator<T>(skip:Int, val limit: Int?, proxy: CloseableIterator<T>) : CloseableIterator<T> {
+    private val iterator = proxy.iterator()
+    var count = 0
+
+    init {
+        repeat(skip) { iterator.next() }
+    }
+
+    override fun next(): T {
+        count++
+        return iterator.next()
+    }
+
+    override fun hasNext(): Boolean {
+        return iterator.hasNext() && (limit == null || count < limit)
+    }
+
+    override fun close() {
+        // NOOP
+    }
+}

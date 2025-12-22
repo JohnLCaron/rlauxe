@@ -134,24 +134,6 @@ class TestProbRatios {
         }
     }
 
-    fun testUpperOld(mu: Double, nu: Double, upper:Double) {
-        val margin = nu * 2 - 1.0
-        println("\nmu= $mu; nu = $nu; u=$upper; margin = ${"%6.2f".format(margin)}")
-
-        // (X_j*(nu/mu) + (upper-X_j)*(upper-nu)/(upper-mu))/upper
-        val r1 = nu/mu
-        val r1u = r1/upper
-        val r0 = (1-nu)/(1-mu)
-        val r0u = (upper-nu)/(upper-mu)/upper
-        println("          r1=nu/mu = ${r1}")
-        println("       r1u=nu/mu/u = ${r1u}")
-        println(" r0=(1-nu)/(1-mu) = ${r0}")
-        println("r0u=(u-nu)/(u-mu) = ${r0u}")
-        assertEquals(2.0/upper, r1u+r0u)
-        assertEquals((1+margin)/upper, r1u)
-        assertEquals((1-margin)/upper, r0u)
-    }
-
     @Test
     fun testNumerics() {
         testNumerics(upperBound=1.0101010101010102, etaj=.7575757575756341, mj = .5, xj = .5050505050505051)

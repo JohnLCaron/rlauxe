@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.estimate.OneAuditVunderBarFuzzer
+import org.cryptobiotic.rlauxe.util.OneAuditVunderBarFuzzer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
@@ -130,7 +130,7 @@ class TestVunder {
         val Nc = 10000
         val cvrFraction = 0.80
         val (contestOA, mvrs, cards, cardPools) =
-            makeOneAuditTestP(margin, Nc, cvrFraction = cvrFraction, undervoteFraction = 0.0, phantomFraction = 0.0)
+            makeOneAuditTest(margin, Nc, cvrFraction = cvrFraction, undervoteFraction = 0.0, phantomFraction = 0.0)
 
         val cardPool = cardPools.first()
         val votes = cardPool.regVotes()[contestOA.id]!!

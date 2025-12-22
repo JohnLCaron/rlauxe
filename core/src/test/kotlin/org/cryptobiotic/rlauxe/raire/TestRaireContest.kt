@@ -40,12 +40,12 @@ class TestRaireContest {
     @Test
     fun testSimulateRaireTestContest() {
         val contestId=111
-        val (rcontestUA: RaireContestUnderAudit, _: List<Cvr>) = simulateRaireTestContest(5000, contestId=contestId, ncands=3, minMargin=.04, quiet = true, hasStyle=true)
+        val (rcontestUA: RaireContestUnderAudit, _: List<Cvr>) = simulateRaireTestContest(5000, contestId=contestId, ncands=3, minMargin=.04, quiet = true)
 
         assertEquals(rcontestUA, rcontestUA)
         assertEquals(rcontestUA.hashCode(), rcontestUA.hashCode())
 
-        val (rcontestUA2: RaireContestUnderAudit, _) = simulateRaireTestContest(5000, contestId=111, ncands=3, minMargin=.04, quiet = true, hasStyle=true)
+        val (rcontestUA2: RaireContestUnderAudit, _) = simulateRaireTestContest(5000, contestId=111, ncands=3, minMargin=.04, quiet = true)
         assertNotEquals(rcontestUA, rcontestUA2)
         assertNotEquals(rcontestUA.hashCode(), rcontestUA2.hashCode())
 
@@ -59,7 +59,7 @@ class TestRaireContest {
     @Test
     fun testMakeRaireContestUA() {
         val contestId=111
-        val (rcu: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(5000, contestId=contestId, ncands=5, minMargin=.04, quiet = true, hasStyle=true)
+        val (rcu: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(5000, contestId=contestId, ncands=5, minMargin=.04, quiet = true)
 
         val info = rcu.contest.info()
         val contestTab = tabulateCvrs(rcvrs.iterator(), mapOf(info.id to info))

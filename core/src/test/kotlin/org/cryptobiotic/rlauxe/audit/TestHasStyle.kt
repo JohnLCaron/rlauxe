@@ -392,7 +392,7 @@ class TestHasStyle {
         }
 
         val infos = contests.map{ it.info }.associateBy { it.id }
-        val cardIter = CardsWithPopulationsToCardManifest(config.auditType,
+        val cardIter = MergePopulationsIntoCardManifest(
             Closer(testCards.iterator()),
             populations = cardStyles,
         )

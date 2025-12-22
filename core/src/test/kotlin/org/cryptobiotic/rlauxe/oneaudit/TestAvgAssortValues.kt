@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.verifyOAassortAvg
@@ -23,10 +24,11 @@ class TestAvgAssortValues {
         val margin = .03
         val Nc = 100
         val (oaContest, mvrs, cards, cardPools) =
-            makeOneAuditTestP(margin, Nc, cvrFraction = 0.50, undervoteFraction = 0.0, phantomFraction = 0.0)
+            makeOneAuditTest(margin, Nc, cvrFraction = 0.50, undervoteFraction = 0.0, phantomFraction = 0.0)
         println("oaContest = $oaContest")
         if (showCards) mvrs.forEach { println("  $it") }
 
+        // note: using the mvrs
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
             CvrsWithPopulationsToCardManifest(
                 AuditType.ONEAUDIT, Closer(mvrs.iterator()),
@@ -62,12 +64,13 @@ class TestAvgAssortValues {
         val margin = .05
         val Nc = 1000
         val (oaContest, mvrs, cards, cardPools) =
-            makeOneAuditTestP(margin, Nc, cvrFraction = 0.80, undervoteFraction = 0.0, phantomFraction = 0.03)
+            makeOneAuditTest(margin, Nc, cvrFraction = 0.80, undervoteFraction = 0.0, phantomFraction = 0.03)
 
         println("oaContest = $oaContest")
         if (showCvrs) mvrs.subList(0, 10).forEach { println("  $it") }
-        assertEquals(margin, oaContest.minDilutedMargin())
+        assertEquals(margin, oaContest.minDilutedMargin()!!, doublePrecision)
 
+        // note: using the mvrs
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
             CvrsWithPopulationsToCardManifest(
                 AuditType.ONEAUDIT,  Closer(mvrs.iterator()),
@@ -97,11 +100,12 @@ class TestAvgAssortValues {
         val margin = .05
         val Nc = 1000
         val (oaContest, mvrs, cards, cardPools) =
-            makeOneAuditTestP(margin, Nc, cvrFraction = 0.80, undervoteFraction = 0.0, phantomFraction = 0.03, extraInPool=200)
+            makeOneAuditTest(margin, Nc, cvrFraction = 0.80, undervoteFraction = 0.0, phantomFraction = 0.03, extraInPool=200)
 
         println("oaContest = $oaContest")
         if (showCvrs) mvrs.subList(0, 10).forEach { println("  $it") }
 
+        // note: using the mvrs
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
             CvrsWithPopulationsToCardManifest(
                 AuditType.ONEAUDIT, Closer(mvrs.iterator()),

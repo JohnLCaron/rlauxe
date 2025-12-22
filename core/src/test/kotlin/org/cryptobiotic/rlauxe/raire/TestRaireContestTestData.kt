@@ -22,7 +22,7 @@ class TestRaireContestTestData {
         val phantomPct = phantomRange.start + Random.nextDouble(phantomRange.endInclusive - phantomRange.start)
         println("minMargin = $minMargin, phantomPct=${phantomPct}")
 
-        val makeRaireContestResult = simulateRaireTestContest(N=N, contestId=111, ncands=4, minMargin=minMargin, phantomPct=phantomPct, quiet=false, hasStyle=true)
+        val makeRaireContestResult = simulateRaireTestContest(N=N, contestId=111, ncands=4, minMargin=minMargin, phantomPct=phantomPct, quiet=false)
         rcontestUA = makeRaireContestResult.first
         cvrs = makeRaireContestResult.second
         rcontest = rcontestUA.contest as RaireContest

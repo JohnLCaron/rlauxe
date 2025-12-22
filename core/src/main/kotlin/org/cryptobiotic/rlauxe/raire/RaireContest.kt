@@ -3,10 +3,11 @@ package org.cryptobiotic.rlauxe.raire
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext
+import au.org.democracydevelopers.raire.irv.Votes
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.util.*
+import kotlin.collections.toIntArray
 
 private val logger = KotlinLogging.logger("RaireContest")
 
@@ -81,10 +82,10 @@ data class RaireContest(
         // find the latest round with both candidates
         var latestRound : IrvRound? = null
         rounds.forEach{ it:IrvRound -> if (it.count.contains(assorter.winner()) && it.count.contains(assorter.loser())) latestRound = it }
-        if (latestRound == null) return diffDdefault
+        if (latestRound == null) latestRound = rounds.last()
 
         val winner = latestRound.count[assorter.winner()]!!
-        val loser = latestRound.count[assorter.loser()]!!
+        val loser = latestRound.count[assorter.loser()] ?: 0
         val recountMargin = (winner - loser) / (winner.toDouble())
         return "winner=$winner loser=$loser diff=${winner-loser} (w-l)/w =${recountMargin} difficulty=${rassertion.difficulty}"
     }
@@ -205,8 +206,8 @@ NEN(irv_elimination): ci > ck if only {S} remain
   NEN one vote understatement: cvr has neither winner nor loser as first pref among remaining (1/2), mvr has winner as first pref among remaining  (1)
  */
 enum class RaireAssertionType(val shortName: String) {
-    winner_only("NEB"),
-    irv_elimination("NEN");
+    winner_only("NEB"), // winner cannot be eliminated before loser
+    irv_elimination("NEN"); // winner > loser if only {remaining} remain
 
     companion object {
         fun fromString(s:String) : RaireAssertionType {
@@ -227,6 +228,8 @@ data class RaireAssertion(
     var difficulty: Double,
     var marginInVotes: Int,
     val assertionType: RaireAssertionType,
+    val winnerIdx: Int,
+    val loserIdx: Int,
     val eliminated: List<Int> = emptyList(), // candidate Ids; NEN only; already eliminated for the purpose of this assertion
     val votes: Map<Int, Int> = emptyMap(), // votes for winner, loser depending on assertion type
 ) {
@@ -243,21 +246,33 @@ data class RaireAssertion(
             return if (aassertion is NotEliminatedBefore) {
                 val winner = candidateIds[aassertion.winner]
                 val loser = candidateIds[aassertion.loser]
-                RaireAssertion(winner, loser, aandd.difficulty, aandd.margin, RaireAssertionType.winner_only, votes = votes)
+                RaireAssertion(
+                    winner,
+                    loser,
+                    aandd.difficulty,
+                    aandd.margin,
+                    RaireAssertionType.winner_only,
+                    aassertion.winner,
+                    aassertion.loser,
+                    emptyList(),
+                    votes,
+                )
             } else if (aassertion is NotEliminatedNext) {
                 val winner = candidateIds[aassertion.winner]
                 val loser = candidateIds[aassertion.loser]
                 // have to convert continuing (aka remaining) -> alreadyEliminated, and index -> id
                 val continuing = aassertion.continuing.map{ candidateIds[it] }.toList()
                 val eliminated = candidateIds.filter { !continuing.contains(it) }
-                return RaireAssertion(
+                RaireAssertion(
                     winner,
                     loser,
                     aandd.difficulty,
                     aandd.margin,
                     RaireAssertionType.irv_elimination,
+                    aassertion.winner,
+                    aassertion.loser,
                     eliminated,
-                    votes = votes,
+                    votes,
                 )
             } else {
                 throw Exception("Unknown assertion type: ${aassertion.javaClass.name}")
@@ -268,10 +283,12 @@ data class RaireAssertion(
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-// This is a "primitive" assorter.
 data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion): AssorterIF {
     val contestId = info.id
-    val remaining = info.candidateIds.filter { !rassertion.eliminated.contains(it) }
+    val remaining = info.candidateIds.filter { !rassertion.eliminated.contains(it) } // candidate Ids
+    val remainingIdx: IntArray = remaining.map { info.candidateIdToIdx[it]!! }.toIntArray() // candidate Indices
+    val isNEB = rassertion.assertionType == RaireAssertionType.winner_only
+
     var dilutedMean: Double = 0.0
 
     fun setDilutedMean(mean: Double): RaireAssorter {
@@ -279,11 +296,34 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
         return this
     }
 
+    fun calcMargin(votes: Votes, N: Int): Double {
+        return calcMarginInVotes(votes) / N.toDouble()
+    }
+
+    fun calcMarginInVotes(votes: Votes): Int {
+        val marginInVotes = if (isNEB) { // raire-java NotEliminatedBefore lines 67-71
+            val tally2 = votes.restrictedTallies(intArrayOf(rassertion.winnerIdx, rassertion.loserIdx))
+            val tallyWinner = votes.firstPreferenceOnlyTally(rassertion.winnerIdx)
+            val tallyLoser = tally2[1]
+            tallyWinner - tallyLoser
+
+        } else { // raire-java NotEliminatedNext lines 83-95
+            val tallyAll = votes.restrictedTallies(remainingIdx)
+            val tallyMap = remainingIdx.mapIndexed { idx, it -> Pair(it, idx) }.toMap() // candidate idx -> remaining index
+
+            val tallyWinner = tallyAll[tallyMap[rassertion.winnerIdx]!!]
+            val tallyLoser = tallyAll[tallyMap[rassertion.loserIdx]!!]
+            tallyWinner - tallyLoser
+        }
+        return marginInVotes
+    }
+
     override fun upperBound() = 1.0
     override fun winner() = rassertion.winnerId // candidate id, not index
     override fun loser() = rassertion.loserId   // candidate id, not index
     override fun dilutedMargin() = mean2margin(dilutedMean)
     override fun dilutedMean() = dilutedMean
+    override fun shortName() = "${rassertion.assertionType.shortName} ${winner()}/${loser()}"
 
     override fun desc() = buildString {
         append("Raire ${rassertion.assertionType.shortName} winner/loser=${rassertion.winnerId}/${rassertion.loserId} marginInVotes=${rassertion.marginInVotes} difficulty=${rassertion.difficulty}")
@@ -292,25 +332,19 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
     }
     override fun hashcodeDesc() = "${rassertion.assertionType.shortName} ${winLose()} ${rassertion.eliminated}" // must be unique for serialization
 
-    override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
-        return rassertion.marginInVotes / N.toDouble()
+    override fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double {
+        throw RuntimeException("RaireAssorter can't calculate margin from Regular Voes")
     }
 
     override fun assort(mvr: CvrIF, usePhantoms: Boolean): Double {
         if (!mvr.hasContest(info.id)) return 0.5
         if (usePhantoms && mvr.isPhantom()) return 0.5
-        return if (rassertion.assertionType == RaireAssertionType.winner_only) assortWinnerOnly(mvr)
-            else  if (rassertion.assertionType == RaireAssertionType.irv_elimination) assortIrvElimination(mvr)
-            else throw RuntimeException("unknown assertionType = ${rassertion.assertionType}")
+        return if (isNEB) assortNotEliminatedBefore(mvr)
+               else assortNotEliminatedNext(mvr)
     }
 
-    //                 # CVR is a vote for the winner only if it has the
-    //                # winner as its first preference
-    //                winner_func = lambda v, contest_id=contest.id, winr=winr: (
-    //                    1 if v.get_vote_for(contest_id, winr) == 1 else 0
-    //                )
     // aka NEB
-    fun assortWinnerOnly(rcvr: CvrIF): Double {
+    fun assortNotEliminatedBefore(rcvr: CvrIF): Double {
         // CVR is a vote for the winner only if it has the winner as its first preference (rank == 1)
         val awinner = if (raire_get_rank(rcvr, contestId, rassertion.winnerId) == 1) 1 else 0
         // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
@@ -318,12 +352,8 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
         return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
     }
 
-    //                        assort=lambda v, contest_id=contest.id, winner=winr, loser=losr, remn=remn:
-    //                            ( v.rcv_votefor_cand(contest.id, winner, remn)
-    //                            - v.rcv_votefor_cand(contest.id, loser, remn)
-    //                            + 1 ) / 2
     // aka NEN
-    fun assortIrvElimination(rcvr: CvrIF): Double {
+    fun assortNotEliminatedNext(rcvr: CvrIF): Double {
         // Context is that all candidates in "already_eliminated" have been
         // eliminated and their votes distributed to later preferences
         val awinner = raire_votefor_elim(rcvr, contestId, rassertion.winnerId, remaining)
@@ -334,31 +364,12 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
     override fun toString() = desc()
 }
 
-/** Duplicating the math from SHANGRLA CVR in Audit.py */
-
-//     def get_vote_for(self, contest_id: str, candidate: str):
-//        return (
-//            False
-//            if (contest_id not in self.votes or candidate not in self.votes[contest_id])
-//            else self.votes[contest_id][candidate]
-//        )
-
 // if candidate not ranked, return 0, else rank (1 based)
 fun raire_get_rank(cvr: CvrIF, contest: Int, candidate: Int): Int {
     val rankedChoices = cvr.votes(contest)
     return if (rankedChoices == null || !rankedChoices.contains(candidate)) 0
     else rankedChoices.indexOf(candidate) + 1
 }
-
-//        rank_winner = self.get_vote_for(contest_id, winner)
-//        rank_loser = self.get_vote_for(contest_id, loser)
-//
-//        if not bool(rank_winner) and bool(rank_loser):
-//            return 1
-//        elif bool(rank_winner) and bool(rank_loser) and rank_loser < rank_winner:
-//            return 1
-//        else:
-//            return 0
 
 // Check whether vote is a vote for the loser with respect to a 'winner only' assertion.
 // Its a vote for the loser if they appear and the winner does not, or they appear before the winner
@@ -374,19 +385,6 @@ fun raire_loser_vote_wo(cvr: CvrIF, contest: Int, winner: Int, loser: Int): Int 
     }
 }
 
-//         if not cand in remaining:
-//            return 0
-//
-//        if not bool(rank_cand := self.get_vote_for(contest_id, cand)):
-//            return 0
-//        else:
-//            for altc in remaining:
-//                if altc == cand:
-//                    continue
-//                rank_altc = self.get_vote_for(contest_id, altc)
-//                if bool(rank_altc) and rank_altc <= rank_cand:
-//                    return 0
-//            return 1
 /**
  * Check whether 'vote' is a vote for the given candidate in the context where only candidates in 'remaining' remain standing.
  * If you reduce the ballot down to only those candidates in 'remaining', and 'cand' is the first preference, return 1; otherwise return 0.

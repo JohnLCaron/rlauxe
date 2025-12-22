@@ -93,6 +93,7 @@ interface OneAuditContestIF {
 
 private const val debug = false
 
+// the contests share the audit pools, so its convenient to process them all at once?
 fun makeOneAuditContests(
     wantContests: List<ContestIF>, // the contests you want to audit
     nbs: Map<Int,Int>,
@@ -113,16 +114,16 @@ fun makeOneAuditContests(
         cua
     }
 
-    // The OA assort averages come from the cardPools
-    addOAClcaAssortersFromMargin(contestsUA, cardPools)
+    // Its the OA assorters that make this a OneAudit contest
+    setPoolAssorterAverages(contestsUA, cardPools)
     return contestsUA
 }
 
-// use dilutedMargin to set the pool assorter averages. can only use for non-IRV contests
-fun addOAClcaAssortersFromMargin(
+// use dilutedMargin to set the pool assorter averages. can only use for non-IRV contests because calcMargin(regVotes)
+// this also repalces the clcaAssertions with ones that use ClcaAssorterOneAudit which contain the pool assorter averages
+fun setPoolAssorterAverages(
     oaContests: List<ContestUnderAudit>,
     cardPools: List<OneAuditPoolIF>, // poolId -> pool
-    // hasStyle: Boolean,
 ) {
     // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
     // create the clcaAssertions and add then to the oaContests
@@ -135,16 +136,13 @@ fun addOAClcaAssortersFromMargin(
                     val regVotes = cardPool.regVotes()[oaContest.id]!!
                     if (cardPool.ncards() > 0) {
                         // note: using cardPool.ncards(), this is the diluted count
-                        val poolMargin = assertion.assorter.calcMargin(regVotes.votes, cardPool.ncards())
+                        val poolMargin = assertion.assorter.calcMarginFromRegVotes(regVotes.votes, cardPool.ncards())
                         assortAverages[cardPool.poolId] = margin2mean(poolMargin)
-                        if (debug)
-                            println("contest ${oaContest.id} assertion=${assertion.assorter.shortName()} poolAverage = ${margin2mean(poolMargin)} " +
-                                    "regVotes.votes=${regVotes.votes} cardPool.ncards=${cardPool.ncards()}")
                     }
                 }
             }
             val clcaAssorter = ClcaAssorterOneAudit(assertion.info, assertion.assorter,
-                dilutedMargin = oaContest.makeDilutedMargin(assertion.assorter),
+                dilutedMargin = assertion.assorter.dilutedMargin(),
                 poolAverages = AssortAvgsInPools(assortAverages))
             ClcaAssertion(assertion.info, clcaAssorter)
         }
@@ -158,6 +156,7 @@ class ClcaAssorterOneAudit(
     dilutedMargin: Double,
     val poolAverages: AssortAvgsInPools,
 ) : ClcaAssorter(info, assorter, dilutedMargin=dilutedMargin) {
+    override fun classname() = this::class.simpleName
 
     // B(bi, ci)
     override fun bassort(mvr: CvrIF, cvr: CvrIF, hasStyle: Boolean): Double {
@@ -206,12 +205,6 @@ class ClcaAssorterOneAudit(
         // val cvr_assort = if (cvr.phantom) .5 else poolAvgAssortValue
         val cvr_assort = poolAvgAssortValue
         return cvr_assort - mvr_assort
-    }
-
-    override fun toString() = buildString {
-        appendLine("OneAuditClcaAssorter for contest ${info.name} (${info.id})")
-        appendLine("  assorter=${assorter.desc()}")
-        appendLine("  dilutedMargin=$dilutedMargin noerror=$noerror upperBound=$upperBound")
     }
 
     override fun equals(other: Any?): Boolean {

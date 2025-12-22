@@ -24,7 +24,7 @@ class TestFuzzedWithRaire {
         val show = false
 
         val testData =
-            MultiContestTestDataP(1, 4, N,
+            MultiContestTestData(1, 4, N,
                 marginRange = margin..margin,
                 underVotePctRange = underVotePct .. underVotePct,
                 phantomPctRange = phantomPct..phantomPct)
@@ -41,7 +41,7 @@ class TestFuzzedWithRaire {
             }
         }
 
-        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N/2, contestId=111, ncands=3, minMargin=.04, quiet = true, hasStyle=true)
+        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N/2, contestId=111, ncands=3, minMargin=.04, quiet = true)
         if (show) {
             println("\nraire cvrs")
             rcvrs.forEach {

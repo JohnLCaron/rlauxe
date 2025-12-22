@@ -81,8 +81,9 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
                else estSampleSize
     }
 
+    // TODO: for Clca, use noerror
     fun minAssertion(): AssertionRound? {
-        return assertionRounds.minByOrNull { contestUA.makeDilutedMargin(it.assertion.assorter) }
+        return assertionRounds.minByOrNull { it.assertion.assorter.dilutedMargin() }
     }
 
     fun createNextRound() : ContestRound {

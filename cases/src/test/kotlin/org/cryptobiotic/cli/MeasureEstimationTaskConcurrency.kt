@@ -15,7 +15,7 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.estimate.EstimationResult
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeEstimationTasks
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
@@ -27,7 +27,7 @@ import kotlin.test.Test
 class MeasureEstimationTaskConcurrency {
     @Test
     fun measure() {
-        val test = MultiContestTestDataP(15, 1, 20000)
+        val test = MultiContestTestData(15, 1, 20000)
         val cards = test.makeCardsFromContests()
 
         val contestsUA  = test.contests.map { ContestUnderAudit(it).addStandardAssertions() }

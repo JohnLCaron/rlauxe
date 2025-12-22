@@ -180,4 +180,93 @@ last changed: 03/10/2025
 * review strategies and fuzzing in estimation and auditing
 * replace old plots
 
+////////////////////////////////////////////
+Simulation
 
+Production
+
+Estimation
+
+  Polling: ContestSimulation.simulateCvrsDilutedMargin(contestRound.contestUA, config)
+    ContestSimulation(contestOrg, contestUA.Npop).makeCvrs() else ContestSimulation(contestScaled, sNb)
+    // could we use PollingCardFuzzSampler ??
+
+  Clca:    ClcaCardFuzzSampler(config.simFuzzPct ?: 0.0, contestCards, contestUA.contest, cassorter)
+    //  for one contest, this takes a list of cards and fuzzes them for the mvrs
+
+  OneAudit: OneAuditVunderBarFuzzer.makePairsFromCards(contestCards)
+    // fuzz cvrs, leave pools alone i think
+
+  OneAuditVunderBarFuzzer
+    // uses primitives in SamplingForEstimation
+    // simulate pooled data from the pool values; (not sure about IRV)
+    VunderBar = simulate pooled data Votes and Undervotes for multiple OA Pools
+    VunderPool = Votes and Undervotes for one OA Pool
+    Vunder = Votes and Undervotes for one OA contest
+
+    // combines Vunder for multiple contests into cvrs for one pool
+    // make cvrs until we exhaust the votes
+    // this algorithm puts as many contests as possible on each cvr
+    // the number of cvrs can vary when there are multiple contests
+    fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): List<Cvr>
+
+Auditing
+
+for a real audit, so simulation is used:
+
+    // the sampleMvrsFile is added externally for real audits, and by MvrManagerTestFromRecord for test audits
+
+    open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, val contestsUA: List<ContestUnderAudit>, val mvrWrite: Boolean = true): MvrManager {
+
+Testing
+
+1. class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA: List<ContestUnderAudit>)
+   // extract the cards with sampleNumbers from the cardManifest, optionally fuzz them, and write them to sampleMvrsFile
+   // fails if Polling
+   makeFuzzedCardsFrom(contestsUA.map { it.contest.info() }, newCards, simFuzzPct)
+
+(or)
+
+2. class MvrManagerForTesting
+   // simulated cvrs, mvrs for testing are sorted and kept here in memory
+    makeFuzzedCvrsFrom(contests, testCvrs, mvrFuzzPct) // handles IRV
+
+(or)
+
+3. writeUnsortedPrivateMvrs(Publisher(auditdir), testMvrs, config.seed)
+    // (persistent) write mvrs to private when audit is created
+    // eg from MultiContestTestData.makeCvrsFromContests() with simFuzzPct
+
+(or)
+
+// used for singleRoundAudit
+4. class MvrManagerFromManifest(
+    cardManifest: List<AuditableCard>,
+    mvrs: List<Cvr>,
+    val infoList: List<ContestInfo>,
+    seed:Long,
+    val simFuzzPct: Double?,
+    val pools: List<OneAuditPoolIF>? = null,
+    ) : MvrManager
+
+
+Other Testing
+
+testFixtures
+
+    MultiContestTestData: specify the contests with range of margins, phantoms, undervotes, phantoms, single poolId, poolPct
+        used by RunRlaStartFuzz (Polling, Clca)
+
+    MultiContestCombineData: specify the contests with exact number of votes
+
+    OneAuditTest : One OA contest
+        makeOneAuditTestContests: multiple OA contests
+        used by RunRlaCreateOneAudit
+
+
+    // Simulation of Raire Contest; pass in the parameters and simulate the cvrs; then call raire library to generate the assertions
+    simulateRaireTestContest: single raire contest
+
+    makeTestContestOAIrv : One OA IRV contest (not used?)
+
+    ContestForTesting.makeContestFromCrvs(): single contest, make cvrs first

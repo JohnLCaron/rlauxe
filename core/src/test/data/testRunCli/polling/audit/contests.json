@@ -18,13 +18,13 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "3": 5613,
-                    "0": 4557,
-                    "2": 1383,
-                    "1": 768
+                    "0": 4032,
+                    "1": 3191,
+                    "2": 3174,
+                    "3": 185
                 },
-                "Nc": 15959,
-                "Ncast": 15882
+                "Nc": 14182,
+                "Ncast": 14144
             },
             "isComparison": false,
             "pollingAssertions": [
@@ -32,17 +32,8 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5262987498132191,
-                        "winner": 3,
-                        "loser": 0
-                    }
-                },
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.6206604572396275,
-                        "winner": 3,
+                        "reportedMean": 0.5209548014152589,
+                        "winner": 0,
                         "loser": 1
                     }
                 },
@@ -50,15 +41,24 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.6053444239677243,
-                        "winner": 3,
+                        "reportedMean": 0.5213783824188967,
+                        "winner": 0,
                         "loser": 2
+                    }
+                },
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.5958538894702746,
+                        "winner": 0,
+                        "loser": 3
                     }
                 }
             ],
             "clcaAssertions": [],
             "status": "InProgress",
-            "Npop": 20077
+            "Npop": 20067
         },
         {
             "info": {
@@ -66,7 +66,8 @@
                 "id": 1,
                 "candidateNames": {
                     "cand0": 0,
-                    "cand1": 1
+                    "cand1": 1,
+                    "cand2": 2
                 },
                 "choiceFunction": "PLURALITY",
                 "nwinners": 1,
@@ -76,11 +77,12 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "1": 1697,
-                    "0": 1420
+                    "1": 7503,
+                    "0": 6525,
+                    "2": 2565
                 },
-                "Nc": 4134,
-                "Ncast": 4118
+                "Nc": 20067,
+                "Ncast": 20000
             },
             "isComparison": false,
             "pollingAssertions": [
@@ -88,15 +90,24 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5068984410021418,
+                        "reportedMean": 0.5243683659739872,
                         "winner": 1,
                         "loser": 0
+                    }
+                },
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.6230378232919719,
+                        "winner": 1,
+                        "loser": 2
                     }
                 }
             ],
             "clcaAssertions": [],
             "status": "InProgress",
-            "Npop": 20077
+            "Npop": 20067
         }
     ],
     "rcontestsUnderAudit": []

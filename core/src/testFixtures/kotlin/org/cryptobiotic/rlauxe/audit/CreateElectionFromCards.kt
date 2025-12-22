@@ -18,8 +18,7 @@ class CreateElectionFromCards (
     override fun cardManifest() = createCardManifest()
 
     fun createCardManifest(): CloseableIterator<AuditableCard> {
-        return CardsWithPopulationsToCardManifest(
-            config.auditType,
+        return MergePopulationsIntoCardManifest(
             Closer(cards.iterator()),
             populations = cardPools ?: cardStyles,
         )

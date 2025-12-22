@@ -22,7 +22,7 @@ class TestRaireAudit {
     }
 
     fun testRaireWorkflow(auditConfig: AuditConfig) {
-        val (rcontest, testCvrs) = simulateRaireTestContest(N=20000, contestId=111, ncands=3, minMargin=.04, quiet = true, hasStyle=true)
+        val (rcontest, testCvrs) = simulateRaireTestContest(N=20000, contestId=111, ncands=3, minMargin=.04, quiet = true)
         val workflow = WorkflowTesterClca(auditConfig, emptyList(), listOf(rcontest),
             MvrManagerForTesting(testCvrs, testCvrs, auditConfig.seed))
         runTestAuditToCompletion("testRaireWorkflow", workflow)
@@ -31,12 +31,12 @@ class TestRaireAudit {
     @Test
     fun testRaireFuzz() {
         val mvrFuzzPct = .02
-        val config = AuditConfig( // TODO hasStyle=false
-            AuditType.CLCA, hasStyle=false, nsimEst=10, simFuzzPct = mvrFuzzPct,
+        val config = AuditConfig(
+            AuditType.CLCA, nsimEst=10, simFuzzPct = mvrFuzzPct,
             clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct = mvrFuzzPct)
         )
 
-        val (rcontest: RaireContestUnderAudit, testCvrs: List<Cvr>) = simulateRaireTestContest(N=20000, contestId=111, ncands=4, minMargin=.04, quiet = true, hasStyle=config.hasStyle)
+        val (rcontest: RaireContestUnderAudit, testCvrs: List<Cvr>) = simulateRaireTestContest(N=20000, contestId=111, ncands=4, minMargin=.04, quiet = true)
         val testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrFuzzPct)
         val workflow = WorkflowTesterClca(config, emptyList(), listOf(rcontest),
             MvrManagerForTesting(testCvrs, testMvrs, config.seed))

@@ -24,15 +24,15 @@ import org.cryptobiotic.rlauxe.raire.RaireAssorter
 @Serializable
 data class ClcaAssorterJson(
     val className: String,
-    val assorter: AssorterIFJson,
+    val assorter: AssorterIFJson, // replicating the passorter
     val dilutedMargin: Double,
-    val poolAverages: AssortAvgsInPoolsJson?,
+    val poolAverages: AssortAvgsInPoolsJson?, // consider putting these in another file ??
 )
 
 fun ClcaAssorter.publishJson() : ClcaAssorterJson {
     return if (this is ClcaAssorterOneAudit) {
         ClcaAssorterJson(
-            "OAClcaAssorter",
+            "ClcaAssorterOneAudit",
             this.assorter.publishJson(),
             this.dilutedMargin,
             poolAverages.publishJson()
@@ -57,7 +57,7 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
                 this.dilutedMargin,
             )
 
-        "OAClcaAssorter" ->
+        "ClcaAssorterOneAudit" ->
             ClcaAssorterOneAudit(
                 info,
                 this.assorter.import(info),
@@ -65,7 +65,7 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
                 poolAverages!!.import()
             )
 
-        else -> throw RuntimeException()
+        else -> throw RuntimeException("unknown class name ${this.className}")
     }
 }
 
@@ -165,7 +165,7 @@ fun AssorterIFJson.import(info: ContestInfo): AssorterIF {
                 this.minFraction!!)
             .setDilutedMean(this.reportedMean)
 
-        else -> throw RuntimeException()
+        else -> throw RuntimeException("unknown class name ${this.className}")
     }
 }
 

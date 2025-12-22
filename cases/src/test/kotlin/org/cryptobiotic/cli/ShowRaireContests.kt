@@ -45,8 +45,8 @@ class ShowRaireContests {
 
         irvCounters.forEach { counter ->
             println("${counter.rcontest}")
-            val cvotes = counter.vc.makeVotes()
-            val irvCount = IrvCount(cvotes, counter.rcontest.info.candidateIds)
+            val votes = counter.vc.makeVotes(counter.rcontest.info.candidateIds.size)
+            val irvCount = IrvCount(votes.votes, counter.rcontest.info.candidateIds)
             showIrvCount(counter.rcontest, irvCount)
         }
         println("showIrvCounts took $stopwatch")

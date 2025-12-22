@@ -8,8 +8,8 @@ import org.cryptobiotic.rlauxe.cli.enterMvrs
 import org.cryptobiotic.rlauxe.cli.startTestElectionPolling
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.json.*
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
-import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTestP
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.persist.*
 import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
@@ -23,10 +23,12 @@ class TestPersistedWorkflow {
         val topdir = "$testdataDir/persist/persistWorkflow/singleClca"
         val auditdir = "$topdir/audit"
 
-        val config = AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01)
+        val config = AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01,
+            persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs
+        )
 
         val N = 50000
-        val testData = MultiContestTestDataP(1, 1, N, marginRange=0.03..0.03, ncands=2)
+        val testData = MultiContestTestData(1, 1, N, marginRange=0.03..0.03, ncands=2)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistedSingleClca $testData")
@@ -49,9 +51,11 @@ class TestPersistedWorkflow {
         val topdir = "$testdataDir/persist/persistWorkflow/clca"
         val auditdir = "$topdir/audit"
 
-        val config = AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01)
+        val config = AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01,
+            persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs
+        )
         val N = 50000
-        val testData = MultiContestTestDataP(11, 4, N, marginRange=0.03..0.05)
+        val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistedAuditClca $testData")
@@ -120,7 +124,7 @@ class TestPersistedWorkflow {
 
         val N = 5000
         // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
-        val (contestOA, mvrs, cards, cardPools) = makeOneAuditTestP(
+        val (contestOA, mvrs, cards, cardPools) = makeOneAuditTest(
             N + 100,
             N - 100,
             cvrFraction = .95,

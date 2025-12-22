@@ -48,7 +48,7 @@ class TestTruncShrinkageDebug {
     }
 }
 
-data class TruncShrinkageResult(val capBelow: Double, val est: Double, val capAbove: Double, val boundedEst: Double) {
+private data class TruncShrinkageResult(val capBelow: Double, val est: Double, val capAbove: Double, val boundedEst: Double) {
     val isCapAbove = if (est > capAbove) "*" else ""
     val isCapBelow = if (est < capBelow) "*" else ""
 
@@ -61,7 +61,7 @@ data class TruncShrinkageResult(val capBelow: Double, val est: Double, val capAb
 }
 
 // instrumented version of TruncShrinkage in AlphaMart. Keep them synchonized.
-class TruncShrinkageDebug(
+private class TruncShrinkageDebug(
     val N: Int,
     val withoutReplacement: Boolean = true,
     val upperBound: Double,

@@ -35,6 +35,8 @@ open class ClcaAssorter(
     val dilutedMargin: Double, // dilutedMargin of the primitive assorter; note its only used in dilutedMargin / assorter.upperBound()
     val check: Boolean = true,
 ) {
+    open fun classname() = this::class.simpleName
+
     // Define v ≡ 2Ā − 1, the assorter margin
     // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
     val noerror: Double = 1.0 / (2.0 - dilutedMargin / assorter.upperBound()) // clca assort value when no error
@@ -212,9 +214,9 @@ open class ClcaAssorter(
     }
 
     override fun toString() = buildString {
-        appendLine("ClcaAssorter for contest ${info.name} (${info.id})")
+        appendLine("${classname()} for contest ${info.name} (${info.id})")
         appendLine("  assorter=${assorter.desc()}")
-        append("  assortMargin=${dfn(dilutedMargin, 8)} assortMean=${dfn(margin2mean(dilutedMargin), 8)}")
+        append("  dilutedMargin=${dfn(dilutedMargin, 8)} dilutedMean=${dfn(margin2mean(dilutedMargin), 8)}")
         append(" assortUpper=${dfn(assorter.upperBound(), 8)}")
         append(" noerror=${dfn(noerror, 8)}")
     }

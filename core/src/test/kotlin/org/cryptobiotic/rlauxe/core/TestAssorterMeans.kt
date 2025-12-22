@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 class TestAssorterMeans {
 
     @Test
-    fun testMakeContestFromCvrsPLURALITY() {
+    fun testMakeContestFromCvrsPlurality() {
         val N = 1000
         val cvrMean = 0.55
 
@@ -83,9 +83,10 @@ class TestAssorterMeans {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// TODO how does this compare with ContestSimulation ??
 // TODO currently estimation wont be accurate for nwinners > 1 ??
 //    but this doesnt control margin or undercount. Then back to just using cvrs for estimation ??
-data class ContestTestDataNWinners(
+private data class ContestTestDataNWinners(
     val info: ContestInfo,
     val Nc: Int,
     val phantomPct: Double,

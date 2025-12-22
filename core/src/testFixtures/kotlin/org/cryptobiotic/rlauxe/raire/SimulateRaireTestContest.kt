@@ -9,7 +9,6 @@ import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext
 import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMargin
 import au.org.democracydevelopers.raire.irv.IRVResult
-import au.org.democracydevelopers.raire.irv.Votes
 import au.org.democracydevelopers.raire.time.TimeOut
 import org.cryptobiotic.rlauxe.core.*
 
@@ -17,26 +16,27 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.listToMap
 import kotlin.random.Random
 
-// Simulation of Raire Contest; pass in the parameters and simulate the cvrs; then call raire library to generate the assertions
+// Simulation of Raire Contest; pass in the parameters to make RaireContest with and simulate the cvrs;
+// then call raire library to generate the assertions to get  RaireContestUnderAudit
 fun simulateRaireTestContest(N: Int, contestId: Int, ncands:Int, minMargin: Double,
-                             undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true, hasStyle: Boolean)
+                             undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true)
 : Pair<RaireContestUnderAudit, List<Cvr>> {
 
     repeat(11) {
-        val result = trytoMakeRaireContest(N, contestId, ncands, minMargin, undervotePct, phantomPct, quiet, hasStyle)
+        val result = trytoMakeRaireContest(N, contestId, ncands, minMargin, undervotePct, phantomPct, quiet)
         if (result != null) return result
     }
     throw RuntimeException("failed 11 times to make raire contest with N=$N minMargin=$minMargin")
 }
 
 private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin: Double, undervotePct: Double, phantomPct: Double,
-                                  quiet: Boolean = false, hasStyle: Boolean): Pair<RaireContestUnderAudit, List<Cvr>>? {
+                                  quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>>? {
     val testContest = RaireContestTestData(contestId, ncands=ncands, ncards=N, minMargin=minMargin, undervotePct = undervotePct, phantomPct = phantomPct)
     val testCvrs = testContest.makeCvrs()
 
     var round = 1
     if (!quiet) println("===================================\nRound $round")
-    var solution = testContest.findMinAssertion(testCvrs, quiet)
+    var solution = findMinAssertion(testContest.info, testCvrs, quiet)
     if (solution == null) {
         println("round 1 solution is null")
         return null
@@ -65,7 +65,7 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
         }
 
         if (!quiet) println("===================================\nRound $round")
-        solution = testContest.findMinAssertion(testCvrs, quiet)
+        solution = findMinAssertion(testContest.info, testCvrs, quiet)
         if (solution == null) {
             println("round $round solution is null")
             return null
@@ -128,7 +128,7 @@ data class SimulateIrvTestData(
     val quiet: Boolean = true
 ) */
 
-// TODO use SimulateIrvTestData
+// Simulation of Raire Contest; pass in the parameters to make RaireContest with and simulate the cvrs;
 data class RaireContestTestData(
     val contestId: Int,
     val ncands: Int,
@@ -151,6 +151,7 @@ data class RaireContestTestData(
     val phantomCount = (this.ncards * phantomPct).toInt()
     val Nc = this.ncards
 
+    // same as SimulateIrvTestData
     fun makeCvrs(): List<Cvr> {
         var count = 0
         val cvrs = mutableListOf<Cvr>()
@@ -172,6 +173,7 @@ data class RaireContestTestData(
         return cvrs
     }
 
+    // same as SimulateIrvTestData
     private fun makeCvrWithLeading0(cvrIdx: Int): Cvr {
         // vote for a random number of candidates, including 0
         val nprefs = 1 + Random.nextInt(ncands - 1)
@@ -184,6 +186,7 @@ data class RaireContestTestData(
         return Cvr("cvr$cvrIdx", mapOf(contestId to prefs.toIntArray()))
     }
 
+    // same as SimulateIrvTestData
     private fun makeCvr(cvrIdx: Int): Cvr {
         // vote for a random number of candidates, including 0
         val nprefs = Random.nextInt(ncands)
@@ -221,70 +224,69 @@ data class RaireContestTestData(
         append("ContestTestData($contestId, ncands=$ncands, ncards=$ncards, undervotePct=${df(undervotePct)}")
         append(" phantomPct=${df(phantomPct)} Nc=$Nc")
     }
+}
 
-    // TODO using testCvrs.size as Nc I think
-    // return Triple(winner, solution.solution.Ok, minAssertion)
-    fun findMinAssertion(
-        testCvrs: List<Cvr>,
-        quiet: Boolean
-    ): Triple<Int, RaireResult, AssertionAndDifficulty>? {
-        val vc = VoteConsolidator()
-        testCvrs.forEach { cvr ->
-            val votes = cvr.votes[info.id]
-            if (votes != null) {
-                vc.addVote(votes)
-            }
+// TODO using testCvrs.size as Nc I think
+// return Triple(winner, solution.solution.Ok, minAssertion)
+fun findMinAssertion(
+    info: ContestInfo,
+    testCvrs: List<Cvr>,
+    quiet: Boolean
+): Triple<Int, RaireResult, AssertionAndDifficulty>? {
+    val vc = VoteConsolidator()
+    testCvrs.forEach { cvr ->
+        val votes = cvr.votes[info.id]
+        if (votes != null) {
+            vc.addVote(votes)
         }
-        val cvotes = vc.makeVotes()
-        val votes = Votes(cvotes, ncands)
-
-        // Tabulates the outcome of the IRV election, returning the outcome as an IRVResult.
-        val result: IRVResult = votes.runElection(TimeOut.never())
-        if (!quiet) println(" runElection: possibleWinners=${result.possibleWinners.contentToString()} eliminationOrder=${result.eliminationOrder.contentToString()}")
-
-        if (1 != result.possibleWinners.size) {
-            // println("nwinners ${result.possibleWinners.size} must be 1")
-            return null
-        }
-        val winner: Int = result.possibleWinners[0] // we need a winner in order to generate the assertions
-
-        val problem = RaireProblem(
-            mapOf("candidates" to candidateNames),
-            cvotes,
-            ncands,
-            winner,
-            BallotComparisonOneOnDilutedMargin(testCvrs.size),
-            null,
-            null,
-            null,
-        )
-        val solution: RaireSolution = problem.solve()
-        if (solution.solution.Err != null) {
-            println("solution.solution.Err=${solution.solution.Err}")
-            return null
-        }
-        requireNotNull(solution.solution.Ok) // TODO
-        val solutionResult: RaireResult = solution.solution.Ok
-        val minAssertion: AssertionAndDifficulty =
-            solutionResult.assertions.find { it.margin == solutionResult.margin }!!
-
-        if (!quiet) {
-            val marginPct = solutionResult.margin / ncards.toDouble()
-            println(
-                " solutionResult: margin=${solutionResult.margin} marginPct=${df(marginPct)} difficulty=${
-                    df(
-                        solutionResult.difficulty
-                    )
-                } nassertions=${solutionResult.assertions.size}"
-            )
-            solutionResult.assertions.forEach {
-                val isMinAssertion = if (it == minAssertion) "*" else ""
-                println("   ${showIrvAssertion(it.assertion)} margin=${it.margin} difficulty=${df(it.difficulty)} $isMinAssertion")
-            }
-        }
-
-        return Triple(winner, solutionResult, minAssertion)
     }
+    val ncands = info.candidateIds.size
+    val votes = vc.makeVotes(ncands)
+
+    // Tabulates the outcome of the IRV election, returning the outcome as an IRVResult.
+    val result: IRVResult = votes.runElection(TimeOut.never())
+    if (!quiet) println(" runElection: possibleWinners=${result.possibleWinners.contentToString()} eliminationOrder=${result.eliminationOrder.contentToString()}")
+
+    if (1 != result.possibleWinners.size) {
+        // println("nwinners ${result.possibleWinners.size} must be 1")
+        return null
+    }
+    val winner: Int = result.possibleWinners[0] // we need a winner in order to generate the assertions
+
+    val problem = RaireProblem(
+        mapOf("candidates" to info.candidateNames),
+        votes.votes,
+        ncands,
+        winner,
+        BallotComparisonOneOnDilutedMargin(testCvrs.size),
+        null,
+        null,
+        null,
+    )
+    val solution: RaireSolution = problem.solve()
+    if (solution.solution.Err != null) {
+        println("solution.solution.Err=${solution.solution.Err}")
+        return null
+    }
+    requireNotNull(solution.solution.Ok) // TODO
+    val solutionResult: RaireResult = solution.solution.Ok
+    val minAssertion: AssertionAndDifficulty =
+        solutionResult.assertions.find { it.margin == solutionResult.margin }!!
+
+    if (!quiet) {
+        val ncards = testCvrs.size
+        val marginPct = solutionResult.margin / ncards.toDouble()
+        println(
+            " solutionResult: margin=${solutionResult.margin} marginPct=${df(marginPct)} " +
+            "difficulty=${df(solutionResult.difficulty)} nassertions=${solutionResult.assertions.size}"
+        )
+        solutionResult.assertions.forEach {
+            val isMinAssertion = if (it == minAssertion) "*" else ""
+            println("   ${showIrvAssertion(it.assertion)} margin=${it.margin} difficulty=${df(it.difficulty)} $isMinAssertion")
+        }
+    }
+
+    return Triple(winner, solutionResult, minAssertion)
 }
 
 private fun showIrvAssertion(assertion: Assertion) = buildString {

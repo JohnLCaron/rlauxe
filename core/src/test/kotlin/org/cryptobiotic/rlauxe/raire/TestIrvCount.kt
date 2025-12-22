@@ -52,8 +52,8 @@ class TestIrvCount {
                 vc.addVote(votes)
             }
         }
-        val cvotes = vc.makeVotes()
-        val irvCount = IrvCount(cvotes, candidateIds)
+        val votes = vc.makeVotes(candidateIds.size)
+        val irvCount = IrvCount(votes.votes, candidateIds)
 
         val result = irvCount.runRounds()
         if (result.ivrRoundsPaths.size > 1) {

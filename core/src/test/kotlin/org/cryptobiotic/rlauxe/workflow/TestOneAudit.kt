@@ -1,14 +1,14 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTestP
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import kotlin.test.Test
 
 class TestOneAudit {
 
     @Test
     fun testOneAuditContestSmall() {
-        val (contestOA, mvrs, _, pools) = makeOneAuditTestP(
+        val (contestOA, mvrs, _, pools) = makeOneAuditTest(
             100,
             50,
             cvrFraction = .80,
@@ -26,7 +26,7 @@ class TestOneAudit {
 
     @Test
     fun testOneAuditContest() {
-        val (contestOA, mvrs, _, pools) = makeOneAuditTestP(
+        val (contestOA, mvrs, _, pools) = makeOneAuditTest(
             25000,
             20000,
             cvrFraction = .70,
@@ -43,7 +43,7 @@ class TestOneAudit {
 
     @Test
     fun testMakeScaledMvrs() {
-        val (contestOA, testCvrs, _, pools) = makeOneAuditTestP(
+        val (contestOA, testCvrs, _, pools) = makeOneAuditTest(
             25000,
             20000,
             cvrFraction = .70,
@@ -60,7 +60,7 @@ class TestOneAudit {
 
     @Test
     fun testOneAuditContestMax99() {
-        val (contestOA, testCvrs, _, pools) = makeOneAuditTestP(
+        val (contestOA, testCvrs, _, pools) = makeOneAuditTest(
             100,
             50,
             cvrFraction = .80,

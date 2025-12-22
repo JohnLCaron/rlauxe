@@ -1,19 +1,15 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.CardManifest
-import org.cryptobiotic.rlauxe.audit.CardsWithPopulationsToCardManifest
+import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCardManifest
 import org.cryptobiotic.rlauxe.audit.Population
-import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.audit.makePhantomCards
 import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
-import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import kotlin.Int
 import kotlin.String
 import kotlin.math.abs
@@ -25,13 +21,12 @@ private const val debugAdjust = false
 
 data class MvrCardAndPops(val mvrs: List<Cvr>, val cardManifest: List<AuditableCard>, val pools: List<OneAuditPoolIF>, val styles: List<Population>)
 
-
 /**
- * Creates a set of contests and cardStyles, with randomly chosen candidates and margins.
+ * Creates a set of contests and populations, with randomly chosen candidates and margins.
  * It can create cvrs that reflect the contests' exact votes.
- * Not for OneAudit, use makeOneContestUA()
+ * Not for OneAudit, use makeOneAuditTest()
  */
-data class MultiContestTestDataP(
+data class MultiContestTestData(
     val ncontest: Int,
     val nballotStyles: Int,
     val totalBallots: Int, // including undervotes and phantoms
@@ -43,7 +38,6 @@ data class MultiContestTestDataP(
     val poolPct: Double? = null,  // if not null, make a pool with this pct with two ballotStyles
 ) {
     val poolId = if (poolPct == null) null else 1
-    // generate with ballotStyles
     val ballotStylePartition: Map<Int,Int>
 
     val contestTestBuilders: List<ContestTestDataBuilder>
@@ -128,8 +122,7 @@ data class MultiContestTestDataP(
 
         // here we put the pool data into a single pool, and combine their contestIds, to get a diluted margin for testing
         val cardManifest = mutableListOf<AuditableCard>()
-        val converter = CardsWithPopulationsToCardManifest(
-            type = AuditType.ONEAUDIT,
+        val converter = MergePopulationsIntoCardManifest(
             cards = Closer(mvrs.iterator()),
             expandedCardStyles,
         )
@@ -213,7 +206,6 @@ data class MultiContestTestDataP(
         return cardBuilder.build(poolId)
     }
 }
-
 
 // This creates a multicandidate contest with the two closest candidates having exactly the given margin.
 // It can create cvrs that exactly reflect this contest's vote; so can be used in simulating the audit.
@@ -370,41 +362,4 @@ fun partitionWithPool(nthings: Int, npartitions: Int, poolPct: Double): List<Pai
         last = ps.second
     }
     return partition
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-fun makeOneAuditTestContestsP(
-    infos: Map<Int, ContestInfo>, // all the contests in the pools
-    contestsToAudit: List<Contest>, // the contests you want to audit
-    cardStyles: List<PopulationIF>,
-    cardManifest: List<AuditableCard>,
-    mvrs: List<Cvr>, // this must be just for tests
-): Pair<List<ContestUnderAudit>, List<OneAuditPoolIF>> {
-
-    // The Nbs come from the cards
-    //val manifestTabs = tabulateAuditableCards(Closer(cardManifest.iterator()), infos)
-    //val Nbs = manifestTabs.mapValues { it.value.ncards }
-    //     val contestsUA = contestsToAudit.map {
-    //        val cua = ContestUnderAudit(it, true, hasStyle = hasStyle, NpopIn=Nbs[it.id])
-    //        if (it is DHondtContest) {
-    //            cua.addAssertionsFromAssorters(it.assorters)
-    //        } else {
-    //            cua.addStandardAssertions()
-    //        }
-    //    }
-    //     if (debug) println(showTabs("manifestTabs", manifestTabs))
-
-    // TODO why  is this differrent ?
-    val cards = Closer(cardManifest.iterator())
-    val contestsUA = ContestUnderAudit.make(contestsToAudit, cards, isClca=true)
-
-    // create from cardStyles and populate the pool counts from the mvrs
-    val poolsFromCvrs = calcOneAuditPoolsFromMvrs(infos, cardStyles, mvrs)
-
-    // The OA assort averages come from the mvrs
-    addOAClcaAssortersFromMargin(contestsUA, poolsFromCvrs)
-
-    // poolsFromCvrs record the complete pool contests,
-    return Pair(contestsUA, poolsFromCvrs)
 }

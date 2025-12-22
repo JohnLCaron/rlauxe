@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
@@ -18,11 +17,11 @@ class TestMultiContestPoolData {
     val underVotePct = 0.234..0.345
     val phantomRange = 0.001..0.01
     val poolPct = .11
-    val test: MultiContestTestDataP
+    val test: MultiContestTestData
     val infos: Map<Int, ContestInfo>
 
     init {
-        test = MultiContestTestDataP(ncontests, nbs, N, marginRange, underVotePct,
+        test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct,
             phantomRange, poolPct=poolPct)
         infos = test.contests.associate { it.id to it.info }
     }

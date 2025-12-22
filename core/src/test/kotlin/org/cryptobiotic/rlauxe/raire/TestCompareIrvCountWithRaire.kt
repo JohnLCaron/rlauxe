@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.raire
 
-import au.org.democracydevelopers.raire.irv.Votes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -53,10 +52,9 @@ class TestCompareIrvCountWithRaire {
                 vc.addVote(votes)
             }
         }
-        val cvotes = vc.makeVotes()
-        val votes = Votes(cvotes, testContest.ncands)
+        val votes = vc.makeVotes(testContest.ncands)
 
-        val irvCount = IrvCount(cvotes, candidateIds)
+        val irvCount = IrvCount(votes.votes, candidateIds)
         val rootPath = irvCount.rootPath
 
         val raireCount = candidateIds.map { votes.firstPreferenceOnlyTally(it) }

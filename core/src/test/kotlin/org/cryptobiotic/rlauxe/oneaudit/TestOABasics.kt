@@ -34,7 +34,7 @@ class TestOABasics {
 
     @Test
     fun testMakeOneContestUA() {
-        val (contestUA, mvrs, cards, cardPools) = makeOneAuditTestP(
+        val (contestUA, mvrs, cards, cardPools) = makeOneAuditTest(
             20000,
             18000,
             cvrFraction = .66,

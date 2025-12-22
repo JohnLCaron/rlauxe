@@ -99,7 +99,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     override fun dilutedMargin() = mean2margin(dilutedMean)
 
     // TODO test
-    override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
+    override fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double {
         if (useVotes == null || N <= 0) {
             return 0.0
         } // shouldnt happen
@@ -269,7 +269,7 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
     override fun dilutedMean() = dilutedMean
     override fun dilutedMargin() = mean2margin(dilutedMean)
 
-    override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
+    override fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double {
         if (useVotes == null || N <= 0) {
             return 0.0
         } // shouldnt happen

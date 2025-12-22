@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import kotlin.test.Test
 
 class TestOneRoundClcaAudit {
@@ -17,7 +17,7 @@ class TestOneRoundClcaAudit {
         val underVotePct= 0.02 .. 0.12
         val phantomPct= 0.005
         val phantomRange= phantomPct .. phantomPct
-        val testData = MultiContestTestDataP(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = PluralityErrorRates(0.0, phantomPct, 0.0, 0.0, )
         val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, pluralityErrorRates=errorRates))

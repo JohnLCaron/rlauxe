@@ -20,7 +20,7 @@ import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
-import org.cryptobiotic.rlauxe.oneaudit.addOAClcaAssortersFromMargin
+import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.Closer
@@ -214,7 +214,7 @@ class CardManifestAttack {
             ContestUnderAudit(it, true, NpopIn=Npops[it.id]).addStandardAssertions()
         }
         // The OA assort averages come from the card Pools
-        addOAClcaAssortersFromMargin(contestsUA, cardPools)
+        setPoolAssorterAverages(contestsUA, cardPools)
 
         println("false Contest totals")
         contestsUA.forEach { contestUA -> println(contestUA.showSimple())}

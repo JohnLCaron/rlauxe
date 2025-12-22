@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditErrorsFromPools
 import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.OneAuditVunderBarFuzzer
 import org.cryptobiotic.rlauxe.util.VunderBar
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
@@ -41,7 +42,8 @@ fun estimateSampleSizes(
     nthreads: Int = 32,
 ): List<RunTestRepeatedResult> {
 
-    // simulate the card pools for all OneAudit contests; here because its over all contests
+    // TODO SimulateIrvTestData
+    // simulate the card pools for all OneAudit contests; do it here because simulation is over all contests
     val infos = auditRound.contestRounds.map { it.contestUA.contest.info() }.associateBy { it.id }
     val vunderFuzz = if (!config.isOA) null else {
         OneAuditVunderBarFuzzer(VunderBar(cardPools!!, infos), infos, config.simFuzzPct ?: 0.0)
@@ -264,6 +266,7 @@ fun estimateClcaAssertionRound(
     // we need a permutation to get uniform distribution of errors, since some simulations put all the errors at the beginning
     // sampler.reset()
 
+    // TODO SimulateIrvTestData
     val sampler = ClcaCardFuzzSampler(config.simFuzzPct ?: 0.0, contestCards, contestUA.contest, cassorter)
 
     // run the simulation ntrials (=config.nsimEst) times

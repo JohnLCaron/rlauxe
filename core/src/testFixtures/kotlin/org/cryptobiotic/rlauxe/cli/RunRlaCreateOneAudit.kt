@@ -6,10 +6,10 @@ import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
-import org.cryptobiotic.rlauxe.estimate.OneAuditVunderBarFuzzer
+import org.cryptobiotic.rlauxe.util.OneAuditVunderBarFuzzer
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 
-import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTestP
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
@@ -157,14 +157,15 @@ object RunRlaCreateOneAudit {
 
         init {
             // one contest
-            val (contestOA, mvrs, cardManifest, pools) = makeOneAuditTestP(
-                margin = minMargin,
-                Nc = ncards,
-                cvrFraction = .95,
-                undervoteFraction = .01,
-                phantomFraction = pctPhantoms ?: 0.0,
-                extraInPool= (extraPct * ncards).toInt(),
-            )
+            val (contestOA, mvrs, cardManifest, pools) =
+                    makeOneAuditTest(
+                        margin = minMargin,
+                        Nc = ncards,
+                        cvrFraction = .95,
+                        undervoteFraction = .01,
+                        phantomFraction = pctPhantoms ?: 0.0,
+                        extraInPool= (extraPct * ncards).toInt(),
+                    )
             contestsUA.add(contestOA)
             this.cardManifest = cardManifest
             this.cardPools = pools

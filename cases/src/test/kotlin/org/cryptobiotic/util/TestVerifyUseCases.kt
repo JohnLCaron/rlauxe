@@ -89,7 +89,6 @@ class TestVerifyUseCases {
         if (results.hasErrors) fail()
     }
 
-
     @Test
     fun testRunVerifySf2024clcaContest() {
         val auditdir = "$testdataDir/cases/sf2024/clca/audit"
@@ -111,7 +110,7 @@ class TestVerifyUseCases {
     @Test
     fun testRunVerifySf2024oaContest() {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, 52, show = true)
+        val results = RunVerifyContests.runVerifyContests(auditdir, 24, show = true)
         println()
         print(results)
         if (results.hasErrors) fail()

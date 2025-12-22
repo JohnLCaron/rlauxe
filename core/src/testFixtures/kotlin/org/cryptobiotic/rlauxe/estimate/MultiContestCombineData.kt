@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.shuffle
 import kotlin.random.Random
 
-// specifi the contests with exact number of votes
+// specify the contests with exact number of votes
 data class MultiContestCombineData(
     val contests: List<Contest>,
     val totalBallots: Int, // including undervotes and phantoms

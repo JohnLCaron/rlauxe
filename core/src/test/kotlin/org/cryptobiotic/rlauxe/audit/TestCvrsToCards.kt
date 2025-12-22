@@ -131,14 +131,17 @@ class TestCvrsToCards {
             assertEquals(cvr, card.cvr())
             assertNotNull(card.votes)
             assertEquals(cvr.votes, card.votes)
+            assertEquals(null, card.poolId, "poolId")
 
         } else if (auditType.isPolling()) {
             assertNull(card.votes)
+
+        }  else if (auditType.isOA()) {
+            assertEquals(cvr.poolId, card.poolId, "poolId")
         }
 
         assertEquals(cvr.id, card.location)
         assertEquals(cvr.phantom, card.phantom)
-        assertEquals(cvr.poolId, card.poolId, "poolId")
         assertEquals(expectStyle, card.cardStyle, "cardStyle")
 
         val styleContests = expectPop?.possibleContests?.toList()?.toSet() ?: emptySet()

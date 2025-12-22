@@ -85,7 +85,7 @@ data class RaireResultsAssertionJson(
     val loser: String,
     val assertion_type: String,
     val already_eliminated: List<String>,
-    val explanation: String?,  // thiese json files have an explanation tacked on, not on the raire Assertion object I think
+    val explanation: String?,  // these json files have an explanation tacked on, not on the raire Assertion object I think
 )
 
 fun RaireResultsAssertionJson.import(): RaireAssertion {
@@ -95,6 +95,7 @@ fun RaireResultsAssertionJson.import(): RaireAssertion {
         0.0,
         0, // not available, calculate instead
         RaireAssertionType.Companion.fromString(this.assertion_type),
+        0, 0, // TODO
         this.already_eliminated.map { it.toInt() },  // must invert
         emptyMap(),
     )

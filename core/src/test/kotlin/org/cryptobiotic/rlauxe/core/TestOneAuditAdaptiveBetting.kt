@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.core
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditErrorsFromPools
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTestP
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
@@ -27,7 +27,7 @@ class TestOneAuditAdaptiveBetting {
         println()
 
         val cvrFraction = .84
-        val (contestUA, mvrs, cards, cardPools) = makeOneAuditTestP(
+        val (contestUA, mvrs, cards, cardPools) = makeOneAuditTest(
             20000,
             18000,
             cvrFraction = cvrFraction,

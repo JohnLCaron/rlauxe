@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.raire
 
 import au.org.democracydevelopers.raire.irv.Vote
+import au.org.democracydevelopers.raire.irv.Votes
 import kotlin.collections.getOrPut
 
 /**
@@ -32,9 +33,10 @@ class VoteConsolidator {
         }
     }
 
-    fun makeVotes(): Array<Vote> {
+    fun makeVotes(numCandidates: Int): Votes {
         val voteList = votes.map { Vote(it.value, it.key.array) }  //n, IntArray
-        return Array(voteList.size) { voteList[it] }
+        val voteArray = Array(voteList.size) { voteList[it] } // TODO eliminate extra copy?
+        return Votes(voteArray, numCandidates)
     }
 
     fun makeVoteList(): List<VoteList> {

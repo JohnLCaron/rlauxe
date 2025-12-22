@@ -18,8 +18,8 @@ class TestRaireWorkflowFromJson {
     }
 
     // @Test TODO failing
-    fun testRaireComparisonNoStyle() { // TODO hasStyle=false
-        testRaireWorkflow(AuditConfig(AuditType.CLCA, hasStyle=false, seed = 123568667890L, nsimEst=10))
+    fun testRaireComparisonNoStyle() {
+        testRaireWorkflow(AuditConfig(AuditType.CLCA, seed = 123568667890L, nsimEst=10))
     }
 
     fun testRaireWorkflow(config: AuditConfig) {

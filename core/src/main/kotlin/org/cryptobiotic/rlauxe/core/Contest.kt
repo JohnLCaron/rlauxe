@@ -39,6 +39,7 @@ data class ContestInfo(
     val isIrv = choiceFunction == SocialChoiceFunction.IRV
 
     val candidateIdToName: Map<Int, String> by lazy { candidateNames.entries.associate {(k,v) -> v to k } }
+    val candidateIdToIdx: Map<Int, Int>
 
     init {
         if (choiceFunction.hasMinPct) require(minFraction != null) { "$choiceFunction requires minFraction"}
@@ -57,6 +58,7 @@ data class ContestInfo(
         }
 
         candidateIds = candidateNames.toList().map { it.second }
+        candidateIdToIdx = candidateIds.mapIndexed { idx, id -> Pair(id, idx) }.toMap()
         val candidateIdSet = candidateIds.toSet()
         require(candidateIdSet.size == candidateIds.size) { "duplicate candidate id $candidateIds"}
     }
@@ -296,7 +298,7 @@ open class ContestUnderAudit(
     val isIrv = contest.info().isIrv
 
     var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms
-    var pollingAssertions: List<Assertion> = emptyList() // mutable needed for Raire override and serialization
+    var pollingAssertions: List<Assertion> = emptyList() // mutable needed for Raire override and serialization // TODO rename to assertions
     var clcaAssertions: List<ClcaAssertion> = emptyList() // mutable needed for serialization
 
     init {
@@ -364,11 +366,11 @@ open class ContestUnderAudit(
         return assertions
     }
 
-    // TODO check that assorters already have the diluted margin
+    /* TODO check that assorters already have the diluted margin
     fun makeDilutedMargin(assorter: AssorterIF): Double {
         val margin = assorter.calcMargin(contest.votes(), Npop)
         return margin
-    }
+    } */
 
     private fun addClcaAssertionsFromDilutedMargin(): ContestUnderAudit {
         require(isClca) { "makeComparisonAssertions() can be called only on comparison contest"}
@@ -380,7 +382,7 @@ open class ContestUnderAudit(
     }
 
     open fun makeClcaAssorter(assertion: Assertion): ClcaAssorter {
-        return ClcaAssorter(contest.info(), assertion.assorter, dilutedMargin=makeDilutedMargin(assertion.assorter))
+        return ClcaAssorter(contest.info(), assertion.assorter, dilutedMargin=assertion.assorter.dilutedMargin())
     }
 
     fun assertions(): List<Assertion> {
@@ -409,7 +411,7 @@ open class ContestUnderAudit(
 
     fun minDilutedMargin(): Double? {
         val minAssertion = minAssertion()
-        return if (minAssertion != null) makeDilutedMargin(minAssertion.assorter) else null
+        return if (minAssertion != null) minAssertion.assorter.dilutedMargin() else null
     }
 
     fun minRecountMargin(): Double? {
@@ -430,7 +432,7 @@ open class ContestUnderAudit(
         if (minAssertion != null) {
             val minAssorter = minAssertion.assorter
             append("   ${contest.showAssertionDifficulty(minAssertion.assorter)}")
-            append(" Npop=$Npop dilutedMargin=${pfn(makeDilutedMargin(minAssorter))}")
+            append(" Npop=$Npop dilutedMargin=${pfn(minAssorter.dilutedMargin())}")
             appendLine(" reportedMargin=${pfn(minAssorter.dilutedMargin())} recountMargin=${pfn(contest.recountMargin(minAssorter))} ")
         }
         append(contest.showCandidates())

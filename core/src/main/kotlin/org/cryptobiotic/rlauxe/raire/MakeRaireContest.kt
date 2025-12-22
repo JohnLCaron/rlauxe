@@ -7,16 +7,22 @@ import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext
 import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMargin
 import au.org.democracydevelopers.raire.irv.IRVResult
-import au.org.democracydevelopers.raire.irv.Votes
 import au.org.democracydevelopers.raire.time.TimeOut
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
+import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
+import org.cryptobiotic.rlauxe.util.doubleIsClose
+import org.cryptobiotic.rlauxe.util.margin2mean
+import kotlin.collections.forEach
 
 private val quiet = true
 private val logger = KotlinLogging.logger("MakeRaireContest")
 
-// TODO diluted margin
 // make RaireContestUnderAudit from ContestTabulation; get RaireAssertions from raire-java libray
 // note ivrRoundsPaths are filled in
 fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, Nbin: Int): RaireContestUnderAudit {
@@ -24,8 +30,7 @@ fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int
     // all candidate indexes
     val vc = contestTab.irvVotes
     val startingVotes = vc.makeVoteList()
-    val cvotes = vc.makeVotes()
-    val votes = Votes(cvotes, info.candidateIds.size)
+    val votes = vc.makeVotes(info.candidateIds.size)
 
     // Tabulates the outcome of the IRV election, returning the outcome as an IRVResult.
     val irvResult: IRVResult = votes.runElection(TimeOut.never())
@@ -40,7 +45,7 @@ fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int
     //// heres the hard part - solving for the assertions
     val problem = RaireProblem(
         mapOf("candidates" to info.candidateNames.keys.toList()),
-        cvotes,
+        votes.votes,
         info.candidateIds.size,
         winner,
         BallotComparisonOneOnDilutedMargin(Nc),
@@ -113,7 +118,7 @@ fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int
     )
 
     val candidateIdxs = info.candidateIds.mapIndexed { idx, candidateId -> idx } // TODO use candidateIdToIndex?
-    val irvCount = IrvCount(cvotes, candidateIdxs)
+    val irvCount = IrvCount(votes.votes, candidateIdxs)
     val roundResultByIdx = irvCount.runRounds()
 
     // now convert results back to using the real Ids:
@@ -125,3 +130,171 @@ fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int
 
     return rcontestUA
 }
+
+// contestTab.irvVotes must include the pooled data, since we generate the RaireAssertions from them.
+fun makeRaireContestIrv(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, Nbin: Int, oneAuditPools: List<OneAuditPoolFromCvrs>): RaireContestUnderAudit {
+    val vc = contestTab.irvVotes
+    val startingVotes = vc.makeVoteList()
+    val votes = vc.makeVotes(info.candidateIds.size)
+
+    // Tabulates the outcome of the IRV election, returning the outcome as an IRVResult.
+    val irvResult: IRVResult = votes.runElection(TimeOut.never())
+    if (!quiet) logger.debug{" runElection: possibleWinners=${irvResult.possibleWinners.contentToString()} eliminationOrder=${irvResult.eliminationOrder.contentToString()}"}
+
+    if (1 != irvResult.possibleWinners.size) {
+        // throw RuntimeException("nwinners ${irvResult.possibleWinners.size} must be 1")
+        logger.warn{"${info.id} nwinners ${irvResult.possibleWinners.size} must be 1"}
+    }
+    val winner: Int = irvResult.possibleWinners[0] // we need a winner in order to generate the assertions
+
+    //// heres the hard part - solving for the assertions
+    val problem = RaireProblem(
+        mapOf("candidates" to info.candidateNames.keys.toList()),
+        votes.votes,
+        info.candidateIds.size,
+        winner,
+        BallotComparisonOneOnDilutedMargin(Nc),
+        null,
+        null,
+        null,
+    )
+    val raireSolution: RaireSolution = problem.solve()
+    if (raireSolution.solution.Err != null) {
+        throw RuntimeException("solution.solution.Err=${raireSolution.solution.Err}")
+    }
+    requireNotNull(raireSolution.solution.Ok)
+    val raireResult: RaireResult = raireSolution.solution.Ok
+    val raireAssertions = raireResult.assertions.map { aand ->
+        val votes = if (aand.assertion is NotEliminatedNext) {
+            val nen = (aand.assertion as NotEliminatedNext)
+            val voteSeq = VoteSequences.eliminate(startingVotes, nen.continuing.toList())
+            val nenChoices = voteSeq.nenFirstChoices(nen.winner, nen.loser)
+            val margin = voteSeq.margin(nen.winner, nen.loser, nenChoices)
+            require(aand.margin == margin)
+            nenChoices
+
+        } else {
+            val neb = (aand.assertion as NotEliminatedBefore)
+            val voteSeq = VoteSequences(startingVotes)
+            val nebChoices = voteSeq.nebFirstChoices(neb.winner, neb.loser)
+            val margin = voteSeq.margin(neb.winner, neb.loser, nebChoices)
+            require(aand.margin == margin)
+            nebChoices
+        }
+
+        RaireAssertion.convertAssertion(info.candidateIds, aand, votes)
+    }
+
+    val rcontestUA = RaireContestUnderAudit.makeFromInfo(
+        info,
+        winnerIndex = raireResult.winner,
+        Nc = Nc,
+        Ncast = contestTab.ncards,
+        undervotes = contestTab.undervotes,
+        raireAssertions,
+        Nbin,
+    )
+
+    // sanity check
+    rcontestUA.pollingAssertions.forEach { assertion ->
+        val irvVotes = contestTab.irvVotes.makeVotes(info.candidateIds.size)
+        val raireAssorter = assertion.assorter as RaireAssorter
+        val margin = raireAssorter.calcMargin(irvVotes, rcontestUA.Npop)
+        if (!doubleIsClose(margin,raireAssorter.dilutedMargin())) {
+            raireAssorter.calcMargin(irvVotes, rcontestUA.Npop)
+            println("margin $margin != ${raireAssorter.dilutedMargin()} raireAssorter.dilutedMargin()")
+        }
+    }
+
+    // use RaireAssorter with an ClcaAssorterOneAudit
+    setPoolAssorterAveragesForRaire(listOf(rcontestUA), oneAuditPools)
+
+    val candidateIdxs = info.candidateIds.mapIndexed { idx, candidateId -> idx } // TODO use candidateIdToIndex?
+    val irvCount = IrvCount(votes.votes, candidateIdxs)
+    val roundResultByIdx = irvCount.runRounds()
+
+    // now convert results back to using the real Ids:
+    val roundPathsById = roundResultByIdx.ivrRoundsPaths.map { roundPath ->
+        val roundsById = roundPath.rounds.map { round -> round.convert(info.candidateIds) }
+        IrvRoundsPath(roundsById, roundPath.irvWinner.convert(info.candidateIds))
+    }
+    (rcontestUA.contest as RaireContest).roundsPaths.addAll(roundPathsById)
+
+
+    return rcontestUA
+}
+
+// use dilutedMargin to set the pool assorter averages. TODO why can only use for non-IRV contests?
+fun setPoolAssorterAveragesForRaire(
+    oaContests: List<ContestUnderAudit>,
+    cardPools: List<OneAuditPoolFromCvrs>, // poolId -> pool
+) {
+    // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
+    // create the clcaAssertions and add then to the oaContests
+    oaContests.filter { it.isIrv }. forEach { oaContest ->
+        val contestId = oaContest.id
+        val info = oaContest.contest.info()
+        val clcaAssertions = oaContest.pollingAssertions.map { assertion ->
+            val raireAssorter = assertion.assorter as RaireAssorter
+            val assortAverages = mutableMapOf<Int, Double>() // poolId -> average assort value
+            cardPools.filter { it.ncards() > 0}.forEach { cardPool ->
+                if (cardPool.hasContest(contestId)) {
+                    val tab = cardPool.contestTabs[oaContest.id]!!
+                    val irvVotes = tab.irvVotes.makeVotes(oaContest.ncandidates)
+                    val poolMargin = raireAssorter.calcMargin(irvVotes, cardPool.ncards()) // could just save margin in votes
+                    assortAverages[cardPool.poolId] = margin2mean(poolMargin)
+                }
+            }
+            val clcaAssorter = ClcaAssorterOneAudit(assertion.info, assertion.assorter,
+                dilutedMargin = assertion.assorter.dilutedMargin(),
+                poolAverages = AssortAvgsInPools(assortAverages))
+            ClcaAssertion(assertion.info, clcaAssorter)
+        }
+        oaContest.clcaAssertions = clcaAssertions
+    }
+}
+
+/* TODO who uses?
+fun makeTestContestOAIrv(): RaireContestUnderAudit {
+
+    val info = ContestInfo(
+        "TestOneAuditIrvContest",
+        0,
+        mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2, "cand3" to 3, "cand4" to 4, "cand42" to 42),
+        SocialChoiceFunction.IRV,
+        voteForN = 6,
+    )
+    val Nc = 2120
+    val Np = 2
+    val rcontest = RaireContest(info, winners = listOf(1), Nc = Nc, Ncast = Nc - Np, undervotes = 0)
+
+    // where did these come from ??
+    val assert1 = RaireAssertion(1, 0, 0.0, 42, RaireAssertionType.winner_only)
+    val assert2 = RaireAssertion(
+        1, 2, 0.0, 422, RaireAssertionType.irv_elimination,
+        listOf(2), mapOf(1 to 1, 2 to 2, 3 to 3)
+    )
+
+    val oaIrv = RaireContestUnderAudit(rcontest, rassertions = listOf(assert1, assert2), Nc)
+
+    /* add pools
+
+    // val contestOA = OneAuditContest.make(contest, cvrVotes, cvrPercent = cvrPercent, undervotePercent = undervotePercent, phantomPercent = phantomPercent)
+    //val cvrVotes = mapOf(0 to 100, 1 to 200, 2 to 42, 3 to 7, 4 to 0) // worthless?
+    //val cvrNc = 200
+    // val pool = BallotPool("swim", 42, 0, 11, mapOf(0 to 1, 1 to 2, 2 to 3, 3 to 4, 4 to 0))
+    val pools = emptyList<CardPoolIF>() // TODO
+
+    val clcaAssertions = oaIrv.pollingAssertions.map { assertion ->
+        val passort = assertion.assorter
+        val pairs = pools.map { pool ->
+            Pair(pool.poolId, 0.55)
+        }
+        val poolAvgs = AssortAvgsInPools(pairs.toMap())
+        val clcaAssertion = ClcaAssorterOneAudit(assertion.info, passort, oaIrv.makeDilutedMargin(passort), poolAvgs)
+        ClcaAssertion(assertion.info, clcaAssertion)
+    }
+    oaIrv.clcaAssertions = clcaAssertions */
+
+    return oaIrv
+} */

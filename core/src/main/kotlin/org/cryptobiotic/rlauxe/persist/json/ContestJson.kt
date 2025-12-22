@@ -163,7 +163,7 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
                 sortedScores = this.sortedScores!!.map { it.import() }
             )
         }
-        else -> throw RuntimeException()
+        else -> throw RuntimeException("unknown class name ${this.className}")
     }
 }
 

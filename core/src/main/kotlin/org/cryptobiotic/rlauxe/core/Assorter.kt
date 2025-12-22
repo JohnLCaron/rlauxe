@@ -50,15 +50,8 @@ interface AssorterIF {
 
     // reportedMargin : N = Nc
     // dilutedMargin: Npop = sample population size
-    // used when you need to calculate reportedMargin from some subset of votes
-    fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
-        if (useVotes == null) {
-            return 0.0 // TODO something
-        } // shouldnt happen
-        val winnerVotes = useVotes[winner()] ?: 0
-        val loserVotes = useVotes[loser()] ?: 0
-        return if (N == 0) 0.0 else (winnerVotes - loserVotes) / N.toDouble()
-    }
+    // used when you need to calculate margin from some subset of regular votes; cant be used for IRV
+    fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double
 }
 
 /** See SHANGRLA, section 2.1, p.4 */
@@ -94,6 +87,15 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     override fun loser() = loser
     override fun dilutedMargin() = mean2margin(dilutedMean)
     override fun dilutedMean() = dilutedMean
+
+    override fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double {
+        if (useVotes == null) {
+            return 0.0 // TODO something
+        } // shouldnt happen
+        val winnerVotes = useVotes[winner()] ?: 0
+        val loserVotes = useVotes[loser()] ?: 0
+        return if (N == 0) 0.0 else (winnerVotes - loserVotes) / N.toDouble()
+    }
 
     override fun toString(): String = desc()
 

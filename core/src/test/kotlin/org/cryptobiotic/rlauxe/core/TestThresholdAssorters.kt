@@ -270,7 +270,7 @@ data class AboveThresholdB(val info: ContestInfo, val winner: Int, val t: Double
     #     h_bar = g_bar + .5
     #           = T_A / T_L - .05 + .5
      */
-    override fun calcMargin(useVotes: Map<Int, Int>?, N: Int): Double {
+    override fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double {
         if (useVotes == null || N <= 0) {
             return 0.0
         } // shouldnt happen

@@ -122,7 +122,7 @@ open class CreateColoradoElectionP (
                         if (candId == null) {
                             // logger.warn{"*** precinct ${precinct} candidate ${choiceName} writein missing in info ${info.id} $contestName infoNames= ${info.candidateNames}"}
                         } else {
-                            contestTab.addVote(candId, choice.totalVotes)
+                            contestTab.addVote(candId, choice.totalVotes) // TODO use addVotes
                         }
                     }
                 }

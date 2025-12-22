@@ -56,7 +56,7 @@ fun auditPollingAssertion(
     val assertion = assertionRound.assertion
     val assorter = assertion.assorter
 
-    val eta0 = margin2mean(contestUA.makeDilutedMargin(assorter))
+    val eta0 = margin2mean(assorter.dilutedMargin())
 
     val estimFn = TruncShrinkage(
         N = contestUA.Npop,

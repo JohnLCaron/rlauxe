@@ -16,7 +16,7 @@ class TestConsistentSampling {
 
     @Test
     fun testConsistentClcaSampling() {
-        val test = MultiContestTestDataP(20, 11, 20000)
+        val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map {
             ContestUnderAudit(it, isClca = true).addStandardAssertions()
         }
@@ -61,7 +61,7 @@ class TestConsistentSampling {
 
     @Test
     fun testConsistentPollingSampling() {
-        val test = MultiContestTestDataP(20, 11, 20000)
+        val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it, isClca = false).addStandardAssertions() }
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estSampleSize = it.Npop / 11 } // random

@@ -166,6 +166,7 @@ fun tabulateOneAuditPools(cardPools: List<OneAuditPoolIF>, infos: Map<Int, Conte
     return poolSums
 }
 
+// TODO only accumulates regular votes, not IRV
 fun tabulateCardManifest(cardManifest: CardManifest, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val poolSums = infos.mapValues { ContestTabulation(it.value) }
     cardManifest.populations.forEach {
@@ -187,6 +188,7 @@ fun tabulateCvrs(cvrs: Iterator<Cvr>, infos: Map<Int, ContestInfo>): Map<Int, Co
     return tabulateCloseableCvrs(Closer(cvrs), infos)
 }
 
+// tabulates both regular and IRV over everything in the cvrs
 fun tabulateCloseableCvrs(cvrs: CloseableIterator<Cvr>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val votes = mutableMapOf<Int, ContestTabulation>()
     cvrs.use { cvrIter ->
@@ -208,6 +210,7 @@ fun tabulateCards(cards: Iterator<AuditableCard>, infos: Map<Int, ContestInfo>):
     return tabulateAuditableCards(Closer(cards), infos)
 }
 
+// tabulates both regular and IRV over everything in the cards
 fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val tabs = mutableMapOf<Int, ContestTabulation>()
     cards.use { cardIter ->
@@ -216,15 +219,12 @@ fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<I
             infos.forEach { (contestId, info) ->
                 if (card.hasContest(contestId)) { // TODO note that here, we believe possibleContests ...
                     val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
-                    tab.ncards++
                     if (card.phantom) tab.nphantoms++
-                    if (card.votes != null) {
-                        val contestVote = card.votes[contestId]
-                        if (contestVote == null) {
-                            tab.undervotes++
-                        } else {
-                            contestVote.forEach { cand -> tab.addVote(cand, 1) }
-                        }
+                    if (card.votes != null && card.votes[contestId] != null) { // happens when cardStyle == all
+                        val contestVote = card.votes[contestId]!!
+                            tab.addVotes(contestVote, card.phantom)
+                    } else {
+                        tab.ncards++
                     }
                 }
             }

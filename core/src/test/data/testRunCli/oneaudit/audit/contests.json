@@ -39,14 +39,14 @@
             "clcaAssertions": [
                 {
                     "cassorter": {
-                        "className": "OAClcaAssorter",
+                        "className": "ClcaAssorterOneAudit",
                         "assorter": {
                             "className": "PluralityAssorter",
                             "reportedMean": 0.52,
                             "winner": 0,
                             "loser": 1
                         },
-                        "dilutedMargin": 0.04,
+                        "dilutedMargin": 0.040000000000000036,
                         "poolAverages": {
                             "assortAverage": {
                                 "42": 0.5202

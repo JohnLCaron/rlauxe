@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestUnderAudit
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -72,8 +71,7 @@ fun readCardManifest(publisher: Publisher): CardManifest {
         val populations = readPopulationsJsonFileUnwrapped(publisher.populationsFile())
         // merge population references into the Card
         val mergedCards = CloseableIterable {
-            CardsWithPopulationsToCardManifest(
-                type = AuditType.ONEAUDIT, // TODO
+            MergePopulationsIntoCardManifest(
                 readCardsCsvIterator(publisher.sortedCardsFile()),
                 populations,
             )

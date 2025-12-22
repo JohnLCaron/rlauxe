@@ -32,7 +32,6 @@ class RaireContestAuditTaskGenerator(
             undervotePct = underVotePct,
             phantomPct = phantomPct,
             quiet = true,
-            hasStyle=useConfig.hasStyle
         )
         val testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
 
@@ -78,7 +77,6 @@ class RaireSingleRoundAuditTaskGenerator(
             undervotePct = underVotePct,
             phantomPct = phantomPct,
             quiet = true,
-            hasStyle=useConfig.hasStyle
         )
         val testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
 

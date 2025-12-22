@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.MultiContestTestDataP
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
 import kotlin.test.Test
 import kotlin.test.assertNotNull
@@ -22,7 +22,7 @@ class TestClcaAudit {
         val underVotePct= 0.02 .. 0.12
         val phantomPct= 0.00
         val phantomRange= phantomPct .. phantomPct
-        val testData = MultiContestTestDataP(ncontests, nbs, N, marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         // high fuzz rate to get multiple rounds
         val finalRound = testClcaWorkflow(config, testData, 0.005)
@@ -37,7 +37,7 @@ class TestClcaAudit {
         val marginRange= 0.015 .. 0.05
         val underVotePct= 0.02 .. 0.12
         val phantomPct= 0.00 .. 0.00
-        val testData = MultiContestTestDataP(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomPct)
 
         val finalRound = testClcaWorkflow(config, testData)
         assertNotNull(finalRound)
@@ -52,7 +52,7 @@ class TestClcaAudit {
         val marginRange= 0.01 .. 0.05
         val underVotePct= 0.02 .. 0.22
         val phantomPct= 0.005 .. 0.005
-        val testData = MultiContestTestDataP(ncontests, nbs, N, marginRange =marginRange, underVotePctRange=underVotePct, phantomPctRange=phantomPct)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange=underVotePct, phantomPctRange=phantomPct)
 
         val finalRound = testClcaWorkflow(config, testData)
         assertNotNull(finalRound)
@@ -67,7 +67,7 @@ class TestClcaAudit {
         val underVotePct= 0.02 .. 0.22
         val phantomPct= 0.005
         val phantomRange= phantomPct .. phantomPct
-        val testData = MultiContestTestDataP(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
+        val testData = MultiContestTestData(ncontests, nbs, N, marginRange =marginRange, underVotePctRange =underVotePct, phantomPctRange =phantomRange)
 
         val errorRates = PluralityErrorRates(0.0, phantomPct, 0.0, 0.0, ) // TODO automatic
         val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, pluralityErrorRates=errorRates))
@@ -80,7 +80,7 @@ class TestClcaAudit {
     @Test
     fun testClcaWithSimFuzz() {
         val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct))
-        val testData = MultiContestTestDataP(11, 1, N,  )
+        val testData = MultiContestTestData(11, 1, N,  )
         val finalRound = testClcaWorkflow(config, testData)
         assertNotNull(finalRound)
         println(finalRound.show())
@@ -88,7 +88,7 @@ class TestClcaAudit {
 
     @Test
     fun testClcaWithMvrFuzz() {
-        val testData = MultiContestTestDataP(11, 1, N, )
+        val testData = MultiContestTestData(11, 1, N, )
         val finalRound = testClcaWorkflow(config, testData, .05)
         assertNotNull(finalRound)
         println(finalRound.show())
@@ -97,7 +97,7 @@ class TestClcaAudit {
     // @Test // TODO oracle disabled
     fun testClcaOracle() {
         val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle))
-        val testData = MultiContestTestDataP(11, 4, N, )
+        val testData = MultiContestTestData(11, 4, N, )
         val finalRound = testClcaWorkflow(config, testData)
         assertNotNull(finalRound)
         println(finalRound.show())
@@ -105,13 +105,13 @@ class TestClcaAudit {
 
     @Test
     fun testClcaPhantoms() {
-        val testData = MultiContestTestDataP(11, 4, N, )
+        val testData = MultiContestTestData(11, 4, N, )
         val finalRound = testClcaWorkflow(config, testData)
         assertNotNull(finalRound)
         println(finalRound.show())
     }
 
-    fun testClcaWorkflow(config: AuditConfig, testData: MultiContestTestDataP, mvrFuzzPct: Double? = null): AuditRound? {
+    fun testClcaWorkflow(config: AuditConfig, testData: MultiContestTestData, mvrFuzzPct: Double? = null): AuditRound? {
         val contests: List<Contest> = testData.contests
         println("Start testClcaWorkflow $testData")
         contests.forEach{ println("  $it")}

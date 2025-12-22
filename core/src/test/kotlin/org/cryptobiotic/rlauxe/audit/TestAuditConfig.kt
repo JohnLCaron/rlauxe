@@ -11,7 +11,7 @@ class TestAuditConfig {
             AuditType.CLCA, nsimEst = 10, seed=-2417429242344992892,
         )
         val expected =
-"""AuditConfig(auditType=CLCA, riskLimit=0.05, seed=-2417429242344992892 version=2.0
+"""AuditConfig(auditType=CLCA, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testSimulated
   nsimEst=10, quantile=0.8, simFuzzPct=null,
   minRecountMargin=0.005 removeTooManyPhantoms=false contestSampleCutoff=30000 removeCutoffContests=false
   ClcaConfig(strategy=generalAdaptive, fuzzPct=null, pluralityErrorRates=null, d=100, maxRisk=0.9, cvrsContainUndervotes=true)
@@ -26,7 +26,7 @@ class TestAuditConfig {
             AuditType.POLLING, nsimEst = 10, seed=-2417429242344992892,
         )
         val expected =
-            """AuditConfig(auditType=POLLING, riskLimit=0.05, seed=-2417429242344992892 version=2.0
+            """AuditConfig(auditType=POLLING, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testSimulated
   nsimEst=10, quantile=0.8, simFuzzPct=null,
   minRecountMargin=0.005 removeTooManyPhantoms=false contestSampleCutoff=30000 removeCutoffContests=false
   PollingConfig(d=100)
@@ -42,7 +42,7 @@ class TestAuditConfig {
             oaConfig = OneAuditConfig(OneAuditStrategyType.eta0Eps)
         )
         val expected =
-            """AuditConfig(auditType=ONEAUDIT, riskLimit=0.05, seed=-2417429242344992892 version=2.0
+            """AuditConfig(auditType=ONEAUDIT, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testSimulated
   nsimEst=10, quantile=0.8, simFuzzPct=null,
   minRecountMargin=0.005 removeTooManyPhantoms=false contestSampleCutoff=30000 removeCutoffContests=false
   OneAuditConfig(strategy=eta0Eps, d=100, useFirst=false)

@@ -24,7 +24,7 @@ private val logger = KotlinLogging.logger("BoulderElectionOA")
 // Use OneAudit; redacted ballots are in pools.
 // No redacted CVRs. Cant do IRV.
 // specific to 2025 election. TODO: generalize
-class CreateBoulderElectionP(
+class CreateBoulderElection(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
     val isClca: Boolean,
@@ -38,11 +38,11 @@ class CreateBoulderElectionP(
     val countCvrVotes = countCvrVotes()
     val countRedactedVotes = countRedactedVotes() // wrong
     val oaContests: Map<Int, OneAuditContestBoulder> = makeOAContests().associate { it.info.id to it}
-    val cardPoolBuilders = convertRedactedToCardPool()
+    val cardPoolBuilders: List<OneAuditPoolWithBallotStyle> = convertRedactedToCardPool()
 
     val contests: List<ContestIF>
     val contestsUA : List<ContestUnderAudit>
-    val cardPools: List<OneAuditPool>
+    // val cardPools: List<OneAuditPool>
 
     init {
         //// the redacted groups dont have undervotes, so we do some fancy dancing to generate reasonable undervote counts
@@ -56,18 +56,19 @@ class CreateBoulderElectionP(
             distributeExpectedOvervotes(oaContest, cardPoolBuilders)
             oaContests.values.forEach { it.adjustPoolInfo(cardPoolBuilders)}
         }
-        cardPools = cardPoolBuilders.map { it.toOneAuditPool() }
+        // cardPools = cardPoolBuilders.map { it.toOneAuditPool() } // why ?
 
         // we need to know the diluted Nb before we can create the UAs
         contests = makeContests()
 
         val manifestTabs = tabulateAuditableCards(createCardManifest(), infoMap)
-        val contestNbs = manifestTabs.mapValues { it.value.ncards }
+        val npopMap = manifestTabs.mapValues { it.value.ncards }
 
-        contestsUA = makeOneAuditContests(contests, contestNbs, cardPools).sortedBy { it.id }
+        contestsUA = if (isClca) ContestUnderAudit.make(contests, npopMap, isClca=true, )
+            else makeOneAuditContests(contests, npopMap, cardPoolBuilders)
 
-        val totalRedactedBallots = cardPools.sumOf { it.ncards() }
-        logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPools.size} cardPools"}
+        val totalRedactedBallots = cardPoolBuilders.sumOf { it.ncards() }
+        logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPoolBuilders.size} cardPools"}
     }
 
     // make ContestInfo from BoulderStatementOfVotes, and matching export.schema.contests
@@ -134,7 +135,7 @@ class CreateBoulderElectionP(
     // make simulated CVRs for all the pools
     fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<Cvr>()
-        cardPools.forEach { cardPool ->
+        cardPoolBuilders.forEach { cardPool ->
             rcvrs.addAll(makeCvrsForOnePool(cardPool, infoMap))
         }
 
@@ -159,10 +160,10 @@ class CreateBoulderElectionP(
     }
 
     // make simulated CVRs for one pool, all contests
-    private fun makeCvrsForOnePool(cardPool: OneAuditPool, infos: Map<Int, ContestInfo>) : List<Cvr> { // contestId -> candidateId -> nvotes
+    private fun makeCvrsForOnePool(cardPool: OneAuditPoolIF, infos: Map<Int, ContestInfo>) : List<Cvr> { // contestId -> candidateId -> nvotes
 
         val poolVunders = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
-        cardPool.regVotes.forEach { (contestId, regVote) ->
+        cardPool.regVotes().forEach { (contestId, regVote) ->
             val sumVotes = regVote.ncards()
             val voteForN = infos[contestId]?.voteForN ?: 1
             val underVotes = cardPool.ncards() * voteForN - sumVotes
@@ -263,7 +264,7 @@ class CreateBoulderElectionP(
     }
 
     override fun contestsUA() = contestsUA
-    override fun populations() = if (isClca) emptyList() else cardPools
+    override fun populations() = if (isClca) emptyList() else cardPoolBuilders
     override fun cardManifest() = createCardManifest()
 
     fun createCardManifest(): CloseableIterator<AuditableCard> {
@@ -283,7 +284,7 @@ class CreateBoulderElectionP(
                 AuditType.ONEAUDIT,
                 Closer(cvrs.iterator()),
                 makePhantomCvrs(contests),
-                populations = cardPools
+                populations = cardPoolBuilders
             )
         }
     }
@@ -291,14 +292,14 @@ class CreateBoulderElectionP(
     fun createCvrsFromPools() : List<Cvr> {
         val cvrs = mutableListOf<Cvr>()
 
-        cardPools.forEach { pool ->
+        cardPoolBuilders.forEach { pool ->
             val cleanName = cleanCsvString(pool.poolName)
             repeat(pool.ncards()) { poolIndex ->
                 cvrs.add(
                     Cvr(
                         id = "pool${cleanName} card ${poolIndex + 1}",
                         phantom = false,
-                        votes = pool.regVotes.mapValues { intArrayOf() }, // empty votes
+                        votes = pool.regVotes().mapValues { intArrayOf() }, // empty votes
                         poolId = pool.poolId
                     )
                 )
@@ -311,7 +312,7 @@ class CreateBoulderElectionP(
 ////////////////////////////////////////////////////////////////////
 // Clca: create simulated cvrs for the redacted groups, for a full CLCA audit with hasStyles=true.
 // OA: Create a OneAudit where pools are from the redacted cvrs.
-fun createBoulderElectionP(
+fun createBoulderElection(
     cvrExportFile: String,
     sovoFile: String,
     topdir: String,
@@ -345,7 +346,7 @@ fun createBoulderElectionP(
             )
     else throw RuntimeException("unsupported audit type $auditType")
 
-    val election = CreateBoulderElectionP(export, sovo, isClca = auditType.isClca(), poolsHaveOneCardStyle)
+    val election = CreateBoulderElection(export, sovo, isClca = auditType.isClca(), poolsHaveOneCardStyle)
 
     CreateAudit("boulder", config, election, auditDir = auditDir, clear = clear)
     println("createBoulderElectionOAnew took $stopwatch")

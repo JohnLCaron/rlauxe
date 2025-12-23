@@ -16,9 +16,7 @@ import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
-import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.raire.makeRaireContestIrv
 import org.cryptobiotic.rlauxe.raire.makeRaireContestUA
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -80,11 +78,11 @@ class CreateSfElection(
 
         // make contests based on cvr tabulations
         contestsUA = if (config.isClca) {
-            makeClcaContests(allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
+            makeClcaContestsSF(allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
         } else if (config.isOA) {
-            makeOneAuditContests(allCvrTabs, contestNcs, contestNbs, unpooledPool, cardPools).sortedBy { it.id }
+            makeOneAuditContestsSF(allCvrTabs, contestNcs, contestNbs, unpooledPool, cardPools).sortedBy { it.id }
         } else {
-            makePollingContests(allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
+            makePollingContestsSF(allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
         }
     }
 
@@ -185,7 +183,7 @@ class CreateSfElection(
     }
 }
 
-fun makeClcaContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestUnderAudit> {
+fun makeClcaContestsSF(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestUnderAudit> {
     val contestsUAs = mutableListOf<ContestUnderAudit>()
     allCvrTabs.map { (contestId, cvrTab)  ->
         val info = cvrTab.info
@@ -203,8 +201,8 @@ fun makeClcaContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<I
     return contestsUAs
 }
 
-fun makeOneAuditContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>,
-                         unpooledPool: OneAuditPoolFromCvrs, oneAuditPools: List<OneAuditPoolFromCvrs>): List<ContestUnderAudit> {
+fun makeOneAuditContestsSF(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>,
+                           unpooledPool: OneAuditPoolFromCvrs, oneAuditPools: List<OneAuditPoolFromCvrs>): List<ContestUnderAudit> {
     val contestsUAs = mutableListOf<ContestUnderAudit>()
 
     val regularContests = makeRegularContests(allCvrTabs, unpooledPool, contestNcs)
@@ -226,7 +224,7 @@ fun makeOneAuditContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : M
     return contestsUAs
 }
 
-fun makePollingContests(allCvrTabs: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestUnderAudit> {
+fun makePollingContestsSF(allCvrTabs: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestUnderAudit> {
     val contestsUAs = mutableListOf<ContestUnderAudit>()
     allCvrTabs.map { (contestId, contestSumTab)  ->
         val useNc = contestNcs[contestId] ?: contestSumTab.ncards

@@ -36,9 +36,10 @@ data class AuditableCard (
     override fun toString() = buildString {
         append("AuditableCard(desc='$location', index=$index, sampleNum=$prn, phantom=$phantom")
         if (poolId != null) append(", poolId=$poolId")
-        if (cardStyle != null) append(", cardStyle=$cardStyle")
-        if (population != null) append(", population=${population.name()}")
+        if (cardStyle != null) append(", cardStyle='$cardStyle'")
+        if (population != null) append(", population='${population.name()}'")
         appendLine(")")
+        if (votes != null)  appendLine(" votes:")
         votes?.forEach { id, vote -> appendLine("   contest $id: ${vote.contentToString()}")}
     }
 
@@ -50,7 +51,6 @@ data class AuditableCard (
     override fun hasContest(contestId: Int): Boolean {
         return if (cardStyle == "all") true
             else if (population != null) population.hasContest(contestId)
-            // else if (possibleContests.isNotEmpty()) possibleContests.contains(contestId)
             else if (votes != null) votes[contestId] != null
             else false
     }
@@ -58,7 +58,6 @@ data class AuditableCard (
     // TODO deprecated? Dont have a list of "all"
     fun contests(): IntArray {
         return if (population != null) population.contests().toList().sorted().toIntArray()
-            // else if (possibleContests.isNotEmpty()) possibleContests
             else if (votes != null) votes.keys.toList().sorted().toIntArray()
             else intArrayOf()
     }
@@ -67,7 +66,7 @@ data class AuditableCard (
     fun exactContests(): Boolean {
         return if (population != null) population.hasSingleCardStyle()
         else if (cardStyle == "all") false
-        else true // else config.cvrsHaveUndervotes
+        else true // else config.cvrsHaveUndervotes?
 
     }
 
@@ -78,8 +77,7 @@ data class AuditableCard (
         else if (contestVotes.contains(candidateId)) 1 else 0
     }
 
-    // Kotlin data class doesnt handle IntArray and List<IntArray> correctly
-
+    //// Kotlin data class doesnt handle IntArray and List<IntArray> correctly
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is AuditableCard) return false

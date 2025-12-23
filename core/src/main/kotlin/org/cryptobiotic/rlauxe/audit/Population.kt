@@ -15,7 +15,7 @@ import kotlin.collections.contains
 interface PopulationIF {
     fun name(): String
     fun id(): Int
-    fun contests(): IntArray // any card may have any of these contests
+    fun contests(): IntArray // the set of contests that might be on any card in the population
     fun hasSingleCardStyle(): Boolean // aka hasStyle: if all cards have exactly the contests in possibleContests
     fun ncards(): Int
     fun hasContest(contestId: Int): Boolean

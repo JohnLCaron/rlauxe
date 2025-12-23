@@ -13,7 +13,7 @@ enum class AuditType { POLLING, CLCA, ONEAUDIT;
 // TODO seems like config should know what directory it lives in ??
 data class AuditConfig(
     val auditType: AuditType,
-    val hasStyle: Boolean = true, // TODO deprecated
+    val hasStyle: Boolean = true, // TODO deprecated?; perhaps useful when all pools have hasSingleCardStyle=true ?? etc
     val riskLimit: Double = 0.05,
     val seed: Long = secureRandom.nextLong(), // determines sample order. set carefully to ensure truly random.
 

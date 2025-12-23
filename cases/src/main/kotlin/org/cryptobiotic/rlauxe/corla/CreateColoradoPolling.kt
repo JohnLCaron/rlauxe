@@ -15,7 +15,7 @@ class ColoradoPolling (
     contestRoundFile: String,
     precinctFile: String,
     config: AuditConfig,
-): CreateColoradoElectionP(electionDetailXmlFile, contestRoundFile, precinctFile, config) {
+): CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, config) {
 
     val contestsPolling: List<ContestUnderAudit>
 
@@ -25,8 +25,8 @@ class ColoradoPolling (
     }
 
     fun makePollingContests(tabs: Map<Int, ContestTabulation>): List<ContestUnderAudit> {
-        val infoList= oaContests.map { it.info }.sortedBy { it.id }
-        val contestMap= oaContests.associateBy { it.info.id }
+        val infoList= oaBuilders.map { it.info }.sortedBy { it.id }
+        val contestMap= oaBuilders.associateBy { it.info.id }
 
         println("ncontests with info = ${infoList.size}")
 

@@ -84,7 +84,7 @@ null mean is 1/2 once again, which reproduces the original assorter, A:
  */
 
 
-interface OneAuditContestIF {
+interface OneAuditContestBuilderIF {
     val contestId: Int
     fun poolTotalCards(): Int // total cards in all pools for this contest
     fun expectedPoolNCards(): Int // expected total pool cards for this contest, making assumptions about missing undervotes
@@ -96,16 +96,12 @@ private const val debug = false
 // the contests share the audit pools, so its convenient to process them all at once?
 fun makeOneAuditContests(
     wantContests: List<ContestIF>, // the contests you want to audit
-    nbs: Map<Int,Int>,
+    npopMap: Map<Int,Int>,  // contestId -> Npop
     cardPools: List<OneAuditPoolIF>,
 ): List<ContestUnderAudit> {
 
-    // The Nbs come from the cards
-    //val manifestTabs = tabulateAuditableCards(cardManifest, infos)
-    //val Nbs = manifestTabs.mapValues { it.value.ncards }
-
     val contestsUA = wantContests.filter{ !it.isIrv() }.map { contest ->
-        val cua = ContestUnderAudit(contest, true, NpopIn=nbs[contest.id]).addStandardAssertions()
+        val cua = ContestUnderAudit(contest, true, NpopIn=npopMap[contest.id]).addStandardAssertions()
         if (contest is DHondtContest) {
             cua.addAssertionsFromAssorters(contest.assorters)
         } else {

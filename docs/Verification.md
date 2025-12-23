@@ -62,8 +62,7 @@ data class AuditableCard (
 
 1. Check that all card locations and indices are unique, and the card prns are in ascending order
 2. Given the seed and the PRNG, check that the PRNs are correct and are assigned sequentially by index.
-3. If hasStyle, check that the count of cards containing a contest = Contest.Nc.
-4. If hasStyle, check that the count of phantom cards containing a contest = Contest.Nc - Contest.Ncast.
+4. Check that the count of phantom cards containing a contest = Contest.Nc - Contest.Ncast.
 
 ## Cvr verification
 

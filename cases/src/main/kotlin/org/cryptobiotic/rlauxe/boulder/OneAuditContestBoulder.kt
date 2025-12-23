@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.boulder
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestBuilderIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.util.mergeReduce
 import kotlin.collections.component1
@@ -16,7 +16,7 @@ private val logger = KotlinLogging.logger("OneAuditContestBoulder")
 class OneAuditContestBoulder(val info: ContestInfo,
                              val sovoContest: BoulderContestVotes,
                              val cvrTab: ContestTabulation,
-                             val redTab: ContestTabulation): OneAuditContestIF {
+                             val redTab: ContestTabulation): OneAuditContestBuilderIF {
 
     // there are no overvotes in the Cvrs; we treat them as blanks (not divided by voteForN)
     val sovoCards = (sovoContest.totalVotes + sovoContest.totalUnderVotes) / info.voteForN + sovoContest.totalOverVotes

@@ -40,7 +40,7 @@ class TestCreateColoradoElection {
     }
 
     @Test
-    fun testRunVerifyColoradoOneAuditP() {
+    fun testRunVerifyColoradoOneAudit() {
         val auditdir = "$testdataDir/cases/corla/oneaudit/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
         println()

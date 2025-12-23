@@ -40,11 +40,11 @@ interface OneAuditPoolIF: PopulationIF {
     val poolId: Int
     fun assortAvg(): MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contestId -> assorter -> average in the pool
     fun regVotes(): Map<Int, RegVotesIF> // contestId -> RegVotes, regular contests only, not IRV
-    fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder  // candidate for removal
+    fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder  // TODO candidate for removal
     // fun contestTab(contestId: Int): ContestTabulation? need this for IRV
 
     fun show() = buildString {
-        appendLine("OneAuditPool(poolName=$poolName, poolId=$poolId, ncards=${ncards()}")
+        appendLine("OneAuditPool(poolName='$poolName', poolId=$poolId, ncards=${ncards()} hasSingleCardStyle=${hasSingleCardStyle()},")
         regVotes().toSortedMap().forEach{
             appendLine("    contest ${it.key} votes= ${it.value.votes}, ncards= ${it.value.ncards()}, undervotes= ${it.value.undervotes()} ")
         }
@@ -300,22 +300,12 @@ fun calcOneAuditPoolsFromMvrs(
         val pool = poolsFromCvrs[it.poolId]
         if (pool != null) pool.accumulateVotes(it)
     }
-    if (false) {
-        println("tabulatePooledMvrs")
-        poolsFromCvrs.forEach { (id, pool) ->
-            println(pool)
-            pool.contestTabs.forEach {
-                println(" $it")
-            }
-            println()
-        }
-    }
     return poolsFromCvrs.values.toList()
 }
 
 //////////////////////////////////////////////////////////////////
 
-fun distributeExpectedOvervotes(oaContest: OneAuditContestIF, cardPools: List<OneAuditPoolWithBallotStyle>) {
+fun distributeExpectedOvervotes(oaContest: OneAuditContestBuilderIF, cardPools: List<OneAuditPoolWithBallotStyle>) {
     val contestId = oaContest.contestId
     val poolCards = oaContest.poolTotalCards()
     val expectedCards = oaContest.expectedPoolNCards()

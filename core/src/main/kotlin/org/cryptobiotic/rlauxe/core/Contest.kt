@@ -471,12 +471,20 @@ open class ContestUnderAudit(
 
     companion object {
         private val logger = KotlinLogging.logger("ContestUnderAudit")
+
+        // make contestUA from contests, generate Npop by readin cards
         fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCard>, isClca: Boolean): List<ContestUnderAudit> {
             val infos = contests.map { it.info() }.associateBy { it.id }
             val manifestTabs = tabulateAuditableCards(cards, infos)
-            val Nbs = manifestTabs.mapValues { it.value.ncards }
+            val npopMap = manifestTabs.mapValues { it.value.ncards }
+            return make(contests, npopMap, isClca)
+        }
+
+        // make contestUA from contests and Nbs.
+        // this does not make OneAudit: use makeOneAuditContests
+        fun make(contests: List<ContestIF>, npopMap: Map<Int,Int>, isClca: Boolean): List<ContestUnderAudit> {
             return contests.map {
-                val cua = ContestUnderAudit(it, isClca, NpopIn=Nbs[it.id]).addStandardAssertions()
+                val cua = ContestUnderAudit(it, isClca, NpopIn=npopMap[it.id]).addStandardAssertions()
                 if (it is DHondtContest) {
                     cua.addAssertionsFromAssorters(it.assorters)
                 } else {

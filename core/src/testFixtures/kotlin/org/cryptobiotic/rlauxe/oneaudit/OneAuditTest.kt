@@ -114,27 +114,16 @@ fun makeOneAuditTest(
     val contest = Contest(info1, mapOf(0 to winnerVotes, 1 to loserVotes), Nc = Nc, Ncast = Nc - Np)
     info1.metadata["PoolPct"] = (100.0 * poolNcards / Nc).toInt()
 
-    // // fun makeOneAuditContests(
-    ////    config: AuditConfig,
-    ////    infos: Map<Int, ContestInfo>, // all the contests in the pools
-    ////    contestsToAudit: List<Contest>, // the contests you want to audit
-    ////    cardStyles: List<CardStyleIF>,
-    ////    cardManifest: List<AuditableCard>,
-    ////    mvrs: List<Cvr>,
-    ////): Pair<List<ContestUnderAudit>, List<CardPoolIF>> {
-
-    val mvrs = makeMvrsP(contest, cvrNc, cvrVotes, cvrUndervotes, pool, extraInPool)
+    val mvrs = makeMvrs(contest, cvrNc, cvrVotes, cvrUndervotes, pool, extraInPool)
     val cardManifest=  makeCardManifest(mvrs, pool)
-    // val oaUAold = makeContestUA(contest, cardManifest, infos, listOf(pool), hasStyle)
 
-    val (oaUA, cardPools) = makeOneAuditTestContests(
-        infos, listOf(contest), listOf(pool), cardManifest, mvrs)
+    val (oaUA, cardPools) = makeOneAuditTestContests(infos, listOf(contest), listOf(pool), cardManifest, mvrs)
 
     return ContestMvrCardAndPops(oaUA.first(), mvrs, cardManifest, cardPools)
 }
 
 // these are the mvr truth
-fun makeMvrsP(
+fun makeMvrs(
     contest: Contest,
     cvrNcards: Int,
     cvrVotes:Map<Int, Int>,
@@ -219,29 +208,15 @@ fun makeOneAuditTestContests(
     mvrs: List<Cvr>, // this must be just for tests
 ): Pair<List<ContestUnderAudit>, List<OneAuditPoolIF>> {
 
-    // The Nbs come from the cards
-    //val manifestTabs = tabulateAuditableCards(Closer(cardManifest.iterator()), infos)
-    //val Nbs = manifestTabs.mapValues { it.value.ncards }
-    //     val contestsUA = contestsToAudit.map {
-    //        val cua = ContestUnderAudit(it, true, hasStyle = hasStyle, NpopIn=Nbs[it.id])
-    //        if (it is DHondtContest) {
-    //            cua.addAssertionsFromAssorters(it.assorters)
-    //        } else {
-    //            cua.addStandardAssertions()
-    //        }
-    //    }
-    //     if (debug) println(showTabs("manifestTabs", manifestTabs))
-
-    // TODO why  is this differrent ?
     val cards = Closer(cardManifest.iterator())
-    val contestsUA = ContestUnderAudit.make(contestsToAudit, cards, isClca=true)
+    val manifestTabs = tabulateAuditableCards(cards, infos)
+    val npopMap = manifestTabs.mapValues { it.value.ncards }
 
-    // create from cardStyles and populate the pool counts from the mvrs
+    // create pools from cardStyles and populate the pool counts from the mvrs
     val poolsFromCvrs = calcOneAuditPoolsFromMvrs(infos, cardStyles, mvrs)
 
-    // The OA assort averages come from the mvrs
-    setPoolAssorterAverages(contestsUA, poolsFromCvrs)
+    // create the OneAudit contests
+    val contestsUA = makeOneAuditContests(contestsToAudit, npopMap, poolsFromCvrs)
 
-    // poolsFromCvrs record the complete pool contests,
     return Pair(contestsUA, poolsFromCvrs)
 }

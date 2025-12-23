@@ -225,13 +225,7 @@ fun verifyManifest(
                 allOk = false
 
             } else {
-                // 3. If hasStyle, check that the count of cards containing a contest = Contest.Nc.
-                if (contestUA.Nc != contestTab.ncards) {
-                    results.addError("contest ${contestUA.id} Nc ${contestUA.Nc} disagree with cards = ${contestTab.ncards}")
-                    contestUA.preAuditStatus = TestH0Status.ContestMisformed
-                    allOk = false
-                }
-                // 4. If hasStyle, check that the count of phantom cards containing a contest = Contest.Nc - Contest.Ncast.
+                // 4. check that the count of phantom cards containing a contest = Contest.Nc - Contest.Ncast.
                 if (contestUA.Nphantoms != contestTab.nphantoms) {
                     results.addError("contest ${contestUA.id} Nphantoms ${contestUA.Nphantoms} disagree with cards = ${contestTab.nphantoms}")
                     contestUA.preAuditStatus = TestH0Status.ContestMisformed
@@ -475,7 +469,7 @@ fun verifyOApools(
     result.addMessage("verifyOApools")
     var allOk = true
 
-    val cvrTabs = contestSummary.nonpooled
+    val cvrTabs = contestSummary.nonpooled // corla has nothing nonpooled
 
     contestsUA.forEach { contestUA ->
         val contestId = contestUA.id
@@ -485,20 +479,22 @@ fun verifyOApools(
             val cassorter = cassertion.cassorter as ClcaAssorterOneAudit
             val passorter = cassertion.assorter
             val assortAvg = AssortAvg()
-            val cvrTab = cvrTabs[contestId]!!
 
             // the cvrs
-            val cvrMargin = if (contestUA.isIrv) {
-                val rassorter = passorter as RaireAssorter
-                val cvrVotes = cvrTab.irvVotes.makeVotes(contestUA.ncandidates)
-                rassorter.calcMargin(cvrVotes, cvrTab.ncards)
-            } else {
-                val regVotes = cvrTab.votes
-                passorter.calcMarginFromRegVotes(regVotes, cvrTab.ncards)
+            val cvrTab = cvrTabs[contestId]
+            if (cvrTab != null) {
+                val cvrMargin = if (contestUA.isIrv) {
+                    val rassorter = passorter as RaireAssorter
+                    val cvrVotes = cvrTab.irvVotes.makeVotes(contestUA.ncandidates)
+                    rassorter.calcMargin(cvrVotes, cvrTab.ncards)
+                } else {
+                    val regVotes = cvrTab.votes
+                    passorter.calcMarginFromRegVotes(regVotes, cvrTab.ncards)
+                }
+                val cvrMean = margin2mean(cvrMargin)
+                assortAvg.ncards += cvrTab.ncards
+                assortAvg.totalAssort += cvrTab.ncards * cvrMean
             }
-            val cvrMean = margin2mean(cvrMargin)
-            assortAvg.ncards += cvrTab.ncards
-            assortAvg.totalAssort += cvrTab.ncards * cvrMean
 
             // the pools
             cardManifest.populations.forEach { pop ->

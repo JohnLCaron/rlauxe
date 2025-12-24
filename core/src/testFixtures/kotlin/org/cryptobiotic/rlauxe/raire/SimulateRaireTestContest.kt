@@ -20,7 +20,7 @@ import kotlin.random.Random
 // then call raire library to generate the assertions to get  RaireContestUnderAudit
 fun simulateRaireTestContest(N: Int, contestId: Int, ncands:Int, minMargin: Double,
                              undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true)
-: Pair<RaireContestUnderAudit, List<Cvr>> {
+: Pair<RaireContestWithAssertions, List<Cvr>> {
 
     repeat(11) {
         val result = trytoMakeRaireContest(N, contestId, ncands, minMargin, undervotePct, phantomPct, quiet)
@@ -30,7 +30,7 @@ fun simulateRaireTestContest(N: Int, contestId: Int, ncands:Int, minMargin: Doub
 }
 
 private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin: Double, undervotePct: Double, phantomPct: Double,
-                                  quiet: Boolean = false): Pair<RaireContestUnderAudit, List<Cvr>>? {
+                                  quiet: Boolean = false): Pair<RaireContestWithAssertions, List<Cvr>>? {
     val testContest = RaireContestTestData(contestId, ncands=ncands, ncards=N, minMargin=minMargin, undervotePct = undervotePct, phantomPct = phantomPct)
     val testCvrs = testContest.makeCvrs()
 
@@ -106,7 +106,7 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
         RaireAssertion.convertAssertion(testContest.info.candidateIds, aand, votes)
     }
 
-    val rcontestUA = RaireContestUnderAudit.makeFromInfo(
+    val rcontestUA = RaireContestWithAssertions.makeFromInfo(
         testContest.info,
         winnerIndex = solution.first,
         Nc = testContest.Nc,

@@ -5,7 +5,7 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
@@ -29,7 +29,7 @@ import org.cryptobiotic.rlauxe.workflow.findSamples
 import kotlin.io.path.Path
 
 interface CreateElectionPIF {
-    fun contestsUA(): List<ContestUnderAudit>
+    fun contestsUA(): List<ContestWithAssertions>
     fun populations(): List<PopulationIF>?
 
     // if you immediately write to disk, you only need one pass through the iterator
@@ -37,7 +37,7 @@ interface CreateElectionPIF {
 }
 
 class CreateElectionP(
-    val contestsUA: List<ContestUnderAudit>,
+    val contestsUA: List<ContestWithAssertions>,
     val populations: List<PopulationIF>?,
     val cardManifest: List<AuditableCard>
 ):  CreateElectionPIF {
@@ -80,9 +80,6 @@ class CreateAudit(val name: String, val config: AuditConfig, election: CreateEle
         } else {
             logger.info{ results.toString() }
         }
-
-        // sf only writes these:
-        // contestsUA.filter { it.preAuditStatus == TestH0Status.InProgress }
 
         // write contests
         writeContestsJsonFile(contestsUA, publisher.contestsFile())

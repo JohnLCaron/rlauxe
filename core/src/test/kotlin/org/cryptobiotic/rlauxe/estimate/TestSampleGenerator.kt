@@ -46,15 +46,15 @@ class TestSampleGenerator {
             }
             assertEquals(contest.winners, listOf(0))
         }
-        val contestsUA = contests.map { ContestUnderAudit(it, isClca = false).addStandardAssertions() }
+        val contestsUA = contests.map { ContestWithAssertions(it, isClca = false).addStandardAssertions() }
 
         contestsUA.forEach { contestUA ->
-            contestUA.pollingAssertions.forEach { ass ->
+            contestUA.assertions.forEach { ass ->
                 assertEquals(0, (ass.assorter as PluralityAssorter).winner)
             }
 
             if (!silent && showContests) println("Assertions for Contest ${contestUA.id}")
-            contestUA.pollingAssertions.forEach {
+            contestUA.assertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
                 PollingSampling(contestUA.id, cvrs.zip(cvrs), it.assorter)

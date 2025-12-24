@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.audit
 
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.consistentSampling
 import org.cryptobiotic.rlauxe.util.Prng
@@ -15,8 +15,8 @@ class TestAuditRound {
     @Test
     fun testAuditRound() {
         val test = MultiContestTestData(20, 11, 20000)
-        val contestsUAs: List<ContestUnderAudit> = test.contests.map {
-            ContestUnderAudit(it, isClca = true).addStandardAssertions()
+        val contestsUAs: List<ContestWithAssertions> = test.contests.map {
+            ContestWithAssertions(it, isClca = true).addStandardAssertions()
         }
         val testCvrs = test.makeCvrsFromContests()
         val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())

@@ -54,7 +54,7 @@ class CardBuilder(
             card.index,
             card.prn,
             card.phantom,
-            card.contests(),
+            card.contests(), // TODO bogus
             card.votes,
             card.poolId,
             card.cardStyle

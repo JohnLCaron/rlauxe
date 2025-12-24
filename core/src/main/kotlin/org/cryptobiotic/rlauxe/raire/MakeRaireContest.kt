@@ -12,7 +12,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
@@ -25,7 +25,7 @@ private val logger = KotlinLogging.logger("MakeRaireContest")
 
 // make RaireContestUnderAudit from ContestTabulation; get RaireAssertions from raire-java libray
 // note ivrRoundsPaths are filled in
-fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, Nbin: Int): RaireContestUnderAudit {
+fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, Nbin: Int): RaireContestWithAssertions {
     // TODO consistency checks on voteConsolidator
     // all candidate indexes
     val vc = contestTab.irvVotes
@@ -107,7 +107,7 @@ fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int
     //                 Nundervotes: Int,
     //                 assertions: List<RaireAssertion>
     //         )
-    val rcontestUA = RaireContestUnderAudit.makeFromInfo(
+    val rcontestUA = RaireContestWithAssertions.makeFromInfo(
         info,
         winnerIndex = raireResult.winner,
         Nc = Nc,
@@ -132,7 +132,7 @@ fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int
 }
 
 // contestTab.irvVotes must include the pooled data, since we generate the RaireAssertions from them.
-fun makeRaireContestIrv(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, Nbin: Int, oneAuditPools: List<OneAuditPoolFromCvrs>): RaireContestUnderAudit {
+fun makeRaireContestIrv(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, Nbin: Int, oneAuditPools: List<OneAuditPoolFromCvrs>): RaireContestWithAssertions {
     val vc = contestTab.irvVotes
     val startingVotes = vc.makeVoteList()
     val votes = vc.makeVotes(info.candidateIds.size)
@@ -185,7 +185,7 @@ fun makeRaireContestIrv(info: ContestInfo, contestTab: ContestTabulation, Nc: In
         RaireAssertion.convertAssertion(info.candidateIds, aand, votes)
     }
 
-    val rcontestUA = RaireContestUnderAudit.makeFromInfo(
+    val rcontestUA = RaireContestWithAssertions.makeFromInfo(
         info,
         winnerIndex = raireResult.winner,
         Nc = Nc,
@@ -196,7 +196,7 @@ fun makeRaireContestIrv(info: ContestInfo, contestTab: ContestTabulation, Nc: In
     )
 
     // sanity check
-    rcontestUA.pollingAssertions.forEach { assertion ->
+    rcontestUA.assertions.forEach { assertion ->
         val irvVotes = contestTab.irvVotes.makeVotes(info.candidateIds.size)
         val raireAssorter = assertion.assorter as RaireAssorter
         val margin = raireAssorter.calcMargin(irvVotes, rcontestUA.Npop)
@@ -226,7 +226,7 @@ fun makeRaireContestIrv(info: ContestInfo, contestTab: ContestTabulation, Nc: In
 
 // use dilutedMargin to set the pool assorter averages. TODO why can only use for non-IRV contests?
 fun setPoolAssorterAveragesForRaire(
-    oaContests: List<ContestUnderAudit>,
+    oaContests: List<ContestWithAssertions>,
     cardPools: List<OneAuditPoolFromCvrs>, // poolId -> pool
 ) {
     // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
@@ -234,7 +234,7 @@ fun setPoolAssorterAveragesForRaire(
     oaContests.filter { it.isIrv }. forEach { oaContest ->
         val contestId = oaContest.id
         val info = oaContest.contest.info()
-        val clcaAssertions = oaContest.pollingAssertions.map { assertion ->
+        val clcaAssertions = oaContest.assertions.map { assertion ->
             val raireAssorter = assertion.assorter as RaireAssorter
             val assortAverages = mutableMapOf<Int, Double>() // poolId -> average assort value
             cardPools.filter { it.ncards() > 0}.forEach { cardPool ->

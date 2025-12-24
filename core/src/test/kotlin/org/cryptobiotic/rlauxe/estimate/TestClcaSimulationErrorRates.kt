@@ -19,7 +19,7 @@ class TestClcaSimulationErrorRates {
             val cvrs: List<Cvr> = makeCvrsByExactMean(N, theta)
 
             val contest = makeContestsFromCvrs(cvrs).first()
-            val contestUA = ContestUnderAudit(contest).addStandardAssertions()
+            val contestUA = ContestWithAssertions(contest).addStandardAssertions()
             val compareAssorter = contestUA.clcaAssertions.first().cassorter
 
             val sampler = ClcaSimulatedErrorRates(
@@ -55,14 +55,14 @@ class TestClcaSimulationErrorRates {
             val theta = margin2mean(margin)
             val cvrs: List<Cvr> = makeCvrsByExactMean(N, theta)
             val contest = makeContestsFromCvrs(cvrs).first()
-            val contestUA = ContestUnderAudit(contest).addStandardAssertions()
+            val contestUA = ContestWithAssertions(contest).addStandardAssertions()
             val compareAssorter = contestUA.clcaAssertions.first().cassorter
 
             runClcaSimulation(cvrs, contestUA, compareAssorter)
         }
     }
 
-    fun runClcaSimulation(cvrs: List<Cvr>, contestUA: ContestUnderAudit, assorter: ClcaAssorter) {
+    fun runClcaSimulation(cvrs: List<Cvr>, contestUA: ContestWithAssertions, assorter: ClcaAssorter) {
         println("\n${assorter.assorter.desc()}")
 
         val phantomRate = contestUA.contest.phantomRate()

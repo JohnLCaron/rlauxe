@@ -15,15 +15,14 @@ data class AuditableCard (
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
 
-    val votes: Map<Int, IntArray>?, // must have this and/or population
-    val poolId: Int?,
-    val cardStyle: String? = null, // hijacked for population name
-    val population: PopulationIF? = null,
+    val votes: Map<Int, IntArray>?, // if not null and population == null, then hasStyle = true. TODO too obscure?
+    val poolId: Int?,               // OneAudit pool
+    val cardStyle: String? = null,  // hijacked for population name
+    val population: PopulationIF? = null, // must have this if !hasStyle
 ): CvrIF {
 
     init {
         if (population == null && cardStyle == null && votes == null && poolId == null) {
-            // you could make this case mean "all". But maybe its better to be explicit ??
             throw RuntimeException("AuditableCard must have poolId, votes, cardStyle, or population")
         }
     }
@@ -36,9 +35,10 @@ data class AuditableCard (
     override fun toString() = buildString {
         append("AuditableCard(desc='$location', index=$index, sampleNum=$prn, phantom=$phantom")
         if (poolId != null) append(", poolId=$poolId")
-        if (cardStyle != null) append(", cardStyle=$cardStyle")
-        if (population != null) append(", population=${population.name()}")
+        if (cardStyle != null) append(", cardStyle='$cardStyle'")
+        if (population != null) append(", population='${population.name()}'")
         appendLine(")")
+        if (votes != null)  appendLine(" votes:")
         votes?.forEach { id, vote -> appendLine("   contest $id: ${vote.contentToString()}")}
     }
 
@@ -50,24 +50,22 @@ data class AuditableCard (
     override fun hasContest(contestId: Int): Boolean {
         return if (cardStyle == "all") true
             else if (population != null) population.hasContest(contestId)
-            // else if (possibleContests.isNotEmpty()) possibleContests.contains(contestId)
             else if (votes != null) votes[contestId] != null
             else false
     }
 
-    // TODO deprecated? Dont have a list of "all"
+    // TODO deprecated? Dont have a list for "all"
     fun contests(): IntArray {
         return if (population != null) population.contests().toList().sorted().toIntArray()
-            // else if (possibleContests.isNotEmpty()) possibleContests
             else if (votes != null) votes.keys.toList().sorted().toIntArray()
             else intArrayOf()
     }
 
-    // better if every card has a population
+    // TODO better if every card has a population
     fun exactContests(): Boolean {
         return if (population != null) population.hasSingleCardStyle()
         else if (cardStyle == "all") false
-        else true // else config.cvrsHaveUndervotes
+        else true // else config.cvrsHaveUndervotes?
 
     }
 
@@ -78,8 +76,7 @@ data class AuditableCard (
         else if (contestVotes.contains(candidateId)) 1 else 0
     }
 
-    // Kotlin data class doesnt handle IntArray and List<IntArray> correctly
-
+    //// Kotlin data class doesnt handle IntArray and List<IntArray> correctly
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is AuditableCard) return false
@@ -163,7 +160,7 @@ class CvrsWithPopulationsToCardManifest(
 
         return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
             votes,
-            if (type.isClca()) null else org.poolId,
+            if (type.isOA()) org.poolId else null,
             cardStyle = cardStyle,
             population = pop,
         )

@@ -209,8 +209,6 @@ data class Vunder(val candVotes: Map<Int, Int>, val undervotes: Int, val voteFor
                 needVotes--
             }
         }
-        //if (needVotes != 0)
-        //    print("checkit")
         return result.toIntArray()
     }
 
@@ -306,11 +304,6 @@ fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): L
             throw RuntimeException("candVotes ${vunder.candVotes.toSortedMap()} != ${voteFromCvrs.toSortedMap()} voteFromCvrs")
         }
     }
-
-    //vunders.values.forEach { vunder ->
-        // if (!vunder.isEmpty())
-    //        println(vunder)
-    //}
 
     rcvrs.shuffle()
     return rcvrs

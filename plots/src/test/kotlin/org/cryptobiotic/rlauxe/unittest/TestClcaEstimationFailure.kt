@@ -44,7 +44,7 @@ class TestClcaEstimationFailure {
     }
 
     val debug = false
-    fun runClcaSimulation(cvrs: List<Cvr>, contestUA: ContestUnderAudit, cassorter: ClcaAssorter) {
+    fun runClcaSimulation(cvrs: List<Cvr>, contestUA: ContestWithAssertions, cassorter: ClcaAssorter) {
         val contest = contestUA.contest as Contest
         if (debug) println("\n$contest phantomRate=${contest.phantomRate()}")
 

@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.raire.RaireAssertion
 import org.cryptobiotic.rlauxe.raire.RaireAssertionType
 import org.cryptobiotic.rlauxe.raire.RaireContest
-import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
+import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
@@ -22,7 +22,7 @@ import java.nio.file.StandardOpenOption
 data class RaireResults(
     val overallExpectedPollsNumber : Int,  // what is this?
     val ballotsInvolvedInAuditNumber : Int, // what is this?
-    val contests: List<RaireContestUnderAudit>,
+    val contests: List<RaireContestWithAssertions>,
 ) {
     fun show() = buildString {
         appendLine("RaireResults: overallExpectedPollsNumber=$overallExpectedPollsNumber ballotsInvolvedInAuditNumber=$ballotsInvolvedInAuditNumber")
@@ -58,7 +58,7 @@ data class RaireResultsContestAuditJson(
     val assertions: List<RaireResultsAssertionJson>,
 )
 
-fun RaireResultsContestAuditJson.import(Nc: Int, Np: Int): RaireContestUnderAudit {
+fun RaireResultsContestAuditJson.import(Nc: Int, Np: Int): RaireContestWithAssertions {
     val name = this.contest
     val winner = this.winner.toInt()
     val eliminated = this.eliminated.map { it.toInt() } // eliminated
@@ -76,7 +76,7 @@ fun RaireResultsContestAuditJson.import(Nc: Int, Np: Int): RaireContestUnderAudi
         Ncast = Nc - Np,
         undervotes = 0,
     )
-    return RaireContestUnderAudit(contest, assertions, Nc)
+    return RaireContestWithAssertions(contest, assertions, Nc)
 }
 
 @Serializable

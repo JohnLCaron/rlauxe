@@ -5,7 +5,7 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.util.OneAuditVunderBarFuzzer
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 
@@ -151,7 +151,7 @@ object RunRlaCreateOneAudit {
         hasStyle: Boolean,
         extraPct: Double,
     ): CreateElectionPIF {
-        val contestsUA = mutableListOf<ContestUnderAudit>()
+        val contestsUA = mutableListOf<ContestWithAssertions>()
         val cardPools: List<PopulationIF>
         val cardManifest: List<AuditableCard>
 

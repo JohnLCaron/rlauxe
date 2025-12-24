@@ -24,10 +24,10 @@ class TestAssorterMargins {
         //repeat(100) {
             val test = MultiContestTestData(16, 13, 27703, 0.02..0.033)
             test.contests.forEach { contest ->
-                val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
+                val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
                 val cvrs = test.makeCvrsFromContests()
                 assertNotNull(test.contestTestBuilders.find { it.info.name == contest.name })
-                testAssertions(contest, contestUA.pollingAssertions, cvrs)
+                testAssertions(contest, contestUA.assertions, cvrs)
             }
         //}
     }
@@ -47,8 +47,8 @@ class TestAssorterMargins {
 
                 try {
                     test.contests.forEach { contest ->
-                        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
-                        testAssertions(contest, contestUA.pollingAssertions, cvrs)
+                        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
+                        testAssertions(contest, contestUA.assertions, cvrs)
                     }
                 } catch( t: Throwable) {
                     t.printStackTrace() // TODO without this doesnt tell me why it fails
@@ -70,7 +70,7 @@ class TestAssorterMargins {
             ) { reportedMargin, underVotePct, phantomPct, Nc, Np ->
                 val sim = ContestSimulation.make2wayTestContest(Nc, reportedMargin, undervotePct=underVotePct, phantomPct=phantomPct)
                 // val sim = ContestSimulation.make2wayTestContestOld(reportedMargin, underVotePct, phantomPct, Nc=Nc)
-                val contestUA = ContestUnderAudit(sim.contest, isClca = false).addStandardAssertions()
+                val contestUA = ContestWithAssertions(sim.contest, isClca = false).addStandardAssertions()
                 println(
                     "${sim.show()} margin=${df(reportedMargin)} under=${df(underVotePct)} phantom=${df(phantomPct)} votes: [${
                         showVotes(
@@ -78,7 +78,7 @@ class TestAssorterMargins {
                         )
                     }]"
                 )
-                testAssertions(sim.contest, contestUA.pollingAssertions, sim.makeCvrs())
+                testAssertions(sim.contest, contestUA.assertions, sim.makeCvrs())
             }
         }
     }

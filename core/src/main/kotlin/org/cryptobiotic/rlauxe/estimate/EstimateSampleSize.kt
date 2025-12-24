@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditErrorsFromPools
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.OneAuditVunderBarFuzzer
+import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.VunderBar
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
@@ -49,10 +50,18 @@ fun estimateSampleSizes(
         OneAuditVunderBarFuzzer(VunderBar(cardPools!!, infos), infos, config.simFuzzPct ?: 0.0)
     }
 
+    // grab the first ? cards from the card manifest
+    val contestCards = if (config.isPolling) null
+    else {
+        val limit = 100_000
+        getCardsLimited(limit, cardManifest.iterator())
+    }
+
     // create the estimation tasks for each contest
+    val stopwatch = Stopwatch()
     val tasks = mutableListOf<EstimateSampleSizeTask>()
     auditRound.contestRounds.filter { !it.done }.forEach { contestRound ->
-        tasks.addAll(makeEstimationTasks(config, contestRound, auditRound.roundIdx, cardManifest,  vunderFuzz))
+        tasks.addAll(makeEstimationTasks(config, contestRound, auditRound.roundIdx, contestCards,  vunderFuzz))
     }
 
     // run tasks concurrently
@@ -65,7 +74,10 @@ fun estimateSampleSizes(
         val result = estResult.repeatedResult
 
         val useFirst = config.auditType == AuditType.ONEAUDIT && config.oaConfig.useFirst // experimental
-        val estNewSamples = if (useFirst) result.sampleCount[0] else result.findQuantile(config.quantile)
+        val estNewSamples = if (result.sampleCount.size == 0) 0
+            else if (useFirst) result.sampleCount[0]
+            else result.findQuantile(config.quantile)
+
         task.assertionRound.estNewSampleSize = estNewSamples
         task.assertionRound.estSampleSize = min(estNewSamples + task.prevSampleSize, task.contestRound.Npop)
 
@@ -94,6 +106,9 @@ fun estimateSampleSizes(
         if (!quiet) logger.info{" ** contest ${contest.id} avgSamplesNeeded ${contest.estSampleSize} task=${contest.estNewSamples}"}
     }
 
+    logger.info{ "ConcurrentTaskRunnerG run ${tasks.size} tasks took $stopwatch"}
+
+
     // return repeatedResult for debugging and diagnostics
     return estResults.map { it.repeatedResult }
 }
@@ -104,23 +119,29 @@ fun makeEstimationTasks(
     config: AuditConfig,
     contestRound: ContestRound,
     roundIdx: Int,
-    cardManifest: CloseableIterable<AuditableCard>,
+    contestCards: List<AuditableCard>?,
     vunderFuzz: OneAuditVunderBarFuzzer?,
     moreParameters: Map<String, Double> = emptyMap(),
 ): List<EstimateSampleSizeTask> {
-
+    val stopwatch = Stopwatch()
     val tasks = mutableListOf<EstimateSampleSizeTask>()
 
     val mvrs = if (!config.isPolling) null
         // contestCards: List<AuditableCard>, cant use the card manifest - there are no votes!
         // simulate the cvrs once for all the assertions for this contest
-        else ContestSimulation.simulateCvrsDilutedMargin(contestRound.contestUA, config)
+        else {
+            ContestSimulation.simulateCvrsDilutedMargin(contestRound.contestUA, config)
+    }
 
-
-    // get the first n cards for this contest
+    /* get the first n cards for this contest
     // assumes the cards are already randomized
     val contestCards = if (config.isPolling) null
-        else ContestCardsLimited(contestRound.contestUA.id, config.contestSampleCutoff, cardManifest.iterator()).cards()
+        else {
+            // have to iterate over the cards for each contest - barf
+            val cards = ContestCardsLimited(contestRound.contestUA.id, config.contestSampleCutoff, cardManifest.iterator()).cards()
+            logger.debug{ "ContestCardsLimited contest ${contestRound.contestUA.id} took $stopwatch"}
+            cards
+        } */
 
     contestRound.assertionRounds.map { assertionRound ->
         if (!assertionRound.status.complete) {
@@ -156,6 +177,8 @@ fun makeEstimationTasks(
             }
         }
     }
+
+    logger.debug{ "make ${tasks.size} tasks for contest ${contestRound.contestUA.id} took $stopwatch"}
     return tasks
 }
 
@@ -269,6 +292,10 @@ fun estimateClcaAssertionRound(
     // TODO SimulateIrvTestData
     val sampler = ClcaCardFuzzSampler(config.simFuzzPct ?: 0.0, contestCards, contestUA.contest, cassorter)
 
+    val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
+    logger.debug{ "estimateClcaAssertionRound for $name with ${config.nsimEst} trials"}
+    val stopwatch = Stopwatch()
+
     // run the simulation ntrials (=config.nsimEst) times
     val result: RunTestRepeatedResult = runRepeatedBettingMart(
         config,
@@ -291,6 +318,8 @@ fun estimateClcaAssertionRound(
         estimatedDistribution = makeDeciles(result.sampleCount),
         firstSample = if (result.sampleCount.isEmpty()) 0 else result.sampleCount[0],
     )
+
+    logger.debug{"estimateClcaAssertionRound $roundIdx ${name} ${makeDeciles(result.sampleCount)} took=$stopwatch"}
 
     return result
 }
@@ -335,8 +364,7 @@ fun runRepeatedBettingMart(
 fun estimatePollingAssertionRound(
     roundIdx: Int,
     config: AuditConfig,
-    contestUA: ContestUnderAudit,
-    // contestCards: List<AuditableCard>, cant use the card manifest - there are no votes!
+    contestUA: ContestWithAssertions,
     mvrs: List<Cvr>,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
@@ -357,6 +385,10 @@ fun estimatePollingAssertionRound(
     // makeFuzzedCardsFrom(contestsUA: List<ContestUnderAudit>, cards: List<AuditableCard>, fuzzPct: Double)
     // val cvrs = ContestSimulation.simulateCvrsDilutedMargin(contestRound.contestUA, config)
 
+    val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
+    logger.debug{ "estimatePollingAssertionRound for $name with ${config.nsimEst} trials"}
+    val stopwatch = Stopwatch()
+
     val result = runRepeatedAlphaMart(
         config,
         sampler,
@@ -376,6 +408,8 @@ fun estimatePollingAssertionRound(
         estimatedDistribution = makeDeciles(result.sampleCount),
         firstSample = if (result.sampleCount.isEmpty()) 0 else result.sampleCount[0],
     )
+
+    logger.debug{"estimatePollingAssertionRound $roundIdx ${name} ${makeDeciles(result.sampleCount)} took=$stopwatch"}
 
     return result
 }
@@ -480,6 +514,10 @@ fun estimateOneAuditAssertionRound(
 
     val sampler = ClcaSampling(contestUA.contest.id, oaFuzzedPairs, oaCassorter, allowReset = true)
 
+    val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
+    logger.debug{ "estimateOneAuditAssertionRound for $name with ${config.nsimEst} trials"}
+    val stopwatch = Stopwatch()
+
     val result = runRepeatedBettingMart(
             config,
             sampler,
@@ -531,11 +569,12 @@ fun estimateOneAuditAssertionRound(
         firstSample = if (result.sampleCount.size > 0) result.sampleCount[0] else 0,
     )
 
-    logger.info{"estimateOneAuditAssertionRound $roundIdx ${contestUA.id} ${oaCassorter.assorter().desc()} ${makeDeciles(result.sampleCount)} " +
-                "firstSample=${assertionRound.estimationResult!!.firstSample}"}
+    logger.debug{"estimateOneAuditAssertionRound $roundIdx ${name} ${makeDeciles(result.sampleCount)}  took=$stopwatch" +
+                " firstSample=${assertionRound.estimationResult!!.firstSample}"}
     return result
 }
 
+// TODO all at once
 // take the first contestSampleCutoff cards that contain the contest
 // TODO this assumes the cards are randomized, so we can just take the first L cvrs; but some of the tests may not do that...track them down
 class ContestCardsLimited(
@@ -553,4 +592,13 @@ class ContestCardsLimited(
     }
 
     fun cards() = cards.toList()
+}
+
+fun getCardsLimited(contestSampleCutoff: Int?, cardIter: Iterator<AuditableCard>): List<AuditableCard> {
+    val cards = mutableListOf<AuditableCard>()
+    while ((contestSampleCutoff == null || cards.size < contestSampleCutoff) && cardIter.hasNext()) {
+        val card = cardIter.next()
+        cards.add(card)
+    }
+    return cards
 }

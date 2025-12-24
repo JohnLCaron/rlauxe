@@ -7,12 +7,12 @@ import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
 
 import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
-import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
+import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
@@ -122,7 +122,7 @@ class TestClcaElection(
     addRaire: Boolean,
     addRaireCandidates: Int,
 ): CreateElectionPIF {
-    val contestsUA = mutableListOf<ContestUnderAudit>()
+    val contestsUA = mutableListOf<ContestWithAssertions>()
     val allCvrs = mutableListOf<Cvr>()
 
     init {
@@ -141,12 +141,12 @@ class TestClcaElection(
         println("ncvrs (not raire) = ${allCvrs.size}")
 
         if (addRaire) {
-            val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N=ncards/2, contestId=111, addRaireCandidates, minMargin=.04, quiet = true)
+            val (rcontest: RaireContestWithAssertions, rcvrs: List<Cvr>) = simulateRaireTestContest(N=ncards/2, contestId=111, addRaireCandidates, minMargin=.04, quiet = true)
             contestsUA.add(rcontest)
             allCvrs.addAll(rcvrs)
         }
 
-        val regularContests = testData.contests.map { ContestUnderAudit(it, isClca=true).addStandardAssertions() }
+        val regularContests = testData.contests.map { ContestWithAssertions(it, isClca=true).addStandardAssertions() }
         contestsUA.addAll(regularContests)
         contestsUA.forEach { println("  $it") }
         println()
@@ -202,7 +202,7 @@ class TestPollingElection(
     ncards: Int,
     ncontests: Int,
 ): CreateElectionPIF {
-    val contestsUA = mutableListOf<ContestUnderAudit>()
+    val contestsUA = mutableListOf<ContestWithAssertions>()
     val cvrs: List<Cvr>
     val testMvrs: List<Cvr>
     val pops: List<Population>
@@ -225,7 +225,7 @@ class TestPollingElection(
         cvrs = testData.makeCvrsFromContests()
         testMvrs = makeFuzzedCvrsFrom(contests.map{ it.info() }, cvrs, fuzzMvrs) // ??
 
-        val makum = ContestUnderAudit.make(testData.contests, cardManifest(), isClca=false)
+        val makum = ContestWithAssertions.make(testData.contests, cardManifest(), isClca=false)
         // not setting Npop, so it defaults to Nc
         //val regularContests = testData.contests.map {
         //    ContestUnderAudit(it, isClca=true, hasStyle=config.hasStyle).addStandardAssertions()

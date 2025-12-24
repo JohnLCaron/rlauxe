@@ -28,7 +28,7 @@ data class PollingTask(
     }
 
     override fun makeSampler(): Sampling {
-        val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
+        val contestUA = ContestWithAssertions(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
         return PollingSampling(contestUA.id, pairs, pollingAssorter)
     }
 

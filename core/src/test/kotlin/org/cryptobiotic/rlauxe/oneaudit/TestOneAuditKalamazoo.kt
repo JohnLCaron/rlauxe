@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.util.RegVotes
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.Vunder
@@ -73,7 +73,7 @@ class TestOneAuditKalamazoo {
 }
 
 // from oa_polling.ipynb
-fun makeContestKalamazoo(nwinners:Int = 1): Triple<ContestUnderAudit, List<OneAuditPoolIF>, List<Cvr>> {
+fun makeContestKalamazoo(nwinners:Int = 1): Triple<ContestWithAssertions, List<OneAuditPoolIF>, List<Cvr>> {
 
     // the candidates
     val info = ContestInfo(
@@ -122,7 +122,7 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<ContestUnderAudit, List<OneAu
     val cvrUndervotes = cvrNcards - cvrVotes.values.sum()
 
     val cvrs = makeTestMvrs(contest, cvrNcards = cvrNcards, cvrVotes, cvrUndervotes, listOf(cardPool))
-    val contestUA = ContestUnderAudit(contest, ).addStandardAssertions()
+    val contestUA = ContestWithAssertions(contest, ).addStandardAssertions()
     setPoolAssorterAverages(listOf(contestUA), listOf(cardPool))
 
     return Triple(contestUA, listOf(cardPool), cvrs)

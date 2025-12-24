@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.ClcaSampling
@@ -19,7 +19,7 @@ class TestMakeFuzzedCvrs {
         val ncvrs = 10000
         val testCvrs = makeCvrsByExactMean(ncvrs, avgCvrAssortValue)
         val contest = makeContestsFromCvrs(testCvrs).first()
-        val contestUA = ContestUnderAudit(contest).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contest).addStandardAssertions()
         val assort = contestUA.clcaAssertions.first().cassorter
 
         val testMvrs = makeFuzzedCvrsFrom(listOf(contest), testCvrs, mvrsFuzzPct)

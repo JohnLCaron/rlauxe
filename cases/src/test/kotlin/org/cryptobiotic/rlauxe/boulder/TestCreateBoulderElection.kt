@@ -4,7 +4,7 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
-import org.cryptobiotic.rlauxe.cli.RunRliRoundCli
+import org.cryptobiotic.rlauxe.cli.RunRlaRoundCli
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
@@ -49,7 +49,7 @@ class TestCreateBoulderElection {
     @Test
     fun createBoulder24oa() {
         val topdir = "$testdataDir/cases/boulder24/oa"
-        createBoulderElectionP(
+        createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = topdir,
@@ -74,7 +74,7 @@ class TestCreateBoulderElection {
     @Test
     fun createBoulder24clca() { // simulate CVRs
         val topdir = "$testdataDir/cases/boulder24/clca"
-        createBoulderElectionP(
+        createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = topdir,
@@ -100,7 +100,7 @@ class TestCreateBoulderElection {
     fun createBoulder25clca() { // simulate CVRs
         val datadir = "$testdataDir/cases/boulder2025"
         val topdir = "$testdataDir/cases/boulder2025/clca"
-        createBoulderElectionP(
+        createBoulderElection(
             "$datadir/Redacted-CVR-PUBLIC.utf8.csv",
             "$datadir/2025C-Boulder-County-Official-Statement-of-Votes.utf8.csv",
             topdir = topdir,
@@ -120,7 +120,7 @@ class TestCreateBoulderElection {
         repeat(10) { run ->
             val auditDir = "$topdir/audit$run"
 
-            createBoulderElectionP(
+            createBoulderElection(
                 "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
                 "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
                 topdir = topdir,
@@ -138,12 +138,12 @@ class TestCreateBoulderElection {
 
         repeat(10) { run ->
             val auditDir = "$topDir/audit$run"
-            RunRliRoundCli.main(
+            RunRlaRoundCli.main(
                 arrayOf(
                     "-in", auditDir,
                 )
             )
-            RunRliRoundCli.main(
+            RunRlaRoundCli.main(
                 arrayOf(
                     "-in", auditDir,
                 )

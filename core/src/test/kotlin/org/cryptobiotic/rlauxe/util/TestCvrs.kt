@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import kotlin.test.Test
@@ -145,8 +145,8 @@ class TestCvrs {
             candidateNames = listToMap("A", "B", "C", "D", "E"),
         )
         val contest = makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
-        val asrtns = contestUA.pollingAssertions
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
+        val asrtns = contestUA.assertions
         asrtns.first().assorter
 
 //        val m = assertFailsWith<RuntimeException> {

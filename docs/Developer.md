@@ -1,5 +1,5 @@
 # Developer Notes
-_12/20/2025_
+_12/23/2025_
 
 ## Prerequisites
 
@@ -18,7 +18,6 @@ cd rlauxe
 ````
 
 ## Build the library
-
 To do a clean build (no tests):
 
 ```
@@ -26,7 +25,8 @@ cd <devhome>/rlauxe
 ./gradlew clean assemble
 ```
 
-If the library has changed on github and you need to update it:
+Normally rlauxe-vierer keeps the current rlauxe library inside its own repo.
+However, if the library has changed on github and you need to rebuild it:
 
 ````
 cd <devhome>/rlauxe
@@ -62,6 +62,14 @@ To build the complete library and run the core tests:
     ./gradlew clean assemble
     ./gradlew core:test
 ```
+
+To run a subset of tests in cases:
+
+```
+    cd <devhome>/rlauxe
+    ./gradlew :cases:test --tests "org.cryptobiotic.util.*"
+```
+
 
 ## Using IntelliJ
 
@@ -106,7 +114,7 @@ The repo contains all the test case data, except for San Francisco. Download
 
   https://www.sfelections.org/results/20241105/data/20241203/CVR_Export_20241202143051.zip
 
-into testdataDir/cases/sf2024. (_testdataDir_ as you chose in "Set the test data directory" step above.)
+into testdataDir/cases/sf2024/ (where _testdataDir_ is as you chose in the "Set the test data directory" step above)
 
 Then run _createSf2024CvrExport()_ test in _cases/src/test/kotlin/org/cryptobiotic/rlauxe/sf/CreateSf2024CvrExport.kt_
 to generate _testdataDir/cases/sf2024/crvExport.csv_. This only needs to be done one time.
@@ -115,14 +123,19 @@ All the test cases can be generated from:
 
 _cases/src/test/kotlin/org/cryptobiotic/util/TestGenerateAllUseCases.kt_.
 
+Run the verifier on all the gnerated test cases:
+
+_cases/src/test/kotlin/org/cryptobiotic/util/TestVerifyUseCases.kt_.
+
+
 ## rlauxe viewer
 
 Download the [rlauxe-viewer repo](https://github.com/JohnLCaron/rlauxe-viewer) and follow instructions there to view 
-Audit Records and run audits on them, in particular, any of the test cases.
+Audit Records and run audits on them, in particular, on any of the test cases.
 
 **Caveat Emptor**: The serialization formats are undergoing rapid changes, with no backwards compatibility (yet). Expect that
-if you download a new version of the library, you will have to regenerate audit records, and download the latest rlauxe viewer
-to view them.
+if you download a new version of the library, you will possibly have to regenerate any audit records (including tests cases), 
+before viewing them.
 
 
 # Random notes and stats
@@ -142,17 +155,19 @@ to view them.
 | 12/10/2025 | 80.5 % | 5338/6634       |
 | 12/13/2025 | 82.8 % | 5341/6449       |
 | 12/18/2025 | 83.9 % | 5332/6357       |
+| 12/23/2025 | 83.9 % | 5393/6431       |
 
  **core + cases test coverage** 
 
 | date       | pct    | cover/total LOC |
-|------------|--------|-----------------|
-| 11/28/2025 | 79.3 % | 6417/8094       |
-| 11/29/2025 | 79.6 % | 6434/8087       |
-| 11/29/2025 | 81.4 % | 6479/7962       |
-| 12/04/2025 | 81.7 % | 6530/7994       |
-| 12/10/2025 | 78.4 % | 6597/8412       |
-| 12/13/2025 | 80.7 % | 6606/8187       |
+|------------|--------|----------------|
+| 11/28/2025 | 79.3 % | 6417/8094      |
+| 11/29/2025 | 79.6 % | 6434/8087      |
+| 11/29/2025 | 81.4 % | 6479/7962      |
+| 12/04/2025 | 81.7 % | 6530/7994      |
+| 12/10/2025 | 78.4 % | 6597/8412      |
+| 12/13/2025 | 80.7 % | 6606/8187      |
+| 12/23/2025 | 81.0 % | 6634/8186      |
 
 
 ## UML
@@ -270,3 +285,52 @@ testFixtures
     makeTestContestOAIrv : One OA IRV contest (not used?)
 
     ContestForTesting.makeContestFromCrvs(): single contest, make cvrs first
+
+
+/////////////////////////////////////////
+
+you could say theres two kinds of Contests, Regular and Irv
+you could say theres two kinds of Audits, Polling and Clca
+if a Clca has pools, then its a OneAudit with ClcaAssorterOneAudit
+
+| audit   | contest | assorters                               |
+|---------|---------|-----------------------------------------|
+| polling | regular | PAssorter                               |
+| polling | irv     | RaireAssorter                           |
+| clca    | regular | ClcaAssorter                            |
+| clca    | regular | ClcaAssorterOneAudit                    |
+| clca    | irv     | ClcaAssorter with RaireAssorter         |
+| clca    | irv     | ClcaAssorterOneAudit with RaireAssorter |
+
+ContestIF
+    Contest
+        DhondtContest
+    RaireContest
+
+ContestUnderAudit
+    hasa ContestIF
+    hasa List<PrimitiveAssorter>
+    hasa List<ClcaAssorter>, (if Clca): (if ClcaAssorterOneAudit, then its OneAudit)
+
+->subclass RaireContestUnderAudit
+    hasa RaireContest
+    hasa List<RaireAssorter>
+    hasa List<ClcaAssorter>, (if Clca): (if ClcaAssorterOneAudit, then its OneAudit)
+
+AssorterIF (aka PrimitiveAssorter)
+    PluralityAssorter
+    AboveThreshold
+    BelowThreshold
+    DhondtAssorter
+    RaireAssorter
+
+ClcaAssorter
+    hasa AssorterIF
+
+->subclass ClcaAssorterOneAudit
+
+Assertion
+    hasa AssorterIF
+
+->subclass ClcaAssertion
+        hasa ClcaAssorter

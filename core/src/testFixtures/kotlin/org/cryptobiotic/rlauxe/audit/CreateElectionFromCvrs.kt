@@ -1,13 +1,13 @@
 package org.cryptobiotic.rlauxe.audit
 
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 
 class CreateElectionFromCvrs (
-    val contestsUA: List<ContestUnderAudit>,
+    val contestsUA: List<ContestWithAssertions>,
     val cvrs: List<Cvr>, // includes phantoms
     val cardPools: List<OneAuditPoolIF>? = null,
     val cardStyles: List<PopulationIF>? = null,

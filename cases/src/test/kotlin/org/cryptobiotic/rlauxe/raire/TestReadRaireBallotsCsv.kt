@@ -98,7 +98,7 @@ class TestReadRaireBallotsCsv {
 ///////////////////////////////////////////////////////////////////////
 
 // TODO make this part of readRaireResultsJson
-fun tabulateRaireMargins(rcontests: List<RaireContestUnderAudit>, cvrs: List<Cvr>) {
+fun tabulateRaireMargins(rcontests: List<RaireContestWithAssertions>, cvrs: List<Cvr>) {
     if (rcontests.isEmpty()) return
 
     // we have to calculate the margin ourselves, since they are not in the RaireResults file (!)

@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -367,7 +367,7 @@ class TestHasStyle {
 
         val contestsUA = contests.map {
             val Nb = tabs[it.id]?.ncards ?: throw RuntimeException("Contest ${it.id} not found")
-            ContestUnderAudit(it, true, NpopIn=Nb).addStandardAssertions()
+            ContestWithAssertions(it, true, NpopIn=Nb).addStandardAssertions()
         }
 
         val election =
@@ -402,7 +402,7 @@ class TestHasStyle {
         val contestsUA = contests.map {
             val Nb = tabs[it.id]?.ncards ?:
                 throw RuntimeException("Contest ${it.id} not found")
-            ContestUnderAudit(it, isClca=true, NpopIn=Nb).addStandardAssertions()
+            ContestWithAssertions(it, isClca=true, NpopIn=Nb).addStandardAssertions()
         }
 
         // class TestCreateElection (
@@ -420,7 +420,7 @@ class TestHasStyle {
     }
 }
 
-fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestUnderAudit>): AuditRound {
+fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestWithAssertions>): AuditRound {
     val auditdir = "$topdir/audit"
     val publisher = Publisher(auditdir)
     val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()

@@ -16,7 +16,7 @@ class TestClcaFuzzSampler {
     @Test
     fun testComparisonFuzzed() {
         val test = MultiContestTestData(20, 11, 20000)
-        val contestsUA: List<ContestUnderAudit> = test.contests.map { ContestUnderAudit(it).addStandardAssertions() }
+        val contestsUA: List<ContestWithAssertions> = test.contests.map { ContestWithAssertions(it).addStandardAssertions() }
         val cvrs = test.makeCvrsFromContests()
         println("total ncvrs = ${cvrs.size}\n")
         val contests = contestsUA.map { ContestRound(it, 1) }
@@ -49,7 +49,7 @@ class TestClcaFuzzSampler {
 
 private fun runWithComparisonFuzzSampler(
     auditConfig: AuditConfig,
-    contestUA: ContestUnderAudit,
+    contestUA: ContestWithAssertions,
     assertionRound: AssertionRound,
     cvrs: List<Cvr>, // (mvr, cvr)
     moreParameters: Map<String, Double> = emptyMap(),

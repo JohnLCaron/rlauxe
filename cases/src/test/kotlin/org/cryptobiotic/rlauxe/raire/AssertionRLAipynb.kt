@@ -390,7 +390,7 @@ class AssertionRLA {
         )
         // these are the averages of the polling plurality assorters; use this to set the margins
         var count = 0
-        val rrContest: RaireContestUnderAudit = raireResults.contests.first()
+        val rrContest: RaireContestWithAssertions = raireResults.contests.first()
         val assorts: List<RaireAssorter> = rrContest.makeAssorters()
         val rcvrs = raireCvrs.cvrs
         val margins = assorts.map { assort ->
@@ -595,7 +595,7 @@ class AssertionRLA {
 
 fun replicate_p_values(
     N: Int,
-    contests: List<RaireContestUnderAudit>,
+    contests: List<RaireContestWithAssertions>,
     cvrs: List<Cvr>,
 ) {
     // TODO SHANGRLA doing complicated stuff. I think trying to audit simultaneous contests (dont understand the rules for that)
@@ -638,7 +638,7 @@ fun replicate_p_values(
 
 fun calc_sample_sizes(
     ntrials: Int,
-    contests: List<RaireContestUnderAudit>,
+    contests: List<RaireContestWithAssertions>,
     cvrs: List<Cvr>,
 ): RunTestRepeatedResult {
 

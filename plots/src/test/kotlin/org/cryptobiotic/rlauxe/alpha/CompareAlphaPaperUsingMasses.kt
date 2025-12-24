@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.alpha
 
 
 import org.cryptobiotic.rlauxe.estimate.ClcaFlipErrorsSampler
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.workflow.Sampling
@@ -91,7 +91,7 @@ class CompareAlphaPaperUsingMasses {
 
         val cvrs = makeCvrsByExactMean(N, cvrMean)
         val contest = makeContestsFromCvrs(cvrs).first()
-        val contestUA = ContestUnderAudit(contest, isClca=true).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contest, isClca=true).addStandardAssertions()
         val compareAssorter = contestUA.clcaAssertions.first().cassorter
 
         // sanity checks

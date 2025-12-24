@@ -26,7 +26,7 @@ class TestAssorterCvrMeans {
         val contest = makeContestFromCvrs(info, cvrs)
         println("\n$contest")
 
-        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
         testMeanAssort(cvrs, contestUA)
     }
 
@@ -40,7 +40,7 @@ class TestAssorterCvrMeans {
         val (contests, cvrs) = makeContestsWithUndervotesAndPhantoms(candVotes,
             listOf(15, 123, 3), listOf(0, 0, 0))
 
-        val contestUA = ContestUnderAudit(contests[2], isClca = false).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contests[2], isClca = false).addStandardAssertions()
         println("\n$contestUA")
         println("ncvrs = ${cvrs.size}")
         testMeanAssort(cvrs, contestUA)
@@ -56,7 +56,7 @@ class TestAssorterCvrMeans {
         val (contests, cvrs) = makeContestsWithUndervotesAndPhantoms(candVotes,
             listOf(15, 123, 3), listOf(11, 12, 13))
 
-        val contestUA = ContestUnderAudit(contests[1], isClca = false).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contests[1], isClca = false).addStandardAssertions()
         println("\n$contestUA")
         println("ncvrs = ${cvrs.size}")
         testMeanAssort(cvrs, contestUA)
@@ -87,15 +87,15 @@ class TestAssorterCvrMeans {
             candidateNames = listToMap( "0", "1", "2", "3", "4"),
         )
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
 
         println("\n$contestUA")
         println("ncvrs = ${cvrs.size}")
         testMeanAssort(cvrs, contestUA)
     }
 
-    fun testMeanAssort(cvrs: List<Cvr>, contestUA: ContestUnderAudit) {
-        val assorter = contestUA.pollingAssertions[0].assorter
+    fun testMeanAssort(cvrs: List<Cvr>, contestUA: ContestWithAssertions) {
+        val assorter = contestUA.assertions[0].assorter
         val tracker = MeanMarginTracker(contestUA.id, assorter)
         cvrs.forEach {
             // println(it)

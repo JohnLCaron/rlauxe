@@ -9,7 +9,7 @@ import kotlin.math.min
 
 private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOANS")
 
-fun checkContestsCorrectlyFormed(config: AuditConfig, contestsUA: List<ContestUnderAudit>, results: VerifyResults) {
+fun checkContestsCorrectlyFormed(config: AuditConfig, contestsUA: List<ContestWithAssertions>, results: VerifyResults) {
     results.addMessage("checkContestsCorrectlyFormed")
 
     checkContestInfos(contestsUA, results)
@@ -37,7 +37,7 @@ fun checkContestsCorrectlyFormed(config: AuditConfig, contestsUA: List<ContestUn
     }
 }
 
-fun checkContestInfos(contestsUA: List<ContestUnderAudit>, results: VerifyResults) {
+fun checkContestInfos(contestsUA: List<ContestWithAssertions>, results: VerifyResults) {
     val contestNames = mutableSetOf<String>()
     val contestIds = mutableSetOf<Int>()
     contestsUA.forEach { contestUA ->
@@ -67,7 +67,7 @@ fun checkContestInfos(contestsUA: List<ContestUnderAudit>, results: VerifyResult
     }
 }
 
-fun checkWinners(contestUA: ContestUnderAudit, results: VerifyResults) {
+fun checkWinners(contestUA: ContestWithAssertions, results: VerifyResults) {
     val contest = contestUA.contest
     val info = contest.info()
 
@@ -108,7 +108,7 @@ fun checkWinners(contestUA: ContestUnderAudit, results: VerifyResults) {
 
 // 3. verify that the winners have more votes than the losers (margins > 0 for all assertions)
 // 4. check that the top nwinners are in the list of winners
-fun checkWinnerVotes(contestUA: ContestUnderAudit, results: VerifyResults) {
+fun checkWinnerVotes(contestUA: ContestWithAssertions, results: VerifyResults) {
     val contest = contestUA.contest as Contest
     val info = contest.info
 

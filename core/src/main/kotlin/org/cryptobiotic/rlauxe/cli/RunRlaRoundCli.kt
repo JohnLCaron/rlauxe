@@ -11,7 +11,7 @@ import kotlin.String
 
 /** Run one round of a PersistentAudit that has already been started. */
 
-object RunRliRoundCli {
+object RunRlaRoundCli {
 
     @JvmStatic
     fun main(args: Array<String>) {

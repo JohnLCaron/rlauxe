@@ -23,7 +23,7 @@ class TestClcaCardSimulationErrorRates {
             val cvrs: List<Cvr> = makeCvrsByExactMean(N, theta)
             val cards = cvrs.map { AuditableCard.fromCvr(it, 0, 0L) }
             val contest = makeContestsFromCvrs(cvrs).first()
-            val contestUA = ContestUnderAudit(contest).addStandardAssertions()
+            val contestUA = ContestWithAssertions(contest).addStandardAssertions()
             val compareAssorter = contestUA.clcaAssertions.first().cassorter
 
             println("margin=$margin")
@@ -70,14 +70,14 @@ class TestClcaCardSimulationErrorRates {
             val cards = cvrs.map { AuditableCard.fromCvr(it, 0, 0L) }
 
             val contest = makeContestsFromCvrs(cvrs).first()
-            val contestUA = ContestUnderAudit(contest).addStandardAssertions()
+            val contestUA = ContestWithAssertions(contest).addStandardAssertions()
             val compareAssorter = contestUA.clcaAssertions.first().cassorter
 
             runClcaSimulation(cards, contestUA, compareAssorter)
         }
     }
 
-    fun runClcaSimulation(cards: List<AuditableCard>, contestUA: ContestUnderAudit, assorter: ClcaAssorter) {
+    fun runClcaSimulation(cards: List<AuditableCard>, contestUA: ContestWithAssertions, assorter: ClcaAssorter) {
         println("\n${assorter.assorter.desc()}")
 
         val phantomRate = contestUA.contest.phantomRate()

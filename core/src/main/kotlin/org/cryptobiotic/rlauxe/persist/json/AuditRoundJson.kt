@@ -55,7 +55,7 @@ fun AuditRound.publishJson() : AuditRoundJson {
     )
 }
 
-fun AuditRoundJson.import(contestUAs: List<ContestUnderAudit>, samplePrns: List<Long>): AuditRound {
+fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: List<Long>): AuditRound {
     val contestUAmap = contestUAs.associateBy { it.id }
     val contestRounds = this.contestRounds.map {
         it.import( contestUAmap[it.id]!! )
@@ -121,7 +121,7 @@ fun ContestRound.publishJson() : ContestRoundJson {
     )
 }
 
-fun ContestRoundJson.import(contestUA: ContestUnderAudit): ContestRound {
+fun ContestRoundJson.import(contestUA: ContestWithAssertions): ContestRound {
     val assertionMap = contestUA.assertions().associateBy { it.assorter.hashcodeDesc() }
     val assertionRounds = assertionRounds.map {
         val ref = assertionMap[it.assorterDesc]
@@ -340,7 +340,7 @@ fun writeAuditRoundJsonFile(AuditRound: AuditRound, filename: String) {
 
 fun readAuditRoundJsonFile(
     auditRoundFile: String,
-    contests: List<ContestUnderAudit>,
+    contests: List<ContestWithAssertions>,
     samplePrns: List<Long>,
 ): Result<AuditRound, ErrorMessages> {
 

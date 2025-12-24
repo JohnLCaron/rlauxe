@@ -100,7 +100,7 @@ class TestBoulderUndervotes {
     fun showSovoContestDetail2() {
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
 
-        val election2 = CreateBoulderElectionP(export, sovo, isClca=false)
+        val election2 = CreateBoulderElection(export, sovo, isClca=false)
         println()
         election2.oaContests.forEach { (_, oa) ->
             println(BoulderContestVotes.header)
@@ -114,7 +114,7 @@ class TestBoulderUndervotes {
 
         println("votes, undervotes")
 
-        val election2 = CreateBoulderElectionP(export, sovo, isClca=false)
+        val election2 = CreateBoulderElection(export, sovo, isClca=false)
         val contestIds = election2.infoList.map { it.id }
         showPoolVotes(contestIds, election2.cardPoolBuilders)
     }
@@ -134,7 +134,7 @@ class TestBoulderUndervotes {
     fun showRedactedUndervotes2() {
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
         // val election1 = BoulderElectionOAsim(export, sovo)
-        val election2 = CreateBoulderElectionP(export, sovo, isClca=false)
+        val election2 = CreateBoulderElection(export, sovo, isClca=false)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -198,7 +198,7 @@ class TestBoulderUndervotes {
     @Test
     fun showRedactedNcards() {
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
-        val election2 = CreateBoulderElectionP(export, sovo, isClca=false)
+        val election2 = CreateBoulderElection(export, sovo, isClca=false)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -267,12 +267,12 @@ class TestBoulderUndervotes {
     @Test
     fun showNcards() {
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
-        val election2 = CreateBoulderElectionP(export, sovo, isClca=false)
+        val election2 = CreateBoulderElection(export, sovo, isClca=false)
 
         val contestIds = election2.infoList.map { it.id }
 
-        val list2 = election2.cardPools.map { pool ->
-            val oapool = pool as OneAuditPoolWithBallotStyle
+        val list2 = election2.cardPoolBuilders.map { pool ->
+            val oapool = pool
             oapool.minCardsNeeded.keys.associate{ it to pool.ncards() }
         }
         val sum2 = mutableMapOf<Int, Int>()
@@ -287,7 +287,7 @@ class TestBoulderUndervotes {
             appendLine()
 
             contestIds.forEach { id ->
-                val oaContest = election2.oaContests[id]!!
+                val oaContest = election2.oaContests[id]
                 if (oaContest == null)
                     ("     |")
                 else {
@@ -297,7 +297,7 @@ class TestBoulderUndervotes {
             appendLine()
 
             contestIds.forEach { id ->
-                val oaContest = election2.oaContests[id]!!
+                val oaContest = election2.oaContests[id]
                 if (oaContest == null)
                     ("     |")
                 else {
@@ -307,7 +307,7 @@ class TestBoulderUndervotes {
             appendLine()
 
             contestIds.forEach { id ->
-                val oaContest = election2.oaContests[id]!!
+                val oaContest = election2.oaContests[id]
                 if (oaContest == null)
                     ("     |")
                 else {
@@ -317,7 +317,7 @@ class TestBoulderUndervotes {
             appendLine()
 
             contestIds.forEach { id ->
-                val oaContest = election2.oaContests[id]!!
+                val oaContest = election2.oaContests[id]
                 if (oaContest == null)
                     ("     |")
                 else {
@@ -327,7 +327,7 @@ class TestBoulderUndervotes {
             appendLine()
 
             contestIds.forEach { id ->
-                val oaContest = election2.oaContests[id]!!
+                val oaContest = election2.oaContests[id]
                 if (oaContest == null)
                     ("     |")
                 else {

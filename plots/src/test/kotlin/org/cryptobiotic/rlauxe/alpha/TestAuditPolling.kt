@@ -37,8 +37,8 @@ class TestAuditPolling {
         val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
 
         val contest = test.contests.first()
-        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
-        val assorter = contestUA.pollingAssertions.first().assorter
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
+        val assorter = contestUA.assertions.first().assorter
 
         val cvrs = test.makeCvrsFromContests()
         val pairs = cvrs.zip(cvrs)
@@ -108,13 +108,13 @@ class TestAuditPolling {
             println("Contests")
             contests.forEach { println("  ${it}") }
         }
-        val contestsUA = contests.map { ContestUnderAudit(it, isClca=false).addStandardAssertions() }
+        val contestsUA = contests.map { ContestWithAssertions(it, isClca=false).addStandardAssertions() }
 
         // this has to be run separately for each assorter, but we want to combine them in practice
         val results = mutableListOf<RunTestRepeatedResult>()
         contestsUA.forEach { contestUA ->
             if (!silent && showContests) println("Assertions for Contest ${contestUA.id}")
-            contestUA.pollingAssertions.forEach {
+            contestUA.assertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
                 val cvrSampler = if (withoutReplacement) PollingSampling(contestUA.id, cvrs.zip(cvrs), it.assorter)

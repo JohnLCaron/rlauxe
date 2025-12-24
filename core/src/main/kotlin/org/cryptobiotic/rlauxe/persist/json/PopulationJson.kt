@@ -97,45 +97,6 @@ fun PopulationJson.import(): Population {
     return cardPool
 }
 
-// data class OneAuditPoolWithBallotStyle(
-//    override val poolName: String,
-//    override val poolId: Int,
-//    val population: PopulationIF,
-//    val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes; must include contests with no votes
-//    val infos: Map<Int, ContestInfo>, // all infos
-// }
-//    val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
-//    val maxMinCardsNeeded: Int
-/*    private var adjustCards = 0
-@Serializable
-class OneAuditPoolWithBallotStyleJson(
-    val poolName: String,
-    val poolId: Int,
-    val exactContests: Boolean,
-    val voteTotals: Map<Int, ContestTabulationJson>, // contestId -> candidateId -> nvotes
-    val adjustCards: Int
-)
-
-fun OneAuditPoolWithBallotStyle.publishJson() = OneAuditPoolWithBallotStyleJson(
-    this.poolName,
-    this.poolId,
-    this.exactContests,
-    this.voteTotals.mapValues { it.value.publishJson() },
-    this.adjustCards,
-)
-
-fun OneAuditPoolWithBallotStyleJson.import(infos: Map<Int, ContestInfo>): OneAuditPoolWithBallotStyle {
-    val cardPool = OneAuditPoolWithBallotStyle(
-        this.poolName,
-        this.poolId,
-        this.exactContests,
-        this.voteTotals.mapValues { it.value.import(infos[it.key]!!) },
-        infos
-    )
-    cardPool.adjustCards = this.adjustCards
-    return cardPool
-} */
-
 // data class OneAuditPool(override val poolName: String, override val poolId: Int, val exactContests: Boolean,
 //                        val ncards: Int, val regVotes: Map<Int, RegVotesIF
 
@@ -148,14 +109,15 @@ class OneAuditPoolJson(
     val regVotes: Map<Int, RegVotesJson>,
 )
 
-fun OneAuditPool.publishJson() = OneAuditPoolJson(
+fun OneAuditPoolIF.publishJson() = OneAuditPoolJson(
     this.poolName,
     this.poolId,
-    this.hasSingleCardStyle,
-    this.ncards,
+    this.hasSingleCardStyle(),
+    this.ncards(),
     this.regVotes().mapValues { it.value.publishJson() },
 )
 
+// note that we publish OneAuditPoolIF, then turn that into OneAuditPool, losing original information
 fun OneAuditPoolJson.import() = OneAuditPool(
         this.poolName,
         this.poolId,
@@ -163,7 +125,6 @@ fun OneAuditPoolJson.import() = OneAuditPool(
         this.ncards,
         this.regVotes.mapValues { it.value.import() },
     )
-
 
 // data class RegVotes(override val votes: Map<Int, Int>, val ncards: Int, val undervotes: Int): RegVotesIF {
 @Serializable

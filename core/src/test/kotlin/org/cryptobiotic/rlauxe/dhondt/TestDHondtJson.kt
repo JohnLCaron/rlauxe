@@ -31,7 +31,7 @@ class TestDHondtJson {
         val dcontest = makeProtoContest("contest1", 1, parties, 8, 0, 0.01)
         val contest = dcontest.createContest(dcontest.validVotes, dcontest.validVotes)
 
-        val contestUA = ContestUnderAudit(contest, isClca=true).addAssertionsFromAssorters(dcontest.makeAssorters())
+        val contestUA = ContestWithAssertions(contest, isClca=true).addAssertionsFromAssorters(dcontest.makeAssorters())
 
         val json = contestUA.publishJson()
         val roundtrip = json.import()
@@ -45,7 +45,7 @@ class TestDHondtJson {
         val parties = listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500))
         val dcontest = makeProtoContest("contest1", 1, parties, 8, 0, 0.01)
         val contest = dcontest.createContest(dcontest.validVotes, dcontest.validVotes)
-        val contestUA = ContestUnderAudit(contest, isClca=true).addAssertionsFromAssorters(dcontest.makeAssorters())
+        val contestUA = ContestWithAssertions(contest, isClca=true).addAssertionsFromAssorters(dcontest.makeAssorters())
 
         val target = contestUA.minPollingAssertion()!!.assorter
 

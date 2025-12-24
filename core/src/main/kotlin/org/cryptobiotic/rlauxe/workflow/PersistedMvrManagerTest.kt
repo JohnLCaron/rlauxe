@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsFrom
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.persist.json.readSamplePrns
 private val logger = KotlinLogging.logger("PersistedMvrManagerTest")
 private val checkValidity = true
 
-class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA: List<ContestUnderAudit>)
+class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA: List<ContestWithAssertions>)
     : MvrManagerTestIF, PersistedMvrManager(auditDir, config, contestsUA) {
 
     // extract the cards with sampleNumbers from the cardManifest, optionally fuzz them, and write them to sampleMvrsFile

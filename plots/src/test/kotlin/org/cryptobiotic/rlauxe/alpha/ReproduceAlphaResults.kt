@@ -483,7 +483,7 @@ class ReproduceAlphaResults {
             for (N in nlist) {
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val contest = makeContestsFromCvrs(cvrs).first()
-                val contestUA = ContestUnderAudit(contest).addStandardAssertions()
+                val contestUA = ContestWithAssertions(contest).addStandardAssertions()
                 val assorter = contestUA.minClcaAssertion()!!.cassorter
 
                 val margin = assorter.assorter().dilutedMargin()

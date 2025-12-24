@@ -36,7 +36,7 @@ class TestRaireAudit {
             clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct = mvrFuzzPct)
         )
 
-        val (rcontest: RaireContestUnderAudit, testCvrs: List<Cvr>) = simulateRaireTestContest(N=20000, contestId=111, ncands=4, minMargin=.04, quiet = true)
+        val (rcontest: RaireContestWithAssertions, testCvrs: List<Cvr>) = simulateRaireTestContest(N=20000, contestId=111, ncands=4, minMargin=.04, quiet = true)
         val testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrFuzzPct)
         val workflow = WorkflowTesterClca(config, emptyList(), listOf(rcontest),
             MvrManagerForTesting(testCvrs, testMvrs, config.seed))

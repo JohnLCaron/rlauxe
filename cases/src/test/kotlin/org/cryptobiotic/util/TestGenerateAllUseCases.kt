@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.belgium.belgianElectionMap
 import org.cryptobiotic.rlauxe.belgium.createBelgiumElection
-import org.cryptobiotic.rlauxe.boulder.createBoulderElectionP
+import org.cryptobiotic.rlauxe.boulder.createBoulderElection
 import org.cryptobiotic.rlauxe.corla.createColoradoElectionP
 import org.cryptobiotic.rlauxe.corla.createColoradoPolling
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -27,7 +27,7 @@ class TestGenerateAllUseCases {
     fun createBoulder24oa() {
         val topdir = "$testdataDir/cases/boulder24/oa"
 
-        createBoulderElectionP(
+        createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = topdir,
@@ -43,7 +43,7 @@ class TestGenerateAllUseCases {
     @Test
     fun createBoulder24clca() { // simulate CVRs
         val topdir = "$testdataDir/cases/boulder24/clca"
-        createBoulderElectionP(
+        createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             topdir = "$testdataDir/cases/boulder24/clca",
@@ -86,7 +86,7 @@ class TestGenerateAllUseCases {
         writeSortedCardsExternalSort(topdir, publisher, config.seed)
     }
 
-    // @Test
+    @Test
     fun testCreateColoradoPolling() {
         val topdir = "$testdataDir/cases/corla/polling"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"

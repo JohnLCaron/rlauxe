@@ -99,16 +99,16 @@ data class RaireContest(
     }
 }
 
-class RaireContestUnderAudit(
+class RaireContestWithAssertions(
     contest: RaireContest,
     val rassertions: List<RaireAssertion>,
     NpopIn: Int,
-): ContestUnderAudit(contest, isClca=true, NpopIn) {
+): ContestWithAssertions(contest, isClca=true, NpopIn) {
     val candidates =  contest.info.candidateIds
 
     init {
-        this.pollingAssertions = makeRairePollingAssertions()
-        this.clcaAssertions = pollingAssertions.map { assertion ->
+        this.assertions = makeRairePollingAssertions()
+        this.clcaAssertions = assertions.map { assertion ->
             val clcaAssorter = makeClcaAssorter(assertion)
             ClcaAssertion(contest.info(), clcaAssorter)
         }
@@ -131,7 +131,7 @@ class RaireContestUnderAudit(
         if (javaClass != other?.javaClass) return false
         if (!super.equals(other)) return false
 
-        other as RaireContestUnderAudit
+        other as RaireContestWithAssertions
 
         if (rassertions != other.rassertions) return false
         if (candidates != other.candidates) return false
@@ -155,7 +155,7 @@ class RaireContestUnderAudit(
                  undervotes: Int,
                  assertions: List<RaireAssertion>,
                  Npop: Int,
-         ): RaireContestUnderAudit {
+         ): RaireContestWithAssertions {
 
             val winnerId = info.candidateIds[winnerIndex]
             val contest = RaireContest(
@@ -165,7 +165,7 @@ class RaireContestUnderAudit(
                 Ncast = Ncast,
                 undervotes = undervotes,
             )
-            return RaireContestUnderAudit(contest, assertions, Npop)
+            return RaireContestWithAssertions(contest, assertions, Npop)
         }
     }
 }

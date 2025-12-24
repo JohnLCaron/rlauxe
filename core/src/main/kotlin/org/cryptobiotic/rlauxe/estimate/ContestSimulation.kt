@@ -6,9 +6,8 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.roundToClosest
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import kotlin.math.abs
 import kotlin.math.round
@@ -165,9 +164,9 @@ class ContestSimulation(val contest: Contest, val Npop: Int) {
         //    val assorter: AssorterIF
         //): Sampling, Iterator<Double>
         // Needed for Polling estimation
-        fun simulateCvrsDilutedMargin(contestUA: ContestUnderAudit, config: AuditConfig): List<Cvr> {
+        fun simulateCvrsDilutedMargin(contestUA: ContestWithAssertions, config: AuditConfig): List<Cvr> {
             val limit = config.contestSampleCutoff
-            val contestOrg = contestUA.contest as Contest // TODO
+            val contestOrg = contestUA.contest as Contest // TODO IRV
             if (limit == null || contestOrg.Nc <= limit) return ContestSimulation(contestOrg, contestUA.Npop).makeCvrs()
 
             // otherwise scale everything
@@ -179,9 +178,9 @@ class ContestSimulation(val contest: Contest, val Npop: Int) {
             val svotes = contestOrg.votes.map { (id, nvotes) -> id to roundToClosest(sNc * nvotes) }.toMap()
             val voteCount = svotes.map { it.value }.sum() // V_c
 
-            if (abs(voteCount - limit) > 10) {
-                logger.warn {"simulateContestCvrsWithLimits limit wanted = ${limit} scaled = ${voteCount}"}
-            }
+            //if (abs(voteCount - limit) > 10) {
+            //    logger.warn {"simulateContestCvrsWithLimits limit wanted = ${limit} scaled = ${voteCount}"}
+            //}
 
             val contestScaled = Contest(
                 contestOrg.info,

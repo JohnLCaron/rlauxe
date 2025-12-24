@@ -60,11 +60,9 @@ class TestMultiContestTestData {
                     assertTrue(underVotePct.contains(fcontest.undervotePct))
                     assertTrue(phantomRange.contains(fcontest.phantomPct))
 
-                    val calcMargin = contest.margin(winner, loser)
                     val margin = (contest.votes[winner]!! - contest.votes[loser]!!) / contest.Nc.toDouble()
-                    val calcReportedMargin = contest.margin(winner, loser)
+                    val calcReportedMargin = contest.reportedMargin(winner, loser)
                     assertEquals(margin, calcReportedMargin, doublePrecision)
-                    assertEquals(margin, calcMargin, doublePrecision)
                     println(" ${contest.id} fcontest= ${fcontest.margin} contest=$margin")
                 }
             }

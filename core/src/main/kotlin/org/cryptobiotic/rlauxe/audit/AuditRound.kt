@@ -50,6 +50,8 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     val name = contestUA.name
     val Npop = contestUA.Npop
 
+    var estCardsNeeded = 0 // initial estiimate of cards for the contests
+
     var actualMvrs = 0 // Actual number of ballots with this contest contained in this round's sample.
     var actualNewMvrs = 0 // Actual number of new ballots with this contest contained in this round's sample.
 
@@ -81,9 +83,9 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
                else estSampleSize
     }
 
-    // TODO: for Clca, use noerror
     fun minAssertion(): AssertionRound? {
-        return assertionRounds.minByOrNull { it.assertion.assorter.dilutedMargin() }
+        val minAssertion = contestUA.minAssertion()!!
+        return assertionRounds.find { it.assertion == minAssertion }
     }
 
     fun createNextRound() : ContestRound {

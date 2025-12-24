@@ -42,7 +42,7 @@ class TestHasStyle {
             10000,
             10000
         )
-        assertEquals(.1, contestB.margin(1, 2))
+        assertEquals(.1, contestB.reportedMargin(1, 2))
 
         ////////
 
@@ -52,7 +52,7 @@ class TestHasStyle {
             1000,
             1000
         )
-        assertEquals(0.1, contestS.margin(1, 2))
+        assertEquals(0.1, contestS.reportedMargin(1, 2))
 
         val poolId = if (hasStyle) null else 1
         val testData = MultiContestCombineData(listOf(contestB, contestS), contestB.Nc, poolId = poolId)
@@ -119,7 +119,7 @@ class TestHasStyle {
             10000,
             10000
         )
-        assertEquals(.1, contestB.margin(1, 2))
+        assertEquals(.1, contestB.reportedMargin(1, 2))
 
         // card 1
         val testData1 = MultiContestCombineData(listOf(contestB), contestB.Nc, poolId = poolId)
@@ -133,7 +133,7 @@ class TestHasStyle {
             1000,
             1000
         )
-        assertEquals(0.1, contestS.margin(1, 2))
+        assertEquals(0.1, contestS.reportedMargin(1, 2))
 
         val contest3 = Contest(
             ContestInfo("3", 3, mapOf("Jim" to 1, "John" to 2), SocialChoiceFunction.PLURALITY),
@@ -141,7 +141,7 @@ class TestHasStyle {
             10000,
             10000
         )
-        assertEquals(0.1, contestS.margin(1, 2))
+        assertEquals(0.1, contestS.reportedMargin(1, 2))
 
         // card 2
         val testData2 = MultiContestCombineData(listOf(contest3, contestS), contest3.Nc, poolId = poolId)
@@ -211,7 +211,7 @@ class TestHasStyle {
             10000,
             10000
         )
-        assertEquals(.1, contestB.margin(1, 2))
+        assertEquals(.1, contestB.reportedMargin(1, 2))
 
         ////////
 
@@ -221,7 +221,7 @@ class TestHasStyle {
             3000, // p = 0.3,
             3000
         )
-        assertEquals(0.1, contestS.margin(1, 2))
+        assertEquals(0.1, contestS.reportedMargin(1, 2))
 
         val testData = MultiContestCombineData(listOf(contestB, contestS), contestB.Nc, poolId=1)
         val testCvrs = testData.makeCvrsFromContests()
@@ -269,7 +269,7 @@ class TestHasStyle {
             10000,
             10000
         )
-        assertEquals(.1, contestB.margin(1, 2))
+        assertEquals(.1, contestB.reportedMargin(1, 2))
 
         // card 1
         val testData1 = MultiContestCombineData(listOf(contestB), contestB.Nc)
@@ -283,7 +283,7 @@ class TestHasStyle {
             3000, // p = 0.3,
             3000
         )
-        assertEquals(0.1, contestS.margin(1, 2))
+        assertEquals(0.1, contestS.reportedMargin(1, 2))
 
         val contest3 = Contest(
             ContestInfo("3", 3, mapOf("Jim" to 1, "John" to 2), SocialChoiceFunction.PLURALITY),
@@ -291,7 +291,7 @@ class TestHasStyle {
             10000,
             10000
         )
-        assertEquals(0.1, contestS.margin(1, 2))
+        assertEquals(0.1, contestS.reportedMargin(1, 2))
 
         // card 2
         val testData2 = MultiContestCombineData(listOf(contest3, contestS), contest3.Nc)
@@ -441,6 +441,7 @@ fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestWithAssertions>
         auditRound,
         cardManifest = mvrManager.sortedCards(),
         cardPools = mvrManager.oapools(),
+        previousSamples = emptySet(),
         // nthreads=1,
     )
 

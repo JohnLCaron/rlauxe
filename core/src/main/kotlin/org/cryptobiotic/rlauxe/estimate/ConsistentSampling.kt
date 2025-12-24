@@ -3,9 +3,12 @@ package org.cryptobiotic.rlauxe.estimate
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.MvrManager
 import org.cryptobiotic.rlauxe.workflow.wantSampleSize
+import kotlin.math.ln
+import kotlin.math.roundToInt
 
 private val debugConsistent = false
 private val logger = KotlinLogging.logger("ConsistentSampling")
@@ -136,3 +139,85 @@ fun consistentSampling(
     auditRound.newmvrs = newMvrs
     auditRound.samplePrns = sampledCards.map { it.prn }
 }
+
+fun consistentSampling(
+    config: AuditConfig,
+    contests: List<ContestRound>,
+    cards: CloseableIterable<AuditableCard>,
+    previousSamples: Set<Long>,
+): List<AuditableCard> {
+    val contestsNotDone = contests.filter { !it.done }
+    if (contestsNotDone.isEmpty()) return emptyList() // may not quite be right...
+
+    // calculate how many samples are wanted for each contest.
+    val wantSamples: Map<Int, Int> = contestsNotDone.associate { it.id to estSamplesNeeded(it, config.riskLimit, 2.2) }
+    val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
+
+    fun contestWantsMoreSamples(c: ContestRound): Boolean {
+        return (haveSampleSize[c.id] ?: 0) < (wantSamples[c.id] ?: 0)
+    }
+
+    val contestsIncluded = contestsNotDone.filter { it.included }
+
+    // var newMvrs = 0 // count when this card not in previous samples
+    val sampledCards = mutableListOf<AuditableCard>()
+
+    // makes only one partial iteration over sortedCards, until wantSamples foreach contest are fouond
+    var countSamples = 0
+    val sortedCardIter = cards.iterator()
+    while (contestsIncluded.any { contestWantsMoreSamples(it) } && sortedCardIter.hasNext()) {
+        val card = sortedCardIter.next()
+        if (previousSamples.contains(card.prn)) continue
+
+        // does this contribute to one or more contests that need more samples?
+        if (contestsIncluded.any { contestWantsMoreSamples(it) && card.hasContest(it.id) }) {
+            // then use it
+            sampledCards.add(card)
+
+            // count only if included
+            contestsIncluded.forEach { contest ->
+                if (card.hasContest(contest.id)) {
+                    haveSampleSize[contest.id] = haveSampleSize[contest.id]?.plus(1) ?: 1
+                }
+            }
+        }
+        countSamples++
+    }
+
+    return sampledCards
+}
+
+// CLCA and OneAudit
+fun estSamplesNeeded(contestRound: ContestRound, alpha: Double, fac: Double): Int {
+    val minAssertionRound = contestRound.minAssertion()
+    if (minAssertionRound == null) {
+        contestRound.minAssertion()
+        throw RuntimeException()
+    }
+
+    val lastPvalue = minAssertionRound.auditResult?.pvalue ?: alpha
+    val minAssertion = minAssertionRound.assertion
+
+    val cassorter = (minAssertion as ClcaAssertion).cassorter
+    // val expected = ln(1 / alpha) / ln(2 * cassorter.noerror())
+    val estSamplesNoErrors = ln(1 / lastPvalue) / ln(2 * cassorter.noerror())
+
+    val estNeeded =  (fac * estSamplesNoErrors).roundToInt()
+    contestRound.estCardsNeeded = estNeeded
+    return estNeeded
+}
+
+//val minSamples = -ln(.05) / ln(2 * minAssorter.noerror())
+
+// (1 - lam * noerror)^n < alpha
+//n * ln(1 - maxLam * noerror) < ln(alpha)
+
+// ttj is how much you win or lose
+// ttj = 1 + lamj * (xj - mj)
+// ttj = 1 + lamj * (noerror - mj) // lamj ~ 2, mj ~ 1/2
+// ttj = 1 + 2 * noerror - 1
+// ttj = 2 * noerror
+
+// (2 * noerror)^n > 1/alpha
+// n * log(2 * noerror) > -log(alpha)
+// n ~ -log(alpha) / log(2 * noerror)

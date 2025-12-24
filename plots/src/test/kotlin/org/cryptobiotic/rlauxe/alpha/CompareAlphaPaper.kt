@@ -45,6 +45,7 @@ class CompareAlphaPaper {
 
             for (eta in etas) {
                 val compareResult: RunTestRepeatedResult = runAlphaMartRepeated(
+                    name = "makeClcaNoErrorSampler",
                     drawSample = makeClcaNoErrorSampler(contest.id, cvrs, compareAssertion.cassorter),
                     N = N,
                     eta0 = eta,
@@ -56,6 +57,7 @@ class CompareAlphaPaper {
                 compareSrs.add(compareResult.makeSRT(theta, 0.0))
 
                 val pollingResult = runAlphaMartRepeated(
+                    name = "PollingSampling",
                     drawSample = PollingSampling(contestUA.id, pairs, pollingAssertion.assorter),
                     N = N,
                     eta0 = eta, // use the reportedMean for the initial guess

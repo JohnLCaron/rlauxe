@@ -48,6 +48,7 @@ class TestAuditPolling {
         val d = 100
         val margin = assorter.dilutedMargin()
         val result = runAlphaMartRepeated(
+            name = "testMultiContestTestData",
             drawSample = cvrSampler,
             N = N,
             eta0 = margin2mean(margin),
@@ -121,6 +122,7 @@ class TestAuditPolling {
                     else PollWithReplacement(contestUA.contest as Contest, cvrs, it.assorter)
 
                 val result = runAlphaMartRepeated(
+                    name = "testPollingWorkflow",
                     drawSample = cvrSampler,
                     N = contestUA.Npop,
                     eta0 = margin2mean(margin),

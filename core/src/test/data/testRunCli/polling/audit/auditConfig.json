@@ -2,7 +2,7 @@
     "auditType": "POLLING",
     "hasStyle": true,
     "riskLimit": 0.05,
-    "seed": -420897972213531404,
+    "seed": -3126485599041806166,
     "nsimEst": 100,
     "quantile": 0.8,
     "contestSampleCutoff": 30000,

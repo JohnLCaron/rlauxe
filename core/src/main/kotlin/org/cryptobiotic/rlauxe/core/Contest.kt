@@ -179,7 +179,6 @@ open class Contest(
         val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) } // invert the map
         winnerNames = winners.map { mapIdToName[it]!! }
         if (winners.isEmpty()) {
-            val pct = votes.toList().associate { it.first to it.second.toDouble() / nvotes }.toMap()
             logger.info {"*** there are no winners for $info" }
         }
 
@@ -189,12 +188,14 @@ open class Contest(
             if (!winners.contains(id)) mlosers.add(id)
         }
         losers = mlosers.toList()
+        if (losers.isEmpty()) {
+            logger.info {"*** there are no losers for $info" }
+        }
     }
 
-    // TODO candidate for removal? or call it reportedMargin()
-    fun margin(winner: Int, loser: Int): Double {
-        val winnerVotes = votes[winner] ?: 0
-        val loserVotes = votes[loser] ?: 0
+    fun reportedMargin(winnerId: Int, loserId: Int): Double {
+        val winnerVotes = votes[winnerId] ?: 0
+        val loserVotes = votes[loserId] ?: 0
         return (winnerVotes - loserVotes) / Nc.toDouble()
     }
 

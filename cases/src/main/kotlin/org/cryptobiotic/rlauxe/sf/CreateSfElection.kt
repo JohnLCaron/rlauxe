@@ -329,10 +329,10 @@ fun createSfElection(
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
 
-        (auditType ==  AuditType.CLCA) -> AuditConfig(AuditType.CLCA, contestSampleCutoff = 20000, riskLimit = .05, nsimEst=10)
+        (auditType ==  AuditType.CLCA) -> AuditConfig(AuditType.CLCA, riskLimit = .05, nsimEst=10)
 
         (auditType ==  AuditType.ONEAUDIT) -> AuditConfig(
-            AuditType.ONEAUDIT, riskLimit = .05, contestSampleCutoff = 20000, nsimEst = 1,
+            AuditType.ONEAUDIT, riskLimit = .05, nsimEst = 10,
             oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = true)
         )
 

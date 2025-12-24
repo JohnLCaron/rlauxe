@@ -39,8 +39,10 @@ fun estimateSampleSizes(
     auditRound: AuditRound,
     cardManifest: CloseableIterable<AuditableCard>, // Clca, OneAudit, ignored for Polling
     cardPools: List<OneAuditPoolIF>?, // Clca, OneAudit, ignored for Polling
+    previousSamples: Set<Long>,
     showTasks: Boolean = false,
     nthreads: Int = 32,
+    onlyTask: String? = null
 ): List<RunTestRepeatedResult> {
 
     // TODO SimulateIrvTestData
@@ -50,18 +52,24 @@ fun estimateSampleSizes(
         OneAuditVunderBarFuzzer(VunderBar(cardPools!!, infos), infos, config.simFuzzPct ?: 0.0)
     }
 
-    // grab the first ? cards from the card manifest
-    val contestCards = if (config.isPolling) null
-    else {
-        val limit = 100_000
-        getCardsLimited(limit, cardManifest.iterator())
-    }
+    // choose a subset of the cards for the estimation
+    val contestCards: List<AuditableCard>? = if (config.isPolling) null else
+        consistentSampling(
+            config,
+            auditRound.contestRounds,
+            cardManifest,
+            previousSamples,
+        )
 
     // create the estimation tasks for each contest
     val stopwatch = Stopwatch()
     val tasks = mutableListOf<EstimateSampleSizeTask>()
     auditRound.contestRounds.filter { !it.done }.forEach { contestRound ->
         tasks.addAll(makeEstimationTasks(config, contestRound, auditRound.roundIdx, contestCards,  vunderFuzz))
+    }
+
+    if (onlyTask != null) {
+        tasks.removeAll{  it.name() != onlyTask }
     }
 
     // run tasks concurrently
@@ -196,7 +204,7 @@ class EstimateSampleSizeTask(
     val moreParameters: Map<String, Double> = emptyMap(),
 ) : ConcurrentTaskG<EstimationResult> {
 
-    override fun name() = "task ${contestRound.name} ${assertionRound.assertion.assorter.desc()} ${config.strategy()}}"
+    override fun name() = "${contestRound.contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
 
     // all assertions share the same cvrs. run ntrials (=config.nsimEst times).
     // each time the trial is run, the cvrs are randomly permuted. The result is a distribution of ntrials sampleSizes.
@@ -298,6 +306,7 @@ fun estimateClcaAssertionRound(
 
     // run the simulation ntrials (=config.nsimEst) times
     val result: RunTestRepeatedResult = runRepeatedBettingMart(
+        name,
         config,
         sampler,
         bettingFn,
@@ -325,6 +334,7 @@ fun estimateClcaAssertionRound(
 }
 
 fun runRepeatedBettingMart(
+    name: String,
     config: AuditConfig,
     sampleFn: Sampling,
     bettingFn: BettingFn,
@@ -347,6 +357,7 @@ fun runRepeatedBettingMart(
 
     // run the simulation ntrials (config.nsimEst) times
     val result: RunTestRepeatedResult = runTestRepeated(
+        name = name,
         drawSample = sampleFn,
         ntrials = config.nsimEst,
         testFn = testFn,
@@ -390,6 +401,7 @@ fun estimatePollingAssertionRound(
     val stopwatch = Stopwatch()
 
     val result = runRepeatedAlphaMart(
+        name,
         config,
         sampler,
         null,
@@ -415,6 +427,7 @@ fun estimatePollingAssertionRound(
 }
 
 fun runRepeatedAlphaMart(
+    name: String,
     config: AuditConfig,
     sampleFn: Sampling,
     estimFn: EstimFn?, // if null use default TruncShrinkage
@@ -440,6 +453,7 @@ fun runRepeatedAlphaMart(
     )
 
     val result: RunTestRepeatedResult = runTestRepeated(
+        name,
         drawSample = sampleFn,
         ntrials = config.nsimEst,
         testFn = testFn,
@@ -519,6 +533,7 @@ fun estimateOneAuditAssertionRound(
     val stopwatch = Stopwatch()
 
     val result = runRepeatedBettingMart(
+        name,
             config,
             sampler,
             bettingFn,
@@ -574,7 +589,7 @@ fun estimateOneAuditAssertionRound(
     return result
 }
 
-// TODO all at once
+// TODO too slow
 // take the first contestSampleCutoff cards that contain the contest
 // TODO this assumes the cards are randomized, so we can just take the first L cvrs; but some of the tests may not do that...track them down
 class ContestCardsLimited(
@@ -594,6 +609,8 @@ class ContestCardsLimited(
     fun cards() = cards.toList()
 }
 
+
+// what if you fetch  fac * estNoError(margin) ?? alos, get new cards  for subsequest rounds ...
 fun getCardsLimited(contestSampleCutoff: Int?, cardIter: Iterator<AuditableCard>): List<AuditableCard> {
     val cards = mutableListOf<AuditableCard>()
     while ((contestSampleCutoff == null || cards.size < contestSampleCutoff) && cardIter.hasNext()) {

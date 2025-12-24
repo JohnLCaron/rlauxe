@@ -42,7 +42,7 @@ class CreateBoulderElection(
 
     val contests: List<ContestIF>
     val contestsUA : List<ContestWithAssertions>
-    // val cardPools: List<OneAuditPool>
+    val simulatedCvrs: List<Cvr>
 
     init {
         //// the redacted groups dont have undervotes, so we do some fancy dancing to generate reasonable undervote counts
@@ -60,6 +60,7 @@ class CreateBoulderElection(
 
         // we need to know the diluted Nb before we can create the UAs
         contests = makeContests()
+        simulatedCvrs = makeRedactedCvrs()
 
         val manifestTabs = tabulateAuditableCards(createCardManifest(), infoMap)
         val npopMap = manifestTabs.mapValues { it.value.ncards }
@@ -269,7 +270,6 @@ class CreateBoulderElection(
 
     fun createCardManifest(): CloseableIterator<AuditableCard> {
         return if (isClca) { // TODO and hasUndervotes
-            val simulatedCvrs = makeRedactedCvrs()
             val cvrs =  exportCvrs + simulatedCvrs
             CvrsWithPopulationsToCardManifest(
                 AuditType.CLCA,
@@ -335,13 +335,12 @@ fun createBoulderElection(
             AuditConfig(
                 AuditType.CLCA,
                 riskLimit = riskLimit,
-                contestSampleCutoff = 20000,
                 minRecountMargin = minRecountMargin,
                 nsimEst = 10,
             )
         else if (auditType.isOA())
             AuditConfig( // TODO hasStyle=false ?
-                AuditType.ONEAUDIT, riskLimit=riskLimit, contestSampleCutoff=20000, minRecountMargin=minRecountMargin, nsimEst=10,
+                AuditType.ONEAUDIT, riskLimit=riskLimit, minRecountMargin=minRecountMargin, nsimEst=10,
                 oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = true)
             )
     else throw RuntimeException("unsupported audit type $auditType")

@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 // run AlphaMart with TrunkShrinkage in repeated trials
 // this creates the riskTestingFn for you
 fun runAlphaMartRepeated(
+    name: String,
     drawSample: Sampling,
     N: Int,
     eta0: Double,
@@ -34,6 +35,7 @@ fun runAlphaMartRepeated(
     )
 
     return runTestRepeated(
+        name = name,
         drawSample = drawSample,
         terminateOnNullReject = true,
         ntrials = ntrials,

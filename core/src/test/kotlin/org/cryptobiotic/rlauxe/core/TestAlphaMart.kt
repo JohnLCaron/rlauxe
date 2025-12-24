@@ -43,6 +43,7 @@ class TestAlphaMart {
         println("eta0=$eta0, margin=${mean2margin(eta0)}")
 
         val result = runRepeatedAlphaMart(
+            name = "runRepeatedAlphaMart",
             config = config,
             sampleFn = cvrSampler,
             estimFn = null,
@@ -56,6 +57,7 @@ class TestAlphaMart {
         val d = 100
         cvrSampler.reset()
         val result2 = runAlphaMartRepeated(
+            name = "runAlphaMartRepeated",
             drawSample = cvrSampler,
             N=N,
             eta0 = eta0,

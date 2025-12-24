@@ -234,6 +234,7 @@ class CreatePollingDiffMeans {
             val cvrSampler = PollingSampling(contestUA.id,  pairs, assert.assorter)
 
             val result = runAlphaMartRepeated(
+                name = "runAlphaMartWithMeanDiff",
                 drawSample = cvrSampler,
                 N = N,
                 eta0 = reportedMean, // use the reportedMean for the initial guess

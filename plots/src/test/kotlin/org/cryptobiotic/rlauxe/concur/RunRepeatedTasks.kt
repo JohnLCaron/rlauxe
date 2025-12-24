@@ -82,6 +82,7 @@ class RunRepeatedTasks {
         val tracker = ClcaErrorTracker(0.0, 1.0)
 
         return runTestRepeated(
+            name = task.name(),
             drawSample = task.makeSampler(),
             ntrials = ntrials,
             testFn = task.makeTestFn(),

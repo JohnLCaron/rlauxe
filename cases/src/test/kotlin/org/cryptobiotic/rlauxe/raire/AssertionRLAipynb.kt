@@ -651,6 +651,7 @@ fun calc_sample_sizes(
     val betta = BettingMart(bettingFn = betFn, N = N, sampleUpperBound = cassorter.upperBound(), withoutReplacement = false)
 
     return runTestRepeated(
+        name = "calc_sample_sizes",
         drawSample = sampling,
         // maxSamples = N,
         ntrials = ntrials,

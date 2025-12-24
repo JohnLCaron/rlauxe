@@ -72,20 +72,22 @@ fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: L
     )
 }
 
-// data class ContestRound(val contestUA: ContestUnderAudit, val assertions: List<AssertionRound>, val roundIdx: Int,) {
+// data class ContestRound(val contestUA: ContestWithAssertions, val assertionRounds: List<AssertionRound>, val roundIdx: Int) {
 //    val id = contestUA.id
 //    val name = contestUA.name
-//    val Nc = contestUA.Nc
+//    val Npop = contestUA.Npop
+//
+//    var estCardsNeeded = 0 // initial estiimate of cards for the contests
 //
 //    var actualMvrs = 0 // Actual number of ballots with this contest contained in this round's sample.
 //    var actualNewMvrs = 0 // Actual number of new ballots with this contest contained in this round's sample.
 //
 //    var estNewSamples = 0 // Estimate of the new sample size required to confirm the contest
-//    var estSampleSize = 0 // number of total samples estimated needed, consistentSampling
-//    var estSampleSizeNoStyles = 0 // number of total samples estimated needed, uniformSampling
+//    var estSampleSize = 0 // number of total samples estimated needed
+//    var auditorWantNewMvrs: Int = -1 // Auditor has set the new sample size for this audit round. rlauxe-viewer
 //    var done = false
 //    var included = true
-//    var status = TestH0Status.InProgress // or its own enum ??
+//    var status = contestUA.preAuditStatus
 
 @Serializable
 data class ContestRoundJson(
@@ -93,6 +95,7 @@ data class ContestRoundJson(
     var assertionRounds: List<AssertionRoundJson>,
     val roundIdx: Int,
 
+    val estCardsNeeded: Int,
     val actualMvrs: Int,
     val actualNewMvrs: Int,  // Estimate of new sample size required to confirm the contest
     val estNewSamples: Int,
@@ -102,19 +105,19 @@ data class ContestRoundJson(
     val done: Boolean,
     val included: Boolean,
     val status: TestH0Status, // or its own enum ??
-    val estSampleSizeNoStyles: Int?=null, // TODO remove
 )
 
 fun ContestRound.publishJson() : ContestRoundJson {
     return ContestRoundJson(
         this.id,
         assertionRounds.map { it.publishJson() },
-        this.roundIdx,
-        this.actualMvrs,
-        this.actualNewMvrs,
-        this.estNewSamples,
-        this.estSampleSize,
-        this.auditorWantNewMvrs,
+        roundIdx = this.roundIdx,
+        estCardsNeeded = this.estCardsNeeded,
+        actualMvrs = this.actualMvrs,
+        actualNewMvrs = this.actualNewMvrs,
+        estNewSamples = this.estNewSamples,
+        estSampleSize = this.estSampleSize,
+        auditorWantNewMvrs = this.auditorWantNewMvrs,
         this.done,
         this.included,
         this.status,
@@ -133,6 +136,7 @@ fun ContestRoundJson.import(contestUA: ContestWithAssertions): ContestRound {
     }
     val contestRound = ContestRound(contestUA, assertionRounds, this.roundIdx)
 
+    contestRound.estCardsNeeded = this.estCardsNeeded
     contestRound.actualMvrs = this.actualMvrs
     contestRound.actualNewMvrs = this.actualNewMvrs
     contestRound.estNewSamples = this.estNewSamples

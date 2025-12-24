@@ -53,12 +53,13 @@ fun estimateSampleSizes(
     }
 
     // choose a subset of the cards for the estimation
-    val contestCards: List<AuditableCard> =  consistentSampling(
-        config,
-        auditRound.contestRounds,
-        cardManifest,
-        previousSamples,
-    )
+    val contestCards: List<AuditableCard>? = if (config.isPolling) null else
+        consistentSampling(
+            config,
+            auditRound.contestRounds,
+            cardManifest,
+            previousSamples,
+        )
 
     // create the estimation tasks for each contest
     val stopwatch = Stopwatch()

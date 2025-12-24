@@ -189,7 +189,12 @@ fun consistentSampling(
 
 // CLCA and OneAudit
 fun estSamplesNeeded(contestRound: ContestRound, alpha: Double, fac: Double): Int {
-    val minAssertionRound = contestRound.minAssertion()!!
+    val minAssertionRound = contestRound.minAssertion()
+    if (minAssertionRound == null) {
+        contestRound.minAssertion()
+        throw RuntimeException()
+    }
+
     val lastPvalue = minAssertionRound.auditResult?.pvalue ?: alpha
     val minAssertion = minAssertionRound.assertion
 

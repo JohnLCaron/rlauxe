@@ -42,7 +42,7 @@ class CreateBoulderElection(
 
     val contests: List<ContestIF>
     val contestsUA : List<ContestWithAssertions>
-    // val cardPools: List<OneAuditPool>
+    val simulatedCvrs: List<Cvr>
 
     init {
         //// the redacted groups dont have undervotes, so we do some fancy dancing to generate reasonable undervote counts
@@ -60,6 +60,7 @@ class CreateBoulderElection(
 
         // we need to know the diluted Nb before we can create the UAs
         contests = makeContests()
+        simulatedCvrs = makeRedactedCvrs()
 
         val manifestTabs = tabulateAuditableCards(createCardManifest(), infoMap)
         val npopMap = manifestTabs.mapValues { it.value.ncards }
@@ -269,7 +270,6 @@ class CreateBoulderElection(
 
     fun createCardManifest(): CloseableIterator<AuditableCard> {
         return if (isClca) { // TODO and hasUndervotes
-            val simulatedCvrs = makeRedactedCvrs()
             val cvrs =  exportCvrs + simulatedCvrs
             CvrsWithPopulationsToCardManifest(
                 AuditType.CLCA,

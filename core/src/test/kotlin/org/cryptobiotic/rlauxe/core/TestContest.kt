@@ -162,8 +162,8 @@ class TestContest {
             "testContestInfo (0) Nc=227 Nphantoms=2 votes={1=125, 0=100, 2=0} undervotes=0, voteForN=1",
             contest.toString()
         )
-        println("margin(1,0) = ${contest.margin(1,0)}")
-        assertEquals(25/227.toDouble(), contest.margin(1,0))
+        println("margin(1,0) = ${contest.reportedMargin(1,0)}")
+        assertEquals(25/227.toDouble(), contest.reportedMargin(1,0))
 
         assertTrue(contest.percentForCand(1) > info.minFraction!!)
     }
@@ -191,8 +191,8 @@ class TestContest {
             "testContestInfo (0) Nc=227 Nphantoms=2 votes={1=123, 0=100, 2=2} undervotes=0, voteForN=1",
             contest.toString()
         )
-        println("margin(1,0) = ${contest.margin(1,0)}")
-        assertEquals(23/227.toDouble(), contest.margin(1,0))
+        println("margin(1,0) = ${contest.reportedMargin(1,0)}")
+        assertEquals(23/227.toDouble(), contest.reportedMargin(1,0))
 
         assertTrue(contest.percentForCand(1) < info.minFraction!!)
 
@@ -241,12 +241,12 @@ class TestContest {
             "testContestInfo (0) Nc=227 Np=2 votes={1=123, 0=100, 2=2}",
             contest.toString()
         )
-        println("margin(1,0) = ${contest.margin(1,0)} percent(1) = ${contest.percentForCand(1)}")
-        assertEquals(23/227.toDouble(), contest.margin(1,0))
-        println("margin(1,2) = ${contest.margin(1,2)} percent(2) = ${contest.percentForCand(2)}")
-        assertEquals(121/227.toDouble(), contest.margin(1,2))
-        println("margin(0,2) = ${contest.margin(0,2)} percent(0) = ${contest.percentForCand(0)}")
-        assertEquals(98/227.toDouble(), contest.margin(0,2))
+        println("margin(1,0) = ${contest.reportedMargin(1,0)} percent(1) = ${contest.percentForCand(1)}")
+        assertEquals(23/227.toDouble(), contest.reportedMargin(1,0))
+        println("margin(1,2) = ${contest.reportedMargin(1,2)} percent(2) = ${contest.percentForCand(2)}")
+        assertEquals(121/227.toDouble(), contest.reportedMargin(1,2))
+        println("margin(0,2) = ${contest.reportedMargin(0,2)} percent(0) = ${contest.percentForCand(0)}")
+        assertEquals(98/227.toDouble(), contest.reportedMargin(0,2))
 
         assertTrue(contest.percentForCand(0) >= info.minFraction!!)
         assertTrue(contest.percentForCand(1) >= info.minFraction!!)

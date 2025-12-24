@@ -16,7 +16,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
     abstract fun contestsUA(): List<ContestWithAssertions>
 
     // start new round and create estimate
-    open fun startNewRound(quiet: Boolean = true): AuditRound {
+    open fun startNewRound(quiet: Boolean = true, onlyTask: String? = null): AuditRound {
         val auditRounds = auditRounds()
         val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
         val roundIdx = auditRounds.size + 1
@@ -36,13 +36,17 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         logger.info{"Estimate round ${roundIdx}"}
         val stopwatch = Stopwatch()
 
+        val previousSamples = auditRounds.previousSamples(roundIdx)
+
         // 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function,
         estimateSampleSizes(
             auditConfig(),
             auditRound,
             cardManifest = mvrManager().sortedCards(),
             cardPools = mvrManager().oapools(),
+            previousSamples,
             // nthreads=1,
+            onlyTask = onlyTask,
         )
         logger.info{"Estimate round ${roundIdx} took ${stopwatch}"}
 
@@ -52,7 +56,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
             auditConfig(),
             mvrManager(),
             auditRound,
-            auditRounds.previousSamples(roundIdx),
+            previousSamples = previousSamples,
             quiet)
 
         return auditRound

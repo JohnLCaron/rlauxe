@@ -60,6 +60,7 @@ class GenBravoResults  {
             val tracker = ClcaErrorTracker(0.0, 1.0)
 
             val rr = runTestRepeated(
+                name = "runBravoRepeat",
                 drawSample = sampler,
                 testParameters = mapOf("eta0" to eta0, "margin" to mean2margin(eta0)),
                 ntrials = ntrials,

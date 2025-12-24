@@ -48,6 +48,7 @@ class ReproduceCobraResults {
                     )
 
                 val result = runTestRepeated(
+                    name = "reproduceCobraResults",
                     drawSample = sampler,
                     ntrials = ntrials,
                     testFn = betting,
@@ -104,6 +105,7 @@ class ReproduceCobraResults {
                         sampleUpperBound = upperBound, withoutReplacement = false)
 
                 val result = runTestRepeated(
+                    name = "reproduceCobraResults",
                     drawSample = sampleWithErrors,
                     ntrials = ntrials,
                     testFn = betting,
@@ -174,12 +176,11 @@ class ReproduceCobraResults {
                                 sampleUpperBound = upperBound, withoutReplacement = false)
 
                         val result = runTestRepeated(
+                            name = "reproduceCobraResults",
                             drawSample = sampleWithErrors,
-                            // maxSamples = N,
                             ntrials = ntrials,
                             testFn = betting,
                             testParameters = mapOf("p1" to p1, "p2" to p2, "margin" to margin),
-                            // margin = margin,
                             N=N,
                             tracker=tracker,
                             )
@@ -262,6 +263,7 @@ class ReproduceCobraResults {
                                 sampleUpperBound = upperBound, withoutReplacement = false)
 
                         val result = runTestRepeated(
+                            name = "reproduceCobraResults",
                             drawSample = sampler,
                             ntrials = ntrials,
                             testFn = betting,

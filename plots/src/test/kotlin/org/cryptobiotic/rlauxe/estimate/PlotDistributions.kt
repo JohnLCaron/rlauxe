@@ -87,7 +87,8 @@ class PlotDistributions {
             auditRound,
             cardManifest = mvrManager.sortedCards(),
             cardPools = mvrManager.oapools(),
-        )
+            previousSamples = emptySet(),
+            )
     }
 
     // calculate 100 simulated audits, return "samplesNeeded", single contest, fuzzed, no phantoms

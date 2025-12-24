@@ -94,7 +94,7 @@ class TestAssorterMargins {
             }
             assertTrue(checkEquivilentVotes(contest.votes, votem))
 
-            val calcReportedMargin = contest.margin(ast.winner, ast.loser)
+            val calcReportedMargin = contest.reportedMargin(ast.winner, ast.loser)
             val calcAssorterMargin = ast.assorter.calcAssorterMargin(ast.info.id, cvrs)
             assertEquals(calcReportedMargin, calcAssorterMargin, doublePrecision, "calcReportedMargin")
             assertEquals(ast.assorter.dilutedMargin(), calcAssorterMargin, doublePrecision, "calcAssorterMargin")

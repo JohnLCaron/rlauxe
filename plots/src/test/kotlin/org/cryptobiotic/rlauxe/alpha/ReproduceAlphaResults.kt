@@ -148,6 +148,7 @@ class ReproduceAlphaResults {
 
                         print("  eta0=$eta0 d=$d")
                         val result =  runTestRepeated(
+                            name = "ReproduceAlphaResults",
                             drawSample = sampleFn,
                             ntrials = reps,
                             testFn = alpha,
@@ -353,6 +354,7 @@ class ReproduceAlphaResults {
         for (eta in etal) {
             for (d in dl) {
                 val mart: RunTestRepeatedResult = runAlphaMartRepeated(
+                    name = "comparisonSimulation",
                     drawSample = SampleFromArrayWithoutReplacement(x),
                     N = N,
                     eta0 = eta,
@@ -495,6 +497,7 @@ class ReproduceAlphaResults {
                 // println(" theta=$theta N=$N etaActual=$etaActual same=$same ")
 
                 val mart: RunTestRepeatedResult = runAlphaMartRepeated(
+                    name = "comparisonNvsTheta",
                     drawSample = drawSample,
                     N = N,
                     eta0 = compareUpper - eps,
@@ -583,6 +586,7 @@ class ReproduceAlphaResults {
             println(" theta=$theta N=$N etaActual=$etaActual eta0=$eta0 ")
 
             val mart: RunTestRepeatedResult = runAlphaMartRepeated(
+                name = "testNvsThetaFactors",
                 drawSample = drawSample,
                 N = N,
                 eta0 = eta0,

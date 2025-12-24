@@ -21,11 +21,11 @@ object RunRlaRoundCli {
             shortName = "in",
             description = "Directory containing input election record"
         ).required()
-        val useTest by parser.option(
-            ArgType.Boolean,
-            shortName = "test",
-            description = "this is a test (uses MvrManagerTestFromRecord to set mvrs)"
-        ).default(true)
+        val onlyTask by parser.option(
+            ArgType.String,
+            shortName = "estTaskName",
+            description = "run only this estimate task"
+        )
         val quiet by parser.option(
             ArgType.Boolean,
             shortName = "quiet",
@@ -33,7 +33,7 @@ object RunRlaRoundCli {
         ).default(false)
 
         parser.parse(args)
-        runRound(inputDir)
+        runRound(inputDir, onlyTask)
     }
 }
 

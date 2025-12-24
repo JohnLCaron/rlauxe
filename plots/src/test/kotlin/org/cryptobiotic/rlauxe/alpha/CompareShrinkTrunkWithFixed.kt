@@ -113,6 +113,7 @@ class CompareShrinkTrunkWithFixed {
         val alpha = AlphaMart(estimFn = trunc, N = sampling.maxSamples())
 
         return runTestRepeated(
+            name = "runAlphaMartTruncRepeated",
             drawSample = sampling,
             terminateOnNullReject = true,
             ntrials = ntrials,
@@ -129,6 +130,7 @@ class CompareShrinkTrunkWithFixed {
         val alpha = AlphaMart(estimFn = fixed, N = N)
 
         return runTestRepeated(
+            name = "runAlphaMartFixedRepeated",
             drawSample = sampling,
             terminateOnNullReject = true,
             ntrials = ntrials,

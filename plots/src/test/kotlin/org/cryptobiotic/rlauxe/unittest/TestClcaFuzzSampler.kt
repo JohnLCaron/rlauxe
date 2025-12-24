@@ -65,6 +65,7 @@ private fun runWithComparisonFuzzSampler(
     // val optimal = GeneralAdaptiveBettingOld(N = contestUA.Npop, errorCounts, d = 100)
 
     return runRepeatedBettingMart(
+        name = "runWithComparisonFuzzSampler",
         auditConfig,
         sampler,
         betFn,

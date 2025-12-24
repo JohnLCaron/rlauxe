@@ -29,8 +29,8 @@ import java.util.concurrent.TimeUnit
 private val logger = KotlinLogging.logger("RunAudit")
 
 // from rlauxe-viewer
-fun runRound(inputDir: String): AuditRound? {
-    val roundResult = runRoundResult(inputDir)
+fun runRound(inputDir: String, onlyTask: String? = null): AuditRound? {
+    val roundResult = runRoundResult(inputDir, onlyTask)
     if (roundResult is Err) {
         logger.error{"runRoundResult failed ${roundResult.error}"}
         return null
@@ -38,7 +38,7 @@ fun runRound(inputDir: String): AuditRound? {
     return roundResult.unwrap()
 }
 
-fun runRoundResult(inputDir: String): Result<AuditRound, ErrorMessages> {
+fun runRoundResult(inputDir: String, onlyTask: String? = null): Result<AuditRound, ErrorMessages> {
     val errs = ErrorMessages("runRoundResult")
 
     try {
@@ -71,7 +71,7 @@ fun runRoundResult(inputDir: String): Result<AuditRound, ErrorMessages> {
             roundIdx++
             // start next round and estimate sample sizes
             logger.info { "Start audit round $roundIdx using ${rlauxAudit}" }
-            val nextRound = rlauxAudit.startNewRound(quiet = false)
+            val nextRound = rlauxAudit.startNewRound(quiet = false, onlyTask)
             logger.info { "nextRound ${nextRound.show()}" }
             return Ok(nextRound)
 

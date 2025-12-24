@@ -59,7 +59,7 @@ class TestClcaEstimationFailure {
         while (sampler.hasNext()) { tracker.addSample(sampler.next()) }
 
         val assorter = cassorter.assorter
-        val contestMargin = contest.margin(assorter.winner(), assorter.loser())
+        val contestMargin = contest.reportedMargin(assorter.winner(), assorter.loser())
         val adjustedMargin = contestMargin - contest.phantomRate()
 
         val noerror = 1.0 / (2.0 - adjustedMargin)

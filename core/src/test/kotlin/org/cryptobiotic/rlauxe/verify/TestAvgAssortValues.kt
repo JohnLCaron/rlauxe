@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCardManifest
 import org.cryptobiotic.rlauxe.audit.CvrsWithPopulationsToCardManifest
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
@@ -50,7 +50,7 @@ class TestAvgAssortValues {
             println()
         }
 
-        val contestsUA = ContestUnderAudit.make(listOf(contest), cardIterable.iterator(), isClca=true)
+        val contestsUA = ContestWithAssertions.make(listOf(contest), cardIterable.iterator(), isClca=true)
         val contestUA= contestsUA.first()
         println("contestUA = ${contestUA.show()}")
 
@@ -98,7 +98,7 @@ class TestAvgAssortValues {
             println()
         }
 
-        val contestsUA = ContestUnderAudit.make(listOf(contest), cardIterable.iterator(), isClca=true)
+        val contestsUA = ContestWithAssertions.make(listOf(contest), cardIterable.iterator(), isClca=true)
         val contestUA= contestsUA.first()
         println("contestUA = ${contestUA.show()}")
 
@@ -141,7 +141,7 @@ class TestAvgAssortValues {
             println()
         }
 
-        val contestsUA = ContestUnderAudit.make(test.contests, cardIterable.iterator(), isClca=true)
+        val contestsUA = ContestWithAssertions.make(test.contests, cardIterable.iterator(), isClca=true)
 
         val results = VerifyResults()
         verifyClcaAssortAvg(contestsUA, cardIterable.iterator(), results, show = false)
@@ -185,7 +185,7 @@ class TestAvgAssortValues {
             println()
         }
 
-        val contestsUA = ContestUnderAudit.make(test.contests, cardIterable.iterator(), isClca=true)
+        val contestsUA = ContestWithAssertions.make(test.contests, cardIterable.iterator(), isClca=true)
         contestsUA.forEach {
             println("$it : Npop diff = ${it.Npop != it.Nc}")
         }
@@ -234,7 +234,7 @@ class TestAvgAssortValues {
             println()
         }
 
-        val contestsUA = ContestUnderAudit.make(test.contests, cardIterable.iterator(), isClca=true)
+        val contestsUA = ContestWithAssertions.make(test.contests, cardIterable.iterator(), isClca=true)
         contestsUA.forEach {
             println("$it : Nb diff = ${it.Npop != it.Nc}")
         }

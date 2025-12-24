@@ -19,7 +19,7 @@ class TestSimulateOneAuditRaire {
     val underVotePct = 0.04
     val phantomPct = 0.0
 
-    val rcontestUA: RaireContestUnderAudit
+    val rcontestUA: RaireContestWithAssertions
     val rcontest: RaireContest
     val cvrs: List<Cvr>
     val infos: Map<Int, ContestInfo>

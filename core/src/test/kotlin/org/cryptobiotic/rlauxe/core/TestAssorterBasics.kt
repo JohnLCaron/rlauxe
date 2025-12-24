@@ -33,9 +33,9 @@ class TestAssorterBasics {
             candidateNames = listToMap( "0", "1", "2", "3", "4"),
         )
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
 
-        val assertions = contestUA.pollingAssertions
+        val assertions = contestUA.assertions
         assertNotNull(assertions)
         assertEquals(contest.winners.size * contest.losers.size, assertions.size)
         assertions.forEach {
@@ -79,9 +79,9 @@ class TestAssorterBasics {
             candidateNames = listToMap( "0", "1", "2", "3", "4"),
         )
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
 
-        val assertions = contestUA.pollingAssertions
+        val assertions = contestUA.assertions
         assertNotNull(assertions)
         assertEquals(contest.winners.size * contest.losers.size, assertions.size)
         assertions.forEach {
@@ -132,10 +132,10 @@ class TestAssorterBasics {
             minFraction = .42,
             )
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
         println("votes: [${showVotes((contestUA.contest as Contest).votes)}]")
 
-        val assertions = contestUA.pollingAssertions
+        val assertions = contestUA.assertions
         assertNotNull(assertions)
         assertEquals(contest.winners.size, assertions.size)
         assertions.forEach { assertion ->

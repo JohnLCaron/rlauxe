@@ -34,9 +34,9 @@ class TestAssertions {
             .addCvr().addContest("AvB", "4").ddone()
             .build()
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
 
-        val assertions = contestUA.pollingAssertions
+        val assertions = contestUA.assertions
         assertNotNull(assertions)
         assertEquals(contest.winners.size * contest.losers.size, assertions.size)
         assertions.forEach {
@@ -84,9 +84,9 @@ class TestAssertions {
             .addCvr().addContest("AvB", "4").ddone()
             .build()
         val contest = makeContestFromCvrs(contestInfo, cvrs)
-        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
 
-        val assertions = contestUA.pollingAssertions
+        val assertions = contestUA.assertions
         assertNotNull(assertions)
         assertEquals(contest.winners.size, assertions.size)
         assertions.forEach {
@@ -116,7 +116,7 @@ class TestAssertions {
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
         val contest = makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contest, isClca = true).addStandardAssertions()
 
         val assertions = contestUA.clcaAssertions
         assertNotNull(assertions)
@@ -156,7 +156,7 @@ class TestAssertions {
         val counts = listOf(1000, 980, 3000, 50, 3001)
         val cvrs: List<Cvr> = makeCvrsByExactCount(counts)
         val contest = makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contest, isClca = true).addStandardAssertions()
 
         val assertions = contestUA.clcaAssertions
         assertNotNull(assertions)
@@ -185,7 +185,7 @@ class TestAssertions {
 
         // TODO: no winners have minFraction = .66, where do we test that ?
         //val exception = assertFailsWith<RuntimeException> {
-        ContestUnderAudit(contest, isClca = true).addStandardAssertions()
+        ContestWithAssertions(contest, isClca = true).addStandardAssertions()
         //}
         //println(exception)
         //assertNotNull(exception.message)

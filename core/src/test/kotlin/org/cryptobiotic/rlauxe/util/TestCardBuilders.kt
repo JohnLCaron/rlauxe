@@ -17,7 +17,7 @@ class TestCardBuilders {
 
         val cardbs = mutableListOf<CardBuilder>()
         cards.forEach {
-            val cb = CardBuilder(it.location, it.index, it.prn, it.phantom, it.contests(), null, it.poolId, it.cardStyle)
+            val cb = CardBuilder.fromCard(it)
             if (it.votes != null) {
                 it.votes.forEach{ (contestId, votes) -> cb.replaceContestVotes(contestId, votes) }
             }

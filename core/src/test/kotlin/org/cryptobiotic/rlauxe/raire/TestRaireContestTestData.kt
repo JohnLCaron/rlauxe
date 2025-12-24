@@ -13,7 +13,7 @@ class TestRaireContestTestData {
     val underVotePct = 0.234..0.345
     val phantomRange = 0.001..0.01
 
-    val rcontestUA: RaireContestUnderAudit
+    val rcontestUA: RaireContestWithAssertions
     val rcontest: RaireContest
     val cvrs: List<Cvr>
 

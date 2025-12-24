@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.util.doublePrecision
@@ -185,7 +185,7 @@ class TestMultiContestTestData {
 
             print(" fcontest margin=${df(fcontest.margin)} undervotePct=${fcontest.undervotePct} phantomPct=${fcontest.phantomPct}")
             println(" underCount=${fcontest.underCount} phantomCount=${fcontest.phantomCount}")
-            val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
+            val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
             contestUA.assertions().forEach {
                 println("  $it")
             }
@@ -209,7 +209,7 @@ class TestMultiContestTestData {
             println("Nc=${contest.Nc} nphantom=$nphantom pct= $phantomPct =~ ${fcontest.phantomPct} abs=${abs(phantomPct - fcontest.phantomPct)} tol=${1.0/Nc}")
             if (nphantom > 1) assertEquals(fcontest.phantomPct, phantomPct, 5.0/Nc) // TODO seems like should be 2 at the most, maybe 1
 
-            val contestUA = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
+            val contestUA = ContestWithAssertions(contest, isClca = true).addStandardAssertions()
             val cassorter = contestUA.minClcaAssertion()!!.cassorter
 
             val sampler = ClcaSampling(contest.id, testCvrs.zip(AuditableCard.fromCvrs(testCvrs)), cassorter, true) // TODO

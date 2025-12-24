@@ -17,14 +17,14 @@ class ColoradoPolling (
     config: AuditConfig,
 ): CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, config) {
 
-    val contestsPolling: List<ContestUnderAudit>
+    val contestsPolling: List<ContestWithAssertions>
 
     init {
         val contestTabs: Map<Int, ContestTabulation> = tabulateCvrs(CvrIteratorfromPools(), infoMap)
         contestsPolling = makePollingContests(contestTabs)
     }
 
-    fun makePollingContests(tabs: Map<Int, ContestTabulation>): List<ContestUnderAudit> {
+    fun makePollingContests(tabs: Map<Int, ContestTabulation>): List<ContestWithAssertions> {
         val infoList= oaBuilders.map { it.info }.sortedBy { it.id }
         val contestMap= oaBuilders.associateBy { it.info.id }
 
@@ -38,7 +38,7 @@ class ColoradoPolling (
             val contest = Contest(info, candVotes, useNc, ncards)
             info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
             val Nb = tabs[contest.id]?.ncards // tabs.ncards + contest.Np TODO
-            ContestUnderAudit(contest, isClca=false, NpopIn=Nb).addStandardAssertions()
+            ContestWithAssertions(contest, isClca=false, NpopIn=Nb).addStandardAssertions()
         }
 
         return regContests
@@ -63,11 +63,17 @@ fun createColoradoPolling(
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
         else -> AuditConfig(
-            AuditType.POLLING, riskLimit = .03, contestSampleCutoff = null, nsimEst = 100,
+            AuditType.POLLING, riskLimit = .03, nsimEst = 100,
             pollingConfig = PollingConfig()
         )
     }
-    val election = ColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile, config)
+    // open class CreateColoradoElection (
+    //    electionDetailXmlFile: String,
+    //    contestRoundFile: String,
+    //    precinctFile: String,
+    //    val config: AuditConfig,
+    //    val poolsHaveOneCardStyle:Boolean = false,
+    val election = CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, config)
 
     CreateAudit("corla", config, election, auditDir = "$topdir/audit", clear = clear)
     println("createColoradoPolling took $stopwatch")

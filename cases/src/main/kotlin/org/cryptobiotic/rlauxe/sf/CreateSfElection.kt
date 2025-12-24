@@ -7,7 +7,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.unpooled
@@ -42,7 +42,7 @@ class CreateSfElection(
     val cardPoolMapByName: Map<String, OneAuditPoolFromCvrs>
     val cardPools: List<OneAuditPoolFromCvrs>
     val phantomCount: Map<Int, Int>
-    val contestsUA: List<ContestUnderAudit>
+    val contestsUA: List<ContestWithAssertions>
     val cardCount: Int
 
     init {
@@ -183,15 +183,15 @@ class CreateSfElection(
     }
 }
 
-fun makeClcaContestsSF(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestUnderAudit> {
-    val contestsUAs = mutableListOf<ContestUnderAudit>()
+fun makeClcaContestsSF(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestWithAssertions> {
+    val contestsUAs = mutableListOf<ContestWithAssertions>()
     allCvrTabs.map { (contestId, cvrTab)  ->
         val info = cvrTab.info
         val useNc = contestNcs[info.id] ?: cvrTab.ncards
 
-        val contestUA: ContestUnderAudit = if (!cvrTab.isIrv) {
+        val contestUA: ContestWithAssertions = if (!cvrTab.isIrv) {
             val contest = Contest(info, cvrTab.votes, useNc, cvrTab.ncards)
-            ContestUnderAudit(contest, NpopIn=contestNbs[info.id]).addStandardAssertions()
+            ContestWithAssertions(contest, NpopIn=contestNbs[info.id]).addStandardAssertions()
         } else {
             makeRaireContestUA(info, cvrTab, useNc, Nbin=contestNbs[info.id]!!)
         }
@@ -202,8 +202,8 @@ fun makeClcaContestsSF(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map
 }
 
 fun makeOneAuditContestsSF(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>,
-                           unpooledPool: OneAuditPoolFromCvrs, oneAuditPools: List<OneAuditPoolFromCvrs>): List<ContestUnderAudit> {
-    val contestsUAs = mutableListOf<ContestUnderAudit>()
+                           unpooledPool: OneAuditPoolFromCvrs, oneAuditPools: List<OneAuditPoolFromCvrs>): List<ContestWithAssertions> {
+    val contestsUAs = mutableListOf<ContestWithAssertions>()
 
     val regularContests = makeRegularContests(allCvrTabs, unpooledPool, contestNcs)
     val regularOAcontests = makeOneAuditContests(regularContests, contestNbs, oneAuditPools).sortedBy { it.id }
@@ -224,14 +224,14 @@ fun makeOneAuditContestsSF(allCvrTabs: Map<Int, ContestTabulation>, contestNcs :
     return contestsUAs
 }
 
-fun makePollingContestsSF(allCvrTabs: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestUnderAudit> {
-    val contestsUAs = mutableListOf<ContestUnderAudit>()
+fun makePollingContestsSF(allCvrTabs: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestWithAssertions> {
+    val contestsUAs = mutableListOf<ContestWithAssertions>()
     allCvrTabs.map { (contestId, contestSumTab)  ->
         val useNc = contestNcs[contestId] ?: contestSumTab.ncards
         if (useNc > 0) {
             if (!contestSumTab.isIrv) { // cant do IRV
                 val contest = Contest(contestSumTab.info, contestSumTab.votes, useNc, contestSumTab.ncards)
-                val contestUA = ContestUnderAudit(contest, isClca = false, NpopIn=contestNbs[contestId]).addStandardAssertions()
+                val contestUA = ContestWithAssertions(contest, isClca = false, NpopIn=contestNbs[contestId]).addStandardAssertions()
                 contestUA.contest.info().metadata["PoolPct"] = 0
                 contestsUAs.add(contestUA)
             }

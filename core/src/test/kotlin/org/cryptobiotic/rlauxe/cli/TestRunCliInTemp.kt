@@ -41,7 +41,7 @@ class TestRunCliInTemp {
         RunVerifyContests.main(arrayOf("-in", auditdir))
 
         println("============================================================")
-        RunRliRoundCli.main(
+        RunRlaRoundCli.main(
             arrayOf(
                 "-in", auditdir,
             )

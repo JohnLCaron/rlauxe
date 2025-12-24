@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
-import org.cryptobiotic.rlauxe.raire.RaireContestUnderAudit
+import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.io.path.createTempFile
@@ -24,7 +24,7 @@ class TestAuditRoundJson {
     @Test
     fun testRoundtrip() {
         val testData = MultiContestTestData(11, 4, 50000)
-        val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, isClca=false, ).addStandardAssertions()}
+        val contestsUAs: List<ContestWithAssertions> = testData.contests. map { ContestWithAssertions(it, isClca=false, ).addStandardAssertions()}
         val contestRounds = contestsUAs.map{ contest ->
             val cr = ContestRound(contest, 1,)
             //     var actualMvrs = 0 // Actual number of ballots with this contest contained in this round's sample.
@@ -70,7 +70,7 @@ class TestAuditRoundJson {
     @Test
     fun testRoundtripIO() {
         val testData = MultiContestTestData(11, 4, 50000)
-        val contestsUAs: List<ContestUnderAudit> = testData.contests. map { ContestUnderAudit(it, isClca=false).addStandardAssertions()}
+        val contestsUAs: List<ContestWithAssertions> = testData.contests. map { ContestWithAssertions(it, isClca=false).addStandardAssertions()}
         val contestRounds = contestsUAs.map{ contest ->
             val cr = ContestRound(contest, 1)
             cr.actualMvrs = 420
@@ -175,7 +175,7 @@ class TestAuditRoundJson {
         println("Start testComparisonWorkflow $testData")
         contests.forEach { println("  $it") }
 
-        val (rcontest: RaireContestUnderAudit, rcvrs: List<Cvr>) = simulateRaireTestContest(N/2, contestId=111, ncands=5, minMargin=.04, quiet = true)
+        val (rcontest: RaireContestWithAssertions, rcvrs: List<Cvr>) = simulateRaireTestContest(N/2, contestId=111, ncands=5, minMargin=.04, quiet = true)
         println(rcontest)
         println()
 

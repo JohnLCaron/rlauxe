@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.core.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.plots.plotSRS
@@ -37,10 +37,10 @@ class CompareAlphaPaper {
             val pairs = cvrs.zip(cvrs)
 
             val contest = makeContestFromCvrs(info, cvrs)
-            val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
-            val pollingAssertion = contestUA.pollingAssertions.first()
+            val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
+            val pollingAssertion = contestUA.assertions.first()
 
-            val contestUAc = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
+            val contestUAc = ContestWithAssertions(contest, isClca = true).addStandardAssertions()
             val compareAssertion = contestUAc.clcaAssertions.first()
 
             for (eta in etas) {

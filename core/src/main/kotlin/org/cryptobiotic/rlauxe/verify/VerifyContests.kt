@@ -4,7 +4,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
@@ -19,7 +19,6 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
@@ -28,7 +27,6 @@ import org.cryptobiotic.rlauxe.workflow.readCardManifest
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
-import kotlin.math.roundToInt
 import kotlin.text.appendLine
 import kotlin.use
 
@@ -37,7 +35,7 @@ import kotlin.use
 // but only if you call cerify with the contests' note only then do you get contestUA.preAuditStatus saved
 class VerifyContests(val auditRecordLocation: String, val show: Boolean = false) {
     val config: AuditConfig
-    val allContests: List<ContestUnderAudit>?
+    val allContests: List<ContestWithAssertions>?
     val allInfos: Map<Int, ContestInfo>?
     val cardManifest: CardManifest
     val publisher: Publisher
@@ -59,9 +57,9 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
 
     fun verify() = verify( allContests!!, show = show)
 
-    fun verifyContest(contest: ContestUnderAudit) = verify(listOf(contest), show = true)
+    fun verifyContest(contest: ContestWithAssertions) = verify(listOf(contest), show = true)
 
-    fun verify(contests: List<ContestUnderAudit>, show: Boolean): VerifyResults {
+    fun verify(contests: List<ContestWithAssertions>, show: Boolean): VerifyResults {
         val results = VerifyResults()
         results.addMessage("---RunVerifyContests on $auditRecordLocation ")
         if (contests.size == 1) results.addMessage("  ${contests.first()} ")
@@ -115,7 +113,7 @@ data class ContestSummary(
 // all audits, including polling
 fun verifyManifest(
     config: AuditConfig,
-    contestsUA: List<ContestUnderAudit>,
+    contestsUA: List<ContestWithAssertions>,
     cards: CloseableIterable<AuditableCard>,
     infos: Map<Int, ContestInfo>,
     results: VerifyResults,
@@ -239,7 +237,7 @@ fun verifyManifest(
 }
 
 fun verifyOAagainstCards(
-    contests: List<ContestUnderAudit>,
+    contests: List<ContestWithAssertions>,
     contestSummary: ContestSummary,
     cardManifest: CardManifest,
     infos: Map<Int, ContestInfo>,
@@ -291,7 +289,7 @@ fun verifyOAagainstCards(
 }
 
 fun verifyClcaAgainstCards(
-    contests: List<ContestUnderAudit>,
+    contests: List<ContestWithAssertions>,
     contestSummary: ContestSummary,
     result: VerifyResults,
     show: Boolean = false
@@ -324,7 +322,7 @@ fun verifyClcaAgainstCards(
 }
 
 fun verifyClcaAssortAvg(
-    contestsUA: List<ContestUnderAudit>,
+    contestsUA: List<ContestWithAssertions>,
     cards: CloseableIterator<AuditableCard>,
     result: VerifyResults,
     show: Boolean = false
@@ -356,7 +354,7 @@ fun verifyClcaAssortAvg(
     // compare the assortAverage with the contest's reportedMargin in passorter.
     contestsUA.forEach { contestUA ->
         val cardAssortAvg = cardAssortAvgs[contestUA.id]!!
-        contestUA.pollingAssertions.forEach { assertion ->
+        contestUA.assertions.forEach { assertion ->
             val passorter = assertion.assorter
             val assortAvg = cardAssortAvg[passorter.hashcodeDesc()]!!
             val dilutedMargin = passorter.dilutedMargin()
@@ -376,7 +374,7 @@ fun verifyClcaAssortAvg(
 
 // calculate diluted margin from assort values and poolAverages
 fun verifyOAassortAvg(
-    contestsUA: List<ContestUnderAudit>,
+    contestsUA: List<ContestWithAssertions>,
     cards: CloseableIterator<AuditableCard>,
     result: VerifyResults,
     show: Boolean = false
@@ -419,7 +417,7 @@ fun verifyOAassortAvg(
             print("${contestUA.id}")
             throw RuntimeException()
         }
-        contestUA.pollingAssertions.forEach { assertion ->
+        contestUA.assertions.forEach { assertion ->
             val passorter = assertion.assorter
             if (cardAssortAvg[passorter.hashcodeDesc()] != null) {  //  may be Raire
                 val assortAvg = cardAssortAvg[passorter.hashcodeDesc()]!!
@@ -460,7 +458,7 @@ fun verifyOAassortAvg(
 
 // verify assorter diluted margin from cvrs and cardPools
 fun verifyOApools(
-    contestsUA: List<ContestUnderAudit>,
+    contestsUA: List<ContestWithAssertions>,
     contestSummary: ContestSummary,
     cardManifest: CardManifest,
     result: VerifyResults,

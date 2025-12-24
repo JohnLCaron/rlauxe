@@ -5,7 +5,7 @@ import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardCsvReader
@@ -21,7 +21,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
     val auditRecord: AuditRecord
     val publisher: Publisher
     val config: AuditConfig
-    val contests: List<ContestUnderAudit>
+    val contests: List<ContestWithAssertions>
     val allInfos: Map<Int, ContestInfo>?
     val cards: CloseableIterable<AuditableCard>
 
@@ -105,7 +105,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
 
     }
 
-    fun verifySamplingForContest(contest: ContestUnderAudit, result: VerifyResults) {
+    fun verifySamplingForContest(contest: ContestWithAssertions, result: VerifyResults) {
         val firstRound = auditRecord.rounds.first()
         val contestRound = firstRound.contestRounds.find { it.id == contest.contest.id }
         if (contestRound == null) return
@@ -132,7 +132,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
     }
 
     // TODO check mvrs
-    fun verifySamplingForContest(contest: ContestUnderAudit, cards: List<AuditableCard>, nextCards: List<AuditableCard>,
+    fun verifySamplingForContest(contest: ContestWithAssertions, cards: List<AuditableCard>, nextCards: List<AuditableCard>,
                                  round:Int, estCards: Int, result: VerifyResults): Boolean {
         val mycards = cards.filter { it.hasContest(contest.id) }.iterator()
         val nextcards = nextCards.filter { it.hasContest(contest.id) }.iterator()

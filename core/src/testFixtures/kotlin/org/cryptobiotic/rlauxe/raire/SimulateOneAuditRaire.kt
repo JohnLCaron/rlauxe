@@ -11,7 +11,7 @@ import kotlin.random.Random
 // Try using in San Francisco, since we coul generate the VoteConsolidators from the cvrs in the pool
 fun simulateOneAuditRaire(N: Int, contestId: Int, ncands:Int, minMargin: Double, poolPct: Int,
                              undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true)
-        : Triple<RaireContestUnderAudit, List<Cvr>, List<OneAuditPoolFromCvrs>> {
+        : Triple<RaireContestWithAssertions, List<Cvr>, List<OneAuditPoolFromCvrs>> {
 
     val (raireCUA, cvrs) = simulateRaireTestContest(N, contestId, ncands, minMargin, undervotePct, phantomPct, quiet)
 

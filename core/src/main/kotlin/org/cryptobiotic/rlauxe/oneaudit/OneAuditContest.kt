@@ -98,10 +98,10 @@ fun makeOneAuditContests(
     wantContests: List<ContestIF>, // the contests you want to audit
     npopMap: Map<Int,Int>,  // contestId -> Npop
     cardPools: List<OneAuditPoolIF>,
-): List<ContestUnderAudit> {
+): List<ContestWithAssertions> {
 
     val contestsUA = wantContests.filter{ !it.isIrv() }.map { contest ->
-        val cua = ContestUnderAudit(contest, true, NpopIn=npopMap[contest.id]).addStandardAssertions()
+        val cua = ContestWithAssertions(contest, true, NpopIn=npopMap[contest.id]).addStandardAssertions()
         if (contest is DHondtContest) {
             cua.addAssertionsFromAssorters(contest.assorters)
         } else {
@@ -118,14 +118,14 @@ fun makeOneAuditContests(
 // use dilutedMargin to set the pool assorter averages. can only use for non-IRV contests because calcMargin(regVotes)
 // this also repalces the clcaAssertions with ones that use ClcaAssorterOneAudit which contain the pool assorter averages
 fun setPoolAssorterAverages(
-    oaContests: List<ContestUnderAudit>,
+    oaContests: List<ContestWithAssertions>,
     cardPools: List<OneAuditPoolIF>, // poolId -> pool
 ) {
     // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
     // create the clcaAssertions and add then to the oaContests
     oaContests.filter { !it.isIrv}. forEach { oaContest ->
         val contestId = oaContest.id
-        val clcaAssertions = oaContest.pollingAssertions.map { assertion ->
+        val clcaAssertions = oaContest.assertions.map { assertion ->
             val assortAverages = mutableMapOf<Int, Double>() // poolId -> average assort value
             cardPools.forEach { cardPool ->
                 if (cardPool.hasContest(contestId)) {
@@ -148,7 +148,7 @@ fun setPoolAssorterAverages(
 
 class ClcaAssorterOneAudit(
     info: ContestInfo,
-    assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs: plurality or IRV
+    assorter: AssorterIF,   // A(mvr) Use this assorter for the CVRs
     dilutedMargin: Double,
     val poolAverages: AssortAvgsInPools,
 ) : ClcaAssorter(info, assorter, dilutedMargin=dilutedMargin) {

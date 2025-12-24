@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.workflow.*
 
@@ -88,12 +88,12 @@ class CorlaAudit(
     val mvrManagerForTesting: MvrManagerForTesting, // mutable
     val quiet: Boolean = false,
 ): AuditWorkflow() {
-    private val contestsUA: List<ContestUnderAudit>
+    private val contestsUA: List<ContestWithAssertions>
     private val auditRounds = mutableListOf<AuditRound>()
 
     init {
         require (auditConfig.auditType == AuditType.CLCA)
-        contestsUA = contestsToAudit.map { ContestUnderAudit(it, isClca=true, ).addStandardAssertions() }
+        contestsUA = contestsToAudit.map { ContestWithAssertions(it, isClca=true, ).addStandardAssertions() }
     }
 
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
@@ -107,7 +107,7 @@ class CorlaAudit(
 
     override fun auditConfig() =  this.auditConfig
     override fun auditRounds() = auditRounds
-    override fun contestsUA(): List<ContestUnderAudit> = contestsUA
+    override fun contestsUA(): List<ContestWithAssertions> = contestsUA
     override fun mvrManager() = mvrManagerForTesting
 }
 

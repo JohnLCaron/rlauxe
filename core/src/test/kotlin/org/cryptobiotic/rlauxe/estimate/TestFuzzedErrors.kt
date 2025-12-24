@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.ClcaErrorRatesCumul
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.util.dfn
@@ -15,7 +15,7 @@ class TestFuzzedErrors {
         val ncontests = 11
         val phantomPct = 0.00
         val test = MultiContestTestData(ncontests, 1, 50000, phantomPctRange=phantomPct..phantomPct)
-        val contestsUA = test.contests.map { ContestUnderAudit(it).addStandardAssertions() }
+        val contestsUA = test.contests.map { ContestWithAssertions(it).addStandardAssertions() }
         val cards = test.makeCardsFromContests()
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
 
@@ -79,7 +79,7 @@ fuzzPct 0.050: 0.0077, 0.0350, 0.0125, 0.0064, 0.06162
         val ncontests = 11
         val phantomPct = .02
         val test = MultiContestTestData(ncontests, 1, 50000, phantomPctRange=phantomPct..phantomPct)
-        val contestsUA = test.contests.map { ContestUnderAudit(it).addStandardAssertions() }
+        val contestsUA = test.contests.map { ContestWithAssertions(it).addStandardAssertions() }
         val cvrs = test.makeCvrsFromContests()
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
 

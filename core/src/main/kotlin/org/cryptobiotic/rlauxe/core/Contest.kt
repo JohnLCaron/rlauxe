@@ -282,8 +282,8 @@ open class Contest(
     }
 }
 
-/** Could rename to "Contest with assertions". note mutability. */
-open class ContestUnderAudit(
+// note mutability
+open class ContestWithAssertions(
     val contest: ContestIF,
     val isClca: Boolean = true,
     NpopIn: Int? = null,
@@ -298,7 +298,7 @@ open class ContestUnderAudit(
     val isIrv = contest.info().isIrv
 
     var preAuditStatus = TestH0Status.InProgress // pre-auditing status: NoLosers, NoWinners, ContestMisformed, MinMargin, TooManyPhantoms
-    var pollingAssertions: List<Assertion> = emptyList() // mutable needed for Raire override and serialization // TODO rename to assertions
+    var assertions: List<Assertion> = emptyList() // mutable needed for Raire override and serialization
     var clcaAssertions: List<ClcaAssertion> = emptyList() // mutable needed for serialization
 
     init {
@@ -310,12 +310,12 @@ open class ContestUnderAudit(
     }
 
     // dhondt
-    fun addAssertionsFromAssorters(assorters: List<AssorterIF>): ContestUnderAudit {
+    fun addAssertionsFromAssorters(assorters: List<AssorterIF>): ContestWithAssertions {
         val assertions = mutableListOf<Assertion>()
         assorters.forEach { assorter ->
             assertions.add(Assertion(contest.info(), assorter))
         }
-        pollingAssertions = assertions
+        this@ContestWithAssertions.assertions = assertions
 
         if (isClca) {
             addClcaAssertionsFromDilutedMargin()
@@ -324,12 +324,12 @@ open class ContestUnderAudit(
         return this
     }
 
-    fun addStandardAssertions(): ContestUnderAudit {
+    fun addStandardAssertions(): ContestWithAssertions {
         if (contest.votes() == null) {
             throw RuntimeException("contest type ${contest.javaClass.simpleName} is not supported for addStandardAssertions")
         }
 
-        this.pollingAssertions = when (choiceFunction) {
+        this.assertions = when (choiceFunction) {
             SocialChoiceFunction.APPROVAL,
             SocialChoiceFunction.PLURALITY -> makePluralityAssertions()
             SocialChoiceFunction.THRESHOLD -> makeThresholdAssertions()
@@ -366,16 +366,10 @@ open class ContestUnderAudit(
         return assertions
     }
 
-    /* TODO check that assorters already have the diluted margin
-    fun makeDilutedMargin(assorter: AssorterIF): Double {
-        val margin = assorter.calcMargin(contest.votes(), Npop)
-        return margin
-    } */
-
-    private fun addClcaAssertionsFromDilutedMargin(): ContestUnderAudit {
+    private fun addClcaAssertionsFromDilutedMargin(): ContestWithAssertions {
         require(isClca) { "makeComparisonAssertions() can be called only on comparison contest"}
 
-        this.clcaAssertions = pollingAssertions.map { assertion ->
+        this.clcaAssertions = assertions.map { assertion ->
             ClcaAssertion(contest.info(), makeClcaAssorter(assertion))
         }
         return this
@@ -386,7 +380,7 @@ open class ContestUnderAudit(
     }
 
     fun assertions(): List<Assertion> {
-        return if (isClca) clcaAssertions else pollingAssertions
+        return if (isClca) clcaAssertions else assertions
     }
 
     // assertion with the minimum noerror
@@ -399,8 +393,8 @@ open class ContestUnderAudit(
 
     // assertion with the minimum dilutedMargin
     fun minPollingAssertion(): Assertion? {
-        if (pollingAssertions.isEmpty()) return null
-        val margins = pollingAssertions.map { Pair(it, it.assorter.dilutedMargin())  }
+        if (assertions.isEmpty()) return null
+        val margins = assertions.map { Pair(it, it.assorter.dilutedMargin())  }
         val minMargin = margins.sortedBy { it.second }
         return minMargin.first().first
     }
@@ -427,7 +421,7 @@ open class ContestUnderAudit(
     override fun toString() = showShort()
 
     open fun show() = buildString {
-        appendLine("${contest.javaClass.simpleName} ${contest.show()}")
+        appendLine("${contest::class.simpleName} ${contest.show()}")
         val minAssertion = minAssertion()
         if (minAssertion != null) {
             val minAssorter = minAssertion.assorter
@@ -447,13 +441,13 @@ open class ContestUnderAudit(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as ContestUnderAudit
+        other as ContestWithAssertions
 
         if (isClca != other.isClca) return false
         // if (hasCompleteCvrs != other.hasCompleteCvrs) return false
         if (!contest.equals(other.contest)) return false
         if (preAuditStatus != other.preAuditStatus) return false
-        if (pollingAssertions != other.pollingAssertions) return false
+        if (assertions != other.assertions) return false
         if (clcaAssertions != other.clcaAssertions) return false
 
         return true
@@ -464,7 +458,7 @@ open class ContestUnderAudit(
         // result = 31 * result + hasCompleteCvrs.hashCode()
         result = 31 * result + contest.hashCode()
         result = 31 * result + preAuditStatus.hashCode()
-        result = 31 * result + pollingAssertions.hashCode()
+        result = 31 * result + assertions.hashCode()
         result = 31 * result + clcaAssertions.hashCode()
         return result
     }
@@ -473,7 +467,7 @@ open class ContestUnderAudit(
         private val logger = KotlinLogging.logger("ContestUnderAudit")
 
         // make contestUA from contests, generate Npop by readin cards
-        fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCard>, isClca: Boolean): List<ContestUnderAudit> {
+        fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCard>, isClca: Boolean): List<ContestWithAssertions> {
             val infos = contests.map { it.info() }.associateBy { it.id }
             val manifestTabs = tabulateAuditableCards(cards, infos)
             val npopMap = manifestTabs.mapValues { it.value.ncards }
@@ -482,9 +476,9 @@ open class ContestUnderAudit(
 
         // make contestUA from contests and Nbs.
         // this does not make OneAudit: use makeOneAuditContests
-        fun make(contests: List<ContestIF>, npopMap: Map<Int,Int>, isClca: Boolean): List<ContestUnderAudit> {
+        fun make(contests: List<ContestIF>, npopMap: Map<Int,Int>, isClca: Boolean): List<ContestWithAssertions> {
             return contests.map {
-                val cua = ContestUnderAudit(it, isClca, NpopIn=npopMap[it.id]).addStandardAssertions()
+                val cua = ContestWithAssertions(it, isClca, NpopIn=npopMap[it.id]).addStandardAssertions()
                 if (it is DHondtContest) {
                     cua.addAssertionsFromAssorters(it.assorters)
                 } else {

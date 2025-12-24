@@ -16,7 +16,7 @@ import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.audit.writeUnsortedPrivateMvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
@@ -179,7 +179,7 @@ class CardManifestAttack {
         val realContests = makeContestsFromCvrs(mvrs)
         val realNps = mvrTabs.mapValues { it.value.ncards }
         val realcontestUA = realContests.map {
-            ContestUnderAudit(it, true, NpopIn=realNps[it.id]).addStandardAssertions()
+            ContestWithAssertions(it, true, NpopIn=realNps[it.id]).addStandardAssertions()
         }
         println("true Contest totals")
         realcontestUA.forEach { contestUA -> println(contestUA.showSimple())}
@@ -211,7 +211,7 @@ class CardManifestAttack {
         val Npops = manifestTabs.mapValues { it.value.ncards }
 
         val contestsUA = contests.map {
-            ContestUnderAudit(it, true, NpopIn=Npops[it.id]).addStandardAssertions()
+            ContestWithAssertions(it, true, NpopIn=Npops[it.id]).addStandardAssertions()
         }
         // The OA assort averages come from the card Pools
         setPoolAssorterAverages(contestsUA, cardPools)
@@ -267,7 +267,7 @@ class CardManifestAttack {
     }
 }
 
-fun ContestUnderAudit.showSimple() = buildString {
+fun ContestWithAssertions.showSimple() = buildString {
     val contestWithVotes = contest as Contest
     val votesByName = contestWithVotes.votes.map{ (key, value) ->  Pair(contestWithVotes.info.candidateIdToName[key], value) }
     append("Contest ($id) votes=$votesByName Npop=${Npop} Nc=${contestWithVotes.Nc()} undervotes=${contestWithVotes.Nundervotes()}")

@@ -14,11 +14,11 @@ class BelgiumClca (
 ): CreateElectionPIF {
 
     val infoMap: Map<Int, ContestInfo>
-    val contestsUA: List<ContestUnderAudit>
+    val contestsUA: List<ContestWithAssertions>
     val cvrs: List<Cvr>
 
     init {
-        val contestUA = ContestUnderAudit(contestd, isClca=true).addAssertionsFromAssorters(contestd.assorters)
+        val contestUA = ContestWithAssertions(contestd, isClca=true).addAssertionsFromAssorters(contestd.assorters)
         contestsUA = listOf(contestUA)
         infoMap = contestsUA.associate { it.id to it.contest.info() }
         cvrs = contestd.createSimulatedCvrs()

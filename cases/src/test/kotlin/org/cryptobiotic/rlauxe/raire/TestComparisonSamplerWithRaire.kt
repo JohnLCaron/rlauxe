@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.ClcaErrorTable
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.rairejson.import
 import org.cryptobiotic.rlauxe.rairejson.readRaireBallotsCsv
@@ -37,7 +37,7 @@ class TestComparisonSamplerWithRaire {
         }
     }
 
-    fun run(cvrs: List<Cvr>, contestUA: ContestUnderAudit, cassorter: ClcaAssorter) {
+    fun run(cvrs: List<Cvr>, contestUA: ContestWithAssertions, cassorter: ClcaAssorter) {
         println("\n${cassorter.assorter().desc()}")
 
         val sampler = ClcaSimulatedErrorRates(cvrs, contestUA.contest, cassorter, ClcaErrorTable.standard)

@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.ClcaErrorRatesCumul
 import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
@@ -44,7 +44,7 @@ class GenerateClcaErrorTable {
 
                     repeat(auditConfig.nsimEst) {
                         val cvrs = sim.makeCvrs()
-                        val contestUA = ContestUnderAudit(contest, true).addStandardAssertions()
+                        val contestUA = ContestWithAssertions(contest, true).addStandardAssertions()
                         val minAssert = contestUA.minClcaAssertion()!!
                         val minAssort = minAssert.cassorter
 
@@ -88,7 +88,7 @@ class GenerateClcaErrorTable {
         val ncontests = 11
         val phantomPct = 0.02
         val test = MultiContestTestData(ncontests, 1, 50000, phantomPctRange=phantomPct..phantomPct)
-        val contestsUA = test.contests.map { ContestUnderAudit(it).addStandardAssertions() }
+        val contestsUA = test.contests.map { ContestWithAssertions(it).addStandardAssertions() }
         val cards = test.makeCardsFromContests()
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
 
@@ -152,7 +152,7 @@ class GenerateClcaErrorTable {
 
                     repeat(auditConfig.nsimEst) {
                         val cvrs = sim.makeCvrs()
-                        val contestUA = ContestUnderAudit(contest, true).addStandardAssertions()
+                        val contestUA = ContestWithAssertions(contest, true).addStandardAssertions()
                         val minAssert = contestUA.minClcaAssertion()!!
                         val minAssort = minAssert.cassorter
 

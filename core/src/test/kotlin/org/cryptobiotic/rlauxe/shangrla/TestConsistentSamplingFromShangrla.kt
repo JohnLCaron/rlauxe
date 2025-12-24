@@ -87,7 +87,7 @@ class TestConsistentSamplingFromShangrla {
             .build()
 
         val contests = makeContestsFromCvrs(cvrs)
-        val contestsUA = contests.mapIndexed { idx, it -> ContestUnderAudit( it).addStandardAssertions() }
+        val contestsUA = contests.mapIndexed { idx, it -> ContestWithAssertions( it).addStandardAssertions() }
         val contestRounds = contestsUA.map{ contest -> ContestRound(contest, 1) }
         contestRounds[0].estSampleSize = 3
         contestRounds[1].estSampleSize = 3

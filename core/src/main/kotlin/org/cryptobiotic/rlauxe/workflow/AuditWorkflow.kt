@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sampleWithContestCutoff
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -13,7 +13,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
     abstract fun auditConfig() : AuditConfig
     abstract fun mvrManager() : MvrManager
     abstract fun auditRounds(): MutableList<AuditRound>
-    abstract fun contestsUA(): List<ContestUnderAudit>
+    abstract fun contestsUA(): List<ContestWithAssertions>
 
     // start new round and create estimate
     open fun startNewRound(quiet: Boolean = true): AuditRound {

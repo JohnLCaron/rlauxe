@@ -82,7 +82,7 @@ fun runRoundResult(inputDir: String): Result<AuditRound, ErrorMessages> {
         }
 
     } catch (t: Throwable) {
-        logger.error {t}
+        logger.error(t) { "runRoundResult Exception" }
         return errs.add( t.message ?: t.toString())
     }
 }

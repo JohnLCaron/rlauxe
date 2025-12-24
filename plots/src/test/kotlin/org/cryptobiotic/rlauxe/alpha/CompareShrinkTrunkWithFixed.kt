@@ -24,7 +24,7 @@ class CompareShrinkTrunkWithFixed {
             val cvrs = makeCvrsByExactMean(N, eta)
             val pairs = cvrs.zip(cvrs)
 
-            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
+            val contestUA = ContestWithAssertions(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
 
             val sampleFn = PollingSampling(contestUA.id, pairs, makeStandardPluralityAssorter(N))
 
@@ -70,7 +70,7 @@ class CompareShrinkTrunkWithFixed {
             val cvrs = makeCvrsByExactMean(N, eta)
             val pairs = cvrs.zip(cvrs)
 
-            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
+            val contestUA = ContestWithAssertions(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
             val sampleFn = PollingSampling(contestUA.id, pairs, makeStandardPluralityAssorter(N))
 
             println("\neta0 = $eta")

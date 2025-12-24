@@ -47,7 +47,7 @@ fun runPollingAuditRound(
 
 fun auditPollingAssertion(
     config: AuditConfig,
-    contestUA: ContestUnderAudit,
+    contestUA: ContestWithAssertions,
     assertionRound: AssertionRound,
     sampling: Sampling,
     roundIdx: Int,

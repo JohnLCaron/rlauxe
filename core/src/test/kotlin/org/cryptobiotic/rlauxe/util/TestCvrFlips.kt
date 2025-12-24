@@ -16,7 +16,7 @@ class TestCvrFlips {
 
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1), SocialChoiceFunction.PLURALITY)
         val contest =  makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contest, isClca = true).addStandardAssertions()
         val margin = contestUA.minDilutedMargin()!!
         assertEquals(mean2margin(mean), margin, doublePrecision)
 
@@ -70,7 +70,7 @@ class TestCvrFlips {
 
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1), SocialChoiceFunction.PLURALITY)
         val contest =  makeContestFromCvrs(info, cvrs)
-        val contestUA = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
+        val contestUA = ContestWithAssertions(contest, isClca = true).addStandardAssertions()
         val margin = contestUA.minDilutedMargin()!!
         assertEquals(mean2margin(mean), margin, doublePrecision)
 

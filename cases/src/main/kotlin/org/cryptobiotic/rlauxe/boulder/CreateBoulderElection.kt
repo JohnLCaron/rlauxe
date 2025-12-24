@@ -41,7 +41,7 @@ class CreateBoulderElection(
     val cardPoolBuilders: List<OneAuditPoolWithBallotStyle> = convertRedactedToCardPool()
 
     val contests: List<ContestIF>
-    val contestsUA : List<ContestUnderAudit>
+    val contestsUA : List<ContestWithAssertions>
     // val cardPools: List<OneAuditPool>
 
     init {
@@ -64,7 +64,7 @@ class CreateBoulderElection(
         val manifestTabs = tabulateAuditableCards(createCardManifest(), infoMap)
         val npopMap = manifestTabs.mapValues { it.value.ncards }
 
-        contestsUA = if (isClca) ContestUnderAudit.make(contests, npopMap, isClca=true, )
+        contestsUA = if (isClca) ContestWithAssertions.make(contests, npopMap, isClca=true, )
             else makeOneAuditContests(contests, npopMap, cardPoolBuilders)
 
         val totalRedactedBallots = cardPoolBuilders.sumOf { it.ncards() }
@@ -172,8 +172,8 @@ class CreateBoulderElection(
 
         val cvrs = makeVunderCvrs(poolVunders, cardPool.poolName, poolId = cardPool.poolId)
         // the number of cvrs can vary when there are multiple contests: artifact of simulating the cvrs
-        if (cardPool.ncards() != cvrs.size)
-            logger.info{"cardPool.ncards ${cardPool.ncards()} cvrs.size = ${cvrs.size}"}
+        //if (cardPool.ncards() != cvrs.size)
+        //    logger.info{"cardPool.ncards ${cardPool.ncards()} cvrs.size = ${cvrs.size}"}
 
         // check it
         val contestTabs: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infoMap)

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.TausIF
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 
@@ -12,23 +12,25 @@ data class OneAuditErrorRates(val name: String, val rates: Map<Double, Double>, 
 class OneAuditErrorsFromPools(val pools: List<OneAuditPoolIF>) {
     // could also contain the ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double) ??
 
-    fun oaErrorRates(contestUA: ContestUnderAudit, oaCassorter: ClcaAssorterOneAudit): OneAuditErrorRates { // sampleValue -> rate
+    fun oaErrorRates(contestUA: ContestWithAssertions, oaCassorter: ClcaAssorterOneAudit): OneAuditErrorRates { // sampleValue -> rate
         val result = mutableListOf<Pair<Double, Double>>()
         var totalInPools = 0
         pools.filter{ it.hasContest(contestUA.id )}.forEach { pool ->
-            val poolAvg = oaCassorter.poolAverages.assortAverage[pool.poolId]!!
-            val taus = TausOA(oaCassorter.assorter.upperBound(), poolAvg)
-            val votes = pool.regVotes()[contestUA.id]!!
-            val winnerCounts: Int = votes.votes[ oaCassorter.assorter.winner()] ?: 0
-            val loserCounts: Int = votes.votes[ oaCassorter.assorter.loser()] ?: 0
-            val otherCounts = pool.ncards() - winnerCounts - loserCounts
-            totalInPools += pool.ncards()
-            val dcards = contestUA.Npop.toDouble() // rate is over entire population
+            val poolAvg = oaCassorter.poolAverages.assortAverage[pool.poolId]
+            if (poolAvg != null) {
+                val taus = TausOA(oaCassorter.assorter.upperBound(), poolAvg)
+                val votes = pool.regVotes()[contestUA.id]!!
+                val winnerCounts: Int = votes.votes[oaCassorter.assorter.winner()] ?: 0
+                val loserCounts: Int = votes.votes[oaCassorter.assorter.loser()] ?: 0
+                val otherCounts = pool.ncards() - winnerCounts - loserCounts
+                totalInPools += pool.ncards()
+                val dcards = contestUA.Npop.toDouble() // rate is over entire population
 
-            // sampleValue -> rate
-            result.add(Pair(taus.tausOA[0].first * oaCassorter.noerror(), loserCounts / dcards))
-            result.add(Pair(taus.tausOA[1].first * oaCassorter.noerror(), otherCounts / dcards))
-            result.add(Pair(taus.tausOA[2].first * oaCassorter.noerror(), winnerCounts / dcards))
+                // sampleValue -> rate
+                result.add(Pair(taus.tausOA[0].first * oaCassorter.noerror(), loserCounts / dcards))
+                result.add(Pair(taus.tausOA[1].first * oaCassorter.noerror(), otherCounts / dcards))
+                result.add(Pair(taus.tausOA[2].first * oaCassorter.noerror(), winnerCounts / dcards))
+            }
         }
         return OneAuditErrorRates("name", result.toMap().toSortedMap(), totalInPools)  // could also return a string description
     }

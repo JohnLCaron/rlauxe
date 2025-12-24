@@ -4,7 +4,7 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
-import org.cryptobiotic.rlauxe.cli.RunRliRoundCli
+import org.cryptobiotic.rlauxe.cli.RunRlaRoundCli
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
@@ -138,12 +138,12 @@ class TestCreateBoulderElection {
 
         repeat(10) { run ->
             val auditDir = "$topDir/audit$run"
-            RunRliRoundCli.main(
+            RunRlaRoundCli.main(
                 arrayOf(
                     "-in", auditDir,
                 )
             )
-            RunRliRoundCli.main(
+            RunRlaRoundCli.main(
                 arrayOf(
                     "-in", auditDir,
                 )

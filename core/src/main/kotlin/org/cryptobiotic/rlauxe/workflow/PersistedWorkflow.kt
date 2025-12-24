@@ -23,7 +23,7 @@ class PersistedWorkflow(
     val publisher = Publisher(auditDir)
 
     private val config: AuditConfig
-    private val contestsUA: List<ContestUnderAudit>
+    private val auditContests: List<ContestWithAssertions>
     private val auditRounds = mutableListOf<AuditRound>()
     private val mvrManager: MvrManager
     private val mode: PersistedWorkflowMode
@@ -39,20 +39,21 @@ class PersistedWorkflow(
 
         config = auditRecord.config
         mode = config.persistedWorkflowMode
-        contestsUA = auditRecord.contests
+        // skip contests that have been removed
+        auditContests = auditRecord.contests.filter { it.preAuditStatus == TestH0Status.InProgress }
 
         auditRounds.addAll(auditRecord.rounds)
         mvrManager = if (mode == PersistedWorkflowMode.testSimulated) {
-            PersistedMvrManagerTest(auditRecord.location, config, contestsUA)
+            PersistedMvrManagerTest(auditRecord.location, config, auditContests)
         } else {
-            PersistedMvrManager(auditRecord.location, config, contestsUA, mvrWrite=mvrWrite)
+            PersistedMvrManager(auditRecord.location, config, auditContests, mvrWrite=mvrWrite)
         }
     }
 
     override fun auditConfig() =  this.config
     override fun mvrManager() = mvrManager
     override fun auditRounds() = auditRounds
-    override fun contestsUA(): List<ContestUnderAudit> = contestsUA
+    override fun contestsUA(): List<ContestWithAssertions> = auditContests
 
     override fun startNewRound(quiet: Boolean): AuditRound {
 

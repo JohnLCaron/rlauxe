@@ -81,6 +81,24 @@ class TestVerifyUseCases {
     }
 
     @Test
+    fun testRunVerifyCorlaPolling() {
+        val auditdir = "$testdataDir/cases/corla/polling/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        println()
+        print(results)
+        if (results.hasErrors) fail()
+    }
+
+    @Test
+    fun testRunVerifyCorlaPollingContest() {
+        val auditdir = "$testdataDir/cases/corla/polling/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
+        println()
+        print(results)
+        if (results.hasErrors) fail()
+    }
+
+    @Test
     fun testRunVerifySf2024clca() {
         val auditdir = "$testdataDir/cases/sf2024/clca/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)

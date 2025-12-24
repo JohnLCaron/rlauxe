@@ -62,9 +62,9 @@ class TestAssorterMeans {
     }
 
     fun testMeanAssort(cvrs: List<Cvr>, contest: Contest) {
-        val contestAU = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
+        val contestAU = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
 
-        contestAU.pollingAssertions.forEach { assertion ->
+        contestAU.assertions.forEach { assertion ->
             val assorter = assertion.assorter
             println("=== ${assorter}")
 

@@ -29,7 +29,7 @@ import kotlin.use
 
 class TestSf2024OneAuditIrv() {
     val config: AuditConfig
-    val contests: List<ContestUnderAudit>
+    val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
     val cardManifest: CardManifest
     val mvrs: CloseableIterable<AuditableCard>
@@ -54,7 +54,7 @@ class TestSf2024OneAuditIrv() {
     @Test
     fun testSf2024oa() {
         val contest24 = contests.find { it.id == 24 }!!
-        val rcontestUA = contest24 as RaireContestUnderAudit
+        val rcontestUA = contest24 as RaireContestWithAssertions
         val rcontest = contest24.contest as RaireContest
         val Npop = rcontestUA.Npop
         val info24 = rcontestUA.contest.info()
@@ -64,7 +64,7 @@ class TestSf2024OneAuditIrv() {
             println("  $it marginPct=${it.marginInVotes / Npop.toDouble()}")
         }
         println("assertionAndDifficulty")
-        rcontestUA.pollingAssertions.forEach {
+        rcontestUA.assertions.forEach {
             println(" ${it.assorter.shortName()} ${rcontest.showAssertionDifficulty(it.assorter)}")
             if ( it.assorter.shortName() == "NEB 83/167") {
                 rcontest.showAssertionDifficulty(it.assorter)
@@ -115,7 +115,7 @@ class TestSf2024OneAuditIrv() {
     @Test
     fun testDivideMarginInVotes() {
         val contest24 = contests.find { it.id == 24 }!!
-        val rcontestUA = contest24 as RaireContestUnderAudit
+        val rcontestUA = contest24 as RaireContestWithAssertions
         val rcontest = contest24.contest as RaireContest
         val Npop = rcontestUA.Npop
         val info24 = rcontestUA.contest.info()
@@ -153,7 +153,7 @@ class TestSf2024OneAuditIrv() {
     @Test
     fun testMarginInVotes() {
         val contest24 = contests.find { it.id == 24 }!!
-        val rcontestUA = contest24 as RaireContestUnderAudit
+        val rcontestUA = contest24 as RaireContestWithAssertions
         val Npop = rcontestUA.Npop
         val info24 = rcontestUA.contest.info()
         val infos24 = mapOf(24 to info24)
@@ -220,7 +220,7 @@ class TestSf2024OneAuditIrv() {
     fun testVerifyOApools() {
         val contestId = 24
         val contest24 = contests.find { it.id == contestId }!!
-        val rcontestUA = contest24 as RaireContestUnderAudit
+        val rcontestUA = contest24 as RaireContestWithAssertions
         val Npop = rcontestUA.Npop
         val info24 = rcontestUA.contest.info()
         val infos24 = mapOf(contestId to info24)

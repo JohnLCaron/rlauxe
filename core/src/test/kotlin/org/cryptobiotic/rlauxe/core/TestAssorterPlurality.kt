@@ -274,8 +274,8 @@ class TestAssorterPlurality {
             nwinners = 1,
         )
         val contest = Contest(info, mapOf(0 to 52, 1 to 44), Nc=100, Ncast=100, )
-        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
-        val assorter = contestUA.pollingAssertions.first().assorter
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
+        val assorter = contestUA.assertions.first().assorter
         assertTrue(assorter is PluralityAssorter)
         assertEquals(0, assorter.winner())
         assertEquals(1, assorter.loser())
@@ -311,8 +311,8 @@ class TestAssorterPlurality {
         val contest = Contest(info, mapOf(0 to 52, 1 to 44), Nc = 100, Ncast = 100)
         println(contest.show())
 
-        val contestUA = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
-        contestUA.pollingAssertions.forEach { assertion ->
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
+        contestUA.assertions.forEach { assertion ->
             val assorter = assertion.assorter
             println("  assorter = $assorter")
         }

@@ -196,7 +196,7 @@ class TestContest {
 
         assertTrue(contest.percentForCand(1) < info.minFraction!!)
 
-        val contestUAc = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
+        val contestUAc = ContestWithAssertions(contest, isClca = true).addStandardAssertions()
         contestUAc.clcaAssertions.forEach { println("  ${it.cassorter.assorter.desc()} ${it.cassorter}") }
         println("minAssert = ${contestUAc.minAssertion()}")
     }
@@ -252,7 +252,7 @@ class TestContest {
         assertTrue(contest.percentForCand(1) >= info.minFraction!!)
         assertTrue(contest.percentForCand(2) < info.minFraction!!)
 
-        val contestUAc = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
+        val contestUAc = ContestWithAssertions(contest, isClca = true).addStandardAssertions()
         contestUAc.clcaAssertions.forEach { println("  ${it.cassorter.assorter.desc()} ${it.cassorter}") }
         println("minAssert = ${contestUAc.minAssertion()}")
     }
@@ -262,13 +262,13 @@ class TestContest {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.PLURALITY)
         val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211, Ncast=209)
 
-        val contestUAp = ContestUnderAudit(contest, isClca = false).addStandardAssertions()
-        val contestUAc = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
+        val contestUAp = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
+        val contestUAc = ContestWithAssertions(contest, isClca = true).addStandardAssertions()
 
         assertNotEquals(contestUAp, contestUAc)
         assertNotEquals(contestUAp.hashCode(), contestUAc.hashCode())
 
-        val contestUAc2 = ContestUnderAudit(contest, isClca = true).addStandardAssertions()
+        val contestUAc2 = ContestWithAssertions(contest, isClca = true).addStandardAssertions()
         assertEquals(contestUAc2, contestUAc)
         assertEquals(contestUAc2.hashCode(), contestUAc.hashCode())
         assertEquals(contestUAc2.toString(), contestUAc.toString())
@@ -300,7 +300,7 @@ class TestContest {
         val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc = 211, Ncast=211)
 
         val mess1 = assertFailsWith<RuntimeException> {
-            ContestUnderAudit(contest, isClca = false).addStandardAssertions()
+            ContestWithAssertions(contest, isClca = false).addStandardAssertions()
         }.message
         assertEquals("choice function IRV is not supported", mess1)
     }

@@ -36,7 +36,7 @@ open class CreateColoradoElection (
 
     val cardPools: List<OneAuditPool>
     val contests: List<ContestIF>
-    val contestsUA: List<ContestUnderAudit>
+    val contestsUA: List<ContestWithAssertions>
 
     init {
         // add pool counts into contests
@@ -63,8 +63,8 @@ open class CreateColoradoElection (
         val manifestTabs = tabulateAuditableCards(createCardManifest(), infos)
         val npopMap = manifestTabs.mapValues { it.value.ncards }
 
-        contestsUA = if (config.isClca) ContestUnderAudit.make(contests, npopMap, isClca=true, )
-                     else makeOneAuditContests(contests, npopMap, cardPoolBuilders)
+        contestsUA = if (config.isOA) makeOneAuditContests(contests, npopMap, cardPoolBuilders)
+                     else ContestWithAssertions.make(contests, npopMap, isClca=config.isClca, )
     }
 
     private fun makeOneAuditBuilders(electionDetailXml: ElectionDetailXml, roundContests: List<CorlaContestRoundCsv>): List<OneAuditBuilderCorla> {
@@ -162,7 +162,7 @@ open class CreateColoradoElection (
         return CvrsWithPopulationsToCardManifest(config.auditType,
             Closer(CvrIteratorfromPools()),
             makePhantomCvrs(contests),
-            if (config.isOA) cardPoolBuilders else null,
+            if (config.isClca) null else cardPoolBuilders,
         )
     }
 
@@ -267,7 +267,7 @@ fun createColoradoElectionP(
         auditType.isClca() -> AuditConfig(AuditType.CLCA, contestSampleCutoff = 20000, riskLimit = .03, nsimEst=10)
 
         else -> AuditConfig( // // TODO hasStyle=false
-            AuditType.ONEAUDIT, riskLimit = .03, contestSampleCutoff = null, nsimEst = 1,
+            AuditType.ONEAUDIT, riskLimit = .03, nsimEst = 1,
             oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = true)
         )
     }

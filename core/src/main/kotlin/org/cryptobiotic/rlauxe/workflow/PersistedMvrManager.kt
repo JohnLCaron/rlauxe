@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -20,7 +20,7 @@ private val checkValidity = true
 
 // assumes that the mvrs have been set externally into the election record, eg by EnterMvrsCli.
 // skip writing when doing runRoundAgain
-open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, val contestsUA: List<ContestUnderAudit>, val mvrWrite: Boolean = true): MvrManager {
+open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, val contestsUA: List<ContestWithAssertions>, val mvrWrite: Boolean = true): MvrManager {
     val publisher = Publisher(auditDir)
 
     override fun sortedCards() = CloseableIterable{ auditableCards() }

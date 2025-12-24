@@ -13,14 +13,13 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
-import org.cryptobiotic.rlauxe.core.ContestUnderAudit
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.EstimationResult
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeEstimationTasks
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ContestRound
-import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
@@ -30,7 +29,7 @@ class MeasureEstimationTaskConcurrency {
         val test = MultiContestTestData(15, 1, 20000)
         val cards = test.makeCardsFromContests()
 
-        val contestsUA  = test.contests.map { ContestUnderAudit(it).addStandardAssertions() }
+        val contestsUA  = test.contests.map { ContestWithAssertions(it).addStandardAssertions() }
         val nassertions = contestsUA.sumOf { it.assertions().size }
         println("ncontests=${contestsUA.size} nassertions=${nassertions} ncvrs=${cards.size}")
         val contestRounds = contestsUA.map{ contest -> ContestRound(contest, 1) }
@@ -43,7 +42,7 @@ class MeasureEstimationTaskConcurrency {
                 auditConfig,
                 contest,
                 1,
-                cardManifest = CloseableIterable { cards.iterator() },
+                contestCards = cards,
                 vunderFuzz=null)
             )
         }

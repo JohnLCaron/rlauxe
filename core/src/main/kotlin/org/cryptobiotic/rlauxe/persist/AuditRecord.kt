@@ -25,7 +25,7 @@ private val showMissing = true
 class AuditRecord(
     val location: String,
     val config: AuditConfig,
-    val contests: List<ContestUnderAudit>,
+    val contests: List<ContestWithAssertions>,
     val rounds: List<AuditRound>,
     mvrs: List<AuditableCard> // mvrs already sampled
 ) {

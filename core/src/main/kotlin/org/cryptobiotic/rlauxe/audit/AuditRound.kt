@@ -45,7 +45,7 @@ fun List<AuditRound>.previousSamples(currentRoundIdx: Int): Set<Long> {
     return result.toSet()
 }
 
-data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: List<AssertionRound>, val roundIdx: Int) {
+data class ContestRound(val contestUA: ContestWithAssertions, val assertionRounds: List<AssertionRound>, val roundIdx: Int) {
     val id = contestUA.id
     val name = contestUA.name
     val Npop = contestUA.Npop
@@ -68,7 +68,7 @@ data class ContestRound(val contestUA: ContestUnderAudit, val assertionRounds: L
         }
     }
 
-    constructor(contestUA: ContestUnderAudit, roundIdx: Int) :
+    constructor(contestUA: ContestWithAssertions, roundIdx: Int) :
             this(contestUA, contestUA.assertions().map{ AssertionRound(it, roundIdx, null) }, roundIdx)
 
     fun wantSampleSize(prevCount: Int): Int {

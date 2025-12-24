@@ -11,7 +11,7 @@ import kotlin.Int
 import kotlin.test.assertEquals
 
 data class ContestMvrCardAndPops(
-    val contestUA: ContestUnderAudit,
+    val contestUA: ContestWithAssertions,
     val mvrs: List<Cvr>,
     val cards: List<AuditableCard>,
     val pools: List<OneAuditPoolIF>,
@@ -206,7 +206,7 @@ fun makeOneAuditTestContests(
     cardStyles: List<PopulationIF>,
     cardManifest: List<AuditableCard>,
     mvrs: List<Cvr>, // this must be just for tests
-): Pair<List<ContestUnderAudit>, List<OneAuditPoolIF>> {
+): Pair<List<ContestWithAssertions>, List<OneAuditPoolIF>> {
 
     val cards = Closer(cardManifest.iterator())
     val manifestTabs = tabulateAuditableCards(cards, infos)

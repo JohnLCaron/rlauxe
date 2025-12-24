@@ -91,7 +91,7 @@ class TestRaireJson {
     }
 }
 
-fun makeRaireUA(): RaireContestUnderAudit {
+fun makeRaireUA(): RaireContestWithAssertions {
     val info = ContestInfo(
         name = "AvB",
         id = 0,
@@ -111,5 +111,5 @@ fun makeRaireUA(): RaireContestUnderAudit {
         0, 1,
         listOf(2), mapOf(1 to 1, 2 to 2, 3 to 3))
 
-    return RaireContestUnderAudit(contest, rassertions=listOf(assert1, assert2), contest.Nc)
+    return RaireContestWithAssertions(contest, rassertions=listOf(assert1, assert2), contest.Nc)
 }

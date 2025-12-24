@@ -226,11 +226,11 @@ class CreatePollingDiffMeans {
         val contestUA = makeContestUAfromCvrs(info, cvrs, isComparison = false)
 
         val results = mutableListOf<RunTestRepeatedResult>()
-        contestUA.pollingAssertions.map { assert ->
+        contestUA.assertions.map { assert ->
             if (!silent && showContests) println("Assertions for Contest ${contestUA.name}")
             if (!silent && showContests) println("  ${assert}")
 
-            val contestUA = ContestUnderAudit(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
+            val contestUA = ContestWithAssertions(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
             val cvrSampler = PollingSampling(contestUA.id,  pairs, assert.assorter)
 
             val result = runAlphaMartRepeated(

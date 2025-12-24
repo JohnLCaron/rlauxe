@@ -223,22 +223,22 @@ data class ContestUnderAuditJson(
     val Npop: Int? = null,
 )
 
-fun ContestUnderAudit.publishJson() : ContestUnderAuditJson {
+fun ContestWithAssertions.publishJson() : ContestUnderAuditJson {
     return ContestUnderAuditJson(
         this.contest.info().publishJson(),
         this.contest.publishJson(),
         this.isClca,
-        this.pollingAssertions.map { it.publishIFJson() },
+        this.assertions.map { it.publishIFJson() },
         this.clcaAssertions.map { it.publishJson() },
         this.preAuditStatus,
         this.Npop,
     )
 }
 
-fun ContestUnderAuditJson.import(): ContestUnderAudit {
+fun ContestUnderAuditJson.import(): ContestWithAssertions {
     val info = this.info.import()
-    val contestUA = ContestUnderAudit(this.contest.import(info), isClca=this.isComparison, NpopIn = this.Npop)
-    contestUA.pollingAssertions = this.pollingAssertions.map { it.import(info) }
+    val contestUA = ContestWithAssertions(this.contest.import(info), isClca=this.isComparison, NpopIn = this.Npop)
+    contestUA.assertions = this.pollingAssertions.map { it.import(info) }
     contestUA.clcaAssertions = this.clcaAssertions.map { it.import(info) }
     contestUA.preAuditStatus = this.status
     return contestUA
@@ -251,11 +251,11 @@ data class ContestsUnderAuditJson(
     val rcontestsUnderAudit: List<RaireContestUnderAuditJson>,
 )
 
-fun List<ContestUnderAudit>.publishJson() : ContestsUnderAuditJson {
+fun List<ContestWithAssertions>.publishJson() : ContestsUnderAuditJson {
     val contests = mutableListOf<ContestUnderAuditJson>()
     val rcontests = mutableListOf<RaireContestUnderAuditJson>()
     this.forEach {
-        if (it is RaireContestUnderAudit) {
+        if (it is RaireContestWithAssertions) {
             rcontests.add( it.publishRaireJson())
         } else {
             contests.add( it.publishJson())
@@ -264,14 +264,14 @@ fun List<ContestUnderAudit>.publishJson() : ContestsUnderAuditJson {
     return ContestsUnderAuditJson(contests, rcontests)
 }
 
-fun ContestsUnderAuditJson.import() : List<ContestUnderAudit> {
+fun ContestsUnderAuditJson.import() : List<ContestWithAssertions> {
     return this.contestsUnderAudit.map { it.import() } +
             this.rcontestsUnderAudit.map { it.import() }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-fun writeContestsJsonFile(contests: List<ContestUnderAudit>, filename: String) {
+fun writeContestsJsonFile(contests: List<ContestWithAssertions>, filename: String) {
     val json = contests.publishJson()
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
     FileOutputStream(filename).use { out ->
@@ -280,7 +280,7 @@ fun writeContestsJsonFile(contests: List<ContestUnderAudit>, filename: String) {
     }
 }
 
-fun readContestsJsonFile(filename: String): Result<List<ContestUnderAudit>, ErrorMessages> {
+fun readContestsJsonFile(filename: String): Result<List<ContestWithAssertions>, ErrorMessages> {
     val errs = ErrorMessages("readContestsJsonFile '${filename}'")
     val filepath = Path.of(filename)
     if (!Files.exists(filepath)) {
@@ -299,6 +299,6 @@ fun readContestsJsonFile(filename: String): Result<List<ContestUnderAudit>, Erro
     }
 }
 
-fun readContestsJsonFileUnwrapped(filename: String): List<ContestUnderAudit> {
+fun readContestsJsonFileUnwrapped(filename: String): List<ContestWithAssertions> {
     return readContestsJsonFile(filename).unwrap()
 }

@@ -13,16 +13,14 @@ import kotlin.test.Test
 
 class AuditsNoErrors {
     val name = "AuditsNoErrors4"
-    val dirName = "$testdataDir/plots/oneaudit4/$name" // you need to make this directory first
-
-    val nruns = 100  // number of times to run workflow
-    val nsimEst = 10
+    val dirName = "$testdataDir/plots/samplesNeeded/$name" // you need to make this directory first
     val N = 50000
+    val nruns = 100
 
     @Test
     fun genAuditsNoErrorsPlots() {
-        val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .10, .20)
 
+        val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .10, .20)
         val cvrPercents = listOf(0.5, 0.75, 0.83, 0.90, 0.96)
         val stopwatch = Stopwatch()
 
@@ -45,7 +43,7 @@ class AuditsNoErrors {
                 val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
                     N, margin, 0.0, 0.0, cvrPercent, 0.0,
                     auditConfigIn = AuditConfig(
-                        AuditType.ONEAUDIT, true, nsimEst = nsimEst,
+                        AuditType.ONEAUDIT, true,
                         oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.generalAdaptive)
                     ),
                     parameters=mapOf("nruns" to nruns, "cat" to "oneaudit-${(100 * cvrPercent).toInt()}%"),
@@ -72,48 +70,24 @@ class AuditsNoErrors {
         showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog)
     }
 
-    fun showSampleSizesVsMargin(name: String, dirName: String, yscale: ScaleTypeOld) {
-        val io = WorkflowResultsIO("$dirName/${name}.csv")
-        val results = io.readResults()
-
-        val plotter = WorkflowResultsPlotterOld(dirName, name)
-        plotter.showSampleSizesVsMargin(results, null, "auditType", yscale) { category(it) }
-
-
-        /* {
-            when (it.parameters["auditType"]) {
-                1.0 -> "oneaudit ${dfn(it.Dparam("cvrPercent"), 3)}"
-                2.0 -> "polling"
-                3.0 -> "clca"
-                else -> "unknown"
-            }
-        } */
-    }
-
     @Test
-    fun clcaNoErrorsPlots() {
+    fun clcaNoErrors() {
         val name = "clcaNoErrors"
-        val dirName = "$testdataDir/plots/workflows/$name"
+        val dirName = "$testdataDir/plots/samplesNeeded/$name"
         validateOutputDir(Path(dirName))
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
+        val nruns = 1
 
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
-            val generalAdaptive = ClcaSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, 0.0, 0.0,
-                clcaConfigIn= ClcaConfig(ClcaStrategyType.generalAdaptive, 0.0),
-                parameters=mapOf("nruns" to nruns, "cat" to "generalAdaptive")
-            )
-            tasks.add(RepeatedWorkflowRunner(nruns, generalAdaptive))
-
             val noerror = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
-                parameters=mapOf("nruns" to nruns, "cat" to "adaptive")
+                parameters=mapOf("nruns" to 1, "cat" to "clca")
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, noerror))
+            tasks.add(RepeatedWorkflowRunner(1, noerror))
         }
 
         // run tasks concurrently and average the results
@@ -123,13 +97,55 @@ class AuditsNoErrors {
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
-        showSampleSizesVsMargin(name, dirName, ScaleTypeOld.Linear)
+        //     fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType, catName: String) {
+        val subtitle = "Nc=${N} nruns=${nruns}"
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog)
     }
 
     @Test
-    fun pollingNoErrorsPlots() {
+    fun clcaNoErrorsMaxRisk() {
+        val name = "clcaNoErrorsMaxRisk"
+        val dirName = "$testdataDir/plots/samplesNeeded/$name"
+        validateOutputDir(Path(dirName))
+        val margins =
+            listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
+        val maxRisk = listOf(.70, .80, .90, 1.0)
+        val nruns = 1
+
+        val stopwatch = Stopwatch()
+
+        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+
+        maxRisk.forEach { maxRisk ->
+            margins.forEach { margin ->
+                val noerror = ClcaSingleRoundAuditTaskGenerator(
+                    N, margin, 0.0, 0.0, 0.0,
+                    clcaConfigIn= ClcaConfig(maxRisk=maxRisk),
+                    parameters = mapOf("nruns" to nruns, "cat" to maxRisk)
+                )
+                tasks.add(RepeatedWorkflowRunner(nruns, noerror))
+            }
+        }
+
+        // run tasks concurrently and average the results
+        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
+        println(stopwatch.took())
+
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
+        writer.writeResults(results)
+
+        //     fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType, catName: String) {
+        val subtitle = "Nc=${N} nruns=${nruns}"
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.Linear, catName="maxRisk")
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLinear, catName="maxRisk")
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog, catName="maxRisk")
+    }
+
+    @Test
+    fun pollingNoErrorsOld() {
+        val nruns = 100
         val name = "pollingNoErrors"
-        val dir = "$testdataDir/plots/workflows/$name"
+        val dir = "$testdataDir/plots/samplesNeeded/$name"
         validateOutputDir(Path(dir))
         val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .10)
         val stopwatch = Stopwatch()
@@ -185,10 +201,47 @@ class AuditsNoErrors {
         )
     }
 
+    @Test
+    fun pollingWithStdDev() {
+        val nruns = 100
+        val name = "pollingWithStdDev"
+        val dir = "$testdataDir/plots/samplesNeeded/$name"
+        validateOutputDir(Path(dir))
+        val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .10)
+        val stopwatch = Stopwatch()
+
+        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        margins.forEach { margin ->
+            val nsamplesGenerator = PollingSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, 0.0, 0.0,
+                parameters=mapOf("nruns" to nruns, "cat" to "polling")
+            )
+            tasks.add(RepeatedWorkflowRunner(nruns, nsamplesGenerator))
+        }
+        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
+        println(stopwatch.took())
+
+        val writer = WorkflowResultsIO("$dir/${name}.csv")
+        writer.writeResults(results)
+
+        wrsErrorBars(
+            titleS = "$name samples needed",
+            subtitleS = "Nc=${N} nruns=${nruns}",
+            wrs = results,
+            xname = "margin", xfld = { it.margin },
+            yname = "samplesNeeded", yfld = { it.samplesUsed },
+            yupperFld = { it.samplesUsed + it.usedStddev },
+            ylowerFld = { it.samplesUsed - it.usedStddev },
+            // scaleType = ScaleType.LogLog, // only linear
+            catName = "legend",
+            catFld = { category(it) },
+            writeFile = "$dir/${name}Linear",
+        )
+    }
+
 }
 
-
-fun showSampleSizesVsMargin(name: String, dirName: String, subtitle: String, yscale: ScaleType) {
+fun showSampleSizesVsMargin(name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String = "auditType") {
     val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
     wrsPlot(
@@ -198,7 +251,7 @@ fun showSampleSizesVsMargin(name: String, dirName: String, subtitle: String, ysc
         wrs = data,
         xname = "true margin", xfld = { it.margin },
         yname = "samplesNeeded", yfld = { it.samplesUsed },
-        catName = "auditType", catfld = { category(it) },
+        catName = catName, catfld = { category(it) },
         scaleType = yscale
     )
 }

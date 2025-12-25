@@ -20,7 +20,6 @@ import kotlin.math.ln
 private val showRates = false
 private val showBets = false
 
-// TODO can use for CLCA?
 class GeneralAdaptiveBetting(
     val Npop: Int, // population size for this contest
     // val accumErrorCounts: ClcaErrorCounts, // propable illegal to do (cant use prior knowlege of the sample)

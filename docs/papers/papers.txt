@@ -54,6 +54,9 @@ RLA papers
 2021	RiLACS: Risk-Limiting Audits via Confidence Sequences		Ian Waudby-Smith, Philip B. Stark, Aaditya Ramdas; Jul 23, 2021
 	RLAs using confidence sequences
 
+2021    Assertion-Based Approaches to Auditing Complex Elections, with Application to Party-List Proportional Elections; 2 Oct, 2021
+    Blom, Budurushi, Rivest, Stark, Stuckey, Teague, Vukcevic
+
 2022	ALPHA: Audit that Learns from Previously Hand-Audited Ballots	Stark; Jan 7, 2022
 	https://github.com/pbstark/alpha
 

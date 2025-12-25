@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 12/12/2025_
+_last changed: 12/24/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -475,117 +475,85 @@ the percent of false positives stays below the risk limit (here its 5%):
 ## Reference Papers
 ````
 P2Z         Limiting Risk by Turning Manifest Phantoms into Evil Zombies. Banuelos and Stark. July 14, 2012
-
+    https://arxiv.org/pdf/1207.3413
+    
 RAIRE        Risk-Limiting Audits for IRV Elections. Blom, Stucky, Teague 29 Oct 2019
     https://arxiv.org/abs/1903.08804
 
 SHANGRLA     Sets of Half-Average Nulls Generate Risk-Limiting Audits: SHANGRLA.	Stark, 24 Mar 2020
-    https://github.com/pbstark/SHANGRLA
+    https://arxiv.org/pdf/1911.10035, https://github.com/pbstark/SHANGRLA
 
 MoreStyle	More style, less work: card-style data decrease risk-limiting audit sample sizes. Glazer, Spertus, Stark; 6 Dec 2020
-
+    https://arxiv.org/abs/2012.03371
+    
+Proportional  Assertion-Based Approaches to Auditing Complex Elections, with Application to Party-List Proportional Elections; 2 Oct, 2021
+    Blom, Budurushi, Rivest, Stark, Stuckey, Teague, Vukcevic
+    http://arxiv.org/abs/2107.11903v2
+    
 ALPHA:      Audit that Learns from Previously Hand-Audited Ballots. Stark, Jan 7, 2022
-    https://github.com/pbstark/alpha.
+    https://arxiv.org/pdf/2201.02707, https://github.com/pbstark/alpha.
 
 BETTING     Estimating means of bounded random variables by betting. Waudby-Smith and Ramdas, Aug 29, 2022
-    https://github.com/WannabeSmith/betting-paper-simulations
+    https://arxiv.org/pdf/2010.09686, https://github.com/WannabeSmith/betting-paper-simulations
 
 COBRA:      Comparison-Optimal Betting for Risk-limiting Audits. Jacob Spertus, 16 Mar 2023
-    https://github.com/spertus/comparison-RLA-betting/tree/main
+    https://arxiv.org/pdf/2304.01010, https://github.com/spertus/comparison-RLA-betting/tree/main
 
 ONEAudit:   Overstatement-Net-Equivalent Risk-Limiting Audit. Stark 6 Mar 2023.
-    https://github.com/pbstark/ONEAudit
+    https://arxiv.org/pdf/2303.03335, https://github.com/pbstark/ONEAudit
 
 STYLISH	    Stylish Risk-Limiting Audits in Practice. Glazer, Spertus, Stark  16 Sep 2023
-  https://github.com/pbstark/SHANGRLA
+    https://arxiv.org/pdf/2309.09081, https://github.com/pbstark/SHANGRLA
 
 SliceDice   Dice, but don’t slice: Optimizing the efficiency of ONEAudit. Spertus, Glazer and Stark, Aug 18 2025
     https://arxiv.org/pdf/2507.22179; https://github.com/spertus/UI-TS
     
 Verifiable  Risk-Limiting Audits Are Interactive Proofs — How Do We Guarantee They Are Sound?
+    Blom, Caron, Ek, Ozdemir, Pereira, Stark, Teague, Vukcevic
+    submitted to IEEE Symposium on Security and Privacy (S&P 2026 Cycle 2) 
 
 ````
 Also see [complete list](docs/notes/papers.txt).
 
-## Differences with SHANGRLA
 
-### Limit audit to estimated samples
+## Extensions of SHANGRLA
 
-SHANGRLA consistent_sampling() in Audit.py only audits with the estimated sample size. However, in multiple
-contest audits, additional ballots may be in the sample because they are needed by another contest. Since there is no 
-guarentee that the estimated sample size is large enough, theres no reason not to include all the available mvrs in the audit.
+### Populations and hasStyle
 
-Note that as soon as an audit gets below the risk limit, the audit is considered a success.
-This reflects the "anytime P-value" property of the Betting martingale (ALPHA eq 9).
-That is, one does not continue with the audit, which could go back above the risk limit with more samples.
-This does agree with how SHANGRLA works.
+Rlauxe uses Population objects as a way to capture the information about which cards are in which sample populations,
+in order to set the diluted margins correctly.
+This allows us to refine SHANGRLA's hasStyle flag. 
+See [SamplePopulations](docs/SamplePopulations.md) for more explanation and current thinking.
 
-### compute sample size
+## CardManifest
 
-From STYLISH paper:
+Rlauxe uses a CardManifest, which consists of a canonical list of AuditableCards, one for each possible card in the election, 
+and the list of Populations. OneAudit pools are subtypes of Populations. The CardManifest is one of the committments that
+the Prover must make before the random seed can be generated.
 
-````
-4.a) Pick the (cumulative) sample sizes {𝑆_𝑐} for 𝑐 ∈ C to attain by the end of this round of 
-sampling. The software offers several options for picking {𝑆_𝑐}, including some based on simulation.
-The desired sampling fraction 𝑓_𝑐 := 𝑆_𝑐 /𝑁_𝑐 for contest 𝑐 is the sampling probability
-for each card that contains contest 𝑘, treating cards already in the sample as having sampling 
-probability 1. The probability 𝑝_𝑖 that previously unsampled card 𝑖 is sampled in the next round is 
-the largest of those probabilities:
-  𝑝_𝑖 := max (𝑓_𝑐), 𝑐 ∈ C ∩ C𝑖, where C_𝑖 denotes the contests on card 𝑖.
-  
-4.b) Estimate the total sample size to be Sum(𝑝_𝑖), where the sum is across all cards 𝑖 except 
-phantom cards.
-````
+### General Adaptive Betting strategy.
 
-AFAICT, the calculation of the total_size using the probabilities as described in 4.b) is only used when you just want the
-total_size estimate, but not do the consistent sampling, which already gives you the total sample size.
+SHANGRLA's Adaptive Betting Strategy has been generalized to work for both CLCA and OneAudit and for any assorter. 
+It uses estimated and/or measured error rates to set optimal betting values. This is currently the only betting strategy used by Rlauxe.
+See [GeneralizedAdaptiveBetting](docs/GeneralizedAdaptiveBetting.md) for more info.
 
-### generation of phantoms
+### MaxRisk for Betting
 
-From STYLISH paper:
+In order to prevent stalls in BettingMart, the maximum bet is bounded by a "maximum risk" value, which is the maximum
+percent of your "winnings" you are willing to risk on any one bet.
 
-````
-2.c) If the upper bound on the number of cards that contain any contest is greater than the 
-number of CVRs that contain the contest, create a corresponding set of “phantom” CVRs as 
-described in section 3.4 of [St20]. The phantom CVRs are generated separately for each contest: 
-each phantom card contains only one contest.
-````
 
-SHANGRLA.make_phantoms() instead generates max(Np_c) phantoms, then for each contest adds it to the first Np_c phantoms.
-Im guessing STYLISH is trying to describe the easist possible algorithm.
+### Additional assorters
 
-````
-2.d) If the upper bound 𝑁_𝑐 on the number of cards that contain contest 𝑐 is greater than the 
-number of physical cards whose locations are known, create enough “phantom” cards to make up 
-the difference. 
-````
+Dhondt, AboveThreshold and BelowThreshold assorters have been added to support Belgian elections using Dhondt proportional
+scoring. These assorters have an upper bound != 1, so are an important generalization of the Plurality assorter.
 
-Not clear what this means, and how its different from 2.c.
-
-### estimate CLCA error rates
-
-SHANGRLA has guesses for p1,p2,p3,p4. 
-We can use that method (strategy.apriori), and we can also use strategy.fuzzPct, which guesses a percent of contests to randomly 
-change ("fuzzPct"), and use it to simulate errors (by number of candidates) in a contest. That and other strategies are described in
-[CLCA error rates](https://github.com/JohnLCaron/rlauxe/blob/main/docs/ClcaErrorRates.md) ; we are still exploring which strategy works best.
-
-### use of previous round's sampled_cvr_indices
-
-At first glance, it appears that SHANGRLA Audit.py CVR.consistent_sampling() might make use of the previous round's
-selected ballots (sampled_cvr_indices). However, it looks like CVR.consistent_sampling() never uses sampled_cvr_indices, 
-and so uses the same strategy as we do, namely sampling without regards to the previous rounds.
-
-Of course, when the same ballots are selected as in previous rounds, which is the common case, the previous MVRs for those
-balllots are used.
 
 ### OneAudit Card Style Data
 
-SHANGRLA assumes there is no [Card Style Data for pooled data](#card-style-data-for-the-pooled-data), and so adds undervotes 
-to the ballots in the pools. Rlauxe adds the option that there may be CSD for pooled data, in part to investigate the 
-difference between the two options.
-
-The algorithm to add undervotes is not published anywhere that I know of, and needs explanation.
-
+Rlauxe adds the option that there may be CSD for OneAudit pooled data, in part to investigate the 
+difference between having CSD and not. Specifically, different OneAudit pools may have different values of
+_hasStyle_ (aka _hasSingleCardStyle_).  See [SamplePopulations](docs/SamplePopulations.md).
 
 ## Developer Notes
 

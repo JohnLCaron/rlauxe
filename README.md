@@ -242,7 +242,7 @@ The best case for CLCA no-errors is when you always make the maximum bet of 2. H
 the maximum bet will "stall" the audit and you wont recover. To deal with this, rlauxe sets a maximum bet allowed. Here is a 
 plot of CLCA no-error audits with maximum risks of 70, 80, 90, and 100% maximum:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaNoErrors/clcaNoErrorsMaxRiskLogLog.html" rel="clcaNoErrorsMaxRiskLogLog">![clcaNoErrorsMaxRiskLogLog](docs/plots2/samplesNeeded/clcaNoErrors/clcaNoErrorsMaxRiskLogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaNoErrorsMaxRisk/clcaNoErrorsMaxRiskLogLog.html" rel="clcaNoErrorsMaxRiskLogLog">![clcaNoErrorsMaxRiskLogLog](docs/plots2/samplesNeeded/clcaNoErrorsMaxRisk/clcaNoErrorsMaxRiskLogLog.png)</a>
 
 Currently we set maximum risk to 90%, and we are investigating what the optimal setting should be.
 
@@ -252,7 +252,7 @@ For polling, the assort values vary, and the number of samples needed depends on
 Here we show the average and standard deviation over 100 independent trials at each reported margin, when no errors are found,
 for poth polling and CLCA:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/pollingWithStdDev/pollingWithStdDev.html" rel="pollingWithStdDev">![pollingWithStdDev](docs/plots2/samplesNeeded/pollingWithStdDev/pollingWithStdDev.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/pollingWithStdDev/pollingWithStdDevLinear.html" rel="pollingWithStdDev">![pollingWithStdDev](docs/plots2/samplesNeeded/pollingWithStdDev/pollingWithStdDevLinear.png)</a>
 
 ## Samples needed when there are errors
 
@@ -262,11 +262,11 @@ When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on.
 
 With the margin fixed at 4%, this plot compares polling and CLCA audits and their variance:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/margin2WithStdDevLinear/pollingWithStdDevLinear.html" rel="margin2WithStdDevLinear">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/margin2WithStdDevLinear/margin2WithStdDevLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/margin2WithStdDev/pollingWithStdDevLinear.html" rel="margin2WithStdDevLinear">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/margin2WithStdDev/margin2WithStdDevLinear.png)</a>
 
 Here we show just CLCA audits with margins of .01, .02, and .04, over a range of fuzz errors from 0 to 1%:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaAuditsWithFuzz/clcaAuditsWithFuzz.html" rel="clcaAuditsWithFuzz">![clcaAuditsWithFuzz](docs/plots2/samplesNeeded/clcaAuditsWithFuzz/clcaAuditsWithFuzz.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaAuditsWithFuzz/clcaAuditsWithFuzzLinear.html" rel="clcaAuditsWithFuzz">![clcaAuditsWithFuzz](docs/plots2/samplesNeeded/clcaAuditsWithFuzz/clcaAuditsWithFuzzLinear.png)</a>
 
 * Polling audit sample sizes are all but impervious to errors.
 * CLCA as a percent of Nc is more sensitive to errors than polling, but still does much better in an absolute sense

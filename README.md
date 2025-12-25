@@ -45,7 +45,7 @@ Click on plot images to get an interactive html plot. You can also read this doc
   * [Reference Papers](#reference-papers)
   * [Extensions of SHANGRLA](#extensions-of-shangrla)
     * [Populations and hasStyle](#populations-and-hasstyle)
-  * [CardManifest](#cardmanifest)
+    * [CardManifest](#cardmanifest)
     * [General Adaptive Betting strategy.](#general-adaptive-betting-strategy)
     * [MaxRisk for Betting](#maxrisk-for-betting)
     * [Additional assorters](#additional-assorters)
@@ -525,7 +525,7 @@ in order to set the diluted margins correctly.
 This allows us to refine SHANGRLA's hasStyle flag. 
 See [SamplePopulations](docs/SamplePopulations.md) for more explanation and current thinking.
 
-## CardManifest
+### CardManifest
 
 Rlauxe uses a CardManifest, which consists of a canonical list of AuditableCards, one for each possible card in the election, 
 and the list of Populations. OneAudit pools are subtypes of Populations. The CardManifest is one of the committments that

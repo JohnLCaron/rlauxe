@@ -256,25 +256,7 @@ is the core abstraction, used by assorters and all the core routines. It represe
 
 is used to make the CardLocationManifest (aka Ballot Manifest), especially when there are no CVRs.
 
-
-## Audit Workflow
-
-An audit is performed in _rounds_, as outlined here:
-
-For each contest:
-- Count the votes in the usual way. The reported winner(s) and the reported margins are based on this vote count.
-- Determine the total number of valid ballots, including undervotes and overvotes (Nc).
-- For a Card Level Comparison Audit (CLCA), extract the Cast Vote Records (CVRs) from the vote tabulation system.
-
-For the election:
-- Create a Card Manifest (aka Ballot Manifest), in which every physical ballot has a unique entry. If this is a CLCA, attach the
-  Cvr to its CardLocation.
-- If necessary, add phantoms to the Card Manifest following SHANGRLA section 3.4.
-- Write the Card Manifest to cardManifest.csv.zip
-
-- initialize the audit by choosing the contests to be audited, the risk limit, and the random seed.
-- sort the Card Manifest by prn and wrte to to cardManifest.csv.zip.
-
+## Audit details
 
 The purpose of the audit is to determine whether the reported winner(s) are correct, to within the chosen risk limit.
 Contests are removed from the audit if:

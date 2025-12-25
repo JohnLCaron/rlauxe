@@ -152,15 +152,3 @@ class WorkflowResultsPlotterOld(val dir: String, val filename: String) {
     }
 
 }
-
-fun category(wr: WorkflowResult): String {
-    return wr.parameters["cat"] as String
-}
-
-fun categoryFuzzPct(wr: WorkflowResult): String {
-    return df(wr.Dparam("fuzzPct"))
-}
-
-fun categoryFuzzDiff(wr: WorkflowResult): String {
-    return dfn(100.0*wr.Dparam("fuzzDiff"), 2)
-}

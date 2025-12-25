@@ -12,8 +12,8 @@ bull-result = "1.1.18"
 commons-csv = "1.4"
 commons-math = "3.6.1"
 commons-poi = "5.4.1"
-letsPlot = "0.8.0"
-letsPlotStatistics = "0.4.0"
+kandy-letsPlot = "0.8.3"
+kotlin-statistics = "0.8.3"
 serialization = "1.7.1"
 xmlutil-version = "0.91.1"
 
@@ -31,8 +31,8 @@ kotlinx-cli = { module = "org.jetbrains.kotlinx:kotlinx-cli", version.ref = "kot
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 
 # Lets-Plot
-lets-plot = { group = "org.jetbrains.kotlinx", name = "kandy-lets-plot", version.ref = "letsPlot" }
-lets-plot-statistics = { group = "org.jetbrains.kotlinx", name = "kotlin-statistics-jvm", version.ref = "letsPlotStatistics" }
+lets-plot = { group = "org.jetbrains.kotlinx", name = "kandy-lets-plot", version.ref = "kandy-letsPlot" }
+lets-plot-statistics = { group = "org.jetbrains.kotlinx", name = "kotlin-statistics-jvm", version.ref = "kotlin-statistics" }
 
 # Other
 bull-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "bull-result" }

@@ -249,14 +249,13 @@ Currently we set maximum risk to 90%, and we are investigating what the optimal 
 In any setting of maximum risk, the CLCA assort value is always the same when there are no errors, and so there is no variance.
 
 For polling, the assort values vary, and the number of samples needed depends on the order the samples are drawn.
-Here we show the average and standard deviation over 100 independent trials at each reported margin, when no errors are found,
-for poth polling and CLCA:
+Here we show the average and standard deviation over 100 independent trials at each reported margin, when no errors are found:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/pollingWithStdDev/pollingWithStdDevLinear.html" rel="pollingWithStdDev">![pollingWithStdDev](docs/plots2/samplesNeeded/pollingWithStdDev/pollingWithStdDevLinear.png)</a>
 
 ## Samples needed when there are errors
 
-In these simulations, errors are created between the CVRs and the MVRs, by taking _fuzzPct_ of the ballots
+In the following simulations, errors are created between the CVRs and the MVRs, by taking _fuzzPct_ of the ballots
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the CVRs and MVRs agree.
 When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. 
 
@@ -264,15 +263,15 @@ With the margin fixed at 4%, this plot compares polling and CLCA audits and thei
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/margin2WithStdDev/pollingWithStdDevLinear.html" rel="margin2WithStdDevLinear">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/margin2WithStdDev/margin2WithStdDevLinear.png)</a>
 
-Here we show just CLCA audits with margins of .01, .02, and .04, over a range of fuzz errors from 0 to 1%:
+In this plot we show CLCA audits with margins of .01, .02, and .04, over a range of fuzz errors from 0 to 1%:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaAuditsWithFuzz/clcaAuditsWithFuzzLinear.html" rel="clcaAuditsWithFuzz">![clcaAuditsWithFuzz](docs/plots2/samplesNeeded/clcaAuditsWithFuzz/clcaAuditsWithFuzzLinear.png)</a>
 
 * Polling audit sample sizes are all but impervious to errors.
-* CLCA as a percent of Nc is more sensitive to errors than polling, but still does much better in an absolute sense
+* CLCA as a percent of Nc is more sensitive to errors than polling, but much better in an absolute sense
 * As margins get smaller, the variance in CLCA audits increases. At .001 fuzz (1 in 1000), an audit with a margin of 1% has an
 average sample size of 780, but the 1-sigma range goes from 462 to 1096. 
-* A rule of thumb might be that if you want to audit down to 1% margin, your error rate must be less than 1/1000.
+* A rule of thumb might be that if you want to do CLCA audits down to 1% margin, your error rate must be less than 1/1000.
 
 ## Effect of Phantoms on Samples needed
 

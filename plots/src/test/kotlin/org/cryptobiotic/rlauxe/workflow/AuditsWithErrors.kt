@@ -96,7 +96,7 @@ class AuditsWithErrors {
         val dirName = "$testdataDir/plots/samplesNeeded/$name"
 
         val N = 50000
-        val margins = listOf(.005, .01, .02, .04)
+        val margins = listOf(.01, .02, .04)
         val fuzzPcts = listOf(.00, .001, .0025, .005, .0075, .01)
 
         val stopwatch = Stopwatch()

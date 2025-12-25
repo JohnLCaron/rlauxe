@@ -364,6 +364,7 @@ fun wrsErrorBars(
     }
 
     plot.save("${writeFile}.html")
+    plot.save("${writeFile}.png")
     println("saved to $writeFile")
 }
 

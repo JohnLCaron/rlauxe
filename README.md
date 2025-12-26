@@ -42,7 +42,6 @@ Click on plot images to get an interactive html plot. You can also read this doc
 * [Sample Populations and diluted margins](#sample-populations-and-diluted-margins)
 * [Estimating Sample Batch sizes](#estimating-sample-batch-sizes)
   * [Estimation](#estimation)
-    * [Polling Vs CLCA with/out CSD](#polling-vs-clca-without-csd)
   * [Under/Over estimating CLCA sample sizes](#underover-estimating-clca-sample-sizes)
   * [Multiple Contest Auditing](#multiple-contest-auditing)
     * [Efficiency](#efficiency)
@@ -339,14 +338,6 @@ so previously audited MVRS are always used again in subsequent rounds, for conte
 each round we record both the total number of MVRs, and the number of "new samples" needed for that round, which are the
 ballots the auditors have to find and hand audit for that round.
 
-### Polling Vs CLCA with/out CSD
-
-The following plot shows nmvrs for Polling vs CLCA, with and without CSD at different margins, no errors, where Nb/Nc = 2.
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/nostyle/compareWithStyle/compareWithStyleLogLinear.html" rel="compareWithStyleLogLinear">![compareWithStyleLogLinear](docs/plots/nostyle/compareWithStyle/compareWithStyleLogLinear.png)</a>
-
-* For both Polling and CLCA, the sample sizes are a factor of Nb/Nc greater without Card Style Data.
-
 ## Under/Over estimating CLCA sample sizes
 
 Overestimating sample sizes uses more hand-counted MVRs than needed. Underestimating sample sizes forces more rounds than needed.
@@ -571,8 +562,10 @@ Modules
 * plots: plot generation and testing
 
 Also See:
-* [Verification](docs/Verification.md)
+* [Developer Notes](docs/Developer.md)
+* [Rlauxe Implementation Overview](docs/Overview.md)
 * [Implementation Specificaton](docs/RlauxeSpec.md)
+* [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer)
+* [Verification](docs/Verification.md)
 * [Case Studies](docs/CaseStudies.md)
-* [Corla Notes](docs/Corla.md)
 

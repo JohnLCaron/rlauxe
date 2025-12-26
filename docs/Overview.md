@@ -65,9 +65,9 @@ See Sample Population for more details.
 
     $auditdir/
         auditConfig.json      // AuditConfigJson
-        auditSeed.json        // PrnJson
+        auditSeed.json        // PrnJson // TODO
         cardManifest.csv      // AuditableCardCsv, may be zipped
-        cardPools.json        // CardPoolJson (OneAudit only)
+        populations.json      // PopulationJson 
         contests.json         // ContestsUnderAuditJson
         sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
         
@@ -85,7 +85,7 @@ At each stage, the AuditRecord is zipped, digitally signed and published publica
 
         auditConfig.json      
         cardManifest.csv      
-        cardPools.json        // (OneAudit only)
+        populations.json       
         contests.json
 
 2. PRN chosen
@@ -229,7 +229,7 @@ mvrManager abstracts the handling of mvrs.
 
 
 ///////////////////////////////////////////////////////////////////////////
-TODO rewrite
+TODO rewrite b elow
 
 
 ## Cast Vote Records

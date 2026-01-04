@@ -11,23 +11,31 @@ interface BettingFn {
     fun bet(prevSamples: SampleTracker): Double
 }
 
-// SmithRamdas eq 33, ALPHA section 2.2.1
-// NonnegMean line 173
-// m = ( (N * t - S) / (N - j + 1) # mean of population after (j-1)st draw, if null is true (t=eta is the mean)
-//   where t= 1/2, j-1 = sample number, N = population size, S = sum of samples 1..j
+// SmithRamdas eq 33
+//   m_t(WOR) = N * µ - Sum {Xi, i=1..t-1 } / (N - (t - 1))
+// Notice that constructing a WoR test martingale only relies on changing the fixed conditional mean µ
+// to the time-varying conditional mean µ_t(WoR)
+//
+// ALPHA section 2.2.1
+// To use ALPHA with a sample drawn without replacment, we need E(Xj |X j−1 ) computed on the assumption that
+//    θ := Sum {Xi, i=1..N} = µ
+// For sampling without replacement from a population with mean µ, after draw j - 1, the mean of the remaining numbers is
+//   (N * µ − Sum {Xi, i=1..j-1 }) / (N - j  + 1)
+
+// note µ = 1/2 here
 fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, sampleTracker: SampleTracker): Double {
     val sampleNum = sampleTracker.numberOfSamples()
     return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - sampleTracker.sum()) / (N - sampleNum)
 }
 
 /*
-Alpha eq 12. Choosing λi is equivalent to choosing ηi :
-       λi = (ηi /µi − 1) / (u − µi )
-    ⇐⇒ ηi = µi (1 + λi (u − µi ))
-As ηi ranges from µi to u, λi ranges continuously from 0 to 1/µi , the same range of values of λi permitted in
-Waudby-Smith and Ramdas (2021): selecting λi is equivalent to selecting a method for estimating θi.
-The difference is only in how λi is chosen. However, see section 4 for a generalization to allow sampling weights
-and to allow u to vary by draw.
+    Alpha eq 12. Choosing λi is equivalent to choosing ηi :
+           λi = (ηi /µi − 1) / (u − µi )
+        ⇐⇒ ηi = µi (1 + λi (u − µi ))
+    As ηi ranges from µi to u, λi ranges continuously from 0 to 1/µi , the same range of values of λi permitted in
+    Waudby-Smith and Ramdas (2021): selecting λi is equivalent to selecting a method for estimating θi.
+    The difference is only in how λi is chosen. However, see section 4 for a generalization to allow sampling weights
+    and to allow u to vary by draw.
  */
 
 fun lamToEta(lam: Double, mu: Double, upper: Double): Double {

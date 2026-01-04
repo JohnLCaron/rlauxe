@@ -112,7 +112,7 @@ There's lots of online help for using IntelliJ.
 
 The repo contains all the test case data, except for San Francisco. Download
 
-  https://www.sfelections.org/results/20241105/data/20241203/CVR_Export_20241202143051.zip
+  [SF2024 data](https://www.sfelections.org/results/20241105/data/20241203/CVR_Export_20241202143051.zip)
 
 into testdataDir/cases/sf2024/ (where _testdataDir_ is as you chose in the "Set the test data directory" step above)
 
@@ -123,7 +123,7 @@ All the test cases can be generated from:
 
 _cases/src/test/kotlin/org/cryptobiotic/util/TestGenerateAllUseCases.kt_.
 
-Run the verifier on all the gnerated test cases:
+Run the verifier on all the generated test cases:
 
 _cases/src/test/kotlin/org/cryptobiotic/util/TestVerifyUseCases.kt_.
 

@@ -11,7 +11,7 @@ interface ClcaErrorRatesIF {
     fun errorCounts(): Map<Double, Int>
 }
 
-// TODO back out handling OneAudit?
+// OneAudit now has OneAuditErrorRates
 // primitive assorter upper bound, is always > 1/2
 data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
     override fun errorRates() = errorCounts.mapValues { if (totalSamples == 0) 0.0 else it.value / totalSamples.toDouble() }

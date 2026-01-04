@@ -1,5 +1,5 @@
 # Sample Populations
-_12/20/25_
+_01/03/25_
 
 ## TL;DR
 
@@ -15,10 +15,11 @@ The use of populations is implicit in the "More styles, less work" paper. Settin
 
 ## Definitions
 
-* **physical card** = pcard: the physical ballot or physical card if the ballot has multiple cards and the cards are scanned and stored seperately.
+* **physical card** = pcard: the physical ballot or physical card if the ballot has multiple cards and the cards are scanned and stored separately.
 * **CVR**: scanned electronic record of a physical card
 * **MVR**: human audited physical card
-* **auditable card** = card:  internal computer representation of a physical card; contains the CVR if there is one. At minimum a card has a _location_ which allows a human auditor to locate the physical card, and a _population_ that it belongs to.
+* **auditable card** = card:  internal computer representation of a physical card; contains the CVR if there is one. A card usually has a _location_ 
+  which allows a human auditor to locate the physical card, and either a CVR or a _population_ that it belongs to.
 
 * **CardStyle**: the full and exact list of contests on a card.
 * **population**: a distinct container of pcards, from which we can retreive named cards (even if its just by an index into an ordered list).
@@ -30,7 +31,7 @@ The use of populations is implicit in the "More styles, less work" paper. Settin
 * **card manifest** = complete list of auditable cards, one for each physical card and phantom card.
 
 * **Contest population** = P_c: For each contest, the set of cards that may contain the contest. This is the sample population for the contest. 
-* **Contest population size** = |P_c| = Npop: The size of the contest's population. Npop >= Nc. If hasStyle = true for all populations containing the contest, then Nc = Npop.
+* **Contest population size** = \|P_c\| = Npop: The size of the contest's population. Npop >= Nc. If hasStyle = true for all populations containing the contest, then Nc = Npop.
 
 * **Reported margin**: Each assorter has a reported margin with Nc as denominator; For Plurality it is (nwinners - nlosers) / Nc.
   Other assorters have numerators somewhat different.
@@ -107,7 +108,7 @@ for each population. Also see Ncast section below.
 
 ## Contest is missing in the MVR
 
-When the contest is missing on th MVR, we assign 0 to mvr_assort when hasStyle=true, and 0.5 when hasStyle=false.
+When the contest is missing on the MVR, we assign 0 to mvr_assort when hasStyle=true, and 0.5 when hasStyle=false.
 
 The first case tanks the audit, and the second may allow attacks(?)
 

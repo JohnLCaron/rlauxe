@@ -1,6 +1,8 @@
 # OneAudit version 4 
 _last changed 12/06/2025_
 
+REDO
+
 ## Strategies
 
 We try different betting "strategies":

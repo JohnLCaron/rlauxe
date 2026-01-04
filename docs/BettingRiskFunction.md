@@ -1,5 +1,5 @@
 # CLCA Betting Risk Functions
-_last changed 3/25/25_
+_last changed 01/03/25_
 
 ## Betting martingales
 
@@ -16,6 +16,7 @@ The gambler starts with a stake of 1 unit and bets a fraction λi of their curre
 the outcome of the ith wager. The value Mj is the gambler’s wealth after the jth wager. The
 gambler is not permitted to borrow money, so to ensure that when X_i = 0 (corresponding to
 losing the ith bet) the gambler does not end up in debt (Mi < 0), λi cannot exceed 1/µi.
+In practice, λi < 1/µi to prevent stalls.
 
 See Cobra section 4.2 and SHANGRLA Section 3.2.
 
@@ -76,7 +77,7 @@ and so B is an half-average assorter.
 
 Notes
 * The comparison assorter B needs Ā(c) ≡ the average CVR assort value > 0.5.
-* Ā(c) should have the diluted margin as the denominator.
+* Ā(c) should have the diluted margin as the denominator, SO N = Npop, the size of the population that the contest is drawn from.
   (Margins are  traditionally calculated as the difference in votes divided by the number of valid votes.
   Diluted refers to the fact that the denominator is the number of ballot cards containing that contest, which is
   greater than or equal to the number of valid votes.)
@@ -121,7 +122,7 @@ Plots 1-5 shows the betting payoffs when all 4 error rates are equal to {0.0, 0.
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.005.html" rel="BettingPayoff0.005">![BettingPayoff0.005](plots/betting/BettingPayoff0.005.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.01.html" rel="BettingPayoff01">![BettingPayoff01](plots/betting/BettingPayoff0.01.png)</a>
 
-Plot 6 shows the payoffs for all the error rates when the MVR matches the CVR (assort value = 1.0 * noerror):
+Plot 6 shows the payoffs for all the error rates when the MVR matches the CVR (assort value = noerror):
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoffAssort1.0.html" rel="BettingPayoffAssort1">![BettingPayoffAssort1](plots/betting/BettingPayoffAssort1.0.png)</a>
 
@@ -135,3 +136,5 @@ the minimum sampling size for the RLA.
 Note that this value is independent of N, the number of ballots.
 
 See GenBettingPayoff.kt for the generation of these plots.
+
+Note AdaptiveBetting has been replaced by GeneralizedAdaptiveBetting.

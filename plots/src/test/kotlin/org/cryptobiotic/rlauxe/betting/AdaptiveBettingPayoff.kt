@@ -4,13 +4,11 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.core.AdaptiveBetting
 import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
-import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.core.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.sampleSize
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
 
-class GenBettingPayoff {
+class AdaptiveBettingPayoff {
 
     @Test
     fun showAdaptiveComparisonBet() {
@@ -45,6 +43,7 @@ class GenBettingPayoff {
         }
     }
 
+    /*
     @Test
     fun showGeneralAdaptiveComparisonBet() {
         val N = 10000
@@ -63,7 +62,7 @@ class GenBettingPayoff {
                 println(" margin=$margin, noerror=$noerror bet = ${betFn.bet(samples)}")
             }
         }
-    }
+    } */
 
     @Test
     fun showBettingPayoff() {
@@ -84,15 +83,15 @@ class GenBettingPayoff {
                 val samples = PluralityErrorTracker(noerror)
                 repeat(100) { samples.addSample(noerror) }
                 val bet = bettingFn.bet(samples)
-                println("margin=$margin, noerror=$noerror bet = $bet}")
+                println(" margin=$margin, noerror=$noerror bet = $bet")
 
-                println("2voteOver, 1voteOver, equal, 1voteUnder, 2voteUnder")
+                println(" 2voteOver, 1voteOver, equal, 1voteUnder, 2voteUnder")
                 //     X_i = {0, .5, 1, 1.5, 2} * noerror for {2voteOver, 1voteOver, equal, 1voteUnder, 2voteUnder} respectively.
                 val payoff = listOf(0.0, 0.5, 1.0, 1.5, 2.0).map { x ->
                     // 1 + λ_i (X_i − µ_i)
                     1.0 + bet * (noerror * x - .5)
                 }
-                payoff.forEach { print("${dfn(it, 6)}, ") }
+                payoff.forEach { print(" ${dfn(it, 6)}, ") }
                 println()
             }
         }

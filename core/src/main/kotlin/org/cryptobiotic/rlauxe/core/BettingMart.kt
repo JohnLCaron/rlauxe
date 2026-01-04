@@ -48,7 +48,7 @@ class BettingMart(
 
             // make sure mj is in bounds
             if (mj > sampleUpperBound || mj < 0.0) { // 1, 5
-                populationMeanIfH0(N, withoutReplacement, tracker)
+                populationMeanIfH0(N, withoutReplacement, tracker) // debug
                 break
             }
 
@@ -171,6 +171,9 @@ class DebuggingSequences {
         this.testStatistics.add(testStatistic)
     }
 
+    // That is, min(1, 1/Tj ) is an “anytime P -value” for the composite null hypothesis θ ≤ µ. ALPHA (9)
+    // TODO so probably should be min (1, 1 / testStatistic)
+    //   but unsure of the implications for muliple round sampling
     fun pvalues(): List<Double> {
         return testStatistics.map { 1.0 / it }
     }

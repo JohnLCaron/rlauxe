@@ -23,7 +23,7 @@ private val checkValidity = true
 open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, val contestsUA: List<ContestWithAssertions>, val mvrWrite: Boolean = true): MvrManager {
     val publisher = Publisher(auditDir)
 
-    override fun sortedCards() = CloseableIterable{ auditableCards() }
+    override fun sortedCards() = readCardManifest(publisher).cards
 
     override fun populations(): List<PopulationIF>?  {
         return readPopulations(publisher)
@@ -62,7 +62,10 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
         return readAuditableCardCsvFile(publisher.sampleMvrsFile(round))
     }
 
-    fun auditableCards(): CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.sortedCardsFile())
+    fun auditableCards(): CloseableIterator<AuditableCard> {
+        val cardManifest = readCardManifest(publisher)
+        return cardManifest.cards.iterator()
+    }
 }
 
 fun readCardManifest(publisher: Publisher): CardManifest {

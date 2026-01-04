@@ -1,9 +1,11 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditErrorsFromPools
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
+import org.cryptobiotic.rlauxe.core.BettingFn
+import org.cryptobiotic.rlauxe.core.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.core.GeneralAdaptiveBetting
+import org.cryptobiotic.rlauxe.core.GeneralOptimalLambda
+import org.cryptobiotic.rlauxe.core.populationMeanIfH0
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
@@ -44,11 +46,23 @@ class TestOneAuditAdaptiveBetting {
         println()
 
         // no clca errors at first
-        val clcaErrors = ClcaErrorCounts(emptyMap(), totalSamples = 0, noerror = oaCassorter.noerror(), upper = oaCassorter.assorter.upperBound())
+        val clcaErrors = ClcaErrorCounts(
+            emptyMap(),
+            totalSamples = 0,
+            noerror = oaCassorter.noerror(),
+            upper = oaCassorter.assorter.upperBound()
+        )
         //val tracker2 = ClcaErrorTracker(noerror, 1.0)
 
         val mui = .5
-        val solver = GeneralOptimalLambda(oaCassorter.noerror(), clcaErrors.errorRates(), oaErrorRates.rates, mui, 2.0, debug=true)
+        val solver = GeneralOptimalLambda(
+            oaCassorter.noerror(),
+            clcaErrors.errorRates(),
+            oaErrorRates.rates,
+            mui,
+            2.0,
+            debug = true
+        )
         val lam = solver.solve()
         println("lamda = $lam")
         println()
@@ -66,7 +80,13 @@ class TestOneAuditAdaptiveBetting {
         val welford = Welford()
         repeat(100) {
             sampler.reset()
-            val betFun = GeneralAdaptiveBetting(contestUA.Npop, oaErrorRates = oaErrorRates, d=100, maxRisk=0.90, debug = false)
+            val betFun = GeneralAdaptiveBetting(
+                contestUA.Npop,
+                oaErrorRates = oaErrorRates,
+                d = 100,
+                maxRisk = 0.90,
+                debug = false
+            )
             val tracker = ClcaErrorTracker(oaCassorter.noerror(), oaCassorter.assorter.upperBound())
             val nsamples = runSamplesNeeded(contestUA.Npop, betFun, sampler, tracker, show = false)
             sampleSizes.add(nsamples)

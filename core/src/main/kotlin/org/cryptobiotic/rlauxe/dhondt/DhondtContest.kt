@@ -20,7 +20,7 @@ import kotlin.collections.mutableListOf
 private val showDetails = false
 private val useBt = false // always use Bt
 
-// Belgium does each contest seperately, so Npop = Nc. TODO generalize that
+// Belgium does each contest separately, so Npop = Nc. TODO generalize that
 
 data class DhondtCandidate(val name: String, val id: Int, val votes: Int) {
     var lastSeatWon: Int? = null // We

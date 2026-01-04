@@ -36,7 +36,7 @@ class OneAuditErrorsFromPools(val pools: List<OneAuditPoolIF>) {
     }
 }
 
-// Consider a single pool and an assorter a, with upper bound u and avg assort value in the pool poolAvg.
+// Consider a single pool and an assorter a, with upper bound u and avg assort value in the pool = poolAvg.
 // poolAvg is used as the cvr_value, so then mvr_assort - mvr_assort has one of 3 possible overstatement values:
 //
 //    poolAvg - [0, .5, u] = [poolAvg, poolAvg -.5, poolAvg - u] for mvr loser, other and winner
@@ -69,3 +69,9 @@ class TausOA(val upper: Double, val poolAvg: Double): TausIF {
         return tausOA.toString()
     }
 }
+
+// poolAvg lies betweeen 0 and u
+//              loser  other   winner
+// poolAvg= 0 :  [1,    1.5/u,   2  ] * noerror
+// poolAvg= u :  [0,    .5/u,    1  ] * noerror
+

@@ -1,6 +1,8 @@
 # OneAudit Use Cases
 _last changed: 9/28/2025_
 
+REDO
+
 <!-- TOC -->
 * [OneAudit Use Cases](#oneaudit-use-cases)
   * [OneAudit inherent sample variance](#oneaudit-inherent-sample-variance)
@@ -11,7 +13,7 @@ _last changed: 9/28/2025_
 
 ## OneAudit inherent sample variance
 
-For CLCA and Polling, if there are no errors, then the number of samples needed for the audit is completely determined
+For CLCA, if there are no errors, then the number of samples needed for the audit is completely determined
 by the margin and the betting method chosen. The presence of errors adds variance because the errors show up randomly in
 the sequence of sampled ballots.
 

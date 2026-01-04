@@ -23,11 +23,15 @@ enum class TestH0Status(val rank: Int, val complete: Boolean, val success: Boole
     AcceptNull(13,true, false), // SampleSum + (all remaining ballots == 1) < Nc / 2, so we know that H0 is true.
 }
 
+// TODO pvalueLast = pvalueMin when you terminate on p < risk.
+//   but not when you hit maxSamples
+//   but not "risk measuring" audits.
+//   probably should show pmin instead of plast in viewer.
 data class TestH0Result(
     val status: TestH0Status,  // how did the test conclude?
     val sampleCount: Int,      // number of samples used in testH0
-    val pvalueMin: Double,    // smallest pvalue in the sequence
-    val pvalueLast: Double,    // last pvalue
+    val pvalueMin: Double,     // smallest pvalue in the sequence.
+    val pvalueLast: Double,    // last pvalue.
     val tracker: SampleTracker,
 ) {
     override fun toString() = buildString {

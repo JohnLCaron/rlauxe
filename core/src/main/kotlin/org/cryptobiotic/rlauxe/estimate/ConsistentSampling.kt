@@ -92,8 +92,9 @@ fun consistentSampling(
     val sortedCardIter = mvrManager.sortedCards().iterator()
     while (
         ((auditRound.auditorWantNewMvrs < 0) || (newMvrs < auditRound.auditorWantNewMvrs)) &&
-            contestsIncluded.any { contestWantsMoreSamples(it) } &&
-            sortedCardIter.hasNext()) {
+        contestsIncluded.any { contestWantsMoreSamples(it) } &&
+        sortedCardIter.hasNext()
+    ) {
 
         // get the next card in sorted order
         val card = sortedCardIter.next()

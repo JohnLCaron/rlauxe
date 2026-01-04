@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 12/25/2025_
+_last changed: 01/03/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -79,15 +79,14 @@ in a risk-limiting audit with risk limit α:
 
 | term      | definition                                                                                   |
 |-----------|----------------------------------------------------------------------------------------------|
-| Nc        | a trusted, independent bound on the number of valid cards cast in the contest c.             |
-| Ncast     | the number of ballot cards validly cast in the contest                                       |
-| risk	     | we want to confirm or reject the null hypothesis with risk level α.                          |
+| audit     | iterative process of choosing ballots and checking if all the assertions are true.           |
+| risk	     | we want to confirm or reject with risk level α.                                              |
 | assorter  | assigns a number between 0 and upper to each card, chosen to make assertions "half average". |
 | assertion | the mean of assorter values is > 1/2: "half-average assertion"                               |
-| estimator | estimates the true population mean from the sampled assorter values.                         |
 | bettingFn | decides how much to bet for each sample. (BettingMart)                                       |
 | riskFn    | the statistical method to test if the assertion is true.                                     |
-| audit     | iterative process of choosing ballots and checking if all the assertions are true.           |
+| Nc        | a trusted, independent bound on the number of valid cards cast in the contest c.             |
+| Ncast     | the number of ballot cards validly cast in the contest                                       |
 
 
 # Audit Workflow Overview
@@ -116,7 +115,7 @@ Committment:
 ## Creating a random seed
 
 - Create a random 32-bit integer "seed" in a way that allows public observers to be confident that it is truly random.
-- Publish the random seed to the bulletin board, it becomes part of the "audit committment" and may not be altered once chosen.
+- Publish the random seed to the bulletin board. It becomes part of the "audit committment" and may not be altered once chosen.
 - Use a PRNG (Psuedo Random Number Generator) with the random seed, and assign the generated PRNs, in order, to the auditable cards.
 - Sort the cards by PRN and write them to sortedCards.csv.
 
@@ -138,7 +137,7 @@ The audit proceeds in rounds:
 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk limit
 2. _Choosing contests and sample sizes_: the EA decides which contests and how many samples will be audited.
  This may be done with an automated algorithm, or the Auditor may make individual contest choices.
-3. _Random sampling_: The actual ballots to be sampled are selected in order from the sorted Manifest until the sample size is satisfied.
+3. _Random sampling_: The actual ballots to be sampled are selected in order from the sorted Card Manifest until the sample size is satisfied.
 4. _Manual Audit_: find the chosen paper ballots that were selected to audit and do a manual audit of each.
 5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
 6. _Run the audit_: For each contest, using the MVRs, calculate if the risk limit is satisfied.
@@ -210,8 +209,8 @@ When CVRs are not available, a Polling audit can be done instead. A Polling audi
 creates an MVR for each ballot card selected for sampling, just as with a CLCA, except without the CVR.
 
 For the risk function, Rlaux uses the **AlphaMart** (aka ALPHA) function with the **ShrinkTrunkage** estimation of the true
-population mean (theta). ShrinkTrunkage uses a weighted average of an initial estimate of the mean with the measured mean
-of the mvrs as they are sampled. The reported mean is used as the initial estimate of the mean.
+population mean. ShrinkTrunkage uses a weighted average of an initial estimate of the mean with the measured mean
+of the MVRs as they are sampled. The reported mean is used as the initial estimate of the mean.
 
 See [AlphaMart risk function](docs/AlphaMart.md) for details on the AlphaMart risk function.
 
@@ -238,7 +237,7 @@ The audit needing the least samples is CLCA when there are no errors in the CVRs
 the samplesNeeded depend only on the margin, and is a straight line vs margin on a log-log plot. 
 
 The best case for CLCA no-errors is when you always make the maximum bet of 2. However, if it turns out there are errors,
-the maximum bet will "stall" the audit and you wont recover. To deal with this, rlauxe sets a maximum bet allowed. Here is a 
+the maximum bet will "stall" the audit and the audit cant recover. To deal with this, rlauxe sets a maximum bet allowed. Here is a 
 plot of CLCA no-error audits with maximum risks of 70, 80, 90, and 100% maximum:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaNoErrorsMaxRisk/clcaNoErrorsMaxRiskLogLog.html" rel="clcaNoErrorsMaxRiskLogLog">![clcaNoErrorsMaxRiskLogLog](docs/plots2/samplesNeeded/clcaNoErrorsMaxRisk/clcaNoErrorsMaxRiskLogLog.png)</a>
@@ -258,7 +257,7 @@ In the following simulations, errors are created between the CVRs and the MVRs, 
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the CVRs and MVRs agree.
 When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. 
 
-With the margin fixed at 4%, this plot compares polling and CLCA audits and their variance:
+With the margin fixed at 2%, this plot compares polling and CLCA audits and their variance:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/margin2WithStdDev/pollingWithStdDevLinear.html" rel="margin2WithStdDevLinear">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/margin2WithStdDev/margin2WithStdDevLinear.png)</a>
 
@@ -266,7 +265,7 @@ In this plot we show CLCA audits with margins of .01, .02, and .04, over a range
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaAuditsWithFuzz/clcaAuditsWithFuzzLinear.html" rel="clcaAuditsWithFuzz">![clcaAuditsWithFuzz](docs/plots2/samplesNeeded/clcaAuditsWithFuzz/clcaAuditsWithFuzzLinear.png)</a>
 
-* Polling audit sample sizes are all but impervious to errors.
+* Polling audit sample sizes are all but impervious to errors, because the sample variance dominates the errors.
 * CLCA as a percent of Nc is more sensitive to errors than polling, but much better in an absolute sense
 * As margins get smaller, the variance in CLCA audits increases. At .001 fuzz (1 in 1000), an audit with a margin of 1% has an
 average sample size of 780, but the 1-sigma range goes from 462 to 1096. 
@@ -418,7 +417,7 @@ on the various percentages the contests appear on the same ballot.
 
 For any given contest, the sequence of ballots/CVRS to be used by that contest is fixed when the PRNG is chosen.
 
-In a multi-contest audit, at each round, the estimate of the number of ballots needed for each contest is calculated = n, 
+In a multi-contest audit, at each round, the estimate n of the number of ballots needed for each contest is calculated, 
 and the first n ballots in the contest's sequence are sampled.
 The total set of ballots sampled in a round is just the union of the individual contests' set. 
 The extra efficiency of a multi-contest audit comes when the same ballot is chosen for more than one contest.
@@ -511,7 +510,7 @@ Verifiable  Risk-Limiting Audits Are Interactive Proofs — How Do We Guarantee 
     submitted to IEEE Symposium on Security and Privacy (S&P 2026 Cycle 2) 
 
 ````
-Also see [complete list](docs/notes/papers.txt).
+Also see [complete list of references](docs/papers/papers.txt).
 
 
 ## Extensions of SHANGRLA

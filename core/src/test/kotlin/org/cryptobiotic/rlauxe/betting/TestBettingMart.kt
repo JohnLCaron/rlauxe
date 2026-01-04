@@ -1,19 +1,22 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.betting
 
+import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.core.populationMeanIfH0
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
 import kotlin.test.Test
 
+// all tests here are with assort values = noerror
 class TestBettingMart {
     val allShow = false
 
-    // what does populationMeanIfH0 look like as j -> N, when all are noerror
+    // what does populationMeanIfH0 look like as j -> N, when all are noerror?
     @Test
     fun showPopulationMeanIfH0() {
         for (N in listOf(100, 1000, 10000)) {
             for (margin in listOf(.05, .01, .001)) {
-                for (upper in listOf(10.0, 1.0, .67)) {
+                for (upper in listOf(10.0, 1.0, .67)) { // for upper > 1, 1, < 1
                     showPopulationMeanIfH0(N, margin, upper)
                 }
                 println()
@@ -37,42 +40,27 @@ class TestBettingMart {
             val mj = populationMeanIfH0(N = N, withoutReplacement = true, sampleTracker = tracker)
             if (show) println(
                 "${nfn(tracker.numberOfSamples(), 3)}: m=${dfn(mj, 6)} diff from 1/2 = ${
-                    dfn(
-                        0.5 - mj,
-                        6
-                    )
-                }"
+                    dfn(0.5 - mj, 6)}"
             )
-            if ((diff1 == 0) && (0.5 - mj > .01)) diff1 = it
-            if ((hitZero == 0) && (mj <= 0.0)) hitZero = it
-            if ((hitUpper == 0) && (mj >= upper)) hitUpper = it
+            if ((diff1 == 0) && (0.5 - mj > .01)) diff1 = it     // how many samples before mj is 1% different from 1/2
+            if ((hitZero == 0) && (mj <= 0.0)) hitZero = it       // first time (mj <= 0.0) "true mean certainly greater than hypothesized"
+            if ((hitUpper == 0) && (mj >= upper)) hitUpper = it   // first time mj >= upper
         }
         println("N=$N, margin=$margin, upper=$upper: hitZero=$hitZero hitUpper=$hitUpper diff1% = $diff1")
     }
 
-
-    // when is ttj == 0?
-    // val ttj = 1.0 + lamj * (xj - mj)
-    // 0 = 1 + lamj * (xj - mj)
-    // lamj * (mj - xj) = 1
-    // lamj = 1 / (mj - xj)
-
-    // lamj = 1 / (1/2 - xj) // when mj ~= 1/2
-    // lamj = 1 / (1 - 2*xj)/2
-    // lamj = 2 / (1 - 2*xj)
-
-
-    // lamj is in (0..2)
-    // mj in (0, upper)
-    // xj in (0, upper)
-    // (mj-xj) in (-upper, upper)
-
-    // ttj = 1 + lamj * (xj - mj)
-    // ttj = 1 - lamj * mj when x == 0
-    // ttj ~= 0            when x == 0, m ~ 1/2, lam ~= 2
-
-    // suppose you want 1 - lamj * mj > mint; so 1 - mint > lamj * mj;
-    // then lamj < (1-mint) / mj
+    //    tj is how much you win or lose
+    //    tj = 1 + lamj * (xj - mj)
+    //    tj = 1 - lamj * mj when x == 0 (smallest value x can be)
+    //
+    //    how much above 0 should it be?
+    //    limit your bets so at most you lose maxRisk for any one bet:
+    //
+    //    tj > (1 - maxRisk)
+    //    1 - lamj * mj > 1 - maxRisk   when x = 0
+    //    lamj * mj < maxRisk
+    //    lamj <  maxRisk / mj
+    //    maxBet = maxRisk / mj
 
     // (" i, ${sfn("xs", 6)}, ${sfn("bet", 6)}, ${sfn("tj", 6)}, ${sfn("Tj", 6)}, ${sfn("pvalue", 8)}, ")
     //     x       lam=bet, tj   , Tj    ,p

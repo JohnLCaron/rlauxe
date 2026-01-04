@@ -1,5 +1,5 @@
 # Generalized Adaptive Betting for CLCA
-_last updated Dec 01, 2025_
+_last updated 01/03/24_
 
 The default betting strategy for CLCA is a generalized form of AdaptiveBetting from the COBRA paper. We generalize to use any
 number of error types, and any kind of assorter, in particular ones with upper != 1, such as DHondt.
@@ -23,7 +23,7 @@ where
 Following COBRA, at each step, before sample X_i is drawn, we find the optimal value of lambda which maximizes the expected value of the log of T_i, and use that as the lamda bet for step i:
 
 ````
-log T_i = ln(1.0 + lamda * (noerror - mui)) * p0  + Sum { ln(1.0 + lamda * (assortValue_k - mui)) * p_k }
+log T_i = ln(1.0 + lamda * (noerror - mui)) * p0  + Sum { ln(1.0 + lamda * (assortValue_k - mui)) * p_k }   (eq 1)
 
 where 
     p0 is the probability of no error (mvr matches the cvr)
@@ -31,7 +31,30 @@ where
     assortValue_k is the value of X when error type k occurs
 ````
 
-We use the BrentOptimizer from _org.apache.commons.math3_ library to find the optimal lamda for this equation.
+We use the BrentOptimizer from _org.apache.commons.math3_ library to find the optimal lamda for equation 1 on
+the interval \[0.0, maxBet].
+
+## Maximum Bet using Maximum Risk
+
+In order to prevent stalls in BettingMart, the maximum bet is bounded by a "maximum risk" value, which is the maximum
+percent of your "winnings" you are willing to risk on any one bet:
+
+````
+    tj is how much you win or lose
+    tj = 1 + lamj * (xj - mj)
+    tj = 1 - lamj * mj when x == 0 (smallest value x can be)
+
+    how much above 0 should it be?
+    limit your bets so at most you lose maxRisk for any one bet:
+    
+    tj > (1 - maxRisk)
+    1 - lamj * mj > 1 - maxRisk   when x = 0
+    lamj * mj < maxRisk
+    lamj <  maxRisk / mj
+    maxBet = maxRisk / mj
+````
+
+TODO: whats a good maxRisk?
 
 ## Possible assort values
 
@@ -117,39 +140,46 @@ We use the "shrink-truncate" algorithm with d = 100 to ease the effects of error
 each of the error types:
 
 ````
-        if (sampleNum == 0) return minRate
+        if (sampleNum == 0) return 0.0
+        if (errorCount == 0) return 0.0 
         val est = (d * aprioriRate + errorCount) / (d + sampleNum - 1)
-        val boundedBelow = max(est, minRate) // lower bound on the estimated rate
-        val boundedAboveAndBelow = min(1.0, boundedBelow) // upper bound on the estimated rate
-        return boundedAboveAndBelow
+        return est
     
     where
       aprioriRate = user settable, default is 0.0
-      minRate = epsilon = 1e-5
       errorCount = number of errors of this type found so far
       sampleNum = i      
 ````
 
 ## OneAudit
 
-Consider a single pool and assorter a, with upper bound u and avg assort value in the pool is poolAvg_a.
-poolAvg_a is used as the cvr_value, so then mvr_assort - mvr_assort has one of 3 possible overstatement values:
+Consider a single pool and assorter a, with upper bound u and avg assort value in the pool = poolAvg.
+poolAvg is used as the cvr_value, so then cvr_assort - mvr_assort has one of 3 possible overstatement values:
 
-    poolAvg_a - [0, .5, u] = [poolAvg_a, poolAvg_a -.5, poolAvg_a - u] for mvr loser, other and winner 
+    poolAvg - [0, .5, u] = [poolAvg, poolAvg -.5, poolAvg - u] for mvr loser, other and winner 
 
 then bassort = (1-o/u)/(2-v/u) in [0, 2] * noerror
 
-    bassort = [1-poolAvg_a/u, 1 - (poolAvg_a -.5)/u, 1 - (poolAvg_a - u)/u] * noerror
-    bassort = [1-poolAvg_a/u, (u - poolAvg_a + .5)/u, (2u - poolAvg_a)/u] * noerror
+    bassort = [1-poolAvg/u, 1 - (poolAvg -.5)/u, 1 - (poolAvg - u)/u] * noerror
+    bassort = [1-poolAvg/u, (u - poolAvg + .5)/u, (2u - poolAvg)/u] * noerror
 
-when u = 1
+For each pool, we know the expected number of loser, winner, and other votes:
 
-    bassort = [1 - poolAvg_a, 1.5 - poolAvg_a, 2 - poolAvg_a] * noerror,  for mvr loser, other and winner
+```
+    winnerVotes = votes[assorter.winner()]
+    loserVotes = votes[assorter.loser()]
+    otherVotes = pool.ncards() - winnerVotes - loserVotes
+```
 
-strategies
+The expected rates are the votes divided by Npop.
 
-1. each pool can keep track of its "error" rates and use Generalized Adaptive Betting. problem is one doesnt know what pool the next sample is from
+Then we extend equation 1 with the expected assort values from the pools:
 
-2. Given the pool votes, we can calculate the expected value of the entire pool.
+````
+log T_i = ln(1.0 + lamda * (noerror - mui)) * p0  + Sum { ln(1.0 + lamda * (assortValue_k - mui)) * p_k } 
+          + Sum { ln(1.0 + lamda * (assortValue_pk - mui)) * p_pk; over pools and pool types }              (eq 2)
 
-3. Also do the affine transform in order to make bassort start at 0.
+where 
+    p_pk is the probability (=rate)  of getting pool p, type k
+    assortValue_pk is the assort value when pool p, type k occurs (k = winner, loser, other)
+````

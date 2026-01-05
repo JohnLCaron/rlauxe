@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.workflow.Sampling
+import org.cryptobiotic.rlauxe.workflow.Sampler
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated
 import org.cryptobiotic.rlauxe.util.mean2margin
 
@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 // this creates the riskTestingFn for you
 fun runAlphaMartRepeated(
     name: String,
-    drawSample: Sampling,
+    drawSample: Sampler,
     N: Int,
     eta0: Double,
     d: Int = 500,

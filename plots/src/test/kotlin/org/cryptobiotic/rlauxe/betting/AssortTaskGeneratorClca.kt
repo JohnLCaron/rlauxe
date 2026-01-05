@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.betting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.workflow.ContestAuditTaskGenerator
-import org.cryptobiotic.rlauxe.workflow.Sampling
+import org.cryptobiotic.rlauxe.workflow.Sampler
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
 import kotlin.Int
 import kotlin.random.Random
@@ -35,7 +35,7 @@ class ClcaSingleRoundAssortTask(
     val rate: Double,
     val parameters : Map<String, Any>,
 ) : ConcurrentTaskG<WorkflowResult> {
-    val sampling: SamplingFromAssortValues
+    val sampling: SamplerFromAssortValues
     val noerror: Double
 
     init {
@@ -50,7 +50,7 @@ class ClcaSingleRoundAssortTask(
         val noerrorCount = N - assorts.size
         repeat(noerrorCount) { assorts.add(noerror) }
 
-        sampling = SamplingFromAssortValues(assorts)
+        sampling = SamplerFromAssortValues(assorts)
     }
 
     override fun name() = "ClcaSingleRoundAssortTask"
@@ -107,7 +107,7 @@ class ClcaSingleRoundAssortTask(
     fun runAudit(
         N: Int,
         noerror: Double,
-        sampling: Sampling,
+        sampling: Sampler,
         maxRisk: Double,
     ): TestH0Result {
 
@@ -135,7 +135,7 @@ class ClcaSingleRoundAssortTask(
     }
 }
 
-class SamplingFromAssortValues(val assortValues : List<Double>): Sampling {
+class SamplerFromAssortValues(val assortValues : List<Double>): Sampler {
     val maxSamples = assortValues.size
     val permutedIndex = MutableList(maxSamples) { it }
     private var idx = 0

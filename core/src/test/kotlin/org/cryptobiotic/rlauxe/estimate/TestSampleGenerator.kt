@@ -3,8 +3,8 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
-import org.cryptobiotic.rlauxe.workflow.PollingSampling
-import org.cryptobiotic.rlauxe.workflow.Sampling
+import org.cryptobiotic.rlauxe.workflow.PollingSampler
+import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -57,7 +57,7 @@ class TestSampleGenerator {
             contestUA.assertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
-                PollingSampling(contestUA.id, cvrs.zip(cvrs), it.assorter)
+                PollingSampler(contestUA.id, cvrs.zip(cvrs), it.assorter)
             }
         }
     }
@@ -73,7 +73,7 @@ class TestSampleGenerator {
 
 }
 
-fun testLimits(sampling: Sampling, nsamples: Int, upper: Double) {
+fun testLimits(sampling: Sampler, nsamples: Int, upper: Double) {
     repeat(nsamples) {
         val ss = sampling.sample()
         assertTrue(ss >= 0)
@@ -81,7 +81,7 @@ fun testLimits(sampling: Sampling, nsamples: Int, upper: Double) {
     }
 }
 
-fun countAssortValues(sampling: Sampling, nsamples: Int, assortValue: Double): Int {
+fun countAssortValues(sampling: Sampler, nsamples: Int, assortValue: Double): Int {
     sampling.reset()
     var count = 0
     repeat(nsamples) {

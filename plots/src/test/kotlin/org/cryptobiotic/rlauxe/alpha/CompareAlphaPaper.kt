@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.core.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.plots.plotSRS
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
-import org.cryptobiotic.rlauxe.workflow.PollingSampling
+import org.cryptobiotic.rlauxe.workflow.PollingSampler
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
@@ -58,7 +58,7 @@ class CompareAlphaPaper {
 
                 val pollingResult = runAlphaMartRepeated(
                     name = "PollingSampling",
-                    drawSample = PollingSampling(contestUA.id, pairs, pollingAssertion.assorter),
+                    drawSample = PollingSampler(contestUA.id, pairs, pollingAssertion.assorter),
                     N = N,
                     eta0 = eta, // use the reportedMean for the initial guess
                     d = d,

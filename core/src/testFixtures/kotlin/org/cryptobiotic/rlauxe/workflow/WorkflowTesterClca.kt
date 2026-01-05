@@ -52,8 +52,8 @@ class WorkflowTesterClca(
     override fun mvrManager() = mvrManager
 }
 
-fun makeClcaNoErrorSampler(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAssorter): Sampling {
+fun makeClcaNoErrorSampler(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAssorter): Sampler {
     val cards = cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, 0) }
     val cvrPairs = cvrs.zip(cards)
-    return ClcaSampling(contestId, cvrPairs, cassorter, true)
+    return ClcaSampler(contestId, cvrPairs, cassorter, true)
 }

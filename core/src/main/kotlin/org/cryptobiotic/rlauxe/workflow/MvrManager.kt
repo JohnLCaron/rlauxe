@@ -15,7 +15,6 @@ private val logger = KotlinLogging.logger("MvrManager")
 interface MvrManager {
     fun sortedCards(): CloseableIterable<AuditableCard>  // most uses will just need the first n samples
     fun populations(): List<PopulationIF>?
-    // fun sortedCvrs(): CloseableIterable<CardIF> = CloseableIterable { AuditableCardToCvrAdapter(sortedCards().iterator()) }
     fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  // Pair(mvr, cvr)
 
     fun oapools(): List<OneAuditPoolIF>? {

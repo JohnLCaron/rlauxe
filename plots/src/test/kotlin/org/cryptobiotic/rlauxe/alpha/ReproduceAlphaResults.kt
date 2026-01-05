@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.alpha
 
-import org.cryptobiotic.rlauxe.betting.SamplingFromAssortValues
+import org.cryptobiotic.rlauxe.betting.SamplerFromAssortValues
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.util.doublePrecision
@@ -111,7 +111,7 @@ class ReproduceAlphaResults {
                     }
                     t = xp.average()
                 }
-                val sampleFn = SamplingFromAssortValues(xp)
+                val sampleFn = SamplerFromAssortValues(xp)
                 val theta = sampleFn.sampleMean()
 
                 val assorter_margin = 2*theta - 1
@@ -357,7 +357,7 @@ class ReproduceAlphaResults {
             for (d in dl) {
                 val mart: RunTestRepeatedResult = runAlphaMartRepeated(
                     name = "comparisonSimulation",
-                    drawSample = SamplingFromAssortValues(x),
+                    drawSample = SamplerFromAssortValues(x),
                     N = N,
                     eta0 = eta,
                     d = d,

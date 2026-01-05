@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.ClcaSampling
+import org.cryptobiotic.rlauxe.workflow.ClcaSampler
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.math.max
@@ -24,7 +24,7 @@ class TestMakeFuzzedCvrs {
 
         val testMvrs = makeFuzzedCvrsFrom(listOf(contest), testCvrs, mvrsFuzzPct)
         val testCards = testCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0) }
-        val sampler = ClcaSampling( // fuzz single contest OK
+        val sampler = ClcaSampler( // fuzz single contest OK
             contestUA.id,
             testMvrs.zip(testCards),
             assort,

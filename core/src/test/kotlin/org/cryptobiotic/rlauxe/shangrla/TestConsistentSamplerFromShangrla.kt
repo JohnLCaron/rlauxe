@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.audit.ContestRound
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestConsistentSamplingFromShangrla {
+class TestConsistentSamplerFromShangrla {
 
     // SHANGRLA test_CVR.py
     @Test

@@ -10,8 +10,8 @@ import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.makeDeciles
-import org.cryptobiotic.rlauxe.workflow.ClcaSampling
-import org.cryptobiotic.rlauxe.workflow.Sampling
+import org.cryptobiotic.rlauxe.workflow.ClcaSampler
+import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.test.Test
 
 // TODO use GA
@@ -76,7 +76,7 @@ class TestOneAuditAdaptiveBetting {
         //    val allowReset: Boolean,
         //)
         val cvrPairs = mvrs.zip( cards)
-        val sampler = ClcaSampling(contestUA.id, cvrPairs, oaCassorter, true)
+        val sampler = ClcaSampler(contestUA.id, cvrPairs, oaCassorter, true)
 
         val sampleSizes = mutableListOf<Int>()
         val welford = Welford()
@@ -100,7 +100,7 @@ class TestOneAuditAdaptiveBetting {
 
 }
 
-fun runSamplesNeeded(Npop: Int, betFn: BettingFn, sampler: Sampling, tracker: ClcaErrorTracker, show: Boolean = false): Int {
+fun runSamplesNeeded(Npop: Int, betFn: BettingFn, sampler: Sampler, tracker: ClcaErrorTracker, show: Boolean = false): Int {
     var T: Double = 1.0
     var sample = 0
 

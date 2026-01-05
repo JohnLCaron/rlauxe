@@ -20,7 +20,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampling: Sampling,
+        sampling: Sampler,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA
@@ -91,11 +91,11 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
 
     // CANDIDATE for removal
      fun runAlpha(
-         config: AuditConfig,
-         N: Int,
-         cassorter: ClcaAssorterOneAudit,
-         sampling: Sampling,
-         upperBound: Double,
+        config: AuditConfig,
+        N: Int,
+        cassorter: ClcaAssorterOneAudit,
+        sampling: Sampler,
+        upperBound: Double,
     ): TestH0Result {
 
          val strategy = config.oaConfig.strategy
@@ -136,7 +136,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         config: AuditConfig,
         N: Int,
         cassorter: ClcaAssorterOneAudit,
-        sampling: Sampling,
+        sampling: Sampler,
         bettingFn: BettingFn,
     ): TestH0Result {
 

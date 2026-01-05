@@ -95,7 +95,7 @@ class AuditCobraAssertion(
         auditConfig: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampling: Sampling,
+        sampling: Sampler,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA

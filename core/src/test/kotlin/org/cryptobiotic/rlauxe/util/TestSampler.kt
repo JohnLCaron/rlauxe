@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.util
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
 
-class TestSampling {
+class TestSampler {
     val ntrials = 1000
     val Nc = 100000
 

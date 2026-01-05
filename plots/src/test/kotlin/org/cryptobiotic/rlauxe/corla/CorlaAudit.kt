@@ -122,7 +122,7 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         auditConfig: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampling: Sampling,
+        sampling: Sampler,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA

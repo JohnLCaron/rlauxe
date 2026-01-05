@@ -7,8 +7,8 @@ import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.PollingSampling
-import org.cryptobiotic.rlauxe.workflow.Sampling
+import org.cryptobiotic.rlauxe.workflow.PollingSampler
+import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.random.Random
 import kotlin.test.Test
 
@@ -43,7 +43,7 @@ class TestAuditPolling {
         val cvrs = test.makeCvrsFromContests()
         val pairs = cvrs.zip(cvrs)
 
-        val cvrSampler = PollingSampling(contestUA.id, pairs, assorter)
+        val cvrSampler = PollingSampler(contestUA.id, pairs, assorter)
 
         val d = 100
         val margin = assorter.dilutedMargin()
@@ -118,7 +118,7 @@ class TestAuditPolling {
             contestUA.assertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
-                val cvrSampler = if (withoutReplacement) PollingSampling(contestUA.id, cvrs.zip(cvrs), it.assorter)
+                val cvrSampler = if (withoutReplacement) PollingSampler(contestUA.id, cvrs.zip(cvrs), it.assorter)
                     else PollWithReplacement(contestUA.contest as Contest, cvrs, it.assorter)
 
                 val result = runAlphaMartRepeated(
@@ -162,7 +162,7 @@ class TestAuditPolling {
 
 }
 
-class PollWithReplacement(val contest: Contest, val mvrs : List<Cvr>, val assorter: AssorterIF): Sampling {
+class PollWithReplacement(val contest: Contest, val mvrs : List<Cvr>, val assorter: AssorterIF): Sampler {
     val maxSamples = mvrs.count { it.hasContest(contest.id) }
     private var count = 0
 

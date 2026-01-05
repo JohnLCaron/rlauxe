@@ -1,5 +1,5 @@
-# CLCA Betting Risk Functions
-_last changed 3/25/25_
+# CLCA Betting Risk Function
+_last changed 01/03/25_
 
 ## Betting martingales
 
@@ -16,6 +16,7 @@ The gambler starts with a stake of 1 unit and bets a fraction λi of their curre
 the outcome of the ith wager. The value Mj is the gambler’s wealth after the jth wager. The
 gambler is not permitted to borrow money, so to ensure that when X_i = 0 (corresponding to
 losing the ith bet) the gambler does not end up in debt (Mi < 0), λi cannot exceed 1/µi.
+In practice, λi < 1/µi to prevent stalls.
 
 See Cobra section 4.2 and SHANGRLA Section 3.2.
 
@@ -39,21 +40,22 @@ and so B is an half-average assorter.
 ````
 
 ````
-  "assorter" here is the plurality assorter
+  In the following treatment, "assorter" is the plurality assorter.
+  
   Let 
     bi denote the true votes on the ith ballot card; there are N cards in all.
     ci denote the voting system’s interpretation of the ith card
     Ā(c) ≡ Sum(A(ci))/N is the average assorter value across all the CVRs
-    margin ≡ v ≡ 2Ā(c) − 1, the _reported assorter margin_
+    margin ≡ v ≡ 2Ā(c) − 1, the _assorter margin_
   
-    ωi ≡ A(ci) − A(bi)   overstatementError for ith ballot
+    ωi ≡ A(ci) − A(bi)   overstatement error for ith ballot
     ωi in [-1, -.5, 0, .5, 1] (for plurality assorter, which is in {0, .5, 1}))
   
     We know Āb = Āc − ω̄, so Āb > 1/2 iff ω̄ < Āc − 1/2 iff ω̄/(2*Āc − 1) < 1/2 = ω̄/v < 1/2
     
     scale so that B(0) = (2*Āc − 1)
     
-        find B affine transform to interval [0, u], where H0 is average B < 1/2
+    find B affine transform to interval [0, u], where H0 is average B < 1/2
     shift to 0, just add 1 to ωi, B(-1) = 0
     
     so B(-1) = 0
@@ -66,7 +68,7 @@ and so B is an half-average assorter.
     τi ≡ (1 − ωi /upper) ≥ 0, since ωi <= upper
     B(bi, ci) ≡ τi / (2 − margin/upper) = (1 − ωi /upper) / (2 − margin/upper)
   
-  overstatementError in [-1, -.5, 0, .5, 1] == A(ci) − A(bi) = ωi
+  overstatement error in [-1, -.5, 0, .5, 1] == A(ci) − A(bi) = ωi
   find B transform to interval [0, u],  where H0 is B < 1/2
   Bi = (1 - ωi/u) / (2 - v/u)
   Bi = tau * noerror; tau = (1 - ωi/u), noerror = 1 / (2 - v/u)
@@ -76,10 +78,7 @@ and so B is an half-average assorter.
 
 Notes
 * The comparison assorter B needs Ā(c) ≡ the average CVR assort value > 0.5.
-* Ā(c) should have the diluted margin as the denominator.
-  (Margins are  traditionally calculated as the difference in votes divided by the number of valid votes.
-  Diluted refers to the fact that the denominator is the number of ballot cards containing that contest, which is
-  greater than or equal to the number of valid votes.)
+* Ā(c) should have the diluted margin as the denominator, So N = Npop, the size of the population that the contest is drawn from.
 * If overstatement error is always zero (no errors in CRV), the assort value is always
 
   ````
@@ -87,9 +86,35 @@ Notes
               = 1 / (3 - 2 * awinnerAvg/assorter.upperBound())
               > 0.5 since awinnerAvg > 0.5
   ````
-* The possible values of the bassort function are then:
-  {0, .5, 1, 1.5, 2} * noerror
-* When the CVRs  always equal the corresponding MVR, we always get bassort == noerror > .5, so eventually the null is rejected.
+
+## Generalization to u != 1
+
+An assorter value is in the range [lower, upper], lower >= 0. The "neutral value" is 1/2.
+Generally we do an affine transformation so that lower = 0 and nuetral = 1/2, and upper > 1/2 is unbounded.
+The plurality assorter is the special case of assort upper = 1.
+
+The general treatment is as follows:
+
+````
+ B(bi, ci) = (1-o/u)/(2-v/u) = (1-o/u) * noerror, where
+    o is the overstatement = (cvr_assort - mvr_assort)
+    u is the upper bound on the value the assorter assigns to any ballot
+    v is the assorter margin
+    noerror = 1/(2-v/u) == B(bi, ci) when overstatement = 0
+
+ assort in [0, .5, u], u > .5, so overstatement is in
+      [-1, -.5, 0, .5, 1] (plurality)
+      [-u, -.5, .5-u, 0, u-.5, .5, u] (SM, u in [.5, 1])
+      [-u, .5-u, -.5, 0, .5, u-.5, u] (SM, u > 1)
+
+ so B(bi, ci) in
+
+ [1+(u-l)/u, 1+(.5-l)/u, 1+(u-.5)/u,  1, 1-(.5-l)/u, 1-(u-.5)/u, 1-(u-l)/u] * noerror
+ [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror (when l==0) 
+ [2, 1.5,  1, .5, 0] * noerror (when l==0, u==1)
+````
+So when u=1, there are 5 possible bassort values, and otherwise 7.
+
 
 ## CLCA Betting Payoffs
 
@@ -98,9 +123,8 @@ For the ith sample with bet λ_i, the BettingMart payoff is
     t_i = 1 + λ_i * (X_i − µ_i)
 
 where
-
-    λ_i in [0, 1/u_i]
-    X_i = {0, .5, 1, 1.5, 2} * noerror for {2voteOver, 1voteOver, equal, 1voteUnder, 2voteUnder} respectively.
+    λ_i in [0, 1/µ_i]
+    X_i = [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror.
     µ_i ~= 1/2
     λ_i ~in [0, 2]
 
@@ -109,11 +133,13 @@ then
     payoff = t_i = 1 + λ_i * noerror * {-.5, 0, .5, 1.5}
 
 Using AdaptiveBetting, λ_i depends only on the 4 estimated error rates (see next section) and the margin.
-Also note that AdaptiveBetting wil use a "floor" (default 1.0e-5) for the estimated error rates, to prevent betting everything.
+Also note that AdaptiveBetting uses a "floor" (default 1.0e-5) for the estimated error rates, to prevent betting everything.
 
 ### Betting Payoff Plots
 
-Plots 1-5 shows the betting payoffs when all 4 error rates are equal to {0.0, 0.0001, .001, .005, .01}, respectively:
+REDO
+
+Plots 1-5 shows the betting payoffs when the error rates are all equal to {0.0, 0.0001, .001, .005, .01}
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.0.html" rel="BettingPayoff0">![BettingPayoff0](plots/betting/BettingPayoff0.0.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff1.0E-4.html" rel="BettingPayoff1.0E-4">![BettingPayoff1.0E-4](plots/betting/BettingPayoff1.0E-4.png)</a>
@@ -121,7 +147,7 @@ Plots 1-5 shows the betting payoffs when all 4 error rates are equal to {0.0, 0.
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.005.html" rel="BettingPayoff0.005">![BettingPayoff0.005](plots/betting/BettingPayoff0.005.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.01.html" rel="BettingPayoff01">![BettingPayoff01](plots/betting/BettingPayoff0.01.png)</a>
 
-Plot 6 shows the payoffs for all the error rates when the MVR matches the CVR (assort value = 1.0 * noerror):
+Plot 6 shows the payoffs for all the error rates when the MVR matches the CVR (assort value = noerror):
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoffAssort1.0.html" rel="BettingPayoffAssort1">![BettingPayoffAssort1](plots/betting/BettingPayoffAssort1.0.png)</a>
 
@@ -131,7 +157,10 @@ solving for sampleSize = -ln(riskLimit) / ln(payoff), for the various values of 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoffSampleSize.html" rel="BettingPayoffSampleSize">![BettingPayoffSampleSize](plots/betting/BettingPayoffSampleSize.png)</a>
 
 The plot "error=0.0" is the equivilent to COBRA Fig 1, p. 6 for risk=.05. This is the best that can be done,
-the minimum sampling size for the RLA.
+the minimum sampling size for the RLA. You can use it to see how many samples you are likely to need, based on the smallest
+diluted margin of the assorters of the contest.
 Note that this value is independent of N, the number of ballots.
 
 See GenBettingPayoff.kt for the generation of these plots.
+
+Note AdaptiveBetting has been replaced by GeneralizedAdaptiveBetting.

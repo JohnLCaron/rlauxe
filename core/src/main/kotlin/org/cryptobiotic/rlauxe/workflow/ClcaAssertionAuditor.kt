@@ -2,6 +2,10 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.betting.BettingFn
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
@@ -88,10 +92,10 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val clcaConfig = config.clcaConfig
 
         val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
-        prevRounds.setPhantomRate(contest.phantomRate()) // TODO ??
+        //prevRounds.setPhantomRate(contest.phantomRate()) // TODO ??
 
         val bettingFn: BettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-            GeneralAdaptiveBetting(contestUA.Npop, oaErrorRates = null, d = clcaConfig.d, maxRisk=clcaConfig.maxRisk)
+            GeneralAdaptiveBetting(contestUA.Npop, oaAssortRates = null, d = clcaConfig.d, maxRisk = clcaConfig.maxRisk)
 
         /* } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
             //AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
@@ -119,13 +123,17 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
         // TODO make optional
         val sequences = testFn.setDebuggingSequences()
-        val tracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound(), sequences) // track pool data; something better to do?
+        val tracker = ClcaErrorTracker(
+            cassorter.noerror(),
+            cassorter.assorter.upperBound(),
+            sequences
+        ) // track pool data; something better to do?
 
         val terminateOnNullReject = config.auditSampleLimit == null
         // TODO remove tracker from testH0
         val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = terminateOnNullReject, tracker=tracker) { sampling.sample() }
 
-        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) testH0Result.tracker.measuredErrorCounts() else null
+        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) testH0Result.tracker.measuredClcaErrorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampling.maxSamples(),

@@ -1,18 +1,16 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.core.TausIF
+import org.cryptobiotic.rlauxe.betting.TausIF
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 
+// rate is assort value -> rate over the entire population
+data class OneAuditAssortValueRates(val name: String, val rates: Map<Double, Double>, val totalInPools: Int)
 
-// The rates are over the entire population
-data class OneAuditErrorRates(val name: String, val rates: Map<Double, Double>, val totalInPools: Int)
+// we know exactly the assort values and their frequency
+class OneAuditRatesFromPools(val pools: List<OneAuditPoolIF>) {
 
-// we know exactly the return values and their frequency
-class OneAuditErrorsFromPools(val pools: List<OneAuditPoolIF>) {
-    // could also contain the ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double) ??
-
-    fun oaErrorRates(contestUA: ContestWithAssertions, oaCassorter: ClcaAssorterOneAudit): OneAuditErrorRates { // sampleValue -> rate
+    fun oaErrorRates(contestUA: ContestWithAssertions, oaCassorter: ClcaAssorterOneAudit): OneAuditAssortValueRates { // sampleValue -> rate
         val result = mutableListOf<Pair<Double, Double>>()
         var totalInPools = 0
         pools.filter{ it.hasContest(contestUA.id )}.forEach { pool ->
@@ -32,16 +30,16 @@ class OneAuditErrorsFromPools(val pools: List<OneAuditPoolIF>) {
                 result.add(Pair(taus.tausOA[2].first * oaCassorter.noerror(), winnerCounts / dcards))
             }
         }
-        return OneAuditErrorRates("name", result.toMap().toSortedMap(), totalInPools)  // could also return a string description
+        return OneAuditAssortValueRates("name", result.toMap().toSortedMap(), totalInPools)  // could also return a string description
     }
 }
 
-// Consider a single pool and an assorter a, with upper bound u and avg assort value in the pool poolAvg.
-// poolAvg is used as the cvr_value, so then mvr_assort - mvr_assort has one of 3 possible overstatement values:
+// Consider a single pool and an assorter a, with upper bound u and avg assort value in the pool = poolAvg.
+// poolAvg is used as the cvr_value, so then cvr_assort - mvr_assort has one of 3 possible overstatement values:
 //
 //    poolAvg - [0, .5, u] = [poolAvg, poolAvg -.5, poolAvg - u] for mvr loser, other and winner
 //
-// then bassort = (1-o/u)/(2-v/u) in [0, 2] * noerror
+// then bassort = (1-o/u)/(2-v/u) = (1-o/u) * noerror
 //
 //    bassort = [1-poolAvg/u, 1 - (poolAvg -.5)/u, 1 - (poolAvg - u)/u] * noerror
 //    bassort = [1-poolAvg/u, (u - poolAvg + .5)/u, (2u - poolAvg)/u] * noerror
@@ -53,13 +51,13 @@ class TausOA(val upper: Double, val poolAvg: Double): TausIF {
         // bassort = [1-poolAvg/u, (u - poolAvg + .5)/u, (2u - poolAvg)/u] * noerror, for mvr loser, other and winner
         tausOA = mapOf(
             (1 - poolAvg / upper) to "loser",
-            (upper - poolAvg + .5) / upper to "other",
+            (upper - poolAvg + .5) / upper to "other",  // TODO plot these
             (2 * upper - poolAvg) / upper to "winner"
         ).toList()
     }
 
-    override fun desc(want: Double): String? {
-        val pair = tausOA.find { doubleIsClose(it.first, want) }
+    override fun desc(tau: Double): String? {
+        val pair = tausOA.find { doubleIsClose(it.first, tau) }
         return pair?.second
     }
 
@@ -69,3 +67,9 @@ class TausOA(val upper: Double, val poolAvg: Double): TausIF {
         return tausOA.toString()
     }
 }
+
+// poolAvg lies betweeen 0 and u
+//              loser  other   winner
+// poolAvg= 0 :  [1,    1.5/u,   2  ] * noerror
+// poolAvg= u :  [0,    .5/u,    1  ] * noerror
+

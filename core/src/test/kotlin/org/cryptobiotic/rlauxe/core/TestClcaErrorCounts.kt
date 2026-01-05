@@ -1,7 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
 
-import org.cryptobiotic.rlauxe.oneaudit.TausOA
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.computeBassortValues
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import kotlin.test.*
 
@@ -25,18 +27,18 @@ class TestClcaErrorCounts {
         var noerror: Double = 1.0 / (2.0 - dilutedMargin / upper)
 
         val fuzz = .01
-        var bassorts = computeBassortValues(noerror=noerror, upper=upper)
+        var bassorts = computeBassortValues(noerror = noerror, upper = upper)
         var errorCounts = bassorts.associate { it to (fuzz * totalSamples).toInt() }
 
         val cerr2 = ClcaErrorCounts(errorCounts, 1000, noerror, upper)
         println(cerr2.clcaErrorRate())
         assertEquals(fuzz * bassorts.size, cerr2.clcaErrorRate())
 
-        // what if upper is < 1> ?
+        // what if upper is < 1 ?
         upper = 0.5678
         noerror = 1.0 / (2.0 - dilutedMargin / upper)
 
-        bassorts = computeBassortValues(noerror=noerror, upper=upper)
+        bassorts = computeBassortValues(noerror = noerror, upper = upper)
         errorCounts = bassorts.associate { it to (fuzz * totalSamples).toInt() }
 
         val cerr3 = ClcaErrorCounts(errorCounts, 1000, noerror, upper)
@@ -93,7 +95,7 @@ class TestClcaErrorCounts {
         assertEquals(countedTotal, tracker.numberOfSamples())
         assertEquals(0, tracker.noerrorCount)
 
-        var errorCounts: ClcaErrorCounts = tracker.measuredErrorCounts()
+        var errorCounts: ClcaErrorCounts = tracker.measuredClcaErrorCounts()
         assertEquals(upper, errorCounts.upper)
         assertEquals(noerror, errorCounts.noerror)
         assertEquals(countedTotal, errorCounts.totalSamples)
@@ -104,50 +106,5 @@ class TestClcaErrorCounts {
         }
         assertEquals(countedTotal+11, tracker.numberOfSamples())
         assertEquals(11, tracker.noerrorCount)
-
-        val allCounts = tracker.measuredAllCounts()
-        assertEquals(11, allCounts[noerror])
-        assertEquals(countedTotal+11, allCounts.values.sum())
-    }
-
-    @Test
-    fun testTrackerWithPools() {
-        var upper = 1.1
-        val dilutedMargin = .02
-        val fuzz = .01
-        val poolAvg = 0.505
-        val clcaSamples = 1000
-        val poolSamples = 1000
-
-        val noerror: Double = 1.0 / (2.0 - dilutedMargin / upper)
-        val tracker = ClcaErrorTracker(noerror, upper)
-        val bassorts = computeBassortValues(noerror = noerror, upper = upper)
-
-        bassorts.forEachIndexed { idx, bassort ->
-            repeat((idx * fuzz * clcaSamples).toInt()) {
-                tracker.addSample(bassort)
-            }
-        }
-
-        val tauOA = TausOA(upper, poolAvg)
-
-        tauOA.tausOA.forEach { (bassort, desc) ->
-            repeat((fuzz * poolSamples).toInt()) {
-                tracker.addSample(bassort * noerror)
-            }
-        }
-
-        var errorCounts: ClcaErrorCounts = tracker.measuredErrorCounts()
-        println(errorCounts.show(poolAvg))
-        assertContains(errorCounts.show(poolAvg), "loser=10, other=10, winner=10", )
-        assertContains(errorCounts.show(poolAvg), "win-oth=10, oth-los=20, oth-win=30, los-oth=40, los-win=50")
-
-        val countedTotal = tracker.valueCounter.values.sum()
-        assertEquals(countedTotal, tracker.numberOfSamples())
-        assertEquals(0, tracker.noerrorCount)
-
-        assertEquals(upper, errorCounts.upper)
-        assertEquals(noerror, errorCounts.noerror)
-        assertEquals(countedTotal, errorCounts.totalSamples)
     }
 }

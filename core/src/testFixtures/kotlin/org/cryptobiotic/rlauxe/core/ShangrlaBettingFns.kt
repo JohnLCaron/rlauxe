@@ -1,6 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.betting.BettingFn
+import org.cryptobiotic.rlauxe.betting.etaToLam
+import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
@@ -148,7 +151,7 @@ class OptimalComparisonNoP1(
         // (N * 0.5 - sampleTracker.sum()) / (N - sampleNum) =~ 0.5
         val mu = populationMeanIfH0(N, withoutReplacement, prevSamples)
         // return (eta / mu - 1) / (upper - mu)
-        val lam =  etaToLam(eta, mu, upperBound)
+        val lam = etaToLam(eta, mu, upperBound)
 
         // however, this is out of bounds in testing for plurality, assortUpper = 1
         if (lam <= 0.0 || lam >= 2.0) {

@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.audit
 
-import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.util.secureRandom
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 
@@ -92,7 +91,7 @@ enum class ClcaStrategyType { generalAdaptive, apriori, fuzzPct, oracle  }
 data class ClcaConfig(
     val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
     val fuzzPct: Double? = null, // use to generate apriori errorRates for simulation, only used when ClcaStrategyType = fuzzPct
-    val pluralityErrorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker?
+    // val pluralityErrorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker?
     val d: Int = 100,  // shrinkTrunc weight for error rates
     val maxRisk: Double = 0.90,  // max risk on any one bet
     val cvrsContainUndervotes: Boolean = true,

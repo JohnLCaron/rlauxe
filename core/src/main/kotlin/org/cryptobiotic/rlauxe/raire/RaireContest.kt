@@ -336,11 +336,11 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
         throw RuntimeException("RaireAssorter can't calculate margin from Regular Voes")
     }
 
-    override fun assort(mvr: CvrIF, usePhantoms: Boolean): Double {
-        if (!mvr.hasContest(info.id)) return 0.5
-        if (usePhantoms && mvr.isPhantom()) return 0.5
-        return if (isNEB) assortNotEliminatedBefore(mvr)
-               else assortNotEliminatedNext(mvr)
+    override fun assort(cvr: CvrIF, usePhantoms: Boolean): Double {
+        if (!cvr.hasContest(info.id)) return 0.5
+        if (usePhantoms && cvr.isPhantom()) return 0.5
+        return if (isNEB) assortNotEliminatedBefore(cvr)
+               else assortNotEliminatedNext(cvr)
     }
 
     // aka NEB

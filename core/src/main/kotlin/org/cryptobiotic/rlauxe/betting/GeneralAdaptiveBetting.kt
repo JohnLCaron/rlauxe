@@ -1,5 +1,4 @@
-package org.cryptobiotic.rlauxe.core
-
+package org.cryptobiotic.rlauxe.betting
 
 import org.apache.commons.math3.analysis.UnivariateFunction
 import org.apache.commons.math3.optim.MaxEval
@@ -8,7 +7,8 @@ import org.apache.commons.math3.optim.univariate.BrentOptimizer
 import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction
 import org.apache.commons.math3.optim.univariate.SearchInterval
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditErrorRates
+import org.cryptobiotic.rlauxe.core.SampleTracker
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditAssortValueRates
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -17,69 +17,49 @@ import kotlin.math.ln
 // generalize AdaptiveBetting for any clca assorter, including OneAudit
 // Kelly optimization of lambda parameter with estimated error rates
 
-private val showRates = false
-private val showBets = false
-
 class GeneralAdaptiveBetting(
     val Npop: Int, // population size for this contest
-    // val accumErrorCounts: ClcaErrorCounts, // propable illegal to do (cant use prior knowlege of the sample)
-    val oaErrorRates: OneAuditErrorRates?,
+    val oaAssortRates: OneAuditAssortValueRates?, // only for OneAudit
     val d: Int = 100,  // trunc weight
-    val maxRisk: Double, // this bounds how close lam gets to 2.0; TODO study effects of this
+    val maxRisk: Double, // this bounds how close lam gets to 2.0
     val withoutReplacement: Boolean = true,
     val debug: Boolean = false,
 ) : BettingFn {
-    // debugging
-    private var lastBet = 0.0
-    private var prevErrors: ClcaErrorCounts? = null
+    private var lastBet = 0.0 // debugging
 
     override fun bet(prevSamples: SampleTracker): Double {
-        // prevSamples not updated for the sample that this bet is for
         val tracker = prevSamples as ClcaErrorTracker
-        val trackerErrors = tracker.measuredErrorCounts()
-        prevErrors = trackerErrors
+        val trackerErrors = tracker.measuredClcaErrorCounts()
 
         // estimated rates for each clca bassort value
-        val scaled = if (oaErrorRates == null) 1.0 else (Npop - oaErrorRates.totalInPools) / Npop.toDouble()
+        val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.totalInPools) / Npop.toDouble()
         val sampleNumber = tracker.numberOfSamples()
         val estRates = trackerErrors.errorCounts.mapValues {
             scaled * shrinkTruncEstimateRate(
-                    apriori = 0.0,
+                    apriori = 0.0,  // TODO allow user to set aprioris
                     errorCount = it.value,
                     sampleNum = sampleNumber,
                 )
             }
 
-        if (showRates) {
-            val p0 = tracker.noerrorCount / tracker.numberOfSamples().toDouble()
-            println("  gRates = ${estRates.toSortedMap()} scaled=$scaled nsamples=${tracker.numberOfSamples()}")
-        }
-
         val mui = populationMeanIfH0(Npop, withoutReplacement, tracker)
 
-        // limit your bets so at most you lose maxRisk for any one bet
+        //    tj is how much you win or lose
+        //    tj = 1 + lamj * (xj - mj)
+        //    tj = 1 - lamj * mj when x == 0 (smallest value x can be)
+        //
+        //    how much above 0 should it be?
+        //    limit your bets so at most you lose maxRisk for any one bet:
+        //
+        //    tj > (1 - maxRisk)
+        //    1 - lamj * mj > 1 - maxRisk   when x = 0
+        //    lamj * mj < maxRisk
+        //    lamj <  maxRisk / mj
+        //    maxBet = maxRisk / mj
 
-        // ttj is how much you win or lose
-        // ttj = 1 + lamj * (xj - mj)
-        // ttj = 1 - lamj * mj when x == 0 (smallest value x can be)
-        // ttj = 0 when x == 0, lam = 1 / mj
-        // so to prevent stalls when xj = 0, 1 - lamj * mj > 0; 1 > lam / mj; lam < 1 / mj
-
-        // let mint = (1 - maxRisk); maxRisk = (1 - mint)
-        // make sure tj > mint
-        // ttj = 1 - lamj * mj > mint
-        // 1 - mint > lamj * mj
-        // lamj < (1-mint) / mj = maxRisk / mj
-
-        // limit the bet to the maximum risk we are willing to take
         val maxBet = maxRisk / mui
-        val kelly = GeneralOptimalLambda(tracker.noerror, estRates, oaErrorRates?.rates, mui, maxBet, debug = debug)
+        val kelly = GeneralOptimalLambda(tracker.noerror, estRates, oaAssortRates?.rates, mui=mui, maxBet=maxBet, debug = debug)
         val bet = kelly.solve()
-
-        if (showBets && lastBet != 0.0 && bet < lastBet) {
-            println("lastBet=$lastBet bet=$bet")
-            // if (!showRates) println("    gRates = ${estRates.toSortedMap()} nsamples=${tracker.numberOfSamples()}")
-        }
 
         lastBet = bet
         return bet
@@ -99,10 +79,8 @@ class GeneralAdaptiveBetting(
     ): Double {
         if (sampleNum == 0) return 0.0
         if (errorCount == 0) return 0.0 // experiment
-        val est = (d * apriori + errorCount) / (d + sampleNum - 1)
-        // we have a limit on the bet, so I think we dont need to do it here
-        //val boundedBelow = max(est, minRate) // lower bound on the estimated rate
-        //val boundedAbove = min(1.0, boundedBelow) // upper bound on the estimated rate
+        val used = if (d > 0) d else 1
+        val est = (used * apriori + errorCount) / (used + sampleNum - 1)
         return est
     }
 }
@@ -112,17 +90,16 @@ class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, 
     val p0: Double
 
     init {
-        if (mui < 0.0)
-            print("wtf")
-        require (mui > 0.0)
+        require (mui > 0.0) {
+            "mui=$mui"
+        }
         require (maxBet > 0.0)
 
         val oasum = if (oaErrorRates == null) 0.0 else oaErrorRates.map{ it.value }.sum()
-        p0 = 1.0 - clcaErrorRates.map{ it.value }.sum() - oasum
-
+        p0 = 1.0 - clcaErrorRates.map{ it.value }.sum() - oasum  // calculate against other values to get it exact
         require (p0 >= 0.0)
         if (debug) {
-            print("OneAuditOptimalLambda init: ")
+            print("OneAuditOptimalLambda init: mui=$mui ")
             expectedValueLogt(1.0, true)
         }
     }
@@ -155,18 +132,12 @@ class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, 
     }
 
     fun expectedValueLogt(lam: Double, show: Boolean = false): Double {
-
-        //if (nsamples == 0) {
-        //    return ln(1.0 + lam * (noerror - mui))
-        //}
-
         val noerrorTerm = ln(1.0 + lam * (noerror - mui)) * p0
 
         var sumClcaTerm = 0.0
-        clcaErrorRates.filter { it.value != 0.0 }.forEach { (sampleValue: Double, rate: Double) ->
+        clcaErrorRates.forEach { (sampleValue: Double, rate: Double) ->
             sumClcaTerm += ln(1.0 + lam * (sampleValue - mui)) * rate
         }
-
 
         var sumOneAuditTerm = 0.0
         if (oaErrorRates != null) {

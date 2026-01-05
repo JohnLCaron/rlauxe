@@ -2,11 +2,14 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.betting.BettingFn
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.core.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditErrorsFromPools
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditRatesFromPools
 
 private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
 
@@ -25,14 +28,19 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         val oaCassorter = cassertion.cassorter as ClcaAssorterOneAudit
         val clcaConfig = config.clcaConfig
 
-        val oneAuditErrorsFromPools = OneAuditErrorsFromPools(pools)
+        val oneAuditErrorsFromPools = OneAuditRatesFromPools(pools)
         val oaErrorRates = oneAuditErrorsFromPools.oaErrorRates(contestUA, oaCassorter)
 
         val accumErrorCounts: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
-        accumErrorCounts.setPhantomRate(contestUA.contest.phantomRate()) // TODO ??
+        //accumErrorCounts.setPhantomRate(contestUA.contest.phantomRate()) // TODO ??
 
         val bettingFn: BettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-            GeneralAdaptiveBetting(Npop = contestUA.Npop, oaErrorRates=oaErrorRates, d = clcaConfig.d, maxRisk=clcaConfig.maxRisk)
+            GeneralAdaptiveBetting(
+                Npop = contestUA.Npop,
+                oaAssortRates = oaErrorRates,
+                d = clcaConfig.d,
+                maxRisk = clcaConfig.maxRisk
+            )
 
         /* } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
             val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(clcaConfig.pluralityErrorRates!!, accumErrorCounts)
@@ -62,7 +70,8 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
 
         val testH0Result = runBetting(config, contestUA.Npop, oaCassorter, sampling, bettingFn)
 
-        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) testH0Result.tracker.measuredErrorCounts() else null
+        // TODO errors counted twice by GeneralAdaptiveBetting ??
+        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) testH0Result.tracker.measuredClcaErrorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampling.nmvrs(),
@@ -115,7 +124,10 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
             upperBound = upperBound,
         )
 
-         val tracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound()) // track pool data; something better to do?
+         val tracker = ClcaErrorTracker(
+             cassorter.noerror(),
+             cassorter.assorter.upperBound()
+         ) // track pool data; something better to do?
 
          return alpha.testH0(sampling.maxSamples(), terminateOnNullReject = true, tracker=tracker) { sampling.sample() }
     }
@@ -140,7 +152,11 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
 
         // TODO make optional
         val sequences = testFn.setDebuggingSequences()
-        val tracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound(), sequences) // track pool data; something better to do?
+        val tracker = ClcaErrorTracker(
+            cassorter.noerror(),
+            cassorter.assorter.upperBound(),
+            sequences
+        ) // track pool data; something better to do?
 
         // TODO how come you dont need startingTestStatistic: Double,
         return testFn.testH0(sampling.maxSamples(), terminateOnNullReject = true, tracker=tracker) { sampling.sample() }

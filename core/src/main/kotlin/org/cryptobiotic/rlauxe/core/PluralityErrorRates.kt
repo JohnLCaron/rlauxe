@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.pfn
-import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.sfn
 
 // CANDIDATE for removal
@@ -30,6 +29,7 @@ data class PluralityErrorRates(val p2o: Double, val p1o: Double, val p1u: Double
     }
     fun sum() = toList().sum()
 
+    // assort value -> rate
     fun errorRates(noerror: Double): Map<Double, Double> {
         return mapOf(
             noerror * 0.0 to p2o,
@@ -162,7 +162,7 @@ object ClcaErrorTable {
  * This counts the under/overstatements for clca plurality audits.
  * @param noerror for comparison assorters who need rate counting. set to 0 for polling
  */
-class PluralityErrorTracker(val noerror: Double) : SampleTracker, ClcaErrorRatesIF {
+class PluralityErrorTracker(val noerror: Double) : SampleTracker {
     private val isClca = (noerror > 0.0)
     private var last = 0.0
     private var sum = 0.0
@@ -209,7 +209,7 @@ class PluralityErrorTracker(val noerror: Double) : SampleTracker, ClcaErrorRates
         countP1u = 0
     }
 
-    override fun errorRates(): Map<Double, Double> {
+    fun errorRates(): Map<Double, Double> {
         return mapOf(
             noerror * 0.0 to countP2o / numberOfSamples().toDouble(),
             noerror * 0.5 to countP1o / numberOfSamples().toDouble(),
@@ -218,7 +218,7 @@ class PluralityErrorTracker(val noerror: Double) : SampleTracker, ClcaErrorRates
         )
     }
 
-    override fun errorCounts(): Map<Double, Int> {
+    fun errorCounts(): Map<Double, Int> {
         return mapOf(
             noerror * 0.0 to countP2o,
             noerror * 0.5 to countP1o,

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.audit
 
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.max
@@ -215,16 +216,14 @@ data class AuditRoundResult(
 
     fun measuredCounts() = buildString {
         if (measuredCounts == null) append("empty") else {
-            val poolAvg = params["poolAvg"]
-            append(measuredCounts.show(poolAvg))
+            append(measuredCounts.show())
             // measuredCounts.errorCounts.toSortedMap().forEach { append( "${df(it.key)}=${it.value}, " ) }
         }
     }
 
     fun startingRates() = buildString {
         if (startingRates == null) append("empty") else {
-            val poolAvg = params["poolAvg"]
-            append(startingRates.show(poolAvg))
+            append(startingRates.show())
             // startingRates.errorCounts.toSortedMap().forEach { append("${df(it.key)}=${it.value}, ") }
         }
     }

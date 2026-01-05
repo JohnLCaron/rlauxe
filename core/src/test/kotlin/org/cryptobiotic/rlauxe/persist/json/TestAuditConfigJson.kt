@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.persist.json
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -21,7 +20,7 @@ class TestAuditConfigJson {
         testRoundtrips(
             AuditConfig(
                 AuditType.CLCA, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50, simFuzzPct=.111, contestSampleCutoff=10000,  version=2.0,
-                clcaConfig= ClcaConfig(strategy=ClcaStrategyType.fuzzPct, pluralityErrorRates=PluralityErrorRates(.01, .02, .03, .04), d = 99)
+                // clcaConfig= ClcaConfig(strategy=ClcaStrategyType.fuzzPct, pluralityErrorRates=PluralityErrorRates(.01, .02, .03, .04), d = 99)
             )
         )
         testRoundtrips(

@@ -172,3 +172,22 @@ fun sampleSizesVsFuzzPctStdDev(dirName: String, name:String, subtitle: String,
         writeFile = "$dirName/${name}Linear",
     )
 }
+
+fun sampleSizesVsMarginStdDev(dirName: String, name:String, subtitle: String,
+                               catName: String, catfld: ((WorkflowResult) -> String) = { category(it) } ) {
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
+    val data = io.readResults()
+
+    wrsErrorBars(
+        titleS = "$name samples needed",
+        subtitleS = subtitle,
+        wrs = data,
+        xname = "margin", xfld = { it.Dparam("margin") },
+        yname = "samplesNeeded", yfld = { it.samplesUsed },
+        yupperFld = { it.samplesUsed + it.usedStddev },
+        ylowerFld = { it.samplesUsed - it.usedStddev },
+        // scaleType = ScaleType.LogLog, // only linear
+        catName = catName, catFld = catfld,
+        writeFile = "$dirName/${name}Linear",
+    )
+}

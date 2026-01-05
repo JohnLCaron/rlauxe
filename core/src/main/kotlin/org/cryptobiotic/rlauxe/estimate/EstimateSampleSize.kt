@@ -3,11 +3,14 @@ package org.cryptobiotic.rlauxe.estimate
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.core.BettingFn
+import org.cryptobiotic.rlauxe.betting.BettingFn
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditErrorsFromPools
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditRatesFromPools
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.OneAuditVunderBarFuzzer
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -273,10 +276,10 @@ fun estimateClcaAssertionRound(
 
     // duplicate to ClcaAssertionAuditor
     val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
-    prevRounds.setPhantomRate(contest.phantomRate()) // TODO ??
+    // prevRounds.setPhantomRate(contest.phantomRate()) // TODO ??
 
     val bettingFn: BettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-        GeneralAdaptiveBetting(contestUA.Npop, oaErrorRates = null, d = clcaConfig.d, maxRisk=clcaConfig.maxRisk)
+        GeneralAdaptiveBetting(contestUA.Npop, oaAssortRates = null, d = clcaConfig.d, maxRisk = clcaConfig.maxRisk)
 
     /* } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
         //AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
@@ -491,14 +494,19 @@ fun estimateOneAuditAssertionRound(
 
     // duplicate to OneAuditAssertionAuditor
     val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
-    prevRounds.setPhantomRate(contestUA.contest.phantomRate()) // TODO ??
+    // prevRounds.setPhantomRate(contestUA.contest.phantomRate()) // TODO ??
 
     // could also get from the vunderFuzz
-    val oneAuditErrorsFromPools = OneAuditErrorsFromPools(pools)
+    val oneAuditErrorsFromPools = OneAuditRatesFromPools(pools)
     val oaErrorRates = oneAuditErrorsFromPools.oaErrorRates(contestUA, oaCassorter)
 
     val bettingFn: BettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-        GeneralAdaptiveBetting(Npop = contestUA.Npop, oaErrorRates=oaErrorRates, d = clcaConfig.d, maxRisk=clcaConfig.maxRisk)
+        GeneralAdaptiveBetting(
+            Npop = contestUA.Npop,
+            oaAssortRates = oaErrorRates,
+            d = clcaConfig.d,
+            maxRisk = clcaConfig.maxRisk
+        )
 
     /*
     val clcaBettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {

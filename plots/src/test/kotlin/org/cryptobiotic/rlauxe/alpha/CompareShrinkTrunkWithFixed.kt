@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.alpha
 
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.workflow.PollingSampling
 import org.cryptobiotic.rlauxe.workflow.Sampling

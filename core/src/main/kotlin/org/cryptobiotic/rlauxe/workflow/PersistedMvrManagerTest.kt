@@ -16,12 +16,12 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
     : MvrManagerTestIF, PersistedMvrManager(auditDir, config, contestsUA) {
 
     // extract the cards with sampleNumbers from the cardManifest, optionally fuzz them, and write them to sampleMvrsFile
-    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, roundIdx: Int): List<AuditableCard> {
+    override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCard> {
         val cards = findSamples(sampleNumbers, auditableCards())
 
         // get maybe-fuzzed mvrs from previous round, use them again
-        val previousMvrs = if (roundIdx == 1) emptyList() else readAuditableCardCsvFile( publisher.sampleMvrsFile(roundIdx-1))
-        val previousPrns = if (roundIdx == 1) emptyList() else readSamplePrns(publisher.samplePrnsFile(roundIdx-1))
+        val previousMvrs = if (round == 1) emptyList() else readAuditableCardCsvFile( publisher.sampleMvrsFile(round-1))
+        val previousPrns = if (round == 1) emptyList() else readSamplePrns(publisher.samplePrnsFile(round-1))
         val previousPrnsSet = previousPrns.toSet()
         require(previousPrns.size == previousMvrs.size)
         require(previousPrnsSet.size == previousMvrs.size)
@@ -59,8 +59,8 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
         }
 
         val publisher = Publisher(auditDir)
-        writeAuditableCardCsvFile(sampledMvrs, publisher.sampleMvrsFile(roundIdx)) // test sampleMvrs
-        logger.info{"setMvrsBySampleNumber write sampledMvrs to '${publisher.sampleMvrsFile(roundIdx)}"}
+        writeAuditableCardCsvFile(sampledMvrs, publisher.sampleMvrsFile(round)) // test sampleMvrs
+        logger.info{"setMvrsBySampleNumber write sampledMvrs to '${publisher.sampleMvrsFile(round)}"}
         return sampledMvrs
     }
 

@@ -14,11 +14,11 @@ import kotlin.test.Test
 
 class GenVsFuzzByStrategy {
     val name = "clcaVsFuzzByStrategy2"
-    val dirName = "$testdataDir/strategy"
+    val dirName = "$testdataDir/plots/strategy"
 
     val N = 50000
     val margin = .02
-    val nruns = 100  // number of times to run workflow
+    val nruns = 10  // number of times to run workflow
 
     @Test
     fun genSamplesVsFuzzByStrategy() {
@@ -51,13 +51,13 @@ class GenVsFuzzByStrategy {
             //// generate mvrs with fuzzPct, but use different errors (twice or half actual) for estimating and auditing
             val clcaGenerator4 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "2*fuzzPct", "fuzzPct" to fuzzPct),
-                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, fuzzPct, pluralityErrorRates = ClcaErrorTable.getErrorRates(2, 2*fuzzPct)))
+                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, fuzzPct)) // , pluralityErrorRates = ClcaErrorTable.getErrorRates(2, 2*fuzzPct)))
                 )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator4))
 
             val clcaGenerator5 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, 0.0, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "fuzzPct/2", "fuzzPct" to fuzzPct),
-                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, fuzzPct, pluralityErrorRates = ClcaErrorTable.getErrorRates(2, fuzzPct/2)))
+                config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.apriori, fuzzPct)) // , pluralityErrorRates = ClcaErrorTable.getErrorRates(2, fuzzPct/2)))
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator5))
         }

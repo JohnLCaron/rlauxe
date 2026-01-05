@@ -1,57 +1,36 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.oneaudit.TausOA
+import org.cryptobiotic.rlauxe.core.DebuggingSequences
+import org.cryptobiotic.rlauxe.core.PluralityErrorRates
+import org.cryptobiotic.rlauxe.core.SampleTracker
 import org.cryptobiotic.rlauxe.util.Welford
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.roundToClosest
 
 interface ClcaErrorRatesIF {
-    fun errorRates(): Map<Double, Double>
-    fun errorCounts(): Map<Double, Int>
+    fun errorRates(): Map<Double, Double>  // bassort -> rate
+    fun errorCounts(): Map<Double, Int>  // bassort -> count
 }
 
-// TODO back out handling OneAudit?
-// primitive assorter upper bound, is always > 1/2
-data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
-    override fun errorRates() = errorCounts.mapValues { if (totalSamples == 0) 0.0 else it.value / totalSamples.toDouble() }
-    override fun errorCounts() = errorCounts
+data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double) {
+    val taus = Taus(upper)
 
-    fun bassortValues(poolAvg: Double?=null): List<Double> {
-        val tausValues = Taus(upper).values()
-        val tausOAvalues = if (poolAvg != null) TausOA(upper, poolAvg).values() else emptyList()
-        return (tausValues + tausOAvalues).map { it * noerror }.sorted()
+    fun errorRates() = errorCounts.mapValues { if (totalSamples == 0) 0.0 else it.value / totalSamples.toDouble() }  // bassortValue -> rate
+    fun errorCounts() = errorCounts // bassortValue -> count
+
+    fun bassortValues(): List<Double> {
+        return taus.values().map { it * noerror }.sorted()
     }
 
-    // TODO what do phantom ballots do to the error counts?
-    fun setPhantomRate(phantomRate: Double): ClcaErrorCounts {
-        return this // TODO
-    }
-
-    fun changedFrom(other: ClcaErrorCounts): Boolean {
-        val one = errorCounts.filter{ it.key != noerror }
-        val two = other.errorCounts.filter{ it.key != noerror }
-        return one != two
-    }
-
-    // only the errors from CLCA
     fun clcaErrorRate(): Double {
-        val taus = Taus(upper)
         val clcaErrors = errorCounts.toList().filter { (key, value) -> taus.isClcaError(key / noerror) }.sumOf { it.second }
         return clcaErrors / totalSamples.toDouble()
     }
 
-    fun show(poolAvg: Double?=null) = buildString {
-        appendLine("totalSamples=$totalSamples, noerror=$noerror, upper=$upper poolAvg=$poolAvg")
+    fun show() = buildString {
+        appendLine("totalSamples=$totalSamples, noerror=$noerror, upper=$upper")
 
         if (errorCounts.isNotEmpty()) {
-            // appendLine(errorCounts.toList().associate { Pair(it.first / noerror, it.second) }.toSortedMap())
-
-            val taus = Taus(upper)
-            val tausOA = if (poolAvg != null) TausOA(upper, poolAvg) else null
-            //appendLine(" cvr taus = $taus")
-            //appendLine("pool taus = $tausOA")
-
             val sorted = errorCounts.toSortedMap()
             append("    cvr counts= [")
             sorted.forEach { (bassort, count) ->
@@ -59,34 +38,7 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
                 if (desc != null) append("$desc=$count, ")
             }
             appendLine("]")
-
-            if (tausOA != null) {
-                append("    pool counts= [")
-                sorted.forEach { (bassort, count) ->
-                    var desc = tausOA.desc(bassort / noerror)
-                    if (desc != null) append("$desc=$count, ") // else append("${df(bassort / noerror)}=$count, ")
-                }
-                appendLine("]")
-            }
         }
-    }
-
-    fun showShort(poolAvg: Double?=null) = buildString {
-        val taus = Taus(upper)
-        val tausOA = if (poolAvg != null) TausOA(upper, poolAvg) else null
-
-        val sorted = errorCounts.toSortedMap()
-        append("[")
-        sorted.forEach { (bassort, count) ->
-            val desc = taus.desc(bassort / noerror)
-            if (desc != null) append("$desc=$count, ") else if (tausOA != null) {
-                var desc = tausOA.desc(bassort / noerror)
-                if (desc != null) append("$desc=$count, ") else append("${df(bassort / noerror)}=$count, ")
-            } else {
-                append("${df(bassort / noerror)}=$count, ")
-            }
-        }
-        append("]")
     }
 
     override fun toString(): String {
@@ -104,16 +56,6 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
 
             // data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
             return ClcaErrorCounts(errorCounts, totalSamples, noerror, upper)
-        }
-
-        // this only works for upper=1
-        fun fromPluralityAndPrevRates(prates: PluralityErrorRates, prev: ClcaErrorCounts): ClcaErrorCounts {
-            if (prev.upper != 1.0) throw RuntimeException("fromPluralityAndPrevRates must have upper = 1")
-            val errorRates = prates.errorRates(prev.noerror)
-            val errorCounts = errorRates.mapValues { roundToClosest(it.value * prev.totalSamples) }
-
-            // data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
-            return ClcaErrorCounts(errorCounts, prev.totalSamples, prev.noerror, prev.upper)
         }
     }
 }
@@ -173,12 +115,12 @@ interface TausIF {
 class Taus(upper: Double): TausIF {
     // p2o, p1o, ? noerror, ?, p1u, p2u
     // [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror (l==0) (we will assume this)
-    val u12 = 1.0 / (2 * upper)
+    val u12 = 1.0 / (2 * upper)  // (2 * upper) > 1, u12 < 1
     val name = mapOf(0.0 to "0", u12 to "1/2u", 1 - u12 to "1-1/2u", 1.0 to "noerror", 2 - u12 to "2-1/2u", 1 + u12 to "1+1/2u", 2.0 to "2").toList().sortedBy{ it.first }
     val taus = mapOf(0.0 to "win-los", u12 to "win-oth", 1 - u12 to "oth-los", 1.0 to "noerror", 2 - u12 to "los-oth", 1 + u12 to "oth-win", 2.0 to "los-win").toList().sortedBy{ it.first }
 
-    override fun desc(want: Double): String? {
-        val pair = taus.find { doubleIsClose(it.first, want) }
+    override fun desc(tau: Double): String? {
+        val pair = taus.find { doubleIsClose(it.first, tau) }
         return pair?.second
     }
 
@@ -199,8 +141,9 @@ class Taus(upper: Double): TausIF {
     }
 }
 
-class ClcaErrorTracker(val noerror: Double, val upper: Double, val sequences: DebuggingSequences?=null, val debug:Boolean=false) :
-        SampleTracker, ClcaErrorRatesIF {
+class ClcaErrorTracker(val noerror: Double, val upper: Double, val sequences: DebuggingSequences?=null) : SampleTracker {
+    val taus = Taus(upper)
+
     private var last = 0.0
     private var sum = 0.0
     private var welford = Welford()
@@ -222,10 +165,9 @@ class ClcaErrorTracker(val noerror: Double, val upper: Double, val sequences: De
         if (noerror != 0.0) {
             if (doubleIsClose(sample, noerror))
                 noerrorCount++
-            else {
+            else if (taus.isClcaError(sample / noerror)) {
                 val counter = valueCounter.getOrPut(sample) { 0 }
                 valueCounter[sample] = counter + 1
-                if (debug) println("--> error $sample")
             }
         }
     }
@@ -238,18 +180,13 @@ class ClcaErrorTracker(val noerror: Double, val upper: Double, val sequences: De
         noerrorCount = 0
     }
 
-    // data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
-    fun measuredErrorCounts(): ClcaErrorCounts {
-        return ClcaErrorCounts(valueCounter.toSortedMap(), numberOfSamples(), noerror, upper)
+    fun measuredClcaErrorCounts(): ClcaErrorCounts {
+        val clcaErrors = valueCounter.toList().filter { (key, value) -> taus.isClcaError(key / noerror) }.toMap().toSortedMap()
+        return ClcaErrorCounts(clcaErrors, numberOfSamples(), noerror, upper)
     }
 
-    fun measuredAllCounts(): Map<Double, Int> {
-        val complete = (valueCounter.toList() + Pair(noerror, noerrorCount)).toMap()
-        return complete.toSortedMap()
-    }
-
-    override fun errorRates() = valueCounter.mapValues { it.value / numberOfSamples().toDouble() }.toSortedMap()
-    override fun errorCounts() = valueCounter.toSortedMap()
+    fun errorRates() = valueCounter.mapValues { it.value / numberOfSamples().toDouble() }.toSortedMap()
+    fun errorCounts() = valueCounter.toSortedMap()
 
     override fun toString(): String {
         return "ClcaErrorTracker(noerror=$noerror, noerrorCount=$noerrorCount, valueCounter=${valueCounter.toSortedMap()}, N=${numberOfSamples()})"

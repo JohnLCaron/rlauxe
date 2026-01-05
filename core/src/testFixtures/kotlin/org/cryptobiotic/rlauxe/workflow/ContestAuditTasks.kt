@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.core.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
 import org.cryptobiotic.rlauxe.core.TestH0Status
@@ -47,8 +47,8 @@ class ContestAuditTask(
         val contest = lastRound.contestRounds.first() // theres only one
 
         val minAssertion = contest.minAssertion() // TODO why would this fail ?
-        logger.error { "minAssertion is null, setting contest to ContestMisformed"}
         if (minAssertion == null) {
+            logger.error { "minAssertion is null, setting contest to ContestMisformed"}
             return WorkflowResult(
                 name,
                 contest.Npop,
@@ -120,13 +120,14 @@ data class WorkflowResult(
     val startingRates: ClcaErrorCounts? = null, // starting error rates (clca only)
     val measuredCounts: ClcaErrorCounts? = null, // measured error counts (clca only)
 ) {
-    fun Dparam(key: String) = (parameters[key]!! as String).toDouble()
+    fun Dparam(key: String): Double {
+        return (parameters[key]!! as String).toDouble()
+    }
 
     fun show() = buildString {
-        val poolAvg = parameters["poolAvg"] as Double?
         appendLine("WorkflowResult(name='$name', Nc=$Nc, margin=$margin, status=$status, nrounds=$nrounds, samplesUsed=$samplesUsed, nmvrs=$nmvrs, parameters=$parameters, failPct=$failPct, usedStddev=$usedStddev, mvrMargin=$mvrMargin")
-        if (startingRates != null) append("  startingRates=${startingRates.show(poolAvg)}")
-        if (measuredCounts != null) append("  measuredCounts=${measuredCounts.show(poolAvg)}")
+        if (startingRates != null) append("  startingRates=${startingRates.show()}")
+        if (measuredCounts != null) append("  measuredCounts=${measuredCounts.show()}")
         appendLine(")")
     }
 }

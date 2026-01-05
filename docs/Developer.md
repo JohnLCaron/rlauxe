@@ -112,7 +112,7 @@ There's lots of online help for using IntelliJ.
 
 The repo contains all the test case data, except for San Francisco. Download
 
-  https://www.sfelections.org/results/20241105/data/20241203/CVR_Export_20241202143051.zip
+  [SF2024 data](https://www.sfelections.org/results/20241105/data/20241203/CVR_Export_20241202143051.zip)
 
 into testdataDir/cases/sf2024/ (where _testdataDir_ is as you chose in the "Set the test data directory" step above)
 
@@ -123,7 +123,7 @@ All the test cases can be generated from:
 
 _cases/src/test/kotlin/org/cryptobiotic/util/TestGenerateAllUseCases.kt_.
 
-Run the verifier on all the gnerated test cases:
+Run the verifier on all the generated test cases:
 
 _cases/src/test/kotlin/org/cryptobiotic/util/TestVerifyUseCases.kt_.
 
@@ -194,6 +194,39 @@ last changed: 03/10/2025
 * review strategies and fuzzing in estimation and auditing
 * replace old plots
 
+# TODO 01/04/26
+
+* OneAudit GABetting
+* maxRisk does it help? reduce lamda tradeoff 
+* 2D plotting
+* betting on the error rate
+* mix_betting_mart: "Finds a simple discrete mixture martingale as a (flat) average of D TSMs each with fixed bet 'lam'"
+* review COBRA 3.2, 4.3 (Diversified betting)
+* AdaptiveBettingPayoff shows plots of 1.0 + bet * (x - .5). what about sum of logs ?
+
+````
+// generalize AdaptiveBetting for any clca assorter, including OneAudit
+
+log T_i = ln(1.0 + lamda * (noerror - mui)) * p0  + Sum { ln(1.0 + lamda * (assortValue_k - mui)) * p_k }
+  + Sum { ln(1.0 + lamda * (assortValue_pk - mui)) * p_pk; over pools and pool types }              (eq 2)
+where
+  upper > 1/2
+  noerror > 1/2
+  mui ~ 1/2  
+  
+  ln(1) = 0
+  ln(x), x > 1 is positive
+  ln(x), x < 1 is negetive
+  
+  could group into + and - terms ?
+  clca:
+    val u12 = 1.0 / (2 * upper)  // (2 * upper) > 1, u12 < 1
+    val name = mapOf(0.0 to "0", u12 to "1/2u", 1 - u12 to "1-1/2u",   // value - 1/2 is negetive
+        1.0 to "noerror", 2 - u12 to "2-1/2u", 1 + u12 to "1+1/2u", 2.0 to "2")  // value - 1/2 is positive
+
+ 
+````
+ 
 ////////////////////////////////////////////
 Simulation
 

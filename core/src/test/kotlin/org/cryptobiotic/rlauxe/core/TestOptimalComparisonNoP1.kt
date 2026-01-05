@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.betting.etaToLam
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -67,7 +68,7 @@ class TestOptimalComparisonNoP1 {
         val mu = .5
 
         val eta =  (1.0 - upperBound * (1.0 - p2)) / (2.0 - 2.0 * upperBound) + upperBound * (1.0 - p2) - 0.5
-        val lam =  etaToLam(eta, mu, upperBound) // (eta / mu - 1) / (upper - mu)
+        val lam = etaToLam(eta, mu, upperBound) // (eta / mu - 1) / (upper - mu)
 
         // so this equation only works if mu = .5
         val p0 = 1.0 - p2

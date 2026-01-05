@@ -4,13 +4,11 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.core.AdaptiveBetting
 import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
-import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.core.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.sampleSize
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
 
-class GenBettingPayoff {
+class AdaptiveBettingPayoff {
 
     @Test
     fun showAdaptiveComparisonBet() {
@@ -46,26 +44,6 @@ class GenBettingPayoff {
     }
 
     @Test
-    fun showGeneralAdaptiveComparisonBet() {
-        val N = 10000
-        val margins = listOf(.001, .002, .004, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
-
-        for (error in listOf(0.0, 0.0001, .001, .01)) {
-            println("errors = $error")
-            for (margin in margins) {
-                val noerror = 1 / (2 - margin)
-                // ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
-                //val errorCounts = ClcaErrorCounts(emptyMap(), 0, noerror, 1.0)
-                //val optimal = GeneralAdaptiveBettingOld(N = N, errorCounts, d = 100)
-                val betFn = GeneralAdaptiveBetting(N, oaErrorRates = null, d = 100, maxRisk=.99)
-                val samples = ClcaErrorTracker(noerror, 1.0)
-                repeat(100) { samples.addSample(noerror) }
-                println(" margin=$margin, noerror=$noerror bet = ${betFn.bet(samples)}")
-            }
-        }
-    }
-
-    @Test
     fun showBettingPayoff() {
         val N = 10000
         val margins = listOf(.01)
@@ -84,15 +62,15 @@ class GenBettingPayoff {
                 val samples = PluralityErrorTracker(noerror)
                 repeat(100) { samples.addSample(noerror) }
                 val bet = bettingFn.bet(samples)
-                println("margin=$margin, noerror=$noerror bet = $bet}")
+                println(" margin=$margin, noerror=$noerror bet = $bet")
 
-                println("2voteOver, 1voteOver, equal, 1voteUnder, 2voteUnder")
+                println(" 2voteOver, 1voteOver, equal, 1voteUnder, 2voteUnder")
                 //     X_i = {0, .5, 1, 1.5, 2} * noerror for {2voteOver, 1voteOver, equal, 1voteUnder, 2voteUnder} respectively.
                 val payoff = listOf(0.0, 0.5, 1.0, 1.5, 2.0).map { x ->
                     // 1 + λ_i (X_i − µ_i)
                     1.0 + bet * (noerror * x - .5)
                 }
-                payoff.forEach { print("${dfn(it, 6)}, ") }
+                payoff.forEach { print(" ${dfn(it, 6)}, ") }
                 println()
             }
         }
@@ -138,7 +116,7 @@ class GenBettingPayoff {
             }
         }
 
-        val plotter = PlotBettingPayoffData("$testdataDir/betting/", "bettingPayoff.csv")
+        val plotter = PlotBettingPayoffData("$testdataDir/plots/betting/bettingPayoff/", "bettingPayoff.csv")
         errorRates.forEach { error ->
             plotter.plotOneErrorRate(results, error)
         }

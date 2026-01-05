@@ -161,12 +161,12 @@ fun runPersistedAudit(topdir: String, test:Boolean) {
         lastRound = runRound(inputDir = auditdir)
         if (lastRound == null) fail()
 
-        // TODO!!
+        /* TODO!! ??
         val enterResult = enterMvrs(auditdir, publisher.sortedCardsFile())
         if (enterResult is Err) {
             println("enterMvrs failed ${enterResult.error}")
             fail()
-        }
+        } */
 
         done = lastRound.auditIsComplete || lastRound.roundIdx > 5
         if (!done && writeMvrs) writeMvrsForRound(publisher, lastRound!!.roundIdx) // RunRlaCreateOneAudit writes the mvrs

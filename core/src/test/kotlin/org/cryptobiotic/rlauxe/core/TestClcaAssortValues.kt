@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
 
+import org.cryptobiotic.rlauxe.betting.Taus
+import org.cryptobiotic.rlauxe.betting.computeBassortValues
 import org.cryptobiotic.rlauxe.dhondt.DHondtAssorter
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.listToMap

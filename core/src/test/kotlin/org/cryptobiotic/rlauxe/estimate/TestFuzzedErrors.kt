@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.core.ClcaErrorRatesCumul
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
-import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.util.dfn
 import org.junit.jupiter.api.Test
 

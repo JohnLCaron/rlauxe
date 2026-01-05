@@ -249,7 +249,7 @@ fun showSampleSizesVsMargin(name: String, dirName: String, subtitle: String, ysc
         subtitleS = subtitle,
         writeFile = "$dirName/${name}${yscale.name}",
         wrs = data,
-        xname = "true margin", xfld = { it.margin },
+        xname = "margin", xfld = { it.margin },
         yname = "samplesNeeded", yfld = { it.samplesUsed },
         catName = catName, catfld = { category(it) },
         scaleType = yscale

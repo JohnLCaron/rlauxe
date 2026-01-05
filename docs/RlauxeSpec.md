@@ -503,7 +503,7 @@ the outcome of the ith wager. The value Mj is the gambler’s wealth after the j
 gambler is not permitted to borrow money, so to ensure that when X_i = 0 (corresponding to
 losing the ith bet) the gambler does not end up in debt (Mi < 0), λi cannot exceed 1/µi.
 
-See Cobra section 4.2 and SHANGRLA Section 3.2. See [CLCA Risk function](../BettingRiskFunction.md) for more algorithm details.
+See Cobra section 4.2 and SHANGRLA Section 3.2. See [CLCA Risk function](../ClcaRiskFunction.md) for more algorithm details.
 
 See [BettingRiskFunction implementation](../../core/src/main/kotlin/org/cryptobiotic/rlauxe/core/BettingMart.kt) for
 implementation details.

@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.audit
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
-import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -347,13 +346,14 @@ class TestHasStyle {
                                   testCvrs: List<Cvr>, cardStyles:List<PopulationIF>?): AuditRound {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
-        val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
+        // val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
         val config = if (isPolling) {
             AuditConfig(AuditType.POLLING, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
                 pollingConfig = PollingConfig())
         } else {
             AuditConfig(AuditType.CLCA, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
-                clcaConfig = ClcaConfig(strategy= ClcaStrategyType.apriori, pluralityErrorRates=errorRates))
+                // clcaConfig = ClcaConfig(strategy= ClcaStrategyType.apriori, pluralityErrorRates=errorRates)
+            )
         }
 
         val infos = contests.map{ it.info }.associateBy { it.id }
@@ -382,13 +382,14 @@ class TestHasStyle {
                                    testCards: List<AuditableCard>, cardStyles:List<PopulationIF>?): AuditRound {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
-        val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
+        // val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
         val config = if (isPolling) {
             AuditConfig(AuditType.POLLING, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
                 pollingConfig = PollingConfig())
         } else {
             AuditConfig(AuditType.CLCA, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
-                clcaConfig = ClcaConfig(strategy= ClcaStrategyType.apriori, pluralityErrorRates=errorRates))
+               //clcaConfig = ClcaConfig(strategy= ClcaStrategyType.apriori, pluralityErrorRates=errorRates)
+            )
         }
 
         val infos = contests.map{ it.info }.associateBy { it.id }

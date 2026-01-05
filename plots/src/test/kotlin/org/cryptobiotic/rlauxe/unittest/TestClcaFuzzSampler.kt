@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.unittest
 
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.runRepeatedBettingMart
@@ -60,7 +61,7 @@ private fun runWithComparisonFuzzSampler(
     val sampler = ClcaFuzzSampler(auditConfig.simFuzzPct!!, cvrs, contestUA.contest as Contest, cassorter)
 
     //val errorCounts = ClcaErrorCounts(emptyMap(), 0, noerror=cassorter.noerror(), upper=cassorter.assorter.upperBound())
-    val betFn = GeneralAdaptiveBetting(contestUA.Npop, oaErrorRates = null, d = 100, maxRisk=.99)
+    val betFn = GeneralAdaptiveBetting(contestUA.Npop, oaAssortRates = null, d = 100, maxRisk = .99)
 
     // val optimal = GeneralAdaptiveBettingOld(N = contestUA.Npop, errorCounts, d = 100)
 

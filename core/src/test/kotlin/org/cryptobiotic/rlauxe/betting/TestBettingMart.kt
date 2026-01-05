@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.core.populationMeanIfH0
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
@@ -11,7 +9,7 @@ import kotlin.test.Test
 class TestBettingMart {
     val allShow = false
 
-    // what does populationMeanIfH0 look like as j -> N, when all are noerror?
+    //// what does populationMeanIfH0 look like as j -> N, when all are noerror?
     @Test
     fun showPopulationMeanIfH0() {
         for (N in listOf(100, 1000, 10000)) {
@@ -70,13 +68,14 @@ class TestBettingMart {
     // suppose you want to only lose .95 = maxRisk, then max bet = maxRisk*mui ~ .95*2 = lamda = 1.9
     // i see why you focus on p2 errors
 
+    // just bet the maxRisk
     @Test
     fun testMaxRisk() {
         for (maxRisk in listOf(.90, .95, .99, .999, .9999)) {
             for (N in listOf(100, 1000, 10000)) {
                 for (margin in listOf(.05, .01, .001)) {
                     for (upper in listOf(10.0, 1.0, .67)) {
-                        findSamplesNeeded(N, margin, upper, maxRisk)
+                        findSamplesNeededUsingMaxRisk(N, margin, upper, maxRisk)
                     }
                 }
                 println()
@@ -86,38 +85,39 @@ class TestBettingMart {
 
     @Test
     fun showMaxRisk() {
-        findSamplesNeeded(N = 10000, margin = .05, upper = 1.0, maxRisk = .90, show = false)
-        findSamplesNeeded(N = 10000, margin = .05, upper = 1.0, maxRisk = .99, show = false)
-        findSamplesNeeded(N = 10000, margin = .05, upper = 1.0, maxRisk = .999, show = false)
-        findSamplesNeeded(N = 10000, margin = .05, upper = 1.0, maxRisk = .9999, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .05, upper = 1.0, maxRisk = .90, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .05, upper = 1.0, maxRisk = .99, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .05, upper = 1.0, maxRisk = .999, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .05, upper = 1.0, maxRisk = .9999, show = false)
     }
 
     @Test
     fun showUpper() {
-        findSamplesNeeded(N = 10000, margin = .05, upper = 0.67, maxRisk = .90, show = false)
-        findSamplesNeeded(N = 10000, margin = .05, upper = 0.87, maxRisk = .90, show = false)
-        findSamplesNeeded(N = 10000, margin = .05, upper = 1.0, maxRisk = .90, show = false)
-        findSamplesNeeded(N = 10000, margin = .05, upper = 2.0, maxRisk = .90, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .05, upper = 0.67, maxRisk = .90, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .05, upper = 0.87, maxRisk = .90, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .05, upper = 1.0, maxRisk = .90, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .05, upper = 2.0, maxRisk = .90, show = false)
     }
 
     @Test
     fun showMargins() {
-        findSamplesNeeded(N = 10000, margin = .05, upper = 1.0, maxRisk = .95, show = false)
-        findSamplesNeeded(N = 10000, margin = .03, upper = 1.0, maxRisk = .95, show = false)
-        findSamplesNeeded(N = 10000, margin = .01, upper = 1.0, maxRisk = .95, show = false)
-        findSamplesNeeded(N = 10000, margin = .005, upper = 1.0, maxRisk = .95, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .05, upper = 1.0, maxRisk = .95, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .03, upper = 1.0, maxRisk = .95, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .01, upper = 1.0, maxRisk = .95, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .005, upper = 1.0, maxRisk = .95, show = false)
     }
 
     @Test
     fun showMarginsAtRisk() {
-        findSamplesNeeded(N = 10000, margin = .005, upper = 1.0, maxRisk = .9, show = false)
-        findSamplesNeeded(N = 10000, margin = .005, upper = 1.0, maxRisk = .99, show = false)
-        findSamplesNeeded(N = 10000, margin = .005, upper = 1.0, maxRisk = .999, show = false)
-        findSamplesNeeded(N = 10000, margin = .005, upper = 1.0, maxRisk = .9999, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .005, upper = 1.0, maxRisk = .9, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .005, upper = 1.0, maxRisk = .95, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .005, upper = 1.0, maxRisk = .99, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .005, upper = 1.0, maxRisk = .999, show = false)
+        findSamplesNeededUsingMaxRisk(N = 10000, margin = .005, upper = 1.0, maxRisk = .9999, show = false)
     }
 }
 
-fun findSamplesNeeded(N:Int, margin: Double, upper: Double, maxRisk: Double, mui: Double = 0.5, show: Boolean = false) {
+fun findSamplesNeededUsingMaxRisk(N:Int, margin: Double, upper: Double, maxRisk: Double, mui: Double = 0.5, show: Boolean = false) {
     val noerror: Double = 1.0 / (2.0 - margin / upper) // clca assort value when no error
     val maxLambda = maxRisk / mui
     val maxtj: Double = 1.0 + maxLambda * (noerror - mui)

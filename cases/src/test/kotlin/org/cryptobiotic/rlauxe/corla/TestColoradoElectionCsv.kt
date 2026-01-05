@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.core.GeneralAdaptiveBetting
-import org.cryptobiotic.rlauxe.core.populationMeanIfH0
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
+import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.core.sampleSize
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
@@ -65,7 +65,7 @@ fun betPayoffSamples(N: Int, risk: Double, assorterMargin: Double, error: Double
     //    val debug: Boolean = false,
     val bettingFn = GeneralAdaptiveBetting(
         Npop = N,
-        oaErrorRates = null,
+        oaAssortRates = null,
         d = 100,
         maxRisk = .99,
     )

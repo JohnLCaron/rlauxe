@@ -10,7 +10,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.enumValueOf
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
@@ -237,7 +236,7 @@ fun PollingConfigJson.import() = PollingConfig(this.d)
 data class ClcaConfigJson(
     val strategy: String,
     val fuzzPct: Double?,
-    val errorRates: List<Double>?,
+    // val errorRates: List<Double>?,
     val d: Int,
     val maxRisk: Double?,
     val cvrsContainUndervotes: Boolean=true,
@@ -246,7 +245,7 @@ data class ClcaConfigJson(
 fun ClcaConfig.publishJson() = ClcaConfigJson(
     this.strategy.name,
     this.fuzzPct,
-    this.pluralityErrorRates?.toList(),
+    // this.pluralityErrorRates?.toList(),
     this.d,
     this.maxRisk,
     this.cvrsContainUndervotes,
@@ -255,7 +254,7 @@ fun ClcaConfig.publishJson() = ClcaConfigJson(
 fun ClcaConfigJson.import() = ClcaConfig(
         enumValueOf(this.strategy, ClcaStrategyType.entries) ?: ClcaStrategyType.generalAdaptive,
         this.fuzzPct,
-        if (this.errorRates != null) PluralityErrorRates.fromList(this.errorRates) else null,
+        // if (this.errorRates != null) PluralityErrorRates.fromList(this.errorRates) else null,
         this.d,
         this.maxRisk ?: 0.90, // TODO
         this.cvrsContainUndervotes,

@@ -44,9 +44,9 @@ interface AssorterIF {
         return 1.0 / (2.0 - ratio)
     }
 
-    fun shortName() = "${winner()}/${loser()}"
-    fun winLose() = "${winner()}/${loser()}"
     fun hashcodeDesc(): String // Used as unique reference, DO NOT CHANGE!
+    fun shortName() = winLose()
+    fun winLose() = "${winner()}/${loser()}"
 
     // reportedMargin : N = Nc
     // dilutedMargin: Npop = sample population size

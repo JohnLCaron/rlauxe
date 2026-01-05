@@ -7,8 +7,8 @@ import org.cryptobiotic.rlauxe.core.BettingMart
 import org.cryptobiotic.rlauxe.core.FixedBet
 import org.cryptobiotic.rlauxe.core.OptimalComparisonNoP1
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
-import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.core.lamToEta
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.lamToEta
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import kotlin.math.max
 import kotlin.math.min

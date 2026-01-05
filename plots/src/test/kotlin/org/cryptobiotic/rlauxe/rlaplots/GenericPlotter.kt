@@ -14,7 +14,7 @@ import org.jetbrains.kotlinx.kandy.letsplot.settings.Symbol
 import org.jetbrains.kotlinx.kandy.letsplot.tooltips.tooltips
 import org.jetbrains.kotlinx.kandy.util.color.Color
 
-// generic multiple line plotter
+// generic multiple line plotter; dont need WorkflowResult
 fun <T> genericPlotter(
         titleS: String,
         subtitleS: String,

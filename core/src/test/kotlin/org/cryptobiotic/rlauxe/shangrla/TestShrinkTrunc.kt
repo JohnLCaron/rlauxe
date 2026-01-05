@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.core.PrevSamples
 import org.cryptobiotic.rlauxe.core.TruncShrinkage
-import org.cryptobiotic.rlauxe.core.populationMeanIfH0
+import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.doublesAreClose
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import kotlin.test.Test

@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.*
@@ -143,7 +145,7 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val samplesNeeded = testH0Result.sampleCount
 
         val upper = cassorter.assorter.upperBound()
-        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) (testH0Result.tracker as ClcaErrorTracker).measuredErrorCounts() else null
+        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) (testH0Result.tracker as ClcaErrorTracker).measuredClcaErrorCounts() else null
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,

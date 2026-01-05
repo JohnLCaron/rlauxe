@@ -1,7 +1,7 @@
 # Generalized Adaptive Betting for CLCA
 _last updated 01/03/24_
 
-The default betting strategy for CLCA is a generalized form of AdaptiveBetting from the COBRA paper. We generalize to use any
+The betting strategy for CLCA is a generalized form of AdaptiveBetting from the COBRA paper. We generalize to use any
 number of error types, and any kind of assorter, in particular ones with upper != 1, such as DHondt.
 
 Suppose for a particular assorter, there are a fixed number and type of errors with known assort values and probabilities {p1..,pn},

@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.alpha
 
 
+import org.cryptobiotic.rlauxe.betting.SamplingFromAssortValues
 import org.cryptobiotic.rlauxe.estimate.ClcaFlipErrorsSampler
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
@@ -51,7 +52,8 @@ class CompareAlphaPaperUsingMasses {
                 }
                 t = xp.average()
             }
-            val sampleFn = SampleFromArrayWithoutReplacement(xp.toDoubleArray())
+            // class SamplingFromAssortValues(val assortValues : List<Double>): Sampling {
+            val sampleFn = SamplingFromAssortValues(xp)
             val theta = sampleFn.sampleMean()
             println(" testMass m=$m N=$N theta=$theta")
             thetas.add(theta)
@@ -107,37 +109,4 @@ class CompareAlphaPaperUsingMasses {
 
         println()
     }
-}
-
-class SampleFromArrayWithoutReplacement(val assortValues : DoubleArray): Sampling {
-    val maxSamples = assortValues.size
-    val permutedIndex = MutableList(maxSamples) { it }
-    private var idx = 0
-    private var count = 0
-
-    init {
-        reset()
-    }
-
-    override fun sample(): Double {
-        require (idx < maxSamples)
-        require (permutedIndex[idx] < maxSamples)
-        count++
-        return assortValues[permutedIndex[idx++]]
-    }
-
-    override fun reset() {
-        permutedIndex.shuffle(Random)
-        idx = 0
-        count = 0
-    }
-
-    fun sampleMean() = assortValues.average()
-
-    override fun maxSamples() = maxSamples
-    override fun maxSampleIndexUsed() = idx
-    override fun nmvrs() = idx // TODO
-
-    override fun hasNext() = (count < maxSamples)
-    override fun next() = sample()
 }

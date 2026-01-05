@@ -29,7 +29,7 @@ class PlotBettingPayoffData(val dir: String, val filename: String) {
 
         genericPlotter(
             "BettingPayoff",
-            "error = $wantError",
+            "errorRate = $wantError",
             "$dir/BettingPayoff${wantError}",
             useData,
             "margin", "payoff", "assort",
@@ -52,7 +52,7 @@ class PlotBettingPayoffData(val dir: String, val filename: String) {
             "assortValue = $wantAssort",
             "$dir/BettingPayoffAssort${wantAssort}",
             useData,
-            "margin", "payoff", "error",
+            "margin", "payoff", "errorRate",
             xfld = { it.margin },
             yfld = { it.payoff },
             catfld = { df(it.error) },
@@ -74,7 +74,7 @@ class PlotBettingPayoffData(val dir: String, val filename: String) {
             useData,
             xname = "margin", xfld = { it.margin },
             yname="sampleSize", yfld = { sampleSize(risk, it.payoff) },
-            catName="error", catfld = { df(it.error) },
+            catName="errorRate", catfld = { df(it.error) },
             scaleType = ScaleType.LogLog,
         )
     }

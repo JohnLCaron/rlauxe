@@ -1,11 +1,11 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.core.BettingFn
-import org.cryptobiotic.rlauxe.core.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.core.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.core.GeneralAdaptiveBetting
-import org.cryptobiotic.rlauxe.core.GeneralOptimalLambda
-import org.cryptobiotic.rlauxe.core.populationMeanIfH0
+import org.cryptobiotic.rlauxe.betting.BettingFn
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
+import org.cryptobiotic.rlauxe.betting.GeneralOptimalLambda
+import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
@@ -13,6 +13,8 @@ import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.workflow.ClcaSampling
 import org.cryptobiotic.rlauxe.workflow.Sampling
 import kotlin.test.Test
+
+// TODO use GA
 
 class TestOneAuditAdaptiveBetting {
 
@@ -40,7 +42,7 @@ class TestOneAuditAdaptiveBetting {
         println("contestUA=${contestUA}")
         println("cardPool=${cardPools.first()}")
         val oaCassorter = contestUA.minClcaAssertion()!!.cassorter as ClcaAssorterOneAudit
-        val oaErrorsFromPools = OneAuditErrorsFromPools(cardPools as List<OneAuditPoolIF>)
+        val oaErrorsFromPools = OneAuditRatesFromPools(cardPools as List<OneAuditPoolIF>)
         val oaErrorRates = oaErrorsFromPools.oaErrorRates(contestUA, oaCassorter)
         println("oaErrorRates=$oaErrorRates pct=${oaErrorRates.rates.values.sum()} ")
         println()
@@ -82,7 +84,7 @@ class TestOneAuditAdaptiveBetting {
             sampler.reset()
             val betFun = GeneralAdaptiveBetting(
                 contestUA.Npop,
-                oaErrorRates = oaErrorRates,
+                oaAssortRates = oaErrorRates,
                 d = 100,
                 maxRisk = 0.90,
                 debug = false

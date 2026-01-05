@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
 import org.cryptobiotic.rlauxe.workflow.Sampling
 import org.cryptobiotic.rlauxe.estimate.runTestRepeated

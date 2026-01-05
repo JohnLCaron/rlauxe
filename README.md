@@ -174,9 +174,9 @@ GeneralAdaptiveBetting uses estimates/measurements of the error rates between th
 If the error estimates are correct, one gets optimal 
 "sample sizes", the number of ballots needed to prove the election is correct.
 
-See [CLCA Risk function](docs/BettingRiskFunction.md) for details on the BettingMart risk function.
+See [CLCA Risk function](docs/ClcaRiskFunction.md) for details on the CLCA risk function.
 
-See [Generalized Adaptive Betting for CLCA](docs/GeneralizedAdaptiveBetting.md) for details on the GeneralAdaptiveBetting function.
+See [Generalized Adaptive Betting for CLCA](docs/GeneralizedAdaptiveBetting.md) for details on the CLCA betting function.
 
 ## OneAudit CLCA
 
@@ -528,17 +528,21 @@ Rlauxe uses a CardManifest, which consists of a canonical list of AuditableCards
 and the list of Populations. OneAudit pools are subtypes of Populations. The CardManifest is one of the committments that
 the Prover must make before the random seed can be generated.
 
-### General Adaptive Betting strategy.
+### General Adaptive Betting
 
-SHANGRLA's Adaptive Betting Strategy has been generalized to work for both CLCA and OneAudit and for any assorter. 
+SHANGRLA's Adaptive Betting has been generalized to work for both CLCA and OneAudit and for any assorter. 
 It uses estimated and/or measured error rates to set optimal betting values. This is currently the only betting strategy used by Rlauxe.
 See [GeneralizedAdaptiveBetting](docs/GeneralizedAdaptiveBetting.md) for more info.
+
+### OneAudit Betting strategy
+
+OneAudit uses GeneralizedAdaptiveBetting and includes the OneAudit assort values and their known
+frequencies in computing the optimal betting values.
 
 ### MaxRisk for Betting
 
 In order to prevent stalls in BettingMart, the maximum bet is bounded by a "maximum risk" value, which is the maximum
 percent of your "winnings" you are willing to risk on any one bet.
-
 
 ### Additional assorters
 

@@ -24,7 +24,7 @@ class ClcaNoErrorIterator(
     val contestNc: Int,
     val cassorter: ClcaAssorter,
     val cvrIterator: Iterator<CvrIF>,
-): Sampling, Iterator<Double> {
+): Sampler, Iterator<Double> {
     private var idx = 0
     private var count = 0
     private var done = false
@@ -71,7 +71,7 @@ class OneAuditNoErrorIterator(
     val contestSampleCutoff: Int?,
     val cassorter: ClcaAssorter,
     cvrIter: Iterator<Cvr>,
-): Sampling, Iterator<Double> {
+): Sampler, Iterator<Double> {
     val cvrs = mutableListOf<Cvr>()
     var permutedIndex = mutableListOf<Int>()
 
@@ -134,7 +134,7 @@ class ClcaSimulatedErrorRates(
     val contest: ContestIF,
     val cassorter: ClcaAssorter,
     val errorRates: PluralityErrorRates,
-): Sampling {
+): Sampler {
     val Ncvrs = rcvrs.size
     val maxSamples = rcvrs.count { it.hasContest(contest.id) }
     val isIRV = contest.isIrv()
@@ -428,7 +428,7 @@ class ClcaCardSimulatedErrorRates(
     val contest: ContestIF,
     val cassorter: ClcaAssorter,
     val errorRates: PluralityErrorRates,
-): Sampling {
+): Sampler {
     val Ncards = cards.size
     val maxSamples = cards.count { it.hasContest(contest.id) }
     val isIRV = contest.isIrv()
@@ -710,7 +710,7 @@ class ClcaFuzzSampler(
     val cvrs: List<Cvr>,
     val contest: ContestIF,
     val cassorter: ClcaAssorter
-): Sampling, Iterator<Double> {
+): Sampler, Iterator<Double> {
     val maxSamples = cvrs.count { it.hasContest(contest.id) }
     val N = cvrs.size
     val permutedIndex = MutableList(N) { it }
@@ -761,7 +761,7 @@ class PollingFuzzSampler(
     val cvrs: List<Cvr>,
     val contest: Contest,
     val assorter: AssorterIF
-): Sampling, Iterator<Double> {
+): Sampler, Iterator<Double> {
     val maxSamples = cvrs.count { it.hasContest(contest.id) } // dont need this is its single contest
     val N = cvrs.size
     val welford = Welford()

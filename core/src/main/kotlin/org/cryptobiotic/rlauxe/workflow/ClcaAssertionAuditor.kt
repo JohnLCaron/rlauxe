@@ -51,7 +51,7 @@ class RunClcaContestTask(
             if (!assertionRound.status.complete) {
                 val cassertion = assertionRound.assertion as ClcaAssertion
                 val cassorter = cassertion.cassorter
-                val sampler = ClcaSampling(contest.id, cvrPairs, cassorter, allowReset = false)
+                val sampler = ClcaSampler(contest.id, cvrPairs, cassorter, allowReset = false)
 
                 val testH0Result = auditor.run(config, contest, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status
@@ -71,7 +71,7 @@ fun interface ClcaAssertionAuditorIF {
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampling: Sampling,
+        sampling: Sampler,
         roundIdx: Int,
     ): TestH0Result
 }
@@ -82,7 +82,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampling: Sampling,
+        sampling: Sampler,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA

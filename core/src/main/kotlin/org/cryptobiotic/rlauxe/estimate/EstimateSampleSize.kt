@@ -17,8 +17,8 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.VunderBar
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
-import org.cryptobiotic.rlauxe.workflow.ClcaSampling
-import org.cryptobiotic.rlauxe.workflow.Sampling
+import org.cryptobiotic.rlauxe.workflow.ClcaSampler
+import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.collections.List
 import kotlin.collections.mutableListOf
 import kotlin.math.min
@@ -339,7 +339,7 @@ fun estimateClcaAssertionRound(
 fun runRepeatedBettingMart(
     name: String,
     config: AuditConfig,
-    sampleFn: Sampling,
+    sampleFn: Sampler,
     bettingFn: BettingFn,
     noerror: Double,
     upper: Double, // cassorter.assorter.upperBound(),
@@ -432,7 +432,7 @@ fun estimatePollingAssertionRound(
 fun runRepeatedAlphaMart(
     name: String,
     config: AuditConfig,
-    sampleFn: Sampling,
+    sampleFn: Sampler,
     estimFn: EstimFn?, // if null use default TruncShrinkage
     eta0: Double,  // initial estimate of mean
     upperBound: Double,
@@ -534,7 +534,7 @@ fun estimateOneAuditAssertionRound(
             OptimalComparisonNoP1(contestUA.Npop, true, oaCassorter.upperBound)
         } */
 
-    val sampler = ClcaSampling(contestUA.contest.id, oaFuzzedPairs, oaCassorter, allowReset = true)
+    val sampler = ClcaSampler(contestUA.contest.id, oaFuzzedPairs, oaCassorter, allowReset = true)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateOneAuditAssertionRound for $name with ${config.nsimEst} trials"}

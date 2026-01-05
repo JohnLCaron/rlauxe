@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.betting.etaToLam
 import org.cryptobiotic.rlauxe.betting.lamToEta
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.runRepeatedAlphaMart
-import org.cryptobiotic.rlauxe.workflow.PollingSampling
+import org.cryptobiotic.rlauxe.workflow.PollingSampler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -39,7 +39,7 @@ class TestAlphaMart {
 
         val cvrs = test.makeCvrsFromContests()
         val config = AuditConfig(AuditType.POLLING, nsimEst=10)
-        val cvrSampler = PollingSampling(contestUA.contest.id, cvrs.zip(cvrs), assorter)
+        val cvrSampler = PollingSampler(contestUA.contest.id, cvrs.zip(cvrs), assorter)
 
         val eta0 = assorter.dilutedMean()
         println("eta0=$eta0, margin=${mean2margin(eta0)}")

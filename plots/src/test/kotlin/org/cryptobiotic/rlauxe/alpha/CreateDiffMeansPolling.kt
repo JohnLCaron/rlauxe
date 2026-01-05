@@ -27,7 +27,7 @@ import org.cryptobiotic.rlauxe.rlaplots.SRTcsvWriter
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.PollingSampling
+import org.cryptobiotic.rlauxe.workflow.PollingSampler
 import kotlin.test.Test
 
 // CANDIDATE FOR REFACTOR
@@ -231,7 +231,7 @@ class CreatePollingDiffMeans {
             if (!silent && showContests) println("  ${assert}")
 
             val contestUA = ContestWithAssertions(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
-            val cvrSampler = PollingSampling(contestUA.id,  pairs, assert.assorter)
+            val cvrSampler = PollingSampler(contestUA.id,  pairs, assert.assorter)
 
             val result = runAlphaMartRepeated(
                 name = "runAlphaMartWithMeanDiff",

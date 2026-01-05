@@ -10,9 +10,9 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.workflow.ClcaNoErrorIterator
-import org.cryptobiotic.rlauxe.workflow.ClcaSampling
+import org.cryptobiotic.rlauxe.workflow.ClcaSampler
 import org.cryptobiotic.rlauxe.workflow.OneAuditNoErrorIterator
-import org.cryptobiotic.rlauxe.workflow.PollingSampling
+import org.cryptobiotic.rlauxe.workflow.PollingSampler
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -28,7 +28,7 @@ class TestSampler {
 
     @Test
     fun testPollingSampling() {
-        val target = PollingSampling(0, cvrs.zip(cvrs), assertion.assorter)
+        val target = PollingSampler(0, cvrs.zip(cvrs), assertion.assorter)
 
         var count = 0
         while (target.hasNext()) {
@@ -51,7 +51,7 @@ class TestSampler {
         // was hasUndervotes=false
         val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, dilutedMargin=assertion.assorter.dilutedMargin(), true)
         val cvrPairs = cvrs.zip( AuditableCard.fromCvrs(cvrs))
-        val target = ClcaSampling(0, cvrPairs, cassorter, true) // single contest OK
+        val target = ClcaSampler(0, cvrPairs, cassorter, true) // single contest OK
 
         var count = 0
         while (target.hasNext()) {

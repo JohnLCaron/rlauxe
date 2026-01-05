@@ -1,16 +1,14 @@
 package org.cryptobiotic.rlauxe.alpha
 
 
-import org.cryptobiotic.rlauxe.betting.SamplingFromAssortValues
+import org.cryptobiotic.rlauxe.betting.SamplerFromAssortValues
 import org.cryptobiotic.rlauxe.estimate.ClcaFlipErrorsSampler
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.doublePrecision
-import org.cryptobiotic.rlauxe.workflow.Sampling
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import kotlin.test.Test
 import kotlin.math.abs
-import kotlin.random.Random
 import kotlin.test.assertEquals
 
 class CompareAlphaPaperUsingMasses {
@@ -53,7 +51,7 @@ class CompareAlphaPaperUsingMasses {
                 t = xp.average()
             }
             // class SamplingFromAssortValues(val assortValues : List<Double>): Sampling {
-            val sampleFn = SamplingFromAssortValues(xp)
+            val sampleFn = SamplerFromAssortValues(xp)
             val theta = sampleFn.sampleMean()
             println(" testMass m=$m N=$N theta=$theta")
             thetas.add(theta)

@@ -2,8 +2,8 @@ package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.workflow.PollingSampling
-import org.cryptobiotic.rlauxe.workflow.Sampling
+import org.cryptobiotic.rlauxe.workflow.PollingSampler
+import org.cryptobiotic.rlauxe.workflow.Sampler
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
 import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
@@ -27,7 +27,7 @@ class CompareShrinkTrunkWithFixed {
 
             val contestUA = ContestWithAssertions(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
 
-            val sampleFn = PollingSampling(contestUA.id, pairs, makeStandardPluralityAssorter(N))
+            val sampleFn = PollingSampler(contestUA.id, pairs, makeStandardPluralityAssorter(N))
 
             println("\neta0 = $eta")
             val fixResult = testAlphaMartFixed(eta, sampleFn)
@@ -39,7 +39,7 @@ class CompareShrinkTrunkWithFixed {
         }
     }
 
-    fun testAlphaMartTrunc(eta0: Double, sampling: Sampling): TestH0Result {
+    fun testAlphaMartTrunc(eta0: Double, sampling: Sampler): TestH0Result {
         val u = 1.0
         val d = 10000
         val N = sampling.maxSamples()
@@ -51,7 +51,7 @@ class CompareShrinkTrunkWithFixed {
         return alpha.testH0(N, true, tracker=tracker) { sampling.sample() }
     }
 
-    fun testAlphaMartFixed(eta0: Double, sampling: Sampling): TestH0Result {
+    fun testAlphaMartFixed(eta0: Double, sampling: Sampler): TestH0Result {
         val fixed = FixedEstimFn(eta0 = eta0)
         val alpha = AlphaMart(estimFn = fixed, N = sampling.maxSamples())
         val tracker = ClcaErrorTracker(0.0, 1.0)
@@ -72,7 +72,7 @@ class CompareShrinkTrunkWithFixed {
             val pairs = cvrs.zip(cvrs)
 
             val contestUA = ContestWithAssertions(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
-            val sampleFn = PollingSampling(contestUA.id, pairs, makeStandardPluralityAssorter(N))
+            val sampleFn = PollingSampler(contestUA.id, pairs, makeStandardPluralityAssorter(N))
 
             println("\neta0 = $eta")
             val fixResult = runAlphaMartFixedRepeated(eta, sampleFn, ntrials)
@@ -105,7 +105,7 @@ class CompareShrinkTrunkWithFixed {
         // println("GeometricMean for $title: fix=${geometricMean(fixFld)}, trunc=${geometricMean(truncFld)}")
     }
 
-    fun runAlphaMartTruncRepeated(eta0: Double, sampling: Sampling, ntrials: Int): RunTestRepeatedResult {
+    fun runAlphaMartTruncRepeated(eta0: Double, sampling: Sampler, ntrials: Int): RunTestRepeatedResult {
         val u = 1.0
         val d = 10000
         val N = sampling.maxSamples()
@@ -125,7 +125,7 @@ class CompareShrinkTrunkWithFixed {
             )
     }
 
-    fun runAlphaMartFixedRepeated(eta0: Double, sampling: Sampling, ntrials: Int): RunTestRepeatedResult {
+    fun runAlphaMartFixedRepeated(eta0: Double, sampling: Sampler, ntrials: Int): RunTestRepeatedResult {
         val N = sampling.maxSamples()
         val fixed = FixedEstimFn(eta0 = eta0)
         val alpha = AlphaMart(estimFn = fixed, N = N)

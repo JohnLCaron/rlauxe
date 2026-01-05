@@ -17,10 +17,10 @@ import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import org.cryptobiotic.rlauxe.workflow.ClcaAssertionAuditor
-import org.cryptobiotic.rlauxe.workflow.ClcaSampling
+import org.cryptobiotic.rlauxe.workflow.ClcaSampler
 import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
-import org.cryptobiotic.rlauxe.workflow.PollingSampling
+import org.cryptobiotic.rlauxe.workflow.PollingSampler
 import org.cryptobiotic.rlauxe.workflow.auditPollingAssertion
 import java.nio.file.Files.notExists
 import java.nio.file.Path
@@ -150,7 +150,7 @@ fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>
 
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-        val sampler = ClcaSampling(contestRound.id, cvrPairs, cassorter, allowReset = false)
+        val sampler = ClcaSampler(contestRound.id, cvrPairs, cassorter, allowReset = false)
 
         val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
 
@@ -168,7 +168,7 @@ fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>,
         val auditor = OneAuditAssertionAuditor(pools)
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-        val sampler = ClcaSampling(contestRound.id, cvrPairs, cassorter, allowReset = false)
+        val sampler = ClcaSampler(contestRound.id, cvrPairs, cassorter, allowReset = false)
 
         val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
 
@@ -185,7 +185,7 @@ fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, CvrIF>>, con
     try {
         val assertion = assertionRound.assertion
         val assorter = assertion.assorter
-        val sampler = PollingSampling(contestRound.id, cvrPairs, assorter, allowReset = false)
+        val sampler = PollingSampler(contestRound.id, cvrPairs, assorter, allowReset = false)
 
         val testH0Result = auditPollingAssertion(config, contestRound.contestUA, assertionRound, sampler, auditRoundResult.roundIdx)
 

@@ -8,7 +8,7 @@ import kotlin.random.Random
 private val logger = KotlinLogging.logger("Sampling")
 
 //// abstraction for creating a sequence of assort values
-interface Sampling: Iterator<Double> {
+interface Sampler: Iterator<Double> {
     fun sample(): Double // get next in sample
     fun maxSamples(): Int  // max samples available, needed by testFn
     fun reset()   // start over again with different permutation (may be prohibited)
@@ -19,12 +19,12 @@ interface Sampling: Iterator<Double> {
 // Note that we are stuffing the sampling logic into card.hasContest(contestId)
 
 //// For polling audits. Production runPollingAuditRound
-class PollingSampling(
+class PollingSampler(
     val contestId: Int,
     val cvrPairs: List<Pair<CvrIF, CvrIF>>, // Pair(mvr, card)
     val assorter: AssorterIF,
     val allowReset: Boolean = true,
-): Sampling {
+): Sampler {
     val maxSamples = cvrPairs.count { it.second.hasContest(contestId) }
     val permutedIndex = MutableList(cvrPairs.size) { it }
     private var idx = 0
@@ -66,12 +66,12 @@ class PollingSampling(
 }
 
 //// For clca audits. Production RunClcaContestTask
-class ClcaSampling(
+class ClcaSampler(
     val contestId: Int,
     val cvrPairs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
     val cassorter: ClcaAssorter,
     val allowReset: Boolean,
-): Sampling, Iterator<Double> {
+): Sampler, Iterator<Double> {
     val maxSamples = cvrPairs.count { it.second.hasContest(contestId) }
     val permutedIndex = MutableList(cvrPairs.size) { it }
     private var idx = 0

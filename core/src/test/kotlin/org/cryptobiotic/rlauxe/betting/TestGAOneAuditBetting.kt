@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
-import org.cryptobiotic.rlauxe.workflow.ClcaSampling
+import org.cryptobiotic.rlauxe.workflow.ClcaSampler
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.random.Random
@@ -60,7 +60,7 @@ class TestGeneralAdaptiveBetting2 {
         val assorts = mutableListOf<Double>()
         val pairs = mvrs.zip ( cards)
 
-        val sampling = ClcaSampling(
+        val sampling = ClcaSampler(
             oaContest.id,
             pairs, // Pair(mvr, card)
             minCassorter,

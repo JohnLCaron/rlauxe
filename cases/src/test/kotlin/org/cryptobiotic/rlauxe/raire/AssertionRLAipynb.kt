@@ -620,7 +620,7 @@ fun replicate_p_values(
     val contest = contests.first()
     val cassorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
-    val sampling: Sampling = makeClcaNoErrorSampler(contest.id, cvrs, cassorter)
+    val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, cassorter)
 
     val optimal = OptimalComparisonNoP1(
         N = N,
@@ -634,7 +634,7 @@ fun replicate_p_values(
         withoutReplacement = false)
 
     val debugSeq = betta.setDebuggingSequences()
-    val result = betta.testH0(sample_size, true,  tracker = ClcaErrorTracker(0.0, 1.0)) { sampling.sample() }
+    val result = betta.testH0(sample_size, true,  tracker = ClcaErrorTracker(0.0, 1.0)) { sampler.sample() }
     println(result)
     println("pvalues=  ${debugSeq.pvalues()}")}
 
@@ -648,13 +648,13 @@ fun calc_sample_sizes(
     val contest = contests.first().addStandardAssertions()
     val cassorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
-    val sampling: Sampling = makeClcaNoErrorSampler(contest.id, cvrs, cassorter)
+    val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, cassorter)
     val betFn = GeneralAdaptiveBetting(N, oaAssortRates = null, d = 100, maxRisk = .99)
     val betta = BettingMart(bettingFn = betFn, N = N, sampleUpperBound = cassorter.upperBound(), withoutReplacement = false)
 
     return runTestRepeated(
         name = "calc_sample_sizes",
-        drawSample = sampling,
+        drawSample = sampler,
         // maxSamples = N,
         ntrials = ntrials,
         testFn = betta,

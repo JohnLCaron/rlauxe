@@ -1,0 +1,181 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;bDUHTY&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;bDUHTY&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;BettingPayoff&quot;,
+&quot;subtitle&quot;:&quot;assortValue = 1.0&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;payoff&quot;,
+&quot;color&quot;:&quot;errorRate&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;&amp;merged_groups&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;],
+&quot;payoff&quot;:[1.0009909764727098,1.001993980641601,1.0029989950506584,1.0040060251794607,1.0050150764924166,1.00602616015937,1.0080544420652744,1.010090911120876,1.0152182883393293,1.0203980030156736,1.0256308518040482,1.0309176123401371,1.036259224326905,1.0416564409812148,1.0526212915216329,1.0005709926537467,1.0015187546727617,1.0025112776749294,1.0035140439556873,1.0045212056777646,1.005531256596356,1.0075583363891432,1.0095939359775874,1.0147192907452374,1.0198968356710854,1.0251273721486758,1.0304117690488088,1.0357508697674545,1.0411455813015371,1.0521052785267526,1.0003567546384642,1.0011429924468749,1.0020699489474758,1.003043477446437,1.004035855757827,1.0050376230532656,1.0070563689289962,1.009088046993761,1.014208867419128,1.019383704921034,1.0246118756892852,1.0298939044052362,1.0352305882882327,1.0406228445296821,1.0515774363897064,1.0000796607063847,1.0003138008024295,1.000689196820467,1.001187426220374,1.0017883709067397,1.002472913927515,1.004028900142589,1.0057555991641378,1.010469894462874,1.0154605082621988,1.0205887258169015,1.0258076450261955,1.0310991183410951,1.0364555772251778,1.0473522155866917,1.0000399889425702,1.0001593466591723,1.0003562903058414,1.0006279878252906,1.0009707430120494,1.0013802155390752,1.0023801132093886,1.0035883148917661,1.0072853388493477,1.0116145809891988,1.0163152466648,1.0212484963255928,1.026340676066618,1.0315516776216542,1.042249713364391],
+&quot;errorRate&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;errorRate&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;payoff&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;payoff&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;&amp;merged_groups&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;],
+&quot;payoff&quot;:[1.0009909764727098,1.001993980641601,1.0029989950506584,1.0040060251794607,1.0050150764924166,1.00602616015937,1.0080544420652744,1.010090911120876,1.0152182883393293,1.0203980030156736,1.0256308518040482,1.0309176123401371,1.036259224326905,1.0416564409812148,1.0526212915216329,1.0005709926537467,1.0015187546727617,1.0025112776749294,1.0035140439556873,1.0045212056777646,1.005531256596356,1.0075583363891432,1.0095939359775874,1.0147192907452374,1.0198968356710854,1.0251273721486758,1.0304117690488088,1.0357508697674545,1.0411455813015371,1.0521052785267526,1.0003567546384642,1.0011429924468749,1.0020699489474758,1.003043477446437,1.004035855757827,1.0050376230532656,1.0070563689289962,1.009088046993761,1.014208867419128,1.019383704921034,1.0246118756892852,1.0298939044052362,1.0352305882882327,1.0406228445296821,1.0515774363897064,1.0000796607063847,1.0003138008024295,1.000689196820467,1.001187426220374,1.0017883709067397,1.002472913927515,1.004028900142589,1.0057555991641378,1.010469894462874,1.0154605082621988,1.0205887258169015,1.0258076450261955,1.0310991183410951,1.0364555772251778,1.0473522155866917,1.0000399889425702,1.0001593466591723,1.0003562903058414,1.0006279878252906,1.0009707430120494,1.0013802155390752,1.0023801132093886,1.0035883148917661,1.0072853388493477,1.0116145809891988,1.0163152466648,1.0212484963255928,1.026340676066618,1.0315516776216542,1.042249713364391],
+&quot;errorRate&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;,&quot;0.0100&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#ee6666&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;errorRate&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;payoff&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;payoff&quot;,&quot;errorRate&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;18&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

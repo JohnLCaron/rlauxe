@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.core.sampleSize
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
 
-class BettingPayoff {
+class BettingPayoffOld {
 
     @Test
     fun showGeneralAdaptiveComparisonBet() {
@@ -76,7 +76,7 @@ class BettingPayoff {
             }
         }
 
-        val plotter = PlotBettingPayoffData("$testdataDir/plots/betting/bettingPayoff/", "bettingPayoff.csv")
+        val plotter = PlotBettingPayoffData("$testdataDir/plots/betting/payoff/", "bettingPayoff.csv")
         errorRates.forEach { error ->
             plotter.plotOneErrorRate(results, error)
         }

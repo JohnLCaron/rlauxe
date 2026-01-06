@@ -1,5 +1,5 @@
 # Generalized Adaptive Betting for CLCA
-_last updated 01/03/24_
+_last updated 01/06/24_
 
 The betting strategy for CLCA is a generalized form of AdaptiveBetting from the COBRA paper. We generalize to use any
 number of error types, and any kind of assorter, in particular ones with upper != 1, such as DHondt.
@@ -14,7 +14,7 @@ M_t = Prod { 1 + lamda_i(X_i - mu_i) , i = 1...t }
 where
   lamda_i is the bet at step i, lamda_i in [0..2]
   X_i is the CLCA assort value at step i
-  mu_i is the populationMean under the null hypothesis, when sampling without replacement. See (ALPHA section 2.2.1).
+  mu_i is the populationMean under the null hypothesis, when sampling without replacement (ALPHA section 2.2.1)
   mu_i = (N * 0.5 - sampleTracker.sum()) / (N - i)
       N = population size
       i = sample number
@@ -33,6 +33,16 @@ where
 
 We use the BrentOptimizer from _org.apache.commons.math3_ library to find the optimal lamda for equation 1 on
 the interval \[0.0, maxBet].
+
+To get a sense of the optimization process, here are plots of the terms in equation 1, for a 1% plurality assorter margin
+and error rates of .001 for each of the errors:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/optimallamda/payoff.html" rel="BettingPayoff">![BettingPayoff](plots2/betting/optimallamda/payoff.png)</a>
+
+The sum of terms is the yellow line. The optimizer finds the value of lamda where eq 1 is at a maximum. Equation 1 is used 
+just for finding the optimal lamda; the value of the equation is not used.
+
+If there are no negetive terms, then eq 1 is monotonically increasing, and lamda will always be the maximum value allowed.
 
 ## Maximum Bet using Maximum Risk
 
@@ -98,7 +108,7 @@ In general, when u != 1, there are 7 possible values, for example, a Dhondt asso
 ````
 DHondt upperBound=1.7500, noerror=0.51470588
 
-[0.0, 0.14705882352941177, 0.36764705882352944, 0.51470588, 0.6617647058823529, 0.8823529411764708, 1.0294117647058825]
+[0.0, 0.1470588235294, 0.3676470588235, 0.51470588, 0.661764705882, 0.882352941176, 1.029411764705]
 [0, 1/2u, 1-1/2u, 1, 1+1/2u, 2-1/2u, 2] * noerror
 
      winner-loser tau= 0.0000 '      0' (win-los)
@@ -136,8 +146,8 @@ when you throw phantoms into the mix:
 ## Estimating Error Rates
 
 We keep track of the number of errors of each type that are found for steps < i, and use those to estimate the error rates at step i.
-We use the "shrink-truncate" algorithm with d = 100 to ease the effects of errors found early in the sample, following COBRA eq 4. For
-each of the error types:
+We use the "shrink-truncate" algorithm with (defaut d = 100) to ease the effects of errors found early in the sample, following COBRA eq 4. 
+For each of the error types:
 
 ````
         if (sampleNum == 0) return 0.0

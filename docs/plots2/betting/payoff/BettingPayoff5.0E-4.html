@@ -1,0 +1,181 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;hZQ93D&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;hZQ93D&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;BettingPayoff&quot;,
+&quot;subtitle&quot;:&quot;errorRate = 5.0E-4&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;payoff&quot;,
+&quot;color&quot;:&quot;assort&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;assort&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;],
+&quot;&amp;merged_groups&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;],
+&quot;margin&quot;:[0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;payoff&quot;:[0.4295783389069886,0.24214141829184033,0.16541871936508878,0.12500305503385323,0.10028007012481166,0.0836551572036851,0.06276628774623982,0.05020033821884451,0.03343324106274925,0.025055052116823906,0.02003248620164888,0.01668613408852082,0.014297447840186828,0.012506048763110456,0.00999970799170069,0.7150746657803677,0.621830086482301,0.5839649985200092,0.5642585494947703,0.5524006379012882,0.5445932069000206,0.5351623120676916,0.529897137098216,0.5240762659039933,0.5224759438939546,0.5225799291751623,0.5235489515686648,0.5250241588038207,0.5268258150323237,0.5310524932592267,1.0005709926537467,1.0015187546727617,1.0025112776749294,1.0035140439556873,1.0045212056777646,1.005531256596356,1.0075583363891432,1.0095939359775874,1.0147192907452374,1.0198968356710854,1.0251273721486758,1.0304117690488088,1.0357508697674545,1.0411455813015371,1.0521052785267526,1.286067319527126,1.3812074228632225,1.42105755682985,1.4427695384166044,1.4566417734542412,1.4664693062926915,1.479954360710595,1.4892907348569588,1.5053623155864813,1.5173177274482161,1.5276748151221895,1.5372745865289528,1.5464775807310884,1.5554653475707503,1.5731580637942786,1.571563646400505,1.760896091053683,1.8396038359847702,1.8820250328775217,1.9087623412307178,1.9274073559890268,1.9523503850320467,1.9689875337363305,1.9960053404277254,2.014738619225347,2.030222258095703,2.0441374040090965,2.057204291694722,2.0697851138399637,2.0942108490618043]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;assort&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;payoff&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;payoff&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;assort&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;],
+&quot;&amp;merged_groups&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;],
+&quot;margin&quot;:[0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;payoff&quot;:[0.4295783389069886,0.24214141829184033,0.16541871936508878,0.12500305503385323,0.10028007012481166,0.0836551572036851,0.06276628774623982,0.05020033821884451,0.03343324106274925,0.025055052116823906,0.02003248620164888,0.01668613408852082,0.014297447840186828,0.012506048763110456,0.00999970799170069,0.7150746657803677,0.621830086482301,0.5839649985200092,0.5642585494947703,0.5524006379012882,0.5445932069000206,0.5351623120676916,0.529897137098216,0.5240762659039933,0.5224759438939546,0.5225799291751623,0.5235489515686648,0.5250241588038207,0.5268258150323237,0.5310524932592267,1.0005709926537467,1.0015187546727617,1.0025112776749294,1.0035140439556873,1.0045212056777646,1.005531256596356,1.0075583363891432,1.0095939359775874,1.0147192907452374,1.0198968356710854,1.0251273721486758,1.0304117690488088,1.0357508697674545,1.0411455813015371,1.0521052785267526,1.286067319527126,1.3812074228632225,1.42105755682985,1.4427695384166044,1.4566417734542412,1.4664693062926915,1.479954360710595,1.4892907348569588,1.5053623155864813,1.5173177274482161,1.5276748151221895,1.5372745865289528,1.5464775807310884,1.5554653475707503,1.5731580637942786,1.571563646400505,1.760896091053683,1.8396038359847702,1.8820250328775217,1.9087623412307178,1.9274073559890268,1.9523503850320467,1.9689875337363305,1.9960053404277254,2.014738619225347,2.030222258095703,2.0441374040090965,2.057204291694722,2.0697851138399637,2.0942108490618043]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#ee6666&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;assort&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;payoff&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;payoff&quot;,&quot;assort&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;6&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

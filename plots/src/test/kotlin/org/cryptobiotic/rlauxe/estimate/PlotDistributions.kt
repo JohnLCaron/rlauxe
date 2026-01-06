@@ -19,7 +19,7 @@ class PlotDistributions {
     val simFuzzPct = .02
 
     val name = "estErrorRatesEqual"
-    val dirName = "$testdataDir/dist/distSamplesNeeded"
+    val dirName = "$testdataDir/plots/dist"
 
     // Used in docs: Under/Over estimating CLCA sample sizes, show distributions
 

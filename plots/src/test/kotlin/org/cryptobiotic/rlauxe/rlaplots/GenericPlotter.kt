@@ -1,12 +1,12 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
 import org.jetbrains.kotlinx.kandy.dsl.categorical
-import org.jetbrains.kotlinx.kandy.dsl.continuous
 import org.jetbrains.kotlinx.kandy.dsl.continuousPos
 import org.jetbrains.kotlinx.kandy.dsl.plot
 import org.jetbrains.kotlinx.kandy.ir.scale.Scale
 import org.jetbrains.kotlinx.kandy.letsplot.export.save
 import org.jetbrains.kotlinx.kandy.letsplot.feature.layout
+import org.jetbrains.kotlinx.kandy.letsplot.layers.hLine
 import org.jetbrains.kotlinx.kandy.letsplot.layers.line
 import org.jetbrains.kotlinx.kandy.letsplot.layers.points
 import org.jetbrains.kotlinx.kandy.letsplot.scales.Transformation
@@ -71,13 +71,19 @@ fun <T> genericPlotter(
                     x(xname) { scale = xScale }
                     y(yname) { scale = yScale }
                     size = 1.0
-                    symbol = Symbol.CIRCLE_OPEN
-                    color = Color.RED
+                    symbol = Symbol.CIRCLE
+                    color = Color.BLACK
 
                     // tooltips(variables, formats, title, anchor, minWidth, hide)
                     tooltips(xname, yname, catName)
                     //    formats = mapOf("margin" to "f8.3"))
                 }
+            }
+
+            hLine {
+                yIntercept.constant(0) // Sets the line position
+                color = Color.BLACK       // Customizes the line color
+                width = .3             // Customizes the line thickness
             }
 
             layout {

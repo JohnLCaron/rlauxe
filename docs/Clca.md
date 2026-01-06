@@ -1,24 +1,5 @@
-# CLCA Betting Risk Function
-_last changed 01/03/25_
-
-## Betting martingales
-
-In BETTING, Waudby-Smith and Ramdas develop tests and confidence sequences for the mean of a bounded population using
-betting martingales of the form
-
-    M_j :=  Prod (1 + λ_i (X_i − µ_i)),  i=1..j    (BETTING eq 34 and ALPHA eq  10)
-
-where µi := E(Xi | Xi−1), computed on the assumption that the null hypothesis is true.
-(For large N, µ_i is very close to 1/2.)
-
-The sequence (M_j) can be viewed as the fortune of a gambler in a series of wagers.
-The gambler starts with a stake of 1 unit and bets a fraction λi of their current wealth on
-the outcome of the ith wager. The value Mj is the gambler’s wealth after the jth wager. The
-gambler is not permitted to borrow money, so to ensure that when X_i = 0 (corresponding to
-losing the ith bet) the gambler does not end up in debt (Mi < 0), λi cannot exceed 1/µi.
-In practice, λi < 1/µi to prevent stalls.
-
-See Cobra section 4.2 and SHANGRLA Section 3.2.
+# CLCA 
+_last changed 01/06/25_
 
 ## CLCA Assorter
 
@@ -89,8 +70,8 @@ Notes
 
 ## Generalization to u != 1
 
-An assorter value is in the range [lower, upper], lower >= 0. The "neutral value" is 1/2.
-Generally we do an affine transformation so that lower = 0 and nuetral = 1/2, and upper > 1/2 is unbounded.
+An assorter value is in the range [lower, upper], where lower >= 0. The "neutral value" is 1/2.
+We always do an affine transformation so that lower = 0 and nuetral = 1/2; then upper > 1/2 is unbounded.
 The plurality assorter is the special case of assort upper = 1.
 
 The general treatment is as follows:
@@ -110,11 +91,29 @@ The general treatment is as follows:
  so B(bi, ci) in
 
  [1+(u-l)/u, 1+(.5-l)/u, 1+(u-.5)/u,  1, 1-(.5-l)/u, 1-(u-.5)/u, 1-(u-l)/u] * noerror
- [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror (when l==0) 
- [2, 1.5,  1, .5, 0] * noerror (when l==0, u==1)
+ [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror (when l=0) 
+ [2, 1.5,  1, .5, 0] * noerror (when l=0, u=1)
 ````
 So when u=1, there are 5 possible bassort values, and otherwise 7.
 
+## Betting martingales
+
+In BETTING, Waudby-Smith and Ramdas develop tests and confidence sequences for the mean of a bounded population using
+betting martingales of the form
+
+    M_j :=  Prod (1 + λ_i (X_i − µ_i)),  i=1..j    (BETTING eq 34 and ALPHA eq  10)
+
+where µi := E(Xi | Xi−1), computed on the assumption that the null hypothesis is true.
+(For large N, µ_i is very close to 1/2.)
+
+The sequence (M_j) can be viewed as the fortune of a gambler in a series of wagers.
+The gambler starts with a stake of 1 unit and bets a fraction λi of their current wealth on
+the outcome of the ith wager. The value Mj is the gambler’s wealth after the jth wager. The
+gambler is not permitted to borrow money, so to ensure that when X_i = 0 (corresponding to
+losing the ith bet) the gambler does not end up in debt (Mi < 0), λi cannot exceed 1/µi.
+In practice, λi < 1/µi to prevent stalls.
+
+See Cobra section 4.2 and SHANGRLA Section 3.2.
 
 ## CLCA Betting Payoffs
 
@@ -130,31 +129,55 @@ where
 
 then
 
-    payoff = t_i = 1 + λ_i * noerror * {-.5, 0, .5, 1.5}
+    payoff = t_i = 1 + λ_i * noerror * ([2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] - 1/2)
+    payoff = t_i = 1 + λ_i * noerror * [3/2, 1/2 + 1/2u, 3/2 - 1/2u,  1/2, 1/2 - 1/2u, 1/2u - 1/2, -1/2]
+    payoff = t_i = 1 + λ_i * noerror * [3/2, (u + 1)/2u, (3u - 1)/2u,  1/2, (u - 1)/2u, (1 - u)/2u, -1/2]
 
-Using AdaptiveBetting, λ_i depends only on the 4 estimated error rates (see next section) and the margin.
-Also note that AdaptiveBetting uses a "floor" (default 1.0e-5) for the estimated error rates, to prevent betting everything.
+    payoff = t_i = 1 + λ_i * noerror * [3/2, 1,  1/2, 0, -1/2] when u = 1
+
+
+    payoff = 1 + λ_i * (x - 1/2)
+    ln(payoff) = ln(1 + λ_i * (x - 1/2)) is positive when (x - 1/2) is
+
+    let u12 = 1 / (2 * u) 
+    since u > 1/2, (2 * u) > 1, u12 < 1
+
+                los-win, oth-win,    los-oth,    noerror, oth-los,   win-oth,    win-los
+    (x - 1/2) = [3/2,    (u+1)*u12, (3u-1)*u12,  1/2,     (u-1)*u12, (1-u)*u12, -1/2]
+
+    note oth-los = - win-oth
+
+when u < 1, oth-los < 0 and win-oth > 0
+when u > 1, oth-los > 0 and win-oth < 0
+
+u + 1 > 3u - 1
+when 2 > 2u 
+when 1 > u
+so when u < 1, oth-win > los-oth
+
+u = 1, only win-los < 0
+u < 1, win-los, oth-los < 0
+u > 1, win-los, win-oth < 0
+
 
 ### Betting Payoff Plots
 
-REDO
-
 Plots 1-5 shows the betting payoffs when the error rates are all equal to {0.0, 0.0001, .001, .005, .01}
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.0.html" rel="BettingPayoff0">![BettingPayoff0](plots/betting/BettingPayoff0.0.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff1.0E-4.html" rel="BettingPayoff1.0E-4">![BettingPayoff1.0E-4](plots/betting/BettingPayoff1.0E-4.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.001.html" rel="BettingPayoff0.001">![BettingPayoff0.001](./plots/betting/BettingPayoff0.001.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.005.html" rel="BettingPayoff0.005">![BettingPayoff0.005](plots/betting/BettingPayoff0.005.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoff0.01.html" rel="BettingPayoff01">![BettingPayoff01](plots/betting/BettingPayoff0.01.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/payoff/BettingPayoff0.0.html" rel="BettingPayoff0">![BettingPayoff0](plots2/betting/payoff/BettingPayoff0.0.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/payoff/BettingPayoff1.0E-4.html" rel="BettingPayoff1.0E-4">![BettingPayoff1.0E-4](plots2/betting/payoff/BettingPayoff1.0E-4.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/payoff/BettingPayoff0.001.html" rel="BettingPayoff0.001">![BettingPayoff0.001](./plots2/betting/payoff/BettingPayoff0.001.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/payoff/BettingPayoff0.005.html" rel="BettingPayoff0.005">![BettingPayoff0.005](plots2/betting/payoff/BettingPayoff0.005.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/payoff/BettingPayoff0.01.html" rel="BettingPayoff01">![BettingPayoff01](plots2/betting/payoff/BettingPayoff0.01.png)</a>
 
 Plot 6 shows the payoffs for all the error rates when the MVR matches the CVR (assort value = noerror):
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoffAssort1.0.html" rel="BettingPayoffAssort1">![BettingPayoffAssort1](plots/betting/BettingPayoffAssort1.0.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/payoff/BettingPayoffAssort1.0.html" rel="BettingPayoffAssort1">![BettingPayoffAssort1](plots2/betting/payoff/BettingPayoffAssort1.0.png)</a>
 
 Plot 7 translates the payoff into a sample size, using (payoff)^sampleSize = 1 / riskLimit and
 solving for sampleSize = -ln(riskLimit) / ln(payoff), for the various values of the error rates, as above.
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/betting/BettingPayoffSampleSize.html" rel="BettingPayoffSampleSize">![BettingPayoffSampleSize](plots/betting/BettingPayoffSampleSize.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/payoff/BettingPayoffSampleSize.html" rel="BettingPayoffSampleSize">![BettingPayoffSampleSize](plots2/betting/payoff/BettingPayoffSampleSize.png)</a>
 
 The plot "error=0.0" is the equivilent to COBRA Fig 1, p. 6 for risk=.05. This is the best that can be done,
 the minimum sampling size for the RLA. You can use it to see how many samples you are likely to need, based on the smallest

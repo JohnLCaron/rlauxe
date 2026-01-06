@@ -1,0 +1,181 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;XLpU8s&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;XLpU8s&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;BettingPayoff&quot;,
+&quot;subtitle&quot;:&quot;errorRate = 0.0&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;payoff&quot;,
+&quot;color&quot;:&quot;assort&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;assort&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;],
+&quot;margin&quot;:[0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;&amp;merged_groups&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;],
+&quot;payoff&quot;:[0.010014503762965643,0.0050036598410571065,0.0033339781645442823,0.0024997303142851868,0.0019997780090565964,0.0016661335976860814,0.0012491839059739496,9.99799033281068E-4,6.657323840367768E-4,4.978522319982748E-4,3.9677964212680994E-4,3.305343355687329E-4,2.8138641533315134E-4,2.454164508466361E-4,1.9546108897250392E-4,0.5055027401178378,0.5034988202413291,0.5031664866076013,0.503252877746873,0.5035074272507367,0.503846146878528,0.5046518129856241,0.5055453550770785,0.5079420103616831,0.5104479276238358,0.5130138157230875,0.515624073337853,0.5182703053711191,0.5209509287160308,0.5264083763053027,1.0009909764727098,1.001993980641601,1.0029989950506584,1.0040060251794607,1.0050150764924166,1.00602616015937,1.0080544420652744,1.010090911120876,1.0152182883393293,1.0203980030156736,1.0256308518040482,1.0309176123401371,1.036259224326905,1.0416564409812148,1.0526212915216329,1.496479212827582,1.500489141041873,1.5028315034937156,1.5047591726120486,1.5065227257340967,1.508206173440212,1.5114570711449247,1.5146364671646735,1.5224945663169756,1.5303480784075112,1.538247887885009,1.5462111513424215,1.5542481432826911,1.5623619532463988,1.5788342067379633,1.9919674491824542,1.998984301442145,2.0026640119367727,2.0055123200446365,2.008030374975777,2.010386186721054,2.0148597002245747,2.019182023208471,2.029770844294622,2.0402981537993488,2.0508649239659693,2.0615046903447056,2.072237062238477,2.083067465511583,2.1050471219542937]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;assort&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;payoff&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;payoff&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;assort&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;],
+&quot;margin&quot;:[0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.002,0.004,0.006,0.008,0.01,0.012,0.016,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;&amp;merged_groups&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;0.5000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.0000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;1.5000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;,&quot;2.0000&quot;],
+&quot;payoff&quot;:[0.010014503762965643,0.0050036598410571065,0.0033339781645442823,0.0024997303142851868,0.0019997780090565964,0.0016661335976860814,0.0012491839059739496,9.99799033281068E-4,6.657323840367768E-4,4.978522319982748E-4,3.9677964212680994E-4,3.305343355687329E-4,2.8138641533315134E-4,2.454164508466361E-4,1.9546108897250392E-4,0.5055027401178378,0.5034988202413291,0.5031664866076013,0.503252877746873,0.5035074272507367,0.503846146878528,0.5046518129856241,0.5055453550770785,0.5079420103616831,0.5104479276238358,0.5130138157230875,0.515624073337853,0.5182703053711191,0.5209509287160308,0.5264083763053027,1.0009909764727098,1.001993980641601,1.0029989950506584,1.0040060251794607,1.0050150764924166,1.00602616015937,1.0080544420652744,1.010090911120876,1.0152182883393293,1.0203980030156736,1.0256308518040482,1.0309176123401371,1.036259224326905,1.0416564409812148,1.0526212915216329,1.496479212827582,1.500489141041873,1.5028315034937156,1.5047591726120486,1.5065227257340967,1.508206173440212,1.5114570711449247,1.5146364671646735,1.5224945663169756,1.5303480784075112,1.538247887885009,1.5462111513424215,1.5542481432826911,1.5623619532463988,1.5788342067379633,1.9919674491824542,1.998984301442145,2.0026640119367727,2.0055123200446365,2.008030374975777,2.010386186721054,2.0148597002245747,2.019182023208471,2.029770844294622,2.0402981537993488,2.0508649239659693,2.0615046903447056,2.072237062238477,2.083067465511583,2.1050471219542937]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#ee6666&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;assort&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;payoff&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;payoff&quot;,&quot;assort&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

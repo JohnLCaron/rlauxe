@@ -174,9 +174,9 @@ GeneralAdaptiveBetting uses estimates/measurements of the error rates between th
 If the error estimates are correct, one gets optimal 
 "sample sizes", the number of ballots needed to prove the election is correct.
 
-See [CLCA Risk function](docs/ClcaRiskFunction.md) for details on the CLCA risk function.
+See [CLCA Risk function](docs/ClcaRiskFunction.md) for details on CLCA and BettingMart.
 
-See [Generalized Adaptive Betting for CLCA](docs/GeneralizedAdaptiveBetting.md) for details on the CLCA betting function.
+See [Generalized Adaptive Betting for CLCA](docs/GeneralizedAdaptiveBetting.md) for details on the GeneralAdaptiveBetting function.
 
 ## OneAudit CLCA
 

@@ -140,7 +140,7 @@ class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, 
         }
 
         var sumOneAuditTerm = 0.0
-        if (oaErrorRates != null) {
+        if (oaErrorRates != null) { // probably dont need the filter
             oaErrorRates.filter { it.value != 0.0 }.forEach { (sampleValue: Double, rate: Double) ->
                 sumOneAuditTerm += ln(1.0 + lam * (sampleValue - mui)) * rate
             }

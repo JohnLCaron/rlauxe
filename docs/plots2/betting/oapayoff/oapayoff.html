@@ -1,0 +1,211 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;kUIPPk&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;kUIPPk&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;OneAudit BettingPayoff&quot;,
+&quot;subtitle&quot;:&quot;N=10000 margin=0.02 poolPct=0.05 poolAvg=0.490&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;lamda&quot;,
+&quot;y&quot;:&quot;ln(payoff)*rate&quot;,
+&quot;color&quot;:&quot;cat&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;],
+&quot;ln(payoff)*rate&quot;:[1.8230573889780615E-4,3.6457649989449096E-4,5.468122964098986E-4,7.290131418553089E-4,9.111790496351294E-4,0.0010933100331452152,0.0012754061057745614,0.0014574672809036225,0.001639493571906004,0.0018214849921467833,0.0020034415549842004,0.002185363273767979,0.0023672501618410167,0.002549102232537708,0.0027309194991856313,0.0029127019751038733,0.0030944496736047197,0.0032761626079919723,0.0034578407915626446,0.00363948423760528,0.0038210929594016427,0.004002666970225249,0.00418420628334201,0.004365710912010858,0.0045471808694822905,0.004728616169000051,0.004910016823799458,0.005091382847109089,0.005272714252149107,0.005454011052132945,0.005635273260265635,0.005816500889745487,0.005997693953762426,0.006178852465499665,0.006359976438132039,0.00654106588482769,0.006722120818746391,0.006903141253041229,0.007084127200856938,0.007265078675331577,0.007445995689595071,0.007626878256769845,0.007807726389971459,0.007988540102307144,0.008169319406877495,0.008350064316774774,0.008530774845084627,0.008711451004884388,0.00889209280924477,0.009072700271228192,-2.3599778771485366E-4,-4.742001097838168E-4,-7.146485414675776E-4,-9.573858453316502E-4,-0.0012024560168905818,-0.0014499043324668387,-0.0016997773993946462,-0.001952123208707976,-0.0022069911904616796,-0.0024644322718452663,-0.00272449893826025,-0.002987245297544231,-0.0032527271475383613,-0.0035210020472091963,-0.003792129391551723,-0.004066170490517372,-0.0043431886522294,-0.004623249270768173,-0.004906419918830827,-0.005192770445593804,-0.005482373080132767,-0.005775302540782967,-0.006071636150854335,-0.006371453961149531,-0.006674838879770726,-0.006981876809741629,-0.0072926567950163425,-0.007607271175495904,-0.007925815751727744,-0.008248389960023013,-0.008575097058792705,-0.00890604432697628,-0.00924134327551679,-0.009581109872925746,-0.009925464786079335,-0.010274533637497103,-0.010628447280475916,-0.010987342093586958,-0.011351360296194546,-0.011720650286823505,-0.012095367006389841,-0.01247567232851981,-0.012861735479418322,-0.013253733490012442,-0.013651851683393756,-0.01405628420091897,-0.014467234570707355,-0.014884916322702087,-0.015309553654948715,-0.015741382156295232,2.43293051996672E-4,4.8419386032869766E-4,7.227490120329591E-4,9.590037463909581E-4,0.0011930020064197936,0.0014247864879273714,0.0016543986862688161,0.0018818789409321614,0.0021072664780731323,0.002330599451111207,0.0025519149794920306,0.0027712491857146884,0.0029886372307162032,0.0032041133476999697,0.0034177108744895034,0.003629462284483999,0.0038393992162875745,0.00404755250207982,0.004253952194791276,0.004458627594143743,0.004661607271611853,0.0048629190943590955,0.005062590248198433,0.0052606472596248375,0.00545711601696438,0.005652021790682071,0.0058453892528882705,0.006037242496081306,0.006227605051161998,0.006416499904753624,0.006603949515859344,0.0067899758318871965,0.006974600304071317,0.007157843902316368,0.007339727129491052,0.007520270035194832,0.007699492229021247,0.007877412893339488,0.008054050795615329,0.008229424300290965,0.008403551380242782,0.00857644962783472,0.008748136265584449,0.008918628156458308,0.009087941813810615,0.009256093410981773,0.009423098790569358,0.00958897347338524,0.00975373266711163,0.00991739127466791,1.896010031796245E-4,3.7457025043937184E-4,5.549127669752801E-4,7.306310429146168E-4,9.017250391643412E-4,0.001068192188605748,0.0012300273926487313,0.0013872230131278078,0.0015397688595174567,0.001687652171412724,0.001830857596215981,0.0019693671619384363,0.0021031602450188587,0.0022322135330284814,0.0023565009821234118,0.0024759937690704997,0.002590660237662894,0.002700465839303619,0.0028053730675230938,0.0029053413861552186,0.003000327150880728,0.0030902835238013774,0.0031751603806861074,0.0032549042104861653,0.003329458006675945,0.0033987611499404925,0.003462749281671386,0.003521354167694491,0.003574503551583361,0.0036221209968635556,0.003664125717332274,0.003700432394656404,0.003730950982316952,0.0037555864948902867,0.003774238781543756,0.0037868022825254194,0.0037931657672917217,0.0037932120527937587,0.003786817700277721,0.0037738526887990363,0.003754180063448012,0.0037276555560847545,0.0036941271761375856,0.0036534347687530097,0.0036054095372943535,0.0035498735268375773,0.0034866390649466294,0.003415508155567541,0.0033362718214076832,0.0032487093896008696],
+&quot;cat&quot;:[&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;],
+&quot;lamda&quot;:[0.038,0.076,0.11399999999999999,0.152,0.19,0.22799999999999998,0.26599999999999996,0.304,0.34199999999999997,0.38,0.418,0.45599999999999996,0.494,0.5319999999999999,0.57,0.608,0.6459999999999999,0.6839999999999999,0.722,0.76,0.7979999999999999,0.836,0.8739999999999999,0.9119999999999999,0.95,0.988,1.026,1.0639999999999998,1.1019999999999999,1.14,1.178,1.216,1.254,1.2919999999999998,1.33,1.3679999999999999,1.406,1.444,1.482,1.52,1.5579999999999998,1.5959999999999999,1.6340000000000001,1.672,1.71,1.7479999999999998,1.786,1.8239999999999998,1.8619999999999999,1.9,0.038,0.076,0.11399999999999999,0.152,0.19,0.22799999999999998,0.26599999999999996,0.304,0.34199999999999997,0.38,0.418,0.45599999999999996,0.494,0.5319999999999999,0.57,0.608,0.6459999999999999,0.6839999999999999,0.722,0.76,0.7979999999999999,0.836,0.8739999999999999,0.9119999999999999,0.95,0.988,1.026,1.0639999999999998,1.1019999999999999,1.14,1.178,1.216,1.254,1.2919999999999998,1.33,1.3679999999999999,1.406,1.444,1.482,1.52,1.5579999999999998,1.5959999999999999,1.6340000000000001,1.672,1.71,1.7479999999999998,1.786,1.8239999999999998,1.8619999999999999,1.9,0.038,0.076,0.11399999999999999,0.152,0.19,0.22799999999999998,0.26599999999999996,0.304,0.34199999999999997,0.38,0.418,0.45599999999999996,0.494,0.5319999999999999,0.57,0.608,0.6459999999999999,0.6839999999999999,0.722,0.76,0.7979999999999999,0.836,0.8739999999999999,0.9119999999999999,0.95,0.988,1.026,1.0639999999999998,1.1019999999999999,1.14,1.178,1.216,1.254,1.2919999999999998,1.33,1.3679999999999999,1.406,1.444,1.482,1.52,1.5579999999999998,1.5959999999999999,1.6340000000000001,1.672,1.71,1.7479999999999998,1.786,1.8239999999999998,1.8619999999999999,1.9,0.038,0.076,0.11399999999999999,0.152,0.19,0.22799999999999998,0.26599999999999996,0.304,0.34199999999999997,0.38,0.418,0.45599999999999996,0.494,0.5319999999999999,0.57,0.608,0.6459999999999999,0.6839999999999999,0.722,0.76,0.7979999999999999,0.836,0.8739999999999999,0.9119999999999999,0.95,0.988,1.026,1.0639999999999998,1.1019999999999999,1.14,1.178,1.216,1.254,1.2919999999999998,1.33,1.3679999999999999,1.406,1.444,1.482,1.52,1.5579999999999998,1.5959999999999999,1.6340000000000001,1.672,1.71,1.7479999999999998,1.786,1.8239999999999998,1.8619999999999999,1.9]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;cat&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;lamda&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;ln(payoff)*rate&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;lamda&quot;,
+&quot;y&quot;:&quot;ln(payoff)*rate&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;],
+&quot;ln(payoff)*rate&quot;:[1.8230573889780615E-4,3.6457649989449096E-4,5.468122964098986E-4,7.290131418553089E-4,9.111790496351294E-4,0.0010933100331452152,0.0012754061057745614,0.0014574672809036225,0.001639493571906004,0.0018214849921467833,0.0020034415549842004,0.002185363273767979,0.0023672501618410167,0.002549102232537708,0.0027309194991856313,0.0029127019751038733,0.0030944496736047197,0.0032761626079919723,0.0034578407915626446,0.00363948423760528,0.0038210929594016427,0.004002666970225249,0.00418420628334201,0.004365710912010858,0.0045471808694822905,0.004728616169000051,0.004910016823799458,0.005091382847109089,0.005272714252149107,0.005454011052132945,0.005635273260265635,0.005816500889745487,0.005997693953762426,0.006178852465499665,0.006359976438132039,0.00654106588482769,0.006722120818746391,0.006903141253041229,0.007084127200856938,0.007265078675331577,0.007445995689595071,0.007626878256769845,0.007807726389971459,0.007988540102307144,0.008169319406877495,0.008350064316774774,0.008530774845084627,0.008711451004884388,0.00889209280924477,0.009072700271228192,-2.3599778771485366E-4,-4.742001097838168E-4,-7.146485414675776E-4,-9.573858453316502E-4,-0.0012024560168905818,-0.0014499043324668387,-0.0016997773993946462,-0.001952123208707976,-0.0022069911904616796,-0.0024644322718452663,-0.00272449893826025,-0.002987245297544231,-0.0032527271475383613,-0.0035210020472091963,-0.003792129391551723,-0.004066170490517372,-0.0043431886522294,-0.004623249270768173,-0.004906419918830827,-0.005192770445593804,-0.005482373080132767,-0.005775302540782967,-0.006071636150854335,-0.006371453961149531,-0.006674838879770726,-0.006981876809741629,-0.0072926567950163425,-0.007607271175495904,-0.007925815751727744,-0.008248389960023013,-0.008575097058792705,-0.00890604432697628,-0.00924134327551679,-0.009581109872925746,-0.009925464786079335,-0.010274533637497103,-0.010628447280475916,-0.010987342093586958,-0.011351360296194546,-0.011720650286823505,-0.012095367006389841,-0.01247567232851981,-0.012861735479418322,-0.013253733490012442,-0.013651851683393756,-0.01405628420091897,-0.014467234570707355,-0.014884916322702087,-0.015309553654948715,-0.015741382156295232,2.43293051996672E-4,4.8419386032869766E-4,7.227490120329591E-4,9.590037463909581E-4,0.0011930020064197936,0.0014247864879273714,0.0016543986862688161,0.0018818789409321614,0.0021072664780731323,0.002330599451111207,0.0025519149794920306,0.0027712491857146884,0.0029886372307162032,0.0032041133476999697,0.0034177108744895034,0.003629462284483999,0.0038393992162875745,0.00404755250207982,0.004253952194791276,0.004458627594143743,0.004661607271611853,0.0048629190943590955,0.005062590248198433,0.0052606472596248375,0.00545711601696438,0.005652021790682071,0.0058453892528882705,0.006037242496081306,0.006227605051161998,0.006416499904753624,0.006603949515859344,0.0067899758318871965,0.006974600304071317,0.007157843902316368,0.007339727129491052,0.007520270035194832,0.007699492229021247,0.007877412893339488,0.008054050795615329,0.008229424300290965,0.008403551380242782,0.00857644962783472,0.008748136265584449,0.008918628156458308,0.009087941813810615,0.009256093410981773,0.009423098790569358,0.00958897347338524,0.00975373266711163,0.00991739127466791,1.896010031796245E-4,3.7457025043937184E-4,5.549127669752801E-4,7.306310429146168E-4,9.017250391643412E-4,0.001068192188605748,0.0012300273926487313,0.0013872230131278078,0.0015397688595174567,0.001687652171412724,0.001830857596215981,0.0019693671619384363,0.0021031602450188587,0.0022322135330284814,0.0023565009821234118,0.0024759937690704997,0.002590660237662894,0.002700465839303619,0.0028053730675230938,0.0029053413861552186,0.003000327150880728,0.0030902835238013774,0.0031751603806861074,0.0032549042104861653,0.003329458006675945,0.0033987611499404925,0.003462749281671386,0.003521354167694491,0.003574503551583361,0.0036221209968635556,0.003664125717332274,0.003700432394656404,0.003730950982316952,0.0037555864948902867,0.003774238781543756,0.0037868022825254194,0.0037931657672917217,0.0037932120527937587,0.003786817700277721,0.0037738526887990363,0.003754180063448012,0.0037276555560847545,0.0036941271761375856,0.0036534347687530097,0.0036054095372943535,0.0035498735268375773,0.0034866390649466294,0.003415508155567541,0.0033362718214076832,0.0032487093896008696],
+&quot;cat&quot;:[&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;],
+&quot;lamda&quot;:[0.038,0.076,0.11399999999999999,0.152,0.19,0.22799999999999998,0.26599999999999996,0.304,0.34199999999999997,0.38,0.418,0.45599999999999996,0.494,0.5319999999999999,0.57,0.608,0.6459999999999999,0.6839999999999999,0.722,0.76,0.7979999999999999,0.836,0.8739999999999999,0.9119999999999999,0.95,0.988,1.026,1.0639999999999998,1.1019999999999999,1.14,1.178,1.216,1.254,1.2919999999999998,1.33,1.3679999999999999,1.406,1.444,1.482,1.52,1.5579999999999998,1.5959999999999999,1.6340000000000001,1.672,1.71,1.7479999999999998,1.786,1.8239999999999998,1.8619999999999999,1.9,0.038,0.076,0.11399999999999999,0.152,0.19,0.22799999999999998,0.26599999999999996,0.304,0.34199999999999997,0.38,0.418,0.45599999999999996,0.494,0.5319999999999999,0.57,0.608,0.6459999999999999,0.6839999999999999,0.722,0.76,0.7979999999999999,0.836,0.8739999999999999,0.9119999999999999,0.95,0.988,1.026,1.0639999999999998,1.1019999999999999,1.14,1.178,1.216,1.254,1.2919999999999998,1.33,1.3679999999999999,1.406,1.444,1.482,1.52,1.5579999999999998,1.5959999999999999,1.6340000000000001,1.672,1.71,1.7479999999999998,1.786,1.8239999999999998,1.8619999999999999,1.9,0.038,0.076,0.11399999999999999,0.152,0.19,0.22799999999999998,0.26599999999999996,0.304,0.34199999999999997,0.38,0.418,0.45599999999999996,0.494,0.5319999999999999,0.57,0.608,0.6459999999999999,0.6839999999999999,0.722,0.76,0.7979999999999999,0.836,0.8739999999999999,0.9119999999999999,0.95,0.988,1.026,1.0639999999999998,1.1019999999999999,1.14,1.178,1.216,1.254,1.2919999999999998,1.33,1.3679999999999999,1.406,1.444,1.482,1.52,1.5579999999999998,1.5959999999999999,1.6340000000000001,1.672,1.71,1.7479999999999998,1.786,1.8239999999999998,1.8619999999999999,1.9,0.038,0.076,0.11399999999999999,0.152,0.19,0.22799999999999998,0.26599999999999996,0.304,0.34199999999999997,0.38,0.418,0.45599999999999996,0.494,0.5319999999999999,0.57,0.608,0.6459999999999999,0.6839999999999999,0.722,0.76,0.7979999999999999,0.836,0.8739999999999999,0.9119999999999999,0.95,0.988,1.026,1.0639999999999998,1.1019999999999999,1.14,1.178,1.216,1.254,1.2919999999999998,1.33,1.3679999999999999,1.406,1.444,1.482,1.52,1.5579999999999998,1.5959999999999999,1.6340000000000001,1.672,1.71,1.7479999999999998,1.786,1.8239999999999998,1.8619999999999999,1.9]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:16.0,
+&quot;color&quot;:&quot;#000000&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;cat&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;lamda&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;ln(payoff)*rate&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;lamda&quot;,&quot;ln(payoff)*rate&quot;,&quot;cat&quot;],
+&quot;disable_splitting&quot;:true
+}
+},{
+&quot;mapping&quot;:{
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;yintercept&quot;:0.0,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;noerror&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;loser&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;winner&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;,&quot;sum&quot;]
+},
+&quot;color&quot;:&quot;#000000&quot;,
+&quot;size&quot;:0.3,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;hline&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;cat&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;lamda&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;ln(payoff)*rate&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

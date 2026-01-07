@@ -39,11 +39,11 @@ object RunRlaCreateOneAudit {
             shortName = "fuzzMvrs",
             description = "Fuzz Mvrs by this factor (0.0 to 1.0)"
         ).default(0.0)
-        val pctPhantoms by parser.option(
+        val cvrFraction by parser.option(
             ArgType.Double,
-            shortName = "pctPhantoms",
-            description = "Pct phantoms (0.0 to 1.0)"
-        )
+            shortName = "cvrFraction",
+            description = "CVR fraction (0.0 to 1.0)"
+        ).default(0.95)
         val ncards by parser.option(
             ArgType.Int,
             shortName = "ncards",
@@ -77,16 +77,15 @@ object RunRlaCreateOneAudit {
 
         parser.parse(args)
         println(
-            "RunRlaCreateOneAudit on $inputDir minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards hasStyle=$hasStyle" +
+            "RunRlaCreateOneAudit on $inputDir minMargin=$minMargin fuzzMvrs=$fuzzMvrs, cvrFraction=$cvrFraction, ncards=$ncards hasStyle=$hasStyle" +
                     " extra=$extra"
         )
         startTestElectionOneAudit(
             inputDir,
             minMargin,
             fuzzMvrs,
-            pctPhantoms,
+            cvrFraction=cvrFraction,
             ncards,
-            hasStyle,
             extra,
         )
     }
@@ -95,9 +94,8 @@ object RunRlaCreateOneAudit {
         topdir: String,
         minMargin: Double,
         fuzzMvrs: Double,
-        pctPhantoms: Double?,
+        cvrFraction: Double,
         ncards: Int,
-        hasStyle: Boolean,
         extraPct: Double,
     ) {
         val auditDir = "$topdir/audit"
@@ -114,9 +112,8 @@ object RunRlaCreateOneAudit {
             auditDir,
             config,
             minMargin,
-            pctPhantoms,
+            cvrFraction = cvrFraction,
             ncards,
-            hasStyle,
             extraPct,
         )
 
@@ -146,9 +143,8 @@ object RunRlaCreateOneAudit {
         auditDir: String,
         val config: AuditConfig,
         minMargin: Double,
-        pctPhantoms: Double?,
+        cvrFraction: Double,
         ncards: Int,
-        hasStyle: Boolean,
         extraPct: Double,
     ): CreateElectionPIF {
         val contestsUA = mutableListOf<ContestWithAssertions>()
@@ -161,9 +157,9 @@ object RunRlaCreateOneAudit {
                     makeOneAuditTest(
                         margin = minMargin,
                         Nc = ncards,
-                        cvrFraction = .95,
+                        cvrFraction = cvrFraction,
                         undervoteFraction = .01,
-                        phantomFraction = pctPhantoms ?: 0.0,
+                        phantomFraction = 0.0,
                         extraInPool= (extraPct * ncards).toInt(),
                     )
             contestsUA.add(contestOA)

@@ -107,8 +107,7 @@ class AuditsNoErrors {
         val name = "clcaNoErrorsMaxRisk"
         val dirName = "$testdataDir/plots/samplesNeeded/$name"
         validateOutputDir(Path(dirName))
-        val margins =
-            listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
+        val margins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
         val maxRisk = listOf(.70, .80, .90, 1.0)
         val nruns = 1
 

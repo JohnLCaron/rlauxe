@@ -145,7 +145,8 @@ class TestRunCli {
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.04",
-                "-fuzzMvrs", "0.02",
+                "-fuzzMvrs", "0.0",
+                "-cvrFraction", "0.95",
                 "-ncards", "50000",
                 "-extraPct", "0.00"
             )

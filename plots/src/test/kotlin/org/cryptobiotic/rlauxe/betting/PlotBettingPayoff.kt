@@ -20,9 +20,11 @@ data class BettingPayoff(
 
 
 class PlotBettingPayoff {
+    val dirName = "$testdataDir/plots/betting/optimallamda"
+    val filename = "payoff"
 
     @Test
-    fun plotBettingPayoff2() {
+    fun plotBettingPayoff() {
         val nsteps = 50
         // data class PluralityErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u: Double) {
         val taus = mapOf("p2o" to 0.0, "p1o" to 0.5, "p1u" to 1.5, "p2u" to 2.0)
@@ -49,27 +51,23 @@ class PlotBettingPayoff {
                 results.add(BettingPayoff("sum", lamda, sum))
             }
 
-        val plotter = PlotBettingPayoffData("$testdataDir/plots/betting/optimallamda", "payoff")
-        plotter.plotData(results, margin, noerror, p)
+        plotData(results, margin, noerror, p)
     }
 
-    class PlotBettingPayoffData(val dirName: String, val filename: String) {
+    fun plotData(data: List<BettingPayoff>, margin: Double, noerror: Double, p2:Double) {
+        validateOutputDir(Path(dirName))
 
-        fun plotData(data: List<BettingPayoff>, margin: Double, noerror: Double, p2:Double) {
-            validateOutputDir(Path(dirName))
-
-            genericPlotter(
-                "BettingPayoff",
-                "margin=$margin noerror=${df(noerror)} errRate=${df(p2)}",
-                "$dirName/$filename",
-                data,
-                "lamda", "ln(payoff)*rate", "cat",
-                xfld = { it.lamda },
-                yfld = { it.t },
-                // catfld = { df(it.tau) },
-                catfld = { it.cat },
-            )
-        }
+        genericPlotter(
+            "BettingPayoff",
+            "margin=$margin noerror=${df(noerror)} errRate=${df(p2)}",
+            "$dirName/$filename",
+            data,
+            "lamda", "ln(payoff)*rate", "cat",
+            xfld = { it.lamda },
+            yfld = { it.t },
+            // catfld = { df(it.tau) },
+            catfld = { it.cat },
+        )
     }
 }
 

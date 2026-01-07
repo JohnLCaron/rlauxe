@@ -202,7 +202,6 @@ data class AuditRoundResult(
     val pvalue: Double,       // last pvalue when testH0 terminates
     val samplesUsed: Int,     // sample count when testH0 terminates
     val status: TestH0Status, // testH0 status
-    val measuredMean: Double, // measured population mean TODO used?
     val startingRates: ClcaErrorCounts? = null, // starting error rates (clca only)
     val measuredCounts: ClcaErrorCounts? = null, // measured error counts (clca only)
     val params: Map<String, Double> = emptyMap(),

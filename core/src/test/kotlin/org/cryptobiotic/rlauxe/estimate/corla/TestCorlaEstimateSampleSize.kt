@@ -11,6 +11,8 @@ import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
+import org.cryptobiotic.rlauxe.util.roundToClosest
+import kotlin.math.abs
 import kotlin.test.Test
 
 class TestCorlaEstimateSampleSize {
@@ -58,7 +60,7 @@ class TestCorlaEstimateSampleSize {
         contestRounds.forEach { contestRound ->
             val cn = contestRound.Npop
             val estSizes = mutableListOf<Int>()
-            val cvrs = ContestSimulation.simulateContestCvrsWithLimits(contestRound.contestUA.contest as Contest, config).makeCvrs()
+            val cvrs = simulateContestCvrsWithLimits(contestRound.contestUA.contest as Contest, config).makeCvrs()
             val cards = cvrs.map { AuditableCard.fromCvr(it, 0, 0L)}
             val sampleSizes = contestRound.assertionRounds.map { assertRound ->
                 val result = estimateClcaAssertionRound(1, config,cards, contestRound, assertRound)
@@ -78,4 +80,31 @@ class TestCorlaEstimateSampleSize {
             println("${contestRound.name} estSize=$estSize  simSize=${contestRound.estSampleSize}\n")
         }
     }
+}
+
+
+fun simulateContestCvrsWithLimits(contest: Contest, config: AuditConfig): ContestSimulation {
+    val limit = config.contestSampleCutoff
+    if (limit == null || contest.Nc <= limit) return ContestSimulation(contest, contest.Nc)
+
+    // otherwise scale everything
+    val sNc = limit / contest.Nc.toDouble()
+    val sNp = roundToClosest(sNc * contest.Nphantoms())
+    val sNu = roundToClosest(sNc * contest.Nundervotes())
+    val orgVoteCount = contest.votes.map { it.value }.sum() // V_c
+    val svotes = contest.votes.map { (id, nvotes) -> id to roundToClosest(sNc * nvotes) }.toMap()
+    val voteCount = svotes.map { it.value }.sum() // V_c
+
+    if (abs(voteCount - limit) > 10) {
+        println("simulateContestCvrsWithLimits limit wanted = ${limit} scaled = ${voteCount}")
+    }
+
+    val contest = Contest(
+        contest.info,
+        svotes,
+        Nc = voteCount + sNu + sNp,
+        Ncast = voteCount + sNu,
+    )
+
+    return ContestSimulation(contest, contest.Nc)
 }

@@ -144,16 +144,6 @@ fun makeEstimationTasks(
             ContestSimulation.simulateCvrsDilutedMargin(contestRound.contestUA, config)
     }
 
-    /* get the first n cards for this contest
-    // assumes the cards are already randomized
-    val contestCards = if (config.isPolling) null
-        else {
-            // have to iterate over the cards for each contest - barf
-            val cards = ContestCardsLimited(contestRound.contestUA.id, config.contestSampleCutoff, cardManifest.iterator()).cards()
-            logger.debug{ "ContestCardsLimited contest ${contestRound.contestUA.id} took $stopwatch"}
-            cards
-        } */
-
     contestRound.assertionRounds.map { assertionRound ->
         if (!assertionRound.status.complete) {
             var prevSampleSize = 0
@@ -280,21 +270,6 @@ fun estimateClcaAssertionRound(
 
     val bettingFn: BettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
         GeneralAdaptiveBetting(contestUA.Npop, oaAssortRates = null, d = clcaConfig.d, maxRisk = clcaConfig.maxRisk)
-
-    /* } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
-        //AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
-        val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(clcaConfig.pluralityErrorRates!!, prevRounds)
-        GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
-
-    } else if (clcaConfig.strategy == ClcaStrategyType.fuzzPct) {
-        val errorsP = ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct) // TODO do better
-        val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(errorsP, prevRounds)
-        // AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=errorsP) // just stick with them
-        GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
-
-    } else {
-        throw RuntimeException("unsupported strategy ${clcaConfig.strategy}")
-    } */
 
     // TODO track down simulations and do initial permutation there; we want first trial to use the actual permutation
     // we need a permutation to get uniform distribution of errors, since some simulations put all the errors at the beginning
@@ -511,32 +486,6 @@ fun estimateOneAuditAssertionRound(
             maxRisk = clcaConfig.maxRisk
         )
 
-    /*
-    val clcaBettingFn: BettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-        GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = prevRounds, d = clcaConfig.d,)
-
-    } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
-        val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(clcaConfig.pluralityErrorRates!!, prevRounds)
-        GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
-
-    } else if (clcaConfig.strategy == ClcaStrategyType.fuzzPct) {
-        val errorsP = ClcaErrorTable.getErrorRates(contestUA.contest.ncandidates, clcaConfig.fuzzPct) // TODO do better
-        val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(errorsP, prevRounds)
-        GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
-
-    } else {
-        throw RuntimeException("unsupported strategy ${clcaConfig.strategy}")
-    }
-
-
-    // enum class OneAuditStrategyType { reportedMean, bet99, eta0Eps, optimalComparison }
-    val strategy = config.oaConfig.strategy
-    val result = if (strategy == OneAuditStrategyType.clca || strategy == OneAuditStrategyType.optimalComparison) {
-        val bettingFn: BettingFn = if (strategy == OneAuditStrategyType.clca) clcaBettingFn else {
-            // TODO p2o = clcaBettingFn.startingErrorRates.get("p2o")
-            OptimalComparisonNoP1(contestUA.Npop, true, oaCassorter.upperBound)
-        } */
-
     val sampler = ClcaSampler(contestUA.contest.id, oaFuzzedPairs, oaCassorter, allowReset = true)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
@@ -556,36 +505,6 @@ fun estimateOneAuditAssertionRound(
             moreParameters
         )
 
-    /* } else {
-        val eta0 = if (strategy == OneAuditStrategyType.eta0Eps)
-            oaCassorter.upperBound() * (1.0 - eps)
-        else
-            oaCassorter.noerror()
-
-        val estimFn = if (config.oaConfig.strategy == OneAuditStrategyType.bet99) {
-            FixedEstimFn(.99 * oaCassorter.upperBound())
-        } else {
-            TruncShrinkage(
-                N = contestUA.Nc,
-                withoutReplacement = true,
-                upperBound = oaCassorter.upperBound(),
-                d = config.pollingConfig.d,
-                eta0 = eta0,
-            )
-        }
-
-        runRepeatedAlphaMart(
-            config,
-            sampler,
-            estimFn = estimFn,
-            eta0 = eta0,
-            upperBound = oaCassorter.upperBound(),
-            N = contestUA.Npop,
-            startingTestStatistic = startingTestStatistic,
-            moreParameters
-        )
-    } */
-
     assertionRound.estimationResult = EstimationRoundResult(
         roundIdx,
         oaConfig.strategy.name,
@@ -598,35 +517,4 @@ fun estimateOneAuditAssertionRound(
     logger.debug{"estimateOneAuditAssertionRound $roundIdx ${name} ${makeDeciles(result.sampleCount)}  took=$stopwatch" +
                 " firstSample=${assertionRound.estimationResult!!.firstSample}"}
     return result
-}
-
-// TODO too slow
-// take the first contestSampleCutoff cards that contain the contest
-// TODO this assumes the cards are randomized, so we can just take the first L cvrs; but some of the tests may not do that...track them down
-class ContestCardsLimited(
-    val contestId: Int,
-    val contestSampleCutoff: Int?,
-    cardIter: Iterator<AuditableCard>,
-) {
-    private val cards = mutableListOf<AuditableCard>()
-
-    init {
-        while ((contestSampleCutoff == null || cards.size < contestSampleCutoff) && cardIter.hasNext()) {
-            val card = cardIter.next()
-            if (card.hasContest(contestId)) cards.add(card)
-        }
-    }
-
-    fun cards() = cards.toList()
-}
-
-
-// what if you fetch  fac * estNoError(margin) ?? alos, get new cards  for subsequest rounds ...
-fun getCardsLimited(contestSampleCutoff: Int?, cardIter: Iterator<AuditableCard>): List<AuditableCard> {
-    val cards = mutableListOf<AuditableCard>()
-    while ((contestSampleCutoff == null || cards.size < contestSampleCutoff) && cardIter.hasNext()) {
-        val card = cardIter.next()
-        cards.add(card)
-    }
-    return cards
 }

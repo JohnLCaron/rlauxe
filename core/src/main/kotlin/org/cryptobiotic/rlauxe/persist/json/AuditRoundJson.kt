@@ -272,7 +272,6 @@ data class AuditRoundResultJson(
     val pvalue: Double,       // last pvalue when testH0 terminates
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
     val status: String, // testH0 status
-    val measuredMean: Double,     // measured population mean, used for polling?
     val startingRates: ClcaErrorCountsJson?,
     val measuredCounts: ClcaErrorCountsJson?,
     val params: Map<String, Double>
@@ -286,7 +285,6 @@ fun AuditRoundResult.publishJson() = AuditRoundResultJson(
     this.pvalue,
     this.samplesUsed,
     this.status.name,
-    this.measuredMean,
     this.startingRates?.publishJson(),
     this.measuredCounts?.publishJson(),
     params,
@@ -301,7 +299,6 @@ fun AuditRoundResultJson.import() : AuditRoundResult {
         this.pvalue,
         this.samplesUsed,
         status,
-        this.measuredMean,
         this.startingRates?.import(),
         this.measuredCounts?.import(),
         params,

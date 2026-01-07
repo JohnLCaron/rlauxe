@@ -85,7 +85,6 @@ fun auditPollingAssertion(
         pvalue = testH0Result.pvalueLast,
         samplesUsed = testH0Result.sampleCount,
         status = testH0Result.status,
-        measuredMean = testH0Result.tracker.mean(),
     )
 
     if (!quiet) logger.debug{" ${contestUA.name} ${assertionRound.auditResult}"}

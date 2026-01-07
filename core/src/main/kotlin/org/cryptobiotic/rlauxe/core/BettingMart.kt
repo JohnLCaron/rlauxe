@@ -15,7 +15,7 @@ class BettingMart(
     val bettingFn : BettingFn,
     val N: Int,             // diluted number of cards for this contest, only used by populationMeanIfH0
     val withoutReplacement: Boolean = true,
-    val tracker: SampleTracker, // TODO put back on constructor. too ugly
+    val tracker: SampleTracker,
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val sampleUpperBound: Double,  // the upper bound of the values of the sequence; bassort for CLCA
 ): RiskTestingFn {

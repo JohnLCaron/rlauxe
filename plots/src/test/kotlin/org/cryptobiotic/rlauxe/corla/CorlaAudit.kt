@@ -152,7 +152,6 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             pvalue = testH0Result.pvalueLast,
             samplesUsed = samplesNeeded,
             status = testH0Result.status,
-            measuredMean = testH0Result.tracker.mean(),
             measuredCounts = measuredCounts,
         )
 

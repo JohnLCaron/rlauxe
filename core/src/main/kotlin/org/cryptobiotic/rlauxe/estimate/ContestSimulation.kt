@@ -129,33 +129,6 @@ class ContestSimulation(val contest: Contest, val Npop: Int) {
             return ContestSimulation(contest, Nc)
         }
 
-        // TODO CANDIDATE for removal
-        fun simulateContestCvrsWithLimits(contest: Contest, config: AuditConfig): ContestSimulation {
-            val limit = config.contestSampleCutoff
-            if (limit == null || contest.Nc <= limit) return ContestSimulation(contest, contest.Nc)
-
-            // otherwise scale everything
-            val sNc = limit / contest.Nc.toDouble()
-            val sNp = roundToClosest(sNc * contest.Nphantoms())
-            val sNu = roundToClosest(sNc * contest.Nundervotes())
-            val orgVoteCount = contest.votes.map { it.value }.sum() // V_c
-            val svotes = contest.votes.map { (id, nvotes) -> id to roundToClosest(sNc * nvotes) }.toMap()
-            val voteCount = svotes.map { it.value }.sum() // V_c
-
-            if (abs(voteCount - limit) > 10) {
-                logger.warn {"simulateContestCvrsWithLimits limit wanted = ${limit} scaled = ${voteCount}"}
-            }
-
-            val contest = Contest(
-                contest.info,
-                svotes,
-                Nc = voteCount + sNu + sNp,
-                Ncast = voteCount + sNu,
-            )
-
-            return ContestSimulation(contest, contest.Nc)
-        }
-
         // TODO compare to PollingCardFuzzSampler
         // class PollingCardFuzzSampler(
         //    val fuzzPct: Double,

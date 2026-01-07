@@ -131,7 +131,6 @@ class AuditCobraAssertion(
             pvalue = testH0Result.pvalueLast,
             samplesUsed = samplesNeeded,
             status = testH0Result.status,
-            measuredMean = testH0Result.tracker.mean(),
         )
 
         // println(" ${contest.info.name} ${assertionRound.auditResult}")

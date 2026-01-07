@@ -125,7 +125,6 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             pvalue = testH0Result.pvalueLast,
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
-            measuredMean = testH0Result.tracker.mean(),
             startingRates = prevRounds,
             measuredCounts = measuredCounts,
         )

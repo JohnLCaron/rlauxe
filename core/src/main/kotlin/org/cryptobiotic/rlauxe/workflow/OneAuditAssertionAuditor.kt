@@ -52,7 +52,6 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
             pvalue = testH0Result.pvalueLast,
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
-            measuredMean = testH0Result.tracker.mean(),
             startingRates = accumErrorCounts,
             measuredCounts = measuredCounts,
             // params = mapOf("poolAvg" to poolAvg)

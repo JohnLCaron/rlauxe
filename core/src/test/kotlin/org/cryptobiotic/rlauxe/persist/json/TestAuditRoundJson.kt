@@ -383,7 +383,6 @@ fun check(a1: AuditRoundResult, a2: AuditRoundResult): Boolean {
     assertEquals(a1.pvalue, a2.pvalue)
     assertEquals(a1.samplesUsed, a2.samplesUsed)
     assertEquals(a1.status, a2.status)
-    assertEquals(a1.measuredMean, a2.measuredMean)
     assertEquals(a1.startingRates, a2.startingRates)
     assertEquals(a1.measuredCounts, a2.measuredCounts)
     assertEquals(a1.params, a2.params)

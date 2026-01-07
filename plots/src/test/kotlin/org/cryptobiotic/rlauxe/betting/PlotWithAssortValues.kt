@@ -97,5 +97,4 @@ class PlotWithAssortValues {
         showSampleSizesVsFuzzPct(dirName, name, subtitle, scaleType=ScaleType.LogLog,  catName="maxRisk")
         sampleSizesVsFuzzPctStdDev(dirName, name, subtitle, catName="maxRisk", catfld= { category(it) })
     }
-
 }

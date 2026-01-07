@@ -1,0 +1,247 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;HDqm2c&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;HDqm2c&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;OneAuditWithStdDev samples needed&quot;,
+&quot;subtitle&quot;:&quot;Nc=50000 nruns=100&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;ymin&quot;:&quot;ylowers&quot;,
+&quot;ymax&quot;:&quot;yuppers&quot;,
+&quot;color&quot;:&quot;legend&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.004999999999999893,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044],
+&quot;&amp;merged_groups&quot;:[&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;],
+&quot;legend&quot;:[&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;],
+&quot;ylowers&quot;:[7969.403774750345,1989.8327598106252,704.0800210229829,466.44520889214505,255.52066096547873,128.93723891434323,103.45821795430729],
+&quot;yuppers&quot;:[23015.216225249653,8142.607240189375,4652.139978977017,2520.734791107856,1228.3393390345216,598.6827610856568,396.3817820456927]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;width&quot;:0.5,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;dodge&quot;,
+&quot;geom&quot;:&quot;errorbar&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;legend&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;ylowers&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;yuppers&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;color&quot;:&quot;legend&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;],
+&quot;margin&quot;:[0.004999999999999893,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044],
+&quot;samplesNeeded&quot;:[15492.310000000001,5066.220000000001,2678.11,1493.5900000000006,741.9300000000003,363.81000000000006,249.92000000000002],
+&quot;legend&quot;:[&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;legend&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;ylowers&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;yuppers&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;],
+&quot;margin&quot;:[0.004999999999999893,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044],
+&quot;legend&quot;:[&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;],
+&quot;samplesNeeded&quot;:[15492.310000000001,5066.220000000001,2678.11,1493.5900000000006,741.9300000000003,363.81000000000006,249.92000000000002]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;legend&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;ylowers&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;yuppers&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;samplesNeeded&quot;,&quot;legend&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+}]
+},
+&quot;spec_id&quot;:&quot;2&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

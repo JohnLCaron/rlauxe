@@ -1,0 +1,8 @@
+parameters, N, margin, status, nrounds, samplesUsed, notUsed, nmvrs, failPct, usedStddev, mvrMargin
+"nruns=100 cat=oneaudit-90% mvrsFuzzPct=0.0 auditType=1.0 ", 50000, 0.040000000000000036, StatRejectNull, 1.0, 363.81, 0.0, 0.0, 0.0, 234.87276108565678, 0.040000000000000036
+"nruns=100 cat=oneaudit-90% mvrsFuzzPct=0.0 auditType=1.0 ", 50000, 0.050000000000000044, StatRejectNull, 1.0, 249.92, 0.0, 0.0, 0.0, 146.4617820456927, 0.04999999999999991
+"nruns=100 cat=oneaudit-90% mvrsFuzzPct=0.0 auditType=1.0 ", 50000, 0.030000000000000027, StatRejectNull, 1.0, 741.9300000000002, 0.0, 0.0, 0.0, 486.40933903452145, 0.030000000000000096
+"nruns=100 cat=oneaudit-90% mvrsFuzzPct=0.0 auditType=1.0 ", 50000, 0.020000000000000018, StatRejectNull, 1.0, 1493.5900000000004, 0.0, 0.0, 0.0, 1027.1447911078553, 0.020000000000000018
+"nruns=100 cat=oneaudit-90% mvrsFuzzPct=0.0 auditType=1.0 ", 50000, 0.014999999999999902, StatRejectNull, 1.0, 2678.1099999999997, 0.0, 0.0, 0.0, 1974.0299789770168, 0.014999999999999902
+"nruns=100 cat=oneaudit-90% mvrsFuzzPct=0.0 auditType=1.0 ", 50000, 0.010000000000000009, StatRejectNull, 1.0, 5066.22, 0.0, 0.0, 0.0, 3076.387240189375, 0.010000000000000009
+"nruns=100 cat=oneaudit-90% mvrsFuzzPct=0.0 auditType=1.0 ", 50000, 0.004999999999999893, StatRejectNull, 1.0, 15492.31, 0.0, 0.0, 0.0, 7522.906225249654, 0.004999999999999893

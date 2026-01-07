@@ -48,10 +48,12 @@ class TausOA(val upper: Double, val poolAvg: Double): TausIF {
     val tausOA: List<Pair<Double, String>>
 
     init {
-        // bassort = [1-poolAvg/u, (u - poolAvg + .5)/u, (2u - poolAvg)/u] * noerror, for mvr loser, other and winner
+        // bassort = [1-poolAvg/u,
+        //            (u - poolAvg + .5)/u,
+        //            (2u - poolAvg)/u] * noerror, for mvr loser, other and winner
         tausOA = mapOf(
             (1 - poolAvg / upper) to "loser",
-            (upper - poolAvg + .5) / upper to "other",  // TODO plot these
+            (upper - poolAvg + .5) / upper to "other",  // TODO check this
             (2 * upper - poolAvg) / upper to "winner"
         ).toList()
     }

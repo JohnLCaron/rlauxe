@@ -148,12 +148,13 @@ class TestPopulationMeanWithoutReplacement {
         assertEquals(0.2448979591836735, assortValues.variance(), doublePrecision)
 
         // compare directly to ALPHA
+        val tracker= ClcaErrorTracker(0.0, 1.0)
         val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta)
-        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
+        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u, tracker=tracker)
 
         val sampler = SampleFromArray(x.toDoubleArray())
         println("alphaTestH0")
-        alpha.testH0(x.size, false, tracker= ClcaErrorTracker(0.0, 1.0)) { sampler.sample() }
+        alpha.testH0(x.size, false, ) { sampler.sample() }
 
         // alphaTestH0
         // 1: howAbout sum=0.0 result = 0.5

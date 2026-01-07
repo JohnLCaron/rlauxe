@@ -42,35 +42,8 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
                 maxRisk = clcaConfig.maxRisk
             )
 
-        /* } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
-            val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(clcaConfig.pluralityErrorRates!!, accumErrorCounts)
-            GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d)
-
-        } else if (clcaConfig.strategy == ClcaStrategyType.fuzzPct) {
-            val errorsP = ClcaErrorTable.getErrorRates(contestUA.contest.ncandidates, clcaConfig.fuzzPct) // TODO do better
-            val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(errorsP, accumErrorCounts)
-            GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d)
-
-        } else {
-            throw RuntimeException("unsupported strategy ${clcaConfig.strategy}")
-        } */
-
-        /* enum class OneAuditStrategyType { reportedMean, bet99, eta0Eps, optimalComparison }
-        val strategy = config.oaConfig.strategy
-        val testH0Result = if (strategy == OneAuditStrategyType.clca || strategy == OneAuditStrategyType.optimalComparison) {
-            val bettingFn: BettingFn = if (strategy == OneAuditStrategyType.clca) clcaBettingFn else {
-                // TODO p2o = clcaBettingFn.startingErrorRates.get("p2o")
-                OptimalComparisonNoP1(contestUA.Npop, true, oaCassorter.upperBound)
-            }
-            runBetting(config, contestUA.Npop, oaCassorter, sampling, bettingFn)
-
-        } else {
-            runAlpha(config, contestUA.Npop, oaCassorter, sampling, oaCassorter.upperBound())
-        } */
-
         val testH0Result = runBetting(config, contestUA.Npop, oaCassorter, sampling, bettingFn)
 
-        // TODO errors counted twice by GeneralAdaptiveBetting ??
         val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) testH0Result.tracker.measuredClcaErrorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
@@ -89,49 +62,6 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         return testH0Result
     }
 
-    // CANDIDATE for removal
-     fun runAlpha(
-        config: AuditConfig,
-        N: Int,
-        cassorter: ClcaAssorterOneAudit,
-        sampling: Sampler,
-        upperBound: Double,
-    ): TestH0Result {
-
-         val strategy = config.oaConfig.strategy
-         val eta0 = if (strategy == OneAuditStrategyType.eta0Eps)
-             cassorter.upperBound() * (1.0 - eps)
-         else
-             cassorter.noerror() // seems reasonable, but I dont think SHANGRLA ever uses, so maybe not?
-
-         val estimFn = if (config.oaConfig.strategy == OneAuditStrategyType.bet99) {
-             FixedEstimFn(.99 * cassorter.upperBound())
-         } else {
-             TruncShrinkage(
-                 N = N,
-                 withoutReplacement = true,
-                 upperBound = cassorter.upperBound(),
-                 d = config.pollingConfig.d,
-                 eta0 = eta0,
-             )
-         }
-
-        val alpha = AlphaMart(
-            estimFn = estimFn,
-            N = N,
-            withoutReplacement = true,
-            riskLimit = config.riskLimit,
-            upperBound = upperBound,
-        )
-
-         val tracker = ClcaErrorTracker(
-             cassorter.noerror(),
-             cassorter.assorter.upperBound()
-         ) // track pool data; something better to do?
-
-         return alpha.testH0(sampling.maxSamples(), terminateOnNullReject = true, tracker=tracker) { sampling.sample() }
-    }
-
     fun runBetting(
         config: AuditConfig,
         N: Int,
@@ -140,25 +70,23 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         bettingFn: BettingFn,
     ): TestH0Result {
 
-        // TODO something better ??
+        val tracker = ClcaErrorTracker(
+            cassorter.noerror(),
+            cassorter.assorter.upperBound(),
+        )
 
         val testFn = BettingMart(
             bettingFn = bettingFn,
             N = N,
             sampleUpperBound = cassorter.upperBound(),
             riskLimit = config.riskLimit,
-            withoutReplacement = true
+            withoutReplacement = true,
+            tracker=tracker,
         )
-
         // TODO make optional
-        val sequences = testFn.setDebuggingSequences()
-        val tracker = ClcaErrorTracker(
-            cassorter.noerror(),
-            cassorter.assorter.upperBound(),
-            sequences
-        ) // track pool data; something better to do?
+        tracker.setDebuggingSequences(testFn.setDebuggingSequences())
 
         // TODO how come you dont need startingTestStatistic: Double,
-        return testFn.testH0(sampling.maxSamples(), terminateOnNullReject = true, tracker=tracker) { sampling.sample() }
+        return testFn.testH0(sampling.maxSamples(), terminateOnNullReject = true) { sampling.sample() }
     }
 }

@@ -51,13 +51,14 @@ fun doOneAlphaMartRun(
         d = d
     )
 
+    val tracker = ClcaErrorTracker(0.0, 1.0)
     val alpha = AlphaMart(
         estimFn = estimFn,
         N = drawSample.maxSamples(),
         upperBound = upperBound,
         withoutReplacement = withoutReplacement,
+        tracker=tracker
     )
 
-    val tracker = ClcaErrorTracker(0.0, 1.0)
-    return alpha.testH0(maxSamples, terminateOnNullReject = true, tracker=tracker) { drawSample.sample() }
+    return alpha.testH0(maxSamples, terminateOnNullReject = true) { drawSample.sample() }
 }

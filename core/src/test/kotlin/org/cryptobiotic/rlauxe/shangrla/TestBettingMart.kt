@@ -45,11 +45,11 @@ class TestBettingMart {
             for (lam in lams) {
                 println("assort value = $value lam=$lam")
                 val betta = BettingMart(bettingFn = FixedBet(lam),
-                    N = N, sampleUpperBound = u)
+                    N = N, sampleUpperBound = u, tracker=tracker)
                 val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
-                val result = betta.testH0(x.size, false, tracker=tracker) { sampler.sample() }
+                val result = betta.testH0(x.size, false) { sampler.sample() }
                 println("  ${result}")
 
                 // return min(1, 1 / np.max(terms)), np.minimum(1, 1 / terms)
@@ -85,14 +85,14 @@ class TestBettingMart {
                     c_grapa_max = c_g_m,
                     c_grapa_grow = c_g_g,
                 )
+                val tracker = ClcaErrorTracker(0.0, 1.0)
                 val betta = BettingMart(bettingFn = agrapa, N = N,
-                    sampleUpperBound = u)
+                    sampleUpperBound = u, tracker=tracker)
                 val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
-                val tracker = ClcaErrorTracker(0.0, 1.0)
 
-                val result = betta.testH0(x.size, false, tracker=tracker) { sampler.sample() }
+                val result = betta.testH0(x.size, false) { sampler.sample() }
                 println("  ${result}")
                 println("   bets=  ${debugSeq.bets}")
 
@@ -126,14 +126,14 @@ class TestBettingMart {
                     c_grapa_max = c_g_m,
                     c_grapa_grow = c_g_g,
                 )
+                val tracker = ClcaErrorTracker(0.0, 1.0)
                 val betta = BettingMart(bettingFn = agrapa, N = N,
-                    sampleUpperBound = u)
+                    sampleUpperBound = u, tracker=tracker)
                 val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
                 val sampler = SampleFromArray(x)
-                val tracker = ClcaErrorTracker(0.0, 1.0)
 
-                val result = betta.testH0(x.size, false, tracker=tracker) { sampler.sample() }
+                val result = betta.testH0(x.size, false) { sampler.sample() }
                 println("  ${result}")
                 println("   bets=  ${debugSeq.bets}")
 
@@ -199,14 +199,14 @@ class TestBettingMart {
             c_grapa_max = c_g_m,
             c_grapa_grow = c_g_g,
         )
+        val tracker = ClcaErrorTracker(0.0, 1.0)
         val betta = BettingMart(bettingFn = agrapa, N = N,
-            sampleUpperBound = u)
+            sampleUpperBound = u, tracker=tracker)
         val debugSeq = betta.setDebuggingSequences()
 
         val sampler = SampleFromList(x)
-        val tracker = ClcaErrorTracker(0.0, 1.0)
 
-        val result = betta.testH0(x.size, false, tracker=tracker) { sampler.sample() }
+        val result = betta.testH0(x.size, false) { sampler.sample() }
         println("  ${result}")
         println("   bets=  ${debugSeq.bets}") // these are the bets, despite the name
 

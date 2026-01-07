@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.computeBassortValues
 import org.cryptobiotic.rlauxe.util.doublePrecision
+import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.test.*
 
 class TestClcaErrorCounts {
@@ -17,7 +18,7 @@ class TestClcaErrorCounts {
         val totalSamples = 1000
 
         val perr = PluralityErrorRates.fromList(listOf(0.1, 0.2, 0.1, 0.1))
-        val cerr = ClcaErrorCounts.fromPluralityErrorRates(perr, 1.1, totalSamples, 1.0)
+        val cerr = fromPluralityErrorRates(perr, 1.1, totalSamples, 1.0)
         println(cerr.clcaErrorRate())
         assertEquals(perr.toList().sum(), cerr.clcaErrorRate())
 
@@ -107,4 +108,15 @@ class TestClcaErrorCounts {
         assertEquals(countedTotal+11, tracker.numberOfSamples())
         assertEquals(11, tracker.noerrorCount)
     }
+}
+
+// this only works for upper=1
+fun fromPluralityErrorRates(prates: PluralityErrorRates, noerror: Double, totalSamples: Int, upper: Double): ClcaErrorCounts {
+    if (upper != 1.0) throw RuntimeException("fromPluralityErrorRates must have upper = 1")
+
+    val errorRates = prates.errorRates(noerror)
+    val errorCounts = errorRates.mapValues { roundToClosest(it.value * totalSamples) }
+
+    // data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
+    return ClcaErrorCounts(errorCounts, totalSamples, noerror, upper)
 }

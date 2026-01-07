@@ -117,7 +117,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
             appendLine("contest $contestId assertion win/lose = ${assertion.assorter.winLose()}")
             val tracker = testH0Result.tracker
             if (tracker is ClcaErrorTracker && tracker.sequences != null) {
-                val seq = tracker.sequences
+                val seq = tracker.sequences!!
                 val pvalues = seq.pvalues()
                 val count = seq.xs.size
                 append(" i, ${sfn("xs", 6)}, ${sfn("bet", 6)}, ${sfn("tj", 6)}, ${sfn("Tj", 6)}, ${sfn("pvalue", 8)}, ")

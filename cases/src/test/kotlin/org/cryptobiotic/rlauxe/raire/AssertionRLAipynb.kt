@@ -631,10 +631,12 @@ fun replicate_p_values(
 
     val betta = BettingMart(bettingFn = optimal, N = N,
         sampleUpperBound = cassorter.upperBound(),
-        withoutReplacement = false)
+        withoutReplacement = false,
+        tracker = ClcaErrorTracker(0.0, 1.0),
+        )
 
     val debugSeq = betta.setDebuggingSequences()
-    val result = betta.testH0(sample_size, true,  tracker = ClcaErrorTracker(0.0, 1.0)) { sampler.sample() }
+    val result = betta.testH0(sample_size, true) { sampler.sample() }
     println(result)
     println("pvalues=  ${debugSeq.pvalues()}")}
 
@@ -648,9 +650,11 @@ fun calc_sample_sizes(
     val contest = contests.first().addStandardAssertions()
     val cassorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
+    val tracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound())
     val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, cassorter)
     val betFn = GeneralAdaptiveBetting(N, oaAssortRates = null, d = 100, maxRisk = .99)
-    val betta = BettingMart(bettingFn = betFn, N = N, sampleUpperBound = cassorter.upperBound(), withoutReplacement = false)
+    val betta = BettingMart(bettingFn = betFn, N = N, sampleUpperBound = cassorter.upperBound(), withoutReplacement = false,
+        tracker = tracker)
 
     return runTestRepeated(
         name = "calc_sample_sizes",
@@ -660,7 +664,7 @@ fun calc_sample_sizes(
         testFn = betta,
         testParameters = mapOf("margin" to cassorter.assorter().dilutedMargin()),
         N = N,
-        tracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound()),
+        tracker=tracker
     )
 }
 

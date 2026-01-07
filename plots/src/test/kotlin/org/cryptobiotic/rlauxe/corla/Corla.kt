@@ -15,7 +15,6 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
         maxSamples: Int,
         terminateOnNullReject: Boolean,
         startingTestStatistic: Double, // TODO ignore?
-        tracker: SampleTracker,
         drawSample: () -> Double
     ): TestH0Result {
         require(maxSamples <= N)

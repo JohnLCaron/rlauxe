@@ -56,9 +56,9 @@ class GenBravoResults  {
         val results = mutableListOf<SRT>()
         trueMeans.forEach { trueMean ->
             val estimFn = FixedMean(eta0)
-            val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = 1.0, withoutReplacement = withoutReplacement)
-            val sampler = if (withoutReplacement) GenSampleMeanWithoutReplacement(m, trueMean) else GenSampleMeanWithReplacement(m, trueMean)
             val tracker = ClcaErrorTracker(0.0, 1.0)
+            val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = 1.0, withoutReplacement = withoutReplacement, tracker=tracker)
+            val sampler = if (withoutReplacement) GenSampleMeanWithoutReplacement(m, trueMean) else GenSampleMeanWithReplacement(m, trueMean)
 
             val rr = runTestRepeated(
                 name = "runBravoRepeat",

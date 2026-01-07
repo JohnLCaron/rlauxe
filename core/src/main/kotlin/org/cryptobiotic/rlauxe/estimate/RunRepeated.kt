@@ -39,7 +39,7 @@ fun runTestRepeated(
             maxSamples=drawSample.maxSamples(),
             terminateOnNullReject=terminateOnNullReject,
             startingTestStatistic = startingTestStatistic,
-            tracker=tracker) { drawSample.sample() }
+       ) { drawSample.sample() }
 
         val currCount = statusMap.getOrPut(testH0Result.status) { 0 }
         statusMap[testH0Result.status] = currCount + 1

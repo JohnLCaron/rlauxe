@@ -158,6 +158,7 @@ class AlphaMart(
     val estimFn : EstimFn,  // estimator of the population mean
     val N: Int,             // max number of cards for this contest (diluted)
     val withoutReplacement: Boolean = true,
+    val tracker: SampleTracker,
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val upperBound: Double = 1.0,  // aka u
 ): RiskTestingFn {
@@ -165,17 +166,16 @@ class AlphaMart(
 
     init {
         val bettingFn = EstimAdapter(N, withoutReplacement, upperBound, estimFn)
-        betting = BettingMart(bettingFn, N, withoutReplacement, riskLimit, upperBound)
+        betting = BettingMart(bettingFn, N, withoutReplacement, tracker, riskLimit, upperBound)
     }
 
     override fun testH0(
         maxSamples: Int,
         terminateOnNullReject: Boolean,
         startingTestStatistic: Double,
-        tracker: SampleTracker,
         drawSample: () -> Double,
     ): TestH0Result {
-        return betting.testH0(maxSamples, terminateOnNullReject, startingTestStatistic, tracker, drawSample)
+        return betting.testH0(maxSamples, terminateOnNullReject, startingTestStatistic, drawSample)
     }
 
     fun setDebuggingSequences(): DebuggingSequences {

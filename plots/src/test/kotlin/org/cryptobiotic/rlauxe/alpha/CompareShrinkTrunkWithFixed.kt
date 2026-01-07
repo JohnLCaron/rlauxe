@@ -44,19 +44,18 @@ class CompareShrinkTrunkWithFixed {
         val d = 10000
         val N = sampling.maxSamples()
 
-        val trunc = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
-        val alpha = AlphaMart(estimFn = trunc, N = N)
         val tracker = ClcaErrorTracker(0.0, 1.0)
+        val trunc = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
+        val alpha = AlphaMart(estimFn = trunc, N = N, tracker=tracker)
 
-        return alpha.testH0(N, true, tracker=tracker) { sampling.sample() }
+        return alpha.testH0(N, true) { sampling.sample() }
     }
 
     fun testAlphaMartFixed(eta0: Double, sampling: Sampler): TestH0Result {
         val fixed = FixedEstimFn(eta0 = eta0)
-        val alpha = AlphaMart(estimFn = fixed, N = sampling.maxSamples())
         val tracker = ClcaErrorTracker(0.0, 1.0)
-
-        return alpha.testH0(sampling.maxSamples(), true, tracker=tracker) { sampling.sample() }
+        val alpha = AlphaMart(estimFn = fixed, N = sampling.maxSamples(), tracker=tracker)
+        return alpha.testH0(sampling.maxSamples(), true) { sampling.sample() }
     }
 
     @Test
@@ -110,8 +109,9 @@ class CompareShrinkTrunkWithFixed {
         val d = 10000
         val N = sampling.maxSamples()
 
+        val tracker = ClcaErrorTracker(0.0, 1.0)
         val trunc = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
-        val alpha = AlphaMart(estimFn = trunc, N = sampling.maxSamples())
+        val alpha = AlphaMart(estimFn = trunc, N = sampling.maxSamples(), tracker=tracker)
 
         return runTestRepeated(
             name = "runAlphaMartTruncRepeated",
@@ -121,14 +121,15 @@ class CompareShrinkTrunkWithFixed {
             testFn = alpha,
             testParameters = mapOf("eta0" to eta0, "d" to d.toDouble(), "margin" to mean2margin(eta0)),
             N=N,
-            tracker = ClcaErrorTracker(0.0, 1.0),
+            tracker=tracker,
             )
     }
 
     fun runAlphaMartFixedRepeated(eta0: Double, sampling: Sampler, ntrials: Int): RunTestRepeatedResult {
         val N = sampling.maxSamples()
         val fixed = FixedEstimFn(eta0 = eta0)
-        val alpha = AlphaMart(estimFn = fixed, N = N)
+        val tracker = ClcaErrorTracker(0.0, 1.0)
+        val alpha = AlphaMart(estimFn = fixed, N = N, tracker=tracker)
 
         return runTestRepeated(
             name = "runAlphaMartFixedRepeated",
@@ -138,7 +139,7 @@ class CompareShrinkTrunkWithFixed {
             testFn = alpha,
             testParameters = mapOf("eta0" to eta0, "margin" to mean2margin(eta0)),
             N=N,
-            tracker = ClcaErrorTracker(0.0, 1.0),
-            )
+            tracker = tracker,
+        )
     }
 }

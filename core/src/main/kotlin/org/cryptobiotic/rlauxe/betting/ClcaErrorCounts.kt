@@ -1,16 +1,9 @@
 package org.cryptobiotic.rlauxe.betting
 
 import org.cryptobiotic.rlauxe.core.DebuggingSequences
-import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.core.SampleTracker
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.doubleIsClose
-import org.cryptobiotic.rlauxe.util.roundToClosest
-
-interface ClcaErrorRatesIF {
-    fun errorRates(): Map<Double, Double>  // bassort -> rate
-    fun errorCounts(): Map<Double, Int>  // bassort -> count
-}
 
 data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double) {
     val taus = Taus(upper)
@@ -45,19 +38,6 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
         return "ClcaErrorCounts(errorCounts=$errorCounts, totalSamples=$totalSamples, noerror=$noerror, upper=$upper, bassortValues=${bassortValues()})"
     }
 
-    companion object {
-
-         // this only works for upper=1
-        fun fromPluralityErrorRates(prates: PluralityErrorRates, noerror: Double, totalSamples: Int, upper: Double): ClcaErrorCounts {
-             if (upper != 1.0) throw RuntimeException("fromPluralityErrorRates must have upper = 1")
-
-             val errorRates = prates.errorRates(noerror)
-             val errorCounts = errorRates.mapValues { roundToClosest(it.value * totalSamples) }
-
-            // data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
-            return ClcaErrorCounts(errorCounts, totalSamples, noerror, upper)
-        }
-    }
 }
 
 // B(bi, ci) = (1-o/u)/(2-v/u) = (1-o/u) * noerror, where
@@ -141,7 +121,7 @@ class Taus(upper: Double): TausIF {
     }
 }
 
-class ClcaErrorTracker(val noerror: Double, val upper: Double, val sequences: DebuggingSequences?=null) : SampleTracker {
+class ClcaErrorTracker(val noerror: Double, val upper: Double) : SampleTracker {
     val taus = Taus(upper)
 
     private var last = 0.0
@@ -156,6 +136,11 @@ class ClcaErrorTracker(val noerror: Double, val upper: Double, val sequences: De
 
     val valueCounter = mutableMapOf<Double, Int>()
     var noerrorCount = 0
+    var sequences: DebuggingSequences?=null
+
+    fun setDebuggingSequences(sequences: DebuggingSequences) {
+        this.sequences = sequences
+    }
 
     override fun addSample(sample : Double) {
         last = sample

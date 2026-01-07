@@ -97,41 +97,25 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val bettingFn: BettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
             GeneralAdaptiveBetting(contestUA.Npop, oaAssortRates = null, d = clcaConfig.d, maxRisk = clcaConfig.maxRisk)
 
-        /* } else if (clcaConfig.strategy == ClcaStrategyType.apriori) {
-            //AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=clcaConfig.pluralityErrorRates!!) // just stick with them
-            val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(clcaConfig.pluralityErrorRates!!, prevRounds)
-            GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
+        val tracker = ClcaErrorTracker(
+            cassorter.noerror(),
+            cassorter.assorter.upperBound(),
+        )
 
-        } else if (clcaConfig.strategy == ClcaStrategyType.fuzzPct) {
-            val errorsP = ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.fuzzPct) // TODO do better
-            val errorRates= ClcaErrorCounts.fromPluralityAndPrevRates(errorsP, prevRounds)
-            // AdaptiveBetting(N = contestUA.Npop, a = cassorter.noerror(), d = clcaConfig.d, errorRates=errorsP) // just stick with them
-            GeneralAdaptiveBettingOld(N = contestUA.Npop, startingErrorRates = errorRates, d = clcaConfig.d,)
-
-        } else {
-            throw RuntimeException("unsupported strategy ${clcaConfig.strategy}")
-        } */
-
-        // TODO put tracker back on bettingMart I think
         val testFn = BettingMart(
             bettingFn = bettingFn,
             N = contestUA.Npop,
             sampleUpperBound = cassorter.upperBound(),
             riskLimit = config.riskLimit,
-            withoutReplacement = true
+            withoutReplacement = true,
+            tracker=tracker
         )
-
         // TODO make optional
-        val sequences = testFn.setDebuggingSequences()
-        val tracker = ClcaErrorTracker(
-            cassorter.noerror(),
-            cassorter.assorter.upperBound(),
-            sequences
-        ) // track pool data; something better to do?
+        tracker.setDebuggingSequences(testFn.setDebuggingSequences())
 
         val terminateOnNullReject = config.auditSampleLimit == null
         // TODO remove tracker from testH0
-        val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = terminateOnNullReject, tracker=tracker) { sampling.sample() }
+        val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = terminateOnNullReject) { sampling.sample() }
 
         val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) testH0Result.tracker.measuredClcaErrorCounts() else null
         assertionRound.auditResult = AuditRoundResult(

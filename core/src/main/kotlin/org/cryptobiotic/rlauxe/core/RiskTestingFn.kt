@@ -1,5 +1,14 @@
 package org.cryptobiotic.rlauxe.core
 
+interface RiskTestingFn {
+    fun testH0(
+        maxSamples: Int,
+        terminateOnNullReject: Boolean,
+        startingTestStatistic: Double = 1.0,
+        drawSample: () -> Double,
+    ): TestH0Result
+}
+
 // NOTE: contest status is min rank of assertions
 enum class TestH0Status(val rank: Int, val complete: Boolean, val success: Boolean) {
     // starting state
@@ -40,14 +49,4 @@ data class TestH0Result(
         append(" pvalueMin=${pvalueMin}")
         append(" pvalueLast=${pvalueLast}")
     }
-}
-
-interface RiskTestingFn {
-    fun testH0(
-        maxSamples: Int,
-        terminateOnNullReject: Boolean,
-        startingTestStatistic: Double = 1.0,
-        tracker: SampleTracker,
-        drawSample: () -> Double,
-    ): TestH0Result
 }

@@ -66,16 +66,18 @@ fun auditPollingAssertion(
         d = config.pollingConfig.d,
         eta0 = eta0,
     )
+    val tracker = ClcaErrorTracker(0.0, assorter.upperBound())
+
     val testFn = AlphaMart(
         estimFn = estimFn,
         N = contestUA.Npop,
         withoutReplacement = true,
         riskLimit = config.riskLimit,
         upperBound = assorter.upperBound(),
+        tracker=tracker,
     )
 
-    val tracker = ClcaErrorTracker(0.0, assorter.upperBound())
-    val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject=true, tracker=tracker) { sampling.sample() }
+    val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject=true) { sampling.sample() }
 
     assertionRound.auditResult = AuditRoundResult(roundIdx,
         nmvrs = sampling.nmvrs(),

@@ -116,13 +116,13 @@ class TestAlphaMart {
         val d = 10
         val N = x.size
 
+        val tracker = ClcaErrorTracker(0.0, 1.0)
         val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
-        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
+        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u, tracker=tracker)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
         val sampler = SampleFromArray(x.toDoubleArray())
-        val tracker = ClcaErrorTracker(0.0, 1.0)
 
-        val result = alpha.testH0(x.size, false, tracker=tracker) { sampler.sample() }
+        val result = alpha.testH0(x.size, false) { sampler.sample() }
         println(" test_shrink_trunk_f1 = ${result}")
 
         val pvalues = dseq.pvalues()
@@ -155,12 +155,12 @@ class TestAlphaMart {
             d = d,
             eta0 = eta0,
         )
-        val alpha = AlphaMart(estimFn = estimFn, N = N, withoutReplacement = false, upperBound = u)
+        val tracker = ClcaErrorTracker(0.0, 1.0)
+        val alpha = AlphaMart(estimFn = estimFn, N = N, withoutReplacement = false, upperBound = u, tracker=tracker)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
         val sampler = SampleFromArray(x.toDoubleArray())
-        val tracker = ClcaErrorTracker(0.0, 1.0)
 
-        val result = alpha.testH0(x.size, false, tracker=tracker) { sampler.sample() }
+        val result = alpha.testH0(x.size, false) { sampler.sample() }
         println(" test_shrink_trunk_f1_wreplacement = ${result}")
 
         val pvalues = dseq.pvalues()
@@ -219,14 +219,14 @@ class TestAlphaMart {
         val d = 10
         val N = x.size
 
+        val tracker = ClcaErrorTracker(0.0, 1.0)
         val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
-        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
+        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u, tracker=tracker)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
 
         val sampler = SampleFromArray(x.toDoubleArray())
-        val tracker = ClcaErrorTracker(0.0, 1.0)
 
-        return Pair(alpha.testH0(x.size, true, tracker=tracker) { sampler.sample() }, dseq)
+        return Pair(alpha.testH0(x.size, true) { sampler.sample() }, dseq)
     }
 
     fun testAlphaMartBatch(eta0: Double, x: List<Double>, u: Double = 1.0): Pair<TestH0Result, DebuggingSequences> {
@@ -234,14 +234,14 @@ class TestAlphaMart {
         val d = 10
         val N = x.size
 
+        val tracker = ClcaErrorTracker(0.0, 1.0)
         val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
-        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
+        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u, tracker=tracker)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
 
         val sampler = SampleFromArray(x.toDoubleArray())
-        val tracker = ClcaErrorTracker(0.0, 1.0)
 
-        return Pair(alpha.testH0(x.size, false, tracker=tracker) { sampler.sample() }, dseq)
+        return Pair(alpha.testH0(x.size, false) { sampler.sample() }, dseq)
     }
 
     @Test

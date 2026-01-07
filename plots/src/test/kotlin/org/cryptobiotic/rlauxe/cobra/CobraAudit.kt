@@ -117,10 +117,11 @@ class AuditCobraAssertion(
             bettingFn = adaptive,
             N = contestUA.Npop,
             sampleUpperBound = cassorter.upperBound(),
-            withoutReplacement = true
+            withoutReplacement = true,
+            tracker=tracker,
         )
 
-        val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = true, tracker=tracker) { sampling.sample() }
+        val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = true) { sampling.sample() }
         val samplesNeeded = testH0Result.sampleCount
 
         assertionRound.auditResult = AuditRoundResult(

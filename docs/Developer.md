@@ -156,6 +156,7 @@ before viewing them.
 | 12/13/2025 | 82.8 % | 5341/6449       |
 | 12/18/2025 | 83.9 % | 5332/6357       |
 | 12/23/2025 | 83.9 % | 5393/6431       |
+| 01/07/2026 | 84.5 % | 5344/6327       |
 
  **core + cases test coverage** 
 
@@ -202,7 +203,6 @@ last changed: 03/10/2025
 * betting on the error rate
 * mix_betting_mart: "Finds a simple discrete mixture martingale as a (flat) average of D TSMs each with fixed bet 'lam'"
 * review COBRA 3.2, 4.3 (Diversified betting)
-* AdaptiveBettingPayoff shows plots of 1.0 + bet * (x - .5). what about sum of logs ?
 
 ````
 // generalize AdaptiveBetting for any clca assorter, including OneAudit

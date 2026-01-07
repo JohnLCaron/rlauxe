@@ -28,11 +28,14 @@ fun runAlphaMartRepeated(
         d = d,
         eta0 = eta0)
 
+    val tracker = ClcaErrorTracker(0.0, upper)
+
     val alpha = AlphaMart(
         estimFn = useEstimFn,
         N = drawSample.maxSamples(),
         upperBound = sampleUpperBound,
         withoutReplacement = withoutReplacement,
+        tracker=tracker,
     )
 
     return runTestRepeated(
@@ -43,6 +46,6 @@ fun runAlphaMartRepeated(
         testFn = alpha,
         testParameters = mapOf("eta0" to eta0, "d" to d.toDouble(), "margin" to mean2margin(eta0)),
         N=N,
-        tracker = ClcaErrorTracker(0.0, upper),
+        tracker = tracker
    )
 }

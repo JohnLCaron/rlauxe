@@ -45,7 +45,8 @@ class ReproduceCobraResults {
                 val betting =
                     BettingMart(
                         riskLimit = alpha, bettingFn = fixed, N = N, withoutReplacement = false,
-                        sampleUpperBound = upperBound
+                        sampleUpperBound = upperBound,
+                        tracker=tracker,
                     )
 
                 val result = runTestRepeated(
@@ -103,7 +104,7 @@ class ReproduceCobraResults {
                 )
                 val betting =
                     BettingMart(bettingFn = oracle, N = N,
-                        sampleUpperBound = upperBound, withoutReplacement = false)
+                        sampleUpperBound = upperBound, withoutReplacement = false, tracker=tracker)
 
                 val result = runTestRepeated(
                     name = "reproduceCobraResults",
@@ -174,7 +175,7 @@ class ReproduceCobraResults {
                         )
                         val betting =
                             BettingMart(bettingFn = oracle, N = N,
-                                sampleUpperBound = upperBound, withoutReplacement = false)
+                                sampleUpperBound = upperBound, withoutReplacement = false, tracker=tracker)
 
                         val result = runTestRepeated(
                             name = "reproduceCobraResults",
@@ -261,7 +262,7 @@ class ReproduceCobraResults {
 
                         val betting =
                             BettingMart(bettingFn = adaptive, N = N,
-                                sampleUpperBound = upperBound, withoutReplacement = false)
+                                sampleUpperBound = upperBound, withoutReplacement = false, tracker=tracker)
 
                         val result = runTestRepeated(
                             name = "reproduceCobraResults",

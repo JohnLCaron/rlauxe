@@ -14,12 +14,6 @@ called Instant runoff Voting (IRV).
 Raire-Java is Copyright 2023-2025 Democracy Developers. It is based on software (c) Michelle Blom in C++
 https://github.com/michelleblom/audit-irv-cp/tree/raire-branch , and released under the GNU General Public License v3.0.
 
-Also see:
-* [Developer Notes](docs/Developer.md)
-* [Rlauxe Implementation Overview](docs/Overview.md)
-* [Implementation Specificaton](docs/RlauxeSpec.md)
-* [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer)
-
 Click on plot images to get an interactive html plot. You can also read this document on [github.io](https://johnlcaron.github.io/rlauxe/).
 
 **Table of Contents**
@@ -54,7 +48,8 @@ Click on plot images to get an interactive html plot. You can also read this doc
   * [Extensions of SHANGRLA](#extensions-of-shangrla)
     * [Populations and hasStyle](#populations-and-hasstyle)
     * [CardManifest](#cardmanifest)
-    * [General Adaptive Betting strategy.](#general-adaptive-betting-strategy)
+    * [General Adaptive Betting](#general-adaptive-betting)
+    * [OneAudit Betting strategy](#oneaudit-betting-strategy)
     * [MaxRisk for Betting](#maxrisk-for-betting)
     * [Additional assorters](#additional-assorters)
     * [OneAudit Card Style Data](#oneaudit-card-style-data)
@@ -198,9 +193,7 @@ When a ballot has been chosen for hand audit:
 Thus, all cards must either have a CVR or be contained in a pool.
 
 
-For results, see [OneAudit results](docs/OneAudit4.md).
-
-For details of use cases, see [OneAudit Use Cases](docs/OneAuditUseCases.md).
+For details of OneAudit use cases, see [OneAudit Use Cases](docs/OneAuditUseCases.md).
 
 
 ## Polling Audits
@@ -566,7 +559,6 @@ percent of your "winnings" you are willing to risk on any one bet.
 Dhondt, AboveThreshold and BelowThreshold assorters have been added to support Belgian elections using Dhondt proportional
 scoring. These assorters have an upper bound != 1, so are an important generalization of the Plurality assorter.
 
-
 ### OneAudit Card Style Data
 
 Rlauxe adds the option that there may be CSD for OneAudit pooled data, in part to investigate the 
@@ -588,4 +580,5 @@ Also See:
 * [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer)
 * [Verification](docs/Verification.md)
 * [Case Studies](docs/CaseStudies.md)
+
 

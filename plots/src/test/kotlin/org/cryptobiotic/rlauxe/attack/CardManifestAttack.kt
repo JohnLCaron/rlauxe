@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CreateAudit
-import org.cryptobiotic.rlauxe.audit.CreateElectionP
+import org.cryptobiotic.rlauxe.audit.CreateElection
 import org.cryptobiotic.rlauxe.audit.OneAuditConfig
 import org.cryptobiotic.rlauxe.audit.OneAuditStrategyType
 import org.cryptobiotic.rlauxe.audit.Population
@@ -238,7 +238,7 @@ class CardManifestAttack {
         println()
 
         //// create a peristent audit
-        val election = CreateElectionP(listOf(contestUA), cardPools, cards)
+        val election = CreateElection(listOf(contestUA), cardPools, cards)
 
         val auditdir = "$topdir/audit"
         val config = AuditConfig(

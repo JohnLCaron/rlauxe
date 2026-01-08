@@ -146,7 +146,7 @@ object RunRlaCreateOneAudit {
         cvrFraction: Double,
         ncards: Int,
         extraPct: Double,
-    ): CreateElectionPIF {
+    ): CreateElectionIF {
         val contestsUA = mutableListOf<ContestWithAssertions>()
         val cardPools: List<PopulationIF>
         val cardManifest: List<AuditableCard>

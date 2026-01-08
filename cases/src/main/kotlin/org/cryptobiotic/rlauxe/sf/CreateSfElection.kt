@@ -38,7 +38,7 @@ class CreateSfElection(
         val cvrExportCsv: String,
         val config: AuditConfig,
         poolsHaveOneCardStyle: Boolean,
-    ): CreateElectionPIF {
+    ): CreateElectionIF {
     val cardPoolMapByName: Map<String, OneAuditPoolFromCvrs>
     val cardPools: List<OneAuditPoolFromCvrs>
     val phantomCount: Map<Int, Int>

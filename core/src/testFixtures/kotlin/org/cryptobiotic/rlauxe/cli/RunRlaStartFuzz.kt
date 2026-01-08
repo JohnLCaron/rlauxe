@@ -121,7 +121,7 @@ class TestClcaElection(
     ncontests: Int,
     addRaire: Boolean,
     addRaireCandidates: Int,
-): CreateElectionPIF {
+): CreateElectionIF {
     val contestsUA = mutableListOf<ContestWithAssertions>()
     val allCvrs = mutableListOf<Cvr>()
 
@@ -201,7 +201,7 @@ class TestPollingElection(
     pctPhantoms: Double?,
     ncards: Int,
     ncontests: Int,
-): CreateElectionPIF {
+): CreateElectionIF {
     val contestsUA = mutableListOf<ContestWithAssertions>()
     val cvrs: List<Cvr>
     val testMvrs: List<Cvr>

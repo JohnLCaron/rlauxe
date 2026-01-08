@@ -172,13 +172,11 @@ before viewing them.
 
 
 ## UML
-last changed: 03/10/2025
+last changed: 01/07/2026
 
-![rlauxe core UML](images/rlauxeUML.svg)
+![rlauxe core UML](images/coreUML.svg)
 
-![rlauxe Audit UML](images/rlauxeAuditUML.svg)
-
-![rlauxe JSON UML](images/rlauxeJson.svg)
+![rlauxe Audit UML](images/auditUML.svg)
 
 
 # TODO 12/11/25 (Belgium)

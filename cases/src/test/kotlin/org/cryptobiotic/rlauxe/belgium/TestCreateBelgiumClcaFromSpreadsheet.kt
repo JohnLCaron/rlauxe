@@ -13,6 +13,8 @@ import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import kotlin.test.Test
 import kotlin.test.fail
 
+// deprecated - use TestCreateBelgium
+
 class TestCreateBelgiumClcaFromSpreadsheet {
     val Afile = "$testdataDir/cases/belgium/2024/CK_K_2024.xlsx"
     val Bfile = "$testdataDir/cases/belgium/2024/CK_CEListes_2024.xlsx"

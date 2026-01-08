@@ -26,7 +26,7 @@ open class CreateColoradoElection (
     precinctFile: String,
     val config: AuditConfig,
     val poolsHaveOneCardStyle:Boolean = false,
-): CreateElectionPIF {
+): CreateElectionIF {
     val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
 

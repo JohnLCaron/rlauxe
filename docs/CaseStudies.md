@@ -5,6 +5,7 @@ _last changed 11/03/2025_
 
 * 1,603,908 cvrs
 * 53 contests, 11 IRV
+* 53 contests, 11 IRV
 * 4224 pools with 216286 cards (13.5%), using SHANGRLA grouping. 
 * Many pools have only a few cards, which may be problematic.
 

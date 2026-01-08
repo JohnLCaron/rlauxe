@@ -11,7 +11,7 @@ class CreateElectionFromCards (
     val cardPools: List<OneAuditPoolIF>? = null,
     val cardStyles: List<PopulationIF>? = null,
     val config: AuditConfig,
-): CreateElectionPIF {
+): CreateElectionIF {
 
     override fun populations() = cardPools
     override fun contestsUA() = contestsUA

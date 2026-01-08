@@ -28,7 +28,7 @@ import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
 import org.cryptobiotic.rlauxe.workflow.findSamples
 import kotlin.io.path.Path
 
-interface CreateElectionPIF {
+interface CreateElectionIF {
     fun contestsUA(): List<ContestWithAssertions>
     fun populations(): List<PopulationIF>?
 
@@ -36,11 +36,11 @@ interface CreateElectionPIF {
     fun cardManifest() : CloseableIterator<AuditableCard>
 }
 
-class CreateElectionP(
+class CreateElection(
     val contestsUA: List<ContestWithAssertions>,
     val populations: List<PopulationIF>?,
     val cardManifest: List<AuditableCard>
-):  CreateElectionPIF {
+):  CreateElectionIF {
 
     override fun contestsUA() = contestsUA
     override fun populations() = populations
@@ -49,7 +49,7 @@ class CreateElectionP(
 
 private val logger = KotlinLogging.logger("CreateAudit")
 
-class CreateAudit(val name: String, val config: AuditConfig, election: CreateElectionPIF, val auditDir: String, clear: Boolean = true) {
+class CreateAudit(val name: String, val config: AuditConfig, election: CreateElectionIF, val auditDir: String, clear: Boolean = true) {
 
     val stopwatch = Stopwatch()
 

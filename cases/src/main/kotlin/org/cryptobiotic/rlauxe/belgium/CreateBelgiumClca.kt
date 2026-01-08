@@ -11,7 +11,7 @@ private val logger = KotlinLogging.logger("BelgiumClca")
 
 class BelgiumClca (
     contestd: DHondtContest,
-): CreateElectionPIF {
+): CreateElectionIF {
 
     val infoMap: Map<Int, ContestInfo>
     val contestsUA: List<ContestWithAssertions>

@@ -1,5 +1,5 @@
 # Generalized Adaptive Betting
-_last updated 01/06/24_
+_last updated 01/08/24_
 
 The betting strategy for CLCA is a generalized form of AdaptiveBetting from the COBRA paper. We generalize to use any
 number of error types, and any kind of assorter, in particular ones with upper != 1, such as DHondt.
@@ -199,13 +199,14 @@ and there are no errors at all in the CVRs. The terms in equation 2 are:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/oapayoff/oapayoff.html" rel="OABettingPayoff">![OABettingPayoff](plots2/betting/oapayoff/oapayoff.png)</a>
 
-The optimal lamda is around 1.4. Here, the loser term is always negetive, and the winner term is always positive, so
+In this example, the optimal lamda is around 1.4. Here, the loser term is always negetive, and the winner term is always positive, so
 even with no errors, we need many more samples than CLCA. This is highly dependent on the margin and the percent of cards
 in the pools.
 
-if there are no errors, lamda will be constant for all samples. we can then calculate the average and stddev of the number of samples needed.
+if there are no errors in the CVRs, lamda will be constant for all samples. we can then calculate the average and stddev of the number of samples needed:
 
-(payoff)^sampleSize = 1 / riskLimit and
-solving for sampleSize = -ln(riskLimit) / ln(payoff)
+    (payoff)^sampleSize = 1 / riskLimit and
+    solving for sampleSize = -ln(riskLimit) / ln(payoff)
+    // TODO
 
 

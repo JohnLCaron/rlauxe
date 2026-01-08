@@ -30,7 +30,7 @@ class CreateBoulderElection(
     val isClca: Boolean,
     val poolsHaveOneCardStyle: Boolean = true,
     val distributeOvervotes: List<Int> = listOf(0, 63),
-): CreateElectionPIF {
+): CreateElectionIF {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convertToCvr() }
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infoMap = infoList.associateBy { it.id }

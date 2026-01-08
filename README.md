@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 01/07/2025_
+_last changed: 01/08/2025_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -169,7 +169,7 @@ GeneralAdaptiveBetting uses estimates/measurements of the error rates between th
 If the error estimates are correct, one gets optimal 
 "sample sizes", the number of ballots needed to prove the election is correct.
 
-See [CLCA Risk function](docs/ClcaRiskFunction.md) for details on CLCA and BettingMart.
+See [CLCA Risk function](docs/Clca.md) for details on CLCA and BettingMart.
 
 See [Generalized Adaptive Betting](docs/GeneralizedAdaptiveBetting.md) for details on the GeneralAdaptiveBetting function.
 
@@ -251,13 +251,14 @@ with several values of the CVR percentage, as a function of margin:
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrorsLogLinear.html" rel="OneAuditNoErrorsLogLinear">![OneAuditNoErrorsLogLinear](docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrorsLogLinear.png)</a>
 
 However, OneAudit has a large variance due to the random sequence of pool values. Here are the one sigma intervals for
-a "best case" 90% cvr OneAudit (for example a 2% margin contest has a one-sigma interval of (466, 2520)):
+a "best case" 90% CVR OneAudit (for example, a 2% margin contest has a one-sigma interval of (466, 2520), click on the image
+to get an interactive plot):
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditWithStdDev/OneAuditWithStdDevLinear.html" rel="OneAuditWithStdDevLinear">![OneAuditWithStdDevLinear](docs/plots2/oneaudit/OneAuditWithStdDev/OneAuditWithStdDevLinear.png)</a>
 
 ## Samples needed when there are errors
 
-In the following simulations, errors are created between the CVRs and the MVRs, by taking _fuzzPct_ of the ballots
+In the following simulations, errors are created between the CVRs and the MVRs, by taking _fuzzPct_ of the cards
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the CVRs and MVRs agree.
 When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. 
 
@@ -270,9 +271,8 @@ In this plot we show CLCA audits with margins of .01, .02, and .04, over a range
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaAuditsWithFuzz/clcaAuditsWithFuzzLinear.html" rel="clcaAuditsWithFuzz">![clcaAuditsWithFuzz](docs/plots2/samplesNeeded/clcaAuditsWithFuzz/clcaAuditsWithFuzzLinear.png)</a>
 
 * Polling audit sample sizes are all but impervious to errors, because the sample variance dominates the errors.
-* CLCA as a percent of Nc is more sensitive to errors than polling, but much better in an absolute sense
 * As margins get smaller, the variance in CLCA audits increases. At .001 fuzz (1 in 1000), an audit with a margin of 1% has an
-average sample size of 780, but the 1-sigma range goes from 462 to 1096. 
+average sample size of 814, but the 1-sigma range goes from 472 to 1157. 
 * A rule of thumb might be that if you want to do CLCA audits down to 1% margin, your error rate must be less than 1/1000.
 
 Here are similar plots for OneAudits with fuzz in their CVRs:

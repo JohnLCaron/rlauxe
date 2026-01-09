@@ -15,7 +15,7 @@ class TestClcaAuditTask {
         val config = AuditConfig(
             AuditType.CLCA, nsimEst = 10, contestSampleCutoff = 10000, simFuzzPct = mvrFuzzPct,
         )
-        val taskGen = ClcaContestAuditTaskGenerator(
+        val taskGen = ClcaContestAuditTaskGenerator("TestClcaAuditTask",
             Nc, margin, 0.10, 0.001, mvrFuzzPct,
             config = config,
             parameters = emptyMap(),

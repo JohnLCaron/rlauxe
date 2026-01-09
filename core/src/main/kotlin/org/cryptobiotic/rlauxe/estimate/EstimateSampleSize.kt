@@ -76,7 +76,6 @@ fun estimateSampleSizes(
     }
 
     // run tasks concurrently
-    logger.info{ "ConcurrentTaskRunnerG run ${tasks.size} tasks"}
     val estResults: List<EstimationResult> = ConcurrentTaskRunnerG<EstimationResult>(showTasks).run(tasks, nthreads=nthreads)
 
     // put results into assertionRounds
@@ -116,9 +115,6 @@ fun estimateSampleSizes(
         contest.estNewSamples = if (newSampleSizes.isEmpty()) 0 else newSampleSizes.max()
         if (!quiet) logger.info{" ** contest ${contest.id} avgSamplesNeeded ${contest.estSampleSize} task=${contest.estNewSamples}"}
     }
-
-    logger.info{ "ConcurrentTaskRunnerG run ${tasks.size} tasks took $stopwatch"}
-
 
     // return repeatedResult for debugging and diagnostics
     return estResults.map { it.repeatedResult }

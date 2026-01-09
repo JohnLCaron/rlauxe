@@ -4,18 +4,19 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
+import kotlin.io.path.Path
 import kotlin.test.Test
 
 class AuditsWithPhantoms {
     val name = "AuditsWithPhantoms"
-    val dirName = "$testdataDir/audits/$name"
+    val dirName = "$testdataDir/plots/phantoms/$name"
 
     val mvrFuzzPct = .01
-    val nruns = 500  // number of times to run workflow
-    val nsimEst = 10  // number of times to run workflow
+    val nruns = 200  // number of times to run workflow
     val N = 50000
     val margin = .045
 
@@ -28,30 +29,25 @@ class AuditsWithPhantoms {
 
         phantoms.forEach { phantom ->
             val pollingGenerator = PollingSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
-                auditConfig= AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "polling"))
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
-                config= AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "clca"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            /* val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
-                N, margin, 0.0, phantomPct=phantom, cvrPercent = .95, mvrsFuzzPct=mvrFuzzPct, skewPct = .05,
-                parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "oneaudit"),
-                auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true,
-                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.eta0Eps)
-                )
+            val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
+                N, margin, 0.0, phantomPct=phantom, cvrPercent = .90, mvrsFuzzPct=mvrFuzzPct,
+                parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "oneaudit-90%"),
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator)) */
+            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
         }
 
         // run tasks concurrently and average the results
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
+        validateOutputDir(Path(dirName))
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
@@ -62,8 +58,6 @@ class AuditsWithPhantoms {
     fun regenPlots() {
         val subtitle = "margin=${df(margin)} Nc=${N} nruns=${nruns} mvrFuzz=${mvrFuzzPct}"
         showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType")
-        showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.LogLinear, catName="auditType")
-        showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.LogLog, catName="auditType")
     }
 
     fun showSampleSizesVsPhantomPct(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
@@ -84,7 +78,7 @@ class AuditsWithPhantoms {
 
     @Test
     fun genAuditsWithPhantomsPlotsMarginShift() {
-        val nruns = 100  // number of times to run workflow
+        val nruns = 10  // number of times to run workflow
         val nsimEst = 100
         val margin = .045
         val phantoms = listOf(.00, .005, .01, .02, .03, .035, .04, .0425)
@@ -112,18 +106,11 @@ class AuditsWithPhantoms {
         println(stopwatch.took())
 
         val name = "phantomMarginShift"
-        val dirName = "$testdataDir/samples/$name"
+        val dirName = "$testdataDir/plots/phantoms/$name"
 
+        validateOutputDir(Path(dirName))
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
-
-        regenMarginShiftPlots()
-    }
-
-    @Test
-    fun regenMarginShiftPlots() {
-        val name = "phantomMarginShift"
-        val dirName = "$testdataDir/samples/$name"
 
         val subtitle = "margin=${df(.045)} Nc=${N} nruns=${300} mvrFuzz=${mvrFuzzPct}"
         showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType")

@@ -47,7 +47,8 @@ class CompareAuditsNoStyles {
             val clcaConfigNS = AuditConfig(
                 AuditType.CLCA, false, nsimEst = nsimEst,
             )
-            val clcaGeneratorNS = ClcaContestAuditTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
+            val clcaGeneratorNS = ClcaContestAuditTaskGenerator("compareAuditsByStyles hasStyle=false",
+                    Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "clcaNoStyles"),
                 config = clcaConfigNS,
                 Npop=Npop
@@ -57,7 +58,8 @@ class CompareAuditsNoStyles {
             val clcaConfig = AuditConfig(
                 AuditType.CLCA, true, nsimEst = nsimEst,
             )
-            val clcaGenerator = ClcaContestAuditTaskGenerator(Nc, margin, 0.0, 0.0, 0.0,
+            val clcaGenerator = ClcaContestAuditTaskGenerator("compareAuditsByStyles hasStyle=true",
+                Nc, margin, 0.0, 0.0, 0.0,
                 mapOf("nruns" to nruns.toDouble(), "cat" to "clcaWithStyles"),
                 config = clcaConfig,
                 Npop=Nc

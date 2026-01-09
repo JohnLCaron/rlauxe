@@ -44,7 +44,7 @@ fun sampleWithContestCutoff(
         maxContest.status = TestH0Status.FailMaxSamplesAllowed
         contestsNotDone.remove(maxContest)
     }
-    logger.info{" sample() success on ${auditRound.contestRounds.count { !it.done }} contests: ready to audit; took ${stopwatch}"}
+    logger.debug{"sampleWithContestCutoff success on ${auditRound.contestRounds.count { !it.done }} contests: round ${auditRound.roundIdx} took ${stopwatch}"}
 }
 
 /** Choose what cards to sample */

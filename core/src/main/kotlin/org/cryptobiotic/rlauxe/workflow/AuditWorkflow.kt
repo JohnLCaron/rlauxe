@@ -33,7 +33,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         }
         auditRounds.add(auditRound)
 
-        logger.info{"Estimate round ${roundIdx}"}
+        logger.debug{"Estimate round ${roundIdx}"}
         val stopwatch = Stopwatch()
 
         val previousSamples = auditRounds.previousSamples(roundIdx)
@@ -48,7 +48,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
             // nthreads=1,
             onlyTask = onlyTask,
         )
-        logger.info{"Estimate round ${roundIdx} took ${stopwatch}"}
+        logger.debug{"Estimate round ${roundIdx} took ${stopwatch}"}
 
         // 2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited.
         // 3. _Random sampling_: The actual ballots to be sampled are selected randomly based on a carefully chosen random seed.

@@ -6,9 +6,11 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
+import kotlin.io.path.Path
 import kotlin.test.Test
 
 class ExtraVsMarginByFuzzDiff {
@@ -16,15 +18,20 @@ class ExtraVsMarginByFuzzDiff {
     val nruns = 100
     val nsimEst = 100
     val name = "extraVsMarginByFuzzDiff"
-    val dirName = "$testdataDir/extra/$name"
+    val dirName = "$testdataDir/plots/extra/$name"
     val fuzzMvrs = .02
 
     // Used in docs
 
+    // TODO this is going off the rails
+    // 2026-01-08 10:01:18.170 WARN  0/0/1:  100/100 failures in sampling the max= 875 samples
+    // runAudit ClcaWorkflowTaskGenerator 11 exceeded maxRounds = 10
     @Test
     fun estSamplesVsMarginByFuzzDiff() {
-        val margins = listOf(.005, .0075, .01, .015, .02, .03, .04, .05, .06, .07, .08, .09, .10)
+        val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .09, .10)
         val fuzzDiffs = listOf(-.01, -.005, 0.0, .005, .01)
+        //val margins = listOf(.005)
+        // val fuzzDiffs = listOf(-.01)
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
@@ -36,16 +43,18 @@ class ExtraVsMarginByFuzzDiff {
             )
 
             margins.forEach { margin ->
-                val clcaGenerator1 = ClcaContestAuditTaskGenerator(Nc, margin, 0.0, 0.0, fuzzMvrs,
+                val clcaGenerator1 = ClcaContestAuditTaskGenerator("'estSamplesVsMarginByFuzzDiff simFuzzPct=$simFuzzPct, margin=$margin'",
+                    Nc, margin, 0.0, 0.0, fuzzMvrs,
                     parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "1.0", "fuzzDiff" to fuzzDiff, "fuzzMvrs" to fuzzMvrs),
                     config=auditConfig)
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator1))
             }
 
         }
-        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
+        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks, nthreads = 1)
         println(stopwatch.took())
 
+        validateOutputDir(Path(dirName))
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 

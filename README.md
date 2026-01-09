@@ -53,7 +53,7 @@ Click on plot images to get an interactive html plot. You can also read this doc
     * [MaxRisk for Betting](#maxrisk-for-betting)
     * [Additional assorters](#additional-assorters)
     * [OneAudit Card Style Data](#oneaudit-card-style-data)
-  * [Developer Notes](#developer-notes)
+  * [Also See:](#also-see)
 <!-- TOC -->
 
 
@@ -285,7 +285,7 @@ We dont see that much change as the CLCA errors increase; the variance generated
 
 Varying phantom percent, up to and over the margin of 4.5%, with errors generated with 1% fuzz:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/AuditsWithPhantoms/AuditsWithPhantomsLinear.html" rel="AuditsWithPhantomsLinear">![AuditsWithPhantomsLinear](docs/plots/plots2/samplesNeeded/AuditsWithPhantoms/AuditsWithPhantomsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/AuditsWithPhantoms/AuditsWithPhantomsLinear.html" rel="AuditsWithPhantomsLinear">![AuditsWithPhantomsLinear](docs/plots2/samplesNeeded/AuditsWithPhantoms/AuditsWithPhantomsLinear.png)</a>
 
 * Increased phantoms have a strong effect on sample size.
 * All audits go to hand count when phantomPct gets close to the margin, as they should.
@@ -556,15 +556,7 @@ Rlauxe adds the option that there may be CSD for OneAudit pooled data, in part t
 difference between having CSD and not. Specifically, different OneAudit pools may have different values of
 _hasStyle_ (aka _hasSingleCardStyle_).  See [SamplePopulations](docs/SamplePopulations.md).
 
-## Developer Notes
-
-Modules
-* core: the core library, with minimal dependencies
-* rla: serialization and command line utilities
-* cases: San Francisco, Colorado, and Boulder County use cases
-* plots: plot generation and testing
-
-Also See:
+## Also See:
 * [Developer Notes](docs/Developer.md)
 * [Rlauxe Implementation Overview](docs/Overview.md)
 * [Implementation Specificaton](docs/RlauxeSpec.md)

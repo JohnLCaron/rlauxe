@@ -59,7 +59,7 @@ fun runTestRepeated(
     }
 
     if (fail > 0) {
-        logger.warn { "$name:  $fail/$ntrials failures in sampling the max= ${drawSample.maxSamples()} samples" }
+        logger.warn { "$name:  $fail/$ntrials failures in sampling max= ${drawSample.maxSamples()} samples" }
     }
 
     val (_, variance, _) = welford.result()

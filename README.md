@@ -285,19 +285,10 @@ We dont see that much change as the CLCA errors increase; the variance generated
 
 Varying phantom percent, up to and over the margin of 4.5%, with errors generated with 1% fuzz:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/audits/AuditsWithPhantoms/auditsWithPhantomsLogLinear.html" rel="auditsWithPhantomsLogLinear">![auditsWithPhantomsLogLinear](docs/plots/audits/AuditsWithPhantoms/AuditsWithPhantomsLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/AuditsWithPhantoms/AuditsWithPhantomsLinear.html" rel="AuditsWithPhantomsLinear">![AuditsWithPhantomsLinear](docs/plots/plots2/samplesNeeded/AuditsWithPhantoms/AuditsWithPhantomsLinear.png)</a>
 
 * Increased phantoms have a strong effect on sample size.
 * All audits go to hand count when phantomPct gets close to the margin, as they should.
-
-Having _phantomPct_ phantoms is similar to subtracting phantomPct from the margin. In this CLCA plot we show samples needed
-as a function of phantomPct, and also with no phantoms but the margin shifted by phantomPct:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/samples/phantomMarginShift/phantomMarginShiftLinear.html" rel="phantomMarginShiftLinear">![phantomMarginShiftLinear](docs/plots/samples/phantomMarginShift/phantomMarginShiftLinear.png)</a>
-
-* A rule of thumb is that the effect of phantoms is approximately as if the margins are reduced by phantomPct across the board,
-  at least at phantomPct < 3% or so.
-
 
 # Sample Populations and diluted margins
 

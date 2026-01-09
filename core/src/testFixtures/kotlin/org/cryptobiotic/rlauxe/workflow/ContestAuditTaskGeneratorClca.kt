@@ -9,6 +9,7 @@ import kotlin.math.max
 
 // Simulate single Contest, do regular audit
 class ClcaContestAuditTaskGenerator(
+    val name: String,
     val Nc: Int,
     val margin: Double,
     val underVotePct: Double,
@@ -21,7 +22,7 @@ class ClcaContestAuditTaskGenerator(
     val nsimEst: Int = 100,
     val p2flips: Double? = null,
 ): ContestAuditTaskGenerator {
-    override fun name() = "ClcaWorkflowTaskGenerator"
+    override fun name() = name
 
     override fun generateNewTask(): ContestAuditTask {
         val useConfig = config ?:

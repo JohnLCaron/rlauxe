@@ -1,19 +1,18 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.audit.AuditConfig
-import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import kotlin.io.path.Path
 import kotlin.test.Test
 
 class AuditsWithUndervotes {
     val nruns = 100  // number of times to run workflow
-    val nsimEst = 10  // number of times to run simulation
     val name = "AuditsWithUndervotes"
-    val dirName = "$testdataDir/audits/$name"
+    val dirName = "$testdataDir/plots/undervotes/$name"
     val mvrFuzzPct = .01
     val margin = .04
     val N = 50000
@@ -27,30 +26,25 @@ class AuditsWithUndervotes {
 
         undervotes.forEach { undervote ->
             val pollingGenerator = PollingSingleRoundAuditTaskGenerator(N, margin, undervote, phantomPct=0.0, mvrsFuzzPct=mvrFuzzPct,
-                auditConfig= AuditConfig(AuditType.POLLING, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "polling"))
             tasks.add(RepeatedWorkflowRunner(nruns, pollingGenerator))
 
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(N, margin, undervote, 0.0, mvrFuzzPct,
-                config= AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst),
                 parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "clca"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            /* val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
-                N, margin, undervote, 0.0, cvrPercent = .95, mvrsFuzzPct=mvrFuzzPct, skewPct = .05,
-                parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "oneaudit"),
-                auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true,
-                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.eta0Eps)
-                )
+            val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
+                N, margin, undervote, 0.0, cvrPercent = .90, mvrsFuzzPct=mvrFuzzPct,
+                parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "oneaudit-90%"),
             )
-            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator)) */
+            tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
         }
 
         // run tasks concurrently and average the results
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
+        validateOutputDir(Path(dirName))
         val writer = WorkflowResultsIO("$dirName/AuditsWithUndervotes.csv")
         writer.writeResults(results)
 

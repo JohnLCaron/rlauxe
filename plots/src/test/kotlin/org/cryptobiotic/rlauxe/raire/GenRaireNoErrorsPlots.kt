@@ -39,7 +39,7 @@ class GenRaireNoErrorsPlots {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, raireGenerator))
 
-            val noerrorGenerator = ClcaContestAuditTaskGenerator(
+            val noerrorGenerator = ClcaContestAuditTaskGenerator("raireNoErrorsPlots margin=$margin",
                 N, margin, 0.0, 0.0, 0.0, nsimEst=nsimEst,
                 config=config,
                 parameters=mapOf("nruns" to nruns, "cat" to "clcaNoerror")

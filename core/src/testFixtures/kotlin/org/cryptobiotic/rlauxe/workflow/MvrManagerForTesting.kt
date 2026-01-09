@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
@@ -7,6 +8,8 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
+
+private val logger = KotlinLogging.logger("MvrManagerForTesting")
 
 // simulated cvrs, mvrs for testing are sorted and kept here in memory
 class MvrManagerForTesting(
@@ -88,13 +91,13 @@ fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boole
             // workflow MvrManager must implement MvrManagerTest, else Exception
             (workflow.mvrManager() as MvrManagerTestIF).setMvrsBySampleNumber(nextRound.samplePrns, nextRound.roundIdx)
 
-            if (!quiet) println("\nrunAudit $name ${nextRound.roundIdx}")
+            logger.info {"runTestAuditToCompletion $name round=${nextRound.roundIdx}"}
             complete = workflow.runAuditRound(nextRound, quiet)
             nextRound.auditWasDone = true
             nextRound.auditIsComplete = complete
-            println(" runAudit $name ${nextRound.roundIdx} done=$complete samples=${nextRound.samplePrns.size}")
+            // println(" runAudit $name ${nextRound.roundIdx} done=$complete samples=${nextRound.samplePrns.size}")
             if (nextRound.roundIdx > maxRounds) {
-                println(" runAudit $name ${nextRound.roundIdx} exceedewd maxRounds = $maxRounds")
+                logger.warn {" runAudit $name ${nextRound.roundIdx} exceeded maxRounds = $maxRounds"}
                 break
             }  // safety net
         }

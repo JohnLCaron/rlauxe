@@ -39,7 +39,7 @@ class TestAuditRound {
             assertNotEquals(firstAssertion.assertion.loser, firstAssertion.assertion.winner) // wtf?
         }
 
-        assertEquals(0, auditRound.maxBallotsUsed())
+        assertEquals(0, auditRound.mvrsUsed())
     }
 
 }

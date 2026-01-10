@@ -4,15 +4,23 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.MvrManager
 import org.cryptobiotic.rlauxe.workflow.wantSampleSize
 import kotlin.math.ln
 import kotlin.math.roundToInt
+import kotlin.use
 
 private val debugConsistent = false
 private val logger = KotlinLogging.logger("ConsistentSampling")
 
+// TODO
+// for each contest record first card prn not taken due to have >= want.
+// can continue the audit up to that prn.
+
+
+// called from auditWorkflow
 // also called by rlauxe-viewer
 fun sampleWithContestCutoff(
     config: AuditConfig,
@@ -70,8 +78,8 @@ fun consistentSampling(
     if (contestsNotDone.isEmpty()) return
 
     // calculate how many samples are wanted for each contest.
-    // TODO eliminate?
-    val wantSampleSizeMap = wantSampleSize(contestsNotDone, previousSamples, mvrManager.sortedCards().iterator())
+    // TODO try simple?
+    val wantSampleSizeMap = wantSampleSizeSimple(contestsNotDone, previousSamples, mvrManager.sortedCards().iterator())
     require(wantSampleSizeMap.values.all { it >= 0 }) { "wantSampleSize must be >= 0" }
 
     val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
@@ -95,9 +103,19 @@ fun consistentSampling(
         contestsIncluded.any { contestWantsMoreSamples(it) } &&
         sortedCardIter.hasNext()
     ) {
-
         // get the next card in sorted order
         val card = sortedCardIter.next()
+        /* if (card.location == "card1659") {
+            contestsIncluded.forEach {
+                if (card.hasContest(it.id)) {
+                    val want = contestWantsMoreSamples(it) && card.hasContest(it.id)
+                    println("  ${it.id} $want have=${haveSampleSize[it.id]} want=${wantSampleSizeMap[it.id]} autor=${it.auditorWantNewMvrs}")
+                }
+            }
+            val anywant = contestsIncluded.any { contestRound -> contestWantsMoreSamples(contestRound) && card.hasContest(contestRound.id) }
+            println(" $card anywant $anywant")
+        } */
+
         // does this contribute to one or more contests that need more samples?
         if (contestsIncluded.any { contestRound -> contestWantsMoreSamples(contestRound) && card.hasContest(contestRound.id) }) {
             // then use it
@@ -141,6 +159,12 @@ fun consistentSampling(
     auditRound.samplePrns = sampledCards.map { it.prn }
 }
 
+// try running without complexity
+fun wantSampleSizeSimple(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedCards : CloseableIterator<AuditableCard>, debug: Boolean = false): Map<Int, Int> {
+     return contestsNotDone.associate { it.id to it.estSampleSize }
+}
+
+// called from estimateSampleSizes to choose N cards to reduce simulation cost
 fun consistentSampling(
     config: AuditConfig,
     contests: List<ContestRound>,
@@ -204,7 +228,7 @@ fun estSamplesNeeded(contestRound: ContestRound, alpha: Double, fac: Double): In
     val estSamplesNoErrors = ln(1 / lastPvalue) / ln(2 * cassorter.noerror())
 
     val estNeeded =  (fac * estSamplesNoErrors).roundToInt()
-    contestRound.estCardsNeeded = estNeeded
+    // contestRound.estCardsNeeded = estNeeded
     return estNeeded
 }
 

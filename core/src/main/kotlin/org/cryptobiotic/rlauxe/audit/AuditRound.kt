@@ -26,7 +26,7 @@ data class AuditRound(
     }
 
     //// called from viewer
-    fun maxBallotsUsed(): Int {
+    fun mvrsUsed(): Int {
         var result = 0
         contestRounds.forEach { contest ->
             contest.assertionRounds.forEach { assertion ->
@@ -51,13 +51,13 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     val name = contestUA.name
     val Npop = contestUA.Npop
 
-    var estCardsNeeded = 0 // initial estiimate of cards for the contests
-
-    var actualMvrs = 0 // Actual number of ballots with this contest contained in this round's sample.
-    var actualNewMvrs = 0 // Actual number of new ballots with this contest contained in this round's sample.
-
+    var estCardsNeeded = 0 // initial estimate of cards for the contest
+    var estSampleSize = 0 // TODO CANDIDATE FOR REMOVAL // number of total samples estimated needed
     var estNewSamples = 0 // Estimate of the new sample size required to confirm the contest
-    var estSampleSize = 0 // number of total samples estimated needed
+
+    var actualMvrs = 0    // Actual number of ballots with this contest contained in this round's sample.
+    var actualNewMvrs = 0 // TODO CANDIDATE FOR REMOVAL Actual number of new ballots with this contest contained in this round's sample.
+
     var auditorWantNewMvrs: Int = -1 // Auditor has set the new sample size for this audit round. rlauxe-viewer
 
     var done = false
@@ -183,7 +183,7 @@ data class EstimationRoundResult(
     val strategy: String,
     val fuzzPct: Double?,
     val startingTestStatistic: Double,
-    val startingRates: Map<Double, Double>? = null, // error rates used for estimation
+    val startingRates: Map<Double, Double>? = null, // error rates used for estimation TODO
     val estimatedDistribution: List<Int>,   // distribution of estimated sample size; currently deciles
     val firstSample: Int,
 ) {

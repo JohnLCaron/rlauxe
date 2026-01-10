@@ -12,7 +12,11 @@ import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
 
 private val logger = KotlinLogging.logger("PersistentAudit")
 
-enum class PersistedWorkflowMode { real, testSimulated, testPrivateMvrs }
+enum class PersistedWorkflowMode {
+    real,           // use PersistedMvrManager;  sampleMvrs$round.csv must be written from external program.
+    testSimulated,  // use PersistedMvrManagerTest which fuzzes the cvrs on the fly
+    testPrivateMvrs  // use PersistedMvrManager; use private/sortedMvrs.csv to write sampleMvrs$round.csv
+}
 
 /** AuditWorkflow with persistent state. */
 class PersistedWorkflow(
@@ -81,7 +85,7 @@ class PersistedWorkflow(
     override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  { // return complete
         val roundIdx = auditRound.roundIdx
 
-        //   in a real audit, upi need to set the real mvrs externally with EnterMvrsCli, which calls auditRecord.enterMvrs(mvrs)
+        //   in a real audit, need to set the real mvrs externally with EnterMvrsCli, which calls auditRecord.enterMvrs(mvrs)
         //   in a test audit, the test mvrs are generated from the cardManifest, with optional fuzzing
         if (mvrManager is PersistedMvrManagerTest) {
             val sampledMvrs = mvrManager.setMvrsForRoundIdx(roundIdx)

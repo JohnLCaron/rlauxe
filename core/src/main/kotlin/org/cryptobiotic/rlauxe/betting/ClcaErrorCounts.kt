@@ -21,16 +21,15 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
     }
 
     fun show() = buildString {
-        appendLine("totalSamples=$totalSamples, noerror=$noerror, upper=$upper")
-
+        // appendLine("totalSamples=$totalSamples, noerror=$noerror, upper=$upper")
         if (errorCounts.isNotEmpty()) {
             val sorted = errorCounts.toSortedMap()
-            append("    cvr counts= [")
+            append("[")
             sorted.forEach { (bassort, count) ->
                 val desc = taus.desc(bassort / noerror)
                 if (desc != null) append("$desc=$count, ")
             }
-            appendLine("]")
+            append("]")
         }
     }
 

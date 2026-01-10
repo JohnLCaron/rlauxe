@@ -19,6 +19,15 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCard> {
         val cards = findSamples(sampleNumbers, auditableCards())
 
+        var lastRN = 0L
+        cards.forEachIndexed { idx, mvr ->
+            if (mvr.prn <= lastRN) {
+                logger.error { "findSamples of order prn" }
+                throw RuntimeException("findSamples of order prn")
+            }
+            lastRN = mvr.prn
+        }
+
         // get maybe-fuzzed mvrs from previous round, use them again
         val previousMvrs = if (round == 1) emptyList() else readAuditableCardCsvFile( publisher.sampleMvrsFile(round-1))
         val previousPrns = if (round == 1) emptyList() else readSamplePrns(publisher.samplePrnsFile(round-1))
@@ -34,28 +43,47 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
                 throw RuntimeException("cant fuzz polling audit; no cvrs!")
             }
             val wantSet = sampleNumbers.toSet()
-            val wantPrevious = previousMvrs.filter{ wantSet.contains(it.prn) }
-            val newCards = cards.filter{ !previousPrnsSet.contains(it.prn) }
-            val newFuzzedCards = makeFuzzedCardsFrom(contestsUA.map { it.contest.info() }, newCards, simFuzzPct)
-            wantPrevious + newFuzzedCards
-        }
-        require(cards.size == sampledMvrs.size)
+            require(sampleNumbers.size == wantSet.size)
 
-        if (checkValidity) {
-            require(sampledMvrs.size == sampleNumbers.size)
+            // the previous samples probably include some ballots we dont want. just get the ones we want
+            val wantPrevious = previousMvrs.filter{ wantSet.contains(it.prn) }
+
+            // get the new cards not in the previous sample
+            val newCards = cards.filter{ !previousPrnsSet.contains(it.prn) }
+
+            // and fuzz them
+            val newFuzzedCards = makeFuzzedCardsFrom(contestsUA.map { it.contest.info() }, newCards, simFuzzPct)
+
+            // then the cards we want are the previous cards and the new fuzzed cards
+            // cant assume they are sorted by prn
+
+            val mvrs2 = mutableListOf<AuditableCard>()
+            mvrs2.addAll(wantPrevious + newFuzzedCards)
+            mvrs2.sortBy{ it.prn}
+
+            require(cards.size == mvrs2.size)
+            require(mvrs2.size == sampleNumbers.size)
+
+            var count = 0
             var lastRN = 0L
-            sampledMvrs.forEachIndexed { idx, mvr ->
+            mvrs2.forEachIndexed { idx, mvr ->
                 if (mvr.prn <= lastRN) {
                     logger.error { "setMvrsBySampleNumberout of order prn" }
                     throw RuntimeException("setMvrsBySampleNumberout of order prn")
                 }
                 lastRN = mvr.prn
-                val card = cards[idx]
-                if (mvr.location != card.location) {
-                    logger.error { "setMvrsBySampleNumberout bad location mvr=${mvr.location} card=${card.location} " }
+                count++
+            }
+
+            val z = mvrs2.zip(cards)
+            z.forEach { (mvr, card) ->
+                if (mvr.prn != card.prn) {
+                    logger.error { "setMvrsBySampleNumberout bad location mvr=${mvr.location} ${mvr.prn}  card=${card.location} ${card.prn}" }
                     throw RuntimeException("setMvrsBySampleNumberout bad location mvr=${mvr.location} card=${card.location} ")
                 }
             }
+
+            mvrs2
         }
 
         val publisher = Publisher(auditDir)

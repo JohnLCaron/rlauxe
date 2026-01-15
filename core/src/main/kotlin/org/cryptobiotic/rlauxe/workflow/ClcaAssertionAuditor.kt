@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.betting.BettingFn
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
@@ -91,11 +90,14 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val cassorter = cassertion.cassorter
         val clcaConfig = config.clcaConfig
 
-        val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
-        //prevRounds.setPhantomRate(contest.phantomRate()) // TODO ??
-
-        val bettingFn: BettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-            GeneralAdaptiveBetting(contestUA.Npop, oaAssortRates = null, d = clcaConfig.d, maxRisk = clcaConfig.maxRisk)
+        val bettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
+            GeneralAdaptiveBetting(
+                contestUA.Npop,
+                startingErrors = ClcaErrorCounts.empty(cassorter.noerror(), cassorter.assorter.upperBound()),
+                contest.Nphantoms(),
+                oaAssortRates = null,
+                d = clcaConfig.d,
+                maxRisk = clcaConfig.maxRisk)
 
         val tracker = ClcaErrorTracker(
             cassorter.noerror(),
@@ -125,7 +127,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             pvalue = testH0Result.pvalueLast,
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
-            startingRates = prevRounds,
+            // startingRates = bettingFn.startingErrorRates(),
             measuredCounts = measuredCounts,
         )
 

@@ -40,8 +40,8 @@ class TestAuditRoundJson {
             //    var status = TestH0Status.InProgress
             cr.actualMvrs = 420
             cr.actualNewMvrs = 42
-            cr.estNewSamples = 66
-            cr.estSampleSize = 77
+            cr.estNewMvrs = 66
+            cr.estMvrs = 77
             // cr.estSampleSizeNoStyles = 88
             cr.auditorWantNewMvrs = 88
             cr.done = true
@@ -75,8 +75,8 @@ class TestAuditRoundJson {
             val cr = ContestRound(contest, 1)
             cr.actualMvrs = 420
             cr.actualNewMvrs = 42
-            cr.estNewSamples = 66
-            cr.estSampleSize = 77
+            cr.estNewMvrs = 66
+            cr.estMvrs = 77
             // cr.estSampleSizeNoStyles = 88
             cr.auditorWantNewMvrs = 88
             cr.done = true
@@ -315,8 +315,8 @@ fun check(c1: ContestRound, c2: ContestRound): Boolean {
     assertEquals(c1.id, c2.id)
     assertEquals(c1.roundIdx, c2.roundIdx)
     assertEquals(c1.actualNewMvrs, c2.actualNewMvrs)
-    assertEquals(c1.estNewSamples, c2.estNewSamples)
-    assertEquals(c1.estSampleSize, c2.estSampleSize)
+    assertEquals(c1.estNewMvrs, c2.estNewMvrs)
+    assertEquals(c1.estMvrs, c2.estMvrs)
     assertEquals(c1.auditorWantNewMvrs, c2.auditorWantNewMvrs)
     assertEquals(c1.done, c2.done)
     assertEquals(c1.included, c2.included)
@@ -346,8 +346,8 @@ fun check(c1: ContestRound, c2: ContestRound): Boolean {
 fun check(a1: AssertionRound, a2: AssertionRound): Boolean {
     assertEquals(a1.assertion.assorter.hashcodeDesc(), a2.assertion.assorter.hashcodeDesc())
     assertEquals(a1.roundIdx, a2.roundIdx)
-    assertEquals(a1.estSampleSize, a2.estSampleSize)
-    assertEquals(a1.estNewSampleSize, a2.estNewSampleSize)
+    assertEquals(a1.estMvrs, a2.estMvrs)
+    assertEquals(a1.estNewMvrs, a2.estNewMvrs)
     assertEquals(a1.estimationResult, a2.estimationResult)
     assertEquals(a1.status, a2.status)
     assertEquals(a1.roundProved, a2.roundProved)
@@ -383,7 +383,6 @@ fun check(a1: AuditRoundResult, a2: AuditRoundResult): Boolean {
     assertEquals(a1.pvalue, a2.pvalue)
     assertEquals(a1.samplesUsed, a2.samplesUsed)
     assertEquals(a1.status, a2.status)
-    assertEquals(a1.startingRates, a2.startingRates)
     assertEquals(a1.measuredCounts, a2.measuredCounts)
     assertEquals(a1.params, a2.params)
 

@@ -94,7 +94,6 @@ interface ContestIF {
     fun losers(): List<Int>
 
     fun undervotePct() = roundToClosest(100.0 * Nundervotes() / (info().voteForN * Nc())) // for viewer
-    fun phantomRate() = Nphantoms() / Nc().toDouble()
     fun isIrv() = choiceFunction == SocialChoiceFunction.IRV
     fun show() : String = toString()
     fun showCandidates(): String
@@ -419,6 +418,8 @@ open class ContestWithAssertions(
         return if (minAssertion != null)  contest.showAssertionDifficulty(minAssertion.assorter) else "N/A"
     }
 
+    fun phantomRate() = contest.Nphantoms() / Npop.toDouble()
+
     override fun toString() = showShort()
 
     open fun show() = buildString {
@@ -429,6 +430,7 @@ open class ContestWithAssertions(
             append("   ${contest.showAssertionDifficulty(minAssertion.assorter)}")
             append(" Npop=$Npop dilutedMargin=${pfn(minAssorter.dilutedMargin())}")
             appendLine(" reportedMargin=${pfn(minAssorter.dilutedMargin())} recountMargin=${pfn(contest.recountMargin(minAssorter))} ")
+            appendLine()
         }
         append(contest.showCandidates())
     }

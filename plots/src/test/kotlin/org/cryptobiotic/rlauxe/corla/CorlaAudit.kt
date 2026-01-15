@@ -119,7 +119,7 @@ class CorlaAudit(
 class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
     override fun run(
-        auditConfig: AuditConfig,
+        config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
         sampling: Sampler,
@@ -134,7 +134,7 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         //    val p1: Double, val p2: Double, val p3: Double, val p4: Double): RiskTestingFn
         val testFn = Corla(
             N = contestUA.Npop,
-            riskLimit = auditConfig.riskLimit,
+            riskLimit = config.riskLimit,
             reportedMargin = cassertion.assorter.dilutedMargin(),
             noerror = cassorter.noerror(),
             p1 = 0.0, p2 = 0.0, p3 = 0.0, p4 = 0.0, // TODO

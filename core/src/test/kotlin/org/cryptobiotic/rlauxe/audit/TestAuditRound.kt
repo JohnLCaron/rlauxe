@@ -22,7 +22,7 @@ class TestAuditRound {
         val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())
 
         val contestRounds = contestsUAs.map { contest -> ContestRound(contest, 1) }
-        contestRounds.forEach { it.estSampleSize = it.Npop / 11 } // random
+        contestRounds.forEach { it.estMvrs = it.Npop / 11 } // random
 
         val prng = Prng(Random.nextLong())
         testCvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }
@@ -31,11 +31,11 @@ class TestAuditRound {
         consistentSampling(auditRound, mvrManager)
 
         contestRounds.forEach { contestRound ->
-            assertEquals(contestRound.estSampleSize, contestRound.wantSampleSize(0))
-            assertEquals(contestRound.estSampleSize, contestRound.estSampleSizeEligibleForRemoval())
+            assertEquals(contestRound.estMvrs, contestRound.wantSampleSize(0))
+            assertEquals(contestRound.estMvrs, contestRound.estSampleSizeEligibleForRemoval())
 
             val firstAssertion = contestRound.assertionRounds.first()
-            assertEquals(0, firstAssertion.estSampleSize)
+            assertEquals(0, firstAssertion.estMvrs)
             assertNotEquals(firstAssertion.assertion.loser, firstAssertion.assertion.winner) // wtf?
         }
 

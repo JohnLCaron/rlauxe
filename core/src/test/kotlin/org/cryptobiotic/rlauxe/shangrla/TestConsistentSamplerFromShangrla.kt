@@ -47,8 +47,8 @@ class TestConsistentSamplerFromShangrla {
             makeContestUAfromCvrs( it, cvrs)
         }
         val contestRounds = contestsUA.map{ contest -> ContestRound(contest, 1) }
-        contestRounds[0].estSampleSize = 3
-        contestRounds[1].estSampleSize = 4
+        contestRounds[0].estMvrs = 3
+        contestRounds[1].estMvrs = 4
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
 
@@ -89,9 +89,9 @@ class TestConsistentSamplerFromShangrla {
         val contests = makeContestsFromCvrs(cvrs)
         val contestsUA = contests.mapIndexed { idx, it -> ContestWithAssertions( it).addStandardAssertions() }
         val contestRounds = contestsUA.map{ contest -> ContestRound(contest, 1) }
-        contestRounds[0].estSampleSize = 3
-        contestRounds[1].estSampleSize = 3
-        contestRounds[2].estSampleSize = 2
+        contestRounds[0].estMvrs = 3
+        contestRounds[1].estMvrs = 3
+        contestRounds[2].estMvrs = 2
 
         // val ncvrs = makeNcvrsPerContest(contests, cvrs)
         val phantomCVRs = makePhantomCvrs(contests)

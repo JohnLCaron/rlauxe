@@ -29,6 +29,7 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
         return readPopulations(publisher)
     }
 
+    // TODO I think we need to read previous rounds in, and merge/sort with this round's mvrs.
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
         val mvrsForRound = readMvrsForRound(round)
         val sampleNumbers = mvrsForRound.map { it.prn }

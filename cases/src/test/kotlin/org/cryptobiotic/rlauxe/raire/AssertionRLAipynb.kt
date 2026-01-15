@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
@@ -652,7 +653,10 @@ fun calc_sample_sizes(
 
     val tracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound())
     val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, cassorter)
-    val betFn = GeneralAdaptiveBetting(N, oaAssortRates = null, d = 100, maxRisk = .99)
+    val betFn = GeneralAdaptiveBetting(N,
+        startingErrors = ClcaErrorCounts.empty(noerror = cassorter.noerror(), upper = cassorter.assorter.upperBound()),
+        contest.contest.Nphantoms(),
+        oaAssortRates = null, d = 100, maxRisk = .99)
     val betta = BettingMart(bettingFn = betFn, N = N, sampleUpperBound = cassorter.upperBound(), withoutReplacement = false,
         tracker = tracker)
 

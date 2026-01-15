@@ -20,7 +20,7 @@ data class AuditConfig(
     val nsimEst: Int = 100, // number of simulation estimation trials
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
     val contestSampleCutoff: Int? = 30000, // use this number of cvrs in the estimation, set to null to use all
-    val simFuzzPct: Double? = null, // for simulating the estimation and testMvr fuzzing
+    val simFuzzPct: Double? = null, // for simulating the estimation fuzzing
 
     // audit sample size control
     val removeCutoffContests: Boolean = false, // remove contests that need more samples than contestSampleCutoff
@@ -40,15 +40,21 @@ data class AuditConfig(
     val isOA = auditType == AuditType.ONEAUDIT
     val isPolling = auditType == AuditType.POLLING
 
-    fun simFuzzPct() = simFuzzPct
+    fun mvrFuzzPct(): Double {
+        return when (auditType) {
+            AuditType.POLLING -> clcaConfig.fuzzPct ?: 0.0
+            AuditType.CLCA -> clcaConfig.fuzzPct  ?: 0.0
+            AuditType.ONEAUDIT -> clcaConfig.fuzzPct  ?: 0.0
+        }
+    }
 
     override fun toString() = buildString {
         appendLine("AuditConfig(auditType=$auditType, riskLimit=$riskLimit, seed=$seed persistedWorkflowMode=$persistedWorkflowMode" )
-        appendLine("  nsimEst=$nsimEst, quantile=$quantile, simFuzzPct=$simFuzzPct,")
         append("  minRecountMargin=$minRecountMargin removeTooManyPhantoms=$removeTooManyPhantoms")
         if (contestSampleCutoff != null) { append(" contestSampleCutoff=$contestSampleCutoff removeCutoffContests=$removeCutoffContests") }
         if (auditSampleLimit != null) { append(" auditSampleLimit=$auditSampleLimit (risk measuring audit)") }
         appendLine()
+        appendLine("  nsimEst=$nsimEst, quantile=$quantile, simFuzzPct=${simFuzzPct}, mvrFuzzPct=${mvrFuzzPct()},")
 
         if (skipContests.isNotEmpty()) { appendLine("  skipContests=$skipContests") }
         when (auditType) {
@@ -90,9 +96,9 @@ data class PollingConfig(
 enum class ClcaStrategyType { generalAdaptive, apriori, fuzzPct, oracle  }
 data class ClcaConfig(
     val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
-    val fuzzPct: Double? = null, // use to generate apriori errorRates for simulation, only used when ClcaStrategyType = fuzzPct
+    val fuzzPct: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs
     // val pluralityErrorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker?
-    val d: Int = 100,  // shrinkTrunc weight for error rates
+    val d: Int = 1,  // shrinkTrunc weight for error rates
     val maxRisk: Double = 0.90,  // max risk on any one bet
     val cvrsContainUndervotes: Boolean = true,
 )

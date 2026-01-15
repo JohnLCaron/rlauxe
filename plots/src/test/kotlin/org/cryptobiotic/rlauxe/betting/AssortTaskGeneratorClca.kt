@@ -13,7 +13,7 @@ class ClcaSingleRoundAssortTaskGenerator(
     val margin: Double,
     val upper: Double,
     val maxRisk: Double,
-    val rate: Double = .001,
+    val errorRates: Double = .001,
     val parameters : Map<String, Any> = emptyMap(),
 ): ContestAuditTaskGenerator {
 
@@ -22,17 +22,17 @@ class ClcaSingleRoundAssortTaskGenerator(
     }
 
     override fun generateNewTask(): ClcaSingleRoundAssortTask {
-        return ClcaSingleRoundAssortTask(N, margin, upper, maxRisk, rate, parameters)
+        return ClcaSingleRoundAssortTask(N, margin, upper, maxRisk, errorRates, parameters)
     }
 }
 
-// Assort values are given, audit them in a single round
+// Assort values and error rates are given, audit them in a single round
 class ClcaSingleRoundAssortTask(
     val N: Int,
     val margin: Double,
     val upper: Double,
     val maxRisk: Double,
-    val rate: Double,
+    val errorRates: Double,
     val parameters : Map<String, Any>,
 ) : ConcurrentTaskG<WorkflowResult> {
     val sampling: SamplerFromAssortValues
@@ -42,10 +42,10 @@ class ClcaSingleRoundAssortTask(
         noerror = 1.0 / (2.0 - margin / upper)
 
         val assorts = mutableListOf<Double>()
-        repeat((N * rate).toInt()) { assorts.add( 0.0 * noerror) }
-        repeat((N * rate).toInt()) { assorts.add( 0.5 * noerror) }
-        repeat((N * rate).toInt()) { assorts.add( 1.5 * noerror) }
-        repeat((N * rate).toInt()) { assorts.add( 2.0 * noerror) }
+        repeat((N * errorRates).toInt()) { assorts.add( 0.0 * noerror) }
+        repeat((N * errorRates).toInt()) { assorts.add( 0.5 * noerror) }
+        repeat((N * errorRates).toInt()) { assorts.add( 1.5 * noerror) }
+        repeat((N * errorRates).toInt()) { assorts.add( 2.0 * noerror) }
 
         val noerrorCount = N - assorts.size
         repeat(noerrorCount) { assorts.add(noerror) }
@@ -111,7 +111,9 @@ class ClcaSingleRoundAssortTask(
         maxRisk: Double,
     ): TestH0Result {
 
-        val bettingFn = GeneralAdaptiveBetting(N, oaAssortRates = null, d=0,  maxRisk = maxRisk, debug=false)
+        val bettingFn = GeneralAdaptiveBetting(N,
+            startingErrors = ClcaErrorCounts.empty(noerror, upper),
+            nphantoms=0, oaAssortRates = null, d=0,  maxRisk = maxRisk, debug=false)
 
         val tracker = ClcaErrorTracker(noerror, upper)
         val testFn = BettingMart(

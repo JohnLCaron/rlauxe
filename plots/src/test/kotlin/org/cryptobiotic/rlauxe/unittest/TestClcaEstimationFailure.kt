@@ -46,9 +46,9 @@ class TestClcaEstimationFailure {
     val debug = false
     fun runClcaSimulation(cvrs: List<Cvr>, contestUA: ContestWithAssertions, cassorter: ClcaAssorter) {
         val contest = contestUA.contest as Contest
-        if (debug) println("\n$contest phantomRate=${contest.phantomRate()}")
+        if (debug) println("\n$contest phantomRate=${contestUA.phantomRate()}")
 
-        val phantomRate = contest.phantomRate()
+        val phantomRate = contestUA.phantomRate()
         val errorRates = PluralityErrorRates(0.0, phantomRate, 0.0, 0.0)
         val sampler = ClcaSimulatedErrorRates(cvrs, contestUA.contest, cassorter, errorRates)
         // if (debug) print(sampler.showFlips())
@@ -60,7 +60,7 @@ class TestClcaEstimationFailure {
 
         val assorter = cassorter.assorter
         val contestMargin = contest.reportedMargin(assorter.winner(), assorter.loser())
-        val adjustedMargin = contestMargin - contest.phantomRate()
+        val adjustedMargin = contestMargin - contestUA.phantomRate()
 
         val noerror = 1.0 / (2.0 - adjustedMargin)
         val expectedMargin = mean2margin(noerror)

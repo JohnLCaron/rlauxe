@@ -65,7 +65,7 @@ class TestClcaSimulationErrorRates {
     fun runClcaSimulation(cvrs: List<Cvr>, contestUA: ContestWithAssertions, assorter: ClcaAssorter) {
         println("\n${assorter.assorter.desc()}")
 
-        val phantomRate = contestUA.contest.phantomRate()
+        val phantomRate = contestUA.phantomRate()
         val errorRates = PluralityErrorRates(0.0, phantomRate, 0.0, 0.0)
         val sampler = ClcaSimulatedErrorRates(cvrs, contestUA.contest, assorter, errorRates)
         sampler.reset()

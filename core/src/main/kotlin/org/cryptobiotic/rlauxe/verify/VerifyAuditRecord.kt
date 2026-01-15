@@ -109,7 +109,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         val firstRound = auditRecord.rounds.first()
         val contestRound = firstRound.contestRounds.find { it.id == contest.contest.id }
         if (contestRound == null) return
-        val estCards = contestRound.estSampleSize
+        val estCards = contestRound.estMvrs
 
         result.addMessage(" verify sampling for contest ${contest.id}")
         val cards = readAuditableCardCsvFile(publisher.sampleCardsFile(firstRound.roundIdx))
@@ -118,7 +118,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
             val nextRound = auditRecord.rounds[nextRoundIdx]
             val nextContestRound = nextRound.contestRounds.find { it.id == contest.contest.id }
             if (nextContestRound == null) break
-            val estCardsNext = nextContestRound.estSampleSize
+            val estCardsNext = nextContestRound.estMvrs
 
             if (!existsOrZip(publisher.sampleCardsFile(nextRound.roundIdx))) return
             val nextCards = readAuditableCardCsvFile(publisher.sampleCardsFile(nextRound.roundIdx))

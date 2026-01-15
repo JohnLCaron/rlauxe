@@ -24,7 +24,7 @@ class TestConsistentSampler {
         val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())
 
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
-        contestRounds.forEach { it.estSampleSize = it.Npop / 11 } // random
+        contestRounds.forEach { it.estMvrs = it.Npop / 11 } // random
 
         val prng = Prng(Random.nextLong())
         val cards = testCvrs.mapIndexed { idx, it -> AuditableCard.fromCvr( it, idx, prng.next()) }
@@ -47,14 +47,14 @@ class TestConsistentSampler {
         }
 
         contestRounds.forEach { contest ->
-            println(" ${contest.name} (${contest.id}) estSampleSize=${contest.estSampleSize}")
+            println(" ${contest.name} (${contest.id}) estSampleSize=${contest.estMvrs}")
         }
 
         // double check the number of cvrs == sampleSize, and the cvrs are marked as sampled
         println("contest.name (id) == sampleSize")
         contestRounds.forEach { contest ->
             val cvrs = cards.filter { it.hasContest(contest.id) }
-            assertTrue(contest.estSampleSize <= cvrs.size)
+            assertTrue(contest.estMvrs <= cvrs.size)
             // TODO what else can we check ??
         }
     }
@@ -64,7 +64,7 @@ class TestConsistentSampler {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestWithAssertions> = test.contests.map { ContestWithAssertions(it, isClca = false).addStandardAssertions() }
         val contestRounds = contestsUAs.map{ contest -> ContestRound(contest, 1) }
-        contestRounds.forEach { it.estSampleSize = it.Npop / 11 } // random
+        contestRounds.forEach { it.estMvrs = it.Npop / 11 } // random
 
         val cvrs = test.makeCvrsFromContests()
         val mvrManager = MvrManagerForTesting(cvrs, cvrs, Random.nextLong())
@@ -81,13 +81,13 @@ class TestConsistentSampler {
         }
 
         contestRounds.forEach { contest ->
-            println(" ${contest.name} (${contest.id}) estSampleSize=${contest.estSampleSize}")
+            println(" ${contest.name} (${contest.id}) estSampleSize=${contest.estMvrs}")
         }
         // double check the number of cvrs == sampleSize
         println("contest.name (id) == sampleSize")
         contestRounds.forEach { contest ->
             val ballotsForContest = mvrManager.mvrsUA.count { it.hasContest(contest.id) }
-            assertTrue(contest.estSampleSize <= ballotsForContest)
+            assertTrue(contest.estMvrs <= ballotsForContest)
         }
     }
 

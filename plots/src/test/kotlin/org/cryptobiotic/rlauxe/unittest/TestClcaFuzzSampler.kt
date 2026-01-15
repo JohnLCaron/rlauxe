@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.unittest
 
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -33,7 +34,7 @@ class TestClcaFuzzSampler {
             contest.assertionRounds.map { assertionRound ->
                 val result: RunTestRepeatedResult = runWithComparisonFuzzSampler(auditConfig, contest.contestUA, assertionRound, cvrs)
                 val size = result.findQuantile(auditConfig.quantile)
-                assertionRound.estSampleSize = size
+                assertionRound.estMvrs = size
                 val assertion = assertionRound.assertion as ClcaAssertion
                 sampleSizes.add(Pair(size, assertion.assorter.dilutedMargin()))
                 println(" ${assertion.cassorter.assorter().desc()} margin=${df(assertion.assorter.dilutedMargin())} estSize=${size}}")
@@ -42,8 +43,8 @@ class TestClcaFuzzSampler {
             // TODO use minAssertion()
             val maxSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.maxOfOrNull { it.first } ?: 0
             val pair = if (sampleSizes.isEmpty()) Pair(0, 0.0) else sampleSizes.find{ it.first == maxSize }!!
-            contest.estSampleSize = pair.first
-            println("${contest.contestUA.name} estSize=${contest.estSampleSize} margin=${df(pair.second)}")
+            contest.estMvrs = pair.first
+            println("${contest.contestUA.name} estSize=${contest.estMvrs} margin=${df(pair.second)}")
         }
     }
 }
@@ -60,8 +61,10 @@ private fun runWithComparisonFuzzSampler(
 
     val sampler = ClcaFuzzSampler(auditConfig.simFuzzPct!!, cvrs, contestUA.contest as Contest, cassorter)
 
-    //val errorCounts = ClcaErrorCounts(emptyMap(), 0, noerror=cassorter.noerror(), upper=cassorter.assorter.upperBound())
-    val betFn = GeneralAdaptiveBetting(contestUA.Npop, oaAssortRates = null, d = 100, maxRisk = .99)
+    val betFn = GeneralAdaptiveBetting(contestUA.Npop,
+        startingErrors = ClcaErrorCounts.empty(noerror = cassorter.noerror(), upper = cassorter.assorter.upperBound()),
+        contestUA.contest.Nphantoms(),
+        oaAssortRates = null, d = 100, maxRisk = .99)
 
     // val optimal = GeneralAdaptiveBettingOld(N = contestUA.Npop, errorCounts, d = 100)
 

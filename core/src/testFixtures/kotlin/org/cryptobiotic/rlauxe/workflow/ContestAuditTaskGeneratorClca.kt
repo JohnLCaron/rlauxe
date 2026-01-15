@@ -159,7 +159,7 @@ class ClcaSingleRoundWorkflowTask(
                 if (lastRound.status != TestH0Status.StatRejectNull) 100.0 else 0.0,
                 mvrMargin=mvrMargin,
 
-                startingRates=lastRound.startingRates,
+                startingRates=null,
                 measuredCounts=lastRound.measuredCounts,
             )
         }
@@ -177,7 +177,7 @@ fun runClcaSingleRoundAudit(workflow: AuditWorkflow, contestRounds: List<Contest
     var maxSamples = 0
     contestRounds.forEach { contest->
         contest.assertionRounds.forEach { assertion ->
-            maxSamples = max( maxSamples, assertion.estSampleSize)
+            maxSamples = max( maxSamples, assertion.estMvrs)
         }
     }
     return maxSamples

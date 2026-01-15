@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.core
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.util.roundUp
+import kotlin.math.ln
 
 private val logger = KotlinLogging.logger("ClcaAssorter")
 
@@ -63,6 +65,20 @@ open class ClcaAssorter(
     fun noerror() = noerror
     fun upperBound() = upperBound  // upper bound of clca assorter; betting functions may need to know this
     fun assorter() = assorter
+
+    // expected sample size of there are no errors
+    fun sampleSizeNoErrors(maxRisk: Double, alpha: Double): Int {
+        val maxBet = 2 * maxRisk
+
+        // payoff = 1 + λ_i * (x - mui)
+        val payoff = 1 + maxBet * (noerror - 0.5)  // mui ~= 1/2
+
+        // t_i = 1 + λ_i * (X_i − µ_i) ; T_i = Prod(t_i) > 1/alpha
+        // if X_i always equals noerror:
+        // (payoff)^sampleSize = 1 / alpha
+        // sampleSize = -ln(alpha) / ln(payoff)
+        return roundUp((-ln(alpha) / ln(payoff)))
+    }
 
     // B(bi, ci) = (1-o/u)/(2-v/u), where
     //                o is the overstatement

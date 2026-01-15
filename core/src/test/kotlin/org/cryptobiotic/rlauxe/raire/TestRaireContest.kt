@@ -32,9 +32,6 @@ class TestRaireContest {
         assertEquals( "RaireContest(info='testContestInfo' (0) candidates=[0, 1, 2, 3, 4, 42] choiceFunction=IRV nwinners=1 voteForN=1, winners=[1], Nc=211, Ncast=210, undervotes=1)",
             contest.toString()
         )
-
-        // assertEquals(-1, contest.undervotes) // TODO
-        assertEquals(1/211.toDouble(), contest.phantomRate())
     }
 
     @Test

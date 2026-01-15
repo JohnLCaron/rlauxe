@@ -1,13 +1,11 @@
 package org.cryptobiotic.rlauxe.betting
 
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.workflow.ClcaSingleRoundAuditTaskGenerator
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
 import org.cryptobiotic.rlauxe.workflow.runRepeatedWorkflowsAndAverage
 import org.cryptobiotic.rlauxe.workflow.sampleSizesVsFuzzPctStdDev
@@ -77,7 +75,7 @@ class PlotWithAssortValues {
         rates.forEach { rate ->
             maxRisk.forEach { maxRisk ->
                 val clcaGenerator = ClcaSingleRoundAssortTaskGenerator(
-                    N, margin, upper = 1.0, maxRisk = maxRisk, rate=rate,
+                    N, margin, upper = 1.0, maxRisk = maxRisk, errorRates=rate,
                     parameters = mapOf("margin" to margin, "fuzzPct" to rate, "cat" to maxRisk)
                 )
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))

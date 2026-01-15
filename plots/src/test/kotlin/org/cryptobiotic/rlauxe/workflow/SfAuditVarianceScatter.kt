@@ -64,7 +64,7 @@ class SfAuditVarianceScatter {
             yname = "estimated samples",
             catName = "type",
             xfld = { it.margin },
-            yfld = { it.assertion.estSampleSize.toDouble() },
+            yfld = { it.assertion.estMvrs.toDouble() },
             catfld = { it.cat },
             scaleType=scaleType,
         )

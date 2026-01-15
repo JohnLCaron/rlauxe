@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.previousSamples
 import org.cryptobiotic.rlauxe.estimate.consistentSampling
-import kotlin.test.Test
 
 class TestPersistentConsistentSampling {
 

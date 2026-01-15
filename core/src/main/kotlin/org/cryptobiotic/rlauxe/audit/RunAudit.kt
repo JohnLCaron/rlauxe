@@ -123,7 +123,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
                 append(" i, ${sfn("xs", 6)}, ${sfn("bet", 6)}, ${sfn("tj", 6)}, ${sfn("Tj", 6)}, ${sfn("pvalue", 8)}, ")
                 appendLine("${sfn("location", 10)}, ${sfn("mvr votes", 10)}, ${sfn("card", 10)}")
                 repeat(count) {
-                    append("${nfn(it, 2)}, ${df(seq.xs[it])}, ${df(seq.bets[it])}, ${df(seq.tjs[it])}")
+                    append("${nfn(it+1, 2)}, ${df(seq.xs[it])}, ${df(seq.bets[it])}, ${df(seq.tjs[it])}")
                     append(", ${trunc(seq.testStatistics[it].toString(), 6)}, ${trunc(pvalues[it].toString(), 8)}")
                     val pair = sampler.next()
                     val mvrVotes = pair.first.votes(contestId)?.contentToString() ?: "missing"

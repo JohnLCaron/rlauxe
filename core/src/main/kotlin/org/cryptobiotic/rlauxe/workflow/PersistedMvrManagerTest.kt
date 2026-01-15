@@ -35,8 +35,8 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
         require(previousPrns.size == previousMvrs.size)
         require(previousPrnsSet.size == previousMvrs.size)
 
-        val simFuzzPct = config.simFuzzPct()
-        val sampledMvrs = if (simFuzzPct == null) {
+        val mvrFuzzPct = config.mvrFuzzPct() // TODO should be independent of the simulation
+        val sampledMvrs = if (mvrFuzzPct == 0.0) {
             cards // use the cvrs - ie, no errors
         } else { // fuzz the new cvrs only; doesnt work for polling since we dont have cvrs
             if (config.isPolling) {
@@ -52,7 +52,7 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
             val newCards = cards.filter{ !previousPrnsSet.contains(it.prn) }
 
             // and fuzz them
-            val newFuzzedCards = makeFuzzedCardsFrom(contestsUA.map { it.contest.info() }, newCards, simFuzzPct)
+            val newFuzzedCards = makeFuzzedCardsFrom(contestsUA.map { it.contest.info() }, newCards, mvrFuzzPct)
 
             // then the cards we want are the previous cards and the new fuzzed cards
             // cant assume they are sorted by prn

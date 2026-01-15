@@ -74,7 +74,7 @@ class TestHasStyle {
         println("==========================")
         println("testHasStyleClcaSingleCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
-            println(" *** contest ${round.contestUA.name} wants ${round.estSampleSize} mvrs")
+            println(" *** contest ${round.contestUA.name} wants ${round.estMvrs} mvrs")
         }
 
         // testHasStyleClcaSingleCard hasStyle=false audit estimates we need 550
@@ -169,7 +169,7 @@ class TestHasStyle {
         println("==========================")
         println("testHasStyleClcaMultiCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
-            println(" *** contest ${round.contestUA.name} wants ${round.estSampleSize} mvrs")
+            println(" *** contest ${round.contestUA.name} wants ${round.estMvrs} mvrs")
         }
 
         // testHasStyleClcaMultiCard hasStyle=false audit estimates we need 830
@@ -235,7 +235,7 @@ class TestHasStyle {
         println("==========================")
         println("testHasStylePollingSingleCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
-            println(" *** contest ${round.contestUA.name} wants ${round.estSampleSize} mvrs")
+            println(" *** contest ${round.contestUA.name} wants ${round.estMvrs} mvrs")
         }
         //testHasStylePollingSingleCard hasStyle=false audit estimates we need 2061
         // *** contest B wants 872 mvrs
@@ -321,7 +321,7 @@ class TestHasStyle {
         println("==========================")
         println("testHasStylePollingMultiCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
         auditRound.contestRounds.forEach { round ->
-            println(" *** contest ${round.contestUA.name} wants ${round.estSampleSize} mvrs")
+            println(" *** contest ${round.contestUA.name} wants ${round.estMvrs} mvrs")
         }
         // testHasStylePollingMultiCard hasStyle=false audit estimates we need 2769
         // *** contest B wants 2275 mvrs

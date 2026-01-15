@@ -57,7 +57,7 @@ fun estimateSampleSizes(
 
     // choose a subset of the cards for the estimation
     val contestCards: List<AuditableCard>? = if (config.isPolling) null else
-        consistentSampling(
+        estimationSubset(
             config,
             auditRound.contestRounds,
             cardManifest,
@@ -88,8 +88,11 @@ fun estimateSampleSizes(
             else if (useFirst) result.sampleCount[0]
             else result.findQuantile(config.quantile)
 
-        task.assertionRound.estNewSampleSize = estNewSamples
-        task.assertionRound.estSampleSize = min(estNewSamples + task.prevSampleSize, task.contestRound.Npop)
+        if (task.assertionRound.estimationResult != null) {
+            task.assertionRound.estimationResult!!.estNewMvrs = estNewSamples
+        }
+        task.assertionRound.estNewMvrs = estNewSamples
+        task.assertionRound.estMvrs = min(estNewSamples + task.prevSampleSize, task.contestRound.Npop) // TODO check
 
         if (debug) println(result.showSampleDist(estResult.task.contestRound.id))
         if (debugSampleSmall && result.avgSamplesNeeded() < 10) {
@@ -98,7 +101,7 @@ fun estimateSampleSizes(
         if (debugSampleDist) {
             println(
                 "---debugSampleDist for '${task.name()}' ${auditRound.roundIdx} ntrials=${config.nsimEst} pctSamplesNeeded=" +
-                        "${df(result.pctSamplesNeeded())} estSampleSize=${task.assertionRound.estSampleSize}" +
+                        "${df(result.pctSamplesNeeded())} estSampleSize=${task.assertionRound.estMvrs}" +
                         " totalSamplesNeeded=${result.totalSamplesNeeded} nsuccess=${result.nsuccess}" +
                         "\n  sampleDist = ${result.showSampleDist(estResult.task.contestRound.id)}"
             )
@@ -108,12 +111,12 @@ fun estimateSampleSizes(
     // put results into contestRounds
     auditRound.contestRounds.filter { !it.done }.forEach { contest ->
         val sampleSizes = estResults.filter { it.task.contestRound.id == contest.id }
-            .map { it.task.assertionRound.estSampleSize }
-        contest.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+            .map { it.task.assertionRound.estMvrs }
+        contest.estMvrs = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
         val newSampleSizes = estResults.filter { it.task.contestRound.id == contest.id }
-            .map { it.task.assertionRound.estNewSampleSize }
-        contest.estNewSamples = if (newSampleSizes.isEmpty()) 0 else newSampleSizes.max()
-        if (!quiet) logger.info{" ** contest ${contest.id} avgSamplesNeeded ${contest.estSampleSize} task=${contest.estNewSamples}"}
+            .map { it.task.assertionRound.estNewMvrs }
+        contest.estNewMvrs = if (newSampleSizes.isEmpty()) 0 else newSampleSizes.max()
+        if (!quiet) logger.info{" ** contest ${contest.id} avgSamplesNeeded ${contest.estMvrs} task=${contest.estNewMvrs}"}
     }
 
     // return repeatedResult for debugging and diagnostics
@@ -262,10 +265,15 @@ fun estimateClcaAssertionRound(
 
     // duplicate to ClcaAssertionAuditor
     val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
-    // prevRounds.setPhantomRate(contest.phantomRate()) // TODO ??
 
-    val bettingFn: BettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-        GeneralAdaptiveBetting(contestUA.Npop, oaAssortRates = null, d = clcaConfig.d, maxRisk = clcaConfig.maxRisk)
+    val bettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
+        GeneralAdaptiveBetting(
+            contestUA.Npop,
+            startingErrors = prevRounds,
+            contest.Nphantoms(),
+            oaAssortRates = null,
+            d = clcaConfig.d,
+            maxRisk = clcaConfig.maxRisk)
 
     // TODO track down simulations and do initial permutation there; we want first trial to use the actual permutation
     // we need a permutation to get uniform distribution of errors, since some simulations put all the errors at the beginning
@@ -293,11 +301,12 @@ fun estimateClcaAssertionRound(
     )
 
     // The result is a distribution of ntrials sampleSizes
-    assertionRound.estimationResult = EstimationRoundResult(roundIdx,
+    assertionRound.estimationResult = EstimationRoundResult(
+        roundIdx,
         clcaConfig.strategy.name,
         fuzzPct = config.simFuzzPct,
         startingTestStatistic = startingTestStatistic,
-        startingRates = prevRounds.errorRates(),
+        startingErrorRates = bettingFn.startingErrorRates(),
         estimatedDistribution = makeDeciles(result.sampleCount),
         firstSample = if (result.sampleCount.isEmpty()) 0 else result.sampleCount[0],
     )
@@ -468,15 +477,16 @@ fun estimateOneAuditAssertionRound(
 
     // duplicate to OneAuditAssertionAuditor
     val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
-    // prevRounds.setPhantomRate(contestUA.contest.phantomRate()) // TODO ??
 
     // could also get from the vunderFuzz
     val oneAuditErrorsFromPools = OneAuditRatesFromPools(pools)
     val oaErrorRates = oneAuditErrorsFromPools.oaErrorRates(contestUA, oaCassorter)
 
-    val bettingFn: BettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
+    val bettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
         GeneralAdaptiveBetting(
             Npop = contestUA.Npop,
+            startingErrors = prevRounds,
+            contestUA.contest.Nphantoms(),
             oaAssortRates = oaErrorRates,
             d = clcaConfig.d,
             maxRisk = clcaConfig.maxRisk
@@ -505,6 +515,7 @@ fun estimateOneAuditAssertionRound(
         roundIdx,
         oaConfig.strategy.name,
         fuzzPct = config.simFuzzPct, // TODO used ??
+        startingErrorRates = bettingFn.startingErrorRates(),
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
         firstSample = if (result.sampleCount.size > 0) result.sampleCount[0] else 0,

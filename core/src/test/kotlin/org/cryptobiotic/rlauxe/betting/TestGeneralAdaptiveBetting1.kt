@@ -14,7 +14,7 @@ class TestGeneralAdaptiveBetting1 {
 
     @Test
     fun makeBet() {
-        makeBet(N = 10000, margin = .02, upper = 1.0, maxRisk = .9)
+        makeBet(N = 10000, margin = .01, upper = 1.0, maxRisk = .9)
     }
 
     fun makeBet(
@@ -38,7 +38,14 @@ class TestGeneralAdaptiveBetting1 {
         assorts.forEach{ tracker.addSample(it) }
         println(tracker.measuredClcaErrorCounts().show())
 
-        val betFn = GeneralAdaptiveBetting(N, oaErrorRates, d=0,  maxRisk = maxRisk, debug=true)
+        val betFn = GeneralAdaptiveBetting(N,
+            startingErrors = ClcaErrorCounts.empty(noerror, upper),
+            nphantoms = 2,
+            oaErrorRates, d=0,  maxRisk = maxRisk, debug=true)
+
+        val starting = betFn.startingErrorRates()
+        println("starting = $starting maxRisk")
+
         val bet = betFn.bet(tracker)
         println("bet = $bet maxRisk = $maxRisk")
 

@@ -84,6 +84,8 @@ class TestOneAuditAdaptiveBetting {
             sampler.reset()
             val betFun = GeneralAdaptiveBetting(
                 contestUA.Npop,
+                startingErrors = ClcaErrorCounts.empty(oaCassorter.noerror(), oaCassorter.assorter.upperBound()),
+                nphantoms=contestUA.contest.Nphantoms(),
                 oaAssortRates = oaErrorRates,
                 d = 100,
                 maxRisk = 0.90,

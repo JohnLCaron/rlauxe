@@ -64,6 +64,6 @@ data class SimulateIrvTestData(
     }
 
     override fun toString() = buildString {
-        append("SimulateIrvTestData(${contest.id}} phantomPct=${df(contest.phantomRate())} ncards=${ncards}")
+        append("SimulateIrvTestData(${contest.id}} phantoms=${contest.Nphantoms()} ncards=${ncards}")
     }
 }

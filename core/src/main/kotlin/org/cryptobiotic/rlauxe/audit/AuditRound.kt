@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.audit
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.df
+import kotlin.math.ceil
 import kotlin.math.max
 
 data class AuditRound(
@@ -48,12 +49,14 @@ fun List<AuditRound>.previousSamples(currentRoundIdx: Int): Set<Long> {
 
 data class ContestRound(val contestUA: ContestWithAssertions, val assertionRounds: List<AssertionRound>, val roundIdx: Int) {
     val id = contestUA.id
+
     val name = contestUA.name
     val Npop = contestUA.Npop
 
-    var estCardsNeeded = 0 // initial estimate of cards for the contest
-    var estSampleSize = 0 // TODO CANDIDATE FOR REMOVAL // number of total samples estimated needed
-    var estNewSamples = 0 // Estimate of the new sample size required to confirm the contest
+    var missed = false // true when contest has card but
+    var maxSampleIndex = 0 // maximum index in the sample allowed to use
+    var estMvrs = 0 // Estimate of the mvrs required to confirm the contest
+    var estNewMvrs = 0 // Estimate of the new mvrs required to confirm the contest
 
     var actualMvrs = 0    // Actual number of ballots with this contest contained in this round's sample.
     var actualNewMvrs = 0 // TODO CANDIDATE FOR REMOVAL Actual number of new ballots with this contest contained in this round's sample.
@@ -76,12 +79,12 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
 
     fun wantSampleSize(prevCount: Int): Int {
         return if (auditorWantNewMvrs > 0) (auditorWantNewMvrs + prevCount)
-                else estSampleSize
+                else estMvrs
     }
 
     fun estSampleSizeEligibleForRemoval(): Int {
         return if (!included || auditorWantNewMvrs >= 0 ) 0 // auditor excluded or set explicitly, not eligible
-               else estSampleSize
+               else estMvrs
     }
 
     fun minAssertion(): AssertionRound? {
@@ -117,8 +120,8 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         if (roundIdx != other.roundIdx) return false
         if (actualMvrs != other.actualMvrs) return false
         if (actualNewMvrs != other.actualNewMvrs) return false
-        if (estNewSamples != other.estNewSamples) return false
-        if (estSampleSize != other.estSampleSize) return false
+        if (estNewMvrs != other.estNewMvrs) return false
+        if (estMvrs != other.estMvrs) return false
         if (auditorWantNewMvrs != other.auditorWantNewMvrs) return false
         if (done != other.done) return false
         if (included != other.included) return false
@@ -133,8 +136,8 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         var result = roundIdx
         result = 31 * result + actualMvrs
         result = 31 * result + actualNewMvrs
-        result = 31 * result + estNewSamples
-        result = 31 * result + estSampleSize
+        result = 31 * result + estNewMvrs
+        result = 31 * result + estMvrs
         result = 31 * result + auditorWantNewMvrs
         result = 31 * result + done.hashCode()
         result = 31 * result + included.hashCode()
@@ -148,8 +151,8 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
 
 data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevAuditResult: AuditRoundResult?) {
     // these values are set during estimateSampleSizes()
-    var estSampleSize = 0   // estimated sample size for current round
-    var estNewSampleSize = 0   // estimated new sample size for current round
+    var estMvrs = 0   // estimated sample size for current round
+    var estNewMvrs = 0   // estimated new sample size for current round
     var estimationResult: EstimationRoundResult? = null
 
     // these values are set during runAudit()
@@ -183,17 +186,23 @@ data class EstimationRoundResult(
     val strategy: String,
     val fuzzPct: Double?,
     val startingTestStatistic: Double,
-    val startingRates: Map<Double, Double>? = null, // error rates used for estimation TODO
+    val startingErrorRates: Map<Double, Double>? = null, // error rates used for estimation
     val estimatedDistribution: List<Int>,   // distribution of estimated sample size; currently deciles
     val firstSample: Int,
 ) {
-    override fun toString() = "round=$roundIdx estimatedDistribution=$estimatedDistribution fuzzPct=$fuzzPct " +
-            " startingRates=$startingRates"
+    var estNewMvrs: Int = 0
 
-    fun startingRates() = buildString {
-        startingRates?.toSortedMap()?.forEach { append( "${df(it.key)}=${df(it.value)}, " ) } ?: append("empty")
+    override fun toString() = "round=$roundIdx estimatedDistribution=$estimatedDistribution fuzzPct=$fuzzPct " +
+            " estNewMvrs=$estNewMvrs startingErrorRates=$startingErrorRates"
+
+    fun startingErrorRates() = buildString {
+        if (startingErrorRates == null) return "N/A"
+        startingErrorRates.filter{ it.value != 0.0 }.forEach { append( "${df(it.key)}=${df(it.value)}, " ) }
     }
 }
+
+fun roundUp(x: Double) = ceil(x).toInt()
+
 
 data class AuditRoundResult(
     val roundIdx: Int,
@@ -202,29 +211,26 @@ data class AuditRoundResult(
     val pvalue: Double,       // last pvalue when testH0 terminates
     val samplesUsed: Int,     // sample count when testH0 terminates
     val status: TestH0Status, // testH0 status
-    val startingRates: ClcaErrorCounts? = null, // starting error rates (clca only)
+    // val startingRates: Map<Double, Double>? = null, // cant use prevResults, so just phantoms, not really needed.
     val measuredCounts: ClcaErrorCounts? = null, // measured error counts (clca only)
     val params: Map<String, Double> = emptyMap(),
 ) {
 
     override fun toString() = buildString {
         append("round=$roundIdx pvalue=${df(pvalue)} nmvrs=$nmvrs samplesUsed=$samplesUsed status=$status")
-        append(" startingRates=${startingRates()}")
         append(" measuredCounts=${measuredCounts()}")
     }
 
     fun measuredCounts() = buildString {
         if (measuredCounts == null) append("empty") else {
             append(measuredCounts.show())
-            // measuredCounts.errorCounts.toSortedMap().forEach { append( "${df(it.key)}=${it.value}, " ) }
         }
     }
 
-    fun startingRates() = buildString {
-        if (startingRates == null) append("empty") else {
-            append(startingRates.show())
-            // startingRates.errorCounts.toSortedMap().forEach { append("${df(it.key)}=${it.value}, ") }
-        }
-    }
+    /*
+    fun startingErrorRates() = buildString {
+        if (startingRates == null) return "N/A"
+        startingRates.filter{ it.value != 0.0 }.forEach { append( "${df(it.key)}=${df(it.value)}, " ) }
+    } */
 
 }

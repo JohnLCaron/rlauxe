@@ -22,7 +22,9 @@ class BettingPayoffOld {
                 // ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
                 //val errorCounts = ClcaErrorCounts(emptyMap(), 0, noerror, 1.0)
                 //val optimal = GeneralAdaptiveBettingOld(N = N, errorCounts, d = 100)
-                val betFn = GeneralAdaptiveBetting(N, oaAssortRates = null, d = 100, maxRisk = .99)
+                val betFn = GeneralAdaptiveBetting(N,
+                    startingErrors = ClcaErrorCounts.empty(noerror, 1.0),
+                    nphantoms=0, oaAssortRates = null, d = 100, maxRisk = .99)
                 val samples = ClcaErrorTracker(noerror, 1.0)
                 repeat(100) { samples.addSample(noerror) }
                 println(" margin=$margin, noerror=$noerror bet = ${betFn.bet(samples)}")
@@ -55,6 +57,8 @@ class BettingPayoffOld {
                 //) : BettingFn {
                 val bettingFn = GeneralAdaptiveBetting(
                     Npop = N,
+                    startingErrors = ClcaErrorCounts.empty(noerror, 1.0),
+                    nphantoms=0,
                     oaAssortRates = null,
                     d = 0,
                     maxRisk = .90,

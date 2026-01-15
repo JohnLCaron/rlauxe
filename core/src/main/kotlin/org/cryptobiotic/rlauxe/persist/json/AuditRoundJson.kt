@@ -96,11 +96,10 @@ data class ContestRoundJson(
     var assertionRounds: List<AssertionRoundJson>,
     val roundIdx: Int,
 
-    val estCardsNeeded: Int,
+    val estMvrs: Int,
+    val estNewMvrs: Int,
     val actualMvrs: Int,
-    val actualNewMvrs: Int,  // Estimate of new sample size required to confirm the contest
-    val estNewSamples: Int,
-    val estSampleSize: Int,  // Estimate of total sample size required to confirm the contest
+    val actualNewMvrs: Int,
     val auditorWantNewMvrs: Int,
 
     val done: Boolean,
@@ -113,11 +112,10 @@ fun ContestRound.publishJson() : ContestRoundJson {
         this.id,
         assertionRounds.map { it.publishJson() },
         roundIdx = this.roundIdx,
-        estCardsNeeded = this.estCardsNeeded,
+        estMvrs = this.estMvrs,
+        estNewMvrs = this.estNewMvrs,
         actualMvrs = this.actualMvrs,
         actualNewMvrs = this.actualNewMvrs,
-        estNewSamples = this.estNewSamples,
-        estSampleSize = this.estSampleSize,
         auditorWantNewMvrs = this.auditorWantNewMvrs,
         this.done,
         this.included,
@@ -137,11 +135,10 @@ fun ContestRoundJson.import(contestUA: ContestWithAssertions): ContestRound {
     }
     val contestRound = ContestRound(contestUA, assertionRounds, this.roundIdx)
 
-    contestRound.estCardsNeeded = this.estCardsNeeded
+    contestRound.estMvrs = this.estMvrs
+    contestRound.estNewMvrs = this.estNewMvrs
     contestRound.actualMvrs = this.actualMvrs
     contestRound.actualNewMvrs = this.actualNewMvrs
-    contestRound.estNewSamples = this.estNewSamples
-    contestRound.estSampleSize = this.estSampleSize
     contestRound.auditorWantNewMvrs = this.auditorWantNewMvrs
 
     contestRound.done = this.done
@@ -180,8 +177,8 @@ fun AssertionRound.publishJson() : AssertionRoundJson {
     return AssertionRoundJson(
         this.assertion.assorter.hashcodeDesc(),
         this.roundIdx,
-        this.estSampleSize,
-        this.estNewSampleSize,
+        this.estMvrs,
+        this.estNewMvrs,
         this.estimationResult?.publishJson(),
         this.auditResult?.publishJson(),
         this.prevAuditResult?.publishJson(),
@@ -196,8 +193,8 @@ fun AssertionRoundJson.import(assertion: Assertion): AssertionRound {
     //    if (this.assertion != null) AssertionRound(this.assertion.import(), this.roundIdx, prevAuditResult)
    //     else AssertionRound(this.clcaAssertion!!.import(), this.roundIdx, prevAuditResult)
 
-    assertionRound.estSampleSize = this.estSampleSize
-    assertionRound.estNewSampleSize = this.estNewSampleSize
+    assertionRound.estMvrs = this.estSampleSize
+    assertionRound.estNewMvrs = this.estNewSampleSize
     assertionRound.estimationResult = this.estimationResult?.import()
     assertionRound.auditResult = this.auditResult?.import()
     assertionRound.prevAuditResult = this.prevAuditResult?.import()
@@ -223,9 +220,10 @@ data class EstimationRoundResultJson(
     val strategy: String,
     val fuzzPct: Double?,
     val startingTestStatistic: Double,
-    val startingRates: Map<Double, Double>?,
+    val startingErrorRates: Map<Double, Double>? = null, // error rates used for estimation
     val estimatedDistribution: List<Int>,
     val firstSample: Int,
+    val estNewMvrs: Int = 0,
 )
 
 fun EstimationRoundResult.publishJson() = EstimationRoundResultJson(
@@ -233,21 +231,24 @@ fun EstimationRoundResult.publishJson() = EstimationRoundResultJson(
     this.strategy,
     this.fuzzPct,
     this.startingTestStatistic,
-    this.startingRates,
+    this.startingErrorRates,
     this.estimatedDistribution,
     this.firstSample,
+    this.estNewMvrs,
 )
 
 fun EstimationRoundResultJson.import() : EstimationRoundResult {
-    return EstimationRoundResult(
+    val rr = EstimationRoundResult(
         this.roundIdx,
         this.strategy,
         this.fuzzPct,
         this.startingTestStatistic,
-        this.startingRates,
+        this.startingErrorRates,
         this.estimatedDistribution,
         this.firstSample,
     )
+    rr.estNewMvrs = this.estNewMvrs
+    return rr
 }
 
 // data class AuditRoundResult(
@@ -272,7 +273,7 @@ data class AuditRoundResultJson(
     val pvalue: Double,       // last pvalue when testH0 terminates
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
     val status: String, // testH0 status
-    val startingRates: ClcaErrorCountsJson?,
+    // val startingRates: Map<Double, Double>?,
     val measuredCounts: ClcaErrorCountsJson?,
     val params: Map<String, Double>
 )
@@ -285,7 +286,7 @@ fun AuditRoundResult.publishJson() = AuditRoundResultJson(
     this.pvalue,
     this.samplesUsed,
     this.status.name,
-    this.startingRates?.publishJson(),
+    // this.startingRates,
     this.measuredCounts?.publishJson(),
     params,
 )
@@ -299,7 +300,7 @@ fun AuditRoundResultJson.import() : AuditRoundResult {
         this.pvalue,
         this.samplesUsed,
         status,
-        this.startingRates?.import(),
+        // this.startingRates,
         this.measuredCounts?.import(),
         params,
     )

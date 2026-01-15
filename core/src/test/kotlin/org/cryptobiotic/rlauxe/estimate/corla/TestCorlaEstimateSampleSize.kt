@@ -76,8 +76,8 @@ class TestCorlaEstimateSampleSize {
                 simSize
             }
             val estSize = if (estSizes.isEmpty()) 0 else estSizes.max()
-            contestRound.estSampleSize = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-            println("${contestRound.name} estSize=$estSize  simSize=${contestRound.estSampleSize}\n")
+            contestRound.estMvrs = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+            println("${contestRound.name} estSize=$estSize  simSize=${contestRound.estMvrs}\n")
         }
     }
 }

@@ -71,10 +71,17 @@ class TestGeneralAdaptiveBetting2 {
             assorts.add(assortValue)
         }
 
-        val betFn = GeneralAdaptiveBetting(N, oaErrorRates, d=0,  maxRisk = maxRisk, debug=true)
-        val tracker = ClcaErrorTracker(noerror, upper)
+        val betFn = GeneralAdaptiveBetting(
+            N,
+            startingErrors = ClcaErrorCounts.empty(noerror, upper),
+            nphantoms = oaContest.contest.Nphantoms(),
+            oaErrorRates,
+            d=0,
+            maxRisk = maxRisk,
+            debug=true)
 
         // bet from first half
+        val tracker = ClcaErrorTracker(noerror, upper)
         assorts.subList(0, N/2).forEach{ tracker.addSample(it) }
         println(tracker.measuredClcaErrorCounts().show())
 

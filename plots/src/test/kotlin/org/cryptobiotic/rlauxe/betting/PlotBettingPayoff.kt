@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.dfn
 
 import org.junit.jupiter.api.Test
 import kotlin.io.path.Path
@@ -29,14 +30,14 @@ class PlotBettingPayoff {
         // data class PluralityErrorRates(val p2o: Double, val p1o: Double, val p1u: Double, val p2u: Double) {
         val taus = mapOf("p2o" to 0.0, "p1o" to 0.5, "p1u" to 1.5, "p2u" to 2.0)
         val margin = .01
-        val noerror = 1 / (2 - margin)
+        val noerror = 1 / (2 - margin) // upper = 1.0
 
         val p = .001
-        val p0 = 1.0 - taus.size * p
+        val p0 = 1.0 - taus.size * p // each error type is .001
 
         val results = mutableListOf<BettingPayoff>()
             repeat(nsteps) { step ->
-                val lamda = (step + 1) * 1.9 / nsteps
+                val lamda = (step + 1) * 1.9 / nsteps   // 1.9 is the arbitrary upper limit for plotting lamda
 
                 val t0 = ln(1.0 + lamda * (noerror - 0.5)) * p0
                 results.add(BettingPayoff("noerror", lamda, t0))
@@ -59,7 +60,7 @@ class PlotBettingPayoff {
 
         genericPlotter(
             "BettingPayoff",
-            "margin=$margin noerror=${df(noerror)} errRate=${df(p2)}",
+            "margin=$margin noerror=${df(noerror)} errRate=${dfn(p2, 3)}",
             "$dirName/$filename",
             data,
             "lamda", "ln(payoff)*rate", "cat",

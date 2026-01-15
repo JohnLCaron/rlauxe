@@ -93,7 +93,7 @@ class PollingSingleRoundAuditTask(
         var maxSamples = 0
         contestRounds.forEach { contest->
             contest.assertionRounds.forEach { assertion ->
-                maxSamples = max( maxSamples, assertion.estSampleSize)
+                maxSamples = max( maxSamples, assertion.estMvrs)
             }
         }
         val nmvrs = maxSamples

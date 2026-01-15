@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.doubleIsClose
 data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double) {
     val taus = Taus(upper)
 
-    fun errorRates() = errorCounts.mapValues { if (totalSamples == 0) 0.0 else it.value / totalSamples.toDouble() }  // bassortValue -> rate
+    fun errorRates() : Map<Double, Double> = errorCounts.mapValues { if (totalSamples == 0) 0.0 else it.value / totalSamples.toDouble() }  // bassortValue -> rate
     fun errorCounts() = errorCounts // bassortValue -> count
 
     fun bassortValues(): List<Double> {
@@ -18,6 +18,11 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
     fun clcaErrorRate(): Double {
         val clcaErrors = errorCounts.toList().filter { (key, value) -> taus.isClcaError(key / noerror) }.sumOf { it.second }
         return clcaErrors / totalSamples.toDouble()
+    }
+
+    fun isPhantom(bassort: Double): Boolean {
+        val tau = bassort / noerror
+        return taus.desc(tau) == "oth-los"
     }
 
     fun show() = buildString {
@@ -30,11 +35,19 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
                 if (desc != null) append("$desc=$count, ")
             }
             append("]")
+        } else {
+            append("no errors")
         }
     }
 
-    override fun toString(): String {
-        return "ClcaErrorCounts(errorCounts=$errorCounts, totalSamples=$totalSamples, noerror=$noerror, upper=$upper, bassortValues=${bassortValues()})"
+    override fun toString() = buildString {
+        appendLine("ClcaErrorCounts(totalSamples=$totalSamples, noerror=$noerror, upper=$upper")
+        appendLine("  bassortValues=${bassortValues()}")
+        appendLine("    errorCounts=$errorCounts")
+    }
+
+    companion object {
+        fun empty(noerror: Double, upper: Double) = ClcaErrorCounts(emptyMap(), 0, noerror, upper)
     }
 
 }

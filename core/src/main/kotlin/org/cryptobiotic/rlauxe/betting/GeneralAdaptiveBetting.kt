@@ -13,12 +13,15 @@ import org.cryptobiotic.rlauxe.util.df
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.ln
+import kotlin.math.max
 
 // generalize AdaptiveBetting for any clca assorter, including OneAudit
 // Kelly optimization of lambda parameter with estimated error rates
 
 class GeneralAdaptiveBetting(
     val Npop: Int, // population size for this contest
+    val startingErrors: ClcaErrorCounts,  // zero for auditing
+    val nphantoms: Int, // number of phantoms in the population
     val oaAssortRates: OneAuditAssortValueRates?, // only for OneAudit
     val d: Int = 100,  // trunc weight
     val maxRisk: Double, // this bounds how close lam gets to 2.0
@@ -27,20 +30,46 @@ class GeneralAdaptiveBetting(
 ) : BettingFn {
     private var lastBet = 0.0 // debugging
 
+    fun startingErrorRates(): Map<Double, Double> {
+        // estimated rates for each clca bassort value
+        val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.totalInPools) / Npop.toDouble()
+        val sampleNumber = startingErrors.totalSamples
+        val estRates = startingErrors.bassortValues().map { bassort ->
+            val allCount = (startingErrors.errorCounts()[bassort] ?: 0)
+            var rate = scaled * shrinkTruncEstimateRate(
+                apriori = 0.0,
+                errorCount = allCount,
+                sampleNum = sampleNumber,
+            )
+            // rate of phantoms is the minimum "oth-los" rate
+            if (startingErrors.isPhantom(bassort)) {
+                rate = max( rate, nphantoms / Npop.toDouble())
+            }
+            Pair(bassort, rate)
+        }.toMap()
+        return estRates
+    }
+
     override fun bet(prevSamples: SampleTracker): Double {
         val tracker = prevSamples as ClcaErrorTracker
         val trackerErrors = tracker.measuredClcaErrorCounts()
 
         // estimated rates for each clca bassort value
         val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.totalInPools) / Npop.toDouble()
-        val sampleNumber = tracker.numberOfSamples()
-        val estRates = trackerErrors.errorCounts.mapValues {
-            scaled * shrinkTruncEstimateRate(
-                    apriori = 0.0,  // TODO allow user to set aprioris
-                    errorCount = it.value,
-                    sampleNum = sampleNumber,
-                )
+        val sampleNumber = (startingErrors.totalSamples) + tracker.numberOfSamples()
+        val estRates = trackerErrors.errorCounts.map { (assort, errorCount) ->
+            val allCount = errorCount + (startingErrors.errorCounts()[assort] ?: 0)
+            var rate = scaled * shrinkTruncEstimateRate(
+                apriori = 0.0,
+                errorCount = allCount,
+                sampleNum = sampleNumber,
+            )
+            // rate of phantoms is the minimum "oth-los" rate
+            if (startingErrors.isPhantom(assort)) {
+                rate = max( rate, nphantoms / Npop.toDouble())
             }
+            Pair(assort, rate)
+        }.toMap()
 
         val mui = populationMeanIfH0(Npop, withoutReplacement, tracker)
 

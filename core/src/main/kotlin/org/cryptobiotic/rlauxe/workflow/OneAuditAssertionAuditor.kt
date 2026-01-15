@@ -31,12 +31,11 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         val oneAuditErrorsFromPools = OneAuditRatesFromPools(pools)
         val oaErrorRates = oneAuditErrorsFromPools.oaErrorRates(contestUA, oaCassorter)
 
-        val accumErrorCounts: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
-        //accumErrorCounts.setPhantomRate(contestUA.contest.phantomRate()) // TODO ??
-
-        val bettingFn: BettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
+        val bettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
             GeneralAdaptiveBetting(
                 Npop = contestUA.Npop,
+                startingErrors = ClcaErrorCounts.empty(oaCassorter.noerror(), oaCassorter.assorter.upperBound()),
+                contestUA.contest.Nphantoms(),
                 oaAssortRates = oaErrorRates,
                 d = clcaConfig.d,
                 maxRisk = clcaConfig.maxRisk
@@ -52,7 +51,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
             pvalue = testH0Result.pvalueLast,
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
-            startingRates = accumErrorCounts,
+            // startingRates = bettingFn.startingErrorRates(),
             measuredCounts = measuredCounts,
             // params = mapOf("poolAvg" to poolAvg)
         )

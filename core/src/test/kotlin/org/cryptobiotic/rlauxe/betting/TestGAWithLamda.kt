@@ -27,9 +27,13 @@ class TestGAWithLamda {
         maxRisk: Double,
         oaErrorRates: OneAuditAssortValueRates? = null
     ) {
-        val betFn = GeneralAdaptiveBetting(N, oaErrorRates, d=0,  maxRisk = maxRisk, debug=false)
-
         val noerror: Double = 1.0 / (2.0 - margin / upper)
+
+        val betFn = GeneralAdaptiveBetting(N,
+            startingErrors = ClcaErrorCounts.empty(noerror, upper),
+            nphantoms = 0,
+            oaErrorRates, d=0,  maxRisk = maxRisk, debug=false)
+
         val tracker = ClcaErrorTracker(noerror, upper)
         repeat(1000) { tracker.addSample(noerror) }
 

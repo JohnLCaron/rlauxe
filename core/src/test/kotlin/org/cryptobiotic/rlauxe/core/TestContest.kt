@@ -134,9 +134,6 @@ class TestContest {
         assertEquals( """'testContestInfo' (0) PLURALITY voteForN=1 votes={1=108, 0=100, 2=0} undervotes=2, voteForN=1
    winners=[1] Nc=211 Nphantoms=1 Nu=2 sumVotes=208""",
             contest.show())
-
-        // assertEquals((211-208-1)/211.toDouble(), contest.undervoteRate())
-        assertEquals(1/211.toDouble(), contest.phantomRate())
     }
 
     @Test

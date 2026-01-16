@@ -156,39 +156,3 @@ fun makeContestsWithUndervotesAndPhantoms(
 
     return Pair(contests, cvrs + phantoms)
 }
-
-//// use these when you dont have ContestInfo yet
-// Number of votes in each contest, return contestId -> candidateId -> nvotes
-fun tabulateVotesFromCvrs(cvrs: Iterator<Cvr>): Map<Int, Map<Int, Int>> {
-    val votes = mutableMapOf<Int, MutableMap<Int, Int>>()
-    for (cvr in cvrs) {
-        for ((contestId, conVotes) in cvr.votes) {
-            val accumVotes = votes.getOrPut(contestId) { mutableMapOf() }
-            for (cand in conVotes) {
-                val accum = accumVotes.getOrPut(cand) { 0 }
-                accumVotes[cand] = accum + 1
-            }
-        }
-    }
-    return votes
-}
-
-fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int, voteForN: Int = 1): Vunder {
-    val result = mutableMapOf<Int, Int>()
-    var undervotes = 0
-    cvrs.forEach{ cvr ->
-        if (cvr.hasContest(contestId) && !cvr.phantom) {
-            val candVotes = cvr.votes[contestId] // should always succeed
-            if (candVotes != null) {
-                if (candVotes.size < voteForN) {  // undervote
-                    undervotes += (voteForN - candVotes.size)
-                }
-                for (cand in candVotes) {
-                    val count = result[cand] ?: 0
-                    result[cand] = count + 1
-                }
-            }
-        }
-    }
-    return Vunder(result, undervotes, voteForN)
-}

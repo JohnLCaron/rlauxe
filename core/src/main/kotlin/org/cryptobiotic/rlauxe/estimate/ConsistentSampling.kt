@@ -178,7 +178,8 @@ fun estimationSubset(
     if (contestsNotDone.isEmpty()) return emptyList() // may not quite be right...
 
     // calculate how many samples are wanted for each contest.
-    val wantSamples: Map<Int, Int> = contestsNotDone.associate { it.id to estSamplesNeeded(config, it, 2.2) }
+    val fac = if (config.isClca) 2.2 else 4.0
+    val wantSamples: Map<Int, Int> = contestsNotDone.associate { it.id to estSamplesNeeded(config, it, fac) }
     val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
 
     fun contestWantsMoreSamples(c: ContestRound): Boolean {
@@ -216,7 +217,7 @@ fun estimationSubset(
     return sampledCards
 }
 
-// CLCA and OneAudit
+// CLCA and OneAudit TODO POLLING
 // we dont use this for the actual estimation....
 private fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, fac: Double): Int {
     val est0 = estSamplesNeeded( contestRound,  config.riskLimit, fac)

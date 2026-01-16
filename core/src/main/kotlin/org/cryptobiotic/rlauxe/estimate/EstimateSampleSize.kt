@@ -12,9 +12,8 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditRatesFromPools
 import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.OneAuditVunderBarFuzzer
+import org.cryptobiotic.rlauxe.util.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.VunderBar
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.workflow.ClcaSampler
@@ -49,11 +48,6 @@ fun estimateSampleSizes(
 ): List<RunTestRepeatedResult> {
 
     // TODO SimulateIrvTestData
-    // simulate the card pools for all OneAudit contests; do it here because simulation is over all contests
-    val infos = auditRound.contestRounds.map { it.contestUA.contest.info() }.associateBy { it.id }
-    val vunderFuzz = if (!config.isOA) null else {
-        OneAuditVunderBarFuzzer(VunderBar(cardPools!!, infos), infos, config.simFuzzPct ?: 0.0)
-    }
 
     // choose a subset of the cards for the estimation
     val contestCards: List<AuditableCard>? = if (config.isPolling) null else
@@ -63,7 +57,13 @@ fun estimateSampleSizes(
             cardManifest,
             previousSamples,
         )
-    // println("choose ${contestCards?.size} cards")
+    println("choose ${contestCards?.size} cards")
+
+    // simulate the card pools for all OneAudit contests; do it here one time for all contests
+    val infos = auditRound.contestRounds.map { it.contestUA.contest.info() }.associateBy { it.id }
+    val vunderFuzz = if (!config.isOA) null else {
+        OneAuditVunderFuzzer(cardPools!!, infos, config.simFuzzPct ?: 0.0, contestCards!!)
+    }
 
     // create the estimation tasks for each contest
     val stopwatch = Stopwatch()
@@ -131,7 +131,7 @@ fun makeEstimationTasks(
     contestRound: ContestRound,
     roundIdx: Int,
     contestCards: List<AuditableCard>?,
-    vunderFuzz: OneAuditVunderBarFuzzer?,
+    vunderFuzz: OneAuditVunderFuzzer?,
     moreParameters: Map<String, Double> = emptyMap(),
 ): List<EstimateSampleSizeTask> {
     val stopwatch = Stopwatch()
@@ -189,7 +189,7 @@ class EstimateSampleSizeTask(
     val config: AuditConfig,
     val contestCards: List<AuditableCard>?,
     val mvrs: List<Cvr>?,
-    val vunderFuzz: OneAuditVunderBarFuzzer?,
+    val vunderFuzz: OneAuditVunderFuzzer?,
     val contestRound: ContestRound,
     val assertionRound: AssertionRound,
     val startingTestStatistic: Double,
@@ -226,7 +226,6 @@ class EstimateSampleSizeTask(
                 estimateOneAuditAssertionRound(
                     roundIdx,
                     config,
-                    contestCards!!,
                     vunderFuzz!!,
                     contestRound,
                     assertionRound,
@@ -459,8 +458,7 @@ fun runRepeatedAlphaMart(
 fun estimateOneAuditAssertionRound(
     roundIdx: Int,
     config: AuditConfig,
-    contestCards: List<AuditableCard>,
-    vunderFuzz: OneAuditVunderBarFuzzer,
+    vunderFuzz: OneAuditVunderFuzzer,
     contestRound: ContestRound,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
@@ -473,9 +471,9 @@ fun estimateOneAuditAssertionRound(
     val clcaConfig = config.clcaConfig
 
     // The estimation and the audit are using a different fuzz.
-    vunderFuzz.reset()
-    val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.makePairsFromCards(contestCards)
-    val pools = vunderFuzz.vunderBar.pools
+    // making a different set of cards for each contest and assertion. cant be right
+    val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.fuzzedPairs
+    val pools = vunderFuzz.pools
 
     // duplicate to OneAuditAssertionAuditor
     val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)

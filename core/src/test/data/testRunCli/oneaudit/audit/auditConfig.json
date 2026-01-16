@@ -2,12 +2,12 @@
     "auditType": "ONEAUDIT",
     "hasStyle": true,
     "riskLimit": 0.05,
-    "seed": 7315689882041900582,
+    "seed": -8663066827627764464,
     "nsimEst": 10,
     "quantile": 0.8,
     "contestSampleCutoff": 20000,
     "removeCutoffContests": false,
-    "simFuzzPct": 0.02,
+    "simFuzzPct": 0.001,
     "minRecountMargin": 0.005,
     "removeTooManyPhantoms": false,
     "clcaConfig": {
@@ -18,7 +18,7 @@
     "oaConfig": {
         "strategy": "clca",
         "d": 100,
-        "useFirst": true
+        "useFirst": false
     },
     "persistedWorkflowMode": "testPrivateMvrs",
     "version": 2.0,

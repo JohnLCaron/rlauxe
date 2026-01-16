@@ -30,7 +30,7 @@ data class AuditConfig(
 
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(),
-    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.clca, useFirst = true),
+    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.clca, useFirst = false),
 
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
     val skipContests: List<Int> = emptyList(),
@@ -98,7 +98,7 @@ data class ClcaConfig(
     val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
     val fuzzPct: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs
     // val pluralityErrorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker?
-    val d: Int = 1,  // shrinkTrunc weight for error rates
+    val d: Int = 100,  // shrinkTrunc weight for error rates
     val maxRisk: Double = 0.90,  // max risk on any one bet
     val cvrsContainUndervotes: Boolean = true,
 )

@@ -268,7 +268,7 @@ fun createColoradoElectionP(
 
         else -> AuditConfig( // // TODO hasStyle=false
             AuditType.ONEAUDIT, riskLimit = .03, nsimEst = 1,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = true)
+            oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = false)
         )
     }
     val election = CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, config, poolsHaveOneCardStyle)

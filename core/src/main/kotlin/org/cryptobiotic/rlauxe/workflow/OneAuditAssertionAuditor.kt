@@ -46,7 +46,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) testH0Result.tracker.measuredClcaErrorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
-            nmvrs = sampling.nmvrs(),
+            nmvrs = sampling.maxSamples(),
             maxBallotIndexUsed = sampling.maxSampleIndexUsed(),
             pvalue = testH0Result.pvalueLast,
             samplesUsed = testH0Result.sampleCount,

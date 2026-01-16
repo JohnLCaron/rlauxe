@@ -119,7 +119,7 @@ class TestPersistedWorkflow {
 
         val config = AuditConfig(
             AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = .01,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = true)
+            oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive)
         )
 
         val N = 5000

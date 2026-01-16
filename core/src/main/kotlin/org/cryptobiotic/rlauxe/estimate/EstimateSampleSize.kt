@@ -63,6 +63,7 @@ fun estimateSampleSizes(
             cardManifest,
             previousSamples,
         )
+    // println("choose ${contestCards?.size} cards")
 
     // create the estimation tasks for each contest
     val stopwatch = Stopwatch()
@@ -281,6 +282,7 @@ fun estimateClcaAssertionRound(
 
     // TODO SimulateIrvTestData
     val sampler = ClcaCardFuzzSampler(config.simFuzzPct ?: 0.0, contestCards, contestUA.contest, cassorter)
+    // println("contest ${contest.id} contestCards=${contestCards.size} maxSamples ${sampler.maxSamples()} ")
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateClcaAssertionRound for $name with ${config.nsimEst} trials"}
@@ -492,7 +494,7 @@ fun estimateOneAuditAssertionRound(
             maxRisk = clcaConfig.maxRisk
         )
 
-    val sampler = ClcaSampler(contestUA.contest.id, oaFuzzedPairs, oaCassorter, allowReset = true)
+    val sampler = ClcaSampler(contestUA.contest.id, oaFuzzedPairs.size, oaFuzzedPairs, oaCassorter, allowReset = true)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateOneAuditAssertionRound for $name with ${config.nsimEst} trials"}

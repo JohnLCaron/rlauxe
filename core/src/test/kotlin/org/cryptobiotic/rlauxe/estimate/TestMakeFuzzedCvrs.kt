@@ -26,6 +26,7 @@ class TestMakeFuzzedCvrs {
         val testCards = testCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0) }
         val sampler = ClcaSampler( // fuzz single contest OK
             contestUA.id,
+            testCards.size,
             testMvrs.zip(testCards),
             assort,
             allowReset = true

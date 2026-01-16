@@ -76,7 +76,7 @@ class TestOneAuditAdaptiveBetting {
         //    val allowReset: Boolean,
         //)
         val cvrPairs = mvrs.zip( cards)
-        val sampler = ClcaSampler(contestUA.id, cvrPairs, oaCassorter, true)
+        val sampler = ClcaSampler(contestUA.id, cvrPairs.size, cvrPairs, oaCassorter, true)
 
         val sampleSizes = mutableListOf<Int>()
         val welford = Welford()

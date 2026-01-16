@@ -68,23 +68,24 @@ class PollingSampler(
 //// For clca audits. Production RunClcaContestTask
 class ClcaSampler(
     val contestId: Int,
+    val maxSampleIndex: Int,
     val cvrPairs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
     val cassorter: ClcaAssorter,
     val allowReset: Boolean,
 ): Sampler, Iterator<Double> {
-    val maxSamples = cvrPairs.count { it.second.hasContest(contestId) }
     val permutedIndex = MutableList(cvrPairs.size) { it }
+    private var maxSamples = 0
     private var idx = 0
     private var count = 0
 
     init {
-        // TODO this may not be true ??
         cvrPairs.forEach { (mvr, card) ->
             require(mvr.location() == card.location())  { "mvr location ${mvr.location()} != card.location ${card.location()}"}  }
+        maxSamples = cvrPairs.take(maxSampleIndex).count { it.second.hasContest(contestId) }
     }
 
     override fun sample(): Double {
-        while (idx < cvrPairs.size) {
+        while (idx < cvrPairs.size && idx < maxSampleIndex) {
             val (mvr, card) = cvrPairs[permutedIndex[idx]]
             idx++
             if (card.hasContest(contestId)) {
@@ -105,6 +106,7 @@ class ClcaSampler(
         permutedIndex.shuffle(Random)
         idx = 0
         count = 0
+        maxSamples = cvrPairs.take(maxSampleIndex).count { it.second.hasContest(contestId) }
     }
 
     override fun maxSamples() = maxSamples

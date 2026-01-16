@@ -51,7 +51,7 @@ class TestSampler {
         // was hasUndervotes=false
         val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, dilutedMargin=assertion.assorter.dilutedMargin(), true)
         val cvrPairs = cvrs.zip( AuditableCard.fromCvrs(cvrs))
-        val target = ClcaSampler(0, cvrPairs, cassorter, true) // single contest OK
+        val target = ClcaSampler(0, cvrPairs.size, cvrPairs, cassorter, true) // single contest OK
 
         var count = 0
         while (target.hasNext()) {

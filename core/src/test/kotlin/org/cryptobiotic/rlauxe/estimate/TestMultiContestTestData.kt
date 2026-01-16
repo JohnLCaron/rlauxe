@@ -210,7 +210,7 @@ class TestMultiContestTestData {
             val contestUA = ContestWithAssertions(contest, isClca = true).addStandardAssertions()
             val cassorter = contestUA.minClcaAssertion()!!.cassorter
 
-            val sampler = ClcaSampler(contest.id, testCvrs.zip(AuditableCard.fromCvrs(testCvrs)), cassorter, true) // TODO
+            val sampler = ClcaSampler(contest.id, testCvrs.size, testCvrs.zip(AuditableCard.fromCvrs(testCvrs)), cassorter, true) // TODO
             val tracker = PluralityErrorTracker(cassorter.noerror())
             while (sampler.hasNext()) { tracker.addSample(sampler.next()) }
             // println("   tracker.errorRates = ${tracker.errorRates()}")

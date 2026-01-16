@@ -62,6 +62,7 @@ class TestGeneralAdaptiveBetting2 {
 
         val sampling = ClcaSampler(
             oaContest.id,
+            pairs.size,
             pairs, // Pair(mvr, card)
             minCassorter,
             true)

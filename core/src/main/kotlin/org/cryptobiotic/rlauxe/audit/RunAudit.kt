@@ -150,8 +150,8 @@ fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>
 
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-        val sampler = ClcaSampler(contestRound.id, cvrPairs, cassorter, allowReset = false)
-
+        val sampler = ClcaSampler(contestRound.id, contestRound.maxSampleIndex, cvrPairs, cassorter, allowReset = false)
+        // println("contest ${contestRound.id} maxSampleIndex ${contestRound.maxSampleIndex} maxSamples ${sampler.maxSamples()} ")
         val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
 
         return testH0Result
@@ -168,7 +168,7 @@ fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>,
         val auditor = OneAuditAssertionAuditor(pools)
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-        val sampler = ClcaSampler(contestRound.id, cvrPairs, cassorter, allowReset = false)
+        val sampler = ClcaSampler(contestRound.id, contestRound.maxSampleIndex, cvrPairs, cassorter, allowReset = false)
 
         val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
 

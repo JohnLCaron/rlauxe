@@ -48,13 +48,13 @@ class TestOneAuditFuzzers {
                 val contestId = contest.id
                 if (showOA) println("ncands = $ncands fuzzPct = $fuzzPct, margin = $margin ${contest.votes}")
 
-                val vunder = tabulateVotesWithUndervotes(mvrs.iterator(), contestOA.id, ncands)
+                val vunder = tabulateVotesWithUndervotes(mvrs.iterator(), contestOA.id)
                 if (showOA) println("cvrVotes = ${vunder}  contestVotes = ${contest.votesAndUndervotes()}")
                 assertEquals(vunder, contest.votesAndUndervotes())
                 assertEquals(Nc, mvrs.size)
 
                 val fuzzed = makeFuzzedCvrsFrom(listOf(contestOA.contest.info()), mvrs, fuzzPct, welfordFromFuzz)
-                val mvrVotes = tabulateVotesWithUndervotes(fuzzed.iterator(), contestOA.id, ncands)
+                val mvrVotes = tabulateVotesWithUndervotes(fuzzed.iterator(), contestOA.id)
                 if (showOA) println("mvrVotes = ${mvrVotes}")
 
                 val choiceChange = mutableMapOf<String, Int>() // org-fuzz -> count

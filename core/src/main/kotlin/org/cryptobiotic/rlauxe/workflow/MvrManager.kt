@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
@@ -54,38 +53,4 @@ fun findSamples(samplePrns: List<Long>, sortedCards: CloseableIterator<Auditable
     }
     require(result.size == samplePrns.size)
     return result
-}
-
-//// TODO  this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set
-// for each contest, return map contestId -> wantSampleSize. used in ConsistentSampling
-fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedCards : CloseableIterator<AuditableCard>, debug: Boolean = false): Map<Int, Int> {
-    //// count how many samples each contest already has
-    val prevContestCounts = mutableMapOf<ContestRound, Int>()
-    contestsNotDone.forEach { prevContestCounts[it] = 0 }
-
-    // Note this iterates through sortedCards only until all previousSamples have been found and counted
-    sortedCards.use { cardIter ->
-        previousSamples.forEach { prevNumber ->
-            while (cardIter.hasNext()) {
-                val card = cardIter.next() // previousSamples must be in same order as sortedBorc
-                if (card.prn == prevNumber) {
-                    contestsNotDone.forEach { contest ->
-                        if (card.hasContest(contest.id)) {
-                            prevContestCounts[contest] = prevContestCounts[contest]?.plus(1) ?: 1
-                        }
-                    }
-                    break
-                }
-            }
-        }
-    }
-    if (debug) {
-        val prevContestCountsById = prevContestCounts.entries.associate { it.key.id to it.value }
-        logger.debug{"**wantSampleSize prevContestCountsById = $prevContestCountsById"}
-    }
-    // we need prevContestCounts in order to calculate wantSampleSize if contest.auditorWantNewMvrs has been set
-    val wantSampleSizeMap = prevContestCounts.entries.associate { it.key.id to it.key.wantSampleSize(it.value) }
-    if (debug) logger.debug{"wantSampleSize = $wantSampleSizeMap"}
-
-    return wantSampleSizeMap
 }

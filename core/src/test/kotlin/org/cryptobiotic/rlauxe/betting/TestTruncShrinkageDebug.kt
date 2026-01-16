@@ -1,5 +1,7 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.betting
 
+import org.cryptobiotic.rlauxe.core.PrevSamples
+import org.cryptobiotic.rlauxe.core.SampleTracker
 import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.math.max
 import kotlin.math.min

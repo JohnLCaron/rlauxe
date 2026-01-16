@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.betting
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.apache.commons.math3.analysis.UnivariateFunction
 import org.apache.commons.math3.optim.MaxEval
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType
@@ -15,6 +16,8 @@ import kotlin.collections.component2
 import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
+
+private val logger = KotlinLogging.logger("GeneralAdaptiveBetting")
 
 // generalize AdaptiveBetting for any clca assorter, including OneAudit
 // Kelly optimization of lambda parameter with estimated error rates
@@ -117,7 +120,7 @@ class GeneralAdaptiveBetting(
 
 class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, Double>, val oaErrorRates: Map<Double, Double>?,
                            val mui: Double, val maxBet: Double, val debug: Boolean=false) {
-    val p0: Double
+    var p0: Double
 
     init {
         require (mui > 0.0) {
@@ -128,8 +131,10 @@ class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, 
         val oasum = if (oaErrorRates == null) 0.0 else oaErrorRates.map{ it.value }.sum()
         val clcasum = clcaErrorRates.map{ it.value }.sum()
         p0 = 1.0 - clcasum - oasum    // calculate against other values to get it exact
-        if (p0 < 0.0)
-            print("")
+        if (p0 < 0.0) {
+            // logger.warn{"p0 less than 0 = $p0"}
+            p0 = 0.0
+        }
         require (p0 >= 0.0)
         if (debug) {
             print("OneAuditOptimalLambda init: mui=$mui ")

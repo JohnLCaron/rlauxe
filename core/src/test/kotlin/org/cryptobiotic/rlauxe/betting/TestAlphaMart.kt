@@ -1,11 +1,10 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.betting
 
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.betting.etaToLam
-import org.cryptobiotic.rlauxe.betting.lamToEta
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.runRepeatedAlphaMart
 import org.cryptobiotic.rlauxe.workflow.PollingSampler
@@ -61,7 +60,7 @@ class TestAlphaMart {
         val result2 = runAlphaMartRepeated(
             name = "runAlphaMartRepeated",
             drawSample = cvrSampler,
-            N=N,
+            N = N,
             eta0 = eta0,
             d = d,
             ntrials = 10,

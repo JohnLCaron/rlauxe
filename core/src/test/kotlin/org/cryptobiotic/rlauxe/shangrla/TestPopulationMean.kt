@@ -1,7 +1,9 @@
 package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.SampleFromArray
+import org.cryptobiotic.rlauxe.betting.AlphaMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.doublePrecision
@@ -150,7 +152,7 @@ class TestPopulationMeanWithoutReplacement {
         // compare directly to ALPHA
         val tracker= ClcaErrorTracker(0.0, 1.0)
         val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta)
-        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u, tracker=tracker)
+        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u, tracker = tracker)
 
         val sampler = SampleFromArray(x.toDoubleArray())
         println("alphaTestH0")

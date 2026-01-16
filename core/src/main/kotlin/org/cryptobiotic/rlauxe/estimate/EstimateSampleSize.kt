@@ -3,11 +3,14 @@ package org.cryptobiotic.rlauxe.estimate
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.betting.AlphaMart
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.betting.BettingFn
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.EstimFn
+import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditRatesFromPools
@@ -436,7 +439,7 @@ fun runRepeatedAlphaMart(
         N = N,
         upperBound = upperBound,
         riskLimit = config.riskLimit,
-        tracker=tracker,
+        tracker = tracker,
     )
 
     val result: RunRepeatedResult = runRepeated(

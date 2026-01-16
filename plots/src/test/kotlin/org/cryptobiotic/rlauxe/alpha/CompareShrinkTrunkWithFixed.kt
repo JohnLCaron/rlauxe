@@ -1,6 +1,9 @@
 package org.cryptobiotic.rlauxe.alpha
 
+import org.cryptobiotic.rlauxe.betting.AlphaMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.FixedEstimFn
+import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.workflow.PollingSampler
 import org.cryptobiotic.rlauxe.workflow.Sampler
@@ -46,7 +49,7 @@ class CompareShrinkTrunkWithFixed {
 
         val tracker = ClcaErrorTracker(0.0, 1.0)
         val trunc = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
-        val alpha = AlphaMart(estimFn = trunc, N = N, tracker=tracker)
+        val alpha = AlphaMart(estimFn = trunc, N = N, tracker = tracker)
 
         return alpha.testH0(N, true) { sampling.sample() }
     }
@@ -54,7 +57,7 @@ class CompareShrinkTrunkWithFixed {
     fun testAlphaMartFixed(eta0: Double, sampling: Sampler): TestH0Result {
         val fixed = FixedEstimFn(eta0 = eta0)
         val tracker = ClcaErrorTracker(0.0, 1.0)
-        val alpha = AlphaMart(estimFn = fixed, N = sampling.maxSamples(), tracker=tracker)
+        val alpha = AlphaMart(estimFn = fixed, N = sampling.maxSamples(), tracker = tracker)
         return alpha.testH0(sampling.maxSamples(), true) { sampling.sample() }
     }
 
@@ -111,7 +114,7 @@ class CompareShrinkTrunkWithFixed {
 
         val tracker = ClcaErrorTracker(0.0, 1.0)
         val trunc = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
-        val alpha = AlphaMart(estimFn = trunc, N = sampling.maxSamples(), tracker=tracker)
+        val alpha = AlphaMart(estimFn = trunc, N = sampling.maxSamples(), tracker = tracker)
 
         return runRepeated(
             name = "runAlphaMartTruncRepeated",
@@ -129,7 +132,7 @@ class CompareShrinkTrunkWithFixed {
         val N = sampling.maxSamples()
         val fixed = FixedEstimFn(eta0 = eta0)
         val tracker = ClcaErrorTracker(0.0, 1.0)
-        val alpha = AlphaMart(estimFn = fixed, N = N, tracker=tracker)
+        val alpha = AlphaMart(estimFn = fixed, N = N, tracker = tracker)
 
         return runRepeated(
             name = "runAlphaMartFixedRepeated",

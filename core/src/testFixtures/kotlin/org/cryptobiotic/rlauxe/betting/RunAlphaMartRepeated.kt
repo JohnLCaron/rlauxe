@@ -1,6 +1,5 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.estimate.RunRepeatedResult
 import org.cryptobiotic.rlauxe.workflow.Sampler
 import org.cryptobiotic.rlauxe.estimate.runRepeated
@@ -26,7 +25,8 @@ fun runAlphaMartRepeated(
         true,
         upperBound = sampleUpperBound,
         d = d,
-        eta0 = eta0)
+        eta0 = eta0
+    )
 
     val tracker = ClcaErrorTracker(0.0, upper)
 
@@ -35,7 +35,7 @@ fun runAlphaMartRepeated(
         N = drawSample.maxSamples(),
         upperBound = sampleUpperBound,
         withoutReplacement = withoutReplacement,
-        tracker=tracker,
+        tracker = tracker,
     )
 
     return runRepeated(

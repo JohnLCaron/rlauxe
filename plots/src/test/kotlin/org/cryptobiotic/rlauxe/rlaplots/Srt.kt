@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
-import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.estimate.RunRepeatedResult
 import org.cryptobiotic.rlauxe.util.*
 import java.io.BufferedReader
 import java.io.File
@@ -71,7 +71,7 @@ data class SRT(val Nc: Int,
 }
 
 // TODO reportedMean, reportedMeanDiff in parameters, or in RunTestRepeatedResult
-fun RunTestRepeatedResult.makeSRT(reportedMean: Double, reportedMeanDiff: Double): SRT {
+fun RunRepeatedResult.makeSRT(reportedMean: Double, reportedMeanDiff: Double): SRT {
     return SRT(
         this.N,
         this.testParameters["margin"] ?: mean2margin(reportedMean),

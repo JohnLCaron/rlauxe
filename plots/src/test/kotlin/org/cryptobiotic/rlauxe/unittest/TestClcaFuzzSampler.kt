@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.runRepeatedBettingMart
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.estimate.RunRepeatedResult
 import org.cryptobiotic.rlauxe.workflow.ClcaFuzzSampler
 import org.junit.jupiter.api.Test
 
@@ -32,7 +32,7 @@ class TestClcaFuzzSampler {
         contests.forEach { contest ->
             val sampleSizes = mutableListOf<Pair<Int, Double>>()
             contest.assertionRounds.map { assertionRound ->
-                val result: RunTestRepeatedResult = runWithComparisonFuzzSampler(auditConfig, contest.contestUA, assertionRound, cvrs)
+                val result: RunRepeatedResult = runWithComparisonFuzzSampler(auditConfig, contest.contestUA, assertionRound, cvrs)
                 val size = result.findQuantile(auditConfig.quantile)
                 assertionRound.estMvrs = size
                 val assertion = assertionRound.assertion as ClcaAssertion
@@ -55,7 +55,7 @@ private fun runWithComparisonFuzzSampler(
     assertionRound: AssertionRound,
     cvrs: List<Cvr>, // (mvr, cvr)
     moreParameters: Map<String, Double> = emptyMap(),
-): RunTestRepeatedResult {
+): RunRepeatedResult {
     val cassertion = assertionRound.assertion as ClcaAssertion
     val cassorter = cassertion.cassorter
 

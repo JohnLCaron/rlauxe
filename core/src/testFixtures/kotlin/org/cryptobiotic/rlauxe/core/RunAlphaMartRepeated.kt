@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.estimate.RunRepeatedResult
 import org.cryptobiotic.rlauxe.workflow.Sampler
-import org.cryptobiotic.rlauxe.estimate.runTestRepeated
+import org.cryptobiotic.rlauxe.estimate.runRepeated
 import org.cryptobiotic.rlauxe.util.mean2margin
 
 // run AlphaMart with TrunkShrinkage in repeated trials
@@ -19,7 +19,7 @@ fun runAlphaMartRepeated(
     upper: Double = 1.0,
     sampleUpperBound: Double = 1.0,
     estimFn: EstimFn? = null, // if not supplied, use TruncShrinkage
-): RunTestRepeatedResult {
+): RunRepeatedResult {
 
     val useEstimFn = estimFn ?: TruncShrinkage(
         drawSample.maxSamples(),
@@ -38,7 +38,7 @@ fun runAlphaMartRepeated(
         tracker=tracker,
     )
 
-    return runTestRepeated(
+    return runRepeated(
         name = name,
         drawSample = drawSample,
         terminateOnNullReject = true,

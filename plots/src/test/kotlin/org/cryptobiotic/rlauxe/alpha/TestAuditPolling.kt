@@ -91,7 +91,7 @@ class TestAuditPolling {
         plotDDsample(srs, "PollingWithoutDD")
     }
 
-    fun testPollingWorkflow(margin: Double, withoutReplacement: Boolean, cvrs: List<Cvr>, d: Int, silent: Boolean = true): List<RunTestRepeatedResult> {
+    fun testPollingWorkflow(margin: Double, withoutReplacement: Boolean, cvrs: List<Cvr>, d: Int, silent: Boolean = true): List<RunRepeatedResult> {
         if (!silent) println(" d= $d, N=${cvrs.size} margin=$margin ${if (withoutReplacement) "withoutReplacement" else "withReplacement"}")
 
         // count actual votes
@@ -112,7 +112,7 @@ class TestAuditPolling {
         val contestsUA = contests.map { ContestWithAssertions(it, isClca=false).addStandardAssertions() }
 
         // this has to be run separately for each assorter, but we want to combine them in practice
-        val results = mutableListOf<RunTestRepeatedResult>()
+        val results = mutableListOf<RunRepeatedResult>()
         contestsUA.forEach { contestUA ->
             if (!silent && showContests) println("Assertions for Contest ${contestUA.id}")
             contestUA.assertions.forEach {

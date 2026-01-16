@@ -60,55 +60,7 @@ class ClcaCardFuzzSampler(
     override fun next(): Double = sample()
 }
 
-// for one contest, this takes a list of cvrs and fuzzes them
-// Only used for estimatePollingAssertionRound, not auditing.
-class PollingCardFuzzSampler(
-    val fuzzPct: Double,
-    val cards: List<AuditableCard>,
-    val contest: Contest,
-    val assorter: AssorterIF
-): Sampler, Iterator<Double> {
-    val maxSamples = cards.count { it.hasContest(contest.id) } // dont need this is its single contest
-    val N = cards.size
-    val welford = Welford()
-    val permutedIndex = MutableList(N) { it }
-    private var mvrs: List<AuditableCard>
-    private var idx = 0
-
-    init {
-        mvrs = remakeFuzzed() // TODO could do fuzzing on the fly ??
-    }
-
-    override fun sample(): Double {
-        while (idx < N) {
-            val mvr = mvrs[permutedIndex[idx]]
-            idx++
-            if (mvr.hasContest(contest.id)) {
-                val result = assorter.assort(mvr, usePhantoms = true)
-                welford.update(result)
-                return result
-            }
-        }
-        throw RuntimeException("no samples left for ${contest.id} and Assorter ${assorter}")
-    }
-
-    override fun reset() {
-        mvrs = remakeFuzzed()
-        permutedIndex.shuffle(Random)
-        idx = 0
-    }
-
-    fun remakeFuzzed(): List<AuditableCard> {
-        return makeFuzzedCardsFrom(listOf(contest.info()), cards, fuzzPct) // single contest
-    }
-
-    override fun maxSamples() = maxSamples
-    override fun maxSampleIndexUsed() = idx
-    override fun nmvrs() = mvrs.size
-
-    override fun hasNext(): Boolean = (idx < N)
-    override fun next(): Double = sample()
-}
+//// PollingCardFuzzSampler was here
 
 // for one contest, this takes a list of cvrs and fuzzes them
 class PollingFuzzSampler(
@@ -164,7 +116,6 @@ class PollingFuzzSampler(
 fun makeFuzzedCardsFrom(infoList: List<ContestInfo>,
                         cards: List<AuditableCard>,
                         fuzzPct: Double,
-                        undervotes: Boolean = true, // chooseNewCandidateWithUndervotes
 ) : List<AuditableCard> {
     if (fuzzPct == 0.0) return cards
     val infos = infoList.associate{ it.id to it }
@@ -189,7 +140,7 @@ fun makeFuzzedCardsFrom(infoList: List<ContestInfo>,
                     else
                         votes[0] // TODO only one vote allowed, cant use on Raire
                     // choose a different candidate, or none.
-                    val ncandId = chooseNewCandidate(currId, info.candidateIds, undervotes)
+                    val ncandId = chooseNewCandidate(currId, info.candidateIds)
                     cardb.replaceContestVote(contestId, ncandId)
                 }
             }
@@ -219,12 +170,7 @@ fun switchCandidateRankings(votes: MutableList<Int>, candidateIds: List<Int>) {
 }
 
 // randomly change a candidate to another
-fun chooseNewCandidate(currId: Int?, candidateIds: List<Int>, undervotes: Boolean): Int? {
-    return if (undervotes) chooseNewCandidateWithUndervotes(currId, candidateIds) else
-        chooseNewCandidateNoUndervotes(currId, candidateIds)
-}
-
-fun chooseNewCandidateWithUndervotes(currId: Int?, candidateIds: List<Int>): Int? {
+fun chooseNewCandidate(currId: Int?, candidateIds: List<Int>): Int? {
     val size = candidateIds.size
     while (true) {
         val ncandIdx = Random.nextInt(size + 1)
@@ -237,6 +183,7 @@ fun chooseNewCandidateWithUndervotes(currId: Int?, candidateIds: List<Int>): Int
     }
 }
 
+/*
 fun chooseNewCandidateNoUndervotes(currId: Int?, candidateIds: List<Int>): Int? {
     val size = candidateIds.size
     while (true) {
@@ -246,4 +193,4 @@ fun chooseNewCandidateNoUndervotes(currId: Int?, candidateIds: List<Int>): Int? 
             return candId
         }
     }
-}
+} */

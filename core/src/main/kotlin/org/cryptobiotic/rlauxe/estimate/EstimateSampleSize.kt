@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditRatesFromPools
 import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.OneAuditVunderFuzzer
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
@@ -45,7 +45,7 @@ fun estimateSampleSizes(
     showTasks: Boolean = false,
     nthreads: Int = 32,
     onlyTask: String? = null
-): List<RunTestRepeatedResult> {
+): List<RunRepeatedResult> {
 
     // TODO SimulateIrvTestData
 
@@ -57,7 +57,7 @@ fun estimateSampleSizes(
             cardManifest,
             previousSamples,
         )
-    println("choose ${contestCards?.size} cards")
+    // println("choose ${contestCards?.size} cards")
 
     // simulate the card pools for all OneAudit contests; do it here one time for all contests
     val infos = auditRound.contestRounds.map { it.contestUA.contest.info() }.associateBy { it.id }
@@ -202,7 +202,7 @@ class EstimateSampleSizeTask(
     // all assertions share the same cvrs. run ntrials (=config.nsimEst times).
     // each time the trial is run, the cvrs are randomly permuted. The result is a distribution of ntrials sampleSizes.
     override fun run(): EstimationResult {
-        val result: RunTestRepeatedResult = when (config.auditType) {
+        val result: RunRepeatedResult = when (config.auditType) {
             AuditType.CLCA ->
                 estimateClcaAssertionRound(
                     roundIdx,
@@ -239,7 +239,7 @@ class EstimateSampleSizeTask(
 
 data class EstimationResult(
     val task: EstimateSampleSizeTask,
-    val repeatedResult: RunTestRepeatedResult,
+    val repeatedResult: RunRepeatedResult,
 )
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -255,7 +255,7 @@ fun estimateClcaAssertionRound(
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
-): RunTestRepeatedResult {
+): RunRepeatedResult {
     val contestUA = contestRound.contestUA
     val contest = contestUA.contest
 
@@ -288,7 +288,7 @@ fun estimateClcaAssertionRound(
     val stopwatch = Stopwatch()
 
     // run the simulation ntrials (=config.nsimEst) times
-    val result: RunTestRepeatedResult = runRepeatedBettingMart(
+    val result: RunRepeatedResult = runRepeatedBettingMart(
         name,
         config,
         sampler,
@@ -328,7 +328,7 @@ fun runRepeatedBettingMart(
     N: Int,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
-): RunTestRepeatedResult {
+): RunRepeatedResult {
 
     val tracker = ClcaErrorTracker(noerror, upper)
 
@@ -341,7 +341,7 @@ fun runRepeatedBettingMart(
     )
 
     // run the simulation ntrials (config.nsimEst) times
-    val result: RunTestRepeatedResult = runTestRepeated(
+    val result: RunRepeatedResult = runRepeated(
         name = name,
         drawSample = sampleFn,
         ntrials = config.nsimEst,
@@ -365,7 +365,7 @@ fun estimatePollingAssertionRound(
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
-): RunTestRepeatedResult {
+): RunRepeatedResult {
     val assorter = assertionRound.assertion.assorter
     val eta0 = assorter.dilutedMean()
 
@@ -421,7 +421,7 @@ fun runRepeatedAlphaMart(
     N: Int,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
-): RunTestRepeatedResult {
+): RunRepeatedResult {
 
     val useEstimFn = estimFn ?: TruncShrinkage(
         N = N,
@@ -439,7 +439,7 @@ fun runRepeatedAlphaMart(
         tracker=tracker,
     )
 
-    val result: RunTestRepeatedResult = runTestRepeated(
+    val result: RunRepeatedResult = runRepeated(
         name,
         drawSample = sampleFn,
         ntrials = config.nsimEst,
@@ -463,7 +463,7 @@ fun estimateOneAuditAssertionRound(
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
     moreParameters: Map<String, Double> = emptyMap(),
-): RunTestRepeatedResult {
+): RunRepeatedResult {
     val contestUA = contestRound.contestUA
     val cassertion = assertionRound.assertion as ClcaAssertion
     val oaCassorter = cassertion.cassorter as ClcaAssorterOneAudit

@@ -9,8 +9,8 @@ import org.cryptobiotic.rlauxe.plots.plotSRS
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.estimate.runTestRepeated
+import org.cryptobiotic.rlauxe.estimate.RunRepeatedResult
+import org.cryptobiotic.rlauxe.estimate.runRepeated
 import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -148,7 +148,7 @@ class ReproduceAlphaResults {
                         val alpha = AlphaMart(estimFn = trunc, N = N, upperBound=upperBound, tracker=tracker)
 
                         print("  eta0=$eta0 d=$d")
-                        val result =  runTestRepeated(
+                        val result =  runRepeated(
                             name = "ReproduceAlphaResults",
                             drawSample = sampleFn,
                             ntrials = reps,
@@ -355,7 +355,7 @@ class ReproduceAlphaResults {
         val srs = mutableListOf<SRT>()
         for (eta in etal) {
             for (d in dl) {
-                val mart: RunTestRepeatedResult = runAlphaMartRepeated(
+                val mart: RunRepeatedResult = runAlphaMartRepeated(
                     name = "comparisonSimulation",
                     drawSample = SamplerFromAssortValues(x),
                     N = N,
@@ -498,7 +498,7 @@ class ReproduceAlphaResults {
                 doubleIsClose(etaActual, etaExpect)
                 // println(" theta=$theta N=$N etaActual=$etaActual same=$same ")
 
-                val mart: RunTestRepeatedResult = runAlphaMartRepeated(
+                val mart: RunRepeatedResult = runAlphaMartRepeated(
                     name = "comparisonNvsTheta",
                     drawSample = drawSample,
                     N = N,
@@ -587,7 +587,7 @@ class ReproduceAlphaResults {
             val eta0 = factor / (2 - margin)
             println(" theta=$theta N=$N etaActual=$etaActual eta0=$eta0 ")
 
-            val mart: RunTestRepeatedResult = runAlphaMartRepeated(
+            val mart: RunRepeatedResult = runAlphaMartRepeated(
                 name = "testNvsThetaFactors",
                 drawSample = drawSample,
                 N = N,

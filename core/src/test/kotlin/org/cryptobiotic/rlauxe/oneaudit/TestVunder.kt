@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.util.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.util.tabulateCvrs

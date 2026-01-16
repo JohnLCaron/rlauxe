@@ -7,8 +7,8 @@ import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
-import org.cryptobiotic.rlauxe.estimate.runTestRepeated
+import org.cryptobiotic.rlauxe.estimate.RunRepeatedResult
+import org.cryptobiotic.rlauxe.estimate.runRepeated
 import org.cryptobiotic.rlauxe.rairejson.import
 import org.cryptobiotic.rlauxe.rairejson.readRaireBallotsCsv
 import org.cryptobiotic.rlauxe.rairejson.readRaireResultsJson
@@ -645,7 +645,7 @@ fun calc_sample_sizes(
     ntrials: Int,
     contests: List<RaireContestWithAssertions>,
     cvrs: List<Cvr>,
-): RunTestRepeatedResult {
+): RunRepeatedResult {
 
     val N = cvrs.size
     val contest = contests.first().addStandardAssertions()
@@ -660,7 +660,7 @@ fun calc_sample_sizes(
     val betta = BettingMart(bettingFn = betFn, N = N, sampleUpperBound = cassorter.upperBound(), withoutReplacement = false,
         tracker = tracker)
 
-    return runTestRepeated(
+    return runRepeated(
         name = "calc_sample_sizes",
         drawSample = sampler,
         // maxSamples = N,

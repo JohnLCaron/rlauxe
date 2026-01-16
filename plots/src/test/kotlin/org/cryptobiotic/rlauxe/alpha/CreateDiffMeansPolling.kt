@@ -216,7 +216,7 @@ class CreatePollingDiffMeans {
         nrepeat: Int,
         d: Int = 500,
         silent: Boolean = true,
-    ): List<RunTestRepeatedResult> {
+    ): List<RunRepeatedResult> {
         if (!silent) println(" N=${cvrs.size} theta=$theta withoutReplacement")
 
         val reportedMean = theta + reportedMeanDiff
@@ -225,7 +225,7 @@ class CreatePollingDiffMeans {
         val info = ContestInfo("contest0", 0, listToMap("A", "B"), choiceFunction = SocialChoiceFunction.PLURALITY)
         val contestUA = makeContestUAfromCvrs(info, cvrs, isComparison = false)
 
-        val results = mutableListOf<RunTestRepeatedResult>()
+        val results = mutableListOf<RunRepeatedResult>()
         contestUA.assertions.map { assert ->
             if (!silent && showContests) println("Assertions for Contest ${contestUA.name}")
             if (!silent && showContests) println("  ${assert}")

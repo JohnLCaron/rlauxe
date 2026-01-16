@@ -13,7 +13,7 @@ private val logger = KotlinLogging.logger("runTestRepeated")
 
 // single threaded, used for estimating sample size
 // runs RiskTestingFn repeatedly, drawSample.reset() gives different permutation for each trial.
-fun runTestRepeated(
+fun runRepeated(
     name: String,
     drawSample: Sampler,
     ntrials: Int,
@@ -23,7 +23,7 @@ fun runTestRepeated(
     startingTestStatistic: Double = 1.0,
     tracker: SampleTracker,
     N:Int, // maximum cards in the contest (diluted)
-): RunTestRepeatedResult {
+): RunRepeatedResult {
     var totalSamplesNeeded = 0
     var fail = 0
     var nsuccess = 0
@@ -63,11 +63,11 @@ fun runTestRepeated(
     }
 
     val (_, variance, _) = welford.result()
-    return RunTestRepeatedResult(testParameters=testParameters, N=N, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
+    return RunRepeatedResult(testParameters=testParameters, N=N, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,
         ntrials=ntrials, variance=variance, statusMap, sampleCounts) // , margin = margin)
 }
 
-data class RunTestRepeatedResult(
+data class RunRepeatedResult(
     val testParameters: Map<String, Double>, // various parameters, depends on the test
     val N: Int,                  // population size (eg number of ballots)
     val totalSamplesNeeded: Int, // total number of samples needed in nsuccess trials

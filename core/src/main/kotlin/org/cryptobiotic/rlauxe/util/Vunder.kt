@@ -1,12 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.estimate.chooseNewCandidate
-import org.cryptobiotic.rlauxe.estimate.switchCandidateRankings
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import kotlin.random.Random
 
@@ -69,8 +64,6 @@ class VunderPicker(val vunder: Vunder) {
     // return candidateId
     fun chooseCandidateAndDecrement(randomChoice: Int): Int {
         val check = vunderRemaining.sumOf { it.second }
-        if (check != vunderLeft)
-            print("")
         require(check == vunderLeft)
         require(randomChoice in 0 until vunderLeft)
 

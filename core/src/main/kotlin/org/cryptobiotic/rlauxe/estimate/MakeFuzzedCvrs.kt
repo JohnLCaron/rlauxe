@@ -26,7 +26,6 @@ fun makeFuzzedCvrsFrom(infoList: List<ContestInfo>,
                        fuzzPct: Double,
                        welford: Welford? = null,
                        filter: ((CvrBuilder) -> Boolean)? = null,
-                       underVotes: Boolean = true,
 ): List<Cvr> {
     if (fuzzPct == 0.0) return cvrs
 
@@ -46,7 +45,7 @@ fun makeFuzzedCvrsFrom(infoList: List<ContestInfo>,
                     val currId: Int? = if (cvb.votes.size == 0) null else cvb.votes[0] // TODO only one vote allowed, cant use on Raire
                     cvb.votes.clear()
                     // choose a different candidate, or none.
-                    val ncandId = chooseNewCandidate(currId, ccontest.candidateIds, underVotes)
+                    val ncandId = chooseNewCandidate(currId, ccontest.candidateIds)
                     if (ncandId != null) {
                         cvb.votes.add(ncandId)
                     }

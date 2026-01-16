@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.util.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.estimate.showChangeMatrix
 import org.cryptobiotic.rlauxe.estimate.sumDiagonal
 import org.cryptobiotic.rlauxe.estimate.sumOffDiagonal

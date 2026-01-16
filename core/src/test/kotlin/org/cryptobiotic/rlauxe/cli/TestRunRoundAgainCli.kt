@@ -44,7 +44,7 @@ class TestRunRoundAgainCli {
                 "-auditDir", auditDir,
                 "-contest", "1",
                 "-round", "1",
-                "-assertion", "0/1",
+                "-assertion", "1/0",
             )
         )
     }

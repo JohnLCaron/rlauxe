@@ -38,7 +38,7 @@ class PlotDistributions {
             actuals.mapIndexed { idx, y -> Triple((idx + 1).toDouble(), 100.0 * y.toDouble() / Nc, "actual") }
 
         println("doOneEstSample")
-        val rr: RunTestRepeatedResult = doOneEstSample(Nc, margin, mvrsFuzzPct, auditConfig).first()
+        val rr: RunRepeatedResult = doOneEstSample(Nc, margin, mvrsFuzzPct, auditConfig).first()
         val sdata = rr.sampleCount.sorted()
         val tripleEst =
             sdata.mapIndexed { idx, y -> Triple((idx + 1).toDouble(), 100.0 * y.toDouble() / Nc, "estimate") }
@@ -66,7 +66,7 @@ class PlotDistributions {
     }
 
     // calculate 100 estimateSampleSizes, return List<EstimationResult>, single contest, no phantoms
-    fun doOneEstSample(Nc: Int, margin: Double, mvrsFuzzPct: Double, config: AuditConfig): List<RunTestRepeatedResult> {
+    fun doOneEstSample(Nc: Int, margin: Double, mvrsFuzzPct: Double, config: AuditConfig): List<RunRepeatedResult> {
         val undervotePct = 0.0
         val phantomPct = 0.0
 

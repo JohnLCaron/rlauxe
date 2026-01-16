@@ -76,6 +76,8 @@ fun auditPollingAssertion(
         upperBound = assorter.upperBound(),
         tracker=tracker,
     )
+    // TODO make optional
+    tracker.setDebuggingSequences(testFn.setDebuggingSequences())
 
     val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject=true) { sampling.sample() }
 

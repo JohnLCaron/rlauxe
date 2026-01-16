@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.plots.geometricMean
 import org.cryptobiotic.rlauxe.estimate.ClcaAttackSampler
-import org.cryptobiotic.rlauxe.estimate.runTestRepeated
+import org.cryptobiotic.rlauxe.estimate.runRepeated
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
 import org.cryptobiotic.rlauxe.makeStandardContest
@@ -49,7 +49,7 @@ class ReproduceCobraResults {
                         tracker=tracker,
                     )
 
-                val result = runTestRepeated(
+                val result = runRepeated(
                     name = "reproduceCobraResults",
                     drawSample = sampler,
                     ntrials = ntrials,
@@ -106,7 +106,7 @@ class ReproduceCobraResults {
                     BettingMart(bettingFn = oracle, N = N,
                         sampleUpperBound = upperBound, withoutReplacement = false, tracker=tracker)
 
-                val result = runTestRepeated(
+                val result = runRepeated(
                     name = "reproduceCobraResults",
                     drawSample = sampleWithErrors,
                     ntrials = ntrials,
@@ -177,7 +177,7 @@ class ReproduceCobraResults {
                             BettingMart(bettingFn = oracle, N = N,
                                 sampleUpperBound = upperBound, withoutReplacement = false, tracker=tracker)
 
-                        val result = runTestRepeated(
+                        val result = runRepeated(
                             name = "reproduceCobraResults",
                             drawSample = sampleWithErrors,
                             ntrials = ntrials,
@@ -264,7 +264,7 @@ class ReproduceCobraResults {
                             BettingMart(bettingFn = adaptive, N = N,
                                 sampleUpperBound = upperBound, withoutReplacement = false, tracker=tracker)
 
-                        val result = runTestRepeated(
+                        val result = runRepeated(
                             name = "reproduceCobraResults",
                             drawSample = sampler,
                             ntrials = ntrials,

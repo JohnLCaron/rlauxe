@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
 import org.cryptobiotic.rlauxe.core.TestH0Status
-import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.estimate.RunRepeatedResult
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -46,7 +46,7 @@ class TestSrt {
         //               val percentHist: Deciles? = null, // histogram of successful sample size as percentage of N, count trials in 10% bins
         //               val status: Map<TestH0Status, Int>? = null, // count of the trial status
         val parameters = mapOf("p1" to .01, "p2" to .001, "lam" to 1.1, "margin" to .04)
-        val betta = RunTestRepeatedResult(parameters, N=43, totalSamplesNeeded=112, nsuccess=12, ntrials=ntrials, variance=11.5, status)
+        val betta = RunRepeatedResult(parameters, N=43, totalSamplesNeeded=112, nsuccess=12, ntrials=ntrials, variance=11.5, status)
 
         // N: Int, reportedMean: Double, reportedMeanDiff: Double, d: Int, eta0Factor: Double = 0.0
         val target = betta.makeSRT(reportedMean=.52, reportedMeanDiff=.005)

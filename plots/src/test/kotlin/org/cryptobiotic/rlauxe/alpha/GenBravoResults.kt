@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.plots.plotNTsamplesPct
 import org.cryptobiotic.rlauxe.plots.plotNTsamples
 import org.cryptobiotic.rlauxe.plots.plotNTsuccessPct
-import org.cryptobiotic.rlauxe.estimate.runTestRepeated
+import org.cryptobiotic.rlauxe.estimate.runRepeated
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.workflow.Sampler
 import org.cryptobiotic.rlauxe.util.mean2margin
@@ -60,7 +60,7 @@ class GenBravoResults  {
             val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = 1.0, withoutReplacement = withoutReplacement, tracker=tracker)
             val sampler = if (withoutReplacement) GenSampleMeanWithoutReplacement(m, trueMean) else GenSampleMeanWithReplacement(m, trueMean)
 
-            val rr = runTestRepeated(
+            val rr = runRepeated(
                 name = "runBravoRepeat",
                 drawSample = sampler,
                 testParameters = mapOf("eta0" to eta0, "margin" to mean2margin(eta0)),

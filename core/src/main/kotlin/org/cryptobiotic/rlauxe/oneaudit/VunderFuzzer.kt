@@ -1,10 +1,12 @@
-package org.cryptobiotic.rlauxe.util
+package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.estimate.chooseNewCandidate
 import org.cryptobiotic.rlauxe.estimate.switchCandidateRankings
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.util.CardBuilder
+import org.cryptobiotic.rlauxe.util.Vunder
+import org.cryptobiotic.rlauxe.util.VunderPicker
 import kotlin.random.Random
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -40,13 +42,12 @@ private fun makeFuzzedCardFromCard(
     isIRV: Map<Int, Boolean>,
     card: AuditableCard, // must have votes, ie have a Cvr
     fuzzPct: Double,
-    undervotes: Boolean = true, // chooseNewCandidateWithUndervotes
 ) : AuditableCard {
     if (fuzzPct == 0.0 || card.phantom) return card
     val r = Random.nextDouble(1.0)
     if (r > fuzzPct) return card
 
-    val cardb = CardBuilder.fromCard(card)
+    val cardb = CardBuilder.Companion.fromCard(card)
     cardb.possibleContests.forEach { contestId ->
         val info = infos[contestId]
         if (info != null) {
@@ -58,7 +59,7 @@ private fun makeFuzzedCardFromCard(
                 val votes = cardb.votes[contestId]
                 val currId: Int? = if (votes == null || votes.size == 0) null else votes[0] // only one vote allowed
                 // choose a different candidate, or none.
-                val ncandId = chooseNewCandidate(currId, info.candidateIds, undervotes)
+                val ncandId = chooseNewCandidate(currId, info.candidateIds)
                 cardb.replaceContestVote(contestId, ncandId)
             }
         }
@@ -90,10 +91,10 @@ class VunderPools(pools: List<OneAuditPoolIF>, infos: Map<Int, ContestInfo>) {
 // for one pool
 // vunders: Contest id -> Vunder
 class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int ) {
-    val vunderPickers = vunders.mapValues { VunderPicker(it.value)}
+    val vunderPickers = vunders.mapValues { VunderPicker(it.value) }
 
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
-        val cardb = CardBuilder.fromCard(card)
+        val cardb = CardBuilder.Companion.fromCard(card)
         card.contests().forEach { contestId ->
             val vunderPicker = vunderPickers[contestId]
             if (vunderPicker == null || vunderPicker.isEmpty())

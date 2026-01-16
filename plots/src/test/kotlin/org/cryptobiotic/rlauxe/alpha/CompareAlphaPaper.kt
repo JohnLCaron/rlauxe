@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.workflow.PollingSampler
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.estimate.RunTestRepeatedResult
+import org.cryptobiotic.rlauxe.estimate.RunRepeatedResult
 import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
 import kotlin.test.Test
 
@@ -44,7 +44,7 @@ class CompareAlphaPaper {
             val compareAssertion = contestUAc.clcaAssertions.first()
 
             for (eta in etas) {
-                val compareResult: RunTestRepeatedResult = runAlphaMartRepeated(
+                val compareResult: RunRepeatedResult = runAlphaMartRepeated(
                     name = "makeClcaNoErrorSampler",
                     drawSample = makeClcaNoErrorSampler(contest.id, cvrs, compareAssertion.cassorter),
                     N = N,

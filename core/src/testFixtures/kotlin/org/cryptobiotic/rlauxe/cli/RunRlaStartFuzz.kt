@@ -73,12 +73,17 @@ object RunRlaStartFuzz {
             shortName = "rcands",
             description = "Number of candidates for raire contest"
         ).default(5)
+        val quantile by parser.option(
+            ArgType.Double,
+            shortName = "quantile",
+            description = "Estimation quantile (0.1-1.0)"
+        ).default(0.8)
 
         parser.parse(args)
         println("RunRlaStartFuzz on $topdir isPolling=$isPolling minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
-                " addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates")
+                " addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates quantile=$quantile")
         if (!isPolling) startTestElectionClca(topdir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates)
-            else startTestElectionPolling(topdir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests)
+            else startTestElectionPolling(topdir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, quantile)
     }
 }
 
@@ -172,11 +177,12 @@ fun startTestElectionPolling(
     pctPhantoms: Double?,
     ncards: Int,
     ncontests: Int = 11,
+    quantile: Double = .80,
 ) {
     val auditDir = "$topdir/audit"
     clearDirectory(Path(auditDir))
     val config = AuditConfig(AuditType.POLLING, nsimEst = 100, simFuzzPct = fuzzMvrs,
-        persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs)
+        persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs, quantile=quantile)
 
     clearDirectory(Path(auditDir))
     val election = TestPollingElection(

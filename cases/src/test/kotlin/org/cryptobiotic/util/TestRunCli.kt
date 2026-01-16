@@ -61,9 +61,10 @@ class TestRunCli {
             arrayOf(
                 "-in", topdir,
                 "-isPolling",
-                "-fuzzMvrs", ".001",
+                "-fuzzMvrs", "0.0",
                 "-ncards", "20000",
-                "-ncontests", "2",
+                "-ncontests", "5",
+                "-quantile", "0.5",
             )
         )
 

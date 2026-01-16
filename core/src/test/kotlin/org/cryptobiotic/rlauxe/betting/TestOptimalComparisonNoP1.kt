@@ -1,6 +1,9 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.betting.etaToLam
+import org.cryptobiotic.rlauxe.core.OptimalComparisonNoP1
+import org.cryptobiotic.rlauxe.core.OptimalLambda
+import org.cryptobiotic.rlauxe.core.PluralityErrorRates
+import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

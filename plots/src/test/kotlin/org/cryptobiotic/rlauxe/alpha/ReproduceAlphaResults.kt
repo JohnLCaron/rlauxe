@@ -1,8 +1,12 @@
 package org.cryptobiotic.rlauxe.alpha
 
+import org.cryptobiotic.rlauxe.betting.AlphaMart
 import org.cryptobiotic.rlauxe.betting.SamplerFromAssortValues
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.TruncShrinkage
+import org.cryptobiotic.rlauxe.betting.eps
+import org.cryptobiotic.rlauxe.betting.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.plots.plotSRS
@@ -145,7 +149,7 @@ class ReproduceAlphaResults {
                     for (d in dl) {
                         val tracker = ClcaErrorTracker(0.0, 1.0)
                         val trunc = TruncShrinkage(N = N, upperBound = upperBound, d = d, eta0 = eta0, c = c)
-                        val alpha = AlphaMart(estimFn = trunc, N = N, upperBound=upperBound, tracker=tracker)
+                        val alpha = AlphaMart(estimFn = trunc, N = N, upperBound = upperBound, tracker = tracker)
 
                         print("  eta0=$eta0 d=$d")
                         val result =  runRepeated(

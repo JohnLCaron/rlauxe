@@ -267,7 +267,7 @@ fun createColoradoElectionP(
         auditType.isClca() -> AuditConfig(AuditType.CLCA, contestSampleCutoff = 20000, riskLimit = .03, nsimEst=10)
 
         else -> AuditConfig( // // TODO hasStyle=false
-            AuditType.ONEAUDIT, riskLimit = .03, nsimEst = 1,
+            AuditType.ONEAUDIT, riskLimit = .03, nsimEst = 10,
             oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = false)
         )
     }

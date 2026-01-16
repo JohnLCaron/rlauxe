@@ -1,7 +1,9 @@
 package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.SampleFromArray
+import org.cryptobiotic.rlauxe.betting.AlphaMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.Bernoulli
 import org.cryptobiotic.rlauxe.util.doublePrecision
@@ -118,7 +120,7 @@ class TestAlphaMart {
 
         val tracker = ClcaErrorTracker(0.0, 1.0)
         val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
-        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u, tracker=tracker)
+        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u, tracker = tracker)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
         val sampler = SampleFromArray(x.toDoubleArray())
 
@@ -156,7 +158,7 @@ class TestAlphaMart {
             eta0 = eta0,
         )
         val tracker = ClcaErrorTracker(0.0, 1.0)
-        val alpha = AlphaMart(estimFn = estimFn, N = N, withoutReplacement = false, upperBound = u, tracker=tracker)
+        val alpha = AlphaMart(estimFn = estimFn, N = N, withoutReplacement = false, upperBound = u, tracker = tracker)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
         val sampler = SampleFromArray(x.toDoubleArray())
 
@@ -221,7 +223,7 @@ class TestAlphaMart {
 
         val tracker = ClcaErrorTracker(0.0, 1.0)
         val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
-        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u, tracker=tracker)
+        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u, tracker = tracker)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
 
         val sampler = SampleFromArray(x.toDoubleArray())
@@ -236,7 +238,7 @@ class TestAlphaMart {
 
         val tracker = ClcaErrorTracker(0.0, 1.0)
         val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
-        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u, tracker=tracker)
+        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u, tracker = tracker)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
 
         val sampler = SampleFromArray(x.toDoubleArray())

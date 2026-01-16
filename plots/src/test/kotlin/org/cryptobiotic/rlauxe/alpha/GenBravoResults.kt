@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.alpha
 
+import org.cryptobiotic.rlauxe.betting.AlphaMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.EstimFn
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.plots.plotNTsamplesPct
@@ -57,7 +59,13 @@ class GenBravoResults  {
         trueMeans.forEach { trueMean ->
             val estimFn = FixedMean(eta0)
             val tracker = ClcaErrorTracker(0.0, 1.0)
-            val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = 1.0, withoutReplacement = withoutReplacement, tracker=tracker)
+            val alpha = AlphaMart(
+                estimFn = estimFn,
+                N = N,
+                upperBound = 1.0,
+                withoutReplacement = withoutReplacement,
+                tracker = tracker
+            )
             val sampler = if (withoutReplacement) GenSampleMeanWithoutReplacement(m, trueMean) else GenSampleMeanWithReplacement(m, trueMean)
 
             val rr = runRepeated(

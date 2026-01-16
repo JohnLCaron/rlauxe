@@ -1,6 +1,8 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.core.TestH0Result
+import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.workflow.Sampler
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
@@ -57,7 +59,7 @@ fun doOneAlphaMartRun(
         N = drawSample.maxSamples(),
         upperBound = upperBound,
         withoutReplacement = withoutReplacement,
-        tracker=tracker
+        tracker = tracker
     )
 
     return alpha.testH0(maxSamples, terminateOnNullReject = true) { drawSample.sample() }

@@ -63,7 +63,7 @@ fun createColoradoPolling(
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
         else -> AuditConfig(
-            AuditType.POLLING, riskLimit = .03, nsimEst = 100,
+            AuditType.POLLING, riskLimit = .03, nsimEst = 100, quantile = 0.5,
             pollingConfig = PollingConfig()
         )
     }

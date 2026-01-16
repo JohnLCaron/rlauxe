@@ -30,7 +30,7 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.52,
+                        "reportedMean": 0.5198019801980198,
                         "winner": 0,
                         "loser": 1
                     }
@@ -42,21 +42,21 @@
                         "className": "ClcaAssorterOneAudit",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.52,
+                            "reportedMean": 0.5198019801980198,
                             "winner": 0,
                             "loser": 1
                         },
-                        "dilutedMargin": 0.040000000000000036,
+                        "dilutedMargin": 0.03960396039603964,
                         "poolAverages": {
                             "assortAverage": {
-                                "42": 0.5202
+                                "42": 0.5168333333333334
                             }
                         }
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 50000
+            "Npop": 50500
         }
     ],
     "rcontestsUnderAudit": []

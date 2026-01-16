@@ -6,7 +6,7 @@ import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.util.OneAuditVunderBarFuzzer
+import org.cryptobiotic.rlauxe.util.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
@@ -14,7 +14,6 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.util.VunderBar
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import org.cryptobiotic.rlauxe.workflow.readCardManifest
 import kotlin.io.path.Path
@@ -104,7 +103,7 @@ object RunRlaCreateOneAudit {
         val config = AuditConfig(
             AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = fuzzMvrs,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.clca, useFirst = true)
+            oaConfig = OneAuditConfig(OneAuditStrategyType.clca)
         )
 
         clearDirectory(Path(auditDir))
@@ -132,8 +131,8 @@ object RunRlaCreateOneAudit {
         scardIter.forEach { sortedCards.add(it) }
 
         // TODO test OneAuditVunderBarFuzzer
-        val vunderFuzz = OneAuditVunderBarFuzzer(VunderBar(cardManifest.populations as List<OneAuditPoolIF>, infos), infos, fuzzMvrs)
-        val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.makePairsFromCards(sortedCards)
+        val vunderFuzz = OneAuditVunderFuzzer(cardManifest.populations as List<OneAuditPoolIF>, infos, fuzzMvrs, sortedCards)
+        val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.fuzzedPairs
         val sortedMvrs = oaFuzzedPairs.map { it.first }
         // have to write this here, where we know the mvrs
         writePrivateMvrs(publisher, sortedMvrs)

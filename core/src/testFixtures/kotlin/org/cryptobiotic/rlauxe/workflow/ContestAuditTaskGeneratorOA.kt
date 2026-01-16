@@ -122,13 +122,10 @@ class OneAuditSingleRoundWithDilutedMargin(
     val quiet: Boolean = true,
 ): ContestAuditTaskGenerator {
 
-    override fun name() = "ClcaSingleRoundAuditTaskGenerator"
+    override fun name() = "OneAuditSingleRoundWithDilutedMargin"
 
     override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
-        val config = auditConfigIn ?: AuditConfig(
-            AuditType.ONEAUDIT, true,
-            simFuzzPct = mvrsFuzzPct,
-        )
+        val config = auditConfigIn ?: AuditConfig(AuditType.ONEAUDIT, true, simFuzzPct = mvrsFuzzPct)
 
         val (contestUA, mvrs, cards, pools) = makeOneAuditTest(
                 margin,

@@ -7,13 +7,12 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.util.OneAuditVunderBarFuzzer
+import org.cryptobiotic.rlauxe.util.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.util.Vunder
-import org.cryptobiotic.rlauxe.util.VunderBar
 import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import org.cryptobiotic.rlauxe.util.tabulateCards
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -138,9 +137,9 @@ class TestVunder {
 
         val info2 = ContestInfo("contest2", 2,  mapOf("Wes" to 1), SocialChoiceFunction.PLURALITY)
         val infos = mapOf(contestOA.id to contestOA.contest.info(), 2 to info2)
-        val vunderFuzz = OneAuditVunderBarFuzzer( VunderBar(cardPools, infos), infos, .00)
+        val vunderFuzz = OneAuditVunderFuzzer( cardPools, infos, 0.0, cards)
 
-        val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.makePairsFromCards(cards)
+        val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.fuzzedPairs
         val fuzzedMvrs = oaFuzzedPairs.map { it.first }
 
         val fuzzedMvrTab = tabulateCards(fuzzedMvrs.iterator(), infos)
@@ -156,8 +155,8 @@ class TestVunder {
         // what if we choose the first 1000 ballots ??
         val limit = 1000
         val limitedCards = cards.subList(0, limit)
-        vunderFuzz.reset()
-        val limitedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.makePairsFromCards(limitedCards)
+        val limitedFuzz = OneAuditVunderFuzzer( cardPools, infos, 0.0, limitedCards)
+        val limitedPairs: List<Pair<AuditableCard, AuditableCard>> = limitedFuzz.fuzzedPairs
         val limitedMvrs = limitedPairs.map { it.first }
 
         val limitedMvrTab = tabulateCards(limitedMvrs.iterator(), infos)

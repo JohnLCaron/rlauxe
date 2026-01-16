@@ -26,7 +26,7 @@ class TestRunCli {
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",
-                "-fuzzMvrs", "0.0",
+                "-fuzzMvrs", "0.001",
                 "-ncards", "10000",
                 "-ncontests", "11",
             )
@@ -61,7 +61,7 @@ class TestRunCli {
             arrayOf(
                 "-in", topdir,
                 "-isPolling",
-                "-fuzzMvrs", ".0023",
+                "-fuzzMvrs", ".001",
                 "-ncards", "20000",
                 "-ncontests", "2",
             )
@@ -101,7 +101,7 @@ class TestRunCli {
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",
-                "-fuzzMvrs", ".0123",
+                "-fuzzMvrs", ".00123",
                 "-ncards", "10000",
                 "-ncontests", "10",
                 "--addRaireContest",
@@ -145,10 +145,10 @@ class TestRunCli {
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.04",
-                "-fuzzMvrs", "0.0",
+                "-fuzzMvrs", "0.001",
                 "-cvrFraction", "0.95",
                 "-ncards", "50000",
-                "-extraPct", "0.00"
+                "-extraPct", "0.01"
             )
         )
         val publisher = Publisher(auditdir)

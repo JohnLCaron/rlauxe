@@ -70,7 +70,7 @@ class TestOneAuditTask {
             margin,
             underVotePct = 0.0,
             phantomPct = 0.005,
-            cvrPercent = 0.90,
+            cvrPercent = 0.95,
             extraInPool = Nc/20, // 5%
             mvrsFuzzPct = mvrFuzzPct,
             auditConfigIn = config,

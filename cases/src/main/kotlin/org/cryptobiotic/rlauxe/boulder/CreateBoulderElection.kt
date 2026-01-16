@@ -341,7 +341,7 @@ fun createBoulderElection(
         else if (auditType.isOA())
             AuditConfig( // TODO hasStyle=false ?
                 AuditType.ONEAUDIT, riskLimit=riskLimit, minRecountMargin=minRecountMargin, nsimEst=10,
-                oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = true)
+                oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = false)
             )
     else throw RuntimeException("unsupported audit type $auditType")
 

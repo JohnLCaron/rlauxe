@@ -112,7 +112,7 @@ class TestCreateSfElection {
             val auditConfig = AuditConfig(
                 AuditType.ONEAUDIT, hasStyles = true, sampleLimit = 50000, riskLimit = .05, nsimEst = 10,
                 minRecountMargin = 0.0,
-                oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true),
+                oaConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = false),
                 skipContests = listOf(14, 28)
             )
 

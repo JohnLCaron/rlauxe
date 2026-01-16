@@ -41,7 +41,7 @@ data class AuditConfig(
     // old config, replace by error strategies
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.previous),
-    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = true),
+    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = false),
 
     // default error strategies
     val pollingErrorStrategy: PollingErrorStrategy = PollingErrorStrategy(),

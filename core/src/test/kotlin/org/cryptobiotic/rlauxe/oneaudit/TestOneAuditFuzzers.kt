@@ -4,11 +4,10 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.util.OneAuditVunderBarFuzzer
+import org.cryptobiotic.rlauxe.util.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.estimate.showChangeMatrix
 import org.cryptobiotic.rlauxe.estimate.sumDiagonal
 import org.cryptobiotic.rlauxe.estimate.sumOffDiagonal
-import org.cryptobiotic.rlauxe.util.VunderBar
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.mergeReduceS
@@ -141,9 +140,8 @@ class TestOneAuditFuzzers {
         val countPoolCards = cards.count { it.poolId == cardPool.poolId }
         assertEquals(countPoolCards, cardPool.ncards())
 
-        val vunderBar = VunderBar(pools, infos)
-        val vunderFuzz = OneAuditVunderBarFuzzer(vunderBar, infos, fuzzPct)
-        val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.makePairsFromCards(cards)
+        val vunderFuzz = OneAuditVunderFuzzer(pools, infos, fuzzPct, cards)
+        val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.fuzzedPairs
         assertEquals(cards.size, oaFuzzedPairs.size)
 
         val countPoolCards2 = oaFuzzedPairs.count { it.second.poolId == cardPool.poolId }

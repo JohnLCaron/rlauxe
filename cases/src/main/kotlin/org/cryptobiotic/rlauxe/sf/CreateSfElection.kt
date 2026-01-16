@@ -333,7 +333,7 @@ fun createSfElection(
 
         (auditType ==  AuditType.ONEAUDIT) -> AuditConfig(
             AuditType.ONEAUDIT, riskLimit = .05, nsimEst = 10,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = true)
+            oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = false)
         )
 
         else -> AuditConfig(AuditType.POLLING, riskLimit = .05, contestSampleCutoff = 10000, nsimEst = 100)

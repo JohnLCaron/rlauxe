@@ -14,6 +14,7 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.ln
 import kotlin.math.max
+import kotlin.math.min
 
 // generalize AdaptiveBetting for any clca assorter, including OneAudit
 // Kelly optimization of lambda parameter with estimated error rates
@@ -108,7 +109,7 @@ class GeneralAdaptiveBetting(
     ): Double {
         if (sampleNum == 0) return 0.0
         if (errorCount == 0) return 0.0 // experiment
-        val used = if (d > 0) d else 1
+        val used = min(d, 1)
         val est = (used * apriori + errorCount) / (used + sampleNum - 1)
         return est
     }
@@ -125,7 +126,10 @@ class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, 
         require (maxBet > 0.0)
 
         val oasum = if (oaErrorRates == null) 0.0 else oaErrorRates.map{ it.value }.sum()
-        p0 = 1.0 - clcaErrorRates.map{ it.value }.sum() - oasum  // calculate against other values to get it exact
+        val clcasum = clcaErrorRates.map{ it.value }.sum()
+        p0 = 1.0 - clcasum - oasum    // calculate against other values to get it exact
+        if (p0 < 0.0)
+            print("")
         require (p0 >= 0.0)
         if (debug) {
             print("OneAuditOptimalLambda init: mui=$mui ")

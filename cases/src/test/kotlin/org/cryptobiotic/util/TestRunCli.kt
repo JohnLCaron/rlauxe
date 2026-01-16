@@ -26,7 +26,7 @@ class TestRunCli {
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",
-                "-fuzzMvrs", ".0",
+                "-fuzzMvrs", "0.0",
                 "-ncards", "10000",
                 "-ncontests", "11",
             )

@@ -8,6 +8,8 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.workflow.MvrManager
+import kotlin.math.ln
+import kotlin.math.roundToInt
 
 private val debugConsistent = false
 private val logger = KotlinLogging.logger("ConsistentSampling")
@@ -71,70 +73,83 @@ fun consistentSampling(
     mvrManager: MvrManager,
     previousSamples: Set<Long> = emptySet(),
 ) {
-    val contestsNotDone = auditRound.contestRounds.filter { !it.done }
-    if (contestsNotDone.isEmpty()) return
+    // TODO included vs done
+    val contestsIncluded = auditRound.contestRounds.filter { !it.done && it.included}
+    if (contestsIncluded.isEmpty()) return
 
     // calculate how many samples are wanted for each contest.
     // TODO trying simple
-    val wantSampleSizeMap = wantSampleSizeSimple(contestsNotDone, previousSamples, mvrManager.sortedCards().iterator())
-    require(wantSampleSizeMap.values.all { it >= 0 }) { "wantSampleSize must be >= 0" }
+    val wantSampleSize = wantSampleSizeSimple(contestsIncluded, previousSamples, mvrManager.sortedCards().iterator())
+    require(wantSampleSize.values.all { it >= 0 }) { "wantSampleSize must be >= 0" }
 
     val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
     val haveNewSamples = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
-    fun contestWantsMoreSamples(c: ContestRound): Boolean {
-        if (c.auditorWantNewMvrs > 0 && (haveNewSamples[c.id] ?: 0) >= c.auditorWantNewMvrs) return false
-        return (haveSampleSize[c.id] ?: 0) < (wantSampleSizeMap[c.id] ?: 0)
-    }
-
-    val contestsIncluded = contestsNotDone.filter { it.included }
-    val haveActualMvrs = mutableMapOf<Int, Int>() // contestId -> new nmvrs in sample
-
     var newMvrs = 0 // count when this card not in previous samples
-    val sampledCards = mutableListOf<AuditableCard>()
 
-    // makes only one partial iteration over sortedCards, until wantSamples foreach contest are fouond
-    var sampleIndex = 0  // track maximum index (not done yet)
+    val sampledCards = mutableListOf<AuditableCard>()
+    var cardIndex = 0  // track maximum index (not done yet)
+
     val sortedCardIter = mvrManager.sortedCards().iterator()
     while (
-        ((auditRound.auditorWantNewMvrs < 0) || (newMvrs < auditRound.auditorWantNewMvrs)) && // TODO REDO or delete?
-        contestsIncluded.any { contestWantsMoreSamples(it) } &&
-        sortedCardIter.hasNext()
+        sortedCardIter.hasNext() &&
+        // ((auditRound.auditorWantNewMvrs < 0) || (newMvrs < auditRound.auditorWantNewMvrs)) && // TODO REDO or delete?
+        contestsIncluded.any { (haveSampleSize[it.id] ?: 0) < (wantSampleSize[it.id] ?: 0) }
     ) {
         // get the next card in sorted order
         val card = sortedCardIter.next()
 
-        // does this contribute to one or more contests that need more samples?
-        if (contestsIncluded.any { contestRound -> contestWantsMoreSamples(contestRound) && card.hasContest(contestRound.id) }) {
-            // then use it
-            sampledCards.add(card)
-            if (!previousSamples.contains(card.prn)) {
-                newMvrs++
-            }
-            //
-            contestsIncluded.forEach { contest ->
-                if (card.hasContest(contest.id)) {
-                    haveSampleSize[contest.id] = haveSampleSize[contest.id]?.plus(1) ?: 1
+        // do we want it ?
+        var include = false
+        contestsIncluded.forEach { contest ->
+            // does this contest want this card ?
+            if (card.hasContest(contest.id)) {
+                if ((haveSampleSize[contest.id] ?: 0) < (wantSampleSize[contest.id] ?: 0)) {
+                    include = true
                 }
-            }
-            // track actual for all contests not done
-            contestsNotDone.forEach { contest ->
-                if (card.hasContest(contest.id)) {
-                    haveActualMvrs[contest.id] = haveActualMvrs[contest.id]?.plus(1) ?: 1
-                    if (!previousSamples.contains(card.prn))
+            } // has contest
+        }
+
+        if (include) {
+            sampledCards.add(card)
+            if (!previousSamples.contains(card.prn))
+                newMvrs++
+        }
+
+        // track how many continguous mvrs each contest has
+        contestsIncluded.forEach { contest ->
+            if (card.hasContest(contest.id)) {
+                if (include && !contest.skipped) {
+                    haveSampleSize[contest.id] = haveSampleSize[contest.id]?.plus(1) ?: 1
+                    if (!previousSamples.contains(card.prn)) {
                         haveNewSamples[contest.id] = haveNewSamples[contest.id]?.plus(1) ?: 1
+                    }
+                    // ok to use if we havent skipped any cards for this contest in its sequence
+                    contest.maxSampleIndex = sampledCards.size
+                } else {
+                    // if card has contest but its not included in the sample, then continuity has been broken
+                    contest.skipped = true
                 }
             }
         }
-        sampleIndex++
+
+        cardIndex++
     }
 
-    if (debugConsistent) logger.info{"**consistentSampling haveActualMvrs = $haveActualMvrs, haveNewSamples = $haveNewSamples, newMvrs=$newMvrs"}
-    val contestIdMap = contestsNotDone.associate { it.id to it }
+    val wantMore = contestsIncluded.any { (haveSampleSize[it.id] ?: 0) < (wantSampleSize[it.id] ?: 0) }
+    if (wantMore) {
+        contestsIncluded.forEach {
+            if ((haveSampleSize[it.id] ?: 0) < (wantSampleSize[it.id] ?: 0))
+                logger.warn { "contest ${it.id} ${(haveSampleSize[it.id] ?: 0)} < ${(wantSampleSize[it.id] ?: 0)}" }
+        }
+    }
+
+    if (debugConsistent) logger.info{"**consistentSampling haveSampleSize = $haveSampleSize, haveNewSamples = $haveNewSamples, newMvrs=$newMvrs"}
+    val contestIdMap = contestsIncluded.associate { it.id to it }
     contestIdMap.values.forEach { // defaults to 0
         it.actualMvrs = 0
         it.actualNewMvrs = 0
     }
-    haveActualMvrs.forEach { (contestId, nmvrs) ->
+    haveSampleSize.forEach { (contestId, nmvrs) ->
         contestIdMap[contestId]?.actualMvrs = nmvrs
     }
     haveNewSamples.forEach { (contestId, nnmvrs) ->
@@ -204,6 +219,8 @@ fun estimationSubset(
 // CLCA and OneAudit
 // we dont use this for the actual estimation....
 private fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, fac: Double): Int {
+    val est0 = estSamplesNeeded( contestRound,  config.riskLimit, fac)
+
     val minAssertionRound = contestRound.minAssertion()
     if (minAssertionRound == null) {
         contestRound.minAssertion()
@@ -214,7 +231,28 @@ private fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, fa
     val minAssertion = minAssertionRound.assertion
 
     val cassorter = (minAssertion as ClcaAssertion).cassorter
-    return roundUp(fac * cassorter.sampleSizeNoErrors(maxRisk = config.clcaConfig.maxRisk, lastPvalue))
+    val est = roundUp(fac * cassorter.sampleSizeNoErrors(maxRisk = config.clcaConfig.maxRisk, lastPvalue))
+    // println("$est $est0") TODO
+    return est0
+}
+
+fun estSamplesNeeded(contestRound: ContestRound, alpha: Double, fac: Double): Int {
+    val minAssertionRound = contestRound.minAssertion()
+    if (minAssertionRound == null) {
+        contestRound.minAssertion()
+        throw RuntimeException()
+    }
+
+    val lastPvalue = minAssertionRound.auditResult?.pvalue ?: alpha
+    val minAssertion = minAssertionRound.assertion
+
+    val cassorter = (minAssertion as ClcaAssertion).cassorter
+    // val expected = ln(1 / alpha) / ln(2 * cassorter.noerror())
+    val estSamplesNoErrors = ln(1 / lastPvalue) / ln(2 * cassorter.noerror())
+
+    val estNeeded =  (fac * estSamplesNoErrors).roundToInt()
+    // contestRound.estCardsNeeded = estNeeded
+    return estNeeded
 }
 
 //val minSamples = -ln(.05) / ln(2 * minAssorter.noerror())

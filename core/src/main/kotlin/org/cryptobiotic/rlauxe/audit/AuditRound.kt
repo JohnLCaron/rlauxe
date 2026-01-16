@@ -53,7 +53,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     val name = contestUA.name
     val Npop = contestUA.Npop
 
-    var missed = false // true when contest has card but
+    var skipped = false // true when contest has card but it was skilled in the sample
     var maxSampleIndex = 0 // maximum index in the sample allowed to use
     var estMvrs = 0 // Estimate of the mvrs required to confirm the contest
     var estNewMvrs = 0 // Estimate of the new mvrs required to confirm the contest

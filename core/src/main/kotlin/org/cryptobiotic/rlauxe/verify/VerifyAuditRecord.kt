@@ -141,14 +141,16 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         var count = 0
         while (mycards.hasNext() && count < estCards) {
             val mycard = mycards.next()
-            val nextcard = nextcards.next()
-            if (mycard.location == "card9835" && round == 3 && contest.id == 9) {
-                val wwtf = mycard.equals(nextcard)
-            }
+            if (nextcards.hasNext()) {
+                val nextcard = nextcards.next()
+                if (mycard.location == "card9835" && round == 3 && contest.id == 9) {
+                    val wwtf = mycard.equals(nextcard)
+                }
 
-            if (mycard != nextcard) {
-                result.addError("  failed ${mycard.location()} != ${nextcard.location}")
-                return false
+                if (mycard != nextcard) {
+                    result.addError("  failed ${mycard.location()} != ${nextcard.location}")
+                    return false
+                }
             }
             count++
         }

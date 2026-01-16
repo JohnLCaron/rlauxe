@@ -96,6 +96,7 @@ data class ContestRoundJson(
     var assertionRounds: List<AssertionRoundJson>,
     val roundIdx: Int,
 
+    val maxSampleIndex: Int,
     val estMvrs: Int,
     val estNewMvrs: Int,
     val actualMvrs: Int,
@@ -112,6 +113,7 @@ fun ContestRound.publishJson() : ContestRoundJson {
         this.id,
         assertionRounds.map { it.publishJson() },
         roundIdx = this.roundIdx,
+        maxSampleIndex = this.maxSampleIndex,
         estMvrs = this.estMvrs,
         estNewMvrs = this.estNewMvrs,
         actualMvrs = this.actualMvrs,
@@ -135,6 +137,7 @@ fun ContestRoundJson.import(contestUA: ContestWithAssertions): ContestRound {
     }
     val contestRound = ContestRound(contestUA, assertionRounds, this.roundIdx)
 
+    contestRound.maxSampleIndex = this.maxSampleIndex
     contestRound.estMvrs = this.estMvrs
     contestRound.estNewMvrs = this.estNewMvrs
     contestRound.actualMvrs = this.actualMvrs

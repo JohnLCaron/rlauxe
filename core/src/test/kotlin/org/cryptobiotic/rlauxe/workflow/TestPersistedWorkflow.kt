@@ -155,7 +155,7 @@ fun runPersistedAudit(topdir: String, test:Boolean) {
 
     println("============================================================")
     var done = false
-    var lastRound: AuditRound? = null
+    var lastRound: AuditRoundIF? = null
 
     while (!done) {
         lastRound = runRound(inputDir = auditdir)

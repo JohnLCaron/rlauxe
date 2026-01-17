@@ -33,6 +33,7 @@ import java.nio.file.StandardOpenOption
 //)
 
 // one in each roundXX subdirectory
+// note dont store samplePrns: List<Long>, these are kept im seperate file
 @Serializable
 data class AuditRoundJson(
     val roundIdx: Int,
@@ -44,7 +45,7 @@ data class AuditRoundJson(
     var auditorWantNewMvrs: Int,
 )
 
-fun AuditRound.publishJson() : AuditRoundJson {
+fun AuditRoundIF.publishJson() : AuditRoundJson {
     return AuditRoundJson(
         this.roundIdx,
         contestRounds.map { it.publishJson() },
@@ -61,6 +62,7 @@ fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: L
     val contestRounds = this.contestRounds.map {
         it.import( contestUAmap[it.id]!! )
     }
+    // TODO Composite ??
     return AuditRound(
         this.roundIdx,
         contestRounds,
@@ -335,8 +337,8 @@ fun ClcaErrorCountsJson.import() = ClcaErrorCounts(
 
 /////////////////////////////////////////////////////////////////////////////////
 
-fun writeAuditRoundJsonFile(AuditRound: AuditRound, filename: String) {
-    val json = AuditRound.publishJson()
+fun writeAuditRoundJsonFile(auditRound: AuditRoundIF, filename: String) {
+    val json = auditRound.publishJson()
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
     FileOutputStream(filename).use { out ->
         jsonReader.encodeToStream(json, out)
@@ -348,7 +350,7 @@ fun readAuditRoundJsonFile(
     auditRoundFile: String,
     contests: List<ContestWithAssertions>,
     samplePrns: List<Long>,
-): Result<AuditRound, ErrorMessages> {
+): Result<AuditRoundIF, ErrorMessages> {
 
     val errs = ErrorMessages("readAuditRoundJsonFile '${auditRoundFile}'")
     val filepath = Path.of(auditRoundFile)

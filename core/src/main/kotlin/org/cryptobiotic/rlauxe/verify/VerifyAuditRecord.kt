@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.persist.AuditRecordIF
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.existsOrZip
@@ -18,7 +19,7 @@ import org.cryptobiotic.rlauxe.workflow.readCardManifest
 private val logger = KotlinLogging.logger("VerifyAuditRecord")
 
 class VerifyAuditRecord(val auditRecordLocation: String) {
-    val auditRecord: AuditRecord
+    val auditRecord: AuditRecordIF
     val publisher: Publisher
     val config: AuditConfig
     val contests: List<ContestWithAssertions>
@@ -60,7 +61,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         return result
     }
 
-    fun verifyRound(round: AuditRound, result: VerifyResults) {
+    fun verifyRound(round: AuditRoundIF, result: VerifyResults) {
         result.addMessage(" verify round = ${round.roundIdx}")
         round.contestRounds.forEach { verifyContest(it, result) }
     }

@@ -50,7 +50,8 @@ fun createBelgiumClca(
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
         else -> AuditConfig(
-            AuditType.CLCA, removeCutoffContests = false, riskLimit = .05, nsimEst=10, minRecountMargin=0.0, simFuzzPct = 0.001, // auditSampleLimit=1000,
+            AuditType.CLCA, removeCutoffContests = false, riskLimit = .05, nsimEst=10, minRecountMargin=0.0, simFuzzPct = 0.001,
+            quantile=0.5
         )
     }
     val election = BelgiumClca(contestd)

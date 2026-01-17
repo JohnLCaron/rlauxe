@@ -217,7 +217,18 @@ fun tabulateVotesFromCvrs(cvrs: Iterator<Cvr>): Map<Int, Map<Int, Int>> {
     return votes
 }
 
-fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, ncands: Int, voteForN: Int = 1): Vunder {
+fun countContestsFromCvrs(cvrs: Iterator<Cvr>): Map<Int, Int> {
+    val contestCount = mutableMapOf<Int, Int>()
+    for (cvr in cvrs) {
+        for ((contestId, _) in cvr.votes) {
+            val count = contestCount.getOrPut(contestId) { 0 }
+            contestCount[contestId] = count + 1
+        }
+    }
+    return contestCount
+}
+
+fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, voteForN: Int = 1): Vunder {
     val result = mutableMapOf<Int, Int>()
     var undervotes = 0
     cvrs.forEach{ cvr ->

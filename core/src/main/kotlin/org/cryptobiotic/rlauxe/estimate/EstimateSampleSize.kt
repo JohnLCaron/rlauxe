@@ -41,7 +41,7 @@ private val logger = KotlinLogging.logger("EstimateSampleSizes")
 // 1. _Estimation_: for each contest, estimate how many samples are needed for this AuditRound
 fun estimateSampleSizes(
     config: AuditConfig,
-    auditRound: AuditRound,
+    auditRound: AuditRoundIF,
     cardManifest: CloseableIterable<AuditableCard>, // Clca, OneAudit, ignored for Polling
     cardPools: List<OneAuditPoolIF>?, // Clca, OneAudit, ignored for Polling
     previousSamples: Set<Long>,

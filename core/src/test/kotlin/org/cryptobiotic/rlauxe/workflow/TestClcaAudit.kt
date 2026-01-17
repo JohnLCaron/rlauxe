@@ -111,7 +111,7 @@ class TestClcaAudit {
         println(finalRound.show())
     }
 
-    fun testClcaWorkflow(config: AuditConfig, testData: MultiContestTestData, mvrFuzzPct: Double? = null): AuditRound? {
+    fun testClcaWorkflow(config: AuditConfig, testData: MultiContestTestData, mvrFuzzPct: Double? = null): AuditRoundIF? {
         val contests: List<Contest> = testData.contests
         println("Start testClcaWorkflow $testData")
         contests.forEach{ println("  $it")}

@@ -75,10 +75,10 @@ class MvrManagerForTesting(
 // runs audit rounds until finished. return last audit round
 // Can only use this if the MvrManager implements MvrManagerTest
 // otherwise run one round at a time with PersistentAudit
-fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boolean=true, maxRounds:Int=10): AuditRound? {
+fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boolean=true, maxRounds:Int=10): AuditRoundIF? {
     val stopwatch = Stopwatch()
 
-    var nextRound: AuditRound? = null
+    var nextRound: AuditRoundIF? = null
     var complete = false
     while (!complete) {
         nextRound = workflow.startNewRound(quiet=quiet)

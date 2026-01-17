@@ -8,6 +8,7 @@ import com.github.michaelbull.result.unwrapError
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
+import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
@@ -22,13 +23,20 @@ import java.nio.file.Path
 private val logger = KotlinLogging.logger("AuditRecord")
 private val showMissing = true
 
+interface AuditRecordIF {
+    val location: String
+    val config: AuditConfig
+    val contests: List<ContestWithAssertions>
+    val rounds: List<AuditRoundIF>
+}
+
 class AuditRecord(
-    val location: String,
-    val config: AuditConfig,
-    val contests: List<ContestWithAssertions>,
-    val rounds: List<AuditRound>,
+    override val location: String,
+    override val config: AuditConfig,
+    override val contests: List<ContestWithAssertions>,
+    override val rounds: List<AuditRound>,
     mvrs: List<AuditableCard> // mvrs already sampled
-) {
+): AuditRecordIF {
     val previousMvrs = mutableMapOf<Long, AuditableCard>() // TODO not used ??
 
     init {
@@ -63,7 +71,10 @@ class AuditRecord(
     companion object {
 
         // used by viewer
-        fun readFrom(location: String): AuditRecord? {
+        fun readFrom(location: String): AuditRecordIF? {
+            val compositeRecord = CompositeRecord.readFrom(location)
+            if (compositeRecord != null) return compositeRecord
+
             val auditRecordResult = readFromResult(location)
             if (auditRecordResult is Ok) {
                 return auditRecordResult.unwrap()
@@ -73,7 +84,7 @@ class AuditRecord(
             }
         }
 
-        fun readFromResult(location: String): Result<AuditRecord, ErrorMessages> {
+        fun readFromResult(location: String): Result<AuditRecordIF, ErrorMessages> {
             val errs = ErrorMessages("readAuditRecord from '${location}'")
 
             val publisher = Publisher(location)
@@ -118,11 +129,12 @@ class AuditRecord(
                         contests!!,
                         samplePrns!!,
                     )
-                    if (auditRoundResult is Ok) rounds.add(auditRoundResult.unwrap()) else {
+                    if (auditRoundResult is Ok) rounds.add(auditRoundResult.unwrap() as AuditRound) else { // TODO
                         errs.addNested(auditRoundResult.unwrapError())
                     }
                 }
             }
+            // TODO AuditRecord or CompositeRecord ??
             return if (errs.hasErrors()) Err(errs) else
                 Ok(AuditRecord(location, config!!, contests!!, rounds, sampledMvrsAll))
         }

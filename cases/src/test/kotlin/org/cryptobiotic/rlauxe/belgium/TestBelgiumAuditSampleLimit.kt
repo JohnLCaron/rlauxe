@@ -5,6 +5,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
+import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.audit.runRound
@@ -66,7 +67,7 @@ fun createBelgiumElectionLimited(electionName: String)  {
     runRound(inputDir = auditdir)
 }
 
-fun runAudit(auditdir: String): AuditRound? {
+fun runAudit(auditdir: String): AuditRoundIF? {
     println("============================================================")
     val lastRound = runRound(inputDir = auditdir)
     return lastRound

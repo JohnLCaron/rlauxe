@@ -150,6 +150,8 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
     }
 }
 
+//// also see Vunder
+
 // TODO only accumulates regular votes, not IRV
 fun tabulateOneAuditPools(cardPools: List<OneAuditPoolIF>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val poolSums = infos.mapValues { ContestTabulation(it.value) }

@@ -187,9 +187,6 @@ open class Contest(
             if (!winners.contains(id)) mlosers.add(id)
         }
         losers = mlosers.toList()
-        if (losers.isEmpty()) {
-            logger.info {"*** there are no losers for $info" }
-        }
     }
 
     fun reportedMargin(winnerId: Int, loserId: Int): Double {

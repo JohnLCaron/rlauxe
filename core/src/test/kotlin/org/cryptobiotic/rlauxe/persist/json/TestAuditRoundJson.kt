@@ -157,6 +157,30 @@ class TestAuditRoundJson {
         assertTrue(roundtripIO.equals(target))
         assertEquals(roundtripIO, target)
 
+        val contestZip = target.contestRounds.zip(roundtripIO.contestRounds)
+        contestZip.forEach { (contest, contestio) ->
+            assertEquals(contest, contestio)
+            assertEquals(contest.hashCode(), contestio.hashCode())
+
+            val assertZip = contest.assertionRounds.zip(contestio.assertionRounds)
+            assertZip.forEach { (assert, assertio) ->
+                assertEquals(assert, assertio)
+                assertEquals(assert.hashCode(), assertio.hashCode())
+
+                val est = assert.estimationResult
+                val estio = assertio.estimationResult
+                assertEquals(est, estio)
+                assertEquals(est.hashCode(), estio.hashCode())
+                assertEquals(est?.toString(), estio?.toString())
+                assertEquals(est?.startingErrorRates(), estio?.startingErrorRates())
+
+                val ar = assert.auditResult
+                val ario = assertio.auditResult
+                assertEquals(ar, ario)
+                assertEquals(ar.hashCode(), ario.hashCode())
+            }
+        }
+
         scratchFile.delete()
     }
 
@@ -276,7 +300,7 @@ class TestAuditRoundJson {
 //    var newmvrs: Int,
 //    var auditorWantNewMvrs: Int,
 //)
-fun check(s1: AuditRound, s2: AuditRound) {
+fun check(s1: AuditRoundIF, s2: AuditRoundIF) {
     assertEquals(s1.roundIdx, s2.roundIdx)
     assertEquals(s1.auditWasDone, s2.auditWasDone)
     assertEquals(s1.auditIsComplete, s2.auditIsComplete)

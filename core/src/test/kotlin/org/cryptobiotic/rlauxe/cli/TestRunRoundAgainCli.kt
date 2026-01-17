@@ -16,7 +16,7 @@ class TestRunRoundAgainCli {
                 "-auditDir", auditDir,
                 "-contest", "1",
                 "-round", "1",
-                "-assertion", "0/1",
+                "-assertion", "first",
             )
         )
     }
@@ -30,7 +30,7 @@ class TestRunRoundAgainCli {
                 "-auditDir", auditDir,
                 "-contest", "1",
                 "-round", "1",
-                "-assertion", "0/1",
+                "-assertion", "first",
             )
         )
     }
@@ -44,12 +44,12 @@ class TestRunRoundAgainCli {
                 "-auditDir", auditDir,
                 "-contest", "1",
                 "-round", "1",
-                "-assertion", "1/0",
+                "-assertion", "first",
             )
         )
     }
 
-    // @Test TODO
+    @Test
     fun testRunRoundAgainRaire() {
         val auditDir = "$testdataDir/persist/testRunCli/raire/audit"
 
@@ -58,7 +58,21 @@ class TestRunRoundAgainCli {
                 "-auditDir", auditDir,
                 "-contest", "1",
                 "-round", "1",
-                "-assertion", "0/1",
+                "-assertion", "first",
+            )
+        )
+    }
+
+    @Test
+    fun testRunRoundAgainComposite() {
+        val auditDir = "$testdataDir/cases/belgium/2024"
+
+        RunRoundAgainCli.main(
+            arrayOf(
+                "-auditDir", auditDir,
+                "-contest", "1",
+                "-round", "1",
+                "-assertion", "first",
             )
         )
     }

@@ -29,7 +29,7 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
         return readPopulations(publisher)
     }
 
-    // TODO I think we need to read previous rounds in, and merge/sort with this round's mvrs.
+    // AuditableCardCsv, complete mvrs used for this round; matches samplePrnsX.csv
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
         val mvrsForRound = readMvrsForRound(round)
         val sampleNumbers = mvrsForRound.map { it.prn }
@@ -58,8 +58,8 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
     // the sampleMvrsFile is added externally for real audits, and by MvrManagerTestFromRecord for test audits
     // it must be in the same order as the sorted cards
     // it is placed into publisher.sampleMvrsFile, and this just reads from that file.
+    // AuditableCardCsv, complete mvrs used for this round; matches samplePrnsX.csv
     private fun readMvrsForRound(round: Int): List<AuditableCard> {
-        val publisher = Publisher(auditDir)
         return readAuditableCardCsvFile(publisher.sampleMvrsFile(round))
     }
 
@@ -73,22 +73,29 @@ fun readCardManifest(publisher: Publisher): CardManifest {
 
     if (Files.exists(Path(publisher.populationsFile()))) {
         val populations = readPopulationsJsonFileUnwrapped(publisher.populationsFile())
-        // merge population references into the Card
-        val mergedCards = CloseableIterable {
-            MergePopulationsIntoCardManifest(
-                readCardsCsvIterator(publisher.sortedCardsFile()),
-                populations,
-            )
+        if (populations.isNotEmpty()) {
+            // merge population references into the Card
+            val mergedCards = CloseableIterable {
+                MergePopulationsIntoCardManifest(
+                    readCardsCsvIterator(publisher.sortedCardsFile()),
+                    populations,
+                )
+            }
+            return CardManifest(mergedCards, populations)
         }
-        return CardManifest(mergedCards, populations)
     }
 
     val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
     return CardManifest(CloseableIterable { sortedCards.iterator() }, emptyList())
 }
 
+
 fun readPopulations(publisher: Publisher): List<PopulationIF>? {
     return if (!Files.exists(Path(publisher.populationsFile()))) null else
         readPopulationsJsonFileUnwrapped(publisher.populationsFile())
+}
 
+// for viewer
+fun readMvrsForRound(publisher: Publisher, roundIdx: Int): List<AuditableCard> {
+    return readAuditableCardCsvFile(publisher.sampleMvrsFile(roundIdx))
 }

@@ -91,14 +91,14 @@ class CorlaAudit(
     val quiet: Boolean = false,
 ): AuditWorkflow() {
     private val contestsUA: List<ContestWithAssertions>
-    private val auditRounds = mutableListOf<AuditRound>()
+    private val auditRounds = mutableListOf<AuditRoundIF>()
 
     init {
         require (auditConfig.auditType == AuditType.CLCA)
         contestsUA = contestsToAudit.map { ContestWithAssertions(it, isClca=true, ).addStandardAssertions() }
     }
 
-    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
+    override fun runAuditRound(auditRound: AuditRoundIF, quiet: Boolean): Boolean  {
         val complete = runClcaAuditRound(auditConfig, auditRound.contestRounds, mvrManagerForTesting, auditRound.roundIdx,
             auditor = AuditCorlaAssertion()
         )

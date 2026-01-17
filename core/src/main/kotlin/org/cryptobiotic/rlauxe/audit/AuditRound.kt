@@ -6,28 +6,46 @@ import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.ceil
 import kotlin.math.max
 
-data class AuditRound(
-    val roundIdx: Int,
-    val contestRounds: List<ContestRound>,
+interface AuditRoundIF {
+    val roundIdx: Int
+    val contestRounds: List<ContestRound>
 
-    var auditWasDone: Boolean = false,
-    var auditIsComplete: Boolean = false,
-    var samplePrns: List<Long>, // card prns to sample for this round (complete, not just new)
-    var nmvrs: Int = 0,
-    var newmvrs: Int = 0,
-    var auditorWantNewMvrs: Int = -1,
-) {
-    fun show() =
+    var auditWasDone: Boolean
+    var auditIsComplete: Boolean
+    var samplePrns: List<Long> // card prns to sample for this round (complete, not just new)
+    var nmvrs: Int
+    var newmvrs: Int
+    var auditorWantNewMvrs: Int
+
+    fun mvrsUsed(): Int
+    fun mvrsExtra(): Int
+
+    fun show(): String
+    fun createNextRound(): AuditRoundIF
+}
+
+data class AuditRound(
+    override val roundIdx: Int,
+    override val contestRounds: List<ContestRound>,
+
+    override var auditWasDone: Boolean = false,
+    override var auditIsComplete: Boolean = false,
+    override var samplePrns: List<Long>, // card prns to sample for this round (complete, not just new)
+    override var nmvrs: Int = 0,
+    override var newmvrs: Int = 0,
+    override var auditorWantNewMvrs: Int = -1,
+) : AuditRoundIF {
+    override fun show() =
         "AuditState(round = $roundIdx, nmvrs=$nmvrs, auditWasDone=$auditWasDone, auditIsComplete=$auditIsComplete)" +
                 " ncontests=${contestRounds.size} ncontestsDone=${contestRounds.count { it.done }}"
 
-    fun createNextRound() : AuditRound {
-        val nextContests = contestRounds.filter { !it.status.complete }.map{ it.createNextRound() }
+    override fun createNextRound(): AuditRoundIF {
+        val nextContests = contestRounds.filter { !it.status.complete }.map { it.createNextRound() }
         return AuditRound(roundIdx + 1, nextContests, samplePrns = emptyList())
     }
 
     //// called from viewer
-    fun mvrsUsed(): Int {
+    override fun mvrsUsed(): Int {
         var result = 0
         contestRounds.forEach { contest ->
             contest.assertionRounds.forEach { assertion ->
@@ -36,10 +54,12 @@ data class AuditRound(
         }
         return result
     }
+
+    override fun mvrsExtra() = this.nmvrs - mvrsUsed()
 }
 
 // called from rlauxe-viewer
-fun List<AuditRound>.previousSamples(currentRoundIdx: Int): Set<Long> {
+fun List<AuditRoundIF>.previousSamples(currentRoundIdx: Int): Set<Long> {
     val result = mutableSetOf<Long>()
     this.filter { it.roundIdx < currentRoundIdx }.forEach { auditRound ->
         result.addAll(auditRound.samplePrns)
@@ -53,7 +73,6 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     val name = contestUA.name
     val Npop = contestUA.Npop
 
-    var skipped = false // true when contest has card but it was skilled in the sample
     var maxSampleIndex = 0 // maximum index in the sample allowed to use
     var estMvrs = 0 // Estimate of the mvrs required to confirm the contest
     var estNewMvrs = 0 // Estimate of the new mvrs required to confirm the contest

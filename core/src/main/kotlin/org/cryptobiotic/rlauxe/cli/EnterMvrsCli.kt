@@ -55,7 +55,7 @@ fun enterMvrs(inputDir: String, mvrFile: String): Result<Boolean, ErrorMessages>
     val result = AuditRecord.readFromResult(inputDir)
     if (result is Err) return result
 
-    val auditRecord = result.unwrap()
+    val auditRecord = result.unwrap() as AuditRecord // TODO
     val mvrs = AuditableCardCsvReader(mvrFile)
 
     if (!auditRecord.enterMvrs(mvrs, errs)) {

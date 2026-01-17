@@ -5,6 +5,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditRound
+import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
@@ -137,7 +138,7 @@ fun createBelgiumElection(electionName: String, stopRound:Int=0, showVerify:Bool
 
     println("============================================================")
     var done = false
-    var finalRound: AuditRound? = null
+    var finalRound: AuditRoundIF? = null
     while (!done) {
         val lastRound = runRound(inputDir = auditdir)
         if (lastRound != null) finalRound = lastRound
@@ -155,7 +156,7 @@ fun runBelgiumElection(electionName: String, stopRound:Int=0): Int {
     val auditdir = "$topdir/audit"
 
     var done = false
-    var finalRound: AuditRound? = null
+    var finalRound: AuditRoundIF? = null
     while (!done) {
         val lastRound = runRound(inputDir = auditdir)
         if (lastRound != null) finalRound = lastRound

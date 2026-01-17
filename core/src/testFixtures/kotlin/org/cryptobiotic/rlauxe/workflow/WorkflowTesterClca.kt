@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
+import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ClcaAssorter
@@ -20,7 +21,7 @@ class WorkflowTesterClca(
     Npops : Map<Int, Int> = emptyMap(), // TODO retrofit Npop
 ): AuditWorkflow() {
     private val contestsUA: List<ContestWithAssertions>
-    private val auditRounds = mutableListOf<AuditRound>()
+    private val auditRounds = mutableListOf<AuditRoundIF>()
 
     init {
         require (auditConfig.auditType == AuditType.CLCA)
@@ -37,7 +38,7 @@ class WorkflowTesterClca(
         contestsUA = regularContests + raireContests
     }
 
-    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
+    override fun runAuditRound(auditRound: AuditRoundIF, quiet: Boolean): Boolean  {
         val complete = runClcaAuditRound(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
             auditor = ClcaAssertionAuditor(quiet)
         )

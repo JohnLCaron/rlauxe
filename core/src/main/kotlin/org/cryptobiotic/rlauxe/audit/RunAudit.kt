@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit
 private val logger = KotlinLogging.logger("RunAudit")
 
 // from rlauxe-viewer
-fun runRound(inputDir: String, onlyTask: String? = null): AuditRound? {
+fun runRound(inputDir: String, onlyTask: String? = null): AuditRoundIF? {
     val roundResult = runRoundResult(inputDir, onlyTask)
     if (roundResult is Err) {
         logger.error{"runRoundResult failed ${roundResult.error}"}
@@ -38,7 +38,7 @@ fun runRound(inputDir: String, onlyTask: String? = null): AuditRound? {
     return roundResult.unwrap()
 }
 
-fun runRoundResult(inputDir: String, onlyTask: String? = null): Result<AuditRound, ErrorMessages> {
+fun runRoundResult(inputDir: String, onlyTask: String? = null): Result<AuditRoundIF, ErrorMessages> {
     val errs = ErrorMessages("runRoundResult")
 
     try {
@@ -99,7 +99,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         val assertion = assertionRound.assertion
         logger.info { "runAudit in $auditDir for round $roundIdx, contest $contestId, and assertion $assertion" }
 
-        val workflow = PersistedWorkflow(auditDir, mvrWrite=false)
+        val workflow = PersistedWorkflow(auditDir, mvrWrite = false)
         val cvrPairs = workflow.mvrManager().makeMvrCardPairsForRound(roundIdx)
         val sampler = PairSampler(contestId, cvrPairs)
 
@@ -131,8 +131,10 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
                     val cardVotes = card.votes(contestId)?.contentToString() ?: "N/A"
                     append(", ${sfn(pair.first.location(), 10)}")
                     append(", ${sfn(mvrVotes, 10)}")
-                    append(", votes=${cardVotes} possible=${card.hasContest(contestId)} pool=${card.poolId()}, ")
+                    append(", votes=${cardVotes} pool=${card.poolId()}, ")
                     appendLine()
+                    if (!card.hasContest(contestId))
+                        logger.warn{"possible=${card.hasContest(contestId)}"}
                 }
             }
         }

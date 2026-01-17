@@ -300,7 +300,7 @@ class TestAuditRoundJson {
 //    var newmvrs: Int,
 //    var auditorWantNewMvrs: Int,
 //)
-fun check(s1: AuditRound, s2: AuditRound) {
+fun check(s1: AuditRoundIF, s2: AuditRoundIF) {
     assertEquals(s1.roundIdx, s2.roundIdx)
     assertEquals(s1.auditWasDone, s2.auditWasDone)
     assertEquals(s1.auditIsComplete, s2.auditIsComplete)

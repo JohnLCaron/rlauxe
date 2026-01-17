@@ -12,11 +12,11 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
  abstract class AuditWorkflow {
     abstract fun auditConfig() : AuditConfig
     abstract fun mvrManager() : MvrManager
-    abstract fun auditRounds(): MutableList<AuditRound>
+    abstract fun auditRounds(): MutableList<AuditRoundIF>
     abstract fun contestsUA(): List<ContestWithAssertions>
 
     // start new round and create estimate
-    open fun startNewRound(quiet: Boolean = true, onlyTask: String? = null): AuditRound {
+    open fun startNewRound(quiet: Boolean = true, onlyTask: String? = null): AuditRoundIF {
         val auditRounds = auditRounds()
         val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
         val roundIdx = auditRounds.size + 1
@@ -68,5 +68,5 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
     // AuditRecord.enterMvrs(mvrFile: String)
 
     // 6. _Run the audit_
-    abstract fun runAuditRound(auditRound: AuditRound, quiet: Boolean = true): Boolean  // return complete
+    abstract fun runAuditRound(auditRound: AuditRoundIF, quiet: Boolean = true): Boolean  // return complete
 }

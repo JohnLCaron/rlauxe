@@ -60,7 +60,7 @@ class CreateAudit(val name: String, val config: AuditConfig, election: CreateEle
         writeAuditConfigJsonFile(config, publisher.auditConfigFile())
         logger.info{"CreateAudit writeAuditConfigJsonFile to ${publisher.auditConfigFile()}\n  $config"}
 
-        if (election.populations() != null) {
+        if (!election.populations().isNullOrEmpty()) {
             writePopulationsJsonFile(election.populations()!!, publisher.populationsFile())
             logger.info { "CreateAudit write ${election.populations()!!.size} populations, to ${publisher.populationsFile()}" }
         }

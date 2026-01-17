@@ -343,7 +343,7 @@ class TestHasStyle {
     }
 
     fun createAndRunTestAuditCvrs(topdir: String, isPolling: Boolean, contests: List<Contest>, skipContests: List<Int>, hasStyle: Boolean,
-                                  testCvrs: List<Cvr>, cardStyles:List<PopulationIF>?): AuditRound {
+                                  testCvrs: List<Cvr>, cardStyles:List<PopulationIF>?): AuditRoundIF {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         // val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
@@ -379,7 +379,7 @@ class TestHasStyle {
     }
 
     fun createAndRunTestAuditCards(topdir: String, isPolling: Boolean, contests: List<Contest>, skipContests: List<Int>, hasStyle: Boolean,
-                                   testCards: List<AuditableCard>, cardStyles:List<PopulationIF>?): AuditRound {
+                                   testCards: List<AuditableCard>, cardStyles:List<PopulationIF>?): AuditRoundIF {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         // val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
@@ -421,7 +421,7 @@ class TestHasStyle {
     }
 }
 
-fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestWithAssertions>): AuditRound {
+fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestWithAssertions>): AuditRoundIF {
     val auditdir = "$topdir/audit"
     val publisher = Publisher(auditdir)
     val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()

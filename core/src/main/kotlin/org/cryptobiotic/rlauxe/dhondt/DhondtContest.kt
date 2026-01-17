@@ -232,20 +232,20 @@ class DHondtContest(
                 val winnerScore = votes[assorter.winner()]!! / assorter.lastSeatWon.toDouble()
                 val loserScore = votes[assorter.loser()]!! / assorter.firstSeatLost.toDouble()
                 val recountMargin = (winnerScore - loserScore) / winnerScore
-                "${assorter.shortName()} fw/fl=${dfn(winnerScore, 1)}/${dfn(loserScore, 1)}" +
+                "fw/fl=${dfn(winnerScore, 1)}/${dfn(loserScore, 1)}" +
                         " diff=${dfn(winnerScore - loserScore, 0)} (w-l)/w =${dfn(recountMargin, 5)}"
             }
             is BelowThreshold -> {
                 val votesFor = votes[assorter.winner()]!!
                 val pct = 100.0 * votesFor / nvotes
                 val diff= 100.0 * assorter.t - pct
-                "${assorter.shortName()} votesFor=$votesFor pct=${dfn(pct, 4)} diff=${dfn(diff, 6)} %"
+                "votesFor=$votesFor pct=${dfn(pct, 4)} diff=${dfn(diff, 6)} %"
             }
             is AboveThreshold -> {
                 val votesFor = votes[assorter.winner()]!!
                 val pct = 100.0 * votesFor / nvotes
                 val diff= pct - 100.0 * assorter.t
-                "${assorter.shortName()} votesFor=$votesFor pct=${dfn(pct, 4)} diff=${dfn(diff, 6)} %"
+                "votesFor=$votesFor pct=${dfn(pct, 4)} diff=${dfn(diff, 6)} %"
             }
             else -> throw RuntimeException()
         }
@@ -274,6 +274,7 @@ class DHondtContest(
             val candName = "${nfn(id, 2)} ${trunc(info.candidateIdToName[id]!!, width0)}$below"
             append(showCandidate(candName, votes[id]!!, maxRound, rounds, width))
         }
+        appendLine("\n* failed threshold")
     }
 
     fun showCandidate(candName: String, candTotal: Int, maxRound: Int, rounds: List<Dround>, width:Int) = buildString {

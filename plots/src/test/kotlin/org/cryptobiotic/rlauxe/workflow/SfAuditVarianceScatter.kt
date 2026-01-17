@@ -5,7 +5,6 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.unwrap
 
 import org.cryptobiotic.rlauxe.audit.AssertionRound
-import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
@@ -85,7 +84,7 @@ fun readAssertionAndTotal(auditDir: String, cat: String, marginOverride:Map<Int,
 
     val auditRounds = auditRecord.unwrap().rounds
     require( auditRounds.size >= 1)
-    val auditRound: AuditRound = auditRounds[0]
+    val auditRound = auditRounds[0]
 
     val allAssertions = mutableListOf<AssertionAndCat>()
     val contestRounds = auditRound.contestRounds

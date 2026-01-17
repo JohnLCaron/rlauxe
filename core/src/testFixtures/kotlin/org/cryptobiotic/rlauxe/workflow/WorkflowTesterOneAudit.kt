@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
+import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 
@@ -10,13 +11,13 @@ class WorkflowTesterOneAudit(
     val contestsUA: List<ContestWithAssertions>,
     val mvrManager: MvrManager,
 ): AuditWorkflow() {
-    private val auditRounds = mutableListOf<AuditRound>()
+    private val auditRounds = mutableListOf<AuditRoundIF>()
 
     init {
         require (config.auditType == AuditType.ONEAUDIT)
     }
 
-    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
+    override fun runAuditRound(auditRound: AuditRoundIF, quiet: Boolean): Boolean  {
         val complete = runClcaAuditRound(config, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
             auditor = OneAuditAssertionAuditor(mvrManager.oapools()!!)
         )

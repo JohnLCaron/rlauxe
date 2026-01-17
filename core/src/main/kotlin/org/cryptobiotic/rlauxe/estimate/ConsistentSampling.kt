@@ -24,7 +24,7 @@ private val logger = KotlinLogging.logger("ConsistentSampling")
 fun sampleWithContestCutoff(
     config: AuditConfig,
     mvrManager : MvrManager,
-    auditRound: AuditRound,
+    auditRound: AuditRoundIF,
     previousSamples: Set<Long>,
     quiet: Boolean
 ) {
@@ -58,18 +58,18 @@ fun sampleWithContestCutoff(
 private fun sample(
     config: AuditConfig,
     mvrManager : MvrManager,
-    auditRound: AuditRound,
+    auditRound: AuditRoundIF,
     previousSamples: Set<Long> = emptySet(),
     quiet: Boolean = true
 ) {
-        if (!quiet) logger.info{"consistentSampling round ${auditRound.roundIdx} auditorSetNewMvrs=${auditRound.auditorWantNewMvrs}"}
-        consistentSampling(auditRound, mvrManager, previousSamples)
-        if (!quiet) logger.info{" consistentSamplingSize= ${auditRound.samplePrns.size}"}
+    if (!quiet) logger.info{"consistentSampling round ${auditRound.roundIdx} auditorSetNewMvrs=${auditRound.auditorWantNewMvrs}"}
+    consistentSampling(auditRound, mvrManager, previousSamples)
+    if (!quiet) logger.info{" consistentSamplingSize= ${auditRound.samplePrns.size} newmvrs= ${auditRound.newmvrs} "}
 }
 
 // From Consistent Sampling with Replacement, Ronald Rivest, August 31, 2018
 fun consistentSampling(
-    auditRound: AuditRound,
+    auditRound: AuditRoundIF,
     mvrManager: MvrManager,
     previousSamples: Set<Long> = emptySet(),
 ) {
@@ -79,9 +79,10 @@ fun consistentSampling(
 
     // calculate how many samples are wanted for each contest.
     // TODO was val wantSampleSizeMap = wantSampleSize(contestsNotDone, previousSamples, mvrManager.sortedCards().iterator())
-    val wantSampleSize = wantSampleSizeSimple(contestsIncluded, previousSamples, mvrManager.sortedCards().iterator())
+    val wantSampleSize = wantSampleSizeSimple(contestsIncluded)
     require(wantSampleSize.values.all { it >= 0 }) { "wantSampleSize must be >= 0" }
 
+    val skippedContests = mutableSetOf<Int>()
     val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
     val haveNewSamples = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
     var newMvrs = 0 // count when this card not in previous samples
@@ -118,7 +119,7 @@ fun consistentSampling(
         // track how many continguous mvrs each contest has
         contestsIncluded.forEach { contest ->
             if (card.hasContest(contest.id)) {
-                if (include && !contest.skipped) {
+                if (include && !skippedContests.contains(contest.id)) {
                     haveSampleSize[contest.id] = haveSampleSize[contest.id]?.plus(1) ?: 1
                     if (!previousSamples.contains(card.prn)) {
                         haveNewSamples[contest.id] = haveNewSamples[contest.id]?.plus(1) ?: 1
@@ -127,7 +128,7 @@ fun consistentSampling(
                     contest.maxSampleIndex = sampledCards.size
                 } else {
                     // if card has contest but its not included in the sample, then continuity has been broken
-                    contest.skipped = true
+                    skippedContests.add(contest.id)
                 }
             }
         }
@@ -139,7 +140,7 @@ fun consistentSampling(
     if (wantMore) {
         contestsIncluded.forEach {
             if ((haveSampleSize[it.id] ?: 0) < (wantSampleSize[it.id] ?: 0))
-                logger.warn { "contest ${it.id} ${(haveSampleSize[it.id] ?: 0)} < ${(wantSampleSize[it.id] ?: 0)}" }
+                logger.warn { "contest ${it.id}:  (have) ${(haveSampleSize[it.id] ?: 0)} < ${(wantSampleSize[it.id] ?: 0)} (want)" }
         }
     }
 
@@ -163,7 +164,7 @@ fun consistentSampling(
 }
 
 // try running without complexity
-fun wantSampleSizeSimple(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedCards : CloseableIterator<AuditableCard>, debug: Boolean = false): Map<Int, Int> {
+fun wantSampleSizeSimple(contestsNotDone: List<ContestRound>): Map<Int, Int> {
      return contestsNotDone.associate { it.id to it.estMvrs }
 }
 

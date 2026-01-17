@@ -1,11 +1,11 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.persist.AuditRecordIF
+import org.cryptobiotic.rlauxe.persist.CompositeRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
@@ -23,34 +23,32 @@ class PersistedWorkflow(
     val auditDir: String,
     val mvrWrite: Boolean = true,
 ): AuditWorkflow() {
-    val auditRecord: AuditRecord // only need auditConfig, contests from record
+    val auditRecord: AuditRecordIF // only need auditConfig, contests from record
     val publisher = Publisher(auditDir)
 
     private val config: AuditConfig
     private val auditContests: List<ContestWithAssertions>
-    private val auditRounds = mutableListOf<AuditRound>()
+    private val auditRounds = mutableListOf<AuditRoundIF>()
     private val mvrManager: MvrManager
     private val mode: PersistedWorkflowMode
 
     init {
-        val auditRecordResult = AuditRecord.readFromResult(auditDir)
-        if (auditRecordResult is Ok) {
-            auditRecord = auditRecordResult.unwrap()
-        } else {
-            logger.error{ auditRecordResult.toString() }
-            throw RuntimeException( auditRecordResult.toString() )
-        }
+        auditRecord = AuditRecord.readFrom(auditDir)!!
 
         config = auditRecord.config
         mode = config.persistedWorkflowMode
         // skip contests that have been removed
         auditContests = auditRecord.contests.filter { it.preAuditStatus == TestH0Status.InProgress }
-
         auditRounds.addAll(auditRecord.rounds)
-        mvrManager = if (mode == PersistedWorkflowMode.testSimulated) {
-            PersistedMvrManagerTest(auditRecord.location, config, auditContests)
-        } else {
-            PersistedMvrManager(auditRecord.location, config, auditContests, mvrWrite=mvrWrite)
+
+        mvrManager = when {
+            (auditRecord is CompositeRecord) ->
+                // TODO mode
+                CompositeMvrManager(auditRecord, config, auditContests)
+            (mode == PersistedWorkflowMode.testSimulated) ->
+                PersistedMvrManagerTest(auditRecord.location, config, auditContests)
+            else ->
+                PersistedMvrManager(auditRecord.location, config, auditContests, mvrWrite=mvrWrite)
         }
     }
 
@@ -59,7 +57,7 @@ class PersistedWorkflow(
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestWithAssertions> = auditContests
 
-    override fun startNewRound(quiet: Boolean, onlyTask: String?): AuditRound {
+    override fun startNewRound(quiet: Boolean, onlyTask: String?): AuditRoundIF {
 
         val nextRound = super.startNewRound(quiet, onlyTask)
 
@@ -82,7 +80,7 @@ class PersistedWorkflow(
         return nextRound
     }
 
-    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  { // return complete
+    override fun runAuditRound(auditRound: AuditRoundIF, quiet: Boolean): Boolean  { // return complete
         val roundIdx = auditRound.roundIdx
 
         //   in a real audit, need to set the real mvrs externally with EnterMvrsCli, which calls auditRecord.enterMvrs(mvrs)

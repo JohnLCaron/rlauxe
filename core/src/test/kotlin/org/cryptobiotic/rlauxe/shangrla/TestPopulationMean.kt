@@ -3,9 +3,9 @@ package org.cryptobiotic.rlauxe.shangrla
 import org.cryptobiotic.rlauxe.SampleFromArray
 import org.cryptobiotic.rlauxe.betting.AlphaMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.SampleTracker
 import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
-import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.doublesAreClose
@@ -137,7 +137,7 @@ class TestPopulationMeanWithoutReplacement {
         val d = 10
 
         // compare directly to TruncShrinkage
-        val assortValues = PrevSamples()
+        val assortValues = SampleTrackerImpl()
         val means = mutableListOf<Double>()
         x.forEach {
             means.add(populationMeanIfH0(N, true, assortValues))
@@ -189,7 +189,7 @@ class TestPopulationMeanWithoutReplacement {
         // values from SHANGRLA test_NonnegMean.test_alpha_mart1
         val expected = listOf(0.5, 0.55555556, 0.625, 0.71428571, 0.83333333, 1.0, 1.0, 1.0, 1.0, 1.0, )
 
-        var assortValues = PrevSamples()
+        var assortValues = SampleTrackerImpl()
         var means = mutableListOf<Double>()
         x.forEach {
             means.add(populationMeanIfH0(x.size, true, assortValues))
@@ -199,7 +199,7 @@ class TestPopulationMeanWithoutReplacement {
         println()
         doublesAreClose(expected, means)
 
-        assortValues = PrevSamples()
+        assortValues = SampleTrackerImpl()
         means = mutableListOf<Double>()
         x.forEach {
             means.add(meanUnderNull(x.size, true, assortValues))

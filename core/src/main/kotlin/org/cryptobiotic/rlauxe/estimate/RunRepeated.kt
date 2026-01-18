@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.core.RiskTestingFn
-import org.cryptobiotic.rlauxe.core.SampleTracker
-import org.cryptobiotic.rlauxe.core.TestH0Status
+import org.cryptobiotic.rlauxe.betting.RiskMeasuringFn
+import org.cryptobiotic.rlauxe.betting.SampleTracker
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.math.sqrt
@@ -17,7 +17,7 @@ fun runRepeated(
     name: String,
     drawSample: Sampler,
     ntrials: Int,
-    testFn: RiskTestingFn,
+    testFn: RiskMeasuringFn,
     testParameters: Map<String, Double>,
     terminateOnNullReject: Boolean = true,
     startingTestStatistic: Double = 1.0,

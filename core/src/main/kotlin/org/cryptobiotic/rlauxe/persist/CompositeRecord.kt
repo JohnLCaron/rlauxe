@@ -50,9 +50,7 @@ data class CompositeRecord(
                 path.listDirectoryEntries().forEach { entry ->
                     if (entry.isDirectory()) {
                         val auditDir = "${entry.toAbsolutePath()}/audit"
-                        if (!Path(auditDir).exists()) {
-                            println("  auditDir: ${auditDir} does not exist")
-                        } else {
+                        if (Path(auditDir).exists()) {
                             val result: Result<AuditRecordIF, ErrorMessages> = AuditRecord.readFromResult(auditDir)
                             if (result is Err) {
                                 println("  Error: ${result.error}")
@@ -75,9 +73,7 @@ data class CompositeRecord(
                 null
             }
         }
-
     }
-
 }
 
 fun makeAuditRounds(records: List<AuditRecord>) : List<AuditRoundIF> {

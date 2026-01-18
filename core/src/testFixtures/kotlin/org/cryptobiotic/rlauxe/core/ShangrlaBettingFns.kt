@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.betting.BettingFn
+import org.cryptobiotic.rlauxe.betting.SampleTracker
 import org.cryptobiotic.rlauxe.betting.etaToLam
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import kotlin.math.max

@@ -1,9 +1,13 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.persist.AuditRecord.Companion.readFromResult
 import org.cryptobiotic.rlauxe.persist.AuditRecordIF
 import org.cryptobiotic.rlauxe.persist.CompositeRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -20,10 +24,10 @@ enum class PersistedWorkflowMode {
 
 /** AuditWorkflow with persistent state. */
 class PersistedWorkflow(
-    val auditDir: String,
+    val auditRecord: AuditRecordIF,
     val mvrWrite: Boolean = true,
 ): AuditWorkflow() {
-    val auditRecord: AuditRecordIF // only need auditConfig, contests from record
+    val auditDir = auditRecord.location
     val publisher = Publisher(auditDir)
 
     private val config: AuditConfig
@@ -33,8 +37,6 @@ class PersistedWorkflow(
     private val mode: PersistedWorkflowMode
 
     init {
-        auditRecord = AuditRecord.readFrom(auditDir)!!
-
         config = auditRecord.config
         mode = config.persistedWorkflowMode
         // skip contests that have been removed
@@ -100,7 +102,6 @@ class PersistedWorkflow(
         auditRound.auditWasDone = true
         auditRound.auditIsComplete = complete
 
-        val publisher = Publisher(auditDir)
         writeAuditRoundJsonFile(auditRound, publisher.auditStateFile(roundIdx)) // replace auditState
         logger.info {"writeAuditRoundJsonFile to '${publisher.auditStateFile(roundIdx)}'"}
 
@@ -109,5 +110,13 @@ class PersistedWorkflow(
 
     override fun toString(): String {
         return "PersistentWorkflow(auditDir='$auditDir', mode=$mode, mvrManager=$mvrManager)"
+    }
+
+    companion object {
+        fun readFrom(location: String): PersistedWorkflow? {
+            val auditRecord = AuditRecord.readFrom(location)
+            return if (auditRecord == null) null
+            else PersistedWorkflow(auditRecord)
+        }
     }
 }

@@ -6,8 +6,8 @@ import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.CardManifest
 import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCardManifest
 import org.cryptobiotic.rlauxe.audit.Population
-import org.cryptobiotic.rlauxe.audit.makePhantomCards
-import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
+import org.cryptobiotic.rlauxe.util.makePhantomCards
+import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import kotlin.Int

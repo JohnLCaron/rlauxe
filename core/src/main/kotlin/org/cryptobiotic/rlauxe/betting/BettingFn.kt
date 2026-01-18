@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.core.SampleTracker
-
 /**
  * Interface for defining a betting function.
  *

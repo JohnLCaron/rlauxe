@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.cobra
 
+import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.doubleIsClose
@@ -46,7 +47,7 @@ class ReproduceCobraResults {
                     BettingMart(
                         riskLimit = alpha, bettingFn = fixed, N = N, withoutReplacement = false,
                         sampleUpperBound = upperBound,
-                        tracker=tracker,
+                        tracker = tracker,
                     )
 
                 val result = runRepeated(
@@ -103,8 +104,10 @@ class ReproduceCobraResults {
                     p2 = p2,
                 )
                 val betting =
-                    BettingMart(bettingFn = oracle, N = N,
-                        sampleUpperBound = upperBound, withoutReplacement = false, tracker=tracker)
+                    BettingMart(
+                        bettingFn = oracle, N = N,
+                        sampleUpperBound = upperBound, withoutReplacement = false, tracker = tracker
+                    )
 
                 val result = runRepeated(
                     name = "reproduceCobraResults",
@@ -174,8 +177,10 @@ class ReproduceCobraResults {
                             PluralityErrorRates(p2, p1, 0.0, 0.0)
                         )
                         val betting =
-                            BettingMart(bettingFn = oracle, N = N,
-                                sampleUpperBound = upperBound, withoutReplacement = false, tracker=tracker)
+                            BettingMart(
+                                bettingFn = oracle, N = N,
+                                sampleUpperBound = upperBound, withoutReplacement = false, tracker = tracker
+                            )
 
                         val result = runRepeated(
                             name = "reproduceCobraResults",
@@ -261,8 +266,10 @@ class ReproduceCobraResults {
                         val tracker = PluralityErrorTracker(cassorter.noerror())
 
                         val betting =
-                            BettingMart(bettingFn = adaptive, N = N,
-                                sampleUpperBound = upperBound, withoutReplacement = false, tracker=tracker)
+                            BettingMart(
+                                bettingFn = adaptive, N = N,
+                                sampleUpperBound = upperBound, withoutReplacement = false, tracker = tracker
+                            )
 
                         val result = runRepeated(
                             name = "reproduceCobraResults",

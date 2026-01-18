@@ -19,8 +19,7 @@ import kotlin.io.path.Path
 private val logger = KotlinLogging.logger("PersistedMvrManager")
 private val checkValidity = true
 
-// assumes that the mvrs have been set externally into the election record, eg by EnterMvrsCli.
-// skip writing when doing runRoundAgain
+// TODO generalize using just first component
 open class CompositeMvrManager(
     val auditRecord: CompositeRecord,
     val config: AuditConfig,
@@ -63,9 +62,6 @@ open class CompositeMvrManager(
         return mvrsForRound.zip(sampledCards)
     }
 
-    // the sampleMvrsFile is added externally for real audits, and by MvrManagerTestFromRecord for test audits
-    // it must be in the same order as the sorted cards
-    // it is placed into publisher.sampleMvrsFile, and this just reads from that file.
     private fun readMvrsForRound(round: Int): List<AuditableCard> {
         return readAuditableCardCsvFile(publisher.sampleMvrsFile(round))
     }

@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.core.DebuggingSequences
-import org.cryptobiotic.rlauxe.core.SampleTracker
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 

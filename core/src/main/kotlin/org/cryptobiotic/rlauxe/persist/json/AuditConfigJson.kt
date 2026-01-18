@@ -228,7 +228,7 @@ fun PollingConfigJson.import() = PollingConfig(this.d)
 //    val cvrsContainUndervotes: Boolean = true,
 //    val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
 //    val fuzzPct: Double? = null, // use to generate apriori errorRates for simulation, only used when ClcaStrategyType = fuzzPct
-//    val pluralityErrorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker?
+//    val pluralityErrorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit.
 //    val d: Int = 100,  // shrinkTrunc weight for error rates
 //    val maxRisk: Double = 0.90,  // max risk on any one bet
 //)
@@ -256,7 +256,7 @@ fun ClcaConfigJson.import() = ClcaConfig(
         this.fuzzPct,
         // if (this.errorRates != null) PluralityErrorRates.fromList(this.errorRates) else null,
         this.d,
-        this.maxRisk ?: 0.90, // TODO
+        this.maxRisk ?: 0.90, // TODO what should this be?
         this.cvrsContainUndervotes,
     )
 

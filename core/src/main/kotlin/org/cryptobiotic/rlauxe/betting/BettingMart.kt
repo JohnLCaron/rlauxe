@@ -1,8 +1,6 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.betting
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.betting.BettingFn
-import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.doublePrecision
@@ -18,7 +16,7 @@ class BettingMart(
     val tracker: SampleTracker,
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val sampleUpperBound: Double,  // the upper bound of the values of the sequence; bassort for CLCA
-): RiskTestingFn {
+): RiskMeasuringFn {
     private val showEachSample = false
     private val sequences = DebuggingSequences()
 
@@ -32,7 +30,6 @@ class BettingMart(
                         terminateOnNullReject: Boolean,
                         startingTestStatistic: Double,
                         drawSample : () -> Double) : TestH0Result {
-        // require(!withoutReplacement || maxSamples <= Nc) TODO problems with redacted cvrs ? too many undervotes ??
 
         var sampleNumber = 0        // – j ← 0: sample number
         var testStatistic = startingTestStatistic     // – T ← 1: test statistic
@@ -87,7 +84,7 @@ class BettingMart(
             // 1           m[i] > u -> terms[i] = 0.0   # true mean is certainly less than 1/2
             // 2           isCloseToZero(m[i], atol) -> terms[i] = 1.0
             // 3           isCloseToU(m[i], u, atol, rtol) -> terms[i] = 1.0
-            // 4           isCloseToZero(terms[i], atol) -> terms[i] = 1.0 TODO wtf ?? prevent stalls ??
+            // 4           isCloseToZero(terms[i], atol) -> terms[i] = 1.0      LOOK SHANGRLA original code cant be used here
             // 5           m[i] < 0 -> terms[i] = Double.POSITIVE_INFINITY # true mean certainly greater than 1/2
             // 6           else -> terms[i] = if (Stot > N * t) Double.POSITIVE_INFINITY else terms[i]
 
@@ -100,7 +97,6 @@ class BettingMart(
                 if (doubleIsClose(ttj, 0.0, doublePrecision)) {
                     logger.warn {"stalled audit: assort=$xj, lamda=$lamj, tj=$ttj, Tj-1=$testStatistic Tj=${testStatistic * ttj}"}
                 }
-                // if (doubleIsClose(ttj, 0.0)) 1.0 else ttj // 4  TODO this is why optimalBet is working so well
                 ttj
             }
 
@@ -134,7 +130,6 @@ class BettingMart(
                 else -> TestH0Status.LimitReached
             }
         }
-        // println(" status=$status mean = ${tracker.mean()} samplesUsed = ${sampleNumber/Nc.toDouble()}")
 
         // data class TestH0Result(
         //    val status: TestH0Status,  // how did the test conclude?
@@ -144,7 +139,7 @@ class BettingMart(
         //    val pvalueLast: Double,    // last pvalue
         //    val tracker: SampleTracker,
         //)
-        return TestH0Result(status, sampleCount=sampleNumber, pvalueMin, pvalueLast, tracker)
+        return TestH0Result(status, sampleCount = sampleNumber, pvalueMin, pvalueLast, tracker)
     }
 
     fun setDebuggingSequences(): DebuggingSequences {
@@ -174,8 +169,9 @@ class DebuggingSequences {
     }
 
     // That is, min(1, 1/Tj ) is an “anytime P -value” for the composite null hypothesis θ ≤ µ. ALPHA (9)
-    // TODO so probably should be min (1, 1 / testStatistic)
-    //   but unsure of the implications for muliple round sampling
+    // Technically should be min (1, 1 / testStatistic), but we want to use it just to capture 1 / Tj, in order to start
+    // muliple round estimation from where it left off. If you start the estimatiom from the beginning, it will probably just
+    // deliver the same estimate; that is, it wont tell you how many _more_ samples are needed.
     fun pvalues(): List<Double> {
         return testStatistics.map { 1.0 / it }
     }

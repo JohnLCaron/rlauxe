@@ -53,6 +53,9 @@ Click on plot images to get an interactive html plot. You can also read this doc
     * [MaxRisk for Betting](#maxrisk-for-betting)
     * [Additional assorters](#additional-assorters)
     * [OneAudit Card Style Data](#oneaudit-card-style-data)
+    * [Multicontest audits](#multicontest-audits)
+  * [Unanswered Questions](#unanswered-questions)
+    * [Use has_style for polling](#use-has_style-for-polling)
   * [Also See:](#also-see)
 <!-- TOC -->
 
@@ -555,6 +558,23 @@ scoring. These assorters have an upper bound != 1, so are an important generaliz
 Rlauxe adds the option that there may be CSD for OneAudit pooled data, in part to investigate the 
 difference between having CSD and not. Specifically, different OneAudit pools may have different values of
 _hasStyle_ (aka _hasSingleCardStyle_).  See [SamplePopulations](docs/SamplePopulations.md).
+
+### Multicontest audits
+
+Each contest has a canonical sequence of sampled cards, namely all the cards sorted by prn, that may contain that contest.
+This sequence doesnt change when doing multicontest audits. 
+Multicontest audits choose what cards are sampled based on each contests' estimated sample size. An audit can take advantage
+of "extra" samples for a contest in the sample, as long as the canonical sequence is always used. Once a card in the sequence is skipped,
+the audit must stop for that contest.
+
+## Unanswered Questions
+
+### Contest is missing in the MVR
+
+The main use of _hasStyle_, aka _hasSingleCardStyle_ is when deciding the assort value when an MVR is missing a contest.
+There are unanswered questions about if this allows attacks, and if it should be used for polling audits.
+See [SamplePopulations](docs/SamplePopulations.md#contest-is-missing-in-the-mvr)
+
 
 ## Also See:
 * [Developer Notes](docs/Developer.md)

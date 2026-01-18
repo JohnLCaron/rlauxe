@@ -12,6 +12,7 @@ import java.util.zip.ZipOutputStream
 
 private val logger = KotlinLogging.logger("Zipper")
 
+// read a zipped file as an input stream
 class ZipReader(val zipFilename: String) {
     val fileSystem : FileSystem
     val fileSystemProvider : FileSystemProvider
@@ -34,7 +35,7 @@ class ZipReader(val zipFilename: String) {
         return fileSystemProvider.newInputStream(path, StandardOpenOption.READ)
     }
 
-    // special case when the name of the file you want is the same as the zip file, but with .csv extension
+    // special case when the name of the file you want is the same as the zip file, without the zip extension
     fun inputStream() : InputStream {
         val lastPart = zipFilename.substringAfterLast("/")
         val innerFilename = lastPart.replace(".zip", "")

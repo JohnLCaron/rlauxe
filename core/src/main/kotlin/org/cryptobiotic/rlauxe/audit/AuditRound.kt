@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.ceil
@@ -230,7 +231,6 @@ data class AuditRoundResult(
     val pvalue: Double,       // last pvalue when testH0 terminates
     val samplesUsed: Int,     // sample count when testH0 terminates
     val status: TestH0Status, // testH0 status
-    // val startingRates: Map<Double, Double>? = null, // cant use prevResults, so just phantoms, not really needed.
     val measuredCounts: ClcaErrorCounts? = null, // measured error counts (clca only)
     val params: Map<String, Double> = emptyMap(),
 ) {

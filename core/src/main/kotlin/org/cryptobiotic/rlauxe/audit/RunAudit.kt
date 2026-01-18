@@ -8,8 +8,9 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.core.CvrIF
-import org.cryptobiotic.rlauxe.core.TestH0Result
+import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
@@ -28,7 +29,7 @@ import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger("RunAudit")
 
-// from rlauxe-viewer
+// called from cli and rlauxe-viewer
 fun runRound(inputDir: String, onlyTask: String? = null): AuditRoundIF? {
     val roundResult = runRoundResult(inputDir, onlyTask)
     if (roundResult is Err) {
@@ -38,16 +39,20 @@ fun runRound(inputDir: String, onlyTask: String? = null): AuditRoundIF? {
     return roundResult.unwrap()
 }
 
-fun runRoundResult(inputDir: String, onlyTask: String? = null): Result<AuditRoundIF, ErrorMessages> {
+fun runRoundResult(auditDir: String, onlyTask: String? = null): Result<AuditRoundIF, ErrorMessages> {
     val errs = ErrorMessages("runRoundResult")
 
     try {
-        if (notExists(Path.of(inputDir))) {
-            return errs.add( "runRoundResult Audit Directory $inputDir does not exist" )
+        if (notExists(Path.of(auditDir))) {
+            return errs.add( "audit Directory $auditDir does not exist" )
         }
-        logger.info { "runRound on Audit in $inputDir" }
+        val auditRecord = AuditRecord.readFrom(auditDir)
+        if (auditRecord == null) {
+            return errs.add("directory '$auditDir' does not contain an audit record")
+        }
 
-        val rlauxAudit = PersistedWorkflow(inputDir)
+        logger.info { "runRound on record in $auditDir" }
+        val rlauxAudit = PersistedWorkflow(auditRecord)
         var roundIdx = 0
         var complete = false
 
@@ -97,9 +102,14 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         }
         val roundIdx = auditRoundResult.roundIdx
         val assertion = assertionRound.assertion
+
+        val auditRecord = AuditRecord.readFrom(auditDir)
+        if (auditRecord == null) {
+            return "directory '$auditDir' does not contain an audit record"
+        }
         logger.info { "runAudit in $auditDir for round $roundIdx, contest $contestId, and assertion $assertion" }
 
-        val workflow = PersistedWorkflow(auditDir, mvrWrite = false)
+        val workflow = PersistedWorkflow(auditRecord, mvrWrite = false)
         val cvrPairs = workflow.mvrManager().makeMvrCardPairsForRound(roundIdx)
         val sampler = PairSampler(contestId, cvrPairs)
 

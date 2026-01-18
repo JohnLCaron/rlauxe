@@ -432,7 +432,7 @@ fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestWithAssertions>
     if (showDetails) print(verifyResults)
     if (verifyResults.hasErrors) fail()
 
-    val rlauxAudit = PersistedWorkflow(auditdir)
+    val rlauxAudit = PersistedWorkflow.readFrom(auditdir)!!
     val mvrManager = rlauxAudit.mvrManager()
     val contestRounds = wantAudit.map { ContestRound(it, 1) }
     val auditRound = AuditRound(1, contestRounds = contestRounds, samplePrns = emptyList())

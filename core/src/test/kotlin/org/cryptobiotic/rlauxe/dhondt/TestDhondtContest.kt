@@ -30,7 +30,6 @@ class TestDhondtContest {
         println(contestd.show())
     }
 
-    /*
     @Test
     fun testAssortAvg() {
         testAssortAvg(listOf(DhondtCandidate(1, 10), DhondtCandidate(2, 20), DhondtCandidate(3, 30)), 2, minPct)
@@ -39,16 +38,15 @@ class TestDhondtContest {
 
     fun testAssortAvg(parties: List<DhondtCandidate>, nseats: Int, minPct: Double) {
         val dcontest = makeProtoContest("contest1", 1, parties, nseats, 0, minPct)
-        dcontest.assorters.forEach { it ->
-            val (gavg, havg) = it.getAssortAvg(0)
-            print(it.show())
-            println("             gavg=${gavg.show2()}")
-            println("             havg=${havg.show2()}")
-            assertEquals(it.gmean, gavg.mean, doublePrecision)
-            assertEquals(it.reportedMean(), havg.mean, doublePrecision)
+        val contestd = dcontest.createContest()
 
-            // TODO: in plurality, the avg assort value = margin2mean( assort.margin). here, avg assort value = assort margin. maybe a different choice of c ?
-            // TODO margin2mean and mean2margin assumes lower = 1. is that wrong ?
+        contestd.assorters.forEach {
+            if (it is DHondtAssorter) {
+                val dassorter = it as DHondtAssorter
+                assertEquals(dassorter, dassorter)
+                assertEquals(dassorter.hashCode(), dassorter.hashCode())
+                // TODO
+            }
         }
     }
 
@@ -65,17 +63,16 @@ class TestDhondtContest {
         val cvrsIF = contestd.createSimulatedCvrs()
         println("validVotes = ${contestd.votes.values.sum()} undervotes=${contestd.undervotes} ncvrsIF = ${cvrsIF.size}")
 
-        dcontest.assorters.forEach { assorter ->
-            val assorterif = assorter.makeAssorter()
-            println(" assorterif reportedMean= ${df(assorterif.reportedMean())} reportedMargin= ${df(assorterif.reportedMargin())}")
+        contestd.assorters.forEach { assorter ->
+            println(" assorterif dilutedMean= ${df(assorter.dilutedMean())} dilutedMargin= ${df(assorter.dilutedMargin())}")
 
             val welford = Welford()
             cvrsIF.forEach { cvr ->
-                welford.update(assorterif.assort(cvr))
+                welford.update(assorter.assort(cvr))
             }
 
             println("             assort mean = ${df(welford.mean)}")
-            assertEquals(welford.mean, assorterif.reportedMean(), doublePrecision)
+            assertEquals(welford.mean, assorter.dilutedMean(), doublePrecision)
         }
-    } */
+    }
 }

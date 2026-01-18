@@ -257,8 +257,7 @@ class TestSf2024OneAuditIrv() {
             println("  cvrs calcMarginInVotes= ${rassorter.calcMarginInVotes(cvrVotes)}")
             rassorter.calcMargin(cvrVotes, nonpoolTab.ncards)
         } else {
-            val regVotes = nonpoolTab.votes
-            passorter.calcMarginFromRegVotes(regVotes, nonpoolTab.ncards)
+            passorter.calcMarginFromRegVotes(nonpoolTab.votes, nonpoolTab.ncards)
         }
         val cvrMean = margin2mean(cvrMargin)
         assortAvg.ncards += nonpoolTab.ncards // i think your overcounting ncards here

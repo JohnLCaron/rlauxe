@@ -1,5 +1,5 @@
 # Sample Populations
-_01/03/25_
+_01/18/26_
 
 ## TL;DR
 
@@ -9,9 +9,26 @@ Otherwise, we need to create "Population" card containers that know which contes
 
 Each population sets "hasSingleCardStyle" = true if all cards in the population have one CardType (i.e all cards in the population have the same contests).  This is set independently on each population, and replaces the global hasStyle (aka use_style) flag.
 
-The population.hasSingleCardStyle field is used when deciding the assort value when an MVR is missing a contest, for all audits including Polling.
+The population.hasSingleCardStyle field is used when deciding the assort value when an MVR is missing a contest, for all audits (including Polling?).
 
 The use of populations is implicit in the "More styles, less work" paper. Setting hasStyle by population and using hasStyle in Polling audits is new, I think. These complexities arise in multi-contest audits and multi-card ballots.
+
+**Table of Contents**
+<!-- TOC -->
+* [Sample Populations](#sample-populations)
+  * [TL;DR](#tldr)
+  * [Definitions](#definitions)
+  * [Populations](#populations)
+  * [Examples](#examples)
+    * [multi-card ballots, Polling audit (MoreStyle section 5)](#multi-card-ballots-polling-audit-morestyle-section-5)
+    * [CLCA without undervotes](#clca-without-undervotes)
+    * [OneAudit](#oneaudit)
+  * [Contest is missing in the MVR](#contest-is-missing-in-the-mvr)
+    * [Contest is missing in the MVR for Polling](#contest-is-missing-in-the-mvr-for-polling)
+  * [What about Ncast and Nphantom?](#what-about-ncast-and-nphantom)
+* [Claims](#claims)
+  * [Should noerror use reported or diluted margin?](#should-noerror-use-reported-or-diluted-margin)
+<!-- TOC -->
 
 ## Definitions
 
@@ -130,9 +147,10 @@ have hasSingleCardStyle = true. The contest audit can sample only from the popul
 
 Suppose you audit a ballot that turns out not to have that contest? Seems like mvr_assort should be 0, not a 0.5, when hasSingleCardStyle = true.
 `if (!cvr.hasContest(info.id)) return if (hasStyle) 0.0 else 0.5`
-is in the code for ClcaAssorter, but not for the primitive assorters.
+is in the code for ClcaAssorter, but not for the primitive assorters,which have
+`if (!cvr.hasContest(info.id)) return 0.5`
 
-If in the same scenario, but with the cards separated (the example of MoreStyle section 5).
+If in the same scenario, but with the cards separated (the example of MoreStyle section 5):
 Each ballot puts n seperate cards in the pile, and hasSingleCardStyle = false.
 We expect to see (n-1)/n cards without the contest, and 1/n with the contest, so we cant tolerate setting
 mvr_assort = 0 when mvr doesnt have the contest, since that will happen a lot. We need to set it to 0.5.

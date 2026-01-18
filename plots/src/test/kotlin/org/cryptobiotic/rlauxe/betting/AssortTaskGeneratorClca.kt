@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.workflow.ContestAuditTaskGenerator
 import org.cryptobiotic.rlauxe.workflow.Sampler

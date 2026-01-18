@@ -1,7 +1,7 @@
-package org.cryptobiotic.rlauxe.betting
+package org.cryptobiotic.rlauxe.shangrla
 
-import org.cryptobiotic.rlauxe.core.PrevSamples
-import org.cryptobiotic.rlauxe.core.SampleTracker
+import org.cryptobiotic.rlauxe.betting.eps
+import org.cryptobiotic.rlauxe.betting.SampleTracker
 import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.math.max
 import kotlin.math.min
@@ -41,7 +41,7 @@ class TestTruncShrinkageDebug {
             c = c
         )
 
-        val assortValues = PrevSamples()
+        val assortValues = SampleTrackerImpl()
         x.forEach {
             val eta = trunkShrink.eta(assortValues)
             println("eta= $eta")

@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -73,7 +74,6 @@ fun consistentSampling(
     mvrManager: MvrManager,
     previousSamples: Set<Long> = emptySet(),
 ) {
-    // TODO included vs done
     val contestsIncluded = auditRound.contestRounds.filter { !it.done && it.included}
     if (contestsIncluded.isEmpty()) return
 

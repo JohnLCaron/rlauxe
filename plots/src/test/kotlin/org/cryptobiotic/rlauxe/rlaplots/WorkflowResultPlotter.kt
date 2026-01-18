@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
-import org.cryptobiotic.rlauxe.core.TestH0Status
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
@@ -20,7 +20,6 @@ import org.jetbrains.kotlinx.kandy.letsplot.x
 import org.jetbrains.kotlinx.kandy.util.color.Color
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.math.log10
 
 enum class ScaleType { Linear, LogLinear, LogLog }
 

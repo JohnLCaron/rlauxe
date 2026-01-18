@@ -3,12 +3,14 @@ package org.cryptobiotic.rlauxe.oneaudit
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
 class TestOneAuditPool {
 
@@ -32,10 +34,33 @@ class TestOneAuditPool {
         assertEquals(cvrTab.ncards, contestOA.contest.Nc())
 
         // only one pool, only one contest
-        val cardPool = cardPools.first() as OneAuditPoolIF
+        val cardPool = cardPools.first()
         assertTrue(cardPool.hasContest(info.id))
         assertFalse(cardPool.hasContest(42))
         assertEquals(1, cardPool.regVotes().size)
+
+        assertTrue(cardPool is OneAuditPoolFromCvrs)
+        val cardPoolCvrs = cardPool as OneAuditPoolFromCvrs
+        val cardPoolCvrs2 = cardPoolCvrs.copy()
+        assertEquals(cardPoolCvrs, cardPoolCvrs)
+        assertEquals(cardPoolCvrs.hashCode(), cardPoolCvrs.hashCode())
+
+        assertNotEquals(cardPoolCvrs2, cardPoolCvrs)
+        assertNotEquals(cardPoolCvrs2.hashCode(), cardPoolCvrs.hashCode())
+
+        val poolTabs = mutableMapOf<Int, ContestTabulation>()
+        cardPool.addTo(poolTabs)
+        assertEquals(cardPool.contestTabs, poolTabs)
+
+        cardPool.addTo(poolTabs)
+
+        assertEquals(1, poolTabs.size)
+        val tab = poolTabs.values.first()
+        assertEquals(1, tab.info.id)
+        val poolVotes = cardPool.contestTabs[1]!!.votes
+        poolVotes.forEach { (cand, vote) ->
+            assertEquals(2 * vote, tab.votes[cand])
+        }
     }
 
     @Test
@@ -71,7 +96,7 @@ class TestOneAuditPool {
     }
 
     @Test
-    fun testCardPool() {
+    fun testOneAuditPoolWithBallotStyle() {
         val test = MultiContestTestData(20, 11, 20000)
         val contestsUAs: List<ContestWithAssertions> = test.contests.map {
             ContestWithAssertions(it, isClca = true).addStandardAssertions()
@@ -92,6 +117,12 @@ class TestOneAuditPool {
 
         val cardPool = OneAuditPoolWithBallotStyle("pool42", 42, false, cvrTabs, infos)
         println(cardPool)
-        // OneAuditPoolWithBallotStyle.showVotes(contestVotes.keys.toList(), listOf(cardPool), width=6)
+
+        assertEquals(cardPool, cardPool)
+        assertEquals(cardPool.hashCode(), cardPool.hashCode())
+
+        val cardPool2 = cardPool.copy(hasSingleCardStyle = true)
+        assertNotEquals(cardPool2, cardPool)
+        assertNotEquals(cardPool2.hashCode(), cardPool.hashCode())
     }
 }

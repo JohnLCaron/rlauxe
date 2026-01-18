@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.unpooled
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
+import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator

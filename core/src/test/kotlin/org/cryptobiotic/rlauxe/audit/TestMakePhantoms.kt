@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.countContestsFromCvrs
+import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.test.Test
 import kotlin.test.assertTrue

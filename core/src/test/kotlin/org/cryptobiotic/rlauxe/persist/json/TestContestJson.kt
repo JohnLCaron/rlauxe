@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.persist.json
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import kotlin.test.Test
 import kotlin.test.assertEquals

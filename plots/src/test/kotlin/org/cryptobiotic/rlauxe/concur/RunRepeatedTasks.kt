@@ -16,7 +16,7 @@ import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.core.RiskTestingFn
+import org.cryptobiotic.rlauxe.betting.RiskMeasuringFn
 import org.cryptobiotic.rlauxe.estimate.RunRepeatedResult
 import org.cryptobiotic.rlauxe.estimate.runRepeated
 import org.cryptobiotic.rlauxe.workflow.Sampler
@@ -26,7 +26,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 
 interface RepeatedTask {
     fun makeSampler() : Sampler
-    fun makeTestFn() : RiskTestingFn
+    fun makeTestFn() : RiskMeasuringFn
     fun makeTestParameters() : Map<String, Double>
     fun name() : String
     fun N() : Int

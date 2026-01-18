@@ -12,6 +12,7 @@ import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.util.ErrorMessages
@@ -177,7 +178,9 @@ fun showBelgiumElection(electionName: String): Triple<Int, Int, AssorterIF> {
     val topdir = "$toptopdir/$electionName"
     val auditdir = "$topdir/audit"
 
-    val auditRecord = PersistedWorkflow(auditdir).auditRecord
+    val auditRecord = AuditRecord.readFrom(auditdir)
+        ?: throw RuntimeException("directory '$auditdir' does not contain an audit record")
+
     val contestUA = auditRecord.contests.first()
     println(contestUA.show())
     val minAssertion = contestUA.minAssertion()

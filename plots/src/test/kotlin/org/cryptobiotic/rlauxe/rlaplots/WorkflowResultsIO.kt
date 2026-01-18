@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.rlaplots
 
-import org.cryptobiotic.rlauxe.core.TestH0Status
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
 import java.io.BufferedReader

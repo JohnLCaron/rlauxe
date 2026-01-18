@@ -6,6 +6,7 @@ import kotlinx.cli.required
 import kotlinx.cli.default
 import org.cryptobiotic.rlauxe.audit.runRoundAgain
 import org.cryptobiotic.rlauxe.audit.runRound
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import kotlin.String
 
@@ -65,11 +66,14 @@ object RunRoundAgainCli {
 
         parser.parse(args)
 
-        val pflow = PersistedWorkflow(auditDir, false)
-        val auditRecord = pflow.auditRecord
+        val auditRecord = AuditRecord.readFrom(auditDir)
+        if (auditRecord == null) {
+            println("auditRecord not found at $auditDir")
+            return
+        }
         val auditRound = if (roundIdx == -1) auditRecord.rounds.last() else auditRecord.rounds.find { it.roundIdx == roundIdx }
         if (auditRound == null) {
-            println("AuditRound $auditRound not found")
+            println("AuditRound roundIdx $roundIdx not found at $auditDir")
             return
         }
         val contestRound = auditRound.contestRounds.find { it.id == contest }

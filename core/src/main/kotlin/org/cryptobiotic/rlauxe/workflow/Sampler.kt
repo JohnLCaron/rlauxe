@@ -19,6 +19,7 @@ interface Sampler: Iterator<Double> {
 // Note that we are stuffing the sampling logic into card.hasContest(contestId)
 
 //// For polling audits. Production runPollingAuditRound
+// TODO do we need maxSampleIndex ??
 class PollingSampler(
     val contestId: Int,
     val cvrPairs: List<Pair<CvrIF, CvrIF>>, // Pair(mvr, card)

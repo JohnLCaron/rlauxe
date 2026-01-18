@@ -24,6 +24,13 @@ class TestClcaAssortValues {
         // val votes = mapOf(0 to 1010, 1 to 990) // Map<Int, Int>
         // data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val lastSeatWon: Int, val firstSeatLost: Int): AssorterIF  {
         val assorter = DHondtAssorter(info, winner = 0, loser = 1, lastSeatWon=2, firstSeatLost=5).setDilutedMean(.55)
+        assertEquals(assorter, assorter)
+        assertEquals(assorter.hashCode(), assorter.hashCode())
+
+        val assorter2 = assorter.copy()
+        assertNotEquals(assorter2, assorter)
+        assertNotEquals(assorter2.hashCode(), assorter.hashCode())
+
         val cassorter = ClcaAssorter(info, assorter, dilutedMargin=assorter.dilutedMargin())
         println(cassorter)
 

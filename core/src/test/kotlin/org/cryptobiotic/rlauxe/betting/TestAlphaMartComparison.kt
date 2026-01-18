@@ -1,8 +1,6 @@
 package org.cryptobiotic.rlauxe.betting
 
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.core.TestH0Result
-import org.cryptobiotic.rlauxe.core.TestH0Status
 import org.cryptobiotic.rlauxe.workflow.Sampler
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean

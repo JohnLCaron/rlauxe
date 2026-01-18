@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.shangrla
 
-import org.cryptobiotic.rlauxe.core.PrevSamples
 import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.doublesAreClose
@@ -30,7 +29,7 @@ class TestShrinkTrunc {
         // values from SHANGRLA test_NonnegMean.test_alpha_mart1
         val expectedmeans = listOf(0.5, 0.55555556, 0.625, 0.71428571, 0.83333333, 1.0, 1.0, 1.0, 1.0, 1.0, )
 
-        val meanValues = PrevSamples()
+        val meanValues = SampleTrackerImpl()
         val means = mutableListOf<Double>()
         x.forEach {
             means.add(populationMeanIfH0(x.size, true, meanValues))
@@ -49,7 +48,7 @@ class TestShrinkTrunc {
 
         val N = x.size
         val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0, c = c)
-        val assortValues = PrevSamples()
+        val assortValues = SampleTrackerImpl()
         val etaValues = mutableListOf<Double>()
         x.forEach {
             val eta = estimFn.eta(assortValues)
@@ -83,7 +82,7 @@ class TestShrinkTrunc {
 
         val N = x.size
         val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0, c = c)
-        val assortValues = PrevSamples()
+        val assortValues = SampleTrackerImpl()
         val etaValues = mutableListOf<Double>()
         x.forEach {
             val eta = estimFn.eta(assortValues)
@@ -108,7 +107,7 @@ class TestShrinkTrunc {
 
         val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0, c = c)
 
-        val assortValues = PrevSamples()
+        val assortValues = SampleTrackerImpl()
         val etaValues = mutableListOf<Double>()
         x.forEach {
             val eta = estimFn.eta(assortValues)
@@ -147,7 +146,7 @@ class TestShrinkTrunc {
             c = c
         )
 
-        val assortValues = PrevSamples()
+        val assortValues = SampleTrackerImpl()
         val etaValues = mutableListOf<Double>()
         x.forEach {
             val eta = estimFn.eta(assortValues)

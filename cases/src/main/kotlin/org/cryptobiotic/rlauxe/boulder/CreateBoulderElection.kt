@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.ContestVotes
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
-import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
+import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes

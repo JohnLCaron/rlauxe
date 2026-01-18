@@ -50,7 +50,7 @@ open class ClcaAssorter(
 
     init {
         val reportedAssortAvg = assorter.dilutedMean() // ?? what used for ??
-        if (check) { // TODO suspend checking for some tests that expect to fail
+        if (check) { // suspend checking for some tests that expect to fail
             require(reportedAssortAvg > 0.5) {
                 "*** ${info.choiceFunction} ${info.name} (${info.id}) ${assorter.desc()}: cvrAssortAvg ($reportedAssortAvg) must be > .5"
             }
@@ -186,19 +186,18 @@ open class ClcaAssorter(
 
     // could just use this.undervotes
     fun overstatementError(mvr: CvrIF, cvr: CvrIF, hasStyle: Boolean): Double {
-
-
-        //        # sanity check
-        //        if use_style and not cvr.has_contest(self.contest.id):
-        //            raise ValueError(
-        //                f"use_style==True but {cvr=} does not contain contest {self.contest.id}"
-        //            )
+        // # SHANGRLA
+        // if use_style and not cvr.has_contest(self.contest.id):
+        //    raise ValueError(
+        //      f"use_style==True but {cvr=} does not contain contest {self.contest.id}"
+        //    )
         // if hasU = hasStyle, we use the cvr as the pcontests, so how did this happen?
-        // if !hasU && !cvr.hasContest, passorter returns 0.5.
         if (hasStyle and !cvr.hasContest(info.id)) {
-            logger.error { "hasStyle==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})" }
+            val trace = Throwable().stackTraceToString()
+            logger.error { "hasStyle==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})\n$trace" }
             // TODO core dump not a good option.
-            throw RuntimeException("hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
+            //    if we were using hasStyle is assorter.assort(), it would return 0.0 for cvr_assort
+            // throw RuntimeException("hasStyle==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
         }
 
         // If use_style, then if the CVR contains the contest but the MVR does not, treat the MVR as having a vote for
@@ -208,13 +207,8 @@ open class ClcaAssorter(
 
         //         Phantom CVRs and MVRs are treated specially:
         //            A phantom CVR is considered a non-vote in every contest (assort()=1/2).
-        //            A phantom MVR is considered a vote for the loser (i.e., assort()=0) in every
-        //            contest.
+        //            A phantom MVR is considered a vote for the loser (i.e., assort()=0) in every contest.
 
-        // TODO
-        // if mvr doesnt have the contest, seems like you need to do worst case always
-        //   which may be ok since we are return 0.5 for pooled data ??
-        // OTOH, pooled data could also have Nc == Npop
         val mvr_assort =
             if (mvr.isPhantom()) 0.0
             else if (!mvr.hasContest(info.id)) { if (hasStyle) 0.0 else 0.5 }

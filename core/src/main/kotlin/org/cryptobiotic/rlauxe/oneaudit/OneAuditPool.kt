@@ -156,23 +156,27 @@ data class OneAuditPoolWithBallotStyle(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as OneAuditPoolWithBallotStyle
+        if (other !is OneAuditPoolWithBallotStyle) return false
 
         if (poolId != other.poolId) return false
+        if (hasSingleCardStyle != other.hasSingleCardStyle) return false
+        if (maxMinCardsNeeded != other.maxMinCardsNeeded) return false
         if (adjustCards != other.adjustCards) return false
         if (poolName != other.poolName) return false
         if (voteTotals != other.voteTotals) return false
+        if (minCardsNeeded != other.minCardsNeeded) return false
 
         return true
     }
 
     override fun hashCode(): Int {
         var result = poolId
+        result = 31 * result + hasSingleCardStyle.hashCode()
+        result = 31 * result + maxMinCardsNeeded
         result = 31 * result + adjustCards
         result = 31 * result + poolName.hashCode()
         result = 31 * result + voteTotals.hashCode()
+        result = 31 * result + minCardsNeeded.hashCode()
         return result
     }
 }
@@ -218,7 +222,6 @@ data class OneAuditPoolFromCvrs(
         }
         totalCards++
     }
-
 
     override fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder {
         val contestTab = contestTabs[contestId]!!
@@ -301,56 +304,4 @@ fun calcOneAuditPoolsFromMvrs(
         if (pool != null) pool.accumulateVotes(it)
     }
     return poolsFromCvrs.values.toList()
-}
-
-//////////////////////////////////////////////////////////////////
-
-fun distributeExpectedOvervotes(oaContest: OneAuditContestBuilderIF, cardPools: List<OneAuditPoolWithBallotStyle>) {
-    val contestId = oaContest.contestId
-    val poolCards = oaContest.poolTotalCards()
-    val expectedCards = oaContest.expectedPoolNCards()
-    val diff = expectedCards - poolCards
-
-    var used = 0
-    val allocDiffPool = mutableMapOf<Int, Int>()
-    cardPools.forEach { pool ->
-        val minCardsNeeded = pool.minCardsNeeded[contestId]
-        if (minCardsNeeded != null) {
-            // distribute cards as proportion of totalVotes
-            val allocDiff = roundToClosest(diff * (pool.maxMinCardsNeeded / poolCards.toDouble()))
-            used += allocDiff
-            allocDiffPool[pool.poolId] = allocDiff
-        }
-    }
-
-    // adjust some pool so sum undervotes = redUndervotes
-    if (used < diff) {
-        val keys = allocDiffPool.keys.toList()
-        while (used < diff) {
-            val chooseOne = keys[Random.nextInt(allocDiffPool.size)]
-            val prev = allocDiffPool[chooseOne]!!
-            allocDiffPool[chooseOne] = prev + 1
-            used++
-        }
-    }
-    if (used > diff) {
-        val keys = allocDiffPool.keys.toList()
-        while (used > diff) {
-            val chooseOne = keys[Random.nextInt(allocDiffPool.size)]
-            val prev = allocDiffPool[chooseOne]!!
-            if (prev > 0) {
-                allocDiffPool[chooseOne] = prev - 1
-                used--
-            }
-        }
-    }
-
-    // check
-    require(allocDiffPool.values.sum() == diff)
-
-    // adjust
-    val cardPoolMap = cardPools.associateBy { it.poolId }
-    allocDiffPool.forEach { (poolId, adjust) ->
-        cardPoolMap[poolId]!!.adjustCards(adjust, contestId)
-    }
 }

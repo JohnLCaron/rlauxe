@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.shangrla
 import org.cryptobiotic.rlauxe.SampleFromArray
 import org.cryptobiotic.rlauxe.SampleFromList
 import org.cryptobiotic.rlauxe.core.AgrapaBet
-import org.cryptobiotic.rlauxe.core.BettingMart
+import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.core.FixedBet
 import org.cryptobiotic.rlauxe.core.OptimalComparisonNoP1
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker

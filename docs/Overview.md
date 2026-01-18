@@ -1,5 +1,5 @@
 # Rlauxe Implementation Overview
-_last changed 12/20/2025_
+_last changed 01/18/2026_
 
 While Rlauxe is intended to be used in real elections, its primary use currently is to simulate elections for testing
 RLA algorithms.
@@ -76,6 +76,19 @@ See Sample Population for more details.
             sampleCardsX.csv     // AuditableCardCsv, complete cards used for this round; matches samplePrnsX.csv
             sampleMvrsX.csv      // AuditableCardCsv, complete mvrs used for this round; matches samplePrnsX.csv
             samplePrnsX.json     // SamplePrnsJson, complete sample prns for this round, in order
+
+## Composite AuditRecord
+
+    $compositedir/
+        $component1/
+           audit/
+        $component2/
+           audit/      
+        ...  
+
+Use AuditRecord.readFrom($compositedir). Each $component/audit is an AuditRecord.
+The contests from all components are put into the CompositeRecord. You can view and read, but not run audits on the
+CompositeRecord. Run audits independently on the components.
 
 ### Commitment Sequence
 

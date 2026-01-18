@@ -5,11 +5,14 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestBuilderIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolWithBallotStyle
 import org.cryptobiotic.rlauxe.util.mergeReduce
+import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.collections.get
+import kotlin.random.Random
 
 private val logger = KotlinLogging.logger("OneAuditContestBoulder")
 
@@ -140,5 +143,56 @@ class OneAuditContestBoulder(val info: ContestInfo,
     }
 }
 
+//////////////////////////////////////////////////////////////////
+
+fun distributeExpectedOvervotes(oaContest: OneAuditContestBuilderIF, cardPools: List<OneAuditPoolWithBallotStyle>) {
+    val contestId = oaContest.contestId
+    val poolCards = oaContest.poolTotalCards()
+    val expectedCards = oaContest.expectedPoolNCards()
+    val diff = expectedCards - poolCards
+
+    var used = 0
+    val allocDiffPool = mutableMapOf<Int, Int>()
+    cardPools.forEach { pool ->
+        val minCardsNeeded = pool.minCardsNeeded[contestId]
+        if (minCardsNeeded != null) {
+            // distribute cards as proportion of totalVotes
+            val allocDiff = roundToClosest(diff * (pool.maxMinCardsNeeded / poolCards.toDouble()))
+            used += allocDiff
+            allocDiffPool[pool.poolId] = allocDiff
+        }
+    }
+
+    // adjust some pool so sum undervotes = redUndervotes
+    if (used < diff) {
+        val keys = allocDiffPool.keys.toList()
+        while (used < diff) {
+            val chooseOne = keys[Random.nextInt(allocDiffPool.size)]
+            val prev = allocDiffPool[chooseOne]!!
+            allocDiffPool[chooseOne] = prev + 1
+            used++
+        }
+    }
+    if (used > diff) {
+        val keys = allocDiffPool.keys.toList()
+        while (used > diff) {
+            val chooseOne = keys[Random.nextInt(allocDiffPool.size)]
+            val prev = allocDiffPool[chooseOne]!!
+            if (prev > 0) {
+                allocDiffPool[chooseOne] = prev - 1
+                used--
+            }
+        }
+    }
+
+    // check
+    require(allocDiffPool.values.sum() == diff)
+
+    // adjust
+    val cardPoolMap = cardPools.associateBy { it.poolId }
+    allocDiffPool.forEach { (poolId, adjust) ->
+        cardPoolMap[poolId]!!.adjustCards(adjust, contestId)
+    }
+}
 
 

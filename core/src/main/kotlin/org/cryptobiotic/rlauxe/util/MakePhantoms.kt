@@ -1,5 +1,6 @@
-package org.cryptobiotic.rlauxe.audit
+package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.Cvr
 
@@ -87,6 +88,6 @@ class PhantomBuilder(val id: String, val idx: Int) {
     fun buildCard(): AuditableCard {
         // hijack votes
         val votes = contests.associateWith { IntArray(0) }
-        return AuditableCard(location=id, index=idx, prn=0L, phantom = true, votes=votes, poolId=null)
+        return AuditableCard(location = id, index = idx, prn = 0L, phantom = true, votes = votes, poolId = null)
     }
 }

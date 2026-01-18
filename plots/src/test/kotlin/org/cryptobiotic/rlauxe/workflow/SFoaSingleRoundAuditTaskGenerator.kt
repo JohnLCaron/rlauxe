@@ -4,9 +4,11 @@ import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.ContestRound
+import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.TestH0Result
+import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import kotlin.use
 
@@ -51,14 +53,16 @@ class SfoaSingleRoundAuditTask(
         println("SfoaSingleRoundAuditTask start ${name()}")
         val wresults = mutableListOf<WorkflowResult>()
 
-        val rlauxAudit = PersistedWorkflow(auditDir, true)
+        val rlauxAudit = PersistedWorkflow.readFrom(auditDir)!!
         rlauxAudit.contestsUA().forEach { contestUA ->
             contestUA.clcaAssertions.forEach { cassertion ->
                 val assertionRound = AssertionRound(cassertion, 1, null)
                 val contestRound = ContestRound(contestUA, listOf(assertionRound), 1)
 
                 val mvrManager = MvrManagerClcaSingleRound(
-                    AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run)
+                    AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run),
+                    -1,
+                    rlauxAudit.mvrManager().populations()!!
                 )
 
                 val sampler =
@@ -69,7 +73,7 @@ class SfoaSingleRoundAuditTask(
                         mvrManager.sortedCards().iterator(),
                     )
 
-                val runner = OneAuditAssertionAuditor(mvrManager.populations()!!)
+                val runner = OneAuditAssertionAuditor(mvrManager.populations() as List<OneAuditPoolIF>)
 
                 val result: TestH0Result = runner.run(
                     rlauxAudit.auditConfig(),
@@ -100,11 +104,12 @@ class SfoaSingleRoundAuditTask(
     }
 }
 
-class MvrManagerClcaSingleRound(val sortedCards: CloseableIterable<AuditableCard>, val maxSamples: Int = -1) : MvrManager {
+class MvrManagerClcaSingleRound(val sortedCards: CloseableIterable<AuditableCard>, val maxSamples: Int = -1,
+    val populations: List<PopulationIF>) : MvrManager {
 
     override fun sortedCards() = sortedCards
 
-    override fun populations() = null // TODO
+    override fun populations() = populations
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<Cvr, AuditableCard>> {
         val cvrs = mutableListOf<Cvr>()

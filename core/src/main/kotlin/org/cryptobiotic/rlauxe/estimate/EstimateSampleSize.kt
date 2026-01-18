@@ -7,9 +7,11 @@ import org.cryptobiotic.rlauxe.betting.AlphaMart
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.betting.BettingFn
+import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.EstimFn
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
@@ -340,7 +342,7 @@ fun runRepeatedBettingMart(
         N = N,
         riskLimit = config.riskLimit,
         sampleUpperBound = clcaUpper,
-        tracker=tracker
+        tracker = tracker
     )
 
     // run the simulation ntrials (config.nsimEst) times

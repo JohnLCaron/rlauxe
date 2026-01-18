@@ -5,7 +5,7 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.core.TestH0Status
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
@@ -486,8 +486,7 @@ fun verifyOApools(
                     val cvrVotes = cvrTab.irvVotes.makeVotes(contestUA.ncandidates)
                     rassorter.calcMargin(cvrVotes, cvrTab.ncards)
                 } else {
-                    val regVotes = cvrTab.votes
-                    passorter.calcMarginFromRegVotes(regVotes, cvrTab.ncards)
+                    passorter.calcMarginFromRegVotes(cvrTab.votes, cvrTab.ncards)
                 }
                 val cvrMean = margin2mean(cvrMargin)
                 assortAvg.ncards += cvrTab.ncards

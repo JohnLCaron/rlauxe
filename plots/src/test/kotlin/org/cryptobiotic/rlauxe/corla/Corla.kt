@@ -1,5 +1,8 @@
 package org.cryptobiotic.rlauxe.corla
 
+import org.cryptobiotic.rlauxe.betting.RiskMeasuringFn
+import org.cryptobiotic.rlauxe.betting.TestH0Result
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import java.lang.Math.pow
 import kotlin.math.min
@@ -8,7 +11,7 @@ import kotlin.math.min
 // Corla is a RiskTestingFn
 // TODO does Corla use phantoms ?
 class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val noerror: Double,
-    val p1: Double, val p2: Double, val p3: Double, val p4: Double): RiskTestingFn {
+    val p1: Double, val p2: Double, val p3: Double, val p4: Double): RiskMeasuringFn {
     val gamma = 1.03
 
     override fun testH0(

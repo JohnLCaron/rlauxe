@@ -39,6 +39,28 @@ data class Population(
     override fun ncards() = ncards
     override fun hasContest(contestId: Int) = possibleContests.contains(contestId)
     override fun contests() = possibleContests
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Population) return false
+
+        if (id != other.id) return false
+        if (hasSingleCardStyle != other.hasSingleCardStyle) return false
+        if (ncards != other.ncards) return false
+        if (name != other.name) return false
+        if (!possibleContests.contentEquals(other.possibleContests)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = id
+        result = 31 * result + hasSingleCardStyle.hashCode()
+        result = 31 * result + ncards
+        result = 31 * result + name.hashCode()
+        result = 31 * result + possibleContests.contentHashCode()
+        return result
+    }
 }
 
 class CardManifest(val cards: CloseableIterable<AuditableCard>, val populations: List<PopulationIF>) {

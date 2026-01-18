@@ -4,12 +4,12 @@ package org.cryptobiotic.rlauxe.corla
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.audit.makePhantomCvrs
+import org.cryptobiotic.rlauxe.util.makePhantomCvrs
+import org.cryptobiotic.rlauxe.boulder.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestBuilderIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolWithBallotStyle
-import org.cryptobiotic.rlauxe.oneaudit.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.component1

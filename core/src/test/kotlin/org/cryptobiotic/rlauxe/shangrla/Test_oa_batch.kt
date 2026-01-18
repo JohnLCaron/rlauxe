@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.shangrla
 
-import org.cryptobiotic.rlauxe.core.PrevSamples
 import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
@@ -197,7 +196,7 @@ class TruncShrinkageProxy(
     val proxy = TruncShrinkage(N = N, upperBound = u, eta0 = mu, c = c, d = d)
 
     override fun eta(prevSamples: DoubleArray): DoubleArray {
-        val prevSample = PrevSamples()
+        val prevSample = SampleTrackerImpl()
         val result: List<Double> = prevSamples.map {
             val eta = proxy.eta(prevSample)
             prevSample.addSample(it)

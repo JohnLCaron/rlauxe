@@ -1,10 +1,5 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.core.BettingMart
-import org.cryptobiotic.rlauxe.core.DebuggingSequences
-import org.cryptobiotic.rlauxe.core.RiskTestingFn
-import org.cryptobiotic.rlauxe.core.SampleTracker
-import org.cryptobiotic.rlauxe.core.TestH0Result
 import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.math.max
 import kotlin.math.min
@@ -163,7 +158,7 @@ class AlphaMart(
     val tracker: SampleTracker,
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val upperBound: Double = 1.0,  // aka u
-): RiskTestingFn {
+): RiskMeasuringFn {
     val betting: BettingMart
 
     init {

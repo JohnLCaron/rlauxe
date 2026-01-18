@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.alpha
 import org.cryptobiotic.rlauxe.betting.AlphaMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.FixedEstimFn
+import org.cryptobiotic.rlauxe.betting.RiskMeasuringFn
 import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
@@ -36,7 +37,7 @@ data class PollingTask(
         return PollingSampler(contestUA.id, pairs, pollingAssorter)
     }
 
-    override fun makeTestFn(): RiskTestingFn {
+    override fun makeTestFn(): RiskMeasuringFn {
         val tracker = ClcaErrorTracker(0.0, pollingAssorter.upperBound())
 
         return if (useFixedEstimFn) {

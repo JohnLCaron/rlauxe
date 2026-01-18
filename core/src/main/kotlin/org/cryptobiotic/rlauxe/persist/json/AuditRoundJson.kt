@@ -11,6 +11,7 @@ import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.enumValueOf
@@ -62,7 +63,7 @@ fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: L
     val contestRounds = this.contestRounds.map {
         it.import( contestUAmap[it.id]!! )
     }
-    // TODO Composite ??
+    // TODO Composite needed to serialize ??
     return AuditRound(
         this.roundIdx,
         contestRounds,
@@ -263,8 +264,6 @@ fun EstimationRoundResultJson.import() : EstimationRoundResult {
 //    val pvalue: Double,       // last pvalue when testH0 terminates
 //    val samplesUsed: Int,     // sample count when testH0 terminates
 //    val status: TestH0Status, // testH0 status
-//    val measuredMean: Double, // measured population mean TODO used?
-//    val startingRates: ClcaErrorCounts? = null, // starting error rates (clca only)
 //    val measuredCounts: ClcaErrorCounts? = null, // measured error counts (clca only)
 //    val params: Map<String, Double> = emptyMap(),
 //)
@@ -278,7 +277,6 @@ data class AuditRoundResultJson(
     val pvalue: Double,       // last pvalue when testH0 terminates
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
     val status: String, // testH0 status
-    // val startingRates: Map<Double, Double>?,
     val measuredCounts: ClcaErrorCountsJson?,
     val params: Map<String, Double>
 )
@@ -291,7 +289,6 @@ fun AuditRoundResult.publishJson() = AuditRoundResultJson(
     this.pvalue,
     this.samplesUsed,
     this.status.name,
-    // this.startingRates,
     this.measuredCounts?.publishJson(),
     params,
 )
@@ -305,7 +302,6 @@ fun AuditRoundResultJson.import() : AuditRoundResult {
         this.pvalue,
         this.samplesUsed,
         status,
-        // this.startingRates,
         this.measuredCounts?.import(),
         params,
     )

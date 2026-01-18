@@ -3,10 +3,12 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.BettingFn
+import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditRatesFromPools
@@ -79,7 +81,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
             sampleUpperBound = cassorter.upperBound(),
             riskLimit = config.riskLimit,
             withoutReplacement = true,
-            tracker=tracker,
+            tracker = tracker,
         )
         // TODO make optional
         tracker.setDebuggingSequences(testFn.setDebuggingSequences())

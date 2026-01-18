@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
-
 
 // from SuperSimple:
 // The number µ is the “diluted margin”: the smallest margin of victory in votes among the contests, divided by the
@@ -63,7 +63,7 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
         return this
     }
 
-    // If a ballot cannot be found (because the manifest is wrong—either because it lists a ballot that is not there, or
+    // If a ballot cannot be found (because the manifest is wrong, either because it lists a ballot that is not there, or
     //   because it does not list all the ballots), pretend that the audit actually finds a ballot, an evil zombie
     //   ballot that shows whatever would increase the P-value the most. For ballot-polling audits, this means
     //   pretending it showed a valid vote for every loser. P2Z section 2 p 3-4.
@@ -72,7 +72,7 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     // usePhantoms = true for polling, but when this is the "primitive assorter" in clca, usePhantoms = false so that
     //   clcaAssorter can handle the phantoms.
     override fun assort(cvr: CvrIF, usePhantoms: Boolean): Double {
-        // if (!cvr.hasContest(info.id)) return if (hasStyle) 0.0 else 0.5 TODO
+        // if (!cvr.hasContest(info.id)) return if (hasStyle) 0.0 else 0.5 TODO use hasStyle?
         if (!cvr.hasContest(info.id)) return 0.5
         if (usePhantoms && cvr.isPhantom()) return 0.0 // worst case
         val w = cvr.hasMarkFor(info.id, winner)
@@ -90,8 +90,10 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
 
     override fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double {
         if (useVotes == null) {
-            return 0.0 // TODO something
-        } // shouldnt happen
+            val trace = Throwable().stackTraceToString()
+            logger.error { "PluralityAssorter.calcMarginFromRegVotes called with useVotes == null\n$trace" }
+            return 0.0
+        }
         val winnerVotes = useVotes[winner()] ?: 0
         val loserVotes = useVotes[loser()] ?: 0
         return if (N == 0) 0.0 else (winnerVotes - loserVotes) / N.toDouble()
@@ -120,6 +122,8 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     }
 
     companion object {
+        private val logger = KotlinLogging.logger("PluralityAssorter")
+
         fun makeWithVotes(contest: ContestIF, winner: Int, loser: Int, Npop: Int?=null): PluralityAssorter {
             val useVotes = contest.votes()!!
             val winnerVotes = useVotes[winner] ?: 0

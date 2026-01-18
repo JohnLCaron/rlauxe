@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.verify
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import kotlin.collections.component1
 import kotlin.collections.component2

@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.unpooled
@@ -17,12 +18,14 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
-import org.cryptobiotic.rlauxe.raire.makeRaireContestIrv
-import org.cryptobiotic.rlauxe.raire.makeRaireContestUA
+import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.raire.makeRaireOneAuditContest
+import org.cryptobiotic.rlauxe.raire.makeRaireContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.Boolean
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -72,7 +75,7 @@ class CreateSfElection(
         phantomCount = countPhantoms(allCvrTabs, contestNcs)
 
         // we need to know the diluted Nb before we can create the UAs: another pass through the cvrExports
-        val manifestTabs = tabulateAuditableCards(createCardManifest(phantomCount), infos)
+        val manifestTabs = tabulateAuditableCards(createCardManifest(config.auditType), infos)
         val contestNbs = manifestTabs.mapValues { it.value.ncards }
         println("contestNbs= ${contestNbs}")
 
@@ -162,24 +165,35 @@ class CreateSfElection(
 
     override fun populations() = if (config.isClca) emptyList() else cardPools
     override fun contestsUA() = contestsUA
-    override fun cardManifest() = createCardManifest(phantomCount)
+    override fun cardManifest() = createCardManifest(config.auditType)
 
     // these are the same cvrs for CLCA and OneAudit
-    fun createCardManifest(phantomCount: Map<Int,Int>): CloseableIterator<AuditableCard> {
+    fun createCardManifest(auditType: AuditType): CloseableIterator<AuditableCard> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
         val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPools.associate { it.name() to it.id() })
 
-        return if (config.isOA) CvrsWithPopulationsToCardManifest(
-            config.auditType,
+        return if (auditType == AuditType.ONEAUDIT) CvrsWithPopulationsToCardManifest(
+            auditType,
             cvrIter,
             makePhantomCvrs(phantomCount),
             cardPools)
         else
             CvrsWithPopulationsToCardManifest(
-                config.auditType,
+                auditType,
                 cvrIter,
                 makePhantomCvrs(phantomCount),
                 null)
+    }
+
+    fun createUnsortedMvrs(): List<Cvr> {
+        val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
+        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPools.associate { it.name() to it.id() })
+
+        val unsortedMvrs = mutableListOf<Cvr>()
+        cvrIter.use { iter ->
+            while( iter.hasNext()) { unsortedMvrs.add (iter.next()) }
+        }
+        return unsortedMvrs
     }
 }
 
@@ -193,7 +207,7 @@ fun makeClcaContestsSF(allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map
             val contest = Contest(info, cvrTab.votes, useNc, cvrTab.ncards)
             ContestWithAssertions(contest, NpopIn=contestNbs[info.id]).addStandardAssertions()
         } else {
-            makeRaireContestUA(info, cvrTab, useNc, Nbin=contestNbs[info.id]!!)
+            makeRaireContest(info, cvrTab, useNc, Nbin=contestNbs[info.id]!!) // HERE
         }
         contestUA.contest.info().metadata["PoolPct"] = 0
         contestsUAs.add(contestUA)
@@ -213,7 +227,7 @@ fun makeOneAuditContestsSF(allCvrTabs: Map<Int, ContestTabulation>, contestNcs :
     allCvrTabs.filter{ it.value.isIrv }. map { (contestId, cvrTab)  ->
         val info = cvrTab.info
         val useNc = contestNcs[info.id] ?: cvrTab.ncards
-        val contestUA = makeRaireContestIrv(info, cvrTab, useNc, Nbin=contestNbs[info.id]!!, oneAuditPools)
+        val contestUA = makeRaireOneAuditContest(info, cvrTab, useNc, Nbin=contestNbs[info.id]!!, oneAuditPools)
 
         val unpooledTab = unpooledPool.contestTabs[info.id]!!
         val unpooledPct = 100.0 * unpooledTab.ncards / cvrTab.ncards
@@ -329,14 +343,15 @@ fun createSfElection(
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
 
-        (auditType ==  AuditType.CLCA) -> AuditConfig(AuditType.CLCA, riskLimit = .05, nsimEst=10)
+        (auditType ==  AuditType.CLCA) -> AuditConfig(AuditType.CLCA, riskLimit = .05, nsimEst=20)
 
         (auditType ==  AuditType.ONEAUDIT) -> AuditConfig(
-            AuditType.ONEAUDIT, riskLimit = .05, nsimEst = 10,
+            AuditType.ONEAUDIT, riskLimit = .05, nsimEst = 20,
+            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
             oaConfig = OneAuditConfig(OneAuditStrategyType.generalAdaptive, useFirst = false)
         )
 
-        else -> AuditConfig(AuditType.POLLING, riskLimit = .05, contestSampleCutoff = 10000, nsimEst = 100)
+        else -> AuditConfig(AuditType.POLLING, riskLimit = .05, contestSampleCutoff = 10000, nsimEst = 20)
     }
 
     val election = CreateSfElection(
@@ -347,7 +362,12 @@ fun createSfElection(
         config = config,
         poolsHaveOneCardStyle=poolsHaveOneCardStyle,
     )
-
     CreateAudit("sf2024", config, election, auditDir = "$topdir/audit", )
+
+    // convert the cvrExports to the private mvrs
+    val unsortedMvrs = election.createUnsortedMvrs()
+    writeUnsortedPrivateMvrs(Publisher("$topdir/audit"), unsortedMvrs, seed = config.seed)
+
     println("createSfElection took $stopwatch")
+
 }

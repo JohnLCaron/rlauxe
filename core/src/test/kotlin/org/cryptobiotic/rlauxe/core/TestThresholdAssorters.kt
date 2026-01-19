@@ -189,7 +189,7 @@ class TestThresholdAssorters {
         ) // bi has a mark for exactly one candidate and not Alice
         assertEquals(massorter.upperBound(), massorter.assort(makeCvr(1))) // // bi has a mark for Alice and no one else
         assertEquals(
-            massorter.lowerBound(),
+            0.0,
             massorter.assort(makeCvr(2))
         ) // // bi has a mark for exactly one candidate and not Alice
 

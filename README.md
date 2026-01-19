@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 01/08/2025_
+_last changed: 01/18/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -55,7 +55,7 @@ Click on plot images to get an interactive html plot. You can also read this doc
     * [OneAudit Card Style Data](#oneaudit-card-style-data)
     * [Multicontest audits](#multicontest-audits)
   * [Unanswered Questions](#unanswered-questions)
-    * [Use has_style for polling](#use-has_style-for-polling)
+    * [Contest is missing in the MVR](#contest-is-missing-in-the-mvr)
   * [Also See:](#also-see)
 <!-- TOC -->
 
@@ -84,7 +84,8 @@ in a risk-limiting audit with risk limit α:
 | bettingFn | decides how much to bet for each sample. (BettingMart)                                       |
 | riskFn    | the statistical method to test if the assertion is true.                                     |
 | Nc        | a trusted, independent bound on the number of valid cards cast in the contest c.             |
-| Ncast     | the number of ballot cards validly cast in the contest                                       |
+| Ncast     | the number of cards validly cast in the contest                                              |
+| Npop      | the number of cards that might contain the contest                                           |
 
 
 # Audit Workflow Overview
@@ -146,6 +147,7 @@ Each round generates samplePrns.json, sampleCards.csv, sampleMvrs.csv, and audit
 ## Verification
 
 Independently written verifiers can read the Audit Record and verify that the audit was correctly performed.
+See [Verification](docs/Verification.md).
 
 # Audit Types
 
@@ -297,14 +299,22 @@ Varying phantom percent, up to and over the margin of 4.5%, with errors generate
 
 Once we have all of the contests' estimated sample sizes, we next choose which ballots/cards to sample.
 This step depends on the CardManifest and Population information, which tells which cards
-have which contests. When you know exactly what contests are on each card, the contest margin is at a maximum, and the samplesNeeded
-are at a minimum. If you dont know exactly what contests are on each card, the cards may be divided up into populations in a
+may have which contests. The number of cards that may have a contest on it is called the population size (Npop)
+and is used as the denominator of the _diluted margin_ for the contest. The sampling must be uniform over the 
+contests' population for a statistically valid audit.
+
+The Population objects are a generalization of SHANGRLA's Card Style Data, allowing for partial information about which cards
+have which contests.
+
+When you know exactly what contests are on each card, the diluted margin is at a maximum, and the samples needed
+is at a minimum. If you dont know exactly what contests are on each card, the cards may be divided up into populations in a
 way that minimizes the number of cards that might have the contest.
 See [SamplePopulations](docs/SamplePopulations.md) for more explanation and current thinking.
 
-For CLCA audits, the generated Cast Vote Records (CVRs) comprise the Card Style Data, as long as the CVR records the undervotes
-(contests where no vote was cast). For Polling audits and OneAudit pools, the Populations describe 
-which contests are on which cards.
+For CLCA audits, the generated Cast Vote Records (CVRs) tell you exactly which cards have which
+contests, as long as the CVR records the undervotes (contests where no vote was cast). 
+For Polling audits and OneAudit pools (and the case where _cvrsContainUndervotes_ = false), 
+the Populations describe which contests are on which cards.
 
 
 # Estimating Sample Batch sizes

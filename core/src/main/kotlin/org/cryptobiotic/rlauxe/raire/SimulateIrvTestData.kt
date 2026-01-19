@@ -5,9 +5,7 @@ import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.min
 import kotlin.random.Random
 
-// simulate cvrs for a RaireContest
-// TODO not called from estimateSampleSize.
-//     also see simulateRaireTestContest
+// simulate cvrs for a RaireContest, doesnt call raire-java for the assertions
 data class SimulateIrvTestData(
     val contest: RaireContest,
     val minMargin: Double,
@@ -22,6 +20,8 @@ data class SimulateIrvTestData(
         var count = 0
         val cvrs = mutableListOf<Cvr>()
 
+        // TODO just makes sure the winner is chosen first ncards * minMargin more than any other candidate.
+        //    kinda primitive; something better ??
         val excess = excessVotes ?: (ncards * minMargin).toInt()
         repeat(excess) {
             cvrs.add(makeCvrWithLeading0(count++))

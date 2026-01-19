@@ -23,9 +23,10 @@ import kotlin.collections.forEach
 private val quiet = true
 private val logger = KotlinLogging.logger("MakeRaireContest")
 
-// make RaireContestUnderAudit from ContestTabulation; get RaireAssertions from raire-java libray
+// make RaireContestWithAssertions from ContestTabulation; get RaireAssertions from raire-java libray
 // note ivrRoundsPaths are filled in
-fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, Nbin: Int): RaireContestWithAssertions {
+// used by CreateSfElection
+fun makeRaireContest(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, Nbin: Int): RaireContestWithAssertions {
     // TODO consistency checks on voteConsolidator
     // all candidate indexes
     val vc = contestTab.irvVotes
@@ -111,7 +112,7 @@ fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int
         info,
         winnerIndex = raireResult.winner,
         Nc = Nc,
-        Ncast = contestTab.ncards,
+        Ncast = Nc - contestTab.nphantoms,
         undervotes = contestTab.undervotes,
         raireAssertions,
         Nbin,
@@ -132,7 +133,7 @@ fun makeRaireContestUA(info: ContestInfo, contestTab: ContestTabulation, Nc: Int
 }
 
 // contestTab.irvVotes must include the pooled data, since we generate the RaireAssertions from them.
-fun makeRaireContestIrv(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, Nbin: Int, oneAuditPools: List<OneAuditPoolFromCvrs>): RaireContestWithAssertions {
+fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, Nbin: Int, oneAuditPools: List<OneAuditPoolFromCvrs>): RaireContestWithAssertions {
     val vc = contestTab.irvVotes
     val startingVotes = vc.makeVoteList()
     val votes = vc.makeVotes(info.candidateIds.size)

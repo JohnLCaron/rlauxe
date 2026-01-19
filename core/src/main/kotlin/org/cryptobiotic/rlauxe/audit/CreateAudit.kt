@@ -125,7 +125,7 @@ fun writeExternalSortedCards(topdir: String, outputFile: String, unsortedCards: 
 }
 
 // uses private/sortedMvrs.cvs
-fun writeMvrsForRound(publisher: Publisher, round: Int) {
+fun writeMvrsForRound(publisher: Publisher, round: Int): Int {
     val resultSamples = readSamplePrnsJsonFile(publisher.samplePrnsFile(round))
     if (resultSamples is Err) logger.error{"$resultSamples"}
     require(resultSamples is Ok)
@@ -140,8 +140,7 @@ fun writeMvrsForRound(publisher: Publisher, round: Int) {
         require(mvr.prn == sampleNumbers[index])
     }
 
-    val countCards = writeAuditableCardCsvFile(Closer(sampledMvrs.iterator()), publisher.sampleMvrsFile(round))
-    logger.info{"writeMvrsForRound ${countCards} cards to ${publisher.sampleMvrsFile(round)}"}
+    return writeAuditableCardCsvFile(Closer(sampledMvrs.iterator()), publisher.sampleMvrsFile(round))
 }
 
 fun writePrivateMvrs(publisher: Publisher, sortedMvrs: List<AuditableCard>) {

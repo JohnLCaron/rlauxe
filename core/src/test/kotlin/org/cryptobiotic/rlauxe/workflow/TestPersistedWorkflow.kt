@@ -144,7 +144,6 @@ fun runPersistedAudit(topdir: String, test:Boolean) {
     val publisher = Publisher(auditdir)
     val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
     writeSortedCardsExternalSort(topdir, publisher, config.seed)
-    val writeMvrs = config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs
 
     val verifyResults = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
     println()
@@ -167,7 +166,6 @@ fun runPersistedAudit(topdir: String, test:Boolean) {
         } */
 
         done = lastRound.auditIsComplete || lastRound.roundIdx > 5
-        if (!done && writeMvrs) writeMvrsForRound(publisher, lastRound!!.roundIdx) // RunRlaCreateOneAudit writes the mvrs
     }
 
     if (lastRound != null) {

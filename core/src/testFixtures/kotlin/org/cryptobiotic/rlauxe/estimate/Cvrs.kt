@@ -149,7 +149,7 @@ fun add2voteOverstatements(cvrs: MutableList<Cvr>, needToChangeVotesFromA: Int):
 
 // This only agrees with reportedMargin when the cvrs are complete with undervotes and phantoms.
 // Note that we rely on it.hasContest(contestId), assumes undervotes are in the cvr, ie hasStyle = true.
-fun AssorterIF.calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false, show: Boolean= false): Double {
+fun AssorterIF.calcAssorterMargin(contestId: Int, cvrs: Iterable<Cvr>, usePhantoms: Boolean = false): Double {
     return mean2margin(calcAssortAvgFromCvrs(contestId, cvrs, usePhantoms))
 }
 

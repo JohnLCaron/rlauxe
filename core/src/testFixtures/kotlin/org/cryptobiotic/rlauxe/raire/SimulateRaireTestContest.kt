@@ -18,6 +18,7 @@ import kotlin.random.Random
 
 // Simulation of Raire Contest; pass in the parameters to make RaireContest with and simulate the cvrs;
 // then call raire library to generate the assertions to get  RaireContestUnderAudit
+// used for testing only
 fun simulateRaireTestContest(N: Int, contestId: Int, ncands:Int, minMargin: Double,
                              undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true)
 : Pair<RaireContestWithAssertions, List<Cvr>> {
@@ -263,6 +264,7 @@ fun findMinAssertion(
         null,
         null,
     )
+    if (!quiet) println("call problem.solve in raire library")
     val solution: RaireSolution = problem.solve()
     if (solution.solution.Err != null) {
         println("solution.solution.Err=${solution.solution.Err}")

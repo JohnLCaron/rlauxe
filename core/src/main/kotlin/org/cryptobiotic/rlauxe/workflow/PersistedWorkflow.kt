@@ -1,20 +1,17 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.persist.AuditRecord.Companion.readFromResult
 import org.cryptobiotic.rlauxe.persist.AuditRecordIF
 import org.cryptobiotic.rlauxe.persist.CompositeRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
 
-private val logger = KotlinLogging.logger("PersistentAudit")
+private val logger = KotlinLogging.logger("PersistedWorkflow")
 
 enum class PersistedWorkflowMode {
     real,           // use PersistedMvrManager;  sampleMvrs$round.csv must be written from external program.
@@ -73,10 +70,10 @@ class PersistedWorkflow(
             }
 
             writeAuditRoundJsonFile(nextRound, publisher.auditStateFile(nextRound.roundIdx))
-            logger.info {"   writeAuditStateJsonFile ${publisher.auditStateFile(nextRound.roundIdx)}"}
+            logger.info {"startNewRound writeAuditState ${publisher.auditStateFile(nextRound.roundIdx)}"}
 
             writeSamplePrnsJsonFile(nextRound.samplePrns, publisher.samplePrnsFile(nextRound.roundIdx))
-            logger.info {"   writeSampleIndicesJsonFile ${publisher.samplePrnsFile(nextRound.roundIdx)}"}
+            logger.info {"startNewRound writeSamplePrns ${publisher.samplePrnsFile(nextRound.roundIdx)}"}
         }
 
         return nextRound
@@ -103,13 +100,13 @@ class PersistedWorkflow(
         auditRound.auditIsComplete = complete
 
         writeAuditRoundJsonFile(auditRound, publisher.auditStateFile(roundIdx)) // replace auditState
-        logger.info {"writeAuditRoundJsonFile to '${publisher.auditStateFile(roundIdx)}'"}
+        logger.info {"runAuditRound writeAuditState to '${publisher.auditStateFile(roundIdx)}'"}
 
         return complete
     }
 
     override fun toString(): String {
-        return "PersistentWorkflow(auditDir='$auditDir', mode=$mode, mvrManager=$mvrManager)"
+        return "PersistentWorkflow(auditDir='$auditDir', mode=$mode, mvrManager=${mvrManager.javaClass.simpleName})"
     }
 
     companion object {

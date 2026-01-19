@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
@@ -21,13 +22,14 @@ import org.cryptobiotic.rlauxe.workflow.ClcaAssertionAuditor
 import org.cryptobiotic.rlauxe.workflow.ClcaSampler
 import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import org.cryptobiotic.rlauxe.workflow.PollingSampler
 import org.cryptobiotic.rlauxe.workflow.auditPollingAssertion
 import java.nio.file.Files.notExists
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 
-private val logger = KotlinLogging.logger("RunAudit")
+private val logger = KotlinLogging.logger("RunAuditRound")
 
 // called from cli and rlauxe-viewer
 fun runRound(inputDir: String, onlyTask: String? = null): AuditRoundIF? {
@@ -51,21 +53,20 @@ fun runRoundResult(auditDir: String, onlyTask: String? = null): Result<AuditRoun
             return errs.add("directory '$auditDir' does not contain an audit record")
         }
 
-        logger.info { "runRound on record in $auditDir" }
-        val rlauxAudit = PersistedWorkflow(auditRecord)
+        val workflow = PersistedWorkflow(auditRecord)
         var roundIdx = 0
         var complete = false
 
-        if (!rlauxAudit.auditRounds().isEmpty()) {
-            val lastRound = rlauxAudit.auditRounds().last()
+        if (!workflow.auditRounds().isEmpty()) {
+            val lastRound = workflow.auditRounds().last()
             roundIdx = lastRound.roundIdx
 
             if (!lastRound.auditWasDone) {
-                logger.info { "Run audit round ${lastRound.roundIdx}" }
+                logger.info { "Start runAuditRound ${lastRound.roundIdx}" }
                 val roundStopwatch = Stopwatch()
                 // run the audit for this round
-                complete = rlauxAudit.runAuditRound(lastRound)
-                logger.info { "  complete=$complete took ${roundStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms" }
+                complete = workflow.runAuditRound(lastRound)
+                logger.info { "End runAuditRound ${lastRound.roundIdx} complete=$complete took ${roundStopwatch}" }
 
             } else {
                 complete = lastRound.auditIsComplete
@@ -75,13 +76,21 @@ fun runRoundResult(auditDir: String, onlyTask: String? = null): Result<AuditRoun
         if (!complete) {
             roundIdx++
             // start next round and estimate sample sizes
-            logger.info { "Start audit round $roundIdx using ${rlauxAudit}" }
-            val nextRound = rlauxAudit.startNewRound(quiet = false, onlyTask)
-            logger.info { "nextRound ${nextRound.show()}" }
+            logger.info { "Start startNewRound $roundIdx using ${workflow}" }
+            val roundStopwatch = Stopwatch()
+            val nextRound = workflow.startNewRound(quiet = false, onlyTask)
+
+            if (auditRecord.config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs) {
+                val publisher = Publisher(auditDir)
+                val ncards = writeMvrsForRound(publisher, roundIdx)
+                logger.info{"writeMvrsForRound ${ncards} cards to ${publisher.sampleMvrsFile(roundIdx)}"}
+            }
+            logger.info { "End startNewRound $roundIdx took ${roundStopwatch}: ${nextRound.show()}" }
+
             return Ok(nextRound)
 
         } else {
-            val lastRound = rlauxAudit.auditRounds().last()
+            val lastRound = workflow.auditRounds().last()
             logger.info { "runRound ${lastRound.roundIdx} complete = $complete" }
             return Ok(lastRound)
         }
@@ -131,7 +140,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
                 val pvalues = seq.pvalues()
                 val count = seq.xs.size
                 append(" i, ${sfn("xs", 6)}, ${sfn("bet", 6)}, ${sfn("tj", 6)}, ${sfn("Tj", 6)}, ${sfn("pvalue", 8)}, ")
-                appendLine("${sfn("location", 10)}, ${sfn("mvr votes", 10)}, ${sfn("card", 10)}")
+                appendLine("${sfn("location", 20)}, ${sfn("mvr votes", 10)}, ${sfn("card", 10)}")
                 repeat(count) {
                     append("${nfn(it+1, 2)}, ${df(seq.xs[it])}, ${df(seq.bets[it])}, ${df(seq.tjs[it])}")
                     append(", ${trunc(seq.testStatistics[it].toString(), 6)}, ${trunc(pvalues[it].toString(), 8)}")
@@ -139,9 +148,10 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
                     val mvrVotes = pair.first.votes(contestId)?.contentToString() ?: "missing"
                     val card = pair.second
                     val cardVotes = card.votes(contestId)?.contentToString() ?: "N/A"
-                    append(", ${sfn(pair.first.location(), 10)}")
+                    append(", ${sfn(pair.first.location(), 20)}")
                     append(", ${sfn(mvrVotes, 10)}")
-                    append(", votes=${cardVotes} pool=${card.poolId()}, ")
+                    append(", votes=${cardVotes}")
+                    if (card.poolId() != null) append(" pool=${card.poolId()}, ")
                     appendLine()
                     if (!card.hasContest(contestId))
                         logger.warn{"possible=${card.hasContest(contestId)}"}

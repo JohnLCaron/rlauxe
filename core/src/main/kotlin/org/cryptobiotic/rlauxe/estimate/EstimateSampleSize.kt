@@ -18,9 +18,12 @@ import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditRatesFromPools
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
+import org.cryptobiotic.rlauxe.raire.RaireContest
+import org.cryptobiotic.rlauxe.raire.SimulateIrvTestData
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
+import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.workflow.ClcaSampler
 import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.collections.List
@@ -45,14 +48,12 @@ fun estimateSampleSizes(
     config: AuditConfig,
     auditRound: AuditRoundIF,
     cardManifest: CloseableIterable<AuditableCard>, // Clca, OneAudit, ignored for Polling
-    cardPools: List<OneAuditPoolIF>?, // Clca, OneAudit, ignored for Polling
+    cardPools: List<OneAuditPoolIF>?,               // only OneAudit
     previousSamples: Set<Long>,
     showTasks: Boolean = false,
     nthreads: Int = 32,
     onlyTask: String? = null
 ): List<RunRepeatedResult> {
-
-    // TODO SimulateIrvTestData
 
     // choose a subset of the cards for the estimation
     val contestCards: List<AuditableCard>? = if (config.isPolling) null else
@@ -142,12 +143,23 @@ fun makeEstimationTasks(
     val stopwatch = Stopwatch()
     val tasks = mutableListOf<EstimateSampleSizeTask>()
 
+    // simulate the polling mvrs once for all the assertions for this contest
     val mvrs = if (!config.isPolling) null
-        // contestCards: List<AuditableCard>, cant use the card manifest - there are no votes!
-        // simulate the cvrs once for all the assertions for this contest
         else {
-            ContestSimulation.simulateCvrsDilutedMargin(contestRound.contestUA, config)
-    }
+            val contest = contestRound.contestUA.contest
+            if (!contest.isIrv()) {
+                ContestSimulation.simulateCvrsDilutedMargin(contestRound.contestUA, config)
+            } else {
+                // TODO this just makes sure the winner is chosen first (ncards * minMargin) more than any other candidate.
+                val minMargin = contestRound.contestUA.minDilutedMargin()!! // not sure about this...
+                val sim = SimulateIrvTestData(
+                    contest as RaireContest,
+                    minMargin,
+                    sampleLimits = config.contestSampleCutoff
+                )
+                sim.makeCvrs()
+            }
+        }
 
     contestRound.assertionRounds.map { assertionRound ->
         if (!assertionRound.status.complete) {
@@ -197,7 +209,7 @@ class EstimateSampleSizeTask(
     val vunderFuzz: OneAuditVunderFuzzer?,
     val contestRound: ContestRound,
     val assertionRound: AssertionRound,
-    val startingTestStatistic: Double,
+    val startingTestStatistic: Double, // T, must grow to 1/riskLimit
     val prevSampleSize: Int,
     val moreParameters: Map<String, Double> = emptyMap(),
 ) : ConcurrentTaskG<EstimationResult> {
@@ -280,13 +292,8 @@ fun estimateClcaAssertionRound(
             d = clcaConfig.d,
             maxRisk = clcaConfig.maxRisk)
 
-    // TODO track down simulations and do initial permutation there; we want first trial to use the actual permutation
-    // we need a permutation to get uniform distribution of errors, since some simulations put all the errors at the beginning
-    // sampler.reset()
-
-    // TODO SimulateIrvTestData
+    // for one contest, this takes a list of cards and fuzzes them to use as the mvrs.
     val sampler = ClcaCardFuzzSampler(config.simFuzzPct ?: 0.0, contestCards, contestUA.contest, cassorter)
-    // println("contest ${contest.id} contestCards=${contestCards.size} maxSamples ${sampler.maxSamples()} ")
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateClcaAssertionRound for $name with ${config.nsimEst} trials"}
@@ -331,7 +338,7 @@ fun runRepeatedBettingMart(
     upper: Double, // cassorter.assorter.upperBound(),
     clcaUpper: Double, // clca assorter
     N: Int,
-    startingTestStatistic: Double = 1.0,
+    startingTestStatistic: Double = 1.0, // T, must grow to 1/riskLimit
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunRepeatedResult {
 
@@ -466,7 +473,7 @@ fun estimateOneAuditAssertionRound(
     vunderFuzz: OneAuditVunderFuzzer,
     contestRound: ContestRound,
     assertionRound: AssertionRound,
-    startingTestStatistic: Double = 1.0,
+    startingTestStatistic: Double = 1.0, // T, must grow to 1/riskLimit
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunRepeatedResult {
     val contestUA = contestRound.contestUA
@@ -475,8 +482,23 @@ fun estimateOneAuditAssertionRound(
     val oaConfig = config.oaConfig
     val clcaConfig = config.clcaConfig
 
-    // The estimation and the audit are using a different fuzz.
-    // making a different set of cards for each contest and assertion. cant be right
+    // TODO dont have an estimation algorithm for OneAudit IRV pooled data, since there are no CVRs
+    //    its not even clear how one generates the assertions in general.
+    //    can do it for SF because we have the cvrs.
+    if (contestUA.isIrv) {
+        val est = estSamplesSimple(config, assertionRound, 1.01, startingTestStatistic) // add 1 %
+        return RunRepeatedResult(
+            testParameters=moreParameters,
+            N=contestUA.Npop,
+            totalSamplesNeeded=est,
+            nsuccess=1,
+            ntrials=1,
+            variance=0.0,
+            null,
+            listOf(est))
+    }
+
+    // one set of fuzzed pairs for all contests and assertions.
     val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.fuzzedPairs
     val pools = vunderFuzz.pools
 
@@ -497,6 +519,7 @@ fun estimateOneAuditAssertionRound(
             maxRisk = clcaConfig.maxRisk
         )
 
+    // uses the vunderFuzz.fuzzedPairs as is; each trial is a new permutation
     val sampler = ClcaSampler(contestUA.contest.id, oaFuzzedPairs.size, oaFuzzedPairs, oaCassorter, allowReset = true)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
@@ -529,4 +552,24 @@ fun estimateOneAuditAssertionRound(
     logger.debug{"estimateOneAuditAssertionRound $roundIdx ${name} ${makeDeciles(result.sampleCount)}  took=$stopwatch" +
                 " firstSample=${assertionRound.estimationResult!!.firstSample}"}
     return result
+}
+
+// for OneAudit IRV contests
+fun estSamplesSimple(config: AuditConfig, assertionRound: AssertionRound, fac: Double, startingTestStatistic: Double): Int {
+    val lastPvalue = assertionRound.auditResult?.pvalue ?: config.riskLimit
+    val cassertion = assertionRound.assertion as ClcaAssertion
+
+    val cassorter = cassertion.cassorter
+    val est = roundUp(fac * cassorter.sampleSizeNoErrors(maxRisk = config.clcaConfig.maxRisk, lastPvalue))
+
+    assertionRound.estimationResult = EstimationRoundResult(
+        assertionRound.roundIdx,
+        "estSamplesSimple",
+        fuzzPct = config.simFuzzPct, // TODO used ??
+        startingErrorRates = null,
+        startingTestStatistic = startingTestStatistic,
+        estimatedDistribution = makeDeciles(listOf(est)),
+        firstSample = est,
+    )
+    return est
 }

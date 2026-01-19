@@ -26,14 +26,10 @@ fun createPctRatio(dlcalcs: Map<Int, List<SRT>>, thetas: List<Double>, ns: List<
                 val dmap = mmap[N]
                 val pct = if (dmap != null) extractPct(dmap[margin]) else 100.0
                 pct / pctMin
-                // (val N: Int, val theta: Double, val nsamples: Double, val pct: Double, val stddev: Double,
-                //               val reportedMeanDiff: Double, val d: Int, val eta0: Double, val hist: Histogram?)
-                // data class SRT(val N: Int, val theta: Double, val reportedMeanDiff: Double, val d: Int, val eta0: Double,
-                //               val failPct: Double, val nsamples: Double, val stddev: Double)
                 val sr = SRT(
                     N, margin, 0.0, emptyMap(), 0, 0, 0,
-                    stddev = TODO(),
-                ) // TODO
+                    stddev = 0.0, // TODO
+                )
                 val newsrs = newdlc.getOrPut(d) { mutableListOf() }
                 newsrs.add(sr)
             }

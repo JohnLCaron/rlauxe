@@ -153,7 +153,7 @@ class CvrsWithPopulationsToCardManifest(
         val org = allCvrs.next()
         val pop = if (popMap == null) null else popMap[org.poolId] // hijack poolId
         val hasCvr = type.isClca() || (type.isOA() && org.poolId == null)
-        val votes = if (hasCvr) org.votes else null
+        val votes = if (hasCvr) org.votes else null  // removes votes for pooled data
 
         // if you havent specified a population or votes, then the population = all contests
         val cardStyle = if (votes == null && pop == null) "all" else pop?.name()

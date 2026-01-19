@@ -29,9 +29,6 @@ class TestCardBuilders {
         // same order
         roundtrip.forEach{
             val orgCard = cardMap[it.location]!!
-            if (orgCard != it) {
-                orgCard.equals(it)
-            }
             assertEquals(orgCard, it)
         }
     }

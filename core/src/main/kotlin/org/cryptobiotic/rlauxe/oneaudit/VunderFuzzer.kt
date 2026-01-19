@@ -12,6 +12,7 @@ import kotlin.random.Random
 ////////////////////////////////////////////////////////////////////////////////
 // OneAudit Estimation Sampling
 
+// OneAuditVunderFuzzer creates fuzzed mvrs (non-pooled) and simulated mvrs (pooled)
 class OneAuditVunderFuzzer(
     val pools: List<OneAuditPoolIF>,
     val infos: Map<Int, ContestInfo>,
@@ -19,7 +20,7 @@ class OneAuditVunderFuzzer(
     cards: List<AuditableCard>
 ) {
     val isIRV = infos.mapValues { it.value.isIrv }
-    var fuzzedPairs: List<Pair<AuditableCard, AuditableCard>>
+    var fuzzedPairs: List<Pair<AuditableCard, AuditableCard>>  // mvr, cvr pairs
 
     init {
         val vunderPools =  VunderPools(pools, infos)
@@ -36,7 +37,7 @@ class OneAuditVunderFuzzer(
     }
 }
 
-// claims you can use IRV ?
+// IRV ok, must have card.votes
 private fun makeFuzzedCardFromCard(
     infos: Map<Int, ContestInfo>,
     isIRV: Map<Int, Boolean>,
@@ -47,7 +48,7 @@ private fun makeFuzzedCardFromCard(
     val r = Random.nextDouble(1.0)
     if (r > fuzzPct) return card
 
-    val cardb = CardBuilder.Companion.fromCard(card)
+    val cardb = CardBuilder.fromCard(card)
     cardb.possibleContests.forEach { contestId ->
         val info = infos[contestId]
         if (info != null) {
@@ -74,6 +75,7 @@ class VunderPools(pools: List<OneAuditPoolIF>, infos: Map<Int, ContestInfo>) {
 
     init {
         vunderPools = pools.map { pool ->
+            // TODO could skip IRV contests
             val vunders = pool.contests().associate { contestId ->
                 Pair( contestId, pool.votesAndUndervotes(contestId, infos[contestId]?.voteForN ?: 1))
             }
@@ -82,6 +84,7 @@ class VunderPools(pools: List<OneAuditPoolIF>, infos: Map<Int, ContestInfo>) {
     }
 
     // for the given pooled card with no votes, simulate one with votes, staying within the pool vote totals.
+    // TODO doesnt seem to work for IRV...
     fun simulatePooledCard(card: AuditableCard, poolId: Int): AuditableCard {
         val vunderPool = vunderPools[poolId]!!
         return vunderPool.simulatePooledCard(card)

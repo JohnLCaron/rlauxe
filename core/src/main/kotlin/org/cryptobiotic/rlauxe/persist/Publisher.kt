@@ -21,9 +21,9 @@ private val logger = KotlinLogging.logger("Publisher")
 
         roundX/
             auditStateX.json     // AuditRoundJson,  the state of the audit for this round
-            sampleCardsX.csv     // AuditableCardCsv, complete cards used for this round; matches samplePrnsX.csv
-            sampleMvrsX.csv      // AuditableCardCsv, complete mvrs used for this round; matches samplePrnsX.csv
-            samplePrnsX.json     // SamplePrnsJson, complete sample prns for this round, in order
+            sampleCardsX.csv     // AuditableCardCsv, complete cards used for this round; MvrManager called from runClcaAuditRound, runPollingAuditRound
+            sampleMvrsX.csv      // AuditableCardCsv, complete mvrs used for this round; PersistedWorkflow runAuditRound, startNewRound
+            samplePrnsX.json     // SamplePrnsJson, complete sample prns for this round, in order;
 
         private/
             sortedMvrs.csv       // AuditableCardCsv, sorted by prn, matches sortedCards.csv, may be zipped
@@ -78,7 +78,7 @@ class Publisher(val auditDir: String) {
 }
 
 /** Make sure output directories exists; delete existing files in them.  */
-fun clearDirectory(path: Path): Boolean {
+fun clearDirectory(path: Path) {
     if (!Files.exists(path)) {
         Files.createDirectories(path)
     } else {
@@ -87,7 +87,6 @@ fun clearDirectory(path: Path): Boolean {
             .map { obj: Path -> obj.toFile() }
             .forEach { obj: File -> obj.delete() }
     }
-    return true
 }
 
 /** Make sure output directories exist and are writeable.  */

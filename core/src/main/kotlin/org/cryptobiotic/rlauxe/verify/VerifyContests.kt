@@ -67,7 +67,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         // all
         val infos = allInfos ?: contests.associate { it.id to it.contest.info() }
         checkContestsCorrectlyFormed(config, contests, results)
-        val contestSummary = verifyManifest(config, contests, cardManifest.cards, infos, results, show = show)
+        val contestSummary = verifyManifest(config, contests, cardManifest.cards, infos, results)
 
         // OA
         if (config.isOA) {
@@ -117,7 +117,6 @@ fun verifyManifest(
     cards: CloseableIterable<AuditableCard>,
     infos: Map<Int, ContestInfo>,
     results: VerifyResults,
-    show: Boolean = false
 ): ContestSummary {
     results.addMessage("VerifyManifest")
 

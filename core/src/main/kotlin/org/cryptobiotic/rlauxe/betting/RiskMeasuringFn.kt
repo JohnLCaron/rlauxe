@@ -23,7 +23,7 @@ interface RiskMeasuringFn {
     fun testH0(
         maxSamples: Int,
         terminateOnNullReject: Boolean,
-        startingTestStatistic: Double = 1.0,
+        startingTestStatistic: Double = 1.0, // T, must grow to 1/riskLimit
         drawSample: () -> Double,
     ): TestH0Result
 }

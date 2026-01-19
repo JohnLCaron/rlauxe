@@ -165,7 +165,7 @@ u > 1, win-los, win-oth < 0
 Plots 1-5 shows the betting payoffs when the error rates are all equal to {0.0, 0.0001, .001, .005, .01}
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/payoff/BettingPayoff0.0.html" rel="BettingPayoff0">![BettingPayoff0](plots2/betting/payoff/BettingPayoff0.0.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/payoff/BettingPayoff1.0E-4.html" rel="BettingPayoff1.0E-4">![BettingPayoff1.0E-4](plots2/betting/payoff/BettingPayoff1.0E-4.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/payoff/BettingPayoff5.0E-4.html" rel="BettingPayoff5.0E-4">![BettingPayoff5.0E-4](plots2/betting/payoff/BettingPayoff5.0E-4.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/payoff/BettingPayoff0.001.html" rel="BettingPayoff0.001">![BettingPayoff0.001](./plots2/betting/payoff/BettingPayoff0.001.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/payoff/BettingPayoff0.005.html" rel="BettingPayoff0.005">![BettingPayoff0.005](plots2/betting/payoff/BettingPayoff0.005.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/payoff/BettingPayoff0.01.html" rel="BettingPayoff01">![BettingPayoff01](plots2/betting/payoff/BettingPayoff0.01.png)</a>

@@ -7,8 +7,7 @@ import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.random.Random
 
-// TODO not done; do we want to support OA IRV ??
-// Try using in San Francisco, since we coul generate the VoteConsolidators from the cvrs in the pool
+// Try using in San Francisco, since we could generate the VoteConsolidators from the cvrs in the pool
 fun simulateOneAuditRaire(N: Int, contestId: Int, ncands:Int, minMargin: Double, poolPct: Int,
                              undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true)
         : Triple<RaireContestWithAssertions, List<Cvr>, List<OneAuditPoolFromCvrs>> {
@@ -40,7 +39,7 @@ fun simulateOneAuditRaire(N: Int, contestId: Int, ncands:Int, minMargin: Double,
         cvrsWithPools,
     )
 
-    val raireOAUA = makeRaireContestIrv(info, cvrTab, N, Nbin=N, pools)
+    val raireOAUA = makeRaireOneAuditContest(info, cvrTab, N, Nbin=N, pools)
     println(raireOAUA)
 
     return Triple(raireOAUA, cvrsWithPools, pools)

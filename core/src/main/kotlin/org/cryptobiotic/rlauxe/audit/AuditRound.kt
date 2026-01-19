@@ -48,7 +48,7 @@ data class AuditRound(
     //// called from viewer
     override fun mvrsUsed(): Int {
         var result = 0
-        contestRounds.forEach { contest ->
+        contestRounds.filter{ it.included }.forEach { contest ->
             contest.assertionRounds.forEach { assertion ->
                 result = max(result, assertion.auditResult?.maxBallotIndexUsed ?: 0)
             }

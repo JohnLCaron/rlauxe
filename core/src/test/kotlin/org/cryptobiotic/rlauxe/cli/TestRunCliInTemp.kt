@@ -3,10 +3,8 @@ package org.cryptobiotic.rlauxe.cli
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.audit.runRound
-import org.cryptobiotic.rlauxe.audit.writeMvrsForRound
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
@@ -35,7 +33,6 @@ class TestRunCliInTemp {
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
-        val writeMvrs = config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs
 
         println("============================================================")
         RunVerifyContests.main(arrayOf("-in", auditdir))
@@ -51,7 +48,6 @@ class TestRunCliInTemp {
         while (!done) {
             val lastRound = runRound(inputDir = auditdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
-            if (!done && writeMvrs) writeMvrsForRound(publisher, lastRound!!.roundIdx) // cant use test for polling because cards dont have the votes
         }
 
         println("============================================================")
@@ -83,13 +79,11 @@ class TestRunCliInTemp {
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
-        val writeMvrs = config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs
 
         var done = false
         while (!done) {
             val lastRound = runRound(inputDir = auditdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 7
-            if (!done && writeMvrs) writeMvrsForRound(publisher, lastRound!!.roundIdx) // cant use test for polling because cards dont have the votes
         }
 
         println("============================================================")
@@ -126,7 +120,6 @@ class TestRunCliInTemp {
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
-        val writeMvrs = config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs
 
         println("============================================================")
         val results = RunVerifyContests.runVerifyContests(auditdir, null, false)
@@ -136,7 +129,6 @@ class TestRunCliInTemp {
         while (!done) {
             val lastRound = runRound(inputDir = auditdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
-            if (!done && writeMvrs) writeMvrsForRound(publisher, lastRound!!.roundIdx) // cant use test for polling because cards dont have the votes
         }
 
         println("============================================================")
@@ -164,7 +156,6 @@ class TestRunCliInTemp {
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
-        val writeMvrs = config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs
 
         println("============================================================")
         val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)
@@ -176,7 +167,6 @@ class TestRunCliInTemp {
         while (!done) {
             val lastRound = runRound(inputDir = auditdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
-            if (!done && writeMvrs) writeMvrsForRound(publisher, lastRound!!.roundIdx) // cant use test for polling because cards dont have the votes
         }
 
         println("============================================================")

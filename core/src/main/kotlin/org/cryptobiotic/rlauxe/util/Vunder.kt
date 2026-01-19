@@ -65,7 +65,6 @@ class VunderPicker(val vunder: Vunder) {
     fun chooseCandidateAndDecrement(randomChoice: Int): Int {
         val check = vunderRemaining.sumOf { it.second }
         require(check == vunderLeft)
-        require(randomChoice in 0 until vunderLeft)
 
         var sum = 0
         var nvotesLeft = 0

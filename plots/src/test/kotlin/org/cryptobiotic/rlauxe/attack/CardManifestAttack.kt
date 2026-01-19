@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.audit.CreateElection
 import org.cryptobiotic.rlauxe.audit.OneAuditConfig
 import org.cryptobiotic.rlauxe.audit.OneAuditStrategyType
 import org.cryptobiotic.rlauxe.audit.Population
-import org.cryptobiotic.rlauxe.audit.writeMvrsForRound
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
@@ -262,7 +261,6 @@ class CardManifestAttack {
         while (!done) {
             val lastRound = runRound(inputDir = auditdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
-            if (!done) writeMvrsForRound(publisher, lastRound!!.roundIdx)
         }
     }
 }

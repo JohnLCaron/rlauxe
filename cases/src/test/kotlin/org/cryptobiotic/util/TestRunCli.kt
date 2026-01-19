@@ -8,10 +8,8 @@ import org.cryptobiotic.rlauxe.cli.RunRlaStartFuzz
 import org.cryptobiotic.rlauxe.cli.RunVerifyAuditRecord
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
-import org.cryptobiotic.rlauxe.audit.writeMvrsForRound
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.test.Test
 import kotlin.test.fail
 
@@ -34,7 +32,6 @@ class TestRunCli {
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
-        val writeMvrs = config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs
 
         println("============================================================")
         RunVerifyContests.main(arrayOf("-in", auditdir))
@@ -44,7 +41,6 @@ class TestRunCli {
         while (!done) {
             val lastRound = runRound(inputDir = auditdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
-            if (!done && writeMvrs) writeMvrsForRound(publisher, lastRound!!.roundIdx)
         }
 
         println("============================================================")
@@ -71,13 +67,11 @@ class TestRunCli {
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
-        val writeMvrs = config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs
 
         var done = false
         while (!done) {
             val lastRound = runRound(inputDir = auditdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 7
-            if (!done && writeMvrs) writeMvrsForRound(publisher, lastRound!!.roundIdx) // cabt use test for polling because cards dont have the votes
         }
 
         println("============================================================")
@@ -112,7 +106,6 @@ class TestRunCli {
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
-        val writeMvrs = config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs
 
         println("============================================================")
         RunVerifyContests.main(arrayOf("-in", auditdir))
@@ -122,7 +115,6 @@ class TestRunCli {
         while (!done) {
             val lastRound = runRound(inputDir = auditdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
-            if (!done && writeMvrs) writeMvrsForRound(publisher, lastRound!!.roundIdx) // TODO add this to runRound; dont need when useTest = true?
         }
 
         println("============================================================")
@@ -154,7 +146,6 @@ class TestRunCli {
         )
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        val writeMvrs = config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs
 
         println("============================================================")
         val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)
@@ -167,7 +158,6 @@ class TestRunCli {
         while (!done) {
             val lastRound = runRound(inputDir = auditdir)
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
-            if (!done && writeMvrs) writeMvrsForRound(publisher, lastRound!!.roundIdx) // RunRlaCreateOneAudit writes the mvrs
         }
 
         println("============================================================")

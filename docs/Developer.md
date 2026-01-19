@@ -1,5 +1,5 @@
 # Developer Notes
-_12/23/2025_
+_01/18/2026_
 
 ## Prerequisites
 
@@ -158,19 +158,19 @@ before viewing them.
 | 12/23/2025 | 83.9 % | 5393/6431       |
 | 01/07/2026 | 84.5 % | 5344/6327       |
 | 01/16/2026 | 87.5 % | 5417/6190       |
-| 01/16/2026 | 87.7 % | 5554/6333       |
+| 01/18/2026 | 90.2 % | 5677/6294       |
 
  **core + cases test coverage** 
 
 | date       | pct    | cover/total LOC |
-|------------|--------|----------------|
-| 11/28/2025 | 79.3 % | 6417/8094      |
-| 11/29/2025 | 79.6 % | 6434/8087      |
-| 11/29/2025 | 81.4 % | 6479/7962      |
-| 12/04/2025 | 81.7 % | 6530/7994      |
-| 12/10/2025 | 78.4 % | 6597/8412      |
-| 12/13/2025 | 80.7 % | 6606/8187      |
-| 12/23/2025 | 81.0 % | 6634/8186      |
+|------------|--------|-----------------|
+| 11/28/2025 | 79.3 % | 6417/8094       |
+| 11/29/2025 | 79.6 % | 6434/8087       |
+| 11/29/2025 | 81.4 % | 6479/7962       |
+| 12/04/2025 | 81.7 % | 6530/7994       |
+| 12/10/2025 | 78.4 % | 6597/8412       |
+| 12/13/2025 | 80.7 % | 6606/8187       |
+| 12/23/2025 | 81.0 % | 6634/8186       |
 
 
 ## UML
@@ -183,7 +183,6 @@ last changed: 01/07/2026
 
 # TODO 12/11/25 (Belgium)
 
-* consolidate over counties
 * include undervotes
 * assertions that look at coalitions of parties. (Vanessa)
 * choose an audit size and measure the risk.
@@ -197,35 +196,11 @@ last changed: 01/07/2026
 
 # TODO 01/04/26
 
-* OneAudit GABetting
 * maxRisk does it help? reduce lamda tradeoff 
 * 2D plotting
 * betting on the error rate
 * mix_betting_mart: "Finds a simple discrete mixture martingale as a (flat) average of D TSMs each with fixed bet 'lam'"
 * review COBRA 3.2, 4.3 (Diversified betting)
-
-````
-// generalize AdaptiveBetting for any clca assorter, including OneAudit
-
-log T_i = ln(1.0 + lamda * (noerror - mui)) * p0  + Sum { ln(1.0 + lamda * (assortValue_k - mui)) * p_k }
-  + Sum { ln(1.0 + lamda * (assortValue_pk - mui)) * p_pk; over pools and pool types }              (eq 2)
-where
-  upper > 1/2
-  noerror > 1/2
-  mui ~ 1/2  
-  
-  ln(1) = 0
-  ln(x), x > 1 is positive
-  ln(x), x < 1 is negetive
-  
-  could group into + and - terms ?
-  clca:
-    val u12 = 1.0 / (2 * upper)  // (2 * upper) > 1, u12 < 1
-    val name = mapOf(0.0 to "0", u12 to "1/2u", 1 - u12 to "1-1/2u",   // value - 1/2 is negetive
-        1.0 to "noerror", 2 - u12 to "2-1/2u", 1 + u12 to "1+1/2u", 2.0 to "2")  // value - 1/2 is positive
-
- 
-````
  
 ////////////////////////////////////////////
 Simulation

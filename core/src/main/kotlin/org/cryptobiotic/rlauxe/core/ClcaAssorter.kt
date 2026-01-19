@@ -194,10 +194,10 @@ open class ClcaAssorter(
         // if hasU = hasStyle, we use the cvr as the pcontests, so how did this happen?
         if (hasStyle and !cvr.hasContest(info.id)) {
             val trace = Throwable().stackTraceToString()
-            logger.error { "hasStyle==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})\n$trace" }
+            logger.error { "hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})\n$trace" }
             // TODO core dump not a good option.
             //    if we were using hasStyle is assorter.assort(), it would return 0.0 for cvr_assort
-            // throw RuntimeException("hasStyle==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
+            throw RuntimeException("hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
         }
 
         // If use_style, then if the CVR contains the contest but the MVR does not, treat the MVR as having a vote for

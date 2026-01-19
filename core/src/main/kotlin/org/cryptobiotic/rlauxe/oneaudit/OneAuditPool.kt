@@ -40,7 +40,7 @@ interface OneAuditPoolIF: PopulationIF {
     val poolId: Int
     fun assortAvg(): MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contestId -> assorter -> average in the pool
     fun regVotes(): Map<Int, RegVotesIF> // contestId -> RegVotes, regular contests only, not IRV
-    fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder  // TODO candidate for removal
+    fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder
     // fun contestTab(contestId: Int): ContestTabulation? need this for IRV
 
     fun show() = buildString {
@@ -74,7 +74,7 @@ data class OneAuditPool(override val poolName: String, override val poolId: Int,
 
     // candidate for removal, assumes voteForN == 1, perhaps we need to save that ??
     override fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder {
-        val regVotes = regVotes[contestId]!!
+        val regVotes = regVotes[contestId]!!         // empty for IRV ...
         val poolUndervotes = ncards * voteForN - regVotes.votes.values.sum()
         return Vunder(regVotes.votes, poolUndervotes, voteForN)
     }

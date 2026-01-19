@@ -8,7 +8,7 @@ import kotlin.random.Random
 
 private const val debug = false
 
-// for one contest, this takes a list of cards and fuzzes them for the mvrs.
+// for one contest, this takes a list of cards and fuzzes them to use as the mvrs.
 // Only used for estimateClcaAssertionRound, estimateOneAuditAssertionRound, not auditing.
 class ClcaCardFuzzSampler(
     val fuzzPct: Double,

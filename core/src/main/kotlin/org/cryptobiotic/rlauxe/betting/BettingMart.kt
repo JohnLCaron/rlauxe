@@ -28,7 +28,7 @@ class BettingMart(
     // run until sampleNumber == maxSample (batch mode) or terminateOnNullReject (ballot at a time)
     override fun testH0(maxSamples: Int,
                         terminateOnNullReject: Boolean,
-                        startingTestStatistic: Double,
+                        startingTestStatistic: Double,  // T, must grow to 1/riskLimit
                         drawSample : () -> Double) : TestH0Result {
 
         var sampleNumber = 0        // – j ← 0: sample number

@@ -20,7 +20,7 @@ fun runRepeated(
     testFn: RiskMeasuringFn,
     testParameters: Map<String, Double>,
     terminateOnNullReject: Boolean = true,
-    startingTestStatistic: Double = 1.0,
+    startingTestStatistic: Double = 1.0, // T, must grow to 1/riskLimit
     tracker: SampleTracker,
     N:Int, // maximum cards in the contest (diluted)
 ): RunRepeatedResult {

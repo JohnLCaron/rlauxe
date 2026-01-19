@@ -92,7 +92,7 @@ object RunRlaCreateOneAudit {
     fun startTestElectionOneAudit(
         topdir: String,
         minMargin: Double,
-        fuzzMvrs: Double,
+        fuzzPct: Double,
         cvrFraction: Double,
         ncards: Int,
         extraPct: Double,
@@ -101,7 +101,7 @@ object RunRlaCreateOneAudit {
         clearDirectory(Path(auditDir))
 
         val config = AuditConfig(
-            AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = fuzzMvrs,
+            AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = fuzzPct,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
             oaConfig = OneAuditConfig(OneAuditStrategyType.clca)
         )
@@ -130,10 +130,11 @@ object RunRlaCreateOneAudit {
         val sortedCards = mutableListOf<AuditableCard>()
         scardIter.forEach { sortedCards.add(it) }
 
-        // TODO test OneAuditVunderBarFuzzer
-        val vunderFuzz = OneAuditVunderFuzzer(cardManifest.populations as List<OneAuditPoolIF>, infos, fuzzMvrs, sortedCards)
+        // OneAuditVunderFuzzer creates fuzzed mvrs (non-pooled) and simulated mvrs (pooled)
+        val vunderFuzz = OneAuditVunderFuzzer(cardManifest.populations as List<OneAuditPoolIF>, infos, fuzzPct, sortedCards)
         val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.fuzzedPairs
         val sortedMvrs = oaFuzzedPairs.map { it.first }
+
         // have to write this here, where we know the mvrs
         writePrivateMvrs(publisher, sortedMvrs)
     }

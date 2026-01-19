@@ -29,7 +29,6 @@ interface AssorterIF {
     // usePhantoms=true for polling assort value
     fun assort(cvr: CvrIF, usePhantoms: Boolean = false) : Double
 
-    fun lowerBound() = 0.0  // makes life easier; do an affine tranform if needed to make this true
     fun upperBound(): Double
     fun desc(): String
     fun winner(): Int  // candidate id

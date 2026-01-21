@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditAssortValueRates
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.enumValueOf
 
@@ -274,7 +275,8 @@ data class AuditRoundResultJson(
     val roundIdx: Int,
     val nmvrs: Int,   // estimated sample size
     val maxBallotIndexUsed: Int,   // max index used
-    val pvalue: Double,       // last pvalue when testH0 terminates
+    val plast: Double,       // last pvalue when testH0 terminates
+    val pmin: Double,       // minimum pvalue reached
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
     val status: String, // testH0 status
     val measuredCounts: ClcaErrorCountsJson?,
@@ -286,7 +288,8 @@ fun AuditRoundResult.publishJson() = AuditRoundResultJson(
     this.roundIdx,
     this.nmvrs,
     this.maxBallotIndexUsed,
-    this.pvalue,
+    this.plast,
+    this.pmin,
     this.samplesUsed,
     this.status.name,
     this.measuredCounts?.publishJson(),
@@ -299,7 +302,8 @@ fun AuditRoundResultJson.import() : AuditRoundResult {
         this.roundIdx,
         this.nmvrs,
         this.maxBallotIndexUsed,
-        this.pvalue,
+        this.plast,
+        this.pmin,
         this.samplesUsed,
         status,
         this.measuredCounts?.import(),

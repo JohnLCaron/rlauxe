@@ -168,7 +168,7 @@ class CreateBoulderElection(
             val sumVotes = regVote.ncards()
             val voteForN = infos[contestId]?.voteForN ?: 1
             val underVotes = cardPool.ncards() * voteForN - sumVotes
-            poolVunders[contestId] = Vunder(regVote.votes, underVotes, voteForN)
+            poolVunders[contestId] = Vunder.fromNpop(contestId, underVotes, cardPool.ncards(), regVote.votes, voteForN)
         }
 
         val cvrs = makeVunderCvrs(poolVunders, cardPool.poolName, poolId = cardPool.poolId)

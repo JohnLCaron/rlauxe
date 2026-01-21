@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.estimate.calcAssorterMargin
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
@@ -8,8 +9,164 @@ import org.cryptobiotic.rlauxe.util.*
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 
-class TestAssorterMeans {
+// Does assorter.dilutedMargin()) equals cvr assort average ?
+class TestAssortAvgOld {
+
+    //// first pass
+    @Test
+    fun testPluralityAssorter() {
+        val cvrs = CvrBuilders()
+            .addCvr().addContest("AvB", "0").ddone()
+            .addCvr().addContest("AvB", "1").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            // artifact of creating Contests and candidates from cvrs.
+            .addCvr().addContest("AvB").addCandidate("3", 0).ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .build()
+
+        val contestInfo = ContestInfo(
+            name = "AvB",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.PLURALITY,
+            candidateNames = listToMap( "0", "1", "2", "3", "4"),
+        )
+        val contest = makeContestFromCvrs(contestInfo, cvrs) // Nc is set as number of cvrs with that contest
+        println(contest)
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
+
+        val assertions = contestUA.assertions
+        assertNotNull(assertions)
+        assertEquals(contest.winners.size * contest.losers.size, assertions.size)
+        assertions.forEach {
+            assertIs<Assertion>(it)
+            assertIs<PluralityAssorter>(it.assorter)
+            assertEquals(1.0, it.assorter.upperBound())
+
+            val assortAvgMean = cvrs.map { cvr -> it.assorter.assort(cvr)}.average()
+            val reportedMean = margin2mean(it.assorter.dilutedMargin())
+            println("${it.assorter.shortName()}: assortAvgMean=${assortAvgMean} reportedMean=${reportedMean}")
+            assertEquals(assortAvgMean, reportedMean, doublePrecision)
+
+            val calcMargin = it.assorter.calcAssorterMargin(contest.id, cvrs)
+            assertEquals(assortAvgMean, margin2mean(calcMargin), doublePrecision)
+            assertEquals(it.assorter.dilutedMargin(), calcMargin, doublePrecision)
+        }
+    }
+
+    @Test
+    fun testPluralityAssorterWithPhantoms() {
+        val cvrs = CvrBuilders()
+            .addCvr().addContest("AvB", "0").ddone()
+            .addCvr().addContest("AvB", "1").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            // artifact of creating Contests and candidates from cvrs.
+            .addCvr().addContest("AvB").addCandidate("3", 0).ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addPhantomCvr().addContest("AvB").ddone()
+            .build()
+
+        val contestInfo = ContestInfo(
+            name = "AvB",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.PLURALITY,
+            candidateNames = listToMap( "0", "1", "2", "3", "4"),
+        )
+        val contest = makeContestFromCvrs(contestInfo, cvrs)
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
+
+        val assertions = contestUA.assertions
+        assertNotNull(assertions)
+        assertEquals(contest.winners.size * contest.losers.size, assertions.size)
+        assertions.forEach {
+            assertIs<Assertion>(it)
+            assertIs<PluralityAssorter>(it.assorter)
+            assertEquals(1.0, it.assorter.upperBound())
+
+            val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr, usePhantoms = false)}.average()
+            val mean = margin2mean(it.assorter.dilutedMargin())
+            println("$it: assortAvg=${assortAvg} mean=${mean}")
+            assertEquals(assortAvg, mean, doublePrecision)
+
+            val calcMargin = it.assorter.calcAssorterMargin(contest.id, cvrs)
+            assertEquals(assortAvg, margin2mean(calcMargin), doublePrecision)
+            assertEquals(it.assorter.dilutedMargin(), calcMargin, doublePrecision)
+
+            val Ncd = contest.Nc.toDouble()
+            val expectWithPhantoms = (assortAvg * Ncd - 0.5) / Ncd
+            val assortWithPhantoms = cvrs.map { cvr -> it.assorter.assort(cvr, usePhantoms = true)}.average()
+            println("$it: assortWithPhantoms=${assortWithPhantoms} expectWithPhantoms=${expectWithPhantoms}")
+            assertEquals(expectWithPhantoms, assortWithPhantoms, doublePrecision)
+        }
+    }
+
+    @Test
+    fun testPluralityAssorterWithMissingContests() {
+        val cvrs = CvrBuilders()
+            .addCvr().addContest("AvB", "0").ddone()
+            .addCvr().addContest("AvB", "1").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            // artifact of creating Contests and candidates from cvrs.
+            .addCvr().addContest("AvB").addCandidate("3", 0).ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addPhantomCvr().addContest("AvB").ddone()
+            // a cvr that doesnt have the contest on it; if you include it in the assortAvg, then assortAvg != reportedMean
+            .addCvr().addContest("other", "1").ddone()
+
+            .build()
+
+        val contestInfo = ContestInfo(
+            name = "AvB",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.PLURALITY,
+            candidateNames = listToMap( "0", "1", "2", "3", "4"),
+        )
+        val contest = makeContestFromCvrs(contestInfo, cvrs)
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
+
+        val assertions = contestUA.assertions
+        assertNotNull(assertions)
+        assertEquals(contest.winners.size * contest.losers.size, assertions.size)
+        assertions.forEach {
+            println(it)
+            assertIs<Assertion>(it)
+            assertIs<PluralityAssorter>(it.assorter)
+            assertEquals(1.0, it.assorter.upperBound())
+
+            // if you include all cvr assorts, the
+            val assortAvg = cvrs.map { cvr -> it.assorter.assort(cvr, usePhantoms = false)}.average()
+            val reportedMean = margin2mean(it.assorter.dilutedMargin())
+            println("  allcvrs: assortAvg=${assortAvg} reportedMean=${reportedMean} equals = ${doubleIsClose(assortAvg, reportedMean, doublePrecision)}")
+            // assertEquals(assortAvg, reportedMean, doublePrecision)
+
+            // this skips cvrs that dont have the contest
+            val skipMargin = it.assorter.calcAssorterMargin(contest.id, cvrs)
+            println("$it: assortAvg=${assortAvg} skipMean=${margin2mean(skipMargin)}")
+            assertEquals(it.assorter.dilutedMargin(), skipMargin, doublePrecision)
+        }
+    }
+
+    //// second pass
 
     @Test
     fun testMakeContestFromCvrsPlurality() {
@@ -27,7 +184,7 @@ class TestAssorterMeans {
     }
 
     @Test
-    fun testMakeContestFromCvrsThreshold() {
+    fun testMakeContestFromCvrsAboveThreshold() {
         val N = 1000
         val cvrMean = 0.60
 
@@ -70,7 +227,7 @@ class TestAssorterMeans {
 
             // val reportedMargin = (winnerVotes - loserVotes) / (contest.info.voteForN * contest.Nc.toDouble())
             // println("   assorter reportedMargin = ${assorter.reportedMargin()}")
-            println("   assorter reportedMean = ${margin2mean(assorter.dilutedMargin())}")
+            println("   assorter dilutedMargin = ${margin2mean(assorter.dilutedMargin())}")
 
             val assortAvg = cvrs.map { assorter.assort(it, usePhantoms = false) }.average()
             println("   assorter assort mean = $assortAvg")
@@ -83,6 +240,8 @@ class TestAssorterMeans {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// Candidate for removal
+
 // TODO how does this compare with ContestSimulation ??
 // TODO currently estimation wont be accurate for nwinners > 1 ??
 //    but this doesnt control margin or undercount. Then back to just using cvrs for estimation ??

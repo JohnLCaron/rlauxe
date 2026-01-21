@@ -55,7 +55,7 @@ fun estimateSampleSizes(
     onlyTask: String? = null
 ): List<RunRepeatedResult> {
 
-    // choose a subset of the cards for the estimation
+    // choose a subset of the cards for the estimation for speed
     val contestCards: List<AuditableCard>? = if (config.isPolling) null else
         estimationSubset(
             config,
@@ -174,7 +174,7 @@ fun makeEstimationTasks(
                 }
                 // start where the audit left off
                 prevSampleSize = prevAuditResult.samplesUsed
-                startingTestStatistic = 1.0 / prevAuditResult.pvalue
+                startingTestStatistic = 1.0 / prevAuditResult.plast
             }
 
             if (!contestRound.done) {
@@ -500,21 +500,16 @@ fun estimateOneAuditAssertionRound(
 
     // one set of fuzzed pairs for all contests and assertions.
     val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.fuzzedPairs
-    val pools = vunderFuzz.pools
 
     // duplicate to OneAuditAssertionAuditor
     val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
-
-    // could also get from the vunderFuzz
-    val oneAuditErrorsFromPools = OneAuditRatesFromPools(pools)
-    val oaErrorRates = oneAuditErrorsFromPools.oaErrorRates(contestUA, oaCassorter)
 
     val bettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
         GeneralAdaptiveBetting(
             Npop = contestUA.Npop,
             startingErrors = prevRounds,
             contestUA.contest.Nphantoms(),
-            oaAssortRates = oaErrorRates,
+            oaAssortRates = oaCassorter.oaAssortRates,
             d = clcaConfig.d,
             maxRisk = clcaConfig.maxRisk
         )
@@ -556,7 +551,7 @@ fun estimateOneAuditAssertionRound(
 
 // for OneAudit IRV contests
 fun estSamplesSimple(config: AuditConfig, assertionRound: AssertionRound, fac: Double, startingTestStatistic: Double): Int {
-    val lastPvalue = assertionRound.auditResult?.pvalue ?: config.riskLimit
+    val lastPvalue = assertionRound.auditResult?.plast ?: config.riskLimit
     val cassertion = assertionRound.assertion as ClcaAssertion
 
     val cassorter = cassertion.cassorter

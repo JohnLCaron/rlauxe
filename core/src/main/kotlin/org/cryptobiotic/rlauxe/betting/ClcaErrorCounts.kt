@@ -109,6 +109,7 @@ class Taus(upper: Double): TausIF {
     val name = mapOf(0.0 to "0", u12 to "1/2u", 1 - u12 to "1-1/2u", 1.0 to "noerror", 2 - u12 to "2-1/2u", 1 + u12 to "1+1/2u", 2.0 to "2").toList().sortedBy{ it.first }
     val taus = mapOf(0.0 to "win-los", u12 to "win-oth", 1 - u12 to "oth-los", 1.0 to "noerror", 2 - u12 to "los-oth", 1 + u12 to "oth-win", 2.0 to "los-win").toList().sortedBy{ it.first }
 
+    // cvr-mvr
     override fun desc(tau: Double): String? {
         val pair = taus.find { doubleIsClose(it.first, tau) }
         return pair?.second

@@ -16,6 +16,7 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditRatesFromPools
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.collections.forEach
@@ -225,11 +226,13 @@ fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, N
     return rcontestUA
 }
 
-// use dilutedMargin to set the pool assorter averages. TODO why can only use for non-IRV contests?
+// use dilutedMargin to set the pool assorter averages.
 fun setPoolAssorterAveragesForRaire(
     oaContests: List<ContestWithAssertions>,
-    cardPools: List<OneAuditPoolFromCvrs>, // poolId -> pool
+    pools: List<OneAuditPoolFromCvrs>, // poolId -> pool
 ) {
+    val oneAuditErrorsFromPools = OneAuditRatesFromPools(pools)
+
     // ClcaAssorter already has the contest-wide reported margin. We just have to add the pool assorter averages
     // create the clcaAssertions and add then to the oaContests
     oaContests.filter { it.isIrv }. forEach { oaContest ->
@@ -238,7 +241,7 @@ fun setPoolAssorterAveragesForRaire(
         val clcaAssertions = oaContest.assertions.map { assertion ->
             val raireAssorter = assertion.assorter as RaireAssorter
             val assortAverages = mutableMapOf<Int, Double>() // poolId -> average assort value
-            cardPools.filter { it.ncards() > 0}.forEach { cardPool ->
+            pools.filter { it.ncards() > 0}.forEach { cardPool ->
                 if (cardPool.hasContest(contestId)) {
                     val tab = cardPool.contestTabs[oaContest.id]!!
                     val irvVotes = tab.irvVotes.makeVotes(oaContest.ncandidates)
@@ -246,10 +249,13 @@ fun setPoolAssorterAveragesForRaire(
                     assortAverages[cardPool.poolId] = margin2mean(poolMargin)
                 }
             }
-            val clcaAssorter = ClcaAssorterOneAudit(assertion.info, assertion.assorter,
+            val oaAssorter = ClcaAssorterOneAudit(assertion.info, assertion.assorter,
                 dilutedMargin = assertion.assorter.dilutedMargin(),
                 poolAverages = AssortAvgsInPools(assortAverages))
-            ClcaAssertion(assertion.info, clcaAssorter)
+
+            oaAssorter.oaAssortRates = oneAuditErrorsFromPools.oaErrorRates(oaContest, oaAssorter)
+
+            ClcaAssertion(assertion.info, oaAssorter)
         }
         oaContest.clcaAssertions = clcaAssertions
     }

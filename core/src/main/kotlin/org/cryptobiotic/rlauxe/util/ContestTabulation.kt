@@ -23,25 +23,23 @@ data class RegVotes(override val votes: Map<Int, Int>, val ncards: Int, val unde
 }
 
 // tabulate contest votes from cards or cvrs; can handle both regular and irv voting
-class ContestTabulation(val info: ContestInfo): RegVotesIF {
-    val isIrv = info.isIrv
-    val voteForN = if (isIrv) 1 else info.voteForN
+class ContestTabulation(val contestId: Int, val voteForN: Int, val isIrv: Boolean, val candidateIdToIndex: Map<Int, Int>): RegVotesIF {
+
+    constructor(info: ContestInfo) : this(info.id, info.voteForN, info.isIrv,
+        if (info.isIrv) info.candidateIds.mapIndexed { idx, candidateId -> Pair(candidateId, idx) }.toMap() else emptyMap()
+    )
+
+    constructor(other: ContestTabulation) : this(other.contestId, other.voteForN, other.isIrv, other.candidateIdToIndex)
 
     override val votes = mutableMapOf<Int, Int>() // cand -> votes
     val irvVotes = VoteConsolidator() // candidate indexes
     val notfound = mutableMapOf<Int, Int>() // candidate -> nvotes; track candidates on the cvr but not in the contestInfo, for debugging
-    val candidateIdToIndex: Map<Int, Int>
 
     var ncards = 0 // TODO should be "how many cards are in the population"?
     var novote = 0  // how many cards had no vote for this contest?
     var undervotes = 0  // how many undervotes = voteForN - nvotes
     var overvotes = 0  // how many overvotes = (voteForN < cands.size)
     var nphantoms = 0  // how many overvotes = (voteForN < cands.size)
-
-    init {
-        // The candidate Ids must go From 0 ... ncandidates-1, for Raire; use the ordering from ContestInfo.candidateIds
-        candidateIdToIndex = if (isIrv) info.candidateIds.mapIndexed { idx, candidateId -> Pair(candidateId, idx) }.toMap() else emptyMap()
-    }
 
     constructor(info: ContestInfo, votes: Map<Int, Int>, ncards: Int): this(info) {
         votes.forEach{ this.addVote(it.key, it.value) }
@@ -86,7 +84,7 @@ class ContestTabulation(val info: ContestInfo): RegVotesIF {
 
     // for summing multiple tabs into this one
     fun sum(other: ContestTabulation) {
-        require (info.id == other.info.id)
+        require (contestId == other.contestId)
         if (this.isIrv) {
             this.irvVotes.addVotes(other.irvVotes)
         } else {
@@ -99,45 +97,47 @@ class ContestTabulation(val info: ContestInfo): RegVotesIF {
     }
 
      fun votesAndUndervotes(): Vunder {
-        return Vunder(votes, undervotes, info.voteForN)
+        return Vunder.fromNpop(contestId, undervotes, ncards(), votes, voteForN)
     }
 
     fun nvotes() = votes.map { it.value}.sum()
 
     override fun toString(): String {
         val sortedVotes = votes.entries.sortedBy { it.key }
-        return "ContestTabulation(id=${info.id} isIrv=$isIrv, voteForN=$voteForN, votes=$sortedVotes, nvotes=${nvotes()} ncards=$ncards, novote=$novote, undervotes=$undervotes, overvotes=$overvotes)"
+        return "ContestTabulation(id=${contestId} isIrv=$isIrv, voteForN=$voteForN, votes=$sortedVotes, nvotes=${nvotes()} ncards=$ncards, undervotes=$undervotes, novote=$novote, overvotes=$overvotes)"
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        if (other !is ContestTabulation) return false
 
-        other as ContestTabulation
-
-        if (isIrv != other.isIrv) return false
+        if (contestId != other.contestId) return false
         if (voteForN != other.voteForN) return false
+        if (isIrv != other.isIrv) return false
         if (ncards != other.ncards) return false
-        // if (novote != other.novote) return false
         if (undervotes != other.undervotes) return false
         if (overvotes != other.overvotes) return false
-        if (info != other.info) return false
+        if (nphantoms != other.nphantoms) return false
+        if (candidateIdToIndex != other.candidateIdToIndex) return false
         if (votes != other.votes) return false
         if (irvVotes != other.irvVotes) return false
+        if (notfound != other.notfound) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = isIrv.hashCode()
+        var result = contestId
         result = 31 * result + voteForN
+        result = 31 * result + isIrv.hashCode()
         result = 31 * result + ncards
-        // result = 31 * result + novote
         result = 31 * result + undervotes
         result = 31 * result + overvotes
-        result = 31 * result + info.hashCode()
+        result = 31 * result + nphantoms
+        result = 31 * result + candidateIdToIndex.hashCode()
         result = 31 * result + votes.hashCode()
         result = 31 * result + irvVotes.hashCode()
+        result = 31 * result + notfound.hashCode()
         return result
     }
 }
@@ -145,7 +145,7 @@ class ContestTabulation(val info: ContestInfo): RegVotesIF {
 // add other into this
 fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, ContestTabulation>) {
     other.forEach { (contestId, otherTab) ->
-        val contestSum = this.getOrPut(contestId) { ContestTabulation(otherTab.info) }
+        val contestSum = this.getOrPut(contestId) { ContestTabulation(otherTab) }
         contestSum.sum(otherTab)
     }
 }
@@ -224,7 +224,7 @@ fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<I
                     if (card.phantom) tab.nphantoms++
                     if (card.votes != null && card.votes[contestId] != null) { // happens when cardStyle == all
                         val contestVote = card.votes[contestId]!!
-                            tab.addVotes(contestVote, card.phantom)
+                        tab.addVotes(contestVote, card.phantom)
                     } else {
                         tab.ncards++
                     }

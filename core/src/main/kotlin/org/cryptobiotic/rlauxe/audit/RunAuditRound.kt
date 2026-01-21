@@ -150,8 +150,8 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
                     val cardVotes = card.votes(contestId)?.contentToString() ?: "N/A"
                     append(", ${sfn(pair.first.location(), 20)}")
                     append(", ${sfn(mvrVotes, 10)}")
-                    append(", votes=${cardVotes}")
-                    if (card.poolId() != null) append(" pool=${card.poolId()}, ")
+                    if (card.poolId() != null) append(", pool=${card.poolId()}, ")  // TODO show pool average
+                        else append(", votes=${cardVotes}")
                     appendLine()
                     if (!card.hasContest(contestId))
                         logger.warn{"possible=${card.hasContest(contestId)}"}

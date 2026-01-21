@@ -4,12 +4,14 @@ package org.cryptobiotic.rlauxe.persist.json
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.unwrap
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.enumValueOf
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
@@ -302,4 +304,8 @@ fun readAuditConfigJsonFile(filename: String): Result<AuditConfig, ErrorMessages
     } catch (t: Throwable) {
         errs.add("Exception= ${t.message} ${t.stackTraceToString()}")
     }
+}
+
+fun readAuditConfigUnwrapped(filename: String): AuditConfig? {
+    return readAuditConfigJsonFile(filename).unwrap()
 }

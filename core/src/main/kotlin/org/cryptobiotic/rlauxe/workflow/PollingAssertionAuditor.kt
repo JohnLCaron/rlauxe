@@ -88,7 +88,8 @@ fun auditPollingAssertion(
     assertionRound.auditResult = AuditRoundResult(roundIdx,
         nmvrs = sampling.nmvrs(),
         maxBallotIndexUsed = sampling.maxSampleIndexUsed(),
-        pvalue = testH0Result.pvalueLast,
+        plast = testH0Result.pvalueLast,
+        pmin = testH0Result.pvalueMin,
         samplesUsed = testH0Result.sampleCount,
         status = testH0Result.status,
     )

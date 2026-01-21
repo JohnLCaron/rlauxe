@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
@@ -147,6 +148,11 @@ open class ContestWithAssertions(
 
     fun phantomRate() = contest.Nphantoms() / Npop.toDouble()
 
+    // just for debugging
+    fun votesAndUndervotes(): Vunder {
+        return Vunder.fromNpop(id, contest.Nundervotes(), Npop, contest.votes()!!, contest.info().voteForN)
+    }
+
     override fun toString() = showShort()
 
     open fun show() = buildString {
@@ -196,7 +202,7 @@ open class ContestWithAssertions(
     companion object {
         private val logger = KotlinLogging.logger("ContestUnderAudit")
 
-        // make contestUA from contests, generate Npop by readin cards
+        // make contestUA from contests, generate Npop by reading cards
         fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCard>, isClca: Boolean): List<ContestWithAssertions> {
             val infos = contests.map { it.info() }.associateBy { it.id }
             val manifestTabs = tabulateAuditableCards(cards, infos)

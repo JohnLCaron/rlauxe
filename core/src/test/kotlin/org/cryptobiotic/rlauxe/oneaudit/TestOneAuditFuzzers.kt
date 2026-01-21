@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.showChangeMatrix
 import org.cryptobiotic.rlauxe.estimate.sumDiagonal
 import org.cryptobiotic.rlauxe.estimate.sumOffDiagonal
@@ -12,8 +13,8 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.mergeReduceS
 import org.cryptobiotic.rlauxe.util.tabulateCards
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.cryptobiotic.rlauxe.util.tabulateVotesWithUndervotes
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.util.Vunder
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -49,8 +50,8 @@ class TestOneAuditFuzzers {
                 if (showOA) println("ncands = $ncands fuzzPct = $fuzzPct, margin = $margin ${contest.votes}")
 
                 val vunder = tabulateVotesWithUndervotes(mvrs.iterator(), contestOA.id)
-                if (showOA) println("cvrVotes = ${vunder}  contestVotes = ${contest.votesAndUndervotes()}")
-                assertEquals(vunder, contest.votesAndUndervotes())
+                if (showOA) println("cvrVotes = ${vunder}  contestVotes = ${contestOA.votesAndUndervotes()}")
+                assertEquals(vunder, contestOA.votesAndUndervotes())
                 assertEquals(Nc, mvrs.size)
 
                 val fuzzed = makeFuzzedCvrsFrom(listOf(contestOA.contest.info()), mvrs, fuzzPct, welfordFromFuzz)
@@ -175,6 +176,27 @@ class TestOneAuditFuzzers {
         val oaFuzzedPairs: List<Pair<CardIF, AuditableCard>> = oaFuzzer.makeFromCards(cards)
         assertEquals(cards.size, oaFuzzedPairs.size) */
     }
+}
 
-
+// assume that the cvrs are the population for the contest. Alternatively, pass in Npop
+fun tabulateVotesWithUndervotes(cvrs: Iterator<Cvr>, contestId: Int, voteForN: Int = 1, Npop :Int? = null): Vunder {
+    val result = mutableMapOf<Int, Int>()
+    var undervotes = 0
+    var ncards = 0
+    cvrs.forEach{ cvr ->
+        if (cvr.hasContest(contestId) && !cvr.phantom) {
+            val candVotes = cvr.votes[contestId] // should always succeed
+            if (candVotes != null) {
+                if (candVotes.size < voteForN) {  // undervote
+                    undervotes += (voteForN - candVotes.size)
+                }
+                for (cand in candVotes) {
+                    val count = result[cand] ?: 0
+                    result[cand] = count + 1
+                }
+            }
+        }
+        ncards++
+    }
+    return Vunder.fromNpop(contestId, undervotes, Npop ?: ncards, result, voteForN)
 }

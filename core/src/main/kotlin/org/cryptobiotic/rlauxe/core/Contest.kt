@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.math.min
@@ -193,11 +192,6 @@ open class Contest(
         return candVotes / Nc.toDouble()
     }
 
-    // put the undervotes into the candidate map.
-    fun votesAndUndervotes(): Vunder {
-        return Vunder(votes, undervotes, info.voteForN)
-    }
-
     override fun recountMargin(assorter: AssorterIF): Double  {
         val winner = votes[assorter.winner()]!!
         val loser = votes[assorter.loser()]!!
@@ -212,7 +206,7 @@ open class Contest(
     }
 
     override fun show() = buildString {
-        appendLine("'$name' ($id) $choiceFunction voteForN=${info.voteForN} ${votesAndUndervotes()}")
+        appendLine("'$name' ($id) $choiceFunction voteForN=${info.voteForN} votes=${votes()} undervotes=$undervotes, voteForN=${info.voteForN}")
         append("   winners=${winners()} Nc=${Nc()} Nphantoms=${Nphantoms()} Nu=${Nundervotes()} sumVotes=${votes.values.sum()}")
     }
 
@@ -233,7 +227,7 @@ open class Contest(
     }
 
     override fun toString() = buildString {
-        append("$name ($id) Nc=$Nc Nphantoms=${Nphantoms()} ${votesAndUndervotes()}")
+        append("$name ($id) Nc=$Nc Nphantoms=${Nphantoms()} votes=${votes()} undervotes=$undervotes, voteForN=${info.voteForN}")
     }
 
     override fun equals(other: Any?): Boolean {

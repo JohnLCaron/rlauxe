@@ -223,12 +223,12 @@ data class EstimationRoundResult(
 
 fun roundUp(x: Double) = ceil(x).toInt()
 
-
 data class AuditRoundResult(
     val roundIdx: Int,
     val nmvrs: Int,               // number of mvrs available for this contest for this round
     val maxBallotIndexUsed: Int,  // maximum ballot index (for multicontest audits)
-    val pvalue: Double,       // last pvalue when testH0 terminates
+    val plast: Double,              // last pvalue when testH0 terminates
+    val pmin: Double,               // minimum pvalue reached
     val samplesUsed: Int,     // sample count when testH0 terminates
     val status: TestH0Status, // testH0 status
     val measuredCounts: ClcaErrorCounts? = null, // measured error counts (clca only)
@@ -236,7 +236,7 @@ data class AuditRoundResult(
 ) {
 
     override fun toString() = buildString {
-        append("round=$roundIdx pvalue=${df(pvalue)} nmvrs=$nmvrs samplesUsed=$samplesUsed status=$status")
+        append("round=$roundIdx pmin=${df(pmin)} plast=${df(plast)} nmvrs=$nmvrs samplesUsed=$samplesUsed status=$status")
         append(" measuredCounts=${measuredCounts()}")
     }
 
@@ -245,11 +245,5 @@ data class AuditRoundResult(
             append(measuredCounts.show())
         }
     }
-
-    /*
-    fun startingErrorRates() = buildString {
-        if (startingRates == null) return "N/A"
-        startingRates.filter{ it.value != 0.0 }.forEach { append( "${df(it.key)}=${df(it.value)}, " ) }
-    } */
 
 }

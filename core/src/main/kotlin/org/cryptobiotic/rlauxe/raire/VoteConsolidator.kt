@@ -17,13 +17,22 @@ import kotlin.collections.getOrPut
  */
 // Note that the candidates go from index 0 ... ncandidates-1, not candidate ids
 class VoteConsolidator {
-    private val votes = mutableMapOf<HashableIntArray, Int>() // candidate ranks -> nvotes
+    val votes = mutableMapOf<HashableIntArray, Int>() // candidate ranks -> nvotes
 
     fun nvotes() = votes.values.sum()
+
+    fun votes(): List<Pair<IntArray, Int>> {
+        return votes.map { Pair(it.key.array, it.value) }
+    }
 
     fun addVote(pref: IntArray) {
         val key = HashableIntArray(pref)
         votes[key] = votes.getOrPut(key) { 0 } + 1
+    }
+
+    fun addVotes(pref: IntArray, count: Int) {
+        val key = HashableIntArray(pref)
+        votes[key] = count
     }
 
     // add other's votes into this
@@ -65,7 +74,7 @@ class VoteConsolidator {
 
 // Adapted from au.org.democracydevelopers.raire.util.VoteConsolidator
 /** A wrapper around int[] that works as a key in a hash map  */
-private class HashableIntArray(val array: IntArray) {
+class HashableIntArray(val array: IntArray) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

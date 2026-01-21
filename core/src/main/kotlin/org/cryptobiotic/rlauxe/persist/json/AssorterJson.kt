@@ -27,6 +27,7 @@ data class ClcaAssorterJson(
     val assorter: AssorterIFJson, // replicating the passorter
     val dilutedMargin: Double,
     val poolAverages: AssortAvgsInPoolsJson?, // consider putting these in another file ??
+    val oaAssortRates: OneAuditAssortValueRatesJson?,
 )
 
 fun ClcaAssorter.publishJson() : ClcaAssorterJson {
@@ -35,7 +36,8 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
             "ClcaAssorterOneAudit",
             this.assorter.publishJson(),
             this.dilutedMargin,
-            poolAverages.publishJson()
+            poolAverages.publishJson(),
+            oaAssortRates.publishJson()
         )
 
     } else {
@@ -43,6 +45,7 @@ fun ClcaAssorter.publishJson() : ClcaAssorterJson {
             "ClcaAssorter",
             this.assorter.publishJson(),
             this.dilutedMargin,
+            null,
             null,
         )
     }
@@ -57,17 +60,37 @@ fun ClcaAssorterJson.import(info: ContestInfo): ClcaAssorter {
                 this.dilutedMargin,
             )
 
-        "ClcaAssorterOneAudit" ->
-            ClcaAssorterOneAudit(
+        "ClcaAssorterOneAudit" -> {
+            val oaClcaAssorter = ClcaAssorterOneAudit(
                 info,
                 this.assorter.import(info),
                 this.dilutedMargin,
-                poolAverages!!.import()
+                poolAverages!!.import(),
             )
-
+            oaClcaAssorter.oaAssortRates = this.oaAssortRates!!.import()
+            oaClcaAssorter
+        }
         else -> throw RuntimeException("unknown class name ${this.className}")
     }
 }
+
+// data class OneAuditAssortValueRates(val rates: Map<Double, Double>, val totalInPools: Int)
+@Serializable
+data class OneAuditAssortValueRatesJson(
+    val rates: Map<Double, Double>,
+    val totalInPools: Int,
+)
+
+fun OneAuditAssortValueRates.publishJson() = OneAuditAssortValueRatesJson(
+    this.rates,
+    this.totalInPools,
+)
+
+fun OneAuditAssortValueRatesJson.import() = OneAuditAssortValueRates(
+    this.rates,
+    this.totalInPools,
+)
+
 
 @Serializable
 data class AssorterIFJson(

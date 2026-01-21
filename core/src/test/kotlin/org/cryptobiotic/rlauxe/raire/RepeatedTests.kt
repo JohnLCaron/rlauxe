@@ -1,8 +1,6 @@
 package org.cryptobiotic.rlauxe.raire
 
-import kotlin.test.Test
-
-class RepeateTests {
+class RepeatedTests {
 
     // @Test
     fun repeatTest() {

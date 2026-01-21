@@ -14,6 +14,7 @@ import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import org.cryptobiotic.rlauxe.util.tabulateCards
+import org.cryptobiotic.rlauxe.util.tabulateCvrsWithVoteForNs
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.collections.List
 import kotlin.test.Test
@@ -25,10 +26,11 @@ class TestVunder {
     fun testMakeVunderCvrs() {
         val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
         val candVotes0 = mapOf(0 to 200, 1 to 123, 2 to 17)
-        contestVotes[0] = Vunder(candVotes0, 51, 1)
+        val undervotes = 51
+        contestVotes[0] = Vunder.fromNpop(0,  undervotes, candVotes0.values.sum() + undervotes, candVotes0, 1)
 
         val candVotes1 = mapOf(0 to 71, 1 to 123, 2 to 3)
-        contestVotes[1] = Vunder(candVotes1, 51, 1)
+        contestVotes[1] = Vunder.fromNpop(1, undervotes, candVotes1.values.sum() + undervotes, candVotes1, 1)
 
         val cvrs = makeVunderCvrs(contestVotes, "poolName", null)
 
@@ -41,36 +43,40 @@ class TestVunder {
             println("  vunders= ${vunders.vunder.toMap()}")
         }
 
-        assertEquals("votes={0=200, 1=123, 2=17} undervotes=51, voteForN=1", contestVotes[0].toString())
-        assertEquals(mapOf(0 to 200, 1 to 123, 2 to 17, 3 to 51), contestVotes[0]!!.vunder.toMap())
+        assertEquals("id=0, voteForN=1, votes={0=200, 1=123, 2=17}, nvotes=340 ncards=391, undervotes=51, missing=0", contestVotes[0].toString())
+        assertTrue(checkEquivilentVotes(mapOf(0 to 200, 1 to 123, 2 to 17, 3 to 51), contestVotes[0]!!.vunder.toMap()))
 
-        assertEquals("votes={1=123, 0=71, 2=3} undervotes=51, voteForN=1", contestVotes[1].toString())
-        assertEquals(mapOf(0 to 71, 1 to 123, 2 to 3, 3 to 51), contestVotes[1]!!.vunder.toMap())
+        assertEquals("id=1, voteForN=1, votes={0=71, 1=123, 2=3}, nvotes=197 ncards=248, undervotes=51, missing=0", contestVotes[1].toString())
+        assertTrue(checkEquivilentVotes(mapOf(0 to 71, 1 to 123, 2 to 3, 3 to 51), contestVotes[1]!!.vunder.toMap()))
     }
 
     @Test
     fun testMakeVunderCvrsVotesFor2() {
-        val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
+        val vunders = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
         val candVotes0 = mapOf(0 to 200, 1 to 123, 2 to 17)
-        contestVotes[0] = Vunder(candVotes0, 51, 2)
+        val undervotes = 51
+        vunders[0] = Vunder.fromNpop(0,  undervotes, candVotes0.values.sum() + undervotes, candVotes0,2)
 
         val candVotes1 = mapOf(0 to 71, 1 to 123, 2 to 3)
-        contestVotes[1] = Vunder(candVotes1, 51, 1)
+        vunders[1] = Vunder.fromNpop(1, undervotes, candVotes1.values.sum() + undervotes, candVotes1,1)
 
-        val cvrs = makeVunderCvrs(contestVotes, "poolName", null)
+        val cvrs = makeVunderCvrs(vunders, "poolName", null)
 
         // check
-        val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
-        contestVotes.forEach { (contestId, vunders) ->
-            val tv = tabVotes[contestId] ?: emptyMap()
+        val voteForNs = vunders.mapValues { it.value.voteForN }
+        val tabVotes = tabulateCvrsWithVoteForNs(cvrs.iterator(), voteForNs)
+        vunders.forEach { (contestId, vunder) ->
+            val tv = tabVotes[contestId]!!
             println("contestId=${contestId}")
             println("  tabVotes=${tv}")
-            println("  vunders= ${vunders.candVotesSorted}")
+            println("  vunder= ${vunder.candVotesSorted}")
         }
 
-        assertEquals("votes={0=200, 1=123, 2=17} undervotes=51, voteForN=2", contestVotes[0].toString())
-        assertEquals(mapOf(0 to 200, 1 to 123, 2 to 17, 3 to 51), contestVotes[0]!!.vunder.toMap())
+        assertEquals("id=0, voteForN=2, votes={0=200, 1=123, 2=17}, nvotes=340 ncards=391, undervotes=51, missing=196", vunders[0].toString())
+        assertTrue(checkEquivilentVotes(mapOf(0 to 200, 1 to 123, 2 to 17, 3 to 51, 4 to 196), vunders[0]!!.vunder.toMap()))
     }
+
+    // checkEquivilentVotes(vunder.candVotes, contestTab.votes)
 
     @Test
     fun testMakeContestsWithVunder() {
@@ -182,7 +188,7 @@ fun makeContestsWithVunder(
     val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
     candsv.forEachIndexed { idx: Int, cands: Map<Int, Int> ->  // use the idx as the Id
         val voteForN = if (voteForNs == null) 1 else voteForNs[idx]
-        contestVotes[idx] = Vunder(cands, undervotes[idx], voteForN = voteForN)
+        contestVotes[idx] = Vunder.fromNpop(idx, undervotes[idx], cands.values.sum() + undervotes[idx], cands, voteForN = voteForN)
     }
 
     val cvrs = makeVunderCvrs(contestVotes, "ballot", null)

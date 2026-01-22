@@ -239,10 +239,11 @@ class TestShangrlaAssertions {
         assertEquals(0.5, cassorter.overstatementError(wrongContestMvr, cvr0, hasStyle = false))
 
         assertEquals(0.0, cassorter.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = false))
-        val mess = assertFailsWith<RuntimeException>{
+        assertEquals(Double.NaN, cassorter.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = true))
+        /*val mess = assertFailsWith<RuntimeException>{
             cassorter.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = true)
         }.message
-        assertEquals("hasCompleteCvrs==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess)
+        assertEquals("hasCompleteCvrs==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess) */
 
         //
         //        assert aVb.assorter.overstatement(mvrs[4], cvrs[4], use_style=True) == 1/2
@@ -303,15 +304,11 @@ class TestShangrlaAssertions {
         assertEquals(0.0, cassorterHasStyle.overstatementError(undervoteMvr, undervoteMvr, hasStyle = true))
 
         assertEquals(0.0, cassorterHasStyle.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = false))
-        val mess1 = assertFailsWith<RuntimeException>{
+        assertEquals(Double.NaN, cassorterHasStyle.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = true))
+        /* val mess1 = assertFailsWith<RuntimeException>{
             assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(wrongContestMvr, wrongContestMvr)) // ??, hasCompleteCvrs = false))
         }.message
-        assertEquals("hasCompleteCvrs==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess1)
-
-        val mess = assertFailsWith<RuntimeException>{
-            cassorterHasStyle.overstatementError(wrongContestMvr, wrongContestMvr, hasStyle = true)
-        }.message
-        assertEquals("hasCompleteCvrs==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess)
+        assertEquals("hasCompleteCvrs==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess1) */
 
         assertEquals(1.0, cassorterHasStyle.overstatementError(bobMvr, aliceMvr, hasStyle = true)) // 2
         assertEquals(0.5, cassorterHasStyle.overstatementError(bobMvr, candyMvr, hasStyle = true))
@@ -390,11 +387,12 @@ class TestShangrlaAssertions {
         assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(wrongContestMvr, bobMvr))
         assertEquals(cassorterHasStyle.noerror/2, cassorterHasStyle.bassort(wrongContestMvr, candyMvr))
         assertEquals(0.0, cassorterHasStyle.bassort(wrongContestMvr, aliceMvr)) // 4
+        assertEquals(Double.NaN, cassorterHasStyle.bassort(wrongContestMvr, wrongContestMvr)) // 4
 
-        val mess = assertFailsWith<RuntimeException>{
+        /* val mess = assertFailsWith<RuntimeException>{
             cassorterHasStyle.bassort(wrongContestMvr, wrongContestMvr)
         }.message
-        assertEquals("hasCompleteCvrs==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess)
+        assertEquals("hasCompleteCvrs==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess) */
 
         /////////////
         val cassorterNoStyle = ClcaAssorter(plur_con_test.info, aliceVsBobP, dilutedMargin=aliceVsBobP.dilutedMargin())

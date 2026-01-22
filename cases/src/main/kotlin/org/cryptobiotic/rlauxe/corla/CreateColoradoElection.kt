@@ -200,7 +200,7 @@ open class CreateColoradoElection (
                 val oaContest: OneAuditBuilderCorla = oaContestMap[contestId]!!
                 val sumVotes = contestTab.nvotes()
                 val underVotes = cardPool.ncards() * oaContest.info.voteForN - sumVotes
-                contestVotes[contestId] = Vunder(contestTab.votes, underVotes, oaContest.info.voteForN)
+                contestVotes[contestId] = Vunder.fromNpop(contestId,  underVotes, cardPool.ncards(), contestTab.votes, oaContest.info.voteForN)
             }
 
             cvrs = makeVunderCvrs(contestVotes, cardPool.poolName, poolId = if (config.isClca) null else cardPool.poolId).iterator()

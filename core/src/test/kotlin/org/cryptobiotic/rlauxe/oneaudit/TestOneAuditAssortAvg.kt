@@ -16,7 +16,7 @@ import kotlin.test.assertEquals
 import kotlin.test.fail
 
 // when does (winner - loser) / N agree with AvgAssortValue?
-class TestAvgAssortValues {
+class TestOneAuditAssortAvg {
     val showCards = false
 
     @Test

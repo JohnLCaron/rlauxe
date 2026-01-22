@@ -52,11 +52,7 @@ class TestAuditableCard {
         assertEquals(card1.toString(), card2.toString())
 
         val expected = """AuditableCard(desc='cvr$id', index=42, sampleNum=4422, phantom=false, poolId=1)
- votes:
-   contest 1: [1, 2, 3]
-   contest 2: [4, 5, 6]
-   contest 3: [0, 1]
-"""
+  votes: 1:[1, 2, 3], 2:[4, 5, 6], 3:[0, 1], """
         assertEquals(expected, card1.toString())
     }
 }

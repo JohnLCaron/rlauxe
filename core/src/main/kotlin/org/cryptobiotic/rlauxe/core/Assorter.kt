@@ -49,7 +49,7 @@ interface AssorterIF {
 
     // reportedMargin : N = Nc
     // dilutedMargin: Npop = sample population size
-    // used when you need to calculate margin from some subset of regular votes; cant be used for IRV
+    // used when you need to calculate margin from some subset of regular votes eg pools; cant be used for IRV
     fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double
 }
 
@@ -67,7 +67,7 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
     //   ballot that shows whatever would increase the P-value the most. For ballot-polling audits, this means
     //   pretending it showed a valid vote for every loser. P2Z section 2 p 3-4.
 
-    // assort in {0, .5, 1}
+    // assort in {0, .5, u}
     // usePhantoms = true for polling, but when this is the "primitive assorter" in clca, usePhantoms = false so that
     //   clcaAssorter can handle the phantoms.
     override fun assort(cvr: CvrIF, usePhantoms: Boolean): Double {

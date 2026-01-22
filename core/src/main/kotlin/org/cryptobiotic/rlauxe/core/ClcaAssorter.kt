@@ -183,21 +183,22 @@ open class ClcaAssorter(
     // (.5-u),      cvr has vote for other, mvr has vote for winner : p1u = 1 vote understatement
     // (0-.5),      cvr has vote for loser, mvr has vote for other  : p1u = 1 vote understatement
     // (0-u)        cvr has vote for loser, mvr has vote for winner : p2u = 2 vote understatement
-
     // could just use this.undervotes
+
     fun overstatementError(mvr: CvrIF, cvr: CvrIF, hasStyle: Boolean): Double {
         // # SHANGRLA
         // if use_style and not cvr.has_contest(self.contest.id):
         //    raise ValueError(
         //      f"use_style==True but {cvr=} does not contain contest {self.contest.id}"
         //    )
-        // if hasU = hasStyle, we use the cvr as the pcontests, so how did this happen?
+        // if hasStyle, we use the cvr as the populations, so how did this happen?
         if (hasStyle and !cvr.hasContest(info.id)) {
-            val trace = Throwable().stackTraceToString()
-            logger.error { "hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})\n$trace" }
+            //val trace = Throwable().stackTraceToString()
+            //logger.error { "hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})\n$trace" }
             // TODO core dump not a good option.
-            //    if we were using hasStyle is assorter.assort(), it would return 0.0 for cvr_assort
-            throw RuntimeException("hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
+            //    if we were using hasStyle in assorter.assort(), it would return 0.0 for cvr_assort
+            //throw RuntimeException("hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
+            return Double.NaN
         }
 
         // If use_style, then if the CVR contains the contest but the MVR does not, treat the MVR as having a vote for

@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.core.*
 import kotlin.random.Random
 
-// CANDIDATE FOR REMOVAL; use MultiContestTestData, Vunder
 
 fun makeContestFromCvrs(
     info: ContestInfo,
@@ -115,21 +114,28 @@ fun makeContestUAFromCvrs(contests: List<Contest>, cvrs: List<Cvr>, hasStyle: Bo
     }
 }
 
-// replace with Vunder ??
+// create contests and cvrs from the given votes, undervotes, and phantoms
 // candsv: candidate votes for each contest
 // undervotes: undervotes for each contest
 // phantoms: phantoms for each contest
 // voteForNs: voteForN for each contest, default is 1
+// missing: number of cards without this contest,
 fun makeContestsWithUndervotesAndPhantoms(
-    candsv: List<Map<Int, Int>>, undervotes: List<Int>, phantoms: List<Int>, voteForNs: List<Int>? = null)
-: Pair<List<Contest>, List<Cvr>> {
+    candsv: List<Map<Int, Int>>,
+    undervotes: List<Int>,
+    phantoms: List<Int>,
+    voteForNs: List<Int>? = null,
+    missings: List<Int>? = null
+): Pair<List<Contest>, List<Cvr>> {
+
     val candsMap = candsv.mapIndexed { idx, it -> Pair(idx, it ) }.toMap()
     val phantomMap = phantoms.mapIndexed { idx, it -> Pair(idx, it ) }.toMap()
 
     val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
-    candsv.forEachIndexed { idx: Int, cands: Map<Int, Int> ->  // use the idx as the Id
+    candsv.forEachIndexed { idx: Int, candVotes: Map<Int, Int> ->  // use the idx as the Id
         val voteForN = if (voteForNs == null) 1 else voteForNs[idx]
-        contestVotes[idx] = Vunder(cands, undervotes[idx], voteForN = voteForN)
+        val missing = if (missings == null) 0 else missings[idx]
+        contestVotes[idx] = Vunder(idx, candVotes, undervotes[idx], missing=missing, voteForN = voteForN)
     }
 
     val cvrs = makeVunderCvrs(contestVotes, "ballot", null)

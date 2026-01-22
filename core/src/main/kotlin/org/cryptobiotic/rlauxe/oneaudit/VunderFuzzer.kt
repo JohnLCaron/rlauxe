@@ -14,7 +14,7 @@ import kotlin.random.Random
 
 // OneAuditVunderFuzzer creates fuzzed mvrs (non-pooled) and simulated mvrs (pooled)
 class OneAuditVunderFuzzer(
-    val pools: List<OneAuditPoolIF>,
+    pools: List<OneAuditPoolIF>,
     val infos: Map<Int, ContestInfo>,
     val fuzzPct: Double,
     cards: List<AuditableCard>
@@ -71,7 +71,7 @@ private fun makeFuzzedCardFromCard(
 
 // simulate pooled data from the pool values; not for IRV
 class VunderPools(pools: List<OneAuditPoolIF>, infos: Map<Int, ContestInfo>) {
-    val vunderPools: Map<Int, VunderPool>
+    val vunderPools: Map<Int, VunderPool>  // poolId -> VunderPool
 
     init {
         vunderPools = pools.map { pool ->
@@ -84,7 +84,7 @@ class VunderPools(pools: List<OneAuditPoolIF>, infos: Map<Int, ContestInfo>) {
     }
 
     // for the given pooled card with no votes, simulate one with votes, staying within the pool vote totals.
-    // TODO doesnt seem to work for IRV...
+    // TODO doesnt  work for IRV...
     fun simulatePooledCard(card: AuditableCard, poolId: Int): AuditableCard {
         val vunderPool = vunderPools[poolId]!!
         return vunderPool.simulatePooledCard(card)
@@ -93,18 +93,21 @@ class VunderPools(pools: List<OneAuditPoolIF>, infos: Map<Int, ContestInfo>) {
 
 // for one pool
 // vunders: Contest id -> Vunder
-class VunderPool(val vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int ) {
-    val vunderPickers = vunders.mapValues { VunderPicker(it.value) }
+class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int ) {
+    val vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
 
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
-        val cardb = CardBuilder.Companion.fromCard(card)
+        require (card.poolId == poolId)
+        val cardb = CardBuilder.fromCard(card)
         card.contests().forEach { contestId ->
             val vunderPicker = vunderPickers[contestId]
             if (vunderPicker == null || vunderPicker.isEmpty())
                 cardb.replaceContestVotes(contestId, intArrayOf())
             else {
                 val cands = vunderPicker.pickRandomCandidatesAndDecrement()
-                cardb.replaceContestVotes(contestId, cands)
+                if (cands != null) {
+                    cardb.replaceContestVotes(contestId, cands) // ok if no contests on it ??
+                }
             }
         }
         return cardb.build()

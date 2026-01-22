@@ -1,9 +1,12 @@
 package org.cryptobiotic.rlauxe.audit
 
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.countContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.junit.jupiter.api.Assertions.assertEquals
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.iterator
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -44,4 +47,15 @@ class TestMakePhantoms {
         //    populations: List<PopulationIF>?,
         //): CloseableIterator<AuditableCard> {
     }
+}
+
+fun countContestsFromCvrs(cvrs: Iterator<Cvr>): Map<Int, Int> {
+    val contestCount = mutableMapOf<Int, Int>()
+    for (cvr in cvrs) {
+        for ((contestId, _) in cvr.votes) {
+            val count = contestCount.getOrPut(contestId) { 0 }
+            contestCount[contestId] = count + 1
+        }
+    }
+    return contestCount
 }

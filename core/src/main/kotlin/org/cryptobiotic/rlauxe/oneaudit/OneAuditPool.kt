@@ -31,7 +31,7 @@ class AssortAvg() {
     fun margin() : Double = mean2margin(avg())
 
     override fun toString(): String {
-        return "AssortAvg(ncards=$ncards, totalAssort=$totalAssort avg=${avg()})"
+        return "AssortAvg(ncards=$ncards, totalAssort=$totalAssort avg=${avg()} margin=${margin()})"
     }
 }
 
@@ -50,7 +50,6 @@ interface OneAuditPoolIF: PopulationIF {
         }
         appendLine(")")
     }
-
 
     // OneAuditPool(override val poolName: String, override val poolId: Int, val exactContests: Boolean,
     //  val ncards: Int, val regVotes: Map<Int, RegVotes>)
@@ -75,12 +74,14 @@ data class OneAuditPool(override val poolName: String, override val poolId: Int,
     // candidate for removal, assumes voteForN == 1, perhaps we need to save that ??
     override fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder {
         val regVotes = regVotes[contestId]!!         // empty for IRV ...
-        val poolUndervotes = ncards * voteForN - regVotes.votes.values.sum()
-        return Vunder(regVotes.votes, poolUndervotes, voteForN)
+        return Vunder.fromNpop(contestId, regVotes.undervotes(), ncards(), regVotes.votes, voteForN)
+        // val poolUndervotes = ncards * voteForN - regVotes.votes.values.sum()
+        // return Vunder(contestId, regVotes.votes, regVotes.undervotes(), 0, voteForN) // old way
+
     }
 }
 
-// this might be specialized for Boulder, perhaps shouldnt be in the general code ??
+// used by Boulder and Corla
 data class OneAuditPoolWithBallotStyle(
     override val poolName: String,
     override val poolId: Int,
@@ -147,7 +148,7 @@ data class OneAuditPoolWithBallotStyle(
     override fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder {
         val poolUndervotes = undervoteForContest(contestId)
         val votesForContest = voteTotals[contestId]!!
-        return Vunder(votesForContest.votes, poolUndervotes, votesForContest.voteForN)
+        return Vunder.fromNpop(contestId, poolUndervotes, ncards(), votesForContest.votes, votesForContest.voteForN)
     }
 
     override fun toString(): String {
@@ -181,10 +182,7 @@ data class OneAuditPoolWithBallotStyle(
     }
 }
 
-// class CardPoolFromCvrs(
-//    override val poolName: String,
-//    override val poolId: Int,
-//    val infos: Map<Int, ContestInfo>) : CardPoolIF
+// used by SF; necessary for doing OneAudit IRV
 data class OneAuditPoolFromCvrs(
     override val poolName: String,
     override val poolId: Int,
@@ -280,8 +278,9 @@ data class OneAuditPoolFromCvrs(
         return result
     }
 
-    override fun toString(): String {
-        return "OneAuditPoolFromCvrs(poolName='$poolName', poolId=$poolId, totalCards=$totalCards contests=${contests().contentToString()})"
+    override fun toString() = buildString {
+        appendLine("OneAuditPoolFromCvrs(poolName='$poolName', poolId=$poolId, totalCards=$totalCards")
+        contestTabs.values.forEach { appendLine("  $it")}
     }
 }
 

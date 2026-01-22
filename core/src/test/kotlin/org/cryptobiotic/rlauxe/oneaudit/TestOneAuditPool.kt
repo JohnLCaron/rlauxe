@@ -56,7 +56,7 @@ class TestOneAuditPool {
 
         assertEquals(1, poolTabs.size)
         val tab = poolTabs.values.first()
-        assertEquals(1, tab.info.id)
+        assertEquals(1, tab.contestId)
         val poolVotes = cardPool.contestTabs[1]!!.votes
         poolVotes.forEach { (cand, vote) ->
             assertEquals(2 * vote, tab.votes[cand])
@@ -76,7 +76,7 @@ class TestOneAuditPool {
             val voteForN = contestUA.contest.info().voteForN
             val sumVotes = candVotes.map { it.value }.sum()
             val underVotes = contestUA.contest.Ncast() * voteForN - sumVotes
-            contestVotes[contestUA.id] = Vunder(candVotes, underVotes, voteForN)
+            contestVotes[contestUA.id] = Vunder.fromNpop(contestUA.id, underVotes, contestUA.contest.Ncast(), candVotes, voteForN)
         }
 
         val cvrs = makeVunderCvrs(contestVotes, "poolName", poolId = 42)
@@ -108,7 +108,7 @@ class TestOneAuditPool {
             val voteForN = contestUA.contest.info().voteForN
             val sumVotes = candVotes.map { it.value }.sum()
             val underVotes = contestUA.contest.Ncast() * voteForN - sumVotes
-            contestVotes[contestUA.id] = Vunder(candVotes, underVotes, voteForN)
+            contestVotes[contestUA.id] = Vunder.fromNpop(contestUA.id, underVotes, contestUA.contest.Ncast(), candVotes, voteForN)
         }
 
         val cvrs = makeVunderCvrs(contestVotes, "poolName", poolId = 42)

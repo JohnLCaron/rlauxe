@@ -130,7 +130,8 @@ class AuditCobraAssertion(
             roundIdx,
             nmvrs = sampling.nmvrs(),
             maxBallotIndexUsed = sampling.maxSampleIndexUsed(),
-            pvalue = testH0Result.pvalueLast,
+            plast = testH0Result.pvalueLast,
+            pmin = testH0Result.pvalueMin,
             samplesUsed = samplesNeeded,
             status = testH0Result.status,
         )

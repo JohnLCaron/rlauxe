@@ -2,15 +2,17 @@ package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.workflow.MvrManager
-import kotlin.math.ln
-import kotlin.math.roundToInt
 
 private val debugConsistent = false
 private val logger = KotlinLogging.logger("ConsistentSampling")
@@ -116,7 +118,7 @@ fun consistentSampling(
                 newMvrs++
         }
 
-        // track how many continguous mvrs each contest has
+        // track how many contiguous mvrs each contest has
         contestsIncluded.forEach { contest ->
             if (card.hasContest(contest.id)) {
                 if (include && !skippedContests.contains(contest.id)) {
@@ -168,6 +170,7 @@ fun wantSampleSizeSimple(contestsNotDone: List<ContestRound>): Map<Int, Int> {
      return contestsNotDone.associate { it.id to it.estMvrs }
 }
 
+////////////////////////////////////////////////////////////////////////////////
 // called from estimateSampleSizes to choose N cards to reduce simulation cost
 fun estimationSubset(
     config: AuditConfig,
@@ -179,8 +182,7 @@ fun estimationSubset(
     if (contestsNotDone.isEmpty()) return emptyList() // may not quite be right...
 
     // calculate how many samples are wanted for each contest.
-    val fac = if (config.isClca) 2.2 else 4.0
-    val wantSamples: Map<Int, Int> = contestsNotDone.associate { it.id to estSamplesNeeded(config, it, fac) }
+    val wantSamples: Map<Int, Int> = contestsNotDone.associate { it.id to estSamplesNeeded(config, it) }
     val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
 
     fun contestWantsMoreSamples(c: ContestRound): Boolean {
@@ -220,43 +222,46 @@ fun estimationSubset(
 
 // CLCA and OneAudit TODO POLLING
 // we dont use this for the actual estimation....
-private fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, fac: Double): Int {
-    val est0 = estSamplesNeeded( contestRound,  config.riskLimit, fac)
-
+private fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
     val minAssertionRound = contestRound.minAssertion()
     if (minAssertionRound == null) {
         contestRound.minAssertion()
         throw RuntimeException()
     }
 
-    val lastPvalue = minAssertionRound.auditResult?.pvalue ?: config.riskLimit
+    val lastPvalue = minAssertionRound.auditResult?.plast ?: config.riskLimit
     val minAssertion = minAssertionRound.assertion
-
     val cassorter = (minAssertion as ClcaAssertion).cassorter
-    val est = roundUp(fac * cassorter.sampleSizeNoErrors(maxRisk = config.clcaConfig.maxRisk, lastPvalue))
-    // println("$est $est0") TODO
-    return est0
-}
 
-fun estSamplesNeeded(contestRound: ContestRound, alpha: Double, fac: Double): Int {
-    val minAssertionRound = contestRound.minAssertion()
-    if (minAssertionRound == null) {
-        contestRound.minAssertion()
-        throw RuntimeException()
+    if (config.isClca) {
+        return roundUp(2.0 * cassorter.sampleSizeNoErrors(maxRisk = config.clcaConfig.maxRisk, lastPvalue))
     }
 
-    val lastPvalue = minAssertionRound.auditResult?.pvalue ?: alpha
-    val minAssertion = minAssertionRound.assertion
+    // maybe just something inverse to margin ??
 
-    val cassorter = (minAssertion as ClcaAssertion).cassorter
-    // val expected = ln(1 / alpha) / ln(2 * cassorter.noerror())
-    val estSamplesNoErrors = ln(1 / lastPvalue) / ln(2 * cassorter.noerror())
-
-    val estNeeded =  (fac * estSamplesNoErrors).roundToInt()
-    // contestRound.estCardsNeeded = estNeeded
-    return estNeeded
+    // one audit - calc optimal bet, use it as maxRisk
+    val contest = contestRound.contestUA
+    val oaass = minAssertion.cassorter as ClcaAssorterOneAudit
+    val assorter = minAssertion.cassorter.assorter
+    val upper = assorter.upperBound()
+    val betFn = GeneralAdaptiveBetting(
+        contest.Npop,
+        ClcaErrorCounts.empty(oaass.noerror(), upper),
+        contest.Nphantoms,
+        oaass.oaAssortRates,
+        maxRisk = config.clcaConfig.maxRisk,
+        debug=false,
+    )
+    val bet = betFn.bet(ClcaErrorTracker(oaass.noerror(), upper))
+    val maxRisk = bet / 2
+    val est = roundUp(5.0 * cassorter.sampleSizeNoErrors(maxRisk = maxRisk, lastPvalue))
+    if (assorter.dilutedMargin() < 0.07) {
+        logger.info { "estimationSubset ${contest.id}-${assorter.winLose()}  sumRates = ${oaass.oaAssortRates.sumRates()} maxRisk= $maxRisk, est = $est, margin=${assorter.dilutedMargin()}" }
+    }
+    return est
 }
 
+////////////////////////////////////////////////////////////////////////////
 //val minSamples = -ln(.05) / ln(2 * minAssorter.noerror())
 
 // (1 - lam * noerror)^n < alpha

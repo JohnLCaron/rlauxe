@@ -4,33 +4,52 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.betting.TausIF
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 
-// rate is assort value -> rate over the entire population
-data class OneAuditAssortValueRates(val name: String, val rates: Map<Double, Double>, val totalInPools: Int)
+// rate :  assort value -> rate over the entire population
+// TODO maybe we just need the sum ??
+data class OneAuditAssortValueRates(val rates: Map<Double, Double>, val totalInPools: Int) {
+    fun sumRates() = rates.map{ it.value }.sum()
+    override fun toString() = buildString {
+        append("OneAuditAssortValueRates(totalInPools=$totalInPools n=${rates.size} sumOfRates= ${sumRates()})")
+        // rates.forEach { appendLine("  $it") }
+    }
+}
 
-// we know exactly the assort values and their frequency
+// we know exactly the assort values and their frequency; non-IRV
 class OneAuditRatesFromPools(val pools: List<OneAuditPoolIF>) {
 
     fun oaErrorRates(contestUA: ContestWithAssertions, oaCassorter: ClcaAssorterOneAudit): OneAuditAssortValueRates { // sampleValue -> rate
-        val result = mutableListOf<Pair<Double, Double>>()
+        val pairs = mutableListOf<Pair<Double, Double>>()
         var totalInPools = 0
         pools.filter{ it.hasContest(contestUA.id )}.forEach { pool ->
             val poolAvg = oaCassorter.poolAverages.assortAverage[pool.poolId]
             if (poolAvg != null) {
                 val taus = TausOA(oaCassorter.assorter.upperBound(), poolAvg)
-                val votes = pool.regVotes()[contestUA.id]!!
+                val votes = pool.regVotes()[contestUA.id]!!     // TODO assumes non-IRV
                 val winnerCounts: Int = votes.votes[oaCassorter.assorter.winner()] ?: 0
                 val loserCounts: Int = votes.votes[oaCassorter.assorter.loser()] ?: 0
                 val otherCounts = pool.ncards() - winnerCounts - loserCounts
                 totalInPools += pool.ncards()
-                val dcards = contestUA.Npop.toDouble() // rate is over entire population
+                val dencards = contestUA.Npop.toDouble() // rate is over entire population
 
                 // sampleValue -> rate
-                result.add(Pair(taus.tausOA[0].first * oaCassorter.noerror(), loserCounts / dcards))
-                result.add(Pair(taus.tausOA[1].first * oaCassorter.noerror(), otherCounts / dcards))
-                result.add(Pair(taus.tausOA[2].first * oaCassorter.noerror(), winnerCounts / dcards))
+                pairs.add(Pair(taus.tausOA[0].first * oaCassorter.noerror(), loserCounts / dencards))  // loser
+                pairs.add(Pair(taus.tausOA[1].first * oaCassorter.noerror(), otherCounts / dencards))  // other
+                pairs.add(Pair(taus.tausOA[2].first * oaCassorter.noerror(), winnerCounts / dencards))  // winner
             }
         }
-        return OneAuditAssortValueRates("name", result.toMap().toSortedMap(), totalInPools)  // could also return a string description
+
+        //         var sumOneAuditTerm = 0.0
+        //        if (oaErrorRates != null) { // probably dont need the filter
+        //            oaErrorRates.filter { it.value != 0.0 }.forEach { (sampleValue: Double, rate: Double) ->
+        //                sumOneAuditTerm += ln(1.0 + lam * (sampleValue - mui)) * rate
+        //            }
+        //        }
+        val rates = mutableMapOf<Double, Double>()
+        pairs.filter { it.second > 0.0 }.forEach {
+            val rate = rates.getOrPut(it.first) { 0.0 }
+            rates[it.first] = rate + it.second
+        }
+        return OneAuditAssortValueRates(rates.toSortedMap(), totalInPools)  // could also return a string description
     }
 }
 
@@ -44,6 +63,8 @@ class OneAuditRatesFromPools(val pools: List<OneAuditPoolIF>) {
 //    bassort = [1-poolAvg/u, 1 - (poolAvg -.5)/u, 1 - (poolAvg - u)/u] * noerror
 //    bassort = [1-poolAvg/u, (u - poolAvg + .5)/u, (2u - poolAvg)/u] * noerror
 
+//    bassort = [1-poolAvg, 1.5 - poolAvg, 2 - poolAvg] * noerror  when u == 1
+
 class TausOA(val upper: Double, val poolAvg: Double): TausIF {
     val tausOA: List<Pair<Double, String>>
 
@@ -53,7 +74,7 @@ class TausOA(val upper: Double, val poolAvg: Double): TausIF {
         //            (2u - poolAvg)/u] * noerror, for mvr loser, other and winner
         tausOA = mapOf(
             (1 - poolAvg / upper) to "loser",
-            (upper - poolAvg + .5) / upper to "other",  // TODO check this
+            (upper - poolAvg + .5) / upper to "other",
             (2 * upper - poolAvg) / upper to "winner"
         ).toList()
     }

@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestAssorterCvrMeans {
+class TestAssortAvg {
 
     @Test
     fun testMakeCvrsByExactMean() {
@@ -63,7 +63,7 @@ class TestAssorterCvrMeans {
     }
 
     @Test
-    fun testPluralityAssorterWithPhantoms() {
+    fun testWithPhantomsFromCvrBuilders() {
         val cvrs = CvrBuilders()
             .addCvr().addContest("AvB", "0").ddone()
             .addCvr().addContest("AvB", "1").ddone()
@@ -94,9 +94,46 @@ class TestAssorterCvrMeans {
         testMeanAssort(cvrs, contestUA)
     }
 
+    @Test
+    fun testWithMissingContestsFromCvrBuilders() {
+        val cvrs = CvrBuilders()
+            .addCvr().addContest("AvB", "0").ddone()
+            .addCvr().addContest("AvB", "1").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            .addCvr().addContest("AvB", "2").ddone()
+            // artifact of creating Contests and candidates from cvrs.
+            .addCvr().addContest("AvB").addCandidate("3", 0).ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addCvr().addContest("AvB", "4").ddone()
+            .addPhantomCvr().addContest("AvB").ddone()
+            // a cvr that doesnt have the contest on it
+            .addCvr().addContest("other", "1").ddone()
+
+            .build()
+
+        val contestInfo = ContestInfo(
+            name = "AvB",
+            id = 0,
+            choiceFunction = SocialChoiceFunction.PLURALITY,
+            candidateNames = listToMap( "0", "1", "2", "3", "4"),
+        )
+        // here the cvrs are the contest's poulation.
+        // So, as long as the diluted margin increases, its ok to have cvrs that dont actually contain the contest.
+        val contest = makeContestFromCvrs(contestInfo, cvrs)
+        val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
+
+        println("\n$contestUA")
+        println("ncvrs = ${cvrs.size}")
+        testMeanAssort(cvrs, contestUA)
+    }
+
     fun testMeanAssort(cvrs: List<Cvr>, contestUA: ContestWithAssertions) {
         val assorter = contestUA.assertions[0].assorter
-        val tracker = MeanMarginTracker(contestUA.id, assorter)
+        val tracker = AssorterMarginTracker(contestUA.id, assorter)
         cvrs.forEach {
             // println(it)
             tracker.addCvr(it)
@@ -104,9 +141,9 @@ class TestAssorterCvrMeans {
     }
 }
 
-private val show = false
+private val show = true
 
-private class MeanMarginTracker(val contestId: Int, val assorter: AssorterIF) {
+private class AssorterMarginTracker(val contestId: Int, val assorter: AssorterIF) {
     val welford = Welford()
     val winner = assorter.winner()
     val loser = assorter.loser()

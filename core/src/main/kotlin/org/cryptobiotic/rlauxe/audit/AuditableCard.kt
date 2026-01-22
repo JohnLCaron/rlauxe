@@ -37,9 +37,12 @@ data class AuditableCard (
         if (poolId != null) append(", poolId=$poolId")
         if (cardStyle != null) append(", cardStyle='$cardStyle'")
         if (population != null) append(", population='${population.name()}'")
-        appendLine(")")
-        if (votes != null)  appendLine(" votes:")
-        votes?.forEach { id, vote -> appendLine("   contest $id: ${vote.contentToString()}")}
+        append(")")
+        if (votes != null) {
+            appendLine()
+            append("  votes: ")
+            votes.forEach { id, vote -> append("$id:${vote.contentToString()}, ") }
+        }
     }
 
     override fun isPhantom() = phantom

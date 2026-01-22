@@ -14,7 +14,7 @@ import kotlin.Int
 import kotlin.test.Test
 
 
-// here we recreate Kalamazoo example in rlaux framework.
+// here we recreate SHANGRLA Kalamazoo example in rlaux framework.
 // also see plots/src/test/kotlin/org/cryptobiotic/rlauxe/oneaudit/KalamazooExample.kt, which ports the python directly
 class TestOneAuditKalamazoo {
 
@@ -144,7 +144,7 @@ class CardPoolSingleContest(override val poolName: String, override val poolId: 
 
     override fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder {
         val poolUndervotes = ncards() * voteForN - regVotes.votes.values.sum()
-        return Vunder(regVotes.votes, poolUndervotes, voteForN)
+        return Vunder(contestId, regVotes.votes, poolUndervotes, ncards(), voteForN)
     }
 }
 
@@ -160,7 +160,7 @@ fun makeTestMvrs(
 
     // add the regular cvrs
     if (cvrNcards > 0) {
-        val vunderCvrs = Vunder(cvrVotes, cvrUndervotes, info.voteForN)
+        val vunderCvrs = Vunder.fromNpop(oaContest.id, cvrUndervotes, cvrNcards, cvrVotes, info.voteForN)
         val cvrCvrs = makeVunderCvrs(mapOf(info.id to vunderCvrs), "regular", poolId = null)
         cvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     }

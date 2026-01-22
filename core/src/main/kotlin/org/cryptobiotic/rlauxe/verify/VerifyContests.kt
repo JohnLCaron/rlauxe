@@ -409,7 +409,7 @@ fun verifyOAassortAvg(
         }
     }
 
-    // compare the assortAverage with the contest's dilutedMargin in passorter.
+    // compare the assortAverage with the dilutedMargin in passorter.
     contestsUA.forEach { contestUA ->
         val cardAssortAvg = cardAssortAvgs[contestUA.id]
         if (cardAssortAvg == null) {

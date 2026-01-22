@@ -31,7 +31,7 @@ class AssortAvg() {
     fun margin() : Double = mean2margin(avg())
 
     override fun toString(): String {
-        return "AssortAvg(ncards=$ncards, totalAssort=$totalAssort avg=${avg()})"
+        return "AssortAvg(ncards=$ncards, totalAssort=$totalAssort avg=${avg()} margin=${margin()})"
     }
 }
 
@@ -40,7 +40,7 @@ interface OneAuditPoolIF: PopulationIF {
     val poolId: Int
     fun assortAvg(): MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contestId -> assorter -> average in the pool
     fun regVotes(): Map<Int, RegVotesIF> // contestId -> RegVotes, regular contests only, not IRV
-    fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder  // TODO needed?
+    fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder
     // fun contestTab(contestId: Int): ContestTabulation? need this for IRV
 
     fun show() = buildString {
@@ -74,8 +74,10 @@ data class OneAuditPool(override val poolName: String, override val poolId: Int,
     // candidate for removal, assumes voteForN == 1, perhaps we need to save that ??
     override fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder {
         val regVotes = regVotes[contestId]!!         // empty for IRV ...
-        val poolUndervotes = ncards * voteForN - regVotes.votes.values.sum()
-        return Vunder.fromNpop(contestId, poolUndervotes, ncards(), regVotes.votes, voteForN)
+        return Vunder.fromNpop(contestId, regVotes.undervotes(), ncards(), regVotes.votes, voteForN)
+        // val poolUndervotes = ncards * voteForN - regVotes.votes.values.sum()
+        // return Vunder(contestId, regVotes.votes, regVotes.undervotes(), 0, voteForN) // old way
+
     }
 }
 

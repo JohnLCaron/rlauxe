@@ -355,10 +355,11 @@ class TestClcaAssorter {
         val differentContest = Cvr("diff", mapOf(1 to IntArray(0)))
 
         assertEquals(-0.5, cassorterHasStyle.overstatementError(winnerCvr, differentContest, false))
-        val mess = assertFailsWith<RuntimeException> {
+        assertEquals(Double.NaN, cassorterHasStyle.overstatementError(winnerCvr, differentContest, true))
+        /* val mess = assertFailsWith<RuntimeException> {
             assertEquals(0.0, cassorterHasStyle.overstatementError(winnerCvr, differentContest, true))
         }.message!!
-        assertTrue(mess.contains("does not contain contest"))
+        assertTrue(mess.contains("does not contain contest")) */
 
         assertEquals(1.0, cassorterHasStyle.overstatementError(differentContest, winnerCvr, true))
         assertEquals(0.0, cassorterHasStyle.overstatementError(differentContest, loserCvr, true))

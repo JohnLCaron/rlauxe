@@ -49,7 +49,7 @@ interface AssorterIF {
 
     // reportedMargin : N = Nc
     // dilutedMargin: Npop = sample population size
-    // used when you need to calculate margin from some subset of regular votes; cant be used for IRV
+    // used when you need to calculate margin from some subset of regular votes eg pools; cant be used for IRV
     fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double
 }
 

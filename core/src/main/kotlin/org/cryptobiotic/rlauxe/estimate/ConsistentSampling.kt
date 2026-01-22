@@ -118,7 +118,7 @@ fun consistentSampling(
                 newMvrs++
         }
 
-        // track how many continguous mvrs each contest has
+        // track how many contiguous mvrs each contest has
         contestsIncluded.forEach { contest ->
             if (card.hasContest(contest.id)) {
                 if (include && !skippedContests.contains(contest.id)) {

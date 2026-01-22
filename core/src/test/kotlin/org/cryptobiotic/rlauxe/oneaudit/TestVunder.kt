@@ -129,7 +129,7 @@ class TestVunder {
     }
 
     @Test
-    fun testOneAuditVunderBarFuzzer() {
+    fun testOneAuditVunderFuzzer() {
         val margin = .02
         val Nc = 10000
         val cvrFraction = 0.80

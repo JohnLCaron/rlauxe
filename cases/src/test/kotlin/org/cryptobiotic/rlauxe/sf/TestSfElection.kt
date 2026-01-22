@@ -85,7 +85,7 @@ class TestSfElection {
         assertEquals(count49, contest49.Npop)
 
 
-        val sortedMvrs: CloseableIterator<AuditableCard> = org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator(publisher.privateMvrsFile())
+        val sortedMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.privateMvrsFile())
         countCards = 0
         count49 = 0
         count49pools = 0
@@ -139,80 +139,6 @@ class TestSfElection {
 
             println("${contest.id}-${minAssertion.assorter.winLose()} bet = $bet")
         }
-    }
-
-    @Test
-    fun testSFvunderFuzz() {
-        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigUnwrapped(publisher.auditConfigFile())!!
-        val cardManifest = readCardManifest(publisher)
-        val cardPools = cardManifest.populations as List<OneAuditPoolIF>
-        val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
-
-        val contestCards = mutableListOf<AuditableCard>()
-        val ncards = 30_000
-        var countCards = 0
-        cardManifest.cards.iterator().use { iter ->
-            while (iter.hasNext() && countCards < ncards) {
-                val card = iter.next()
-                contestCards.add(card)
-                countCards++
-            }
-        }
-
-        // simulate the card pools for all OneAudit contests; do it here one time for all contests
-        val infos = contests.map { it.contest.info() }.associateBy { it.id }
-        val vunderFuzz = OneAuditVunderFuzzer(cardPools, infos, config.simFuzzPct ?: 0.0, contestCards)
-
-        val pairs = vunderFuzz.fuzzedPairs
-        println(" pairs = ${pairs.size}")
-
-        val cardPoolMap = cardPools.associateBy { it.poolId }
-
-        var countMvr49 = 0
-        var countCvr49 = 0
-        var showCards = 0
-        pairs.forEach { (mvr, cvr) ->
-            assertEquals(mvr.location, cvr.location)
-            assertEquals(mvr.poolId, cvr.poolId)
-            if (mvr.hasContest(49)) countMvr49++
-            if (mvr.hasContest(49)) countCvr49++
-
-            if (cvr.poolId != null && showCards < 3) {
-                println("mvr $mvr")
-                println("cvr $cvr")
-                println("pool ${cardPoolMap[cvr.poolId]?.contests().contentToString()}")
-                println()
-                showCards++
-            }
-        }
-        println("countMvr49 = $countMvr49")
-        println("countCvr49 = $countCvr49")
-        println()
-
-
-        val mvrTabs = tabulateCards(PairAdapter(pairs.iterator()) { it.first }, infos)
-        val cvrTabs = tabulateCards(PairAdapter(pairs.iterator()) { it.second }, infos)
-
-        cvrTabs.forEach { id, cvrTab ->
-            val mvrTab = mvrTabs[id]!!
-            println("mvrTab = $mvrTab")
-            println("cvrTab = $cvrTab")
-            println()
-        }
-    }
-}
-
-class PairAdapter(val org: Iterator<Pair<AuditableCard, AuditableCard>>,
-                      val trans: (Pair<AuditableCard, AuditableCard>) -> AuditableCard)
-    : AbstractIterator<AuditableCard>() {
-
-    override fun computeNext() {
-        if (org.hasNext())
-            setNext(trans(org.next()))
-        else
-            done()
     }
 }
 

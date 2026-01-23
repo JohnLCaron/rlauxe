@@ -81,8 +81,8 @@ class TestOAShangrla {
 
         val pool = pools[0]
         println("pool=${pool}")
-        val vunder = pool.votesAndUndervotes(contestUA.id)
-        val poolMargin = calcReportedMargin(vunder.candVotesSorted, pool.ncards(), 0,1)
+        val vunder = pool.votesAndUndervotes2(contestUA.id)
+        val poolMargin = calcReportedMargin(vunder.cands(), pool.ncards(), 0,1)
         assertEquals(margin, poolMargin, .001)
 
         // for pooled assort from pool with avg Ā(g)

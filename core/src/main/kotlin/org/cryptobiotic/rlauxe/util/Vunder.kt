@@ -278,38 +278,4 @@ fun check(vunders: Map<Int, Vunder>, rcvrs: List<Cvr>) {
     }
 }
 
-/////////////////////////////////////////////
-//// use this when you dont have ContestInfo yet
 
-// Number of votes in each contest, return contestId -> candidateId -> nvotes
-fun tabulateVotesFromCvrs(cvrs: Iterator<Cvr>): Map<Int, Map<Int, Int>> {
-    val votes = mutableMapOf<Int, MutableMap<Int, Int>>()
-    for (cvr in cvrs) {
-        for ((contestId, conVotes) in cvr.votes) {
-            val accumVotes = votes.getOrPut(contestId) { mutableMapOf() }
-            for (cand in conVotes) {
-                val accum = accumVotes.getOrPut(cand) { 0 }
-                accumVotes[cand] = accum + 1
-            }
-        }
-    }
-    return votes
-}
-
-// non IRV
-// return contestId -> ContestTabulation
-fun tabulateCvrsWithVoteForNs(cvrIter: Iterator<Cvr>, voteForNs: Map<Int, Int>): Map<Int, ContestTabulation> {
-    val votes = mutableMapOf<Int, ContestTabulation>()
-    while (cvrIter.hasNext()) {
-        val cvr = cvrIter.next()
-        for ((contestId, conVotes) in cvr.votes) {
-            val voteForN = voteForNs[contestId]
-            if (voteForN != null) {
-                // class ContestTabulation(val contestId: Int, val voteForN: Int, val isIrv: Boolean, val candidateIdToIndex: Map<Int, Int>): RegVotesIF {
-                val tab = votes.getOrPut(contestId) { ContestTabulation(contestId, voteForN, false, emptyList()) }
-                tab.addVotes(conVotes, cvr.phantom)
-            }
-        }
-    }
-    return votes
-}

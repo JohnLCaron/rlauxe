@@ -144,8 +144,11 @@ fun makeMvrs(
 
     // add the pooled cvrs
     pool.contests().forEach { contestId ->
-        val vunderPool = pool.votesAndUndervotes(contestId)
+        val vunderPool = pool.votesAndUndervotes2(contestId)
         val poolCvrs = makeVunderCvrs(mapOf(info.id to vunderPool), pool.poolName, poolId = pool.poolId)
+        if (pool.ncards() != poolCvrs.size)
+            print("ppp")
+        require(pool.ncards() == poolCvrs.size)
         mvrs.addAll(poolCvrs)
     }
 
@@ -153,6 +156,8 @@ fun makeMvrs(
     repeat(contest.Nphantoms()) {
         mvrs.add(Cvr("phantom$it", mapOf(contest.info().id to intArrayOf()), phantom = true))
     }
+    if (contest.Nc() != mvrs.size)
+        print("hhh")
     require(contest.Nc() == mvrs.size)
 
     // add the extra cvrs: these are also in the pool, and they cause the margin to be diluted

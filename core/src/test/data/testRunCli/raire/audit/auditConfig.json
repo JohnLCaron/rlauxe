@@ -2,7 +2,7 @@
     "auditType": "CLCA",
     "hasStyle": true,
     "riskLimit": 0.05,
-    "seed": -8176952466604734834,
+    "seed": -2128595567999214057,
     "nsimEst": 100,
     "quantile": 0.2,
     "contestSampleCutoff": 30000,

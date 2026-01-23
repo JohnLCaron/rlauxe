@@ -10,11 +10,11 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.util.Vunder2
 import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import org.cryptobiotic.rlauxe.util.tabulateCards
 import org.cryptobiotic.rlauxe.util.tabulateCvrsWithVoteForNs
+import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.collections.List
 import kotlin.test.Test

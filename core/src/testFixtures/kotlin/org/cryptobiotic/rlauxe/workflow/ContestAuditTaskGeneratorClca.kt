@@ -35,7 +35,7 @@ class ClcaContestAuditTaskGenerator(
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
         var testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
-            makeFuzzedCvrsFrom(listOf(sim.contest.info()), testCvrs, mvrsFuzzPct)
+            makeFuzzedCvrsForPolling(listOf(sim.contest.info()), testCvrs, mvrsFuzzPct)
 
         if (!useConfig.hasStyle && Npop > Nc) { // TODO wtf?
             val otherContestId = 42
@@ -86,7 +86,7 @@ class ClcaSingleRoundAuditTaskGenerator(
         val testMvrs =  if (p2flips != null || p1flips != null) {
             makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips)
         } else {
-            makeFuzzedCvrsFrom(listOf(sim.contest.info()), testCvrs, mvrsFuzzPct)
+            makeFuzzedCvrsForPolling(listOf(sim.contest.info()), testCvrs, mvrsFuzzPct)
         }
 
         // TODO not adding the Nbs...
@@ -172,7 +172,10 @@ fun runClcaSingleRoundAudit(workflow: AuditWorkflow, contestRounds: List<Contest
                             auditor: ClcaAssertionAuditorIF
 ): Int {
     val stopwatch = Stopwatch()
-    runClcaAuditRound(workflow.auditConfig(), contestRounds, workflow.mvrManager(), 1, auditor = auditor)
+
+    val oneRound = AuditRound(1, contestRounds, samplePrns = emptyList())
+
+    runClcaAuditRound(workflow.auditConfig(), oneRound, workflow.mvrManager(), 1, auditor = auditor)
     if (!quiet) println("runClcaSingleRoundAudit took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
 
     var maxSamples = 0

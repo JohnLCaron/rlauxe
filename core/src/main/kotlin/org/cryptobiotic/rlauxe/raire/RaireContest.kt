@@ -231,7 +231,7 @@ data class RaireAssertion(
     val winnerIdx: Int,
     val loserIdx: Int,
     val eliminated: List<Int> = emptyList(), // candidate Ids; NEN only; already eliminated for the purpose of this assertion
-    val votes: Map<Int, Int> = emptyMap(), // votes for winner, loser depending on assertion type
+    // val votes: Map<Int, Int> = emptyMap(), // votes for winner, loser depending on assertion type; TODO WTF? doesnt seem to be needed
 ) {
     fun show() = buildString {
         appendLine("    assertion type '$assertionType' winner $winnerId loser $loserId eliminated=$eliminated difficulty=${dfn(difficulty,2)}, marginInVotes=$marginInVotes")
@@ -255,7 +255,7 @@ data class RaireAssertion(
                     aassertion.winner,
                     aassertion.loser,
                     emptyList(),
-                    votes,
+                    // votes,
                 )
             } else if (aassertion is NotEliminatedNext) {
                 val winner = candidateIds[aassertion.winner]
@@ -272,7 +272,7 @@ data class RaireAssertion(
                     aassertion.winner,
                     aassertion.loser,
                     eliminated,
-                    votes,
+                    // votes,
                 )
             } else {
                 throw Exception("Unknown assertion type: ${aassertion.javaClass.name}")
@@ -328,7 +328,7 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
     override fun desc() = buildString {
         append("Raire ${rassertion.assertionType.shortName} winner/loser=${rassertion.winnerId}/${rassertion.loserId} marginInVotes=${rassertion.marginInVotes} difficulty=${rassertion.difficulty}")
         if (rassertion.assertionType == RaireAssertionType.irv_elimination) append(" eliminated=${rassertion.eliminated}")
-        append(" votes=${rassertion.votes}")
+        // append(" votes=${rassertion.votes}")
     }
     override fun hashcodeDesc() = "${rassertion.assertionType.shortName} ${winLose()} ${rassertion.eliminated}" // must be unique for serialization
 

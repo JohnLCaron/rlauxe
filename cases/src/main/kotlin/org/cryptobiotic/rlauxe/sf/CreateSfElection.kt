@@ -89,18 +89,6 @@ class CreateSfElection(
         } else {
             makePollingContestsSF(infos, allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
         }
-
-        // debug
-        val csvFile = "/home/stormy/rla/tests/scratch/cardPoolCsvYes.csv"
-        writeCardPoolCsvFile(cardPools, csvFile)
-
-        val roundtrips = readCardPoolCsvFile(csvFile,  infos).associateBy { it.poolId }
-        cardPools.forEach {
-            val roundtrip = roundtrips[it.poolId]
-            if (roundtrip != it) {
-                println("failed $it")
-            }
-        }
     }
 
     fun createCardPools(
@@ -379,7 +367,13 @@ fun createSfElection(
 
     // convert the cvrExports to the private mvrs
     val unsortedMvrs = election.createUnsortedMvrs()
-    writeUnsortedPrivateMvrs(Publisher("$topdir/audit"), unsortedMvrs, seed = config.seed)
+    val publisher = Publisher("$topdir/audit")
+    writeUnsortedPrivateMvrs(publisher, unsortedMvrs, seed = config.seed)
+
+    if (auditType.isOA()) {
+        writeCardPoolCsvFile(election.cardPools, publisher.cardPoolsFile())
+        logger.info { "writeCardPoolCsvFile ${election.cardPools.size} pools to ${publisher.cardPoolsFile()}" }
+    }
 
     println("createSfElection took $stopwatch")
 

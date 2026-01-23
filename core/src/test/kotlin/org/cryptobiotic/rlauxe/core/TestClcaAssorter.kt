@@ -101,6 +101,10 @@ class TestClcaAssorter {
 
         val sampleSize = cassorter.sampleSizeNoErrors(0.9, .05);
         println(" sampleSize = $sampleSize")
+
+        val contestUA = ContestWithAssertions(contest, isClca = true)
+        val estSize = cassorter.estSamplesNeeded(contestUA, 0.9, .05);
+        println(" estSize = $estSize")
     }
 
     @Test

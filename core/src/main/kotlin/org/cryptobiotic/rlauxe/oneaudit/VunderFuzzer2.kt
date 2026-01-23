@@ -5,39 +5,39 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.estimate.chooseNewCandidate
 import org.cryptobiotic.rlauxe.estimate.switchCandidateRankings
 import org.cryptobiotic.rlauxe.util.CardBuilder
-import org.cryptobiotic.rlauxe.util.Vunder
-import org.cryptobiotic.rlauxe.util.VunderPicker
+import org.cryptobiotic.rlauxe.util.Vunder2
+import org.cryptobiotic.rlauxe.util.VunderPicker2
 import kotlin.random.Random
 
 ////////////////////////////////////////////////////////////////////////////////
 // OneAudit Estimation Sampling
 
-// OneAuditVunderFuzzer creates fuzzed mvrs (non-pooled) and simulated mvrs (pooled)
-class OneAuditVunderFuzzer(
+// OneAuditVunderFuzzer creates fuzzed mvrs (non-pooled) and simulated mvrs (pooled). IRV ok
+class OneAuditVunderFuzzer2(
     pools: List<OneAuditPoolIF>,
     val infos: Map<Int, ContestInfo>,
     val fuzzPct: Double,
     cards: List<AuditableCard>
 ) {
     val isIRV = infos.mapValues { it.value.isIrv }
-    var fuzzedPairs: List<Pair<AuditableCard, AuditableCard>>  // mvr, cvr pairs
+    var mvrCvrPairs: List<Pair<AuditableCard, AuditableCard>>  // mvr, cvr pairs
 
     init {
-        val vunderPools =  VunderPools(pools)
+        val vunderPools =  VunderPools2(pools)
         val mvrs = cards.map { card ->
-            if (card.poolId != null) {
+            val onecard = if (card.poolId != null) {
                 vunderPools.simulatePooledCard(card, card.poolId)
             } else if (card.votes != null) {
                 makeFuzzedCardFromCard(infos, isIRV, card, fuzzPct)
             } else {
                 throw RuntimeException("card must be pooled or have votes")
             }
+            onecard
         }
-        fuzzedPairs = mvrs.zip(cards)
+        mvrCvrPairs = mvrs.zip(cards)
     }
 }
 
-// IRV ok, must have card.votes
 private fun makeFuzzedCardFromCard(
     infos: Map<Int, ContestInfo>,
     isIRV: Map<Int, Boolean>,
@@ -69,32 +69,30 @@ private fun makeFuzzedCardFromCard(
     return cardb.build()
 }
 
-// simulate pooled data from the pool values; not for IRV
-class VunderPools(pools: List<OneAuditPoolIF>) {
-    val vunderPools: Map<Int, VunderPool>  // poolId -> VunderPool
+// for all pools
+class VunderPools2(pools: List<OneAuditPoolIF>) {
+    val vunderPools: Map<Int, VunderPool2>  // poolId -> VunderPool
 
     init {
         vunderPools = pools.map { pool ->
-            // TODO could skip IRV contests
             val vunders = pool.contests().associate { contestId ->
-                Pair( contestId, pool.votesAndUndervotes(contestId))
+                Pair( contestId, pool.votesAndUndervotes2(contestId))
             }
-            VunderPool(vunders, pool.poolName, pool.poolId)
+            VunderPool2(vunders, pool.poolName, pool.poolId)
         }.associateBy { it.poolId }
     }
 
     // for the given pooled card with no votes, simulate one with votes, staying within the pool vote totals.
-    // TODO doesnt  work for IRV...
     fun simulatePooledCard(card: AuditableCard, poolId: Int): AuditableCard {
-        val vunderPool = vunderPools[poolId]!!
-        return vunderPool.simulatePooledCard(card)
+        val vunderPool = vunderPools[poolId]
+        return vunderPool!!.simulatePooledCard(card)
     }
 }
 
 // for one pool
 // vunders: Contest id -> Vunder
-class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int ) {
-    val vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
+class VunderPool2(vunders: Map<Int, Vunder2>, val poolName: String, val poolId: Int ) {
+    val vunderPickers = vunders.mapValues { VunderPicker2(it.value) } // Contest id -> VunderPicker
 
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
         require (card.poolId == poolId)

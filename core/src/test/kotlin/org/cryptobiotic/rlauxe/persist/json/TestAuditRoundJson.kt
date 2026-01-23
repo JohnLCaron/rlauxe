@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
 import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.workflow.*
@@ -39,8 +39,6 @@ class TestAuditRoundJson {
             //    var done = false
             //    var included = true
             //    var status = TestH0Status.InProgress
-            cr.actualMvrs = 420
-            cr.actualNewMvrs = 42
             cr.estNewMvrs = 66
             cr.estMvrs = 77
             cr.auditorWantNewMvrs = 88
@@ -73,8 +71,6 @@ class TestAuditRoundJson {
         val contestsUAs: List<ContestWithAssertions> = testData.contests. map { ContestWithAssertions(it, isClca=false).addStandardAssertions()}
         val contestRounds = contestsUAs.map{ contest ->
             val cr = ContestRound(contest, 1)
-            cr.actualMvrs = 420
-            cr.actualNewMvrs = 42
             cr.estNewMvrs = 66
             cr.estMvrs = 77
             // cr.estSampleSizeNoStyles = 88
@@ -126,7 +122,7 @@ class TestAuditRoundJson {
         val testCvrs = testData.makeCvrsFromContests()
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-            else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
+            else makeFuzzedCvrsForPolling(contests, testCvrs, fuzzMvrs)
 
         val clcaWorkflow = WorkflowTesterClca(config, contests, emptyList(),
             MvrManagerForTesting(testCvrs, testMvrs, config.seed))
@@ -206,7 +202,7 @@ class TestAuditRoundJson {
         val testCvrs = testData.makeCvrsFromContests() + rcvrs
 
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
-            else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
+            else makeFuzzedCvrsForPolling(contests, testCvrs, fuzzMvrs)
 
         val clcaWorkflow = WorkflowTesterClca(config, contests, listOf(rcontest),
             MvrManagerForTesting(testCvrs, testMvrs, config.seed))
@@ -257,7 +253,7 @@ class TestAuditRoundJson {
 
         val testCvrs = contestd.createSimulatedCvrs()
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
-            else makeFuzzedCvrsFrom(contests, testCvrs, fuzzMvrs)
+            else makeFuzzedCvrsForPolling(contests, testCvrs, fuzzMvrs)
 
         val clcaWorkflow = WorkflowTesterClca(config, contests, emptyList(),
             MvrManagerForTesting(testCvrs, testMvrs, config.seed))
@@ -309,6 +305,7 @@ fun check(s1: AuditRoundIF, s2: AuditRoundIF) {
     assertEquals(s1.nmvrs, s2.nmvrs)
     assertEquals(s1.newmvrs, s2.newmvrs)
     assertEquals(s1.auditorWantNewMvrs, s2.auditorWantNewMvrs)
+    assertEquals(s1.samplesNotUsed, s2.samplesNotUsed)
 
     assertEquals(s1.contestRounds.size, s2.contestRounds.size)
     s1.contestRounds.forEachIndexed { idx, c1 ->
@@ -338,7 +335,6 @@ fun check(s1: AuditRoundIF, s2: AuditRoundIF) {
 fun check(c1: ContestRound, c2: ContestRound): Boolean {
     assertEquals(c1.id, c2.id)
     assertEquals(c1.roundIdx, c2.roundIdx)
-    assertEquals(c1.actualNewMvrs, c2.actualNewMvrs)
     assertEquals(c1.estNewMvrs, c2.estNewMvrs)
     assertEquals(c1.estMvrs, c2.estMvrs)
     assertEquals(c1.auditorWantNewMvrs, c2.auditorWantNewMvrs)
@@ -403,7 +399,7 @@ fun check(a1: AuditRoundResult, a2: AuditRoundResult): Boolean {
     assertEquals(a1.toString(), a2.toString())
     assertEquals(a1.roundIdx, a2.roundIdx)
     assertEquals(a1.nmvrs, a2.nmvrs)
-    assertEquals(a1.maxBallotIndexUsed, a2.maxBallotIndexUsed)
+    assertEquals(a1.maxSampleIndexUsed, a2.maxSampleIndexUsed)
     assertEquals(a1.plast, a2.plast)
     assertEquals(a1.pmin, a2.pmin)
     assertEquals(a1.samplesUsed, a2.samplesUsed)

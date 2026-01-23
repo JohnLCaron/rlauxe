@@ -23,7 +23,7 @@ class TestFuzzedErrors {
         println("              ${ClcaErrorRatesCumul.header()}")
 
         fuzzPcts.forEach { fuzzPct ->
-            val fcards = makeFuzzedCardsFrom(contestsUA.map { it.contest.info() } , cards, fuzzPct)
+            val fcards = makeFuzzedCardsForClca(contestsUA.map { it.contest.info() } , cards, fuzzPct)
             val testPairs = fcards.zip(cards)
 
             val avgErrorRates = ClcaErrorRatesCumul()
@@ -87,7 +87,7 @@ fuzzPct 0.050: 0.0077, 0.0350, 0.0125, 0.0064, 0.06162
         println("               ${ClcaErrorRatesCumul.header()}")
 
         fuzzPcts.forEach { fuzzPct ->
-            val fcvrs = makeFuzzedCvrsFrom(test.contests, cvrs, fuzzPct)
+            val fcvrs = makeFuzzedCvrsForPolling(test.contests, cvrs, fuzzPct)
             val testPairs = cvrs.zip(fcvrs)
 
             val cumulErrorRates = ClcaErrorRatesCumul()

@@ -215,7 +215,7 @@ class TestBoulderUndervotes {
             appendLine()
 
             contestIds.forEach { id ->
-                val oaContest = election2.oaContests[id]!!
+                val oaContest = election2.oaContests[id]
                 if (oaContest == null)
                     ("     |")
                 else {
@@ -236,7 +236,7 @@ class TestBoulderUndervotes {
 
             contestIds.forEach { id ->
                 val poolCards = sum2[id]!!
-                val oaContest = election2.oaContests[id]!!
+                val oaContest = election2.oaContests[id]
                 if (oaContest == null)
                     ("     |")
                 else {

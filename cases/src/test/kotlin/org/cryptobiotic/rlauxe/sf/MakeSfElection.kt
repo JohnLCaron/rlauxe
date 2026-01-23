@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import kotlin.test.Test
 import kotlin.test.fail
 
-class TestCreateSfElection {
+class MakeSfElection {
     val sfDir = "$testdataDir/cases/sf2024"
     val zipFilename = "$sfDir/CVR_Export_20241202143051.zip"
     val cvrExportCsv = "$sfDir/$cvrExportCsvFile"

@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
 import org.cryptobiotic.rlauxe.raire.*
 import kotlin.test.Test
 
@@ -37,7 +37,7 @@ class TestRaireAudit {
         )
 
         val (rcontest: RaireContestWithAssertions, testCvrs: List<Cvr>) = simulateRaireTestContest(N=20000, contestId=111, ncands=4, minMargin=.04, quiet = true)
-        val testMvrs = makeFuzzedCvrsFrom(listOf(rcontest.contest), testCvrs, mvrFuzzPct)
+        val testMvrs = makeFuzzedCvrsForPolling(listOf(rcontest.contest), testCvrs, mvrFuzzPct)
         val workflow = WorkflowTesterClca(config, emptyList(), listOf(rcontest),
             MvrManagerForTesting(testCvrs, testMvrs, config.seed))
         runTestAuditToCompletion("testRaireWorkflow", workflow)

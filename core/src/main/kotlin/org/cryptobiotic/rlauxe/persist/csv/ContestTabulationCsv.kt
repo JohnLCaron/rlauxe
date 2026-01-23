@@ -25,9 +25,7 @@ private val logger = KotlinLogging.logger("ContestTabulationCsv")
 val ContestTabulationHeader = "contestId, voteForN, cands, ncards, novote, undervotes, overvotes, nphantoms, isIrv, cand:count ... \n"
 
 fun writeContestTabulationCsv(tab: ContestTabulation) = buildString {
-    val sortedCandIds = tab.candidateIdToIndex.toList().sortedBy { it.second }.map { it.first }
-
-    append("${tab.contestId}, ${tab.voteForN}, ${sortedCandIds.joinToString(" ")}, ${tab.ncards}, ${tab.novote}, ")
+    append("${tab.contestId}, ${tab.voteForN}, ${tab.candidateIds.joinToString(" ")}, ${tab.ncards}, ${tab.novote}, ")
     append("${tab.undervotes}, ${tab.overvotes}, ${tab.nphantoms}, ${if (tab.isIrv) "yes" else ""}, ")
 
     if (tab.isIrv) {
@@ -61,12 +59,11 @@ fun readContestTabulationCsv(ttokens: List<String>): ContestTabulation {
     val nphantoms = ttokens[idx++].toInt()
     val isIrv = ttokens[idx++] == "yes"
 
-    val candIdToIndex = if (!isIrv) emptyMap() else {
-        val cands: List<Int> = candsToken.split(" ").map { it.trim().toInt() }
-        cands.mapIndexed { idx, id -> Pair(id, idx) }.toMap()
+    val candidateIds = if (!isIrv) emptyList() else {
+        candsToken.split(" ").map { it.trim().toInt() }
     }
 
-    val tab = ContestTabulation(contestId, voteForN, isIrv, candIdToIndex)
+    val tab = ContestTabulation(contestId, voteForN, isIrv, candidateIds)
     tab.ncards = ncards
     tab.novote = novote
     tab.undervotes = undervotes

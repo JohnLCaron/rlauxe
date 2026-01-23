@@ -97,7 +97,7 @@ fun RaireResultsAssertionJson.import(): RaireAssertion {
         RaireAssertionType.Companion.fromString(this.assertion_type),
         0, 0, // TODO
         this.already_eliminated.map { it.toInt() },  // must invert
-        emptyMap(),
+        // emptyMap(),
     )
 }
 

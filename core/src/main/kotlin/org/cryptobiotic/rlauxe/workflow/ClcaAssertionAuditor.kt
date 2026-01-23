@@ -14,10 +14,11 @@ import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
 
 private val logger = KotlinLogging.logger("ClcaAudit")
 
-// run all contests and assertions for one round with the given auditor
+// run all contests and assertions for one round with the given auditor.
+// return isComplete
 fun runClcaAuditRound(
     config: AuditConfig,
-    contests: List<ContestRound>,
+    auditRound: AuditRound,
     mvrManager: MvrManager,
     roundIdx: Int,
     auditor: ClcaAssertionAuditorIF,
@@ -25,16 +26,30 @@ fun runClcaAuditRound(
     val cvrPairs = mvrManager.makeMvrCardPairsForRound(roundIdx)
 
     // parallelize over contests
-    val contestsNotDone = contests.filter{ !it.done }
+    val contestsNotDone = auditRound.contestRounds.filter{ !it.done }
     val auditContestTasks = mutableListOf<RunClcaContestTask>()
     contestsNotDone.forEach { contest ->
         auditContestTasks.add(RunClcaContestTask(config, contest, cvrPairs, auditor, roundIdx))
     }
 
+    // run all tasks
     // logger.debug { "runClcaAuditRound ($roundIdx) ${auditContestTasks.size} tasks for auditor ${auditor.javaClass.simpleName} " }
     // println("---runClcaAuditRound running ${auditContestTasks.size} tasks")
-
     val complete: List<Boolean> = ConcurrentTaskRunnerG<Boolean>().run(auditContestTasks)
+
+    // given the cvrPairs, and each ContestRound's maxSampleIndexUsed, count the cvrs that were not used
+    val maxIndex = contestsNotDone.associate { it.id to it.maxSampleIndexUsed() }
+    var countUnused = 0
+    cvrPairs.forEachIndexed { idx, mvrCardPair ->
+        val card = mvrCardPair.second
+        var wasUsed = false
+        contestsNotDone.forEach { contest ->
+            if (card.hasContest(contest.id) && idx < maxIndex[contest.id]!!) wasUsed = true
+        }
+        if (!wasUsed) countUnused++
+    }
+    auditRound.samplesNotUsed =  countUnused
+
     return if (complete.isEmpty()) true else complete.reduce { acc, b -> acc && b }
 }
 
@@ -85,7 +100,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampling: Sampler,
+        sampler: Sampler,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA
@@ -121,18 +136,17 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
         val terminateOnNullReject = config.auditSampleLimit == null
         // TODO remove tracker from testH0
-        val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = terminateOnNullReject) { sampling.sample() }
+        val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = terminateOnNullReject) { sampler.sample() }
 
         val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) testH0Result.tracker.measuredClcaErrorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
-            nmvrs = sampling.maxSamples(),
-            maxBallotIndexUsed = sampling.maxSampleIndexUsed(),
+            nmvrs = sampler.maxSamples(),
+            maxSampleIndexUsed = sampler.maxSampleIndexUsed(),
             plast = testH0Result.pvalueLast,
             pmin = testH0Result.pvalueMin,
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
-            // startingRates = bettingFn.startingErrorRates(),
             measuredCounts = measuredCounts,
         )
 

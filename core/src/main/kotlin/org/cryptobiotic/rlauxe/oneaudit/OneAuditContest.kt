@@ -1,5 +1,8 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -160,7 +163,7 @@ class ClcaAssorterOneAudit(
     override fun classname() = this::class.simpleName
 
     // convenient place to put this; set from outside
-    var oaAssortRates: OneAuditAssortValueRates = OneAuditAssortValueRates(emptyMap(), 0)
+    var oaAssortRates = OneAuditAssortValueRates(emptyMap(), 0)
 
     fun bassort1(mvr: CvrIF, cvr:CvrIF, hasStyle:Boolean=true): Double {
         val overstatement = overstatementError(mvr, cvr, hasStyle) // ωi eq (1)
@@ -224,6 +227,21 @@ class ClcaAssorterOneAudit(
         // val cvr_assort = if (cvr.phantom) .5 else poolAvgAssortValue
         val cvr_assort = poolAvgAssortValue
         return cvr_assort - mvr_assort
+    }
+
+    override fun estSamplesNeeded(contest: ContestWithAssertions, maxRisk: Double, alpha: Double): Int {
+        val upper = assorter.upperBound()
+        val betFn = GeneralAdaptiveBetting(
+            contest.Npop,
+            ClcaErrorCounts.empty(noerror(), upper),
+            contest.Nphantoms,
+            oaAssortRates,
+            maxRisk = maxRisk,
+            debug=false,
+        )
+        val bet = betFn.bet(ClcaErrorTracker(noerror(), upper))
+        val maxRisk = bet / 2
+        return sampleSizeNoErrors(maxRisk = maxRisk, alpha)
     }
 
     override fun equals(other: Any?): Boolean {

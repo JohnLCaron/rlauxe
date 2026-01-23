@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
@@ -48,7 +48,7 @@ class MvrManagerFromManifest(
             val sampledMvrs = if (simFuzzPct == null) {
                 sortedMvrs // use the mvrs as they are - ie, no errors
             } else { // fuzz the mvrs
-                makeFuzzedCvrsFrom(infoList, sortedMvrs, simFuzzPct) // TODO, undervotes=false)
+                makeFuzzedCvrsForPolling(infoList, sortedMvrs, simFuzzPct) // TODO, undervotes=false)
             }
             return sampledMvrs.map{ it }.zip(sortedCards.map{ it })
         }

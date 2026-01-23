@@ -127,7 +127,7 @@ class TestMakeOneContestUA {
         val cardPool = cardPools.first()
         assertEquals("pool42", cardPool.poolName)
         println(cardPool)
-        val vunder = cardPool.votesAndUndervotes(contestOA.id, contestOA.contest.info().voteForN)
+        val vunder = cardPool.votesAndUndervotes(contestOA.id)
         showPct("pool", vunder.candVotesSorted, cardPool.ncards())
 
         val ncast = contestOA.contest.Ncast()

@@ -27,7 +27,6 @@ import org.cryptobiotic.rlauxe.workflow.PollingSampler
 import org.cryptobiotic.rlauxe.workflow.auditPollingAssertion
 import java.nio.file.Files.notExists
 import java.nio.file.Path
-import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger("RunAuditRound")
 
@@ -65,7 +64,7 @@ fun runRoundResult(auditDir: String, onlyTask: String? = null): Result<AuditRoun
                 logger.info { "Start runAuditRound ${lastRound.roundIdx}" }
                 val roundStopwatch = Stopwatch()
                 // run the audit for this round
-                complete = workflow.runAuditRound(lastRound)
+                complete = workflow.runAuditRound(lastRound as AuditRound)
                 logger.info { "End runAuditRound ${lastRound.roundIdx} complete=$complete took ${roundStopwatch}" }
 
             } else {
@@ -172,7 +171,7 @@ fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>
 
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-        val sampler = ClcaSampler(contestRound.id, contestRound.maxSampleIndex, cvrPairs, cassorter, allowReset = false)
+        val sampler = ClcaSampler(contestRound.id, contestRound.maxSampleAllowed, cvrPairs, cassorter, allowReset = false)
         // println("contest ${contestRound.id} maxSampleIndex ${contestRound.maxSampleIndex} maxSamples ${sampler.maxSamples()} ")
         val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
 
@@ -190,7 +189,7 @@ fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>,
         val auditor = OneAuditAssertionAuditor(pools)
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-        val sampler = ClcaSampler(contestRound.id, contestRound.maxSampleIndex, cvrPairs, cassorter, allowReset = false)
+        val sampler = ClcaSampler(contestRound.id, contestRound.maxSampleAllowed, cvrPairs, cassorter, allowReset = false)
 
         val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
 

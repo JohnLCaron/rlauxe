@@ -24,7 +24,7 @@ class ClcaCardFuzzSampler(
     var idx = 0
 
     init {
-        val mvrs = remakeFuzzed()  // TODO could do fuzzing on the fly ??
+        val mvrs = remakeFuzzed()
         cvrPairs = mvrs.zip(cards)
     }
 
@@ -49,7 +49,7 @@ class ClcaCardFuzzSampler(
     }
 
     fun remakeFuzzed(): List<AuditableCard> {
-        return makeFuzzedCardsFrom(listOf(contest.info()), cards, fuzzPct)
+        return makeFuzzedCardsForClca(listOf(contest.info()), cards, fuzzPct)
     }
 
     override fun maxSamples() = maxSamples
@@ -60,62 +60,11 @@ class ClcaCardFuzzSampler(
     override fun next(): Double = sample()
 }
 
-//// PollingCardFuzzSampler was here
-
-// for one contest, this takes a list of cvrs and fuzzes them
-class PollingFuzzSampler(
-    val fuzzPct: Double,
-    val cvrs: List<Cvr>,
-    val contest: Contest,
-    val assorter: AssorterIF
-): Sampler, Iterator<Double> {
-    val maxSamples = cvrs.count { it.hasContest(contest.id) } // dont need this is its single contest
-    val N = cvrs.size
-    val welford = Welford()
-    val permutedIndex = MutableList(N) { it }
-    private var mvrs: List<Cvr>
-    private var idx = 0
-
-    init {
-        mvrs = remakeFuzzed() // TODO could do fuzzing on the fly ??
-    }
-
-    override fun sample(): Double {
-        while (idx < N) {
-            val mvr = mvrs[permutedIndex[idx]]
-            idx++
-            if (mvr.hasContest(contest.id)) {
-                val result = assorter.assort(mvr, usePhantoms = true)
-                welford.update(result)
-                return result
-            }
-        }
-        throw RuntimeException("no samples left for ${contest.id} and Assorter ${assorter}")
-    }
-
-    override fun reset() {
-        mvrs = remakeFuzzed()
-        permutedIndex.shuffle(Random)
-        idx = 0
-    }
-
-    fun remakeFuzzed(): List<Cvr> {
-        return makeFuzzedCvrsFrom(listOf(contest.info()), cvrs, fuzzPct) // single contest
-    }
-
-    override fun maxSamples() = maxSamples
-    override fun maxSampleIndexUsed() = idx
-    override fun nmvrs() = mvrs.size
-
-    override fun hasNext(): Boolean = (idx < N)
-    override fun next(): Double = sample()
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-// TODO can it be used with DHondt?
-fun makeFuzzedCardsFrom(infoList: List<ContestInfo>,
-                        cards: List<AuditableCard>,
-                        fuzzPct: Double,
+// Ok for CLCA IRV; TODO can this be used with DHondt?
+fun makeFuzzedCardsForClca(infoList: List<ContestInfo>,
+                           cards: List<AuditableCard>,
+                           fuzzPct: Double,
 ) : List<AuditableCard> {
     if (fuzzPct == 0.0) return cards
     val infos = infoList.associate{ it.id to it }
@@ -182,15 +131,3 @@ fun chooseNewCandidate(currId: Int?, candidateIds: List<Int>): Int? {
         }
     }
 }
-
-/*
-fun chooseNewCandidateNoUndervotes(currId: Int?, candidateIds: List<Int>): Int? {
-    val size = candidateIds.size
-    while (true) {
-        val ncandIdx = Random.nextInt(size)
-        val candId = candidateIds[ncandIdx]
-        if (candId != currId) {
-            return candId
-        }
-    }
-} */

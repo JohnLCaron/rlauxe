@@ -106,7 +106,7 @@ class PlotDistributions {
                     phantomPct = phantomPct
                 )
             val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-            val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+            val testMvrs = makeFuzzedCvrsForPolling(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
             val ballotCards = MvrManagerForTesting(testCvrs, testMvrs, auditConfig.seed)
             val workflow = WorkflowTesterClca(auditConfig, listOf(sim.contest), emptyList(), ballotCards)

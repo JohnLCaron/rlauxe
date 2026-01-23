@@ -7,6 +7,7 @@ import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext
 import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMargin
 import au.org.democracydevelopers.raire.irv.IRVResult
+import au.org.democracydevelopers.raire.irv.Votes
 import au.org.democracydevelopers.raire.time.TimeOut
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
@@ -85,7 +86,7 @@ fun makeRaireContest(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, 
             val nen = (aand.assertion as NotEliminatedNext)
             val voteSeq = VoteSequences.eliminate(startingVotes, nen.continuing.toList())
             val nenChoices = voteSeq.nenFirstChoices(nen.winner, nen.loser)
-            val margin = voteSeq.margin(nen.winner, nen.loser, nenChoices)
+            val margin = voteSeq.marginInVotes(nen.winner, nen.loser, nenChoices)
             require(aand.margin == margin)
             nenChoices
 
@@ -93,7 +94,7 @@ fun makeRaireContest(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, 
             val neb = (aand.assertion as NotEliminatedBefore)
             val voteSeq = VoteSequences(startingVotes)
             val nebChoices = voteSeq.nebFirstChoices(neb.winner, neb.loser)
-            val margin = voteSeq.margin(neb.winner, neb.loser, nebChoices)
+            val margin = voteSeq.marginInVotes(neb.winner, neb.loser, nebChoices)
             require(aand.margin == margin)
             nebChoices
         }
@@ -171,7 +172,7 @@ fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, N
             val nen = (aand.assertion as NotEliminatedNext)
             val voteSeq = VoteSequences.eliminate(startingVotes, nen.continuing.toList())
             val nenChoices = voteSeq.nenFirstChoices(nen.winner, nen.loser)
-            val margin = voteSeq.margin(nen.winner, nen.loser, nenChoices)
+            val margin = voteSeq.marginInVotes(nen.winner, nen.loser, nenChoices)
             require(aand.margin == margin)
             nenChoices
 
@@ -179,7 +180,7 @@ fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, N
             val neb = (aand.assertion as NotEliminatedBefore)
             val voteSeq = VoteSequences(startingVotes)
             val nebChoices = voteSeq.nebFirstChoices(neb.winner, neb.loser)
-            val margin = voteSeq.margin(neb.winner, neb.loser, nebChoices)
+            val margin = voteSeq.marginInVotes(neb.winner, neb.loser, nebChoices)
             require(aand.margin == margin)
             nebChoices
         }
@@ -226,7 +227,7 @@ fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, N
     return rcontestUA
 }
 
-// use dilutedMargin to set the pool assorter averages.
+// use raireAssorter.calcMargin to set the pool assorter averages.
 fun setPoolAssorterAveragesForRaire(
     oaContests: List<ContestWithAssertions>,
     pools: List<OneAuditPoolFromCvrs>, // poolId -> pool
@@ -244,8 +245,8 @@ fun setPoolAssorterAveragesForRaire(
             pools.filter { it.ncards() > 0}.forEach { cardPool ->
                 if (cardPool.hasContest(contestId)) {
                     val tab = cardPool.contestTabs[oaContest.id]!!
-                    val irvVotes = tab.irvVotes.makeVotes(oaContest.ncandidates)
-                    val poolMargin = raireAssorter.calcMargin(irvVotes, cardPool.ncards()) // could just save margin in votes
+                    val irvVotes: Votes = tab.irvVotes.makeVotes(oaContest.ncandidates)
+                    val poolMargin = raireAssorter.calcMargin(irvVotes, cardPool.ncards())
                     assortAverages[cardPool.poolId] = margin2mean(poolMargin)
                 }
             }

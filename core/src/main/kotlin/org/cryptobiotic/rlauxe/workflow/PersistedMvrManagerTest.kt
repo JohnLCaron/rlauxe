@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsFrom
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsForClca
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
@@ -51,8 +51,8 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
             // get the new cards not in the previous sample
             val newCards = cards.filter{ !previousPrnsSet.contains(it.prn) }
 
-            // and fuzz them
-            val newFuzzedCards = makeFuzzedCardsFrom(contestsUA.map { it.contest.info() }, newCards, mvrFuzzPct)
+            // and fuzz them TODO use Vunder for OneAudit ?
+            val newFuzzedCards = makeFuzzedCardsForClca(contestsUA.map { it.contest.info() }, newCards, mvrFuzzPct)
 
             // then the cards we want are the previous cards and the new fuzzed cards
             // cant assume they are sorted by prn

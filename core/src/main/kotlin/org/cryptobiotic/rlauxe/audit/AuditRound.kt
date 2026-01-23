@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.ceil
-import kotlin.math.max
 
 interface AuditRoundIF {
     val roundIdx: Int
@@ -17,12 +16,10 @@ interface AuditRoundIF {
     var nmvrs: Int
     var newmvrs: Int
     var auditorWantNewMvrs: Int
-
-    fun mvrsUsed(): Int
-    fun mvrsExtra(): Int
+    var samplesNotUsed: Int
 
     fun show(): String
-    fun createNextRound(): AuditRoundIF
+    fun createNextRound(): AuditRound
 }
 
 data class AuditRound(
@@ -35,28 +32,17 @@ data class AuditRound(
     override var nmvrs: Int = 0,
     override var newmvrs: Int = 0,
     override var auditorWantNewMvrs: Int = -1,
+    override var samplesNotUsed: Int = 0,
 ) : AuditRoundIF {
+
     override fun show() =
         "AuditState(round = $roundIdx, nmvrs=$nmvrs, auditWasDone=$auditWasDone, auditIsComplete=$auditIsComplete)" +
                 " ncontests=${contestRounds.size} ncontestsDone=${contestRounds.count { it.done }}"
 
-    override fun createNextRound(): AuditRoundIF {
+    override fun createNextRound(): AuditRound {
         val nextContests = contestRounds.filter { !it.status.complete }.map { it.createNextRound() }
         return AuditRound(roundIdx + 1, nextContests, samplePrns = emptyList())
     }
-
-    //// called from viewer
-    override fun mvrsUsed(): Int {
-        var result = 0
-        contestRounds.filter{ it.included }.forEach { contest ->
-            contest.assertionRounds.forEach { assertion ->
-                result = max(result, assertion.auditResult?.maxBallotIndexUsed ?: 0)
-            }
-        }
-        return result
-    }
-
-    override fun mvrsExtra() = this.nmvrs - mvrsUsed()
 }
 
 // called from rlauxe-viewer
@@ -74,12 +60,12 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     val name = contestUA.name
     val Npop = contestUA.Npop
 
-    var maxSampleIndex = 0 // maximum index in the sample allowed to use
+    var maxSampleAllowed = 0 // maximum index in the sample allowed to use
     var estMvrs = 0 // Estimate of the mvrs required to confirm the contest
     var estNewMvrs = 0 // Estimate of the new mvrs required to confirm the contest
 
-    var actualMvrs = 0    // Actual number of ballots with this contest contained in this round's sample.
-    var actualNewMvrs = 0 // TODO CANDIDATE FOR REMOVAL Actual number of new ballots with this contest contained in this round's sample.
+    // var actualMvrs = 0    // Actual number of ballots with this contest contained in this round's sample.
+    // var actualNewMvrs = 0 // TODO CANDIDATE FOR REMOVAL Actual number of new ballots with this contest contained in this round's sample.
 
     var auditorWantNewMvrs: Int = -1 // Auditor has set the new sample size for this audit round. rlauxe-viewer
 
@@ -131,6 +117,10 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         return Pair(estList, auditList)
     }
 
+    fun maxSampleIndexUsed(): Int {
+        return assertionRounds.maxOfOrNull { it.auditResult?.maxSampleIndexUsed ?: 0 } ?: 0
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -138,8 +128,8 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         other as ContestRound
 
         if (roundIdx != other.roundIdx) return false
-        if (actualMvrs != other.actualMvrs) return false
-        if (actualNewMvrs != other.actualNewMvrs) return false
+        //if (actualMvrs != other.actualMvrs) return false
+        //if (actualNewMvrs != other.actualNewMvrs) return false
         if (estNewMvrs != other.estNewMvrs) return false
         if (estMvrs != other.estMvrs) return false
         if (auditorWantNewMvrs != other.auditorWantNewMvrs) return false
@@ -154,8 +144,8 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
 
     override fun hashCode(): Int {
         var result = roundIdx
-        result = 31 * result + actualMvrs
-        result = 31 * result + actualNewMvrs
+        //result = 31 * result + actualMvrs
+        //result = 31 * result + actualNewMvrs
         result = 31 * result + estNewMvrs
         result = 31 * result + estMvrs
         result = 31 * result + auditorWantNewMvrs
@@ -207,7 +197,7 @@ data class EstimationRoundResult(
     val fuzzPct: Double?,
     val startingTestStatistic: Double,
     val startingErrorRates: Map<Double, Double>? = null, // error rates used for estimation
-    val estimatedDistribution: List<Int>,   // distribution of estimated sample size; currently deciles
+    val estimatedDistribution: List<Int>,   // distribution of estimated sample size as deciles
     val firstSample: Int,
 ) {
     var estNewMvrs: Int = 0
@@ -226,7 +216,7 @@ fun roundUp(x: Double) = ceil(x).toInt()
 data class AuditRoundResult(
     val roundIdx: Int,
     val nmvrs: Int,               // number of mvrs available for this contest for this round
-    val maxBallotIndexUsed: Int,  // maximum ballot index (for multicontest audits)
+    val maxSampleIndexUsed: Int,  // maximum ballot index (for multicontest audits)
     val plast: Double,              // last pvalue when testH0 terminates
     val pmin: Double,               // minimum pvalue reached
     val samplesUsed: Int,     // sample count when testH0 terminates

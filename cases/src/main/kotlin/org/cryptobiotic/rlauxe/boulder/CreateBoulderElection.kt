@@ -163,14 +163,7 @@ class CreateBoulderElection(
     // make simulated CVRs for one pool, all contests
     private fun makeCvrsForOnePool(cardPool: OneAuditPoolIF, infos: Map<Int, ContestInfo>) : List<Cvr> { // contestId -> candidateId -> nvotes
 
-        val poolVunders = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
-        cardPool.regVotes().forEach { (contestId, regVote) ->
-            val sumVotes = regVote.ncards()
-            val voteForN = infos[contestId]?.voteForN ?: 1
-            val underVotes = cardPool.ncards() * voteForN - sumVotes
-            poolVunders[contestId] = Vunder.fromNpop(contestId, underVotes, cardPool.ncards(), regVote.votes, voteForN)
-        }
-
+        val poolVunders = cardPool.contests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
         val cvrs = makeVunderCvrs(poolVunders, cardPool.poolName, poolId = cardPool.poolId)
         // the number of cvrs can vary when there are multiple contests: artifact of simulating the cvrs
         //if (cardPool.ncards() != cvrs.size)

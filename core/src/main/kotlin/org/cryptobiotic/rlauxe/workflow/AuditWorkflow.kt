@@ -16,7 +16,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
     abstract fun contestsUA(): List<ContestWithAssertions>
 
     // start new round and create estimate
-    open fun startNewRound(quiet: Boolean = true, onlyTask: String? = null): AuditRoundIF {
+    open fun startNewRound(quiet: Boolean = true, onlyTask: String? = null): AuditRound {
         val auditRounds = auditRounds()
         val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
         val roundIdx = auditRounds.size + 1
@@ -68,5 +68,5 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
     // AuditRecord.enterMvrs(mvrFile: String)
 
     // 6. _Run the audit_
-    abstract fun runAuditRound(auditRound: AuditRoundIF, quiet: Boolean = true): Boolean  // return complete
+    abstract fun runAuditRound(auditRound: AuditRound, quiet: Boolean = true): Boolean  // return complete
 }

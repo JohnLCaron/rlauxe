@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.Vunder
+import org.cryptobiotic.rlauxe.util.Vunder2
 import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -70,13 +70,13 @@ class TestOneAuditPool {
             ContestWithAssertions(it, isClca = true).addStandardAssertions()
         }
 
-        val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
+        val contestVotes = mutableMapOf<Int, Vunder2>() // contestId -> VotesAndUndervotes
         contestsUAs.forEach { contestUA ->
             val candVotes = contestUA.contest.votes()!!
             val voteForN = contestUA.contest.info().voteForN
             val sumVotes = candVotes.map { it.value }.sum()
             val underVotes = contestUA.contest.Ncast() * voteForN - sumVotes
-            contestVotes[contestUA.id] = Vunder.fromNpop(contestUA.id, underVotes, contestUA.contest.Ncast(), candVotes, voteForN)
+            contestVotes[contestUA.id] = Vunder2.fromNpop(contestUA.id, underVotes, contestUA.contest.Ncast(), candVotes, voteForN)
         }
 
         val cvrs = makeVunderCvrs(contestVotes, "poolName", poolId = 42)
@@ -102,13 +102,13 @@ class TestOneAuditPool {
             ContestWithAssertions(it, isClca = true).addStandardAssertions()
         }
 
-        val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
+        val contestVotes = mutableMapOf<Int, Vunder2>() // contestId -> VotesAndUndervotes
         contestsUAs.forEach { contestUA ->
             val candVotes = contestUA.contest.votes()!!
             val voteForN = contestUA.contest.info().voteForN
             val sumVotes = candVotes.map { it.value }.sum()
             val underVotes = contestUA.contest.Ncast() * voteForN - sumVotes
-            contestVotes[contestUA.id] = Vunder.fromNpop(contestUA.id, underVotes, contestUA.contest.Ncast(), candVotes, voteForN)
+            contestVotes[contestUA.id] = Vunder2.fromNpop(contestUA.id, underVotes, contestUA.contest.Ncast(), candVotes, voteForN)
         }
 
         val cvrs = makeVunderCvrs(contestVotes, "poolName", poolId = 42)

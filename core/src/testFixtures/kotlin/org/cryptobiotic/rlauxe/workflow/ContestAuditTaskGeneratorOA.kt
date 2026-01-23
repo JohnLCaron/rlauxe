@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import kotlin.random.Random
 
@@ -39,7 +39,7 @@ class OneAuditContestAuditTaskGenerator(
             phantomFraction = phantomPct
         )
         // TODO should be OneAuditPairFuzzer ??
-        val oaMvrs = makeFuzzedCvrsFrom(listOf(contestUA.contest), mvrs, mvrsFuzzPct)
+        val oaMvrs = makeFuzzedCvrsForPolling(listOf(contestUA.contest), mvrs, mvrsFuzzPct)
 
         val oneaudit = WorkflowTesterOneAudit(
             config=config,
@@ -91,7 +91,7 @@ class OneAuditSingleRoundAuditTaskGenerator(
         val oaMvrs =  if (p2flips != null || p1flips != null) {
             makeFlippedMvrs(mvrs, Nc, p2flips, p1flips)
         } else {
-            makeFuzzedCvrsFrom(listOf(contestUA.contest), mvrs, mvrsFuzzPct)
+            makeFuzzedCvrsForPolling(listOf(contestUA.contest), mvrs, mvrsFuzzPct)
         }
 
         val oneaudit = WorkflowTesterOneAudit(config=config, listOf(contestUA),

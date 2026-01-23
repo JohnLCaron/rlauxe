@@ -127,7 +127,7 @@ fun consistentSampling(
                         haveNewSamples[contest.id] = haveNewSamples[contest.id]?.plus(1) ?: 1
                     }
                     // ok to use if we havent skipped any cards for this contest in its sequence
-                    contest.maxSampleIndex = sampledCards.size
+                    contest.maxSampleAllowed = sampledCards.size
                 } else {
                     // if card has contest but its not included in the sample, then continuity has been broken
                     skippedContests.add(contest.id)
@@ -147,7 +147,7 @@ fun consistentSampling(
     }
 
     if (debugConsistent) logger.info{"**consistentSampling haveSampleSize = $haveSampleSize, haveNewSamples = $haveNewSamples, newMvrs=$newMvrs"}
-    val contestIdMap = contestsIncluded.associate { it.id to it }
+    /* val contestIdMap = contestsIncluded.associate { it.id to it }
     contestIdMap.values.forEach { // defaults to 0
         it.actualMvrs = 0
         it.actualNewMvrs = 0
@@ -157,12 +157,12 @@ fun consistentSampling(
     }
     haveNewSamples.forEach { (contestId, nnmvrs) ->
         contestIdMap[contestId]?.actualNewMvrs = nnmvrs
-    }
+    } */
 
     // set the results into the auditRound direclty
     auditRound.nmvrs = sampledCards.size
     auditRound.newmvrs = newMvrs
-    auditRound.samplePrns = sampledCards.map { it.prn }
+    auditRound.samplePrns = sampledCards.map { it.prn }  // TODO WHY ?
 }
 
 // try running without complexity
@@ -172,7 +172,7 @@ fun wantSampleSizeSimple(contestsNotDone: List<ContestRound>): Map<Int, Int> {
 
 ////////////////////////////////////////////////////////////////////////////////
 // called from estimateSampleSizes to choose N cards to reduce simulation cost
-fun estimationSubset(
+fun getSubsetForEstimation(
     config: AuditConfig,
     contests: List<ContestRound>,
     cards: CloseableIterable<AuditableCard>,
@@ -222,7 +222,7 @@ fun estimationSubset(
 
 // CLCA and OneAudit TODO POLLING
 // we dont use this for the actual estimation....
-private fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
+fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
     val minAssertionRound = contestRound.minAssertion()
     if (minAssertionRound == null) {
         contestRound.minAssertion()
@@ -256,7 +256,7 @@ private fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): I
     val maxRisk = bet / 2
     val est = roundUp(5.0 * cassorter.sampleSizeNoErrors(maxRisk = maxRisk, lastPvalue))
     if (assorter.dilutedMargin() < 0.07) {
-        logger.info { "estimationSubset ${contest.id}-${assorter.winLose()}  sumRates = ${oaass.oaAssortRates.sumRates()} maxRisk= $maxRisk, est = $est, margin=${assorter.dilutedMargin()}" }
+        logger.info { "getSubsetForEstimation ${contest.id}-${assorter.winLose()}  sumRates = ${oaass.oaAssortRates.sumRates()} maxRisk= $maxRisk, est = $est, margin=${assorter.dilutedMargin()}" }
     }
     return est
 }

@@ -17,7 +17,7 @@ import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.io.path.Path
 import kotlin.math.min
@@ -229,7 +229,7 @@ class TestPollingElection(
 
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
         cvrs = testData.makeCvrsFromContests()
-        testMvrs = makeFuzzedCvrsFrom(contests.map{ it.info() }, cvrs, fuzzMvrs) // ??
+        testMvrs = makeFuzzedCvrsForPolling(contests.map{ it.info() }, cvrs, fuzzMvrs) // ??
 
         val makum = ContestWithAssertions.make(testData.contests, cardManifest(), isClca=false)
         // not setting Npop, so it defaults to Nc

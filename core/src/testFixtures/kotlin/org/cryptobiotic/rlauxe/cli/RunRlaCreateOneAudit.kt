@@ -6,7 +6,6 @@ import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer2
 

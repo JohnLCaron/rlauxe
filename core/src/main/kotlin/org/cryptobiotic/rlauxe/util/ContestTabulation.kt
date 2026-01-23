@@ -109,10 +109,6 @@ class ContestTabulation(
         this.overvotes += other.overvotes
     }
 
-     fun votesAndUndervotes(): Vunder {
-        return Vunder.fromNpop(contestId, undervotes, ncards(), votes, voteForN)
-     }
-
     fun votesAndUndervotes2(poolId: Int): Vunder2 {
         return if (!isIrv) Vunder2.fromNpop(contestId, undervotes, ncards(), votes, voteForN) else {
             val missing = ncards() - undervotes - irvVotes.nvotes()
@@ -143,10 +139,9 @@ class ContestTabulation(
         if (undervotes != other.undervotes) return false
         if (overvotes != other.overvotes) return false
         if (nphantoms != other.nphantoms) return false
-        if (candidateIds != other.candidateIds) return false
+        if (isIrv && candidateIds != other.candidateIds) return false
         if (votes != other.votes) return false
         if (irvVotes != other.irvVotes) return false
-        if (notfound != other.notfound) return false
 
         return true
     }
@@ -159,10 +154,9 @@ class ContestTabulation(
         result = 31 * result + undervotes
         result = 31 * result + overvotes
         result = 31 * result + nphantoms
-        result = 31 * result + candidateIds.hashCode()
+        if (isIrv) result = 31 * result + candidateIds.hashCode()
         result = 31 * result + votes.hashCode()
         result = 31 * result + irvVotes.hashCode()
-        result = 31 * result + notfound.hashCode()
         return result
     }
 }

@@ -9,6 +9,8 @@
                 "ncards": 3000,
                 "regVotes": {
                     "1": {
+                        "contestId": 1,
+                        "voteForN": 1,
                         "votes": {
                             "0": 1288,
                             "1": 1187
@@ -17,6 +19,8 @@
                         "undervotes": 25
                     },
                     "2": {
+                        "contestId": 2,
+                        "voteForN": 1,
                         "votes": {},
                         "ncards": 500,
                         "undervotes": 500

@@ -6,8 +6,7 @@
                 "id": 0,
                 "candidateNames": {
                     "cand0": 0,
-                    "cand1": 1,
-                    "cand2": 2
+                    "cand1": 1
                 },
                 "choiceFunction": "PLURALITY",
                 "nwinners": 1,
@@ -17,12 +16,11 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "1": 2210,
-                    "2": 2057,
-                    "0": 359
+                    "0": 2603,
+                    "1": 2236
                 },
-                "Nc": 6058,
-                "Ncast": 6043
+                "Nc": 5657,
+                "Ncast": 5647
             },
             "isComparison": true,
             "pollingAssertions": [
@@ -30,18 +28,9 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.6527731924727633,
-                        "winner": 1,
-                        "loser": 0
-                    }
-                },
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.5126279300099043,
-                        "winner": 1,
-                        "loser": 2
+                        "reportedMean": 0.5324376878203995,
+                        "winner": 0,
+                        "loser": 1
                     }
                 }
             ],
@@ -51,28 +40,16 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.6527731924727633,
-                            "winner": 1,
-                            "loser": 0
+                            "reportedMean": 0.5324376878203995,
+                            "winner": 0,
+                            "loser": 1
                         },
-                        "dilutedMargin": 0.30554638494552666
-                    }
-                },
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.5126279300099043,
-                            "winner": 1,
-                            "loser": 2
-                        },
-                        "dilutedMargin": 0.025255860019808507
+                        "dilutedMargin": 0.06487537564079893
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 6058
+            "Npop": 5657
         },
         {
             "info": {
@@ -80,9 +57,7 @@
                 "id": 1,
                 "candidateNames": {
                     "cand0": 0,
-                    "cand1": 1,
-                    "cand2": 2,
-                    "cand3": 3
+                    "cand1": 1
                 },
                 "choiceFunction": "PLURALITY",
                 "nwinners": 1,
@@ -92,13 +67,11 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "1": 1987,
-                    "3": 1914,
-                    "0": 596,
-                    "2": 381
+                    "0": 3394,
+                    "1": 2901
                 },
-                "Nc": 5171,
-                "Ncast": 5171
+                "Nc": 6621,
+                "Ncast": 6620
             },
             "isComparison": true,
             "pollingAssertions": [
@@ -106,27 +79,9 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.6345000966930961,
-                        "winner": 1,
-                        "loser": 0
-                    }
-                },
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.6552891123573776,
-                        "winner": 1,
-                        "loser": 2
-                    }
-                },
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.5070585960162445,
-                        "winner": 1,
-                        "loser": 3
+                        "reportedMean": 0.5372300256758797,
+                        "winner": 0,
+                        "loser": 1
                     }
                 }
             ],
@@ -136,40 +91,16 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.6345000966930961,
-                            "winner": 1,
-                            "loser": 0
+                            "reportedMean": 0.5372300256758797,
+                            "winner": 0,
+                            "loser": 1
                         },
-                        "dilutedMargin": 0.2690001933861923
-                    }
-                },
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.6552891123573776,
-                            "winner": 1,
-                            "loser": 2
-                        },
-                        "dilutedMargin": 0.31057822471475527
-                    }
-                },
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.5070585960162445,
-                            "winner": 1,
-                            "loser": 3
-                        },
-                        "dilutedMargin": 0.014117192032488957
+                        "dilutedMargin": 0.07446005135175948
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 5171
+            "Npop": 6621
         },
         {
             "info": {
@@ -187,11 +118,11 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "1": 3731,
-                    "0": 3006
+                    "0": 1076,
+                    "1": 981
                 },
-                "Nc": 7628,
-                "Ncast": 7617
+                "Nc": 2278,
+                "Ncast": 2267
             },
             "isComparison": true,
             "pollingAssertions": [
@@ -199,9 +130,9 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5475222863135816,
-                        "winner": 1,
-                        "loser": 0
+                        "reportedMean": 0.5208516242317822,
+                        "winner": 0,
+                        "loser": 1
                     }
                 }
             ],
@@ -211,169 +142,21 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.5475222863135816,
-                            "winner": 1,
-                            "loser": 0
+                            "reportedMean": 0.5208516242317822,
+                            "winner": 0,
+                            "loser": 1
                         },
-                        "dilutedMargin": 0.09504457262716315
+                        "dilutedMargin": 0.041703248463564435
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 7628
+            "Npop": 2278
         },
         {
             "info": {
                 "name": "contest3",
                 "id": 3,
-                "candidateNames": {
-                    "cand0": 0,
-                    "cand1": 1,
-                    "cand2": 2
-                },
-                "choiceFunction": "PLURALITY",
-                "nwinners": 1,
-                "voteForN": 1,
-                "metadata": {}
-            },
-            "contest": {
-                "className": "Contest",
-                "votes": {
-                    "1": 1554,
-                    "0": 1175,
-                    "2": 308
-                },
-                "Nc": 3963,
-                "Ncast": 3957
-            },
-            "isComparison": true,
-            "pollingAssertions": [
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.547817310118597,
-                        "winner": 1,
-                        "loser": 0
-                    }
-                },
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.6572041382790815,
-                        "winner": 1,
-                        "loser": 2
-                    }
-                }
-            ],
-            "clcaAssertions": [
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.547817310118597,
-                            "winner": 1,
-                            "loser": 0
-                        },
-                        "dilutedMargin": 0.09563462023719405
-                    }
-                },
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.6572041382790815,
-                            "winner": 1,
-                            "loser": 2
-                        },
-                        "dilutedMargin": 0.31440827655816306
-                    }
-                }
-            ],
-            "status": "InProgress",
-            "Npop": 3963
-        },
-        {
-            "info": {
-                "name": "contest4",
-                "id": 4,
-                "candidateNames": {
-                    "cand0": 0,
-                    "cand1": 1,
-                    "cand2": 2
-                },
-                "choiceFunction": "PLURALITY",
-                "nwinners": 1,
-                "voteForN": 1,
-                "metadata": {}
-            },
-            "contest": {
-                "className": "Contest",
-                "votes": {
-                    "0": 1109,
-                    "2": 927,
-                    "1": 44
-                },
-                "Nc": 2388,
-                "Ncast": 2383
-            },
-            "isComparison": true,
-            "pollingAssertions": [
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.7229899497487438,
-                        "winner": 0,
-                        "loser": 1
-                    }
-                },
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.538107202680067,
-                        "winner": 0,
-                        "loser": 2
-                    }
-                }
-            ],
-            "clcaAssertions": [
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.7229899497487438,
-                            "winner": 0,
-                            "loser": 1
-                        },
-                        "dilutedMargin": 0.4459798994974875
-                    }
-                },
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.538107202680067,
-                            "winner": 0,
-                            "loser": 2
-                        },
-                        "dilutedMargin": 0.07621440536013391
-                    }
-                }
-            ],
-            "status": "InProgress",
-            "Npop": 2388
-        },
-        {
-            "info": {
-                "name": "contest5",
-                "id": 5,
                 "candidateNames": {
                     "cand0": 0,
                     "cand1": 1,
@@ -388,13 +171,13 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "3": 535,
-                    "1": 420,
-                    "0": 398,
-                    "2": 141
+                    "0": 3812,
+                    "1": 3617,
+                    "2": 898,
+                    "3": 602
                 },
-                "Nc": 1577,
-                "Ncast": 1574
+                "Nc": 10004,
+                "Ncast": 10000
             },
             "isComparison": true,
             "pollingAssertions": [
@@ -402,17 +185,8 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.543436905516804,
-                        "winner": 3,
-                        "loser": 0
-                    }
-                },
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.5364616360177552,
-                        "winner": 3,
+                        "reportedMean": 0.5097461015593763,
+                        "winner": 0,
                         "loser": 1
                     }
                 },
@@ -420,9 +194,18 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.6249207355738744,
-                        "winner": 3,
+                        "reportedMean": 0.6456417433026789,
+                        "winner": 0,
                         "loser": 2
+                    }
+                },
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.6604358256697321,
+                        "winner": 0,
+                        "loser": 3
                     }
                 }
             ],
@@ -432,23 +215,11 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.543436905516804,
-                            "winner": 3,
-                            "loser": 0
-                        },
-                        "dilutedMargin": 0.08687381103360803
-                    }
-                },
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.5364616360177552,
-                            "winner": 3,
+                            "reportedMean": 0.5097461015593763,
+                            "winner": 0,
                             "loser": 1
                         },
-                        "dilutedMargin": 0.07292327203551041
+                        "dilutedMargin": 0.01949220311875255
                     }
                 },
                 {
@@ -456,21 +227,33 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.6249207355738744,
-                            "winner": 3,
+                            "reportedMean": 0.6456417433026789,
+                            "winner": 0,
                             "loser": 2
                         },
-                        "dilutedMargin": 0.2498414711477488
+                        "dilutedMargin": 0.29128348660535774
+                    }
+                },
+                {
+                    "cassorter": {
+                        "className": "ClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMean": 0.6604358256697321,
+                            "winner": 0,
+                            "loser": 3
+                        },
+                        "dilutedMargin": 0.32087165133946427
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 1577
+            "Npop": 10004
         },
         {
             "info": {
-                "name": "contest6",
-                "id": 6,
+                "name": "contest4",
+                "id": 4,
                 "candidateNames": {
                     "cand0": 0,
                     "cand1": 1
@@ -483,11 +266,11 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "1": 5171,
-                    "0": 4472
+                    "1": 3739,
+                    "0": 3528
                 },
-                "Nc": 10047,
-                "Ncast": 10000
+                "Nc": 7474,
+                "Ncast": 7468
             },
             "isComparison": true,
             "pollingAssertions": [
@@ -495,7 +278,7 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5347865034338608,
+                        "reportedMean": 0.5141156007492641,
                         "winner": 1,
                         "loser": 0
                     }
@@ -507,16 +290,141 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.5347865034338608,
+                            "reportedMean": 0.5141156007492641,
                             "winner": 1,
                             "loser": 0
                         },
-                        "dilutedMargin": 0.06957300686772161
+                        "dilutedMargin": 0.028231201498528202
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 10047
+            "Npop": 7474
+        },
+        {
+            "info": {
+                "name": "contest5",
+                "id": 5,
+                "candidateNames": {
+                    "cand0": 0,
+                    "cand1": 1
+                },
+                "choiceFunction": "PLURALITY",
+                "nwinners": 1,
+                "voteForN": 1,
+                "metadata": {}
+            },
+            "contest": {
+                "className": "Contest",
+                "votes": {
+                    "0": 3784,
+                    "1": 3201
+                },
+                "Nc": 7492,
+                "Ncast": 7468
+            },
+            "isComparison": true,
+            "pollingAssertions": [
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.5389081687132942,
+                        "winner": 0,
+                        "loser": 1
+                    }
+                }
+            ],
+            "clcaAssertions": [
+                {
+                    "cassorter": {
+                        "className": "ClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMean": 0.5389081687132942,
+                            "winner": 0,
+                            "loser": 1
+                        },
+                        "dilutedMargin": 0.07781633742658833
+                    }
+                }
+            ],
+            "status": "InProgress",
+            "Npop": 7492
+        },
+        {
+            "info": {
+                "name": "contest6",
+                "id": 6,
+                "candidateNames": {
+                    "cand0": 0,
+                    "cand1": 1,
+                    "cand2": 2
+                },
+                "choiceFunction": "PLURALITY",
+                "nwinners": 1,
+                "voteForN": 1,
+                "metadata": {}
+            },
+            "contest": {
+                "className": "Contest",
+                "votes": {
+                    "2": 1314,
+                    "0": 1219,
+                    "1": 584
+                },
+                "Nc": 3386,
+                "Ncast": 3380
+            },
+            "isComparison": true,
+            "pollingAssertions": [
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.5140283520378027,
+                        "winner": 2,
+                        "loser": 0
+                    }
+                },
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.6077968103957472,
+                        "winner": 2,
+                        "loser": 1
+                    }
+                }
+            ],
+            "clcaAssertions": [
+                {
+                    "cassorter": {
+                        "className": "ClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMean": 0.5140283520378027,
+                            "winner": 2,
+                            "loser": 0
+                        },
+                        "dilutedMargin": 0.028056704075605454
+                    }
+                },
+                {
+                    "cassorter": {
+                        "className": "ClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMean": 0.6077968103957472,
+                            "winner": 2,
+                            "loser": 1
+                        },
+                        "dilutedMargin": 0.21559362079149436
+                    }
+                }
+            ],
+            "status": "InProgress",
+            "Npop": 3386
         },
         {
             "info": {
@@ -536,13 +444,13 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "1": 3923,
-                    "2": 3367,
-                    "0": 1154,
-                    "3": 175
+                    "0": 1408,
+                    "1": 1105,
+                    "3": 740,
+                    "2": 162
                 },
-                "Nc": 10020,
-                "Ncast": 10000
+                "Nc": 4802,
+                "Ncast": 4799
             },
             "isComparison": true,
             "pollingAssertions": [
@@ -550,17 +458,17 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.6381736526946108,
-                        "winner": 1,
-                        "loser": 0
+                        "reportedMean": 0.5315493544356518,
+                        "winner": 0,
+                        "loser": 1
                     }
                 },
                 {
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5277445109780439,
-                        "winner": 1,
+                        "reportedMean": 0.629737609329446,
+                        "winner": 0,
                         "loser": 2
                     }
                 },
@@ -568,8 +476,8 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.6870259481037924,
-                        "winner": 1,
+                        "reportedMean": 0.5695543523531862,
+                        "winner": 0,
                         "loser": 3
                     }
                 }
@@ -580,11 +488,11 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.6381736526946108,
-                            "winner": 1,
-                            "loser": 0
+                            "reportedMean": 0.5315493544356518,
+                            "winner": 0,
+                            "loser": 1
                         },
-                        "dilutedMargin": 0.2763473053892216
+                        "dilutedMargin": 0.06309870887130353
                     }
                 },
                 {
@@ -592,11 +500,11 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.5277445109780439,
-                            "winner": 1,
+                            "reportedMean": 0.629737609329446,
+                            "winner": 0,
                             "loser": 2
                         },
-                        "dilutedMargin": 0.055489021956087736
+                        "dilutedMargin": 0.259475218658892
                     }
                 },
                 {
@@ -604,21 +512,95 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.6870259481037924,
-                            "winner": 1,
+                            "reportedMean": 0.5695543523531862,
+                            "winner": 0,
                             "loser": 3
                         },
-                        "dilutedMargin": 0.3740518962075847
+                        "dilutedMargin": 0.13910870470637238
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 10020
+            "Npop": 4802
         },
         {
             "info": {
                 "name": "contest8",
                 "id": 8,
+                "candidateNames": {
+                    "cand0": 0,
+                    "cand1": 1,
+                    "cand2": 2
+                },
+                "choiceFunction": "PLURALITY",
+                "nwinners": 1,
+                "voteForN": 1,
+                "metadata": {}
+            },
+            "contest": {
+                "className": "Contest",
+                "votes": {
+                    "2": 1079,
+                    "1": 1027,
+                    "0": 315
+                },
+                "Nc": 2533,
+                "Ncast": 2532
+            },
+            "isComparison": true,
+            "pollingAssertions": [
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.6508093170153968,
+                        "winner": 2,
+                        "loser": 0
+                    }
+                },
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.5102645084879589,
+                        "winner": 2,
+                        "loser": 1
+                    }
+                }
+            ],
+            "clcaAssertions": [
+                {
+                    "cassorter": {
+                        "className": "ClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMean": 0.6508093170153968,
+                            "winner": 2,
+                            "loser": 0
+                        },
+                        "dilutedMargin": 0.3016186340307936
+                    }
+                },
+                {
+                    "cassorter": {
+                        "className": "ClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMean": 0.5102645084879589,
+                            "winner": 2,
+                            "loser": 1
+                        },
+                        "dilutedMargin": 0.020529016975917802
+                    }
+                }
+            ],
+            "status": "InProgress",
+            "Npop": 2533
+        },
+        {
+            "info": {
+                "name": "contest9",
+                "id": 9,
                 "candidateNames": {
                     "cand0": 0,
                     "cand1": 1
@@ -631,11 +613,11 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "0": 1519,
-                    "1": 1364
+                    "0": 973,
+                    "1": 855
                 },
-                "Nc": 3610,
-                "Ncast": 3597
+                "Nc": 2535,
+                "Ncast": 2532
             },
             "isComparison": true,
             "pollingAssertions": [
@@ -643,7 +625,7 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5214681440443213,
+                        "reportedMean": 0.5232741617357002,
                         "winner": 0,
                         "loser": 1
                     }
@@ -655,90 +637,16 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.5214681440443213,
+                            "reportedMean": 0.5232741617357002,
                             "winner": 0,
                             "loser": 1
                         },
-                        "dilutedMargin": 0.04293628808864258
+                        "dilutedMargin": 0.046548323471400366
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 3610
-        },
-        {
-            "info": {
-                "name": "contest9",
-                "id": 9,
-                "candidateNames": {
-                    "cand0": 0,
-                    "cand1": 1,
-                    "cand2": 2
-                },
-                "choiceFunction": "PLURALITY",
-                "nwinners": 1,
-                "voteForN": 1,
-                "metadata": {}
-            },
-            "contest": {
-                "className": "Contest",
-                "votes": {
-                    "0": 3097,
-                    "1": 2448,
-                    "2": 1326
-                },
-                "Nc": 8428,
-                "Ncast": 8426
-            },
-            "isComparison": true,
-            "pollingAssertions": [
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.5385026103464642,
-                        "winner": 0,
-                        "loser": 1
-                    }
-                },
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.6050664451827242,
-                        "winner": 0,
-                        "loser": 2
-                    }
-                }
-            ],
-            "clcaAssertions": [
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.5385026103464642,
-                            "winner": 0,
-                            "loser": 1
-                        },
-                        "dilutedMargin": 0.07700522069292837
-                    }
-                },
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.6050664451827242,
-                            "winner": 0,
-                            "loser": 2
-                        },
-                        "dilutedMargin": 0.21013289036544847
-                    }
-                }
-            ],
-            "status": "InProgress",
-            "Npop": 8428
+            "Npop": 2535
         },
         {
             "info": {
@@ -747,7 +655,8 @@
                 "candidateNames": {
                     "cand0": 0,
                     "cand1": 1,
-                    "cand2": 2
+                    "cand2": 2,
+                    "cand3": 3
                 },
                 "choiceFunction": "PLURALITY",
                 "nwinners": 1,
@@ -757,12 +666,13 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "1": 2224,
-                    "0": 1825,
-                    "2": 626
+                    "3": 3494,
+                    "0": 2577,
+                    "1": 607,
+                    "2": 589
                 },
-                "Nc": 6004,
-                "Ncast": 5980
+                "Nc": 10018,
+                "Ncast": 10000
             },
             "isComparison": true,
             "pollingAssertions": [
@@ -770,8 +680,8 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5332278481012658,
-                        "winner": 1,
+                        "reportedMean": 0.5457676182870832,
+                        "winner": 3,
                         "loser": 0
                     }
                 },
@@ -779,8 +689,17 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.6330779480346436,
-                        "winner": 1,
+                        "reportedMean": 0.6440906368536634,
+                        "winner": 3,
+                        "loser": 1
+                    }
+                },
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.644989019764424,
+                        "winner": 3,
                         "loser": 2
                     }
                 }
@@ -791,11 +710,11 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.5332278481012658,
-                            "winner": 1,
+                            "reportedMean": 0.5457676182870832,
+                            "winner": 3,
                             "loser": 0
                         },
-                        "dilutedMargin": 0.06645569620253156
+                        "dilutedMargin": 0.0915352365741664
                     }
                 },
                 {
@@ -803,16 +722,28 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.6330779480346436,
-                            "winner": 1,
+                            "reportedMean": 0.6440906368536634,
+                            "winner": 3,
+                            "loser": 1
+                        },
+                        "dilutedMargin": 0.2881812737073268
+                    }
+                },
+                {
+                    "cassorter": {
+                        "className": "ClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMean": 0.644989019764424,
+                            "winner": 3,
                             "loser": 2
                         },
-                        "dilutedMargin": 0.26615589606928713
+                        "dilutedMargin": 0.28997803952884804
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 6004
+            "Npop": 10018
         }
     ],
     "rcontestsUnderAudit": []

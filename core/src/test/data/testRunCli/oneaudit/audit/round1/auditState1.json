@@ -7,8 +7,8 @@
                 {
                     "assorterDesc": "0/1 OneAuditTest",
                     "roundIdx": 1,
-                    "estSampleSize": 270,
-                    "estNewSampleSize": 270,
+                    "estSampleSize": 344,
+                    "estNewSampleSize": 344,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "clca",
@@ -22,31 +22,32 @@
                             "1.02020202020202": 0.0
                         },
                         "estimatedDistribution": [
-                            116,
-                            148,
-                            154,
-                            168,
-                            195,
-                            205,
-                            263,
-                            270,
-                            320,
-                            321
+                            151,
+                            161,
+                            254,
+                            307,
+                            334,
+                            338,
+                            339,
+                            344,
+                            443,
+                            444
                         ],
-                        "firstSample": 263,
-                        "estNewMvrs": 270
+                        "firstSample": 334,
+                        "estNewMvrs": 344
                     },
                     "auditResult": {
-                        "desc": "round=1 pvalue=0.1012 nmvrs=270 samplesUsed=270 status=LimitReached measuredCounts=no errors",
+                        "desc": "round=1 pmin=0.2542 plast=0.5572 nmvrs=344 samplesUsed=344 status=LimitReached measuredCounts=no errors",
                         "roundIdx": 1,
-                        "nmvrs": 270,
-                        "maxBallotIndexUsed": 270,
-                        "pvalue": 0.10124009907399704,
-                        "samplesUsed": 270,
+                        "nmvrs": 344,
+                        "maxSampleIndexUsed": 344,
+                        "plast": 0.5571720683536343,
+                        "pmin": 0.2542078883069219,
+                        "samplesUsed": 344,
                         "status": "LimitReached",
                         "measuredCounts": {
                             "errorCounts": {},
-                            "totalSamples": 270,
+                            "totalSamples": 344,
                             "noerror": 0.51010101010101,
                             "upper": 1.0
                         },
@@ -57,11 +58,9 @@
                 }
             ],
             "roundIdx": 1,
-            "maxSampleIndex": 270,
-            "estMvrs": 270,
-            "estNewMvrs": 270,
-            "actualMvrs": 270,
-            "actualNewMvrs": 270,
+            "maxSampleAllowed": 344,
+            "estMvrs": 344,
+            "estNewMvrs": 344,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -70,7 +69,8 @@
     ],
     "auditWasDone": true,
     "auditIsComplete": false,
-    "nmvrs": 270,
-    "newmvrs": 270,
-    "auditorWantNewMvrs": -1
+    "nmvrs": 344,
+    "newmvrs": 344,
+    "auditorWantNewMvrs": -1,
+    "samplesNotUsed": 0
 }

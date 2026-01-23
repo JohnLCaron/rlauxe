@@ -34,12 +34,21 @@ class TestCardPoolCsv {
 
         val csvFile = "$testdataDir/tests/scratch/cardPoolCsvFile.csv"
         writeCardPoolCsvFile(target, csvFile)
-        print(ContestTabulationHeader)
-        target.forEach { println(it) }
-        println()
 
         val roundtrip = readCardPoolCsvFile(csvFile,  infos)
-        roundtrip.forEach { println(it) }
+        roundtrip.forEachIndexed { pidx, rpool ->
+            val tpool = target[pidx]
+            println(tpool)
+            println(rpool)
+
+            rpool.contestTabs.values.forEach{ rtab ->
+                val ttab = tpool.contestTabs[rtab.contestId]
+                assertEquals(ttab, rtab)
+            }
+
+            assertEquals(tpool, rpool)
+            println("--------------------------------------------------")
+        }
 
         assertEquals(target, roundtrip)
     }

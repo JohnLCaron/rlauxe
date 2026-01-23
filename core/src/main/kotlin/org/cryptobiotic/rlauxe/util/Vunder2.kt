@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.raire.VoteConsolidator
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import kotlin.Int
 import kotlin.random.Random
@@ -27,6 +28,7 @@ data class Vunder2(val contestId: Int, val poolId: Int, val voteCounts: List<Pai
     val vunder: List<Pair<IntArray, Int>> = voteCounts + Pair(intArrayOf(), undervotes) + Pair(intArrayOf(), missing)
     val nvunder = vunder.size  // ncandidates + 2
 
+    // only for non-IRV
     fun cands(): Map<Int, Int> {
         return voteCounts.associate{ it.first[0] to it.second }.toMap()
     }
@@ -69,8 +71,6 @@ class VunderPicker2(val vunder: Vunder2) {
     fun isNotEmpty() = vunderLeft > 0
 
     fun pickRandomCandidatesAndDecrement() : IntArray? {
-        if ((vunder.poolId == 3744) && (vunder.contestId == 18))
-            print("")
 
         if (isEmpty()) {
            logger.error{"Vunder2 called when isEmpty"}
@@ -149,8 +149,8 @@ class VunderPicker2(val vunder: Vunder2) {
                     needVotes--
                 }
                 else -> {
-                    if (vunderIdx < 0)
-                        print("")
+                    if (vunderIdx < 0 || candId < 0)
+                        print("wtf")
                     result.add(choice)
                     useRemaining.removeAt(vunderIdx) // remove candidate to prevent duplicates
                     needVotes--
@@ -173,7 +173,7 @@ class VunderPicker2(val vunder: Vunder2) {
         // find where that lives in the partition
         var sum = 0
         var nvotesLeft = 0
-        var idx = 0
+        var idx = 0  // index into remaining
         while (idx < remaining.size) {
             nvotesLeft = remaining[idx].second // votes left for this candidate
             sum += nvotesLeft
@@ -183,12 +183,18 @@ class VunderPicker2(val vunder: Vunder2) {
         require(nvotesLeft > 0)
         require(idx < remaining.size)
 
-        decrementCandidateByIdx(idx)
+        val cands = remaining[idx].first
+        val vunderIdx = vunderRemaining.indexOfFirst { it.first.contentEquals(cands) } // return -1 if not found
+
+        decrementCandidateByIdx(vunderIdx)
 
         // require single votes when voteForN > 1
-        val cands = vunderRemaining[idx].first
         require(cands.size <= 1)
-        return if (cands.size == 0) Pair(idx, -1) else Pair(idx, cands[0])
+        return if (cands.isEmpty()) {
+            Pair(vunderIdx, -1)
+        } else {
+            Pair(vunderIdx, cands[0])
+        }
     }
 
     fun incrementCandidateByIdx(vunderIdx: Int): Int {
@@ -237,38 +243,78 @@ fun makeVunderCvrs(vunders: Map<Int, Vunder2>, poolName: String, poolId: Int?): 
         done = vunderPickers.values.all { it.isEmpty() }
     }
 
-    /* find bug
+    // find bug
     val voteForNs = vunders.mapValues { it.value.voteForN }
-    val votesFromCvrs = tabulateCvrsWithVoteForNs(rcvrs.iterator(), voteForNs)
-    votesFromCvrs.forEach { (id, voteFromCvrs) ->
+    val tabsFromCvrs = tabulateCvrsWithVoteForNs(rcvrs.iterator(), voteForNs)
+    tabsFromCvrs.forEach { (id, voteFromCvrs) ->
         val fromCvrs = voteFromCvrs.votes.toSortedMap()
         val vunder = vunders[id]!!
-        if (show) {
-            println("                       vunder ${vunder}")
-            println(voteFromCvrs)
-        }
-        if (!checkEquivilent(vunder, voteFromCvrs)) {
+        if (!checkVunderEquivilentTab(vunder, voteFromCvrs)) {
             println("\nfail")
             println("                       vunder ${vunder}")
             println(voteFromCvrs)
-            // rcvrs.forEach { println(it) }
+            checkVunderEquivilentTab(vunder, voteFromCvrs)
             throw RuntimeException("vunderVotes ${vunder} != ${fromCvrs} voteFromCvrs")
         }
-    } */
+    }
 
     rcvrs.shuffle()
     return rcvrs
 }
 
-/* private val show = false
+private val show = false
 
-fun checkEquivilent(vunder: Vunder2, contestTab: ContestTabulation): Boolean {
+fun checkVunderEquivilentTab(vunder: Vunder2, contestTab: ContestTabulation): Boolean {
     val tabNcards = (contestTab.nvotes() + contestTab.undervotes) / contestTab.voteForN
     val vncards = (vunder.nvotes + vunder.undervotes) / vunder.voteForN + vunder.missing
     var allOk = true
     allOk = allOk && (vunder.nvotes == contestTab.nvotes())
     //allOk = allOk && (vunder.undervotes == contestTab.undervotes)
     //allOk = allOk && (vunder.ncards - vunder.missing == contestTab.ncards())
-    allOk = allOk && checkEquivilentVotes(vunder.candVotes, contestTab.votes) // TODO IRV
+    // data class Vunder2(val contestId: Int, val poolId: Int, val voteCounts: List<Pair<IntArray, Int>>, val undervotes: Int, val missing: Int, val voteForN: Int) {
+    if (contestTab.isIrv) {
+        // val irvPairs = contestTab.irvVotes.votes.map { (harr, count) -> Pair(harr.array, count) }
+        val vunderVc = VoteConsolidator()
+        vunder.voteCounts.forEach { (cands, count) -> vunderVc.addVotes(cands, count) }
+        allOk = allOk && vunderVc.equals(contestTab.irvVotes)
+    } else {
+        allOk = allOk && checkEquivilentVotes(vunder.cands(), contestTab.votes)
+    }
     return allOk
-} */
+}
+
+/////////////////////////////////////////////
+//// use this when you dont have ContestInfo yet
+
+// Number of votes in each contest, return contestId -> candidateId -> nvotes
+fun tabulateVotesFromCvrs(cvrs: Iterator<Cvr>): Map<Int, Map<Int, Int>> {
+    val votes = mutableMapOf<Int, MutableMap<Int, Int>>()
+    for (cvr in cvrs) {
+        for ((contestId, conVotes) in cvr.votes) {
+            val accumVotes = votes.getOrPut(contestId) { mutableMapOf() }
+            for (cand in conVotes) {
+                val accum = accumVotes.getOrPut(cand) { 0 }
+                accumVotes[cand] = accum + 1
+            }
+        }
+    }
+    return votes
+}
+
+// non IRV
+// return contestId -> ContestTabulation
+fun tabulateCvrsWithVoteForNs(cvrIter: Iterator<Cvr>, voteForNs: Map<Int, Int>): Map<Int, ContestTabulation> {
+    val votes = mutableMapOf<Int, ContestTabulation>()
+    while (cvrIter.hasNext()) {
+        val cvr = cvrIter.next()
+        for ((contestId, conVotes) in cvr.votes) {
+            val voteForN = voteForNs[contestId]
+            if (voteForN != null) {
+                // class ContestTabulation(val contestId: Int, val voteForN: Int, val isIrv: Boolean, val candidateIdToIndex: Map<Int, Int>): RegVotesIF {
+                val tab = votes.getOrPut(contestId) { ContestTabulation(contestId, voteForN, false, emptyList()) }
+                tab.addVotes(conVotes, cvr.phantom)
+            }
+        }
+    }
+    return votes
+}

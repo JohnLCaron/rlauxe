@@ -14,7 +14,6 @@ private val logger = KotlinLogging.logger("VunderBar")
 // vunder = "votes and undervotes and novotes"
 // novotes = the cards in the population that dont contain the contest
 // voteCounts: Pair(candsVoteFor, count); candsVoteFor is immutable
-// data class Vunder(val contestId: Int, val candVotes: Map<Int, Int>, val undervotes: Int, val missing: Int, val voteForN: Int) {
 data class Vunder2(val contestId: Int, val poolId: Int, val voteCounts: List<Pair<IntArray, Int>>, val undervotes: Int, val missing: Int, val voteForN: Int) {
     val nvotes = voteCounts.sumOf { it.second } // candVotes.values.sum()
     val ncards = missing + (undervotes + nvotes) / voteForN
@@ -47,6 +46,7 @@ data class Vunder2(val contestId: Int, val poolId: Int, val voteCounts: List<Pai
             val voteCounts = contestVotes.votes.map { Pair(intArrayOf(it.key), it.value) }
             return Vunder2(contestVotes.contestId, -1, voteCounts, contestVotes.undervotes(), missing, contestVotes.voteForN)
         }
+        // data class Vunder(val contestId: Int, val candVotes: Map<Int, Int>, val undervotes: Int, val missing: Int, val voteForN: Int) {
         fun fromCandVotes(contestId: Int, candVotes: Map<Int, Int>, undervotes: Int, missing: Int, voteForN: Int): Vunder2 {
             val voteCounts = candVotes.map { Pair(intArrayOf(it.key), it.value) }
             return Vunder2(contestId, -1, voteCounts, undervotes, missing, voteForN)

@@ -35,6 +35,10 @@ data class Vunder(val contestId: Int, val candVotes: Map<Int, Int>, val undervot
             val missing = npop - (undervotes + candVotes.values.sum()) / voteForN
             return Vunder(contestId, candVotes, undervotes, missing, voteForN)
         }
+        fun fromContestVotes(contestVotes: ContestVotesIF): Vunder {
+            val missing = contestVotes.ncards() - (contestVotes.undervotes() + contestVotes.votes.values.sum()) / contestVotes.voteForN
+            return Vunder(contestVotes.contestId, contestVotes.votes, contestVotes.undervotes(), missing, contestVotes.voteForN)
+        }
     }
 }
 
@@ -241,7 +245,7 @@ fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): L
     return rcvrs
 }
 
-val show = false
+private val show = false
 
 fun checkEquivilent(vunder: Vunder, contestTab: ContestTabulation): Boolean {
     val tabNcards = (contestTab.nvotes() + contestTab.undervotes) / contestTab.voteForN
@@ -302,7 +306,7 @@ fun tabulateCvrsWithVoteForNs(cvrIter: Iterator<Cvr>, voteForNs: Map<Int, Int>):
             val voteForN = voteForNs[contestId]
             if (voteForN != null) {
                 // class ContestTabulation(val contestId: Int, val voteForN: Int, val isIrv: Boolean, val candidateIdToIndex: Map<Int, Int>): RegVotesIF {
-                val tab = votes.getOrPut(contestId) { ContestTabulation(contestId, voteForN, false, emptyMap<Int, Int>()) }
+                val tab = votes.getOrPut(contestId) { ContestTabulation(contestId, voteForN, false, emptyList()) }
                 tab.addVotes(conVotes, cvr.phantom)
             }
         }

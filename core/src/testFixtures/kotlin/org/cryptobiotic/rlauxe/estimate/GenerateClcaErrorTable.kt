@@ -96,7 +96,7 @@ class GenerateClcaErrorTable {
         println("              ${ClcaErrorRatesCumul.header()}")
 
         fuzzPcts.forEach { fuzzPct ->
-            val fcards = makeFuzzedCardsFrom(contestsUA.map { it.contest.info() }, cards, fuzzPct)
+            val fcards = makeFuzzedCardsForClca(contestsUA.map { it.contest.info() }, cards, fuzzPct)
             val testPairs = fcards.zip(cards)
 
             val avgErrorRates = ClcaErrorRatesCumul()

@@ -3,20 +3,19 @@ package org.cryptobiotic.rlauxe.oneaudit
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.RegVotesIF
-import org.cryptobiotic.rlauxe.util.RegVotes
+import org.cryptobiotic.rlauxe.util.ContestVotesIF
+import org.cryptobiotic.rlauxe.util.ContestVotes
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.Vunder
+import org.cryptobiotic.rlauxe.util.Vunder2
 import org.cryptobiotic.rlauxe.util.mean2margin
-import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.math.max
-import kotlin.random.Random
 
 
 private val logger = KotlinLogging.logger("OneAuditPool")
@@ -39,8 +38,9 @@ interface OneAuditPoolIF: PopulationIF {
     val poolName: String
     val poolId: Int
     fun assortAvg(): MutableMap<Int, MutableMap<AssorterIF, AssortAvg>>  // contestId -> assorter -> average in the pool
-    fun regVotes(): Map<Int, RegVotesIF> // contestId -> RegVotes, regular contests only, not IRV
-    fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder
+    fun regVotes(): Map<Int, ContestVotesIF> // contestId -> RegVotes, regular contests only, not IRV
+    fun votesAndUndervotes(contestId: Int): Vunder // , voteForN: Int): Vunder
+    fun votesAndUndervotes2(contestId: Int): Vunder2 // , voteForN: Int): Vunder
     // fun contestTab(contestId: Int): ContestTabulation? need this for IRV
 
     fun show() = buildString {
@@ -58,7 +58,7 @@ interface OneAuditPoolIF: PopulationIF {
 
 // TODO keeping regVotes but not irvVotes. Because VoteConsolidator can be large
 data class OneAuditPool(override val poolName: String, override val poolId: Int, val hasSingleCardStyle: Boolean,
-                        val ncards: Int, val regVotes: Map<Int, RegVotesIF>) : OneAuditPoolIF {
+                        val ncards: Int, val regVotes: Map<Int, ContestVotesIF>) : OneAuditPoolIF {
     val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
     override fun name() = poolName
     override fun id() = poolId
@@ -71,13 +71,16 @@ data class OneAuditPool(override val poolName: String, override val poolId: Int,
     override fun contests() = regVotes.keys.toList().sorted().toIntArray()
     override fun assortAvg() = assortAvg
 
-    // candidate for removal, assumes voteForN == 1, perhaps we need to save that ??
-    override fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder {
+    override fun votesAndUndervotes(contestId: Int,): Vunder {
         val regVotes = regVotes[contestId]!!         // empty for IRV ...
-        return Vunder.fromNpop(contestId, regVotes.undervotes(), ncards(), regVotes.votes, voteForN)
+        return Vunder.fromNpop(contestId, regVotes.undervotes(), ncards(), regVotes.votes, regVotes.voteForN)
         // val poolUndervotes = ncards * voteForN - regVotes.votes.values.sum()
         // return Vunder(contestId, regVotes.votes, regVotes.undervotes(), 0, voteForN) // old way
+    }
 
+    override fun votesAndUndervotes2(contestId: Int,): Vunder2 {
+        val regVotes = regVotes[contestId]!!         // empty for IRV ...
+        return Vunder2.fromNpop(contestId, regVotes.undervotes(), ncards(), regVotes.votes, regVotes.voteForN)
     }
 }
 
@@ -115,8 +118,9 @@ data class OneAuditPoolWithBallotStyle(
     override fun hasContest(contestId: Int) = voteTotals.contains(contestId)
     override fun contests() = voteTotals.map { it.key }.toSortedSet().toIntArray()
 
-    override fun regVotes(): Map<Int, RegVotesIF> {
-        return voteTotals.mapValues { (id, contestTab) -> RegVotes(contestTab.votes, ncards(), undervoteForContest(id)) }
+    override fun regVotes(): Map<Int, ContestVotesIF> {
+        return voteTotals.mapValues { (id, contestTab) ->
+            ContestVotes(id, contestTab.voteForN, contestTab.votes, ncards(), undervoteForContest(id)) }
     }
 
     override fun ncards() = maxMinCardsNeeded + adjustCards
@@ -145,10 +149,17 @@ data class OneAuditPoolWithBallotStyle(
         return ncards() * info.voteForN - voteSum
     }
 
-    override fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder {
+    override fun votesAndUndervotes(contestId: Int): Vunder {
         val poolUndervotes = undervoteForContest(contestId)
         val votesForContest = voteTotals[contestId]!!
         return Vunder.fromNpop(contestId, poolUndervotes, ncards(), votesForContest.votes, votesForContest.voteForN)
+    }
+
+    override fun votesAndUndervotes2(contestId: Int): Vunder2 {
+        val poolUndervotes = undervoteForContest(contestId) // TODO is this different from  whats in the contestTab ?
+        val contestTab = voteTotals[contestId]!!
+        return contestTab.votesAndUndervotes2(poolId)
+        // was return Vunder2.fromNpop(contestId, poolUndervotes, ncards(), votesForContest.votes, votesForContest.voteForN)
     }
 
     override fun toString(): String {
@@ -221,9 +232,14 @@ data class OneAuditPoolFromCvrs(
         totalCards++
     }
 
-    override fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder {
+    override fun votesAndUndervotes(contestId: Int): Vunder {
         val contestTab = contestTabs[contestId]!!
         return contestTab.votesAndUndervotes() // good reason for cardPool to always have contestTabs
+    }
+
+    override fun votesAndUndervotes2(contestId: Int): Vunder2 {
+        val contestTab = contestTabs[contestId]!!
+        return contestTab.votesAndUndervotes2(poolId) // good reason for cardPool to always have contestTabs
     }
 
     // every cvr has to have every contest in the pool

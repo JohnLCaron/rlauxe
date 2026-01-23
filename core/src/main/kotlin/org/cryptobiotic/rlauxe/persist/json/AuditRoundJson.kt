@@ -13,7 +13,6 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditAssortValueRates
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.enumValueOf
 
@@ -45,6 +44,7 @@ data class AuditRoundJson(
     val nmvrs: Int,
     var newmvrs: Int,
     var auditorWantNewMvrs: Int,
+    var samplesNotUsed: Int,
 )
 
 fun AuditRoundIF.publishJson() : AuditRoundJson {
@@ -56,6 +56,7 @@ fun AuditRoundIF.publishJson() : AuditRoundJson {
         this.nmvrs,
         this.newmvrs,
         this.auditorWantNewMvrs,
+        this.samplesNotUsed,
     )
 }
 
@@ -74,6 +75,7 @@ fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: L
         this.nmvrs,
         this.newmvrs,
         this.auditorWantNewMvrs,
+        this.samplesNotUsed,
     )
 }
 
@@ -100,11 +102,11 @@ data class ContestRoundJson(
     var assertionRounds: List<AssertionRoundJson>,
     val roundIdx: Int,
 
-    val maxSampleIndex: Int,
+    val maxSampleAllowed: Int,
     val estMvrs: Int,
     val estNewMvrs: Int,
-    val actualMvrs: Int,
-    val actualNewMvrs: Int,
+    // val actualMvrs: Int,
+    // val actualNewMvrs: Int,
     val auditorWantNewMvrs: Int,
 
     val done: Boolean,
@@ -117,11 +119,11 @@ fun ContestRound.publishJson() : ContestRoundJson {
         this.id,
         assertionRounds.map { it.publishJson() },
         roundIdx = this.roundIdx,
-        maxSampleIndex = this.maxSampleIndex,
+        maxSampleAllowed = this.maxSampleAllowed,
         estMvrs = this.estMvrs,
         estNewMvrs = this.estNewMvrs,
-        actualMvrs = this.actualMvrs,
-        actualNewMvrs = this.actualNewMvrs,
+        // actualMvrs = this.actualMvrs,
+        // actualNewMvrs = this.actualNewMvrs,
         auditorWantNewMvrs = this.auditorWantNewMvrs,
         this.done,
         this.included,
@@ -141,11 +143,11 @@ fun ContestRoundJson.import(contestUA: ContestWithAssertions): ContestRound {
     }
     val contestRound = ContestRound(contestUA, assertionRounds, this.roundIdx)
 
-    contestRound.maxSampleIndex = this.maxSampleIndex
+    contestRound.maxSampleAllowed = this.maxSampleAllowed
     contestRound.estMvrs = this.estMvrs
     contestRound.estNewMvrs = this.estNewMvrs
-    contestRound.actualMvrs = this.actualMvrs
-    contestRound.actualNewMvrs = this.actualNewMvrs
+    // contestRound.actualMvrs = this.actualMvrs
+    // contestRound.actualNewMvrs = this.actualNewMvrs
     contestRound.auditorWantNewMvrs = this.auditorWantNewMvrs
 
     contestRound.done = this.done
@@ -274,7 +276,7 @@ data class AuditRoundResultJson(
     val desc: String,
     val roundIdx: Int,
     val nmvrs: Int,   // estimated sample size
-    val maxBallotIndexUsed: Int,   // max index used
+    val maxSampleIndexUsed: Int,   // max index used
     val plast: Double,       // last pvalue when testH0 terminates
     val pmin: Double,       // minimum pvalue reached
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
@@ -287,7 +289,7 @@ fun AuditRoundResult.publishJson() = AuditRoundResultJson(
     this.toString(),
     this.roundIdx,
     this.nmvrs,
-    this.maxBallotIndexUsed,
+    this.maxSampleIndexUsed,
     this.plast,
     this.pmin,
     this.samplesUsed,
@@ -301,7 +303,7 @@ fun AuditRoundResultJson.import() : AuditRoundResult {
     return AuditRoundResult(
         this.roundIdx,
         this.nmvrs,
-        this.maxBallotIndexUsed,
+        this.maxSampleIndexUsed,
         this.plast,
         this.pmin,
         this.samplesUsed,

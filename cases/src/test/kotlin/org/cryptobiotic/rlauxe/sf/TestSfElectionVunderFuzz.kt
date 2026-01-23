@@ -97,7 +97,7 @@ class TestSfElectionVunderFuzz {
         val privateMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.privateMvrsFile())
 
         val contestId = 29
-        val useContest = contests.find{ it.id == contestId }!!
+        val useContest = contests.find { it.id == contestId }!!
         val useCassorter = useContest.minClcaAssertion()!!.cassorter as ClcaAssorterOneAudit
         val usePassorter = useCassorter.assorter
         println(useContest)
@@ -110,7 +110,7 @@ class TestSfElectionVunderFuzz {
 
         val mvrPoolAvg = findPoolAverage(privateMvrs, contestId, useCardPoolId, usePassorter)
         println("mvr poolAvg = ${mvrPoolAvg}")
-        val mvrDilutedMargin2 = mvrPoolAvg.margin() * 84/336
+        val mvrDilutedMargin2 = mvrPoolAvg.margin() * 84 / 336
         println("mvr pool diluted average= ${margin2mean(mvrDilutedMargin2)} margin=${mvrDilutedMargin2}")
 
         // val cvrPoolAvg = findPoolAverage(cardManifest.cards.iterator(), contestId, useCardPoolId, usePassorter)
@@ -162,6 +162,93 @@ class TestSfElectionVunderFuzz {
         val dilutedMargin = usePassorter.dilutedMargin()
         println("fuzzed poolAvg = ${assortAvg}")
     }
+
+    @Test
+    fun testSFvunderPoolAvgIRV() {
+        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
+        val publisher = Publisher(auditdir)
+        val config = readAuditConfigUnwrapped(publisher.auditConfigFile())!!
+        val cardManifest = readCardManifest(publisher)
+        val populations = cardManifest.populations as List<OneAuditPoolIF>
+        val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
+
+        val privateMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.privateMvrsFile())
+
+        val contestId = 18
+        val useContest = contests.find { it.id == contestId }!!
+        val useCassorter = useContest.minClcaAssertion()!!.cassorter as ClcaAssorterOneAudit
+        val usePassorter = useCassorter.assorter
+        println(useContest)
+        println(usePassorter)
+
+        val populationMap = populations.associateBy { it.poolId }
+        val useCardPoolId = 3744
+        val usePopulation = populationMap[useCardPoolId]
+        println(usePopulation)
+        println("cvr assort calculated average for contest=${contestId} pool=$useCardPoolId = ${useCassorter.poolAverages.assortAverage[useCardPoolId]}")
+
+        val mvrPoolAvg = findPoolAverage(privateMvrs, contestId, useCardPoolId, usePassorter)
+        println("mvr poolAvg = ${mvrPoolAvg}")
+        val mvrDilutedMargin2 = mvrPoolAvg.margin() * 84 / 336
+        println("mvr pool diluted average= ${margin2mean(mvrDilutedMargin2)} margin=${mvrDilutedMargin2}")
+
+        // val cvrPoolAvg = findPoolAverage(cardManifest.cards.iterator(), contestId, useCardPoolId, usePassorter)
+        // println("cvr poolAvg = ${cvrPoolAvg}")
+
+        //// so what is the pool average in the vunder fuzzed cards ??
+        //// TODO the problem is bassort, finding undervotes instead of missing contest
+
+        val contestCards = mutableListOf<AuditableCard>()
+        val ncards = 30_000_000 // all
+        var countCards = 0
+        cardManifest.cards.iterator().use { iter ->
+            while (iter.hasNext() && countCards < ncards) {
+                val card = iter.next()
+                contestCards.add(card)
+                countCards++
+            }
+        }
+
+        // simulate the card pools for all OneAudit contests; do it here one time for all contests
+        val infos = contests.map { it.contest.info() }.associateBy { it.id }
+
+        val cardPools = readCardPoolCsvFile(publisher.cardPoolsFile(),  infos)
+        val cardPoolMap = cardPools.associateBy { it.poolId }
+        val useCardPool = cardPoolMap[useCardPoolId]!!
+        // println(useCardPool)
+        val tab = useCardPool.contestTabs[contestId]
+        println(tab)
+
+        val vunderFuzz = OneAuditVunderFuzzer2(cardPools, infos, config.simFuzzPct ?: 0.0, contestCards)
+        val pairs = vunderFuzz.mvrCvrPairs
+        println(" pairs = ${pairs.size}")
+        val fuzzedMvrIter = PairAdapter(pairs.iterator()) { it.first }
+
+        /*
+    val mvrTabs = tabulateCards(PairAdapter(pairs.iterator()) { it.first }, infos)
+    val cvrTabs = tabulateCards(PairAdapter(pairs.iterator()) { it.second }, infos).toSortedMap()
+    println("mvrTab = ${mvrTabs[contestId]}")
+    println("cvrTab = ${cvrTabs[contestId]}")
+
+    // duplicate Vunders that vunderFuzz uses
+    val vunderPools =  VunderPools(cardPools, infos)
+    val vunderPool = vunderPools.vunderPools[useCardPoolId]!!
+    println("vunderPool = ${vunderPool}") */
+
+        val assortAvg = AssortAvg()
+        vunderFuzz.mvrCvrPairs.forEach { (mvr, cvr) ->
+            if (mvr.poolId == useCardPoolId) {
+                if (mvr.hasContest(contestId)) {
+                    val assortVal = usePassorter.assort(mvr.cvr(), usePhantoms = false)
+                    assortAvg.totalAssort += assortVal
+                    assortAvg.ncards++
+                }
+            }
+        }
+
+        println("fuzzed poolAvg = ${assortAvg}")
+    }
+
 }
 
 fun findPoolAverage(cardIter: CloseableIterator<AuditableCard>, contestId: Int, poolId: Int, passorter: AssorterIF): AssortAvg {

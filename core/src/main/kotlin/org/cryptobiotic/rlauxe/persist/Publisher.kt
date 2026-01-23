@@ -15,7 +15,7 @@ private val logger = KotlinLogging.logger("Publisher")
         auditConfig.json      // AuditConfigJson
         auditSeed.json        // PrnJson
         cardManifest.csv      // AuditableCardCsv, may be zipped
-        cardPools.json        // CardPoolJson (OneAudit only)
+        cardPools.csv         // CardPoolCsv (OneAudit only)
         contests.json         // ContestsUnderAuditJson
         sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
 

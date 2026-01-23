@@ -29,7 +29,7 @@ class TestPersistentConsistentSampling {
 
         val workflow = PersistedWorkflow(auditRecord, true)
         consistentSampling(auditRound, workflow.mvrManager(), previousSamples)
-        val actualNewMvrs = auditRound.contestRounds.associate { it.contestUA.id to it.actualNewMvrs }
-        println("last auditRound actualNewMvrs = $actualNewMvrs")
+        //val actualNewMvrs = auditRound.contestRounds.associate { it.contestUA.id to it.actualNewMvrs }
+        //println("last auditRound actualNewMvrs = $actualNewMvrs")
     }
 }

@@ -5,12 +5,16 @@ import org.cryptobiotic.rlauxe.betting.TausIF
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 
 // rate :  assort value -> rate over the entire population
-// TODO maybe we just need the sum ??
 data class OneAuditAssortValueRates(val rates: Map<Double, Double>, val totalInPools: Int) {
     fun sumRates() = rates.map{ it.value }.sum()
+    fun avgAssort() = rates.map{ (value, rate) -> value * rate }.sum() / sumRates()
+
     override fun toString() = buildString {
-        append("OneAuditAssortValueRates(totalInPools=$totalInPools n=${rates.size} sumOfRates= ${sumRates()})")
-        // rates.forEach { appendLine("  $it") }
+        append("OneAuditAssortValueRates(totalInPools=$totalInPools n=${rates.size} sumOfRates= ${sumRates()} avgAssort= ${avgAssort()})")
+    }
+    fun show() = buildString {
+        appendLine(this@OneAuditAssortValueRates)
+        rates.forEach { appendLine("  $it") }
     }
 }
 
@@ -24,7 +28,7 @@ class OneAuditRatesFromPools(val pools: List<OneAuditPoolIF>) {
             val poolAvg = oaCassorter.poolAverages.assortAverage[pool.poolId]
             if (poolAvg != null) {
                 val taus = TausOA(oaCassorter.assorter.upperBound(), poolAvg)
-                val votes = pool.regVotes()[contestUA.id]!!     // TODO assumes non-IRV
+                val votes = pool.regVotes()[contestUA.id]!!           // TODO assumes non-IRV
                 val winnerCounts: Int = votes.votes[oaCassorter.assorter.winner()] ?: 0
                 val loserCounts: Int = votes.votes[oaCassorter.assorter.loser()] ?: 0
                 val otherCounts = pool.ncards() - winnerCounts - loserCounts

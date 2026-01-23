@@ -120,27 +120,23 @@ data class CompositeAuditRound(
     override var newmvrs: Int = 0,
 
     override var auditorWantNewMvrs: Int = -1,
+    override var samplesNotUsed: Int = 0,
 ) : AuditRoundIF {
-    val mvrsUsed: Int
-    val mvrsExtra: Int
 
     init {
         auditWasDone = auditRounds.all { it.auditWasDone }
         auditIsComplete = auditRounds.all { it.auditIsComplete }
         nmvrs = contestRounds.map { it.estMvrs }.sum()
         newmvrs = contestRounds.map { it.estNewMvrs }.sum()
-        mvrsUsed = auditRounds.map { it.mvrsUsed() }.sum()
-        mvrsExtra = auditRounds.map { it.nmvrs - it.mvrsUsed() }.sum()
+        samplesNotUsed = auditRounds.map { it.samplesNotUsed }.sum()
     }
 
     //// called from viewer
-    override fun mvrsUsed() = mvrsUsed
-    override fun mvrsExtra() = mvrsExtra
     override fun show(): String {
         return toString()
     }
 
-    override fun createNextRound(): AuditRoundIF {
+    override fun createNextRound(): AuditRound {
         TODO("Not yet implemented")
     }
 

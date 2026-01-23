@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PluralityErrorRates
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.pfn
@@ -744,7 +744,7 @@ class ClcaFuzzSampler(
     }
 
     fun remakeFuzzed(): List<Cvr> {
-        return makeFuzzedCvrsFrom(listOf(contest.info()), cvrs, fuzzPct)
+        return makeFuzzedCvrsForPolling(listOf(contest.info()), cvrs, fuzzPct)
     }
 
     override fun maxSamples() = maxSamples
@@ -793,7 +793,7 @@ class PollingFuzzSampler(
     }
 
     fun remakeFuzzed(): List<Cvr> {
-        return makeFuzzedCvrsFrom(listOf(contest.info()), cvrs, fuzzPct) // single contest
+        return makeFuzzedCvrsForPolling(listOf(contest.info()), cvrs, fuzzPct) // single contest
     }
 
     override fun maxSamples() = maxSamples

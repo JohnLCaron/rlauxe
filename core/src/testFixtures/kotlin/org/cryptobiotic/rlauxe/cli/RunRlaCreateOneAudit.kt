@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer2
 
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -131,8 +132,10 @@ object RunRlaCreateOneAudit {
         scardIter.forEach { sortedCards.add(it) }
 
         // OneAuditVunderFuzzer creates fuzzed mvrs (non-pooled) and simulated mvrs (pooled)
-        val vunderFuzz = OneAuditVunderFuzzer(cardManifest.populations as List<OneAuditPoolIF>, infos, fuzzPct, sortedCards)
-        val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.fuzzedPairs
+        // TODO use cardPools
+        val vunderFuzz =
+            OneAuditVunderFuzzer2(cardManifest.populations as List<OneAuditPoolIF>, infos, fuzzPct, sortedCards)
+        val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
         val sortedMvrs = oaFuzzedPairs.map { it.first }
 
         // have to write this here, where we know the mvrs

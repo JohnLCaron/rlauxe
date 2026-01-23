@@ -10,6 +10,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
+// TODO better
 class TestAuditRound {
 
     @Test
@@ -38,8 +39,6 @@ class TestAuditRound {
             assertEquals(0, firstAssertion.estMvrs)
             assertNotEquals(firstAssertion.assertion.loser, firstAssertion.assertion.winner) // wtf?
         }
-
-        assertEquals(0, auditRound.mvrsUsed())
     }
 
 }

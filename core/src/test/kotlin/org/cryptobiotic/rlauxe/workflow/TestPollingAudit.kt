@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.random.Random
 import kotlin.test.Test
@@ -123,7 +123,7 @@ class TestPollingAudit {
 
         // Synthetic cvrs for testing reflecting the exact contest votes. In production, we dont actually have the cvrs.
         val testCvrs = test.makeCvrsFromContests()
-        val testMvrs = makeFuzzedCvrsFrom(test.contests, testCvrs, mvrFuzzPct)
+        val testMvrs = makeFuzzedCvrsForPolling(test.contests, testCvrs, mvrFuzzPct)
         val mvrManager = MvrManagerForTesting(testCvrs, testMvrs, Random.nextLong())
 
         val workflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)

@@ -27,7 +27,7 @@ class PollingContestAuditTaskGenerator(
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-        val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+        val testMvrs = makeFuzzedCvrsForPolling(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
         val ballotCards = MvrManagerForTesting(testMvrs, testMvrs, useConfig.seed)
         val pollingWorkflow = WorkflowTesterPolling(useConfig, listOf(sim.contest), ballotCards)
@@ -61,7 +61,7 @@ class PollingSingleRoundAuditTaskGenerator(
 
         val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-        val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+        val testMvrs = makeFuzzedCvrsForPolling(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
         val ballotCards = MvrManagerForTesting(testCvrs, testMvrs, useConfig.seed)
         val pollingWorkflow = WorkflowTesterPolling(useConfig, listOf(sim.contest), ballotCards)
@@ -88,7 +88,9 @@ class PollingSingleRoundAuditTask(
 
     override fun run(): WorkflowResult {
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
-        runPollingAuditRound(workflow.auditConfig(), contestRounds, workflow.mvrManager(), 1)
+        val oneRound = AuditRound(1, contestRounds, samplePrns = emptyList())
+
+        runPollingAuditRound(workflow.auditConfig(), oneRound, workflow.mvrManager(), 1)
 
         var maxSamples = 0
         contestRounds.forEach { contest->

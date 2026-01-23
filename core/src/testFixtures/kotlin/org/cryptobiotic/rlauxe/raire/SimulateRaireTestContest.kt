@@ -37,7 +37,7 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
 
     var round = 1
     if (!quiet) println("===================================\nRound $round")
-    var solution = findMinAssertion(testContest.info, testCvrs, quiet)
+    var solution = solveForMinAssertion(testContest.info, testCvrs, quiet)
     if (solution == null) {
         println("round 1 solution is null")
         return null
@@ -66,7 +66,7 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
         }
 
         if (!quiet) println("===================================\nRound $round")
-        solution = findMinAssertion(testContest.info, testCvrs, quiet)
+        solution = solveForMinAssertion(testContest.info, testCvrs, quiet)
         if (solution == null) {
             println("round $round solution is null")
             return null
@@ -89,7 +89,7 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
             val nen = (aand.assertion as NotEliminatedNext)
             val voteSeq = VoteSequences.eliminate(startingVotes, nen.continuing.toList())
             val nenChoices = voteSeq.nenFirstChoices(nen.winner, nen.loser)
-            val margin = voteSeq.margin(nen.winner, nen.loser, nenChoices)
+            val margin = voteSeq.marginInVotes(nen.winner, nen.loser, nenChoices)
             // println("    nenChoices = $nenChoices margin=$margin\n")
             require(aand.margin == margin)
             nenChoices
@@ -98,7 +98,7 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
             val neb = (aand.assertion as NotEliminatedBefore)
             val voteSeq = VoteSequences(startingVotes)
             val nebChoices = voteSeq.nebFirstChoices(neb.winner, neb.loser)
-            val margin = voteSeq.margin(neb.winner, neb.loser, nebChoices)
+            val margin = voteSeq.marginInVotes(neb.winner, neb.loser, nebChoices)
             // println("    nebChoices = $nebChoices margin=$margin\n")
             require(aand.margin == margin)
             nebChoices
@@ -229,7 +229,7 @@ data class RaireContestTestData(
 
 // TODO using testCvrs.size as Nc I think
 // return Triple(winner, solution.solution.Ok, minAssertion)
-fun findMinAssertion(
+fun solveForMinAssertion(
     info: ContestInfo,
     testCvrs: List<Cvr>,
     quiet: Boolean

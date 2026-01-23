@@ -124,7 +124,7 @@ class TestContestSimulation {
                     phantomPct = phantomPct
                 )
                 var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-                val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+                val testMvrs = makeFuzzedCvrsForPolling(listOf(sim.contest), testCvrs, mvrsFuzzPct)
                 val testPairs = testMvrs.zip(testCvrs)
 
                 // speculative if this is really what happens

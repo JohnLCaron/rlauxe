@@ -72,8 +72,8 @@ class CobraAudit(
         contestsUA = contestsToAudit.map { ContestWithAssertions(it, isClca = true,).addStandardAssertions() }
     }
 
-    override fun runAuditRound(auditRound: AuditRoundIF, quiet: Boolean): Boolean  {
-        val complete = runClcaAuditRound(auditConfig, auditRound.contestRounds, mvrManagerForTesting, auditRound.roundIdx,
+    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
+        val complete = runClcaAuditRound(auditConfig, auditRound, mvrManagerForTesting, auditRound.roundIdx,
             auditor = AuditCobraAssertion(p2prior)
         )
         auditRound.auditWasDone = true
@@ -129,7 +129,7 @@ class AuditCobraAssertion(
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampling.nmvrs(),
-            maxBallotIndexUsed = sampling.maxSampleIndexUsed(),
+            maxSampleIndexUsed = sampling.maxSampleIndexUsed(),
             plast = testH0Result.pvalueLast,
             pmin = testH0Result.pvalueMin,
             samplesUsed = samplesNeeded,

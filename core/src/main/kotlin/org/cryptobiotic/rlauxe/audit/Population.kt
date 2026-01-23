@@ -21,6 +21,7 @@ interface PopulationIF {
     fun hasContest(contestId: Int): Boolean
 }
 
+// serialization turns into this
 data class Population(
     val name: String,
     val id: Int,

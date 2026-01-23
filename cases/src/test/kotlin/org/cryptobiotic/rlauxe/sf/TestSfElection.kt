@@ -1,13 +1,9 @@
 package org.cryptobiotic.rlauxe.sf
 
-import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.persist.csv.*
-import org.cryptobiotic.rlauxe.persist.json.*
-import org.cryptobiotic.rlauxe.util.*
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
@@ -15,14 +11,9 @@ import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
-import org.cryptobiotic.rlauxe.estimate.estimationSubset
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.workflow.readCardManifest
-import java.io.BufferedReader
-import java.io.InputStream
-import java.io.InputStreamReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail

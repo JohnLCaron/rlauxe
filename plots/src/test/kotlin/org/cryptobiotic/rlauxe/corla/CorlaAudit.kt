@@ -35,7 +35,7 @@ class CorlaSingleRoundAuditTaskGenerator(
             ContestSimulation.make2wayTestContest(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
         val testMvrs = if (p2flips != null || p1flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips) else
-            makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+            makeFuzzedCvrsForPolling(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
         val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(sim.contest), emptyList(),
                                  MvrManagerForTesting(testCvrs, testMvrs, useConfig.seed))
@@ -74,7 +74,7 @@ class CorlaContestAuditTaskGenerator(
         val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
 
         val testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
-            makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+            makeFuzzedCvrsForPolling(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
         val clca = CorlaAudit(auditConfig, listOf(sim.contest), MvrManagerForTesting(testCvrs, testMvrs, auditConfig.seed), quiet = true)
         return ContestAuditTask(
@@ -99,8 +99,8 @@ class CorlaAudit(
         contestsUA = contestsToAudit.map { ContestWithAssertions(it, isClca=true, ).addStandardAssertions() }
     }
 
-    override fun runAuditRound(auditRound: AuditRoundIF, quiet: Boolean): Boolean  {
-        val complete = runClcaAuditRound(auditConfig, auditRound.contestRounds, mvrManagerForTesting, auditRound.roundIdx,
+    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
+        val complete = runClcaAuditRound(auditConfig, auditRound, mvrManagerForTesting, auditRound.roundIdx,
             auditor = AuditCorlaAssertion()
         )
         auditRound.auditWasDone = true
@@ -149,7 +149,7 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampling.nmvrs(),
-            maxBallotIndexUsed = sampling.maxSampleIndexUsed(),
+            maxSampleIndexUsed = sampling.maxSampleIndexUsed(),
             plast = testH0Result.pvalueLast,
             pmin = testH0Result.pvalueMin,
             samplesUsed = samplesNeeded,

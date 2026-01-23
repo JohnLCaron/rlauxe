@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.core.AssorterIF
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -8,24 +10,74 @@ import org.cryptobiotic.rlauxe.util.CvrBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.CvrContest
 import org.cryptobiotic.rlauxe.util.Welford
+import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.random.Random
 
-fun makeFuzzedCvrsFrom(contests: List<ContestIF>,
-                       cvrs: List<Cvr>,
-                       fuzzPct: Double,
+// for one contest, this takes a list of cvrs and fuzzes them
+class PollingFuzzSampler(
+    val fuzzPct: Double,
+    val cvrs: List<Cvr>,
+    val contest: Contest,
+    val assorter: AssorterIF
+): Sampler, Iterator<Double> {
+    val maxSamples = cvrs.count { it.hasContest(contest.id) } // dont need this is its single contest
+    val N = cvrs.size
+    val welford = Welford()
+    val permutedIndex = MutableList(N) { it }
+    private var mvrs: List<Cvr>
+    private var idx = 0
+
+    init {
+        mvrs = remakeFuzzed() // TODO could do fuzzing on the fly ??
+    }
+
+    override fun sample(): Double {
+        while (idx < N) {
+            val mvr = mvrs[permutedIndex[idx]]
+            idx++
+            if (mvr.hasContest(contest.id)) {
+                val result = assorter.assort(mvr, usePhantoms = true)
+                welford.update(result)
+                return result
+            }
+        }
+        throw RuntimeException("no samples left for ${contest.id} and Assorter ${assorter}")
+    }
+
+    override fun reset() {
+        mvrs = remakeFuzzed()
+        permutedIndex.shuffle(Random)
+        idx = 0
+    }
+
+    fun remakeFuzzed(): List<Cvr> {
+        return makeFuzzedCvrsForPolling(listOf(contest.info()), cvrs, fuzzPct) // single contest
+    }
+
+    override fun maxSamples() = maxSamples
+    override fun maxSampleIndexUsed() = idx
+    override fun nmvrs() = mvrs.size
+
+    override fun hasNext(): Boolean = (idx < N)
+    override fun next(): Double = sample()
+}
+
+fun makeFuzzedCvrsForPolling(contests: List<ContestIF>,
+                             cvrs: List<Cvr>,
+                             fuzzPct: Double,
 ): List<Cvr>  {
-    return makeFuzzedCvrsFrom(contests.map { it.info()}, cvrs, fuzzPct)
+    return makeFuzzedCvrsForPolling(contests.map { it.info()}, cvrs, fuzzPct)
 }
 
 // includes undervotes i think
-fun makeFuzzedCvrsFrom(infoList: List<ContestInfo>,
-                       cvrs: List<Cvr>,
-                       fuzzPct: Double,
-                       welford: Welford? = null,
-                       filter: ((CvrBuilder) -> Boolean)? = null,
+fun makeFuzzedCvrsForPolling(infoList: List<ContestInfo>,
+                             cvrs: List<Cvr>,
+                             fuzzPct: Double,
+                             welford: Welford? = null,
+                             filter: ((CvrBuilder) -> Boolean)? = null,
 ): List<Cvr> {
     if (fuzzPct == 0.0) return cvrs
 

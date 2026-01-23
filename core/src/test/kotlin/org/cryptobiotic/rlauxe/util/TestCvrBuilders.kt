@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -45,7 +45,7 @@ class TestCvrBuilders {
         val ntrials = 1
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
         fuzzPcts.forEach { fuzzPct ->
-            val fcvrs = makeFuzzedCvrsFrom(contests, cvrs, fuzzPct)
+            val fcvrs = makeFuzzedCvrsForPolling(contests, cvrs, fuzzPct)
             println("fuzzPct = $fuzzPct")
             val allErrorRates = mutableListOf<PluralityErrorRates>()
             contests.forEach { contest ->

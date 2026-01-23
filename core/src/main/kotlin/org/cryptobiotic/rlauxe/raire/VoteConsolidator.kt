@@ -53,6 +53,10 @@ class VoteConsolidator {
     }
 
     override fun toString() = buildString {
+        appendLine(  "n=${votes.size}, nvotes=${nvotes()}")
+    }
+
+    fun show() = buildString {
         votes.forEach { (key, value) ->
             appendLine(  "  ${key.array.contentToString()} == $value ")
         }
@@ -107,7 +111,7 @@ data class VoteSequences(val votes: List<VoteList>) {
         return firstChoices
     }
 
-    fun margin(winner: Int, loser: Int, votes: Map<Int, Int>): Int {
+    fun marginInVotes(winner: Int, loser: Int, votes: Map<Int, Int>): Int {
         val winnerVotes = votes[winner] ?: 0
         val loserVotes = votes[loser] ?: 0
         return winnerVotes - loserVotes

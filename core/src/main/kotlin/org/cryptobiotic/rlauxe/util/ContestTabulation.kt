@@ -5,31 +5,44 @@ import org.cryptobiotic.rlauxe.audit.CardManifest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.raire.HashableIntArray
 import org.cryptobiotic.rlauxe.raire.VoteConsolidator
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.iterator
+import kotlin.collections.toMap
 
-// IRV have empty votes
-interface RegVotesIF {
-    val votes: Map<Int, Int>
+interface ContestVotesIF {
+    val contestId: Int
+    val voteForN: Int
+    val votes: Map<Int, Int> // IRV have empty votes
     fun ncards(): Int // including undervotes
     fun undervotes(): Int // including undervotes
 }
 
-data class RegVotes(override val votes: Map<Int, Int>, val ncards: Int, val undervotes: Int): RegVotesIF {
+data class ContestVotes(
+    override val contestId: Int,
+    override val voteForN: Int,
+    override val votes: Map<Int, Int>,
+    val ncards: Int,
+    val undervotes: Int
+): ContestVotesIF {
     override fun ncards() = ncards
     override fun undervotes() = undervotes
 }
 
 // tabulate contest votes from cards or cvrs; can handle both regular and irv voting
-class ContestTabulation(val contestId: Int, val voteForN: Int, val isIrv: Boolean, val candidateIdToIndex: Map<Int, Int>): RegVotesIF {
+class ContestTabulation(
+    override val contestId: Int,
+    override val voteForN: Int,
+    val isIrv: Boolean,
+    val candidateIds: List<Int>
+): ContestVotesIF {
 
-    constructor(info: ContestInfo) : this(info.id, info.voteForN, info.isIrv,
-        if (info.isIrv) info.candidateIds.mapIndexed { idx, candidateId -> Pair(candidateId, idx) }.toMap() else emptyMap()
-    )
+    constructor(info: ContestInfo) : this(info.id, info.voteForN, info.isIrv, info.candidateIds)
+    constructor(other: ContestTabulation) : this(other.contestId, other.voteForN, other.isIrv, other.candidateIds)
 
-    constructor(other: ContestTabulation) : this(other.contestId, other.voteForN, other.isIrv, other.candidateIdToIndex)
+    val candidateIdToIdx by lazy { candidateIds.mapIndexed { idx, id -> Pair(id, idx) }.toMap() }
 
     override val votes = mutableMapOf<Int, Int>() // cand -> votes
     val irvVotes = VoteConsolidator() // candidate indexes
@@ -70,12 +83,12 @@ class ContestTabulation(val contestId: Int, val voteForN: Int, val isIrv: Boolea
 
     fun addVotesIrv(candidateRanks: IntArray) {
         candidateRanks.forEach {  // track for non IRV also?
-            if (candidateIdToIndex[it] == null) {
+            if (candidateIdToIdx[it] == null) {
                 notfound[it] = notfound.getOrDefault(it, 0) + 1
             }
         }
         // convert to index for Raire
-        val mappedVotes = candidateRanks.map { candidateIdToIndex[it] }
+        val mappedVotes = candidateRanks.map { candidateIdToIdx[it] }
         if (mappedVotes.isNotEmpty()) irvVotes.addVote(mappedVotes.filterNotNull().toIntArray())
         ncards++
         if (candidateRanks.isEmpty()) novote++
@@ -98,6 +111,18 @@ class ContestTabulation(val contestId: Int, val voteForN: Int, val isIrv: Boolea
 
      fun votesAndUndervotes(): Vunder {
         return Vunder.fromNpop(contestId, undervotes, ncards(), votes, voteForN)
+     }
+
+    fun votesAndUndervotes2(poolId: Int): Vunder2 {
+        return if (!isIrv) Vunder2.fromNpop(contestId, undervotes, ncards(), votes, voteForN) else {
+            val missing = ncards() - undervotes - irvVotes.nvotes()
+            val voteCounts = irvVotes.votes.map { (hIntArray, count) ->
+                // convert indices back to ids
+                val idArray: List<Int> = hIntArray.array.map { candidateIds[it] }
+                Pair(idArray.toIntArray(), count)
+            }
+            Vunder2(contestId, poolId, voteCounts, undervotes, missing, 1)
+        }
     }
 
     fun nvotes() = votes.map { it.value}.sum()
@@ -118,7 +143,7 @@ class ContestTabulation(val contestId: Int, val voteForN: Int, val isIrv: Boolea
         if (undervotes != other.undervotes) return false
         if (overvotes != other.overvotes) return false
         if (nphantoms != other.nphantoms) return false
-        if (candidateIdToIndex != other.candidateIdToIndex) return false
+        if (candidateIds != other.candidateIds) return false
         if (votes != other.votes) return false
         if (irvVotes != other.irvVotes) return false
         if (notfound != other.notfound) return false
@@ -134,7 +159,7 @@ class ContestTabulation(val contestId: Int, val voteForN: Int, val isIrv: Boolea
         result = 31 * result + undervotes
         result = 31 * result + overvotes
         result = 31 * result + nphantoms
-        result = 31 * result + candidateIdToIndex.hashCode()
+        result = 31 * result + candidateIds.hashCode()
         result = 31 * result + votes.hashCode()
         result = 31 * result + irvVotes.hashCode()
         result = 31 * result + notfound.hashCode()
@@ -156,7 +181,7 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
 fun tabulateOneAuditPools(cardPools: List<OneAuditPoolIF>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val poolSums = infos.mapValues { ContestTabulation(it.value) }
     cardPools.forEach { cardPool ->
-        cardPool.regVotes().forEach { (contestId, regVotes: RegVotesIF) ->
+        cardPool.regVotes().forEach { (contestId, regVotes: ContestVotesIF) ->
             val poolSum = poolSums[contestId]
             if (poolSum != null) {
                 regVotes.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
@@ -173,7 +198,7 @@ fun tabulateCardManifest(cardManifest: CardManifest, infos: Map<Int, ContestInfo
     val poolSums = infos.mapValues { ContestTabulation(it.value) }
     cardManifest.populations.forEach {
         val cardPool = it as OneAuditPoolIF
-        cardPool.regVotes().forEach { (contestId, regVotes: RegVotesIF) ->
+        cardPool.regVotes().forEach { (contestId, regVotes: ContestVotesIF) ->
             val poolSum = poolSums[contestId]
             if (poolSum != null) {
                 regVotes.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }

@@ -15,14 +15,14 @@ private val logger = KotlinLogging.logger("PollingAudit")
 // TODO parallelize over contests; see runClcaAuditRound
 fun runPollingAuditRound(
     config: AuditConfig,
-    contests: List<ContestRound>,
+    auditRound: AuditRound,
     mvrManager: MvrManager,
     roundIdx: Int,
     quiet: Boolean = true
 ): Boolean {
     val pairs = mvrManager.makeMvrCardPairsForRound(roundIdx)
 
-    val contestsNotDone = contests.filter { !it.done }
+    val contestsNotDone = auditRound.contestRounds.filter { !it.done }
     if (contestsNotDone.isEmpty()) {
         return true
     }
@@ -47,6 +47,20 @@ fun runPollingAuditRound(
         contest.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
         allDone = allDone && contest.done
     }
+
+    // given the cvrPairs, and each ContestRound's maxSampleIndexUsed, count the cvrs that were not used
+    val maxIndex = contestsNotDone.associate { it.id to it.maxSampleIndexUsed() }
+    var countUnused = 0
+    pairs.forEachIndexed { idx, mvrCardPair ->
+        val card = mvrCardPair.second
+        var wasUsed = false
+        contestsNotDone.forEach { contest ->
+            if (card.hasContest(contest.id) && idx < maxIndex[contest.id]!!) wasUsed = true
+        }
+        if (!wasUsed) countUnused++
+    }
+
+    auditRound.samplesNotUsed =  countUnused
     return allDone
 }
 
@@ -87,7 +101,7 @@ fun auditPollingAssertion(
 
     assertionRound.auditResult = AuditRoundResult(roundIdx,
         nmvrs = sampling.nmvrs(),
-        maxBallotIndexUsed = sampling.maxSampleIndexUsed(),
+        maxSampleIndexUsed = sampling.maxSampleIndexUsed(),
         plast = testH0Result.pvalueLast,
         pmin = testH0Result.pvalueMin,
         samplesUsed = testH0Result.sampleCount,

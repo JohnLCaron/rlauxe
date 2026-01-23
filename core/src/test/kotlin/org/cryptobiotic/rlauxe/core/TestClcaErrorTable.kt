@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsFrom
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.Test
@@ -37,7 +37,7 @@ class TestClcaErrorTable {
                 )
 
             val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-            val testMvrs = makeFuzzedCvrsFrom(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+            val testMvrs = makeFuzzedCvrsForPolling(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
             val contestUA = ContestWithAssertions(sim.contest).addStandardAssertions()
             val assertion = contestUA.minClcaAssertion()!!

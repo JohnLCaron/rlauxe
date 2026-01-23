@@ -56,7 +56,7 @@ class PersistedWorkflow(
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestWithAssertions> = auditContests
 
-    override fun startNewRound(quiet: Boolean, onlyTask: String?): AuditRoundIF {
+    override fun startNewRound(quiet: Boolean, onlyTask: String?): AuditRound {
 
         val nextRound = super.startNewRound(quiet, onlyTask)
 
@@ -79,7 +79,7 @@ class PersistedWorkflow(
         return nextRound
     }
 
-    override fun runAuditRound(auditRound: AuditRoundIF, quiet: Boolean): Boolean  { // return complete
+    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  { // return complete
         val roundIdx = auditRound.roundIdx
 
         //   in a real audit, need to set the real mvrs externally with EnterMvrsCli, which calls auditRecord.enterMvrs(mvrs)
@@ -90,9 +90,9 @@ class PersistedWorkflow(
         }
 
         val complete =  when (config.auditType) {
-            AuditType.CLCA -> runClcaAuditRound(config, auditRound.contestRounds, mvrManager, auditRound.roundIdx, auditor = ClcaAssertionAuditor(quiet))
-            AuditType.POLLING -> runPollingAuditRound(config, auditRound.contestRounds, mvrManager, auditRound.roundIdx, quiet)
-            AuditType.ONEAUDIT -> runClcaAuditRound(config, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
+            AuditType.CLCA -> runClcaAuditRound(config, auditRound, mvrManager, auditRound.roundIdx, auditor = ClcaAssertionAuditor(quiet))
+            AuditType.POLLING -> runPollingAuditRound(config, auditRound, mvrManager, auditRound.roundIdx, quiet)
+            AuditType.ONEAUDIT -> runClcaAuditRound(config, auditRound, mvrManager, auditRound.roundIdx,
                 auditor = OneAuditAssertionAuditor(mvrManager().oapools()!!, quiet))
         }
 

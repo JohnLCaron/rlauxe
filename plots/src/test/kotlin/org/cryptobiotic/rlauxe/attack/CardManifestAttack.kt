@@ -24,7 +24,7 @@ import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.RegVotes
+import org.cryptobiotic.rlauxe.util.ContestVotes
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.showTabs
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
@@ -198,9 +198,9 @@ class CardManifestAttack {
         val cardPool = OneAuditPool(
             "groupB", 1, false, 100,
             regVotes = mapOf(
-                1 to RegVotes(mapOf(1 to 0, 2 to 25), 75, undervotes = 50), // false
+                1 to ContestVotes(1, 1,mapOf(1 to 0, 2 to 25), 75, undervotes = 50), // false
                 // 1 to RegVotes(mapOf(1 to 50, 2 to 25), 75, undervotes = 0), // true
-                2 to RegVotes(mapOf(1 to 0, 2 to 25), 25, undervotes = 0),  // unchanged
+                2 to ContestVotes(2, 1, mapOf(1 to 0, 2 to 25), 25, undervotes = 0),  // unchanged
             )
         )
         print(cardPool.show())

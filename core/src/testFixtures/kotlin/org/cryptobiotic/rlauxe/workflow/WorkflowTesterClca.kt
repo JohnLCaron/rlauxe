@@ -38,8 +38,8 @@ class WorkflowTesterClca(
         contestsUA = regularContests + raireContests
     }
 
-    override fun runAuditRound(auditRound: AuditRoundIF, quiet: Boolean): Boolean  {
-        val complete = runClcaAuditRound(auditConfig, auditRound.contestRounds, mvrManager, auditRound.roundIdx,
+    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
+        val complete = runClcaAuditRound(auditConfig, auditRound, mvrManager, auditRound.roundIdx,
             auditor = ClcaAssertionAuditor(quiet)
         )
         auditRound.auditWasDone = true

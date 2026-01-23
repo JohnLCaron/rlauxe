@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.util.RegVotesIF
-import org.cryptobiotic.rlauxe.util.RegVotes
+import org.cryptobiotic.rlauxe.util.ContestVotesIF
+import org.cryptobiotic.rlauxe.util.ContestVotes
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.Vunder
+import org.cryptobiotic.rlauxe.util.Vunder2
 import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import kotlin.Int
 import kotlin.test.Test
@@ -113,7 +114,7 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<ContestWithAssertions, List<O
         Pair( info.candidateNames[name]!!, votes[1])}.toMap()
     val poolUndervotes = stratumSizes[1] - poolVotes.values.sum()
 
-    val regVotes = RegVotes(poolVotes, stratumSizes[1], poolUndervotes)
+    val regVotes = ContestVotes(0, 1, poolVotes, stratumSizes[1], poolUndervotes)
     val cardPool = CardPoolSingleContest("kali", 1, info.id, regVotes)
 
     // reported results for the two strata
@@ -129,7 +130,7 @@ fun makeContestKalamazoo(nwinners:Int = 1): Triple<ContestWithAssertions, List<O
 }
 
 // single contest, for testing
-class CardPoolSingleContest(override val poolName: String, override val poolId: Int, val contestId: Int, val regVotes: RegVotesIF) : OneAuditPoolIF {
+class CardPoolSingleContest(override val poolName: String, override val poolId: Int, val contestId: Int, val regVotes: ContestVotesIF) : OneAuditPoolIF {
     val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
     override fun regVotes() = mapOf(contestId to regVotes)
     override fun hasContest(contestId: Int) = contestId == this.contestId
@@ -142,9 +143,15 @@ class CardPoolSingleContest(override val poolName: String, override val poolId: 
     override fun id() = poolId
     override fun hasSingleCardStyle() = false // TODO dunno
 
-    override fun votesAndUndervotes(contestId: Int, voteForN: Int): Vunder {
-        val poolUndervotes = ncards() * voteForN - regVotes.votes.values.sum()
-        return Vunder(contestId, regVotes.votes, poolUndervotes, ncards(), voteForN)
+    override fun votesAndUndervotes(contestId: Int): Vunder {
+        val poolUndervotes = ncards() * regVotes.voteForN - regVotes.votes.values.sum()
+        return Vunder(contestId, regVotes.votes, poolUndervotes, ncards(), regVotes.voteForN)
+    }
+
+    override fun votesAndUndervotes2(contestId: Int): Vunder2 {
+        val poolUndervotes = ncards() * regVotes.voteForN - regVotes.votes.values.sum()
+        val voteCounts = regVotes.votes.map { Pair(intArrayOf(it.key), it.value) }
+        return Vunder2(contestId, -1, voteCounts, poolUndervotes, ncards(), regVotes.voteForN)
     }
 }
 
@@ -160,7 +167,7 @@ fun makeTestMvrs(
 
     // add the regular cvrs
     if (cvrNcards > 0) {
-        val vunderCvrs = Vunder.fromNpop(oaContest.id, cvrUndervotes, cvrNcards, cvrVotes, info.voteForN)
+        val vunderCvrs = Vunder2.fromNpop(oaContest.id, cvrUndervotes, cvrNcards, cvrVotes, info.voteForN)
         val cvrCvrs = makeVunderCvrs(mapOf(info.id to vunderCvrs), "regular", poolId = null)
         cvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     }
@@ -168,7 +175,7 @@ fun makeTestMvrs(
     // add the pooled cvrs
     pools.forEach { pool ->
         pool.contests().forEach { contestId ->
-            val vunderPool = pool.votesAndUndervotes(contestId, 1)
+            val vunderPool = pool.votesAndUndervotes(contestId)
             val poolCvrs = makeVunderCvrs(mapOf(info.id to vunderPool), pool.poolName, poolId = pool.poolId)
             cvrs.addAll(poolCvrs)
         }

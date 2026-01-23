@@ -1,6 +1,9 @@
 package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
@@ -66,7 +69,7 @@ open class ClcaAssorter(
     fun upperBound() = upperBound  // upper bound of clca assorter; betting functions may need to know this
     fun assorter() = assorter
 
-    // expected sample size of there are no errors
+    // expected sample size if there are no errors
     fun sampleSizeNoErrors(maxRisk: Double, alpha: Double): Int {
         val maxBet = 2 * maxRisk
 
@@ -78,6 +81,22 @@ open class ClcaAssorter(
         // (payoff)^sampleSize = 1 / alpha
         // sampleSize = -ln(alpha) / ln(payoff)
         return roundUp((-ln(alpha) / ln(payoff)))
+    }
+
+    // seems unlikely bet < maxBet when noerrors and not oa. Only if phantoms is big enough.
+    open fun estSamplesNeeded(contest: ContestWithAssertions, maxRisk: Double, alpha: Double): Int {
+        val upper = assorter.upperBound()
+        val betFn = GeneralAdaptiveBetting(
+            contest.Npop,
+            ClcaErrorCounts.empty(noerror(), upper),
+            contest.Nphantoms,
+            null,
+            maxRisk = maxRisk,
+            debug=false,
+        )
+        val bet = betFn.bet(ClcaErrorTracker(noerror(), upper))
+        val maxRisk = bet / 2
+        return sampleSizeNoErrors(maxRisk = maxRisk, alpha)
     }
 
     // B(bi, ci) = (1-o/u)/(2-v/u), where

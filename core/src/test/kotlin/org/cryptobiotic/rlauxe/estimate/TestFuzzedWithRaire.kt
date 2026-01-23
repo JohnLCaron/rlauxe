@@ -53,7 +53,7 @@ class TestFuzzedWithRaire {
         println("count1=${cvrs1.size} count2=${rcvrs.size} countAll = ${testCvrs.size}")
 
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
-            else makeFuzzedCvrsFrom(listOf(contest, rcontest.contest), testCvrs, fuzzMvrs)
+            else makeFuzzedCvrsForPolling(listOf(contest, rcontest.contest), testCvrs, fuzzMvrs)
 
         println("after $fuzzMvrs fuzz")
         require(testCvrs.size == testMvrs.size)

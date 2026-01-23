@@ -46,14 +46,12 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampling.maxSamples(),
-            maxBallotIndexUsed = sampling.maxSampleIndexUsed(),
+            maxSampleIndexUsed = sampling.maxSampleIndexUsed(),
             plast = testH0Result.pvalueLast,
             pmin = testH0Result.pvalueMin,
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
-            // startingRates = bettingFn.startingErrorRates(),
             measuredCounts = measuredCounts,
-            // params = mapOf("poolAvg" to poolAvg)
         )
 
         if (!quiet) logger.debug{" ${contestUA.name} auditResult= ${assertionRound.auditResult}"}

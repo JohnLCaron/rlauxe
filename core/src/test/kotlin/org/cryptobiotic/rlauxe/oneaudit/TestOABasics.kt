@@ -137,7 +137,24 @@ class TestOABasics {
         println("bassort = [0, .5, 1, 1.5, 2] * noerror=${oaAssorter.bassort(loserCvr, loserCvr)} ")
     }
 
-    // AffineTransform code removed 8/19/2025. See history before then to revive
+    @Test
+    fun testEstSamplesNeeded() {
+        val (contestUA, mvrs, cards, cardPools) = makeOneAuditTest(
+            20000,
+            18000,
+            cvrFraction = .66,
+            undervoteFraction = .0,
+            phantomFraction = .0,
+        )
+        println(contestUA)
+        val oaAssorter = contestUA.minClcaAssertion()!!.cassorter as ClcaAssorterOneAudit
+        println(oaAssorter)
+        println("oaAssortRates = ${oaAssorter.oaAssortRates.show()}")
+        println("sampleSizeNoErrors = ${oaAssorter.sampleSizeNoErrors( 0.9, .05)}")
+        println("estSamplesNeeded = ${oaAssorter.estSamplesNeeded(contestUA, 0.9, .05)}")
+    }
+
+        // AffineTransform code removed 8/19/2025. See history before then to revive
 
     /* @Test
     fun testMakeContestOAwithAffine() {

@@ -40,7 +40,7 @@ fun simulateOneAuditRaire(N: Int, contestId: Int, ncands:Int, minMargin: Double,
     )
 
     val raireOAUA = makeRaireOneAuditContest(info, cvrTab, N, Nbin=N, pools)
-    println(raireOAUA)
+    if (!quiet) println(raireOAUA)
 
     return Triple(raireOAUA, cvrsWithPools, pools)
 }

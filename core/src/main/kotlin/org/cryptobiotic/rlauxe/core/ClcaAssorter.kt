@@ -70,7 +70,7 @@ open class ClcaAssorter(
     fun assorter() = assorter
 
     // expected sample size if there are no errors
-    fun sampleSizeNoErrors(maxRisk: Double, alpha: Double): Int {
+    open fun sampleSizeNoErrors(maxRisk: Double, alpha: Double): Int {
         val maxBet = 2 * maxRisk
 
         // payoff = 1 + λ_i * (x - mui)
@@ -84,7 +84,8 @@ open class ClcaAssorter(
     }
 
     // seems unlikely bet < maxBet when noerrors and not oa. Only if phantoms is big enough.
-    open fun estSamplesNeeded(contest: ContestWithAssertions, maxRisk: Double, alpha: Double): Int {
+    // return estSampleSize, optimalBet
+    open fun estSamplesNeeded(contest: ContestWithAssertions, maxRisk: Double, alpha: Double): Pair<Int, Double> {
         val upper = assorter.upperBound()
         val betFn = GeneralAdaptiveBetting(
             contest.Npop,
@@ -94,9 +95,8 @@ open class ClcaAssorter(
             maxRisk = maxRisk,
             debug=false,
         )
-        val bet = betFn.bet(ClcaErrorTracker(noerror(), upper))
-        val maxRisk = bet / 2
-        return sampleSizeNoErrors(maxRisk = maxRisk, alpha)
+        val optimalBet = betFn.bet(ClcaErrorTracker(noerror(), upper))
+        return Pair(sampleSizeNoErrors(maxRisk = optimalBet/2, alpha), optimalBet)
     }
 
     // B(bi, ci) = (1-o/u)/(2-v/u), where

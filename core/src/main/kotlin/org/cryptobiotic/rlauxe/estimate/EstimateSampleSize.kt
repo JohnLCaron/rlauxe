@@ -16,7 +16,7 @@ import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer2
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.raire.SimulateIrvTestData
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -67,7 +67,7 @@ fun estimateSampleSizes(
     // uses config.simFuzzPct to fuzz the non-pooled cvrs; the pooled cvrs are simulated using Vunder
     val vunderFuzz = if (!config.isOA) null else {
         val infos = auditRound.contestRounds.map { it.contestUA.contest.info() }.associateBy { it.id }
-        OneAuditVunderFuzzer2(cardPools!!, infos, config.simFuzzPct ?: 0.0, contestCards!!)
+        OneAuditVunderFuzzer(cardPools!!, infos, config.simFuzzPct ?: 0.0, contestCards!!)
     }
 
     // create the estimation tasks for each contest and assertion
@@ -134,7 +134,7 @@ fun makeEstimationTasks(
     contestRound: ContestRound,
     roundIdx: Int,
     contestCards: List<AuditableCard>?,
-    vunderFuzz: OneAuditVunderFuzzer2?,
+    vunderFuzz: OneAuditVunderFuzzer?,
     moreParameters: Map<String, Double> = emptyMap(),
 ): List<EstimateSampleSizeTask> {
     val stopwatch = Stopwatch()
@@ -201,7 +201,7 @@ class EstimateSampleSizeTask(
     val config: AuditConfig,
     val contestCards: List<AuditableCard>?,
     val mvrsForPolling: List<Cvr>?,
-    val vunderFuzz: OneAuditVunderFuzzer2?,
+    val vunderFuzz: OneAuditVunderFuzzer?,
     val contestRound: ContestRound,
     val assertionRound: AssertionRound,
     val startingTestStatistic: Double, // T, must grow to 1/riskLimit
@@ -367,7 +367,7 @@ fun runRepeatedBettingMart(
 fun estimateOneAuditAssertionRound(
     roundIdx: Int,
     config: AuditConfig,
-    vunderFuzz: OneAuditVunderFuzzer2,
+    vunderFuzz: OneAuditVunderFuzzer,
     contestRound: ContestRound,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0, // T, must grow to 1/riskLimit
@@ -542,7 +542,7 @@ fun runRepeatedAlphaMart(
         eta0 = eta0,
     )
 
-    val tracker = ClcaErrorTracker(0.0, 1.0)
+    val tracker = ClcaErrorTracker(0.0, 1.0) // TODO using ClcaErrorTracker, why not PluralityErrorTracker?
     val testFn = AlphaMart(
         estimFn = useEstimFn,
         N = N,

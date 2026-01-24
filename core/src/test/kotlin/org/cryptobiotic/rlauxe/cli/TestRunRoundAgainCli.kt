@@ -9,14 +9,14 @@ class TestRunRoundAgainCli {
 
     @Test
     fun testRunRoundAgainOneAudit() {
-        val auditDir = "$testdataDir/persist/testRunCli/oneaudit/audit"
+        val auditDir = "$testdataDir/cases/sf2024/oa/audit"
 
         RunRoundAgainCli.main(
             arrayOf(
                 "-auditDir", auditDir,
-                "-contest", "1",
+                "-contest", "23",
                 "-round", "1",
-                "-assertion", "first",
+                "-assertion", "76/75",
             )
         )
     }

@@ -6,8 +6,12 @@ import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.util.roundUp
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 import kotlin.collections.get
+import kotlin.math.ln
 
 /** See OneAudit Section 2.3.
  * Suppose we have a CVR ci for every ballot card whose index i is in C. The cardinality of C is |C|.
@@ -162,10 +166,11 @@ class ClcaAssorterOneAudit(
 ) : ClcaAssorter(info, assorter, dilutedMargin=dilutedMargin) {
     override fun classname() = this::class.simpleName
 
-    // convenient place to put this; set from outside
+    // convenient place to put this; set from outside.
+    // TODO may be very large, may not want to serialize to Json, perhaps rehydrate from cardPool.csv
     var oaAssortRates = OneAuditAssortValueRates(emptyMap(), 0)
 
-    fun bassort1(mvr: CvrIF, cvr:CvrIF, hasStyle:Boolean=true): Double {
+    fun bassortOld(mvr: CvrIF, cvr:CvrIF, hasStyle:Boolean=true): Double {
         val overstatement = overstatementError(mvr, cvr, hasStyle) // ωi eq (1)
         val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
         return tau * noerror   // Bi eq (7)
@@ -184,6 +189,8 @@ class ClcaAssorterOneAudit(
         }
 
         // TODO im surprised that we dont return 0.5 when !mvr.hasContest(info.id)
+        //    I think it does; see TestOneAuditAssortValueRates
+        //    also check that it does for general CLCA
         // if (!mvr.hasContest(info.id)) { if (hasStyle) 0.0 else 0.5 }
 
         val overstatement = overstatementPoolError(mvr, poolAverage, hasStyle) // ωi
@@ -198,7 +205,7 @@ class ClcaAssorterOneAudit(
         return result
     }
 
-    fun overstatementError1(mvr: CvrIF, cvr: CvrIF, hasStyle: Boolean): Double {
+    fun overstatementErrorOld(mvr: CvrIF, cvr: CvrIF, hasStyle: Boolean): Double {
 
         if (hasStyle and !cvr.hasContest(info.id)) {
             val trace = Throwable().stackTraceToString()
@@ -229,7 +236,24 @@ class ClcaAssorterOneAudit(
         return cvr_assort - mvr_assort
     }
 
-    override fun estSamplesNeeded(contest: ContestWithAssertions, maxRisk: Double, alpha: Double): Int {
+    // expected sample size if there are no errors
+    override fun sampleSizeNoErrors(maxRisk: Double, alpha: Double): Int {
+        val maxBet = 2 * maxRisk
+
+        val p0 = 1.0 - oaAssortRates.sumRates()
+        val noerrorTerm = ln(1.0 + maxBet * (noerror - 0.5)) * p0
+
+        var sumOneAuditTerm = 0.0
+        oaAssortRates.rates.forEach { (assortValue: Double, rate: Double) ->
+            sumOneAuditTerm += ln(1.0 + maxBet * (assortValue - 0.5)) * rate
+        }
+        val lnPayoff = noerrorTerm + sumOneAuditTerm
+
+        val s =  roundUp((-ln(alpha) / lnPayoff))
+        return s
+    }
+
+    override fun estSamplesNeeded(contest: ContestWithAssertions, maxRisk: Double, alpha: Double): Pair<Int, Double>  {
         val upper = assorter.upperBound()
         val betFn = GeneralAdaptiveBetting(
             contest.Npop,
@@ -240,8 +264,8 @@ class ClcaAssorterOneAudit(
             debug=false,
         )
         val bet = betFn.bet(ClcaErrorTracker(noerror(), upper))
-        val maxRisk = bet / 2
-        return sampleSizeNoErrors(maxRisk = maxRisk, alpha)
+        val optimalBet = betFn.bet(ClcaErrorTracker(noerror(), upper))
+        return Pair(sampleSizeNoErrors(maxRisk = optimalBet/2, alpha), optimalBet)
     }
 
     override fun equals(other: Any?): Boolean {

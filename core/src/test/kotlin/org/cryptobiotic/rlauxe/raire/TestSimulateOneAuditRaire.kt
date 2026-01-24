@@ -5,12 +5,16 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.TausOA
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
+import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 
 class TestSimulateOneAuditRaire {
     val N = 50000
@@ -153,6 +157,28 @@ class TestSimulateOneAuditRaire {
         println("rassorter pool calcMargin = ${poolIrvMargin}")
 
         assertEquals(cassorterPoolMargin, poolIrvMargin, doublePrecision)
+    }
 
+    @Test
+    fun testOneAuditRates() {
+        rcontestUA.rassertions.forEach { println("  $it marginPct=${it.marginInVotes / N.toDouble()}") }
+
+        rcontestUA.clcaAssertions.forEach { assertion ->
+            val oaCassorter = assertion.cassorter as ClcaAssorterOneAudit
+            val target = oaCassorter.oaAssortRates
+            println("oaAssortRates = ${target}")
+
+            assertEquals(1, pools.size)
+            val pool = pools.first()
+            assertEquals(pool.ncards(), target.totalInPools)
+
+            val poolAvg = oaCassorter.poolAverages.assortAverage[pool.poolId]
+            assertNotNull(poolAvg)
+
+            val taus = TausOA(oaCassorter.assorter.upperBound(), poolAvg)
+            target.rates.toList().forEachIndexed { idx, pair ->
+                assertEquals(taus.tausOA[idx].first * oaCassorter.noerror(), pair.first)
+            }
+        }
     }
 }

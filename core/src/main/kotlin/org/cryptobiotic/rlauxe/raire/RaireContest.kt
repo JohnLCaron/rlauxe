@@ -300,12 +300,20 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
         return calcMarginInVotes(votes) / N.toDouble()
     }
 
+    // uses raire-java to find the marginInVotes from an arbitrary set of Votes. used to get assorter pool averages
+    // Note this may be negetive when loser had more votes than winner in this pool
     fun calcMarginInVotes(votes: Votes): Int {
-        val marginInVotes = if (isNEB) { // raire-java NotEliminatedBefore lines 67-71
+        val winnerLoser = winnerLoserVotes(votes)
+        return winnerLoser.first - winnerLoser.second
+    }
+
+    // uses raire-java to find the assertion winner and loser's vote count
+    fun winnerLoserVotes(votes: Votes): Pair<Int, Int> {
+        val winnerLoser = if (isNEB) { // raire-java NotEliminatedBefore lines 67-71
             val tally2 = votes.restrictedTallies(intArrayOf(rassertion.winnerIdx, rassertion.loserIdx))
             val tallyWinner = votes.firstPreferenceOnlyTally(rassertion.winnerIdx)
             val tallyLoser = tally2[1]
-            tallyWinner - tallyLoser
+            Pair(tallyWinner, tallyLoser)
 
         } else { // raire-java NotEliminatedNext lines 83-95
             val tallyAll = votes.restrictedTallies(remainingIdx)
@@ -313,9 +321,9 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
 
             val tallyWinner = tallyAll[tallyMap[rassertion.winnerIdx]!!]
             val tallyLoser = tallyAll[tallyMap[rassertion.loserIdx]!!]
-            tallyWinner - tallyLoser
+            Pair(tallyWinner, tallyLoser)
         }
-        return marginInVotes
+        return winnerLoser
     }
 
     override fun upperBound() = 1.0

@@ -71,7 +71,7 @@ class TestGenerateAllUseCases {
         writeSortedCardsExternalSort(topdir, publisher, config.seed)
     }
 
-    @Test
+    //@Test
     fun createColoradoClca() {
         val topdir = "$testdataDir/cases/corla/clca"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"

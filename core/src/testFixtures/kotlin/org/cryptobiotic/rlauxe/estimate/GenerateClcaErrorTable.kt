@@ -157,6 +157,7 @@ class GenerateClcaErrorTable {
                         val minAssort = minAssert.cassorter
 
                         val tracker = PluralityErrorTracker(minAssort.noerror())
+                        // TODO ClcaFuzzSampler is a candidate for removal
                         val sampler = ClcaFuzzSampler(fuzzPct, cvrs, contestUA.contest as Contest, minAssort)
                         while (sampler.hasNext()) {
                             tracker.addSample(sampler.next())

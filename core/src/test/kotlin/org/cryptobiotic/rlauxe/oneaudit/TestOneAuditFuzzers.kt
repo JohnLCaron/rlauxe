@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 class TestOneAuditFuzzers {
 
     @Test
-    fun testOneAuditVunderFuzzer2() {
+    fun testOneAuditVunderFuzzer() {
         val fuzzPct = 0.001
         val extraPct = 0.01
         val Nc = 10000
@@ -47,7 +47,7 @@ class TestOneAuditFuzzers {
         val countPoolCards = cards.count { it.poolId == cardPool.poolId }
         assertEquals(countPoolCards, cardPool.ncards())
 
-        val vunderFuzz = OneAuditVunderFuzzer2(pools, infos, fuzzPct, cards)
+        val vunderFuzz = OneAuditVunderFuzzer(pools, infos, fuzzPct, cards)
         val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
         assertEquals(cards.size, oaFuzzedPairs.size)
 

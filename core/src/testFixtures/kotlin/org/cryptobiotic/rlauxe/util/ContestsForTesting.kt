@@ -130,11 +130,11 @@ fun makeContestsWithUndervotesAndPhantoms(
     val candsMap = candsv.mapIndexed { idx, it -> Pair(idx, it ) }.toMap()
     val phantomMap = phantoms.mapIndexed { idx, it -> Pair(idx, it ) }.toMap()
 
-    val contestVotes = mutableMapOf<Int, Vunder2>() // contestId -> VotesAndUndervotes
+    val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
     candsv.forEachIndexed { idx: Int, candVotes: Map<Int, Int> ->  // use the idx as the Id
         val voteForN = if (voteForNs == null) 1 else voteForNs[idx]
         val missing = if (missings == null) 0 else missings[idx]
-        contestVotes[idx] = Vunder2.fromCandVotes(idx, candVotes, undervotes[idx], missing=missing, voteForN = voteForN)
+        contestVotes[idx] = Vunder.fromCandVotes(idx, candVotes, undervotes[idx], missing=missing, voteForN = voteForN)
     }
 
     val cvrs = makeVunderCvrs(contestVotes, "ballot", null)

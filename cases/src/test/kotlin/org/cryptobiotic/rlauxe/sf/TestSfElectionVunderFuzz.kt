@@ -45,7 +45,7 @@ class TestSfElectionVunderFuzz {
 
         // simulate the card pools for all OneAudit contests; do it here one time for all contests
         val infos = contests.map { it.contest.info() }.associateBy { it.id }
-        val vunderFuzz = OneAuditVunderFuzzer2(cardPools, infos, config.simFuzzPct ?: 0.0, contestCards)
+        val vunderFuzz = OneAuditVunderFuzzer(cardPools, infos, config.simFuzzPct ?: 0.0, contestCards)
 
         val pairs = vunderFuzz.mvrCvrPairs
         println(" pairs = ${pairs.size}")
@@ -132,7 +132,7 @@ class TestSfElectionVunderFuzz {
 
         // simulate the card pools for all OneAudit contests; do it here one time for all contests
         val infos = contests.map { it.contest.info() }.associateBy { it.id }
-        val vunderFuzz = OneAuditVunderFuzzer2(cardPools, infos, config.simFuzzPct ?: 0.0, contestCards)
+        val vunderFuzz = OneAuditVunderFuzzer(cardPools, infos, config.simFuzzPct ?: 0.0, contestCards)
         val pairs = vunderFuzz.mvrCvrPairs
         println(" pairs = ${pairs.size}")
         val fuzzedMvrIter = PairAdapter(pairs.iterator()) { it.first }
@@ -219,7 +219,7 @@ class TestSfElectionVunderFuzz {
         val tab = useCardPool.contestTabs[contestId]
         println(tab)
 
-        val vunderFuzz = OneAuditVunderFuzzer2(cardPools, infos, config.simFuzzPct ?: 0.0, contestCards)
+        val vunderFuzz = OneAuditVunderFuzzer(cardPools, infos, config.simFuzzPct ?: 0.0, contestCards)
         val pairs = vunderFuzz.mvrCvrPairs
         println(" pairs = ${pairs.size}")
         val fuzzedMvrIter = PairAdapter(pairs.iterator()) { it.first }

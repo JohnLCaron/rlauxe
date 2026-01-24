@@ -10,7 +10,6 @@ import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -163,7 +162,7 @@ class CreateBoulderElection(
     // make simulated CVRs for one pool, all contests
     private fun makeCvrsForOnePool(cardPool: OneAuditPoolIF, infos: Map<Int, ContestInfo>) : List<Cvr> { // contestId -> candidateId -> nvotes
 
-        val poolVunders = cardPool.contests().map {  Pair(it, cardPool.votesAndUndervotes2(it)) }.toMap()
+        val poolVunders = cardPool.contests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
         val cvrs = makeVunderCvrs(poolVunders, cardPool.poolName, poolId = cardPool.poolId)
         // the number of cvrs can vary when there are multiple contests: artifact of simulating the cvrs
         //if (cardPool.ncards() != cvrs.size)

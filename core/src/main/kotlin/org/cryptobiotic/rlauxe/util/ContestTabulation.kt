@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.audit.CardManifest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
-import org.cryptobiotic.rlauxe.raire.HashableIntArray
 import org.cryptobiotic.rlauxe.raire.VoteConsolidator
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -109,15 +108,15 @@ class ContestTabulation(
         this.overvotes += other.overvotes
     }
 
-    fun votesAndUndervotes2(poolId: Int): Vunder2 {
-        return if (!isIrv) Vunder2.fromNpop(contestId, undervotes, ncards(), votes, voteForN) else {
+    fun votesAndUndervotes(poolId: Int): Vunder {
+        return if (!isIrv) Vunder.fromNpop(contestId, undervotes, ncards(), votes, voteForN) else {
             val missing = ncards() - undervotes - irvVotes.nvotes()
             val voteCounts = irvVotes.votes.map { (hIntArray, count) ->
                 // convert indices back to ids
                 val idArray: List<Int> = hIntArray.array.map { candidateIds[it] }
                 Pair(idArray.toIntArray(), count)
             }
-            Vunder2(contestId, poolId, voteCounts, undervotes, missing, 1)
+            Vunder(contestId, poolId, voteCounts, undervotes, missing, 1)
         }
     }
 

@@ -14,8 +14,6 @@ import org.cryptobiotic.rlauxe.workflow.ClcaSampler
 import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.test.Test
 
-// TODO use GA
-
 class TestOneAuditAdaptiveBetting {
 
     @Test

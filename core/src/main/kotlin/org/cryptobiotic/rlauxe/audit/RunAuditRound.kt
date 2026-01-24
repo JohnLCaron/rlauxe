@@ -123,6 +123,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
 
         val config = workflow.auditConfig()
 
+        // run the audit, capture the tracker
         val testH0Result =  when (config.auditType) {
             AuditType.CLCA -> runClcaAudit(config, cvrPairs, contestRound, assertionRound, auditRoundResult)
             AuditType.POLLING -> runPollingAudit(config, cvrPairs, contestRound, assertionRound, auditRoundResult)
@@ -138,7 +139,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
                 val seq = tracker.sequences!!
                 val pvalues = seq.pvalues()
                 val count = seq.xs.size
-                append(" i, ${sfn("xs", 6)}, ${sfn("bet", 6)}, ${sfn("tj", 6)}, ${sfn("Tj", 6)}, ${sfn("pvalue", 8)}, ")
+                append(" i, ${sfn("xs", 6)}, ${sfn("bet", 6)}, ${sfn("payoff", 6)}, ${sfn("Tj", 6)}, ${sfn("pvalue", 8)}, ")
                 appendLine("${sfn("location", 20)}, ${sfn("mvr votes", 10)}, ${sfn("card", 10)}")
                 repeat(count) {
                     append("${nfn(it+1, 2)}, ${df(seq.xs[it])}, ${df(seq.bets[it])}, ${df(seq.tjs[it])}")

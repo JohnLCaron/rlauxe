@@ -112,7 +112,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val bettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
             GeneralAdaptiveBetting(
                 contestUA.Npop,
-                startingErrors = ClcaErrorCounts.empty(cassorter.noerror(), cassorter.assorter.upperBound()),
+                startingErrors = ClcaErrorCounts.empty(cassorter.noerror(), cassorter.assorter.upperBound()), // TODO why not use tracker ??
                 contest.Nphantoms(),
                 oaAssortRates = null,
                 d = clcaConfig.d,

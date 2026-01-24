@@ -134,7 +134,7 @@ fun makeRaireContest(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, 
     return rcontestUA
 }
 
-// contestTab.irvVotes must include the pooled data, since we generate the RaireAssertions from them.
+// contestTab.irvVotes must be complete, including pooled data, since we generate the RaireAssertions from them.
 fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, Nbin: Int, oneAuditPools: List<OneAuditPoolFromCvrs>): RaireContestWithAssertions {
     val vc = contestTab.irvVotes
     val startingVotes = vc.makeVoteList()
@@ -244,7 +244,7 @@ fun setPoolAssorterAveragesForRaire(
             val assortAverages = mutableMapOf<Int, Double>() // poolId -> average assort value
             pools.filter { it.ncards() > 0}.forEach { cardPool ->
                 if (cardPool.hasContest(contestId)) {
-                    val tab = cardPool.contestTabs[oaContest.id]!!
+                    val tab = cardPool.contestTabs[oaContest.id]!! // assumes that the cardPool has the irvVotes
                     val irvVotes: Votes = tab.irvVotes.makeVotes(oaContest.ncandidates)
                     val poolMargin = raireAssorter.calcMargin(irvVotes, cardPool.ncards())
                     assortAverages[cardPool.poolId] = margin2mean(poolMargin)
@@ -254,7 +254,7 @@ fun setPoolAssorterAveragesForRaire(
                 dilutedMargin = assertion.assorter.dilutedMargin(),
                 poolAverages = AssortAvgsInPools(assortAverages))
 
-            oaAssorter.oaAssortRates = oneAuditErrorsFromPools.oaErrorRates(oaContest, oaAssorter)
+            oaAssorter.oaAssortRates = oneAuditErrorsFromPools.oaErrorRatesIrv(oaContest, oaAssorter, raireAssorter)
 
             ClcaAssertion(assertion.info, oaAssorter)
         }

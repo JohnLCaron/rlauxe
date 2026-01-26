@@ -115,7 +115,7 @@ class ClcaSingleRoundAssortTask(
             nphantoms=0, oaAssortRates = null, d=0,  maxRisk = maxRisk, debug=false)
 
         val tracker = ClcaErrorTracker(noerror, upper)
-        val testFn = BettingMart(
+        val testFn = BettingMartOld(
             bettingFn = bettingFn,
             N = N,
             sampleUpperBound = 2*noerror,

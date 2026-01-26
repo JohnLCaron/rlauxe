@@ -16,7 +16,7 @@ data class AuditableCard (
     val phantom: Boolean,
 
     val votes: Map<Int, IntArray>?, // if not null and population == null, then hasStyle = true. TODO too obscure?
-    val poolId: Int?,               // OneAudit pool
+    val poolId: Int?,               // must be set if its from a OneAudit pool
     val cardStyle: String? = null,  // hijacked for population name
     val population: PopulationIF? = null, // must have this if !hasStyle
 ): CvrIF {

@@ -7,10 +7,11 @@ import org.cryptobiotic.rlauxe.betting.AlphaMart
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.betting.BettingFn
-import org.cryptobiotic.rlauxe.betting.BettingMart
+import org.cryptobiotic.rlauxe.betting.BettingMart2
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.EstimFn
+import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
@@ -23,8 +24,6 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.util.roundUp
-import org.cryptobiotic.rlauxe.workflow.ClcaSampler
-import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.collections.List
 import kotlin.collections.mutableListOf
 import kotlin.math.min
@@ -288,7 +287,7 @@ fun estimateClcaAssertionRound(
             )
 
     // for one contest, this takes a list of cards and fuzzes them to use as the mvrs.
-    val sampler = ClcaCardFuzzSampler(config.simFuzzPct ?: 0.0, contestCards, contestUA.contest, cassorter)
+    val samplerTracker = ClcaFuzzSamplerTracker(config.simFuzzPct ?: 0.0, contestCards, contestUA.contest, cassorter)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateClcaAssertionRound for $name with ${config.nsimEst} trials"}
@@ -298,7 +297,7 @@ fun estimateClcaAssertionRound(
     val result: RunRepeatedResult = runRepeatedBettingMart(
         name,
         config,
-        sampler,
+        samplerTracker=samplerTracker,
         bettingFn,
         cassorter.noerror(),
         upper=cassorter.assorter.upperBound(),
@@ -327,7 +326,7 @@ fun estimateClcaAssertionRound(
 fun runRepeatedBettingMart(
     name: String,
     config: AuditConfig,
-    sampleFn: Sampler,
+    samplerTracker: SamplerTracker,
     bettingFn: BettingFn,
     noerror: Double,
     upper: Double, // cassorter.assorter.upperBound(),
@@ -337,25 +336,22 @@ fun runRepeatedBettingMart(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunRepeatedResult {
 
-    val tracker = ClcaErrorTracker(noerror, upper)
-
-    val testFn = BettingMart(
+    val testFn = BettingMart2(
         bettingFn = bettingFn,
         N = N,
+        tracker = samplerTracker,
         riskLimit = config.riskLimit,
         sampleUpperBound = clcaUpper,
-        tracker = tracker
     )
 
     // run the simulation ntrials (config.nsimEst) times
     val result: RunRepeatedResult = runRepeated(
         name = name,
-        drawSample = sampleFn,
         ntrials = config.nsimEst,
         testFn = testFn,
         testParameters = moreParameters,
         startingTestStatistic = startingTestStatistic,
-        tracker = tracker,
+        samplerTracker = samplerTracker,
         N = N,
     )
     return result
@@ -379,7 +375,7 @@ fun estimateOneAuditAssertionRound(
     val oaConfig = config.oaConfig
     val clcaConfig = config.clcaConfig
 
-    /* TODO dont have an estimation algorithm for OneAudit IRV pooled data, since there are no CVRs
+    /* OneAudit IRV pooled data
     //    its not even clear how one generates the assertions in general.
     //    can do it for SF because we have the cvrs.
     if (contestUA.isIrv) {
@@ -411,7 +407,8 @@ fun estimateOneAuditAssertionRound(
         )
 
     // uses the vunderFuzz.mvrCvrPairs as is; each trial is a new permutation
-    val sampler = ClcaSampler(contestUA.contest.id, oaFuzzedPairs.size, oaFuzzedPairs, oaCassorter, allowReset = true)
+    val sampler =
+        ClcaSamplerErrorTracker(contestUA.contest.id, oaFuzzedPairs, oaCassorter, allowReset = true)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateOneAuditAssertionRound for $name with ${config.nsimEst} trials"}
@@ -440,8 +437,8 @@ fun estimateOneAuditAssertionRound(
         firstSample = if (result.sampleCount.size > 0) result.sampleCount[0] else 0,
     )
 
-    logger.debug{"estimateOneAuditAssertionRound $roundIdx ${name} ${makeDeciles(result.sampleCount)}  took=$stopwatch" +
-            " firstSample=${assertionRound.estimationResult!!.firstSample}"}
+    logger.info{ "($stopwatch) estimateOneAuditAssertion round $roundIdx ${name} ${makeDeciles(result.sampleCount)}" +
+            " firstSample=${assertionRound.estimationResult!!.firstSample}" }
     return result
 }
 
@@ -483,7 +480,7 @@ fun estimatePollingAssertionRound(
 
     // optional fuzzing of the mvrs
     val useFuzz = config.simFuzzPct ?: 0.0
-    val sampler = PollingFuzzSampler(useFuzz, mvrs, contestUA.contest as Contest, assorter) // TODO cant use Raire
+    val samplerTracker = PollingFuzzSamplerTracker(useFuzz, mvrs, contestUA.contest as Contest, assorter) // TODO cant use Raire
 
     // TODO isnt this the same problam as OneAudit ??
     // optional fuzzing of the cvrs
@@ -500,7 +497,7 @@ fun estimatePollingAssertionRound(
     val result = runRepeatedAlphaMart(
         name,
         config,
-        sampler,
+        samplerTracker,
         null,
         eta0 = eta0,
         upperBound = assorter.upperBound(),
@@ -526,7 +523,7 @@ fun estimatePollingAssertionRound(
 fun runRepeatedAlphaMart(
     name: String,
     config: AuditConfig,
-    sampleFn: Sampler,
+    samplerTracker: SamplerTracker,
     estimFn: EstimFn?, // if null use default TruncShrinkage
     eta0: Double,  // initial estimate of mean
     upperBound: Double,
@@ -542,23 +539,20 @@ fun runRepeatedAlphaMart(
         eta0 = eta0,
     )
 
-    val tracker = ClcaErrorTracker(0.0, 1.0) // TODO using ClcaErrorTracker, why not PluralityErrorTracker?
     val testFn = AlphaMart(
         estimFn = useEstimFn,
         N = N,
         upperBound = upperBound,
         riskLimit = config.riskLimit,
-        tracker = tracker,
     )
 
     val result: RunRepeatedResult = runRepeated(
         name,
-        drawSample = sampleFn,
         ntrials = config.nsimEst,
         testFn = testFn,
         testParameters = mapOf("ntrials" to config.nsimEst.toDouble(), "polling" to 1.0) + moreParameters,
         startingTestStatistic = startingTestStatistic,
-        tracker=tracker,
+        samplerTracker=samplerTracker,
         N = N,
     )
     return result

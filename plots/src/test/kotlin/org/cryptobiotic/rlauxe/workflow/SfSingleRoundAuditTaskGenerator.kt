@@ -4,6 +4,9 @@ import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.ContestRound
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker2
+import org.cryptobiotic.rlauxe.betting.ClcaNoErrorSamplerTracker
+import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -55,8 +58,9 @@ class SfSingleRoundAuditTask(
                     -1,
                     emptyList()
                 )
+
                 val sampler =
-                    ClcaNoErrorIterator(
+                    ClcaNoErrorSamplerTracker(
                         contestUA.id,
                         contestUA.Nc,
                         cassertion.cassorter,

@@ -54,12 +54,12 @@ class GeneralAdaptiveBetting(
     }
 
     override fun bet(prevSamples: SampleTracker): Double {
-        val tracker = prevSamples as ClcaErrorTracker
-        val trackerErrors = tracker.measuredClcaErrorCounts()
+        val errorTracker = prevSamples as SampleErrorTracker
+        val trackerErrors = errorTracker.measuredClcaErrorCounts()
 
         // estimated rates for each clca bassort value
         val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.totalInPools) / Npop.toDouble()
-        val sampleNumber = (startingErrors.totalSamples) + tracker.numberOfSamples()
+        val sampleNumber = (startingErrors.totalSamples) + prevSamples.numberOfSamples()
         val estRates = trackerErrors.errorCounts.map { (assort, errorCount) ->
             val allCount = errorCount + (startingErrors.errorCounts()[assort] ?: 0)
             var rate = scaled * shrinkTruncEstimateRate(
@@ -74,7 +74,7 @@ class GeneralAdaptiveBetting(
             Pair(assort, rate)
         }.toMap()
 
-        val mui = populationMeanIfH0(Npop, withoutReplacement, tracker)
+        val mui = populationMeanIfH0(Npop, withoutReplacement, prevSamples)
 
         //    tj is how much you win or lose
         //    tj = 1 + lamj * (xj - mj)
@@ -90,7 +90,7 @@ class GeneralAdaptiveBetting(
         //    maxBet = maxRisk / mj
 
         val maxBet = maxRisk / mui
-        val kelly = GeneralOptimalLambda(tracker.noerror, estRates, oaAssortRates?.rates, mui=mui, maxBet=maxBet, debug = debug)
+        val kelly = GeneralOptimalLambda(errorTracker.noerror(), estRates, oaAssortRates?.rates, mui=mui, maxBet=maxBet, debug = debug)
         val bet = kelly.solve()
 
         lastBet = bet

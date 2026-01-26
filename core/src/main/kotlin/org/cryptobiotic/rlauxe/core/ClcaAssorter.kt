@@ -85,7 +85,7 @@ open class ClcaAssorter(
 
     // seems unlikely bet < maxBet when noerrors and not oa. Only if phantoms is big enough.
     // return estSampleSize, optimalBet
-    open fun estSamplesNeeded(contest: ContestWithAssertions, maxRisk: Double, alpha: Double): Pair<Int, Double> {
+    open fun estWithOptimalBet(contest: ContestWithAssertions, maxRisk: Double, alpha: Double): Pair<Int, Double> {
         val upper = assorter.upperBound()
         val betFn = GeneralAdaptiveBetting(
             contest.Npop,

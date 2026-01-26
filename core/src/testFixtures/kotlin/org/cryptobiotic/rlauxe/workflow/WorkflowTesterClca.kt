@@ -5,6 +5,8 @@ import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.betting.ClcaSamplerTracker
+import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -57,4 +59,10 @@ fun makeClcaNoErrorSampler(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAsso
     val cards = cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, 0) }
     val cvrPairs = cvrs.zip(cards)
     return ClcaSampler(contestId, cvrPairs.size, cvrPairs, cassorter, true)
+}
+
+fun makeClcaNoErrorSamplerTracker(contestId: Int, cvrs : List<Cvr>, cassorter: ClcaAssorter): SamplerTracker {
+    val cards = cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, 0) }
+    val cvrPairs = cvrs.zip(cards)
+    return ClcaSamplerTracker(contestId, cvrPairs, cassorter, true)
 }

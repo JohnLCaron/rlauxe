@@ -132,7 +132,7 @@ class Taus(upper: Double): TausIF {
     }
 }
 
-class ClcaErrorTracker(val noerror: Double, val upper: Double) : SampleTracker {
+class ClcaErrorTracker(val noerror: Double, val upper: Double) : SampleTracker, SampleErrorTracker {
     val taus = Taus(upper)
 
     private var last = 0.0
@@ -176,7 +176,8 @@ class ClcaErrorTracker(val noerror: Double, val upper: Double) : SampleTracker {
         noerrorCount = 0
     }
 
-    fun measuredClcaErrorCounts(): ClcaErrorCounts {
+    override fun noerror() = noerror
+    override fun measuredClcaErrorCounts(): ClcaErrorCounts {
         val clcaErrors = valueCounter.toList().filter { (key, value) -> taus.isClcaError(key / noerror) }.toMap().toSortedMap()
         return ClcaErrorCounts(clcaErrors, numberOfSamples(), noerror, upper)
     }

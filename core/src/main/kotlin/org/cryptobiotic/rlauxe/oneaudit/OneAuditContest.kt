@@ -253,7 +253,7 @@ class ClcaAssorterOneAudit(
         return s
     }
 
-    override fun estSamplesNeeded(contest: ContestWithAssertions, maxRisk: Double, alpha: Double): Pair<Int, Double>  {
+    override fun estWithOptimalBet(contest: ContestWithAssertions, maxRisk: Double, alpha: Double): Pair<Int, Double>  {
         val upper = assorter.upperBound()
         val betFn = GeneralAdaptiveBetting(
             contest.Npop,

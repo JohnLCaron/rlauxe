@@ -4,7 +4,9 @@ import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.runRepeatedAlphaMart
 import org.cryptobiotic.rlauxe.workflow.PollingSampler
@@ -38,7 +40,7 @@ class TestAlphaMart {
 
         val cvrs = test.makeCvrsFromContests()
         val config = AuditConfig(AuditType.POLLING, nsimEst=10)
-        val cvrSampler = PollingSampler(contestUA.contest.id, cvrs.zip(cvrs), assorter)
+        val samplerTracker = PollingSamplerTracker(contestUA.contest.id, cvrs.zip(cvrs), assorter)
 
         val eta0 = assorter.dilutedMean()
         println("eta0=$eta0, margin=${mean2margin(eta0)}")
@@ -46,7 +48,7 @@ class TestAlphaMart {
         val result = runRepeatedAlphaMart(
             name = "runRepeatedAlphaMart",
             config = config,
-            sampleFn = cvrSampler,
+            samplerTracker = samplerTracker,
             estimFn = null,
             eta0 = assorter.dilutedMean(),
             upperBound = assorter.upperBound(),
@@ -56,10 +58,10 @@ class TestAlphaMart {
         println("simulateSampleSizeAlphaMart = $result")
 
         val d = 100
-        cvrSampler.reset()
+        samplerTracker.reset()
         val result2 = runAlphaMartRepeated(
             name = "runAlphaMartRepeated",
-            drawSample = cvrSampler,
+            samplerTracker = samplerTracker,
             N = N,
             eta0 = eta0,
             d = d,

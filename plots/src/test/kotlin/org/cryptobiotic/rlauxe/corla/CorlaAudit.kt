@@ -2,7 +2,8 @@ package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.SampleErrorTracker
+import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -117,13 +118,13 @@ class CorlaAudit(
 /////////////////////////////////////////////////////////////////////////////////
 
 // See ComparisonAudit.riskMeasurement() in colorado-rla us.freeandfair.corla.model
-class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
+class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF2 {
 
     override fun run(
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampling: Sampler,
+        sampling: SamplerTracker,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA
@@ -144,7 +145,7 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val samplesNeeded = testH0Result.sampleCount
 
         val upper = cassorter.assorter.upperBound()
-        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) (testH0Result.tracker as ClcaErrorTracker).measuredClcaErrorCounts() else null
+        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is SampleErrorTracker) (testH0Result.tracker as SampleErrorTracker).measuredClcaErrorCounts() else null
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,

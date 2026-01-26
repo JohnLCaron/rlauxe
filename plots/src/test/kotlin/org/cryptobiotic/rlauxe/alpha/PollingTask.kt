@@ -1,14 +1,13 @@
 package org.cryptobiotic.rlauxe.alpha
 
 import org.cryptobiotic.rlauxe.betting.AlphaMart
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.FixedEstimFn
+import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
 import org.cryptobiotic.rlauxe.betting.RiskMeasuringFn
+import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
-import org.cryptobiotic.rlauxe.workflow.Sampler
-import org.cryptobiotic.rlauxe.workflow.PollingSampler
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.concur.RepeatedTask
 import org.cryptobiotic.rlauxe.util.mean2margin
@@ -32,16 +31,14 @@ data class PollingTask(
         require(N == cvrs.size)
     }
 
-    override fun makeSampler(): Sampler {
+    override fun makeSampler(): SamplerTracker {
         val contestUA = ContestWithAssertions(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
-        return PollingSampler(contestUA.id, pairs, pollingAssorter)
+        return PollingSamplerTracker(contestUA.id, pairs, pollingAssorter)
     }
 
     override fun makeTestFn(): RiskMeasuringFn {
-        val tracker = ClcaErrorTracker(0.0, pollingAssorter.upperBound())
-
         return if (useFixedEstimFn) {
-            AlphaMart(estimFn = FixedEstimFn(cvrMean), N = N, tracker = tracker)
+            AlphaMart(estimFn = FixedEstimFn(cvrMean), N = N, upperBound = pollingAssorter.upperBound())
         } else {
             eta0 = cvrMean
 
@@ -55,7 +52,6 @@ data class PollingTask(
                 N = N,
                 upperBound = pollingAssorter.upperBound(),
                 withoutReplacement = withoutReplacement,
-                tracker = tracker,
             )
         }
     }

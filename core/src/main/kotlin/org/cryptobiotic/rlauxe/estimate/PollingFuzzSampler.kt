@@ -1,10 +1,12 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.util.ContestVoteBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilders
@@ -15,6 +17,75 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.random.Random
+
+class PollingFuzzSamplerTracker(
+    val fuzzPct: Double,
+    val cvrs: List<Cvr>,
+    val contest: Contest,
+    val assorter: AssorterIF,
+): SamplerTracker {
+    var maxSamples = cvrs.count { it.hasContest(contest.id) } // dont need this if its single contest
+    var welford = Welford()
+    val permutedIndex = MutableList(cvrs.size) { it }
+    private var mvrs: List<Cvr>
+    private var idx = 0
+
+    init {
+        mvrs = remakeFuzzed() // TODO could do fuzzing on the fly ??
+        maxSamples = cvrs.count { it.hasContest(contest.id) }
+    }
+
+    override fun sample(): Double {
+        while (idx < cvrs.size) {
+            val mvr = mvrs[permutedIndex[idx]]
+            idx++
+            if (mvr.hasContest(contest.id)) {
+                if (lastVal != null) welford.update(lastVal!!)
+                lastVal =  assorter.assort(mvr, usePhantoms = true)
+                return lastVal!!
+            }
+        }
+        throw RuntimeException("no samples left for ${contest.id} and Assorter ${assorter}")
+    }
+
+    override fun reset() {
+        mvrs = remakeFuzzed()
+        permutedIndex.shuffle(Random)
+        idx = 0
+        maxSamples = cvrs.count { it.hasContest(contest.id) }
+        welford = Welford()
+    }
+
+    fun remakeFuzzed(): List<Cvr> {
+        return makeFuzzedCvrsForPolling(listOf(contest.info()), cvrs, fuzzPct) // single contest
+    }
+
+    override fun maxSamples() = maxSamples
+    override fun maxSampleIndexUsed() = idx
+    override fun nmvrs() = mvrs.size
+
+    override fun hasNext() = (welford.count + 1 < maxSamples)
+    override fun next() = sample()
+
+    // tracker reflects "previous sequence"
+    var lastVal: Double? = null
+    override fun numberOfSamples() = welford.count
+    override fun welford() = welford
+    override fun done() {
+        if (lastVal != null) welford.update(lastVal!!)
+        lastVal = null
+    }
+
+    ///////////////////////////////// temporary
+    override fun sum() = welford.sum()
+    override fun mean() = welford.mean
+    override fun variance() = welford.variance()
+
+    override fun last(): Double = lastVal!!
+    override fun addSample(sample: Double) {
+        TODO("Not implemented")
+    }
+}
 
 // for one contest, this takes a list of cvrs and fuzzes them
 class PollingFuzzSampler(

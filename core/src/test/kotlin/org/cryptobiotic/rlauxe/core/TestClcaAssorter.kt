@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 /*
@@ -103,7 +102,7 @@ class TestClcaAssorter {
         println(" sampleSize = $sampleSize")
 
         val contestUA = ContestWithAssertions(contest, isClca = true)
-        val estSize = cassorter.estSamplesNeeded(contestUA, 0.9, .05);
+        val estSize = cassorter.estWithOptimalBet(contestUA, 0.9, .05);
         println(" estSize = $estSize")
     }
 

@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.alpha
 import org.cryptobiotic.rlauxe.betting.AlphaMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.FixedEstimFn
+import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
+import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.*
@@ -48,17 +50,15 @@ class CompareShrinkTrunkWithFixed {
         val d = 10000
         val N = sampling.maxSamples()
 
-        val tracker = ClcaErrorTracker(0.0, 1.0)
         val trunc = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
-        val alpha = AlphaMart(estimFn = trunc, N = N, tracker = tracker)
+        val alpha = AlphaMart(estimFn = trunc, N = N)
 
         return alpha.testH0(N, true) { sampling.sample() }
     }
 
     fun testAlphaMartFixed(eta0: Double, sampling: Sampler): TestH0Result {
         val fixed = FixedEstimFn(eta0 = eta0)
-        val tracker = ClcaErrorTracker(0.0, 1.0)
-        val alpha = AlphaMart(estimFn = fixed, N = sampling.maxSamples(), tracker = tracker)
+        val alpha = AlphaMart(estimFn = fixed, N = sampling.maxSamples())
         return alpha.testH0(sampling.maxSamples(), true) { sampling.sample() }
     }
 
@@ -75,7 +75,7 @@ class CompareShrinkTrunkWithFixed {
             val pairs = cvrs.zip(cvrs)
 
             val contestUA = ContestWithAssertions(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
-            val sampleFn = PollingSampler(contestUA.id, pairs, makeStandardPluralityAssorter(N))
+            val sampleFn = PollingSamplerTracker(contestUA.id, pairs, makeStandardPluralityAssorter(N))
 
             println("\neta0 = $eta")
             val fixResult = runAlphaMartFixedRepeated(eta, sampleFn, ntrials)
@@ -108,42 +108,38 @@ class CompareShrinkTrunkWithFixed {
         // println("GeometricMean for $title: fix=${geometricMean(fixFld)}, trunc=${geometricMean(truncFld)}")
     }
 
-    fun runAlphaMartTruncRepeated(eta0: Double, sampling: Sampler, ntrials: Int): RunRepeatedResult {
+    fun runAlphaMartTruncRepeated(eta0: Double, samplerTracker: SamplerTracker, ntrials: Int): RunRepeatedResult {
         val u = 1.0
         val d = 10000
-        val N = sampling.maxSamples()
+        val N = samplerTracker.maxSamples()
 
-        val tracker = ClcaErrorTracker(0.0, 1.0)
         val trunc = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
-        val alpha = AlphaMart(estimFn = trunc, N = sampling.maxSamples(), tracker = tracker)
+        val alpha = AlphaMart(estimFn = trunc, N = samplerTracker.maxSamples())
 
         return runRepeated(
             name = "runAlphaMartTruncRepeated",
-            drawSample = sampling,
             terminateOnNullReject = true,
             ntrials = ntrials,
             testFn = alpha,
             testParameters = mapOf("eta0" to eta0, "d" to d.toDouble(), "margin" to mean2margin(eta0)),
             N=N,
-            tracker=tracker,
+            samplerTracker=samplerTracker,
             )
     }
 
-    fun runAlphaMartFixedRepeated(eta0: Double, sampling: Sampler, ntrials: Int): RunRepeatedResult {
-        val N = sampling.maxSamples()
+    fun runAlphaMartFixedRepeated(eta0: Double, samplerTracker: SamplerTracker, ntrials: Int): RunRepeatedResult {
+        val N = samplerTracker.maxSamples()
         val fixed = FixedEstimFn(eta0 = eta0)
-        val tracker = ClcaErrorTracker(0.0, 1.0)
-        val alpha = AlphaMart(estimFn = fixed, N = N, tracker = tracker)
+        val alpha = AlphaMart(estimFn = fixed, N = N)
 
         return runRepeated(
             name = "runAlphaMartFixedRepeated",
-            drawSample = sampling,
             terminateOnNullReject = true,
             ntrials = ntrials,
             testFn = alpha,
             testParameters = mapOf("eta0" to eta0, "margin" to mean2margin(eta0)),
             N=N,
-            tracker = tracker,
+            samplerTracker = samplerTracker,
         )
     }
 }

@@ -84,7 +84,6 @@ fun auditPollingAssertion(
         d = config.pollingConfig.d,
         eta0 = eta0,
     )
-    val tracker = ClcaErrorTracker(0.0, assorter.upperBound())
 
     val testFn = AlphaMart(
         estimFn = estimFn,
@@ -92,10 +91,7 @@ fun auditPollingAssertion(
         withoutReplacement = true,
         riskLimit = config.riskLimit,
         upperBound = assorter.upperBound(),
-        tracker = tracker,
     )
-    // TODO make optional
-    tracker.setDebuggingSequences(testFn.setDebuggingSequences())
 
     val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject=true) { sampling.sample() }
 

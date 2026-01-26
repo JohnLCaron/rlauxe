@@ -42,6 +42,7 @@ data class Welford(
 
     // current variance
     fun variance() = if (count == 0) 0.0 else M2 / count
+    fun sum() = mean * count
 
     override fun toString(): String {
         return "(count, mean, variance, sampleVariance, stddev) = ${this.count}, ${this.result()}, ${sqrt(variance())}"

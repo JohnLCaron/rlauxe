@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.alpha
 
+import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
@@ -13,6 +14,7 @@ import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.estimate.RunRepeatedResult
 import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
+import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSamplerTracker
 import kotlin.test.Test
 
 // compare ballot polling to card comparison
@@ -46,7 +48,7 @@ class CompareAlphaPaper {
             for (eta in etas) {
                 val compareResult: RunRepeatedResult = runAlphaMartRepeated(
                     name = "makeClcaNoErrorSampler",
-                    drawSample = makeClcaNoErrorSampler(contest.id, cvrs, compareAssertion.cassorter),
+                    samplerTracker = makeClcaNoErrorSamplerTracker(contest.id, cvrs, compareAssertion.cassorter),
                     N = N,
                     eta0 = eta,
                     d = d,
@@ -58,7 +60,7 @@ class CompareAlphaPaper {
 
                 val pollingResult = runAlphaMartRepeated(
                     name = "PollingSampling",
-                    drawSample = PollingSampler(contestUA.id, pairs, pollingAssertion.assorter),
+                    samplerTracker = PollingSamplerTracker(contestUA.id, pairs, pollingAssertion.assorter),
                     N = N,
                     eta0 = eta, // use the reportedMean for the initial guess
                     d = d,

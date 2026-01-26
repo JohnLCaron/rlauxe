@@ -9,10 +9,10 @@ import org.cryptobiotic.rlauxe.util.doublePrecision
  * The betting martingale for the hypothesis that the population mean is less than or equal to 1/2,
  * for a population of size N, based on a series of samples x.
  */
-class BettingMartOld(
+class BettingMart2(
     val bettingFn : BettingFn,
     val N: Int,             // diluted number of cards for this contest, only used by populationMeanIfH0
-    val tracker: SampleTracker,
+    val tracker: SamplerTracker,
     val sampleUpperBound: Double,  // the upper bound of the values of the sequence; bassort for CLCA
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val withoutReplacement: Boolean = true,
@@ -110,7 +110,7 @@ class BettingMartOld(
             //    println(sampleNumber)
 
             // – S ← S + Xj
-            tracker.addSample(xj)
+            // tracker.addSample(xj)
             pvalueLast = 1.0 / testStatistic
             if (pvalueLast < pvalueMin) pvalueMin = pvalueLast
 
@@ -118,6 +118,7 @@ class BettingMartOld(
                 break
             }
         }
+        tracker.done()
 
         // if you have sampled the entire population, then you know if it passed
         val status = if (sampleNumber == N) {
@@ -131,15 +132,8 @@ class BettingMartOld(
             }
         }
 
-        // data class TestH0Result(
-        //    val status: TestH0Status,  // how did the test conclude?
-        //    val sampleCount: Int,      // number of samples used in testH0
-        //    val sampleFirstUnderLimit: Int, // first sample index with pvalue with risk < limit, one based
-        //    val pvalueMin: Double,    // smallest pvalue in the sequence
-        //    val pvalueLast: Double,    // last pvalue
-        //    val tracker: SampleTracker,
-        //)
-        return TestH0Result(status, sampleCount = sampleNumber, pvalueMin, pvalueLast, tracker)
+        return TestH0Result(status, sampleCount = sampleNumber, pvalueMin, pvalueLast, tracker,
+            if (sequences.isOn) sequences else null)
     }
 
     fun setDebuggingSequences(): DebuggingSequences {
@@ -149,30 +143,5 @@ class BettingMartOld(
 
     companion object {
         private val logger = KotlinLogging.logger("BettingMart")
-    }
-}
-
-class DebuggingSequences {
-    var isOn = false
-    val xs = mutableListOf<Double>()
-    val bets = mutableListOf<Double>()
-    val mjs = mutableListOf<Double>()
-    val tjs = mutableListOf<Double>()
-    val testStatistics = mutableListOf<Double>()
-
-    fun add(x: Double, bet: Double, mj: Double, tj: Double, testStatistic: Double) {
-        this.xs.add(x)
-        this.bets.add(bet)
-        this.mjs.add(mj)
-        this.tjs.add(tj)
-        this.testStatistics.add(testStatistic)
-    }
-
-    // That is, min(1, 1/Tj ) is an “anytime P -value” for the composite null hypothesis θ ≤ µ. ALPHA (9)
-    // Technically should be min (1, 1 / testStatistic), but we want to use it just to capture 1 / Tj, in order to start
-    // muliple round estimation from where it left off. If you start the estimatiom from the beginning, it will probably just
-    // deliver the same estimate; that is, it wont tell you how many _more_ samples are needed.
-    fun pvalues(): List<Double> {
-        return testStatistics.map { 1.0 / it }
     }
 }

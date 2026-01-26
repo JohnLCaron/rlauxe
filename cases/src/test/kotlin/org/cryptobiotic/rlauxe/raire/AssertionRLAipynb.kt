@@ -1,7 +1,8 @@
 package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.betting.BettingMart
+import org.cryptobiotic.rlauxe.betting.BettingMart2
+import org.cryptobiotic.rlauxe.betting.BettingMartOld
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
@@ -631,7 +632,7 @@ fun replicate_p_values(
         p2 = 0.01
     )
 
-    val betta = BettingMart(
+    val betta = BettingMartOld(
         bettingFn = optimal, N = N,
         sampleUpperBound = cassorter.upperBound(),
         withoutReplacement = false,
@@ -653,26 +654,25 @@ fun calc_sample_sizes(
     val contest = contests.first().addStandardAssertions()
     val cassorter = contest.minClcaAssertion()!!.cassorter // the one with the smallest margin
 
-    val tracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound())
-    val sampler: Sampler = makeClcaNoErrorSampler(contest.id, cvrs, cassorter)
+    val samplerTracker = makeClcaNoErrorSamplerTracker(contest.id, cvrs, cassorter)
     val betFn = GeneralAdaptiveBetting(N,
         startingErrors = ClcaErrorCounts.empty(noerror = cassorter.noerror(), upper = cassorter.assorter.upperBound()),
         contest.contest.Nphantoms(),
         oaAssortRates = null, d = 100, maxRisk = .99)
-    val betta = BettingMart(
+
+    val betta = BettingMart2(
         bettingFn = betFn, N = N, sampleUpperBound = cassorter.upperBound(), withoutReplacement = false,
-        tracker = tracker
+        tracker = samplerTracker,
     )
 
     return runRepeated(
         name = "calc_sample_sizes",
-        drawSample = sampler,
         // maxSamples = N,
         ntrials = ntrials,
         testFn = betta,
         testParameters = mapOf("margin" to cassorter.assorter().dilutedMargin()),
         N = N,
-        tracker=tracker
+        samplerTracker = samplerTracker,
     )
 }
 

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.shangrla
 import org.cryptobiotic.rlauxe.SampleFromArray
 import org.cryptobiotic.rlauxe.SampleFromList
 import org.cryptobiotic.rlauxe.core.AgrapaBet
-import org.cryptobiotic.rlauxe.betting.BettingMart
+import org.cryptobiotic.rlauxe.betting.BettingMartOld
 import org.cryptobiotic.rlauxe.core.FixedBet
 import org.cryptobiotic.rlauxe.core.OptimalComparisonNoP1
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
@@ -17,7 +17,7 @@ import kotlin.math.sqrt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-// compare BetaMart results with SHANGRLA
+// compare BettingMart results with SHANGRLA
 class TestBettingMart {
 
     //     def test_betting_mart(self):
@@ -44,7 +44,7 @@ class TestBettingMart {
         for (value in values) {
             for (lam in lams) {
                 println("assort value = $value lam=$lam")
-                val betta = BettingMart(bettingFn = FixedBet(lam),
+                val betta = BettingMartOld(bettingFn = FixedBet(lam),
                     N = N, sampleUpperBound = u, tracker=tracker)
                 val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
@@ -86,7 +86,7 @@ class TestBettingMart {
                     c_grapa_grow = c_g_g,
                 )
                 val tracker = ClcaErrorTracker(0.0, 1.0)
-                val betta = BettingMart(bettingFn = agrapa, N = N,
+                val betta = BettingMartOld(bettingFn = agrapa, N = N,
                     sampleUpperBound = u, tracker=tracker)
                 val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
@@ -127,7 +127,7 @@ class TestBettingMart {
                     c_grapa_grow = c_g_g,
                 )
                 val tracker = ClcaErrorTracker(0.0, 1.0)
-                val betta = BettingMart(bettingFn = agrapa, N = N,
+                val betta = BettingMartOld(bettingFn = agrapa, N = N,
                     sampleUpperBound = u, tracker=tracker)
                 val debugSeq = betta.setDebuggingSequences()
                 val x = DoubleArray(n) { value }
@@ -200,7 +200,7 @@ class TestBettingMart {
             c_grapa_grow = c_g_g,
         )
         val tracker = ClcaErrorTracker(0.0, 1.0)
-        val betta = BettingMart(bettingFn = agrapa, N = N,
+        val betta = BettingMartOld(bettingFn = agrapa, N = N,
             sampleUpperBound = u, tracker=tracker)
         val debugSeq = betta.setDebuggingSequences()
 

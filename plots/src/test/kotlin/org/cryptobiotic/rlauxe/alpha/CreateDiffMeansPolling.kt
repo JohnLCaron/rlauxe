@@ -14,6 +14,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
+import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
 import org.cryptobiotic.rlauxe.betting.runAlphaMartRepeated
 
 import org.cryptobiotic.rlauxe.testdataDir
@@ -232,11 +233,11 @@ class CreatePollingDiffMeans {
             if (!silent && showContests) println("  ${assert}")
 
             val contestUA = ContestWithAssertions(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
-            val cvrSampler = PollingSampler(contestUA.id,  pairs, assert.assorter)
+            val cvrSampler = PollingSamplerTracker(contestUA.id, pairs, assert.assorter)
 
             val result = runAlphaMartRepeated(
                 name = "runAlphaMartWithMeanDiff",
-                drawSample = cvrSampler,
+                samplerTracker = cvrSampler,
                 N = N,
                 eta0 = reportedMean, // use the reportedMean for the initial guess
                 d = d,

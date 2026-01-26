@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 // this creates the riskTestingFn for you
 fun runAlphaMartRepeated(
     name: String,
-    drawSample: Sampler,
+    samplerTracker: SamplerTracker,
     N: Int,
     eta0: Double,
     d: Int = 500,
@@ -21,31 +21,27 @@ fun runAlphaMartRepeated(
 ): RunRepeatedResult {
 
     val useEstimFn = estimFn ?: TruncShrinkage(
-        drawSample.maxSamples(),
+        samplerTracker.maxSamples(),
         true,
         upperBound = sampleUpperBound,
         d = d,
         eta0 = eta0
     )
 
-    val tracker = ClcaErrorTracker(0.0, upper)
-
     val alpha = AlphaMart(
         estimFn = useEstimFn,
-        N = drawSample.maxSamples(),
+        N = samplerTracker.maxSamples(),
         upperBound = sampleUpperBound,
         withoutReplacement = withoutReplacement,
-        tracker = tracker,
     )
 
     return runRepeated(
         name = name,
-        drawSample = drawSample,
         terminateOnNullReject = true,
         ntrials = ntrials,
         testFn = alpha,
         testParameters = mapOf("eta0" to eta0, "d" to d.toDouble(), "margin" to mean2margin(eta0)),
         N=N,
-        tracker = tracker
+        samplerTracker = samplerTracker
    )
 }

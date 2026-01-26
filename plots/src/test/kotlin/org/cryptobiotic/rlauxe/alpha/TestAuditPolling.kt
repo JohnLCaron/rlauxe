@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.alpha
 
+import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
 import org.cryptobiotic.rlauxe.betting.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.plots.plotDDsample
@@ -44,13 +45,13 @@ class TestAuditPolling {
         val cvrs = test.makeCvrsFromContests()
         val pairs = cvrs.zip(cvrs)
 
-        val cvrSampler = PollingSampler(contestUA.id, pairs, assorter)
+        val cvrSampler = PollingSamplerTracker(contestUA.id, pairs, assorter)
 
         val d = 100
         val margin = assorter.dilutedMargin()
         val result = runAlphaMartRepeated(
             name = "testMultiContestTestData",
-            drawSample = cvrSampler,
+            samplerTracker = cvrSampler,
             N = N,
             eta0 = margin2mean(margin),
             d = d,
@@ -119,12 +120,11 @@ class TestAuditPolling {
             contestUA.assertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
-                val cvrSampler = if (withoutReplacement) PollingSampler(contestUA.id, cvrs.zip(cvrs), it.assorter)
-                    else PollWithReplacement(contestUA.contest as Contest, cvrs, it.assorter)
+                val cvrSampler = PollingSamplerTracker(contestUA.id, cvrs.zip(cvrs), it.assorter)
 
                 val result = runAlphaMartRepeated(
                     name = "testPollingWorkflow",
-                    drawSample = cvrSampler,
+                    samplerTracker = cvrSampler,
                     N = contestUA.Npop,
                     eta0 = margin2mean(margin),
                     d = d,

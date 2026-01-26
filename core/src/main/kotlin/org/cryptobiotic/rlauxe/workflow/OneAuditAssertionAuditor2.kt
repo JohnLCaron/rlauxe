@@ -3,11 +3,12 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.BettingFn
-import org.cryptobiotic.rlauxe.betting.BettingMartOld
+import org.cryptobiotic.rlauxe.betting.BettingMart2
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.SampleErrorTracker
+import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
@@ -15,13 +16,13 @@ import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
 
 // allows to run OneAudit with runClcaAuditRound
-class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boolean = true) : ClcaAssertionAuditorIF {
+class OneAuditAssertionAuditor2(val pools: List<OneAuditPoolIF>, val quiet: Boolean = true) : ClcaAssertionAuditorIF2 {
 
     override fun run(
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampling: Sampler,
+        samplerTracker: SamplerTracker,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA
@@ -38,14 +39,13 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
                 d = clcaConfig.d,
                 maxRisk = clcaConfig.maxRisk
             )
+        val testH0Result = runBetting(config, contestUA.Npop, oaCassorter, samplerTracker, bettingFn)
 
-        val testH0Result = runBetting(config, contestUA.Npop, oaCassorter, sampling, bettingFn)
-
-        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) testH0Result.tracker.measuredClcaErrorCounts() else null
+        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is SampleErrorTracker) testH0Result.tracker.measuredClcaErrorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
-            nmvrs = sampling.maxSamples(),
-            maxSampleIndexUsed = sampling.maxSampleIndexUsed(),
+            nmvrs = samplerTracker.maxSamples(),
+            maxSampleIndexUsed = samplerTracker.maxSampleIndexUsed(),
             plast = testH0Result.pvalueLast,
             pmin = testH0Result.pvalueMin,
             samplesUsed = testH0Result.sampleCount,
@@ -61,27 +61,19 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         config: AuditConfig,
         N: Int,
         cassorter: ClcaAssorterOneAudit,
-        sampling: Sampler,
+        samplerTracker: SamplerTracker,
         bettingFn: BettingFn,
     ): TestH0Result {
 
-        val tracker = ClcaErrorTracker(
-            cassorter.noerror(),
-            cassorter.assorter.upperBound(),
-        )
-
-        val testFn = BettingMartOld(
+        val testFn = BettingMart2(
             bettingFn = bettingFn,
             N = N,
+            tracker = samplerTracker,
             sampleUpperBound = cassorter.upperBound(),
             riskLimit = config.riskLimit,
-            withoutReplacement = true,
-            tracker = tracker,
         )
-        // TODO make optional
-        tracker.setDebuggingSequences(testFn.setDebuggingSequences())
+        testFn.setDebuggingSequences()
 
-        // TODO how come you dont need startingTestStatistic: Double,
-        return testFn.testH0(sampling.maxSamples(), terminateOnNullReject = true) { sampling.sample() }
+        return testFn.testH0(samplerTracker.maxSamples(), terminateOnNullReject = true) { samplerTracker.sample() }
     }
 }

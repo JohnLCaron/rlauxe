@@ -44,6 +44,7 @@ interface OneAuditPoolIF: PopulationIF {
 
     fun show() = buildString {
         appendLine("OneAuditPool(poolName='$poolName', poolId=$poolId, ncards=${ncards()} hasSingleCardStyle=${hasSingleCardStyle()},")
+        appendLine("    contests = ${contests().contentToString()} ")
         regVotes().toSortedMap().forEach{
             appendLine("    contest ${it.key} votes= ${it.value.votes}, ncards= ${it.value.ncards()}, undervotes= ${it.value.undervotes()} ")
         }

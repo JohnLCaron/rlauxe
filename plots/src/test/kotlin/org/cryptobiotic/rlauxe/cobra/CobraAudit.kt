@@ -1,7 +1,8 @@
 package org.cryptobiotic.rlauxe.cobra
 
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.betting.BettingMart
+import org.cryptobiotic.rlauxe.betting.BettingMartOld
+import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -91,13 +92,13 @@ class CobraAudit(
 
 class AuditCobraAssertion(
     val p2prior: Double, // apriori rate of 2-vote overstatements
-) : ClcaAssertionAuditorIF {
+) : ClcaAssertionAuditorIF2 {
 
     override fun run(
         auditConfig: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampling: Sampler,
+        sampling: SamplerTracker,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA
@@ -115,7 +116,7 @@ class AuditCobraAssertion(
         )
         val tracker = PluralityErrorTracker(cassorter.noerror())
 
-        val testFn = BettingMart(
+        val testFn = BettingMartOld(
             bettingFn = adaptive,
             N = contestUA.Npop,
             sampleUpperBound = cassorter.upperBound(),

@@ -155,15 +155,15 @@ class AlphaMart(
     val estimFn : EstimFn,  // estimator of the population mean
     val N: Int,             // max number of cards for this contest (diluted)
     val withoutReplacement: Boolean = true,
-    val tracker: SampleTracker,
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val upperBound: Double = 1.0,  // aka u
 ): RiskMeasuringFn {
-    val betting: BettingMart
+    val betting: BettingMartOld
 
     init {
+        val tracker = ClcaErrorTracker(0.0, upperBound) // TODO using ClcaErrorTracker, why not PluralityErrorTracker?
         val bettingFn = EstimAdapter(N, withoutReplacement, upperBound, estimFn)
-        betting = BettingMart(bettingFn, N, withoutReplacement, tracker, riskLimit, upperBound)
+        betting = BettingMartOld(bettingFn, N,  tracker, upperBound, riskLimit)
     }
 
     override fun testH0(

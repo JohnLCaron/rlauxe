@@ -100,7 +100,7 @@ class OneAuditSingleRoundAuditTaskGenerator(
         return ClcaSingleRoundWorkflowTask(
             name(),
             oneaudit,
-            auditor = OneAuditAssertionAuditor(pools),
+            auditor = OneAuditAssertionAuditor2(pools),
             oaMvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 1.0),
             quiet,
@@ -143,7 +143,7 @@ class OneAuditSingleRoundWithDilutedMargin(
         return ClcaSingleRoundWorkflowTask(
             name(),
             oneaudit,
-            auditor = OneAuditAssertionAuditor(pools),
+            auditor = OneAuditAssertionAuditor2(pools),
             mvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 1.0),
             quiet,

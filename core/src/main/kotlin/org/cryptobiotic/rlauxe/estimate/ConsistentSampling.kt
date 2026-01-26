@@ -166,7 +166,7 @@ fun consistentSampling(
 }
 
 // try running without complexity
-fun wantSampleSizeSimple(contestsNotDone: List<ContestRound>): Map<Int, Int> {
+private fun wantSampleSizeSimple(contestsNotDone: List<ContestRound>): Map<Int, Int> {
      return contestsNotDone.associate { it.id to it.estMvrs }
 }
 
@@ -222,7 +222,7 @@ fun getSubsetForEstimation(
 
 // CLCA and OneAudit TODO POLLING
 // we dont use this for the actual estimation....
-fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
+private fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
     val minAssertionRound = contestRound.minAssertion()
     if (minAssertionRound == null) {
         contestRound.minAssertion()
@@ -304,7 +304,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
 
 //// TODO  this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set
 // for each contest, return map contestId -> wantSampleSize. used in ConsistentSampling
-fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedCards : CloseableIterator<AuditableCard>, debug: Boolean = false): Map<Int, Int> {
+private fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedCards : CloseableIterator<AuditableCard>, debug: Boolean = false): Map<Int, Int> {
     //// count how many samples each contest already has
     val prevContestCounts = mutableMapOf<ContestRound, Int>()
     contestsNotDone.forEach { prevContestCounts[it] = 0 }

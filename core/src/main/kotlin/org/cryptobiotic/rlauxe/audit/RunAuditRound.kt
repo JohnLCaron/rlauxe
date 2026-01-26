@@ -6,7 +6,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
@@ -19,8 +19,7 @@ import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import org.cryptobiotic.rlauxe.workflow.ClcaAssertionAuditor
-import org.cryptobiotic.rlauxe.workflow.ClcaSampler
-import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
+import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor2
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import org.cryptobiotic.rlauxe.workflow.PollingSampler
@@ -123,7 +122,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
 
         val config = workflow.auditConfig()
 
-        // run the audit, capture the tracker
+        // run the audit, capture the sequences
         val testH0Result =  when (config.auditType) {
             AuditType.CLCA -> runClcaAudit(config, cvrPairs, contestRound, assertionRound, auditRoundResult)
             AuditType.POLLING -> runPollingAudit(config, cvrPairs, contestRound, assertionRound, auditRoundResult)
@@ -134,9 +133,8 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
 
         return if (testH0Result == null) "failed" else buildString {
             appendLine("contest $contestId assertion win/lose = ${assertion.assorter.winLose()}")
-            val tracker = testH0Result.tracker
-            if (tracker is ClcaErrorTracker && tracker.sequences != null) {
-                val seq = tracker.sequences!!
+            val seq = testH0Result.sequences
+            if (seq != null) {
                 val pvalues = seq.pvalues()
                 val count = seq.xs.size
                 append(" i, ${sfn("xs", 6)}, ${sfn("bet", 6)}, ${sfn("payoff", 6)}, ${sfn("Tj", 6)}, ${sfn("pvalue", 8)}, ")
@@ -172,10 +170,15 @@ fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>
 
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-        val sampler = ClcaSampler(contestRound.id, contestRound.maxSampleAllowed, cvrPairs, cassorter, allowReset = false)
-        // println("contest ${contestRound.id} maxSampleIndex ${contestRound.maxSampleIndex} maxSamples ${sampler.maxSamples()} ")
-        val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
 
+        val sampler = ClcaSamplerErrorTracker(
+            contestRound.id,
+            cvrPairs,
+            cassorter,
+            allowReset = false,
+            maxSampleIndexIn = contestRound.maxSampleAllowed,
+        )
+        val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
         return testH0Result
 
     } catch (t: Throwable) {
@@ -187,13 +190,18 @@ fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>
 
 fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>, pools: List<OneAuditPoolIF>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
     try {
-        val auditor = OneAuditAssertionAuditor(pools)
+        val auditor = OneAuditAssertionAuditor2(pools)
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-        val sampler = ClcaSampler(contestRound.id, contestRound.maxSampleAllowed, cvrPairs, cassorter, allowReset = false)
 
+        val sampler = ClcaSamplerErrorTracker(
+            contestRound.id,
+            cvrPairs,
+            cassorter,
+            allowReset = false,
+            maxSampleIndexIn = contestRound.maxSampleAllowed,
+        )
         val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
-
         return testH0Result
 
     } catch (t: Throwable) {

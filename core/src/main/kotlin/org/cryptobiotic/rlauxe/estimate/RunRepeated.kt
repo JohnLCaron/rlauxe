@@ -1,8 +1,10 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.RiskMeasuringFn
 import org.cryptobiotic.rlauxe.betting.SampleTracker
+import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.Sampler
@@ -15,13 +17,12 @@ private val logger = KotlinLogging.logger("runTestRepeated")
 // runs RiskTestingFn repeatedly, drawSample.reset() gives different permutation for each trial.
 fun runRepeated(
     name: String,
-    drawSample: Sampler,
     ntrials: Int,
     testFn: RiskMeasuringFn,
     testParameters: Map<String, Double>,
     terminateOnNullReject: Boolean = true,
     startingTestStatistic: Double = 1.0, // T, must grow to 1/riskLimit
-    tracker: SampleTracker,
+    samplerTracker: SamplerTracker,
     N:Int, // maximum cards in the contest (diluted)
 ): RunRepeatedResult {
     var totalSamplesNeeded = 0
@@ -32,14 +33,14 @@ fun runRepeated(
     val sampleCounts = mutableListOf<Int>()
 
     repeat(ntrials) { trial ->
-        if (trial != 0) drawSample.reset() // this creates all the variation for the estimation
-        tracker.reset()
+        if (trial != 0)
+            samplerTracker.reset() // this creates all the variation for the estimation
 
         val testH0Result = testFn.testH0(
-            maxSamples=drawSample.maxSamples(),
+            maxSamples=samplerTracker.maxSamples(),
             terminateOnNullReject=terminateOnNullReject,
             startingTestStatistic = startingTestStatistic,
-       ) { drawSample.sample() }
+       ) { samplerTracker.sample() }
 
         val currCount = statusMap.getOrPut(testH0Result.status) { 0 }
         statusMap[testH0Result.status] = currCount + 1
@@ -47,6 +48,11 @@ fun runRepeated(
         // this can fail when you have limited the number of samples
         if (testH0Result.status == TestH0Status.LimitReached) {
             fail++
+            if (samplerTracker is ClcaSamplerErrorTracker) {
+                val debug = samplerTracker.debug()
+                require(samplerTracker.firstDebug == debug)
+            }
+            logger.warn { "$name:  $trial failed in sampling max= ${samplerTracker.maxSamples()} samples" }
         } else {
             nsuccess++
 
@@ -59,7 +65,7 @@ fun runRepeated(
     }
 
     if (fail > 0) {
-        logger.warn { "$name:  $fail/$ntrials failures in sampling max= ${drawSample.maxSamples()} samples" }
+        logger.warn { "$name:  $fail/$ntrials failures in sampling max= ${samplerTracker.maxSamples()} samples" }
     }
 
     val (_, variance, _) = welford.result()

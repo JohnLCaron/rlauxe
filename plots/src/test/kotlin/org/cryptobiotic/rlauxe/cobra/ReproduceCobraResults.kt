@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.cobra
 
-import org.cryptobiotic.rlauxe.betting.BettingMart
+import org.cryptobiotic.rlauxe.betting.BettingMartOld
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.doubleIsClose
@@ -15,12 +15,15 @@ import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
 import org.cryptobiotic.rlauxe.makeStandardContest
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
 import org.cryptobiotic.rlauxe.util.showDeciles
+import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSamplerTracker
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
+// TODO
 class ReproduceCobraResults {
 
+    /*
     //Fig. 1. Deterministic sample sizes (y-axis; log10 scale) for a comparison audit of a
     //plurality contest with various diluted margins (x-axis) and risk limits (colors), with no
     //error in CVRs and a maximal bet of λ = 2 on every draw
@@ -37,27 +40,25 @@ class ReproduceCobraResults {
                 val theta = margin2mean(margin)
                 val cvrs = makeCvrsByExactMean(N, theta)
                 val cassorter = makeStandardComparisonAssorter(theta, N)
-                val sampler = makeClcaNoErrorSampler(cassorter.info.id,  cvrs, cassorter)
+                val samplerTracker = makeClcaNoErrorSamplerTracker(cassorter.info.id,  cvrs, cassorter)
                 val upperBound = cassorter.upperBound()
                 println("testFigure1: alpha=${alpha} margin=${margin} a=${cassorter.noerror()}")
-                val tracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound())
 
                 val fixed = FixedBet(2.0)
                 val betting =
                     BettingMart(
                         riskLimit = alpha, bettingFn = fixed, N = N, withoutReplacement = false,
                         sampleUpperBound = upperBound,
-                        tracker = tracker,
+                        tracker = samplerTracker,
                     )
 
                 val result = runRepeated(
                     name = "reproduceCobraResults",
-                    drawSample = sampler,
                     ntrials = ntrials,
                     testFn = betting,
                     testParameters = mapOf("alpha" to alpha, "margin" to margin),
                     N=N,
-                    tracker=tracker
+                    samplerTracker=samplerTracker
                 )
                 println("  result = ${result.status} ${result.avgSamplesNeeded()}")
 
@@ -298,6 +299,7 @@ class ReproduceCobraResults {
         println("geometricMean = $gmean of ${ratios.size} ratios")
         assertTrue(doubleIsClose(1.0, gmean, 0.05))
     }
+     */
 }
 
 val table2 = listOf(

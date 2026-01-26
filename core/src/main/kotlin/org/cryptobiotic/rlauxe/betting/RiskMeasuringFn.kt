@@ -60,7 +60,8 @@ data class TestH0Result(
     val sampleCount: Int,      // number of samples used in testH0
     val pvalueMin: Double,     // smallest pvalue in the sequence.
     val pvalueLast: Double,    // last pvalue.
-    val tracker: SampleTracker,
+    val tracker: SampleTracker,                     // TODO remove
+    val sequences: DebuggingSequences? = null,
 ) {
     override fun toString() = buildString {
         append("TestH0Result status=$status")

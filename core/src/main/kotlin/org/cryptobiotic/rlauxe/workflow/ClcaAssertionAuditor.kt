@@ -2,10 +2,12 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.betting.BettingMart
+import org.cryptobiotic.rlauxe.betting.BettingMart2
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
+import org.cryptobiotic.rlauxe.betting.SampleErrorTracker
+import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
@@ -21,7 +23,7 @@ fun runClcaAuditRound(
     auditRound: AuditRound,
     mvrManager: MvrManager,
     roundIdx: Int,
-    auditor: ClcaAssertionAuditorIF,
+    auditor: ClcaAssertionAuditorIF2,
 ): Boolean {
     val cvrPairs = mvrManager.makeMvrCardPairsForRound(roundIdx)
 
@@ -57,7 +59,7 @@ class RunClcaContestTask(
     val config: AuditConfig,
     val contest: ContestRound,
     val cvrPairs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
-    val auditor: ClcaAssertionAuditorIF,
+    val auditor: ClcaAssertionAuditorIF2,
     val roundIdx: Int): ConcurrentTaskG<Boolean> {
 
     override fun name() = "RunContestTask for ${contest.contestUA.name} round $roundIdx nassertions ${contest.assertionRounds.size}"
@@ -68,8 +70,13 @@ class RunClcaContestTask(
             if (!assertionRound.status.complete) {
                 val cassertion = assertionRound.assertion as ClcaAssertion
                 val cassorter = cassertion.cassorter
-                val sampler = ClcaSampler(contest.id, cvrPairs.size, cvrPairs, cassorter, allowReset = false)
-                // println("contest ${contest.id} maxSampleIndex ${contest.maxSampleIndex} maxSamples ${sampler.maxSamples()} ")
+
+                val sampler = ClcaSamplerErrorTracker(
+                    contest.id,
+                    cvrPairs,
+                    cassorter,
+                    allowReset = false,
+                )
 
                 val testH0Result = auditor.run(config, contest, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status
@@ -94,13 +101,23 @@ fun interface ClcaAssertionAuditorIF {
     ): TestH0Result
 }
 
-class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
+fun interface ClcaAssertionAuditorIF2 {
+    fun run(
+        config: AuditConfig,
+        contestRound: ContestRound,
+        assertionRound: AssertionRound,
+        samplerTracker: SamplerTracker,
+        roundIdx: Int,
+    ): TestH0Result
+}
+
+class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF2 {
 
     override fun run(
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampler: Sampler,
+        samplerTracker: SamplerTracker,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA
@@ -118,31 +135,24 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
                 d = clcaConfig.d,
                 maxRisk = clcaConfig.maxRisk)
 
-        val tracker = ClcaErrorTracker(
-            cassorter.noerror(),
-            cassorter.assorter.upperBound(),
-        )
-
-        val testFn = BettingMart(
+        val testFn = BettingMart2(
             bettingFn = bettingFn,
             N = contestUA.Npop,
             sampleUpperBound = cassorter.upperBound(),
             riskLimit = config.riskLimit,
             withoutReplacement = true,
-            tracker = tracker
+            tracker = samplerTracker
         )
-        // TODO make optional
-        tracker.setDebuggingSequences(testFn.setDebuggingSequences())
+        testFn.setDebuggingSequences()
 
         val terminateOnNullReject = config.auditSampleLimit == null
-        // TODO remove tracker from testH0
-        val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject = terminateOnNullReject) { sampler.sample() }
+        val testH0Result = testFn.testH0(samplerTracker.maxSamples(), terminateOnNullReject = terminateOnNullReject) { samplerTracker.sample() }
 
-        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is ClcaErrorTracker) testH0Result.tracker.measuredClcaErrorCounts() else null
+        val measuredCounts: ClcaErrorCounts? = if (samplerTracker is SampleErrorTracker) samplerTracker.measuredClcaErrorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
-            nmvrs = sampler.maxSamples(),
-            maxSampleIndexUsed = sampler.maxSampleIndexUsed(),
+            nmvrs = samplerTracker.maxSamples(),
+            maxSampleIndexUsed = samplerTracker.maxSampleIndexUsed(),
             plast = testH0Result.pvalueLast,
             pmin = testH0Result.pvalueMin,
             samplesUsed = testH0Result.sampleCount,

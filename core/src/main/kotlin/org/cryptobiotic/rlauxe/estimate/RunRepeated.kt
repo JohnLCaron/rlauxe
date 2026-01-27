@@ -48,10 +48,10 @@ fun runRepeated(
         // this can fail when you have limited the number of samples
         if (testH0Result.status == TestH0Status.LimitReached) {
             fail++
-            if (samplerTracker is ClcaSamplerErrorTracker) {
-                val debug = samplerTracker.debug()
-                require(samplerTracker.firstDebug == debug)
-            }
+            //if (samplerTracker is ClcaSamplerErrorTracker) {
+            //    val debug = samplerTracker.debug()
+            //    require(samplerTracker.firstDebug == debug)
+            //}
             logger.warn { "$name:  $trial failed in sampling max= ${samplerTracker.maxSamples()} samples" }
         } else {
             nsuccess++

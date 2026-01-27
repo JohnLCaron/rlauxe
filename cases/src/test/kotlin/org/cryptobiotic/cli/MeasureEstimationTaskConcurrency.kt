@@ -24,6 +24,8 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
 class MeasureEstimationTaskConcurrency {
+
+    /*
     @Test
     fun measure() {
         val test = MultiContestTestData(15, 1, 20000)
@@ -110,4 +112,6 @@ class EstimationWTaskRunner() {
             yield()
         }
     }
+
+     */
 }

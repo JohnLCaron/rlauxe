@@ -18,7 +18,7 @@ interface SampleTracker {
     fun reset()
 }
 
-/** All risk measureing functions implement this */
+/** All risk measuring functions implement this */
 interface RiskMeasuringFn {
     fun testH0(
         maxSamples: Int,

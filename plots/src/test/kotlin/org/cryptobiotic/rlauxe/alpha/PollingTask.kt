@@ -33,12 +33,13 @@ data class PollingTask(
 
     override fun makeSampler(): SamplerTracker {
         val contestUA = ContestWithAssertions(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
-        return PollingSamplerTracker(contestUA.id, pairs, pollingAssorter)
+        return PollingSamplerTracker(contestUA.id, pollingAssorter, pairs,)
     }
 
     override fun makeTestFn(): RiskMeasuringFn {
+        val samplerTracker = makeSampler()
         return if (useFixedEstimFn) {
-            AlphaMart(estimFn = FixedEstimFn(cvrMean), N = N, upperBound = pollingAssorter.upperBound())
+            AlphaMart(estimFn = FixedEstimFn(cvrMean), N = N, tracker = samplerTracker, upperBound = pollingAssorter.upperBound())
         } else {
             eta0 = cvrMean
 
@@ -50,6 +51,7 @@ data class PollingTask(
             AlphaMart(
                 estimFn = useEstimFn,
                 N = N,
+                tracker = samplerTracker,
                 upperBound = pollingAssorter.upperBound(),
                 withoutReplacement = withoutReplacement,
             )

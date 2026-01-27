@@ -2,25 +2,13 @@ package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.TestH0Status
-import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
-import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.workflow.MvrManager
 
 private val debugConsistent = false
 private val logger = KotlinLogging.logger("ConsistentSampling")
-
-// TODO
-// for each contest record first card prn not taken due to have >= want.
-// can continue the audit up to that prn.
-
 
 // called from auditWorkflow.startNewRound
 // also called by rlauxe-viewer
@@ -35,7 +23,7 @@ fun sampleWithContestCutoff(
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }.toMutableList()
 
     while (contestsNotDone.isNotEmpty()) {
-        sample(config, mvrManager, auditRound, previousSamples, quiet = quiet)
+        consistentSampling( auditRound, mvrManager, previousSamples)
 
         //// the rest of this implements contestSampleCutoff
         if (!config.removeCutoffContests || config.contestSampleCutoff == null || auditRound.samplePrns.size <= config.contestSampleCutoff) {
@@ -57,20 +45,12 @@ fun sampleWithContestCutoff(
     logger.debug{"sampleWithContestCutoff success on ${auditRound.contestRounds.count { !it.done }} contests: round ${auditRound.roundIdx} took ${stopwatch}"}
 }
 
-/** Choose what cards to sample */
-private fun sample(
-    config: AuditConfig,
-    mvrManager : MvrManager,
-    auditRound: AuditRoundIF,
-    previousSamples: Set<Long> = emptySet(),
-    quiet: Boolean = true
-) {
-    if (!quiet) logger.info{"consistentSampling round ${auditRound.roundIdx} auditorSetNewMvrs=${auditRound.auditorWantNewMvrs}"}
-    consistentSampling(auditRound, mvrManager, previousSamples)
-    if (!quiet) logger.info{" consistentSamplingSize= ${auditRound.samplePrns.size} newmvrs= ${auditRound.newmvrs} "}
-}
-
 // From Consistent Sampling with Replacement, Ronald Rivest, August 31, 2018
+// main side effects:
+//    auditRound.nmvrs = sampledCards.size
+//    auditRound.newmvrs = newMvrs
+//    auditRound.samplePrns = sampledCards.map { it.prn }
+//    contestRound.maxSampleAllowed = sampledCards.size
 fun consistentSampling(
     auditRound: AuditRoundIF,
     mvrManager: MvrManager,
@@ -147,22 +127,11 @@ fun consistentSampling(
     }
 
     if (debugConsistent) logger.info{"**consistentSampling haveSampleSize = $haveSampleSize, haveNewSamples = $haveNewSamples, newMvrs=$newMvrs"}
-    /* val contestIdMap = contestsIncluded.associate { it.id to it }
-    contestIdMap.values.forEach { // defaults to 0
-        it.actualMvrs = 0
-        it.actualNewMvrs = 0
-    }
-    haveSampleSize.forEach { (contestId, nmvrs) ->
-        contestIdMap[contestId]?.actualMvrs = nmvrs
-    }
-    haveNewSamples.forEach { (contestId, nnmvrs) ->
-        contestIdMap[contestId]?.actualNewMvrs = nnmvrs
-    } */
 
     // set the results into the auditRound direclty
     auditRound.nmvrs = sampledCards.size
     auditRound.newmvrs = newMvrs
-    auditRound.samplePrns = sampledCards.map { it.prn }  // TODO WHY ?
+    auditRound.samplePrns = sampledCards.map { it.prn }
 }
 
 // try running without complexity
@@ -170,96 +139,6 @@ private fun wantSampleSizeSimple(contestsNotDone: List<ContestRound>): Map<Int, 
      return contestsNotDone.associate { it.id to it.estMvrs }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// called from estimateSampleSizes to choose N cards to reduce simulation cost
-fun getSubsetForEstimation(
-    config: AuditConfig,
-    contests: List<ContestRound>,
-    cards: CloseableIterable<AuditableCard>,
-    previousSamples: Set<Long>,
-): List<AuditableCard> {
-    val contestsNotDone = contests.filter { !it.done }
-    if (contestsNotDone.isEmpty()) return emptyList() // may not quite be right...
-
-    // calculate how many samples are wanted for each contest.
-    val wantSamples: Map<Int, Int> = contestsNotDone.associate { it.id to estSamplesNeeded(config, it) }
-    val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
-
-    fun contestWantsMoreSamples(c: ContestRound): Boolean {
-        return (haveSampleSize[c.id] ?: 0) < (wantSamples[c.id] ?: 0)
-    }
-
-    val contestsIncluded = contestsNotDone.filter { it.included }
-
-    // var newMvrs = 0 // count when this card not in previous samples
-    val sampledCards = mutableListOf<AuditableCard>()
-
-    // skip previously used cards, grab next batch if needed by a contest thats not done...
-    // because we are using real cards, we dont need to add phantoms to match....
-    var countSamples = 0
-    val sortedCardIter = cards.iterator()
-    while (contestsIncluded.any { contestWantsMoreSamples(it) } && sortedCardIter.hasNext()) {
-        val card = sortedCardIter.next()
-        if (previousSamples.contains(card.prn)) continue
-
-        // does this contribute to one or more contests that need more samples?
-        if (contestsIncluded.any { contestWantsMoreSamples(it) && card.hasContest(it.id) }) {
-            // then use it
-            sampledCards.add(card)
-
-            // count only if included
-            contestsIncluded.forEach { contest ->
-                if (card.hasContest(contest.id)) {
-                    haveSampleSize[contest.id] = haveSampleSize[contest.id]?.plus(1) ?: 1
-                }
-            }
-        }
-        countSamples++
-    }
-
-    return sampledCards
-}
-
-// CLCA and OneAudit TODO POLLING
-// we dont use this for the actual estimation....
-private fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
-    val minAssertionRound = contestRound.minAssertion()
-    if (minAssertionRound == null) {
-        contestRound.minAssertion()
-        throw RuntimeException()
-    }
-
-    val lastPvalue = minAssertionRound.auditResult?.plast ?: config.riskLimit
-    val minAssertion = minAssertionRound.assertion
-    val cassorter = (minAssertion as ClcaAssertion).cassorter
-
-    if (config.isClca) {
-        return roundUp(2.0 * cassorter.sampleSizeNoErrors(maxRisk = config.clcaConfig.maxRisk, lastPvalue))
-    }
-
-    // maybe just something inverse to margin ??
-
-    // one audit - calc optimal bet, use it as maxRisk
-    val contest = contestRound.contestUA
-    val oaass = minAssertion.cassorter as ClcaAssorterOneAudit
-    val assorter = minAssertion.cassorter.assorter
-    val upper = assorter.upperBound()
-    val betFn = GeneralAdaptiveBetting(
-        contest.Npop,
-        ClcaErrorCounts.empty(oaass.noerror(), upper),
-        contest.Nphantoms,
-        oaass.oaAssortRates,
-        maxRisk = config.clcaConfig.maxRisk,
-        debug=false,
-    )
-    val bet = betFn.bet(ClcaErrorTracker(oaass.noerror(), upper))
-    val maxRisk = bet / 2
-    val est = roundUp(5.0 * cassorter.sampleSizeNoErrors(maxRisk = maxRisk, lastPvalue))
-    if (assorter.dilutedMargin() < 0.07) {
-        logger.info { "getSubsetForEstimation ${contest.id}-${assorter.winLose()}  sumRates = ${oaass.oaAssortRates.sumRates()} maxRisk= $maxRisk, est = $est, margin=${assorter.dilutedMargin()}" }
-    }
-    return est
-}
 
 ////////////////////////////////////////////////////////////////////////////
 //val minSamples = -ln(.05) / ln(2 * minAssorter.noerror())

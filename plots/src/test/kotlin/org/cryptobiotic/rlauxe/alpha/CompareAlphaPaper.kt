@@ -60,7 +60,7 @@ class CompareAlphaPaper {
 
                 val pollingResult = runAlphaMartRepeated(
                     name = "PollingSampling",
-                    samplerTracker = PollingSamplerTracker(contestUA.id, pairs, pollingAssertion.assorter),
+                    samplerTracker = PollingSamplerTracker(contestUA.id, pollingAssertion.assorter, pairs),
                     N = N,
                     eta0 = eta, // use the reportedMean for the initial guess
                     d = d,

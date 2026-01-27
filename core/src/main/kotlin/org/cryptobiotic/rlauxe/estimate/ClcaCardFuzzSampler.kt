@@ -3,27 +3,27 @@ package org.cryptobiotic.rlauxe.estimate
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker2
 import org.cryptobiotic.rlauxe.betting.SampleErrorTracker
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.random.Random
 
 private const val debug = false
 
 private val logger = KotlinLogging.logger("ClcaFuzzSamplerTracker")
 
+// could try to create a subclass of ClcaSamplerErrorTracker ??
 class ClcaFuzzSamplerTracker(
     val fuzzPct: Double,
-    val cards: List<AuditableCard>,
+    cardSamples: CardSamples,
     val contest: ContestIF,
     val cassorter: ClcaAssorter
 ): SamplerTracker, SampleErrorTracker {
-    val maxSamples = cards.count { it.hasContest(contest.id) }
-    val permutedIndex = MutableList(cards.size) { it }
+    val samples = cardSamples.extractSubsetByIndex(contest.id)
+    val maxSamples = samples.size
+    val permutedIndex = MutableList(samples.size) { it }
     val clcaErrorTracker = ClcaErrorTracker2(cassorter.noerror(), cassorter.assorter.upperBound())
 
     var welford = Welford()
@@ -32,19 +32,21 @@ class ClcaFuzzSamplerTracker(
 
     init {
         val mvrs = remakeFuzzed()
-        cvrPairs = mvrs.zip(cards)
+        cvrPairs = mvrs.zip(samples)
     }
 
     override fun sample(): Double {
-        while (idx < cards.size) {
+        while (idx < maxSamples) {
             val (mvr, card) = cvrPairs[permutedIndex[idx]]
             idx++
-            if (card.hasContest(contest.id)) {
+            if (card.hasContest(contest.id)) { // should always be true
                 val nextVal = cassorter.bassort(mvr, card, hasStyle=card.exactContests())
                 clcaErrorTracker.addSample(nextVal, card.poolId == null) // dont track errors from oa pools
                 if (lastVal != null) welford.update(lastVal!!)
                 lastVal = nextVal
                 return nextVal
+            } else {
+                logger.error{"cardSamples for contest ${contest.id} list card does not contain the contest at index ${permutedIndex[idx-1]}"}
             }
         }
         logger.error{"no samples left for ${contest.id} and ComparisonAssorter ${cassorter}"}
@@ -53,14 +55,14 @@ class ClcaFuzzSamplerTracker(
 
     override fun reset() {
         val mvrs = remakeFuzzed() // refuzz each time
-        cvrPairs = mvrs.zip(cards)
+        cvrPairs = mvrs.zip(samples)
         permutedIndex.shuffle(Random) // also, a new permutation....
         idx = 0
         welford = Welford()
     }
 
     fun remakeFuzzed(): List<AuditableCard> {
-        return makeFuzzedCardsForClca(listOf(contest.info()), cards, fuzzPct)
+        return makeFuzzedCardsForClca(listOf(contest.info()), samples, fuzzPct)
     }
 
     override fun maxSamples() = maxSamples
@@ -92,60 +94,8 @@ class ClcaFuzzSamplerTracker(
     override fun addSample(sample: Double) {
         TODO("Not implemented")
     }
-
 }
 
-// for one contest, this takes a list of cards and fuzzes them to use as the mvrs.
-// Only used for estimateClcaAssertionRound, estimateOneAuditAssertionRound, not auditing.
-class ClcaCardFuzzSampler(
-    val fuzzPct: Double,
-    val cards: List<AuditableCard>,
-    val contest: ContestIF,
-    val cassorter: ClcaAssorter
-): Sampler, Iterator<Double> {
-    val maxSamples = cards.count { it.hasContest(contest.id) }
-    val N = cards.size
-    val permutedIndex = MutableList(N) { it }
-    val welford = Welford()
-    var cvrPairs: List<Pair<AuditableCard, AuditableCard>> // (mvr, cvr)
-    var idx = 0
-
-    init {
-        val mvrs = remakeFuzzed()
-        cvrPairs = mvrs.zip(cards)
-    }
-
-    override fun sample(): Double {
-        while (idx < N) {
-            val (mvr, card) = cvrPairs[permutedIndex[idx]]
-            idx++
-            if (card.hasContest(contest.id)) {
-                val result = cassorter.bassort(mvr.cvr(), card.cvr(), card.exactContests())
-                welford.update(result)
-                return result
-            }
-        }
-        throw RuntimeException("no samples left for ${contest.id} and ComparisonAssorter ${cassorter}")
-    }
-
-    override fun reset() {
-        val mvrs = remakeFuzzed() // refuzz each time
-        cvrPairs = mvrs.zip(cards)
-        permutedIndex.shuffle(Random) // also, a new permutation....
-        idx = 0
-    }
-
-    fun remakeFuzzed(): List<AuditableCard> {
-        return makeFuzzedCardsForClca(listOf(contest.info()), cards, fuzzPct)
-    }
-
-    override fun maxSamples() = maxSamples
-    override fun maxSampleIndexUsed() = idx
-    override fun nmvrs() = cvrPairs.size
-
-    override fun hasNext(): Boolean = (idx < N)
-    override fun next(): Double = sample()
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Ok for CLCA IRV; TODO can this be used with DHondt?

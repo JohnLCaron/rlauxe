@@ -28,7 +28,8 @@ data class AuditRound(
 
     override var auditWasDone: Boolean = false,
     override var auditIsComplete: Boolean = false,
-    override var samplePrns: List<Long>, // card prns to sample for this round (complete, not just new)
+    override var samplePrns: List<Long>, // card prns to sample for this round (complete, not just new).
+                                         // duplicates samplePrnsFile, so no need to serialze
     override var nmvrs: Int = 0,
     override var newmvrs: Int = 0,
     override var auditorWantNewMvrs: Int = -1,

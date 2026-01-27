@@ -45,7 +45,7 @@ class TestAuditPolling {
         val cvrs = test.makeCvrsFromContests()
         val pairs = cvrs.zip(cvrs)
 
-        val cvrSampler = PollingSamplerTracker(contestUA.id, pairs, assorter)
+        val cvrSampler = PollingSamplerTracker(contestUA.id, assorter, pairs)
 
         val d = 100
         val margin = assorter.dilutedMargin()
@@ -120,7 +120,7 @@ class TestAuditPolling {
             contestUA.assertions.forEach {
                 if (!silent && showContests) println("  ${it}")
 
-                val cvrSampler = PollingSamplerTracker(contestUA.id, cvrs.zip(cvrs), it.assorter)
+                val cvrSampler = PollingSamplerTracker(contestUA.id, it.assorter, cvrs.zip(cvrs), )
 
                 val result = runAlphaMartRepeated(
                     name = "testPollingWorkflow",

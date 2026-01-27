@@ -7,6 +7,7 @@ import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
+import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
@@ -19,10 +20,9 @@ import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import org.cryptobiotic.rlauxe.workflow.ClcaAssertionAuditor
-import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor2
+import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
-import org.cryptobiotic.rlauxe.workflow.PollingSampler
 import org.cryptobiotic.rlauxe.workflow.auditPollingAssertion
 import java.nio.file.Files.notExists
 import java.nio.file.Path
@@ -171,12 +171,11 @@ fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
 
-        val sampler = ClcaSamplerErrorTracker(
+        val sampler = ClcaSamplerErrorTracker.withMaxSample(
             contestRound.id,
-            cvrPairs,
             cassorter,
-            allowReset = false,
-            maxSampleIndexIn = contestRound.maxSampleAllowed,
+            cvrPairs,
+            maxSampleIndex = contestRound.maxSampleAllowed,
         )
         val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
         return testH0Result
@@ -190,16 +189,15 @@ fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>
 
 fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>, pools: List<OneAuditPoolIF>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
     try {
-        val auditor = OneAuditAssertionAuditor2(pools)
+        val auditor = OneAuditAssertionAuditor(pools)
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
 
-        val sampler = ClcaSamplerErrorTracker(
+        val sampler = ClcaSamplerErrorTracker.withMaxSample(
             contestRound.id,
-            cvrPairs,
             cassorter,
-            allowReset = false,
-            maxSampleIndexIn = contestRound.maxSampleAllowed,
+            cvrPairs,
+            maxSampleIndex = contestRound.maxSampleAllowed,
         )
         val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
         return testH0Result
@@ -215,7 +213,12 @@ fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, CvrIF>>, con
     try {
         val assertion = assertionRound.assertion
         val assorter = assertion.assorter
-        val sampler = PollingSampler(contestRound.id, cvrPairs, assorter, allowReset = false)
+        val sampler = PollingSamplerTracker(
+            contestRound.id,
+            assorter,
+            cvrPairs,
+            maxSampleIndex = contestRound.maxSampleAllowed
+        )
 
         val testH0Result = auditPollingAssertion(config, contestRound.contestUA, assertionRound, sampler, auditRoundResult.roundIdx)
 

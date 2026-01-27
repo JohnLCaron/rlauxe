@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestClcaAuditTask {
@@ -45,6 +46,6 @@ class TestClcaAuditTask {
         val task = taskGen.generateNewTask()
         val workflowResult = task.run()
         println(workflowResult)
-        assertTrue(workflowResult.status == TestH0Status.StatRejectNull)
+        assertEquals(TestH0Status.StatRejectNull, workflowResult.status)
     }
 }

@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 01/18/2026_
+_last changed: 01/27/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -429,15 +429,17 @@ on the various percentages the contests appear on the same ballot.
 
 ### Deterministic sampling order for each Contest
 
-For any given contest, the sequence of ballots/CVRS to be used by that contest is fixed when the PRNG is chosen.
+For any given contest, the sequence of ballots/CVRS to be used by that contest is fixed when the PRNG is chosen. This 
+is called the _canonical sequence_ for that contest.
 
-In a multi-contest audit, at each round, the estimate n of the number of ballots needed for each contest is calculated, 
-and the first n ballots in the contest's sequence are sampled.
-The total set of ballots sampled in a round is just the union of the individual contests' set. 
-The extra efficiency of a multi-contest audit comes when the same ballot is chosen for more than one contest.
+In a multi-contest audit, at each round, the estimate sample size (n) of the number of cards needed for each contest is calculated, 
+and the first n cards in the contest's sequence are sampled.
+The total set of cards sampled in a round is just the union of the individual contests' set. 
+The extra efficiency of a multi-contest audit comes when the same card is chosen for more than one contest.
 
-The set of contests that will continue to the next round is not known, so the set of ballots sampled at each round is 
-not known in advance. Nonetheless, for each contest, the sequence of ballots seen by the algorithm is fixed when the PRNG is chosen.
+It may happen that after a contest's estimated sample size has been satisfied, further cards are chosen because they contain a contest whose sample size has not been satisfied. Those extra cards can be used in the audit for a contest as long as the audit sees the canonical sequence. If a card that contains the contest is not used in the sample, the canonical sequence is broken and any further cards that contain the contest are not used in the audit. This ensures that the audit only uses the canonical sequence for each contest, which ensures that the sample is random.
+
+The set of contests that will continue to the next round is not known, so the set of ballots sampled at each round is not known in advance. Nonetheless, for each contest, and for each round, the sequence of ballots seen by the audit is fixed when the PRNG is chosen.
 
 # Attacks
 

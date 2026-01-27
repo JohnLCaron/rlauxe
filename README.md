@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 01/18/2026_
+_last changed: 01/27/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -403,21 +403,19 @@ An election often consists of several or many contests, and it is likely to be m
 We have several mechanisms for choosing contests to remove from the audit to keep the sample sizes reasonable.
 
 Before the audit begins:
-1. Any contest whose reported margin is less than _auditConfig.minMargin_ is removed from the audit with failure code MinMargin.
-2. Any contest whose reported margin is less than its phantomPct (Np/Nc) is removed from the audit with failure code TooManyPhantoms.
+1. Any contest whose minimum recount margin is less than _auditConfig.minRecountMargin_ (or if there is a tie) is removed from the audit with failure code MinMargin.
+2. If auditConfig.removeTooManyPhantoms is true, Any contest whose reported margin is less than its phantomPct (Np/Nc) is removed from the audit with failure code TooManyPhantoms.
 
 For each Estimation round:
-1. Any contest whose estimated samplesNeeded exceeds _auditConfig.sampleCutoff_ is removed from the audit with failure code FailMaxSamplesAllowed.
-2. If the total number of ballots for a multicontest audit exceeds _auditConfig.sampleCutoff_, the contest with the largest estimated samplesNeeded
-   is removed from the audit with failure code FailMaxSamplesAllowed. The Consistent/Uniform sampling is then redone without that
-   contest, and the check on the total number of ballots is repeated.
+1. A contest's estimated samplesNeeded may not exceed _auditConfig.contestSampleCutoff_.
+2. If _auditConfig.removeCutoffContests_ is true, and the total sample size exceeds _auditConfig.sampleCutoff_, the contest with the largest estimated samplesNeeded is removed from the audit with failure code FailMaxSamplesAllowed. The sampling is then redone without that contest, and the check on the total number of ballots is repeated, until the total sample size is less than _auditConfig.sampleCutoff
 
 These rules are somewhat arbitrary but allow us to test audits without human intervention. In a real audit,
 auditors might hand select which contests to audit, interacting with the estimated samplesNeeded from the estimation stage,
 and try out different scenarios before committing to which contests continue on to the next round. 
 
-* See the prototype [rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer).
-* See [Case Studies](docs/CaseStudies.md)
+* See the prototype [rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer) to see how an auditor might control the estimation phase before committing to a sample for the round.
+* See [Case Studies](docs/CaseStudies.md) for simulated audits on real election data.
 
 
 ### Efficiency
@@ -425,19 +423,21 @@ and try out different scenarios before committing to which contests continue on 
 We assume that the cost of auditing a ballot is the same no matter how many contests are on it. So, if two contests always 
 appear together on a ballot, then auditing the second contest is "free". If the two contests appear on the same ballot some 
 pct of the time, then the cost is reduced by that pct. More generally the reduction in cost of a multicontest audit depends
-on the various percentages the contests appear on the same ballot.
+on the various percentages the contests appear on the same ballot, as well as the random order of the ballots created by the PRNG.
 
 ### Deterministic sampling order for each Contest
 
-For any given contest, the sequence of ballots/CVRS to be used by that contest is fixed when the PRNG is chosen.
+For any given contest, the sequence of ballots/CVRS to be used by that contest is fixed when the PRNG is chosen. This 
+is called the _canonical sequence_ for that contest.
 
-In a multi-contest audit, at each round, the estimate n of the number of ballots needed for each contest is calculated, 
-and the first n ballots in the contest's sequence are sampled.
-The total set of ballots sampled in a round is just the union of the individual contests' set. 
-The extra efficiency of a multi-contest audit comes when the same ballot is chosen for more than one contest.
+In a multi-contest audit, at each round, the estimate sample size (n) of the number of cards needed for each contest is calculated, 
+and the first n cards in the contest's sequence are sampled.
+The total set of cards sampled in a round is just the union of the individual contests' set. 
+The extra efficiency of a multi-contest audit comes when the same card is chosen for more than one contest.
 
-The set of contests that will continue to the next round is not known, so the set of ballots sampled at each round is 
-not known in advance. Nonetheless, for each contest, the sequence of ballots seen by the algorithm is fixed when the PRNG is chosen.
+It may happen that after a contest's estimated sample size has been satisfied, further cards are chosen because they contain a contest whose sample size has not been satisfied. Those extra cards can be used in the audit for a contest as long as the audit sees the canonical sequence. If a card that contains the contest is not used in the sample, the canonical sequence is broken and any further cards that contain the contest are not used in the audit. This ensures that the audit only uses the canonical sequence for each contest, which ensures that the sample is random.
+
+The set of contests that will continue to the next round is not known, so the set of ballots sampled at each round is not known in advance. Nonetheless, for each contest, and for each round, the sequence of ballots seen by the audit is fixed when the PRNG is chosen.
 
 # Attacks
 

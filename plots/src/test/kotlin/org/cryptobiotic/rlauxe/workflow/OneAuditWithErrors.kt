@@ -14,7 +14,7 @@ class OneAuditWithErrors {
 
     @Test
     fun oneAuditsWithFuzz() {
-        val nruns = 100
+        val nruns = 200
         val name = "OneAuditWithFuzz"
         val dirName = "$testdataDir/plots/oneaudit/$name"
 

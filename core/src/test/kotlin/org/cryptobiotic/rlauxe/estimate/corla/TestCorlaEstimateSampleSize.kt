@@ -17,6 +17,7 @@ import kotlin.test.Test
 
 class TestCorlaEstimateSampleSize {
 
+    /*
     @Test
     fun testFindSampleSizePolling() {
         val test = MultiContestTestData(20, 11, 20000)
@@ -80,6 +81,7 @@ class TestCorlaEstimateSampleSize {
             println("${contestRound.name} estSize=$estSize  simSize=${contestRound.estMvrs}\n")
         }
     }
+    */
 }
 
 

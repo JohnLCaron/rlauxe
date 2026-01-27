@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.betting.BettingFn
 import org.cryptobiotic.rlauxe.betting.BettingMart2
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
+import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker2
 import org.cryptobiotic.rlauxe.betting.EstimFn
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Status
@@ -54,8 +54,8 @@ fun estimateSampleSizes(
 ): List<RunRepeatedResult> {
 
     // choose a subset of the cards for the estimation for speed
-    val contestCards: List<AuditableCard>? = if (config.isPolling) null else
-        getSubsetForEstimation(
+    val cardSamples: CardSamples? = if (config.isPolling) null else
+        getSubsetForEstimation2(
             config,
             auditRound.contestRounds,
             cardManifest,
@@ -66,13 +66,13 @@ fun estimateSampleSizes(
     // uses config.simFuzzPct to fuzz the non-pooled cvrs; the pooled cvrs are simulated using Vunder
     val vunderFuzz = if (!config.isOA) null else {
         val infos = auditRound.contestRounds.map { it.contestUA.contest.info() }.associateBy { it.id }
-        OneAuditVunderFuzzer(cardPools!!, infos, config.simFuzzPct ?: 0.0, contestCards!!)
+        OneAuditVunderFuzzer(cardPools!!, infos, config.simFuzzPct ?: 0.0, cardSamples!!.cards)
     }
 
     // create the estimation tasks for each contest and assertion
     val tasks = mutableListOf<EstimateSampleSizeTask>()
     auditRound.contestRounds.filter { !it.done }.forEach { contestRound ->
-        tasks.addAll(makeEstimationTasks(config, contestRound, auditRound.roundIdx, contestCards,  vunderFuzz))
+        tasks.addAll(makeEstimationTasks(config, contestRound, auditRound.roundIdx, cardSamples,  vunderFuzz))
     }
     if (onlyTask != null) {
         tasks.removeAll{  it.name() != onlyTask }
@@ -132,7 +132,7 @@ fun makeEstimationTasks(
     config: AuditConfig,
     contestRound: ContestRound,
     roundIdx: Int,
-    contestCards: List<AuditableCard>?,
+    cardSamples: CardSamples?,
     vunderFuzz: OneAuditVunderFuzzer?,
     moreParameters: Map<String, Double> = emptyMap(),
 ): List<EstimateSampleSizeTask> {
@@ -177,7 +177,7 @@ fun makeEstimationTasks(
                 EstimateSampleSizeTask(
                     roundIdx,
                     config,
-                    contestCards = contestCards,
+                    cardSamples = cardSamples,
                     mvrsForPolling = mvrsForPolling,
                     vunderFuzz,
                     contestRound,
@@ -198,7 +198,7 @@ fun makeEstimationTasks(
 class EstimateSampleSizeTask(
     val roundIdx: Int,
     val config: AuditConfig,
-    val contestCards: List<AuditableCard>?,
+    val cardSamples: CardSamples?,
     val mvrsForPolling: List<Cvr>?,
     val vunderFuzz: OneAuditVunderFuzzer?,
     val contestRound: ContestRound,
@@ -218,7 +218,7 @@ class EstimateSampleSizeTask(
                 estimateClcaAssertionRound(
                     roundIdx,
                     config,
-                    contestCards!!,
+                    cardSamples!!,
                     contestRound,
                     assertionRound,
                     startingTestStatistic
@@ -238,6 +238,7 @@ class EstimateSampleSizeTask(
                     roundIdx,
                     config,
                     vunderFuzz!!,
+                    cardSamples!!,
                     contestRound,
                     assertionRound,
                     startingTestStatistic,
@@ -261,7 +262,7 @@ private const val quiet = true
 fun estimateClcaAssertionRound(
     roundIdx: Int,
     config: AuditConfig,
-    contestCards: List<AuditableCard>,
+    cardSamples: CardSamples,
     contestRound: ContestRound,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
@@ -287,7 +288,7 @@ fun estimateClcaAssertionRound(
             )
 
     // for one contest, this takes a list of cards and fuzzes them to use as the mvrs.
-    val samplerTracker = ClcaFuzzSamplerTracker(config.simFuzzPct ?: 0.0, contestCards, contestUA.contest, cassorter)
+    val samplerTracker = ClcaFuzzSamplerTracker2(config.simFuzzPct ?: 0.0, cardSamples, contestUA.contest, cassorter)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateClcaAssertionRound for $name with ${config.nsimEst} trials"}
@@ -364,6 +365,7 @@ fun estimateOneAuditAssertionRound(
     roundIdx: Int,
     config: AuditConfig,
     vunderFuzz: OneAuditVunderFuzzer,
+    cardSamples: CardSamples,
     contestRound: ContestRound,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0, // T, must grow to 1/riskLimit
@@ -408,7 +410,7 @@ fun estimateOneAuditAssertionRound(
 
     // uses the vunderFuzz.mvrCvrPairs as is; each trial is a new permutation
     val sampler =
-        ClcaSamplerErrorTracker(contestUA.contest.id, oaFuzzedPairs, oaCassorter, allowReset = true)
+        ClcaSamplerErrorTracker2(contestUA.contest.id, oaFuzzedPairs, cardSamples, oaCassorter, allowReset = true)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateOneAuditAssertionRound for $name with ${config.nsimEst} trials"}

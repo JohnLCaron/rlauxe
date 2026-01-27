@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.betting
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.estimate.CardSamples
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
@@ -192,7 +193,7 @@ class ClcaSamplerErrorTracker(
     val maxSampleIndex = maxSampleIndexIn ?: cvrPairs.size
     val permutedIndex = MutableList(cvrPairs.size) { it }
     val clcaErrorTracker = ClcaErrorTracker2(cassorter.noerror, cassorter.assorter.upperBound())
-    val firstDebug: Pair<Int, Int>
+    // val firstDebug: Pair<Int, Int>
 
     private var maxSamples = 0
     private var idx = 0
@@ -202,7 +203,7 @@ class ClcaSamplerErrorTracker(
         cvrPairs.forEach { (mvr, card) ->
             require(mvr.location() == card.location())  { "mvr location ${mvr.location()} != card.location ${card.location()}"}  }
         maxSamples = cvrPairs.take(maxSampleIndex).count { it.second.hasContest(contestId) }
-        firstDebug = debug()
+        // firstDebug = debug()
     }
 
     override fun sample(): Double {
@@ -256,6 +257,107 @@ class ClcaSamplerErrorTracker(
     override fun nmvrs() = cvrPairs.size
 
     override fun hasNext() = (welford.count + 1 < maxSamples)
+    override fun next() = sample()
+
+    // tracker reflects "previous sequence"
+    var lastVal: Double? = null
+    override fun numberOfSamples() = welford.count
+    override fun welford() = welford
+
+    override fun done() {
+        if (lastVal != null) welford.update(lastVal!!)
+        lastVal = null
+    }
+
+    override fun measuredClcaErrorCounts(): ClcaErrorCounts = clcaErrorTracker.measuredClcaErrorCounts()
+    override fun noerror(): Double = clcaErrorTracker.noerror
+
+    ///////////////////////////////// temporary TODO remove
+    override fun sum() = welford.sum()
+    override fun mean() = welford.mean
+    override fun variance() = welford.variance()
+
+    override fun last(): Double = lastVal!!
+    override fun addSample(sample: Double) {
+        TODO("Remove this")
+    }
+}
+
+
+//// For clca audits. Production RunClcaContestTask
+class ClcaSamplerErrorTracker2(
+    val contestId: Int,
+    cvrPairs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
+    cardSamples: CardSamples,
+    val cassorter: ClcaAssorter,
+    val allowReset: Boolean,
+): SamplerTracker, SampleErrorTracker {
+    val samples = cardSamples.extractSubsetByIndex(contestId, cvrPairs)
+    val permutedIndex = MutableList(samples.size) { it }
+    val clcaErrorTracker = ClcaErrorTracker2(cassorter.noerror, cassorter.assorter.upperBound())
+    val firstDebug: Pair<Int, Int>
+
+    private var idx = 0
+    private var welford = Welford()
+
+    init {
+        samples.forEach { (mvr, card) ->
+            require(mvr.location() == card.location())  { "mvr location ${mvr.location()} != card.location ${card.location()}"}  }
+        firstDebug = debug()
+    }
+
+    override fun sample(): Double {
+        while (idx < samples.size) {
+            val (mvr, card) = samples[permutedIndex[idx]]
+            idx++
+            if (card.hasContest(contestId)) {
+                val nextVal = cassorter.bassort(mvr, card, hasStyle=card.exactContests())
+                clcaErrorTracker.addSample(nextVal, card.poolId == null) // dont track errors from oa pools
+                if (lastVal != null) welford.update(lastVal!!)
+                lastVal = nextVal
+                return nextVal
+            }  else {
+                logger.error{"cardSamples for contest ${contestId} list card not contining the contest at index ${permutedIndex[idx-1]}"}
+            }
+        }
+        logger.error{"ClcaSampling no samples left for ${contestId} and ComparisonAssorter ${cassorter}"}
+        throw RuntimeException("ClcaSampling no samples left for ${contestId} and ComparisonAssorter ${cassorter}")
+    }
+
+    override fun reset() {
+        if (!allowReset) {
+            logger.error{"ClcaSampling reset not allowed ; contest ${contestId} cassorter ${cassorter}"}
+            throw RuntimeException("ClcaSampling reset not allowed")
+        }
+        permutedIndex.shuffle(Random)
+        welford = Welford()
+        clcaErrorTracker.reset()
+        idx = 0
+        lastVal = null
+    }
+
+    fun debug(): Pair<Int, Int> {
+        var debugIdx = 0
+        var countHasContest = 0
+        var countNotPooled = 0
+        while (debugIdx < samples.size) {
+            val (mvr, card) = samples[permutedIndex[debugIdx]]
+            debugIdx++
+            if (card.hasContest(contestId)) {
+                countHasContest++
+                if (card.poolId == null) countNotPooled++
+            }
+        }
+        println("$contestId ${cassorter.shortName()}: countHasContest=$countHasContest countNotPooled=$countNotPooled " +
+                "pct=${df(countNotPooled / countHasContest.toDouble())}")
+        return Pair(countHasContest, countNotPooled)
+    }
+
+    override fun maxSamples() = samples.size
+    override fun maxSampleIndexUsed() = idx
+    override fun nmvrs() = samples.size
+
+    override fun hasNext() = (welford.count + 1 < samples.size)
     override fun next() = sample()
 
     // tracker reflects "previous sequence"

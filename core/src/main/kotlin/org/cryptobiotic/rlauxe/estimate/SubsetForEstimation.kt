@@ -61,7 +61,7 @@ fun getSubsetForEstimation(
     val allInfo = tabulateDebugInfo(cards.iterator(), contestsIncluded, null)
 
     // calculate how many samples are wanted for each contest.
-    val wantSampleSize: Map<Int, Int> = contestsIncluded.associate { it.id to estSamplesNeeded2(config, it) }
+    val wantSampleSize: Map<Int, Int> = contestsIncluded.associate { it.id to estSamplesNeeded(config, it) }
     val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
     val skippedContests = mutableSetOf<Int>()
     val usedByContests = mutableMapOf<Int, MutableList<Int>>()
@@ -166,7 +166,7 @@ fun tabulateDebugInfo(cards: CloseableIterator<AuditableCard>, contests: List<Co
 
 // CLCA and OneAudit TODO POLLING
 // we dont use this for the actual estimation....
-fun estSamplesNeeded2(config: AuditConfig, contestRound: ContestRound): Int {
+fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
     val minAssertionRound = contestRound.minAssertion()
     if (minAssertionRound == null) {
         contestRound.minAssertion()

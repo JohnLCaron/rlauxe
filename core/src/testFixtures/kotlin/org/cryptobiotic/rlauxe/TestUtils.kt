@@ -1,9 +1,11 @@
 package org.cryptobiotic.rlauxe
 
+import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -21,9 +23,48 @@ fun doublesAreClose(a: List<Double>, b: List<Double>, rtol: Double=1.0e-5, atol:
     return true
 }
 
-class SampleFromArray(val array: DoubleArray) {
+class SampleFromArray(val array: DoubleArray): SamplerTracker {
+    val welford = Welford()
+
     var index = 0
-    fun sample() = array[index++]
+    override fun sample(): Double {
+        val nextValue = array[index++]
+        welford.update(nextValue)
+        return nextValue
+    }
+
+    override fun maxSamples() = array.size
+
+    override fun maxSampleIndexUsed() = index
+
+    override fun nmvrs() = array.size
+
+    override fun reset() {
+        TODO("Not yet implemented")
+    }
+
+    override fun numberOfSamples() = index
+
+    override fun welford() = welford
+
+    override fun done() {
+    }
+
+    override fun last() = array[index]
+
+    override fun sum() = welford.sum()
+
+    override fun mean() = welford.mean
+
+    override fun variance() = welford.variance()
+
+    override fun addSample(sample: Double) {
+        TODO("Not yet implemented")
+    }
+
+    override fun next() = sample()
+
+    override fun hasNext() = index < array.size - 1
 }
 
 class SampleFromList(val list: List<Double>) {

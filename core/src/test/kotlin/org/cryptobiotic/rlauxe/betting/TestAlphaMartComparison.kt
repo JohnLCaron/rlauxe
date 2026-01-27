@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.workflow.Sampler
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
+import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSamplerTracker
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -27,7 +28,7 @@ class TestAlphaMartComparison {
         val d = 100
 
         println("N=$N cvrMean=$cvrMean theta=$theta eta0=$eta0, d=$d compareAssorter.upperBound=${compareAssorter.upperBound()}")
-        val sampler = makeClcaNoErrorSampler(contest.id, cvrs, compareAssorter)
+        val sampler = makeClcaNoErrorSamplerTracker(contest.id, cvrs, compareAssorter)
         val result = doOneAlphaMartRun(sampler, N, eta0 = eta0, d = d, u = compareAssorter.upperBound())
         println("\n${result}")
 
@@ -36,7 +37,7 @@ class TestAlphaMartComparison {
 }
 
 fun doOneAlphaMartRun(
-    drawSample: Sampler,
+    sampler: SamplerTracker,
     maxSamples: Int,
     eta0: Double,
     d: Int,
@@ -46,17 +47,18 @@ fun doOneAlphaMartRun(
     val upperBound = u
 
     val estimFn = TruncShrinkage(
-        N = drawSample.maxSamples(), withoutReplacement = withoutReplacement, upperBound = upperBound,
+        N = sampler.maxSamples(), withoutReplacement = withoutReplacement, upperBound = upperBound,
         eta0 = eta0,
         d = d
     )
 
     val alpha = AlphaMart(
         estimFn = estimFn,
-        N = drawSample.maxSamples(),
+        N = sampler.maxSamples(),
+        tracker = sampler,
         upperBound = upperBound,
         withoutReplacement = withoutReplacement,
     )
 
-    return alpha.testH0(maxSamples, terminateOnNullReject = true) { drawSample.sample() }
+    return alpha.testH0(maxSamples, terminateOnNullReject = true) { sampler.sample() }
 }

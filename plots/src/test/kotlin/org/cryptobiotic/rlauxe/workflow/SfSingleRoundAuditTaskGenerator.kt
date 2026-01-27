@@ -4,8 +4,6 @@ import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.ContestRound
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker2
-import org.cryptobiotic.rlauxe.betting.ClcaNoErrorSamplerTracker
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
@@ -60,9 +58,8 @@ class SfSingleRoundAuditTask(
                 )
 
                 val sampler =
-                    ClcaNoErrorSamplerTracker(
+                    ClcaSamplerErrorTracker.withNoErrors(
                         contestUA.id,
-                        contestUA.Nc,
                         cassertion.cassorter,
                         mvrManager.sortedCards().iterator(),
                     )

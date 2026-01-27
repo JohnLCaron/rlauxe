@@ -233,7 +233,7 @@ class CreatePollingDiffMeans {
             if (!silent && showContests) println("  ${assert}")
 
             val contestUA = ContestWithAssertions(makeContestsFromCvrs(cvrs).first()).addStandardAssertions()
-            val cvrSampler = PollingSamplerTracker(contestUA.id, pairs, assert.assorter)
+            val cvrSampler = PollingSamplerTracker(contestUA.id, assert.assorter, pairs)
 
             val result = runAlphaMartRepeated(
                 name = "runAlphaMartWithMeanDiff",

@@ -109,74 +109,6 @@ class TestAlphaMart {
         assertEquals(alpha2.tracker.mean(), 0.42857142857142855, doublePrecision)
     }
 
-    // @Test not supporting f1
-    fun test_shrink_trunk_f1() {
-        val x = listOf(1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0 )
-        val eta0 = .51
-
-        println("test_shrink_trunk_f1 $eta0 x=$x")
-        val u = 1.0
-        val d = 10
-        val N = x.size
-
-        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
-        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
-        val dseq: DebuggingSequences = alpha.setDebuggingSequences()
-        val sampler = SampleFromArray(x.toDoubleArray())
-
-        val result = alpha.testH0(x.size, false) { sampler.sample() }
-        println(" test_shrink_trunk_f1 = ${result}")
-
-        val pvalues = dseq.pvalues()
-        val expected = listOf(0.74257426, 1.0, 0.96704619, 0.46507099, 1.0, 1.0, 1.0)
-        println(" expected = ${expected}")
-        expected.forEachIndexed { idx, it ->
-            if (it != 1.0) {
-                assertEquals(it, pvalues[idx], doublePrecision)
-            }
-        }
-        assertTrue(result.status.complete)
-        assertEquals(result.sampleCount, x.size)
-        assertEquals(result.tracker.mean(), 0.5714285714285714)
-    }
-
-    // @Test not supporting f1
-    fun test_shrink_trunk_f1_wreplacement() {
-        val x = listOf(1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0 )
-        val eta0 = .51
-
-        println("test_shrink_trunk_f1 $eta0 x=$x")
-        val u = 1.0
-        val d = 10
-        val N = x.size
-
-        val estimFn = TruncShrinkage(
-            N = N,
-            withoutReplacement = false,
-            upperBound = u,
-            d = d,
-            eta0 = eta0,
-        )
-        val alpha = AlphaMart(estimFn = estimFn, N = N, withoutReplacement = false, upperBound = u)
-        val dseq: DebuggingSequences = alpha.setDebuggingSequences()
-        val sampler = SampleFromArray(x.toDoubleArray())
-
-        val result = alpha.testH0(x.size, false) { sampler.sample() }
-        println(" test_shrink_trunk_f1_wreplacement = ${result}")
-
-        val pvalues = dseq.pvalues()
-        val expected = listOf(0.74257426, 1.0, 0.82889674, 0.53150971, 1.0, 1.0, 1.0)
-        println(" expected = ${expected}")
-        expected.forEachIndexed { idx, it ->
-            if (it != 1.0) {
-                assertEquals(it, pvalues[idx], doublePrecision)
-            }
-        }
-        assertTrue(result.status.complete)
-        assertEquals(result.sampleCount, x.size)
-        assertEquals(result.tracker.mean(), 0.5714285714285714)
-    }
-
     @Test
     fun compareAlphaWithShrinkTrunc() {
         val bernoulliDist = Bernoulli(.5)
@@ -220,11 +152,11 @@ class TestAlphaMart {
         val d = 10
         val N = x.size
 
+        val sampler = SampleFromArray(x.toDoubleArray())
         val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
-        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
+        val alpha = AlphaMart(estimFn = estimFn, N = N, sampler, upperBound = u)
         val dseq: DebuggingSequences = alpha.setDebuggingSequences()
 
-        val sampler = SampleFromArray(x.toDoubleArray())
 
         return Pair(alpha.testH0(x.size, true) { sampler.sample() }, dseq)
     }
@@ -234,11 +166,10 @@ class TestAlphaMart {
         val d = 10
         val N = x.size
 
-        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
-        val alpha = AlphaMart(estimFn = estimFn, N = N, upperBound = u)
-        val dseq: DebuggingSequences = alpha.setDebuggingSequences()
-
         val sampler = SampleFromArray(x.toDoubleArray())
+        val estimFn = TruncShrinkage(N = N, upperBound = u, d = d, eta0 = eta0)
+        val alpha = AlphaMart(estimFn = estimFn, N = N, sampler, upperBound = u)
+        val dseq: DebuggingSequences = alpha.setDebuggingSequences()
 
         return Pair(alpha.testH0(x.size, false) { sampler.sample() }, dseq)
     }

@@ -3,7 +3,8 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.AlphaMart
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
+import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.betting.TruncShrinkage
@@ -35,7 +36,8 @@ fun runPollingAuditRound(
             if (!assertionRound.status.complete) {
                 val assertion = assertionRound.assertion
                 val assorter = assertion.assorter
-                val sampler = PollingSampler(contest.id, pairs, assorter, allowReset = false)
+
+                val sampler =  PollingSamplerTracker(contest.id, assorter, pairs)
 
                 val testH0Result = auditPollingAssertion(config, contest.contestUA, assertionRound, sampler, roundIdx, quiet)
                 assertionRound.status = testH0Result.status
@@ -68,7 +70,7 @@ fun auditPollingAssertion(
     config: AuditConfig,
     contestUA: ContestWithAssertions,
     assertionRound: AssertionRound,
-    sampling: Sampler,
+    sampler: SamplerTracker,
     roundIdx: Int,
     quiet: Boolean = false
 ): TestH0Result {
@@ -88,16 +90,17 @@ fun auditPollingAssertion(
     val testFn = AlphaMart(
         estimFn = estimFn,
         N = contestUA.Npop,
+        tracker = sampler,
         withoutReplacement = true,
         riskLimit = config.riskLimit,
         upperBound = assorter.upperBound(),
     )
 
-    val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject=true) { sampling.sample() }
+    val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=true) { sampler.sample() }
 
     assertionRound.auditResult = AuditRoundResult(roundIdx,
-        nmvrs = sampling.nmvrs(),
-        maxSampleIndexUsed = sampling.maxSampleIndexUsed(),
+        nmvrs = sampler.nmvrs(),
+        maxSampleIndexUsed = sampler.maxSampleIndexUsed(),
         plast = testH0Result.pvalueLast,
         pmin = testH0Result.pvalueMin,
         samplesUsed = testH0Result.sampleCount,

@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.betting.BettingFn
 import org.cryptobiotic.rlauxe.betting.BettingMart2
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker2
+import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.EstimFn
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Status
@@ -55,7 +55,7 @@ fun estimateSampleSizes(
 
     // choose a subset of the cards for the estimation for speed
     val cardSamples: CardSamples? = if (config.isPolling) null else
-        getSubsetForEstimation2(
+        getSubsetForEstimation(
             config,
             auditRound.contestRounds,
             cardManifest,
@@ -288,7 +288,7 @@ fun estimateClcaAssertionRound(
             )
 
     // for one contest, this takes a list of cards and fuzzes them to use as the mvrs.
-    val samplerTracker = ClcaFuzzSamplerTracker2(config.simFuzzPct ?: 0.0, cardSamples, contestUA.contest, cassorter)
+    val samplerTracker = ClcaFuzzSamplerTracker(config.simFuzzPct ?: 0.0, cardSamples, contestUA.contest, cassorter)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateClcaAssertionRound for $name with ${config.nsimEst} trials"}
@@ -409,8 +409,9 @@ fun estimateOneAuditAssertionRound(
         )
 
     // uses the vunderFuzz.mvrCvrPairs as is; each trial is a new permutation
+    val wantIndices = cardSamples.usedByContests[contestUA.contest.id]!!
     val sampler =
-        ClcaSamplerErrorTracker2(contestUA.contest.id, oaFuzzedPairs, cardSamples, oaCassorter, allowReset = true)
+        ClcaSamplerErrorTracker.fromIndexList(contestUA.contest.id, oaCassorter, oaFuzzedPairs, wantIndices)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateOneAuditAssertionRound for $name with ${config.nsimEst} trials"}
@@ -544,6 +545,7 @@ fun runRepeatedAlphaMart(
     val testFn = AlphaMart(
         estimFn = useEstimFn,
         N = N,
+        tracker = samplerTracker,
         upperBound = upperBound,
         riskLimit = config.riskLimit,
     )

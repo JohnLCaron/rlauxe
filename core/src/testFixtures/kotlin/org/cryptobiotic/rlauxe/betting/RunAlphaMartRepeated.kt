@@ -31,6 +31,7 @@ fun runAlphaMartRepeated(
     val alpha = AlphaMart(
         estimFn = useEstimFn,
         N = samplerTracker.maxSamples(),
+        tracker = samplerTracker,
         upperBound = sampleUpperBound,
         withoutReplacement = withoutReplacement,
     )

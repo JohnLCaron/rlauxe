@@ -57,36 +57,35 @@ fun runClcaAuditRound(
 
 class RunClcaContestTask(
     val config: AuditConfig,
-    val contest: ContestRound,
+    val contestRound: ContestRound,
     val cvrPairs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
     val auditor: ClcaAssertionAuditorIF2,
     val roundIdx: Int): ConcurrentTaskG<Boolean> {
 
-    override fun name() = "RunContestTask for ${contest.contestUA.name} round $roundIdx nassertions ${contest.assertionRounds.size}"
+    override fun name() = "RunContestTask for ${contestRound.contestUA.name} round $roundIdx nassertions ${contestRound.assertionRounds.size}"
 
     override fun run(): Boolean {
         val contestAssertionStatus = mutableListOf<TestH0Status>()
-        contest.assertionRounds.forEach { assertionRound ->
+        contestRound.assertionRounds.forEach { assertionRound ->
             if (!assertionRound.status.complete) {
                 val cassertion = assertionRound.assertion as ClcaAssertion
                 val cassorter = cassertion.cassorter
 
-                val sampler = ClcaSamplerErrorTracker(
-                    contest.id,
-                    cvrPairs,
+                val sampler = ClcaSamplerErrorTracker.withMaxSample(
+                    contestRound.id,
                     cassorter,
-                    allowReset = false,
+                    cvrPairs,
                 )
 
-                val testH0Result = auditor.run(config, contest, assertionRound, sampler, roundIdx)
+                val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, roundIdx)
                 assertionRound.status = testH0Result.status
                 if (testH0Result.status.complete) assertionRound.roundProved = roundIdx
             }
             contestAssertionStatus.add(assertionRound.status)
         }
-        contest.done = contestAssertionStatus.all { it.complete }
-        contest.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
-        return contest.done
+        contestRound.done = contestAssertionStatus.all { it.complete }
+        contestRound.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
+        return contestRound.done
     }
 }
 

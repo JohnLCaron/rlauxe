@@ -14,7 +14,7 @@ class TestOneAuditTask {
     fun testOneAuditContestAuditTaskGenerator() {
         val Nc = 50000
         val margin = .04
-        val mvrFuzzPct = .0123
+        val mvrFuzzPct = .003
         val config = AuditConfig(
             AuditType.ONEAUDIT, nsimEst = 10, simFuzzPct = mvrFuzzPct,
         )

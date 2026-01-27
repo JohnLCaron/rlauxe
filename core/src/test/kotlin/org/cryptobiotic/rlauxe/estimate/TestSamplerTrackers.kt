@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
+import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
 import org.cryptobiotic.rlauxe.core.Assertion
 import org.cryptobiotic.rlauxe.core.ClcaAssorter
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -9,16 +11,12 @@ import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
-import org.cryptobiotic.rlauxe.workflow.ClcaNoErrorIterator
-import org.cryptobiotic.rlauxe.workflow.ClcaSampler
-import org.cryptobiotic.rlauxe.workflow.OneAuditNoErrorIterator
-import org.cryptobiotic.rlauxe.workflow.PollingSampler
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
-class TestSampler {
+class TestSamplerTrackers {
     val cvrs: List<Cvr> = makeCvrsByExactCount(listOf(1, 1))
     val assertion = makeAssertion()
 
@@ -28,7 +26,7 @@ class TestSampler {
 
     @Test
     fun testPollingSampling() {
-        val target = PollingSampler(0, cvrs.zip(cvrs), assertion.assorter)
+        val target = PollingSamplerTracker(0, assertion.assorter, cvrs.zip(cvrs), )
 
         var count = 0
         while (target.hasNext()) {
@@ -43,7 +41,7 @@ class TestSampler {
         // deliberately try to read more that there are
         val failMess = assertFailsWith<RuntimeException> { target.next() }.message!!
         println(failMess)
-        assertTrue(failMess.startsWith("PollingSampling no samples left for contest 0"), failMess)
+        assertTrue(failMess.startsWith("PollingSamplerTracker no samples left for contest 0"), failMess)
     }
 
     @Test
@@ -51,7 +49,8 @@ class TestSampler {
         // was hasUndervotes=false
         val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, dilutedMargin=assertion.assorter.dilutedMargin(), true)
         val cvrPairs = cvrs.zip( AuditableCard.fromCvrs(cvrs))
-        val target = ClcaSampler(0, cvrPairs.size, cvrPairs, cassorter, true) // single contest OK
+
+        val target = ClcaSamplerErrorTracker.withMaxSample(0, cassorter, cvrPairs)
 
         var count = 0
         while (target.hasNext()) {
@@ -65,15 +64,42 @@ class TestSampler {
 
         // deliberately try to read more that there are
         val failMess = assertFailsWith<RuntimeException> { target.next() }.message!!
-        assertTrue(failMess.startsWith("ClcaSampling no samples left for 0"), failMess)
+        assertTrue(failMess.equals("ClcaSamplerErrorTracker no samples left for 0 and ComparisonAssorter 0/1"), failMess)
     }
 
     @Test
-    fun testClcaNoErrorIterator() {
+    fun testClcaSamplerErrorTrackerWithNoErrors() {
         // was hasUndervotes=false
         val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, dilutedMargin=assertion.assorter.dilutedMargin(), true)
+        val cards = AuditableCard.fromCvrs(cvrs)
 
-        val target = ClcaNoErrorIterator(0, cvrs.size, cassorter, cvrs.iterator())
+        val target = ClcaSamplerErrorTracker.withNoErrors(0, cassorter, cards.iterator())
+
+        var count = 0
+        while (target.hasNext()) {
+            target.next()
+            count++
+        }
+        assertEquals(cards.size, count)
+        assertEquals(cards.size, target.maxSamples())
+        assertEquals(cards.size, target.maxSampleIndexUsed())
+        assertEquals(cards.size, target.nmvrs())
+
+        // deliberately try to read more that there are
+        val failMess = assertFailsWith<RuntimeException> { target.next() }.message!!
+        println(failMess)
+        assertTrue(failMess.startsWith("ClcaSamplerErrorTracker no samples left for 0 and ComparisonAssorter 0/1"), failMess)
+    }
+
+    @Test
+    fun testClcaSamplerErrorTrackerFromIndexList() {
+        // was hasUndervotes=false
+        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, dilutedMargin=assertion.assorter.dilutedMargin(), true)
+        val cards = AuditableCard.fromCvrs(cvrs)
+        val cvrPairs = cards.zip( cards)
+        val wantIndices = List(cards.size) { it }
+
+        val target = ClcaSamplerErrorTracker.fromIndexList(0, cassorter, cvrPairs, wantIndices)
 
         var count = 0
         while (target.hasNext()) {
@@ -86,28 +112,9 @@ class TestSampler {
         assertEquals(cvrs.size, target.nmvrs())
 
         // deliberately try to read more that there are
-        assertEquals(0.0, target.next())
-    }
-
-    @Test
-    fun testOneAuditNoErrorIterator() {
-        // was hasUndervotes=false
-        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, dilutedMargin=assertion.assorter.dilutedMargin(), true)
-
-        val target = OneAuditNoErrorIterator(0, cvrs.size, null, cassorter, cvrs.iterator())
-
-        var count = 0
-        while (target.hasNext()) {
-            target.next()
-            count++
-        }
-        assertEquals(cvrs.size, count)
-        assertEquals(cvrs.size, target.maxSamples())
-        assertEquals(cvrs.size, target.maxSampleIndexUsed())
-        assertEquals(cvrs.size, target.nmvrs())
-
-        // deliberately try to read more that there are
-        assertEquals(0.0, target.next())
+        val failMess = assertFailsWith<RuntimeException> { target.next() }.message!!
+        println(failMess)
+        assertTrue(failMess.startsWith("ClcaSamplerErrorTracker no samples left for 0 and ComparisonAssorter 0/1"), failMess)
     }
 
 }

@@ -86,7 +86,7 @@ class TestOneAuditAdaptiveBetting {
                 nphantoms=contestUA.contest.Nphantoms(),
                 oaAssortRates = oaErrorRates,
                 d = 100,
-                maxRisk = 0.90,
+                maxLoss = 0.90,
                 debug = false
             )
             val tracker = ClcaErrorTracker(oaCassorter.noerror(), oaCassorter.assorter.upperBound())

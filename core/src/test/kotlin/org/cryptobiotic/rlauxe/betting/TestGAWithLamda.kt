@@ -17,14 +17,14 @@ class TestGAWithLamda {
 
     @Test
     fun showMarginsAtRisk() {
-        makeBet(N = 10000, margin = .01, upper = 1.0, maxRisk = .9)
+        makeBet(N = 10000, margin = .01, upper = 1.0, maxLoss = .9)
     }
 
     fun makeBet(
         N: Int,
         margin: Double,
         upper: Double,
-        maxRisk: Double,
+        maxLoss: Double,
         oaErrorRates: OneAuditAssortValueRates? = null
     ) {
         val noerror: Double = 1.0 / (2.0 - margin / upper)
@@ -32,7 +32,7 @@ class TestGAWithLamda {
         val betFn = GeneralAdaptiveBetting(N,
             startingErrors = ClcaErrorCounts.empty(noerror, upper),
             nphantoms = 0,
-            oaErrorRates, d=0,  maxRisk = maxRisk, debug=false)
+            oaErrorRates, d=0,  maxLoss = maxLoss, debug=false)
 
         val tracker = ClcaErrorTracker(noerror, upper)
         repeat(1000) { tracker.addSample(noerror) }
@@ -49,7 +49,7 @@ class TestGAWithLamda {
         println(tracker.measuredClcaErrorCounts().show())
 
         val bet = betFn.bet(tracker)
-        println("bet = $bet maxRisk = $maxRisk")
+        println("bet = $bet maxLoss = $maxLoss")
 
         val mui = populationMeanIfH0(N, withoutReplacement=true, tracker = tracker)
         val expect = expectedValueLogt(bet, mui, tracker.measuredClcaErrorCounts())

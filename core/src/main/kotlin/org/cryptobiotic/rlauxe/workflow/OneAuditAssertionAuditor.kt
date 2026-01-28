@@ -37,7 +37,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
                 contestUA.contest.Nphantoms(),
                 oaAssortRates = oaCassorter.oaAssortRates,
                 d = clcaConfig.d,
-                maxRisk = clcaConfig.maxRisk
+                maxLoss = clcaConfig.maxLoss
             )
         val testH0Result = runBetting(config, contestUA.Npop, oaCassorter, samplerTracker, bettingFn)
 

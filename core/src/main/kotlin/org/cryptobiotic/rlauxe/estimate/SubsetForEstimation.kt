@@ -179,14 +179,14 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
 
     val contest = contestRound.contestUA
     val assorter = cassorter.assorter
-    val estAndBet = cassorter.estWithOptimalBet(contest, maxRisk = config.clcaConfig.maxRisk, lastPvalue)
+    val estAndBet = cassorter.estWithOptimalBet(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue)
     val dd = if (cassorter is ClcaAssorterOneAudit) {
         val sum = cassorter.oaAssortRates.sumOneAuditTerm(estAndBet.second)
         val sumneg = if (sum < 0) "**" else ""
         "sumOneAuditTerm=${dfn(sum, 6)} $sumneg"
     } else ""
     logger.info { "getSubsetForEstimation ${contest.id}-${assorter.winLose()} margin=${assorter.dilutedMargin()} estAndBet=$estAndBet $dd" }
-    var est =  min( contest.Npop, 3 * estAndBet.first)// arb factor of 3
+    var est =  min( contest.Npop, 3 * estAndBet.first) // TODO arb factor of 3
     if (config.contestSampleCutoff != null) est = min(config.contestSampleCutoff, est)
     return est
 }

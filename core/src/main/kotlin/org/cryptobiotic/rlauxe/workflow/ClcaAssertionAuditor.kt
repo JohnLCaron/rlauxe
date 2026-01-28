@@ -122,7 +122,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
                 contest.Nphantoms(),
                 oaAssortRates = null,
                 d = clcaConfig.d,
-                maxRisk = clcaConfig.maxRisk)
+                maxLoss = clcaConfig.maxLoss)
 
         val testFn = BettingMart(
             bettingFn = bettingFn,

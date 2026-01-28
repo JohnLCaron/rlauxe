@@ -14,14 +14,14 @@ class TestGeneralAdaptiveBetting1 {
 
     @Test
     fun makeBet() {
-        makeBet(N = 10000, margin = .01, upper = 1.0, maxRisk = .9)
+        makeBet(N = 10000, margin = .01, upper = 1.0, maxLoss = .9)
     }
 
     fun makeBet(
         N: Int,
         margin: Double,
         upper: Double,
-        maxRisk: Double,
+        maxLoss: Double,
         oaErrorRates: OneAuditAssortValueRates? = null
     ) {
         val noerror: Double = 1.0 / (2.0 - margin / upper)
@@ -41,13 +41,13 @@ class TestGeneralAdaptiveBetting1 {
         val betFn = GeneralAdaptiveBetting(N,
             startingErrors = ClcaErrorCounts.empty(noerror, upper),
             nphantoms = 2,
-            oaErrorRates, d=0,  maxRisk = maxRisk, debug=true)
+            oaErrorRates, d=0,  maxLoss = maxLoss, debug=true)
 
         val starting = betFn.startingErrorRates()
-        println("starting = $starting maxRisk")
+        println("starting = $starting maxLoss")
 
         val bet = betFn.bet(tracker)
-        println("bet = $bet maxRisk = $maxRisk")
+        println("bet = $bet maxLoss = $maxLoss")
 
         assorts.shuffle(Random)
         findSamplesNeededUsingAssorts(N, margin, upper, bet, assorts, show=false)

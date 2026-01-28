@@ -97,9 +97,8 @@ enum class ClcaStrategyType { generalAdaptive, apriori, fuzzPct, oracle  }
 data class ClcaConfig(
     val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
     val fuzzPct: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs
-    // val pluralityErrorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit. TODO use SampleErrorTracker?
     val d: Int = 100,  // shrinkTrunc weight for error rates
-    val maxRisk: Double = 0.90,  // max risk on any one bet
+    val maxLoss: Double = 0.90,  // max loss on any one bet, 0 < maxLoss < 1
     val cvrsContainUndervotes: Boolean = true,
 )
 

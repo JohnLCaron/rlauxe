@@ -10,7 +10,7 @@ class ClcaSingleRoundAssortTaskGenerator(
     val N: Int,
     val margin: Double,
     val upper: Double,
-    val maxRisk: Double,
+    val maxLoss: Double,
     val errorRates: Double = .001,
     val parameters : Map<String, Any> = emptyMap(),
 ): ContestAuditTaskGenerator {
@@ -20,7 +20,7 @@ class ClcaSingleRoundAssortTaskGenerator(
     }
 
     override fun generateNewTask(): ClcaSingleRoundAssortTask {
-        return ClcaSingleRoundAssortTask(N, margin, upper, maxRisk, errorRates, parameters)
+        return ClcaSingleRoundAssortTask(N, margin, upper, maxLoss, errorRates, parameters)
     }
 }
 
@@ -29,7 +29,7 @@ class ClcaSingleRoundAssortTask(
     val N: Int,
     val margin: Double,
     val upper: Double,
-    val maxRisk: Double,
+    val maxLoss: Double,
     val errorRates: Double,
     val parameters : Map<String, Any>,
 ) : ConcurrentTaskG<WorkflowResult> {
@@ -61,7 +61,7 @@ class ClcaSingleRoundAssortTask(
         //    val pvalueLast: Double,    // last pvalue.
         //    val tracker: SampleTracker,
         //)
-        val testH0Result = runAudit(N, noerror, sampling, maxRisk)
+        val testH0Result = runAudit(N, noerror, sampling, maxLoss)
 
 
         // data class WorkflowResult(
@@ -106,12 +106,12 @@ class ClcaSingleRoundAssortTask(
         N: Int,
         noerror: Double,
         samplerTracker: SamplerTracker,
-        maxRisk: Double,
+        maxLoss: Double,
     ): TestH0Result {
 
         val bettingFn = GeneralAdaptiveBetting(N,
             startingErrors = ClcaErrorCounts.empty(noerror, upper),
-            nphantoms=0, oaAssortRates = null, d=0,  maxRisk = maxRisk, debug=false)
+            nphantoms=0, oaAssortRates = null, d=0,  maxLoss = maxLoss, debug=false)
 
         val tracker = ClcaErrorTracker(noerror, upper)
         val testFn = BettingMart(

@@ -123,7 +123,7 @@ class TestSfElection {
                 ClcaErrorCounts.empty(oaass.noerror(), 1.0),
                 contest.Nphantoms,
                 oaass.oaAssortRates,
-                maxRisk = 0.9,
+                maxLoss = 0.9,
                 debug=true,
             )
             val bet = betFn.bet(ClcaErrorTracker(oaass.noerror(), 1.0))

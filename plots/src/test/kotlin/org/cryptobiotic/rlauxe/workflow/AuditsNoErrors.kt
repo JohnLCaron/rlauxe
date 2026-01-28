@@ -103,24 +103,24 @@ class AuditsNoErrors {
     }
 
     @Test
-    fun clcaNoErrorsMaxRisk() {
-        val name = "clcaNoErrorsMaxRisk"
+    fun clcaNoErrorsmaxLoss() {
+        val name = "clcaNoErrorsmaxLoss"
         val dirName = "$testdataDir/plots/samplesNeeded/$name"
         validateOutputDir(Path(dirName))
         val margins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
-        val maxRisk = listOf(.70, .80, .90, 1.0)
+        val maxLoss = listOf(.70, .80, .90, 1.0)
         val nruns = 1
 
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
 
-        maxRisk.forEach { maxRisk ->
+        maxLoss.forEach { maxLoss ->
             margins.forEach { margin ->
                 val noerror = ClcaSingleRoundAuditTaskGenerator(
                     N, margin, 0.0, 0.0, 0.0,
-                    clcaConfigIn= ClcaConfig(maxRisk=maxRisk),
-                    parameters = mapOf("nruns" to nruns, "cat" to maxRisk)
+                    clcaConfigIn= ClcaConfig(maxLoss=maxLoss),
+                    parameters = mapOf("nruns" to nruns, "cat" to maxLoss)
                 )
                 tasks.add(RepeatedWorkflowRunner(nruns, noerror))
             }
@@ -135,9 +135,9 @@ class AuditsNoErrors {
 
         //     fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType, catName: String) {
         val subtitle = "Nc=${N} nruns=${nruns}"
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.Linear, catName="maxRisk")
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLinear, catName="maxRisk")
-        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog, catName="maxRisk")
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.Linear, catName="maxLoss")
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLinear, catName="maxLoss")
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog, catName="maxLoss")
     }
 
     @Test

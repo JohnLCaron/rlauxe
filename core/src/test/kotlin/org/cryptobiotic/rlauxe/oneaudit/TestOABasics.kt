@@ -150,7 +150,7 @@ class TestOABasics {
         val oaAssorter = contestUA.minClcaAssertion()!!.cassorter as ClcaAssorterOneAudit
         println(oaAssorter)
         println("oaAssortRates = ${oaAssorter.oaAssortRates.show()}")
-        println("sampleSizeNoErrors = ${oaAssorter.sampleSizeNoErrors( 0.9, .05)}")
+        println("sampleSizeNoErrors = ${oaAssorter.sampleSizeNoErrors( 2 * 0.9, .05)}")
         println("estWithOptimalBet = ${oaAssorter.estWithOptimalBet(contestUA, 0.9, .05)}")
     }
 

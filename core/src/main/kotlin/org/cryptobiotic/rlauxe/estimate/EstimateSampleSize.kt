@@ -284,7 +284,7 @@ fun estimateClcaAssertionRound(
             contest.Nphantoms(),
             oaAssortRates = null,
             d = clcaConfig.d,
-            maxRisk = clcaConfig.maxRisk,
+            maxLoss = clcaConfig.maxLoss,
             )
 
     // for one contest, this takes a list of cards and fuzzes them to use as the mvrs.
@@ -405,7 +405,7 @@ fun estimateOneAuditAssertionRound(
             contestUA.contest.Nphantoms(),
             oaAssortRates = oaCassorter.oaAssortRates,
             d = clcaConfig.d,
-            maxRisk = clcaConfig.maxRisk
+            maxLoss = clcaConfig.maxLoss
         )
 
     // uses the vunderFuzz.mvrCvrPairs as is; each trial is a new permutation
@@ -451,7 +451,7 @@ fun estSamplesSimple(config: AuditConfig, assertionRound: AssertionRound, fac: D
     val cassertion = assertionRound.assertion as ClcaAssertion
 
     val cassorter = cassertion.cassorter
-    val est = roundUp(fac * cassorter.sampleSizeNoErrors(maxRisk = config.clcaConfig.maxRisk, lastPvalue))
+    val est = roundUp(fac * cassorter.sampleSizeNoErrors(2 * config.clcaConfig.maxLoss, lastPvalue))
 
     assertionRound.estimationResult = EstimationRoundResult(
         assertionRound.roundIdx,

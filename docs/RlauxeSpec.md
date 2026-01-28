@@ -544,7 +544,7 @@ find the value of lamda that maximizes EF\[Ti], _using org.apache.commons.math3.
 
 See [CLCA AdaptiveBetting](AdaptiveBetting.md) for details on the AdaptiveBetting algorithm.
 
-See [Generalized AdaptiveBetting](GeneralizedAdaptiveBetting.md) for details on our extensions on the AdaptiveBetting algorithm.
+See [GeneralizedAdaptiveBetting](docs/BettingRiskFunction.md) for more info.
 
 ## OneAudit
 

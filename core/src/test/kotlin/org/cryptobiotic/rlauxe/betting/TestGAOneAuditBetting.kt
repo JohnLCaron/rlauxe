@@ -23,14 +23,14 @@ class TestGeneralAdaptiveBetting2 {
 
     @Test
     fun makeBet() {
-        makeBet(N = 10000, margin = .03, upper = 1.0, maxRisk = .9, poolPct = .15)
+        makeBet(N = 10000, margin = .03, upper = 1.0, maxLoss = .9, poolPct = .15)
     }
 
     fun makeBet(
         N: Int,
         margin: Double,
         upper: Double,
-        maxRisk: Double,
+        maxLoss: Double,
         poolPct: Double,
     ) {
         // data class ContestMvrCardAndPops(
@@ -78,7 +78,7 @@ class TestGeneralAdaptiveBetting2 {
             nphantoms = oaContest.contest.Nphantoms(),
             oaErrorRates,
             d=0,
-            maxRisk = maxRisk,
+            maxLoss = maxLoss,
             debug=true)
 
         // bet from first half
@@ -87,7 +87,7 @@ class TestGeneralAdaptiveBetting2 {
         println(tracker.measuredClcaErrorCounts().show())
 
         val bet = betFn.bet(tracker)
-        println("bet = $bet maxRisk = $maxRisk")
+        println("bet = $bet maxLoss = $maxLoss")
 
         assorts.shuffle(Random)
         findSamplesNeededUsingAssorts2(N, margin, upper, bet, assorts, taus)

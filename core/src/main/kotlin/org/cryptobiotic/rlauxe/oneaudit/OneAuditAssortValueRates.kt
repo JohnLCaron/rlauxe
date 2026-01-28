@@ -35,7 +35,7 @@ data class OneAuditAssortValueRates(val rates: Map<Double, Double>, val totalInP
 class OneAuditRatesFromPools(val pools: List<OneAuditPoolIF>) {
 
     // non-IRV
-    fun oaErrorRates(contestUA: ContestWithAssertions, oaCassorter: ClcaAssorterOneAudit): OneAuditAssortValueRates { // sampleValue -> rate
+    fun oaErrorRates(contestUA: ContestWithAssertions, oaCassorter: OneAuditClcaAssorter): OneAuditAssortValueRates { // sampleValue -> rate
         val pairs = mutableListOf<Pair<Double, Double>>()
         var totalInPools = 0
         pools.filter{ it.hasContest(contestUA.id )}.forEach { pool ->
@@ -72,7 +72,7 @@ class OneAuditRatesFromPools(val pools: List<OneAuditPoolIF>) {
         return OneAuditAssortValueRates(rates.toSortedMap(), totalInPools)  // could also return a string description
     }
 
-    fun oaErrorRatesIrv(contestUA: ContestWithAssertions, oaCassorter: ClcaAssorterOneAudit, raire: RaireAssorter): OneAuditAssortValueRates { // sampleValue -> rate
+    fun oaErrorRatesIrv(contestUA: ContestWithAssertions, oaCassorter: OneAuditClcaAssorter, raire: RaireAssorter): OneAuditAssortValueRates { // sampleValue -> rate
         val pairs = mutableListOf<Pair<Double, Double>>()
         var totalInPools = 0
         pools.filter{ it.hasContest(contestUA.id )}.forEach { pool ->

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditRatesFromPools
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.TausOA
@@ -48,7 +48,7 @@ class TestGeneralAdaptiveBetting2 {
         assertFalse(cardPool.hasContest(42))
         assertEquals(1, cardPool.regVotes().size)
         val minAssertion = oaContest.minClcaAssertion()!!
-        val minCassorter = minAssertion.cassorter as ClcaAssorterOneAudit
+        val minCassorter = minAssertion.cassorter as OneAuditClcaAssorter
 
         val oaFromPools = OneAuditRatesFromPools(cardPools)
         val oaErrorRates = oaFromPools.oaErrorRates(oaContest, minCassorter)

@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.betting.ErrorTracker
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 
 private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
 
@@ -27,7 +27,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
     ): TestH0Result {
         val contestUA = contestRound.contestUA
         val cassertion = assertionRound.assertion as ClcaAssertion
-        val oaCassorter = cassertion.cassorter as ClcaAssorterOneAudit
+        val oaCassorter = cassertion.cassorter as OneAuditClcaAssorter
         val clcaConfig = config.clcaConfig
 
         val bettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
@@ -60,7 +60,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
     fun runBetting(
         config: AuditConfig,
         N: Int,
-        cassorter: ClcaAssorterOneAudit,
+        cassorter: OneAuditClcaAssorter,
         samplerTracker: SamplerTracker,
         bettingFn: BettingFn,
     ): TestH0Result {

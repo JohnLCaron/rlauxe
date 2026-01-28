@@ -19,7 +19,6 @@ import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsvFile
 import org.cryptobiotic.rlauxe.raire.makeRaireOneAuditContest
 import org.cryptobiotic.rlauxe.raire.makeRaireContest
@@ -163,6 +162,7 @@ class CreateSfElection(
     }
 
     override fun populations() = if (config.isClca) emptyList() else cardPools
+    override fun cardPools() = if (config.isClca) emptyList() else cardPools
     override fun contestsUA() = contestsUA
     override fun cardManifest() = createCardManifest(config.auditType)
 
@@ -370,11 +370,5 @@ fun createSfElection(
     val publisher = Publisher("$topdir/audit")
     writeUnsortedPrivateMvrs(publisher, unsortedMvrs, seed = config.seed)
 
-    if (auditType.isOA()) {
-        writeCardPoolCsvFile(election.cardPools, publisher.cardPoolsFile())
-        logger.info { "writeCardPoolCsvFile ${election.cardPools.size} pools to ${publisher.cardPoolsFile()}" }
-    }
-
     println("createSfElection took $stopwatch")
-
 }

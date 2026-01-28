@@ -6,7 +6,8 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardManifest
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
-import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
@@ -22,6 +23,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.workflow.readCardManifest
+import org.cryptobiotic.rlauxe.workflow.readCardPools
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.math.roundToInt
 import kotlin.test.Test
@@ -32,6 +34,7 @@ class TestSf2024OneAuditIrv() {
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
     val cardManifest: CardManifest
+    val cardPools: List<OneAuditPoolFromCvrs>
     val mvrs: CloseableIterable<AuditableCard>
 
     init {
@@ -44,6 +47,7 @@ class TestSf2024OneAuditIrv() {
         infos = contests.map{ it.contest.info() }.associateBy { it.id }
 
         cardManifest = readCardManifest(publisher)
+        cardPools = readCardPools(publisher, infos)!!
 
         // use the cvrs from the clca as the mvrs
         val cvrdir = "$testdataDir/cases/sf2024/clca/audit"
@@ -73,7 +77,7 @@ class TestSf2024OneAuditIrv() {
 
         val minAssertion = rcontestUA.minClcaAssertion()!!
         println(minAssertion)
-        val cassorter = minAssertion.cassorter as ClcaAssorterOneAudit
+        val cassorter = minAssertion.cassorter as OneAuditClcaAssorter
         println("cassorter dilutedMargin = ${cassorter.dilutedMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
@@ -123,7 +127,7 @@ class TestSf2024OneAuditIrv() {
 
         val minAssertion = rcontestUA.minClcaAssertion()!!
         println(minAssertion)
-        val cassorter = minAssertion.cassorter as ClcaAssorterOneAudit
+        val cassorter = minAssertion.cassorter as OneAuditClcaAssorter
         println("cassorter dilutedMargin = ${cassorter.dilutedMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
@@ -160,7 +164,7 @@ class TestSf2024OneAuditIrv() {
 
         val minAssertion = rcontestUA.minClcaAssertion()!!
         println(minAssertion)
-        val cassorter = minAssertion.cassorter as ClcaAssorterOneAudit
+        val cassorter = minAssertion.cassorter as OneAuditClcaAssorter
         println("cassorter dilutedMargin = ${cassorter.dilutedMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
@@ -177,7 +181,7 @@ class TestSf2024OneAuditIrv() {
         //                    assortAverages[cardPool.poolId] = margin2mean(poolMargin)
 
         var sumMarginInVotes = 0.0
-        cardManifest.populations.forEach { pop ->
+        cardPools.forEach { pop ->
             val pool = pop as OneAuditPoolIF
             val poolAvg = cassorter.poolAverages.assortAverage[pool.poolId]
             if (poolAvg != null) {
@@ -227,7 +231,7 @@ class TestSf2024OneAuditIrv() {
 
         val minAssertion = rcontestUA.minClcaAssertion()!!
         println(minAssertion)
-        val cassorter = minAssertion.cassorter as ClcaAssorterOneAudit
+        val cassorter = minAssertion.cassorter as OneAuditClcaAssorter
         println("cassorter dilutedMargin = ${cassorter.dilutedMargin}")
 
         val passorter = minAssertion.assorter
@@ -265,8 +269,7 @@ class TestSf2024OneAuditIrv() {
 
         // the pools
         var sumMarginInVotes2 = 0.0
-        cardManifest.populations.forEach { pop ->
-            val pool = pop as OneAuditPoolIF
+        cardPools.forEach { pool ->
             val poolAvg = cassorter.poolAverages.assortAverage[pool.poolId]
             if (poolAvg != null) {
                 assortAvg.totalAssort += poolAvg * pool.ncards()
@@ -276,8 +279,7 @@ class TestSf2024OneAuditIrv() {
         }
 
         var sumMarginInVotes = 0.0
-        cardManifest.populations.forEach { pop ->
-            val pool = pop as OneAuditPoolIF
+        cardPools.forEach { pool ->
             val poolAvg = cassorter.poolAverages.assortAverage[pool.poolId]
             if (poolAvg != null) {
                 val marginInVotes = mean2margin(poolAvg) * pool.ncards()

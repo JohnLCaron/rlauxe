@@ -1,5 +1,16 @@
-# Betting risk function
+# Risk and betting functions
 _last changed 01/28/2026_
+
+<!-- TOC -->
+* [Risk and betting functions](#risk-and-betting-functions)
+  * [Estimating samples needed for CLCA](#estimating-samples-needed-for-clca)
+  * [Stalled audits and maximum bets](#stalled-audits-and-maximum-bets)
+  * [Betting with CLCA errors](#betting-with-clca-errors)
+    * [CLCA assort values](#clca-assort-values)
+  * [Betting with OneAudit pools](#betting-with-oneaudit-pools)
+    * [Estimating samples needed for OneAudit when there are no errors](#estimating-samples-needed-for-oneaudit-when-there-are-no-errors)
+<!-- TOC -->
+
 
 A _risk function_ evaluates the probability that an assertion about an election is true or not. 
 Rlauxe has two risk functions, one for CLCA audits (BettingMart) and one for polling audits (AlphaMart).
@@ -67,7 +78,7 @@ Limit that maximum loss to how much you are willing to lose on any one bet:
 
 Since maxLoss is < 1, λmax < 1/ µ_i.
 
-For now we let the use choose maxLoss, and set λmax accordingly.
+For now we let the user choose maxLoss, and set λmax accordingly.
 
 ## Betting with CLCA errors
 
@@ -237,7 +248,7 @@ number of samples needed for OneAudit when there are no errors in the CVR data, 
 
 over N trials, there will be N * p terms, where p is the probability of that term:   
 
-    T_n = (1 + λc (noerror − .5)) ^ (N*p0) * Prod { (1 + λc * (a_pk - 0.5)) ^ (N*p_pk) ; over pools and pool types } = (1/alpha)
+    T_n = (1 + λc (noerror − .5)) ^ (N*p0) * Prod { (1 + λc * (a_pk - 0.5)) ^ (N*p_pk) } = (1/alpha)
 
     N * ln(1 + λc (noerror − .5))*p0 + N * Sum( ln(1 + λc (a_pk − .5)*p_pk) = ln(1/alpha)
     N = ln(1/alpha) / (ln(1 + λc (noerror − .5))*p0 + Sum( ln(1 + λc (a_pk − .5)*p_pk))

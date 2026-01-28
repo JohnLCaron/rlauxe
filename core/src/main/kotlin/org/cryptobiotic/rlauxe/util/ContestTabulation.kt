@@ -1,9 +1,9 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardManifest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.raire.VoteConsolidator
 import kotlin.collections.component1
@@ -186,11 +186,10 @@ fun tabulateOneAuditPools(cardPools: List<OneAuditPoolIF>, infos: Map<Int, Conte
     return poolSums
 }
 
-// TODO only accumulates regular votes, not IRV
-fun tabulateCardManifest(cardManifest: CardManifest, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
+// now accumulates regular votes and IRV
+fun tabulateCardManifest(cardPools: List<OneAuditPoolFromCvrs>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val poolSums = infos.mapValues { ContestTabulation(it.value) }
-    cardManifest.populations.forEach {
-        val cardPool = it as OneAuditPoolIF
+    cardPools.forEach { cardPool ->
         cardPool.regVotes().forEach { (contestId, regVotes: ContestVotesIF) ->
             val poolSum = poolSums[contestId]
             if (poolSum != null) {

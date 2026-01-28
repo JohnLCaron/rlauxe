@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
@@ -180,12 +180,12 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
     val contest = contestRound.contestUA
     val assorter = cassorter.assorter
     val estAndBet = cassorter.estWithOptimalBet(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue)
-    val dd = if (cassorter is ClcaAssorterOneAudit) {
+    val dd = if (cassorter is OneAuditClcaAssorter) {
         val sum = cassorter.oaAssortRates.sumOneAuditTerm(estAndBet.second)
         val sumneg = if (sum < 0) "**" else ""
         "sumOneAuditTerm=${dfn(sum, 6)} $sumneg"
     } else ""
-    logger.info { "getSubsetForEstimation ${contest.id}-${assorter.winLose()} margin=${assorter.dilutedMargin()} estAndBet=$estAndBet $dd" }
+    logger.debug { "getSubsetForEstimation ${contest.id}-${assorter.winLose()} margin=${assorter.dilutedMargin()} estAndBet=$estAndBet $dd" }
     var est =  min( contest.Npop, 3 * estAndBet.first) // TODO arb factor of 3
     if (config.contestSampleCutoff != null) est = min(config.contestSampleCutoff, est)
     return est

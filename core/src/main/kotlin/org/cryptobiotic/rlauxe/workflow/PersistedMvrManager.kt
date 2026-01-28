@@ -2,11 +2,14 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.CvrIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readPopulationsJsonFileUnwrapped
@@ -27,6 +30,11 @@ open class PersistedMvrManager(val auditDir: String, val config: AuditConfig, va
 
     override fun populations(): List<PopulationIF>?  {
         return readPopulations(publisher)
+    }
+
+    override fun oapools(): List<OneAuditPoolFromCvrs>?  {
+        val infos = contestsUA.associate { it.id to it.contest.info()  }
+        return readCardPools(publisher, infos)
     }
 
     // AuditableCardCsv, complete mvrs used for this round; matches samplePrnsX.csv
@@ -89,10 +97,14 @@ fun readCardManifest(publisher: Publisher): CardManifest {
     return CardManifest(CloseableIterable { sortedCards.iterator() }, emptyList())
 }
 
-
 fun readPopulations(publisher: Publisher): List<PopulationIF>? {
     return if (!Files.exists(Path(publisher.populationsFile()))) null else
         readPopulationsJsonFileUnwrapped(publisher.populationsFile())
+}
+
+fun readCardPools(publisher: Publisher, infos: Map<Int, ContestInfo>): List<OneAuditPoolFromCvrs>? {
+    return if (!Files.exists(Path(publisher.cardPoolsFile()))) null else
+        readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
 }
 
 // for viewer

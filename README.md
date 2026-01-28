@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 01/27/2026_
+_last changed: 01/28/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -197,6 +197,8 @@ When a ballot has been chosen for hand audit:
 2. If it has no CVR, use the overstatement-net-equivalent (ONE) CVR from the pool that it belongs to.
 
 Thus, all cards must either have a CVR or be contained in a pool.
+
+See [Betting with OneAudit Pools](docs/BettingRiskFunctions.md#betting-with-oneaudit-pools) for overview of OneAudit betting.
 
 For details of OneAudit use cases, see [OneAudit Use Cases](docs/OneAuditUseCases.md).
 
@@ -544,18 +546,19 @@ the Prover must make before the random seed can be generated.
 ### General Adaptive Betting
 
 SHANGRLA's Adaptive Betting has been generalized to work for both CLCA and OneAudit and for any assorter. 
-It uses estimated and/or measured error rates to set optimal betting values. This is currently the only betting strategy used by Rlauxe.
-See [GeneralizedAdaptiveBetting](docs/BettingRiskFunction.md) for more info.
+It uses estimated and/or measured error rates to set optimal betting values. This is currently the only betting strategy 
+used for CLCA/OneAudit.
+See [BettingRiskFunction](docs/BettingRiskFunction.md) for more info.
 
 ### OneAudit Betting strategy
 
 OneAudit uses GeneralizedAdaptiveBetting and includes the OneAudit assort values and their known
 frequencies in computing the optimal betting values.
 
-### MaxRisk for Betting
+### MaxLoss for Betting
 
-In order to prevent stalls in BettingMart, the maximum bet is bounded by a "maximum risk" value, which is the maximum
-percent of your "winnings" you are willing to risk on any one bet.
+In order to prevent stalls in BettingMart, the maximum bet is bounded by a "maximum loss" value, which is the maximum
+percent of your "winnings" you are willing to lose on any one bet.
 
 ### Additional assorters
 
@@ -574,7 +577,7 @@ Each contest has a canonical sequence of sampled cards, namely all the cards sor
 This sequence doesnt change when doing multicontest audits. 
 Multicontest audits choose what cards are sampled based on each contests' estimated sample size. An audit can take advantage
 of "extra" samples for a contest in the sample, as long as the canonical sequence is always used. Once a card in the sequence is skipped,
-the audit must stop for that contest.
+the audit cant use more cards in the sample for that contest.
 
 ## Unanswered Questions
 
@@ -583,6 +586,10 @@ the audit must stop for that contest.
 The main use of _hasStyle_, aka _hasSingleCardStyle_ is when deciding the assort value when an MVR is missing a contest.
 There are unanswered questions about if this allows attacks, and if it should be used for polling audits.
 See [SamplePopulations](docs/SamplePopulations.md#contest-is-missing-in-the-mvr)
+
+### Optimal value of MaxLoss
+
+Is there an algorith for setting the MaxLoss value, which limits the maximum bet that can be places at each round?
 
 
 ## Also See:

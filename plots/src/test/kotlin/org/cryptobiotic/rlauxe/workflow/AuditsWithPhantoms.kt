@@ -36,7 +36,7 @@ class AuditsWithPhantoms {
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "clca"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
+            val oneauditGenerator = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                 N, margin, 0.0, phantomPct=phantom, cvrPercent = .90, mvrsFuzzPct=mvrFuzzPct,
                 parameters=mapOf("nruns" to nruns, "phantom" to phantom, "mvrFuzz" to mvrFuzzPct, "cat" to "oneaudit-90%"),
             )

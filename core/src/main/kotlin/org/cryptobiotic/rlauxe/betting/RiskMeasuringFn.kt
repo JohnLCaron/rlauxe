@@ -1,5 +1,16 @@
 package org.cryptobiotic.rlauxe.betting
 
+/**
+ * Interface for defining a betting function.
+ *
+ * Choose the amount to bet (aka lambda) for a given sample number and associated sample value.
+ * "λi can be a predictable function of the data X1 , . . . , Xi−1" COBRA section 4.2
+ *  The bet must only use the previous samples.
+ */
+interface BettingFn {
+    fun bet(prevSamples: Tracker): Double
+}
+
 /** All risk measuring functions implement this */
 interface RiskMeasuringFn {
     fun testH0(

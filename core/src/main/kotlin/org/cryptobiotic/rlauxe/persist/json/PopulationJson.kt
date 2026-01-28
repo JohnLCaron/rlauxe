@@ -21,6 +21,7 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import kotlin.Int
 
+/*
 @Serializable
 data class PopulationsJson(
     val populations: List<PopulationIFJson>,
@@ -33,6 +34,7 @@ fun List<PopulationIF>.publishJson() = PopulationsJson(
 fun PopulationsJson.import(): List<PopulationIF> {
     return this.populations.map { it.import() }
 }
+
 
 @Serializable
 data class PopulationIFJson(
@@ -61,14 +63,21 @@ fun PopulationIFJson.import(): PopulationIF {
     else if (this.type == "Population")
         this.population!!.import()
     else throw IllegalArgumentException("serializing ${this.type} is not supported")
+} */
+
+@Serializable
+data class PopulationsJson(
+    val populations: List<PopulationJson>,
+)
+
+fun List<PopulationIF>.publishJson() = PopulationsJson(
+    this.map { it.publishJson() },
+)
+
+fun PopulationsJson.import(): List<Population> {
+    return this.populations.map { it.import() }
 }
 
-// data class Population(
-//    val name: String,
-//    val id: Int,
-//    val possibleContests: IntArray, // the list of possible contests.
-//    val hasSingleCardStyle: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
-//)
 @Serializable
 class PopulationJson(
     val name: String,
@@ -78,12 +87,12 @@ class PopulationJson(
     val hasSingleCardStyle: Boolean
 )
 
-fun Population.publishJson() = PopulationJson(
-    this.name,
-    this.id,
-    this.ncards,
-    this.possibleContests,
-    this.hasSingleCardStyle
+fun PopulationIF.publishJson() = PopulationJson(
+    this.name(),
+    this.id(),
+    this.ncards(),
+    this.contests(),
+    this.hasSingleCardStyle()
 )
 
 fun PopulationJson.import(): Population {
@@ -100,6 +109,7 @@ fun PopulationJson.import(): Population {
 // data class OneAuditPool(override val poolName: String, override val poolId: Int, val exactContests: Boolean,
 //                        val ncards: Int, val regVotes: Map<Int, RegVotesIF
 
+/*
 @Serializable
 class OneAuditPoolJson(
     val poolName: String,
@@ -150,7 +160,7 @@ fun ContestVotesJson.import() = ContestVotes(
     this.votes,
     this.ncards,
     this.undervotes,
-)
+) */
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 

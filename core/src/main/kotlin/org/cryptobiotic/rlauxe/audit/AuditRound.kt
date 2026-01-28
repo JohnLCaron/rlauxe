@@ -192,11 +192,12 @@ data class EstimationRoundResult(
     val startingTestStatistic: Double,
     val startingErrorRates: Map<Double, Double>? = null, // error rates used for estimation
     val estimatedDistribution: List<Int>,   // distribution of estimated sample size as deciles
+    val ntrials: Int,
     val firstSample: Int,
 ) {
     var estNewMvrs: Int = 0
 
-    override fun toString() = "round=$roundIdx estimatedDistribution=$estimatedDistribution fuzzPct=$fuzzPct " +
+    override fun toString() = "round=$roundIdx estimatedDistribution=$estimatedDistribution ($ntrials) fuzzPct=$fuzzPct " +
             " estNewMvrs=$estNewMvrs startingErrorRates=$startingErrorRates"
 
     fun startingErrorRates() = buildString {

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.persist.json
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.betting.TestH0Status
-import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -36,7 +36,7 @@ class TestOneAuditJson {
         assertNotNull(roundtrip)
         assert(roundtrip is ClcaAssertion)
         println((target as ClcaAssertion).checkEquals(roundtrip as ClcaAssertion))
-        assertEquals((target.cassorter as ClcaAssorterOneAudit).info, (roundtrip.cassorter as ClcaAssorterOneAudit).info)
+        assertEquals((target.cassorter as OneAuditClcaAssorter).info, (roundtrip.cassorter as OneAuditClcaAssorter).info)
         assertEquals(target, roundtrip)
         assertTrue(roundtrip.equals(target))
     }

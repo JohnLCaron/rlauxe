@@ -97,7 +97,7 @@ class TestOneAuditTask {
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.clca)
         )
 
-        val taskGen = OneAuditSingleRoundAuditTaskGenerator(
+        val taskGen = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
             Nc,
             margin,
             underVotePct = underVotePct,

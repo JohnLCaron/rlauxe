@@ -29,7 +29,7 @@ class OneAuditWithErrors {
 
         for (margin in margins) {
             fuzzPcts.forEach { fuzzPct ->
-                val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
+                val oneauditGenerator = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                     N, margin, 0.0, 0.0, cvrPercent, mvrsFuzzPct = fuzzPct,
                     auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true),
                     parameters = mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "cat" to margin)

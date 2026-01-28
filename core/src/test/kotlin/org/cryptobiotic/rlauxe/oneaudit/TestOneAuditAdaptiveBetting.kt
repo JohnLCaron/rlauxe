@@ -39,7 +39,7 @@ class TestOneAuditAdaptiveBetting {
         println("cvrFraction=${cvrFraction}")
         println("contestUA=${contestUA}")
         println("cardPool=${cardPools.first()}")
-        val oaCassorter = contestUA.minClcaAssertion()!!.cassorter as ClcaAssorterOneAudit
+        val oaCassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         val oaErrorsFromPools = OneAuditRatesFromPools(cardPools as List<OneAuditPoolIF>)
         val oaErrorRates = oaErrorsFromPools.oaErrorRates(contestUA, oaCassorter)
         println("oaErrorRates=$oaErrorRates pct=${oaErrorRates.rates.values.sum()} ")

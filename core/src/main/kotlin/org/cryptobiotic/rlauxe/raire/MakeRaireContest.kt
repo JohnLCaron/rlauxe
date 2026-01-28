@@ -15,7 +15,7 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
-import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditRatesFromPools
 import org.cryptobiotic.rlauxe.util.doubleIsClose
@@ -250,7 +250,7 @@ fun setPoolAssorterAveragesForRaire(
                     assortAverages[cardPool.poolId] = margin2mean(poolMargin)
                 }
             }
-            val oaAssorter = ClcaAssorterOneAudit(assertion.info, assertion.assorter,
+            val oaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter,
                 dilutedMargin = assertion.assorter.dilutedMargin(),
                 poolAverages = AssortAvgsInPools(assortAverages))
 

@@ -231,6 +231,7 @@ data class EstimationRoundResultJson(
     val startingTestStatistic: Double,
     val startingErrorRates: Map<Double, Double>? = null, // error rates used for estimation
     val estimatedDistribution: List<Int>,
+    val ntrials: Int,
     val firstSample: Int,
     val estNewMvrs: Int = 0,
 )
@@ -242,6 +243,7 @@ fun EstimationRoundResult.publishJson() = EstimationRoundResultJson(
     this.startingTestStatistic,
     this.startingErrorRates,
     this.estimatedDistribution,
+    this.ntrials,
     this.firstSample,
     this.estNewMvrs,
 )
@@ -254,6 +256,7 @@ fun EstimationRoundResultJson.import() : EstimationRoundResult {
         this.startingTestStatistic,
         this.startingErrorRates,
         this.estimatedDistribution,
+        this.ntrials,
         this.firstSample,
     )
     rr.estNewMvrs = this.estNewMvrs

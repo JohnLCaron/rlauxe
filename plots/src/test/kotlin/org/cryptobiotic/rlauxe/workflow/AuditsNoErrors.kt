@@ -40,7 +40,7 @@ class AuditsNoErrors {
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             cvrPercents.forEach { cvrPercent ->
-                val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
+                val oneauditGenerator = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                     N, margin, 0.0, 0.0, cvrPercent, 0.0,
                     auditConfigIn = AuditConfig(
                         AuditType.ONEAUDIT, true,

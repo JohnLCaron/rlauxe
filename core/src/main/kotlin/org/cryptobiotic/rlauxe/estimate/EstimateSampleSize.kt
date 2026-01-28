@@ -14,8 +14,8 @@ import org.cryptobiotic.rlauxe.betting.EstimFn
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.betting.TruncShrinkage
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.raire.RaireContest
@@ -23,7 +23,6 @@ import org.cryptobiotic.rlauxe.raire.SimulateIrvTestData
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
-import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.collections.List
 import kotlin.collections.mutableListOf
 import kotlin.math.min
@@ -46,7 +45,7 @@ fun estimateSampleSizes(
     config: AuditConfig,
     auditRound: AuditRoundIF,
     cardManifest: CloseableIterable<AuditableCard>, // Clca, OneAudit, ignored for Polling
-    cardPools: List<OneAuditPoolIF>?,               // only OneAudit
+    cardPools: List<OneAuditPoolFromCvrs>?,               // only OneAudit
     previousSamples: Set<Long>,
     showTasks: Boolean = false,
     nthreads: Int = 32,
@@ -316,6 +315,7 @@ fun estimateClcaAssertionRound(
         startingTestStatistic = startingTestStatistic,
         startingErrorRates = bettingFn.startingErrorRates(),
         estimatedDistribution = makeDeciles(result.sampleCount),
+        ntrials = result.sampleCount.size,
         firstSample = if (result.sampleCount.isEmpty()) 0 else result.sampleCount[0],
     )
 
@@ -373,7 +373,7 @@ fun estimateOneAuditAssertionRound(
 ): RunRepeatedResult {
     val contestUA = contestRound.contestUA
     val cassertion = assertionRound.assertion as ClcaAssertion
-    val oaCassorter = cassertion.cassorter as ClcaAssorterOneAudit
+    val oaCassorter = cassertion.cassorter as OneAuditClcaAssorter
     val oaConfig = config.oaConfig
     val clcaConfig = config.clcaConfig
 
@@ -437,6 +437,7 @@ fun estimateOneAuditAssertionRound(
         startingErrorRates = bettingFn.startingErrorRates(),
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
+        ntrials = result.sampleCount.size,
         firstSample = if (result.sampleCount.size > 0) result.sampleCount[0] else 0,
     )
 
@@ -445,7 +446,7 @@ fun estimateOneAuditAssertionRound(
     return result
 }
 
-// for OneAudit IRV contests
+/* for OneAudit IRV contests
 fun estSamplesSimple(config: AuditConfig, assertionRound: AssertionRound, fac: Double, startingTestStatistic: Double): Int {
     val lastPvalue = assertionRound.auditResult?.plast ?: config.riskLimit
     val cassertion = assertionRound.assertion as ClcaAssertion
@@ -460,10 +461,11 @@ fun estSamplesSimple(config: AuditConfig, assertionRound: AssertionRound, fac: D
         startingErrorRates = null,
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(listOf(est)),
+        ntrials = est.size,
         firstSample = est,
     )
     return est
-}
+} */
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -515,6 +517,7 @@ fun estimatePollingAssertionRound(
         fuzzPct = useFuzz,
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
+        ntrials = result.sampleCount.size,
         firstSample = if (result.sampleCount.isEmpty()) 0 else result.sampleCount[0],
     )
 

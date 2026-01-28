@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.workflow.readCardManifest
+import org.cryptobiotic.rlauxe.workflow.readCardPools
 import kotlin.collections.iterator
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,8 +30,9 @@ class TestSfElectionVunderFuzz {
         val publisher = Publisher(auditdir)
         val config = readAuditConfigUnwrapped(publisher.auditConfigFile())!!
         val cardManifest = readCardManifest(publisher)
-        val cardPools = cardManifest.populations as List<OneAuditPoolIF>
         val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
+        val infos = contests.map { it.contest.info() }.associateBy { it.id }
+        val cardPools = readCardPools(publisher, infos)
 
         val contestCards = mutableListOf<AuditableCard>()
         val ncards = 30_000
@@ -44,8 +46,7 @@ class TestSfElectionVunderFuzz {
         }
 
         // simulate the card pools for all OneAudit contests; do it here one time for all contests
-        val infos = contests.map { it.contest.info() }.associateBy { it.id }
-        val vunderFuzz = OneAuditVunderFuzzer(cardPools, infos, config.simFuzzPct ?: 0.0, contestCards)
+        val vunderFuzz = OneAuditVunderFuzzer(cardPools!!, infos, config.simFuzzPct ?: 0.0, contestCards)
 
         val pairs = vunderFuzz.mvrCvrPairs
         println(" pairs = ${pairs.size}")
@@ -91,14 +92,15 @@ class TestSfElectionVunderFuzz {
         val publisher = Publisher(auditdir)
         val config = readAuditConfigUnwrapped(publisher.auditConfigFile())!!
         val cardManifest = readCardManifest(publisher)
-        val cardPools = cardManifest.populations as List<OneAuditPoolIF>
         val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
+        val infos = contests.map { it.contest.info() }.associateBy { it.id }
+        val cardPools = readCardPools(publisher, infos)!!
 
         val privateMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.privateMvrsFile())
 
         val contestId = 29
         val useContest = contests.find { it.id == contestId }!!
-        val useCassorter = useContest.minClcaAssertion()!!.cassorter as ClcaAssorterOneAudit
+        val useCassorter = useContest.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         val usePassorter = useCassorter.assorter
         println(useContest)
 
@@ -131,7 +133,6 @@ class TestSfElectionVunderFuzz {
         }
 
         // simulate the card pools for all OneAudit contests; do it here one time for all contests
-        val infos = contests.map { it.contest.info() }.associateBy { it.id }
         val vunderFuzz = OneAuditVunderFuzzer(cardPools, infos, config.simFuzzPct ?: 0.0, contestCards)
         val pairs = vunderFuzz.mvrCvrPairs
         println(" pairs = ${pairs.size}")
@@ -176,7 +177,7 @@ class TestSfElectionVunderFuzz {
 
         val contestId = 18
         val useContest = contests.find { it.id == contestId }!!
-        val useCassorter = useContest.minClcaAssertion()!!.cassorter as ClcaAssorterOneAudit
+        val useCassorter = useContest.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         val usePassorter = useCassorter.assorter
         println(useContest)
         println(usePassorter)

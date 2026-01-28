@@ -7,8 +7,8 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
-import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
@@ -24,6 +24,7 @@ import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.util.tabulateCardManifest
 import org.cryptobiotic.rlauxe.workflow.readCardManifest
+import org.cryptobiotic.rlauxe.workflow.readCardPools
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -71,9 +72,10 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
 
         // OA
         if (config.isOA) {
-            verifyOAagainstCards(contests, contestSummary, cardManifest, infos, results, show = show)
+            val cardPools = readCardPools(publisher, infos)!!
+            verifyOAagainstCards(contests, contestSummary, cardPools, infos, results, show = show)
             verifyOAassortAvg(contests, cardManifest.cards.iterator(), results, show = show)
-            verifyOApools(contests, contestSummary, cardManifest, results, show = show)
+            verifyOApools(contests, contestSummary, cardPools, results, show = show)
         }
 
         // CLCA
@@ -238,13 +240,15 @@ fun verifyManifest(
 fun verifyOAagainstCards(
     contests: List<ContestWithAssertions>,
     contestSummary: ContestSummary,
-    cardManifest: CardManifest,
+    cardPools: List<OneAuditPoolFromCvrs>,
     infos: Map<Int, ContestInfo>,
     result: VerifyResults,
     show: Boolean = false
 ) {
     val nonpoolCvrVotes = contestSummary.nonpooled
-    val poolSums = tabulateCardManifest(cardManifest, infos)
+
+
+    val poolSums = tabulateCardManifest(cardPools, infos)
     val sumWithPools = mutableMapOf<Int, ContestTabulation>()
     sumWithPools.sumContestTabulations(nonpoolCvrVotes)
     sumWithPools.sumContestTabulations(poolSums)
@@ -391,7 +395,7 @@ fun verifyOAassortAvg(
             contestsUA.forEach { contestUA ->
                 val avg = cardAssortAvgs.getOrPut(contestUA.id) { mutableMapOf() }
                 contestUA.clcaAssertions.forEach { cassertion ->
-                    if (cassertion.cassorter is ClcaAssorterOneAudit) { //  may be Raire
+                    if (cassertion.cassorter is OneAuditClcaAssorter) { //  may be Raire
                         val oaCassorter = cassertion.cassorter
                         val passorter = oaCassorter.assorter
                         val assortAvg = avg.getOrPut(passorter.hashcodeDesc()) { AssortAvg() }
@@ -436,30 +440,11 @@ fun verifyOAassortAvg(
     return result
 }
 
-//         var sumMarginInVotes = 0.0
-//        cardManifest.populations.forEach { pop ->
-//            val pool = pop as OneAuditPoolIF
-//            val poolAvg = cassorter.poolAverages.assortAverage[pool.poolId]
-//            if (poolAvg != null) {
-//                val marginInVotes = mean2margin(poolAvg) * pool.ncards()
-//                sumMarginInVotes += marginInVotes
-//            }
-//        }
-//        println("sumMarginInVotes= ${sumMarginInVotes.roundToInt()}")
-//        val poolMarginInVotes = sumMarginInVotes.roundToInt()
-//
-//        // whats the margin in votes for the cvrs ??
-//        // the cards in the pools dont have votes
-//        val cvrTab = tabulateAuditableCards(cardManifest.cards.iterator(), infos24).values.first()
-//        val cvrVotes = cvrTab.irvVotes.makeVotes(rcontestUA.ncandidates)
-//        println("  cvrVotes calcMarginInVotes= ${rassorter.calcMarginInVotes(cvrVotes)}")
-//        val cvrMarginInVotes = rassorter.calcMarginInVotes(cvrVotes)
-
 // verify assorter diluted margin from cvrs and cardPools
 fun verifyOApools(
     contestsUA: List<ContestWithAssertions>,
     contestSummary: ContestSummary,
-    cardManifest: CardManifest,
+    cardPools: List<OneAuditPoolFromCvrs>,
     result: VerifyResults,
     show: Boolean = false
 ): VerifyResults {
@@ -473,7 +458,7 @@ fun verifyOApools(
 
         // the cvrs
         contestUA.clcaAssertions.forEach { cassertion ->
-            val cassorter = cassertion.cassorter as ClcaAssorterOneAudit
+            val cassorter = cassertion.cassorter as OneAuditClcaAssorter
             val passorter = cassertion.assorter
             val assortAvg = AssortAvg()
 
@@ -493,8 +478,7 @@ fun verifyOApools(
             }
 
             // the pools
-            cardManifest.populations.forEach { pop ->
-                val pool = pop as OneAuditPoolIF
+            cardPools.forEach { pool ->
                 val poolAvg = cassorter.poolAverages.assortAverage[pool.poolId]
                 if (poolAvg != null) {
                     assortAvg.totalAssort += poolAvg * pool.ncards()

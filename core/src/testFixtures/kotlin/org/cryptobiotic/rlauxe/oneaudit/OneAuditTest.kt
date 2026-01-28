@@ -14,7 +14,7 @@ data class ContestMvrCardAndPops(
     val contestUA: ContestWithAssertions,
     val mvrs: List<Cvr>,
     val cards: List<AuditableCard>,
-    val pools: List<OneAuditPoolIF>,
+    val pools: List<OneAuditPoolFromCvrs>,
 )
 
 // simulate OneAudit Contest with extra cards in pool, to get Npop > Nc, and test hasStyle
@@ -210,7 +210,7 @@ fun makeOneAuditTestContests(
     cardStyles: List<PopulationIF>,
     cardManifest: List<AuditableCard>,
     mvrs: List<Cvr>, // this must be just for tests
-): Pair<List<ContestWithAssertions>, List<OneAuditPoolIF>> {
+): Pair<List<ContestWithAssertions>, List<OneAuditPoolFromCvrs>> {
 
     val cards = Closer(cardManifest.iterator())
     val manifestTabs = tabulateAuditableCards(cards, infos)

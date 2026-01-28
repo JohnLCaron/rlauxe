@@ -3,17 +3,15 @@ package org.cryptobiotic.rlauxe.raire
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
-import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.TausOA
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 
 class TestSimulateOneAuditRaire {
@@ -104,7 +102,7 @@ class TestSimulateOneAuditRaire {
 
         val minAssertion = rcontestUA.minClcaAssertion()!!
         println(minAssertion)
-        val cassorter = minAssertion.cassorter as ClcaAssorterOneAudit
+        val cassorter = minAssertion.cassorter as OneAuditClcaAssorter
         println("cassorter dilutedMargin = ${cassorter.dilutedMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
@@ -164,7 +162,7 @@ class TestSimulateOneAuditRaire {
         rcontestUA.rassertions.forEach { println("  $it marginPct=${it.marginInVotes / N.toDouble()}") }
 
         rcontestUA.clcaAssertions.forEach { assertion ->
-            val oaCassorter = assertion.cassorter as ClcaAssorterOneAudit
+            val oaCassorter = assertion.cassorter as OneAuditClcaAssorter
             val target = oaCassorter.oaAssortRates
             println("oaAssortRates = ${target}")
 

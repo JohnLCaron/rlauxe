@@ -56,7 +56,7 @@ class OneAuditContestAuditTaskGenerator(
 }
 
 // Generate OA contest, do audit in a single round
-class OneAuditSingleRoundAuditTaskGenerator(
+class OneAuditSingleRoundAuditTaskGeneratorWithFlips(
     val Nc: Int,
     val margin: Double,
     val underVotePct: Double,
@@ -138,7 +138,13 @@ class OneAuditSingleRoundWithDilutedMargin(
 
         // TODO should be OneAuditPairFuzzer ??
         // different seed each time
-        val manager =  MvrManagerFromManifest(cards, mvrs, listOf(contestUA.contest.info()), seed=Random.nextLong(), simFuzzPct=mvrsFuzzPct, pools=pools)
+        val manager =  MvrManagerFromManifest(
+            cards,
+            mvrs, listOf(contestUA.contest.info()),
+            seed=Random.nextLong(),
+            simFuzzPct=mvrsFuzzPct,
+            pools=pools)
+
         val oneaudit = WorkflowTesterOneAudit(config=config, listOf(contestUA), manager)
         return ClcaSingleRoundWorkflowTask(
             name(),

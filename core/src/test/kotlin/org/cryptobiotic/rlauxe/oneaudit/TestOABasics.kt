@@ -53,7 +53,7 @@ class TestOABasics {
         println()
         assertEquals(contest.votes, cvrVotes[contestId]!!)
 
-        val oaAssorter = contestUA.minClcaAssertion()!!.cassorter as ClcaAssorterOneAudit
+        val oaAssorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         println(oaAssorter)
         val assorter = oaAssorter.assorter
         val assortAvgFromCvrs = assorter.calcAssortAvgFromCvrs(contestUA.id, mvrs)
@@ -147,7 +147,7 @@ class TestOABasics {
             phantomFraction = .0,
         )
         println(contestUA)
-        val oaAssorter = contestUA.minClcaAssertion()!!.cassorter as ClcaAssorterOneAudit
+        val oaAssorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         println(oaAssorter)
         println("oaAssortRates = ${oaAssorter.oaAssortRates.show()}")
         println("sampleSizeNoErrors = ${oaAssorter.sampleSizeNoErrors( 2 * 0.9, .05)}")

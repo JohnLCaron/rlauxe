@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import kotlin.use
@@ -110,6 +111,10 @@ class MvrManagerClcaSingleRound(val sortedCards: CloseableIterable<AuditableCard
     override fun sortedCards() = sortedCards
 
     override fun populations() = populations
+
+    override fun oapools(): List<OneAuditPoolFromCvrs>? {
+        return null
+    }
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<Cvr, AuditableCard>> {
         val cvrs = mutableListOf<Cvr>()

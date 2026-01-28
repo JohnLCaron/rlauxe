@@ -11,8 +11,11 @@ import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.workflow.MvrManager
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import org.cryptobiotic.rlauxe.workflow.readCardManifest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -34,13 +37,13 @@ class TestSfElection {
     }
 
     @Test
-    fun testSFoaPools() {
+    fun testSFoaPopulations() {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
 
         val publisher = Publisher(auditdir)
         val cardManifest = readCardManifest(publisher)
-        val manifestSumPools = cardManifest.populations.sumOf { it.ncards() }
-        println("manifestSumPools = $manifestSumPools")
+        val populationNcards = cardManifest.populations.sumOf { it.ncards() }
+        println("manifestSumPools = $populationNcards")
 
         var countCards = 0
         var count49 = 0
@@ -56,7 +59,7 @@ class TestSfElection {
             }
         }
         println("countCards = $countCards")
-        println("pool/cards = ${manifestSumPools/countCards.toDouble()}")
+        println("pool/cards = ${populationNcards/countCards.toDouble()}")
 
         println("count cards with contest49 = $count49  and in pools =  $count49pools")
         println("contest49 pool/cards = ${count49pools/count49.toDouble()}")
@@ -67,7 +70,7 @@ class TestSfElection {
         println("contest49 = $contest49")
         contest49.clcaAssertions.forEach {
             println(" ${it.cassorter}")
-            val oaass = it.cassorter as ClcaAssorterOneAudit
+            val oaass = it.cassorter as OneAuditClcaAssorter
             println("     ${oaass.oaAssortRates} npools=${oaass.poolAverages.assortAverage.size}")
             assertEquals(count49pools, oaass.oaAssortRates.totalInPools)
             val nzavg = oaass.poolAverages.assortAverage.filter { it.value != 0.0 }.count()
@@ -95,8 +98,6 @@ class TestSfElection {
         println("count cards with contest49 = $count49  and in pools =  $count49pools")
         println("contest49 pool/cards = ${count49pools/count49.toDouble()}")
 
-        /*
-
         val auditRecord = AuditRecord.readFrom(auditdir)
             ?: throw RuntimeException("directory '$auditdir' does not contain an audit record")
         val pw = PersistedWorkflow(auditRecord, false)
@@ -104,7 +105,7 @@ class TestSfElection {
         val populations = man.populations()!!
 
         val sumPools = populations.sumOf { it.ncards() }
-        println("sumPools = $sumPools") */
+        println("sumPools = $sumPools")
     }
 
     @Test
@@ -117,7 +118,7 @@ class TestSfElection {
 
         scontests.filter { !it.isIrv && it.minDilutedMargin()!! < .07 }.forEach { contest ->
             val minAssertion = contest.minClcaAssertion()!!
-            val oaass = minAssertion.cassorter as ClcaAssorterOneAudit
+            val oaass = minAssertion.cassorter as OneAuditClcaAssorter
             val betFn = GeneralAdaptiveBetting(
                 contest.Npop,
                 ClcaErrorCounts.empty(oaass.noerror(), 1.0),

@@ -6,7 +6,7 @@ import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
 
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
@@ -16,6 +16,7 @@ import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import org.cryptobiotic.rlauxe.workflow.readCardManifest
+import org.cryptobiotic.rlauxe.workflow.readCardPools
 import kotlin.io.path.Path
 
 object RunRlaCreateOneAudit {
@@ -126,6 +127,7 @@ object RunRlaCreateOneAudit {
         val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
         val infos = contests.map{ it.contest.info() }.associateBy { it.id }
         val cardManifest = readCardManifest(publisher)
+        val cardPools = readCardPools(publisher, infos)
         val scardIter = cardManifest.cards.iterator()
         val sortedCards = mutableListOf<AuditableCard>()
         scardIter.forEach { sortedCards.add(it) }
@@ -133,7 +135,7 @@ object RunRlaCreateOneAudit {
         // OneAuditVunderFuzzer creates fuzzed mvrs (non-pooled) and simulated mvrs (pooled)
         // TODO use cardPools
         val vunderFuzz =
-            OneAuditVunderFuzzer(cardManifest.populations as List<OneAuditPoolIF>, infos, fuzzPct, sortedCards)
+            OneAuditVunderFuzzer(cardPools!!, infos, fuzzPct, sortedCards)
         val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
         val sortedMvrs = oaFuzzedPairs.map { it.first }
 
@@ -150,7 +152,7 @@ object RunRlaCreateOneAudit {
         extraPct: Double,
     ): CreateElectionIF {
         val contestsUA = mutableListOf<ContestWithAssertions>()
-        val cardPools: List<PopulationIF>
+        val cardPools: List<OneAuditPoolFromCvrs>
         val cardManifest: List<AuditableCard>
 
         init {
@@ -170,6 +172,7 @@ object RunRlaCreateOneAudit {
         }
 
         override fun populations() = cardPools
+        override fun cardPools() = cardPools
         override fun contestsUA() = contestsUA
         override fun cardManifest() = Closer (cardManifest.iterator() )
     }

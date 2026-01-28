@@ -154,7 +154,7 @@ open class CreateColoradoElection (
     }
 
     override fun populations() = if (config.isClca) emptyList() else cardPools
-    // override fun cardPools(): List<CardPoolIF>?  = cardPools
+    override fun cardPools() = null
     override fun contestsUA() = contestsUA
     override fun cardManifest() = createCardManifest()
 

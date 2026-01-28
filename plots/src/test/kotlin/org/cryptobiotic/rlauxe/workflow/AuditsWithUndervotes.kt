@@ -33,7 +33,7 @@ class AuditsWithUndervotes {
                 parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "clca"))
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
-            val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
+            val oneauditGenerator = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                 N, margin, undervote, 0.0, cvrPercent = .90, mvrsFuzzPct=mvrFuzzPct,
                 parameters=mapOf("nruns" to nruns, "undervote" to undervote, "cat" to "oneaudit-90%"),
             )

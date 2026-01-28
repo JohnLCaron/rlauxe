@@ -10,25 +10,14 @@ inline fun <T> CloseableIterable(crossinline iterator: () -> Iterator<T>): Close
 
 interface CloseableIterator<out T> : Iterator<T>, AutoCloseable
 
-fun <T> emptyCloseableIterable() : CloseableIterable<T> {
+/* fun <T> emptyCloseableIterable() : CloseableIterable<T> {
     return CloseableIterable { Closer(emptyList<T>().iterator()) }
-}
+} */
 
 class Closer<out T>(val iter: Iterator<T>) : CloseableIterator<T> {
     override fun hasNext() = iter.hasNext()
     override fun next() = iter.next()
     override fun close() {}
-}
-
-class NoCloser<T>(proxy: CloseableIterator<T>) : Iterator<T> {
-    private val iterator = proxy.iterator()
-    override fun next(): T {
-        return iterator.next()
-    }
-
-    override fun hasNext(): Boolean {
-        return iterator.hasNext()
-    }
 }
 
 class SubsetIterator<T>(skip:Int, val limit: Int?, proxy: CloseableIterator<T>) : CloseableIterator<T> {

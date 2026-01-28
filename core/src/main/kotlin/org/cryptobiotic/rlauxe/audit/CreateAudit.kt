@@ -7,11 +7,13 @@ import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
@@ -30,21 +32,24 @@ import kotlin.io.path.Path
 
 interface CreateElectionIF {
     fun contestsUA(): List<ContestWithAssertions>
-    fun populations(): List<PopulationIF>?
-
     // if you immediately write to disk, you only need one pass through the iterator
     fun cardManifest() : CloseableIterator<AuditableCard>
+
+    fun populations(): List<PopulationIF>?
+    fun cardPools(): List<OneAuditPoolFromCvrs>?
 }
 
 class CreateElection(
     val contestsUA: List<ContestWithAssertions>,
+    val cardManifest: List<AuditableCard>,
     val populations: List<PopulationIF>?,
-    val cardManifest: List<AuditableCard>
+    val cardPools: List<OneAuditPoolFromCvrs>?,
 ):  CreateElectionIF {
 
     override fun contestsUA() = contestsUA
     override fun populations() = populations
     override fun cardManifest() = Closer( cardManifest.iterator() )
+    override fun cardPools() = cardPools
 }
 
 private val logger = KotlinLogging.logger("CreateAudit")
@@ -63,6 +68,11 @@ class CreateAudit(val name: String, val config: AuditConfig, election: CreateEle
         if (!election.populations().isNullOrEmpty()) {
             writePopulationsJsonFile(election.populations()!!, publisher.populationsFile())
             logger.info { "CreateAudit write ${election.populations()!!.size} populations, to ${publisher.populationsFile()}" }
+        }
+
+        if (!election.cardPools().isNullOrEmpty()) {
+            writeCardPoolCsvFile(election.cardPools()!!, publisher.cardPoolsFile())
+            logger.info { "writeCardPoolCsvFile ${election.cardPools()!!.size} pools to ${publisher.cardPoolsFile()}" }
         }
 
         val cards = election.cardManifest()

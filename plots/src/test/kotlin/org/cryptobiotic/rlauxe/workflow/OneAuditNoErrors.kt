@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.io.path.Path
 import kotlin.math.nextUp
-import kotlin.math.roundToInt
 import kotlin.test.Test
 
 class OneAuditNoErrors {
@@ -39,7 +38,7 @@ class OneAuditNoErrors {
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             cvrPercents.forEach { cvrPercent ->
-                val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
+                val oneauditGenerator = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                     N, margin, 0.0, 0.0, cvrPercent, 0.0,
                     auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true),
                     parameters=mapOf("nruns" to nruns, "cat" to "oneaudit-${(100 * cvrPercent).toInt()}%"),
@@ -81,7 +80,7 @@ class OneAuditNoErrors {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         margins.forEach { margin ->
             cvrPercents.forEach { cvrPercent ->
-                val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
+                val oneauditGenerator = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                     N, margin, 0.0, 0.0, cvrPercent, 0.0,
                     auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true),
                     parameters=mapOf("nruns" to nruns, "cat" to "oneaudit-${(100 * cvrPercent).toInt()}%"),

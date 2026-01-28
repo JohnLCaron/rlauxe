@@ -192,6 +192,8 @@ class CardManifestAttack {
         val manifestTabs = tabulateAuditableCards(Closer(cards.iterator()), infos)
         print(showTabs("manifestTabs", manifestTabs))
 
+
+        // TODO
         //// make the CardPool with reported votes (lies)
         // OneAuditPool(override val poolName: String, override val poolId: Int, val exactContests: Boolean,
         //                        val ncards: Int, val regVotes: Map<Int, RegVotesIF>)
@@ -237,7 +239,7 @@ class CardManifestAttack {
         println()
 
         //// create a peristent audit
-        val election = CreateElection(listOf(contestUA), cardPools, cards)
+        val election = CreateElection(listOf(contestUA), cards, cardPools, null)
 
         val auditdir = "$topdir/audit"
         val config = AuditConfig(

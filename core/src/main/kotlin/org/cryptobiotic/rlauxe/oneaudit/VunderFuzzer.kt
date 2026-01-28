@@ -14,7 +14,7 @@ import kotlin.random.Random
 
 // OneAuditVunderFuzzer creates fuzzed mvrs (non-pooled) and simulated mvrs (pooled). IRV ok
 class OneAuditVunderFuzzer(
-    pools: List<OneAuditPoolIF>,
+    pools: List<OneAuditPoolFromCvrs>,
     val infos: Map<Int, ContestInfo>,
     val fuzzPct: Double,
     cards: List<AuditableCard>
@@ -70,7 +70,7 @@ private fun makeFuzzedCardFromCard(
 }
 
 // for all pools
-class VunderPools(pools: List<OneAuditPoolIF>) {
+class VunderPools(pools: List<OneAuditPoolFromCvrs>) {
     val vunderPools: Map<Int, VunderPool>  // poolId -> VunderPool
 
     init {

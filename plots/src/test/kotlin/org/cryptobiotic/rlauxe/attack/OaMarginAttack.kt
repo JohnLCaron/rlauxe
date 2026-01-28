@@ -28,7 +28,7 @@ class OaMarginAttack {
 
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
         margins.forEach { margin ->
-            val oneauditGeneratorReportedMean = OneAuditSingleRoundAuditTaskGenerator(
+            val oneauditGeneratorReportedMean = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "reportedMean", "fuzzPct" to fuzzPct),
                 auditConfigIn = AuditConfig(
@@ -38,7 +38,7 @@ class OaMarginAttack {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorReportedMean))
 
-            val oneauditGeneratorBet99 = OneAuditSingleRoundAuditTaskGenerator(
+            val oneauditGeneratorBet99 = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "bet99", "fuzzPct" to fuzzPct),
                 auditConfigIn = AuditConfig(
@@ -49,7 +49,7 @@ class OaMarginAttack {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorBet99))
 
-            val oneauditGeneratorEta0Eps = OneAuditSingleRoundAuditTaskGenerator(
+            val oneauditGeneratorEta0Eps = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "eta0Eps", "fuzzPct" to fuzzPct),
                 auditConfigIn = AuditConfig(

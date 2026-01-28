@@ -157,6 +157,7 @@ class TestClcaElection(
         println()
     }
     override fun populations() = null
+    override fun cardPools() = null
     override fun contestsUA() = contestsUA
 
     override fun cardManifest() : CloseableIterator<AuditableCard> {
@@ -250,6 +251,7 @@ class TestPollingElection(
     }
 
     override fun populations() = pops
+    override fun cardPools() = null
     override fun contestsUA() = contestsUA
 
     override fun cardManifest() : CloseableIterator<AuditableCard> {

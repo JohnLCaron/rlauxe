@@ -35,7 +35,7 @@ class TestBettingMart {
         var hitUpper: Int = 0
         repeat(N) {
             tracker.addSample(noerror)
-            val mj = populationMeanIfH0(N = N, withoutReplacement = true, sampleTracker = tracker)
+            val mj = populationMeanIfH0(N = N, true, tracker)
             if (show) println(
                 "${nfn(tracker.numberOfSamples(), 3)}: m=${dfn(mj, 6)} diff from 1/2 = ${
                     dfn(0.5 - mj, 6)}"
@@ -127,7 +127,7 @@ fun findSamplesNeededUsingMaxRisk(N:Int, margin: Double, upper: Double, maxRisk:
 
     while (T < 20.0) {
         tracker.addSample(noerror)
-        val mj = populationMeanIfH0(N = N, withoutReplacement = true, sampleTracker = tracker)
+        val mj = populationMeanIfH0(N = N, withoutReplacement = true, tracker = tracker)
         val lamda = maxRisk / mj
         val ttj = 1.0 + lamda * (noerror - mj)
         T *= ttj

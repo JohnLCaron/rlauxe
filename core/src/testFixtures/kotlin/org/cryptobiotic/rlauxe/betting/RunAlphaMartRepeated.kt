@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.betting
 
 import org.cryptobiotic.rlauxe.estimate.RunRepeatedResult
-import org.cryptobiotic.rlauxe.workflow.Sampler
 import org.cryptobiotic.rlauxe.estimate.runRepeated
 import org.cryptobiotic.rlauxe.util.mean2margin
 

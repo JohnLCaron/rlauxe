@@ -1,23 +1,5 @@
 package org.cryptobiotic.rlauxe.betting
 
-/**
- * Keeps track of the latest sample, number of samples, and the sample sum, mean and variance.
- *
- * Its up to the method using this to not add the
- * current sample to it until the end of the iteration.
- * This ensures that the called function doesnt have access to the current sample,
- * as required by "predictable function of the data X1 , . . . , Xi−1" requirement.
- */
-interface SampleTracker {
-    fun last(): Double  // latest sample
-    fun numberOfSamples(): Int    // total number of samples so far
-    fun sum(): Double   // sum of samples so far
-    fun mean(): Double   // average of samples so far
-    fun variance(): Double   // variance of samples so far
-    fun addSample(sample : Double)
-    fun reset()
-}
-
 /** All risk measuring functions implement this */
 interface RiskMeasuringFn {
     fun testH0(
@@ -60,7 +42,6 @@ data class TestH0Result(
     val sampleCount: Int,      // number of samples used in testH0
     val pvalueMin: Double,     // smallest pvalue in the sequence.
     val pvalueLast: Double,    // last pvalue.
-    val tracker: SampleTracker,                     // TODO remove
     val sequences: DebuggingSequences? = null,
 ) {
     override fun toString() = buildString {
@@ -68,5 +49,30 @@ data class TestH0Result(
         append(" sampleCount=$sampleCount")
         append(" pvalueMin=${pvalueMin}")
         append(" pvalueLast=${pvalueLast}")
+    }
+}
+
+class DebuggingSequences {
+    var isOn = false
+    val xs = mutableListOf<Double>()
+    val bets = mutableListOf<Double>()
+    val mjs = mutableListOf<Double>()
+    val tjs = mutableListOf<Double>()
+    val testStatistics = mutableListOf<Double>()
+
+    fun add(x: Double, bet: Double, mj: Double, tj: Double, testStatistic: Double) {
+        this.xs.add(x)
+        this.bets.add(bet)
+        this.mjs.add(mj)
+        this.tjs.add(tj)
+        this.testStatistics.add(testStatistic)
+    }
+
+    // That is, min(1, 1/Tj ) is an “anytime P -value” for the composite null hypothesis θ ≤ µ. ALPHA (9)
+    // Technically should be min (1, 1 / testStatistic), but we want to use it just to capture 1 / Tj, in order to start
+    // muliple round estimation from where it left off. If you start the estimatiom from the beginning, it will probably just
+    // deliver the same estimate; that is, it wont tell you how many _more_ samples are needed.
+    fun pvalues(): List<Double> {
+        return testStatistics.map { 1.0 / it }
     }
 }

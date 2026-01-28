@@ -2,8 +2,7 @@ package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.SampleFromArray
 import org.cryptobiotic.rlauxe.betting.AlphaMart
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.betting.SampleTracker
+import org.cryptobiotic.rlauxe.betting.Tracker
 import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.util.doublePrecision
@@ -216,14 +215,14 @@ class TestPopulationMeanWithoutReplacement {
         repeat(100) {
             (N * 0.5 - halfSamples.sum())
             (N - halfSamples.numberOfSamples())
-            val mj = populationMeanIfH0(N = N, withoutReplacement = true, sampleTracker = halfSamples)
+            val mj = populationMeanIfH0(N = N, withoutReplacement = true, halfSamples)
             // println("mj=${mj} num=$num den=$den")
             halfSamples.count++
             assertEquals(.5, mj) // its the deviations of the sample from 1/2 that cause mj to change
         }
     }
 
-    class HalfSamples(): SampleTracker {
+    class HalfSamples(): SampleTracker, Tracker {
         var count = 0
         override fun last() = .5
         override fun numberOfSamples() = count
@@ -244,13 +243,13 @@ class TestPopulationMeanWithoutReplacement {
         println("awinnerAvg=${awinnerAvg} noerror=${samples.noerror}")
 
         repeat(100) {
-            populationMeanIfH0(N = N, withoutReplacement = true, sampleTracker = samples)
+            populationMeanIfH0(N = N, withoutReplacement = true, samples)
             // println("mj=${mj}")
             samples.count++
         }
     }
 
-    class ComparisonSamples(awinnerAvg: Double): SampleTracker {
+    class ComparisonSamples(awinnerAvg: Double): SampleTracker, Tracker {
         val noerror = 1.0 / (3 - 2 * awinnerAvg)
         var count = 0
 

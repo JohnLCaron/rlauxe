@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.betting.AlphaMart
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.betting.BettingFn
-import org.cryptobiotic.rlauxe.betting.BettingMart2
+import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.EstimFn
@@ -337,7 +337,7 @@ fun runRepeatedBettingMart(
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunRepeatedResult {
 
-    val testFn = BettingMart2(
+    val testFn = BettingMart(
         bettingFn = bettingFn,
         N = N,
         tracker = samplerTracker,

@@ -51,7 +51,7 @@ class TestGAWithLamda {
         val bet = betFn.bet(tracker)
         println("bet = $bet maxRisk = $maxRisk")
 
-        val mui = populationMeanIfH0(N, withoutReplacement=true, sampleTracker = tracker)
+        val mui = populationMeanIfH0(N, withoutReplacement=true, tracker = tracker)
         val expect = expectedValueLogt(bet, mui, tracker.measuredClcaErrorCounts())
         println("expectedValueLogt = $expect")
 
@@ -69,7 +69,7 @@ fun findSamplesNeededUsingLambda(N:Int, margin: Double, upper: Double, lamda: Do
 
     while (T < 20.0) {
         tracker.addSample(noerror)
-        val mj = populationMeanIfH0(N = N, withoutReplacement = true, sampleTracker = tracker)
+        val mj = populationMeanIfH0(N = N, withoutReplacement = true, tracker)
         val ttj = 1.0 + lamda * (noerror - mj)
         T *= ttj
         sample++

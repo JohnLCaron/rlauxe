@@ -55,7 +55,7 @@ class Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val n
         }
         val status = if (pvalue <= riskLimit) TestH0Status.StatRejectNull else TestH0Status.LimitReached
 
-        return TestH0Result(status, sampleNumber, pvalueMin, pvalue, prevSamples)
+        return TestH0Result(status, sampleNumber, pvalueMin, pvalue)
     }
 }
 

@@ -2,11 +2,11 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.betting.BettingMart2
+import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
-import org.cryptobiotic.rlauxe.betting.SampleErrorTracker
+import org.cryptobiotic.rlauxe.betting.ErrorTracker
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.betting.TestH0Status
@@ -23,7 +23,7 @@ fun runClcaAuditRound(
     auditRound: AuditRound,
     mvrManager: MvrManager,
     roundIdx: Int,
-    auditor: ClcaAssertionAuditorIF2,
+    auditor: ClcaAssertionAuditorIF,
 ): Boolean {
     val cvrPairs = mvrManager.makeMvrCardPairsForRound(roundIdx)
 
@@ -59,7 +59,7 @@ class RunClcaContestTask(
     val config: AuditConfig,
     val contestRound: ContestRound,
     val cvrPairs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
-    val auditor: ClcaAssertionAuditorIF2,
+    val auditor: ClcaAssertionAuditorIF,
     val roundIdx: Int): ConcurrentTaskG<Boolean> {
 
     override fun name() = "RunContestTask for ${contestRound.contestUA.name} round $roundIdx nassertions ${contestRound.assertionRounds.size}"
@@ -95,22 +95,12 @@ fun interface ClcaAssertionAuditorIF {
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampling: Sampler,
-        roundIdx: Int,
-    ): TestH0Result
-}
-
-fun interface ClcaAssertionAuditorIF2 {
-    fun run(
-        config: AuditConfig,
-        contestRound: ContestRound,
-        assertionRound: AssertionRound,
         samplerTracker: SamplerTracker,
         roundIdx: Int,
     ): TestH0Result
 }
 
-class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF2 {
+class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
     override fun run(
         config: AuditConfig,
@@ -134,7 +124,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF2 {
                 d = clcaConfig.d,
                 maxRisk = clcaConfig.maxRisk)
 
-        val testFn = BettingMart2(
+        val testFn = BettingMart(
             bettingFn = bettingFn,
             N = contestUA.Npop,
             sampleUpperBound = cassorter.upperBound(),
@@ -147,7 +137,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF2 {
         val terminateOnNullReject = config.auditSampleLimit == null
         val testH0Result = testFn.testH0(samplerTracker.maxSamples(), terminateOnNullReject = terminateOnNullReject) { samplerTracker.sample() }
 
-        val measuredCounts: ClcaErrorCounts? = if (samplerTracker is SampleErrorTracker) samplerTracker.measuredClcaErrorCounts() else null
+        val measuredCounts: ClcaErrorCounts? = if (samplerTracker is ErrorTracker) samplerTracker.measuredClcaErrorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = samplerTracker.maxSamples(),

@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-import org.cryptobiotic.rlauxe.betting.SampleTracker
-import org.cryptobiotic.rlauxe.betting.SamplerTracker
+import org.cryptobiotic.rlauxe.betting.Tracker
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doubleIsClose
@@ -164,10 +163,9 @@ object ClcaErrorTable {
  * This counts the under/overstatements for clca plurality audits.
  * @param noerror for comparison assorters who need rate counting. set to 0 for polling
  */
-class PluralityErrorTracker(val noerror: Double) : SampleTracker {
+class PluralityErrorTracker(val noerror: Double) : Tracker {
     private val isClca = (noerror > 0.0)
     private var last = 0.0
-    private var sum = 0.0
     private var welford = Welford()
     private var countP0 = 0
     private var countP1o = 0
@@ -175,9 +173,8 @@ class PluralityErrorTracker(val noerror: Double) : SampleTracker {
     private var countP1u = 0
     private var countP2u = 0
 
-    override fun last() = last
     override fun numberOfSamples() = welford.count
-    override fun sum() = sum
+    override fun sum(): Double = welford.sum()
     override fun mean() = welford.mean
     override fun variance() = welford.variance()
 
@@ -186,9 +183,8 @@ class PluralityErrorTracker(val noerror: Double) : SampleTracker {
     fun countP1u() = countP1u
     fun countP2u() = countP2u
 
-    override fun addSample(sample : Double) {
+    fun addSample(sample : Double) {
         last = sample
-        sum += sample
         welford.update(sample)
 
         if (isClca) {
@@ -200,9 +196,8 @@ class PluralityErrorTracker(val noerror: Double) : SampleTracker {
         }
     }
 
-    override fun reset() {
+    fun reset() {
         last = 0.0
-        sum = 0.0
         welford = Welford()
         countP0 = 0
         countP1o = 0

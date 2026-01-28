@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.cobra
 
-import org.cryptobiotic.rlauxe.betting.BettingMartOld
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.doubleIsClose

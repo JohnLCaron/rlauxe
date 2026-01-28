@@ -9,7 +9,7 @@ import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction
 import org.apache.commons.math3.optim.univariate.SearchInterval
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair
 import org.cryptobiotic.rlauxe.betting.BettingFn
-import org.cryptobiotic.rlauxe.betting.SampleTracker
+import org.cryptobiotic.rlauxe.betting.Tracker
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import kotlin.math.ln
 import kotlin.math.max
@@ -90,7 +90,7 @@ class AdaptiveBetting(
     val p2u: Double = errorRates.p2u // apriori rate of 2-vote understatements; set < 0 to remove consideration
     var lastBet = 0.0
 
-    override fun bet(prevSamples: SampleTracker): Double {
+    override fun bet(prevSamples: Tracker): Double {
         val rateSampler = prevSamples as PluralityErrorTracker
         val lastj = prevSamples.numberOfSamples()
         val p2oest = if (p2o < 0.0 || lastj == 0) minRate else estimateRate(d, p2o, rateSampler.countP2o().toDouble() / lastj, lastj)
@@ -140,7 +140,7 @@ class OracleComparison(
         lam = kelly.solve()
     }
     // note lam is a constant
-    override fun bet(prevSamples: SampleTracker): Double {
+    override fun bet(prevSamples: Tracker): Double {
         return lam
     }
 }

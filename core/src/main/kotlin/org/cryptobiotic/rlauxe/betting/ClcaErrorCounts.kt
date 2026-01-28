@@ -132,14 +132,14 @@ class Taus(upper: Double): TausIF {
     }
 }
 
-class ClcaErrorTracker(val noerror: Double, val upper: Double) : SampleTracker, SampleErrorTracker {
+class ClcaErrorTracker(val noerror: Double, val upper: Double): ErrorTracker {
     val taus = Taus(upper)
 
     private var last = 0.0
     private var sum = 0.0
     private var welford = Welford()
 
-    override fun last() = last
+    fun last() = last
     override fun numberOfSamples() = welford.count
     override fun sum() = sum
     override fun mean() = welford.mean
@@ -153,7 +153,7 @@ class ClcaErrorTracker(val noerror: Double, val upper: Double) : SampleTracker, 
         this.sequences = sequences
     }
 
-    override fun addSample(sample : Double) {
+    fun addSample(sample : Double) {
         last = sample
         sum += sample
         welford.update(sample)
@@ -168,7 +168,7 @@ class ClcaErrorTracker(val noerror: Double, val upper: Double) : SampleTracker, 
         }
     }
 
-    override fun reset() {
+    fun reset() {
         last = 0.0
         sum = 0.0
         welford = Welford()

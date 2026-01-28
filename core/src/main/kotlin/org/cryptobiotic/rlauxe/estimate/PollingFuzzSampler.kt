@@ -6,13 +6,11 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.util.ContestVoteBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.CvrContest
 import org.cryptobiotic.rlauxe.util.Welford
-import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -77,65 +75,6 @@ class PollingFuzzSamplerTracker(
         if (lastVal != null) welford.update(lastVal!!)
         lastVal = null
     }
-
-    ///////////////////////////////// temporary
-    override fun sum() = welford.sum()
-    override fun mean() = welford.mean
-    override fun variance() = welford.variance()
-
-    override fun last(): Double = lastVal!!
-    override fun addSample(sample: Double) {
-        TODO("Not implemented")
-    }
-}
-
-// for one contest, this takes a list of cvrs and fuzzes them
-class PollingFuzzSampler(
-    val fuzzPct: Double,
-    val cvrs: List<Cvr>,
-    val contest: Contest,
-    val assorter: AssorterIF
-): Sampler, Iterator<Double> {
-    val maxSamples = cvrs.count { it.hasContest(contest.id) } // dont need this is its single contest
-    val N = cvrs.size
-    val welford = Welford()
-    val permutedIndex = MutableList(N) { it }
-    private var mvrs: List<Cvr>
-    private var idx = 0
-
-    init {
-        mvrs = remakeFuzzed() // TODO could do fuzzing on the fly ??
-    }
-
-    override fun sample(): Double {
-        while (idx < N) {
-            val mvr = mvrs[permutedIndex[idx]]
-            idx++
-            if (mvr.hasContest(contest.id)) {
-                val result = assorter.assort(mvr, usePhantoms = true)
-                welford.update(result)
-                return result
-            }
-        }
-        throw RuntimeException("no samples left for ${contest.id} and Assorter ${assorter}")
-    }
-
-    override fun reset() {
-        mvrs = remakeFuzzed()
-        permutedIndex.shuffle(Random)
-        idx = 0
-    }
-
-    fun remakeFuzzed(): List<Cvr> {
-        return makeFuzzedCvrsForPolling(listOf(contest.info()), cvrs, fuzzPct) // single contest
-    }
-
-    override fun maxSamples() = maxSamples
-    override fun maxSampleIndexUsed() = idx
-    override fun nmvrs() = mvrs.size
-
-    override fun hasNext(): Boolean = (idx < N)
-    override fun next(): Double = sample()
 }
 
 fun makeFuzzedCvrsForPolling(contests: List<ContestIF>,

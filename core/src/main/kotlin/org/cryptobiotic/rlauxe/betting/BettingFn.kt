@@ -8,7 +8,7 @@ package org.cryptobiotic.rlauxe.betting
  *  The bet must only use the previous samples.
  */
 interface BettingFn {
-    fun bet(prevSamples: SampleTracker): Double
+    fun bet(prevSamples: Tracker): Double
 }
 
 // SmithRamdas eq 33
@@ -23,9 +23,10 @@ interface BettingFn {
 //   (N * µ − Sum {Xi, i=1..j-1 }) / (N - j  + 1)
 
 // note µ = 1/2 here
-fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, sampleTracker: SampleTracker): Double {
-    val sampleNum = sampleTracker.numberOfSamples()
-    return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - sampleTracker.sum()) / (N - sampleNum)
+fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, tracker: Tracker): Double {
+    val sampleNum = tracker.numberOfSamples()
+    val sum = tracker.sum()
+    return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - sum) / (N - sampleNum)
 }
 
 /*

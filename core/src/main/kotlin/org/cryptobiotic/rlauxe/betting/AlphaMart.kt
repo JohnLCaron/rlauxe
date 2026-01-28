@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
@@ -9,13 +8,13 @@ const val eps = 2.220446049250313e-16
 
 // estimate the population mean for the jth sample from the previous j-1 samples
 interface EstimFn {
-    fun eta(prevSampleTracker: SampleTracker): Double
+    fun eta(prevSampleTracker: Tracker): Double
 }
 
 class FixedEstimFn(
     val eta0: Double,
 ) : EstimFn {
-    override fun eta(prevSampleTracker: SampleTracker) = eta0
+    override fun eta(prevSampleTracker: Tracker) = eta0
 }
 
 class TruncShrinkage(
@@ -35,16 +34,13 @@ class TruncShrinkage(
         require(d >= 0)
     }
 
-    val welford = Welford()
-
     // estimate population mean from previous samples
-    override fun eta(prevSampleTracker: SampleTracker): Double {
-        val lastj = prevSampleTracker.numberOfSamples()
+    override fun eta(tracker: Tracker): Double {
+        val lastj = tracker.numberOfSamples()
         val dj1 = (d + lastj).toDouble()
 
         val sampleSum = if (lastj == 0) 0.0 else {
-            welford.update(prevSampleTracker.last())
-            prevSampleTracker.sum()
+            tracker.sum()
         }
 
         // (2.5.2, eq 14, "truncated shrinkage")
@@ -55,7 +51,7 @@ class TruncShrinkage(
         // Choosing epsi . To allow the estimated winner’s share ηi to approach √ µi as the sample grows
         // (if the sample mean approaches µi or less), we shall take epsi := c/ sqrt(d + i − 1) for a nonnegative constant c,
         // for instance c = (η0 − µ)/2.
-        val mean = populationMeanIfH0(N, withoutReplacement, prevSampleTracker)
+        val mean = populationMeanIfH0(N, withoutReplacement, tracker)
         val e_j = c / sqrt(dj1)
         val capBelow = mean + e_j
 
@@ -159,12 +155,12 @@ class AlphaMart(
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
     val upperBound: Double = 1.0,  // aka u
 ): RiskMeasuringFn {
-    val betting: BettingMart2
+    val betting: BettingMart
 
     init {
         // val tracker = ClcaErrorTracker(0.0, upperBound) // TODO using ClcaErrorTracker, why not PluralityErrorTracker?
         val bettingFn = EstimAdapter(N, withoutReplacement, upperBound, estimFn)
-        betting = BettingMart2(bettingFn, N,  tracker, upperBound, riskLimit)
+        betting = BettingMart(bettingFn, N,  tracker, upperBound, riskLimit)
     }
 
     override fun testH0(
@@ -191,7 +187,7 @@ class EstimAdapter(
     val etas = mutableListOf<Double>()
     val bets = mutableListOf<Double>()
 
-    override fun bet(prevSamples: SampleTracker): Double {
+    override fun bet(prevSamples: Tracker): Double {
         // let bettingmart handle edge cases
         val mu = populationMeanIfH0(N, withoutReplacement, prevSamples)
         val eta = estimFn.eta(prevSamples)

@@ -1,11 +1,10 @@
 package org.cryptobiotic.rlauxe.betting
 
+import org.cryptobiotic.rlauxe.SampleFromArray
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.workflow.ContestAuditTaskGenerator
-import org.cryptobiotic.rlauxe.workflow.Sampler
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
 import kotlin.Int
-import kotlin.random.Random
 
 class ClcaSingleRoundAssortTaskGenerator(
     val N: Int,
@@ -34,7 +33,7 @@ class ClcaSingleRoundAssortTask(
     val errorRates: Double,
     val parameters : Map<String, Any>,
 ) : ConcurrentTaskG<WorkflowResult> {
-    val sampling: SamplerFromAssortValues
+    val sampling: SamplerTracker
     val noerror: Double
 
     init {
@@ -49,7 +48,7 @@ class ClcaSingleRoundAssortTask(
         val noerrorCount = N - assorts.size
         repeat(noerrorCount) { assorts.add(noerror) }
 
-        sampling = SamplerFromAssortValues(assorts)
+        sampling = SampleFromArray(assorts.toDoubleArray())
     }
 
     override fun name() = "ClcaSingleRoundAssortTask"
@@ -98,7 +97,7 @@ class ClcaSingleRoundAssortTask(
                 0.0,
                 mvrMargin = margin,
                 startingRates = null,
-                measuredCounts = (testH0Result.tracker as ClcaErrorTracker).measuredClcaErrorCounts(),
+                measuredCounts = null,
             )
         return result
     }
@@ -106,7 +105,7 @@ class ClcaSingleRoundAssortTask(
     fun runAudit(
         N: Int,
         noerror: Double,
-        sampling: Sampler,
+        samplerTracker: SamplerTracker,
         maxRisk: Double,
     ): TestH0Result {
 
@@ -115,13 +114,13 @@ class ClcaSingleRoundAssortTask(
             nphantoms=0, oaAssortRates = null, d=0,  maxRisk = maxRisk, debug=false)
 
         val tracker = ClcaErrorTracker(noerror, upper)
-        val testFn = BettingMartOld(
+        val testFn = BettingMart(
             bettingFn = bettingFn,
             N = N,
             sampleUpperBound = 2*noerror,
             riskLimit = .05,
             withoutReplacement = true,
-            tracker=tracker
+            tracker=samplerTracker
         )
         tracker.setDebuggingSequences(testFn.setDebuggingSequences())
 
@@ -133,39 +132,6 @@ class ClcaSingleRoundAssortTask(
 
         return testH0Result
     }
-}
-
-class SamplerFromAssortValues(val assortValues : List<Double>): Sampler {
-    val maxSamples = assortValues.size
-    val permutedIndex = MutableList(maxSamples) { it }
-    private var idx = 0
-    private var count = 0
-
-    init {
-        reset()
-    }
-
-    override fun sample(): Double {
-        require (idx < maxSamples)
-        require (permutedIndex[idx] < maxSamples)
-        count++
-        return assortValues[permutedIndex[idx++]]
-    }
-
-    override fun reset() {
-        permutedIndex.shuffle(Random)
-        idx = 0
-        count = 0
-    }
-
-    override fun maxSamples() = maxSamples
-    override fun maxSampleIndexUsed() = idx
-    override fun nmvrs() = idx // TODO
-
-    override fun hasNext() = (count < maxSamples)
-    override fun next() = sample()
-
-    fun sampleMean() = assortValues.average()
 }
 
 

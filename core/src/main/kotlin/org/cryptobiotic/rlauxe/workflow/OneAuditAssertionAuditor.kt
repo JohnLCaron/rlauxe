@@ -3,11 +3,11 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.BettingFn
-import org.cryptobiotic.rlauxe.betting.BettingMart2
+import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.SampleErrorTracker
+import org.cryptobiotic.rlauxe.betting.ErrorTracker
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
@@ -16,7 +16,7 @@ import org.cryptobiotic.rlauxe.oneaudit.ClcaAssorterOneAudit
 private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
 
 // allows to run OneAudit with runClcaAuditRound
-class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boolean = true) : ClcaAssertionAuditorIF2 {
+class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boolean = true) : ClcaAssertionAuditorIF {
 
     override fun run(
         config: AuditConfig,
@@ -41,7 +41,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
             )
         val testH0Result = runBetting(config, contestUA.Npop, oaCassorter, samplerTracker, bettingFn)
 
-        val measuredCounts: ClcaErrorCounts? = if (testH0Result.tracker is SampleErrorTracker) testH0Result.tracker.measuredClcaErrorCounts() else null
+        val measuredCounts: ClcaErrorCounts? = if (samplerTracker is ErrorTracker) samplerTracker.measuredClcaErrorCounts() else null
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = samplerTracker.maxSamples(),
@@ -65,7 +65,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         bettingFn: BettingFn,
     ): TestH0Result {
 
-        val testFn = BettingMart2(
+        val testFn = BettingMart(
             bettingFn = bettingFn,
             N = N,
             tracker = samplerTracker,

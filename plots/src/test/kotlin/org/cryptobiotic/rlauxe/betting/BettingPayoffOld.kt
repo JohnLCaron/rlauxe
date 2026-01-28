@@ -1,10 +1,7 @@
 package org.cryptobiotic.rlauxe.betting
 
+import org.cryptobiotic.rlauxe.SampleFromArray
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.core.AdaptiveBetting
-import org.cryptobiotic.rlauxe.core.PluralityErrorRates
-import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
-import org.cryptobiotic.rlauxe.core.sampleSize
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
 
@@ -25,9 +22,9 @@ class BettingPayoffOld {
                 val betFn = GeneralAdaptiveBetting(N,
                     startingErrors = ClcaErrorCounts.empty(noerror, 1.0),
                     nphantoms=0, oaAssortRates = null, d = 100, maxRisk = .99)
-                val samples = ClcaErrorTracker(noerror, 1.0)
-                repeat(100) { samples.addSample(noerror) }
-                println(" margin=$margin, noerror=$noerror bet = ${betFn.bet(samples)}")
+                val dvalues = DoubleArray(10) { noerror }
+                val sampler = SampleFromArray(dvalues)
+                println(" margin=$margin, noerror=$noerror bet = ${betFn.bet(sampler)}")
             }
         }
     }
@@ -63,9 +60,9 @@ class BettingPayoffOld {
                     d = 0,
                     maxRisk = .90,
                 )
-                val tracker = ClcaErrorTracker(noerror, upper = 1.0)
+                val dvalues = DoubleArray(10) { noerror }
+                val tracker = SampleFromArray(dvalues)
 
-                repeat(10) { tracker.addSample(noerror) }
                 val bet = bettingFn.bet(tracker)
                 println("margin=$margin, noerror=$noerror bet = $bet}")
 
@@ -86,29 +83,6 @@ class BettingPayoffOld {
         }
         plotter.plotOneAssortValue(results, 1.0)
         plotter.plotSampleSize(results, 1.0)
-    }
-
-    @Test
-    fun showPayoffs() {
-        val N = 100000
-        val error = 0.0
-        val risk = .03
-        val margins = listOf(.001, .002, .004, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
-        for (margin in margins) {
-            val noerror = 1 / (2 - margin)
-            val bettingFn = AdaptiveBetting(
-                N = N,
-                a = noerror,
-                d = 10000,
-                errorRates = PluralityErrorRates(error, error, error, error),
-            )
-            val samples = PluralityErrorTracker(noerror)
-            repeat(10) { samples.addSample(noerror) }
-            val bet = bettingFn.bet(samples)
-            val payoff = 1.0 + bet * (noerror - .5)
-            val sampleSize = sampleSize(risk, payoff)
-            println("margin=$margin, noerror=$noerror bet = $bet payoff=$payoff sampleSize=$sampleSize")
-        }
     }
 
 }

@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import kotlin.random.Random
 
-private val logger = KotlinLogging.logger("Sampling")
+private val logger = KotlinLogging.logger("Sampler")
 
 //// abstraction for creating a sequence of assort values
 interface Sampler: Iterator<Double> {

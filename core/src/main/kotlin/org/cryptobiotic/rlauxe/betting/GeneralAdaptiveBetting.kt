@@ -53,8 +53,8 @@ class GeneralAdaptiveBetting(
         return estRates
     }
 
-    override fun bet(prevSamples: SampleTracker): Double {
-        val errorTracker = prevSamples as SampleErrorTracker
+    override fun bet(prevSamples: Tracker): Double {
+        val errorTracker = prevSamples as ErrorTracker
         val trackerErrors = errorTracker.measuredClcaErrorCounts()
 
         // estimated rates for each clca bassort value

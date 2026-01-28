@@ -263,7 +263,6 @@ class ClcaAssorterOneAudit(
             maxRisk = maxRisk,
             debug=false,
         )
-        val bet = betFn.bet(ClcaErrorTracker(noerror(), upper))
         val optimalBet = betFn.bet(ClcaErrorTracker(noerror(), upper))
         return Pair(sampleSizeNoErrors(maxRisk = optimalBet/2, alpha), optimalBet)
     }

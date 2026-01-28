@@ -65,9 +65,6 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     var estMvrs = 0 // Estimate of the mvrs required to confirm the contest
     var estNewMvrs = 0 // Estimate of the new mvrs required to confirm the contest
 
-    // var actualMvrs = 0    // Actual number of ballots with this contest contained in this round's sample.
-    // var actualNewMvrs = 0 // TODO CANDIDATE FOR REMOVAL Actual number of new ballots with this contest contained in this round's sample.
-
     var auditorWantNewMvrs: Int = -1 // Auditor has set the new sample size for this audit round. rlauxe-viewer
 
     var done = false
@@ -129,8 +126,6 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         other as ContestRound
 
         if (roundIdx != other.roundIdx) return false
-        //if (actualMvrs != other.actualMvrs) return false
-        //if (actualNewMvrs != other.actualNewMvrs) return false
         if (estNewMvrs != other.estNewMvrs) return false
         if (estMvrs != other.estMvrs) return false
         if (auditorWantNewMvrs != other.auditorWantNewMvrs) return false
@@ -145,8 +140,6 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
 
     override fun hashCode(): Int {
         var result = roundIdx
-        //result = 31 * result + actualMvrs
-        //result = 31 * result + actualNewMvrs
         result = 31 * result + estNewMvrs
         result = 31 * result + estMvrs
         result = 31 * result + auditorWantNewMvrs

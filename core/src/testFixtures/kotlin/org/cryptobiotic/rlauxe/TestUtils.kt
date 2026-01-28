@@ -47,29 +47,11 @@ class SampleFromArray(val array: DoubleArray): SamplerTracker {
 
     override fun welford() = welford
 
-    override fun done() {
-    }
-
-    override fun last() = array[index]
-
-    override fun sum() = welford.sum()
-
-    override fun mean() = welford.mean
-
-    override fun variance() = welford.variance()
-
-    override fun addSample(sample: Double) {
-        TODO("Not yet implemented")
-    }
+    override fun done() {}
 
     override fun next() = sample()
 
     override fun hasNext() = index < array.size - 1
-}
-
-class SampleFromList(val list: List<Double>) {
-    var index = 0
-    fun sample() = list[index++]
 }
 
 // deprecate

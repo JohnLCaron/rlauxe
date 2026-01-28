@@ -8,12 +8,10 @@ import org.cryptobiotic.rlauxe.betting.runAlphaMartRepeated
 import org.cryptobiotic.rlauxe.plots.plotSRS
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
-import org.cryptobiotic.rlauxe.workflow.PollingSampler
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
 import org.cryptobiotic.rlauxe.estimate.RunRepeatedResult
-import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
 import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSamplerTracker
 import kotlin.test.Test
 

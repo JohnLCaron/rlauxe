@@ -1,7 +1,9 @@
 package org.cryptobiotic.rlauxe.cobra
 
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.betting.BettingMartOld
+import org.cryptobiotic.rlauxe.betting.BettingMart
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.core.*
@@ -92,13 +94,13 @@ class CobraAudit(
 
 class AuditCobraAssertion(
     val p2prior: Double, // apriori rate of 2-vote overstatements
-) : ClcaAssertionAuditorIF2 {
+) : ClcaAssertionAuditorIF {
 
     override fun run(
         auditConfig: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampling: SamplerTracker,
+        sampleTracker: SamplerTracker,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA
@@ -107,30 +109,39 @@ class AuditCobraAssertion(
 
         // val sampler = ClcaWithoutReplacement(contest.id, cvrPairs, cassorter, allowReset = false)
 
-        val adaptive = AdaptiveBetting(
-            N = contestUA.Npop,
-            withoutReplacement = true,
-            a = cassorter.noerror(),
+        //     val Npop: Int, // population size for this contest
+        //    val startingErrors: ClcaErrorCounts,  // zero for auditing
+        //    val nphantoms: Int, // number of phantoms in the population
+        //    val oaAssortRates: OneAuditAssortValueRates?, // only for OneAudit
+        //    val d: Int = 100,  // trunc weight
+        //    val maxRisk: Double, // this bounds how close lam gets to 2.0
+        //    val withoutReplacement: Boolean = true,
+        //    val debug: Boolean = false,
+        val adaptive = GeneralAdaptiveBetting(
+            Npop = contestUA.Npop,
+            startingErrors = ClcaErrorCounts.empty(cassorter.noerror(), upper = cassorter.assorter.upperBound()),
+            nphantoms = 0,
+            oaAssortRates = null,
             d = auditConfig.clcaConfig.d,
-            PluralityErrorRates(p2prior, 0.0, 0.0, 0.0)
+            maxRisk = auditConfig.clcaConfig.maxRisk,
         )
         val tracker = PluralityErrorTracker(cassorter.noerror())
 
-        val testFn = BettingMartOld(
+        val testFn = BettingMart(
             bettingFn = adaptive,
             N = contestUA.Npop,
             sampleUpperBound = cassorter.upperBound(),
             withoutReplacement = true,
-            tracker = tracker,
+            tracker = sampleTracker,
         )
 
-        val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = true) { sampling.sample() }
+        val testH0Result = testFn.testH0(sampleTracker.maxSamples(), terminateOnNullReject = true) { sampleTracker.sample() }
         val samplesNeeded = testH0Result.sampleCount
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
-            nmvrs = sampling.nmvrs(),
-            maxSampleIndexUsed = sampling.maxSampleIndexUsed(),
+            nmvrs = sampleTracker.nmvrs(),
+            maxSampleIndexUsed = sampleTracker.maxSampleIndexUsed(),
             plast = testH0Result.pvalueLast,
             pmin = testH0Result.pvalueMin,
             samplesUsed = samplesNeeded,

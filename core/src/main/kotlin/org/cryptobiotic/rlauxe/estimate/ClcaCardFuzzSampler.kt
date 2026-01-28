@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker2
-import org.cryptobiotic.rlauxe.betting.SampleErrorTracker
+import org.cryptobiotic.rlauxe.betting.ErrorTracker
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
@@ -20,7 +20,7 @@ class ClcaFuzzSamplerTracker(
     cardSamples: CardSamples,
     val contest: ContestIF,
     val cassorter: ClcaAssorter
-): SamplerTracker, SampleErrorTracker {
+): SamplerTracker, ErrorTracker {
     val samples = cardSamples.extractSubsetByIndex(contest.id)
     val maxSamples = samples.size
     val permutedIndex = MutableList(samples.size) { it }
@@ -84,16 +84,6 @@ class ClcaFuzzSamplerTracker(
 
     override fun measuredClcaErrorCounts(): ClcaErrorCounts = clcaErrorTracker.measuredClcaErrorCounts()
     override fun noerror(): Double = clcaErrorTracker.noerror
-
-    ///////////////////////////////// temporary
-    override fun sum() = welford.sum()
-    override fun mean() = welford.mean
-    override fun variance() = welford.variance()
-
-    override fun last(): Double = lastVal!!
-    override fun addSample(sample: Double) {
-        TODO("Not implemented")
-    }
 }
 
 

@@ -119,7 +119,7 @@ class ClcaSingleRoundAuditTaskGenerator(
 class ClcaSingleRoundWorkflowTask(
     val name: String,
     val workflow: AuditWorkflow,
-    val auditor: ClcaAssertionAuditorIF2, // can be used for both Clca and OneAudit
+    val auditor: ClcaAssertionAuditorIF, // can be used for both Clca and OneAudit
     val testMvrs: List<Cvr>, // needed for tracking the true margin of the mvrs, for plotting
     val otherParameters: Map<String, Any> = emptyMap(),
     val quiet: Boolean = true,
@@ -169,7 +169,7 @@ class ClcaSingleRoundWorkflowTask(
 
 // keep this seperate function for testing
 fun runClcaSingleRoundAudit(workflow: AuditWorkflow, contestRounds: List<ContestRound>, quiet: Boolean = true,
-                            auditor: ClcaAssertionAuditorIF2
+                            auditor: ClcaAssertionAuditorIF
 ): Int {
     val stopwatch = Stopwatch()
 

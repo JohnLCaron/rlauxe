@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.shangrla
 
 import org.cryptobiotic.rlauxe.betting.eps
-import org.cryptobiotic.rlauxe.betting.SampleTracker
 import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.math.max
 import kotlin.math.min

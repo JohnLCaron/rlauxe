@@ -105,7 +105,7 @@ fun findSamplesNeededUsingAssorts2(N:Int, margin: Double, upper: Double, lamda: 
     while (T < 20.0 && sample < assorts.size) {
         val x = assorts[sample]
         tracker.addSample(x)
-        val mj = populationMeanIfH0(N = N, withoutReplacement = true, sampleTracker = tracker)
+        val mj = populationMeanIfH0(N = N, withoutReplacement = true, tracker = tracker)
         val ttj = 1.0 + lamda * (x - mj)
         T *= ttj
         sample++

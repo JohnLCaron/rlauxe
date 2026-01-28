@@ -1,5 +1,5 @@
 # Generalized Adaptive Betting
-_last updated 01/08/24_
+_last updated 01/08/26_
 
 The betting strategy for CLCA is a generalized form of AdaptiveBetting from the COBRA paper. We generalize to use any
 number of error types, and any kind of assorter, in particular ones with upper != 1, such as DHondt.
@@ -207,6 +207,36 @@ if there are no errors in the CVRs, lamda will be constant for all samples. we c
 
     (payoff)^sampleSize = 1 / riskLimit and
     solving for sampleSize = -ln(riskLimit) / ln(payoff)
-    // TODO
 
 
+Prod (t_k)^(pk * N) > 1/alpha
+
+Sum(ln(tk)*pk)*N) = -ln(alpha)
+N  = -ln(alpha) / Sum(ln(tk)*pk)
+
+N  = -ln(alpha) / Sum(ln(tk)*pk)
+
+
+````
+    fun expectedValueLogt(lam: Double, show: Boolean = false): Double {
+        val noerrorTerm = ln(1.0 + lam * (noerror - mui)) * p0
+
+        var sumClcaTerm = 0.0
+        clcaErrorRates.forEach { (sampleValue: Double, rate: Double) ->
+            sumClcaTerm += ln(1.0 + lam * (sampleValue - mui)) * rate
+        }
+
+        var sumOneAuditTerm = 0.0
+        if (oaErrorRates != null) {
+            oaErrorRates.forEach { (assortValue: Double, rate: Double) ->
+                sumOneAuditTerm += ln(1.0 + lam * (assortValue - mui)) * rate
+            }
+        }
+        val total = noerrorTerm + sumClcaTerm + sumOneAuditTerm
+
+        if (debug) println("  lam=$lam, noerrorTerm=${df(noerrorTerm)} sumClcaTerm=${df(sumClcaTerm)} " +
+                "sumOneAuditTerm=${df(sumOneAuditTerm)} expectedValueLogt=${total} ")
+
+        return total
+    }
+````

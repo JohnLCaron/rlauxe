@@ -10,26 +10,37 @@ import kotlin.random.Random
 
 private val logger = KotlinLogging.logger("SamplerTracker")
 
+interface Tracker {
+    fun numberOfSamples(): Int    // total number of samples so far
+    fun sum(): Double
+    fun mean(): Double
+    fun variance(): Double
+}
+
+interface ErrorTracker: Tracker {
+    fun measuredClcaErrorCounts(): ClcaErrorCounts
+    fun noerror(): Double
+}
+
 //// abstraction for creating a sequence of assort values
-interface SamplerTracker: SampleTracker, Iterator<Double> {
+interface SamplerTracker: Tracker, Iterator<Double> {
     // Sampler : abstraction for creating a sequence of assort values
     fun sample(): Double // get next in sample
     fun maxSamples(): Int  // max samples available, needed by testFn
     fun maxSampleIndexUsed(): Int // the largest cvr index used in the sampling
     fun nmvrs(): Int // total number mvrs
 
-    override fun reset()   // start over again with different permutation (may be prohibited)
+    fun reset()   // start over again with different permutation (may be prohibited)
 
     /// Tracker : keeps track of the latest sample, number of samples, and the sample sum, mean and variance.
     //  doesnt update the statistics until the next sample is called. Must call done() when finished.
     override fun numberOfSamples(): Int    // total number of samples so far
-    fun welford(): Welford   // running mean, variance, stddev
     fun done()    // end of sampling, update statistics to final form
-}
+    fun welford(): Welford   // running mean, variance, stddev
 
-interface SampleErrorTracker: SampleTracker {
-    fun measuredClcaErrorCounts(): ClcaErrorCounts
-    fun noerror(): Double
+    override fun sum() = welford().sum()
+    override fun mean() = welford().mean
+    override fun variance() = welford().variance()
 }
 
 // Note that we are stuffing the sampling logic into card.hasContest(contestId)
@@ -95,16 +106,6 @@ class PollingSamplerTracker(
         if (lastVal != null) welford.update(lastVal!!)
         lastVal = null
     }
-
-    ///////////////////////////////// temporary
-    override fun sum() = welford.sum()
-    override fun mean() = welford.mean
-    override fun variance() = welford.variance()
-
-    override fun last(): Double = lastVal!!
-    override fun addSample(sample: Double) {
-        TODO("Not implemented")
-    }
 }
 
 //// For clca audits. Production RunClcaContestTask
@@ -113,7 +114,7 @@ class ClcaSamplerErrorTracker(
     val cassorter: ClcaAssorter,
     val samples: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
     val allowReset: Boolean = true,  // needed ?
-): SamplerTracker, SampleErrorTracker {
+): SamplerTracker, ErrorTracker {
     val permutedIndex = MutableList(samples.size) { it }
     val clcaErrorTracker = ClcaErrorTracker2(cassorter.noerror, cassorter.assorter.upperBound())
 
@@ -173,17 +174,6 @@ class ClcaSamplerErrorTracker(
 
     override fun measuredClcaErrorCounts(): ClcaErrorCounts = clcaErrorTracker.measuredClcaErrorCounts()
     override fun noerror(): Double = clcaErrorTracker.noerror
-
-    ///////////////////////////////// temporary TODO remove
-    override fun sum() = welford.sum()
-    override fun mean() = welford.mean
-    override fun variance() = welford.variance()
-
-    override fun last(): Double = lastVal!!
-    override fun addSample(sample: Double) {
-        TODO("Remove this")
-    }
-    ///////////////////////////////
 
     companion object {
         fun fromIndexList(
@@ -267,7 +257,7 @@ class ClcaErrorTracker2(val noerror: Double, val upper: Double) {
     }
 
     fun measuredClcaErrorCounts(): ClcaErrorCounts {
-        val clcaErrors = valueCounter.toList().filter { (key, value) -> taus.isClcaError(key / noerror) }.toMap().toSortedMap()
+        val clcaErrors = valueCounter.toList().filter { (key, _) -> taus.isClcaError(key / noerror) }.toMap().toSortedMap()
         return ClcaErrorCounts(clcaErrors, count, noerror, upper)
     }
 

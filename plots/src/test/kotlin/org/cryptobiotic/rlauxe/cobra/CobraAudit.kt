@@ -123,7 +123,7 @@ class AuditCobraAssertion(
             nphantoms = 0,
             oaAssortRates = null,
             d = auditConfig.clcaConfig.d,
-            maxRisk = auditConfig.clcaConfig.maxRisk,
+            maxLoss = auditConfig.clcaConfig.maxLoss,
         )
         val tracker = PluralityErrorTracker(cassorter.noerror())
 

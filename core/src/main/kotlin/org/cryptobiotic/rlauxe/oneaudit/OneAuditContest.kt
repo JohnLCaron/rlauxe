@@ -237,34 +237,33 @@ class ClcaAssorterOneAudit(
     }
 
     // expected sample size if there are no errors
-    override fun sampleSizeNoErrors(maxRisk: Double, alpha: Double): Int {
-        val maxBet = 2 * maxRisk
-
+    override fun sampleSizeNoErrors(bet: Double, alpha: Double): Int {
         val p0 = 1.0 - oaAssortRates.sumRates()
-        val noerrorTerm = ln(1.0 + maxBet * (noerror - 0.5)) * p0
+        val noerrorTerm = ln(1.0 + bet * (noerror - 0.5)) * p0
 
         var sumOneAuditTerm = 0.0
         oaAssortRates.rates.forEach { (assortValue: Double, rate: Double) ->
-            sumOneAuditTerm += ln(1.0 + maxBet * (assortValue - 0.5)) * rate
+            sumOneAuditTerm += ln(1.0 + bet * (assortValue - 0.5)) * rate
         }
         val lnPayoff = noerrorTerm + sumOneAuditTerm
 
-        val s =  roundUp((-ln(alpha) / lnPayoff))
-        return s
+        // N = ln(1/alpha) / (ln(1 + λc (noerror − .5))*p0 + Sum( ln(1 + λc (a_pk − .5)*p_pk))
+        val N =  roundUp((-ln(alpha) / lnPayoff))
+        return N
     }
 
-    override fun estWithOptimalBet(contest: ContestWithAssertions, maxRisk: Double, alpha: Double): Pair<Int, Double>  {
+    override fun estWithOptimalBet(contest: ContestWithAssertions, maxLoss: Double, alpha: Double): Pair<Int, Double>  {
         val upper = assorter.upperBound()
         val betFn = GeneralAdaptiveBetting(
             contest.Npop,
             ClcaErrorCounts.empty(noerror(), upper),
             contest.Nphantoms,
             oaAssortRates,
-            maxRisk = maxRisk,
+            maxLoss = maxLoss,
             debug=false,
         )
         val optimalBet = betFn.bet(ClcaErrorTracker(noerror(), upper))
-        return Pair(sampleSizeNoErrors(maxRisk = optimalBet/2, alpha), optimalBet)
+        return Pair(sampleSizeNoErrors(optimalBet, alpha), optimalBet)
     }
 
     override fun equals(other: Any?): Boolean {

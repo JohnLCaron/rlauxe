@@ -24,10 +24,10 @@ private val logger = KotlinLogging.logger("GeneralAdaptiveBetting")
 class GeneralAdaptiveBetting(
     val Npop: Int, // population size for this contest
     val startingErrors: ClcaErrorCounts,  // zero for auditing
-    val nphantoms: Int, // number of phantoms in the population
+    val nphantoms: Int, // number of phantoms in the population; minimum of "oth-los" rate
     val oaAssortRates: OneAuditAssortValueRates?, // only for OneAudit
     val d: Int = 100,  // trunc weight
-    val maxRisk: Double, // this bounds how close lam gets to 2.0
+    val maxLoss: Double, // between 0 and 1; this bounds how close lam gets to 2.0; maxBet = maxLoss / mui
     val withoutReplacement: Boolean = true,
     val debug: Boolean = false,
 ) : BettingFn {
@@ -89,7 +89,7 @@ class GeneralAdaptiveBetting(
         //    lamj <  maxRisk / mj
         //    maxBet = maxRisk / mj
 
-        val maxBet = maxRisk / mui
+        val maxBet = maxLoss / mui
         val kelly = GeneralOptimalLambda(errorTracker.noerror(), estRates, oaAssortRates?.rates, mui=mui, maxBet=maxBet, debug = debug)
         val bet = kelly.solve()
 

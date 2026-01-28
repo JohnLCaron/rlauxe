@@ -72,7 +72,7 @@ fun betPayoffSamples(N: Int, risk: Double, assorterMargin: Double, error: Double
         nphantoms=0,
         oaAssortRates = null,
         d = 100,
-        maxRisk = .99,
+        maxLoss = .99,
     )
 
     val samples = ClcaErrorTracker(noerror, 1.0)

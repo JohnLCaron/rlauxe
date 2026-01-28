@@ -174,9 +174,10 @@ GeneralAdaptiveBetting uses estimates/measurements of the error rates between th
 If the error estimates are correct, one gets optimal 
 "sample sizes", the number of ballots needed to prove the election is correct.
 
-See [CLCA Risk function](docs/Clca.md) for details on CLCA and BettingMart.
+See [Betting risk function](docs/BettingRiskFunctions.md) for overview of the risk and betting functions.
 
-See [Generalized Adaptive Betting](docs/GeneralizedAdaptiveBetting.md) for details on the GeneralAdaptiveBetting function.
+See [Card Level Comparison Audits](docs/Clca.md) for details on CLCA.
+
 
 ## OneAudit CLCA
 
@@ -197,9 +198,7 @@ When a ballot has been chosen for hand audit:
 
 Thus, all cards must either have a CVR or be contained in a pool.
 
-
 For details of OneAudit use cases, see [OneAudit Use Cases](docs/OneAuditUseCases.md).
-
 
 ## Polling Audits
 
@@ -546,7 +545,7 @@ the Prover must make before the random seed can be generated.
 
 SHANGRLA's Adaptive Betting has been generalized to work for both CLCA and OneAudit and for any assorter. 
 It uses estimated and/or measured error rates to set optimal betting values. This is currently the only betting strategy used by Rlauxe.
-See [GeneralizedAdaptiveBetting](docs/GeneralizedAdaptiveBetting.md) for more info.
+See [GeneralizedAdaptiveBetting](docs/BettingRiskFunction.md) for more info.
 
 ### OneAudit Betting strategy
 

@@ -187,7 +187,7 @@ class TestOneAuditAssortValueRates {
             ClcaErrorCounts.empty(noerror, upper),
             0,
             oaAssortRates = oaAssortRates,
-            maxRisk = maxBet/2,
+            maxLoss = maxBet/2,
             debug=false,
         )
         val optimalBet = betFn.bet(ClcaErrorTracker(noerror, upper))

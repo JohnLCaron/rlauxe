@@ -98,7 +98,7 @@ class TestClcaAssorter {
         val assortValuesN = assortValues.map { it / noerror / 2 }
         println(" assortValuesN in $assortValuesN")
 
-        val sampleSize = cassorter.sampleSizeNoErrors(0.9, .05);
+        val sampleSize = cassorter.sampleSizeNoErrors(2 * 0.9, .05);
         println(" sampleSize = $sampleSize")
 
         val contestUA = ContestWithAssertions(contest, isClca = true)

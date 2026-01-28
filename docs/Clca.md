@@ -1,5 +1,5 @@
 # CLCA - Card Level Comparison Audits
-_last changed 01/06/26_
+_last changed 01/28/26_
 
 ## CLCA Assorter
 
@@ -95,25 +95,6 @@ The general treatment is as follows:
  [2, 1.5,  1, .5, 0] * noerror (when l=0, u=1)
 ````
 So when u=1, there are 5 possible bassort values, and otherwise 7.
-
-## Betting martingales
-
-In BETTING, Waudby-Smith and Ramdas develop tests and confidence sequences for the mean of a bounded population using
-betting martingales of the form
-
-    M_j :=  Prod (1 + λ_i (X_i − µ_i)),  i=1..j    (BETTING eq 34 and ALPHA eq  10)
-
-where µi := E(Xi | Xi−1), computed on the assumption that the null hypothesis is true.
-(For large N, µ_i is very close to 1/2.)
-
-The sequence (M_j) can be viewed as the fortune of a gambler in a series of wagers.
-The gambler starts with a stake of 1 unit and bets a fraction λi of their current wealth on
-the outcome of the ith wager. The value Mj is the gambler’s wealth after the jth wager. The
-gambler is not permitted to borrow money, so to ensure that when X_i = 0 (corresponding to
-losing the ith bet) the gambler does not end up in debt (Mi < 0), λi cannot exceed 1/µi.
-In practice, λi < 1/µi to prevent stalls.
-
-See Cobra section 4.2 and SHANGRLA Section 3.2.
 
 ## CLCA Betting Payoffs
 

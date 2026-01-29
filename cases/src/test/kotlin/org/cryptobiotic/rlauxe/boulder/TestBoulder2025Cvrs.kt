@@ -74,7 +74,7 @@ class TestBoulder2025Cvrs {
                 }
             }
             val inputVotes = contestTab.votes.filter{ info.candidateIds.contains(it.key) }
-            Contest(info, inputVotes, contestTab.ncards, contestTab.ncards)
+            Contest(info, inputVotes, contestTab.ncardsTabulated, contestTab.ncardsTabulated)
         }
 
         /* from https://assets.bouldercounty.gov/wp-content/uploads/2024/11/2024G-Boulder-County-Official-Summary-of-Votes.pdf

@@ -366,7 +366,7 @@ class TestHasStyle {
         if (showDetails) tabs.forEach { println(it) }
 
         val contestsUA = contests.map {
-            val Nb = tabs[it.id]?.ncards ?: throw RuntimeException("Contest ${it.id} not found")
+            val Nb = tabs[it.id]?.ncardsTabulated ?: throw RuntimeException("Contest ${it.id} not found")
             ContestWithAssertions(it, true, NpopIn=Nb).addStandardAssertions()
         }
 
@@ -401,7 +401,7 @@ class TestHasStyle {
         if (showDetails) tabs.forEach { println(it) }
 
         val contestsUA = contests.map {
-            val Nb = tabs[it.id]?.ncards ?:
+            val Nb = tabs[it.id]?.ncardsTabulated ?:
                 throw RuntimeException("Contest ${it.id} not found")
             ContestWithAssertions(it, isClca=true, NpopIn=Nb).addStandardAssertions()
         }

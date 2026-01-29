@@ -18,8 +18,6 @@ private val logger = KotlinLogging.logger("VunderBar")
 data class Vunder(val contestId: Int, val poolId: Int, val voteCounts: List<Pair<IntArray, Int>>, val undervotes: Int, val missing: Int, val voteForN: Int) {
     val nvotes = voteCounts.sumOf { it.second } // candVotes.values.sum()
     val ncards = missing + (undervotes + nvotes) / voteForN
-    //val candVotesSorted: Map<Int, Int> =
-    //    candVotes.toList().sortedBy { it.second }.reversed().toMap() // reverse sort by largest vote
 
     val undervoteIdx = voteCounts.size
     val missingIdx = voteCounts.size + 1
@@ -30,7 +28,7 @@ data class Vunder(val contestId: Int, val poolId: Int, val voteCounts: List<Pair
 
     // only for non-IRV
     fun cands(): Map<Int, Int> {
-        return voteCounts.associate{ it.first[0] to it.second }.toMap()
+        return voteCounts.map{ Pair(it.first[0], it.second) }.sortedBy { it.first }.toMap()
     }
 
     override fun toString() = buildString {
@@ -53,7 +51,6 @@ data class Vunder(val contestId: Int, val poolId: Int, val voteCounts: List<Pair
             val voteCounts = candVotes.map { Pair(intArrayOf(it.key), it.value) }
             return Vunder(contestId, -1, voteCounts, undervotes, missing, voteForN)
         }
-
     }
 }
 

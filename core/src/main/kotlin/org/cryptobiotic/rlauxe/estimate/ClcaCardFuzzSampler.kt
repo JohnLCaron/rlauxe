@@ -66,7 +66,7 @@ class ClcaFuzzSamplerTracker(
     }
 
     override fun maxSamples() = maxSamples
-    override fun maxSampleIndexUsed() = idx
+    override fun countCvrsUsedInAudit() = idx
     override fun nmvrs() = cvrPairs.size
 
     override fun hasNext() = (welford.count + 1 < maxSamples)

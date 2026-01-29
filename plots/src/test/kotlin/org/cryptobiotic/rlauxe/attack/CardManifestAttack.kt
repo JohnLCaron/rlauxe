@@ -176,7 +176,7 @@ class CardManifestAttack {
         val mvrTabs = tabulateCvrs(Closer(mvrs.iterator()), infos)
         print(showTabs("mvrTabs", mvrTabs))
         val realContests = makeContestsFromCvrs(mvrs)
-        val realNps = mvrTabs.mapValues { it.value.ncards }
+        val realNps = mvrTabs.mapValues { it.value.ncardsTabulated }
         val realcontestUA = realContests.map {
             ContestWithAssertions(it, true, NpopIn=realNps[it.id]).addStandardAssertions()
         }
@@ -209,7 +209,7 @@ class CardManifestAttack {
         val cardPools = listOf(cardPool)
 
         // The sample poulation sizes come from the cards
-        val Npops = manifestTabs.mapValues { it.value.ncards }
+        val Npops = manifestTabs.mapValues { it.value.ncardsTabulated }
 
         val contestsUA = contests.map {
             ContestWithAssertions(it, true, NpopIn=Npops[it.id]).addStandardAssertions()

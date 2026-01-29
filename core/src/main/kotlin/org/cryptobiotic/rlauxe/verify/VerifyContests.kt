@@ -168,7 +168,7 @@ fun verifyManifest(
                             allTab.addVotes(cands, card.phantom)
                     } else {
                         if (card.phantom) allTab.nphantoms++
-                        allTab.ncards++
+                        allTab.ncardsTabulated++
                     }
 
                     if (card.poolId == null) {
@@ -178,11 +178,11 @@ fun verifyManifest(
                                 nonpoolTab.addVotes(cands, card.phantom)  // for IRV
                         } else {
                             if (card.phantom) nonpoolTab.nphantoms++
-                            nonpoolTab.ncards++
+                            nonpoolTab.ncardsTabulated++
                         }
                     } else {
                         val poolTab = pooled.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
-                        poolTab.ncards++
+                        poolTab.ncardsTabulated++
                     }
                 }
             }
@@ -208,8 +208,8 @@ fun verifyManifest(
     // check if tabulation agrees with diluted count
     contestsUA.forEach {
         val tab = allCvrVotes[it.id]!!
-        if (tab.ncards != it.Npop) {
-            results.addError("contest ${it.id} Npop ${it.Npop} disagree with cards = ${tab.ncards}")
+        if (tab.ncardsTabulated != it.Npop) {
+            results.addError("contest ${it.id} Npop ${it.Npop} disagree with cards = ${tab.ncardsTabulated}")
         }
     }
 
@@ -468,13 +468,13 @@ fun verifyOApools(
                 val cvrMargin = if (contestUA.isIrv) {
                     val rassorter = passorter as RaireAssorter
                     val cvrVotes = cvrTab.irvVotes.makeVotes(contestUA.ncandidates)
-                    rassorter.calcMargin(cvrVotes, cvrTab.ncards)
+                    rassorter.calcMargin(cvrVotes, cvrTab.ncardsTabulated)
                 } else {
-                    passorter.calcMarginFromRegVotes(cvrTab.votes, cvrTab.ncards)
+                    passorter.calcMarginFromRegVotes(cvrTab.votes, cvrTab.ncardsTabulated)
                 }
                 val cvrMean = margin2mean(cvrMargin)
-                assortAvg.ncards += cvrTab.ncards
-                assortAvg.totalAssort += cvrTab.ncards * cvrMean
+                assortAvg.ncards += cvrTab.ncardsTabulated
+                assortAvg.totalAssort += cvrTab.ncardsTabulated * cvrMean
             }
 
             // the pools

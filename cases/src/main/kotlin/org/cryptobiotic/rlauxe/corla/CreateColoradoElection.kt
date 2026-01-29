@@ -61,7 +61,7 @@ open class CreateColoradoElection (
 
         val infos = contests.map { it.info() }.associateBy { it.id }
         val manifestTabs = tabulateAuditableCards(createCardManifest(), infos)
-        val npopMap = manifestTabs.mapValues { it.value.ncards }
+        val npopMap = manifestTabs.mapValues { it.value.ncardsTabulated }
 
         contestsUA = if (config.isOA) makeOneAuditContests(contests, npopMap, cardPoolBuilders)
                      else ContestWithAssertions.make(contests, npopMap, isClca=config.isClca, )

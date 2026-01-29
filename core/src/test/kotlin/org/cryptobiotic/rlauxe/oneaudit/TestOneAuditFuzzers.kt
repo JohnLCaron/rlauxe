@@ -35,7 +35,7 @@ class TestOneAuditFuzzers {
         println("mvrTab = $mvrTab")
 
         assertEquals(mvrTab.votes, contestOA.contest.votes())
-        assertEquals(mvrTab.ncards, contestOA.contest.Nc())
+        assertEquals(mvrTab.ncardsTabulated, contestOA.contest.Nc())
 
         assertEquals(1, pools.size)
         val cardPool = pools.first()

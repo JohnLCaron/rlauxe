@@ -60,8 +60,8 @@ class TestMultiContestPoolData {
             val contest = test.contests.find { it.id == contestId }!!
             println("contest $contest")
             println("tab $tab")
-            println("extra cards= ${tab.ncards - contest.Ncast} is ${pfn((tab.ncards - contest.Ncast)/contest.Ncast.toDouble())}")
-            assertTrue (tab.ncards >= contest.Ncast)
+            println("extra cards= ${tab.ncardsTabulated - contest.Ncast} is ${pfn((tab.ncardsTabulated - contest.Ncast)/contest.Ncast.toDouble())}")
+            assertTrue (tab.ncardsTabulated >= contest.Ncast)
             println()
         }
     }

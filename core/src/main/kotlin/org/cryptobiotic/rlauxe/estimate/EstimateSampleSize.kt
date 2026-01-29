@@ -316,7 +316,6 @@ fun estimateClcaAssertionRound(
         startingErrorRates = bettingFn.startingErrorRates(),
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
-        firstSample = if (result.sampleCount.isEmpty()) 0 else result.sampleCount[0],
     )
 
     logger.debug{"estimateClcaAssertionRound $roundIdx ${name} ${makeDeciles(result.sampleCount)} took=$stopwatch"}
@@ -438,11 +437,9 @@ fun estimateOneAuditAssertionRound(
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
-        firstSample = if (result.sampleCount.size > 0) result.sampleCount[0] else 0,
     )
 
-    logger.info{ "($stopwatch) estimateOneAuditAssertion round $roundIdx ${name} ${makeDeciles(result.sampleCount)}" +
-            " firstSample=${assertionRound.estimationResult!!.firstSample}" }
+    logger.info{ "($stopwatch) estimateOneAuditAssertion round $roundIdx ${name} ${makeDeciles(result.sampleCount)}" }
     return result
 }
 
@@ -518,7 +515,6 @@ fun estimatePollingAssertionRound(
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
-        firstSample = if (result.sampleCount.isEmpty()) 0 else result.sampleCount[0],
     )
 
     logger.debug{"estimatePollingAssertionRound $roundIdx ${name} ${makeDeciles(result.sampleCount)} took=$stopwatch"}

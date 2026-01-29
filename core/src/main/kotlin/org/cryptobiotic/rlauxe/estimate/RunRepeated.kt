@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.RiskMeasuringFn
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Status
@@ -30,8 +31,15 @@ fun runRepeated(
     val sampleCounts = mutableListOf<Int>()
 
     repeat(ntrials) { trial ->
-        if (trial != 0)
+        if (trial != 0) {
             samplerTracker.reset() // this creates all the variation for the estimation
+        } /* else {
+            val t = samplerTracker as ClcaSamplerErrorTracker
+            if (t.contestId == 52 && t.cassorter.shortName() == "154/155") {
+                val round = if (startingTestStatistic == 1.0) 1 else 2
+                samplerTracker.dump("/home/stormy/rla/tests/scratch/est52-154-155-$round.txt")
+            }
+        } */
 
         val testH0Result = testFn.testH0(
             maxSamples=samplerTracker.maxSamples(),
@@ -45,10 +53,6 @@ fun runRepeated(
         // this can fail when you have limited the number of samples
         if (testH0Result.status == TestH0Status.LimitReached) {
             fail++
-            //if (samplerTracker is ClcaSamplerErrorTracker) {
-            //    val debug = samplerTracker.debug()
-            //    require(samplerTracker.firstDebug == debug)
-            //}
             logger.warn { "$name:  $trial failed in sampling max= ${samplerTracker.maxSamples()} samples" }
         } else {
             nsuccess++

@@ -62,7 +62,7 @@ class CreateBoulderElection(
         simulatedCvrs = makeRedactedCvrs()
 
         val manifestTabs = tabulateAuditableCards(createCardManifest(), infoMap)
-        val npopMap = manifestTabs.mapValues { it.value.ncards }
+        val npopMap = manifestTabs.mapValues { it.value.ncardsTabulated }
 
         contestsUA = if (isClca) ContestWithAssertions.make(contests, npopMap, isClca=true, )
             else makeOneAuditContests(contests, npopMap, cardPoolBuilders)
@@ -237,7 +237,7 @@ class CreateBoulderElection(
                 val info = infoMap[contestId]
 
                 // TODO approx
-                tab.ncards += contestVote.map { it.value }.sum() / info!!.voteForN // TODO wrong, dont use
+                tab.ncardsTabulated += contestVote.map { it.value }.sum() / info!!.voteForN // TODO wrong, dont use
             }
         }
         return votes

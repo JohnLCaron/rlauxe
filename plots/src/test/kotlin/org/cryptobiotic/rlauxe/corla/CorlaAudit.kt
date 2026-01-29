@@ -150,7 +150,7 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampling.nmvrs(),
-            maxSampleIndexUsed = sampling.maxSampleIndexUsed(),
+            countCvrsUsedInAudit = sampling.countCvrsUsedInAudit(),
             plast = testH0Result.pvalueLast,
             pmin = testH0Result.pvalueMin,
             samplesUsed = samplesNeeded,

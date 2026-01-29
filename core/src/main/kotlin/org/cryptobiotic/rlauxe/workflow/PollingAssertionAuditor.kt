@@ -51,7 +51,7 @@ fun runPollingAuditRound(
     }
 
     // given the cvrPairs, and each ContestRound's maxSampleIndexUsed, count the cvrs that were not used
-    val maxIndex = contestsNotDone.associate { it.id to it.maxSampleIndexUsed() }
+    val maxIndex = contestsNotDone.associate { it.id to it.countCvrsUsedInAudit() }
     var countUnused = 0
     pairs.forEachIndexed { idx, mvrCardPair ->
         val card = mvrCardPair.second
@@ -100,7 +100,7 @@ fun auditPollingAssertion(
 
     assertionRound.auditResult = AuditRoundResult(roundIdx,
         nmvrs = sampler.nmvrs(),
-        maxSampleIndexUsed = sampler.maxSampleIndexUsed(),
+        countCvrsUsedInAudit = sampler.countCvrsUsedInAudit(),
         plast = testH0Result.pvalueLast,
         pmin = testH0Result.pvalueMin,
         samplesUsed = testH0Result.sampleCount,

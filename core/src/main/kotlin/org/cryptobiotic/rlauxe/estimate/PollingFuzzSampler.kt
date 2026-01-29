@@ -61,7 +61,7 @@ class PollingFuzzSamplerTracker(
     }
 
     override fun maxSamples() = maxSamples
-    override fun maxSampleIndexUsed() = idx
+    override fun countCvrsUsedInAudit() = idx
     override fun nmvrs() = mvrs.size
 
     override fun hasNext() = (welford.count + 1 < maxSamples)

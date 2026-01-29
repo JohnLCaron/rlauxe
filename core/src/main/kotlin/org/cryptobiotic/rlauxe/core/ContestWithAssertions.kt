@@ -200,7 +200,7 @@ open class ContestWithAssertions(
         fun make(contests: List<ContestIF>, cards: CloseableIterator<AuditableCard>, isClca: Boolean): List<ContestWithAssertions> {
             val infos = contests.map { it.info() }.associateBy { it.id }
             val manifestTabs = tabulateAuditableCards(cards, infos)
-            val npopMap = manifestTabs.mapValues { it.value.ncards }
+            val npopMap = manifestTabs.mapValues { it.value.ncardsTabulated }
             return make(contests, npopMap, isClca)
         }
 

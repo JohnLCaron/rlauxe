@@ -39,16 +39,15 @@ class TestAuditConfig {
     fun testOneAudit() {
         val config = AuditConfig(
             AuditType.ONEAUDIT, nsimEst = 10, seed=-2417429242344992892,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.eta0Eps)
         )
         val expected =
             """AuditConfig(auditType=ONEAUDIT, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testSimulated
   minRecountMargin=0.005 removeTooManyPhantoms=false contestSampleCutoff=30000 removeCutoffContests=false
   nsimEst=10, quantile=0.8, simFuzzPct=null, mvrFuzzPct=0.0,
-  OneAuditConfig(strategy=eta0Eps, d=100, useFirst=false)
+  OneAuditConfig(strategy=simulate)
 """
         assertEquals(expected, config.toString())
-        assertEquals("eta0Eps", config.strategy())
+        assertEquals("simulate", config.strategy())
     }
 
 }

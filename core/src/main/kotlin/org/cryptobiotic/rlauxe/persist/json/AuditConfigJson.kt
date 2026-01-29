@@ -261,15 +261,11 @@ fun ClcaConfigJson.import() = ClcaConfig(
 @Serializable
 data class OneAuditConfigJson(
     val strategy: String,
-    val d: Int,
-    val useFirst: Boolean,
 )
 
-fun OneAuditConfig.publishJson() = OneAuditConfigJson(this.strategy.name, this.d, this.useFirst)
+fun OneAuditConfig.publishJson() = OneAuditConfigJson(this.strategy.name)
 fun OneAuditConfigJson.import() = OneAuditConfig(
-        enumValueOf(this.strategy, OneAuditStrategyType.entries) ?: OneAuditStrategyType.generalAdaptive,
-        this.d,
-        this.useFirst
+        enumValueOf(this.strategy, OneAuditStrategyType.entries) ?: OneAuditStrategyType.simulate,
     )
 
 /////////////////////////////////////////////////////////////////////////////////

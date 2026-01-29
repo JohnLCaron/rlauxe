@@ -100,7 +100,7 @@ fun auditPollingAssertion(
 
     assertionRound.auditResult = AuditRoundResult(roundIdx,
         nmvrs = sampler.nmvrs(),
-        countCvrsUsedInAudit = sampler.countCvrsUsedInAudit(),
+        // countCvrsUsedInAudit = sampler.countCvrsUsedInAudit(),
         plast = testH0Result.pvalueLast,
         pmin = testH0Result.pvalueMin,
         samplesUsed = testH0Result.sampleCount,

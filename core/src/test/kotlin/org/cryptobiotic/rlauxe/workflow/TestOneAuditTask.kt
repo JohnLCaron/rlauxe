@@ -92,11 +92,7 @@ class TestOneAuditTask {
         val phantomPct = 0.00
         val cvrPercent = 0.80
 
-        val auditConfigIn = AuditConfig(
-            AuditType.ONEAUDIT, true,
-            oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.clca)
-        )
-
+        val auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true)
         val taskGen = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
             Nc,
             margin,

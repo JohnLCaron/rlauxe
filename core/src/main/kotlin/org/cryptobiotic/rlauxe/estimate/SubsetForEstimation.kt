@@ -57,7 +57,6 @@ fun getSubsetForEstimation(
     val contestsIncluded = contests.filter { !it.done && it.included }
     if (contestsIncluded.isEmpty()) return CardSamples(emptyList(), emptyMap())
 
-    println("getSubsetForEstimation all cards")
     val allInfo = tabulateDebugInfo(cards.iterator(), contestsIncluded, null)
 
     // calculate how many samples are wanted for each contest.

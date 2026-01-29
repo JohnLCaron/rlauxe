@@ -399,7 +399,7 @@ fun check(a1: AuditRoundResult, a2: AuditRoundResult): Boolean {
     assertEquals(a1.toString(), a2.toString())
     assertEquals(a1.roundIdx, a2.roundIdx)
     assertEquals(a1.nmvrs, a2.nmvrs)
-    assertEquals(a1.maxSampleIndexUsed, a2.maxSampleIndexUsed)
+    assertEquals(a1.countCvrsUsedInAudit, a2.countCvrsUsedInAudit)
     assertEquals(a1.plast, a2.plast)
     assertEquals(a1.pmin, a2.pmin)
     assertEquals(a1.samplesUsed, a2.samplesUsed)

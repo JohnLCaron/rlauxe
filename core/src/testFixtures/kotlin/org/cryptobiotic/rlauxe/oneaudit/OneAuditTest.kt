@@ -214,7 +214,7 @@ fun makeOneAuditTestContests(
 
     val cards = Closer(cardManifest.iterator())
     val manifestTabs = tabulateAuditableCards(cards, infos)
-    val npopMap = manifestTabs.mapValues { it.value.ncards }
+    val npopMap = manifestTabs.mapValues { it.value.ncardsTabulated }
 
     // create pools from cardStyles and populate the pool counts from the mvrs
     val poolsFromCvrs = calcOneAuditPoolsFromMvrs(infos, cardStyles, mvrs)

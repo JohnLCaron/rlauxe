@@ -19,7 +19,6 @@ import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsvFile
 import org.cryptobiotic.rlauxe.raire.makeRaireOneAuditContest
 import org.cryptobiotic.rlauxe.raire.makeRaireContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -77,7 +76,7 @@ class CreateSfElection(
 
         // we need to know the diluted Nb before we can create the assertions: another pass through the cvrExports
         val manifestTabs = tabulateAuditableCards( createCardManifest(config.auditType), infos)
-        val contestNbs = manifestTabs.mapValues { it.value.ncards }
+        val contestNbs = manifestTabs.mapValues { it.value.ncardsTabulated }
         println("contestNbs= ${contestNbs}")
 
         // make contests based on cvr tabulations
@@ -154,8 +153,8 @@ class CreateSfElection(
     fun countPhantoms(contestTabSums: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>): Map<Int, Int> {
         val result = mutableMapOf<Int, Int>()
         contestTabSums.forEach { (_, contestSumTab) ->
-            val useNc = contestNcs[contestSumTab.contestId] ?: contestSumTab.ncards
-            val Ncast = contestSumTab.ncards
+            val useNc = contestNcs[contestSumTab.contestId] ?: contestSumTab.ncardsTabulated
+            val Ncast = contestSumTab.ncardsTabulated
             result[contestSumTab.contestId] = useNc - Ncast
         }
         return result
@@ -199,11 +198,11 @@ class CreateSfElection(
 fun makeClcaContestsSF(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestWithAssertions> {
     val contestsUAs = mutableListOf<ContestWithAssertions>()
     allCvrTabs.map { (contestId, cvrTab)  ->
-        val useNc = contestNcs[contestId] ?: cvrTab.ncards
+        val useNc = contestNcs[contestId] ?: cvrTab.ncardsTabulated
         val info = infos[contestId]!!
 
         val contestUA: ContestWithAssertions = if (!cvrTab.isIrv) {
-            val contest = Contest(info, cvrTab.votes, useNc, cvrTab.ncards)
+            val contest = Contest(info, cvrTab.votes, useNc, cvrTab.ncardsTabulated)
             ContestWithAssertions(contest, NpopIn=contestNbs[contestId]).addStandardAssertions()
         } else {
             makeRaireContest(info, cvrTab, useNc, Nbin=contestNbs[contestId]!!) // HERE
@@ -226,11 +225,11 @@ fun makeOneAuditContestsSF(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, Co
     // now make the IRV contests
     allCvrTabs.filter{ it.value.isIrv }. map { (contestId, cvrTab)  ->
         val info = infos[contestId]!!
-        val useNc = contestNcs[contestId] ?: cvrTab.ncards
+        val useNc = contestNcs[contestId] ?: cvrTab.ncardsTabulated
         val contestUA = makeRaireOneAuditContest(info, cvrTab, useNc, Nbin=contestNbs[contestId]!!, oneAuditPools)
 
         val unpooledTab = unpooledPool.contestTabs[contestId]!!
-        val unpooledPct = 100.0 * unpooledTab.ncards / cvrTab.ncards   // denominator is cards that have the contest, not Npop
+        val unpooledPct = 100.0 * unpooledTab.ncardsTabulated / cvrTab.ncardsTabulated   // denominator is cards that have the contest, not Npop
         val poolPct = (100 - unpooledPct).toInt()
         contestUA.contest.info().metadata["PoolPct"] = poolPct
         contestsUAs.add(contestUA)
@@ -241,11 +240,11 @@ fun makeOneAuditContestsSF(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, Co
 fun makePollingContestsSF(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>, contestNbs: Map<Int, Int>): List<ContestWithAssertions> {
     val contestsUAs = mutableListOf<ContestWithAssertions>()
     allCvrTabs.map { (contestId, contestSumTab)  ->
-        val useNc = contestNcs[contestId] ?: contestSumTab.ncards
+        val useNc = contestNcs[contestId] ?: contestSumTab.ncardsTabulated
         if (useNc > 0) {
             if (!contestSumTab.isIrv) { // cant do IRV
                 val info = infos[contestId]!!
-                val contest = Contest(info, contestSumTab.votes, useNc, contestSumTab.ncards)
+                val contest = Contest(info, contestSumTab.votes, useNc, contestSumTab.ncardsTabulated)
                 val contestUA = ContestWithAssertions(contest, isClca = false, NpopIn=contestNbs[contestId]).addStandardAssertions()
                 contestUA.contest.info().metadata["PoolPct"] = 0
                 contestsUAs.add(contestUA)
@@ -259,11 +258,11 @@ fun makeRegularContests(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, Conte
     val contests = mutableListOf<Contest>()
     allCvrTabs.map { (contestId, contestSumTab)  ->
         val info = infos[contestId]!!
-        val useNc = contestNcs[info.id] ?: contestSumTab.ncards
+        val useNc = contestNcs[info.id] ?: contestSumTab.ncardsTabulated
         if (useNc > 0 && !info.isIrv) {
-            val contest = Contest(info, contestSumTab.votes, useNc, contestSumTab.ncards)
+            val contest = Contest(info, contestSumTab.votes, useNc, contestSumTab.ncardsTabulated)
             val unpooledTab = unpooledPool.contestTabs[info.id]!!
-            val unpooledPct = 100.0 * unpooledTab.ncards / contestSumTab.ncards
+            val unpooledPct = 100.0 * unpooledTab.ncardsTabulated / contestSumTab.ncardsTabulated
             val poolPct = (100 - unpooledPct).toInt()
             contest.info().metadata["PoolPct"] = poolPct
             contests.add(contest)

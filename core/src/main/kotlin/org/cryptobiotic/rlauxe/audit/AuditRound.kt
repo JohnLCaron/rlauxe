@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.math.ceil
+import kotlin.math.max
 
 interface AuditRoundIF {
     val roundIdx: Int
@@ -91,10 +92,6 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
                else estMvrs
     }
 
-    fun minAssertion(): AssertionRound? {
-        val minAssertion = contestUA.minAssertion()!!
-        return assertionRounds.find { it.assertion == minAssertion }
-    }
 
     fun createNextRound() : ContestRound {
         val nextAssertions =  assertionRounds.filter { !it.status.complete }.map{
@@ -115,8 +112,31 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         return Pair(estList, auditList)
     }
 
-    fun maxSampleIndexUsed(): Int {
-        return assertionRounds.maxOfOrNull { it.auditResult?.maxSampleIndexUsed ?: 0 } ?: 0
+
+    fun minAssertion(): AssertionRound? {
+        val minAssertion = contestUA.minAssertion()!!
+        return assertionRounds.find { it.assertion == minAssertion }
+    }
+
+    fun calcMvrsNeeded(config: AuditConfig): Int {
+        var maxNeeded = 0
+        assertionRounds.forEach { round ->
+            val assertion: Assertion = round.assertion
+            if (assertion is ClcaAssertion) {
+                val cassorter = assertion.cassorter
+                val auditResult: AuditRoundResult? = round.auditResult
+                val alpha = auditResult?.plast ?: config.riskLimit
+                val maxLoss: Double = config.clcaConfig.maxLoss
+                val est: Pair<Int, Double> = cassorter.estWithOptimalBet(contestUA, maxLoss, alpha)
+                val estSamplesNeeded = est.component1()
+                maxNeeded = max( maxNeeded, estSamplesNeeded)
+            }
+        }
+        return maxNeeded
+    }
+
+    fun countCvrsUsedInAudit(): Int {
+        return assertionRounds.maxOfOrNull { it.auditResult?.countCvrsUsedInAudit ?: 0 } ?: 0
     }
 
     override fun equals(other: Any?): Boolean {
@@ -193,7 +213,6 @@ data class EstimationRoundResult(
     val startingErrorRates: Map<Double, Double>? = null, // error rates used for estimation
     val estimatedDistribution: List<Int>,   // distribution of estimated sample size as deciles
     val ntrials: Int,
-    val firstSample: Int,
 ) {
     var estNewMvrs: Int = 0
 
@@ -210,8 +229,8 @@ fun roundUp(x: Double) = ceil(x).toInt()
 
 data class AuditRoundResult(
     val roundIdx: Int,
-    val nmvrs: Int,               // number of mvrs available for this contest for this round
-    val maxSampleIndexUsed: Int,  // maximum ballot index (for multicontest audits)
+    val nmvrs: Int,                 // number of mvrs available for this contest for this round
+    val countCvrsUsedInAudit: Int,  // number of cvrs used in the audit
     val plast: Double,              // last pvalue when testH0 terminates
     val pmin: Double,               // minimum pvalue reached
     val samplesUsed: Int,     // sample count when testH0 terminates

@@ -192,7 +192,7 @@ fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, N
         info,
         winnerIndex = raireResult.winner,
         Nc = Nc,
-        Ncast = contestTab.ncards,
+        Ncast = contestTab.ncardsTabulated,
         undervotes = contestTab.undervotes,
         raireAssertions,
         Nbin,

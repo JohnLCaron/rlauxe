@@ -167,7 +167,7 @@ class OneAuditClcaAssorter(
             else if (!mvr.hasContest(info.id)) { if (hasStyle) 0.0 else 0.5 }
             else this.assorter.assort(mvr, usePhantoms = false)
 
-        // val cvr_assort = if (cvr.phantom) .5 else poolAvgAssortValue
+        // val cvr_assort = if (cvr.phantom) .5 else poolAvgAssortValue TODO
         val cvr_assort = poolAvgAssortValue
         return cvr_assort - mvr_assort
     }

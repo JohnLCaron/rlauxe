@@ -35,7 +35,7 @@ class TestSamplerTrackers {
         }
         assertEquals(cvrs.size, count)
         assertEquals(cvrs.size, target.maxSamples())
-        assertEquals(cvrs.size, target.maxSampleIndexUsed())
+        assertEquals(cvrs.size, target.countCvrsUsedInAudit())
         assertEquals(cvrs.size, target.nmvrs())
 
         // deliberately try to read more that there are
@@ -59,7 +59,7 @@ class TestSamplerTrackers {
         }
         assertEquals(cvrs.size, count)
         assertEquals(cvrs.size, target.maxSamples())
-        assertEquals(cvrs.size, target.maxSampleIndexUsed())
+        assertEquals(cvrs.size, target.countCvrsUsedInAudit())
         assertEquals(cvrs.size, target.nmvrs())
 
         // deliberately try to read more that there are
@@ -82,7 +82,7 @@ class TestSamplerTrackers {
         }
         assertEquals(cards.size, count)
         assertEquals(cards.size, target.maxSamples())
-        assertEquals(cards.size, target.maxSampleIndexUsed())
+        assertEquals(cards.size, target.countCvrsUsedInAudit())
         assertEquals(cards.size, target.nmvrs())
 
         // deliberately try to read more that there are
@@ -108,7 +108,7 @@ class TestSamplerTrackers {
         }
         assertEquals(cvrs.size, count)
         assertEquals(cvrs.size, target.maxSamples())
-        assertEquals(cvrs.size, target.maxSampleIndexUsed())
+        assertEquals(cvrs.size, target.countCvrsUsedInAudit())
         assertEquals(cvrs.size, target.nmvrs())
 
         // deliberately try to read more that there are

@@ -35,7 +35,7 @@ class SampleFromArray(val array: DoubleArray): SamplerTracker {
 
     override fun maxSamples() = array.size
 
-    override fun maxSampleIndexUsed() = index
+    override fun countCvrsUsedInAudit() = index
 
     override fun nmvrs() = array.size
 

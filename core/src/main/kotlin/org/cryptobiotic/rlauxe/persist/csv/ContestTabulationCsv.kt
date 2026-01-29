@@ -1,9 +1,6 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.raire.VoteConsolidator
-import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import java.io.*
 import kotlin.text.isEmpty
@@ -16,7 +13,7 @@ private val logger = KotlinLogging.logger("ContestTabulationCsv")
 //    val irvVotes = VoteConsolidator() // candidate indexes
 //    val notfound = mutableMapOf<Int, Int>() // candidate -> nvotes; track candidates on the cvr but not in the contestInfo, for debugging
 //
-//    var ncards = 0 // TODO should be "how many cards are in the population"?
+//    var ncards = 0 //
 //    var novote = 0  // how many cards had no vote for this contest?
 //    var undervotes = 0  // how many undervotes = voteForN - nvotes
 //    var overvotes = 0  // how many overvotes = (voteForN < cands.size)
@@ -25,7 +22,7 @@ private val logger = KotlinLogging.logger("ContestTabulationCsv")
 val ContestTabulationHeader = "contestId, voteForN, cands, ncards, novote, undervotes, overvotes, nphantoms, isIrv, cand:count ... \n"
 
 fun writeContestTabulationCsv(tab: ContestTabulation) = buildString {
-    append("${tab.contestId}, ${tab.voteForN}, ${tab.candidateIds.joinToString(" ")}, ${tab.ncards}, ${tab.novote}, ")
+    append("${tab.contestId}, ${tab.voteForN}, ${tab.candidateIds.joinToString(" ")}, ${tab.ncardsTabulated}, ${tab.novote}, ")
     append("${tab.undervotes}, ${tab.overvotes}, ${tab.nphantoms}, ${if (tab.isIrv) "yes" else ""}, ")
 
     if (tab.isIrv) {
@@ -64,7 +61,7 @@ fun readContestTabulationCsv(ttokens: List<String>): ContestTabulation {
     }
 
     val tab = ContestTabulation(contestId, voteForN, isIrv, candidateIds)
-    tab.ncards = ncards
+    tab.ncardsTabulated = ncards
     tab.novote = novote
     tab.undervotes = undervotes
     tab.overvotes = overvotes

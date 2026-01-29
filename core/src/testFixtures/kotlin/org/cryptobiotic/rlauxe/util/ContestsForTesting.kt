@@ -17,8 +17,8 @@ fun makeContestFromCvrs(
         Contest(
             info,
             contestTab.votes,
-            Nc=contestTab.ncards,
-            Ncast=contestTab.ncards - contestTab.nphantoms,
+            Nc=contestTab.ncardsTabulated,
+            Ncast=contestTab.ncardsTabulated - contestTab.nphantoms,
             )
 }
 
@@ -152,7 +152,7 @@ fun makeContestsWithUndervotesAndPhantoms(
     val contestTabs: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infos)
     val contests = contestTabs.map { (id, tab) ->
         val phantoms = phantomMap[id]!!
-        Contest(infos[id]!!, tab.votes, tab.ncards + phantoms, tab.ncards)
+        Contest(infos[id]!!, tab.votes, tab.ncardsTabulated + phantoms, tab.ncardsTabulated)
     }
 
     // add the phantoms

@@ -100,14 +100,14 @@ fun runRoundResult(auditDir: String, onlyTask: String? = null): Result<AuditRoun
 }
 
 // for debugging, transparency. rlauxe-viewer
-fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): String {
+fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound): String {
     val contestId = contestRound.contestUA.id
     try {
         if (notExists(Path.of(auditDir))) {
             logger.warn { "Audit Directory $auditDir does not exist" }
             return "Audit Directory $auditDir does not exist"
         }
-        val roundIdx = auditRoundResult.roundIdx
+        val roundIdx = assertionRound.roundIdx
         val assertion = assertionRound.assertion
 
         val auditRecord = AuditRecord.readFrom(auditDir)
@@ -124,11 +124,11 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
 
         // run the audit, capture the sequences
         val testH0Result =  when (config.auditType) {
-            AuditType.CLCA -> runClcaAudit(config, cvrPairs, contestRound, assertionRound, auditRoundResult)
-            AuditType.POLLING -> runPollingAudit(config, cvrPairs, contestRound, assertionRound, auditRoundResult)
+            AuditType.CLCA -> runClcaAudit(config, cvrPairs, contestRound, assertionRound)
+            AuditType.POLLING -> runPollingAudit(config, cvrPairs, contestRound, assertionRound)
             AuditType.ONEAUDIT -> runOneAudit(config, cvrPairs,
                 workflow.mvrManager().oapools()!!,
-                contestRound, assertionRound, auditRoundResult)
+                contestRound, assertionRound)
         }
 
         return if (testH0Result == null) "failed" else buildString {
@@ -164,7 +164,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
     }
 }
 
-fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
+fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
     try {
         val auditor = ClcaAssertionAuditor()
 
@@ -177,7 +177,7 @@ fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>
             cvrPairs,
             maxSampleIndex = contestRound.maxSampleAllowed,
         )
-        val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
+        val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, assertionRound.roundIdx)
         return testH0Result
 
     } catch (t: Throwable) {
@@ -187,7 +187,7 @@ fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>
     }
 }
 
-fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>, pools: List<OneAuditPoolIF>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
+fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>, pools: List<OneAuditPoolIF>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
     try {
         val auditor = OneAuditAssertionAuditor(pools)
         val cassertion = assertionRound.assertion as ClcaAssertion
@@ -199,7 +199,7 @@ fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>,
             cvrPairs,
             maxSampleIndex = contestRound.maxSampleAllowed,
         )
-        val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, auditRoundResult.roundIdx)
+        val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, assertionRound.roundIdx)
         return testH0Result
 
     } catch (t: Throwable) {
@@ -209,7 +209,7 @@ fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>,
     }
 }
 
-fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, CvrIF>>, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): TestH0Result? {
+fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, CvrIF>>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
     try {
         val assertion = assertionRound.assertion
         val assorter = assertion.assorter
@@ -220,7 +220,7 @@ fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, CvrIF>>, con
             maxSampleIndex = contestRound.maxSampleAllowed
         )
 
-        val testH0Result = auditPollingAssertion(config, contestRound.contestUA, assertionRound, sampler, auditRoundResult.roundIdx)
+        val testH0Result = auditPollingAssertion(config, contestRound.contestUA, assertionRound, sampler, assertionRound.roundIdx)
 
         return testH0Result
 

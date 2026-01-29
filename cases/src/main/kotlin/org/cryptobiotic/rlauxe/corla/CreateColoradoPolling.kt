@@ -37,7 +37,7 @@ class ColoradoPolling (
             val useNc = max( ncards, oaContest.Nc)
             val contest = Contest(info, candVotes, useNc, ncards)
             info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
-            val Nb = tabs[contest.id]?.ncards // tabs.ncards + contest.Np TODO
+            val Nb = tabs[contest.id]?.ncardsTabulated // tabs.ncards + contest.Np TODO
             ContestWithAssertions(contest, isClca=false, NpopIn=Nb).addStandardAssertions()
         }
 

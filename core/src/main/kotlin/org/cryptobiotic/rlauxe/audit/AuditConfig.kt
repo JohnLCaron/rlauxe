@@ -9,7 +9,7 @@ enum class AuditType { POLLING, CLCA, ONEAUDIT;
     fun isPolling() = (this == POLLING)
 }
 
-// TODO seems like config should know what directory it lives in ??
+// TODO add directory to config
 data class AuditConfig(
     val auditType: AuditType,
     val hasStyle: Boolean = true, // TODO deprecated?; perhaps useful when all pools have hasSingleCardStyle=true ?? etc

@@ -33,7 +33,7 @@ class OneAuditContestBoulder(val info: ContestInfo,
     // then this is the total cards in the pools
     val redNcards = (redVotes + redUndervotes) / info.voteForN
     // then this is the total cards in the cvrs and the pools
-    val totalCards= redNcards + cvrTab.ncards
+    val totalCards= redNcards + cvrTab.ncardsTabulated
     override val contestId: Int = info.id
 
     var poolTotalCards: Int = 0
@@ -122,7 +122,7 @@ class OneAuditContestBoulder(val info: ContestInfo,
 
     // ncards
     fun sumAllCards() : Int {
-        return poolTotalCards() + cvrTab.ncards
+        return poolTotalCards() + cvrTab.ncardsTabulated
     }
 
     fun checkCvrs(contestTab: ContestTabulation) {
@@ -137,8 +137,8 @@ class OneAuditContestBoulder(val info: ContestInfo,
     }
 
    fun checkNcards(contestTab: ContestTabulation) {
-        println("  ${info.id}: sovoContest.totalBallots=${sovoContest.totalBallots} - contestTab.ncards=${contestTab.ncards} = ${sovoContest.totalBallots - contestTab.ncards}")
-        println("  ${info.id}: sumAllCards=${sumAllCards()} - contestTab.ncards=${contestTab.ncards} = ${sumAllCards() - contestTab.ncards}")
+        println("  ${info.id}: sovoContest.totalBallots=${sovoContest.totalBallots} - contestTab.ncards=${contestTab.ncardsTabulated} = ${sovoContest.totalBallots - contestTab.ncardsTabulated}")
+        println("  ${info.id}: sumAllCards=${sumAllCards()} - contestTab.ncards=${contestTab.ncardsTabulated} = ${sumAllCards() - contestTab.ncardsTabulated}")
         println()
     }
 }

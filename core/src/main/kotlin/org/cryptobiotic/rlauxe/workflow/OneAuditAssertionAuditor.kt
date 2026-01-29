@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.ErrorTracker
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
@@ -30,6 +31,11 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         val oaCassorter = cassertion.cassorter as OneAuditClcaAssorter
         val clcaConfig = config.clcaConfig
 
+        /* val t = samplerTracker as ClcaSamplerErrorTracker
+        if (t.contestId == 52 && t.cassorter.shortName() == "154/155") {
+            samplerTracker.dump("/home/stormy/rla/tests/scratch/audit52-154-155.txt")
+        } */
+
         val bettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
             GeneralAdaptiveBetting(
                 Npop = contestUA.Npop,
@@ -45,7 +51,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = samplerTracker.maxSamples(),
-            maxSampleIndexUsed = samplerTracker.maxSampleIndexUsed(),
+            countCvrsUsedInAudit = samplerTracker.countCvrsUsedInAudit(),
             plast = testH0Result.pvalueLast,
             pmin = testH0Result.pvalueMin,
             samplesUsed = testH0Result.sampleCount,

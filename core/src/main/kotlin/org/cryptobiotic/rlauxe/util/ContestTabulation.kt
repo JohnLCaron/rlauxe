@@ -33,7 +33,7 @@ data class ContestVotes(
 // tabulate contest votes from cards or cvrs; can handle both regular and irv voting
 class ContestTabulation(
     override val contestId: Int,
-    override val voteForN: Int,
+    voteForNin: Int, //
     val isIrv: Boolean,
     val candidateIds: List<Int>
 ): ContestVotesIF {
@@ -41,25 +41,29 @@ class ContestTabulation(
     constructor(info: ContestInfo) : this(info.id, info.voteForN, info.isIrv, info.candidateIds)
     constructor(other: ContestTabulation) : this(other.contestId, other.voteForN, other.isIrv, other.candidateIds)
 
+    override val voteForN = if (isIrv) 1 else voteForNin
     val candidateIdToIdx by lazy { candidateIds.mapIndexed { idx, id -> Pair(id, idx) }.toMap() }
 
     override val votes = mutableMapOf<Int, Int>() // cand -> votes
     val irvVotes = VoteConsolidator() // candidate indexes
     val notfound = mutableMapOf<Int, Int>() // candidate -> nvotes; track candidates on the cvr but not in the contestInfo, for debugging
 
-    var ncards = 0 // TODO should be "how many cards are in the population"?
+    var ncardsTabulated = 0 // total cards added to the tabulation
     var novote = 0  // how many cards had no vote for this contest?
     var undervotes = 0  // how many undervotes = voteForN - nvotes
     var overvotes = 0  // how many overvotes = (voteForN < cands.size)
-    var nphantoms = 0  // how many overvotes = (voteForN < cands.size)
+    var nphantoms = 0  // how many phantoms
 
     constructor(info: ContestInfo, votes: Map<Int, Int>, ncards: Int): this(info) {
         votes.forEach{ this.addVote(it.key, it.value) }
-        this.ncards = ncards
+        this.ncardsTabulated = ncards
     }
 
-    override fun ncards() = ncards
+    override fun ncards() = ncardsTabulated
     override fun undervotes() = undervotes
+
+    fun nvotes() = if (isIrv) irvVotes.nvotes() else votes.map { it.value }.sum()
+    fun missing() = voteForN * ncards() - nvotes()
 
     fun addVotes(cands: IntArray, phantom:Boolean) {
         if (!isIrv) addVotesReg(cands) else addVotesIrv(cands)
@@ -68,8 +72,7 @@ class ContestTabulation(
 
     fun addVotesReg(cands: IntArray) {
         cands.forEach { addVote(it, 1) }
-
-        ncards++
+        ncardsTabulated++
         if (voteForN < cands.size) overvotes++
         undervotes += (voteForN - cands.size)
         if (cands.isEmpty()) novote++
@@ -89,7 +92,7 @@ class ContestTabulation(
         // convert to index for Raire
         val mappedVotes = candidateRanks.map { candidateIdToIdx[it] }
         if (mappedVotes.isNotEmpty()) irvVotes.addVote(mappedVotes.filterNotNull().toIntArray())
-        ncards++
+        ncardsTabulated++
         if (candidateRanks.isEmpty()) novote++
         if (candidateRanks.isEmpty()) undervotes++
     }
@@ -102,15 +105,15 @@ class ContestTabulation(
         } else {
             other.votes.forEach { (candId, nvotes) -> addVote(candId, nvotes) }
         }
-        this.ncards += other.ncards
+        this.ncardsTabulated += other.ncardsTabulated
         this.novote += other.novote
         this.undervotes += other.undervotes
         this.overvotes += other.overvotes
     }
 
-    fun votesAndUndervotes(poolId: Int): Vunder {
-        return if (!isIrv) Vunder.fromNpop(contestId, undervotes, ncards(), votes, voteForN) else {
-            val missing = ncards() - undervotes - irvVotes.nvotes()
+    fun votesAndUndervotes(poolId: Int, npop: Int): Vunder {
+        return if (!isIrv) Vunder.fromNpop(contestId, undervotes, npop, votes, voteForN) else {
+            val missing = npop - undervotes - irvVotes.nvotes()
             val voteCounts = irvVotes.votes.map { (hIntArray, count) ->
                 // convert indices back to ids
                 val idArray: List<Int> = hIntArray.array.map { candidateIds[it] }
@@ -120,11 +123,9 @@ class ContestTabulation(
         }
     }
 
-    fun nvotes() = votes.map { it.value}.sum()
-
     override fun toString(): String {
         val sortedVotes = votes.entries.sortedBy { it.key }
-        return "ContestTabulation(id=${contestId} isIrv=$isIrv, voteForN=$voteForN, votes=$sortedVotes, nvotes=${nvotes()} ncards=$ncards, undervotes=$undervotes, novote=$novote, overvotes=$overvotes)"
+        return "ContestTabulation(id=${contestId} isIrv=$isIrv, voteForN=$voteForN, votes=$sortedVotes, nvotes=${nvotes()} ncards=$ncardsTabulated, undervotes=$undervotes, novote=$novote, overvotes=$overvotes)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -134,7 +135,7 @@ class ContestTabulation(
         if (contestId != other.contestId) return false
         if (voteForN != other.voteForN) return false
         if (isIrv != other.isIrv) return false
-        if (ncards != other.ncards) return false
+        if (ncardsTabulated != other.ncardsTabulated) return false
         if (undervotes != other.undervotes) return false
         if (overvotes != other.overvotes) return false
         if (nphantoms != other.nphantoms) return false
@@ -149,7 +150,7 @@ class ContestTabulation(
         var result = contestId
         result = 31 * result + voteForN
         result = 31 * result + isIrv.hashCode()
-        result = 31 * result + ncards
+        result = 31 * result + ncardsTabulated
         result = 31 * result + undervotes
         result = 31 * result + overvotes
         result = 31 * result + nphantoms
@@ -178,7 +179,7 @@ fun tabulateOneAuditPools(cardPools: List<OneAuditPoolIF>, infos: Map<Int, Conte
             val poolSum = poolSums[contestId]
             if (poolSum != null) {
                 regVotes.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
-                poolSum.ncards += regVotes.ncards()
+                poolSum.ncardsTabulated += regVotes.ncards()
                 poolSum.undervotes += regVotes.undervotes()
             }
         }
@@ -194,7 +195,7 @@ fun tabulateCardManifest(cardPools: List<OneAuditPoolFromCvrs>, infos: Map<Int, 
             val poolSum = poolSums[contestId]
             if (poolSum != null) {
                 regVotes.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
-                poolSum.ncards += regVotes.ncards()
+                poolSum.ncardsTabulated += regVotes.ncards()
                 poolSum.undervotes += regVotes.undervotes()
             }
         }
@@ -243,7 +244,7 @@ fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<I
                         val contestVote = card.votes[contestId]!!
                         tab.addVotes(contestVote, card.phantom)
                     } else {
-                        tab.ncards++
+                        tab.ncardsTabulated++
                     }
                 }
             }

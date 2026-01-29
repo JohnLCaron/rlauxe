@@ -94,7 +94,7 @@ object RunRoundAgainCli {
         }
 
         // fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): String {
-        val result = runRoundAgain(auditDir, contestRound, assertionRound, assertionRound.auditResult!!)
+        val result = runRoundAgain(auditDir, contestRound, assertionRound)
         println(result)
     }
 }

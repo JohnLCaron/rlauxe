@@ -96,7 +96,7 @@ class TestVunder {
             println("contestTab=${tab}")
             val contest = contestMap[id]!!
             println("contest=${contest}")
-            assertEquals(contest.Nc, tab.ncards)
+            assertEquals(contest.Nc, tab.ncardsTabulated)
             assertEquals(contest.undervotes + contest.Nphantoms(), tab.undervotes)
             assertTrue(checkEquivilentVotes(contest.votes, tab.votes))
         }
@@ -121,7 +121,7 @@ class TestVunder {
             println("contestTab=${tab}")
             val contest = contestMap[id]!!
             println("contest=${contest}")
-            assertEquals(contest.Nc, tab.ncards)
+            assertEquals(contest.Nc, tab.ncardsTabulated)
             assertEquals(contest.undervotes + contest.Nphantoms() * contest.info.voteForN, tab.undervotes)
             assertTrue(checkEquivilentVotes(contest.votes, tab.votes))
             println()
@@ -206,7 +206,7 @@ fun makeContestsWithVunder(
     val contestTabs: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infos)
     val contests = contestTabs.map { (id, tab) ->
         val phantoms = phantomMap[id]!!
-        Contest(infos[id]!!, tab.votes, tab.ncards + phantoms, tab.ncards)
+        Contest(infos[id]!!, tab.votes, tab.ncardsTabulated + phantoms, tab.ncardsTabulated)
     }
 
     // add the phantoms

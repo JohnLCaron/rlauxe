@@ -31,7 +31,7 @@ class TestOneAuditPool {
         val cvrTab = cvrTabs[info.id]!!
 
         assertEquals(cvrTab.votes, contestOA.contest.votes())
-        assertEquals(cvrTab.ncards, contestOA.contest.Nc())
+        assertEquals(cvrTab.ncardsTabulated, contestOA.contest.Nc())
 
         // only one pool, only one contest
         val cardPool = cardPools.first()

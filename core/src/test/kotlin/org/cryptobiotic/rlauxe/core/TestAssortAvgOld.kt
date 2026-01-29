@@ -289,10 +289,10 @@ private data class ContestTestDataNWinners(
         val contestTab = tabs[0]!!
         println("  contestTab= $contestTab")
         val nvotes = contestTab.votes.map{ it.value }.sum()
-        println("    nvotes = ${nvotes} undervotes= ${2*contestTab.ncards-nvotes-2*phantomCount}")
+        println("    nvotes = ${nvotes} undervotes= ${2*contestTab.ncardsTabulated-nvotes-2*phantomCount}")
 
         val votesFiltered = contestTab.votes.filter { it.key != ncands }
-        val contest = Contest(this.info, votesFiltered, contestTab.ncards, contestTab.ncards - this.phantomCount)
+        val contest = Contest(this.info, votesFiltered, contestTab.ncardsTabulated, contestTab.ncardsTabulated - this.phantomCount)
 
         return Pair(cvrs, contest)
     }

@@ -3,9 +3,12 @@ package org.cryptobiotic.rlauxe.betting
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.doublePrecision
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
 import kotlin.random.Random
 
 private val logger = KotlinLogging.logger("SamplerTracker")
@@ -27,7 +30,7 @@ interface SamplerTracker: Tracker, Iterator<Double> {
     // Sampler : abstraction for creating a sequence of assort values
     fun sample(): Double // get next in sample
     fun maxSamples(): Int  // max samples available, needed by testFn
-    fun maxSampleIndexUsed(): Int // the largest cvr index used in the sampling
+    fun countCvrsUsedInAudit(): Int // number of cvrs used in the audit
     fun nmvrs(): Int // total number mvrs
 
     fun reset()   // start over again with different permutation (may be prohibited)
@@ -92,7 +95,7 @@ class PollingSamplerTracker(
     }
 
     override fun maxSamples() = maxSamples
-    override fun maxSampleIndexUsed() = idx
+    override fun countCvrsUsedInAudit() = idx
     override fun nmvrs() = cvrPairs.size
 
     override fun hasNext() = (welford.count + 1 < maxSamples)
@@ -117,6 +120,7 @@ class ClcaSamplerErrorTracker(
 ): SamplerTracker, ErrorTracker {
     val permutedIndex = MutableList(samples.size) { it }
     val clcaErrorTracker = ClcaErrorTracker2(cassorter.noerror, cassorter.assorter.upperBound())
+    val oaTracker = if (cassorter is OneAuditClcaAssorter) OneAuditTracker2(contestId, cassorter) else null
 
     private var idx = 0
     private var welford = Welford()
@@ -128,6 +132,15 @@ class ClcaSamplerErrorTracker(
         }
     }
 
+    fun dump(outputFilename: String) {
+        val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
+        samples.forEachIndexed { idx, pair ->
+            writer.write("mvr $idx: ${pair.first}\n")
+            writer.write("cvr $idx: ${pair.second}\n")
+        }
+        writer.close()
+    }
+
     override fun sample(): Double {
         while (idx < samples.size) {
             val (mvr, card) = samples[permutedIndex[idx]]
@@ -135,6 +148,8 @@ class ClcaSamplerErrorTracker(
             val nextVal = cassorter.bassort(mvr, card, hasStyle=card.exactContests())
 
             clcaErrorTracker.addSample(nextVal, card.poolId == null) // dont track errors from oa pools
+            if (oaTracker != null && card.poolId != null) oaTracker.addSample(mvr, card)
+
             if (lastVal != null) welford.update(lastVal!!)
             lastVal = nextVal
             return nextVal
@@ -156,7 +171,7 @@ class ClcaSamplerErrorTracker(
     }
 
     override fun maxSamples() = samples.size
-    override fun maxSampleIndexUsed() = idx  // TODO no longer the index in the entire set ...
+    override fun countCvrsUsedInAudit() = idx  // count of cvrs used in the audit
     override fun nmvrs() = samples.size
 
     override fun hasNext() = (idx < samples.size)
@@ -264,4 +279,32 @@ class ClcaErrorTracker2(val noerror: Double, val upper: Double) {
     override fun toString(): String {
         return "ClcaErrorTracker(noerror=$noerror, noerrorCount=$noerrorCount, valueCounter=${valueCounter.toSortedMap()}, count=$count countTrackError=$countTrackError)"
     }
+}
+
+class OneAuditTracker2(val contestId: Int, val cassorter : OneAuditClcaAssorter) {
+    private var count = 0
+    private var countTrackError = 0
+
+    val welford = Welford()
+    var noerrorCount = 0
+
+    // not really sure what im doing here
+    fun addSample(mvr : CvrIF, card: AuditableCard) {
+        count++
+        val poolAvg = cassorter.poolAverages.assortAverage[card.poolId]
+        if (poolAvg != null) {
+            val nextVal = cassorter.bassort(mvr, card, hasStyle=card.exactContests())
+            welford.update(nextVal)
+
+            val mvr_assort =
+                if (mvr.isPhantom()) 0.0
+                else if (!mvr.hasContest(contestId)) { if (card.exactContests()) 0.0 else 0.5 }
+                else cassorter.assorter.assort(mvr, usePhantoms = false)
+
+            // TODO val cvr_assort = if (cvr.phantom) .5 else poolAvgAssortValue
+            val overstatement = poolAvg - mvr_assort
+        }
+
+    }
+
 }

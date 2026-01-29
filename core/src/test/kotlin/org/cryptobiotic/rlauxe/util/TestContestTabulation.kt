@@ -38,7 +38,7 @@ class TestContestTabulation {
             //println("contest=${contest}")
 
             assertEquals(voteForNs[id], tab.voteForN)
-            assertEquals(contest.Nc, tab.ncards)
+            assertEquals(contest.Nc, tab.ncardsTabulated)
             assertEquals(contest.undervotes + contest.Nphantoms() * contest.info.voteForN, tab.undervotes)
             assertTrue(
                 checkEquivilentVotes(candVotes[id], tab.votes),
@@ -82,7 +82,7 @@ class TestContestTabulation {
             //println("contest=${contest}")
 
             assertEquals(voteForNs[id], tab.voteForN)
-            assertEquals(contest.Nc, tab.ncards)
+            assertEquals(contest.Nc, tab.ncardsTabulated)
             assertEquals(contest.undervotes + contest.Nphantoms() * contest.info.voteForN, tab.undervotes)
             assertTrue(
                 checkEquivilentVotes(candVotes[id], tab.votes),

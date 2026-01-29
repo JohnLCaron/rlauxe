@@ -239,7 +239,7 @@ data class OneAuditPoolFromCvrs(
 
     override fun votesAndUndervotes(contestId: Int): Vunder {
         val contestTab = contestTabs[contestId]!!
-        return contestTab.votesAndUndervotes(poolId) // good reason for cardPool to always have contestTabs
+        return contestTab.votesAndUndervotes(poolId, ncards()) // good reason for cardPool to always have contestTabs
     }
 
     // every cvr has to have every contest in the pool
@@ -260,7 +260,7 @@ data class OneAuditPoolFromCvrs(
     fun addUndervote(contestId: Int) {
         val contestTab = contestTabs[contestId]!!
         contestTab.undervotes += if (contestTab.isIrv) 1 else contestTab.voteForN
-        contestTab.ncards++
+        contestTab.ncardsTabulated++
         contestTab.novote++
     }
 

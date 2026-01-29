@@ -251,7 +251,7 @@ class TestSf2024OneAuditIrv() {
                     val cands = card.votes[contestId]!!
                     nonpoolTab.addVotes(cands, card.phantom)  // for IRV
                 } else {
-                    nonpoolTab.ncards++
+                    nonpoolTab.ncardsTabulated++
                 }
             }
         }
@@ -259,13 +259,13 @@ class TestSf2024OneAuditIrv() {
         val cvrMargin = if (rcontestUA.isIrv) {
             val cvrVotes = nonpoolTab.irvVotes.makeVotes(rcontestUA.ncandidates)
             println("  cvrs calcMarginInVotes= ${rassorter.calcMarginInVotes(cvrVotes)}")
-            rassorter.calcMargin(cvrVotes, nonpoolTab.ncards)
+            rassorter.calcMargin(cvrVotes, nonpoolTab.ncardsTabulated)
         } else {
-            passorter.calcMarginFromRegVotes(nonpoolTab.votes, nonpoolTab.ncards)
+            passorter.calcMarginFromRegVotes(nonpoolTab.votes, nonpoolTab.ncardsTabulated)
         }
         val cvrMean = margin2mean(cvrMargin)
-        assortAvg.ncards += nonpoolTab.ncards // i think your overcounting ncards here
-        assortAvg.totalAssort += nonpoolTab.ncards * cvrMean
+        assortAvg.ncards += nonpoolTab.ncardsTabulated // i think your overcounting ncards here
+        assortAvg.totalAssort += nonpoolTab.ncardsTabulated * cvrMean
 
         // the pools
         var sumMarginInVotes2 = 0.0

@@ -49,7 +49,7 @@ class TestOneAuditAssortAvg {
         val contests = listOf(oaContest)
         val infos = contests.map { it.contest.info() }.associateBy { it.id }
         val manifestTabs = tabulateAuditableCards(cardIterable.iterator(), infos)
-        val Nbs = manifestTabs.mapValues { it.value.ncards }
+        val Nbs = manifestTabs.mapValues { it.value.ncardsTabulated }
         println(Nbs)
 
         val results = VerifyResults()

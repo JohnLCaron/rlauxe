@@ -34,8 +34,7 @@ class TestAuditConfigJson {
             AuditConfig(
                 AuditType.ONEAUDIT, hasStyle=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50, simFuzzPct=.111,
                 contestSampleCutoff=10000,  version=2.0,
-            oaConfig= OneAuditConfig(OneAuditStrategyType.bet99, d = 99)
-        )
+            )
         )
     }
 

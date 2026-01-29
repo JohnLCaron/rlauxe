@@ -30,7 +30,7 @@ data class AuditConfig(
 
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(),
-    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.clca, useFirst = false),
+    val oaConfig: OneAuditConfig = OneAuditConfig(),
 
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
     val skipContests: List<Int> = emptyList(),
@@ -62,7 +62,6 @@ data class AuditConfig(
             AuditType.CLCA -> appendLine("  $clcaConfig")
             AuditType.ONEAUDIT -> {
                 appendLine("  $oaConfig")
-                if (oaConfig.strategy== OneAuditStrategyType.clca) appendLine("  $clcaConfig")
             }
         }
     }
@@ -102,16 +101,10 @@ data class ClcaConfig(
     val cvrsContainUndervotes: Boolean = true,
 )
 
-// clca: use ClcaConfig and bettingMart
-// optimalComparison = uses bettingMart with OptimalComparisonNoP1
-// bet99: eta0 = reportedMean, 99% max bet
-// eta0Eps: eta0 = upper*(1 - eps), shrinkTrunk
-// note OneAudit uses ClcaConfig for error estimation
-// TODO only generalAdaptive is currently used
-enum class OneAuditStrategyType { clca, generalAdaptive, bet99, eta0Eps }
+// simulate: simulate for estimation
+// calcMvrsNeeded: calculate for estimation
+enum class OneAuditStrategyType { simulate, calcMvrsNeeded }
 data class OneAuditConfig(
-    val strategy: OneAuditStrategyType = OneAuditStrategyType.generalAdaptive, // TODO
-    val d: Int = 100,  // shrinkTrunc weight
-    val useFirst: Boolean = false, // use actual cvrs for estimation
+    val strategy: OneAuditStrategyType = OneAuditStrategyType.simulate,
 )
 

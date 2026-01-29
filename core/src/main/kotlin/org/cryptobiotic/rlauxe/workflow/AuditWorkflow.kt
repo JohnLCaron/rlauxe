@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.estimate.calculateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sampleWithContestCutoff
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -21,10 +22,11 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
         val roundIdx = auditRounds.size + 1
 
+        val auditConfig = auditConfig()
         val auditRound = if (previousRound == null) {
             // first time, create the round
             val contestRounds = contestsUA()
-                .filter { !auditConfig().skipContests.contains(it.id) }
+                .filter { !auditConfig.skipContests.contains(it.id) }
                 .map { ContestRound(it, roundIdx) }
             AuditRound(roundIdx, contestRounds = contestRounds, samplePrns = emptyList())
         } else {
@@ -34,13 +36,14 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         auditRounds.add(auditRound)
 
         logger.debug{"Estimate round ${roundIdx}"}
-        val stopwatch = Stopwatch()
 
         val previousSamples = auditRounds.previousSamples(roundIdx)
 
+        val stopwatch = Stopwatch()
+
         // 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function,
         estimateSampleSizes(
-            auditConfig(),
+            auditConfig,
             auditRound,
             cardManifest = mvrManager().sortedCards(),
             cardPools = mvrManager().oapools(),
@@ -50,11 +53,16 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         )
         logger.debug{"Estimate round ${roundIdx} took ${stopwatch}"}
 
+        // overide the simulation with the calculated mvrs needed
+         if (roundIdx == 1 && auditConfig.isOA && auditConfig.oaConfig.strategy == OneAuditStrategyType.calcMvrsNeeded) {
+             calculateSampleSizes(auditConfig, auditRound)
+         }
+
         //    auditRound.nmvrs = sampledCards.size
         //    auditRound.newmvrs = newMvrs
         //    auditRound.samplePrns = sampledCards.map { it.prn }
         sampleWithContestCutoff(
-            auditConfig(),
+            auditConfig,
             mvrManager(),
             auditRound,
             previousSamples = previousSamples,

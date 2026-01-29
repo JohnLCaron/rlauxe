@@ -141,7 +141,7 @@ class AuditCobraAssertion(
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = sampleTracker.nmvrs(),
-            countCvrsUsedInAudit = sampleTracker.countCvrsUsedInAudit(),
+            // countCvrsUsedInAudit = sampleTracker.countCvrsUsedInAudit(),
             plast = testH0Result.pvalueLast,
             pmin = testH0Result.pvalueMin,
             samplesUsed = samplesNeeded,

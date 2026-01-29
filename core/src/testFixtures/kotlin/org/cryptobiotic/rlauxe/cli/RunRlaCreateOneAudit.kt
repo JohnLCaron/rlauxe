@@ -5,6 +5,7 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.audit.OneAuditStrategyType
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
@@ -74,11 +75,16 @@ object RunRlaCreateOneAudit {
             shortName = "extraPct",
             description = "add extra percent to simulate diluted margin"
         ).default(.01)
+        val calc by parser.option(
+            type = ArgType.Boolean,
+            shortName = "calc",
+            description = "calculate mvrs needed for first round"
+        ).default(false)
 
         parser.parse(args)
         println(
             "RunRlaCreateOneAudit on $inputDir minMargin=$minMargin fuzzMvrs=$fuzzMvrs, cvrFraction=$cvrFraction, ncards=$ncards hasStyle=$hasStyle" +
-                    " extra=$extra"
+                    " extra=$extra cals =$calc"
         )
         startTestElectionOneAudit(
             inputDir,
@@ -87,6 +93,7 @@ object RunRlaCreateOneAudit {
             cvrFraction=cvrFraction,
             ncards,
             extra,
+            calc,
         )
     }
 
@@ -97,6 +104,7 @@ object RunRlaCreateOneAudit {
         cvrFraction: Double,
         ncards: Int,
         extraPct: Double,
+        calc: Boolean,
     ) {
         val auditDir = "$topdir/audit"
         clearDirectory(Path(auditDir))
@@ -104,7 +112,7 @@ object RunRlaCreateOneAudit {
         val config = AuditConfig(
             AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = fuzzPct,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.clca)
+            oaConfig = if (calc) OneAuditConfig(strategy = OneAuditStrategyType.calcMvrsNeeded) else OneAuditConfig()
         )
 
         clearDirectory(Path(auditDir))

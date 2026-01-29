@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.math.min
 
-private val debugConsistent = false
+private val debug = false
 private val logger = KotlinLogging.logger("ConsistentSampling")
 
 data class CardSamples(val cards: List<AuditableCard>, val usedByContests: Map<Int, List<Int>>) {
@@ -74,21 +74,13 @@ fun getSubsetForEstimation(
 
     var countCardsLookedAt = 0
     val sortedCardIter = cards.iterator()
-    while (
-        sortedCardIter.hasNext()) {
+    while (sortedCardIter.hasNext()) {
         if (!contestsIncluded.any { contestWantsMoreSamples(it)} ) break
 
         // get the next card in sorted order
         val card = sortedCardIter.next()
+        if (previousSamples.contains(card.prn)) continue
         countCardsLookedAt++
-
-        /* if (countCardsLookedAt % 10000 == 0) {
-            contestsIncluded.forEach {
-                val need = (haveSampleSize[it.id]?: 0) < (wantSampleSize[it.id]?: 0)
-                if (need) println(" ${it.id}: have=${haveSampleSize[it.id]} < want=${wantSampleSize[it.id]}")
-            }
-            println()
-        } */
 
         // does anyone want this card ?
         var include = false
@@ -123,11 +115,13 @@ fun getSubsetForEstimation(
         cardIndex++
     }
 
-    println("getSubsetForEstimation sampled cards  ncards = ${sampledCards.size} countCardsLookedAt = $countCardsLookedAt")
-    val debugInfo = tabulateDebugInfo(Closer(sampledCards.iterator()), contestsIncluded, usedByContests)
-    debugInfo.forEach { (contestId, debugInfo) ->
-        val allInfo = allInfo[contestId]!!
-        println("  $debugInfo allPct=${df(allInfo.pct())} wantSampleSize=${wantSampleSize[contestId]}")
+    logger.debug{ "getSubsetForEstimation sampled cards ncards = ${sampledCards.size} countCardsLookedAt = $countCardsLookedAt" }
+    if (debug) {
+        val debugInfo = tabulateDebugInfo(Closer(sampledCards.iterator()), contestsIncluded, usedByContests)
+        debugInfo.forEach { (contestId, debugInfo) ->
+            val allInfo = allInfo[contestId]!!
+            println("  $debugInfo allPct=${df(allInfo.pct())} wantSampleSize=${wantSampleSize[contestId]}")
+        }
     }
 
     return CardSamples(sampledCards, usedByContests)

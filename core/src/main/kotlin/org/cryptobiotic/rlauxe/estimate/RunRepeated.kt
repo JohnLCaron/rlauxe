@@ -53,7 +53,7 @@ fun runRepeated(
         // this can fail when you have limited the number of samples
         if (testH0Result.status == TestH0Status.LimitReached) {
             fail++
-            logger.warn { "$name:  $trial failed in sampling max= ${samplerTracker.maxSamples()} samples" }
+            logger.debug { "$name:  $trial failed in sampling max= ${samplerTracker.maxSamples()} samples" }
         } else {
             nsuccess++
 

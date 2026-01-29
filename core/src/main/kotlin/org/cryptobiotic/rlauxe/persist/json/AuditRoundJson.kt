@@ -232,7 +232,7 @@ data class EstimationRoundResultJson(
     val startingErrorRates: Map<Double, Double>? = null, // error rates used for estimation
     val estimatedDistribution: List<Int>,
     val ntrials: Int,
-    val estNewMvrs: Int = 0,
+    val simNewMvrs: Int = 0,
 )
 
 fun EstimationRoundResult.publishJson() = EstimationRoundResultJson(
@@ -243,11 +243,10 @@ fun EstimationRoundResult.publishJson() = EstimationRoundResultJson(
     this.startingErrorRates,
     this.estimatedDistribution,
     this.ntrials,
-    this.estNewMvrs,
+    this.simNewMvrs,
 )
 
-fun EstimationRoundResultJson.import() : EstimationRoundResult {
-    val rr = EstimationRoundResult(
+fun EstimationRoundResultJson.import() = EstimationRoundResult(
         this.roundIdx,
         this.strategy,
         this.fuzzPct,
@@ -255,10 +254,8 @@ fun EstimationRoundResultJson.import() : EstimationRoundResult {
         this.startingErrorRates,
         this.estimatedDistribution,
         this.ntrials,
+        this.simNewMvrs,
     )
-    rr.estNewMvrs = this.estNewMvrs
-    return rr
-}
 
 // data class AuditRoundResult(
 //    val roundIdx: Int,
@@ -276,7 +273,7 @@ data class AuditRoundResultJson(
     val desc: String,
     val roundIdx: Int,
     val nmvrs: Int,   // estimated sample size
-    val maxSampleIndexUsed: Int,   // max index used
+    // val maxSampleIndexUsed: Int,   // max index used
     val plast: Double,       // last pvalue when testH0 terminates
     val pmin: Double,       // minimum pvalue reached
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
@@ -289,7 +286,7 @@ fun AuditRoundResult.publishJson() = AuditRoundResultJson(
     this.toString(),
     this.roundIdx,
     this.nmvrs,
-    this.countCvrsUsedInAudit,
+    // this.countCvrsUsedInAudit,
     this.plast,
     this.pmin,
     this.samplesUsed,
@@ -303,7 +300,7 @@ fun AuditRoundResultJson.import() : AuditRoundResult {
     return AuditRoundResult(
         this.roundIdx,
         this.nmvrs,
-        this.maxSampleIndexUsed,
+        // this.maxSampleIndexUsed,
         this.plast,
         this.pmin,
         this.samplesUsed,

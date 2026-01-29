@@ -85,16 +85,13 @@ fun estimateSampleSizes(
         val task = estResult.task
         val result = estResult.repeatedResult
 
-        val useFirst = config.auditType == AuditType.ONEAUDIT && config.oaConfig.useFirst // experimental
-        val estNewSamples = if (result.sampleCount.size == 0) 0
-            else if (useFirst) result.sampleCount[0]
-            else result.findQuantile(config.quantile)
-
+        /* val estNewSamples = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
         if (task.assertionRound.estimationResult != null) {
-            task.assertionRound.estimationResult!!.estNewMvrs = estNewSamples
-        }
+            task.assertionRound.estimationResult!!.simNewMvrs = estNewSamples
+        } */
+        val estNewSamples = task.assertionRound.estimationResult!!.simNewMvrs
         task.assertionRound.estNewMvrs = estNewSamples
-        task.assertionRound.estMvrs = min(estNewSamples + task.prevSampleSize, task.contestRound.Npop) // TODO check
+        task.assertionRound.estMvrs = min(estNewSamples + task.prevSampleSize, task.contestRound.Npop)
 
         if (debug) println(result.showSampleDist(estResult.task.contestRound.id))
         if (debugSampleSmall && result.avgSamplesNeeded() < 10) {
@@ -112,11 +109,9 @@ fun estimateSampleSizes(
 
     // put results into contestRounds
     auditRound.contestRounds.filter { !it.done }.forEach { contest ->
-        val sampleSizes = estResults.filter { it.task.contestRound.id == contest.id }
-            .map { it.task.assertionRound.estMvrs }
+        val sampleSizes = estResults.filter { it.task.contestRound.id == contest.id }.map { it.task.assertionRound.estMvrs }
         contest.estMvrs = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-        val newSampleSizes = estResults.filter { it.task.contestRound.id == contest.id }
-            .map { it.task.assertionRound.estNewMvrs }
+        val newSampleSizes = estResults.filter { it.task.contestRound.id == contest.id }.map { it.task.assertionRound.estNewMvrs }
         contest.estNewMvrs = if (newSampleSizes.isEmpty()) 0 else newSampleSizes.max()
         if (!quiet) logger.info{" ** contest ${contest.id} avgSamplesNeeded ${contest.estMvrs} task=${contest.estNewMvrs}"}
     }
@@ -308,7 +303,8 @@ fun estimateClcaAssertionRound(
     )
 
     // The result is a distribution of ntrials sampleSizes
-    assertionRound.estimationResult = EstimationRoundResult(
+    // what makes this simNewMvrs? because of startingTestStatistic?
+    assertionRound. estimationResult = EstimationRoundResult(
         roundIdx,
         clcaConfig.strategy.name,
         fuzzPct = config.simFuzzPct,
@@ -316,6 +312,7 @@ fun estimateClcaAssertionRound(
         startingErrorRates = bettingFn.startingErrorRates(),
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
+        simNewMvrs = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
     )
 
     logger.debug{"estimateClcaAssertionRound $roundIdx ${name} ${makeDeciles(result.sampleCount)} took=$stopwatch"}
@@ -376,22 +373,6 @@ fun estimateOneAuditAssertionRound(
     val oaConfig = config.oaConfig
     val clcaConfig = config.clcaConfig
 
-    /* OneAudit IRV pooled data
-    //    its not even clear how one generates the assertions in general.
-    //    can do it for SF because we have the cvrs.
-    if (contestUA.isIrv) {
-        val est = estSamplesSimple(config, assertionRound, 1.01, startingTestStatistic) // add 1 %
-        return RunRepeatedResult(
-            testParameters=moreParameters,
-            N=contestUA.Npop,
-            totalSamplesNeeded=est,
-            nsuccess=1,
-            ntrials=1,
-            variance=0.0,
-            null,
-            listOf(est))
-    } */
-
     // one set of fuzzed pairs for all contests and assertions.
     val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
 
@@ -437,6 +418,7 @@ fun estimateOneAuditAssertionRound(
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
+        simNewMvrs = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
     )
 
     logger.info{ "($stopwatch) estimateOneAuditAssertion round $roundIdx ${name} ${makeDeciles(result.sampleCount)}" }
@@ -515,6 +497,7 @@ fun estimatePollingAssertionRound(
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
+        simNewMvrs = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
     )
 
     logger.debug{"estimatePollingAssertionRound $roundIdx ${name} ${makeDeciles(result.sampleCount)} took=$stopwatch"}

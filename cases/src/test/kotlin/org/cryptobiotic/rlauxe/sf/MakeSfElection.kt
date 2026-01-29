@@ -16,8 +16,8 @@ class MakeSfElection {
     val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
 
     @Test
-    fun createSFElectionOA() {
-        val topdir = "$testdataDir/cases/sf2024/oa"
+    fun createSFElectionOAcalc() {
+        val topdir = "$testdataDir/cases/sf2024/oacalc"
 
         createSfElection(
             topdir,

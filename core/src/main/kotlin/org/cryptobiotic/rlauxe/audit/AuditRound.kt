@@ -112,7 +112,6 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         return Pair(estList, auditList)
     }
 
-
     fun minAssertion(): AssertionRound? {
         val minAssertion = contestUA.minAssertion()!!
         return assertionRounds.find { it.assertion == minAssertion }
@@ -121,22 +120,15 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     fun calcMvrsNeeded(config: AuditConfig): Int {
         var maxNeeded = 0
         assertionRounds.forEach { round ->
-            val assertion: Assertion = round.assertion
-            if (assertion is ClcaAssertion) {
-                val cassorter = assertion.cassorter
-                val auditResult: AuditRoundResult? = round.auditResult
-                val alpha = auditResult?.plast ?: config.riskLimit
-                val maxLoss: Double = config.clcaConfig.maxLoss
-                val est: Pair<Int, Double> = cassorter.estWithOptimalBet(contestUA, maxLoss, alpha)
-                val estSamplesNeeded = est.component1()
-                maxNeeded = max( maxNeeded, estSamplesNeeded)
-            }
+            val pair = round.calcMvrsNeeded(contestUA, config.clcaConfig.maxLoss, config.riskLimit, )
+            val estSamplesNeeded = pair.component1()
+            maxNeeded = max( maxNeeded, estSamplesNeeded)
         }
         return maxNeeded
     }
 
     fun countCvrsUsedInAudit(): Int {
-        return assertionRounds.maxOfOrNull { it.auditResult?.countCvrsUsedInAudit ?: 0 } ?: 0
+        return assertionRounds.maxOfOrNull { it.auditResult?.samplesUsed ?: 0 } ?: 0
     }
 
     override fun equals(other: Any?): Boolean {
@@ -203,6 +195,16 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
         val upper = assertion.cassorter.assorter.upperBound()
         return ClcaErrorCounts(sumOfCounts, totalSamples, noerror, upper)
     }
+
+    // return calcMvrsNeeded, optimalBet
+    fun calcMvrsNeeded(contest: ContestWithAssertions, maxLoss: Double, riskLimit: Double): Pair<Int, Double> {
+        val alpha = this.prevAuditResult?.plast ?: riskLimit
+        if (assertion is ClcaAssertion) {
+            val cassorter = assertion.cassorter
+            return cassorter.estWithOptimalBet(contest, maxLoss, alpha)
+        }
+        return Pair(0, 0.0)
+    }
 }
 
 data class EstimationRoundResult(
@@ -213,11 +215,10 @@ data class EstimationRoundResult(
     val startingErrorRates: Map<Double, Double>? = null, // error rates used for estimation
     val estimatedDistribution: List<Int>,   // distribution of estimated sample size as deciles
     val ntrials: Int,
+    val simNewMvrs: Int,
 ) {
-    var estNewMvrs: Int = 0
-
     override fun toString() = "round=$roundIdx estimatedDistribution=$estimatedDistribution ($ntrials) fuzzPct=$fuzzPct " +
-            " estNewMvrs=$estNewMvrs startingErrorRates=$startingErrorRates"
+            " simNewMvrs=$simNewMvrs startingErrorRates=$startingErrorRates"
 
     fun startingErrorRates() = buildString {
         if (startingErrorRates == null) return "N/A"
@@ -230,11 +231,11 @@ fun roundUp(x: Double) = ceil(x).toInt()
 data class AuditRoundResult(
     val roundIdx: Int,
     val nmvrs: Int,                 // number of mvrs available for this contest for this round
-    val countCvrsUsedInAudit: Int,  // number of cvrs used in the audit
+    // val countCvrsUsedInAudit: Int,  // number of cvrs used in the audit : same as samplesUsed
     val plast: Double,              // last pvalue when testH0 terminates
     val pmin: Double,               // minimum pvalue reached
-    val samplesUsed: Int,     // sample count when testH0 terminates
-    val status: TestH0Status, // testH0 status
+    val samplesUsed: Int,           // sample count when testH0 terminates
+    val status: TestH0Status,       // testH0 status
     val measuredCounts: ClcaErrorCounts? = null, // measured error counts (clca only)
     val params: Map<String, Double> = emptyMap(),
 ) {

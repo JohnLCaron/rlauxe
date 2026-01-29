@@ -69,10 +69,7 @@ class TestOneAudit {
         )
         println(contestOA)
 
-        val config = AuditConfig(
-            AuditType.ONEAUDIT, nsimEst=10,
-            oaConfig = OneAuditConfig(OneAuditStrategyType.bet99)
-        )
+        val config = AuditConfig(AuditType.ONEAUDIT, nsimEst=10)
 
         val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.seed, pools=pools))
         runTestAuditToCompletion("testOneAuditContestSmall", workflow)

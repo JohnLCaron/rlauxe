@@ -114,7 +114,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         if (auditRecord == null) {
             return "directory '$auditDir' does not contain an audit record"
         }
-        logger.info { "runAudit in $auditDir for round $roundIdx, contest $contestId, and assertion $assertion" }
+        logger.info { "runRoundAgain in $auditDir for round $roundIdx, contest $contestId, and assertion $assertion" }
 
         val workflow = PersistedWorkflow(auditRecord, mvrWrite = false)
         val cvrPairs = workflow.mvrManager().makeMvrCardPairsForRound(roundIdx)

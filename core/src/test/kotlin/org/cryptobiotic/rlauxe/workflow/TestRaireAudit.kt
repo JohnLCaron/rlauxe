@@ -33,7 +33,7 @@ class TestRaireAudit {
         val mvrFuzzPct = .02
         val config = AuditConfig(
             AuditType.CLCA, nsimEst=10, simFuzzPct = mvrFuzzPct,
-            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct = mvrFuzzPct)
+            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzMvrs = mvrFuzzPct)
         )
 
         val (rcontest: RaireContestWithAssertions, testCvrs: List<Cvr>) = simulateRaireTestContest(N=20000, contestId=111, ncands=4, minMargin=.04, quiet = true)

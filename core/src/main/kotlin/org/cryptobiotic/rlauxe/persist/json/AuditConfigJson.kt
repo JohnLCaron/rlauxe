@@ -244,7 +244,7 @@ data class ClcaConfigJson(
 
 fun ClcaConfig.publishJson() = ClcaConfigJson(
     this.strategy.name,
-    this.fuzzPct,
+    this.fuzzMvrs,
     this.d,
     this.maxLoss,
     this.cvrsContainUndervotes,

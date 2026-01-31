@@ -1,0 +1,189 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;yO16eM&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;yO16eM&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;clcaFuzzByMarginStddev samples needed&quot;,
+&quot;subtitle&quot;:&quot;Nc=100000 nruns=1000&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;stddevSamples&quot;,
+&quot;color&quot;:&quot;fuzzPct&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;fuzzPct&quot;:[&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;],
+&quot;margin&quot;:[9.999999999998899E-4,0.0020000000000000018,0.0029999999999998916,0.0040000000000000036,0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.10000000000000009,9.999999999998899E-4,0.0020000000000000018,0.0029999999999998916,0.0040000000000000036,0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.10000000000000009,9.999999999998899E-4,0.0020000000000000018,0.0029999999999998916,0.0040000000000000036,0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.10000000000000009,9.999999999998899E-4,0.0020000000000000018,0.0029999999999998916,0.0040000000000000036,0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.10000000000000009,9.999999999998899E-4,0.0020000000000000018,0.0029999999999998916,0.0040000000000000036,0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.10000000000000009,9.999999999998899E-4,0.0020000000000000018,0.0029999999999998916,0.0040000000000000036,0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.10000000000000009],
+&quot;&amp;merged_groups&quot;:[&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;],
+&quot;stddevSamples&quot;:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,13796.225363218155,5058.898579821899,2511.2804043497404,1575.0358643167463,1067.0358859944683,791.3572394285659,517.760093850424,345.8626693414598,263.2987794711553,153.42455923026145,116.61318311408874,64.44386921189634,40.80847652142875,35.65664649122233,20.220558226715713,15.92468370172543,18.207226587264735,12.98150669221412,21675.74059471381,10400.23235272194,5100.410783368333,3069.676603223049,2127.1483659300784,1505.7949098728561,938.2267296107051,639.6094258209458,498.28490404586813,292.00295584805326,211.20774370036722,110.38935571874669,73.49572820239287,48.682530583362215,37.67751996880899,25.24942326074004,22.762792249634053,15.80309941119148,25856.736874016133,15959.62624129371,9026.456259874301,5668.79870021074,3771.145152201914,2843.4875251843455,1654.4771966730164,1073.5899838187765,802.2271269104532,465.48186673166975,342.96088035809584,162.5745134976574,111.29975036360136,65.44317870488874,59.461377414251004,41.63133608233105,34.972300910863744,24.396955363323496,25920.75410966941,19254.748670510315,11760.024975493208,7781.995702138116,5480.971161844859,3987.1797829899765,2381.4186154265262,1548.7121166540278,1117.9350317724188,660.8558862293652,442.10151534574044,228.0431736996308,138.1097351528848,104.08382275358649,65.5369201290387,50.97362765195352,43.6497344665463,34.71761604718847,26242.113889452212,21388.94039969106,14599.898900468455,9822.528488063348,7020.02589259584,5047.483683052776,3157.3650600562505,2054.6939851897646,1527.4070692513503,872.7291283668716,541.0500575501312,285.7552587162659,177.66965254651666,121.30811118387759,83.7695068566122,66.86142079704851,50.78824863095791,36.98213048216667]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;fuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;stddevSamples&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;stddevSamples&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;fuzzPct&quot;:[&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;],
+&quot;&amp;merged_groups&quot;:[&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.0&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.001&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.0025&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.005&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.0075&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;,&quot;0.01&quot;],
+&quot;margin&quot;:[9.999999999998899E-4,0.0020000000000000018,0.0029999999999998916,0.0040000000000000036,0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.10000000000000009,9.999999999998899E-4,0.0020000000000000018,0.0029999999999998916,0.0040000000000000036,0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.10000000000000009,9.999999999998899E-4,0.0020000000000000018,0.0029999999999998916,0.0040000000000000036,0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.10000000000000009,9.999999999998899E-4,0.0020000000000000018,0.0029999999999998916,0.0040000000000000036,0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.10000000000000009,9.999999999998899E-4,0.0020000000000000018,0.0029999999999998916,0.0040000000000000036,0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.10000000000000009,9.999999999998899E-4,0.0020000000000000018,0.0029999999999998916,0.0040000000000000036,0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.10000000000000009],
+&quot;stddevSamples&quot;:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,13796.225363218155,5058.898579821899,2511.2804043497404,1575.0358643167463,1067.0358859944683,791.3572394285659,517.760093850424,345.8626693414598,263.2987794711553,153.42455923026145,116.61318311408874,64.44386921189634,40.80847652142875,35.65664649122233,20.220558226715713,15.92468370172543,18.207226587264735,12.98150669221412,21675.74059471381,10400.23235272194,5100.410783368333,3069.676603223049,2127.1483659300784,1505.7949098728561,938.2267296107051,639.6094258209458,498.28490404586813,292.00295584805326,211.20774370036722,110.38935571874669,73.49572820239287,48.682530583362215,37.67751996880899,25.24942326074004,22.762792249634053,15.80309941119148,25856.736874016133,15959.62624129371,9026.456259874301,5668.79870021074,3771.145152201914,2843.4875251843455,1654.4771966730164,1073.5899838187765,802.2271269104532,465.48186673166975,342.96088035809584,162.5745134976574,111.29975036360136,65.44317870488874,59.461377414251004,41.63133608233105,34.972300910863744,24.396955363323496,25920.75410966941,19254.748670510315,11760.024975493208,7781.995702138116,5480.971161844859,3987.1797829899765,2381.4186154265262,1548.7121166540278,1117.9350317724188,660.8558862293652,442.10151534574044,228.0431736996308,138.1097351528848,104.08382275358649,65.5369201290387,50.97362765195352,43.6497344665463,34.71761604718847,26242.113889452212,21388.94039969106,14599.898900468455,9822.528488063348,7020.02589259584,5047.483683052776,3157.3650600562505,2054.6939851897646,1527.4070692513503,872.7291283668716,541.0500575501312,285.7552587162659,177.66965254651666,121.30811118387759,83.7695068566122,66.86142079704851,50.78824863095791,36.98213048216667]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;fuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;stddevSamples&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;stddevSamples&quot;,&quot;fuzzPct&quot;],
+&quot;formats&quot;:[{
+&quot;field&quot;:&quot;margin&quot;,
+&quot;format&quot;:&quot;f8.3&quot;
+}],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;12&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

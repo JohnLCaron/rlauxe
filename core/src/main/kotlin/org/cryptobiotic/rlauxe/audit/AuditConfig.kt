@@ -42,9 +42,9 @@ data class AuditConfig(
 
     fun mvrFuzzPct(): Double {
         return when (auditType) {
-            AuditType.POLLING -> clcaConfig.fuzzPct ?: 0.0
-            AuditType.CLCA -> clcaConfig.fuzzPct  ?: 0.0
-            AuditType.ONEAUDIT -> clcaConfig.fuzzPct  ?: 0.0
+            AuditType.POLLING -> clcaConfig.fuzzMvrs ?: 0.0
+            AuditType.CLCA -> clcaConfig.fuzzMvrs  ?: 0.0
+            AuditType.ONEAUDIT -> clcaConfig.fuzzMvrs  ?: 0.0
         }
     }
 
@@ -95,7 +95,7 @@ data class PollingConfig(
 enum class ClcaStrategyType { generalAdaptive, apriori, fuzzPct, oracle  }
 data class ClcaConfig(
     val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
-    val fuzzPct: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs
+    val fuzzMvrs: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs when persistedWorkflowMode=testSimulate
     val d: Int = 100,  // shrinkTrunc weight for error rates
     val maxLoss: Double = 0.90,  // max loss on any one bet, 0 < maxLoss < 1
     val cvrsContainUndervotes: Boolean = true,

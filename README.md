@@ -268,6 +268,15 @@ In the following simulations, errors are created between the CVRs and the MVRs, 
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the CVRs and MVRs agree.
 When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. 
 
+Here are the results of 1000 simulations of CLCA samplesNeeded by margin for various values of fuzzPct:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.html" rel="clcaFuzzByMarginLogLog">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.png)</a>
+
+And the corresponding standard deviations:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzStddevByMarginLogLog.html" rel="clcaFuzzStddevByMarginLogLog">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzStddevByMarginLogLog.png)</a>
+
+
 With the margin fixed at 2%, this plot compares polling and CLCA audits and their variance:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/margin2WithStdDev/pollingWithStdDevLinear.html" rel="margin2WithStdDevLinear">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/margin2WithStdDev/margin2WithStdDevLinear.png)</a>

@@ -38,7 +38,7 @@ class ClcaMarginAttack {
 
             val clcaGenerator3 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "fuzzPct", "fuzzPct" to fuzzPct),
-                config = config.copy(clcaConfig = ClcaConfig(strategy=ClcaStrategyType.fuzzPct, fuzzPct=fuzzPct)),
+                config = config.copy(clcaConfig = ClcaConfig(strategy=ClcaStrategyType.fuzzPct, fuzzMvrs=fuzzPct)),
                 p1flips=margin*extra,
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))

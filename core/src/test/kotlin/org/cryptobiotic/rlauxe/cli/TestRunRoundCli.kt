@@ -8,7 +8,7 @@ class TestRunRoundCli {
 
     @Test
     fun testRunRoundCli() {
-        val topdir = "$testdataDir/cases/sf2024/oacalc"
+        val topdir = "$testdataDir/persist/testRunCli/oneaudit"
         val auditdir = "$topdir/audit"
 
         RunRlaRoundCli.main(

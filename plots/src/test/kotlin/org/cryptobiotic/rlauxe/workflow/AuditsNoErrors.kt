@@ -253,3 +253,33 @@ fun showSampleSizesVsMargin(name: String, dirName: String, subtitle: String, ysc
         scaleType = yscale
     )
 }
+
+fun showStddevVsMargin(name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String = "auditType") {
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
+    val data = io.readResults()
+    wrsPlot(
+        titleS = "$name samples needed",
+        subtitleS = subtitle,
+        writeFile = "$dirName/${name}${yscale.name}",
+        wrs = data,
+        xname = "margin", xfld = { it.margin },
+        yname = "stddevSamples", yfld = { it.usedStddev },
+        catName = catName, catfld = { category(it) },
+        scaleType = yscale
+    )
+}
+
+fun showRatioVsMargin(name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String = "auditType") {
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
+    val data = io.readResults()
+    wrsPlot(
+        titleS = "$name samples needed",
+        subtitleS = subtitle,
+        writeFile = "$dirName/${name}${yscale.name}",
+        wrs = data,
+        xname = "margin", xfld = { it.margin },
+        yname = "stddev/nsamples", yfld = { it.usedStddev / it.samplesUsed },
+        catName = catName, catfld = { category(it) },
+        scaleType = yscale
+    )
+}

@@ -15,7 +15,7 @@ private val logger = KotlinLogging.logger("PersistedWorkflow")
 
 enum class PersistedWorkflowMode {
     real,           // use PersistedMvrManager;  sampleMvrs$round.csv must be written from external program.
-    testSimulated,  // use PersistedMvrManagerTest which fuzzes the cvrs on the fly
+    testSimulated,  // use PersistedMvrManagerTest which fuzzes the mvrs on the fly
     testPrivateMvrs  // use PersistedMvrManager; use private/sortedMvrs.csv to write sampleMvrs$round.csv
 }
 

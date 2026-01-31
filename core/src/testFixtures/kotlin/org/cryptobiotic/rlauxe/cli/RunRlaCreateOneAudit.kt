@@ -35,11 +35,16 @@ object RunRlaCreateOneAudit {
             shortName = "minMargin",
             description = "contest minimum margin"
         ).default(0.04)
-        val fuzzMvrs by parser.option(
+        val simFuzz by parser.option(
             ArgType.Double,
-            shortName = "fuzzMvrs",
-            description = "Fuzz Mvrs by this factor (0.0 to 1.0)"
+            shortName = "simFuzz",
+            description = "simulation fuzzing"
         ).default(0.0)
+        val quantile by parser.option(
+            ArgType.Double,
+            shortName = "quantile",
+            description = "Estimation quantile (0.1-1.0)"
+        ).default(0.8)
         val cvrFraction by parser.option(
             ArgType.Double,
             shortName = "cvrFraction",
@@ -83,13 +88,13 @@ object RunRlaCreateOneAudit {
 
         parser.parse(args)
         println(
-            "RunRlaCreateOneAudit on $inputDir minMargin=$minMargin fuzzMvrs=$fuzzMvrs, cvrFraction=$cvrFraction, ncards=$ncards hasStyle=$hasStyle" +
+            "RunRlaCreateOneAudit on $inputDir minMargin=$minMargin fuzzMvrs=$simFuzz, cvrFraction=$cvrFraction, ncards=$ncards hasStyle=$hasStyle" +
                     " extra=$extra cals =$calc"
         )
         startTestElectionOneAudit(
             inputDir,
             minMargin,
-            fuzzMvrs,
+            simFuzz,
             cvrFraction=cvrFraction,
             ncards,
             extra,

@@ -274,7 +274,7 @@ Here are the results of 1000 simulations of CLCA samplesNeeded by margin for var
 
 And the corresponding standard deviations:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzStddevByMarginLogLog.html" rel="clcaFuzzStddevByMarginLogLog">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzStddevByMarginLogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginStddevLogLog.html" rel="clcaFuzzByMarginStddevLogLog">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginStddevLogLog.png)</a>
 
 
 With the margin fixed at 2%, this plot compares polling and CLCA audits and their variance:

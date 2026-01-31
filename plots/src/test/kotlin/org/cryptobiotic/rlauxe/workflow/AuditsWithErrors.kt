@@ -1,23 +1,23 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
+import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
+import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.io.path.Path
 import kotlin.test.Test
-import kotlin.text.toDouble
+
+import kotlin.math.pow
 
 class AuditsWithErrors {
+    val nruns = 1000
+    val N = 100000
 
     @Test
     fun clcaFuzzByMargin() {
-        val nruns = 1000
-        val N = 100000
-
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
         val fuzzPcts = listOf(.00, .001, .0025, .005, .0075, .01)
@@ -44,28 +44,47 @@ class AuditsWithErrors {
         validateOutputDir(Path(dirName))
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
+    }
+
+    @Test
+    fun showFuzzByMargin() {
+        val name = "clcaFuzzByMargin"
+        val dirName = "$testdataDir/plots/samplesNeeded/clcaFuzzByMargin"
         val subtitle = "Nc=${N} nruns=${nruns}"
         showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog, catName="fuzzPct")
+    }
 
-        val name2 = "clcaFuzzByMarginStddev"
-        val dirName2 = "$testdataDir/plots/samplesNeeded/$name2"
-        val subtitle2 = "Nc=${N} nruns=${nruns}"
-        validateOutputDir(Path(dirName2))
-        val writer2 = WorkflowResultsIO("$dirName2/${name2}.csv")
-        writer2.writeResults(results)
-        showStddevVsMargin(name2, dirName2, subtitle2, ScaleType.Linear, catName="fuzzPct")
-        showStddevVsMargin(name2, dirName2, subtitle2, ScaleType.LogLinear, catName="fuzzPct")
-        showStddevVsMargin(name2, dirName2, subtitle2, ScaleType.LogLog, catName="fuzzPct")
-
-        val name3 = "clcaFuzzByMarginRatio"
-        val dirName3 = "$testdataDir/plots/samplesNeeded/$name3"
+    @Test
+    fun clcaFuzzByMarginStddev() {
+        val name3 = "clcaFuzzByMarginStddev"
+        val dirName = "$testdataDir/plots/samplesNeeded/clcaFuzzByMargin"
+        val dataFilename = "$dirName/clcaFuzzByMargin.csv"
         val subtitle3 = "Nc=${N} nruns=${nruns}"
-        validateOutputDir(Path(dirName3))
-        val writer3 = WorkflowResultsIO("$dirName3/${name3}.csv")
-        writer3.writeResults(results)
-        showRatioVsMargin(name3, dirName3, subtitle3, ScaleType.Linear, catName="fuzzPct")
-        showRatioVsMargin(name3, dirName3, subtitle3, ScaleType.LogLinear, catName="fuzzPct")
-        showRatioVsMargin(name3, dirName3, subtitle3, ScaleType.LogLog, catName="fuzzPct")
+        showStddevVsMargin(dataFilename, name3, dirName, subtitle3, ScaleType.Linear, catName="fuzzPct")
+        showStddevVsMargin(dataFilename, name3, dirName, subtitle3, ScaleType.LogLinear, catName="fuzzPct")
+        showStddevVsMargin(dataFilename, name3, dirName, subtitle3, ScaleType.LogLog, catName="fuzzPct")
+    }
+
+    @Test
+    fun clcaFuzzStddevVsSamplesNeeded() {
+        val name3 = "clcaStddevVsSamplesNeeded"
+        val dirName = "$testdataDir/plots/samplesNeeded/clcaFuzzByMargin"
+        val dataFilename = "$dirName/clcaFuzzByMargin.csv"
+        val subtitle3 = "Nc=${N} nruns=${nruns}"
+        showStddevVsSamplesNeeded(dataFilename, name3, dirName, subtitle3, ScaleType.Linear, catName="fuzzPct")
+        showStddevVsSamplesNeeded(dataFilename, name3, dirName, subtitle3, ScaleType.LogLinear, catName="fuzzPct")
+        showStddevVsSamplesNeeded(dataFilename, name3, dirName, subtitle3, ScaleType.LogLog, catName="fuzzPct")
+    }
+
+    @Test
+    fun clcaFuzzStddevVsSamplesModel() {
+        val name3 = "clcaStddevVsSamplesModeled"
+        val dirName = "$testdataDir/plots/samplesNeeded/clcaFuzzByMargin"
+        val dataFileName = "$dirName/clcaFuzzByMargin.csv"
+        val subtitle3 = "Nc=${N} nruns=${nruns}"
+        showStddevVsSamplesModel(dataFileName, name3, dirName, subtitle3, ScaleType.Linear)
+        showStddevVsSamplesModel(dataFileName, name3, dirName, subtitle3, ScaleType.LogLinear)
+        showStddevVsSamplesModel(dataFileName, name3, dirName, subtitle3, ScaleType.LogLog)
     }
 
     @Test
@@ -193,8 +212,12 @@ fun compareCategories(wr: WorkflowResult): String {
     }
 }
 
-fun showSampleSizesVsFuzzPct(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
-                             catName: String, catfld: ((WorkflowResult) -> String) = { category(it) } ) {
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+fun showSampleSizesVsFuzzPct(
+    dirName: String, name: String, subtitle: String, scaleType: ScaleType,
+    catName: String, catfld: ((WorkflowResult) -> String) = { category(it) },
+) {
     val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
     wrsPlot(
@@ -209,8 +232,10 @@ fun showSampleSizesVsFuzzPct(dirName: String, name:String, subtitle: String, sca
     )
 }
 
-fun sampleSizesVsFuzzPctStdDev(dirName: String, name:String, subtitle: String,
-                             catName: String, catfld: ((WorkflowResult) -> String) = { category(it) } ) {
+fun sampleSizesVsFuzzPctStdDev(
+    dirName: String, name: String, subtitle: String,
+    catName: String, catfld: ((WorkflowResult) -> String) = { category(it) },
+) {
     val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
 
@@ -228,8 +253,10 @@ fun sampleSizesVsFuzzPctStdDev(dirName: String, name:String, subtitle: String,
     )
 }
 
-fun sampleSizesVsMarginStdDev(dirName: String, name:String, subtitle: String,
-                               catName: String, catfld: ((WorkflowResult) -> String) = { category(it) } ) {
+fun sampleSizesVsMarginWithErrorBars(
+    dirName: String, name: String, subtitle: String,
+    catName: String, catfld: ((WorkflowResult) -> String) = { category(it) },
+) {
     val io = WorkflowResultsIO("$dirName/${name}.csv")
     val data = io.readResults()
 
@@ -246,3 +273,64 @@ fun sampleSizesVsMarginStdDev(dirName: String, name:String, subtitle: String,
         writeFile = "$dirName/${name}Linear",
     )
 }
+
+
+// fun showStddevVsMargin(name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String) {
+fun showStddevVsMargin(dataFile: String, name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String) {
+        val io = WorkflowResultsIO(dataFile)
+    val data = io.readResults()
+    wrsPlot(
+        titleS = "$name samples needed",
+        subtitleS = subtitle,
+        writeFile = "$dirName/${name}${yscale.name}",
+        wrs = data,
+        xname = "margin", xfld = { it.margin },
+        yname = "stddevSamples", yfld = { it.usedStddev },
+        catName = catName, catfld = { category(it) },
+        scaleType = yscale
+    )
+}
+
+fun showStddevVsSamplesNeeded(dataFile: String, name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String) {
+    val io = WorkflowResultsIO(dataFile)
+    val data = io.readResults()
+    wrsPlot(
+        titleS = "$name stddev vs samplesNeeded",
+        subtitleS = subtitle,
+        writeFile = "$dirName/${name}${yscale.name}",
+        wrs = data,
+        xname = "nsamples", xfld = { it.samplesUsed },
+        yname = "stddev", yfld = { it.usedStddev },
+        catName = catName, catfld = { category(it) },
+        scaleType = yscale
+    )
+}
+
+fun showStddevVsSamplesModel(dataFile: String, name: String, dirName: String, subtitle: String, yscale: ScaleType) {
+    val io = WorkflowResultsIO(dataFile)
+    val data = io.readResults()
+
+    wrsPlotMultipleFields(
+        titleS = "stddev vs samplesNeeded with model",
+        subtitleS = subtitle,
+        writeFile = "$dirName/${name}${yscale.name}",
+        wrs = data,
+        xname = "nsamples", xfld = { it.samplesUsed },
+        yname = "stddev",
+        yfld = { cat: String, wr: WorkflowResult ->
+            when (cat) {
+                "stddev" -> wr.usedStddev
+                "linearFit" -> linearModel(wr.samplesUsed)
+                // "logFit" -> logModel(wr.samplesUsed)
+                else -> 0.0
+            }
+        },
+        catName = "legend",
+        catflds = listOf("stddev", "linearFit"),  // "logFit"),
+        scaleType = yscale,
+    )
+}
+
+fun logModel(nsamples: Double) = .135 * nsamples.pow(.586)
+fun linearModel(nsamples: Double) = -23.85 + .586 * nsamples
+

@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
 import org.cryptobiotic.rlauxe.workflow.runRepeatedWorkflowsAndAverage
 import org.cryptobiotic.rlauxe.workflow.sampleSizesVsFuzzPctStdDev
-import org.cryptobiotic.rlauxe.workflow.sampleSizesVsMarginStdDev
+import org.cryptobiotic.rlauxe.workflow.sampleSizesVsMarginWithErrorBars
 import org.cryptobiotic.rlauxe.workflow.showSampleSizesVsFuzzPct
 import org.cryptobiotic.rlauxe.workflow.showSampleSizesVsMargin
 import kotlin.io.path.Path
@@ -54,7 +54,7 @@ class PlotWithAssortValues {
         showSampleSizesVsMargin(name, dirName, subtitle, yscale=ScaleType.LogLog,  catName="maxLoss")
         // fun sampleSizesVsMarginStdDev(dirName: String, name:String, subtitle: String,
         //                               catName: String, catfld: ((WorkflowResult) -> String) = { category(it) } ) {
-        sampleSizesVsMarginStdDev(dirName, name, subtitle,  catName="maxLoss")
+        sampleSizesVsMarginWithErrorBars(dirName, name, subtitle,  catName="maxLoss")
     }
 
     @Test

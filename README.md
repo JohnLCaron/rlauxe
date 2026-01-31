@@ -268,14 +268,46 @@ In the following simulations, errors are created between the CVRs and the MVRs, 
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the CVRs and MVRs agree.
 When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. 
 
-Here are the results of 1000 simulations of CLCA samplesNeeded by margin for various values of fuzzPct:
+Here are the results of 1000 simulations of CLCA average samplesNeeded by margin for various values of fuzzPct:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.html" rel="clcaFuzzByMarginLogLog">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.png)</a>
 
-And the corresponding standard deviations:
+The average samplesNeeded dont tell the whole picture. There is a distribution of samplesNeeded whose variance roughly proprtional 
+to the samplesNeeded; here is the standard deviation of those distributions with dependence on margin and fuzzPct:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginStddevLogLog.html" rel="clcaFuzzByMarginStddevLogLog">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginStddevLogLog.png)</a>
 
+A plot of standard deviation against samples needed shows an approximate linear relationship, approximately independent
+of fuzzPct when nsamples < 30,000:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaStddevVsSamplesNeededLinear.html" rel="clcaFuzzByMarginStddevLogLog">![clcaStddevVsSamplesNeededLinear](docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaStddevVsSamplesNeededLinear.png)</a>
+
+A straight line implies 
+
+    stddev = b + m * nsamples
+
+where m is the slope of the line. We will take representative points (x0 = 68, y0 = 16) and (x1 = 37028, y1 = 21675)
+
+    m = (y2 - y1) / (x2 - x1) 
+      = (21675 - 16) / (37028 - 68) 
+      = .586
+
+    stddev = b + m * nsamples
+    b = stddev - m * nsamples
+    b = y0 - m * x0
+    b = 16 - .586 * 68
+    b = -23.85
+
+so our approximate fit is:
+
+    stddev = .586 * nsamples - 23.85
+
+which we show on the map here:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaStddevVsSamplesModeledLogLog.html" rel="clcaFuzzByMarginStddevLogLog">![clcaStddevVsSamplesModeledLogLog](docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaStddevVsSamplesModeledLogLog.png)</a>
+
+
+These results our current single round (no estimation phase) CLCA algorithms with maxRisk = .9, and would be different with other choices of algorithm parameters.
 
 With the margin fixed at 2%, this plot compares polling and CLCA audits and their variance:
 

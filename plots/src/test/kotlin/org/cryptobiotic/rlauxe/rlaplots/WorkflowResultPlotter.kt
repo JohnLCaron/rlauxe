@@ -115,7 +115,7 @@ fun makeWrGroups(wrs: List<WorkflowResult>, catfld: (WorkflowResult) -> String):
 
 /////////////////////////////////////////////////////////////////////////////////
 // this allows us to put multiple fields from the same WorkflowResult on the plot
-
+// see usage in showSampleVarianceVsMargin, showStddevVsSamplesModel
 fun wrsPlotMultipleFields(
     titleS: String,
     subtitleS: String,
@@ -123,8 +123,8 @@ fun wrsPlotMultipleFields(
     writeFile: String, // no suffix
     xname: String, yname: String, catName: String,
     xfld: (WorkflowResult) -> Double,
-    yfld: (String, WorkflowResult) -> Double,
-    catflds: List<String>,
+    yfld: (String, WorkflowResult) -> Double, // any number of fields generated from WorkflowResult
+    catflds: List<String>,                   // the list of fields you want to put on the plot
     scaleType: ScaleType = ScaleType.Linear
 ) {
     // val useWrs = wrs.filter { it.status != TestH0Status.FailSimulationPct } // TODO
@@ -191,7 +191,7 @@ fun wrsPlotMultipleFields(
 fun makeWrGroups(wrs: List<WorkflowResult>, catfld: List<String>): Map<String, List<WorkflowResult>> {
     val result = mutableMapOf<String, List<WorkflowResult>>()
     catfld.forEach {
-        result[it] = wrs
+        result[it] = wrs  // making a copy of the enire set for each group
     }
     return result.toSortedMap()
 }

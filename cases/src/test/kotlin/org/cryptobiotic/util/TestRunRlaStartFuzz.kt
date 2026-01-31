@@ -13,7 +13,7 @@ import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import kotlin.test.Test
 import kotlin.test.fail
 
-class TestRunCli {
+class TestRunRlaStartFuzz {
 
     @Test
     fun testCliRoundClca() {
@@ -24,7 +24,9 @@ class TestRunCli {
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",
+                "-simFuzz", "0.001",
                 "-fuzzMvrs", "0.001",
+                "-quantile", "0.5",
                 "-ncards", "10000",
                 "-ncontests", "11",
             )
@@ -56,11 +58,12 @@ class TestRunCli {
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
-                "-isPolling",
-                "-fuzzMvrs", "0.0",
+                "--auditType", "POLLING",
+                "-simFuzz", "0.001",
+                "-fuzzMvrs", "0.001",
+                "-quantile", "0.5",
                 "-ncards", "20000",
                 "-ncontests", "5",
-                "-quantile", "0.5",
             )
         )
 
@@ -96,7 +99,9 @@ class TestRunCli {
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",
-                "-fuzzMvrs", ".00123",
+                "-simFuzz", "0.001",
+                "-fuzzMvrs", "0.001",
+                "-quantile", "0.5",
                 "-ncards", "10000",
                 "-ncontests", "10",
                 "--addRaireContest",
@@ -134,11 +139,14 @@ class TestRunCli {
         val topdir = "$testdataDir/persist/testRunCli/oneaudit"
         val auditdir = "$topdir/audit"
 
-        RunRlaCreateOneAudit.main(
+        RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
+                "--auditType", "ONEAUDIT",
                 "-minMargin", "0.04",
+                "-simFuzz", "0.001",
                 "-fuzzMvrs", "0.001",
+                "-quantile", "0.5",
                 "-cvrFraction", "0.95",
                 "-ncards", "50000",
                 "-extraPct", "0.01"
@@ -146,6 +154,7 @@ class TestRunCli {
         )
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
 
         println("============================================================")
         val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)
@@ -172,19 +181,24 @@ class TestRunCli {
         val topdir = "$testdataDir/persist/testRunCli/oneauditcalc"
         val auditdir = "$topdir/audit"
 
-        RunRlaCreateOneAudit.main(
+        RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
+                "--auditType", "ONEAUDIT",
                 "-minMargin", "0.04",
+                "-simFuzz", "0.001",
                 "-fuzzMvrs", "0.001",
+                "-quantile", "0.5",
                 "-cvrFraction", "0.95",
                 "-ncards", "50000",
                 "-extraPct", "0.01",
-                "-calc",
+                "-oaStrategy", "calcMvrsNeeded",
             )
         )
+
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        writeSortedCardsInternalSort(publisher, config.seed)
 
         println("============================================================")
         val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)

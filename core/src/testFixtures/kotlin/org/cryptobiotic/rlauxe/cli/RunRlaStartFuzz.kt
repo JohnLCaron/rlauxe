@@ -5,6 +5,7 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.audit.ClcaConfig
 
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -18,7 +19,13 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
+import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
+import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
+import org.cryptobiotic.rlauxe.workflow.readCardManifest
+import org.cryptobiotic.rlauxe.workflow.readCardPools
 import kotlin.io.path.Path
 import kotlin.math.min
 
@@ -33,11 +40,11 @@ object RunRlaStartFuzz {
             shortName = "in",
             description = "Directory containing test election record"
         ).required()
-        val isPolling by parser.option(
-            ArgType.Boolean,
-            shortName = "isPolling",
-            description = "Polling election"
-        ).default(false)
+        val auditType by parser.option(
+            ArgType.String,
+            shortName = "type",
+            description = "CLCA, ONEAUDIT, POLLING"
+        ).default("CLCA")
         val minMargin by parser.option(
             ArgType.Double,
             shortName = "minMargin",
@@ -46,13 +53,23 @@ object RunRlaStartFuzz {
         val fuzzMvrs by parser.option(
             ArgType.Double,
             shortName = "fuzzMvrs",
-            description = "Fuzz Mvrs by this factor (0.0 to 1.0)"
+            description = "Fuzz Mvrs by this percent"
         ).default(0.0)
+        val simFuzz by parser.option(
+            ArgType.Double,
+            shortName = "simFuzz",
+            description = "simulation fuzzing"
+        ).default(0.0)
+        val quantile by parser.option(
+            ArgType.Double,
+            shortName = "quantile",
+            description = "Estimation quantile (0.1-1.0)"
+        ).default(0.8)
         val pctPhantoms by parser.option(
             ArgType.Double,
             shortName = "pctPhantoms",
             description = "Pct phantoms (0.0 to 1.0)"
-        )
+        ).default(0.0)
         val ncards by parser.option(
             ArgType.Int,
             shortName = "ncards",
@@ -73,17 +90,41 @@ object RunRlaStartFuzz {
             shortName = "rcands",
             description = "Number of candidates for raire contest"
         ).default(5)
-        val quantile by parser.option(
+        val oaStrategy by parser.option(
+            ArgType.String,
+            shortName = "oaStrategy",
+            description = "OneAudit Strategy: simulate or calc"
+        ).default("simulate")
+        val cvrFraction by parser.option(
             ArgType.Double,
-            shortName = "quantile",
-            description = "Estimation quantile (0.1-1.0)"
-        ).default(0.8)
+            shortName = "cvrFraction",
+            description = "CVR fraction (0.0 to 1.0)"
+        ).default(0.95)
+        val extra by parser.option(
+            type = ArgType.Double,
+            shortName = "extraPct",
+            description = "add extra percent to simulate diluted margin"
+        ).default(.01)
 
         parser.parse(args)
-        println("RunRlaStartFuzz on $topdir isPolling=$isPolling minMargin=$minMargin fuzzMvrs=$fuzzMvrs, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
+        println("RunRlaStartFuzz on $topdir auditType=$auditType minMargin=$minMargin fuzzMvrs=$fuzzMvrs, simFuzz=$simFuzz, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
                 " addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates quantile=$quantile")
-        if (!isPolling) startTestElectionClca(topdir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates)
-            else startTestElectionPolling(topdir, minMargin, fuzzMvrs, pctPhantoms, ncards, ncontests, quantile)
+        when (auditType) {
+            "POLLING" -> startTestElectionPolling(topdir, minMargin, ncards, fuzzMvrs, simFuzz, quantile, pctPhantoms, ncontests)
+            // fun startTestElectionOneAudit(
+            //    topdir: String,
+            //    minMargin: Double,
+            //    fuzzMvrs: Double,
+            //    simFuzz: Double,
+            //    quantile: Double,
+            //    phantomPct: Double,
+            //    ncards: Int,
+            //    strategy: String,
+            //    cvrFraction: Double,
+            //    extraPct: Double,
+            "ONEAUDIT" ->  startTestElectionOneAudit(topdir, minMargin, fuzzMvrs, simFuzz, quantile, pctPhantoms, ncards, oaStrategy, cvrFraction, extraPct=extra)
+            else ->  startTestElectionClca(topdir, minMargin, fuzzMvrs, simFuzz, quantile, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates)
+        }
     }
 }
 
@@ -92,6 +133,8 @@ fun startTestElectionClca(
     topdir: String,
     minMargin: Double,
     fuzzMvrs: Double,
+    simFuzz: Double,
+    quantile: Double,
     pctPhantoms: Double?,
     ncards: Int,
     ncontests: Int,
@@ -102,7 +145,8 @@ fun startTestElectionClca(
     clearDirectory(Path(auditDir))
 
     val config = AuditConfig(
-        AuditType.CLCA, nsimEst = 100, simFuzzPct = fuzzMvrs, quantile = .20,
+        AuditType.CLCA, nsimEst = 100, simFuzzPct = simFuzz, quantile = quantile,
+        clcaConfig = ClcaConfig(fuzzMvrs=fuzzMvrs)
     )
 
     clearDirectory(Path(auditDir))
@@ -174,15 +218,16 @@ class TestClcaElection(
 fun startTestElectionPolling(
     topdir: String,
     minMargin: Double,
-    fuzzMvrs: Double,
-    pctPhantoms: Double?,
     ncards: Int,
-    ncontests: Int = 11,
+    fuzzMvrs: Double = .001,
+    simFuzz: Double = .001,
     quantile: Double = .80,
+    pctPhantoms: Double = 0.0,
+    ncontests: Int = 11,
 ) {
     val auditDir = "$topdir/audit"
     clearDirectory(Path(auditDir))
-    val config = AuditConfig(AuditType.POLLING, nsimEst = 100, simFuzzPct = fuzzMvrs,
+    val config = AuditConfig(AuditType.POLLING, nsimEst = 100, simFuzzPct = simFuzz,
         persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs, quantile=quantile)
 
     clearDirectory(Path(auditDir))
@@ -262,4 +307,102 @@ class TestPollingElection(
             populations(),
         )
     }
+}
+
+////////////////////////////////
+
+fun startTestElectionOneAudit(
+    topdir: String,
+    minMargin: Double,
+    fuzzMvrs: Double,
+    simFuzz: Double,
+    quantile: Double,
+    phantomPct: Double,
+    ncards: Int,
+    strategy: String,
+    cvrFraction: Double,
+    extraPct: Double,
+) {
+    val auditDir = "$topdir/audit"
+    clearDirectory(Path(auditDir))
+
+    val config = AuditConfig(
+        AuditType.ONEAUDIT, nsimEst = 10, simFuzzPct = simFuzz, quantile = quantile,
+        persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
+        clcaConfig = ClcaConfig(fuzzMvrs=fuzzMvrs),
+        oaConfig = if (strategy == "calc") OneAuditConfig(strategy = OneAuditStrategyType.calcMvrsNeeded) else OneAuditConfig()
+    )
+    clearDirectory(Path(auditDir))
+
+    //     val config: AuditConfig,
+    //    minMargin: Double,
+    //    cvrFraction: Double,
+    //    ncards: Int,
+    //    phantomPct: Double,
+    //    extraPct: Double,
+    val election = TestOneAuditElection(
+        config,
+        minMargin,
+        cvrFraction = cvrFraction,
+        ncards,
+        phantomPct=phantomPct,
+        extraPct=extraPct,
+    )
+
+    CreateAudit("RunRlaStartOneAudit", config, election, auditDir = "$topdir/audit", clear = false)
+
+    // write the sorted cards: why isnt this part of CreateAudit? Because seed must be generated after committment to cardManifest
+    val publisher = Publisher(auditDir)
+    writeSortedCardsInternalSort(publisher, config.seed)
+
+    // simulate the mvrs, write to private dir
+    val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
+    val infos = contests.map{ it.contest.info() }.associateBy { it.id }
+    val cardManifest = readCardManifest(publisher)
+    val cardPools = readCardPools(publisher, infos)
+    val scardIter = cardManifest.cards.iterator()
+    val sortedCards = mutableListOf<AuditableCard>()
+    scardIter.forEach { sortedCards.add(it) }
+
+    // OneAuditVunderFuzzer creates fuzzed mvrs (non-pooled) and simulated mvrs (pooled)
+    val vunderFuzz = OneAuditVunderFuzzer(cardPools!!, infos, fuzzMvrs, sortedCards)
+    val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
+    val sortedMvrs = oaFuzzedPairs.map { it.first }
+
+    // have to write this here, where we know the mvrs
+    writePrivateMvrs(publisher, sortedMvrs)
+}
+
+class TestOneAuditElection(
+    val config: AuditConfig,
+    minMargin: Double,
+    cvrFraction: Double,
+    ncards: Int,
+    phantomPct: Double,
+    extraPct: Double,
+): CreateElectionIF {
+    val contestsUA = mutableListOf<ContestWithAssertions>()
+    val cardPools: List<OneAuditPoolFromCvrs>
+    val cardManifest: List<AuditableCard>
+
+    init {
+        // one contest
+        val (contestOA, mvrs, cardManifest, pools) =
+            makeOneAuditTest(
+                margin = minMargin,
+                Nc = ncards,
+                cvrFraction = cvrFraction,
+                undervoteFraction = .01,
+                phantomFraction = phantomPct,
+                extraInPool= (extraPct * ncards).toInt(),
+            )
+        contestsUA.add(contestOA)
+        this.cardManifest = cardManifest
+        this.cardPools = pools
+    }
+
+    override fun populations() = cardPools
+    override fun cardPools() = cardPools
+    override fun contestsUA() = contestsUA
+    override fun cardManifest() = Closer (cardManifest.iterator() )
 }

@@ -82,6 +82,8 @@ class TestPersistedWorkflow {
         //    topdir: String,
         //    minMargin: Double,
         //    fuzzMvrs: Double,
+        //    simFuzz: Double,
+        //    quantile: Double,
         //    pctPhantoms: Double?,
         //    ncards: Int,
         //    ncontests: Int = 11,

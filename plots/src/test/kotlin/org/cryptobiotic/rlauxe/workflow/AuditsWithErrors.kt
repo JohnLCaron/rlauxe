@@ -14,6 +14,61 @@ import kotlin.text.toDouble
 class AuditsWithErrors {
 
     @Test
+    fun clcaFuzzByMargin() {
+        val nruns = 1000
+        val N = 100000
+
+        val margins =
+            listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
+        val fuzzPcts = listOf(.00, .001, .0025, .005, .0075, .01)
+
+        val stopwatch = Stopwatch()
+        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+
+        for (margin in margins) {
+            fuzzPcts.forEach { fuzzPct ->
+                val fuzzTask = ClcaSingleRoundAuditTaskGenerator(
+                    N, margin, 0.0, 0.0, fuzzPct,
+                    parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "cat" to fuzzPct)
+                )
+                tasks.add(RepeatedWorkflowRunner(nruns, fuzzTask))
+            }
+        }
+
+        // run tasks concurrently and average the results
+        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
+        println(stopwatch.took())
+
+        val name = "clcaFuzzByMargin"
+        val dirName = "$testdataDir/plots/samplesNeeded/$name"
+        validateOutputDir(Path(dirName))
+        val writer = WorkflowResultsIO("$dirName/${name}.csv")
+        writer.writeResults(results)
+        val subtitle = "Nc=${N} nruns=${nruns}"
+        showSampleSizesVsMargin(name, dirName, subtitle, ScaleType.LogLog, catName="fuzzPct")
+
+        val name2 = "clcaFuzzByMarginStddev"
+        val dirName2 = "$testdataDir/plots/samplesNeeded/$name2"
+        val subtitle2 = "Nc=${N} nruns=${nruns}"
+        validateOutputDir(Path(dirName2))
+        val writer2 = WorkflowResultsIO("$dirName2/${name2}.csv")
+        writer2.writeResults(results)
+        showStddevVsMargin(name2, dirName2, subtitle2, ScaleType.Linear, catName="fuzzPct")
+        showStddevVsMargin(name2, dirName2, subtitle2, ScaleType.LogLinear, catName="fuzzPct")
+        showStddevVsMargin(name2, dirName2, subtitle2, ScaleType.LogLog, catName="fuzzPct")
+
+        val name3 = "clcaFuzzByMarginRatio"
+        val dirName3 = "$testdataDir/plots/samplesNeeded/$name3"
+        val subtitle3 = "Nc=${N} nruns=${nruns}"
+        validateOutputDir(Path(dirName3))
+        val writer3 = WorkflowResultsIO("$dirName3/${name3}.csv")
+        writer3.writeResults(results)
+        showRatioVsMargin(name3, dirName3, subtitle3, ScaleType.Linear, catName="fuzzPct")
+        showRatioVsMargin(name3, dirName3, subtitle3, ScaleType.LogLinear, catName="fuzzPct")
+        showRatioVsMargin(name3, dirName3, subtitle3, ScaleType.LogLog, catName="fuzzPct")
+    }
+
+    @Test
     fun compareAuditsWithFuzz() {
         val nruns = 100
         val name = "margin2WithStdDev"

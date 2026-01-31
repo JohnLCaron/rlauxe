@@ -115,7 +115,7 @@ fun getSubsetForEstimation(
         cardIndex++
     }
 
-    logger.debug{ "getSubsetForEstimation sampled cards ncards = ${sampledCards.size} countCardsLookedAt = $countCardsLookedAt" }
+    logger.info{ "getSubsetForEstimation sampled cards ncards = ${sampledCards.size} countCardsLookedAt = $countCardsLookedAt" }
     if (debug) {
         val debugInfo = tabulateDebugInfo(Closer(sampledCards.iterator()), contestsIncluded, usedByContests)
         debugInfo.forEach { (contestId, debugInfo) ->
@@ -178,8 +178,8 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
         val sumneg = if (sum < 0) "**" else ""
         "sumOneAuditTerm=${dfn(sum, 6)} $sumneg"
     } else ""
-    logger.debug { "getSubsetForEstimation ${contest.id}-${assorter.winLose()} margin=${assorter.dilutedMargin()} estAndBet=$estAndBet $dd" }
-    var est =  min( contest.Npop, 3 * estAndBet.first) // TODO arb factor of 3
+    var est =  min( contest.Npop, 5 * estAndBet.first) // TODO arb factor of 3; should be based on variance, probably 1 / margin ??
     if (config.contestSampleCutoff != null) est = min(config.contestSampleCutoff, est)
+    logger.info { "getSubsetForEstimation ${contest.id}-${assorter.winLose()} useSamplesNeeded=$est margin=${assorter.dilutedMargin()} estAndBet=$estAndBet $dd" }
     return est
 }

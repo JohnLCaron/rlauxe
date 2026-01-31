@@ -104,7 +104,7 @@ class TestClcaAuditNoStyles {
     fun testClcaWithFuzz() {
         val config = AuditConfig(
             AuditType.CLCA, hasStyle=false, nsimEst=10, simFuzzPct = 0.01,
-            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct = 0.01)
+            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzMvrs = 0.01)
         )
 
         val N = 50000

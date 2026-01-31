@@ -176,6 +176,7 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     var status = TestH0Status.InProgress
     var roundProved = 0           // round when set to proved or disproved
 
+    // call only if assertion is ClcaAssertion
     fun accumulatedErrorCounts(contestRound: ContestRound): ClcaErrorCounts {
         val (_, auditRoundResults) = contestRound.resultsForAssertion(assertion.assorter.hashcodeDesc())
 

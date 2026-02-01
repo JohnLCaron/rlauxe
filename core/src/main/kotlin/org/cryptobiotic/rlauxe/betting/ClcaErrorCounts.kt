@@ -132,6 +132,7 @@ class Taus(upper: Double): TausIF {
     }
 }
 
+// used as lightweight ErrorTracker for GeneralAdaptiveBetting.bet()
 class ClcaErrorTracker(val noerror: Double, val upper: Double): ErrorTracker {
     val taus = Taus(upper)
 

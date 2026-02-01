@@ -14,7 +14,7 @@ private const val debug = false
 
 private val logger = KotlinLogging.logger("ClcaFuzzSamplerTracker")
 
-// could try to create a subclass of ClcaSamplerErrorTracker ??
+// used by estimateClcaAssertionRound
 class ClcaFuzzSamplerTracker(
     val fuzzPct: Double,
     cardSamples: CardSamples,
@@ -89,6 +89,8 @@ class ClcaFuzzSamplerTracker(
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Ok for CLCA IRV; TODO can this be used with DHondt?
+// ClcaFuzzSamplerTracker uses this for only one contest; so the other fuzzings are ignored
+// PersistedMvrManagerTest uses this to fuzz all contests
 fun makeFuzzedCardsForClca(infoList: List<ContestInfo>,
                            cards: List<AuditableCard>,
                            fuzzPct: Double,
@@ -104,7 +106,7 @@ fun makeFuzzedCardsForClca(infoList: List<ContestInfo>,
         val r = Random.nextDouble(1.0)
         cardb.possibleContests.forEach { contestId ->
             val info = infos[contestId]
-            if (info != null && r < fuzzPct) {
+            if (info != null && r < fuzzPct) { // all contests on that card are tweaked. seems like you could just do the contest you are simulating ??
                 if (isIRV[contestId]?:false) {
                     val currentVotes = cardb.votes[contestId]?.toList()?.toMutableList() ?: mutableListOf<Int>()
                     switchCandidateRankings(currentVotes, info.candidateIds)

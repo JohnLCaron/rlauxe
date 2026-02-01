@@ -249,7 +249,7 @@ class ClcaErrorTracker2(val noerror: Double, val upper: Double) {
     val valueCounter = mutableMapOf<Double, Int>()
     var noerrorCount = 0
 
-    // when the sample is from an OA pool, the values is not a CLCA error
+    // when the sample is from an OA pool, the value is not an CLCA error
     fun addSample(sample : Double, trackError: Boolean) {
         count++
         if (trackError) countTrackError++

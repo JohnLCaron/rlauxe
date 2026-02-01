@@ -7,6 +7,8 @@ import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.math.ln
 
 private val logger = KotlinLogging.logger("ClcaAssorter")
@@ -76,20 +78,37 @@ open class ClcaAssorter(
         return roundUp((-ln(alpha) / ln(payoff)))
     }
 
-    // seems unlikely bet < maxBet when noerrors and not oa. Only if phantoms is big enough.
-    // return estSampleSize, optimalBet
-    open fun estWithOptimalBet(contest: ContestWithAssertions, maxLoss: Double, alpha: Double): Pair<Int, Double> {
+    // expected sample size if there are clca errors
+    open fun sampleSizeWithErrors(bet: Double, alpha: Double, clcaErrorCounts: ClcaErrorCounts): Int {
+        val p0 = 1.0 - clcaErrorCounts.sumRates()
+        val noerrorTerm = ln(1.0 + bet * (noerror - 0.5)) * p0
+
+        var sumErrors = 0.0
+        clcaErrorCounts.errorRates().forEach { (assortValue: Double, rate: Double) ->
+            sumErrors += ln(1.0 + bet * (assortValue - 0.5)) * rate
+        }
+        val lnPayoff = noerrorTerm + sumErrors
+
+        // N = ln(1/alpha) / (ln(1 + λc (noerror − .5))*p0 + Sum( ln(1 + λc (a_pk − .5)*p_pk))
+        val N =  roundUp((-ln(alpha) / lnPayoff))
+        return N
+    }
+
+    fun estWithOptimalBet(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorCounts: ClcaErrorCounts? = null): Pair<Int, Double> {
         val upper = assorter.upperBound()
         val betFn = GeneralAdaptiveBetting(
             contest.Npop,
-            ClcaErrorCounts.empty(noerror(), upper), // no errors
+            clcaErrorCounts ?: ClcaErrorCounts.empty(noerror(), upper), // no errors
             contest.Nphantoms,
             null,
             maxLoss = maxLoss,
             debug=false,
         )
-        val optimalBet = betFn.bet(ClcaErrorTracker(noerror(), upper))
-        return Pair(sampleSizeNoErrors(optimalBet, alpha), optimalBet)
+        val estRates = betFn.startingErrorRates() // debug
+        val optimalBet = betFn.bet(ClcaErrorTracker(noerror(), upper)) // TODO check
+        val estSampleSize = if (clcaErrorCounts == null) sampleSizeNoErrors(optimalBet, alpha) else
+            sampleSizeWithErrors(optimalBet, alpha, clcaErrorCounts)
+        return Pair(estSampleSize, optimalBet)
     }
 
     // B(bi, ci) = (1-o/u)/(2-v/u), where

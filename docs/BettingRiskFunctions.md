@@ -82,7 +82,7 @@ For now we let the user choose maxLoss, and set λmax accordingly.
 
 ## Betting with CLCA errors
 
-If there were never any errors, we would always place the maximum bet, and our sample size would always be at a minimum.,
+If there were never any errors, we would always place the maximum bet, and our sample size would always be at a minimum,
 depending only on the diluted margin of the assorter. What should we bet in the possible presence of errors that occur 
 randomly in the sequence?
 

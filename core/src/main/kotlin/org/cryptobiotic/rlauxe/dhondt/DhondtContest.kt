@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.pfn
+import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.collections.mutableListOf
@@ -188,8 +189,9 @@ class DHondtContest(
 
     init {
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
-        val useMin = info.minFraction ?: 0.0
-        val belowMinPctM= mutableListOf<Int>()
+        require(info.minFraction != null)
+        val useMin = info.minFraction
+        val belowMinPctM = mutableListOf<Int>()
         votes.toList().filter{ it.second.toDouble()/nvotes < useMin }.forEach {
             belowMinPctM.add(it.first)
         }
@@ -238,14 +240,12 @@ class DHondtContest(
             is BelowThreshold -> {
                 val votesFor = votes[assorter.winner()]!!
                 val pct = 100.0 * votesFor / nvotes
-                val diff= 100.0 * assorter.t - pct
-                "votesFor=$votesFor pct=${dfn(pct, 4)} diff=${dfn(diff, 6)} %"
+                "votesFor=$votesFor pct=${dfn(pct, 4)} diff=${votesFor - assorter.t * nvotes} votes"
             }
             is AboveThreshold -> {
                 val votesFor = votes[assorter.winner()]!!
                 val pct = 100.0 * votesFor / nvotes
-                val diff= pct - 100.0 * assorter.t
-                "votesFor=$votesFor pct=${dfn(pct, 4)} diff=${dfn(diff, 6)} %"
+                "votesFor=$votesFor pct=${dfn(pct, 4)} diff=${votesFor - assorter.t * nvotes} votes"
             }
             else -> throw RuntimeException()
         }
@@ -253,7 +253,7 @@ class DHondtContest(
 
     override fun show() = buildString {
         appendLine(super.show())
-        append("   nseats=${winnerSeats.values.sum()} winners=${winnerSeats} belowMin=${belowMinPct}")
+        append("   nseats=${winnerSeats.values.sum()} winners=${winnerSeats} belowMin=${belowMinPct} threshold=${info.minFraction} minVotes=${roundUp(info.minFraction!! * nvotes)}")
     }
 
     override fun showCandidates() = buildString {

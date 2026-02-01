@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.betting.TausErrorTable
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -18,7 +19,8 @@ data class CardSamples(val cards: List<AuditableCard>, val usedByContests: Map<I
 
     fun extractSubsetByIndex(contestId: Int): List<AuditableCard> {
         val extract = mutableListOf<AuditableCard>()
-        val want = usedByContests[contestId]!!
+        val want = usedByContests[contestId]
+        requireNotNull(want)
         var wantIdx = 0
         cards.forEachIndexed { idx, it ->
             if (wantIdx < want.size && idx == want[wantIdx]) {
@@ -55,7 +57,8 @@ fun getSubsetForEstimation(
 ): CardSamples
 {
     val contestsIncluded = contests.filter { !it.done && it.included }
-    if (contestsIncluded.isEmpty()) return CardSamples(emptyList(), emptyMap())
+    if (contestsIncluded.isEmpty())
+        return CardSamples(emptyList(), emptyMap())
 
     val allInfo = tabulateDebugInfo(cards.iterator(), contestsIncluded, null)
 
@@ -172,14 +175,43 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
 
     val contest = contestRound.contestUA
     val assorter = cassorter.assorter
-    val estAndBet = cassorter.estWithOptimalBet(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue)
+
+    // i think problem is that we arent adding the fuzzPct to estWithOptimalBet ??
+    //val errorCounts = mutableMapOf<Double, Int>()
+    //val taus = Taus(cassorter.assorter.upperBound())
+    // ClcaErrorCounts(errorCounts, contest.Nc, cassorter.noerror(), cassorter.assorter.upperBound())
+    // ClcaErrorTable.getErrorRates(contest.ncandidates, config.simFuzzPct)
+    val clcaErrorCounts = if (config.simFuzzPct == null || config.simFuzzPct == 0.0) null else {
+        TausErrorTable.makeErrorRates(
+            contest.ncandidates,
+            config.simFuzzPct,
+            contest.Npop,
+            cassorter.noerror(),
+            cassorter.assorter.upperBound()
+        )
+    }
+
+    val estAndBet = cassorter.estWithOptimalBet(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue, clcaErrorCounts)
     val dd = if (cassorter is OneAuditClcaAssorter) {
         val sum = cassorter.oaAssortRates.sumOneAuditTerm(estAndBet.second)
         val sumneg = if (sum < 0) "**" else ""
         "sumOneAuditTerm=${dfn(sum, 6)} $sumneg"
     } else ""
-    var est =  min( contest.Npop, 5 * estAndBet.first) // TODO arb factor of 3; should be based on variance, probably 1 / margin ??
+
+    var nsamples =  estAndBet.first
+    val stddev = .586 * nsamples - 23.85 // see https://github.com/JohnLCaron/rlauxe?tab=readme-ov-file#clca-with-errors
+
+    // Approximately 95.45% / 99.73% of the data in a normal distribution falls within two / three standard deviations of the mean.
+    val needed = if (stddev > 0) roundUp(nsamples + 3 * stddev) else nsamples
+
+    var est =  min( contest.Npop, needed)
     if (config.contestSampleCutoff != null) est = min(config.contestSampleCutoff, est)
-    logger.info { "getSubsetForEstimation ${contest.id}-${assorter.winLose()} useSamplesNeeded=$est margin=${assorter.dilutedMargin()} estAndBet=$estAndBet $dd" }
+    logger.info { "getSubsetForEstimation ${contest.id}-${assorter.winLose()} estSamplesNeeded=$est margin=${assorter.dilutedMargin()} " +
+            "estAndBet=${estAndBet.first}, ${df(estAndBet.second)} stddev=$stddev; $dd" }
+
+    if (est < 0) {
+        val wtf = cassorter.estWithOptimalBet(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue, clcaErrorCounts)
+        throw RuntimeException("what to do?") // TODO
+    }
     return est
 }

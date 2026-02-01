@@ -3,9 +3,13 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.TausErrorTable
 import org.cryptobiotic.rlauxe.betting.computeBassortValues
+import org.cryptobiotic.rlauxe.estimate.ContestSimulation
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.roundToClosest
+import kotlin.random.Random
 import kotlin.test.*
 
 class TestClcaErrorCounts {
@@ -16,11 +20,6 @@ class TestClcaErrorCounts {
         val u12 = 1.0 / (2 * upper)
         val computeTaus = listOf(0.0, u12, 1 - u12, 2 - u12, 1 + u12, 2.0)
         val totalSamples = 1000
-
-        val perr = PluralityErrorRates.fromList(listOf(0.1, 0.2, 0.1, 0.1))
-        val cerr = fromPluralityErrorRates(perr, 1.1, totalSamples, 1.0)
-        println(cerr.clcaErrorRate())
-        assertEquals(perr.toList().sum(), cerr.clcaErrorRate())
 
         // what if upper is > 1 ?
         upper = 10.0
@@ -108,15 +107,30 @@ class TestClcaErrorCounts {
         assertEquals(countedTotal+11, tracker.numberOfSamples())
         assertEquals(11, tracker.noerrorCount)
     }
-}
 
-// this only works for upper=1
-fun fromPluralityErrorRates(prates: PluralityErrorRates, noerror: Double, totalSamples: Int, upper: Double): ClcaErrorCounts {
-    if (upper != 1.0) throw RuntimeException("fromPluralityErrorRates must have upper = 1")
+    @Test
+    fun testTausErrorTable() {
+        repeat(131) {
+            val mvrsFuzzPct = Random.nextDouble(0.01)
+            val margin = Random.nextDouble(0.10)
+            val sim =
+                ContestSimulation.make2wayTestContest(
+                    Nc = 11111,
+                    margin,
+                    undervotePct = 0.0,
+                    phantomPct = 0.0
+                )
 
-    val errorRates = prates.errorRates(noerror)
-    val errorCounts = errorRates.mapValues { roundToClosest(it.value * totalSamples) }
+            val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
+            val testMvrs = makeFuzzedCvrsForPolling(listOf(sim.contest), testCvrs, mvrsFuzzPct)
 
-    // data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
-    return ClcaErrorCounts(errorCounts, totalSamples, noerror, upper)
+            val contestUA = ContestWithAssertions(sim.contest).addStandardAssertions()
+            val assertion = contestUA.minClcaAssertion()!!
+            val cassorter = assertion.cassorter
+
+            //     fun makeErrorRates(ncandidates: Int, fuzzPct: Double, totalSamples: Int, noerror: Double, upper: Double): ClcaErrorCounts {
+            val errors = TausErrorTable.makeErrorRates(contestUA.ncandidates, mvrsFuzzPct, contestUA.Npop, cassorter.noerror(), cassorter.assorter.upperBound())
+            println("ncand=${contestUA.ncandidates} margin=$margin mvrsFuzzPct=$mvrsFuzzPct errors=${errors.errorCounts}")
+        }
+    }
 }

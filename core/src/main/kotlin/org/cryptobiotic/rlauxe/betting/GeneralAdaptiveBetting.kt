@@ -23,7 +23,7 @@ private val logger = KotlinLogging.logger("GeneralAdaptiveBetting")
 
 class GeneralAdaptiveBetting(
     val Npop: Int, // population size for this contest
-    val startingErrors: ClcaErrorCounts,  // zero for auditing
+    val startingErrors: ClcaErrorCounts,
     val nphantoms: Int, // number of phantoms in the population; minimum of "oth-los" rate
     val oaAssortRates: OneAuditAssortValueRates?, // only for OneAudit
     val d: Int = 100,  // trunc weight
@@ -33,6 +33,7 @@ class GeneralAdaptiveBetting(
 ) : BettingFn {
     private var lastBet = 0.0 // debugging
 
+    // debugging and transparency
     fun startingErrorRates(): Map<Double, Double> {
         // estimated rates for each clca bassort value
         val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.totalInPools) / Npop.toDouble()

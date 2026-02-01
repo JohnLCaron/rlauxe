@@ -168,3 +168,13 @@ Note that this value is independent of N, the number of ballots.
 See GenBettingPayoff.kt for the generation of these plots.
 
 Note AdaptiveBetting has been replaced by GeneralizedAdaptiveBetting.
+
+### Estimating error rates from FuzzPct
+
+When estimating sample sizes, we let the user set the parameter _simFuzzPct_; then the mvrs are simulated by taking _simFuzzPct_ of the cards
+and randomly changing the candidate that was voted for. Similarly, for running simulated audits, the parameter _ClcaConfig.fuzzMvrs_ is
+used when persistedWorkflowMode=testSimulate to create fake mvrs that have been fuzzed at that value.
+
+What are the expected Clca error rates for these "fuzzed" simulations?
+
+

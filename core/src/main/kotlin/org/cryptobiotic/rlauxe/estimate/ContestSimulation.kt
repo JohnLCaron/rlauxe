@@ -111,6 +111,7 @@ class ContestSimulation(val contest: Contest, val Npop: Int) {
         private val logger = KotlinLogging.logger("ContestSimulation")
 
         /** Make a 2 candidate plurality Contest with given margin etc. */
+        // used by ClcaSingleRoundAuditTaskGenerator
         fun make2wayTestContest(Nc: Int,
                                 margin: Double, // margin of top highest vote getters, not counting undervotePct, phantomPct
                                 undervotePct: Double, // needed to set Nc

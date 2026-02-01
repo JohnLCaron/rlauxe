@@ -25,6 +25,7 @@ data class MvrCardAndPops(val mvrs: List<Cvr>, val cardManifest: List<AuditableC
  * Creates a set of contests and populations, with randomly chosen candidates and margins.
  * It can create cvrs that reflect the contests' exact votes.
  * Not for OneAudit, use makeOneAuditTest()
+ * prehaps superceeded by Vunder, which also models contests missing on a card
  */
 data class MultiContestTestData(
     val ncontest: Int,
@@ -36,6 +37,7 @@ data class MultiContestTestData(
     val addPoolId: Boolean = false, // add cardStyle info to cvrs and cards
     val ncands: Int? = null,
     val poolPct: Double? = null,  // if not null, make a pool with this pct with two ballotStyles
+    val seqCands: Boolean = false // if true, use ncands = 2 .. ncontests + 1
 ) {
     val poolId = if (poolPct == null) null else 1
     val ballotStylePartition: Map<Int,Int>
@@ -55,7 +57,8 @@ data class MultiContestTestData(
 
         // between 2 and 4 candidates, margin is a random number in marginRange
         contestTestBuilders = List(ncontest) { it }.map {// id same as index
-            val useNcands = ncands ?: max(Random.nextInt(5), 2)
+            var useNcands = ncands ?: max(Random.nextInt(5), 2)
+            if (seqCands) useNcands = it + 2
             ContestTestDataBuilder(it, useNcands,
                 marginRange.start + if (marginRange.endInclusive <= marginRange.start) 0.0 else Random.nextDouble(marginRange.endInclusive - marginRange.start),
                 underVotePctRange.start + if (underVotePctRange.endInclusive <= underVotePctRange.start) 0.0 else Random.nextDouble(underVotePctRange.endInclusive - underVotePctRange.start),

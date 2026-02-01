@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.TausErrorTable
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.df
@@ -120,7 +121,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     fun calcMvrsNeeded(config: AuditConfig): Int {
         var maxNeeded = 0
         assertionRounds.forEach { round ->
-            val pair = round.calcMvrsNeeded(contestUA, config.clcaConfig.maxLoss, config.riskLimit, )
+            val pair = round.calcMvrsNeeded(contestUA, config.clcaConfig.maxLoss, config.riskLimit, config.simFuzzPct)
             val estSamplesNeeded = pair.component1()
             maxNeeded = max( maxNeeded, estSamplesNeeded)
         }
@@ -198,11 +199,20 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     }
 
     // return calcMvrsNeeded, optimalBet
-    fun calcMvrsNeeded(contest: ContestWithAssertions, maxLoss: Double, riskLimit: Double): Pair<Int, Double> {
+    fun calcMvrsNeeded(contest: ContestWithAssertions, maxLoss: Double, riskLimit: Double, fuzzPct: Double?): Pair<Int, Double> {
         val alpha = this.prevAuditResult?.plast ?: riskLimit
         if (assertion is ClcaAssertion) {
             val cassorter = assertion.cassorter
-            return cassorter.estWithOptimalBet(contest, maxLoss, alpha)
+            val clcaErrorCounts = if (fuzzPct == null || fuzzPct == 0.0) null else {
+                TausErrorTable.makeErrorRates(
+                    contest.ncandidates,
+                    fuzzPct,
+                    contest.Npop,
+                    cassorter.noerror(),
+                    cassorter.assorter.upperBound()
+                )
+            }
+            return cassorter.estWithOptimalBet(contest, maxLoss, alpha, clcaErrorCounts)
         }
         return Pair(0, 0.0)
     }

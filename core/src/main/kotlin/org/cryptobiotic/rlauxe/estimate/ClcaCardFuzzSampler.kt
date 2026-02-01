@@ -59,6 +59,7 @@ class ClcaFuzzSamplerTracker(
         permutedIndex.shuffle(Random) // also, a new permutation....
         idx = 0
         welford = Welford()
+        clcaErrorTracker.reset()
     }
 
     fun remakeFuzzed(): List<AuditableCard> {
@@ -99,35 +100,41 @@ fun makeFuzzedCardsForClca(infoList: List<ContestInfo>,
     val infos = infoList.associate{ it.id to it }
     val isIRV = infoList.associate { it.id to it.isIrv}
 
-    var count = 0
-    val cardBuilders = cards.map { CardBuilder.fromCard(it) }
+    return cards.map { card -> makeFuzzedCardFromCard(infos, isIRV, card, fuzzPct ) }
+}
 
-    cardBuilders.filter { !it.phantom }.forEach { cardb: CardBuilder ->
-        val r = Random.nextDouble(1.0)
-        cardb.possibleContests.forEach { contestId ->
-            val info = infos[contestId]
-            if (info != null && r < fuzzPct) { // all contests on that card are tweaked. seems like you could just do the contest you are simulating ??
-                if (isIRV[contestId]?:false) {
-                    val currentVotes = cardb.votes[contestId]?.toList()?.toMutableList() ?: mutableListOf<Int>()
-                    switchCandidateRankings(currentVotes, info.candidateIds)
-                    cardb.replaceContestVotes(contestId, currentVotes.toIntArray())
-                } else {
-                    val votes = cardb.votes[contestId]
-                    val currId: Int? = if (votes == null || votes.size == 0)
-                        null
-                    else
-                        votes[0] // TODO only one vote allowed, cant use on Raire
-                    // choose a different candidate, or none.
-                    val ncandId = chooseNewCandidate(currId, info.candidateIds)
-                    cardb.replaceContestVote(contestId, ncandId)
-                }
+// used by VunderFuzzer
+fun makeFuzzedCardFromCard(
+    infos: Map<Int, ContestInfo>,
+    isIRV: Map<Int, Boolean>,
+    card: AuditableCard, // must have votes, ie have a Cvr
+    fuzzPct: Double,
+) : AuditableCard {
+    if (fuzzPct == 0.0 || card.phantom) return card
+    val r = Random.nextDouble(1.0)
+    if (r > fuzzPct) return card
+
+    val cardb = CardBuilder.fromCard(card)
+    cardb.possibleContests.forEach { contestId ->
+        val info = infos[contestId]
+        if (info != null) {
+            if (isIRV[contestId] ?: false) {
+                val currentVotes = cardb.votes[contestId]?.toList()?.toMutableList() ?: mutableListOf<Int>()
+                switchCandidateRankings(currentVotes, info.candidateIds)
+                cardb.replaceContestVotes(contestId, currentVotes.toIntArray())
+            } else {
+                val votes = cardb.votes[contestId]
+                // votes.size == 0 means an undervote
+                // votes = null means it doesnt have this contest. perhaps one shouldnt add it ??
+                val currCand: Int? = if (votes == null || votes.size == 0) null else votes[0] // TODO only one vote allowed
+                // choose a different candidate, or none.
+                val newCand = chooseNewCandidate(currCand, info.candidateIds)
+                cardb.replaceContestVote(contestId, newCand)
             }
         }
-        if (r < fuzzPct) count++
     }
-    if (debug) println("changed $count out of ${cards.size}")
 
-    return cardBuilders.map { it.build() }
+    return cardb.build()
 }
 
 fun switchCandidateRankings(votes: MutableList<Int>, candidateIds: List<Int>) {
@@ -147,16 +154,31 @@ fun switchCandidateRankings(votes: MutableList<Int>, candidateIds: List<Int>) {
     }
 }
 
-// randomly change a candidate to another
+// randomly change a candidate to another; doesnt deal with voteForN > 1
 fun chooseNewCandidate(currId: Int?, candidateIds: List<Int>): Int? {
     val size = candidateIds.size
     while (true) {
         val ncandIdx = Random.nextInt(size + 1)
         if (ncandIdx == size)
-            return null // choose none
+            return null // choose none, so turn it into an undervote
         val candId = candidateIds[ncandIdx]
         if (candId != currId) {
             return candId
         }
+    }
+}
+
+fun makeFuzzedCvrsForClca(infoList: List<ContestInfo>,
+                           cvrs: List<Cvr>,
+                           fuzzPct: Double?,
+) : List<Cvr> {
+    if (fuzzPct == null || fuzzPct == 0.0) return cvrs
+    val infos = infoList.associate{ it.id to it }
+    val isIRV = infoList.associate { it.id to it.isIrv}
+
+    return cvrs.mapIndexed { idx, cvr ->
+        val card = AuditableCard.fromCvr( cvr, idx, Random.nextLong() )
+        val fuzzedCard = makeFuzzedCardFromCard(infos, isIRV, card, fuzzPct )
+        fuzzedCard.cvr()
     }
 }

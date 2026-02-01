@@ -2,17 +2,15 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.estimate.chooseNewCandidate
-import org.cryptobiotic.rlauxe.estimate.switchCandidateRankings
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardFromCard
 import org.cryptobiotic.rlauxe.util.CardBuilder
 import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.VunderPicker
-import kotlin.random.Random
 
 ////////////////////////////////////////////////////////////////////////////////
 // OneAudit Estimation Sampling
 
-// OneAuditVunderFuzzer creates fuzzed mvrs (non-pooled) and simulated mvrs (pooled). IRV ok
+// OneAuditVunderFuzzer creates fuzzed mvrs (non-pooled) and simulated mvrs (pooled), including IRV
 class OneAuditVunderFuzzer(
     pools: List<OneAuditPoolFromCvrs>,
     val infos: Map<Int, ContestInfo>,
@@ -28,7 +26,7 @@ class OneAuditVunderFuzzer(
             val onecard = if (card.poolId != null) {
                 vunderPools.simulatePooledCard(card, card.poolId)
             } else if (card.votes != null) {
-                makeFuzzedCardFromCard(infos, isIRV, card, fuzzPct)
+                makeFuzzedCardFromCard(infos, isIRV, card, fuzzPct)  // in ClcaFuzzSamplerTracker
             } else {
                 throw RuntimeException("card must be pooled or have votes")
             }
@@ -36,37 +34,6 @@ class OneAuditVunderFuzzer(
         }
         mvrCvrPairs = mvrs.zip(cards)
     }
-}
-
-private fun makeFuzzedCardFromCard(
-    infos: Map<Int, ContestInfo>,
-    isIRV: Map<Int, Boolean>,
-    card: AuditableCard, // must have votes, ie have a Cvr
-    fuzzPct: Double,
-) : AuditableCard {
-    if (fuzzPct == 0.0 || card.phantom) return card
-    val r = Random.nextDouble(1.0)
-    if (r > fuzzPct) return card
-
-    val cardb = CardBuilder.fromCard(card)
-    cardb.possibleContests.forEach { contestId ->
-        val info = infos[contestId]
-        if (info != null) {
-            if (isIRV[contestId] ?: false) {
-                val currentVotes = cardb.votes[contestId]?.toList()?.toMutableList() ?: mutableListOf<Int>()
-                switchCandidateRankings(currentVotes, info.candidateIds)
-                cardb.replaceContestVotes(contestId, currentVotes.toIntArray())
-            } else {
-                val votes = cardb.votes[contestId]
-                val currId: Int? = if (votes == null || votes.size == 0) null else votes[0] // only one vote allowed
-                // choose a different candidate, or none.
-                val ncandId = chooseNewCandidate(currId, info.candidateIds)
-                cardb.replaceContestVote(contestId, ncandId)
-            }
-        }
-    }
-
-    return cardb.build()
 }
 
 // for all pools

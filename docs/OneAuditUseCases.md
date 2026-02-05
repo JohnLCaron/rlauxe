@@ -87,7 +87,7 @@ The Boulder County, CO, 2024 general election publishes pools of "redacted ballo
 * 65 contests (no IRV)
 * Both the cvrs and the redacted pool totals reference a BallotType, which can be used for Card Style Data.
 * The number of cards in each pool is not published, so we estimate it, and adjust contest Nc to be consistent.
-  See [CaseStudies](https://github.com/JohnLCaron/rlauxe/blob/main/docs/CaseStudies.md) for details.
+  See [CaseStudies](CaseStudies.md) for details.
 * There are 2 contests below the automatic recountMargin of .005, so we exclude them from the audit. The recount margin
   for Colorado is (winner - loser)/ winner, rather than margin = (winner - loser)/ Nc.
 * Risk limit is 3% per Colorado law.

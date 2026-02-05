@@ -4,7 +4,6 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
@@ -20,7 +19,6 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.fail
@@ -41,19 +39,19 @@ val belgianElectionMap = mapOf(
 )
 val toptopdir = "$testdataDir/cases/belgium/2024"
 
-class TestCreateBelgiumClcaFromJson {
+class CreateBelgiumElection {
     @Test
     fun createBelgiumElection() {
-        createBelgiumElection("Limbourg", showVerify=true)
+        createBelgiumElection("Hainaut", showVerify=true)
     }
 
     @Test
     fun runBelgiumElection() {
-        runBelgiumElection("Limbourg")
+        runBelgiumElection("Hainaut")
     }
 
     @Test
-    fun createAllBelgiumElection() {
+    fun createAllBelgiumElections() {
         val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
         belgianElectionMap.keys.forEach {
             allmvrs[it] =  createBelgiumElection(it)
@@ -189,6 +187,8 @@ fun showBelgiumElection(electionName: String): Triple<Int, Int, AssorterIF> {
     println("  ${contestUA.minAssertionDifficulty()}")
     println(contestUA.contest.showCandidates())
 
+    if (auditRecord.rounds.isEmpty())
+        print("")
     val finalRound = auditRecord.rounds.last()
     val Nb = finalRound.contestRounds.first().Npop
     return Triple(Nb, finalRound.nmvrs, minAssorter)

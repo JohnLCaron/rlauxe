@@ -1,11 +1,11 @@
 # Risk and betting functions
-_last changed 01/28/2026_
+_last changed 02/05/2026_
 
 <!-- TOC -->
 * [Risk and betting functions](#risk-and-betting-functions)
   * [Estimating samples needed for CLCA](#estimating-samples-needed-for-clca)
   * [Stalled audits and maximum bets](#stalled-audits-and-maximum-bets)
-  * [Betting with CLCA errors](#betting-with-clca-errors)
+  * [Betting when there are CLCA errors](#betting-when-there-are-clca-errors)
     * [CLCA assort values](#clca-assort-values)
   * [Betting with OneAudit pools](#betting-with-oneaudit-pools)
     * [Estimating samples needed for OneAudit when there are no errors](#estimating-samples-needed-for-oneaudit-when-there-are-no-errors)
@@ -25,7 +25,7 @@ numbers (aka a "sequence of samples") that are fed into the risk function. For t
     λ_i = the "bet" placed on the ith sample, based on the previous samples, 0 <= λ_i <= 2 .
 
     payoff_i = (1 + λ_i (x_i − µ_i)) = the payoff of the ith bet
-    T_i = Prod (payoff_i, i= 1..i) = the product o f the payoffs aka the "testStatistic"
+    T_i = Prod (payoff_i, i= 1..i) = the product of the payoffs, aka the "testStatistic"
 
 When T_i > 1/alpha then informally we can say that the assertion is true within the risk limit of alpha. So if alpha = .05, 
 T_i must be >= 20 to accept the assertion.
@@ -42,6 +42,7 @@ If we approximate µ_i = .5 and use a constant bet of λc, then for the nth test
     n * ln(1 + λc (noerror − .5)) = ln(1/alpha)
     n = ln(1/alpha) / ln(1 + λc (noerror − .5))
     n = ln(1/alpha) / ln(payoff)
+
     where payoff = (1 + λc (noerror − .5)
     
 which is a closed form expression for the estimated samples needed.
@@ -78,9 +79,9 @@ Limit that maximum loss to how much you are willing to lose on any one bet:
 
 Since maxLoss is < 1, λmax < 1/ µ_i.
 
-For now we let the user choose maxLoss, and set λmax accordingly.
+For now we let the user choose maxLoss, and set λmax accordingly. TODO: find an algorithm that sets maxLoss automatically.
 
-## Betting with CLCA errors
+## Betting when there are CLCA errors
 
 If there were never any errors, we would always place the maximum bet, and our sample size would always be at a minimum,
 depending only on the diluted margin of the assorter. What should we bet in the possible presence of errors that occur 
@@ -89,10 +90,11 @@ randomly in the sequence?
 Our betting strategy is a generalized form of AdaptiveBetting from the [COBRA paper](https://arxiv.org/pdf/2304.01010). 
 We generalize to use any number of error types, and any kind of assorter, in particular ones with upper != 1, such as DHondt.
 
-Suppose for a particular assorter, there are a fixed number of types of errors with known assort values {a_1..a_n} and 
-probabilities {p_1..p_n}. Then p0 = 1 - Sum { p_k, k = 1..n } is the probability of no error.
+Suppose for a particular assorter, there are a fixed number of types of errors with known assort values {a_1 .. a_n} and 
+probabilities {p_1 .. p_n}. Then p0 = 1 - Sum { p_k, k = 1..n } is the probability of no error.
 
-Following COBRA, at each step, before sample X_i is drawn, we find the optimal value of lambda which maximizes the expected value of the log of T_i, and use that as the lamda bet for step i:
+Following COBRA, at each step, before sample X_i is drawn, we find the optimal value of lambda which maximizes the expected 
+value of the log of T_i, and use that as the lamda bet for step i:
 
 ````
 log T_i = ln(1.0 + lamda * (noerror - mui)) * p0  + Sum { ln(1.0 + lamda * (a_k - mui)) * p_k, k=1..n }   (eq 1)
@@ -109,14 +111,14 @@ We use the BrentOptimizer from _org.apache.commons.math3_ library to find the op
 the interval \[0.0, maxBet].
 
 To get a sense of the optimization process, here are plots of the terms in equation 1, for a 1% plurality assorter margin
-and error rates of .001 for each of the errors:
+and error rates of .001 for each of the errors (p2o, p1o, p1u, p2u) = (2 vote overstatement, 1 vote overstatement, 1 vote understatement, 2 vote understatement):
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/optimallamda/payoff.html" rel="BettingPayoff">![BettingPayoff](plots2/betting/optimallamda/payoff.png)</a>
 
 The sum of terms is the yellow line. The optimizer finds the value of lamda where eq 1 is at a maximum. Equation 1 is used
 just for finding the optimal lamda; the value of the equation is not used.
 
-If there are no negetive terms, then eq 1 is monotonically increasing, and lamda will always be the maximum value allowed.
+If there are no negetive terms or the negetive terms are not large (eg if p2o = 0), then eq 1 is monotonically increasing, and lamda will always be the maximum value allowed.
 
 ### CLCA assort values
 
@@ -200,10 +202,10 @@ See [Card Level Comparison Audits](Clca.md) for details and plots.
 ## Betting with OneAudit pools
 
 OneAudit cards are a mixture of CVRs and pooled data. The CVRS are handled exactly as CLCA above. Pooled data
-don not have CVRS, instead we have the average assort value in each pool. 
+do not have CVRS, instead we have the average assort value in each pool. 
 
 Consider a single pool and assorter a, with upper bound u and avg assort value in the pool = poolAvg.
-The poolAvg is used as the cvr_value, so the overstatement error = cvr_assort - mvr_assort has one of 3 possible values:
+The poolAvg is used for cvr_assort, so the overstatement error = cvr_assort - mvr_assort has one of 3 possible values:
 
     poolAvg - [0, .5, u] = [poolAvg, poolAvg -.5, poolAvg - u] for mvr loser, other and winner 
 
@@ -220,7 +222,7 @@ For each pool, we know the expected number of loser, winner, and other votes ove
     otherVotes = pool.ncards() - winnerVotes - loserVotes
 ```
 
-The expected rates are the votes divided by Npop. These are also the probabilities of drawing a card from that pool and that 
+The expected rates are the votes divided by Npop. These are also the probabilities of drawing a card from that pool with that 
 assort value.
 
 Then we extend equation 1 with the expected assort values from the pools:
@@ -239,9 +241,12 @@ where
 
 And use this to find the optimal value of lambda.
 
+Compare [Current OneAuditNoErrors](https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrorsLogLinear.html) with
+[previous OneAudit plots](https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/AuditsNoErrors4/AuditsNoErrors4LogLinear.html) to see the improvement using eq 2. 
+
 ### Estimating samples needed for OneAudit when there are no errors
 
-The a_pk and p_pk values for OneAudit are known in advance, and do not need to be updated as we sample. We can estimate the
+The a_pk and p_pk values for OneAudit (eq 2 above) are known in advance, and do not need to be updated as we sample. We can estimate the
 number of samples needed for OneAudit when there are no errors in the CVR data, assuming an approximate µ_i = .5 and a constant bet of λc:
 
     T_i = Prod (payoff_i, i= 1..i)
@@ -251,18 +256,21 @@ over N trials, there will be N * p terms, where p is the probability of that ter
     T_n = (1 + λc (noerror − .5)) ^ (N*p0) * Prod { (1 + λc * (a_pk - 0.5)) ^ (N*p_pk) } = (1/alpha)
 
     N * ln(1 + λc (noerror − .5))*p0 + N * Sum( ln(1 + λc (a_pk − .5)*p_pk) = ln(1/alpha)
-    N = ln(1/alpha) / (ln(1 + λc (noerror − .5))*p0 + Sum( ln(1 + λc (a_pk − .5)*p_pk))
+    N = ln(1/alpha) / (ln(1 + λc (noerror − .5))*p0 + Sum( ln(1 + λc (a_pk − .5)*p_pk))     (eq 3)
 
-where p0 = 1 - Sum (p_pk), and λc is taken as the optimal value of eq 2 when all error probabilities are 0.
+where p0 = 1 - Sum (p_pk), and λc is taken as the optimal value using eq 2 when all error probabilities are 0.
 
 This value of N estimates the mean of a distribution that has a fairly large variance.
-
 
 Suppose we have a OneAudit with one pool with 5% of the votes, and both the pool margin and the election margin are 2%,
 and there are no errors at all in the CVRs. The terms in equation 2 are:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/oapayoff/oapayoff.html" rel="OABettingPayoff">![OABettingPayoff](plots2/betting/oapayoff/oapayoff.png)</a>
 
-In this example, the optimal lamda is around 1.4. Here, the loser term is always negetive, and the winner term is always positive, so
-even with no errors, we need many more samples than CLCA. This is highly dependent on the margin and the percent of cards
-in the pools.
+In this example, the optimal lamda is around 1.4. As the percent of cards in OneAudit pools increase, the negetive terms get large enough to curve the sum downward,
+then we get an optimal bet less than maxBet, and we need many more samples than CLCA without pools. Errors in the CVRs magnify the downward curve. A combination
+of small margin, large pool percentage and CVR errors will force the audit to a full hand count.
+
+TODO: can we detect when a OneAudit will always go to a full hand count even without CVR errors, based only on the margin and the pool averages? We can see when
+eq 3 goes negetive, which I think means on average the OneAudit will go to a hand count, but the large variance allows the possibility that it will stop
+short of a full count. OTOH we can probably use the calculated variance to estimate the probability of a full count.

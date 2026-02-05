@@ -7,13 +7,11 @@ This continues until only one candidate is left. Only 1 winner is allowed.
 
 In principle one could use polling audits for IRV, but the information
 needed to create the Raire Assertions all but necessitates CVRs.
-So currently we only support IRV with CLCA audits.
+So currently we only support IRV with CLCA and OneAudit.
 
 We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate assertions that fit into the SHANGRLA framework.
-We convert the output of the raire library into RaireAssorters, which assigns the assort values. The clcaAssorter then can be used with
+We convert the output of the raire library into RaireAssorters, which assigns the assort values. The ClcaAssorter then can be used with
 RaireAssorter transparently.
-
-(Should i document the RaireAssorter assort function as above?)
 
 The RaireAssorters function `A_wℓ(bi)` for winner w and loser ℓ operating on the ith ballot bi is
 
@@ -77,8 +75,8 @@ fun raire_votefor_elim(cvr: Cvr, contest: Int, cand: Int, remaining: List<Int>):
 ````
 The upper bound is 1.
 
-/////////////////
-Democracy Developers
+## Democracy Developers Notes
+
 A Guide to Risk Limiting Audits with RAIRE
 Part 1: Auditing IRV Elections with RAIRE
 

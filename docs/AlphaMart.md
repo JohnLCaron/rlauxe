@@ -1,6 +1,8 @@
 # AlphaMart risk function for Polling Audits
 last updated Nov 18, 2025
 
+These are early results from implementing AlphaMart, somewhat dated.
+
 <!-- TOC -->
 * [AlphaMart risk function for Polling Audits](#alphamart-risk-function-for-polling-audits)
   * [AlphaMart](#alphamart)
@@ -13,11 +15,14 @@ last updated Nov 18, 2025
     * [how to set the parameter d?](#how-to-set-the-parameter-d)
 <!-- TOC -->
 
+````
 AlphaMart (aka ALPHA) is a risk-measuring function that adapts to the drawn sample as it is made.
 It estimates the reported winner’s share of the vote before the jth card is drawn from the j-1 cards already in the sample.
 The estimator can be any measurable function of the first j − 1 draws, for example a simple truncated shrinkage estimate, described below.
 ALPHA generalizes BRAVO to situations where the population {xj} is not necessarily binary, but merely nonnegative and bounded.
 ALPHA works for sampling with or without replacement, with or without weights, while BRAVO is specifically for IID sampling with replacement.
+````
+(paraphrased from the [ALPHA paper](http://arxiv.org/abs/2201.02707v9))
 
 ## AlphaMart
 
@@ -171,8 +176,6 @@ but the higher the variance is. Whatever d is, the relative weight of the report
 decreases as the sample size increases.
 ````
 
-See [output](DiffMeanOutput.txt) of DiffMeans.kt and PlotDiffMeans.kt. This is done for each value of N and theta.
-
 A few representative plots are at
 [meanDiff plots](https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=1185506629#gid=1185506629)
 
@@ -187,4 +190,3 @@ Notes:
 * Low values of d work better as mean difference = (reported mean - theta) grows.
 * When the true mean < reported mean, high d may force a full hand count unnecessarily.
 * Tentatively, we will use d = 100 as default, and allow the user to override.
-* See CreatePollingDiffMeans.kt

@@ -242,7 +242,7 @@ mvrManager abstracts the handling of mvrs.
 
 
 ///////////////////////////////////////////////////////////////////////////
-TODO rewrite b elow
+TODO rewrite below
 
 
 ## Cast Vote Records

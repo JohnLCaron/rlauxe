@@ -202,7 +202,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
     val stddev = .586 * nsamples - 23.85 // see https://github.com/JohnLCaron/rlauxe?tab=readme-ov-file#clca-with-errors
 
     // Approximately 95.45% / 99.73% of the data in a normal distribution falls within two / three standard deviations of the mean.
-    val needed = if (stddev > 0) roundUp(nsamples + 3 * stddev) else nsamples
+    val needed = if (stddev > 0) roundUp(nsamples + 3 * stddev) else 3 * nsamples
 
     var est =  min( contest.Npop, needed)
     if (config.contestSampleCutoff != null) est = min(config.contestSampleCutoff, est)
@@ -211,7 +211,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
 
     if (est < 0) {
         val wtf = cassorter.estWithOptimalBet(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue, clcaErrorCounts)
-        throw RuntimeException("what to do?") // TODO
+        throw RuntimeException("est samples $est < 0") // TODO
     }
     return est
 }

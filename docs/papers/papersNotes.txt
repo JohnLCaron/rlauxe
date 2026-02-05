@@ -1,0 +1,306 @@
+Notes on RLA papers
+
+============================================
+online
+
+Introduction to Risk-Limiting Election Audits online class https://ucb-stat-159-s21.github.io/site/Notes/audit.html
+
+The R2B2 (Round-by-Round, Ballot-by-Ballot) library, https://github.com/gwexploratoryaudits/r2b2
+
+Athena - risk limiting audit (round-by-round), https://github.com/filipzz/athena.
+
+RLATool https://github.com/FreeAndFair/ColoradoRLA/
+
+===============================================
+Related
+
+2008	Consistent Weighted Sampling					Manese, McSherry, Talwar
+	an efficient procedure for sampling representatives from a weighted set
+
+2024 	DVSorder: Ballot Randomization Flaws Threaten Voter Privacy	Braden L. Crimmins, Dhanya Y. Narayanan, Drew Springall,  J. Alex Halderman
+	privacy flaw that affects Dominion Voting Systems (DVS) ImageCast Precinct (ICP) and ImageCast Evolution (ICE) ballot scanners,
+
+==================================================
+
+gentle12
+States that mandate hand counting as part of audits generally require counting the votes in selected clusters of ballots (sometimes called “batches" ( but that has another meaning). For instance, under California law, each county counts the votes in 1% of precincts; each cluster comprises the ballots cast in one precinct. Hand counting is minimized when clusters consist of one ballot each, yielding “ballot-level” audits or “single-ballot” audits.
+
+To sample ballots efficiently requires a "ballot manifest" that describes in detail how the ballots are organized and stored.
+
+"Ballot-polling audits" examine a random sample of ballots. When the vote shares in the sample give sufficiently strong evidence that the reported winner really won, the audit stops.
+
+"Comparison audits" check outcomes by comparing hand counts to voting system counts for clusters of ballots.
+
+"Sampling incrementally": In an incremental audit, the auditor draws a ballot at random and checks by hand whether the voting system interpretation of that ballot is right before drawing the next ballot.
+
+"Sampling in stages": To simplify logistics, an auditor might draw many ballots at once, then compare each to its voting system interpretation. Each set of draws and comparisons is a "stage".
+
+ballot-level comparison audits examine fewer ballots than ballot-polling audits when the margin is small and the outcome
+is correct: The number grows like the reciprocal of the margin, versus the square of the reciprocal for ballot-polling audits.
+ballot-polling method we presented would be expected to examine 120 ballots if the winner’s share
+is 60%, 480 if it is 55%, or 3,860 if it is 52%, versus 24, 48, and 120 for the comparison audit method we presented.
+
+An "overstatement error" is an error that caused the margin between any reported winner and any reported loser to appear larger than it really was. An "understatement error" is an error that caused the margin between every reported winner and every reported loser to appear to be smaller than it really was.
+
+Dividing by the number of ballots, rather than by the number of valid votes, allows for the possibility that the vote tabulation system mistook an undervote or overvote for a valid vote, or vice versa.
+
+====================
+Bravo
+
+A transitive audit uses a secondary system to make a CVR for each ballot in a way that allows the CVR to be matched to the ballot it purports torepresent. So far, transitive audits have relied on digital images of all the ballots cast in the contest (produced by the voting system or by rescanning the ballots); creating CVRs from those images using a combination of software and hand labor; and maintaining a mapping beween the physical ballots and the CVRs by keeping the ballots in the order in which they were scanned or by marking individual ballots with an identifier.
+
+it is advantageous to be able to expand the audit flexibly depending on early results, using sequential sampling. (I htink thats Wald’s Sequential Probability Ratio Test (SPRT) [Wald, 1945]) random selection with replacement
+
+The true, unknown proportion of ballots that record votes for candidate c is πc .
+
+The reported proportion of ballots that record votes for candidate c is pc . Typically, instead of reporting pc directly, election officials report sc , the fraction of valid votes cast for candidate c; the denominator is not the total number of ballots but rather the total number of reported valid votes. (In a vote-for-one contest, sc typically exceeds pc , because some ballots do not show a vote for any candidate in the contest.) sc = pc / (Sum pj, j=1, C), where Cj=0 are the invalid votes.
+
+To check whether the set W is really the set of winners, we will draw ballots uniformly at random and interpret the votes on those ballots manually. The probability that a ballot selected at random records a vote for candidate c is πc .
+
+vote-for-one contest: @ candidates, 1 winner.
+α is the risk limit
+M is a maximum number of ballots to audit, beyond which one proceeds to a full hand count
+
+Lindeman and Stark [2012] describes the use of β , which strictly controls the chance of a full hand count on the condition that the winner’s vote share is accurate within a certain specified tolerance, such that the reported winner in fact won.
+
+It is acceptable to continue the audit after M has been reached,10 and it is certainly acceptable to proceed to a full hand count before M is reached.
+
+The mean sample size varies roughly as the inverse square of the margin = π_winner − π_loser ; it increases sharply as πw approaches
+50% from above.
+
+actual margin should be more than reported margin / 2.
+
+==================================
+European proportional elections
+
+This paper fills the gap for many “highest-averages” proportional representation schemes used in Europe, including D’Hondt and Sainte-Laguë.
+
+“Highest-averages” methods are party-list proportional representation methods: Each voter chooses a party, and the seats are allocated to parties in proportion to the votes each received.
+
+The constant γ is a tuning parameter that trades off effort when the cast vote records are error-free against the effort when the cast vote records have errors. The larger γ is (within [0, 1]), the smaller the sample will need to be to confirm the outcome when none of the cast vote records is discovered to have error, but the larger the sample will need to be if the audit uncovers errors.
+
+=============
+corla
+
+- RLATool needs to be improved to audit contests that cross county lines and to audit small contests efficiently.
+- RLATool needs to be modified to recognize and group together contests that cross jurisdictional boundaries; currently, it treats every contest as if it were entirely contained in a single county.
+- auditing contests that appear only on a subset of ballots can be made much more efficient if the sample can be drawn from just those ballots that contain the contest
+
+"stratification": partitioning the cast ballots into non-overlapping groups and sampling independently from those groups. We consider methods that use two strata: CVR counties and no-CVR counties.
+
+We have outlined several methods Colorado might use to audit cross-jurisdictional contests that include CVR counties and no-CVR counties. We expect that stratified “hybrid” audits will be the most palatable, given the constraints on time for software development and the logistics of the audit itself, because the workflow for counties would be the same as it was in November, 2017.
+
+What would change is the risk calculation “behind the scene,” including the algorithms used to decide when the audit can stop. Those algorithms could be implemented in software external to RLATool. The minimal modification to RLATool that would be required to conduct a hybrid audit is to allow the sample size from each county to be controlled externally, e.g. by uploading a parameter file once per round, rather than using a formula that is based on the margin within that county alone. The parameter file would be generated by external software that does the audit calculations described here based on the detailed audit progress and discrepancy data available from RLATools’ rla export command.
+
+To conduct a hybrid audit, one must choose two numbers in addition to the risk limit α:
+• one stratum-wise risk limit, α1 (the other, α2 , is determined from α1 and the overall risk limit, α)
+• the tradeoff (allocation) of the tolerable overstatement between strata, λ1 (the value of λ2 is 1 − λ1 )
+
+Examples of stratified hybrid audits are in Jupyter notebooks available at https://www.github.com/pbstark/CORLA18.
+
+=====================
+Bernoulli
+
+Bernoulli sampling has several advantages: (1) it does not require a ballot manifest; (2) it can be conducted independently at different locations, rather than requiring a central authority to select the sample from the whole population of cast
+ballots or requiring stratified sampling; (3) it can start in polling places on election night, before margins are known.
+
+implement Bernoulli sampling in practice using geometric skipping
+
+========================================
+Betting (Smith-wannabe and Ramdas)
+
+One must typically specify the mixture distribution in advance
+of observing data, but betting can be viewed as building up a data-dependent mixture distribution
+on the fly (this led us to previously name our approach as the “predictable mixture” method).
+
+In abandoning parametrics, and thus abandoning
+likelihood ratios, it may be unclear how to define a powerful test or calculate a nonasymptotically
+valid p-value. Ramdas et al. [64, Proposition 4] prove that not only do likelihood ratios form test martingales, but every (nonparametric,
+composite) test martingale is also a (nonparametric, composite) likelihood ratio.
+[Parametric statistical procedures rely on assumptions about the shape of the distribution (i.e., assume a normal distribution) in the underlying population ]
+
+E-processes are strictly more general than test (super)martingales for P in the sense that there exist many interesting classes
+P for which nontrivial test (super)martingales do not exist, but one can design powerful e-processes
+for P. They are broad generalizations of likelihood ratios.
+
+Section 4
+
+	λt (m) ∈ (−1/(1 − m), 1/m)
+	λt (1/2) ∈ (−2, 2)
+
+	setting λt (m) ∈ {−1/(1 − m), 1/m} means that we are willing to risk all of our capital on the next outcome
+
+test martingales are nonparametric composite generalizations of likelihood ratios, which are at the very heart of statistical inference
+
+=============================
+RiLACS
+
+Kaplan martingale (KMart)
+
+http://github.com/wannabesmith/RiLACS (python)
+
+
+======================
+Alpha
+
+BRAVO is based on Wald’s sequential probability ratio test (SPRT) of the simple hypothesis θ = µ against a simple alternative θ = η from IID (independent, identically distributed) Bernoulli(θ) observations.
+(A Bernoulli(θ) random variable takes the value 0 with probability 1 − θ and the value 1 with probability θ ; its expected value is θ .) Because it requires IID Bernoulli(θ) observations, BRAVO is limited to ballot-polling audits and to using samples drawn with replacement, both of which limit efficiency and applicability.
+
+ # theta (0) is the true population mean value, aka the expected value of the random value. θ = x̄ = avg(x) = the population fraction of 1s (binary).
+
+ALPHA is a simple generalization of BRAVO that
+
+1. works for sampling with and without replacement,
+** with and without weights
+** with and without stratification,
+** for Bernoulli sampling;
+
+2. works not only for ballot polling but also for
+** ballot-level comparison,
+** batch polling, and
+** batch-level comparison audits;
+
+3. works for all social choice functions covered by SHANGRLA, including
+** approval voting,
+** STAR-Voting,
+** proportional representation schemes such as D’Hondt and Hamilton,
+** IRV,
+** Borda count, and
+** all scoring rules;
+
+In situations where both ALPHA and BRAVO apply, requires smaller samples than BRAVO when the reported vote shares are wrong but the outcome is correct— (five orders of magnitude in some examples).
+
+ALPHA includes the family of betting martingale tests in RiLACS, with a different betting strategy parametrized as an estimator of the population mean and explicit flexibility to accommodate sampling weights and population bounds that change with each draw.
+
+ALPHA is adaptive, estimating the reported winner’s share of the vote before the jth card is drawn from the j − 1 cards already in the sample.
+
+ALPHA also generalizes BRAVO to situations where the population {xj } is not necessarily binary, but merely nonnegative and bounded. That generalization allows ALPHA to be used with SHANGRLA to audit supermajority contests and to conduct comparison audits of a wide variety of social choice functions—any for which there is a SHANGRLA audit. In contrast, BRAVO requires +the list elements to be binary-valued. Finally, ALPHA works for sampling with or without replacement, with or without weights.
+
+ALPHA obviates the need to use a combining function across strata. Because ALPHA works with polling and comparison strategies, it can be the basis of the test in every stratum, whereas SUITE used completely different “risk measuring functions” for strata where the audit involves ballot polling and strata where the audit involves comparisons.
+
+One might expect that applying ALPHA to Bernoulli samples would require lower sample sizes (i.e., lower selection probabilities) than BBP (Bernoulli Ballot Polling, see 2020 paper). We do not perform any simulations here, but we plan to investigate the efficiency of ALPHA/SHANGRLA versus BBP in future work.
+
+Sampling without replacement. The methods listed include the best-performing method in RiLACS that uses an explicit alternative η (a priori Kelly), the best-performing method in RiLACS that does not use a pre-specified alternative (SqKelly), Wald’s SPRT for sampling without replacement (the analogue of BRAVO for sampling without replacement), and ALPHA with the truncated shrinkage estimator for a variety of values of d.
+
+3. Pseudo-algorithm for ballot-level comparison and ballot-polling audits
+
+I think d is number of repetitions ?? number of draws ??
+
+
+• Set audit parameters:
+ – Select the risk limit α ∈ (0, 1); decide whether to sample with or without replacement.
+ – Set u as appropriate for the assertion under audit.
+ – Set N to the number of ballot cards in the population of cards from which the sample is drawn.
+ – Set η0 .
+    For polling audits, η0 could be the reported mean value of the assorter.
+	For instance, for the assertion corresponding to checking whether w got more votes than ℓ,
+	η0 = (Nw + Nc /2)/N , where Nw is the number of votes reported for w , Nℓ is the
+	number of votes reported for ℓ, and Nc = N − Nw − Nℓ is the number of ballot cards
+	reported to have a vote for some other candidate or no valid vote in the contest.
+    For comparison audits, η0 can be based on assumed or historical rates of overstatement errors.
+ – Define the function to update η based on the sample,
+	e.g, η(i, X i−1 ) = ((d * η0 + S)/(d + i − 1) ∨ (eps(i) + µi )) ∧ u,    (2.5.2, eq 14, "truncated shrinkage")
+	where S = Sum i−1 k=1 (Xk) is the sample sum of the first i − 1 draws
+	and eps(i) = c/ sqrt(d + i − 1)
+	set any free parameters in the function (e.g., d and c in this example). The only requirement is that
+	η(i, X i−1 ) ∈ (µi , u), where µi := E(Xi |X i−1 ) is computed under the null.
+
+• Initialize variables
+ – j ← 0: sample number
+ – T ← 1: test statistic
+ – S ← 0: sample sum
+ – m = 1/2: population mean under the null
+
+• While T < 1/α and not all ballot cards have been audited:
+ – Draw a ballot at random
+ – j ←j +1
+ – Determine Xj by applying the assorter to the selected ballot card (and the CVR, for comparison audits)
+ – If m < 0, T ← ∞. Otherwise, T ← T / u * ( Xj * η(j,S)/m + (u - Xj) * (u−η(j,S))/(u-m))
+ – S ← S + Xj
+ – If the sample is drawn without replacement, m ← (N/2 − S)/(N − j + 1)
+ – If desired, break and conduct a full hand count instead of continuing to audit.
+
+• If a full hand count is conducted, its results replace the reported results if they differ.
+
+
+===============
+Sweeter
+
+provide an algorithm for stratum selection and evaluate the performance of the approach
+
+================
+Awaire
+
+AWAIRE is the first RLA method for IRV elections that does not require CVRs.
+
+========================
+Stylish
+
+CVRs are generally for individual cards, and ballots comprise more
+than one card in many jurisdictions. The estimated sample size scales with
+the reciprocal of the diluted margin.
+
+There must be a known 1:1 mapping from the
+physical card to its particular CVR. some voting systems cannot provide such a link, or
+cannot provide a link without compromising voter privacy.
+
+an audit can rely on CVRs to infer CSD: consider a card to contain
+a contest if the CVR for that card contains the contest. Even though the CVRs might be
+inaccurate or incomplete (otherwise, no audit would be needed), their method ensures
+that errors in CSD derived from CVRs do not compromise the risk limit.
+
+consistent sampling [Ri18], which ensures
+that cards drawn for the purpose of auditing a given contest can also be used in the audit of
+other contests that appear on the sampled cards.
+
+how the software is implemented to run a card-level comparison audit:
+1. Set up the audit
+	a) Read contest descriptors, candidate names, social choice functions, upper bounds on the number of cards that contain each contest, and reported winners.
+	     Let 𝑁_𝑐 denote the upper bound on the number of cards that contain contest 𝑐, 𝑐 = 1, . . . , 𝐶.
+	b) Read audit parameters (risk limit for each contest, risk-measuring function to use for each contest, assumptions about errors for computing initial sample sizes), and seed for pseudo-random sampling.
+	c) Read ballot manifest.
+	d) Read CVRs.
+2. Pre-processing and consistency checks
+	a) Check that the winners according to the CVRs are the reported winners.
+	b) If there are more CVRs that contain any contest than the upper bound on the number of cards that contain the contest, stop: something is seriously wrong.
+	c) If the upper bound on the number of cards that contain any contest is greater than the number of CVRs that contain the contest, create a corresponding set
+	    of “phantom” CVRs as described in section 3.4 of [St20]. The phantom CVRs are generated separately for each contest: each phantom card contains only one contest.
+	d) If the upper bound 𝑁 𝑐 on the number of cards that contain contest 𝑐 is greater than the number of physical cards whose locations are known, create enough “phantom” cards to make up the difference.
+3. Prepare for sampling
+	a) Generate a set of SHANGRLA [St20] assertions A_𝑐 for every contest 𝑐 under audit.
+	b) Initialize A ← ∪ A_𝑐, c=1..C and C ← {1, . . . , 𝐶}.
+	c) Assign independent uniform pseudo-random numbers to CVRs that contain oneor more contests under audit (including “phantom” CVRs), using a high-quality PRNG [OS19].
+	  (The code uses cryptographic quality pseudo-random integers uniformly distributed on 0, . . . , 2^256 − 1.) Let 𝑢_𝑖 denote the number assigned to CVR 𝑖.
+4. Main audit loop. While A is not empty:
+	a) Pick the (cumulative) sample sizes {𝑆_𝑐 } for 𝑐 ∈ C to attain by the end of this round of sampling.
+	    The software offers several options for picking {𝑆_𝑐 }, including some based on simulation.
+	    The desired sampling fraction 𝑓_𝑐 := 𝑆_𝑐 /𝑁_𝑐 for contest 𝑐 is the sampling probability for each card that contains contest 𝑘, treating cards already in the sample as having sampling probability 1.
+	    The probability 𝑝_𝑖 that previously unsampled card 𝑖 is sampled in the next round is the largest of those probabilities:
+	    𝑝_𝑖 := max 𝑓_𝑐 , 𝑐∈ C∩C𝑖, where C_𝑖 denotes the contests on card 𝑖.
+	b) Estimate the total sample size to be 𝑖 𝑝 𝑖 , where the sum is across all cards except phantom cards.
+	c) Choose thresholds {𝑡_𝑐 } 𝑐∈ C so that 𝑆 𝑐 ballot cards containing contest 𝑐 have a sample number 𝑢_𝑖 less than or equal to 𝑡_𝑐 .
+	d) Retrieve any of the corresponding ballot cards that have not yet been audited and inspect them manually to generate MVRs.
+	e) Import the MVRs.
+	f) For each MVR 𝑖:
+		For each 𝑐 ∈ C:
+			If 𝑢 𝑖 ≤ 𝑡 𝑐 , then for each 𝑎 ∈ A 𝑐 ∩ A:
+				• If the 𝑖th CVR is a phantom, define 𝑎(CVR𝑖 ) := 1/2.
+				• If card 𝑖 cannot be found or if it is a phantom, define 𝑎(MVR𝑖 ) := 0.
+				• Find the overstatement of assertion 𝑎 for CVR 𝑖, 𝑎(CVR𝑖 ) − 𝑎(MVR𝑖 ).
+	g) Use the overstatement data from the previous step to update the measured risk for every assertion 𝑎 ∈ A.
+	h) Optionally, conduct a full hand count of one or more contests, for instance, If the audit data suggest the outcome is wrong or if the auditors think a hand count will be less work than continuing to sample.
+	i) Remove from A all assertions 𝑎 that have met their risk limits or that are for contests for which there has been a full hand count. (The audits of those assertions are complete.)
+	j) Remove from C all contests 𝑐 for which A 𝑐 ∩ A = ∅ (the audits of those contests are complete).
+5. Replace the reported outcomes of any contests that were fully hand counted by the outcomes according to those hand counts.
+
+(P 10)
+Alabama, Arizona, Colorado, Connecticut, Delaware, Florida, New York, Ohio, Pennsylvania, and Washington recount
+contests with margins less than 0.5% (possibly with exceptions). Hawaii automatically
+recount if the margin is below 0.25%. Nebraska and Wyoming have automatic recounts if the
+margin is less than 1% of the winner’s tally. New Mexico and North Dakota automatically
+recount elections with margins less than 1%, 0.5%, or 0.25%, depending on the office. Ohio
+has thresholds of 0.5% and 0.25%, depending on the office. Oregon has a threshold of 0.2%.
+South Carolina has a 1% threshold. Alaska, Montana, South Dakota, Texas, and Vermont
+automatically recount tied elections. Some states have a recount threshold based on the
+number of votes rather than the percentage margin; for instance, Michigan has automatic
+recounts for statewide contests with margins below 2,000 votes

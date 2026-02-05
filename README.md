@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 01/28/2026_
+_last changed: 02/05/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -174,13 +174,9 @@ The requirements for CLCA audits:
 
 For the _risk function_, rlauxe uses the **BettingMart** function with the **GeneralAdaptiveBetting** _betting function_.
 GeneralAdaptiveBetting uses estimates/measurements of the error rates between the Cvrs and the Mvrs. 
-If the error estimates are correct, one gets optimal 
-"sample sizes", the number of ballots needed to prove the election is correct.
+If the error estimates are correct, one gets optimal "sample sizes", the number of ballots needed to prove the election is correct.
 
 See [Betting risk function](docs/BettingRiskFunctions.md) for overview of the risk and betting functions.
-
-See [Card Level Comparison Audits](docs/Clca.md) for details on CLCA.
-
 
 ## OneAudit CLCA
 
@@ -215,7 +211,6 @@ population mean. ShrinkTrunkage uses a weighted average of an initial estimate o
 of the MVRs as they are sampled. The reported mean is used as the initial estimate of the mean.
 
 See [AlphaMart risk function](docs/AlphaMart.md) for details on the AlphaMart risk function.
-
 
 # Comparing Samples Needed by Audit type
 
@@ -277,7 +272,7 @@ Here are the results of 1000 simulations of CLCA average samplesNeeded by margin
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.html" rel="clcaFuzzByMarginLogLog">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.png)</a>
 
-The average samplesNeeded dont tell the whole picture. There is a distribution of samplesNeeded whose variance roughly proprtional 
+The average samplesNeeded dont tell the whole picture. There is a distribution of samplesNeeded whose variance is roughly proportional 
 to the samplesNeeded; here is the standard deviation of those distributions with dependence on margin and fuzzPct:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginStddevLogLog.html" rel="clcaFuzzByMarginStddevLogLog">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginStddevLogLog.png)</a>
@@ -636,7 +631,7 @@ See [SamplePopulations](docs/SamplePopulations.md#contest-is-missing-in-the-mvr)
 
 ### Optimal value of MaxLoss
 
-Is there an algorith for setting the MaxLoss value, which limits the maximum bet that can be places at each round?
+Is there an algorithm for setting the MaxLoss value, which limits the maximum bet that can be placed at each round?
 
 
 ## Also See:
@@ -646,5 +641,8 @@ Is there an algorith for setting the MaxLoss value, which limits the maximum bet
 * [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer)
 * [Verification](docs/Verification.md)
 * [Case Studies](docs/CaseStudies.md)
+* [CLCA details](docs/Clca.md)
+* [Raire notes](docs/Raire.md)
+* [Dhondt notes](docs/Dhondt.md)
 
 

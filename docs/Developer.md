@@ -344,51 +344,25 @@ Assertion
 ->subclass ClcaAssertion
         hasa ClcaAssorter
 
+////////////////////////////////////////////////////////
 
-///////////////
+README
 
-In the old days, as they say, we only had zeros. Then ones were invented and we could start getting work done. 
-When God created Fortran and gave us Fortran Formatted I/O, we could start to share data. That is, as long as the person
-you wanted to share with was using the same hardware floating point format, the same hardware endianess, the same operating system and the same compiler.
-And lastly, you had to go find the program that wrote the data, and copy the Fortran format statement into your reading program. 
-Then you could share data. This worked until the total number of programmers became greater than 42, and you couldnt remember all of their names.
+    docs/BettingRiskFunctions.md
+    docs/OneAuditUseCases.md
+    docs/SamplePopulations.md
+    docs/AlphaMart.md  
+        (https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=662624429#gid=662624429)
+        (https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=1185506629#gid=1185506629)
 
-So this was the problem that NetCDF (and many others) set out to solve. Create a binary file format for scientific data that could be shared across
-hardware, software, and the great religious chasms known as programming languages. NetCDF-3 followed 
-the Fortran-77 data model of fixed length rectangular arrays of numbers in row-major order. The NetCDF "Classic Format" specification fits
-on a single one-sided page of paper. When I first implemented a NetCDF-3 reader in Java, it probably took less than 100 lines of a notoriously
-verbose language. Did I mention it was simple? Like all great technology, it made itself invisible by just reliably working.
+    docs/papers/papers.txt
+    docs/Developer.md
+    docs/Overview.md
+    docs/RlauxeSpec.md
+        (AdaptiveBetting.md)
+    docs/Verification.md
+    docs/CaseStudies.md
+        (Corla.md)
+    docs/Clca.md
 
-Other efforts to share scientific data designed from around the same time, were also widely successful and often brilliant in their own ways.
-The World Meterological Organization (WMO) needed a variable length binary format for weather observations from around the world, with severe constraints
-on communication bandwidth. They also needed an exchange file format for georeferenced 2-D gridded data. These became BUFR and GRIB, respectively.
-Both rely on metadata tables that are seperately stored and maintained from the data in order to know what the data means, aka semantics, and in BUFR's case, 
-to be able to even read the data, aka syntax. A correctly managed central repository could have made the dependence on external tables a non-problem, and
-indeed the formal design requires just that. The communities of practice writing these files, usually national weather services, failed rather
-miserably on this account, caught between a rock of time critical operational services and a hard place of plodding world bureacracies. 
-Certain weather services are better than others, and for sure the later version of GRIB and BUFR offer some improvements. Unfortunately to this day
-to read data in BUFR or GRIB from a source you dont personally have experience with requires tracking down the program that wrote the data, and finding and copying
-their table into your reading software. And yes, there are more than 42 of them.
-
-The strength of NetCDF-3 is its simple format and its use of arbitrary key/value metadata pairs called attributes. Attributes allow the user to
-document their data in whatever way they like, no permission needed from the NetCDF library or from the WMO committee on What Attributes Are Allowed.
-
-The weakness of NetCDF-3 is its simple format and its use of arbitrary key/value metadata pairs called attributes. Arbitrary means its up
-to the writer as to what attributes are put into the file. We say you can use NetCDF to write crap Fortran-like files, just like
-you can use modern languages to write spaghetti-code Fortran-like programs. NetCDF solves the syntactical problems of reading shared data, but not the 
-semantic problems. WMO's efforts to control the metadata wasn't misguided, just poorly engineered. In the place of central tables,
-sets of semantic conventions have emerged to specify metadata required for specific scientific communities. The best example of this
-are the Climate and Forecast (CF) conventions for climate and forecast model data output. These communities are like "vertical markets", and
-NetCDF can be used across them.
-
-The simplicity of NetCDF's Fortran-77 data model eventually found its limits in Exoscale data sets that beg for more sophisticated 
-data structures and ways to speed up data access. Heres where Ed Hartnett NetCDF story begins. Ed merged the NetCDF-3 and HDF5 
-data models and APIs to create NetCDF-4. He built the NetCDF-4 library so it could use both the classic NetCDF-3 file format, or 
-the HDF5 format as its storage layer. 
-
-HDF is another important general purpose scientific data format. While NetCDF-3 followed the KISS principle, HDF went for the
-feature rich, kitchen sink approach. It is used in a much wider way, eg in biology, financials, etc. Its APIs are correspondingly
-more complex and general purpose. 
-
-Limits of HDF5. Dimension scales vs Dimensions. Single threaded.
 

@@ -1,7 +1,7 @@
 # OneAudit version 4 
 _last changed 12/06/2025_
 
-candidate for removeal
+Earlier OneAudit results before we started using [Betting with OneAudit pools](https://github.com/JohnLCaron/rlauxe/blob/main/docs/BettingRiskFunctions.md#betting-with-oneaudit-pools)
 
 ## Strategies
 

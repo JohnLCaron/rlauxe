@@ -1,10 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
-import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import org.junit.jupiter.api.Test
@@ -14,35 +11,6 @@ import kotlin.test.assertEquals
 
 class TestCvrSimulation {
 
-    @Test
-    fun testMakeVunderCvrs() {
-        val Nc = 50000
-        val margin = 0.04
-        val underVotePct = 0.20
-        val phantomPercent = .05
-        //             fun make2wayContest(Nc: Int,
-        //                            margin: Double, // margin of top highest vote getters, not counting undervotePct, phantomPct
-        //                            undervotePct: Double, // needed to set Nc
-        //                            phantomPct: Double): ContestSimulation {
-        val fcontest = ContestSimulation.make2wayTestContest(Nc, margin, underVotePct, phantomPercent)
-        val contest = fcontest.contest
-        assertEquals(Nc, contest.Nc)
-
-        // data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pair<IntArray, Int>>, val undervotes: Int, val missing: Int, val voteForN: Int) {
-        val voteCounts = contest.votes.map { (cand, nvotes) -> Pair(intArrayOf(cand), nvotes) }
-        val vunder = Vunder(contest.id, null, voteCounts, contest.Nundervotes(), 0, 1)
-
-        val vcvrs = makeVunderCvrs(vunder, contest.Nphantoms(), "testV", Nc, null)
-        assertEquals(contest.Nc, vcvrs.size)
-        val nvcrs = vcvrs.count { it.hasContest(contest.id) }
-        assertEquals(nvcrs, contest.Nc)
-
-        val tab2 = tabulateVotesFromCvrs(vcvrs.iterator())
-        assertEquals(mapOf(contest.id to contest.votes), tab2)
-        println(tab2)
-        println(contest.votes)
-    }
-
     // fun simulateCvrsWithDilutedMargin(contestUA: ContestWithAssertions, config: AuditConfig): List<Cvr> {
     @Test
     fun testSimulateCvrsWithDilutedMargin() {
@@ -50,13 +18,9 @@ class TestCvrSimulation {
         val margin = 0.04
         val underVotePct = 0.20
         val phantomPercent = .05
-        val fcontest = ContestSimulation.make2wayTestContest(Nc, margin, underVotePct, phantomPercent)
-        val contest = fcontest.contest
+        val (cu, vcrs) = simulateCvrsWithDilutedMargin(Nc, margin, underVotePct, phantomPercent, limit = null)
+        val contest = cu.contest as Contest
 
-        val contestUA = ContestWithAssertions.make(listOf(contest), mapOf(contest.id to Nc), true).first()
-
-        val config = AuditConfig(AuditType.CLCA, contestSampleCutoff = null)
-        val vcrs = simulateCvrsWithDilutedMargin(contestUA, config)
         val nvcrs = vcrs.count { it.hasContest(contest.id) }
         assertEquals(contest.Nc, nvcrs)
 
@@ -84,19 +48,16 @@ class TestCvrSimulation {
         val margin = 0.04
         val underVotePct = 0.20
         val phantomPercent = .05
-        val fcontest = ContestSimulation.make2wayTestContest(Nc, margin, underVotePct, phantomPercent)
-        val contest = fcontest.contest
 
-        val contestUA = ContestWithAssertions.make(listOf(contest), mapOf(contest.id to Nc), true).first()
-        val config = AuditConfig(AuditType.CLCA)
-        val vcrs = simulateCvrsWithDilutedMargin(contestUA, config)
-        val nvcrs = vcrs.count { it.hasContest(contest.id) }
+        val (cu, vcrs) = simulateCvrsWithDilutedMargin(Nc, margin, underVotePct, phantomPercent, limit = 30000)
+        val nvcrs = vcrs.count { it.hasContest(cu.id) }
+        val contest = cu.contest as Contest
 
         val tab = tabulateCvrs(vcrs.iterator(), mapOf(contest.id to contest.info()))
         val tab0 = tab[0]!!
 
         if (show) {
-            println(" contest = $contest")
+            println(" contest = $cu")
             println(" votes = ${contest.votes} N=${contest.Nc}")
             println(" contest reportedMargin=${contest.reportedMargin(0, 1)}")
 

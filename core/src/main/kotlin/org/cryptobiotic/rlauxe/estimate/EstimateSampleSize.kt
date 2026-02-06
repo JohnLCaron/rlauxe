@@ -23,6 +23,7 @@ import org.cryptobiotic.rlauxe.raire.SimulateIrvTestData
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
+import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import kotlin.collections.List
 import kotlin.collections.mutableListOf
 import kotlin.math.min
@@ -35,10 +36,6 @@ private val logger = KotlinLogging.logger("EstimateSampleSizes")
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //// Comparison, Polling, OneAudit.
-
-// for CLCA and OA, take the first L=config.contestSampleCutoff values in the cardManifest (i.e. the actual cards)
-// For polling, use ContestSimulation.simulateCvrsDilutedMargin(contest as Contest, config).makeCvrs()
-//    using Npop and diluted margin.
 
 // 1. _Estimation_: for each contest, estimate how many samples are needed for this AuditRound
 fun estimateSampleSizes(
@@ -53,13 +50,23 @@ fun estimateSampleSizes(
 ): List<RunRepeatedResult> {
 
     // choose a subset of the cards for the estimation for speed
-    val cardSamples: CardSamples? = if (config.isPolling) null else
+    var cardSamples: CardSamples? = if (config.isPolling) null else
         getSubsetForEstimation(
             config,
             auditRound.contestRounds,
             cardManifest,
             previousSamples,
         )
+
+    // wtf ??
+    if (cardSamples!!.cards.isEmpty()) {
+        cardSamples = getSubsetForEstimation(
+            config,
+            auditRound.contestRounds,
+            cardManifest,
+            previousSamples,
+        )
+    }
 
     // simulate the card pools for all OneAudit contests; do it here one time for all contests
     // uses config.simFuzzPct to fuzz the non-pooled cvrs; the pooled cvrs are simulated using Vunder
@@ -116,7 +123,7 @@ fun estimateSampleSizes(
         if (!quiet) logger.info{" ** contest ${contest.id} avgSamplesNeeded ${contest.estMvrs} task=${contest.estNewMvrs}"}
     }
 
-    // return repeatedResult for debugging and diagnostics
+    // return repeatedResults for debugging and diagnostics
     return estResults.map { it.repeatedResult }
 }
 
@@ -137,7 +144,7 @@ fun makeEstimationTasks(
     val mvrsForPolling = if (config.isPolling) {
             val contest = contestRound.contestUA.contest
             if (!contest.isIrv()) {
-                ContestSimulation.simulateCvrsDilutedMargin(contestRound.contestUA, config)
+                simulateCvrsWithDilutedMargin(contestRound.contestUA, config)
             } else {
                 // TODO this just makes sure the winner is chosen first (ncards * minMargin) more than any other candidate.
                 val minMargin = contestRound.contestUA.minDilutedMargin()!! // not sure about this...
@@ -465,14 +472,6 @@ fun estimatePollingAssertionRound(
     // optional fuzzing of the mvrs
     val useFuzz = config.simFuzzPct ?: 0.0
     val samplerTracker = PollingFuzzSamplerTracker(useFuzz, mvrs, contestUA.contest as Contest, assorter) // TODO cant use Raire
-
-    // TODO isnt this the same problam as OneAudit ??
-    // optional fuzzing of the cvrs
-    // val sampler = PollingCardFuzzSampler(useFuzz, contestCards, contestUA.contest as Contest, assorter) // cant use Raire
-
-    // was
-    // makeFuzzedCardsFrom(contestsUA: List<ContestUnderAudit>, cards: List<AuditableCard>, fuzzPct: Double)
-    // val cvrs = ContestSimulation.simulateCvrsDilutedMargin(contestRound.contestUA, config)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimatePollingAssertionRound for $name with ${config.nsimEst} trials"}

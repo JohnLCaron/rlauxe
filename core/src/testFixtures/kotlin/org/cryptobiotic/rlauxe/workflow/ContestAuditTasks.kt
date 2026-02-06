@@ -44,7 +44,7 @@ class ContestAuditTask(
 
         // TODO since its single contest, does the lastRound always have the entire set of mvr sampleNumbers?
         val nmvrs = lastRound.samplePrns.size // LOOK ??
-        val contest = lastRound.contestRounds.first() // theres only one
+        val contest = lastRound.contestRounds.first() // theres only one contest
 
         val minAssertion = contest.minAssertion() // TODO why would this fail ?
         if (minAssertion == null) {
@@ -73,17 +73,17 @@ class ContestAuditTask(
                 100.0,
             )
         } else {
-            val lastRound = minAssertion.auditResult!!
+            val lastRoundResult = minAssertion.auditResult!!
             WorkflowResult(
                 name,
                 contest.Npop,
                 assorter.dilutedMargin(),
-                lastRound.status,
-                minAssertion.roundProved.toDouble(),
-                lastRound.samplesUsed.toDouble(),
+                lastRoundResult.status,
+                nrounds = minAssertion.roundProved.toDouble(),
+                samplesUsed = lastRoundResult.samplesUsed.toDouble(),
                 nmvrs.toDouble(),
                 otherParameters,
-                if (lastRound.status != TestH0Status.StatRejectNull) 100.0 else 0.0
+                if (lastRoundResult.status != TestH0Status.StatRejectNull) 100.0 else 0.0
             )
         }
     }

@@ -32,13 +32,11 @@ class CorlaSingleRoundAuditTaskGenerator(
             clcaConfig = clcaConfigIn ?: ClcaConfig()
         )
 
-        val sim =
-            ContestSimulation.make2wayTestContest(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
-        val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
+        val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         val testMvrs = if (p2flips != null || p1flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips) else
-            makeFuzzedCvrsForPolling(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+            makeFuzzedCvrsForPolling(listOf(cu.contest), testCvrs, mvrsFuzzPct)
 
-        val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(sim.contest), emptyList(),
+        val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(cu.contest), emptyList(),
                                  MvrManagerForTesting(testCvrs, testMvrs, useConfig.seed))
         return ClcaSingleRoundWorkflowTask(
             name(),
@@ -71,13 +69,11 @@ class CorlaContestAuditTaskGenerator(
             clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.fuzzPct, mvrsFuzzPct)
         )
 
-        val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
-        val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-
+        val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         val testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
-            makeFuzzedCvrsForPolling(listOf(sim.contest), testCvrs, mvrsFuzzPct)
+            makeFuzzedCvrsForPolling(listOf(cu.contest), testCvrs, mvrsFuzzPct)
 
-        val clca = CorlaAudit(auditConfig, listOf(sim.contest), MvrManagerForTesting(testCvrs, testMvrs, auditConfig.seed), quiet = true)
+        val clca = CorlaAudit(auditConfig, listOf(cu.contest), MvrManagerForTesting(testCvrs, testMvrs, auditConfig.seed), quiet = true)
         return ContestAuditTask(
             "genAuditWithErrorsPlots mvrsFuzzPct = $mvrsFuzzPct",
             clca,

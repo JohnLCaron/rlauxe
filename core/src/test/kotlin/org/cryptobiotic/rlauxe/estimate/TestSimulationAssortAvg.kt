@@ -71,22 +71,13 @@ class TestSimulationAssortAvg {
                 Arb.Companion.int(min = 10000, max = 30000),
                 Arb.Companion.int(min = 0, max = 100)
             ) { reportedMargin, underVotePct, phantomPct, Nc, Np ->
-                val sim = ContestSimulation.make2wayTestContest(
-                    Nc,
-                    reportedMargin,
-                    undervotePct = underVotePct,
-                    phantomPct = phantomPct
-                )
-                // val sim = ContestSimulation.make2wayTestContestOld(reportedMargin, underVotePct, phantomPct, Nc=Nc)
-                val contestUA = ContestWithAssertions(sim.contest, isClca = false).addStandardAssertions()
+                val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, reportedMargin, undervotePct = underVotePct, phantomPct = phantomPct, Npop=Np)
                 println(
-                    "${sim.show()} margin=${df(reportedMargin)} under=${df(underVotePct)} phantom=${df(phantomPct)} votes: [${
-                        showVotes(
-                            (contestUA.contest as Contest).votes
-                        )
+                    "margin=${df(reportedMargin)} under=${df(underVotePct)} phantom=${df(phantomPct)} votes: [${
+                        showVotes((cu.contest as Contest).votes)
                     }]"
                 )
-                testAssertions(sim.contest, contestUA.assertions, sim.makeCvrs())
+                testAssertions(cu.contest, cu.assertions, testCvrs)
             }
         }
     }

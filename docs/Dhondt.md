@@ -3,22 +3,22 @@ _last changed 02/05/2026_
 
 <!-- TOC -->
 * [D'Hondt Notes](#dhondt-notes)
-* [Notes From Proportional paper](#notes-from-proportional-paper)
-  * [Section 3. Creating assorters from assertions](#section-3-creating-assorters-from-assertions)
-  * [Section 5.1 highest averages](#section-51-highest-averages)
-  * [Section 5.2 Simple D’Hondt: Party-only voting](#section-52-simple-dhondt-party-only-voting)
-  * [Section 5.3  More complex methods: Multi-candidate voting](#section-53--more-complex-methods-multi-candidate-voting)
-* [Results from running Belgium elections (no errors)](#results-from-running-belgium-elections-no-errors)
-  * [Results from createAllBelgiumElections()](#results-from-createallbelgiumelections-)
-  * [Results from createBelgiumElection("Anvers")](#results-from-createbelgiumelectionanvers-)
-  * [Show Anvers Contest in rlauxe-viewer](#show-anvers-contest-in-rlauxe-viewer)
+  * [Notes From Proportional paper](#notes-from-proportional-paper)
+    * [Section 3. Creating assorters from assertions](#section-3-creating-assorters-from-assertions)
+    * [Section 5.1 highest averages](#section-51-highest-averages)
+    * [Section 5.2 Simple D’Hondt: Party-only voting](#section-52-simple-dhondt-party-only-voting)
+    * [Section 5.3  More complex methods: Multi-candidate voting](#section-53--more-complex-methods-multi-candidate-voting)
+  * [Results from running Belgium elections (no errors)](#results-from-running-belgium-elections-no-errors)
+    * [Results from createAllBelgiumElections()](#results-from-createallbelgiumelections-)
+    * [Results from createBelgiumElection("Anvers")](#results-from-createbelgiumelectionanvers-)
+    * [Show Anvers Contest in rlauxe-viewer](#show-anvers-contest-in-rlauxe-viewer)
 <!-- TOC -->
 
-# Notes From Proportional paper
+## Notes From Proportional paper
 
 Notes From [Assertion-Based Approaches to Auditing Complex Elections, with Application to Party-List Proportional Elections](http://arxiv.org/abs/2107.11903v2)
 
-## Section 3. Creating assorters from assertions
+### Section 3. Creating assorters from assertions
 
 In this section we show how to transform generic linear assertions, i.e. inequalities of the form
 
@@ -148,7 +148,7 @@ Also, the sum and mean across all ballots are, respectively:
 
 Therefore, h̄ > 1/2 iff ḡ > 0.
 
-## Section 5.1 highest averages
+### Section 5.1 highest averages
 
 A highest averages method is parameterized by a set of divisors d(1), d(2), . . . d(S) where S is the number of seats.
 The divisors for D’Hondt are d(i) = i. Sainte-Laguë has divisors d(i) = 2i − 1.
@@ -157,7 +157,7 @@ Define
 
     fe,s = Te/d(s) for entity e and seat s.
 
-## Section 5.2 Simple D’Hondt: Party-only voting
+### Section 5.2 Simple D’Hondt: Party-only voting
 
 In the simplest form of highest averages methods, seats are allocated to each
 entity (party) based on individual entity tallies. Let We be the number of seats
@@ -190,7 +190,7 @@ first and last both range from 1 to nseats, so
     min upper is (1/nseats + 1)/2 which is between 1/2 and 1
     max upper is (nseats + 1)/2 which is >= 1
 
-## Section 5.3  More complex methods: Multi-candidate voting
+### Section 5.3  More complex methods: Multi-candidate voting
 
 Like some Hamiltonian elections, many highest averages elections also allow
 voters to select individual candidates. A party’s tally is the total of its candidates’
@@ -209,9 +209,9 @@ The lower bound is −m/d(LB ), again substituting in to Equation 2 gives
 
     hA,B(b) = (bA * d(LB)/d(WA) − bB + m ) / 2m
 
-# Results from running Belgium elections (no errors)
+## Results from running Belgium elections (no errors)
 
-## Results from createAllBelgiumElections() 
+### Results from createAllBelgiumElections() 
 
 ````
                 |                                minAssorter |  noerror |     mean |    upper |  nmvrs | minMvrs | pct % |
@@ -235,7 +235,7 @@ Notes:
     * run createAllBelgiumElections() which puts all elections under toptopdir = "$testdataDir/cases/belgium/2024"
     * open $toptopdir in rlauxe-viewer
 
-## Results from createBelgiumElection("Anvers") 
+### Results from createBelgiumElection("Anvers") 
 
 ````
 showBelgiumElection Anvers
@@ -265,7 +265,7 @@ minAssorter: DHondt w/l='CD&V'/'PVDA': dilutedMean=50.0267% upperBound=1.0000
   fw/fl=41964.7/41752.3 diff=212 (w-l)/w =0.00506
 ````
 
-## Show Anvers Contest in rlauxe-viewer
+### Show Anvers Contest in rlauxe-viewer
 
 ````
 

@@ -87,6 +87,7 @@ fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boole
     var complete = false
     while (!complete) {
         nextRound = workflow.startNewRound(quiet=quiet)
+        val roundidx = nextRound.roundIdx
         if (nextRound.samplePrns.isEmpty()) {
             complete = true
 
@@ -96,13 +97,14 @@ fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boole
             // workflow MvrManager must implement MvrManagerTest, else Exception
             (workflow.mvrManager() as MvrManagerTestIF).setMvrsBySampleNumber(nextRound.samplePrns, nextRound.roundIdx)
 
-            logger.info {"runTestAuditToCompletion $name round=${nextRound.roundIdx}"}
+            logger.info {"runTestAuditToCompletion $name round=${roundidx}"}
             complete = workflow.runAuditRound(nextRound, quiet)
             nextRound.auditWasDone = true
             nextRound.auditIsComplete = complete
             // println(" runAudit $name ${nextRound.roundIdx} done=$complete samples=${nextRound.samplePrns.size}")
             if (nextRound.roundIdx > maxRounds) {
-                logger.warn {" runAudit $name ${nextRound.roundIdx} exceeded maxRounds = $maxRounds"}
+                logger.warn {" runAudit $name ${roundidx} exceeded maxRounds = $maxRounds"}
+                nextRound = null
                 break
             }  // safety net
         }

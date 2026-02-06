@@ -66,13 +66,17 @@ class ContestTabulation(
     fun missing() = voteForN * ncards() - nvotes()
 
     fun addVotes(cands: IntArray, phantom:Boolean) {
-        if (!isIrv) addVotesReg(cands) else addVotesIrv(cands)
-        if (phantom) nphantoms++
+        ncardsTabulated++
+
+        if (phantom) {
+            nphantoms++
+        } else {
+            if (!isIrv) addVotesReg(cands) else addVotesIrv(cands)
+        }
     }
 
-    fun addVotesReg(cands: IntArray) {
+    private fun addVotesReg(cands: IntArray) {
         cands.forEach { addVote(it, 1) }
-        ncardsTabulated++
         if (voteForN < cands.size) overvotes++
         undervotes += (voteForN - cands.size)
         if (cands.isEmpty()) novote++
@@ -83,7 +87,7 @@ class ContestTabulation(
         votes[cand] = accum + vote
     }
 
-    fun addVotesIrv(candidateRanks: IntArray) {
+    private fun addVotesIrv(candidateRanks: IntArray) {
         candidateRanks.forEach {  // track for non IRV also?
             if (candidateIdToIdx[it] == null) {
                 notfound[it] = notfound.getOrDefault(it, 0) + 1
@@ -92,7 +96,6 @@ class ContestTabulation(
         // convert to index for Raire
         val mappedVotes = candidateRanks.map { candidateIdToIdx[it] }
         if (mappedVotes.isNotEmpty()) irvVotes.addVote(mappedVotes.filterNotNull().toIntArray())
-        ncardsTabulated++
         if (candidateRanks.isEmpty()) novote++
         if (candidateRanks.isEmpty()) undervotes++
     }

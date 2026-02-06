@@ -8,8 +8,12 @@ import kotlinx.coroutines.test.runTest
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.propTestFastConfig
+import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import org.junit.jupiter.api.Test
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.math.abs
 import kotlin.test.assertEquals
 
@@ -99,6 +103,66 @@ class TestContestSimulation {
         println("  nunder=$nunder == ${fcontest.underCount}; pct= $underPct =~ ${underVotePct} abs=${abs(underPct - underVotePct)} " +
                 " rel=${abs(underPct - underVotePct) /underPct}")
         if (nunder > 2) assertEquals(underVotePct, underPct, .02)
+    }
+
+    @Test
+    fun testMakeContestVsVunder() {
+        val Nc = 50000
+        val margin = 0.04
+        val underVotePct = 0.20
+        val phantomPercent = .05
+        //             fun make2wayContest(Nc: Int,
+        //                            margin: Double, // margin of top highest vote getters, not counting undervotePct, phantomPct
+        //                            undervotePct: Double, // needed to set Nc
+        //                            phantomPct: Double): ContestSimulation {
+        val fcontest = ContestSimulation.make2wayTestContest(Nc, margin, underVotePct, phantomPercent)
+        val contest = fcontest.contest
+        assertEquals(Nc, contest.Nc)
+
+        val cvrs = fcontest.makeCvrs()
+        assertEquals(contest.Nc, cvrs.size)
+        val ncvr = cvrs.count { it.hasContest(contest.id) }
+        assertEquals(contest.Nc, ncvr)
+
+        val nphantom = cvrs.count { it.hasContest(contest.id) && it.phantom }
+        assertEquals(fcontest.phantomCount, nphantom)
+        val phantomPct = nphantom/ Nc.toDouble()
+        println("  nphantom=$nphantom pct= $phantomPct =~ ${phantomPercent} abs=${abs(phantomPct - phantomPercent)} " +
+                " rel=${abs(phantomPct - phantomPercent) /phantomPct}")
+
+        val nunder = cvrs.count { it.hasContest(contest.id) && !it.phantom && it.votes[contest.id]!!.isEmpty() }
+        assertEquals(fcontest.underCount, nunder)
+        val underPct = nunder/ Nc.toDouble()
+        println("  nunder=$nunder == ${fcontest.underCount}; pct= $underPct =~ ${underVotePct} abs=${abs(underPct - underVotePct)} " +
+                " rel=${abs(underPct - underVotePct) /underPct}")
+
+        // data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pair<IntArray, Int>>, val undervotes: Int, val missing: Int, val voteForN: Int) {
+        val voteCounts = contest.votes.map { (cand, nvotes) -> Pair(intArrayOf(cand), nvotes) }
+        val vunder = Vunder(contest.id, null, voteCounts, contest.Nundervotes(), 0, 1)
+
+        val vcvrs = makeVunderCvrs(vunder, contest.Nphantoms(), "testV", Nc, null)
+        assertEquals(contest.Nc, vcvrs.size)
+        val nvcrs = vcvrs.count { it.hasContest(contest.id) }
+        assertEquals(contest.Nc, nvcrs)
+
+        val nphantomv = vcvrs.count { it.hasContest(contest.id) && it.phantom }
+        assertEquals(fcontest.phantomCount, nphantom)
+        val phantomPctv = nphantomv/ Nc.toDouble()
+        println("  nphantomv=$nphantomv pct= $phantomPctv =~ ${phantomPercent} abs=${abs(phantomPctv - phantomPercent)} " +
+                " rel=${abs(phantomPctv - phantomPercent) /phantomPct}")
+
+        val nunderv = vcvrs.count { it.hasContest(contest.id) && !it.phantom && it.votes[contest.id]!!.isEmpty() }
+        assertEquals(fcontest.underCount, nunder)
+        val underPctv = nunderv/ Nc.toDouble()
+        println("  nunderv=$nunderv == ${fcontest.underCount}; pct= $underPctv =~ ${underVotePct} abs=${abs(underPctv - underVotePct)} " +
+                " rel=${abs(underPctv - underVotePct) /underPct}")
+
+        val tab1 = tabulateVotesFromCvrs(cvrs.iterator())
+        val tab2 = tabulateVotesFromCvrs(vcvrs.iterator())
+        assertEquals(mapOf(contest.id to contest.votes), tab2)
+        assertEquals(tab1, tab2)
+        println(tab2)
+        println(contest.votes)
     }
 
 }

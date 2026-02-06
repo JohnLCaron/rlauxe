@@ -91,7 +91,7 @@ data class PollingConfig(
 //  fuzzPct: ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct) for first round.
 //  oracle: use actual measured error rates for first round. (violates martingale condition)
 
-// TODO only generalAdaptive is currently used
+// TODO only generalAdaptive is used, remove others
 enum class ClcaStrategyType { generalAdaptive, apriori, fuzzPct, oracle  }
 data class ClcaConfig(
     val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,

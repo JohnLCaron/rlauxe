@@ -51,7 +51,7 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
             // get the new cards not in the previous sample
             val newCards = cards.filter{ !previousPrnsSet.contains(it.prn) }
 
-            // and fuzz them TODO use Vunder for OneAudit ?
+            // and fuzz them
             val newFuzzedCards = makeFuzzedCardsForClca(contestsUA.map { it.contest.info() }, newCards, mvrFuzzPct)
 
             // then the cards we want are the previous cards and the new fuzzed cards

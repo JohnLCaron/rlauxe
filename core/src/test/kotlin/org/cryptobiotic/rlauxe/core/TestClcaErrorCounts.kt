@@ -5,10 +5,8 @@ import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.TausErrorTable
 import org.cryptobiotic.rlauxe.betting.computeBassortValues
-import org.cryptobiotic.rlauxe.estimate.ContestSimulation
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
+import org.cryptobiotic.rlauxe.estimate.simulateCvrsWithDilutedMargin
 import org.cryptobiotic.rlauxe.util.doublePrecision
-import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.random.Random
 import kotlin.test.*
 
@@ -113,18 +111,10 @@ class TestClcaErrorCounts {
         repeat(131) {
             val mvrsFuzzPct = Random.nextDouble(0.01)
             val margin = Random.nextDouble(0.10)
-            val sim =
-                ContestSimulation.make2wayTestContest(
-                    Nc = 11111,
-                    margin,
-                    undervotePct = 0.0,
-                    phantomPct = 0.0
-                )
+            val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = 11111, margin, undervotePct = 0.0, phantomPct = 0.0)
+            // val testMvrs = makeFuzzedCvrsForPolling(listOf(cu.contest), testCvrs, mvrsFuzzPct)
 
-            val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-            val testMvrs = makeFuzzedCvrsForPolling(listOf(sim.contest), testCvrs, mvrsFuzzPct)
-
-            val contestUA = ContestWithAssertions(sim.contest).addStandardAssertions()
+            val contestUA = ContestWithAssertions(cu.contest).addStandardAssertions()
             val assertion = contestUA.minClcaAssertion()!!
             val cassorter = assertion.cassorter
 

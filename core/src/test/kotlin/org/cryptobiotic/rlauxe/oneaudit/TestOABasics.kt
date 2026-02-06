@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-// TODO fix tests
 class TestOABasics {
 
     // OneAudit, section 2.3

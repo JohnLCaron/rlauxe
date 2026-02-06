@@ -277,7 +277,7 @@ fun sampleSizesVsMarginWithErrorBars(
 
 // fun showStddevVsMargin(name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String) {
 fun showStddevVsMargin(dataFile: String, name: String, dirName: String, subtitle: String, yscale: ScaleType, catName: String) {
-        val io = WorkflowResultsIO(dataFile)
+    val io = WorkflowResultsIO(dataFile)
     val data = io.readResults()
     wrsPlot(
         titleS = "$name samples needed",

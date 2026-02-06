@@ -39,7 +39,7 @@ class TestContestTabulation {
 
             assertEquals(voteForNs[id], tab.voteForN)
             assertEquals(contest.Nc, tab.ncardsTabulated)
-            assertEquals(contest.undervotes + contest.Nphantoms() * contest.info.voteForN, tab.undervotes)
+            assertEquals(contest.undervotes, tab.undervotes)
             assertTrue(
                 checkEquivilentVotes(candVotes[id], tab.votes),
                 "${candVotes[id].toSortedMap()} != ${tab.votes.toSortedMap()}"
@@ -83,7 +83,7 @@ class TestContestTabulation {
 
             assertEquals(voteForNs[id], tab.voteForN)
             assertEquals(contest.Nc, tab.ncardsTabulated)
-            assertEquals(contest.undervotes + contest.Nphantoms() * contest.info.voteForN, tab.undervotes)
+            assertEquals(contest.undervotes , tab.undervotes)
             assertTrue(
                 checkEquivilentVotes(candVotes[id], tab.votes),
                 "${candVotes[id].toSortedMap()} != ${tab.votes.toSortedMap()}"

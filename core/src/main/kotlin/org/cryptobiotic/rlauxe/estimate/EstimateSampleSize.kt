@@ -58,16 +58,6 @@ fun estimateSampleSizes(
             previousSamples,
         )
 
-    // wtf ??
-    if (cardSamples!!.cards.isEmpty()) {
-        cardSamples = getSubsetForEstimation(
-            config,
-            auditRound.contestRounds,
-            cardManifest,
-            previousSamples,
-        )
-    }
-
     // simulate the card pools for all OneAudit contests; do it here one time for all contests
     // uses config.simFuzzPct to fuzz the non-pooled cvrs; the pooled cvrs are simulated using Vunder
     val vunderFuzz = if (!config.isOA) null else {

@@ -5,8 +5,8 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCardManifest
 import org.cryptobiotic.rlauxe.audit.CvrsWithPopulationsToCardManifest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.estimate.ContestSimulation
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.simulateCvrsWithDilutedMargin
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -25,12 +25,11 @@ class TestAvgAssortValues {
         val Nc = 1000
         val phantomPercent = 0.0
         val underVotePct = .087
-        val simContest = ContestSimulation.make2wayTestContest(Nc, margin, underVotePct, phantomPercent)
 
-        val contest = simContest.contest
+        val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPercent)
+
+        val contest = cu.contest
         println("contest = $contest")
-
-        val testCvrs =  simContest.makeCvrs()
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
@@ -73,12 +72,11 @@ class TestAvgAssortValues {
         val Nc = 1000
         val phantomPercent = 0.0221
         val underVotePct = .087
-        val simContest = ContestSimulation.make2wayTestContest(Nc, margin, underVotePct, phantomPercent)
 
-        val contest = simContest.contest
+        val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPercent)
+        val contest = cu.contest
         println("contest = $contest")
 
-        val testCvrs =  simContest.makeCvrs()
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {

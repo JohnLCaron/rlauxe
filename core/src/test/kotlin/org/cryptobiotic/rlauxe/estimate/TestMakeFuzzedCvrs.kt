@@ -54,12 +54,10 @@ class TestMakeFuzzedCvrs {
         val choiceChanges = mutableListOf<MutableMap<String, Int>>()
         fuzzPcts.forEach { fuzzPct ->
             margins.forEach { margin ->
-                val sim = ContestSimulation.make2wayTestContest(Nc = N, margin, .1, 0.01)
-                val cvrs = sim.makeCvrs()
-                if (show) println("fuzzPct = $fuzzPct, margin = $margin ${sim.contest.votes}")
-                val fuzzed = makeFuzzedCvrsForPolling(listOf(sim.contest), cvrs, fuzzPct)
+                val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = N, margin, undervotePct = .1, phantomPct = .01)
+                val fuzzed = makeFuzzedCvrsForPolling(listOf(cu.contest), testCvrs, fuzzPct)
                 val choiceChange = mutableMapOf<String, Int>()
-                cvrs.zip(fuzzed).forEach { (cvr, fuzzedCvr) ->
+                testCvrs.zip(fuzzed).forEach { (cvr, fuzzedCvr) ->
                     val orgChoice = cvr.votes[0]!!.firstOrNull() ?: 2
                     val fuzzChoice = fuzzedCvr.votes[0]!!.firstOrNull() ?: 2
                     val change = (orgChoice).toString() + fuzzChoice.toString()

@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.core.ClcaAssorter
-import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
@@ -17,7 +17,7 @@ import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
 // TODO add the Nbs
 class WorkflowTesterClca(
     val auditConfig: AuditConfig,
-    contestsToAudit: List<Contest>, // the contests you want to audit
+    contestsToAudit: List<ContestIF>, // the contests you want to audit
     raireContests: List<RaireContestWithAssertions>,
     val mvrManager: MvrManager,
     Npops : Map<Int, Int> = emptyMap(), // TODO retrofit Npop

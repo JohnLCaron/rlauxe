@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
-import kotlin.math.abs
 import kotlin.math.round
 import kotlin.random.Random
 
@@ -28,10 +27,8 @@ import kotlin.random.Random
 //    For auditing, I think we need to assume U_c is 0? So Np_c = N_c - V_c??
 //    I think we must have a ballot manifest, which means we have Nb, and ...
 
-/**
- * Simulation of single Contest that reflects the exact votes and Nb (diluted), along with undervotes and phantoms, as specified in Contest.
- */
-// ressurected 12/4/25; used for polling estimation
+// Simulation of single Contest that reflects the exact votes and Nb (diluted), along with undervotes and phantoms as specified in Contest.
+// resurrected 12/4/25; used for polling estimation; use ClcaFuzzSamplerTracker for CLCA
 
 class ContestSimulation(val contest: Contest, val Npop: Int) {
     val info = contest.info
@@ -57,7 +54,7 @@ class ContestSimulation(val contest: Contest, val Npop: Int) {
         votesLeft = voteCount
     }
 
-    // TODO replace with CvrBuilders2 ?? Yes, but cant compare unless you set Random seed
+    // TODO replace with replace with CvrSimulation.simulateCvrsWithDilutedMargin
     fun makeCvrs(prefix: String = "card", poolId: Int?=null): List<Cvr> {
         resetTracker()
         val contestId = info.id
@@ -111,7 +108,7 @@ class ContestSimulation(val contest: Contest, val Npop: Int) {
         private val logger = KotlinLogging.logger("ContestSimulation")
 
         /** Make a 2 candidate plurality Contest with given margin etc. */
-        // used by ClcaSingleRoundAuditTaskGenerator
+        // used by ClcaSingleRoundAuditTaskGenerator amd othe rplaces for CLCA
         fun make2wayTestContest(Nc: Int,
                                 margin: Double, // margin of top highest vote getters, not counting undervotePct, phantomPct
                                 undervotePct: Double, // needed to set Nc
@@ -130,7 +127,7 @@ class ContestSimulation(val contest: Contest, val Npop: Int) {
             return ContestSimulation(contest, Nc)
         }
 
-        // TODO compare to PollingCardFuzzSampler
+        // TODO replace with CvrSimulation.simulateCvrsWithDilutedMargin
         // class PollingCardFuzzSampler(
         //    val fuzzPct: Double,
         //    val cards: List<AuditableCard>,
@@ -138,7 +135,7 @@ class ContestSimulation(val contest: Contest, val Npop: Int) {
         //    val assorter: AssorterIF
         //): Sampling, Iterator<Double>
         // Needed for Polling estimation
-        fun simulateCvrsDilutedMargin(contestUA: ContestWithAssertions, config: AuditConfig): List<Cvr> {
+        fun simulateCvrsWithDilutedMargin(contestUA: ContestWithAssertions, config: AuditConfig): List<Cvr> {
             val limit = config.contestSampleCutoff
             val contestOrg = contestUA.contest as Contest // TODO IRV
             if (limit == null || contestOrg.Nc <= limit) return ContestSimulation(contestOrg, contestUA.Npop).makeCvrs()

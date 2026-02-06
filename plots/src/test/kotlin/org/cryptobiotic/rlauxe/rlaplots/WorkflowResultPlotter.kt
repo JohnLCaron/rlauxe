@@ -87,8 +87,8 @@ fun wrsPlot(
                 color = Color.BLUE
 
                 // tooltips(variables, formats, title, anchor, minWidth, hide)
-                tooltips(xname, yname, catName,
-                    formats = mapOf("margin" to "f8.3"))
+                tooltips(xname, yname, catName)
+                    // formats = mapOf("margin" to "f8.3"))
             }
 
             layout {
@@ -379,5 +379,5 @@ fun categoryFuzzPct(wr: WorkflowResult): String {
 }
 
 fun categoryFuzzDiff(wr: WorkflowResult): String {
-    return dfn(100.0*wr.Dparam("fuzzDiff"), 2)
+    return dfn(wr.Dparam("simFuzzPct"), 4)
 }

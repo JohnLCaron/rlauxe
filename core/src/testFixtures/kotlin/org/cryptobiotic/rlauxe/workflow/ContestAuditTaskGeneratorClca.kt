@@ -21,7 +21,6 @@ class ClcaContestAuditTaskGenerator(
     val clcaConfigIn: ClcaConfig? = null,
     val Npop: Int = Nc,
     val nsimEst: Int = 100,
-    val p2flips: Double? = null,
 ): ContestAuditTaskGenerator {
     override fun name() = name
 
@@ -32,30 +31,28 @@ class ClcaContestAuditTaskGenerator(
             clcaConfig = clcaConfigIn ?: ClcaConfig()
         )
 
-        val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
-        var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
-        var testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
-            makeFuzzedCvrsForPolling(listOf(sim.contest.info()), testCvrs, mvrsFuzzPct)
+        var (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
+        var testMvrs = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
-        if (!useConfig.hasStyle && Npop > Nc) { // TODO wtf?
+        if (!useConfig.hasStyle && Npop > Nc) { // TODO test this
             val otherContestId = 42
             val otherCvrs = List<Cvr>(Npop - Nc) { makeUndervoteForContest(otherContestId) }
             testCvrs = testCvrs + otherCvrs
             testMvrs = testMvrs + otherCvrs
         }
 
-        val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(sim.contest), emptyList(),
+        val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(cu.contest), emptyList(),
             MvrManagerForTesting(testCvrs, testMvrs, seed=useConfig.seed))
 
         return ContestAuditTask(
             name(),
             clcaWorkflow,
-            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0)
+            parameters
         )
     }
 }
 
-// Simulate single Contest with ContestSimulation.make2wayTestContest
+// Simulate single Contest, do one-round audit
 class ClcaSingleRoundAuditTaskGenerator(
     val Nc: Int,
     val margin: Double,
@@ -66,7 +63,7 @@ class ClcaSingleRoundAuditTaskGenerator(
     val config: AuditConfig? = null,
     val clcaConfigIn: ClcaConfig? = null,
     val quiet: Boolean = true,
-    val p2flips: Double? = null,
+    val p2flips: Double? = null,  // used in attack
     val p1flips: Double? = null,
 ): ContestAuditTaskGenerator {
 
@@ -81,16 +78,15 @@ class ClcaSingleRoundAuditTaskGenerator(
             clcaConfig = clcaConfigIn ?: ClcaConfig()
         )
 
-        val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
-        val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
+        val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         val testMvrs =  if (p2flips != null || p1flips != null) {
             makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips)
         } else {
-            makeFuzzedCvrsForPolling(listOf(sim.contest.info()), testCvrs, mvrsFuzzPct)
+            makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
         }
 
         // TODO not adding the Nbs...
-        val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(sim.contest), emptyList(),
+        val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(cu.contest), emptyList(),
             MvrManagerForTesting(testCvrs, testMvrs, seed=useConfig.seed))
 
         /* make sure margins are below 0

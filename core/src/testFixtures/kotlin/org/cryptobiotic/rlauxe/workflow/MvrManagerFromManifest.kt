@@ -11,8 +11,7 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
 
-// this checks that the cards and mvrs correspond one-to-one
-// these are the real mvrs
+// used in OneAuditSingleRoundWithDilutedMargin and attacks
 class MvrManagerFromManifest(
     cardManifest: List<AuditableCard>,
     mvrs: List<Cvr>,
@@ -52,8 +51,8 @@ class MvrManagerFromManifest(
         if (mvrsRound.isEmpty()) {  // for SingleRoundAudit.
             val sampledMvrs = if (simFuzzPct == null) {
                 sortedMvrs // use the mvrs as they are - ie, no errors
-            } else { // fuzz the mvrs
-                makeFuzzedCvrsForPolling(infoList, sortedMvrs, simFuzzPct) // TODO, undervotes=false)
+            } else {
+                makeFuzzedCvrsForPolling(infoList, sortedMvrs, simFuzzPct) // TODO wrong
             }
             return sampledMvrs.map{ it }.zip(sortedCards.map{ it })
         }

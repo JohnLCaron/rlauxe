@@ -160,6 +160,8 @@ fun tabulateDebugInfo(cards: CloseableIterator<AuditableCard>, contests: List<Co
     return tabs.toSortedMap()
 }
 
+private val fac = 3 // TODO pass in
+
 // CLCA and OneAudit TODO POLLING
 // we dont use this for the actual estimation....
 fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
@@ -202,7 +204,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
     val stddev = .586 * nsamples - 23.85 // see https://github.com/JohnLCaron/rlauxe?tab=readme-ov-file#clca-with-errors
 
     // Approximately 95.45% / 99.73% of the data in a normal distribution falls within two / three standard deviations of the mean.
-    val needed = if (stddev > 0) roundUp(nsamples + 3 * stddev) else 3 * nsamples
+    val needed = if (stddev > 0) roundUp(nsamples + fac * stddev) else fac * nsamples
 
     var est =  min( contest.Npop, needed)
     if (config.contestSampleCutoff != null) est = min(config.contestSampleCutoff, est)
@@ -210,8 +212,10 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
             "estAndBet=${estAndBet.first}, ${df(estAndBet.second)} stddev=$stddev; $dd" }
 
     if (est < 0) {
-        val wtf = cassorter.estWithOptimalBet(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue, clcaErrorCounts)
-        throw RuntimeException("est samples $est < 0") // TODO
+        // TODO what to do when estimate is negetive?? Perhaps fail ??
+        //val wtf = cassorter.estWithOptimalBet(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue, clcaErrorCounts)
+        //throw RuntimeException("est samples $est < 0") // TODO
+        return cassorter.sampleSizeNoErrors(2 * config.clcaConfig.maxLoss, lastPvalue)
     }
     return est
 }

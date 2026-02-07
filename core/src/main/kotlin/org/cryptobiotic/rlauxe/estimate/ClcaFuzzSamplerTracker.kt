@@ -18,9 +18,10 @@ private val logger = KotlinLogging.logger("ClcaFuzzSamplerTracker")
 class ClcaFuzzSamplerTracker(
     val fuzzPct: Double,
     cardSamples: CardSamples,
-    val contest: ContestIF,
+    val contestUA: ContestWithAssertions,
     val cassorter: ClcaAssorter
 ): SamplerTracker, ErrorTracker {
+    val contest = contestUA.contest
     val samples = cardSamples.extractSubsetByIndex(contest.id)
     val maxSamples = samples.size
     val permutedIndex = MutableList(samples.size) { it }
@@ -29,6 +30,7 @@ class ClcaFuzzSamplerTracker(
     var welford = Welford()
     var cvrPairs: List<Pair<AuditableCard, AuditableCard>> // (mvr, cvr)
     var idx = 0
+    var simulation = 0
 
     init {
         val mvrs = remakeFuzzed()
@@ -56,6 +58,8 @@ class ClcaFuzzSamplerTracker(
     override fun reset() {
         val mvrs = remakeFuzzed() // refuzz each time
         cvrPairs = mvrs.zip(samples)
+        // testFuzzed()
+
         permutedIndex.shuffle(Random) // also, a new permutation....
         idx = 0
         welford = Welford()
@@ -64,6 +68,26 @@ class ClcaFuzzSamplerTracker(
 
     fun remakeFuzzed(): List<AuditableCard> {
         return makeFuzzedCardsForClca(listOf(contest.info()), samples, fuzzPct)
+    }
+
+    fun testFuzzed() {
+        val testErrors = ClcaErrorTracker2(cassorter.noerror(), cassorter.assorter.upperBound())
+        cvrPairs.forEach { (mvr, card) ->
+            if (card.hasContest(contest.id)) { // should always be true
+                val nextVal = cassorter.bassort(mvr, card, hasStyle = card.exactContests())
+                testErrors.addSample(nextVal, card.poolId == null)
+            }
+        }
+        val counts = testErrors.measuredClcaErrorCounts()
+
+        val (est, bet) = cassorter.estWithOptimalBet(contestUA, .9, 0.5, counts)
+        val sumCounts = counts.errorCounts().map { it.value }.sum()
+        val pct = sumCounts/cvrPairs.size.toDouble()
+        if (pct > 10 * fuzzPct) {
+            val logt = counts.expectedValueLogt(bet)
+            println("simulation $simulation has $fuzzPct % errors bet=$bet est=$est counts = ${counts.errorCounts()} logt=$logt")
+        }
+        simulation++
     }
 
     override fun maxSamples() = maxSamples
@@ -88,8 +112,8 @@ class ClcaFuzzSamplerTracker(
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+// TODO this is pretty crude, just randomly changing shit.
 
-// TODO how does this differ from makeFuzzedCvrsForPolling ?? seems to be the same ??
 fun makeFuzzedCvrsForClca(infoList: List<ContestInfo>,
                           cvrs: List<Cvr>,
                           fuzzPct: Double?,
@@ -97,12 +121,17 @@ fun makeFuzzedCvrsForClca(infoList: List<ContestInfo>,
     if (fuzzPct == null || fuzzPct == 0.0) return cvrs
     val infos = infoList.associate{ it.id to it }
     val isIRV = infoList.associate { it.id to it.isIrv}
-
-    return cvrs.mapIndexed { idx, cvr ->
+    var countChanged = 0
+    val result =  cvrs.mapIndexed { idx, cvr ->
         val card = AuditableCard.fromCvr( cvr, idx, Random.nextLong() )
         val fuzzedCard = makeFuzzedCardFromCard(infos, isIRV, card, fuzzPct )
-        fuzzedCard.cvr()
+        val result = fuzzedCard.cvr()
+        if (result != cvr)
+            countChanged++
+        result
     }
+    // println("changed $countChanged cards pct = ${countChanged/cvrs.size.toDouble()}")
+    return result
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +172,11 @@ fun makeFuzzedCardFromCard(
                 val votes = cardb.votes[contestId]
                 // votes.size == 0 means an undervote
                 // votes = null means it doesnt have this contest. perhaps one shouldnt add it ??
-                val currCand: Int? = if (votes == null || votes.size == 0) null else votes[0] // TODO only one vote allowed
+                val currCand: Int? = if (votes == null || votes.size == 0)
+                    null
+                else
+                    votes[0] // TODO only one vote allowed
+
                 // choose a different candidate, or none.
                 val newCand = chooseNewCandidate(currCand, info.candidateIds)
                 cardb.replaceContestVote(contestId, newCand)

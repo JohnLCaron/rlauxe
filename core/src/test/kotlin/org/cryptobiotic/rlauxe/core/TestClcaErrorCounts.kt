@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.TausRateTable
 import org.cryptobiotic.rlauxe.betting.computeBassortValues
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.simulateCvrsWithDilutedMargin
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doublePrecision
@@ -34,8 +33,8 @@ class TestClcaErrorCounts {
         var errorCounts = bassorts.associate { it to (fuzz * totalSamples).toInt() }
 
         val cerr2 = ClcaErrorCounts(errorCounts, 1000, noerror, upper)
-        println(cerr2.clcaErrorRate())
-        assertEquals(fuzz * bassorts.size, cerr2.clcaErrorRate())
+        println(cerr2.sumRates())
+        assertEquals(fuzz * bassorts.size, cerr2.sumRates(), doublePrecision)
 
         // what if upper is < 1 ?
         upper = 0.5678
@@ -45,8 +44,8 @@ class TestClcaErrorCounts {
         errorCounts = bassorts.associate { it to (fuzz * totalSamples).toInt() }
 
         val cerr3 = ClcaErrorCounts(errorCounts, 1000, noerror, upper)
-        println(cerr3.clcaErrorRate())
-        assertEquals(fuzz * bassorts.size, cerr3.clcaErrorRate())
+        println(cerr3.sumRates())
+        assertEquals(fuzz * bassorts.size, cerr3.sumRates(), doublePrecision)
 
         println(cerr3.show())
     }

@@ -1,7 +1,11 @@
 package org.cryptobiotic.rlauxe.betting
 
 import org.cryptobiotic.rlauxe.util.Welford
+import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.math.ln
 
 data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double) {
     val taus = Taus(upper)
@@ -9,15 +13,10 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
     // errorCounts divided by totalSamples
     fun errorRates() : Map<Double, Double> = errorCounts.mapValues { if (totalSamples == 0) 0.0 else it.value / totalSamples.toDouble() }  // bassortValue -> rate
     fun errorCounts() = errorCounts // bassortValue -> count
-    fun sumRates() = errorRates().map{ it.value }.sum()
+    fun sumRates() = errorRates().map{ it.value }.sum()  // hey this includes noerror ??
 
     fun bassortValues(): List<Double> {
         return taus.values().map { it * noerror }
-    }
-
-    fun clcaErrorRate(): Double {
-        val clcaErrors = errorCounts.toList().filter { (key, value) -> taus.isClcaError(key / noerror) }.sumOf { it.second }
-        return clcaErrors / totalSamples.toDouble()
     }
 
     // is this bassort value the one that a phantom would generate?
@@ -39,6 +38,19 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
         } else {
             append("no errors")
         }
+    }
+
+    fun expectedValueLogt(lam: Double): Double {
+        val p0 = 1.0 - sumRates()
+        val mui = 0.5
+        val noerrorTerm = ln(1.0 + lam * (noerror - mui)) * p0
+
+        var sumClcaTerm = 0.0
+        errorRates().forEach { (sampleValue: Double, rate: Double) ->
+            sumClcaTerm += ln(1.0 + lam * (sampleValue - mui)) * rate
+        }
+        val total = noerrorTerm + sumClcaTerm
+        return total
     }
 
     override fun toString() = buildString {

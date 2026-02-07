@@ -84,7 +84,7 @@ class GenerateTausErrorTable {
         //// cut and paste this output into TausErrorTable
         println("\ntauErrorRates N=$totalBallots")
         tauErrorRates.forEach { (ncands, ter) ->
-            println("rrates[$ncands] = mapOf( ${ter.ratesString()} )")
+            println("tauRates[$ncands] = mapOf( ${ter.ratesString()} )")
         }
     }
 }

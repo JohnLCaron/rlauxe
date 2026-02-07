@@ -41,7 +41,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
 
         val stopwatch = Stopwatch()
 
-        // 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function,
+        // for each contest, estimate how many samples are needed to satisfy the risk function,
         estimateSampleSizes(
             auditConfig,
             auditRound,

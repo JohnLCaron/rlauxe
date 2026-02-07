@@ -125,8 +125,8 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             GeneralAdaptiveBetting(
                 contestUA.Npop,
                 // the actual audit cant "look ahead" with the measured error rates, so always start empty
-                // OTOH, I think you could use apriori rates if they are set independently from the mcrs TODO
-                // TODO mixing up apriori dor audit with measuredErrorRates for estimation
+                // OTOH, I think you could use apriori rates if they are set independently from the mcrs
+                // TODO see Issue #519
                 startingErrors = ClcaErrorCounts.empty(cassorter.noerror(), cassorter.assorter.upperBound()),
                 contest.Nphantoms(),
                 oaAssortRates = null,

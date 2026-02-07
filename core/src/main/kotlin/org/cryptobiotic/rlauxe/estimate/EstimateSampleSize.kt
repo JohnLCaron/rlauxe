@@ -278,7 +278,7 @@ fun estimateClcaAssertionRound(
             )
 
     // for one contest, this takes a list of cards and fuzzes them to use as the mvrs.
-    val samplerTracker = ClcaFuzzSamplerTracker(config.simFuzzPct ?: 0.0, cardSamples, contestUA.contest, cassorter)
+    val samplerTracker = ClcaFuzzSamplerTracker(config.simFuzzPct ?: 0.0, cardSamples, contestUA, cassorter)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateClcaAssertionRound for $name with ${config.nsimEst} trials"}
@@ -460,7 +460,7 @@ fun estimatePollingAssertionRound(
 
     // optional fuzzing of the mvrs
     val useFuzz = config.simFuzzPct ?: 0.0
-    val samplerTracker = PollingFuzzSamplerTracker(useFuzz, mvrs, contestUA.contest as Contest, assorter) // TODO cant use Raire
+    val samplerTracker = PollingFuzzSamplerTracker(useFuzz, mvrs, contestUA.contest as Contest, assorter)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimatePollingAssertionRound for $name with ${config.nsimEst} trials"}

@@ -18,9 +18,9 @@ class ClcaDistributions {
     val nsimEst = 100
     val margin = .02
     val mvrsFuzzPct = .005
-    val simFuzzPct = .01
+    val simFuzzPct = .0025
 
-    val name = "estErrorRatesDouble"
+    val name = "estErrorRatesHalf"
     val dirName = "$testdataDir/plots/dist"
 
     // Used in docs: Under/Over estimating CLCA sample sizes, show distributions

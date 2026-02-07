@@ -35,14 +35,6 @@ class GeneralAdaptiveBetting(
 
     // startingErrors:
     // counts is better than rates since we need the totalSamples in order to average with current errors
-    // 1. estimation: on subsequent rounds, you can use the measured error rates to continue; like startingTestStatistic
-    //    so thats the case focusing on error count and just continuing on
-    // 2. the actual audit cant "look ahead" with the measured error rates, so always start empty
-    //    OTOH, I think you could use apriori rates if they are set independently from the mvrs TODO
-    //    so thats the case for trunkShrink I think
-    //    aprioris would have to be set as tauRates? but different assorters have different upperLimit.
-    //    perhaps thats the case for fuzzPct?
-
     // estimated rates for each clca bassort value TODO test
     fun estimatedErrorRates(trackerErrors: ClcaErrorCounts? = null): Map<Double, Double> { // bassort -> rate
         val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.totalInPools) / Npop.toDouble()

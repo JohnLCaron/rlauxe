@@ -19,7 +19,7 @@ import kotlin.math.ln
  * The reported assorter mean Āc > 1/2.
  *
  * We dont actually have ci for i in Gg, so we declare A(ci) := Âc_Gg, the average value in group Gg.
- * From eq 7 define B(bi, ci) ≡ (1 − (ωi / u)) / (2 − v/u) = (u - A(ci) + A(bi)) / (2u - v) in [0, 2u/(2u-v)]] (OA 6) TODO HEY [0, 3u/(2u-v)]] ?
+ * From eq 7 define B(bi, ci) ≡ (1 − (ωi / u)) / (2 − v/u) = (u - A(ci) + A(bi)) / (2u - v) in [0, 2u/(2u-v)]] (OA 6)
  *   B̄b = AVG_N((u - A(ci) + A(bi)) / (2u - v) =  u - AVG_N(A(ci)) + AVG_N(A(bi)) / (2u - v) =
  *        (u - Āc + Āb)  / (2u - v)
  *  define v := 2Āc − 1 ≤ 2u − 1 < 2u     [show that (2u - 2Āc + 1) > 0, so dont flip the sign]
@@ -121,11 +121,6 @@ class OneAuditClcaAssorter(
         if (poolAverage == null) {
             throw RuntimeException("OneAuditClcaAssorter couldnt find pool Avg for pool ${cvr.poolId()}")
         }
-
-        // TODO im surprised that we dont return 0.5 when !mvr.hasContest(info.id)
-        //    I think it does; see TestOneAuditAssortValueRates
-        //    also check that it does for general CLCA
-        // if (!mvr.hasContest(info.id)) { if (hasStyle) 0.0 else 0.5 }
 
         val overstatement = overstatementPoolError(mvr, poolAverage, hasStyle) // ωi
         val tau = (1.0 - overstatement / this.assorter.upperBound())

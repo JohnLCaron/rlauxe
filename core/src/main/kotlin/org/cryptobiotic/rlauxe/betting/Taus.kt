@@ -128,42 +128,35 @@ object TausRateTable {
         // different fuzzPct for each tau
         val fuzzPcts = errorCounts.errorCounts.map { (assortValue, count) ->
             val tau = assortValue / errorCounts.noerror
-            val tauDesc = taus.nameOf(tau)!!
-            val tauRate = tauRateForNCand[tauDesc]!!
+            val tauDesc = taus.nameOf(tau)
+            val tauRate = tauRateForNCand[tauDesc]
+            if (tauRate == null) {
+                print("")
+            }
             val errorRate = errorRates[assortValue] ?: 0.0
             // fuzzPct = error rate / tauRate
-            errorRate / tauRate
+            errorRate / tauRate!!
         }
         return fuzzPcts
     }
 
     init {
-        // TODO this only has tables for upper = 1.0
-        // generated 1/1/2026 by GenerateTausErrorTable
+        // 2/7/26
         // tauErrorRates N=1000000
-        tauRates[2] = mapOf( "win-los" to 0.2515, "oth-los" to 0.27258, "oth-win" to 0.23966, "los-win" to 0.21922,  )
-        tauRates[3] = mapOf( "win-los" to 0.12973, "oth-los" to 0.36293, "oth-win" to 0.30457, "los-win" to 0.10201,  )
-        tauRates[4] = mapOf( "win-los" to 0.09754, "oth-los" to 0.3847, "oth-win" to 0.22948666666666667, "los-win" to 0.038413333333333334,  )
-        tauRates[5] = mapOf( "win-los" to 0.0726, "oth-los" to 0.382905, "oth-win" to 0.223975, "los-win" to 0.03136,  )
-        tauRates[6] = mapOf( "win-los" to 0.051956, "oth-los" to 0.359464, "oth-win" to 0.1865, "los-win" to 0.01924,  )
-        tauRates[7] = mapOf( "win-los" to 0.04778, "oth-los" to 0.36621333333333334, "oth-win" to 0.16278, "los-win" to 0.013033333333333333,  )
-        tauRates[8] = mapOf( "win-los" to 0.03302, "oth-los" to 0.30988571428571426, "oth-win" to 0.14912571428571428, "los-win" to 0.0098,  )
-        tauRates[9] = mapOf( "win-los" to 0.031185, "oth-los" to 0.318485, "oth-win" to 0.141475, "los-win" to 0.009395,  )
-        tauRates[10] = mapOf( "win-los" to 0.029946666666666667, "oth-los" to 0.3352688888888889, "oth-win" to 0.11130666666666666, "los-win" to 0.005048888888888889,  )    }
+        tauRates[2] = mapOf( "win-los" to 0.21339818181818182, "win-oth" to 0.2664109090909091, "oth-los" to 0.2664109090909091, "los-oth" to 0.2591127272727273, "oth-win" to 0.2591127272727273, "los-win" to 0.20853636363636363,  )
+        tauRates[3] = mapOf( "win-los" to 0.13128727272727272, "win-oth" to 0.3697027272727273, "oth-los" to 0.3697027272727273, "los-oth" to 0.26815272727272726, "oth-win" to 0.26815272727272726, "los-win" to 0.0780790909090909,  )
+        tauRates[4] = mapOf( "win-los" to 0.08808363636363636, "win-oth" to 0.3794666666666667, "oth-los" to 0.3794666666666667, "los-oth" to 0.23896242424242425, "oth-win" to 0.23896242424242425, "los-win" to 0.04194484848484849,  )
+        tauRates[5] = mapOf( "win-los" to 0.062468636363636365, "win-oth" to 0.3578081818181818, "oth-los" to 0.3578081818181818, "los-oth" to 0.20814772727272726, "oth-win" to 0.20814772727272726, "los-win" to 0.025486818181818183,  )
+        tauRates[6] = mapOf( "win-los" to 0.048581454545454546, "win-oth" to 0.3369643636363636, "oth-los" to 0.3369643636363636, "los-oth" to 0.19450036363636364, "oth-win" to 0.19450036363636364, "los-win" to 0.02000618181818182,  )
+        tauRates[7] = mapOf( "win-los" to 0.039082121212121214, "win-oth" to 0.32060333333333335, "oth-los" to 0.32060333333333335, "los-oth" to 0.16815060606060606, "oth-win" to 0.16815060606060606, "los-win" to 0.013656969696969697,  )
+        tauRates[8] = mapOf( "win-los" to 0.03302077922077922, "win-oth" to 0.30717766233766236, "oth-los" to 0.30717766233766236, "los-oth" to 0.15172103896103897, "oth-win" to 0.15172103896103897, "los-win" to 0.010150649350649351,  )
+        tauRates[9] = mapOf( "win-los" to 0.028155909090909093, "win-oth" to 0.29654977272727273, "oth-los" to 0.29654977272727273, "los-oth" to 0.14481227272727273, "oth-win" to 0.14481227272727273, "los-win" to 0.008987727272727272,  )
+        tauRates[10] = mapOf( "win-los" to 0.02313131313131313, "win-oth" to 0.2760222222222222, "oth-los" to 0.2760222222222222, "los-oth" to 0.1349258585858586, "oth-win" to 0.1349258585858586, "los-win" to 0.007379595959595959,  )
+    }
 }
 
-/*
-tauErrorRates N=1000000
-rrates[2] = mapOf( "win-los" to 0.2263, "win-oth" to 0.28012, "oth-los" to 0.28012, "noerror" to 0.0, "los-oth" to 0.24746, "oth-win" to 0.24746, "los-win" to 0.22616,  )
-rrates[3] = mapOf( "win-los" to 0.12314, "win-oth" to 0.39035, "oth-los" to 0.39035, "noerror" to 0.0, "los-oth" to 0.26711, "oth-win" to 0.26711, "los-win" to 0.07286,  )
-rrates[4] = mapOf( "win-los" to 0.08524666666666667, "win-oth" to 0.37255333333333335, "oth-los" to 0.37255333333333335, "noerror" to 0.0, "los-oth" to 0.26398, "oth-win" to 0.26398, "los-win" to 0.04366,  )
-rrates[5] = mapOf( "win-los" to 0.0701, "win-oth" to 0.38028, "oth-los" to 0.38028, "noerror" to 0.0, "los-oth" to 0.23144, "oth-win" to 0.23144, "los-win" to 0.029605,  )
-rrates[6] = mapOf( "win-los" to 0.04324, "win-oth" to 0.3219, "oth-los" to 0.3219, "noerror" to 0.0, "los-oth" to 0.22698, "oth-win" to 0.22698, "los-win" to 0.02394,  )
-rrates[7] = mapOf( "win-los" to 0.04602666666666667, "win-oth" to 0.3632533333333333, "oth-los" to 0.3632533333333333, "noerror" to 0.0, "los-oth" to 0.16333333333333333, "oth-win" to 0.16333333333333333, "los-win" to 0.012153333333333334,  )
-rrates[8] = mapOf( "win-los" to 0.0255, "win-oth" to 0.2741485714285714, "oth-los" to 0.2741485714285714, "noerror" to 0.0, "los-oth" to 0.17047714285714285, "oth-win" to 0.17047714285714285, "los-win" to 0.011628571428571429,  )
-rrates[9] = mapOf( "win-los" to 0.0234525, "win-oth" to 0.2685925, "oth-los" to 0.2685925, "noerror" to 0.0, "los-oth" to 0.14736, "oth-win" to 0.14736, "los-win" to 0.008075,  )
-rrates[10] = mapOf( "win-los" to 0.024777777777777777, "win-oth" to 0.2901088888888889, "oth-los" to 0.2901088888888889, "noerror" to 0.0, "los-oth" to 0.14106888888888888, "oth-win" to 0.14106888888888888, "los-win" to 0.007431111111111111,  )
- */
+
+
 
 
 

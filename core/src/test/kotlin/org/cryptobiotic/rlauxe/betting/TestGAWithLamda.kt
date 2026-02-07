@@ -38,7 +38,7 @@ class TestGAWithLamda {
         repeat(1000) { tracker.addSample(noerror) }
 
         val tauPlurality = Taus(1.0)
-        println(tauPlurality.names)
+        println(tauPlurality.names())
         //tauPlurality.values().forEach { tau ->
         //    repeat(10) { tracker.addSample( tau * noerror) }
         //}

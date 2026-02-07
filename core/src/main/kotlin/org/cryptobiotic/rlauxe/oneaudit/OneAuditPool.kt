@@ -16,7 +16,6 @@ import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.math.max
 
-
 private val logger = KotlinLogging.logger("OneAuditPool")
 
 const val unpooled = "unpooled"
@@ -50,38 +49,6 @@ interface OneAuditPoolIF: PopulationIF {
         }
         appendLine(")")
     }
-
-    // OneAuditPool(override val poolName: String, override val poolId: Int, val exactContests: Boolean,
-    //  val ncards: Int, val regVotes: Map<Int, RegVotes>)
-    fun toOneAuditPool() = OneAuditPool(poolName, poolId, hasSingleCardStyle(), ncards(), regVotes())
-}
-
-// TODO keeping regVotes but not irvVotes. Because VoteConsolidator can be large
-data class OneAuditPool(override val poolName: String, override val poolId: Int, val hasSingleCardStyle: Boolean,
-                        val ncards: Int, val regVotes: Map<Int, ContestVotesIF>) : OneAuditPoolIF {
-    val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
-    override fun name() = poolName
-    override fun id() = poolId
-    override fun hasSingleCardStyle() = hasSingleCardStyle
-
-    override fun regVotes() = regVotes
-    override fun hasContest(contestId: Int) = regVotes[contestId] != null
-    override fun ncards() = ncards
-
-    override fun contests() = regVotes.keys.toList().sorted().toIntArray()
-    override fun assortAvg() = assortAvg
-
-    /* override fun votesAndUndervotes(contestId: Int,): Vunder {
-        val regVotes = regVotes[contestId]!!         // empty for IRV ...
-        return Vunder.fromNpop(contestId, regVotes.undervotes(), ncards(), regVotes.votes, regVotes.voteForN)
-        // val poolUndervotes = ncards * voteForN - regVotes.votes.values.sum()
-        // return Vunder(contestId, regVotes.votes, regVotes.undervotes(), 0, voteForN) // old way
-    } */
-
-    override fun votesAndUndervotes(contestId: Int,): Vunder {
-        val regVotes = regVotes[contestId]!!         // empty for IRV ...
-        return Vunder.fromNpop(contestId, regVotes.undervotes(), ncards(), regVotes.votes, regVotes.voteForN)
-    }
 }
 
 // used by Boulder and Corla
@@ -91,7 +58,7 @@ data class OneAuditPoolWithBallotStyle(
     val hasSingleCardStyle: Boolean,
     val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes; must include contests with no votes
     val infos: Map<Int, ContestInfo>, // all infos
-): OneAuditPoolIF {
+): OneAuditPoolIF, PopulationIF {
 
     val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
     val maxMinCardsNeeded: Int
@@ -149,16 +116,9 @@ data class OneAuditPoolWithBallotStyle(
         return ncards() * info.voteForN - voteSum
     }
 
-    /* override fun votesAndUndervotes(contestId: Int): Vunder {
-        val poolUndervotes = undervoteForContest(contestId)
-        val votesForContest = voteTotals[contestId]!!
-        return Vunder.fromNpop(contestId, poolUndervotes, ncards(), votesForContest.votes, votesForContest.voteForN)
-    } */
-
     override fun votesAndUndervotes(contestId: Int): Vunder {
-        val poolUndervotes = undervoteForContest(contestId) // TODO why is this different from  whats in the contestTab ?
+        val poolUndervotes = undervoteForContest(contestId)
         val contestTab = voteTotals[contestId]!!
-        // return contestTab.votesAndUndervotes2(poolId)
         return Vunder.fromNpop(contestId, poolUndervotes, ncards(), contestTab.votes, contestTab.voteForN)
     }
 
@@ -231,11 +191,6 @@ data class OneAuditPoolFromCvrs(
         }
         totalCards++
     }
-
-    /* override fun votesAndUndervotes(contestId: Int): Vunder {
-        val contestTab = contestTabs[contestId]!!
-        return contestTab.votesAndUndervotes() // good reason for cardPool to always have contestTabs
-    } */
 
     override fun votesAndUndervotes(contestId: Int): Vunder {
         val contestTab = contestTabs[contestId]!!

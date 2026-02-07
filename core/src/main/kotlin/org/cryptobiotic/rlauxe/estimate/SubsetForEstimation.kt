@@ -160,7 +160,7 @@ fun tabulateDebugInfo(cards: CloseableIterator<AuditableCard>, contests: List<Co
     return tabs.toSortedMap()
 }
 
-private val fac = 10 // TODO pass in
+private val fac = 3 // TODO pass in
 
 // CLCA and OneAudit, not needed by Polling
 // we dont use this for the actual estimation....
@@ -201,6 +201,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
     } else ""
 
     val nsamples =  estAndBet.first
+    // TODO underestimates when nsamples is low ?
     val stddev = .586 * nsamples - 23.85 // see https://github.com/JohnLCaron/rlauxe?tab=readme-ov-file#clca-with-errors
 
     // Approximately 95.45% / 99.73% of the data in a normal distribution falls within two / three standard deviations of the mean.

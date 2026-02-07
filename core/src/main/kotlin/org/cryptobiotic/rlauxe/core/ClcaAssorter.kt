@@ -94,6 +94,7 @@ open class ClcaAssorter(
         return N
     }
 
+    // Pair(estSampleSize, optimalBet)
     fun estWithOptimalBet(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorCounts: ClcaErrorCounts? = null): Pair<Int, Double> {
         val upper = assorter.upperBound()
         val betFn = GeneralAdaptiveBetting(
@@ -104,8 +105,7 @@ open class ClcaAssorter(
             maxLoss = maxLoss,
             debug=false,
         )
-        val estRates = betFn.estimatedErrorRates() // debug
-        val optimalBet = betFn.bet(ClcaErrorTracker(noerror(), upper)) // TODO check
+        val optimalBet = betFn.bet(ClcaErrorTracker(noerror(), upper))
         val estSampleSize = if (clcaErrorCounts == null) sampleSizeNoErrors(optimalBet, alpha) else
             sampleSizeWithErrors(optimalBet, alpha, clcaErrorCounts)
         return Pair(estSampleSize, optimalBet)

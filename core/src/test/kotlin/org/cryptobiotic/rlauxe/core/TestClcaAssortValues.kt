@@ -44,8 +44,8 @@ class TestClcaAssortValues {
 
         println("DHondtAssorter")
         val taus = Taus(cassorter.assorter().upperBound())
-        println("${taus.names.map { it.first }} * noerror=${cassorter.noerror}")
-        println("${taus.names.map { it.second }} * noerror")
+        println("${taus.values()} * noerror=${cassorter.noerror}")
+        println("${taus.names()}")
         testAll(cassorter, taus, listOf(winner,other,loser, phantom), hasStyle=false)
     }
 // output:
@@ -93,8 +93,8 @@ class TestClcaAssortValues {
 
         println("PluralityAssorter")
         val taus = Taus(cassorter.assorter().upperBound())
-        println("${taus.names.map { it.first }} * noerror=${cassorter.noerror}")
-        println("${taus.names.map { it.second }} * noerror")
+        println("${taus.values()} * noerror=${cassorter.noerror}")
+        println("${taus.names()}")
         testAll(cassorter, taus, listOf(winner,other,loser, phantom), hasStyle=false)
     }
     // output:
@@ -138,13 +138,13 @@ class TestClcaAssortValues {
 
         println("PluralityWithMissing hasStyle=false")
         val taus = Taus(cassorter.assorter().upperBound())
-        println("${taus.names.map { it.first }} * noerror=${cassorter.noerror}")
-        println("${taus.names.map { it.second }} * noerror")
+        println("${taus.values()} * noerror=${cassorter.noerror}")
+        println("${taus.names()}")
         testAll(cassorter, taus, listOf(winner,other,loser,missing), hasStyle=false)
 
         println("\nPluralityWithMissing hasStyle=true")
-        println("${taus.names.map { it.first }} * noerror=${cassorter.noerror}")
-        println("${taus.names.map { it.second }} * noerror")
+        println("${taus.values()} * noerror=${cassorter.noerror}")
+        println("${taus.names()}")
         testAll(cassorter, taus, listOf(winner,other,loser,missing), hasStyle=true)
     }
 

@@ -160,8 +160,6 @@ open class Contest(
 
         //// find winners, check that the minimum value is satisfied
         // This works for PLURALITY, APPROVAL, THRESHOLD.  IRV handled by RaireContest, DHONDT by DHondtContest
-
-        // TODO not sure we should be declaring winners ourselves ???
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
         val useMin = info.minFraction ?: 0.0
         val overTheMin = votes.toList().filter{ it.second.toDouble()/nvotes >= useMin }

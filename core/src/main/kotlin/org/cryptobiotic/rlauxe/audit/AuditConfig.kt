@@ -33,6 +33,8 @@ data class AuditConfig(
     val oaConfig: OneAuditConfig = OneAuditConfig(),
 
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
+    val simulationStrategy: SimulationStrategy =  SimulationStrategy.regular,
+
     val skipContests: List<Int> = emptyList(),
     val version: Double = 2.0,
 ) {
@@ -73,6 +75,10 @@ data class AuditConfig(
         }
     }
 }
+
+// optimistic: round 1 assume no errors, subsequent rounds use measured error rates
+enum class SimulationStrategy { regular, optimistic  }
+
 
 // uses AlphaMart
 data class PollingConfig(

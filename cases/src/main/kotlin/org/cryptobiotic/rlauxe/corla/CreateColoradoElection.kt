@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.boulder.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestBuilderIF
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+// import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolWithBallotStyle
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
@@ -34,7 +34,7 @@ open class CreateColoradoElection (
     val infoMap = oaBuilders.associate { it.info.id to it.info }
     val cardPoolBuilders: List<OneAuditPoolWithBallotStyle> = convertPrecinctsToCardPools(precinctFile, infoMap)
 
-    val cardPools: List<OneAuditPool>
+    val cardPools: List<PopulationIF>
     val contests: List<ContestIF>
     val contestsUA: List<ContestWithAssertions>
 
@@ -56,7 +56,7 @@ open class CreateColoradoElection (
             undervote.add(it.oapoolUndervote(cardPoolBuilders))
         }
 
-        cardPools = cardPoolBuilders.map { it.toOneAuditPool() }
+        cardPools = cardPoolBuilders
         contests = makeContests()
 
         val infos = contests.map { it.info() }.associateBy { it.id }

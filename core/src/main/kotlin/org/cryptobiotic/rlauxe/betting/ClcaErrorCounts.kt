@@ -1,27 +1,28 @@
 package org.cryptobiotic.rlauxe.betting
 
 import org.cryptobiotic.rlauxe.util.Welford
+import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.math.ln
 
 data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double) {
     val taus = Taus(upper)
 
+    // errorCounts divided by totalSamples
     fun errorRates() : Map<Double, Double> = errorCounts.mapValues { if (totalSamples == 0) 0.0 else it.value / totalSamples.toDouble() }  // bassortValue -> rate
     fun errorCounts() = errorCounts // bassortValue -> count
-    fun sumRates() = errorRates().map{ it.value }.sum()
+    fun sumRates() = errorRates().map{ it.value }.sum()  // hey this includes noerror ??
 
     fun bassortValues(): List<Double> {
-        return taus.values().map { it * noerror }.sorted()
+        return taus.values().map { it * noerror }
     }
 
-    fun clcaErrorRate(): Double {
-        val clcaErrors = errorCounts.toList().filter { (key, value) -> taus.isClcaError(key / noerror) }.sumOf { it.second }
-        return clcaErrors / totalSamples.toDouble()
-    }
-
+    // is this bassort value the one that a phantom would generate?
     fun isPhantom(bassort: Double): Boolean {
         val tau = bassort / noerror
-        return taus.desc(tau) == "oth-los"
+        return taus.nameOf(tau) == "oth-los"
     }
 
     fun show() = buildString {
@@ -30,13 +31,26 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
             val sorted = errorCounts.toSortedMap()
             append("[")
             sorted.forEach { (bassort, count) ->
-                val desc = taus.desc(bassort / noerror)
+                val desc = taus.nameOf(bassort / noerror)
                 if (desc != null) append("$desc=$count, ")
             }
             append("]")
         } else {
             append("no errors")
         }
+    }
+
+    fun expectedValueLogt(lam: Double): Double {
+        val p0 = 1.0 - sumRates()
+        val mui = 0.5
+        val noerrorTerm = ln(1.0 + lam * (noerror - mui)) * p0
+
+        var sumClcaTerm = 0.0
+        errorRates().forEach { (sampleValue: Double, rate: Double) ->
+            sumClcaTerm += ln(1.0 + lam * (sampleValue - mui)) * rate
+        }
+        val total = noerrorTerm + sumClcaTerm
+        return total
     }
 
     override fun toString() = buildString {
@@ -75,11 +89,6 @@ fun computeBassortValues(noerror: Double, upper: Double): List<Double> {
     return taus.map { it * noerror }.toSet().toList().sorted()
 }
 
-interface TausIF {
-    fun desc(tau: Double): String?
-    fun values(): List<Double>
-}
-
 // o = cvr_assort - mvr_assort when l = 0:
 // [0, .5, u] - [0, .5, u] = 0, -.5, -u
 //                         = .5,  0, .5-u
@@ -106,38 +115,6 @@ interface TausIF {
 
 //  tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
 //  assort = tau * noerror   // Bi eq (7)
-
-class Taus(upper: Double): TausIF {
-    // p2o, p1o, ? noerror, ?, p1u, p2u
-    // [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror (l==0) (we will assume this)
-    val u12 = 1.0 / (2 * upper)  // (2 * upper) > 1, u12 < 1
-    val name = mapOf(0.0 to "0", u12 to "1/2u", 1 - u12 to "1-1/2u", 1.0 to "noerror", 2 - u12 to "2-1/2u", 1 + u12 to "1+1/2u", 2.0 to "2").toList().sortedBy{ it.first }
-    val taus = mapOf(0.0 to "win-los", u12 to "win-oth", 1 - u12 to "oth-los", 1.0 to "noerror", 2 - u12 to "los-oth", 1 + u12 to "oth-win", 2.0 to "los-win").toList().sortedBy{ it.first }
-
-    // cvr-mvr
-    override fun desc(tau: Double): String? {
-        val pair = taus.find { doubleIsClose(it.first, tau) }
-        return pair?.second
-    }
-
-    fun isClcaError(tau: Double): Boolean {
-        val pair = name.find { doubleIsClose(it.first, tau) }
-        return (pair != null) && (pair.second != "noerror")
-    }
-
-    fun name(want: Double) : String {
-        val pair = name.find { doubleIsClose(it.first, want) }
-        return pair?.second ?: "N/A"
-    }
-
-    override fun values() = taus.map { it.first }.toList()
-
-    fun names(): List<String> = taus.map { it.second }
-
-    override fun toString(): String {
-        return taus.toString()
-    }
-}
 
 // used as lightweight ErrorTracker for GeneralAdaptiveBetting.bet()
 class ClcaErrorTracker(val noerror: Double, val upper: Double): ErrorTracker {
@@ -197,48 +174,5 @@ class ClcaErrorTracker(val noerror: Double, val upper: Double): ErrorTracker {
         return "ClcaErrorTracker(noerror=$noerror, noerrorCount=$noerrorCount, valueCounter=${valueCounter.toSortedMap()}, N=${numberOfSamples()})"
     }
 }
-
-
-// refinement of ClcaErrorTable,
-// the idea is that the errorRates are proportional to fuzzPct
-// Then p1 = fuzzPct * r1, p2 = fuzzPct * r2, p3 = fuzzPct * r3, p4 = fuzzPct * r4.
-// margin doesnt matter (TODO show this)
-
-object TausErrorTable {
-    val rrates = mutableMapOf<Int, Map<String, Double>>() // ncands -> desc -> errorRates / FuzzPct
-
-    fun makeErrorRates(ncandidates: Int, fuzzPct: Double, totalSamples: Int, noerror: Double, upper: Double): ClcaErrorCounts {
-        val useCand = when  {
-            ncandidates < 2 -> 2
-            ncandidates > 10 -> 10
-            else -> ncandidates
-        }
-        val rratesCand: Map<String, Double> = rrates[useCand]!!
-        val taus = Taus(upper)
-        val errorCounts = taus.taus.filter { it.second != "noerror" }.associate { (tau, desc) ->
-            val rate = (rratesCand[desc] ?: 0.0) * fuzzPct
-            val count = (totalSamples * rate).toInt()
-            Pair(tau * noerror, count)
-        }
-
-        // data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double) {
-        return ClcaErrorCounts(errorCounts, totalSamples, noerror, upper)
-    }
-
-    init {
-        // TODO this only has tables for upper = 1.0
-        // generated 1/1/2026 by GenerateTausErrorTable
-        // tauErrorRates N=1000000
-        rrates[2] = mapOf( "win-los" to 0.2515, "oth-los" to 0.27258, "oth-win" to 0.23966, "los-win" to 0.21922,  )
-        rrates[3] = mapOf( "win-los" to 0.12973, "oth-los" to 0.36293, "oth-win" to 0.30457, "los-win" to 0.10201,  )
-        rrates[4] = mapOf( "win-los" to 0.09754, "oth-los" to 0.3847, "oth-win" to 0.22948666666666667, "los-win" to 0.038413333333333334,  )
-        rrates[5] = mapOf( "win-los" to 0.0726, "oth-los" to 0.382905, "oth-win" to 0.223975, "los-win" to 0.03136,  )
-        rrates[6] = mapOf( "win-los" to 0.051956, "oth-los" to 0.359464, "oth-win" to 0.1865, "los-win" to 0.01924,  )
-        rrates[7] = mapOf( "win-los" to 0.04778, "oth-los" to 0.36621333333333334, "oth-win" to 0.16278, "los-win" to 0.013033333333333333,  )
-        rrates[8] = mapOf( "win-los" to 0.03302, "oth-los" to 0.30988571428571426, "oth-win" to 0.14912571428571428, "los-win" to 0.0098,  )
-        rrates[9] = mapOf( "win-los" to 0.031185, "oth-los" to 0.318485, "oth-win" to 0.141475, "los-win" to 0.009395,  )
-        rrates[10] = mapOf( "win-los" to 0.029946666666666667, "oth-los" to 0.3352688888888889, "oth-win" to 0.11130666666666666, "los-win" to 0.005048888888888889,  )    }
-}
-
 
 

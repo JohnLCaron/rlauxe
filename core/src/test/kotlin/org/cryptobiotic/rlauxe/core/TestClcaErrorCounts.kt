@@ -3,10 +3,14 @@ package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.betting.TausErrorTable
+import org.cryptobiotic.rlauxe.betting.TausRateTable
 import org.cryptobiotic.rlauxe.betting.computeBassortValues
-import org.cryptobiotic.rlauxe.estimate.simulateCvrsWithDilutedMargin
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doublePrecision
+import kotlin.math.abs
+import kotlin.math.max
 import kotlin.random.Random
 import kotlin.test.*
 
@@ -29,8 +33,8 @@ class TestClcaErrorCounts {
         var errorCounts = bassorts.associate { it to (fuzz * totalSamples).toInt() }
 
         val cerr2 = ClcaErrorCounts(errorCounts, 1000, noerror, upper)
-        println(cerr2.clcaErrorRate())
-        assertEquals(fuzz * bassorts.size, cerr2.clcaErrorRate())
+        println(cerr2.sumRates())
+        assertEquals(fuzz * bassorts.size, cerr2.sumRates(), doublePrecision)
 
         // what if upper is < 1 ?
         upper = 0.5678
@@ -40,8 +44,8 @@ class TestClcaErrorCounts {
         errorCounts = bassorts.associate { it to (fuzz * totalSamples).toInt() }
 
         val cerr3 = ClcaErrorCounts(errorCounts, 1000, noerror, upper)
-        println(cerr3.clcaErrorRate())
-        assertEquals(fuzz * bassorts.size, cerr3.clcaErrorRate())
+        println(cerr3.sumRates())
+        assertEquals(fuzz * bassorts.size, cerr3.sumRates(), doublePrecision)
 
         println(cerr3.show())
     }
@@ -108,19 +112,65 @@ class TestClcaErrorCounts {
 
     @Test
     fun testTausErrorTable() {
-        repeat(131) {
+        var maxMaxPct = 0.0
+
+        val show = false
+        val maxMaxDiffs = mutableMapOf<Int, Double>()  // ncandidates -> maxDiff
+
+        repeat(111) {
             val mvrsFuzzPct = Random.nextDouble(0.01)
             val margin = Random.nextDouble(0.10)
-            val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = 11111, margin, undervotePct = 0.0, phantomPct = 0.0)
-            // val testMvrs = makeFuzzedCvrsForPolling(listOf(cu.contest), testCvrs, mvrsFuzzPct)
+            val undervotePct = Random.nextDouble(0.10)
+            // data class MultiContestTestData(
+            //    val ncontest: Int,
+            //    val nballotStyles: Int,
+            //    val totalBallots: Int, // including undervotes and phantoms
+            //    val marginRange: ClosedFloatingPointRange<Double> = 0.01.. 0.03,
+            //    val underVotePctRange: ClosedFloatingPointRange<Double> = 0.01.. 0.30, // needed to set Nc
+            //    val phantomPctRange: ClosedFloatingPointRange<Double> = 0.00..  0.005, // needed to set Nc
+            //    val addPoolId: Boolean = false, // add cardStyle info to cvrs and cards
+            //    val ncands: Int? = null,
+            //    val poolPct: Double? = null,  // if not null, make a pool with this pct with two ballotStyles
+            //    val seqCands: Boolean = false // if true, use ncands = 2 .. ncontests + 1
+            //)
+            val testData = MultiContestTestData(9, 1, 50000, margin..margin,
+                undervotePct .. undervotePct, 0.0 .. 0.0, seqCands=true)
+            val testCvrs = testData.makeCvrsFromContests()
 
-            val contestUA = ContestWithAssertions(cu.contest).addStandardAssertions()
-            val assertion = contestUA.minClcaAssertion()!!
-            val cassorter = assertion.cassorter
+            testData.contests.forEach { contest ->
+                val contestUA = ContestWithAssertions(contest).addStandardAssertions()
+                val assertion = contestUA.minClcaAssertion()!!
+                val cassorter = assertion.cassorter
 
-            //     fun makeErrorRates(ncandidates: Int, fuzzPct: Double, totalSamples: Int, noerror: Double, upper: Double): ClcaErrorCounts {
-            val errors = TausErrorTable.makeErrorRates(contestUA.ncandidates, mvrsFuzzPct, contestUA.Npop, cassorter.noerror(), cassorter.assorter.upperBound())
-            println("ncand=${contestUA.ncandidates} margin=$margin mvrsFuzzPct=$mvrsFuzzPct errors=${errors.errorCounts}")
+                //     fun makeErrorRates(ncandidates: Int, fuzzPct: Double, totalSamples: Int, noerror: Double, upper: Double): ClcaErrorCounts {
+                val errorCounts = TausRateTable.makeErrorCounts(
+                    contestUA.ncandidates,
+                    mvrsFuzzPct,
+                    contestUA.Npop,
+                    cassorter.noerror(),
+                    cassorter.assorter.upperBound()
+                )
+                if (show) println("ncand=${contestUA.ncandidates} mvrsFuzzPct=$mvrsFuzzPct errors=${errorCounts.errorCounts}")
+
+                // TODO actually fuzz the cvrs
+                val fuzzPcts = TausRateTable.calcFuzzPct(contestUA.ncandidates, errorCounts)
+                var maxDiff = 0.0
+                fuzzPcts.forEach { fuzzPct ->
+                    maxDiff = max(maxDiff, abs(fuzzPct - mvrsFuzzPct))
+                }
+                val maxPct = maxDiff / mvrsFuzzPct
+                if (show) {
+                    println(" fuzzPcts = ${fuzzPcts}")
+                    println(" maxDiff=${dfn(maxDiff, 6)} maxDiffPct=${df(maxPct)}")
+                    println()
+                }
+                val maxMaxDiff = maxMaxDiffs.getOrPut(contestUA.ncandidates) { 0.0 }
+                maxMaxDiffs[contestUA.ncandidates] = max(maxMaxDiff, maxDiff)
+                if (maxPct < 1.0) maxMaxPct = max(maxMaxPct, maxPct)
+            }
+        }
+        maxMaxDiffs.forEach { (ncand, maxDiff) ->
+            println(" ncand = $ncand maxMaxDiff=${dfn(maxDiff, 6)}") //  maxMaxPct=${df(maxMaxPct)}")
         }
     }
 }

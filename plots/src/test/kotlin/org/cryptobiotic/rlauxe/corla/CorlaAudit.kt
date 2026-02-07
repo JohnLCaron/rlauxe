@@ -34,7 +34,7 @@ class CorlaSingleRoundAuditTaskGenerator(
 
         val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         val testMvrs = if (p2flips != null || p1flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips) else
-            makeFuzzedCvrsForPolling(listOf(cu.contest), testCvrs, mvrsFuzzPct)
+            makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
         val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(cu.contest), emptyList(),
                                  MvrManagerForTesting(testCvrs, testMvrs, useConfig.seed))
@@ -62,7 +62,7 @@ class CorlaContestAuditTaskGenerator(
 ): ContestAuditTaskGenerator {
     override fun name() = "CorlaWorkflowTaskGenerator"
 
-    override fun generateNewTask(): ContestAuditTask {
+    override fun generateNewTask(): SingleContestAuditTask {
         val auditConfig = auditConfigIn ?:
         AuditConfig(
             AuditType.CLCA, true, nsimEst = 10,
@@ -71,10 +71,10 @@ class CorlaContestAuditTaskGenerator(
 
         val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         val testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
-            makeFuzzedCvrsForPolling(listOf(cu.contest), testCvrs, mvrsFuzzPct)
+            makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
-        val clca = CorlaAudit(auditConfig, listOf(cu.contest), MvrManagerForTesting(testCvrs, testMvrs, auditConfig.seed), quiet = true)
-        return ContestAuditTask(
+        val clca = CorlaAudit(auditConfig, listOf(cu.contest as Contest), MvrManagerForTesting(testCvrs, testMvrs, auditConfig.seed), quiet = true)
+        return SingleContestAuditTask(
             "genAuditWithErrorsPlots mvrsFuzzPct = $mvrsFuzzPct",
             clca,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0)

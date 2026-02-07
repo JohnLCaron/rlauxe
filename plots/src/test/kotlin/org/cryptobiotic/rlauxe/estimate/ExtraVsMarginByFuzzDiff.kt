@@ -14,17 +14,17 @@ import kotlin.test.Test
 
 class ExtraVsMarginByFuzzDiff {
     val Nc = 50000
-    val ntrials = 100
-    val nsimEst = 100
-    val name = "extraVsMarginByFuzzDiff001"
+    val ntrials = 1000
+    val nsimEst = 11
+    val name = "extraVsMarginByFuzzDiff002"
     val dirName = "$testdataDir/plots/extra/$name"
-    val fuzzMvrs = 0.001
+    val fuzzMvrs = 0.002
 
     // Used in docs
     @Test
     fun estSamplesVsMarginByFuzzDiff() {
         val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .09, .10)
-        val fuzzDiffs = listOf(-.001, -.0005, 0.0, .0005, .001)
+        val fuzzDiffs = listOf(-.002, -.001, 0.0, .001, .002)
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
@@ -38,13 +38,14 @@ class ExtraVsMarginByFuzzDiff {
 
             margins.forEach { margin ->
                 val clcaGenerator1 = ClcaContestAuditTaskGenerator("'estSamplesVsMarginByFuzzDiff simFuzzPct=$simFuzzPct, margin=$margin'",
-                    Nc, margin, 0.0, 0.0, fuzzMvrs,
+                    Nc, margin, 0.1, 0.0, fuzzMvrs,
                     parameters=mapOf("nruns" to ntrials.toDouble(), "simFuzzPct" to simFuzzPct, "fuzzMvrs" to fuzzMvrs),
                     config=auditConfig)
                 tasks.add(RepeatedWorkflowRunner(ntrials, clcaGenerator1))
             }
 
         }
+        println("run ${tasks.size} tasks $ntrials trials each with ${nsimEst} simulations each trial")
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 

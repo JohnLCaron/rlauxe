@@ -6,6 +6,12 @@ import org.cryptobiotic.rlauxe.betting.Taus
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import kotlin.test.Test
 
+// simulate multiple contests with different numbers of candidates. Fuzz the cvrs and measure the error counts.
+// convert the counts to tauErrorRates (divide out the noerror factor) and then normalize by fuzzPct.
+// now we have tauErrorRates that can be multiplied by the fuzzPct and noerror to simulate the error rates:
+//      tauErrorRate =
+// copy those into TausErrorTable (in ClcaErrorCounts) so we can estimate the ClcaErrorCounts with
+//       fun makeErrorRates(ncandidates: Int, fuzzPct: Double, totalSamples: Int, noerror: Double, upper: Double): ClcaErrorCounts
 class GenerateTausErrorTable {
     val showRates = false
 
@@ -19,41 +25,52 @@ class GenerateTausErrorTable {
         // make seperate rates for each ncandidates
         // for now, u = 1
 
-        val test = MultiContestTestData(ncontests, 1, totalBallots=totalBallots, phantomPctRange=phantomPct..phantomPct, seqCands = true)
-        val contestsUA = test.contests.map {
-            println(" contest ${it.id} ncands ${it.ncandidates}")
-            ContestWithAssertions(it).addStandardAssertions()
-        }
-        val cards = test.makeCardsFromContests()
-        val fuzzPcts = listOf(0.0001, 0.0005, 0.001, .005,  .01, )
-
         val tauErrorRatesList = mutableMapOf<Int, MutableList<TauErrorRatesCumul>>() // avg across assertions
         val tauErrorRates = mutableMapOf<Int, TauErrorRatesCumul>() // avg across assertions
 
-        fuzzPcts.forEach { fuzzPct ->
+        repeat (11) {
+            val test = MultiContestTestData(
+                ncontests,
+                1,
+                totalBallots = totalBallots,
+                phantomPctRange = phantomPct..phantomPct,
+                seqCands = true
+            )
+            val contestsUA = test.contests.map {
+                println(" contest ${it.id} ncands ${it.ncandidates}")
+                ContestWithAssertions(it).addStandardAssertions()
+            }
+            val cards = test.makeCardsFromContests()
+            val fuzzPcts = listOf(0.0001, 0.0005, 0.001, .005, .01)
 
-            val fcards = makeFuzzedCardsForClca(contestsUA.map { it.contest.info() }, cards, fuzzPct)
-            val testPairs = fcards.zip(cards)
 
-            contestsUA.forEach { contestUA ->
-                val terc = TauErrorRatesCumul() // avg across assertions
-                contestUA.clcaAssertions.forEach { cassertion ->
-                    val cassorter = cassertion.cassorter
-                    val sampler: ClcaSamplerErrorTracker  = ClcaSamplerErrorTracker(contestUA.id, cassorter, testPairs)
-                    while (sampler.hasNext()) {
-                        sampler.next()
+            fuzzPcts.forEach { fuzzPct ->
+                val fcards = makeFuzzedCardsForClca(contestsUA.map { it.contest.info() }, cards, fuzzPct)
+                val testPairs = fcards.zip(cards)
+
+                contestsUA.forEach { contestUA ->
+                    val terc = TauErrorRatesCumul() // avg across assertions
+                    contestUA.clcaAssertions.forEach { cassertion ->
+                        val cassorter = cassertion.cassorter
+                        val sampler: ClcaSamplerErrorTracker =
+                            ClcaSamplerErrorTracker(contestUA.id, cassorter, testPairs)
+                        while (sampler.hasNext()) {
+                            sampler.next()
+                        }
+                        terc.add(sampler.measuredClcaErrorCounts(), fuzzPct)
                     }
-                    terc.add(sampler.measuredClcaErrorCounts(), fuzzPct)
-                }
-                val tauList = tauErrorRatesList.getOrPut(contestUA.ncandidates) { mutableListOf() }
-                tauList.add(terc)
-                // println("ncands ${contestUA.ncandidates}: fuzzPct= $fuzzPct totalSamples=${terc.totalSamples}: ${terc.rates()}")
+                    val tauList = tauErrorRatesList.getOrPut(contestUA.ncandidates) { mutableListOf() }
+                    tauList.add(terc)
+                    // println("ncands ${contestUA.ncandidates}: fuzzPct= $fuzzPct totalSamples=${terc.totalSamples}: ${terc.rates()}")
 
-                // avg across assertions and fuzzPcts
-                val tercAll = tauErrorRates.getOrPut(contestUA.ncandidates) { TauErrorRatesCumul() } // avg across assertions and fuzzPcts
-                tercAll.add(terc)
+                    // avg across assertions and fuzzPcts
+                    val tercAll =
+                        tauErrorRates.getOrPut(contestUA.ncandidates) { TauErrorRatesCumul() } // avg across assertions and fuzzPcts
+                    tercAll.add(terc)
+                }
             }
         }
+
         println("all N=$totalBallots")
         tauErrorRates.forEach { (ncands, ter) ->
             val tauList = tauErrorRatesList[ncands]!!
@@ -64,10 +81,10 @@ class GenerateTausErrorTable {
             println("avg rates=${ter.rates()}  totalSamples=${ter.totalSamples}")
         }
 
+        //// cut and paste this output into TausErrorTable
         println("\ntauErrorRates N=$totalBallots")
-        // cut and paste into TausErrorTable
         tauErrorRates.forEach { (ncands, ter) ->
-            println("rrates[$ncands] = mapOf( ${ter.ratesString()} )")
+            println("tauRates[$ncands] = mapOf( ${ter.ratesString()} )")
         }
     }
 }
@@ -78,10 +95,11 @@ class TauErrorRatesCumul {
     var totalSamples = 0
 
     fun add(cec: ClcaErrorCounts, fuzzPct: Double) {
-        // convert assort values to taus
-        cec.errorCounts.forEach { (assort, count) ->
-            val tau = assort / cec.noerror // will depend on upper, for now upper == 1
+        // convert assort values to taus by dividing by noerror
+        cec.errorCounts.forEach { (assortValue, count) ->
+            val tau = assortValue / cec.noerror // the tau value; will depend on upper, for now upper == 1
             val tc = tauCounts.getOrPut(tau) { 0.0 }
+            // convert counts to normalizedCount by dividing by fuzzPct
             val normalizedCount = if (fuzzPct == 0.0) count.toDouble() else count / fuzzPct
             tauCounts[tau] = tc + normalizedCount
         }
@@ -97,18 +115,21 @@ class TauErrorRatesCumul {
         totalSamples += terc.totalSamples
     }
 
+    // rate is sum of normalizedCount / totalSamples
     fun rates(): Map<String, Double> {
-        return taus.taus.map { (tau, desc) ->
+        return taus.names().map { name ->
+            val tau = taus.valueOf(name)
             val ncount = tauCounts[tau] ?: 0.0
-            Pair(desc, ncount/totalSamples)
+            Pair(name, ncount/totalSamples)
         }.toMap()
         // tauCounts.toSortedMap().map { it.value / totalSamples.toDouble() }
     }
 
     fun ratesString() = buildString {
-        taus.taus.forEach { (tau, desc) ->
+        taus.names().forEach { name ->
+            val tau = taus.valueOf(name)
             val ncount = tauCounts[tau] ?: 0.0
-            append("\"$desc\" to ${ncount/totalSamples}, ")
+            append("\"$name\" to ${ncount/totalSamples}, ")
         }
     }
 }

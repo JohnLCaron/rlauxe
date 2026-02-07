@@ -124,7 +124,10 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val bettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
             GeneralAdaptiveBetting(
                 contestUA.Npop,
-                startingErrors = ClcaErrorCounts.empty(cassorter.noerror(), cassorter.assorter.upperBound()), // TODO why not use tracker ??
+                // the actual audit cant "look ahead" with the measured error rates, so always start empty
+                // OTOH, I think you could use apriori rates if they are set independently from the mcrs
+                // TODO see Issue #519
+                startingErrors = ClcaErrorCounts.empty(cassorter.noerror(), cassorter.assorter.upperBound()),
                 contest.Nphantoms(),
                 oaAssortRates = null,
                 d = clcaConfig.d,

@@ -158,7 +158,6 @@ class AlphaMart(
     val betting: BettingMart
 
     init {
-        // val tracker = ClcaErrorTracker(0.0, upperBound) // TODO using ClcaErrorTracker, why not PluralityErrorTracker?
         val bettingFn = EstimAdapter(N, withoutReplacement, upperBound, estimFn)
         betting = BettingMart(bettingFn, N,  tracker, upperBound, riskLimit)
     }

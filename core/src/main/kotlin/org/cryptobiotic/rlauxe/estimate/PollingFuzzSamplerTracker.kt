@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.ContestVoteBuilder
@@ -15,8 +14,6 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.random.Random
-
-// could try to create a subclass of PollingSamplerTracker ??
 
 class PollingFuzzSamplerTracker(
     val fuzzPct: Double,
@@ -31,7 +28,7 @@ class PollingFuzzSamplerTracker(
     private var idx = 0
 
     init {
-        mvrs = remakeFuzzed() // TODO could do fuzzing on the fly ??
+        mvrs = remakeFuzzed()
         maxSamples = cvrs.count { it.hasContest(contest.id) }
     }
 
@@ -77,14 +74,7 @@ class PollingFuzzSamplerTracker(
     }
 }
 
-fun makeFuzzedCvrsForPolling(contests: List<ContestIF>,
-                             cvrs: List<Cvr>,
-                             fuzzPct: Double,
-): List<Cvr>  {
-    return makeFuzzedCvrsForPolling(contests.map { it.info()}, cvrs, fuzzPct)
-}
-
-// includes undervotes i think
+// includes undervotes i think, IRV ok
 fun makeFuzzedCvrsForPolling(infoList: List<ContestInfo>,
                              cvrs: List<Cvr>,
                              fuzzPct: Double,
@@ -93,7 +83,6 @@ fun makeFuzzedCvrsForPolling(infoList: List<ContestInfo>,
 ): List<Cvr> {
     if (fuzzPct == 0.0) return cvrs
 
-    val infos = infoList.associate { it.id to it }.toMap()
     val isIRV = infoList.associate { it.name to it.isIrv }.toMap()
     var count = 0
     val cvrbs: List<CvrBuilder> = CvrBuilders.convertCvrsToBuilders(infoList, cvrs)
@@ -106,10 +95,10 @@ fun makeFuzzedCvrsForPolling(infoList: List<ContestInfo>,
                 if (isIRV[ccontest.name]!!) {
                     switchCandidateRankings(cvb, ccontest.candidateIds)
                 } else {
-                    val currId: Int? = if (cvb.votes.size == 0) null else cvb.votes[0] // TODO only one vote allowed, cant use on Raire
+                    val currId: Int? = if (cvb.votes.size == 0) null else cvb.votes[0] // TODO only one vote allowed
                     cvb.votes.clear()
                     // choose a different candidate, or none.
-                    val ncandId = chooseNewCandidate(currId, ccontest.candidateIds)
+                    val ncandId = chooseNewCandidate(currId, ccontest.candidateIds) // from ClcaFuzzSamplerTracker
                     if (ncandId != null) {
                         cvb.votes.add(ncandId)
                     }

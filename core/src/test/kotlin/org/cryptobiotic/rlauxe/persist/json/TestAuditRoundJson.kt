@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.workflow.*
@@ -122,7 +122,7 @@ class TestAuditRoundJson {
         val testCvrs = testData.makeCvrsFromContests()
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
             // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-            else makeFuzzedCvrsForPolling(contests, testCvrs, fuzzMvrs)
+            else makeFuzzedCvrsForClca(contests.map { it.info }, testCvrs, fuzzMvrs)
 
         val clcaWorkflow = WorkflowTesterClca(config, contests, emptyList(),
             MvrManagerForTesting(testCvrs, testMvrs, config.seed))
@@ -202,7 +202,7 @@ class TestAuditRoundJson {
         val testCvrs = testData.makeCvrsFromContests() + rcvrs
 
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
-            else makeFuzzedCvrsForPolling(contests, testCvrs, fuzzMvrs)
+            else makeFuzzedCvrsForClca(contests.map { it.info }, testCvrs, fuzzMvrs)
 
         val clcaWorkflow = WorkflowTesterClca(config, contests, listOf(rcontest),
             MvrManagerForTesting(testCvrs, testMvrs, config.seed))
@@ -253,7 +253,7 @@ class TestAuditRoundJson {
 
         val testCvrs = contestd.createSimulatedCvrs()
         val testMvrs = if (fuzzMvrs == 0.0) testCvrs
-            else makeFuzzedCvrsForPolling(contests, testCvrs, fuzzMvrs)
+            else makeFuzzedCvrsForClca(listOf(info), testCvrs, fuzzMvrs)
 
         val clcaWorkflow = WorkflowTesterClca(config, contests, emptyList(),
             MvrManagerForTesting(testCvrs, testMvrs, config.seed))

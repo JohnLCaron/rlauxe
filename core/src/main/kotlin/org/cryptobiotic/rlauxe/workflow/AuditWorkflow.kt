@@ -41,7 +41,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
 
         val stopwatch = Stopwatch()
 
-        // 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function,
+        // for each contest, estimate how many samples are needed to satisfy the risk function,
         estimateSampleSizes(
             auditConfig,
             auditRound,
@@ -53,7 +53,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         )
         logger.debug{"Estimate round ${roundIdx} took ${stopwatch}"}
 
-        // overide the simulation with the calculated mvrs needed
+        // overide the simulation with the calculated mvrs needed TODO
          if (roundIdx == 1 && auditConfig.isOA && auditConfig.oaConfig.strategy == OneAuditStrategyType.calcMvrsNeeded) {
              calculateSampleSizes(auditConfig, auditRound)
          }

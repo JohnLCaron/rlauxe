@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import au.org.democracydevelopers.raire.irv.Votes
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.betting.TausIF
 import org.cryptobiotic.rlauxe.raire.RaireAssorter
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import kotlin.collections.component1
@@ -128,7 +127,7 @@ class OneAuditRatesFromPools(val pools: List<OneAuditPoolIF>) {
 
 //    bassort = [1-poolAvg, 1.5 - poolAvg, 2 - poolAvg] * noerror  when u == 1
 
-class TausOA(val upper: Double, val poolAvg: Double): TausIF {
+class TausOA(val upper: Double, val poolAvg: Double) {
     val tausOA: List<Pair<Double, String>>  // value, desc
 
     init {
@@ -144,12 +143,12 @@ class TausOA(val upper: Double, val poolAvg: Double): TausIF {
         ).toList()
     }
 
-    override fun desc(tau: Double): String? {
+    fun desc(tau: Double): String? {
         val pair = tausOA.find { doubleIsClose(it.first, tau) }
         return pair?.second
     }
 
-    override fun values() = tausOA.map { it.first }.toList()
+    fun values() = tausOA.map { it.first }.toList()
 
     override fun toString(): String {
         return tausOA.toString()

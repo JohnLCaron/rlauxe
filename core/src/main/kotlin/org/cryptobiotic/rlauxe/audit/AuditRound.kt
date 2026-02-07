@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.TausErrorTable
+import org.cryptobiotic.rlauxe.betting.TausRateTable
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.df
@@ -204,7 +204,7 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
         if (assertion is ClcaAssertion) {
             val cassorter = assertion.cassorter
             val clcaErrorCounts = if (fuzzPct == null || fuzzPct == 0.0) null else {
-                TausErrorTable.makeErrorRates(
+                TausRateTable.makeErrorCounts(
                     contest.ncandidates,
                     fuzzPct,
                     contest.Npop,

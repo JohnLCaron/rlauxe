@@ -95,7 +95,7 @@ class TestGeneralAdaptiveBetting2 {
 }
 
 // see PlotWithAssortValues
-fun findSamplesNeededUsingAssorts2(N:Int, margin: Double, upper: Double, lamda: Double, assorts: List<Double>, taus: TausIF, show: Boolean = false) {
+fun findSamplesNeededUsingAssorts2(N:Int, margin: Double, upper: Double, lamda: Double, assorts: List<Double>, taus: TausOA, show: Boolean = false) {
 
     val noerror: Double = 1.0 / (2.0 - margin / upper) // clca assort value when no error
     val tracker = ClcaErrorTracker(noerror, upper)

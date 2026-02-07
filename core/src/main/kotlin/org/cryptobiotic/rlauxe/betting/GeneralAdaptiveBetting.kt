@@ -23,9 +23,9 @@ private val logger = KotlinLogging.logger("GeneralAdaptiveBetting")
 
 class GeneralAdaptiveBetting(
     val Npop: Int, // population size for this contest
-    val startingErrors: ClcaErrorCounts,
+    val startingErrors: ClcaErrorCounts, // non-null so we always have the bassort values
     val nphantoms: Int, // number of phantoms in the population; minimum of "oth-los" rate
-    val oaAssortRates: OneAuditAssortValueRates?, // only for OneAudit
+    val oaAssortRates: OneAuditAssortValueRates?, // non-null for OneAudit
     val d: Int = 100,  // trunc weight
     val maxLoss: Double, // between 0 and 1; this bounds how close lam gets to 2.0; maxBet = maxLoss / mui
     val withoutReplacement: Boolean = true,
@@ -33,15 +33,26 @@ class GeneralAdaptiveBetting(
 ) : BettingFn {
     private var lastBet = 0.0 // debugging
 
-    // debugging and transparency
-    fun startingErrorRates(): Map<Double, Double> {
-        // estimated rates for each clca bassort value
+    // startingErrors:
+    // counts is better than rates since we need the totalSamples in order to average with current errors
+    // 1. estimation: on subsequent rounds, you can use the measured error rates to continue; like startingTestStatistic
+    //    so thats the case focusing on error count and just continuing on
+    // 2. the actual audit cant "look ahead" with the measured error rates, so always start empty
+    //    OTOH, I think you could use apriori rates if they are set independently from the mvrs TODO
+    //    so thats the case for trunkShrink I think
+    //    aprioris would have to be set as tauRates? but different assorters have different upperLimit.
+    //    perhaps thats the case for fuzzPct?
+
+    // estimated rates for each clca bassort value TODO test
+    fun estimatedErrorRates(trackerErrors: ClcaErrorCounts? = null): Map<Double, Double> { // bassort -> rate
         val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.totalInPools) / Npop.toDouble()
-        val sampleNumber = startingErrors.totalSamples
+        val sampleNumber = startingErrors.totalSamples + (trackerErrors?.totalSamples ?: 0)
         val estRates = startingErrors.bassortValues().map { bassort ->
-            val allCount = (startingErrors.errorCounts()[bassort] ?: 0)
+            val startCount = (startingErrors.errorCounts()[bassort] ?: 0)
+            val trackCount = (trackerErrors?.errorCounts()[bassort] ?: 0)
+            val allCount = startCount + trackCount
             var rate = scaled * shrinkTruncEstimateRate(
-                apriori = 0.0,
+                apriori = 0.0,   // TODO shouldnt the startingErrors be the apriori ?? right now you are just doing an average
                 errorCount = allCount,
                 sampleNum = sampleNumber,
             )
@@ -58,23 +69,7 @@ class GeneralAdaptiveBetting(
         val errorTracker = prevSamples as ErrorTracker
         val trackerErrors = errorTracker.measuredClcaErrorCounts()
 
-        // estimated rates for each clca bassort value
-        val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.totalInPools) / Npop.toDouble()
-        val sampleNumber = (startingErrors.totalSamples) + prevSamples.numberOfSamples()
-        val estRates = trackerErrors.errorCounts.map { (assort, errorCount) ->
-            val allCount = errorCount + (startingErrors.errorCounts()[assort] ?: 0)
-            var rate = scaled * shrinkTruncEstimateRate(
-                apriori = 0.0,
-                errorCount = allCount,
-                sampleNum = sampleNumber,
-            )
-            // rate of phantoms is the minimum "oth-los" rate
-            if (startingErrors.isPhantom(assort)) {
-                rate = max( rate, nphantoms / Npop.toDouble())
-            }
-            Pair(assort, rate)
-        }.toMap()
-
+        val estRates = estimatedErrorRates(trackerErrors)
         val mui = populationMeanIfH0(Npop, withoutReplacement, prevSamples)
 
         //    tj is how much you win or lose
@@ -94,7 +89,7 @@ class GeneralAdaptiveBetting(
         val kelly = GeneralOptimalLambda(errorTracker.noerror(), estRates, oaAssortRates?.rates, mui=mui, maxBet=maxBet, debug = debug)
         val bet = kelly.solve()
 
-        lastBet = bet
+        lastBet = bet // debugging
         return bet
     }
 

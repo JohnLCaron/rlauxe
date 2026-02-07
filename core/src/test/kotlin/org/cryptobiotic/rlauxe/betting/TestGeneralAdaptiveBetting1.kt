@@ -43,7 +43,7 @@ class TestGeneralAdaptiveBetting1 {
             nphantoms = 2,
             oaErrorRates, d=0,  maxLoss = maxLoss, debug=true)
 
-        val starting = betFn.startingErrorRates()
+        val starting = betFn.estimatedErrorRates()
         println("starting = $starting maxLoss")
 
         val bet = betFn.bet(tracker)
@@ -71,7 +71,7 @@ fun findSamplesNeededUsingAssorts(N:Int, margin: Double, upper: Double, lamda: D
         val ttj = 1.0 + lamda * (x - mj)
         T *= ttj
         sample++
-        val name = taus.name(x/noerror)
+        val name = taus.nameOf(x/noerror)
         if (name != "noerror") println("  $name $ttj")
 
         if (show) println("${nfn(tracker.numberOfSamples(), 3)}: ttj=${dfn(ttj, 6)} Tj=${dfn(T, 6)}")

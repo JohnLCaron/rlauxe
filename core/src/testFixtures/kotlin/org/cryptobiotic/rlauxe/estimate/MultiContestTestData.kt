@@ -25,7 +25,7 @@ data class MvrCardAndPops(val mvrs: List<Cvr>, val cardManifest: List<AuditableC
  * Creates a set of contests and populations, with randomly chosen candidates and margins.
  * It can create cvrs that reflect the contests' exact votes.
  * Not for OneAudit, use makeOneAuditTest()
- * prehaps superceeded by Vunder, which also models contests missing on a card
+ * TODO use Vunder, which also models contests missing on a card
  */
 data class MultiContestTestData(
     val ncontest: Int,

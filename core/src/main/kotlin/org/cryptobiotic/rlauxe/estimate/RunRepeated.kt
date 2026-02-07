@@ -29,17 +29,12 @@ fun runRepeated(
     val statusMap = mutableMapOf<TestH0Status, Int>()
     val welford = Welford()
     val sampleCounts = mutableListOf<Int>()
+    val stopwatch = Stopwatch()
 
     repeat(ntrials) { trial ->
         if (trial != 0) {
             samplerTracker.reset() // this creates all the variation for the estimation
-        } /* else {
-            val t = samplerTracker as ClcaSamplerErrorTracker
-            if (t.contestId == 52 && t.cassorter.shortName() == "154/155") {
-                val round = if (startingTestStatistic == 1.0) 1 else 2
-                samplerTracker.dump("/home/stormy/rla/tests/scratch/est52-154-155-$round.txt")
-            }
-        } */
+        }
 
         val testH0Result = testFn.testH0(
             maxSamples=samplerTracker.maxSamples(),
@@ -53,7 +48,7 @@ fun runRepeated(
         // this can fail when you have limited the number of samples
         if (testH0Result.status == TestH0Status.LimitReached) {
             fail++
-            logger.debug { "$name:  $trial failed in sampling max= ${samplerTracker.maxSamples()} samples" }
+            logger.info { "$name:  $trial failed in sampling max= ${samplerTracker.maxSamples()} samples" }
         } else {
             nsuccess++
 
@@ -67,6 +62,8 @@ fun runRepeated(
 
     if (fail > 0) {
         logger.warn { "$name:  $fail/$ntrials failures in sampling max= ${samplerTracker.maxSamples()} samples" }
+    } else {
+        logger.info { "$name:  $fail/$ntrials failures in sampling max= ${samplerTracker.maxSamples()} samples took $stopwatch" }
     }
 
     val (_, variance, _) = welford.result()

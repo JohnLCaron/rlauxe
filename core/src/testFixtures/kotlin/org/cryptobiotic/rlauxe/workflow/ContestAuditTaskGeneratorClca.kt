@@ -24,7 +24,7 @@ class ClcaContestAuditTaskGenerator(
 ): ContestAuditTaskGenerator {
     override fun name() = name
 
-    override fun generateNewTask(): ContestAuditTask {
+    override fun generateNewTask(): SingleContestAuditTask {
         val useConfig = config ?:
         AuditConfig(
             AuditType.CLCA, true, nsimEst = nsimEst,
@@ -44,7 +44,7 @@ class ClcaContestAuditTaskGenerator(
         val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(cu.contest), emptyList(),
             MvrManagerForTesting(testCvrs, testMvrs, seed=useConfig.seed))
 
-        return ContestAuditTask(
+        return SingleContestAuditTask(
             name(),
             clcaWorkflow,
             parameters

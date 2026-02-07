@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 
 class RaireContestAuditTaskGenerator(
@@ -18,7 +18,7 @@ class RaireContestAuditTaskGenerator(
 
     override fun name() = "RaireWorkflowTaskGenerator"
 
-    override fun generateNewTask(): ContestAuditTask {
+    override fun generateNewTask(): SingleContestAuditTask {
         val useConfig = auditConfig ?: AuditConfig(
             AuditType.CLCA, true, nsimEst = nsimEst,
             clcaConfig = clcaConfigIn ?: ClcaConfig()
@@ -33,13 +33,13 @@ class RaireContestAuditTaskGenerator(
             phantomPct = phantomPct,
             quiet = true,
         )
-        val testMvrs = makeFuzzedCvrsForPolling(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
+        val testMvrs = makeFuzzedCvrsForClca(listOf(rcontest.contest.info()), testCvrs, mvrsFuzzPct) // this will fail
 
         val clca = WorkflowTesterClca(
             useConfig, emptyList(), listOf(rcontest),
             MvrManagerForTesting(cvrs=testCvrs, mvrs=testMvrs, useConfig.seed),
         )
-        return ContestAuditTask(
+        return SingleContestAuditTask(
             name(),
             clca,
             // testMvrs,
@@ -78,7 +78,7 @@ class RaireSingleRoundAuditTaskGenerator(
             phantomPct = phantomPct,
             quiet = true,
         )
-        val testMvrs = makeFuzzedCvrsForPolling(listOf(rcontest.contest), testCvrs, mvrsFuzzPct) // this will fail
+        val testMvrs = makeFuzzedCvrsForClca(listOf(rcontest.contest.info()), testCvrs, mvrsFuzzPct) // this will fail
 
         val raireAudit = WorkflowTesterClca(
             useConfig, emptyList(), listOf(rcontest),

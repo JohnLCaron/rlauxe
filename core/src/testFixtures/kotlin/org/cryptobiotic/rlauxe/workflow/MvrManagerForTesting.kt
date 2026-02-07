@@ -60,7 +60,7 @@ class MvrManagerForTesting(
         return mvrsRound.zip(sampledCvrs)
     }
 
-    // MvrManagerTest
+    // MvrManagerTestIF
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCard> {
         val sampledMvrs = findSamples(sampleNumbers, Closer(mvrsUA.iterator()))
         require(sampledMvrs.size == sampleNumbers.size)

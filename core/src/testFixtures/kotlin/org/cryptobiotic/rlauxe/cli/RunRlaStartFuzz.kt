@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
@@ -18,7 +19,6 @@ import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
@@ -275,7 +275,7 @@ class TestPollingElection(
 
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
         cvrs = testData.makeCvrsFromContests()
-        testMvrs = makeFuzzedCvrsForPolling(contests.map{ it.info() }, cvrs, fuzzMvrs) // ??
+        testMvrs =  makeFuzzedCvrsForClca(contests.map{ it.info() } , cvrs, fuzzMvrs)
 
         val makum = ContestWithAssertions.make(testData.contests, cardManifest(), isClca=false)
         // not setting Npop, so it defaults to Nc

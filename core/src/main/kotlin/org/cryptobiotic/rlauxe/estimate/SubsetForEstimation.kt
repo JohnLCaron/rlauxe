@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.betting.TausErrorTable
+import org.cryptobiotic.rlauxe.betting.TausRateTable
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -53,7 +53,7 @@ fun getSubsetForEstimation(
     config: AuditConfig,
     contests: List<ContestRound>,
     cards: CloseableIterable<AuditableCard>,
-    previousSamples: Set<Long>,  // TODO skip previous samples maybe?
+    previousSamples: Set<Long>,
 ): CardSamples
 {
     val contestsIncluded = contests.filter { !it.done && it.included }
@@ -160,9 +160,9 @@ fun tabulateDebugInfo(cards: CloseableIterator<AuditableCard>, contests: List<Co
     return tabs.toSortedMap()
 }
 
-private val fac = 3 // TODO pass in
+private val fac = 10 // TODO pass in
 
-// CLCA and OneAudit TODO POLLING
+// CLCA and OneAudit, not needed by Polling
 // we dont use this for the actual estimation....
 fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
     val minAssertionRound = contestRound.minAssertion()
@@ -184,7 +184,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
     // ClcaErrorCounts(errorCounts, contest.Nc, cassorter.noerror(), cassorter.assorter.upperBound())
     // ClcaErrorTable.getErrorRates(contest.ncandidates, config.simFuzzPct)
     val clcaErrorCounts = if (config.simFuzzPct == null || config.simFuzzPct == 0.0) null else {
-        TausErrorTable.makeErrorRates(
+        TausRateTable.makeErrorCounts(
             contest.ncandidates,
             config.simFuzzPct,
             contest.Npop,
@@ -200,7 +200,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
         "sumOneAuditTerm=${dfn(sum, 6)} $sumneg"
     } else ""
 
-    var nsamples =  estAndBet.first
+    val nsamples =  estAndBet.first
     val stddev = .586 * nsamples - 23.85 // see https://github.com/JohnLCaron/rlauxe?tab=readme-ov-file#clca-with-errors
 
     // Approximately 95.45% / 99.73% of the data in a normal distribution falls within two / three standard deviations of the mean.

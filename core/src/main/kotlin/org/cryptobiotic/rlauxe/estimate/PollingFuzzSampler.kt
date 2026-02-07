@@ -77,14 +77,7 @@ class PollingFuzzSamplerTracker(
     }
 }
 
-fun makeFuzzedCvrsForPolling(contests: List<ContestIF>,
-                             cvrs: List<Cvr>,
-                             fuzzPct: Double,
-): List<Cvr>  {
-    return makeFuzzedCvrsForPolling(contests.map { it.info()}, cvrs, fuzzPct)
-}
-
-// includes undervotes i think
+// includes undervotes i think, IRV ok
 fun makeFuzzedCvrsForPolling(infoList: List<ContestInfo>,
                              cvrs: List<Cvr>,
                              fuzzPct: Double,
@@ -93,7 +86,6 @@ fun makeFuzzedCvrsForPolling(infoList: List<ContestInfo>,
 ): List<Cvr> {
     if (fuzzPct == 0.0) return cvrs
 
-    val infos = infoList.associate { it.id to it }.toMap()
     val isIRV = infoList.associate { it.name to it.isIrv }.toMap()
     var count = 0
     val cvrbs: List<CvrBuilder> = CvrBuilders.convertCvrsToBuilders(infoList, cvrs)
@@ -109,7 +101,7 @@ fun makeFuzzedCvrsForPolling(infoList: List<ContestInfo>,
                     val currId: Int? = if (cvb.votes.size == 0) null else cvb.votes[0] // TODO only one vote allowed, cant use on Raire
                     cvb.votes.clear()
                     // choose a different candidate, or none.
-                    val ncandId = chooseNewCandidate(currId, ccontest.candidateIds)
+                    val ncandId = chooseNewCandidate(currId, ccontest.candidateIds) // from ClcaFuzzSamplerTracker
                     if (ncandId != null) {
                         cvb.votes.add(ncandId)
                     }

@@ -12,21 +12,21 @@ import org.cryptobiotic.rlauxe.workflow.*
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.test.Test
 
-// show distribution of Clca samplesNeeded estimation vs audits
+// show distribution of Clca samplesNeeded estimation vs actual audits
 class ClcaDistributions {
     val Nc = 50000
     val nsimEst = 100
     val margin = .02
     val mvrsFuzzPct = .005
-    val simFuzzPct = .0025
+    val simFuzzPct = .01
 
-    val name = "estErrorRatesHalf"
+    val name = "estErrorRatesDouble"
     val dirName = "$testdataDir/plots/dist"
 
     // Used in docs: Under/Over estimating CLCA sample sizes, show distributions
 
     @Test
-    fun plotDistributions() {
+    fun plotClcaDistributions() {
         val auditConfig = AuditConfig(AuditType.CLCA, true,
             nsimEst = nsimEst, simFuzzPct = simFuzzPct,
             persistedWorkflowMode =  PersistedWorkflowMode.testSimulated,

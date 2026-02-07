@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
 import kotlin.test.Test
 
  // TODO add Nbs
@@ -117,9 +117,9 @@ class TestClcaAuditNoStyles {
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
-        val testMvrs = if (config.clcaConfig.strategy != ClcaStrategyType.fuzzPct) testCvrs
-            // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-            else makeFuzzedCvrsForPolling(contestsToAudit, testCvrs, config.simFuzzPct!!) // mvrs fuzz = sim fuzz
+        val testMvrs = if (config.clcaConfig.strategy != ClcaStrategyType.fuzzPct) testCvrs else
+                // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
+                makeFuzzedCvrsForClca(testData.contests.map { it.info} , testCvrs, config.simFuzzPct)
 
         val workflow = WorkflowTesterClca(config, contestsToAudit, emptyList(),
             MvrManagerForTesting(testCvrs, testMvrs, config.seed))

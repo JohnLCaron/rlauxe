@@ -2,9 +2,9 @@
     "auditType": "CLCA",
     "hasStyle": true,
     "riskLimit": 0.05,
-    "seed": 6875604921519842633,
+    "seed": 6727373739228592796,
     "nsimEst": 100,
-    "quantile": 0.2,
+    "quantile": 0.5,
     "contestSampleCutoff": 30000,
     "removeCutoffContests": false,
     "simFuzzPct": 0.001,
@@ -12,8 +12,9 @@
     "removeTooManyPhantoms": false,
     "clcaConfig": {
         "strategy": "generalAdaptive",
+        "fuzzPct": 0.001,
         "d": 100,
-        "maxRisk": 0.9
+        "maxLoss": 0.9
     },
     "version": 2.0,
     "skipContests": []

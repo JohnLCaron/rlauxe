@@ -256,10 +256,12 @@ README
 ////////////////////////////////////////////
 Simulation 02/06/2026
 
-ContestSimulation.simulateCvrsWithDilutedMargin
-PollingFuzzSamplerTracker.makeFuzzedCvrsForPolling
-ClcaFuzzSamplerTracker.makeFuzzedCardFromCard, makeFuzzedCardsForClca
-VunderFuzzer
+* vetted
+    ContestSimulation.simulateCvrsWithDilutedMargin
+    PollingFuzzSamplerTracker.makeFuzzedCvrsForPolling
+    ClcaFuzzSamplerTracker.makeFuzzedCardFromCard, makeFuzzedCardsForClca, makeFuzzedCvrsForClca
+    CvrSimulation
+    VunderFuzzer
 
 ** Production Estimation
     cardManifest is passed in, used for CLCA OneAudit but not Polling
@@ -268,9 +270,7 @@ VunderFuzzer
 Polling: for each contest independently:
     * SimulateIrvTestData (IRV)
         simulate cvrs for a RaireContest, doesnt call raire-java for the assertions
-    * ContestSimulation.simulateCvrsWithDilutedMargin(contestRound.contestUA, config) (non IRV)
-        makeCvrs() to match contest totals, undervotes and phantoms
-        scales to config.contestSampleCutoff is needed
+    * CvrSimulation.simulateCvrsWithDilutedMargin(contestRound.contestUA, config) (IRV not ok) to match contest totals, undervotes and phantoms
     * uses PollingFuzzSamplerTracker for the sampler with these cvrs and optional fuzzing
         takes existing cvrs and fuzzes before sampling
 
@@ -307,21 +307,15 @@ for a real audit, no simulation is used:
 3. CreateAudit.writeUnsortedPrivateMvrs(Publisher(auditdir), testMvrs, config.seed)
    // (persistent) write mvrs to private when audit is created
    // mvrs must be fuzzed before passing to writeUnsortedPrivateMvrs; not fuzzed here
-
-// used for singleRoundAudit
-
-
    
 ** testFixtures
 
 ClcaContestAuditTaskGenerator
-    val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
-    var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
+    var testCvrs = simulateCvrsWithDilutedMargin() // includes undervotes and phantoms
     var testMvrs = makeFuzzedCvrsForClca(listOf(sim.contest.info()), testCvrs, mvrsFuzzPct)
 
 ClcaSingleRoundAuditTaskGenerator
-    val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
-    val testCvrs = sim.makeCvrs() // includes undervotes and phantoms
+    val testCvrs = simulateCvrsWithDilutedMargin() // includes undervotes and phantoms
     val testMvrs =  if (p2flips != null || p1flips != null) {
         makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips)
     } else {
@@ -331,7 +325,7 @@ ClcaSingleRoundAuditTaskGenerator
 OneAuditSingleRoundWithDilutedMargin
    val (contestUA, mvrs, cards, pools) = makeOneAuditTest()  // mvrs are not fuzzed
    MvrManagerFromManifest (9)
-        makeFuzzedCvrsForPolling(infoList, sortedMvrs, simFuzzPct) // mvrs fuzzed here; TODO OA not polling
+        makeFuzzedCvrsForClca(infoList, sortedMvrs, simFuzzPct) // mvrs fuzzed here
 
 MultiContestTestData (69) : specify the contests with range of margins, phantoms, undervotes, phantoms, single poolId, poolPct
     used by RunRlaStartFuzz (Polling, Clca)
@@ -348,8 +342,6 @@ simulateRaireTestContest: single raire contest
 
 
 ///////////////////////////////////////////////////////////////
-
-
 
 # TODO 12/11/25 (Belgium)
 
@@ -374,8 +366,7 @@ simulateRaireTestContest: single raire contest
 
 # TODO 2/6/26
 
-* Compare ClcaFuzzSamplerTracker.makeFuzzedCvrsForPolling (34) vs ContestSimulation.makeCvrs(17) and make2wayTestContest (15)
-* compare ContestSimulation.makeCvrs with Vunder: replace
 * replace SimulateIrvTestData with Vunder: we need the VoteConsolidator info
+* can we use Vunder in MultiContestTestData (68) ?
 
 

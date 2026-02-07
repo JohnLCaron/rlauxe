@@ -87,6 +87,23 @@ class ClcaFuzzSamplerTracker(
     override fun noerror(): Double = clcaErrorTracker.noerror
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// TODO how does this differ from makeFuzzedCvrsForPolling ?? seems to be the same ??
+fun makeFuzzedCvrsForClca(infoList: List<ContestInfo>,
+                          cvrs: List<Cvr>,
+                          fuzzPct: Double?,
+) : List<Cvr> {
+    if (fuzzPct == null || fuzzPct == 0.0) return cvrs
+    val infos = infoList.associate{ it.id to it }
+    val isIRV = infoList.associate { it.id to it.isIrv}
+
+    return cvrs.mapIndexed { idx, cvr ->
+        val card = AuditableCard.fromCvr( cvr, idx, Random.nextLong() )
+        val fuzzedCard = makeFuzzedCardFromCard(infos, isIRV, card, fuzzPct )
+        fuzzedCard.cvr()
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Ok for CLCA IRV; TODO can this be used with DHondt?
@@ -165,20 +182,5 @@ fun chooseNewCandidate(currId: Int?, candidateIds: List<Int>): Int? {
         if (candId != currId) {
             return candId
         }
-    }
-}
-
-fun makeFuzzedCvrsForClca(infoList: List<ContestInfo>,
-                           cvrs: List<Cvr>,
-                           fuzzPct: Double?,
-) : List<Cvr> {
-    if (fuzzPct == null || fuzzPct == 0.0) return cvrs
-    val infos = infoList.associate{ it.id to it }
-    val isIRV = infoList.associate { it.id to it.isIrv}
-
-    return cvrs.mapIndexed { idx, cvr ->
-        val card = AuditableCard.fromCvr( cvr, idx, Random.nextLong() )
-        val fuzzedCard = makeFuzzedCardFromCard(infos, isIRV, card, fuzzPct )
-        fuzzedCard.cvr()
     }
 }

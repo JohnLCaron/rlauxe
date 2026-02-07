@@ -22,7 +22,7 @@ class TestMakeFuzzedCvrs {
         val contestUA = ContestWithAssertions(contest).addStandardAssertions()
         val assort = contestUA.clcaAssertions.first().cassorter
 
-        val testMvrs = makeFuzzedCvrsForPolling(listOf(contest), testCvrs, mvrsFuzzPct)
+        val testMvrs = makeFuzzedCvrsForPolling(listOf(contest.info), testCvrs, mvrsFuzzPct)
         val testCards = testCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0) }
         val sampler = ClcaSampler( // fuzz single contest OK
             contestUA.id,
@@ -45,7 +45,7 @@ class TestMakeFuzzedCvrs {
     }
 
     @Test
-    fun testMakeFuzzedCvrsFromContestSimulation() {
+    fun testMakeFuzzedCvrsFromContestSimulatedCvrs() {
         val N = 10000
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
         val margins =
@@ -55,7 +55,7 @@ class TestMakeFuzzedCvrs {
         fuzzPcts.forEach { fuzzPct ->
             margins.forEach { margin ->
                 val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = N, margin, undervotePct = .1, phantomPct = .01)
-                val fuzzed = makeFuzzedCvrsForPolling(listOf(cu.contest), testCvrs, fuzzPct)
+                val fuzzed = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, fuzzPct)
                 val choiceChange = mutableMapOf<String, Int>()
                 testCvrs.zip(fuzzed).forEach { (cvr, fuzzedCvr) ->
                     val orgChoice = cvr.votes[0]!!.firstOrNull() ?: 2
@@ -105,7 +105,7 @@ class TestMakeFuzzedCvrs {
                 val ncands = contest.ncandidates
 
                 if (show) println("ncands = $ncands fuzzPct = $fuzzPct, margin = $margin ${contest.votes}")
-                val fuzzed = makeFuzzedCvrsForPolling(listOf(contest), cvrs, fuzzPct)
+                val fuzzed = makeFuzzedCvrsForClca(listOf(contest.info()), cvrs, fuzzPct)
                 val choiceChange = mutableMapOf<String, Int>()
                 cvrs.zip(fuzzed).forEach { (cvr, fuzzedCvr) ->
                     val orgChoice = cvr.votes[0]!!.firstOrNull() ?: ncands
@@ -147,7 +147,7 @@ class TestMakeFuzzedCvrs {
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
 
         fuzzPcts.forEach { fuzzPct ->
-            val fcvrs = makeFuzzedCvrsForPolling(test.contests, cvrs, fuzzPct)
+            val fcvrs = makeFuzzedCvrsForClca(test.contests.map { it.info }, cvrs, fuzzPct)
             println("fuzzPct = $fuzzPct")
             val totalErrorCounts = mutableListOf(0.0, 0.0, 0.0, 0.0, 0.0)
             test.contests.forEach { contest ->

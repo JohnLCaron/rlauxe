@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.estimate.makeFlippedMvrs
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForPolling
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import kotlin.random.Random
 
@@ -19,7 +19,7 @@ class OneAuditContestAuditTaskGenerator(
 ) : ContestAuditTaskGenerator {
     override fun name() = "OneAuditWorkflowTaskGenerator"
 
-    override fun generateNewTask(): ContestAuditTask {
+    override fun generateNewTask(): SingleContestAuditTask {
         val config = auditConfigIn ?: AuditConfig(
             AuditType.ONEAUDIT, true,
             simFuzzPct = mvrsFuzzPct,
@@ -39,7 +39,7 @@ class OneAuditContestAuditTaskGenerator(
             phantomFraction = phantomPct
         )
         // TODO should be OneAuditPairFuzzer ??
-        val oaMvrs = makeFuzzedCvrsForPolling(listOf(contestUA.contest), mvrs, mvrsFuzzPct)
+        val oaMvrs = makeFuzzedCvrsForClca(listOf(contestUA.contest.info()), mvrs, mvrsFuzzPct)
 
         val oneaudit = WorkflowTesterOneAudit(
             config=config,
@@ -47,7 +47,7 @@ class OneAuditContestAuditTaskGenerator(
             MvrManagerForTesting(mvrs, oaMvrs, seed=config.seed, pools=pools)
         )
 
-        return ContestAuditTask(
+        return SingleContestAuditTask(
             name(),
             oneaudit,
             parameters + mapOf("cvrPercent" to cvrPercent, "fuzzPct" to mvrsFuzzPct, "auditType" to 1.0)
@@ -91,8 +91,9 @@ class OneAuditSingleRoundAuditTaskGeneratorWithFlips(
         val oaMvrs =  if (p2flips != null || p1flips != null) {
             makeFlippedMvrs(mvrs, Nc, p2flips, p1flips)
         } else {
-            makeFuzzedCvrsForPolling(listOf(contestUA.contest), mvrs, mvrsFuzzPct)
+            makeFuzzedCvrsForClca(listOf(contestUA.contest.info()), mvrs, mvrsFuzzPct)
         }
+
 
         val oneaudit = WorkflowTesterOneAudit(config=config, listOf(contestUA),
             MvrManagerForTesting(mvrs, oaMvrs, seed=config.seed, pools=pools))

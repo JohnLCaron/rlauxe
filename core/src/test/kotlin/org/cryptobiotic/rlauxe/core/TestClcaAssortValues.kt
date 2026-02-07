@@ -44,8 +44,8 @@ class TestClcaAssortValues {
 
         println("DHondtAssorter")
         val taus = Taus(cassorter.assorter().upperBound())
-        println("${taus.taus.map { it.first }} * noerror=${cassorter.noerror}")
-        println("${taus.taus.map { it.second }} * noerror")
+        println("${taus.names.map { it.first }} * noerror=${cassorter.noerror}")
+        println("${taus.names.map { it.second }} * noerror")
         testAll(cassorter, taus, listOf(winner,other,loser, phantom), hasStyle=false)
     }
 // output:
@@ -93,8 +93,8 @@ class TestClcaAssortValues {
 
         println("PluralityAssorter")
         val taus = Taus(cassorter.assorter().upperBound())
-        println("${taus.taus.map { it.first }} * noerror=${cassorter.noerror}")
-        println("${taus.taus.map { it.second }} * noerror")
+        println("${taus.names.map { it.first }} * noerror=${cassorter.noerror}")
+        println("${taus.names.map { it.second }} * noerror")
         testAll(cassorter, taus, listOf(winner,other,loser, phantom), hasStyle=false)
     }
     // output:
@@ -138,13 +138,13 @@ class TestClcaAssortValues {
 
         println("PluralityWithMissing hasStyle=false")
         val taus = Taus(cassorter.assorter().upperBound())
-        println("${taus.taus.map { it.first }} * noerror=${cassorter.noerror}")
-        println("${taus.taus.map { it.second }} * noerror")
+        println("${taus.names.map { it.first }} * noerror=${cassorter.noerror}")
+        println("${taus.names.map { it.second }} * noerror")
         testAll(cassorter, taus, listOf(winner,other,loser,missing), hasStyle=false)
 
         println("\nPluralityWithMissing hasStyle=true")
-        println("${taus.taus.map { it.first }} * noerror=${cassorter.noerror}")
-        println("${taus.taus.map { it.second }} * noerror")
+        println("${taus.names.map { it.first }} * noerror=${cassorter.noerror}")
+        println("${taus.names.map { it.second }} * noerror")
         testAll(cassorter, taus, listOf(winner,other,loser,missing), hasStyle=true)
     }
 
@@ -176,8 +176,8 @@ class TestClcaAssortValues {
 
         val expect = expectV(cvrAssort=cvrValue, mvrAssort=mvrValue, cassorter.assorter().upperBound())
         val actual = cassorter.bassort(mvr=mvr, cvr=cvr, hasStyle=hasStyle) / cassorter.noerror() // hasStyle ??
-        val tauName = taus.name(expect)
-        val tauDesc = taus.desc(expect)
+        val tauName = taus.nameOf(expect)
+        val tauDesc = taus.descOf(expect)
         println("  ${sfn(what, 15)} tau= ${df(actual)} '${sfn(tauName,7)}' (${tauDesc})")
 
         if (expect.isNaN() && actual.isNaN()) return

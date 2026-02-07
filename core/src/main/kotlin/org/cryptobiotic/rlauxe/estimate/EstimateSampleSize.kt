@@ -23,7 +23,6 @@ import org.cryptobiotic.rlauxe.raire.SimulateIrvTestData
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
-import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import kotlin.collections.List
 import kotlin.collections.mutableListOf
 import kotlin.math.min
@@ -266,12 +265,12 @@ fun estimateClcaAssertionRound(
     val cassertion = assertionRound.assertion as ClcaAssertion
     val cassorter = cassertion.cassorter
 
-    val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
+    val measuredErrorRates: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
 
     val bettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
         GeneralAdaptiveBetting(
             contestUA.Npop,
-            startingErrors = prevRounds,
+            startingErrors = measuredErrorRates,
             contest.Nphantoms(),
             oaAssortRates = null,
             d = clcaConfig.d,
@@ -306,7 +305,7 @@ fun estimateClcaAssertionRound(
         clcaConfig.strategy.name,
         fuzzPct = config.simFuzzPct,
         startingTestStatistic = startingTestStatistic,
-        startingErrorRates = bettingFn.startingErrorRates(),
+        startingErrorRates = bettingFn.estimatedErrorRates(),
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
         simNewMvrs = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
@@ -373,12 +372,12 @@ fun estimateOneAuditAssertionRound(
     // one set of fuzzed pairs for all contests and assertions.
     val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
 
-    val prevRounds: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
+    val measuredErrorRates: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
 
-    val bettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
+    val bettingFn =
         GeneralAdaptiveBetting(
             Npop = contestUA.Npop,
-            startingErrors = prevRounds,
+            startingErrors = measuredErrorRates,
             contestUA.contest.Nphantoms(),
             oaAssortRates = oaCassorter.oaAssortRates,
             d = clcaConfig.d,
@@ -411,7 +410,7 @@ fun estimateOneAuditAssertionRound(
         roundIdx,
         oaConfig.strategy.name,
         fuzzPct = config.simFuzzPct,
-        startingErrorRates = bettingFn.startingErrorRates(),
+        startingErrorRates = bettingFn.estimatedErrorRates(),
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,

@@ -18,7 +18,7 @@ interface ContestAuditTaskGenerator {
 }
 
 // A ContestAuditTask is always for a single contest (unlike a Workflow which may be multi-contest)
-class ContestAuditTask(
+class SingleContestAuditTask(
     val name: String,
     val workflow: AuditWorkflow,
     val otherParameters: Map<String, Any>,
@@ -27,15 +27,16 @@ class ContestAuditTask(
     override fun name() = name
     override fun run(): WorkflowResult {
 
+        // run all needed rounds. lastRound shows how many rounds were needed
         val lastRound = runTestAuditToCompletion(name, workflow, quiet = quiet)
 
-        if (lastRound == null) {
+        if (lastRound == null) {  // TODO why would this be null?
             logger.error { "lastRound is null, setting contest to ContestMisformed"}
             return WorkflowResult(
                 name,
                 0,
                 0.0,
-                TestH0Status.ContestMisformed, // TODO why empty?
+                TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
                 otherParameters,
                 100.0,
@@ -43,11 +44,11 @@ class ContestAuditTask(
         }
 
         // TODO since its single contest, does the lastRound always have the entire set of mvr sampleNumbers?
-        val nmvrs = lastRound.samplePrns.size // LOOK ??
+        val nmvrs = lastRound.samplePrns.size
         val contest = lastRound.contestRounds.first() // theres only one contest
 
-        val minAssertion = contest.minAssertion() // TODO why would this fail ?
-        if (minAssertion == null) {
+        val minAssertion = contest.minAssertion()
+        if (minAssertion == null) {  // TODO why would this be null ?
             logger.error { "minAssertion is null, setting contest to ContestMisformed"}
             return WorkflowResult(
                 name,
@@ -61,7 +62,7 @@ class ContestAuditTask(
         }
 
         val assorter = minAssertion.assertion.assorter
-        return if (minAssertion.auditResult == null) { // TODO why is this empty?
+        return if (minAssertion.auditResult == null) { // TODO why would this be null ?
             logger.error { "minAssertion.auditResult is null, setting contest to ContestMisformed"}
             WorkflowResult(
                 name,

@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.Contest
@@ -67,6 +68,7 @@ class PollingFuzzSamplerTracker(
     // tracker reflects "previous sequence"
     var lastVal: Double? = null
     override fun numberOfSamples() = welford.count
+    override fun measuredClcaErrorCounts() = ClcaErrorCounts.empty(0.0, 0.0)
     override fun welford() = welford
     override fun done() {
         if (lastVal != null) welford.update(lastVal!!)

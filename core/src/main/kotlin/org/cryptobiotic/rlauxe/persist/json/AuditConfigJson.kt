@@ -75,6 +75,7 @@ data class AuditConfigJson(
     val oaConfig: OneAuditConfigJson?  = null,
 
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
+    val simulationStrategy: SimulationStrategy =  SimulationStrategy.regular,
     val version : Double,
     val skipContests: List<Int>?  = null,
 )
@@ -98,6 +99,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             clcaConfig = this.clcaConfig.publishJson(),
 
             persistedWorkflowMode = this.persistedWorkflowMode,
+            simulationStrategy = this.simulationStrategy,
             skipContests = skipContests,
             version = this.version,
         )
@@ -119,6 +121,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             pollingConfig = this.pollingConfig.publishJson(),
 
             persistedWorkflowMode = this.persistedWorkflowMode,
+            simulationStrategy = this.simulationStrategy,
             skipContests = skipContests,
             version = this.version,
         )
@@ -141,6 +144,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             oaConfig = this.oaConfig.publishJson(),
 
             persistedWorkflowMode = this.persistedWorkflowMode,
+            simulationStrategy = this.simulationStrategy,
             skipContests = skipContests,
             version = this.version,
         )
@@ -167,6 +171,7 @@ fun AuditConfigJson.import(): AuditConfig {
             clcaConfig = this.clcaConfig!!.import(),
 
             persistedWorkflowMode = this.persistedWorkflowMode,
+            simulationStrategy = this.simulationStrategy,
             skipContests = skipContests?: emptyList(),
             version = this.version,
         )
@@ -188,6 +193,7 @@ fun AuditConfigJson.import(): AuditConfig {
             pollingConfig = this.pollingConfig!!.import(),
 
             persistedWorkflowMode = this.persistedWorkflowMode,
+            simulationStrategy = this.simulationStrategy,
             skipContests = skipContests?: emptyList(),
             version = this.version,
         )
@@ -210,6 +216,7 @@ fun AuditConfigJson.import(): AuditConfig {
             oaConfig = this.oaConfig!!.import(),
 
             persistedWorkflowMode = this.persistedWorkflowMode,
+            simulationStrategy = this.simulationStrategy,
             skipContests = skipContests?: emptyList(),
             version = this.version,
         )

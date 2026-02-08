@@ -1,0 +1,166 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;O0qCAu&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;O0qCAu&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;Cumulative Sample Distribution&quot;,
+&quot;subtitle&quot;:&quot;Nc=50000 margin=0.02 mvrsFuzzPct=0.02 simFuzzPct=0.01&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;percentile&quot;,
+&quot;y&quot;:&quot;sample size % of Nc&quot;,
+&quot;color&quot;:&quot;cat&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;],
+&quot;percentile&quot;:[1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0,30.0,31.0,32.0,33.0,34.0,35.0,36.0,37.0,38.0,39.0,40.0,41.0,42.0,43.0,44.0,45.0,46.0,47.0,48.0,49.0,50.0,51.0,52.0,53.0,54.0,55.0,56.0,57.0,58.0,59.0,60.0,61.0,62.0,63.0,64.0,65.0,66.0,67.0,68.0,69.0,70.0,71.0,72.0,73.0,74.0,75.0,76.0,77.0,78.0,79.0,80.0,81.0,82.0,83.0,84.0,85.0,86.0,87.0,88.0,89.0,90.0,91.0,92.0,93.0,94.0,95.0,96.0,97.0,98.0,99.0,100.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0,30.0,31.0,32.0,33.0,34.0,35.0,36.0,37.0,38.0,39.0,40.0,41.0,42.0,43.0,44.0,45.0,46.0,47.0,48.0,49.0,50.0,51.0,52.0,53.0,54.0,55.0,56.0,57.0,58.0,59.0,60.0,61.0,62.0,63.0,64.0,65.0,66.0,67.0,68.0,69.0,70.0,71.0,72.0,73.0,74.0,75.0,76.0,77.0,78.0,79.0,80.0,81.0,82.0,83.0,84.0,85.0,86.0,87.0,88.0,89.0,90.0,91.0,92.0,93.0,94.0,95.0,96.0,97.0,98.0,99.0,100.0],
+&quot;cat&quot;:[&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;],
+&quot;sample size % of Nc&quot;:[0.284,0.378,0.386,0.386,0.438,0.438,0.438,0.466,0.482,0.496,0.498,0.498,0.518,0.52,0.52,0.52,0.52,0.52,0.522,0.568,0.578,0.582,0.586,0.6,0.65,0.652,0.652,0.66,0.66,0.66,0.666,0.686,0.742,0.774,0.784,0.792,0.792,0.842,0.854,0.964,0.982,0.984,1.022,1.056,1.06,1.088,1.12,1.14,1.146,1.188,1.214,1.22,1.254,1.34,1.358,1.366,1.442,1.474,1.544,1.574,1.586,1.602,1.796,1.806,1.822,2.134,2.156,2.178,2.184,2.282,2.286,2.318,2.35,2.352,2.404,2.412,2.51,2.518,2.596,2.606,2.696,2.752,2.768,2.872,2.954,2.986,3.248,3.256,3.62,3.628,3.726,3.886,3.902,3.992,4.052,4.056,4.148,4.156,4.182,6.302,0.27,0.296,0.296,0.296,0.318,0.332,0.356,0.356,0.378,0.416,0.436,0.458,0.478,0.484,0.488,0.488,0.5,0.514,0.52,0.546,0.548,0.558,0.56,0.564,0.61,0.854,0.904,0.974,0.994,1.002,1.036,1.048,1.076,1.116,1.3,1.376,1.44,1.53,1.534,1.578,1.674,1.786,1.786,1.822,1.832,1.958,2.0,2.064,2.084,2.18,2.182,2.22,2.236,2.248,2.284,2.43,2.43,2.512,2.59,2.646,2.65,2.732,2.748,2.774,2.946,3.162,3.23,3.286,3.322,3.412,3.566,3.612,3.622,3.624,3.686,3.714,3.77,3.956,3.966,4.004,4.164,4.44,4.7,4.702,4.824,4.894,4.936,5.216,5.298,5.3,5.638,6.034,6.23,6.248,6.52,6.728,7.19,7.202,11.472,11.822]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;cat&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;percentile&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;sample size % of Nc&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;yintercept&quot;:0.0,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;estimate&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;,&quot;actual&quot;]
+},
+&quot;color&quot;:&quot;#000000&quot;,
+&quot;size&quot;:0.3,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;hline&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;cat&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;percentile&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;sample size % of Nc&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

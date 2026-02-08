@@ -140,7 +140,6 @@ u = 1, only win-los < 0
 u < 1, win-los, oth-los < 0
 u > 1, win-los, win-oth < 0
 
-
 ### Betting Payoff Plots
 
 Plots 1-5 shows the betting payoffs when the error rates are all equal to {0.0, 0.0001, .001, .005, .01}

@@ -17,10 +17,10 @@ class ClcaDistributions {
     val Nc = 50000
     val nsimEst = 100
     val margin = .02
-    val mvrsFuzzPct = .005
-    val simFuzzPct = .0025
+    val mvrsFuzzPct = .02
+    val simFuzzPct = .04
 
-    val name = "estErrorRatesHalf"
+    val name = "estErrorRatesDouble"
     val dirName = "$testdataDir/plots/dist"
 
     // Used in docs: Under/Over estimating CLCA sample sizes, show distributions
@@ -28,7 +28,7 @@ class ClcaDistributions {
     @Test
     fun plotClcaDistributions() {
         val auditConfig = AuditConfig(AuditType.CLCA, true,
-            nsimEst = nsimEst, simFuzzPct = simFuzzPct,
+            nsimEst = nsimEst, simFuzzPct = simFuzzPct, quantile = 0.5,
             persistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
             clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, mvrsFuzzPct),
         )

@@ -38,6 +38,7 @@ interface SamplerTracker: Tracker, Iterator<Double> {
     /// Tracker : keeps track of the latest sample, number of samples, and the sample sum, mean and variance.
     //  doesnt update the statistics until the next sample is called. Must call done() when finished.
     override fun numberOfSamples(): Int    // total number of samples so far
+    fun measuredClcaErrorCounts(): ClcaErrorCounts
     fun done()    // end of sampling, update statistics to final form
     fun welford(): Welford   // running mean, variance, stddev
 
@@ -104,6 +105,8 @@ class PollingSamplerTracker(
     // tracker reflects "previous sequence"
     var lastVal: Double? = null
     override fun numberOfSamples() = welford.count
+    override fun measuredClcaErrorCounts() = ClcaErrorCounts.empty(0.0, 0.0)
+
     override fun welford() = welford
     override fun done() {
         if (lastVal != null) welford.update(lastVal!!)

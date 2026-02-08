@@ -242,7 +242,6 @@ fun roundUp(x: Double) = ceil(x).toInt()
 data class AuditRoundResult(
     val roundIdx: Int,
     val nmvrs: Int,                 // number of mvrs available for this contest for this round
-    // val countCvrsUsedInAudit: Int,  // number of cvrs used in the audit : same as samplesUsed
     val plast: Double,              // last pvalue when testH0 terminates
     val pmin: Double,               // minimum pvalue reached
     val samplesUsed: Int,           // sample count when testH0 terminates

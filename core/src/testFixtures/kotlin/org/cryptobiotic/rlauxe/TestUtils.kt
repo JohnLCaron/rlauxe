@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe
 
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -46,6 +47,7 @@ class SampleFromArray(val array: DoubleArray): SamplerTracker {
     override fun numberOfSamples() = index
 
     override fun welford() = welford
+    override fun measuredClcaErrorCounts() = ClcaErrorCounts.empty(0.0, 0.0)
 
     override fun done() {}
 

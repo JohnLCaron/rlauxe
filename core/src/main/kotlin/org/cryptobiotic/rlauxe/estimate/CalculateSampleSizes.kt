@@ -13,14 +13,14 @@ fun calculateSampleSizes(
     config: AuditConfig,
     auditRound: AuditRoundIF,
 ) {
-    require(config.isOA) // currently only for OneAudit
+    require(config.isOA || config.isClca)
 
     auditRound.contestRounds.filter { !it.done }.forEach { contestRound ->
         var maxEstMvrs = 0
         var maxNewEstMvrs = 0
         contestRound.assertionRounds.forEach { assertionRound ->
 
-            val (calcNewSamples, optimalBet) = assertionRound.calcMvrsNeeded(contestRound.contestUA, config.clcaConfig.maxLoss, config.riskLimit, config.simFuzzPct)
+            val (calcNewSamples, _) = assertionRound.calcMvrsNeeded(contestRound.contestUA, config.clcaConfig.maxLoss, config.riskLimit, config.simFuzzPct)
             assertionRound.estNewMvrs = calcNewSamples
 
             val prevSampleSize = assertionRound.prevAuditResult?.samplesUsed ?: 0

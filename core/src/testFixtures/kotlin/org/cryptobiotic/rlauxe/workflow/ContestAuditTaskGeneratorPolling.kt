@@ -111,7 +111,6 @@ class PollingSingleRoundAuditTask(
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
                 otherParameters,
-                100.0,
             )
         } else {
             val lastRound = minAssertion.auditResult!!
@@ -120,11 +119,12 @@ class PollingSingleRoundAuditTask(
                 contest.Npop,
                 assorter.dilutedMargin(),
                 lastRound.status,
-                minAssertion.roundProved.toDouble(),
-                lastRound.samplesUsed.toDouble(),
-                nmvrs.toDouble(),
+                nrounds = minAssertion.roundProved.toDouble(),
+                samplesUsed = lastRound.samplesUsed.toDouble(),
+                nmvrs = nmvrs.toDouble(),
                 otherParameters,
-                if (lastRound.status != TestH0Status.StatRejectNull) 100.0 else 0.0,
+                wtf = (nmvrs - lastRound.samplesUsed) / minAssertion.roundProved.toDouble(),
+                failPct = if (lastRound.status != TestH0Status.StatRejectNull) 100.0 else 0.0,
                 mvrMargin=mvrMargin,
             )
         }

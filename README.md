@@ -439,7 +439,7 @@ Here are the average extra samples vs the average number of rounds for mvrs with
 </p>
 
 In all three cases, using 0% simulation has the lowest extra samples, better than using simFuzzPct that matches the true
-fuzz (fuzzNvrs). Note that these are everages over 1000 trials. The reason is probably that with a large variance, one is better off
+fuzz (fuzzNvrs). Note that these are averages over 1000 trials. The reason is probably that with a large variance, one is better off
 underestimating the sample size on the first round, and then on the second round using the measured error rates to estimate 
 how many are left to do. 
 

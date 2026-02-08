@@ -445,9 +445,13 @@ how many are left to do.
 
 The trade off here is that the average number of rounds goes up.
 
-See [clickable .001](https://johnlcaron.github.io/rlauxe/docs/plots2/extra/click1.html)
-See [clickable .002](https://johnlcaron.github.io/rlauxe/docs/plots2/extra/click2.html)
-See [clickable .003](https://johnlcaron.github.io/rlauxe/docs/plots2/extra/click3.html)
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/extra/click1.html" rel="001">interactive .001 plots</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/extra/click2.html" rel="002">interactive .002 plots</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/extra/click3.html" rel="003">interactive .003 plots</a>
+
+* [interactive .001 plots](https://johnlcaron.github.io/rlauxe/docs/plots2/extra/click1.html)
+* [interactive .002 plots](https://johnlcaron.github.io/rlauxe/docs/plots2/extra/click2.html)
+* [interactive .003 plots](https://johnlcaron.github.io/rlauxe/docs/plots2/extra/click3.html)
 
 The amount of extra sampling closely follows the number of samples needed, adding around 30-70% extra work, as the 
 following plots vs margin show:

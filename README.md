@@ -443,37 +443,11 @@ fuzz (fuzzNvrs). Note that these are everages over 1000 trials. The reason is pr
 underestimating the sample size on the first round, and then on the second round using the measured error rates to estimate 
 how many are left to do. 
 
-The trade off here is that the average number of rounds goes up.
+The trade off here is that the average number of rounds goes up. Discuss.
 
 * [interactive .001 plots](https://johnlcaron.github.io/rlauxe/docs/plots2/extra/click1.html)
 * [interactive .002 plots](https://johnlcaron.github.io/rlauxe/docs/plots2/extra/click2.html)
 * [interactive .003 plots](https://johnlcaron.github.io/rlauxe/docs/plots2/extra/click3.html)
-
-The amount of extra sampling closely follows the number of samples needed, adding around 30-70% extra work, as the 
-following plots vs margin show:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffLogLinear.html" rel="extraVsMarginByFuzzDiffLogLinear">![extraVsMarginByFuzzDiffLogLinear](./docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffLogLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffPct.html" rel="extraVsMarginByFuzzDiffPct">![extraVsMarginByFuzzDiffPct](./docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffPct.png)</a>
-
-The "extra samples" goes up as our guess for the error rates differ more from the actual rates. 
-In these plots we use fuzzPct as a proxy for what the error rates might be.
-
-In the best case, the simulation accurately estimates the distribution of audit sample sizes (fuzzDiff == 0%). 
-But because there is so much variance in that distribution, the audit sample sizes are significantly overestimated. 
-To emphasize this point, here are plots of average samples needed, and samples needed +/- one stddev, 
-one for CLCA and one for polling:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/clcaVariance/clcaVarianceLogLinear.html" rel="clcaVarianceLogLinear">![clcaVarianceLogLinear](./docs/plots/extra/clcaVariance/clcaVarianceLogLinear.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/pollingVariance/pollingVarianceLogLinear.html" rel="pollingVarianceLogLinear">![pollingVarianceLogLinear](./docs/plots/extra/pollingVariance/pollingVarianceLogLinear.png)</a>
-
-The number of rounds needed reflects the default value of auditConfig.quantile = 80%, so we expect to need a second round 20% of the time:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/clcaVariance/clcaVarianceNrounds.html" rel="clcaVarianceNrounds">![clcaVarianceNrounds](./docs/plots/extra/clcaVariance/clcaVarianceNrounds.png)</a>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/pollingVariance/pollingVarianceNrounds.html" rel="pollingVarianceNrounds">![pollingVarianceNrounds](./docs/plots/extra/pollingVariance/pollingVarianceNrounds.png)</a>
-
-* We see large variance in samples needed, even when we guess the error rates correctly.
-* The variance gets larger as average samples needed gets larger.
-* One could use other algorithms to trade off extra samples vs extra rounds.
 
 ## Multiple Contest Auditing
 

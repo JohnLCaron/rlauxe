@@ -399,7 +399,7 @@ ballots the auditors have to find and hand audit for that round.
 Overestimating sample sizes uses more hand-counted MVRs than needed. Underestimating sample sizes forces more rounds than needed.
 Over/under estimation is strongly influenced by over/under estimating error rates. 
 
-The following plots show approximate distribution of estimated and actual sample sizes, using our standard AdaptiveBetting
+The following plots show approximate distribution of estimated and actual sample sizes, using our standard
 betting function with weight parameter d = 100, for margin=2% and errors in the MVRs generated with 2% fuzz.
 
 When the estimated error rates are equal to the actual error rates:
@@ -414,7 +414,8 @@ When the estimated error rates are half the actual error rates:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/dist2/estErrorRatesHalf.html" rel="estErrorRatesHalf">![estErrorRatesHalf](./docs/plots2/dist/estErrorRatesHalf.png)</a>
 
-However, ...
+These are generated without using rounds. When using rounds, surprisingly its better to start with an initial guess of
+no simulated fuzzing, as these plots show:
 
 Here are the average extra samples vs the average number of rounds for mvrs with 1/1000 fuzz:
 <p>
@@ -437,6 +438,18 @@ Here are the average extra samples vs the average number of rounds for mvrs with
   <img alt="Half" src="./docs/plots2/extra/extraVsMarginCalc003NroundsLinear.png" width="45%">
 </p>
 
+In all three cases, using 0% simulation has the lowest extra samples, better than using simFuzzPct that matches the true
+fuzz (fuzzNvrs). Note that these are everages over 1000 trials. The reason is probably that with a large variance, one is better off
+underestimating the sample size on the first round, and then on the second round using the measured error rates to estimate 
+how many are left to do. 
+
+The trade off here is that the average number of rounds goes up.
+
+<p>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffLogLinear.html" rel="extraVsMarginByFuzzDiffLogLinear">![extraVsMarginByFuzzDiffLogLinear](./docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffLogLinear.png)</a>
+&nbsp; &nbsp; &nbsp; &nbsp; 
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffPct.html" rel="extraVsMarginByFuzzDiffPct">![extraVsMarginByFuzzDiffPct](./docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffPct.png)</a>
+</p>
 
 The amount of extra sampling closely follows the number of samples needed, adding around 30-70% extra work, as the 
 following plots vs margin show:

@@ -5,11 +5,11 @@ _last changed 02/08/2026_
 * [Risk and betting functions](#risk-and-betting-functions)
   * [Estimating samples needed for CLCA](#estimating-samples-needed-for-clca)
   * [Stalled audits and maximum bets](#stalled-audits-and-maximum-bets)
-  * [Choosing maxLoss](#choosing-maxloss)
   * [Betting when there are CLCA errors](#betting-when-there-are-clca-errors)
     * [CLCA assort values](#clca-assort-values)
   * [Betting with OneAudit pools](#betting-with-oneaudit-pools)
     * [Estimating samples needed for OneAudit when there are no errors](#estimating-samples-needed-for-oneaudit-when-there-are-no-errors)
+  * [Choosing MaxLoss](#choosing-maxloss)
 <!-- TOC -->
 
 
@@ -81,92 +81,6 @@ Limit that maximum loss to how much you are willing to lose on any one bet:
 Since maxLoss is < 1, λmax < 1/ µ_i.
 
 For now we let the user choose maxLoss, and set λmax accordingly. 
-
-## Choosing maxLoss
-
-How many noerror samples are needed to offset a "maxLoss" assort value of 0.0, ie a 2-vote overstatement error (p2o) ?
-
-Suppose the bet is constant at maxBet = 2 * (1 - maxLoss). Approximate µ_i as 0.5. then 
-
-    tj = 1 + λ_i * (x_i − µ_i)
-    t_noerror = 1 + maxBet * (noerror − 0.5)
-    
-    noerror = 1 / (2 - dilutedMargin / assorter.upperBound()) 
-            = 1/(2-v) when u = 1
-    
-    noerror-0.5 = 1/(2-v) − 1/2       
-                = 2/2(2-v) - (2-v)/2(2-v)  
-                = (2 - (2-v) / 2(2-v)
-                = v / 2(2-v)
-
-so:
-
-    t_noerror = 1 + maxBet * (noerror − 0.5)
-    t_noerror = (1 + 2 * maxLoss * (v / 2(2-v)))
-    t_noerror = (1 +  maxLoss * (v / (2-v)))
-
-A p2o assort value of 0.0, gives the smallest possible value of tj:
-
-    t_p2o = 1 + maxBet (p2o − 0.5)
-    t_p2o = 1 + 2 * maxLoss (0 − 0.5)
-    t_p2o = 1 - maxLoss 
-
-which is how we choose maxLoss; whats the largest loss we are willing to suffer on a p2o sample? If maxLoss = .9, then t_p2o = .1, and we
-lose 90% of our winnings represented by the testStatistic T.
-
-To compensate for one p2o sample, we need ncomp noerror samples, so that
-
-    t_noerror^ncomp = 1 / (1 - maxLoss)
-    ncomp = -ln(1 - maxLoss) / ln(1 + maxLoss * (v/(2-v)))
-
-If there are no p2o samples, then the number of noerror samples we need to reject the null hypothesis is
-
-    t_noerror^n = 1 / alpha
-    n = -ln(alpha) / ln(1 + maxLoss * (v/(2-v)))
-
-Ignoring other types of errors, the number of samples needed when there are k p2o errors are:
-
-    ntotal = n + k * ncomp
-
-Here is a plot of ntotal for values of k (0..5) and two different margins (.01 and .05):
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxLoss.nloss.LogLog.html" rel="BettingPayoff">![maxLossLog](plots2/betting/maxloss/maxLoss.nloss.LogLog.png)</a>
-
-* When k > 0 there is a value of maxLoss that minimizes the number of samples needed.
-* Informally you can see that the optimal maxLoss is the same for both margins. (click on the image to get an interactive html plot)
-* This optimal maxLoss is probably the exact value of optimalBet from our GeneralAdaptiveBetting function, so we are already adapting
-  to the error rates as we measure them. (TODO: check this)
-* While this particular calculation does not indicate if there is an optimal value of maxRisk, by setting the maximum bet
-  to 0.9, we avoid much of the increased sample sizes to the right of that.
-* The presence of even a single p2o error has a strong effect on the samples needed. The linear plot shows that more clearly:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxLoss.nloss.Linear.html" rel="BettingPayoff">![maxLossLinear](plots2/betting/maxloss/maxLoss.nloss.Linear.png)</a>
-
-Reducing maxLoss causes the ratio optimal/needed to be reduced by approximately the same percent (or less), as this table shows. 
-Note the table also shows assort upper > 1 and < 1, as well as equaling 1.
-
-````
-maxLoss: 0.9000 N=100000, margin=0.01, upper=10.0 noerror:0.5003 maxtj: 1.0005: needed 6439 samples; pct = 0.9031
-maxLoss: 0.9500 N=100000, margin=0.01, upper=10.0 noerror:0.5003 maxtj: 1.0005: needed 6111 samples; pct = 0.9516
-maxLoss: 0.9900 N=100000, margin=0.01, upper=10.0 noerror:0.5003 maxtj: 1.0005: needed 5871 samples; pct = 0.9905
-maxLoss: 0.9990 N=100000, margin=0.01, upper=10.0 noerror:0.5003 maxtj: 1.0005: needed 5820 samples; pct = 0.9991
-maxLoss: 0.9999 N=100000, margin=0.01, upper=10.0 noerror:0.5003 maxtj: 1.0005: needed 5815 samples; pct = 1.0000
-maxLoss: 1.0000 N=100000, margin=0.01, upper=10.0 noerror:0.5003 maxtj: 1.0005: needed 5815 samples; pct = 1.0000
-
-maxLoss: 0.9000 N=100000, margin=0.01, upper=1.0 noerror:0.5025 maxtj: 1.0045: needed 662 samples; pct = 0.9003
-maxLoss: 0.9500 N=100000, margin=0.01, upper=1.0 noerror:0.5025 maxtj: 1.0048: needed 628 samples; pct = 0.9490
-maxLoss: 0.9900 N=100000, margin=0.01, upper=1.0 noerror:0.5025 maxtj: 1.0050: needed 602 samples; pct = 0.9900
-maxLoss: 0.9990 N=100000, margin=0.01, upper=1.0 noerror:0.5025 maxtj: 1.0050: needed 597 samples; pct = 0.9983
-maxLoss: 0.9999 N=100000, margin=0.01, upper=1.0 noerror:0.5025 maxtj: 1.0050: needed 596 samples; pct = 1.0000
-maxLoss: 1.0000 N=100000, margin=0.01, upper=1.0 noerror:0.5025 maxtj: 1.0050: needed 596 samples; pct = 1.0000
-
-maxLoss: 0.9000 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0068: needed 444 samples; pct = 0.9009
-maxLoss: 0.9500 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0071: needed 421 samples; pct = 0.9501
-maxLoss: 0.9900 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0074: needed 404 samples; pct = 0.9901
-maxLoss: 0.9990 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0075: needed 400 samples; pct = 1.0000
-maxLoss: 0.9999 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0075: needed 400 samples; pct = 1.0000
-maxLoss: 1.0000 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0075: needed 400 samples; pct = 1.0000
-````
 
 ## Betting when there are CLCA errors
 
@@ -361,3 +275,91 @@ of small margin, large pool percentage and CVR errors will force the audit to a 
 TODO: can we detect when a OneAudit will always go to a full hand count even without CVR errors, based only on the margin and the pool averages? We can see when
 eq 3 goes negetive, which I think means on average the OneAudit will go to a hand count, but the large variance allows the possibility that it will stop
 short of a full count. OTOH we can probably use the calculated variance to estimate the probability of a full count.
+
+## Choosing MaxLoss
+
+MaxLoss is a user settable parametr which limits the (see maximum bet that can be placed on any one sample [see here](#stalled-audits-and-maximum-bets)).
+
+How many noerror samples are needed to offset an assort value of 0.0, ie a 2-vote overstatement error (p2o) ?
+
+Suppose the bet is constant at maxBet = 2 * (1 - maxLoss). Approximate µ_i as 0.5. then
+
+    tj = 1 + λ_i * (x_i − µ_i)
+    t_noerror = 1 + maxBet * (noerror − 0.5)
+    
+    noerror = 1 / (2 - dilutedMargin / assorter.upperBound()) 
+            = 1/(2-v) when u = 1
+    
+    noerror-0.5 = 1/(2-v) − 1/2       
+                = 2/2(2-v) - (2-v)/2(2-v)  
+                = (2 - (2-v) / 2(2-v)
+                = v / 2(2-v)
+
+so:
+
+    t_noerror = 1 + maxBet * (noerror − 0.5)
+    t_noerror = (1 + 2 * maxLoss * (v / 2(2-v)))
+    t_noerror = (1 +  maxLoss * (v / (2-v)))
+
+A p2o assort value of 0.0, gives the smallest possible value of tj:
+
+    t_p2o = 1 + maxBet (p2o − 0.5)
+    t_p2o = 1 + 2 * maxLoss (0 − 0.5)
+    t_p2o = 1 - maxLoss 
+
+which is how we choose maxLoss; whats the largest loss we are willing to suffer on a p2o sample? If maxLoss = .9, then t_p2o = .1, and we
+lose 90% of our winnings, represented by the testStatistic T.
+
+To compensate for one p2o sample, we need ncomp noerror samples, so that
+
+    t_noerror^ncomp = 1 / (1 - maxLoss)
+    ncomp = -ln(1 - maxLoss) / ln(1 + maxLoss * (v/(2-v)))
+
+If there are no p2o samples, then the number of noerror samples we need to reject the null hypothesis is
+
+    t_noerror^n = 1 / alpha
+    n = -ln(alpha) / ln(1 + maxLoss * (v/(2-v)))
+
+Ignoring other types of errors, the number of samples needed when there are k p2o errors are:
+
+    ntotal = n + k * ncomp
+
+Here is a plot of ntotal for values of k (0..5) and two different margins (.01 and .05):
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxLoss.nloss.LogLog.html" rel="BettingPayoff">![maxLossLog](plots2/betting/maxloss/maxLoss.nloss.LogLog.png)</a>
+
+* When k > 0 there is a value of maxLoss that minimizes the number of samples needed.
+* Informally you can see that the optimal maxLoss is the same for both margins. (click on the image to get an interactive html plot)
+* This optimal maxLoss is probably the exact value of optimalBet from our GeneralAdaptiveBetting function, so we are already adapting
+  to the error rates as we measure them. (TODO: check this)
+* While this particular calculation does not indicate if there is an optimal value of maxRisk, by setting the maximum bet
+  to 0.9, we avoid much of the increased sample sizes to the right of that.
+* The presence of even a single p2o error has a strong effect on the samples needed. The linear plot shows that more clearly:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxLoss.nloss.Linear.html" rel="BettingPayoff">![maxLossLinear](plots2/betting/maxloss/maxLoss.nloss.Linear.png)</a>
+
+Reducing maxLoss causes the ratio optimal/needed to be reduced by approximately the same percent (or less), as this table shows.
+Note the table also shows assort upper > 1 and < 1, as well as equaling 1.
+
+````
+maxLoss: 0.9000 N=100000, margin=0.01, upper=10.0 noerror:0.5003 maxtj: 1.0005: needed 6439 samples; pct = 0.9031
+maxLoss: 0.9500 N=100000, margin=0.01, upper=10.0 noerror:0.5003 maxtj: 1.0005: needed 6111 samples; pct = 0.9516
+maxLoss: 0.9900 N=100000, margin=0.01, upper=10.0 noerror:0.5003 maxtj: 1.0005: needed 5871 samples; pct = 0.9905
+maxLoss: 0.9990 N=100000, margin=0.01, upper=10.0 noerror:0.5003 maxtj: 1.0005: needed 5820 samples; pct = 0.9991
+maxLoss: 0.9999 N=100000, margin=0.01, upper=10.0 noerror:0.5003 maxtj: 1.0005: needed 5815 samples; pct = 1.0000
+maxLoss: 1.0000 N=100000, margin=0.01, upper=10.0 noerror:0.5003 maxtj: 1.0005: needed 5815 samples; pct = 1.0000
+
+maxLoss: 0.9000 N=100000, margin=0.01, upper=1.0 noerror:0.5025 maxtj: 1.0045: needed 662 samples; pct = 0.9003
+maxLoss: 0.9500 N=100000, margin=0.01, upper=1.0 noerror:0.5025 maxtj: 1.0048: needed 628 samples; pct = 0.9490
+maxLoss: 0.9900 N=100000, margin=0.01, upper=1.0 noerror:0.5025 maxtj: 1.0050: needed 602 samples; pct = 0.9900
+maxLoss: 0.9990 N=100000, margin=0.01, upper=1.0 noerror:0.5025 maxtj: 1.0050: needed 597 samples; pct = 0.9983
+maxLoss: 0.9999 N=100000, margin=0.01, upper=1.0 noerror:0.5025 maxtj: 1.0050: needed 596 samples; pct = 1.0000
+maxLoss: 1.0000 N=100000, margin=0.01, upper=1.0 noerror:0.5025 maxtj: 1.0050: needed 596 samples; pct = 1.0000
+
+maxLoss: 0.9000 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0068: needed 444 samples; pct = 0.9009
+maxLoss: 0.9500 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0071: needed 421 samples; pct = 0.9501
+maxLoss: 0.9900 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0074: needed 404 samples; pct = 0.9901
+maxLoss: 0.9990 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0075: needed 400 samples; pct = 1.0000
+maxLoss: 0.9999 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0075: needed 400 samples; pct = 1.0000
+maxLoss: 1.0000 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0075: needed 400 samples; pct = 1.0000
+````

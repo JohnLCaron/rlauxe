@@ -414,6 +414,15 @@ When the estimated error rates are half the actual error rates:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/dist2/estErrorRatesHalf.html" rel="estErrorRatesHalf">![estErrorRatesHalf](./docs/plots2/dist/estErrorRatesHalf.png)</a>
 
+![alt-text-1](./docs/plots2/dist/estErrorRatesHalf.png "title-1") ![alt-text-2](./docs/plots2/dist/estErrorRatesDouble "title-2")
+
+<p align="center">
+  <img alt="Light" src="./docs/plots2/dist/estErrorRatesHalf.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Dark" src="./docs/plots2/dist/estErrorRatesDouble.png" width="45%">
+</p>
+
+
 The amount of extra sampling closely follows the number of samples needed, adding around 30-70% extra work, as the 
 following plots vs margin show:
 

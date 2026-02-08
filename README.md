@@ -404,15 +404,15 @@ betting function with weight parameter d = 100, for margin=2% and errors in the 
 
 When the estimated error rates are equal to the actual error rates:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/dist/estSamplesNeeded/estErrorRatesEqual.html" rel="estErrorRatesEqual">![estErrorRatesEqual](./docs/plots/dist/estSamplesNeeded/estErrorRatesEqual.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/dist/estErrorRatesEqual.html" rel="estErrorRatesEqual">![estErrorRatesEqual](./docs/plots2/dist/estErrorRatesEqual.png)</a>
 
 When the estimated error rates are double the actual error rates:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/dist/estSamplesNeeded/estErrorRatesDouble.html" rel="estErrorRatesDouble">![estErrorRatesDouble](./docs/plots/dist/estSamplesNeeded/estErrorRatesDouble.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/dist//estErrorRatesDouble.html" rel="estErrorRatesDouble">![estErrorRatesDouble](./docs/plots2/dist/estErrorRatesDouble.png)</a>
 
 When the estimated error rates are half the actual error rates:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/dist/estSamplesNeeded/estErrorRatesHalf.html" rel="estErrorRatesHalf">![estErrorRatesHalf](./docs/plots/dist/estSamplesNeeded/estErrorRatesHalf.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/dist2/estErrorRatesHalf.html" rel="estErrorRatesHalf">![estErrorRatesHalf](./docs/plots2/dist/estErrorRatesHalf.png)</a>
 
 The amount of extra sampling closely follows the number of samples needed, adding around 30-70% extra work, as the 
 following plots vs margin show:

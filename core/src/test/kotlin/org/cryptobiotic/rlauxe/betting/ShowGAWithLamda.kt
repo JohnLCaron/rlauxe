@@ -13,7 +13,7 @@ import kotlin.test.Test
 // log T_i = ln(1.0 + lamda * (noerror - mui)) * p0  + Sum { ln(1.0 + lamda * (assortValue_k - mui)) * p_k; over error type k }
 //          + Sum { ln(1.0 + lamda * (assortValue_pk - mui)) * p_pk; over pools and pool types }              (eq 2)
 
-class TestGAWithLamda {
+class ShowGAWithLamda {
 
     @Test
     fun showMarginsAtRisk() {
@@ -39,9 +39,7 @@ class TestGAWithLamda {
 
         val tauPlurality = Taus(1.0)
         println(tauPlurality.names())
-        //tauPlurality.values().forEach { tau ->
-        //    repeat(10) { tracker.addSample( tau * noerror) }
-        //}
+
         repeat(1) { tracker.addSample( 0.0 * noerror) }
         repeat(10) { tracker.addSample( 0.5 * noerror) }
         repeat(10) { tracker.addSample( 1.5 * noerror) }
@@ -88,22 +86,17 @@ fun expectedValueLogt(lam: Double, mui: Double, errs: ClcaErrorCounts): Double {
     val noerrorTerm = ln(1.0 + lam * (noerror - mui)) * p0
 
     var sumClcaTerm = 0.0
+    println("    sampleValue, mui, (sampleValue - mui), rate, term")
     rates.forEach { (sampleValue: Double, rate: Double) ->
         val term = ln(1.0 + lam * (sampleValue - mui)) * rate
         println("    $sampleValue, $mui, ${(sampleValue - mui)}, $rate, $term")
         sumClcaTerm += ln(1.0 + lam * (sampleValue - mui)) * rate
     }
 
-    var sumOneAuditTerm = 0.0
-    /* if (oaErrorRates != null) {
-        oaErrorRates.filter { it.value != 0.0 }.forEach { (sampleValue: Double, rate: Double) ->
-            sumOneAuditTerm += ln(1.0 + lam * (sampleValue - mui)) * rate
-        }
-    } */
-    val total = noerrorTerm + sumClcaTerm + sumOneAuditTerm
+    val total = noerrorTerm + sumClcaTerm
 
     println("  lam=$lam, noerrorTerm=${df(noerrorTerm)} sumClcaTerm=${df(sumClcaTerm)} " +
-            "sumOneAuditTerm=${df(sumOneAuditTerm)} expectedValueLogt=${total} ")
+           "expectedValueLogt=${total} ")
 
     return total
 }

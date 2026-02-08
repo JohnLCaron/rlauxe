@@ -48,8 +48,13 @@ fun estimateSampleSizes(
     onlyTask: String? = null
 ): List<RunRepeatedResult> {
 
+    if ((config.isClca || config.isOA ) && auditRound.roundIdx == 1 && config.simulationStrategy == SimulationStrategy.optimistic) {
+        calculateSampleSizes(config, auditRound)
+        return emptyList()
+    }
+
     // choose a subset of the cards for the estimation for speed
-    var cardSamples: CardSamples? = if (config.isPolling) null else
+    val cardSamples: CardSamples? = if (config.isPolling) null else
         getSubsetForEstimation(
             config,
             auditRound.contestRounds,

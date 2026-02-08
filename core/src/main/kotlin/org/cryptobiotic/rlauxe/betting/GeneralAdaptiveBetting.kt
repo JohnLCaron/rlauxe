@@ -9,7 +9,7 @@ import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction
 import org.apache.commons.math3.optim.univariate.SearchInterval
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditAssortValueRates
-import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.ln
@@ -124,8 +124,8 @@ class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, 
         }
         require (p0 >= 0.0)
         if (debug) {
-            print("OneAuditOptimalLambda init: mui=$mui ")
-            expectedValueLogt(1.0, true)
+            print("GeneralOptimalLambda init: mui=$mui ")
+            expectedValueLogt(maxBet, true)
         }
     }
 
@@ -172,8 +172,9 @@ class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, 
         }
         val total = noerrorTerm + sumClcaTerm + sumOneAuditTerm
 
-        if (debug) println("  lam=$lam, noerrorTerm=${df(noerrorTerm)} sumClcaTerm=${df(sumClcaTerm)} " +
-                "sumOneAuditTerm=${df(sumOneAuditTerm)} expectedValueLogt=${total} ")
+        if (debug)
+            println("  lam=$lam, noerrorTerm=${dfn(noerrorTerm, 6)} sumClcaTerm=${dfn(sumClcaTerm, 6)} " +
+                "sumOneAuditTerm=${dfn(sumOneAuditTerm, 6)} expectedValueLogt=${total} ")
 
         return total
     }

@@ -36,9 +36,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         auditRounds.add(auditRound)
 
         logger.debug{"Estimate round ${roundIdx}"}
-
         val previousSamples = auditRounds.previousSamples(roundIdx)
-
         val stopwatch = Stopwatch()
 
         // for each contest, estimate how many samples are needed to satisfy the risk function,
@@ -52,11 +50,6 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
             onlyTask = onlyTask,
         )
         logger.debug{"Estimate round ${roundIdx} took ${stopwatch}"}
-
-        // overide the simulation with the calculated mvrs needed TODO
-         if (roundIdx == 1 && auditConfig.isOA && auditConfig.oaConfig.strategy == OneAuditStrategyType.calcMvrsNeeded) {
-             calculateSampleSizes(auditConfig, auditRound)
-         }
 
         //    auditRound.nmvrs = sampledCards.size
         //    auditRound.newmvrs = newMvrs

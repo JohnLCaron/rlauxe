@@ -15,7 +15,7 @@ import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
 
-// TODO move to test, dont use in production? remove ??
+// CANDIDATE for removal
 
 // betting functions that use Kelly optimization of lambda parameter for the BettingFn
 

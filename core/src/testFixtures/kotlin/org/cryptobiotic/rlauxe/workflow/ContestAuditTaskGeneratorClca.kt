@@ -140,22 +140,22 @@ class ClcaSingleRoundWorkflowTask(
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
                 otherParameters,
-                100.0,
             )
         } else {
             val lastRound = minAssertion.auditResult!!
             WorkflowResult(
                 name,
-                contest.Npop,
-                assorter.dilutedMargin(),
-                lastRound.status,
-                minAssertion.roundProved.toDouble(),
-                lastRound.samplesUsed.toDouble(),
-                nmvrs.toDouble(),
+                Nc = contest.Npop,
+                margin = assorter.dilutedMargin(),
+                status = lastRound.status,
+                nrounds = minAssertion.roundProved.toDouble(),
+                samplesUsed = lastRound.samplesUsed.toDouble(),
+                nmvrs = nmvrs.toDouble(),
                 otherParameters + lastRound.params,
-                if (lastRound.status != TestH0Status.StatRejectNull) 100.0 else 0.0,
-                mvrMargin=mvrMargin,
+                failPct = if (lastRound.status != TestH0Status.StatRejectNull) 100.0 else 0.0,
+                wtf = (nmvrs - lastRound.samplesUsed) / minAssertion.roundProved.toDouble(),
 
+                mvrMargin=mvrMargin,
                 startingRates=null,
                 measuredCounts=lastRound.measuredCounts,
             )

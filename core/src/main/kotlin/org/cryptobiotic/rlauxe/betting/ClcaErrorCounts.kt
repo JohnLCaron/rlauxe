@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.betting
 
 import org.cryptobiotic.rlauxe.util.Welford
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -32,7 +31,7 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
             append("[")
             sorted.forEach { (bassort, count) ->
                 val desc = taus.nameOf(bassort / noerror)
-                if (desc != null) append("$desc=$count, ")
+                append("$desc=$count, ")
             }
             append("]")
         } else {

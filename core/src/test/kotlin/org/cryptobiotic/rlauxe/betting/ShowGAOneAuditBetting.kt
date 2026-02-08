@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.workflow.ClcaSampler
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -19,7 +20,7 @@ import kotlin.test.assertEquals
 // log T_i = ln(1.0 + lamda * (noerror - mui)) * p0  + Sum { ln(1.0 + lamda * (assortValue_k - mui)) * p_k; over error type k } (eq 1)
 //          + Sum { ln(1.0 + lamda * (assortValue_pk - mui)) * p_pk; over pools and pool types }              (eq 2)
 
-class TestGeneralAdaptiveBetting2 {
+class ShowGAOneAuditBetting {
 
     @Test
     fun makeBet() {
@@ -90,18 +91,20 @@ class TestGeneralAdaptiveBetting2 {
         println("bet = $bet maxLoss = $maxLoss")
 
         assorts.shuffle(Random)
-        findSamplesNeededUsingAssorts2(N, margin, upper, bet, assorts, taus)
+        findSamplesNeededUsingAssorts(N, margin, upper, bet, assorts, taus)
     }
 }
 
 // see PlotWithAssortValues
-fun findSamplesNeededUsingAssorts2(N:Int, margin: Double, upper: Double, lamda: Double, assorts: List<Double>, taus: TausOA, show: Boolean = false) {
+private fun findSamplesNeededUsingAssorts(N:Int, margin: Double, upper: Double, lamda: Double, assorts: List<Double>, taus: TausOA, show: Boolean = false) {
 
     val noerror: Double = 1.0 / (2.0 - margin / upper) // clca assort value when no error
     val tracker = ClcaErrorTracker(noerror, upper)
     var T: Double = 1.0
     var sample = 0
 
+    println()
+    println("  ${sfn("assort",7)} ${sfn("ttj", 6)}, ${sfn("T", 6)}")
     while (T < 20.0 && sample < assorts.size) {
         val x = assorts[sample]
         tracker.addSample(x)
@@ -109,8 +112,8 @@ fun findSamplesNeededUsingAssorts2(N:Int, margin: Double, upper: Double, lamda: 
         val ttj = 1.0 + lamda * (x - mj)
         T *= ttj
         sample++
-        val name = taus.desc(x/noerror)
-        if (name != null) println("  $name $ttj")
+        val name = taus.desc(x/noerror) ?: "noerror"
+        println("  ${sfn(name,7)} ${df(ttj)}, ${df(T)}")
 
         if (show) println("${nfn(tracker.numberOfSamples(), 3)}: ttj=${dfn(ttj, 6)} Tj=${dfn(T, 6)}")
     }

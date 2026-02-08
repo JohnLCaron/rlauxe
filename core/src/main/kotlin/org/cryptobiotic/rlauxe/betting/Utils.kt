@@ -16,6 +16,13 @@ fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, tracker: Tracker): D
     val sampleNum = tracker.numberOfSamples()
     val sum = tracker.sum()
     return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - sum) / (N - sampleNum)
+    /* if (result > .5) {
+        val half = N * 0.5
+        val diff = half - sum
+        val denom = N - sampleNum
+        val r = diff / (N - sampleNum)
+        val ri = 1/r
+    } */
 }
 
 /*

@@ -445,11 +445,9 @@ how many are left to do.
 
 The trade off here is that the average number of rounds goes up.
 
-<p>
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffLogLinear.html" rel="extraVsMarginByFuzzDiffLogLinear">![extraVsMarginByFuzzDiffLogLinear](./docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffLogLinear.png)</a>
-&nbsp; &nbsp; &nbsp; &nbsp; 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffPct.html" rel="extraVsMarginByFuzzDiffPct">![extraVsMarginByFuzzDiffPct](./docs/plots/extra/extraVsMarginByFuzzDiff/extraVsMarginByFuzzDiffPct.png)</a>
-</p>
+See [clickable .001](https://johnlcaron.github.io/rlauxe/docs/plots2/extra/click1.html)
+See [clickable .002](https://johnlcaron.github.io/rlauxe/docs/plots2/extra/click2.html)
+See [clickable .003](https://johnlcaron.github.io/rlauxe/docs/plots2/extra/click3.html)
 
 The amount of extra sampling closely follows the number of samples needed, adding around 30-70% extra work, as the 
 following plots vs margin show:

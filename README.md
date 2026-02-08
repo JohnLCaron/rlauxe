@@ -414,12 +414,27 @@ When the estimated error rates are half the actual error rates:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/dist2/estErrorRatesHalf.html" rel="estErrorRatesHalf">![estErrorRatesHalf](./docs/plots2/dist/estErrorRatesHalf.png)</a>
 
+However, ...
+
+Here are the average extra samples vs the average number of rounds for mvrs with 1/1000 fuzz:
 <p>
-  <img alt="Equal" src="./docs/plots2/dist/estErrorRatesEqual.png" width="32%">
-&nbsp; &nbsp; 
-  <img alt="Half" src="./docs/plots2/dist/estErrorRatesHalf.png" width="32%">
-&nbsp; &nbsp; 
-  <img alt="Double" src="./docs/plots2/dist/estErrorRatesDouble.png" width="32%">
+  <img alt="Equal" src="./docs/plots2/extra/extraVsMarginCalc001Linear.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp; 
+  <img alt="Half" src="./docs/plots2/extra/extraVsMarginCalc001NroundsLinear.png" width="45%">
+</p>
+
+Here are the average extra samples vs the average number of rounds for mvrs with 2/1000 fuzz:
+<p>
+  <img alt="Equal" src="./docs/plots2/extra/extraVsMarginCalc002Linear.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp; 
+  <img alt="Half" src="./docs/plots2/extra/extraVsMarginCalc002NroundsLinear.png" width="45%">
+</p>
+
+Here are the average extra samples vs the average number of rounds for mvrs with 3/1000 fuzz:
+<p>
+  <img alt="Equal" src="./docs/plots2/extra/extraVsMarginCalc003Linear.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp; 
+  <img alt="Half" src="./docs/plots2/extra/extraVsMarginCalc003NroundsLinear.png" width="45%">
 </p>
 
 

@@ -414,12 +414,12 @@ When the estimated error rates are half the actual error rates:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/dist2/estErrorRatesHalf.html" rel="estErrorRatesHalf">![estErrorRatesHalf](./docs/plots2/dist/estErrorRatesHalf.png)</a>
 
-![alt-text-1](./docs/plots2/dist/estErrorRatesHalf.png "title-1") ![alt-text-2](./docs/plots2/dist/estErrorRatesDouble "title-2")
-
-<p align="center">
-  <img alt="Light" src="./docs/plots2/dist/estErrorRatesHalf.png" width="45%">
-&nbsp; &nbsp; &nbsp; &nbsp;
-  <img alt="Dark" src="./docs/plots2/dist/estErrorRatesDouble.png" width="45%">
+<p>
+  <img alt="Equal" src="./docs/plots2/dist/estErrorRatesEqual.png" width="32%">
+&nbsp; &nbsp; 
+  <img alt="Half" src="./docs/plots2/dist/estErrorRatesHalf.png" width="32%">
+&nbsp; &nbsp; 
+  <img alt="Double" src="./docs/plots2/dist/estErrorRatesDouble.png" width="32%">
 </p>
 
 

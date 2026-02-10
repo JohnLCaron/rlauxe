@@ -13,6 +13,7 @@ import kotlin.random.Random
 
 private val logger = KotlinLogging.logger("SamplerTracker")
 
+// main purpose is for BettingFn.bet(prevSamples: Tracker)
 interface Tracker {
     fun numberOfSamples(): Int    // total number of samples so far
     fun sum(): Double
@@ -34,22 +35,19 @@ interface SamplerTracker: Tracker, Iterator<Double> {
     fun nmvrs(): Int // total number mvrs
 
     fun reset()   // start over again with different permutation (may be prohibited)
+    fun measuredClcaErrorCounts(): ClcaErrorCounts // empty when polling
+    fun done()    // end of sampling, update statistics to final form
+    fun welford(): Welford   // running mean, variance, stddev
 
     /// Tracker : keeps track of the latest sample, number of samples, and the sample sum, mean and variance.
     //  doesnt update the statistics until the next sample is called. Must call done() when finished.
     override fun numberOfSamples(): Int    // total number of samples so far
-    fun measuredClcaErrorCounts(): ClcaErrorCounts
-    fun done()    // end of sampling, update statistics to final form
-    fun welford(): Welford   // running mean, variance, stddev
-
     override fun sum() = welford().sum()
     override fun mean() = welford().mean
     override fun variance() = welford().variance()
 }
 
-// Note that we are stuffing the sampling logic into card.hasContest(contestId)
-
-//// For polling audits. Production runPollingAuditRound
+//// For polling audits.
 class PollingSamplerTracker(
     val contestId: Int,
     val assorter: AssorterIF,
@@ -114,7 +112,7 @@ class PollingSamplerTracker(
     }
 }
 
-//// For clca audits. Production RunClcaContestTask
+//// For clca/oa audits, assumes card.hasContest(contestId) for all samples
 class ClcaSamplerErrorTracker(
     val contestId: Int,
     val cassorter: ClcaAssorter,
@@ -133,15 +131,6 @@ class ClcaSamplerErrorTracker(
             require(mvr.location() == card.location())  { "mvr location ${mvr.location()} != card.location ${card.location()}"}
             require(card.hasContest(contestId))  { " card.location ${card.location()} does not have contest $contestId" }
         }
-    }
-
-    fun dump(outputFilename: String) {
-        val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
-        samples.forEachIndexed { idx, pair ->
-            writer.write("mvr $idx: ${pair.first}\n")
-            writer.write("cvr $idx: ${pair.second}\n")
-        }
-        writer.close()
     }
 
     override fun sample(): Double {
@@ -190,8 +179,19 @@ class ClcaSamplerErrorTracker(
         lastVal = null
     }
 
+    //// ErrorTracker
     override fun measuredClcaErrorCounts(): ClcaErrorCounts = clcaErrorTracker.measuredClcaErrorCounts()
     override fun noerror(): Double = clcaErrorTracker.noerror
+
+    // debugging
+    fun dump(outputFilename: String) {
+        val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
+        samples.forEachIndexed { idx, pair ->
+            writer.write("mvr $idx: ${pair.first}\n")
+            writer.write("cvr $idx: ${pair.second}\n")
+        }
+        writer.close()
+    }
 
     companion object {
         fun fromIndexList(

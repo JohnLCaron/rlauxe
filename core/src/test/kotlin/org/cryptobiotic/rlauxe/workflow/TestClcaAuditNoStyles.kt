@@ -104,7 +104,7 @@ class TestClcaAuditNoStyles {
     fun testClcaWithFuzz() {
         val config = AuditConfig(
             AuditType.CLCA, hasStyle=false, nsimEst=10, simFuzzPct = 0.01,
-            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzMvrs = 0.01)
+            clcaConfig = ClcaConfig(fuzzMvrs = 0.01)
         )
 
         val N = 50000
@@ -117,9 +117,9 @@ class TestClcaAuditNoStyles {
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
-        val testMvrs = if (config.clcaConfig.strategy != ClcaStrategyType.fuzzPct) testCvrs else
+        val testMvrs = if (config.mvrFuzzPct() != 0.0) testCvrs else
                 // fuzzPct of the Mvrs have their votes randomly changed ("fuzzed")
-                makeFuzzedCvrsForClca(testData.contests.map { it.info} , testCvrs, config.simFuzzPct)
+                makeFuzzedCvrsForClca(testData.contests.map { it.info} , testCvrs, config.mvrFuzzPct())
 
         val workflow = WorkflowTesterClca(config, contestsToAudit, emptyList(),
             MvrManagerForTesting(testCvrs, testMvrs, config.seed))

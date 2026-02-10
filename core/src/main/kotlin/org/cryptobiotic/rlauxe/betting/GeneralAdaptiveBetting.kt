@@ -16,6 +16,8 @@ import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
 
+// TODO replace with GeneralAdaptiveBetting2
+
 private val logger = KotlinLogging.logger("GeneralAdaptiveBetting")
 
 // generalize AdaptiveBetting for any clca assorter, including OneAudit
@@ -49,12 +51,33 @@ class GeneralAdaptiveBetting(
                 sampleNum = sampleNumber,
             )
             // rate of phantoms is the minimum "oth-los" rate
-            if (startingErrors.isPhantom(bassort)) {
-                rate = max( rate, nphantoms / Npop.toDouble())
+            if (startingErrors.isPhantom(bassort) && nphantoms > 0) {
+                val prate = nphantoms / Npop.toDouble()
+                rate = max( rate, prate) // TODO max or sum ?
             }
             Pair(bassort, rate)
         }.toMap()
         return estRates
+    }
+
+
+    // For k ∈ {1, 2} we set a value d_k ≥ 0, capturing the degree of shrinkage to the a priori estimate p̃_k ,
+    // and a truncation factor eps_k ≥ 0, enforcing a lower bound on the estimated rate.
+    // Let p̂_ki be the sample rates at time i, e.g., p̂_2i = Sum(1{Xj = 0})/i , j=1..i
+    // Then the shrink-trunc estimate is:
+    //   p_̃ki := (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ epsk  ; COBRA eq (4)
+
+    // ease the first d samples in slowly
+    fun shrinkTruncEstimateRate(
+        apriori: Double,
+        errorCount: Int,
+        sampleNum: Int,
+    ): Double {
+        if (sampleNum == 0) return 0.0
+        if (errorCount == 0) return 0.0 // experiment
+        val used = min(d, 1)
+        val est = (used * apriori + errorCount) / (used + sampleNum - 1)
+        return est
     }
 
     override fun bet(prevSamples: Tracker): Double {
@@ -83,25 +106,6 @@ class GeneralAdaptiveBetting(
 
         lastBet = bet // debugging
         return bet
-    }
-
-    // For k ∈ {1, 2} we set a value d_k ≥ 0, capturing the degree of shrinkage to the a priori estimate p̃_k ,
-    // and a truncation factor eps_k ≥ 0, enforcing a lower bound on the estimated rate.
-    // Let p̂_ki be the sample rates at time i, e.g., p̂_2i = Sum(1{Xj = 0})/i , j=1..i
-    // Then the shrink-trunc estimate is:
-    //   p_̃ki := (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ epsk  ; COBRA eq (4)
-
-    // ease the first d samples in slowly
-    fun shrinkTruncEstimateRate(
-        apriori: Double,
-        errorCount: Int,
-        sampleNum: Int,
-    ): Double {
-        if (sampleNum == 0) return 0.0
-        if (errorCount == 0) return 0.0 // experiment
-        val used = min(d, 1)
-        val est = (used * apriori + errorCount) / (used + sampleNum - 1)
-        return est
     }
 }
 

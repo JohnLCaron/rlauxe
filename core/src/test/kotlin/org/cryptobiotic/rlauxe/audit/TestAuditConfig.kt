@@ -13,7 +13,7 @@ class TestAuditConfig {
         val expected =
 """AuditConfig(auditType=CLCA, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testSimulated
   minRecountMargin=0.005 removeTooManyPhantoms=false contestSampleCutoff=30000 removeCutoffContests=false
-  nsimEst=10, quantile=0.8, simFuzzPct=null, mvrFuzzPct=0.0,
+  nsimEst=10, quantile=0.8, simFuzzPct=null, simulationStrategy=regular, mvrFuzzPct=0.0,
   ClcaConfig(strategy=generalAdaptive, fuzzMvrs=null, d=100, maxLoss=0.9, cvrsContainUndervotes=true)
 """
         assertEquals(expected, config.toString())
@@ -28,7 +28,7 @@ class TestAuditConfig {
         val expected =
             """AuditConfig(auditType=POLLING, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testSimulated
   minRecountMargin=0.005 removeTooManyPhantoms=false contestSampleCutoff=30000 removeCutoffContests=false
-  nsimEst=10, quantile=0.8, simFuzzPct=null, mvrFuzzPct=0.0,
+  nsimEst=10, quantile=0.8, simFuzzPct=null, simulationStrategy=regular, mvrFuzzPct=0.0,
   PollingConfig(d=100)
 """
         assertEquals(expected, config.toString())
@@ -43,7 +43,7 @@ class TestAuditConfig {
         val expected =
             """AuditConfig(auditType=ONEAUDIT, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testSimulated
   minRecountMargin=0.005 removeTooManyPhantoms=false contestSampleCutoff=30000 removeCutoffContests=false
-  nsimEst=10, quantile=0.8, simFuzzPct=null, mvrFuzzPct=0.0,
+  nsimEst=10, quantile=0.8, simFuzzPct=null, simulationStrategy=regular, mvrFuzzPct=0.0,
   OneAuditConfig(strategy=simulate)
 """
         assertEquals(expected, config.toString())

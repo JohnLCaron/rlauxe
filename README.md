@@ -599,7 +599,7 @@ the Prover must make before the random seed can be generated.
 SHANGRLA's Adaptive Betting has been generalized to work for both CLCA and OneAudit and for any assorter. 
 It uses estimated and/or measured error rates to set optimal betting values. This is currently the only betting strategy 
 used for CLCA/OneAudit.
-See [BettingRiskFunction](docs/BettingRiskFunction.md) for more info.
+See [BettingRiskFunctions](docs/BettingRiskFunctions.md) for more info.
 
 ### OneAudit Betting strategy
 

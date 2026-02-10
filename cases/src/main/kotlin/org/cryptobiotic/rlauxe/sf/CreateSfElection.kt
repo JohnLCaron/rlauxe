@@ -348,7 +348,7 @@ fun createSfElection(
         (auditType ==  AuditType.ONEAUDIT) -> AuditConfig(
             AuditType.ONEAUDIT, riskLimit = .05, nsimEst = 20,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
-            oaConfig = OneAuditConfig(OneAuditStrategyType.calcMvrsNeeded)
+            simulationStrategy = SimulationStrategy.optimistic,
         )
 
         else -> AuditConfig(AuditType.POLLING, riskLimit = .05, contestSampleCutoff = 10000, nsimEst = 20)

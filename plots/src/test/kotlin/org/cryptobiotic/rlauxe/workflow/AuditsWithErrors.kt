@@ -112,7 +112,7 @@ class AuditsWithErrors {
 
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct,
-                clcaConfigIn= ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
+                clcaConfigIn= ClcaConfig(fuzzMvrs=fuzzPct),
                 parameters=mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "cat" to "clca")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
@@ -181,7 +181,7 @@ class AuditsWithErrors {
             fuzzPcts.forEach { fuzzPct ->
                 val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                     N, margin, 0.0, 0.0, mvrsFuzzPct = fuzzPct,
-                    clcaConfigIn = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct),
+                    clcaConfigIn = ClcaConfig(fuzzMvrs=fuzzPct),
                     parameters = mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "cat" to margin)
                 )
                 tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))

@@ -1,8 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
-
 import org.cryptobiotic.rlauxe.betting.Taus
-import org.cryptobiotic.rlauxe.betting.computeBassortValues
 import org.cryptobiotic.rlauxe.dhondt.DHondtAssorter
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.listToMap
@@ -38,9 +36,6 @@ class TestClcaAssortValues {
         val loser = Cvr("loser", mapOf(0 to intArrayOf(1)))
         val other = Cvr("other", mapOf(0 to intArrayOf(2)))
         val phantom = Cvr("phantom", mapOf(0 to IntArray(0)), phantom = true)
-
-        val bassv = computeBassortValues(cassorter.noerror, cassorter.assorter.upperBound())
-        println(bassv)
 
         println("DHondtAssorter")
         val taus = Taus(cassorter.assorter().upperBound())
@@ -177,8 +172,7 @@ class TestClcaAssortValues {
         val expect = expectV(cvrAssort=cvrValue, mvrAssort=mvrValue, cassorter.assorter().upperBound())
         val actual = cassorter.bassort(mvr=mvr, cvr=cvr, hasStyle=hasStyle) / cassorter.noerror() // hasStyle ??
         val tauName = taus.nameOf(expect)
-        val tauDesc = taus.descOf(expect)
-        println("  ${sfn(what, 15)} tau= ${df(actual)} '${sfn(tauName,7)}' (${tauDesc})")
+        println("  ${sfn(what, 15)} tau= ${df(actual)} '${sfn(tauName,7)}')")
 
         if (expect.isNaN() && actual.isNaN()) return
         if (expect != actual) {

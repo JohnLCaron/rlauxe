@@ -79,7 +79,6 @@ class TestClcaAudit {
 
     @Test
     fun testClcaWithSimFuzz() {
-        val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct))
         val testData = MultiContestTestData(11, 1, N,  )
         val finalRound = testClcaWorkflow(config, testData)
         assertNotNull(finalRound)
@@ -94,14 +93,6 @@ class TestClcaAudit {
         println(finalRound.show())
     }
 
-    // @Test // TODO oracle disabled
-    fun testClcaOracle() {
-        val config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle))
-        val testData = MultiContestTestData(11, 4, N, )
-        val finalRound = testClcaWorkflow(config, testData)
-        assertNotNull(finalRound)
-        println(finalRound.show())
-    }
 
     @Test
     fun testClcaPhantoms() {

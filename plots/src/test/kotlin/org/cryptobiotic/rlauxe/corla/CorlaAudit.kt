@@ -66,7 +66,7 @@ class CorlaContestAuditTaskGenerator(
         val auditConfig = auditConfigIn ?:
         AuditConfig(
             AuditType.CLCA, true, nsimEst = 10,
-            clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.fuzzPct, mvrsFuzzPct)
+            clcaConfig = clcaConfigIn ?: ClcaConfig(fuzzMvrs=mvrsFuzzPct)
         )
 
         val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)

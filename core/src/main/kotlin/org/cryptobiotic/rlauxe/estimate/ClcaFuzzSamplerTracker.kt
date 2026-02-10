@@ -19,7 +19,7 @@ class ClcaFuzzSamplerTracker(
     val fuzzPct: Double,
     cardSamples: CardSamples,
     val contestUA: ContestWithAssertions,
-    val cassorter: ClcaAssorter
+    val cassorter: ClcaAssorter,
 ): SamplerTracker, ErrorTracker {
     val contest = contestUA.contest
     val samples = cardSamples.extractSubsetByIndex(contest.id)
@@ -107,6 +107,7 @@ class ClcaFuzzSamplerTracker(
         lastVal = null
     }
 
+    //// ErrorTracker
     override fun measuredClcaErrorCounts(): ClcaErrorCounts = clcaErrorTracker.measuredClcaErrorCounts()
     override fun noerror(): Double = clcaErrorTracker.noerror
 }

@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditAssortValueRates
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
@@ -8,58 +7,63 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.ln
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 // exoplore this function
 // log T_i = ln(1.0 + lamda * (noerror - mui)) * p0  + Sum { ln(1.0 + lamda * (assortValue_k - mui)) * p_k; over error type k }
 //          + Sum { ln(1.0 + lamda * (assortValue_pk - mui)) * p_pk; over pools and pool types }              (eq 2)
 
-class ShowGAWithLamda {
+class ShowSamplesNeededFromGABetting {
+    val N = 10000
+    val margin = .01
+    val upper = 1.0
+    val maxLoss = .9
 
     @Test
-    fun showMarginsAtRisk() {
-        makeBet(N = 10000, margin = .01, upper = 1.0, maxLoss = .9)
+    fun showSamplesNeeded() {
+        makeBet(0)
     }
 
     fun makeBet(
-        N: Int,
-        margin: Double,
-        upper: Double,
-        maxLoss: Double,
-        oaErrorRates: OneAuditAssortValueRates? = null
-    ) {
+        nphantoms: Int
+    ): List<Int> {
+        println("nphantoms = $nphantoms")
         val noerror: Double = 1.0 / (2.0 - margin / upper)
 
-        val betFn = GeneralAdaptiveBetting(N,
+        val betFn = GeneralAdaptiveBetting(
+            N,
             startingErrors = ClcaErrorCounts.empty(noerror, upper),
-            nphantoms = 0,
-            oaErrorRates, d=0,  maxLoss = maxLoss, debug=false)
+            nphantoms = nphantoms,
+            oaAssortRates = null, d = 0, maxLoss = maxLoss, debug = false
+        )
 
         val tracker = ClcaErrorTracker(noerror, upper)
         repeat(1000) { tracker.addSample(noerror) }
 
-        val tauPlurality = Taus(1.0)
-        println(tauPlurality.names())
+        repeat(1) { tracker.addSample(0.0 * noerror) }
+        repeat(10) { tracker.addSample(0.5 * noerror) }
+        repeat(10) { tracker.addSample(1.5 * noerror) }
+        repeat(1) { tracker.addSample(2.0 * noerror) }
+        println("errorCounts = ${tracker.measuredClcaErrorCounts().show()}")
+        assertEquals(listOf(1, 10, 10, 1), tracker.measuredClcaErrorCounts().errorCounts().map { it.value })
 
-        repeat(1) { tracker.addSample( 0.0 * noerror) }
-        repeat(10) { tracker.addSample( 0.5 * noerror) }
-        repeat(10) { tracker.addSample( 1.5 * noerror) }
-        repeat(1) { tracker.addSample( 2.0 * noerror) }
-        println(tracker.measuredClcaErrorCounts().show())
-
+        // get optimal bet
         val bet = betFn.bet(tracker)
-        println("bet = $bet maxLoss = $maxLoss")
+        println("optimal bet = $bet")
 
-        val mui = populationMeanIfH0(N, withoutReplacement=true, tracker = tracker)
-        val expect = expectedValueLogt(bet, mui, tracker.measuredClcaErrorCounts())
-        println("expectedValueLogt = $expect")
+        val mui = populationMeanIfH0(N, withoutReplacement = true, tracker = tracker)
+        expectedValueLogt(bet, mui, tracker.measuredClcaErrorCounts())
+        println()
 
-        findSamplesNeededUsingLambda(N, margin, upper, bet, mui, show=false)
-        findSamplesNeededUsingLambda(N, margin, upper, 1.8, mui, show=false)
-        findSamplesNeededUsingLambda(N, margin, upper, 2.0, mui, show=false)
+        return listOf(
+            findSamplesNeededUsingLambda(N, margin, upper, bet,),
+            findSamplesNeededUsingLambda(N, margin, upper, 1.8,),
+            findSamplesNeededUsingLambda(N, margin, upper, 2.0,),
+        )
     }
 }
 
-fun findSamplesNeededUsingLambda(N:Int, margin: Double, upper: Double, lamda: Double, mui: Double = 0.5, show: Boolean = false) {
+fun findSamplesNeededUsingLambda(N:Int, margin: Double, upper: Double, lamda: Double, show: Boolean = false): Int {
     val noerror: Double = 1.0 / (2.0 - margin / upper) // clca assort value when no error
     val tracker = ClcaErrorTracker(noerror, upper)
     var T: Double = 1.0
@@ -74,6 +78,7 @@ fun findSamplesNeededUsingLambda(N:Int, margin: Double, upper: Double, lamda: Do
         if (show) println("${nfn(tracker.numberOfSamples(), 3)}: ttj=${dfn(ttj, 6)} Tj=${dfn(T, 6)}")
     }
     println("lamda: ${df(lamda)} N=$N, margin=$margin, upper=$upper noerror:${df(noerror)}: needed $sample samples" )
+    return sample
 }
 
 fun expectedValueLogt(lam: Double, mui: Double, errs: ClcaErrorCounts): Double {
@@ -86,6 +91,7 @@ fun expectedValueLogt(lam: Double, mui: Double, errs: ClcaErrorCounts): Double {
     val noerrorTerm = ln(1.0 + lam * (noerror - mui)) * p0
 
     var sumClcaTerm = 0.0
+    println("expectedValueLogt terms at lamda=$lam")
     println("    sampleValue, mui, (sampleValue - mui), rate, term")
     rates.forEach { (sampleValue: Double, rate: Double) ->
         val term = ln(1.0 + lam * (sampleValue - mui)) * rate
@@ -95,7 +101,7 @@ fun expectedValueLogt(lam: Double, mui: Double, errs: ClcaErrorCounts): Double {
 
     val total = noerrorTerm + sumClcaTerm
 
-    println("  lam=$lam, noerrorTerm=${df(noerrorTerm)} sumClcaTerm=${df(sumClcaTerm)} " +
+    println("noerrorTerm=${df(noerrorTerm)} sumClcaTerm=${df(sumClcaTerm)} " +
            "expectedValueLogt=${total} ")
 
     return total

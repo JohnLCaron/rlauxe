@@ -198,6 +198,17 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
         return ClcaErrorCounts(sumOfCounts, totalSamples, noerror, upper)
     }
 
+    // we get the results from the audit, not the estimation
+    fun previousErrorCounts(): ClcaErrorCounts {
+        val noerror = (assertion as ClcaAssertion).cassorter.noerror()
+        val upper = assertion.cassorter.assorter.upperBound()
+        if (roundIdx == 1 || prevAuditResult == null || prevAuditResult!!.measuredCounts == null) return ClcaErrorCounts.empty(noerror, upper)
+
+        val prevResult = prevAuditResult!!
+        // get previous assertionRound
+        return ClcaErrorCounts(prevResult.measuredCounts!!.errorCounts, prevResult.samplesUsed, noerror, upper)
+    }
+
     // return calcMvrsNeeded, optimalBet
     fun calcMvrsNeeded(contest: ContestWithAssertions, maxLoss: Double, riskLimit: Double, fuzzPct: Double?): Pair<Int, Double> {
         val alpha = this.prevAuditResult?.plast ?: riskLimit

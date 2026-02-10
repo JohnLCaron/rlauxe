@@ -54,7 +54,7 @@ class OaMarginAttack {
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "calcMvrsNeeded", "fuzzPct" to fuzzPct),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true, nsimEst = nsimEst,
-                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.calcMvrsNeeded)
+                    simulationStrategy = SimulationStrategy.optimistic,
                 ),
                 p1flips=margin*extra,
             )
@@ -111,13 +111,11 @@ class OaMarginAttack {
 
     @Test
     fun runOne() {
-        val config = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst)
         val reportedMargin = .01
         val flip1 = .01
         val taskgen = ClcaSingleRoundAuditTaskGenerator(
             N, margin=reportedMargin, 0.0, 0.0, 0.0,
             parameters = mapOf("nruns" to nruns, "cat" to flip1),
-            config = config.copy(clcaConfig = ClcaConfig(ClcaStrategyType.oracle)),
             p1flips=flip1,
         )
         val task: ClcaSingleRoundWorkflowTask = taskgen.generateNewTask()

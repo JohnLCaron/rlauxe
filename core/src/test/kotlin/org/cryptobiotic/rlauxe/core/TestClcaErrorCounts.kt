@@ -1,10 +1,8 @@
 package org.cryptobiotic.rlauxe.core
 
-
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.TausRateTable
-import org.cryptobiotic.rlauxe.betting.computeBassortValues
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
@@ -12,7 +10,8 @@ import org.cryptobiotic.rlauxe.util.doublePrecision
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.random.Random
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class TestClcaErrorCounts {
 
@@ -65,7 +64,7 @@ class TestClcaErrorCounts {
         assertEquals(listOf(1, 1, 1, 2), tracker.errorCounts().toList().map { it.second })
 
         val n = tracker.numberOfSamples().toDouble()
-        assertEquals(listOf(1/n, 1/n, 1/n, 2/n), tracker.errorRates().toList().map { it.second })
+        assertEquals(listOf(1 / n, 1 / n, 1 / n, 2 / n), tracker.errorRates().toList().map { it.second })
 
         assertEquals(0.49, tracker.mean())
         assertEquals(0.09799999, tracker.variance(), doublePrecision)
@@ -106,7 +105,7 @@ class TestClcaErrorCounts {
         repeat(11) {
             tracker.addSample(noerror)
         }
-        assertEquals(countedTotal+11, tracker.numberOfSamples())
+        assertEquals(countedTotal + 11, tracker.numberOfSamples())
         assertEquals(11, tracker.noerrorCount)
     }
 
@@ -118,9 +117,9 @@ class TestClcaErrorCounts {
         val maxMaxDiffs = mutableMapOf<Int, Double>()  // ncandidates -> maxDiff
 
         repeat(111) {
-            val mvrsFuzzPct = Random.nextDouble(0.01)
-            val margin = Random.nextDouble(0.10)
-            val undervotePct = Random.nextDouble(0.10)
+            val mvrsFuzzPct = Random.Default.nextDouble(0.01)
+            val margin = Random.Default.nextDouble(0.10)
+            val undervotePct = Random.Default.nextDouble(0.10)
             // data class MultiContestTestData(
             //    val ncontest: Int,
             //    val nballotStyles: Int,
@@ -133,8 +132,10 @@ class TestClcaErrorCounts {
             //    val poolPct: Double? = null,  // if not null, make a pool with this pct with two ballotStyles
             //    val seqCands: Boolean = false // if true, use ncands = 2 .. ncontests + 1
             //)
-            val testData = MultiContestTestData(9, 1, 50000, margin..margin,
-                undervotePct .. undervotePct, 0.0 .. 0.0, seqCands=true)
+            val testData = MultiContestTestData(
+                9, 1, 50000, margin..margin,
+                undervotePct..undervotePct, 0.0..0.0, seqCands = true
+            )
             val testCvrs = testData.makeCvrsFromContests()
 
             testData.contests.forEach { contest ->
@@ -173,4 +174,12 @@ class TestClcaErrorCounts {
             println(" ncand = $ncand maxMaxDiff=${dfn(maxDiff, 6)}") //  maxMaxPct=${df(maxMaxPct)}")
         }
     }
+}
+
+fun computeBassortValues(noerror: Double, upper: Double): List<Double> {
+    // p2o, p1o, ? noerror, ?, p1u, p2u
+    // [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0] * noerror (l==0) (we will assume this)
+    val u12 = 1.0 / (2 * upper)
+    val taus = listOf(0.0, u12, 1 - u12, 2 - u12, 1 + u12, 2.0)
+    return taus.map { it * noerror }.toSet().toList().sorted()
 }

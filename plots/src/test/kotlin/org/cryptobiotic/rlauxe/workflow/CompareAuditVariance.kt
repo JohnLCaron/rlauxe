@@ -62,7 +62,7 @@ class CompareAuditVariance {
 
         val clcaConfig = AuditConfig(
             AuditType.CLCA, true,
-            clcaConfig = ClcaConfig(ClcaStrategyType.fuzzPct, fuzzPct)
+            clcaConfig = ClcaConfig(fuzzMvrs=fuzzPct)
         )
 
         val stopwatch = Stopwatch()

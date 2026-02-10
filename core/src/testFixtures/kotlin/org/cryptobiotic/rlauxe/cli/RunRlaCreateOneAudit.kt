@@ -117,7 +117,7 @@ object RunRlaCreateOneAudit {
         val config = AuditConfig(
             AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = fuzzPct,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
-            oaConfig = if (calc) OneAuditConfig(strategy = OneAuditStrategyType.calcMvrsNeeded) else OneAuditConfig()
+            simulationStrategy = if (calc) SimulationStrategy.optimistic else SimulationStrategy.regular,
         )
 
         clearDirectory(Path(auditDir))

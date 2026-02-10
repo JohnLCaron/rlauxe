@@ -11,6 +11,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.enumValueOf
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
@@ -247,6 +248,7 @@ data class ClcaConfigJson(
     val d: Int,
     val maxLoss: Double?,
     val cvrsContainUndervotes: Boolean=true,
+    val apriori:  Map<String, Double>?,
 )
 
 fun ClcaConfig.publishJson() = ClcaConfigJson(
@@ -255,6 +257,7 @@ fun ClcaConfig.publishJson() = ClcaConfigJson(
     this.d,
     this.maxLoss,
     this.cvrsContainUndervotes,
+    this.apriori.rates,
 )
 
 fun ClcaConfigJson.import() = ClcaConfig(
@@ -263,6 +266,7 @@ fun ClcaConfigJson.import() = ClcaConfig(
         this.d,
         this.maxLoss ?: 0.90,
         this.cvrsContainUndervotes,
+        apriori=TausRates(this.apriori ?: emptyMap()),
     )
 
 @Serializable

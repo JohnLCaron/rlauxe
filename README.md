@@ -475,9 +475,8 @@ Here are the average extra samples vs the average number of rounds for mvrs with
 
 Here are the interactive plots for more detail:
 
-* [interactive extra amples](https://johnlcaron.github.io/rlauxe/docs/plots2/extra2/extraSamples.html)
-* [interactive number of rounds](https://johnlcaron.github.io/rlauxe/docs/plots22/extra/numberOfRounds.html)
-* 
+* [interactive extra samples plots](https://johnlcaron.github.io/rlauxe/docs/plots2/extra2/extraSamples.html)
+* [interactive number of rounds plots](https://johnlcaron.github.io/rlauxe/docs/plots2/extra/numberOfRounds.html)
 
 ## Multiple Contest Auditing
 

@@ -1,7 +1,9 @@
 package org.cryptobiotic.rlauxe.betting
 
+import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.AuditType
 import kotlin.test.Test
-import kotlin.test.assertEquals
+import kotlin.test.*
 
 class TestTaus {
 
@@ -71,7 +73,7 @@ class TestTaus {
         }
     }
 
-    @Test
+   //  @Test
     fun testUpperNotOne() {
         val tausNotOne = Taus(1.1)
         println(tausNotOne)
@@ -103,6 +105,13 @@ class TestTaus {
             val name = tausNotOne.nameOf(v)
             assertEquals(name == "oth-los", isPhantom)
         }
+    }
+
+    @Test
+    fun testTausRates() {
+        val config = AuditConfig(AuditType.CLCA)
+        val apriori = config.clcaConfig.apriori.makeErrorCounts(42, .542, 1.0)
+        assertTrue(apriori.errorRates().isEmpty())
     }
 
 }

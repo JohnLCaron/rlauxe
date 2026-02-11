@@ -1,5 +1,5 @@
 # Risk and betting functions
-_last changed 02/10/2026_
+_last changed 02/11/2026_
 
 <!-- TOC -->
 * [Risk and betting functions](#risk-and-betting-functions)
@@ -367,3 +367,51 @@ maxLoss: 0.9990 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0075: 
 maxLoss: 0.9999 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0075: needed 400 samples; pct = 1.0000
 maxLoss: 1.0000 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0075: needed 400 samples; pct = 1.0000
 ````
+
+
+
+//////////////////////////////////////////////
+
+
+    tj = 1 + λ_j * (x_i − µ_j)
+    tj = 1 + λ_j * (tau * noerror − 1/2)
+
+when u = 1, tau = [0, .5, 1, 1,5, 2]
+
+    0.0: tj = 1 - λ/2 
+    0.5: tj = 1 + λ/2 (noerror - 1)
+    1.0: tj = 1 + λ   (noerror - 1/2)
+    1.5: tj = 1 + λ   (3 * noerror - 1)/2
+    2.0: tj = 1 + λ   (2 * noerror - 1/2)
+
+
+    noerror = 1/(2-v/u)   u in (1/2 ... inf)
+    u = 1, noerror = 1/(2-v), v in 0..1 so noerror in (1/2 to 1)
+    u > 1/2, noerror = 1/(2-2v), v in (0..1) so noerror in (1/2 to inf)
+    u > 1, noerror = 1/(2-v/u), v in (0..1) so v/u ??
+    u=inf, noerror = 1/(2-v/u) > 1/2
+
+
+  in order to gain, 1 + λ_j * (x_i − µ_j) must be > 1
+
+    1 - λ/2 always loses
+    1 + λ/2 (noerror - 1) wins if noerror > 1 otherwise loses; when u = 1,  noerror in (1/2 to 1), so always loses
+
+
+  if you bet < 1, are you betting that you will lose ??
+
+
+  tau = [0,       1/2u,    1-1/2u,  1,       1+1/2u,  1+1/2u,  2]
+
+    tj = 1 + λ_j * (tau * noerror − 1/2)
+
+         0: 1 - λ/2
+      1/2u: 1 + λ * (noerror/2u − 1/2)
+    1-1/2u: 1 + λ * ((1-1/2u) * noerror − 1/2)
+         1: 1 + λ * (noerror − 1/2)
+    1+1/2u: 1 + λ * ((1+1/2u)noerror − 1/2)
+    1+1/2u: 1 + λ * ((1+1/2u)noerror − 1/2)
+         2: 1 + λ * (2*noerror − 1/2)
+
+
+

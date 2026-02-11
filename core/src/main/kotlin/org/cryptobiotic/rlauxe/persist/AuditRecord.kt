@@ -34,7 +34,7 @@ class AuditRecord(
     override val location: String,
     override val config: AuditConfig,
     override val contests: List<ContestWithAssertions>,
-    override val rounds: List<AuditRound>,
+    override val rounds: List<AuditRound>,  // TODO do we need to replace AuditEst ??
     mvrs: List<AuditableCard> // mvrs already sampled
 ): AuditRecordIF {
     val previousMvrs = mutableMapOf<Long, AuditableCard>() // TODO not used ??
@@ -121,16 +121,29 @@ class AuditRecord(
                 }
                 sampledMvrsAll.addAll(sampledMvrs) // cumulative
 
-                // may not exist yet
-                val auditRoundFile = publisher.auditStateFile(roundIdx)
-                if (Files.exists(Path.of(auditRoundFile))) {
-                    val auditRoundResult = readAuditRoundJsonFile(
-                        auditRoundFile,
+                // AuditStateFile doesnt exist until audit is run
+                val auditStateFile = publisher.auditFile(roundIdx)
+                if (Files.exists(Path.of(auditStateFile))) {
+                    val auditRound = readAuditRoundJsonFile(
+                        auditStateFile,
                         contests!!,
                         samplePrns!!,
                     )
-                    if (auditRoundResult is Ok) rounds.add(auditRoundResult.unwrap() as AuditRound) else { // TODO
-                        errs.addNested(auditRoundResult.unwrapError())
+                    if (auditRound is Ok) rounds.add(auditRound.unwrap() as AuditRound) else { // TODO
+                        errs.addNested(auditRound.unwrapError())
+                    }
+                } else {
+                    // TODO if read in AuditEst, replace with AuditState when audit is done....
+                    val auditEstFile = publisher.auditEstFile(roundIdx)
+                    if (Files.exists(Path.of(auditEstFile))) {
+                        val auditEstRound = readAuditRoundJsonFile(
+                            auditEstFile,
+                            contests!!,
+                            samplePrns!!,
+                        )
+                        if (auditEstRound is Ok) rounds.add(auditEstRound.unwrap() as AuditRound) else { // TODO
+                            errs.addNested(auditEstRound.unwrapError())
+                        }
                     }
                 }
             }

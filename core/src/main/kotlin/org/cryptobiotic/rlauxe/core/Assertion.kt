@@ -6,6 +6,7 @@ open class Assertion(
     val info: ContestInfo,
     val assorter: AssorterIF,
 ) {
+    val upper = assorter.upperBound()
     val winner = assorter.winner()
     val loser = assorter.loser()
 
@@ -33,13 +34,14 @@ open class Assertion(
         appendLine("    assorter: ${assorter.desc()}")
     }
 
-    fun id() = "contest ${info.id} winner: $winner loser: $loser"
+    fun id() = "contest ${info.id} winner: $winner loser: $loser upper: $upper"
 }
 
 class ClcaAssertion(
     info: ContestInfo,
     val cassorter: ClcaAssorter,
 ): Assertion(info, cassorter.assorter()) {
+    val noerror = cassorter.noerror()
 
     override fun toString() = cassorter.assorter().desc()
 

@@ -35,7 +35,7 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
         require(previousPrns.size == previousMvrs.size)
         require(previousPrnsSet.size == previousMvrs.size)
 
-        val mvrFuzzPct = config.mvrFuzzPct() // TODO should be independent of the simulation
+        val mvrFuzzPct = config.mvrFuzzPct()
         val sampledMvrs = if (mvrFuzzPct == 0.0) {
             cards // use the cvrs - ie, no errors
         } else { // fuzz the new cvrs only; doesnt work for polling since we dont have cvrs
@@ -51,7 +51,7 @@ class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA:
             // get the new cards not in the previous sample
             val newCards = cards.filter{ !previousPrnsSet.contains(it.prn) }
 
-            // and fuzz them
+            // here we get a different fuzz each time we run the audit
             val newFuzzedCards = makeFuzzedCardsForClca(contestsUA.map { it.contest.info() }, newCards, mvrFuzzPct)
 
             // then the cards we want are the previous cards and the new fuzzed cards

@@ -17,9 +17,10 @@ class Taus(upper: Double, use7override: Boolean = false) {
             tauValues = listOf(0.0, 0.5, 1.0, 1.5, 2.0)
             tauNames = listOf("p2o", "p1o", "noerror", "p1u", "p2u")
         } else {
-            // tau = [0,       1/2u,    1-1/2u,  1,       1+1/2u,  1+1/2u,  2]
+            // // [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0]
+            // tau = [0,       1/2u,    1-1/2u,  1,       2-1/2u,  1+1/2u,  2]
             //       [win-los, win-oth, oth-los, noerror, los-oth, oth-win, los-win]
-            tauValues = listOf(0.0, u12, 1-u12, 1.0, 1+u12, 1+u12, 2.0)
+            tauValues = listOf(0.0, u12, 1-u12, 1.0, 2-u12, 1+u12, 2.0)
             tauNames = TausRates.names7
         }
     }
@@ -67,7 +68,7 @@ class Taus(upper: Double, use7override: Boolean = false) {
 
 // uses all 7 names, but may have only a subset. Use getNamedRate() to look for name aliases.
 // the rate must be multiplied by noerror to get bassort values.
-class TausRates(val rates: Map<String, Double>) {  // name -> rate over population
+data class TausRates(val rates: Map<String, Double>) {  // name -> rate over population
     val noerrorRate = 1.0 - rates.filter { it.key != "errror" }.map{ it.value }.sum()
 
     init {
@@ -79,14 +80,17 @@ class TausRates(val rates: Map<String, Double>) {  // name -> rate over populati
         val taus = Taus(upper)
 
         // each tau generates an errorCount
-        val errorCounts = taus.names().filter { it != "noerror" }.map { tauName ->
-            val errorRate = getNamedRate(tauName)!!
-            // error count = errorRate * totalSamples
-            val errorCount = (totalSamples * errorRate).toInt()
-            // tau is assort value / noerror, so assort value = tau * noerror
-            val tau = taus.valueOf(tauName)
-            Pair(tau * noerror, errorCount)
-        }.toMap()
+        val errorCounts = mutableMapOf<Double, Int>()
+        taus.names().filter { it != "noerror" }.forEach { tauName ->
+            val errorRate = getNamedRate(tauName)
+            if (errorRate != null) {
+                // error count = errorRate * totalSamples
+                val errorCount = (totalSamples * errorRate).toInt()
+                // tau is assort value / noerror, so assort value = tau * noerror
+                val tau = taus.valueOf(tauName)
+                errorCounts[tau * noerror] = errorCount
+            }
+        }
 
         // data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double)
         return ClcaErrorCounts(errorCounts, totalSamples, noerror, upper)

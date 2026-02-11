@@ -246,21 +246,31 @@ class ClcaSamplerErrorTracker(
 
 class ClcaErrorTracker2(val noerror: Double, val upper: Double) {
     val taus = Taus(upper)
-    private var count = 0
+    private var totalSamples = 0
     private var countTrackError = 0
 
     val valueCounter = mutableMapOf<Double, Int>()
     var noerrorCount = 0
 
-    // when the sample is from an OA pool, the value is not an CLCA error
+    fun setFromPreviousCounts(prevCounts: ClcaErrorCounts) {
+        require(prevCounts.noerror == noerror)
+        require(prevCounts.upper == upper)
+        totalSamples = prevCounts.totalSamples
+        prevCounts.errorCounts.forEach { bassort, count ->
+            valueCounter[bassort] = count
+        }
+    }
+
+    // when the sample is from an OA pool, the value is not a CLCA error
     fun addSample(sample : Double, trackError: Boolean) {
-        count++
+        totalSamples++
         if (trackError) countTrackError++
 
         if (trackError && noerror != 0.0) {
             if (doubleIsClose(sample, noerror, doublePrecision))
                 noerrorCount++
-            else if (taus.isClcaError(sample / noerror)) {
+            else if (sample != noerror) {
+                // println("  $sample taus=${sample / noerror} name=${taus.nameOf(sample / noerror)}")
                 val counter = valueCounter.getOrPut(sample) { 0 }
                 valueCounter[sample] = counter + 1
             }
@@ -269,18 +279,18 @@ class ClcaErrorTracker2(val noerror: Double, val upper: Double) {
 
     fun reset() {
         valueCounter.clear()
-        count = 0
+        totalSamples = 0
         countTrackError = 0
         noerrorCount = 0
     }
 
     fun measuredClcaErrorCounts(): ClcaErrorCounts {
         val clcaErrors = valueCounter.toList().filter { (key, _) -> taus.isClcaError(key / noerror) }.toMap().toSortedMap()
-        return ClcaErrorCounts(clcaErrors, count, noerror, upper)
+        return ClcaErrorCounts(clcaErrors, totalSamples, noerror, upper)
     }
 
     override fun toString(): String {
-        return "ClcaErrorTracker(noerror=$noerror, noerrorCount=$noerrorCount, valueCounter=${valueCounter.toSortedMap()}, count=$count countTrackError=$countTrackError)"
+        return "ClcaErrorTracker(noerror=$noerror, noerrorCount=$noerrorCount, valueCounter=${valueCounter.toSortedMap()}, count=$totalSamples countTrackError=$countTrackError)"
     }
 }
 

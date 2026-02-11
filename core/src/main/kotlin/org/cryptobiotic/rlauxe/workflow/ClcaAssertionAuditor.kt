@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
-import org.cryptobiotic.rlauxe.betting.ErrorTracker
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.betting.TestH0Status
@@ -24,6 +24,7 @@ fun runClcaAuditRound(
     mvrManager: MvrManager,
     roundIdx: Int,
     auditor: ClcaAssertionAuditorIF,
+    onlyTask: String? = null,
 ): Boolean {
     val cvrPairs = mvrManager.makeMvrCardPairsForRound(roundIdx)
 
@@ -31,7 +32,7 @@ fun runClcaAuditRound(
     val contestsNotDone = auditRound.contestRounds.filter{ !it.done }
     val auditContestTasks = mutableListOf<RunClcaContestTask>()
     contestsNotDone.forEach { contest ->
-        auditContestTasks.add(RunClcaContestTask(config, contest, cvrPairs, auditor, roundIdx))
+        auditContestTasks.add(RunClcaContestTask(config, contest, cvrPairs, auditor, roundIdx, onlyTask))
     }
 
     // run all tasks
@@ -66,31 +67,39 @@ class RunClcaContestTask(
     val contestRound: ContestRound,
     val cvrPairs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
     val auditor: ClcaAssertionAuditorIF,
-    val roundIdx: Int): ConcurrentTaskG<Boolean> {
+    val roundIdx: Int,
+    val onlyTask: String? = null,
+): ConcurrentTaskG<Boolean> {
 
     override fun name() = "RunContestTask for ${contestRound.contestUA.name} round $roundIdx nassertions ${contestRound.assertionRounds.size}"
 
     override fun run(): Boolean {
         val contestAssertionStatus = mutableListOf<TestH0Status>()
         contestRound.assertionRounds.forEach { assertionRound ->
-            if (!assertionRound.status.complete) {
-                val cassertion = assertionRound.assertion as ClcaAssertion
-                val cassorter = cassertion.cassorter
+            val taskName = "${contestRound.contestUA.id}-${assertionRound.assertion.assorter.shortName()}"
+            if (onlyTask == null || onlyTask == taskName) {
 
-                val sampler = ClcaSamplerErrorTracker.withMaxSample(
-                    contestRound.id,
-                    cassorter,
-                    cvrPairs,
-                )
+                if (!assertionRound.status.complete) {
+                    val cassertion = assertionRound.assertion as ClcaAssertion
+                    val cassorter = cassertion.cassorter
 
-                val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, roundIdx)
-                assertionRound.status = testH0Result.status
-                if (testH0Result.status.complete) assertionRound.roundProved = roundIdx
+                    val sampler = ClcaSamplerErrorTracker.withMaxSample(
+                        contestRound.id,
+                        cassorter,
+                        cvrPairs,
+                    )
+
+                    val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, roundIdx)
+                    assertionRound.status = testH0Result.status
+                    if (testH0Result.status.complete) assertionRound.roundProved = roundIdx
+                }
             }
             contestAssertionStatus.add(assertionRound.status)
         }
-        contestRound.done = contestAssertionStatus.all { it.complete }
-        contestRound.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
+        if (contestAssertionStatus.isNotEmpty()) {
+            contestRound.done = contestAssertionStatus.all { it.complete }
+            contestRound.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
+        }
         return contestRound.done
     }
 }
@@ -121,17 +130,43 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val cassorter = cassertion.cassorter
         val clcaConfig = config.clcaConfig
 
-        val bettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
+        val noerror=cassorter.noerror()
+        val upper=cassorter.assorter.upperBound()
+
+        val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
+
+        val bettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
             GeneralAdaptiveBetting(
                 contestUA.Npop,
-                // the actual audit cant "look ahead" with the measured error rates, so always start empty
-                // OTOH, I think you could use apriori rates if they are set independently from the mcrs
-                // TODO see Issue #519
                 startingErrors = ClcaErrorCounts.empty(cassorter.noerror(), cassorter.assorter.upperBound()),
                 contest.Nphantoms(),
                 oaAssortRates = null,
                 d = clcaConfig.d,
                 maxLoss = clcaConfig.maxLoss)
+        } else {
+
+            // the actual audit cant "look ahead" with the measured error rates, so always start empty
+            // OTOH, I think you could use apriori rates if they are set independently from the mvrs
+            // TODO see Issue #519
+
+            // class GeneralAdaptiveBetting2(
+            //    val Npop: Int, // population size for this contest
+            //    val apriori: ClcaErrorCounts, // apriori rates not counting phantoms, non-null so we have noerror and upper
+            //    val nphantoms: Int, // number of phantoms in the population
+            //    val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
+            //
+            //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
+            //    val d: Int = 100,  // trunc weight
+            //    val debug: Boolean = false,
+            //)
+            GeneralAdaptiveBetting2(
+                contestUA.Npop,
+                aprioriCounts = apriori,
+                nphantoms = contest.Nphantoms(),
+                maxLoss = clcaConfig.maxLoss,
+                d = clcaConfig.d,
+            )
+        }
 
         val testFn = BettingMart(
             bettingFn = bettingFn,

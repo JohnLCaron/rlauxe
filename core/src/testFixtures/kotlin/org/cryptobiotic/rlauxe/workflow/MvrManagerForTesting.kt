@@ -98,7 +98,7 @@ fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boole
             (workflow.mvrManager() as MvrManagerTestIF).setMvrsBySampleNumber(nextRound.samplePrns, nextRound.roundIdx)
 
             logger.info {"runTestAuditToCompletion $name round=${roundidx}"}
-            complete = workflow.runAuditRound(nextRound, quiet)
+            complete = workflow.runAuditRound(nextRound, quiet=quiet)
             nextRound.auditWasDone = true
             nextRound.auditIsComplete = complete
             // println(" runAudit $name ${nextRound.roundIdx} done=$complete samples=${nextRound.samplePrns.size}")

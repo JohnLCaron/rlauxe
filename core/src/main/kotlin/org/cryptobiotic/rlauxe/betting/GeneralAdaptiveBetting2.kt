@@ -5,9 +5,15 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditAssortValueRates
 
 private val logger = KotlinLogging.logger("GeneralAdaptiveBetting")
 
-class GeneralAdaptiveBetting2(
+// new design
+//  first round: use apriori and nphantoms for initial rate estimate
+//  estimation will jigger the tracker in gaBetting.bet(tracker) to continue on from previous round
+//  audit always starts from beginning
+//  bets will do shrinkTrunc of starting and measured.
+
+data class GeneralAdaptiveBetting2(
     val Npop: Int, // population size for this contest
-    val apriori: ClcaErrorCounts, // apriori rates not counting phantoms, non-null so we have noerror and upper
+    val aprioriCounts: ClcaErrorCounts, // apriori counts not counting phantoms, non-null so we have noerror and upper
     val nphantoms: Int, // number of phantoms in the population
     val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
 
@@ -15,39 +21,17 @@ class GeneralAdaptiveBetting2(
     val d: Int = 100,  // trunc weight
     val debug: Boolean = false,
 ) : BettingFn {
-    val noerror = apriori.noerror
-    val upper = apriori.upper
+    val noerror = aprioriCounts.noerror
+    val upper = aprioriCounts.upper
     val taus = Taus(upper)
-    val startingRates: Map<Double, Double>  // bassort -> rate
+    val aprioriRates: Map<Double, Double>  // bassort -> rate
 
     init {
-        startingRates = startingErrorRates(apriori, noerror, nphantoms/Npop.toDouble())
-    }
-
-    // new design
-    //  first round: use apriori and nphantoms for initial rate estimate, dont need starting errorCount, just apriori starting rates.
-    //  estimation will jigger the tracker in gaBetting.bet(tracker) to continue on from previous round
-    //  audit always starts from beginning
-    //  bets will do shrinktrunc of starting and measured.
-
-    // apriori: apriori rates not counting phantoms
-    // phantomRate: nphantoms / Npop
-    // return full map (all taus except noerrors)
-    fun startingErrorRates(apriori: ClcaErrorCounts, noerror: Double, phantomRate: Double): Map<Double, Double> { // bassort -> rate
-        val startingRates = mutableMapOf<Double, Double>()
-
-        taus.namesNoErrors().forEach { name ->
-            val tauValue = taus.valueOf(name)
-            val bassort = tauValue * noerror
-            val aprioriRate = apriori.getNamedRate(name) // may be null
-            val phantom = if (apriori.isPhantom(tauValue) && phantomRate > 0.0) phantomRate else 0.0
-            startingRates[bassort] = (aprioriRate?: 0.0) + phantom
-        }
-        return startingRates
+        aprioriRates = makeAprioriErrorRates(aprioriCounts, nphantoms/Npop.toDouble())
     }
 
     fun estimatedErrorRates2(trackerErrors: ClcaErrorCounts? = null): Map<Double, Double> { // bassort -> rate
-        if (trackerErrors == null || trackerErrors.errorCounts.isEmpty()) return startingRates
+        if (trackerErrors == null || trackerErrors.errorCounts.isEmpty()) return aprioriRates
 
         val errorRates = trackerErrors.errorRates()
         val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.totalInPools) / Npop.toDouble()
@@ -55,7 +39,7 @@ class GeneralAdaptiveBetting2(
         val estRates = taus.namesNoErrors().map { name ->
             val tauValue = taus.valueOf(name)
             val bassort = tauValue * noerror
-            val aprioriRate = startingRates[bassort] ?: 0.0
+            val aprioriRate = aprioriRates[bassort] ?: 0.0
             val rate = scaled * shrinkTruncEstimateRate2(
                 aprioriRate = aprioriRate,
                 measuredRate = errorRates[bassort] ?: 0.0,
@@ -97,4 +81,24 @@ class GeneralAdaptiveBetting2(
 
         return bet
     }
+}
+
+// apriori: apriori rates not counting phantoms
+// phantomRate: nphantoms / Npop
+// return full errorRates (all taus except noerrors)
+fun makeAprioriErrorRates(apriori: ClcaErrorCounts, phantomRate: Double): Map<Double, Double> { // bassort -> rate
+    val startingRates = mutableMapOf<Double, Double>()
+
+    val noerror = apriori.noerror
+    val upper = apriori.upper
+    val taus = Taus(upper)
+
+    taus.namesNoErrors().forEach { name ->
+        val tauValue = taus.valueOf(name)
+        val bassort = tauValue * noerror
+        val aprioriRate = apriori.getNamedRate(name) // may be null
+        val phantom = if (apriori.isPhantom(tauValue) && phantomRate > 0.0) phantomRate else 0.0
+        startingRates[bassort] = (aprioriRate?: 0.0) + phantom
+    }
+    return startingRates
 }

@@ -75,7 +75,7 @@ class CobraAudit(
         contestsUA = contestsToAudit.map { ContestWithAssertions(it, isClca = true,).addStandardAssertions() }
     }
 
-    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
+    override fun runAuditRound(auditRound: AuditRound, onlyTask: String?, quiet: Boolean): Boolean  {
         val complete = runClcaAuditRound(auditConfig, auditRound, mvrManagerForTesting, auditRound.roundIdx,
             auditor = AuditCobraAssertion(p2prior)
         )

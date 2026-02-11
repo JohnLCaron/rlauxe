@@ -20,7 +20,7 @@ fun calculateSampleSizes(
         var maxNewEstMvrs = 0
         contestRound.assertionRounds.forEach { assertionRound ->
 
-            val (calcNewSamples, _) = assertionRound.calcMvrsNeeded(contestRound.contestUA, config.clcaConfig.maxLoss, config.riskLimit, config.simFuzzPct)
+            val (calcNewSamples, _) = assertionRound.calcMvrsNeeded(contestRound.contestUA, config.clcaConfig.maxLoss, config.riskLimit, config)
             assertionRound.estNewMvrs = calcNewSamples
 
             val prevSampleSize = assertionRound.prevAuditResult?.samplesUsed ?: 0
@@ -29,6 +29,7 @@ fun calculateSampleSizes(
             maxNewEstMvrs = max( maxNewEstMvrs, calcNewSamples)
             maxEstMvrs = max( maxNewEstMvrs, assertionRound.estMvrs)
         }
+
         contestRound.estNewMvrs = maxNewEstMvrs
         contestRound.estMvrs = maxEstMvrs
     }

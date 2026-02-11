@@ -38,7 +38,7 @@ The overstatement would then be cvr_assort - mvr_assort = [0, 1/2, u], and the b
            =    1-1/2u  other-phantom
            =    0       winner-phantom
 
-double check our implementation with u !=1 :
+double check our implementation with u !=1, for example dhondt u = 
 
        winner-loser tau= 0.0000 '      0' (win-los)
        winner-phantom tau= 0.0000 '      0' (win-los)   check

@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.estimate.calculateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sampleWithContestCutoff
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -70,5 +69,5 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
     // AuditRecord.enterMvrs(mvrFile: String)
 
     // 6. _Run the audit_
-    abstract fun runAuditRound(auditRound: AuditRound, quiet: Boolean = true): Boolean  // return complete
+    abstract fun runAuditRound(auditRound: AuditRound, onlyTask: String? = null, quiet: Boolean = true): Boolean  // return complete
 }

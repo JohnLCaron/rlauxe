@@ -19,7 +19,7 @@ class WorkflowTesterPolling(
         require (auditConfig.auditType == AuditType.POLLING)
     }
 
-    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
+    override fun runAuditRound(auditRound: AuditRound, onlyTask: String?, quiet: Boolean): Boolean  {
         val complete = runPollingAuditRound(auditConfig, auditRound, mvrManager, auditRound.roundIdx, quiet)
         auditRound.auditWasDone = true
         auditRound.auditIsComplete = complete

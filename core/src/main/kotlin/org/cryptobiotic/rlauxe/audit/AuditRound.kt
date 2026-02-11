@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.TausRateTable
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.df
@@ -121,7 +120,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     fun calcMvrsNeeded(config: AuditConfig): Int {
         var maxNeeded = 0
         assertionRounds.forEach { round ->
-            val pair = round.calcMvrsNeeded(contestUA, config.clcaConfig.maxLoss, config.riskLimit, config.simFuzzPct)
+            val pair = round.calcMvrsNeeded(contestUA, config.clcaConfig.maxLoss, config.riskLimit, config)
             val estSamplesNeeded = pair.component1()
             maxNeeded = max( maxNeeded, estSamplesNeeded)
         }
@@ -167,6 +166,9 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
 }
 
 data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevAuditResult: AuditRoundResult?) {
+    val noerror = if (assertion is ClcaAssertion) assertion.cassorter.noerror() else 0.0
+    val upper = assertion.upper
+
     // these values are set during estimateSampleSizes()
     var estMvrs = 0   // estimated sample size for current round
     var estNewMvrs = 0   // estimated new sample size for current round
@@ -177,8 +179,9 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     var status = TestH0Status.InProgress
     var roundProved = 0           // round when set to proved or disproved
 
-    // call only if assertion is ClcaAssertion
+    // call only if assertion is ClcaAssertion; deprecated
     fun accumulatedErrorCounts(contestRound: ContestRound): ClcaErrorCounts {
+        require(assertion is ClcaAssertion)
         val (_, auditRoundResults) = contestRound.resultsForAssertion(assertion.assorter.hashcodeDesc())
 
         val sumOfCounts = mutableMapOf<Double, Int>()
@@ -193,17 +196,26 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
             }
         }
 
-        val noerror = (assertion as ClcaAssertion).cassorter.noerror()
-        val upper = assertion.cassorter.assorter.upperBound()
         return ClcaErrorCounts(sumOfCounts, totalSamples, noerror, upper)
     }
 
-    // return calcMvrsNeeded, optimalBet
-    fun calcMvrsNeeded(contest: ContestWithAssertions, maxLoss: Double, riskLimit: Double, fuzzPct: Double?): Pair<Int, Double> {
+    // we get the results from the audit, not the estimation
+    fun previousErrorCounts(): ClcaErrorCounts {
+        require(assertion is ClcaAssertion)
+        if (roundIdx == 1 || prevAuditResult == null || prevAuditResult!!.measuredCounts == null)
+            return ClcaErrorCounts.empty(noerror, upper)
+
+        val prevResult = prevAuditResult!!
+        return ClcaErrorCounts(prevResult.measuredCounts!!.errorCounts, prevResult.samplesUsed, noerror, upper)
+    }
+
+    // return (calculated mvrs needed, optimalBet) based on prevAuditResult.measuredCounts or apriori.errorCounts
+    fun calcMvrsNeeded(contest: ContestWithAssertions, maxLoss: Double, riskLimit: Double, config: AuditConfig): Pair<Int, Double> {
+        require(assertion is ClcaAssertion)
+
         val alpha = this.prevAuditResult?.plast ?: riskLimit
-        if (assertion is ClcaAssertion) {
-            val cassorter = assertion.cassorter
-            val clcaErrorCounts = if (fuzzPct == null || fuzzPct == 0.0) null else {
+        val cassorter = assertion.cassorter
+            /* val clcaErrorCounts = if (fuzzPct == null || fuzzPct == 0.0) null else {
                 TausRateTable.makeErrorCounts(
                     contest.ncandidates,
                     fuzzPct,
@@ -211,10 +223,12 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
                     cassorter.noerror(),
                     cassorter.assorter.upperBound()
                 )
-            }
-            return cassorter.estWithOptimalBet(contest, maxLoss, alpha, clcaErrorCounts)
-        }
-        return Pair(0, 0.0)
+            } */
+        val errorCounts = if (roundIdx == 1 || prevAuditResult == null || prevAuditResult!!.measuredCounts == null) {
+            config.clcaConfig.apriori.makeErrorCounts(contest.Npop, noerror, upper)
+        } else previousErrorCounts()
+
+        return cassorter.estWithOptimalBet2(contest, maxLoss, alpha, errorCounts)
     }
 }
 

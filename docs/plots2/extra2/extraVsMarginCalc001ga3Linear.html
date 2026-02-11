@@ -1,0 +1,181 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;TACbvk&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;TACbvk&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;extraVsMarginCalc001ga3 extra samples&quot;,
+&quot;subtitle&quot;:&quot;Nc=50000 ntrials=1000 fuzzMvrs=0.001&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;extraSamples&quot;,
+&quot;color&quot;:&quot;simFuzzPct&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;simFuzzPct&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;],
+&quot;&amp;merged_groups&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;],
+&quot;margin&quot;:[0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009],
+&quot;extraSamples&quot;:[30.29300000000012,13.58400000000006,9.460999999999672,4.263000000000119,1.9430000000002678,1.2230000000002406,1.7429999999999524,0.7190000000000083,0.37199999999992883,0.30500000000002103,0.22800000000002285,29.810000000000628,13.42799999999994,8.234000000000378,3.89700000000002,1.527999999999821,1.4280000000000541,1.8510000000000275,0.5289999999999822,0.44899999999996965,0.2890000000000299,0.22099999999993258,48.87899999999979,17.31500000000017,10.223000000000184,4.2140000000000555,1.8980000000000246,1.2079999999999131,1.807000000000059,0.44799999999992224,0.3859999999999957,0.3189999999999884,0.2799999999999869,69.82899999999916,20.32599999999985,10.241999999999734,3.847000000000037,1.9550000000002683,1.3220000000001164,1.7569999999998913,0.5699999999999932,0.40500000000015746,0.4089999999999634,0.36699999999987654,77.68399999999917,26.823999999999728,14.495000000000516,4.5950000000001125,1.9220000000000255,1.1839999999998838,1.5969999999998663,0.6680000000000774,0.5470000000000539,0.3509999999998996,0.20900000000000318]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;simFuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;extraSamples&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;extraSamples&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;simFuzzPct&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;],
+&quot;&amp;merged_groups&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0005&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0015&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;],
+&quot;margin&quot;:[0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009],
+&quot;extraSamples&quot;:[30.29300000000012,13.58400000000006,9.460999999999672,4.263000000000119,1.9430000000002678,1.2230000000002406,1.7429999999999524,0.7190000000000083,0.37199999999992883,0.30500000000002103,0.22800000000002285,29.810000000000628,13.42799999999994,8.234000000000378,3.89700000000002,1.527999999999821,1.4280000000000541,1.8510000000000275,0.5289999999999822,0.44899999999996965,0.2890000000000299,0.22099999999993258,48.87899999999979,17.31500000000017,10.223000000000184,4.2140000000000555,1.8980000000000246,1.2079999999999131,1.807000000000059,0.44799999999992224,0.3859999999999957,0.3189999999999884,0.2799999999999869,69.82899999999916,20.32599999999985,10.241999999999734,3.847000000000037,1.9550000000002683,1.3220000000001164,1.7569999999998913,0.5699999999999932,0.40500000000015746,0.4089999999999634,0.36699999999987654,77.68399999999917,26.823999999999728,14.495000000000516,4.5950000000001125,1.9220000000000255,1.1839999999998838,1.5969999999998663,0.6680000000000774,0.5470000000000539,0.3509999999998996,0.20900000000000318]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;simFuzzPct&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;extraSamples&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;extraSamples&quot;,&quot;simFuzzPct&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

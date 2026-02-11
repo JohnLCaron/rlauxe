@@ -169,7 +169,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
     val minAssertionRound = contestRound.minAssertion()
     if (minAssertionRound == null) {
         contestRound.minAssertion()
-        throw RuntimeException()
+        return 0
     }
 
     val lastPvalue = minAssertionRound.auditResult?.plast ?: config.riskLimit

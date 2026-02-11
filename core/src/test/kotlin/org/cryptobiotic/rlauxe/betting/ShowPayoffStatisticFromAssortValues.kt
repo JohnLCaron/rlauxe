@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditAssortValueRates
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
@@ -11,7 +10,7 @@ import kotlin.test.Test
 // exoplore this function
 // log T_i = ln(1.0 + lamda * (noerror - mui)) * p0  + Sum { ln(1.0 + lamda * (assortValue_k - mui)) * p_k; over error type k } (eq 1)
 
-class ShowGeneralAdaptiveBetting {
+class ShowPayoffStatisticFromAssortValues {
 
     @Test
     fun makeBet() {
@@ -49,13 +48,13 @@ class ShowGeneralAdaptiveBetting {
         println("bet = $bet maxLoss = $maxLoss")
 
         assorts.shuffle(Random)
-        findSamplesNeededUsingAssorts(N, margin, upper, 1.8, assorts, show=false)
+        showSamplesNeededUsingAssorts(N, margin, upper, 1.8, assorts, show=false)
     }
 }
 
 // this is the case where you use the same bet (non adaptive)
 // see PlotWithAssortValues
-private fun findSamplesNeededUsingAssorts(N:Int, margin: Double, upper: Double, lamda: Double, assorts: List<Double>, show: Boolean = false) {
+private fun showSamplesNeededUsingAssorts(N:Int, margin: Double, upper: Double, lamda: Double, assorts: List<Double>, show: Boolean = false) {
     val taus = Taus(1.0)
 
     val noerror: Double = 1.0 / (2.0 - margin / upper) // clca assort value when no error
@@ -72,7 +71,7 @@ private fun findSamplesNeededUsingAssorts(N:Int, margin: Double, upper: Double, 
         sample++
         val name = taus.nameOf(x/noerror)
         val useName = if (name == "noerror") name
-        else "*$name"
+                      else "*$name"
         println("  ${nfn(sample, 4)}, ${dfn(x/noerror, 3)}, ${sfn(useName,8)}, ${df(mj)}, ${df(ttj)}, ${df(T)}")
 
         if (show) println("${nfn(tracker.numberOfSamples(), 3)}: ttj=${dfn(ttj, 6)} Tj=${dfn(T, 6)}")

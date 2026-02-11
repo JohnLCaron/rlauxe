@@ -16,12 +16,12 @@ interface RiskMeasuringFn {
     fun testH0(
         maxSamples: Int,
         terminateOnNullReject: Boolean,
-        startingTestStatistic: Double = 1.0, // T, must grow to 1/riskLimit
+        startingTestStatistic: Double = 1.0, // T, must grow to 1/riskLimit for success
         drawSample: () -> Double,
     ): TestH0Result
 }
 
-// NOTE: contest status is min rank of assertions
+// NOTE: contest status is min rank over assertion's status
 enum class TestH0Status(val rank: Int, val complete: Boolean, val success: Boolean) {
     // starting state
     InProgress(0,false, false),
@@ -47,7 +47,7 @@ enum class TestH0Status(val rank: Int, val complete: Boolean, val success: Boole
 // LOOK pvalueLast = pvalueMin when you terminate on p < risk.
 //   but not when you hit maxSamples
 //   but not "risk measuring" audits.
-//   probably should show pmin instead of plast in viewer.
+//   TODO show pmin instead of plast in viewer.
 data class TestH0Result(
     val status: TestH0Status,  // how did the test conclude?
     val sampleCount: Int,      // number of samples used in testH0
@@ -63,6 +63,7 @@ data class TestH0Result(
     }
 }
 
+// a way to pull out debugging information from the RiskMeasuringFn
 class DebuggingSequences {
     var isOn = false
     val xs = mutableListOf<Double>()

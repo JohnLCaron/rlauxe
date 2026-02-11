@@ -69,8 +69,8 @@ class PersistedWorkflow(
                 nextRound.samplePrns = nextRound.samplePrns.subList(0, config.auditSampleLimit)
             }
 
-            writeAuditRoundJsonFile(nextRound, publisher.auditStateFile(nextRound.roundIdx))
-            logger.info {"startNewRound writeAuditState ${publisher.auditStateFile(nextRound.roundIdx)}"}
+            writeAuditRoundJsonFile(nextRound, publisher.auditEstFile(nextRound.roundIdx))
+            logger.info {"startNewRound writeAuditEstimation to ${publisher.auditEstFile(nextRound.roundIdx)}"}
 
             writeSamplePrnsJsonFile(nextRound.samplePrns, publisher.samplePrnsFile(nextRound.roundIdx))
             logger.info {"startNewRound writeSamplePrns ${publisher.samplePrnsFile(nextRound.roundIdx)}"}
@@ -79,7 +79,7 @@ class PersistedWorkflow(
         return nextRound
     }
 
-    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  { // return complete
+    override fun runAuditRound(auditRound: AuditRound, onlyTask: String?, quiet: Boolean): Boolean  { // return complete
         val roundIdx = auditRound.roundIdx
 
         //   in a real audit, need to set the real mvrs externally with EnterMvrsCli, which calls auditRecord.enterMvrs(mvrs)
@@ -90,17 +90,17 @@ class PersistedWorkflow(
         }
 
         val complete =  when (config.auditType) {
-            AuditType.CLCA -> runClcaAuditRound(config, auditRound, mvrManager, auditRound.roundIdx, auditor = ClcaAssertionAuditor(quiet))
+            AuditType.CLCA -> runClcaAuditRound(config, auditRound, mvrManager, auditRound.roundIdx, auditor = ClcaAssertionAuditor(quiet), onlyTask=onlyTask)
             AuditType.POLLING -> runPollingAuditRound(config, auditRound, mvrManager, auditRound.roundIdx, quiet)
             AuditType.ONEAUDIT -> runClcaAuditRound(config, auditRound, mvrManager, auditRound.roundIdx,
-                auditor = OneAuditAssertionAuditor(mvrManager().oapools()!!, quiet))
+                auditor = OneAuditAssertionAuditor(mvrManager().oapools()!!, quiet), onlyTask=onlyTask, )
         }
 
         auditRound.auditWasDone = true
         auditRound.auditIsComplete = complete
 
-        writeAuditRoundJsonFile(auditRound, publisher.auditStateFile(roundIdx)) // replace auditState
-        logger.info {"runAuditRound writeAuditState to '${publisher.auditStateFile(roundIdx)}'"}
+        writeAuditRoundJsonFile(auditRound, publisher.auditFile(roundIdx))
+        logger.info {"runAuditRound writeAuditState to '${publisher.auditFile(roundIdx)}'"}
 
         return complete
     }

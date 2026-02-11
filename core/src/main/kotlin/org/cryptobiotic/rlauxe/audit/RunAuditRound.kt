@@ -8,6 +8,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
+import org.cryptobiotic.rlauxe.betting.Taus
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
@@ -63,7 +64,7 @@ fun runRoundResult(auditDir: String, onlyTask: String? = null): Result<AuditRoun
                 logger.info { "Start runAuditRound ${lastRound.roundIdx}" }
                 val roundStopwatch = Stopwatch()
                 // run the audit for this round
-                complete = workflow.runAuditRound(lastRound as AuditRound)
+                complete = workflow.runAuditRound(lastRound as AuditRound, onlyTask)
                 logger.info { "End runAuditRound ${lastRound.roundIdx} complete=$complete took ${roundStopwatch}" }
 
             } else {
@@ -108,13 +109,15 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
             return "Audit Directory $auditDir does not exist"
         }
         val roundIdx = assertionRound.roundIdx
-        val assertion = assertionRound.assertion
+        val cassertion = assertionRound.assertion as ClcaAssertion // only for clca ??
+        val noerror = cassertion.cassorter.noerror()
+        val taus = Taus(cassertion.assorter.upperBound())
 
         val auditRecord = AuditRecord.readFrom(auditDir)
         if (auditRecord == null) {
             return "directory '$auditDir' does not contain an audit record"
         }
-        logger.info { "runRoundAgain in $auditDir for round $roundIdx, contest $contestId, and assertion $assertion" }
+        logger.info { "runRoundAgain in $auditDir for round $roundIdx, contest $contestId, and assertion $cassertion" }
 
         val workflow = PersistedWorkflow(auditRecord, mvrWrite = false)
         val cvrPairs = workflow.mvrManager().makeMvrCardPairsForRound(roundIdx)
@@ -132,21 +135,23 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         }
 
         return if (testH0Result == null) "failed" else buildString {
-            appendLine("contest $contestId assertion win/lose = ${assertion.assorter.winLose()}")
+            appendLine("contest $contestId assertion win/lose = ${cassertion.assorter.winLose()}")
             val seq = testH0Result.sequences
             if (seq != null) {
                 val pvalues = seq.pvalues()
                 val count = seq.xs.size
-                append(" i, ${sfn("xs", 6)}, ${sfn("bet", 6)}, ${sfn("payoff", 6)}, ${sfn("Tj", 6)}, ${sfn("pvalue", 8)}, ")
-                appendLine("${sfn("location", 20)}, ${sfn("mvr votes", 10)}, ${sfn("card", 10)}")
+                append("${sfn("idx", 4)}, ${sfn("xs", 6)}, ${sfn("bet", 6)}, ${sfn("payoff", 6)}, ${sfn("Tj", 6)}, ${sfn("pvalue", 8)}, ")
+                appendLine("${sfn("location", 25)}, ${sfn("mvr votes", 10)}, ${sfn("card", 10)}")
                 repeat(count) {
-                    append("${nfn(it+1, 2)}, ${df(seq.xs[it])}, ${df(seq.bets[it])}, ${df(seq.tjs[it])}")
+                    val x = seq.xs[it]
+                    val err = if (x == noerror) "" else "*${taus.nameOf(x/noerror)}"
+                    append("${nfn(it+1, 4)}, ${df(x)}$err, ${df(seq.bets[it])}, ${df(seq.tjs[it])}")
                     append(", ${trunc(seq.testStatistics[it].toString(), 6)}, ${trunc(pvalues[it].toString(), 8)}")
                     val pair = sampler.next()
                     val mvrVotes = pair.first.votes(contestId)?.contentToString() ?: "missing"
                     val card = pair.second
                     val cardVotes = card.votes(contestId)?.contentToString() ?: "N/A"
-                    append(", ${sfn(pair.first.location(), 20)}")
+                    append(", ${sfn(pair.first.location(), 25)}")
                     append(", ${sfn(mvrVotes, 10)}")
                     if (card.poolId() != null) append(", pool=${card.poolId()}, ")  // TODO show pool average
                         else append(", votes=${cardVotes}")

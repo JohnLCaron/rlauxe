@@ -254,9 +254,9 @@ class TestClcaAssorter {
             choiceFunction = SocialChoiceFunction.PLURALITY,
             candidateNames = listToMap( "A", "B", "C"),
         )
-        val winnerCvr = makeCvr(0)
-        val loserCvr = makeCvr(1)
-        val otherCvr = makeCvr(2)
+        val winnerCvr = makeCvr(0, name="win")
+        val loserCvr = makeCvr(1, name="los")
+        val otherCvr = makeCvr(2, name="oth")
         val phantomCvr = Cvr("phantom", mapOf(0 to IntArray(0)), phantom = true)
 
         val votes = mapOf(0 to 1000, 1 to 990) // Map<Int, Int>
@@ -278,6 +278,7 @@ class TestClcaAssorter {
         // so assort in {0, .5, 1}
 
         val cassorter = ClcaAssorter(info, assorter, dilutedMargin=assorter.dilutedMargin())
+        val noerror = cassorter.noerror()
         assertEquals(margin, cassorter.dilutedMargin, doublePrecision)
         assertEquals(awinnerAvg, margin2mean(cassorter.dilutedMargin))
 
@@ -300,17 +301,23 @@ class TestClcaAssorter {
         assertEquals(0.5, cassorter.overstatementError(phantomCvr, phantomCvr, true)) // check, usual case
         // so overstatementError in [-1, -.5, 0, .5, 1]
 
-        // TODO hasStyle parameter doesnt matter unless mvr doesnt have the contest. See testHasStyles below.
         val cvrs = listOf(winnerCvr, loserCvr, otherCvr, phantomCvr)
+        for (mvr in cvrs) {
+            for (cvr in cvrs) {
+                println("cvr-mvr overstatement ${cvr.id}-${mvr.id} = ${cassorter.overstatementError(mvr, cvr, true)} " +
+                        "bassort=${cassorter.bassort(mvr, cvr, true)/noerror}")
+            }
+        }
+
+        // TODO hasStyle parameter doesnt matter unless mvr doesnt have the contest. See testHasStyles below.
         for (mvr in cvrs) {
             for (cvr in cvrs) {
                 assertEquals(cassorter.overstatementError(mvr, cvr, false), cassorter.overstatementError(mvr, cvr, true))
             }
         }
 
-        val noerror = 1.0 / (2.0 - margin)
+        assertEquals(1.0 / (2.0 - margin), noerror, doublePrecision)
         assertEquals(1.0 / (3 - 2 * awinnerAvg), noerror, doublePrecision)
-        assertEquals(noerror, cassorter.noerror(), doublePrecision)
         println("noerror = $noerror")
 
         // bassort in [0, .5, 1, 1.5, 2] * noerror = [twoOver, oneOver, nuetral, oneUnder, twoUnder]

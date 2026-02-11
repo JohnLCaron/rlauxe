@@ -16,11 +16,13 @@ private val logger = KotlinLogging.logger("ClcaFuzzSamplerTracker")
 
 // used by estimateClcaAssertionRound
 class ClcaFuzzSamplerTracker(
-    val fuzzPct: Double,
-    cardSamples: CardSamples,
+    val simFuzzPct: Double,
+    val cardSamples: CardSamples, // these are new each round and need to be fuzzed
     val contestUA: ContestWithAssertions,
-    val cassorter: ClcaAssorter
+    val cassorter: ClcaAssorter,
+    val previousErrorCounts: ClcaErrorCounts,
 ): SamplerTracker, ErrorTracker {
+
     val contest = contestUA.contest
     val samples = cardSamples.extractSubsetByIndex(contest.id)
     val maxSamples = samples.size
@@ -58,19 +60,22 @@ class ClcaFuzzSamplerTracker(
     override fun reset() {
         val mvrs = remakeFuzzed() // refuzz each time
         cvrPairs = mvrs.zip(samples)
-        // testFuzzed()
 
         permutedIndex.shuffle(Random) // also, a new permutation....
         idx = 0
         welford = Welford()
+        lastVal = null
         clcaErrorTracker.reset()
+        clcaErrorTracker.setFromPreviousCounts(previousErrorCounts)
+
+        // if (contest.id == 28) checkFuzzed()
     }
 
     fun remakeFuzzed(): List<AuditableCard> {
-        return makeFuzzedCardsForClca(listOf(contest.info()), samples, fuzzPct)
+        return makeFuzzedCardsForClca(listOf(contest.info()), samples, simFuzzPct)
     }
 
-    fun testFuzzed() {
+    fun checkFuzzed() {
         val testErrors = ClcaErrorTracker2(cassorter.noerror(), cassorter.assorter.upperBound())
         cvrPairs.forEach { (mvr, card) ->
             if (card.hasContest(contest.id)) { // should always be true
@@ -80,13 +85,13 @@ class ClcaFuzzSamplerTracker(
         }
         val counts = testErrors.measuredClcaErrorCounts()
 
-        val (est, bet) = cassorter.estWithOptimalBet(contestUA, .9, 0.5, counts)
+        val (est, bet) = cassorter.estWithOptimalBet(contestUA, .9, 0.05, counts)
         val sumCounts = counts.errorCounts().map { it.value }.sum()
         val pct = sumCounts/cvrPairs.size.toDouble()
-        if (pct > 10 * fuzzPct) {
+        // if (pct > 10 * fuzzPct) {
             val logt = counts.expectedValueLogt(bet)
-            println("simulation $simulation has $fuzzPct % errors bet=$bet est=$est counts = ${counts.errorCounts()} logt=$logt")
-        }
+            println("simulation $simulation bet=$bet est=$est counts = ${counts.show()} totalSamples=${counts.totalSamples}")
+        // }
         simulation++
     }
 
@@ -107,6 +112,7 @@ class ClcaFuzzSamplerTracker(
         lastVal = null
     }
 
+    //// ErrorTracker
     override fun measuredClcaErrorCounts(): ClcaErrorCounts = clcaErrorTracker.measuredClcaErrorCounts()
     override fun noerror(): Double = clcaErrorTracker.noerror
 }

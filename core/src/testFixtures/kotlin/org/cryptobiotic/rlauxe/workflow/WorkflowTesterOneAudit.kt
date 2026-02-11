@@ -17,7 +17,7 @@ class WorkflowTesterOneAudit(
         require (config.auditType == AuditType.ONEAUDIT)
     }
 
-    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
+    override fun runAuditRound(auditRound: AuditRound, onlyTask: String?, quiet: Boolean): Boolean  {
         val complete = runClcaAuditRound(config, auditRound, mvrManager, auditRound.roundIdx,
             auditor = OneAuditAssertionAuditor(mvrManager.oapools()!!)
         )

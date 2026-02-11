@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.EstimFn
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.betting.TruncShrinkage
@@ -72,10 +73,7 @@ fun estimateSampleSizes(
     // create the estimation tasks for each contest and assertion
     val tasks = mutableListOf<EstimateSampleSizeTask>()
     auditRound.contestRounds.filter { !it.done }.forEach { contestRound ->
-        tasks.addAll(makeEstimationTasks(config, contestRound, auditRound.roundIdx, cardSamples,  vunderFuzz))
-    }
-    if (onlyTask != null) {
-        tasks.removeAll{  it.name() != onlyTask }
+        tasks.addAll(makeEstimationTasks(config, contestRound, auditRound.roundIdx, cardSamples,  vunderFuzz, onlyTask=onlyTask))
     }
 
     // run estimation tasks concurrently
@@ -130,6 +128,7 @@ fun makeEstimationTasks(
     cardSamples: CardSamples?,
     vunderFuzz: OneAuditVunderFuzzer?,
     moreParameters: Map<String, Double> = emptyMap(),
+    onlyTask: String?
 ): List<EstimateSampleSizeTask> {
     val stopwatch = Stopwatch()
     val tasks = mutableListOf<EstimateSampleSizeTask>()
@@ -152,36 +151,39 @@ fun makeEstimationTasks(
         } else null
 
     contestRound.assertionRounds.filter { !it.status.complete }.map { assertionRound ->
-        var prevSampleSize = 0
-        var startingTestStatistic = 1.0
-        if (roundIdx > 1) {
-            // eliminate contests which have no more samples
-            val prevAuditResult = assertionRound.prevAuditResult!! // TODO another way to do this ?
-            if (prevAuditResult.samplesUsed == contestRound.Npop) {
-                logger.info{"***LimitReached $contestRound"}
-                contestRound.done = true
-                contestRound.status = TestH0Status.LimitReached
+        val taskName = "${contestRound.contestUA.id}-${assertionRound.assertion.assorter.shortName()}"
+        if (onlyTask == null || onlyTask == taskName) {
+            var prevSampleSize = 0
+            var startingTestStatistic = 1.0
+            if (roundIdx > 1) {
+                // eliminate contests which have no more samples
+                val prevAuditResult = assertionRound.prevAuditResult!! // TODO another way to do this ?
+                if (prevAuditResult.samplesUsed == contestRound.Npop) {
+                    logger.info { "***LimitReached $contestRound" }
+                    contestRound.done = true
+                    contestRound.status = TestH0Status.LimitReached
+                }
+                // start where the audit left off
+                prevSampleSize = prevAuditResult.samplesUsed
+                startingTestStatistic = 1.0 / prevAuditResult.plast
             }
-            // start where the audit left off
-            prevSampleSize = prevAuditResult.samplesUsed
-            startingTestStatistic = 1.0 / prevAuditResult.plast
-        }
 
-        if (!contestRound.done) {
-            tasks.add(
-                EstimateSampleSizeTask(
-                    roundIdx,
-                    config,
-                    cardSamples = cardSamples,
-                    mvrsForPolling = mvrsForPolling,
-                    vunderFuzz,
-                    contestRound,
-                    assertionRound,
-                    startingTestStatistic,
-                    prevSampleSize,
-                    moreParameters
+            if (!contestRound.done) {
+                tasks.add(
+                    EstimateSampleSizeTask(
+                        roundIdx,
+                        config,
+                        cardSamples = cardSamples,
+                        mvrsForPolling = mvrsForPolling,
+                        vunderFuzz,
+                        contestRound,
+                        assertionRound,
+                        startingTestStatistic,
+                        prevSampleSize,
+                        moreParameters
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -203,7 +205,7 @@ class EstimateSampleSizeTask(
     val moreParameters: Map<String, Double> = emptyMap(),
 ) : ConcurrentTaskG<EstimationResult> {
 
-    override fun name() = "${contestRound.contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
+    override fun name() = "${contestRound.contestUA.id}-${assertionRound.assertion.assorter.shortName()}"
 
     // all assertions share the same cvrs. run ntrials (=config.nsimEst times).
     // each time the trial is run, the cvrs are randomly permuted. The result is a distribution of ntrials sampleSizes.
@@ -269,21 +271,53 @@ fun estimateClcaAssertionRound(
     val clcaConfig = config.clcaConfig
     val cassertion = assertionRound.assertion as ClcaAssertion
     val cassorter = cassertion.cassorter
+    val noerror=cassorter.noerror()
+    val upper=cassorter.assorter.upperBound()
 
-    val measuredErrorRates: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
+    val measuredErrors = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive)
+        assertionRound.accumulatedErrorCounts(contestRound) // TODO switch to previousErrorCounts ?
+    else
+        assertionRound.previousErrorCounts()
 
-    val bettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
+    // TODO what is totalSamples ?? Npop ??
+    val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
+
+    val bettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
         GeneralAdaptiveBetting(
             contestUA.Npop,
-            startingErrors = measuredErrorRates,
+            startingErrors = measuredErrors,
             contest.Nphantoms(),
             oaAssortRates = null,
             d = clcaConfig.d,
             maxLoss = clcaConfig.maxLoss,
-            )
+        )
+    } else {
+        // class GeneralAdaptiveBetting2(
+        //    val Npop: Int, // population size for this contest
+        //    val apriori: ClcaErrorCounts, // apriori rates not counting phantoms, non-null so we have noerror and upper
+        //    val nphantoms: Int, // number of phantoms in the population
+        //    val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
+        //
+        //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
+        //    val d: Int = 100,  // trunc weight
+        //    val debug: Boolean = false,
+        //)
+        GeneralAdaptiveBetting2(
+            contestUA.Npop,
+            aprioriCounts = apriori,
+            nphantoms = contest.Nphantoms(),
+            maxLoss = clcaConfig.maxLoss,
+            d = clcaConfig.d,
+        )
+    }
 
     // for one contest, this takes a list of cards and fuzzes them to use as the mvrs.
-    val samplerTracker = ClcaFuzzSamplerTracker(config.simFuzzPct ?: 0.0, cardSamples, contestUA, cassorter)
+    val samplerTracker = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
+        ClcaFuzzSamplerTracker(config.simFuzzPct ?: 0.0, cardSamples, contestUA, cassorter, ClcaErrorCounts.empty(noerror, upper))
+    } else {
+        // start from where we left off
+        ClcaFuzzSamplerTracker(config.simFuzzPct ?: 0.0, cardSamples, contestUA, cassorter, measuredErrors)
+    }
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateClcaAssertionRound for $name with ${config.nsimEst} trials"}
@@ -295,7 +329,7 @@ fun estimateClcaAssertionRound(
         config,
         samplerTracker=samplerTracker,
         bettingFn,
-        cassorter.noerror(),
+        noerror=cassorter.noerror(),
         upper=cassorter.assorter.upperBound(),
         clcaUpper=cassorter.upperBound(),
         contestUA.Npop,
@@ -310,7 +344,7 @@ fun estimateClcaAssertionRound(
         clcaConfig.strategy.name,
         fuzzPct = config.simFuzzPct,
         startingTestStatistic = startingTestStatistic,
-        startingErrorRates = bettingFn.estimatedErrorRates(),
+        // startingErrorRates = apriori.errorRates(), // TODO
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
         simNewMvrs = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
@@ -377,12 +411,15 @@ fun estimateOneAuditAssertionRound(
     // one set of fuzzed pairs for all contests and assertions.
     val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
 
-    val measuredErrorRates: ClcaErrorCounts = assertionRound.accumulatedErrorCounts(contestRound)
+    val startingErrors = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive)
+        assertionRound.accumulatedErrorCounts(contestRound) // TODO switch to previousErrorCounts ?
+    else
+        assertionRound.previousErrorCounts()
 
     val bettingFn =
         GeneralAdaptiveBetting(
             Npop = contestUA.Npop,
-            startingErrors = measuredErrorRates,
+            startingErrors = startingErrors,
             contestUA.contest.Nphantoms(),
             oaAssortRates = oaCassorter.oaAssortRates,
             d = clcaConfig.d,
@@ -415,7 +452,7 @@ fun estimateOneAuditAssertionRound(
         roundIdx,
         oaConfig.strategy.name,
         fuzzPct = config.simFuzzPct,
-        startingErrorRates = bettingFn.estimatedErrorRates(),
+        startingErrorRates = bettingFn.estimatedErrorRates(), // TODO
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,

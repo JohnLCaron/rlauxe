@@ -82,15 +82,16 @@ class GenerateTausErrorTable {
         }
 
         //// cut and paste this output into TausErrorTable
+        // tauRates[2] = Taus7Rates(mapOf( "win-los" to 0.21339818181818182, "win-oth" to 0.2664109090909091, "oth-los" to 0.2664109090909091, "los-oth" to 0.2591127272727273, "oth-win" to 0.2591127272727273, "los-win" to 0.20853636363636363))
         println("\ntauErrorRates N=$totalBallots")
         tauErrorRates.forEach { (ncands, ter) ->
-            println("tauRates[$ncands] = mapOf( ${ter.ratesString()} )")
+            println("tauRates[$ncands] = Taus7Rates(mapOf( ${ter.ratesString()}))")
         }
     }
 }
 
 class TauErrorRatesCumul {
-    val taus = Taus(1.0)
+    val taus = Taus(1.0, use7override = true)
     val tauCounts = mutableMapOf<Double, Double>()  // tau, normalizedCount
     var totalSamples = 0
 

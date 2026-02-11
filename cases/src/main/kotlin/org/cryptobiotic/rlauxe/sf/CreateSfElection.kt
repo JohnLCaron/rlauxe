@@ -338,20 +338,30 @@ fun createSfElection(
     auditConfigIn: AuditConfig? = null,
     poolsHaveOneCardStyle: Boolean,
     auditType : AuditType,
+    mvrFuzz: Double? = null,
 ) {
     val stopwatch = Stopwatch()
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
 
-        (auditType ==  AuditType.CLCA) -> AuditConfig(AuditType.CLCA, riskLimit = .05, nsimEst=20)
+        (auditType ==  AuditType.CLCA) -> AuditConfig(
+            AuditType.CLCA, riskLimit = .05, nsimEst=20,
+            // TODO, this should be set when running the audit, so can test same election with differenct scenarios
+            //    so we need the config at create time, and the config at run time...
+            simFuzzPct=mvrFuzz, persistedWorkflowMode=PersistedWorkflowMode.testSimulated,
+            simulationStrategy = SimulationStrategy.optimistic,
+            clcaConfig = ClcaConfig(ClcaStrategyType.generalAdaptive2, fuzzMvrs=mvrFuzz)
+        )
 
         (auditType ==  AuditType.ONEAUDIT) -> AuditConfig(
             AuditType.ONEAUDIT, riskLimit = .05, nsimEst = 20,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
-            oaConfig = OneAuditConfig(OneAuditStrategyType.calcMvrsNeeded)
+            simulationStrategy = SimulationStrategy.optimistic,
+            clcaConfig = ClcaConfig(ClcaStrategyType.generalAdaptive2, fuzzMvrs=mvrFuzz)
         )
 
-        else -> AuditConfig(AuditType.POLLING, riskLimit = .05, contestSampleCutoff = 10000, nsimEst = 20)
+        else -> AuditConfig(
+            AuditType.POLLING, riskLimit = .05, contestSampleCutoff = 10000, nsimEst = 20) // TODO
     }
 
     val election = CreateSfElection(

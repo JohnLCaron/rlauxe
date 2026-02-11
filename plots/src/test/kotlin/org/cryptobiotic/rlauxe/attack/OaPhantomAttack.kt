@@ -50,7 +50,7 @@ class OaPhantomAttack {
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "calcMvrsNeeded", "fuzzPct" to fuzzPct),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, true, nsimEst = nsimEst,
-                    oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.calcMvrsNeeded)
+                    simulationStrategy = SimulationStrategy.optimistic,
                 ),
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorEta0Eps))

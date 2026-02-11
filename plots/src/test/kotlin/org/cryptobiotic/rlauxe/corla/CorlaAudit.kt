@@ -66,7 +66,7 @@ class CorlaContestAuditTaskGenerator(
         val auditConfig = auditConfigIn ?:
         AuditConfig(
             AuditType.CLCA, true, nsimEst = 10,
-            clcaConfig = clcaConfigIn ?: ClcaConfig(ClcaStrategyType.fuzzPct, mvrsFuzzPct)
+            clcaConfig = clcaConfigIn ?: ClcaConfig(fuzzMvrs=mvrsFuzzPct)
         )
 
         val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
@@ -96,7 +96,7 @@ class CorlaAudit(
         contestsUA = contestsToAudit.map { ContestWithAssertions(it, isClca=true, ).addStandardAssertions() }
     }
 
-    override fun runAuditRound(auditRound: AuditRound, quiet: Boolean): Boolean  {
+    override fun runAuditRound(auditRound: AuditRound, onlyTask: String?, quiet: Boolean): Boolean  {
         val complete = runClcaAuditRound(auditConfig, auditRound, mvrManagerForTesting, auditRound.roundIdx,
             auditor = AuditCorlaAssertion()
         )

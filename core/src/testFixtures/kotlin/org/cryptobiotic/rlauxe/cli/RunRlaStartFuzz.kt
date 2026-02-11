@@ -330,7 +330,7 @@ fun startTestElectionOneAudit(
         AuditType.ONEAUDIT, nsimEst = 10, simFuzzPct = simFuzz, quantile = quantile,
         persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
         clcaConfig = ClcaConfig(fuzzMvrs=fuzzMvrs),
-        oaConfig = if (strategy == "calc") OneAuditConfig(strategy = OneAuditStrategyType.calcMvrsNeeded) else OneAuditConfig()
+        simulationStrategy = if (strategy == "calc") SimulationStrategy.optimistic else SimulationStrategy.regular,
     )
     clearDirectory(Path(auditDir))
 

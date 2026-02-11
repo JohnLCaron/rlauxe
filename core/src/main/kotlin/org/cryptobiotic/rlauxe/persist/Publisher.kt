@@ -20,7 +20,8 @@ private val logger = KotlinLogging.logger("Publisher")
         sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
 
         roundX/
-            auditStateX.json     // AuditRoundJson,  the state of the audit for this round
+            auditEstX.json       // AuditRoundJson,  an audit state with estimation, ready for auditinf
+            auditStateX.json     // AuditRoundJson,  the results of the audit for this round
             sampleCardsX.csv     // AuditableCardCsv, complete cards used for this round; MvrManager called from runClcaAuditRound, runPollingAuditRound
             sampleMvrsX.csv      // AuditableCardCsv, complete mvrs used for this round; PersistedWorkflow runAuditRound, startNewRound
             samplePrnsX.json     // SamplePrnsJson, complete sample prns for this round, in order;
@@ -43,7 +44,13 @@ class Publisher(val auditDir: String) {
     fun sortedCardsFile() = "$auditDir/sortedCards.csv" // sorted cardManifest
     fun privateMvrsFile() = "$auditDir/private/sortedMvrs.csv"
 
-    fun auditStateFile(round: Int): String {
+    fun auditEstFile(round: Int): String {
+        val dir = "$auditDir/round$round"
+        validateOutputDir(Path.of(dir), ErrorMessages("auditStateFile"))
+        return "$dir/auditEst$round.json"
+    }
+
+    fun auditFile(round: Int): String {
         val dir = "$auditDir/round$round"
         validateOutputDir(Path.of(dir), ErrorMessages("auditStateFile"))
         return "$dir/auditState$round.json"

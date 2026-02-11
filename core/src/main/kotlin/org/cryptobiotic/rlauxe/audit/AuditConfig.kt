@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.audit
 
+import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.util.secureRandom
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 
@@ -67,6 +68,7 @@ data class AuditConfig(
             }
         }
     }
+
     fun strategy() : String {
         return when (auditType) {
             AuditType.POLLING -> "polling"
@@ -79,37 +81,23 @@ data class AuditConfig(
 // optimistic: round 1 assume no errors, subsequent rounds use measured error rates
 enum class SimulationStrategy { regular, optimistic  }
 
-
 // uses AlphaMart
 data class PollingConfig(
     val d: Int = 100,  // shrinkTrunc weight TODO study what this should be, eg for noerror assumption?
 )
 
-// oracle: use actual measured error rates, testing only
-// fuzzPct: model errors with fuzz simulation at first, then measured
-// apriori: pass in apriori errorRates at first, then measured
-// phantoms: use phantom rates at first.
-// previous: use phantom rates at first, then measured.
-// optimalComparison:  OptimalComparisonNoP1, assume P1 = 0, closed form solution for lamda
-
-// Error Rates: the minimum p1o is always the phantom rate. Subsequent rounds, always use measured rates.
-//  apriori: pass in apriori errorRates for first round.
-//  fuzzPct: ClcaErrorTable.getErrorRates(contest.ncandidates, clcaConfig.simFuzzPct) for first round.
-//  oracle: use actual measured error rates for first round. (violates martingale condition)
-
-// TODO only generalAdaptive is used, remove others
-enum class ClcaStrategyType { generalAdaptive, apriori, fuzzPct, oracle  }
+enum class ClcaStrategyType { generalAdaptive, generalAdaptive2}
 data class ClcaConfig(
     val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
     val fuzzMvrs: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs when persistedWorkflowMode=testSimulate
     val d: Int = 100,  // shrinkTrunc weight for error rates
     val maxLoss: Double = 0.90,  // max loss on any one bet, 0 < maxLoss < 1
     val cvrsContainUndervotes: Boolean = true,
+    val apriori: TausRates = TausRates(emptyMap()),
 )
 
 // simulate: simulate for estimation
-// calcMvrsNeeded: calculate for estimation
-enum class OneAuditStrategyType { simulate, calcMvrsNeeded }
+enum class OneAuditStrategyType { simulate }
 data class OneAuditConfig(
     val strategy: OneAuditStrategyType = OneAuditStrategyType.simulate,
 )

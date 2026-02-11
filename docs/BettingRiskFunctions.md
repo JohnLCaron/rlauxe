@@ -1,5 +1,5 @@
 # Risk and betting functions
-_last changed 02/08/2026_
+_last changed 02/11/2026_
 
 <!-- TOC -->
 * [Risk and betting functions](#risk-and-betting-functions)
@@ -21,7 +21,7 @@ We have a sequence of ballot cards that have been randomly selected from the pop
 For each assertion, each card is assigned an _assort value_ which is a floating point number. So we have a sequence of
 numbers (aka a "sequence of samples") that are fed into the risk function. For the ith sample:
 
-    x_i = the assort value, 0 <= x_i <= upper
+    x_i = the assort value, 0 <= x_i <= upper, upper is unbounded but known
     µ_i = the expected value of the sample mean, if the assertion is false (very close to 1/2 usually)
     λ_i = the "bet" placed on the ith sample, based on the previous samples, 0 <= λ_i <= 2 .
 
@@ -52,7 +52,7 @@ To minimize n, we want to maximize payoff, so we want to maximize λc.
 
 ## Stalled audits and maximum bets
 
-T_i = Prod (payoff_i, i= 1..i), so if any payoff = 0, the audit stalls and cant recover. 
+T_i = Prod (payoff_i, i= 1..i), and if any payoff = 0, the audit stalls and cant recover. 
 So we must ensure that at each step the payoff is > 0:
 
     1 + λ_i (x_i − µ_i) > 0
@@ -141,9 +141,9 @@ The CLCA assorter (aka bassort) does an affine transformation of the overstateme
 ````
    bassort = (1-o/u)/(2-v/u) in [0, 2] * noerror
    where
+     o = overstatement error
      u = assorter upper value
      v = reported margin
-     o = overstatement error
      noerror = 1/(2-v/u)
 
 then the possible values of bassort = (1-o/u) * noerror are:
@@ -278,14 +278,14 @@ short of a full count. OTOH we can probably use the calculated variance to estim
 
 ## Choosing MaxLoss
 
-MaxLoss is a user settable parametr which limits the (see maximum bet that can be placed on any one sample [see here](#stalled-audits-and-maximum-bets)).
+MaxLoss is a user settable parameter which limits the maximum bet that can be placed on any one sample ([see stalled audits](#stalled-audits-and-maximum-bets)).
 
 How many noerror samples are needed to offset an assort value of 0.0, ie a 2-vote overstatement error (p2o) ?
 
-Suppose the bet is constant at maxBet = 2 * (1 - maxLoss). Approximate µ_i as 0.5. then
+Suppose the bet is constant at λc = 2 * (1 - maxLoss). Approximate µ_i as 0.5. then
 
     tj = 1 + λ_i * (x_i − µ_i)
-    t_noerror = 1 + maxBet * (noerror − 0.5)
+    t_noerror = 1 + λc * (noerror − 0.5)
     
     noerror = 1 / (2 - dilutedMargin / assorter.upperBound()) 
             = 1/(2-v) when u = 1
@@ -297,20 +297,22 @@ Suppose the bet is constant at maxBet = 2 * (1 - maxLoss). Approximate µ_i as 0
 
 so:
 
-    t_noerror = 1 + maxBet * (noerror − 0.5)
-    t_noerror = (1 + 2 * maxLoss * (v / 2(2-v)))
-    t_noerror = (1 +  maxLoss * (v / (2-v)))
+    t_noerror = 1 + λc * (noerror − 0.5)
+    t_noerror = (1 + λc * (v / 2(2-v)))
+    t_noerror = (1 +  λc/2 * (v / (2-v)))
 
-A p2o assort value of 0.0, gives the smallest possible value of tj:
+A p2o assort value of x = 0.0, gives the smallest possible value of tj:
 
-    t_p2o = 1 + maxBet (p2o − 0.5)
-    t_p2o = 1 + 2 * maxLoss (0 − 0.5)
-    t_p2o = 1 - maxLoss 
+    tj = 1 + λ_j * (x_i − µ_j)
+    tj = 1 + λ_j * (0 − .5)
+    tj = 1 - λ_j /2
+    t_min = 1 - maxBet /2
+    t_min = 1 - maxLoss
 
 which is how we choose maxLoss; whats the largest loss we are willing to suffer on a p2o sample? If maxLoss = .9, then t_p2o = .1, and we
-lose 90% of our winnings, represented by the testStatistic T.
+lose 90% of our "winnings", aka the testStatistic T.
 
-To compensate for one p2o sample, we need ncomp noerror samples, so that
+To compensate for one p2o sample, we need ncomp noerror samples, such that
 
     t_noerror^ncomp = 1 / (1 - maxLoss)
     ncomp = -ln(1 - maxLoss) / ln(1 + maxLoss * (v/(2-v)))
@@ -323,17 +325,19 @@ If there are no p2o samples, then the number of noerror samples we need to rejec
 Ignoring other types of errors, the number of samples needed when there are k p2o errors are:
 
     ntotal = n + k * ncomp
+    ntotal = -ln(alpha) / ln(1 + maxLoss * (v/(2-v))) + k * -ln(1 - maxLoss) / ln(1 + maxLoss * (v/(2-v)))
+    ntotal = -(ln(alpha) + k * ln(1 - maxLoss)) / ln(1 + maxLoss * (v/(2-v)))
 
-Here is a plot of ntotal for values of k (0..5) and two different margins (.01 and .05):
+Here is a plot of ntotal for values of k (0..5) and two different margins v = .01 and .05:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxLoss.nloss.LogLog.html" rel="BettingPayoff">![maxLossLog](plots2/betting/maxloss/maxLoss.nloss.LogLog.png)</a>
 
 * When k > 0 there is a value of maxLoss that minimizes the number of samples needed.
 * Informally you can see that the optimal maxLoss is the same for both margins. (click on the image to get an interactive html plot)
-* This optimal maxLoss is probably the exact value of optimalBet from our GeneralAdaptiveBetting function, so we are already adapting
-  to the error rates as we measure them. (TODO: check this)
-* While this particular calculation does not indicate if there is an optimal value of maxRisk, by setting the maximum bet
-  to 0.9, we avoid much of the increased sample sizes to the right of that.
+* This optimal maxLoss is probably the same value of optimalBet from our GeneralAdaptiveBetting function if there are no other errors, 
+  so we are already adapting to the error rates as we measure them. (TODO: check this)
+* The optimal value of lamda varies by margin and error rates, but by setting the overall maximum loss
+  to 0.9, we cut off possible increased sample sizes to the right of that.
 * The presence of even a single p2o error has a strong effect on the samples needed. The linear plot shows that more clearly:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxLoss.nloss.Linear.html" rel="BettingPayoff">![maxLossLinear](plots2/betting/maxloss/maxLoss.nloss.Linear.png)</a>
@@ -363,3 +367,51 @@ maxLoss: 0.9990 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0075: 
 maxLoss: 0.9999 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0075: needed 400 samples; pct = 1.0000
 maxLoss: 1.0000 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0075: needed 400 samples; pct = 1.0000
 ````
+
+
+
+//////////////////////////////////////////////
+
+
+    tj = 1 + λ_j * (x_i − µ_j)
+    tj = 1 + λ_j * (tau * noerror − 1/2)
+
+when u = 1, tau = [0, .5, 1, 1,5, 2]
+
+    0.0: tj = 1 - λ/2 
+    0.5: tj = 1 + λ/2 (noerror - 1)
+    1.0: tj = 1 + λ   (noerror - 1/2)
+    1.5: tj = 1 + λ   (3 * noerror - 1)/2
+    2.0: tj = 1 + λ   (2 * noerror - 1/2)
+
+
+    noerror = 1/(2-v/u)   u in (1/2 ... inf)
+    u = 1, noerror = 1/(2-v), v in 0..1 so noerror in (1/2 to 1)
+    u > 1/2, noerror = 1/(2-2v), v in (0..1) so noerror in (1/2 to inf)
+    u > 1, noerror = 1/(2-v/u), v in (0..1) so v/u ??
+    u=inf, noerror = 1/(2-v/u) > 1/2
+
+
+  in order to gain, 1 + λ_j * (x_i − µ_j) must be > 1
+
+    1 - λ/2 always loses
+    1 + λ/2 (noerror - 1) wins if noerror > 1 otherwise loses; when u = 1,  noerror in (1/2 to 1), so always loses
+
+
+  if you bet < 1, are you betting that you will lose ??
+
+
+  tau = [0,       1/2u,    1-1/2u,  1,       1+1/2u,  1+1/2u,  2]
+
+    tj = 1 + λ_j * (tau * noerror − 1/2)
+
+         0: 1 - λ/2
+      1/2u: 1 + λ * (noerror/2u − 1/2)
+    1-1/2u: 1 + λ * ((1-1/2u) * noerror − 1/2)
+         1: 1 + λ * (noerror − 1/2)
+    1+1/2u: 1 + λ * ((1+1/2u)noerror − 1/2)
+    1+1/2u: 1 + λ * ((1+1/2u)noerror − 1/2)
+         2: 1 + λ * (2*noerror − 1/2)
+
+
+

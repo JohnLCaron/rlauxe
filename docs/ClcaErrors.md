@@ -1,7 +1,7 @@
 # CLCA errors
 2/12/2026
 
-Read [BettingRiskFunctions](docs/BettingRiskFunctions.md) for necessary background. Here are necessary definitions:
+Read [BettingRiskFunctions](BettingRiskFunctions.md) for background. Here are necessary definitions:
 
     x_i = the assort value, 0 <= x_i <= upper
     1/2 < upper < unbounded but known
@@ -124,12 +124,12 @@ When you throw phantoms into the mix:
      loser-winner tau= 2.0000 '      2' (los-win)
 ````
 
-When the cvr is a phantom, its the same as "oth".
-When the mvr is a phantom, its the same as "los".
+When the cvr is a phantom, it's the same as "oth".
+When the mvr is a phantom, it's the same as "los".
 
 ## The effects of CLCA Errors
 
-Its instructive to see the effect of each error type on the testStatistic T, which gets multiplied by the 
+It's instructive to see the effect of each error type on the testStatistic T, which gets multiplied by the 
 payoff for that error. We will measure the effect of one error by looking at the increase in noerror samples needed.
 
 When the mvr and cvr agree, the assort value = noerror, so the payoff is (µ_i approximately 1/2):
@@ -159,24 +159,25 @@ Then we fix lamda = 1.8 and show the dependence on margin for various values of 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/byUpperUnder1.html" rel="byUpperUnder1">![byUpperUnder1](plots2/betting/errorComp/byUpperUnder1.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/byUpper10.html" rel="byUpper10">![byUpper10](plots2/betting/errorComp/byUpper10.png)</a>
 
-The last two plots correspond to the AboveThreshhold and BelowThreshold assorters with 5% threshold, as used in Belgian D'hondt elections.
+The last two plots correspond to the BelowThreshold and AboveThreshhold assorters with 5% threshold, as used in Belgian D'hondt elections.
 
 * Understatement errors have the effect of decreasing the number of samples needed, shown on the plots as negetive numbers.
 
-* It is sobering to see how many extra samples are needed for just one error. For example, for a single p2o error, a plurality contest (upper=1) needs 100 extra samples
-when the margin is .05, and 500 extra when the margin is .01. 
+* It is sobering to see how many extra samples are needed for just one error. For example, for a single p2o error, a plurality contest (upper=1) needs 100 extra samples when the margin is .05, and 500 extra when the margin is .01. These are absolute numbers, not dependent on the population size.
 
-* Those values appear to scale linearly with upper: when upper=10, one needs 1000 and 5000 extra ballots for margins of .05 and .01, and so on.
+* Extra samples needed appear to scale linearly with upper: when upper=10, one needs 1000 and 5000 extra ballots for margins of .05 and .01, and so on.
 
 * When applied to a real audit, one must take into account the probability of encountering an error in the sampled population. This will roughly be
   nerrors * sampleSize / populationSize.
 
 
-These results are intrinsic to the risk function's payoff calculation, and independent of our implementation, except for the choice of lamda.
+These results are intrinsic to the risk function's payoff calculation, and independent of any implementation, except for the choice of lamda.
 From the first plot vs lamda, we see that only p2o is strongly dependent on the choice of lamda. But we cant peek ahead to see what the next sample is,
-and a 10% change in lamda approximately increases the samples needed by 10-15% when there are noerrors.
+and a 10% decrease in lamda approximately increases the samples needed by 10-15% when there are noerrors.
 
-It seems that theres a unavoidable choice between optimistically assuming there are few to no errors, and trying to minimize the effects of errors if they are found. 
+It seems that there's an unavoidable choice between optimistically assuming there are few to no errors, and trying to minimize the effects of errors if they are found. 
+
+Also see [Choosing MaxLoss](https://github.com/JohnLCaron/rlauxe/blob/main/docs/BettingRiskFunctions.md#choosing-maxloss)
 
 
 

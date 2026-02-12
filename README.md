@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 02/11/2026_
+_last changed: 02/12/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -20,11 +20,6 @@ Click on plot images to get an interactive html plot. You can also read this doc
 <!-- TOC -->
 * [SHANGRLA framework](#shangrla-framework)
 * [Rlauxe Workflow Overview](#rlauxe-workflow-overview)
-  * [Before the Audit](#before-the-audit)
-  * [Creating a random seed](#creating-a-random-seed)
-  * [Starting the Audit](#starting-the-audit)
-  * [Audit Rounds](#audit-rounds)
-  * [Verification](#verification)
 * [Audit Types](#audit-types)
   * [Card Level Comparison Audits (CLCA)](#card-level-comparison-audits-clca)
   * [OneAudit CLCA](#oneaudit-clca)
@@ -48,18 +43,8 @@ Click on plot images to get an interactive html plot. You can also read this doc
 * [Appendices](#appendices)
   * [Reference Papers](#reference-papers)
   * [Extensions of SHANGRLA](#extensions-of-shangrla)
-    * [Populations and hasStyle](#populations-and-hasstyle)
-    * [CardManifest](#cardmanifest)
-    * [General Adaptive Betting](#general-adaptive-betting)
-    * [OneAudit Betting strategy](#oneaudit-betting-strategy)
-    * [MaxLoss for Betting](#maxloss-for-betting)
-    * [Additional assorters](#additional-assorters)
-    * [OneAudit Card Style Data](#oneaudit-card-style-data)
-    * [Multicontest audits](#multicontest-audits)
   * [Unanswered Questions](#unanswered-questions)
-    * [Contest is missing in the MVR](#contest-is-missing-in-the-mvr)
-    * [Optimal value of MaxLoss](#optimal-value-of-maxloss)
-  * [Also See:](#also-see)
+  * [Also See](#also-see)
 <!-- TOC -->
 
 
@@ -266,7 +251,7 @@ In the following simulations, errors are created between the CVRs and the MVRs, 
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the CVRs and MVRs agree.
 When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. 
 
-This fuzzing mechanism is rather crude, and may not reflect any real-world pattern of errors. See[ClcaErrors](docs/ClcaErrors.md) for a deeper understanding of the effect of CLCA errors.
+This fuzzing mechanism is rather crude, and may not reflect any real-world pattern of errors. See [ClcaErrors](docs/ClcaErrors.md) for a deeper understanding of the effect of CLCA errors.
 
 ### CLCA with errors
 

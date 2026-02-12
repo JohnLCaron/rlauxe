@@ -1,12 +1,11 @@
 # Risk and betting functions
-_last changed 02/11/2026_
+_last changed 02/12/2026_
 
 <!-- TOC -->
 * [Risk and betting functions](#risk-and-betting-functions)
   * [Estimating samples needed for CLCA](#estimating-samples-needed-for-clca)
   * [Stalled audits and maximum bets](#stalled-audits-and-maximum-bets)
   * [Betting when there are CLCA errors](#betting-when-there-are-clca-errors)
-    * [CLCA assort values](#clca-assort-values)
   * [Betting with OneAudit pools](#betting-with-oneaudit-pools)
     * [Estimating samples needed for OneAudit when there are no errors](#estimating-samples-needed-for-oneaudit-when-there-are-no-errors)
   * [Choosing MaxLoss](#choosing-maxloss)
@@ -121,85 +120,6 @@ The sum of terms is the yellow line. The optimizer finds the value of lamda wher
 just for finding the optimal lamda; the value of the equation is not used.
 
 If there are no negetive terms or the negetive terms are not large (eg if p2o = 0), then eq 1 is monotonically increasing, and lamda will always be the maximum value allowed.
-
-### CLCA assort values
-
-We do an affine transformation of our assorters so that they all return one of three values {0, 1/2, upper}, 
-corresponding to whether the card has a vote for the loser, other, or winner.
-
-A CLCA overstatement error = cvr_assort - mvr_assort has one of 7 possible values:
-
-````
-    [0, .5, u] - [0, .5, u] = 0, -.5, -u,
-                             .5,  0, .5-u,
-                              u, u-.5, 0
-                              
-    = [-u, -.5, .5-u, 0, .5, u-.5, u]  
-````
-
-The CLCA assorter (aka bassort) does an affine transformation of the overstatement error:
-
-````
-   bassort = (1-o/u)/(2-v/u) in [0, 2] * noerror
-   where
-     o = overstatement error
-     u = assorter upper value
-     v = reported margin
-     noerror = 1/(2-v/u)
-
-then the possible values of bassort = (1-o/u) * noerror are:
-
-    [0, 1/2u, 1-1/2u, noerror, 1+1/2u, 2-1/2u, 2] * noerror
-````
-
-For Plurality, u = 1, so the possible values are:
-````
-[0, .5, 1, 1.5, 2] * noerror (u=1)
-aka [p2o, p1o, noerror, p1u, p2u]
-````
-
-In general, when u != 1, there are 7 possible values, for example, a Dhondt assorter with u = 1.75:
-
-````
-DHondt upperBound=1.7500, noerror=0.51470588
-
-[0.0, 0.1470588235294, 0.3676470588235, 0.51470588, 0.661764705882, 0.882352941176, 1.029411764705]
-[0, 1/2u, 1-1/2u, 1, 1+1/2u, 2-1/2u, 2] * noerror
-
-     winner-loser tau= 0.0000 '      0' (win-los)
-     winner-other tau= 0.2857 '   1/2u' (win-oth)
-      other-loser tau= 0.7143 ' 1-1/2u' (oth-los)
-    winner-winner tau= 1.0000 'noerror' (noerror)
-      other-other tau= 1.0000 'noerror' (noerror)
-      loser-loser tau= 1.0000 'noerror' (noerror)
-      loser-other tau= 1.2857 ' 1+1/2u' (oth-win)
-     other-winner tau= 1.7143 ' 2-1/2u' (los-oth)
-     loser-winner tau= 2.0000 '      2' (los-win)
-````
-
-when you throw phantoms into the mix:
-
-````
-     winner-loser tau= 0.0000 '      0' (win-los)
-   winner-phantom tau= 0.0000 '      0' (win-los)
-     winner-other tau= 0.2857 '   1/2u' (win-oth)
-      other-loser tau= 0.7143 ' 1-1/2u' (oth-los)
-    other-phantom tau= 0.7143 ' 1-1/2u' (oth-los)
-    phantom-loser tau= 0.7143 ' 1-1/2u' (oth-los)
-  phantom-phantom tau= 0.7143 ' 1-1/2u' (oth-los)
-    winner-winner tau= 1.0000 'noerror' (noerror)
-      other-other tau= 1.0000 'noerror' (noerror)
-      loser-loser tau= 1.0000 'noerror' (noerror)
-    loser-phantom tau= 1.0000 'noerror' (noerror)
-    phantom-other tau= 1.0000 'noerror' (noerror)
-      loser-other tau= 1.2857 ' 1+1/2u' (oth-win)
-     other-winner tau= 1.7143 ' 2-1/2u' (los-oth)
-   phantom-winner tau= 1.7143 ' 2-1/2u' (los-oth)
-     loser-winner tau= 2.0000 '      2' (los-win)
-````
-
-See [Card Level Comparison Audits](Clca.md) for details and plots.
-
 
 ## Betting with OneAudit pools
 
@@ -368,51 +288,3 @@ maxLoss: 0.9990 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0075: 
 maxLoss: 0.9999 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0075: needed 400 samples; pct = 1.0000
 maxLoss: 1.0000 N=100000, margin=0.01, upper=0.67 noerror:0.5038 maxtj: 1.0075: needed 400 samples; pct = 1.0000
 ````
-
-
-
-//////////////////////////////////////////////
-
-
-    tj = 1 + λ_j * (x_i − µ_j)
-    tj = 1 + λ_j * (tau * noerror − 1/2)
-
-when u = 1, tau = [0, .5, 1, 1,5, 2]
-
-    0.0: tj = 1 - λ/2 
-    0.5: tj = 1 + λ/2 (noerror - 1)
-    1.0: tj = 1 + λ   (noerror - 1/2)
-    1.5: tj = 1 + λ   (3 * noerror - 1)/2
-    2.0: tj = 1 + λ   (2 * noerror - 1/2)
-
-
-    noerror = 1/(2-v/u)   u in (1/2 ... inf)
-    u = 1, noerror = 1/(2-v), v in 0..1 so noerror in (1/2 to 1)
-    u > 1/2, noerror = 1/(2-2v), v in (0..1) so noerror in (1/2 to inf)
-    u > 1, noerror = 1/(2-v/u), v in (0..1) so v/u ??
-    u=inf, noerror = 1/(2-v/u) > 1/2
-
-
-  in order to gain, 1 + λ_j * (x_i − µ_j) must be > 1
-
-    1 - λ/2 always loses
-    1 + λ/2 (noerror - 1) wins if noerror > 1 otherwise loses; when u = 1,  noerror in (1/2 to 1), so always loses
-
-
-  if you bet < 1, are you betting that you will lose ??
-
-
-  tau = [0,       1/2u,    1-1/2u,  1,       1+1/2u,  1+1/2u,  2]
-
-    tj = 1 + λ_j * (tau * noerror − 1/2)
-
-         0: 1 - λ/2
-      1/2u: 1 + λ * (noerror/2u − 1/2)
-    1-1/2u: 1 + λ * ((1-1/2u) * noerror − 1/2)
-         1: 1 + λ * (noerror − 1/2)
-    1+1/2u: 1 + λ * ((1+1/2u)noerror − 1/2)
-    1+1/2u: 1 + λ * ((1+1/2u)noerror − 1/2)
-         2: 1 + λ * (2*noerror − 1/2)
-
-
-

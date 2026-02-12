@@ -161,7 +161,7 @@ fun tabulateDebugInfo(cards: CloseableIterator<AuditableCard>, contests: List<Co
 }
 
 private val fac = 10 // TODO pass in? check cardManifest, just use all if not too big, because this
-                     // algorithm isnt so great for small samples....
+                     //     algorithm isnt so great for small samples.... this sucks
 
 // CLCA and OneAudit, not needed by Polling
 // we dont use this for the actual estimation....

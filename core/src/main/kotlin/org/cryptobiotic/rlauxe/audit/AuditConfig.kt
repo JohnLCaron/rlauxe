@@ -34,7 +34,7 @@ data class AuditConfig(
     val oaConfig: OneAuditConfig = OneAuditConfig(),
 
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
-    val simulationStrategy: SimulationStrategy =  SimulationStrategy.regular,
+    val simulationStrategy: SimulationStrategy =  SimulationStrategy.optimistic,
 
     val skipContests: List<Int> = emptyList(),
     val version: Double = 2.0,
@@ -88,7 +88,7 @@ data class PollingConfig(
 
 enum class ClcaStrategyType { generalAdaptive, generalAdaptive2}
 data class ClcaConfig(
-    val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
+    val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive2,
     val fuzzMvrs: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs when persistedWorkflowMode=testSimulate
     val d: Int = 100,  // shrinkTrunc weight for error rates
     val maxLoss: Double = 0.90,  // max loss on any one bet, 0 < maxLoss < 1

@@ -47,7 +47,6 @@ enum class TestH0Status(val rank: Int, val complete: Boolean, val success: Boole
 // LOOK pvalueLast = pvalueMin when you terminate on p < risk.
 //   but not when you hit maxSamples
 //   but not "risk measuring" audits.
-//   TODO show pmin instead of plast in viewer.
 data class TestH0Result(
     val status: TestH0Status,  // how did the test conclude?
     val sampleCount: Int,      // number of samples used in testH0

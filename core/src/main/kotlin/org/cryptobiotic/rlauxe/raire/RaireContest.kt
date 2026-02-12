@@ -231,7 +231,6 @@ data class RaireAssertion(
     val winnerIdx: Int,
     val loserIdx: Int,
     val eliminated: List<Int> = emptyList(), // candidate Ids; NEN only; already eliminated for the purpose of this assertion
-    // val votes: Map<Int, Int> = emptyMap(), // votes for winner, loser depending on assertion type; TODO WTF? doesnt seem to be needed
 ) {
     fun show() = buildString {
         appendLine("    assertion type '$assertionType' winner $winnerId loser $loserId eliminated=$eliminated difficulty=${dfn(difficulty,2)}, marginInVotes=$marginInVotes")

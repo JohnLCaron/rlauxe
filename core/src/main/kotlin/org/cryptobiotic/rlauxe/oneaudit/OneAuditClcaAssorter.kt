@@ -134,26 +134,6 @@ class OneAuditClcaAssorter(
         return result
     }
 
-    fun overstatementErrorOld(mvr: CvrIF, cvr: CvrIF, hasStyle: Boolean): Double {
-
-        if (hasStyle and !cvr.hasContest(info.id)) {
-            val trace = Throwable().stackTraceToString()
-            // logger.error { "hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})\n$trace" }
-            // TODO core dump not a good option.
-            //    if we were using hasStyle in assorter.assort(), it would return 0.0 for cvr_assort
-            throw RuntimeException("hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
-        }
-
-        val mvr_assort =
-            if (mvr.isPhantom()) 0.0
-            else if (!mvr.hasContest(info.id)) { if (hasStyle) 0.0 else 0.5 }
-            else this.assorter.assort(mvr, usePhantoms = false)
-
-        val cvr_assort = if (cvr.isPhantom()) .5 else this.assorter.assort(cvr, usePhantoms = false)
-
-        return cvr_assort - mvr_assort
-    }
-
     fun overstatementPoolError(mvr: CvrIF, poolAvgAssortValue: Double, hasStyle: Boolean): Double {
         val mvr_assort =
             if (mvr.isPhantom()) 0.0

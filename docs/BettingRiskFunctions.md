@@ -21,9 +21,10 @@ We have a sequence of ballot cards that have been randomly selected from the pop
 For each assertion, each card is assigned an _assort value_ which is a floating point number. So we have a sequence of
 numbers (aka a "sequence of samples") that are fed into the risk function. For the ith sample:
 
-    x_i = the assort value, 0 <= x_i <= upper, upper is unbounded but known
+    x_i = the assort value, 0 <= x_i <= upper
+    1/2 < upper < unbounded but known
     µ_i = the expected value of the sample mean, if the assertion is false (very close to 1/2 usually)
-    λ_i = the "bet" placed on the ith sample, based on the previous samples, 0 <= λ_i <= 2 .
+    λ_i = the "bet" placed on the ith sample, based on the previous samples, 0 < λ_i < 2 .
 
     payoff_i = (1 + λ_i (x_i − µ_i)) = the payoff of the ith bet
     T_i = Prod (payoff_i, i= 1..i) = the product of the payoffs, aka the "testStatistic"

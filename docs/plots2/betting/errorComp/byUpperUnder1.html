@@ -1,0 +1,211 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;8PisOp&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;8PisOp&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;samples needed to compensate for one error&quot;,
+&quot;subtitle&quot;:&quot;upper=0.526 (Below 5% Threshold) lamda=1.8&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;samplesToCompensate&quot;,
+&quot;color&quot;:&quot;tau&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;&amp;merged_groups&quot;:[&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;],
+&quot;samplesToCompensate&quot;:[536.8852679091235,447.1695651051687,335.02481224923247,267.7378275451257,213.90808965396533,178.02145820426563,133.1628532993993,88.30339893323907,65.87281083364601,52.41375799639613,43.440463176978795,37.03045019753686,32.22248077329216,25.490195202397953,9.615765164365133,7.8426882057657235,5.62633789131294,4.296523302973266,3.2326666693810933,2.523424305030911,1.6368609370661893,0.7502695987618464,0.30694566371908766,0.04092840037068653,-0.13643577424954015,-0.2631412579676824,-0.35818525434204596,-0.49128321156583904,450.73346273057285,375.3567307214835,281.1356381797272,224.60279275466985,179.37630199200353,149.22510882329695,111.53566632602835,73.84500900585952,54.99844798340472,43.68950825064921,36.14936441990801,30.76280526866057,26.72222487526634,21.063787221225176,-11.153416653206541,-9.457526674823937,-7.337660318971588,-6.065736355187264,-5.048192502558159,-4.3698255867478695,-3.5218571196569917,-2.6738622675488144,-2.249838177542517,-1.9954021190275026,-1.82575984299344,-1.704570952150145,-1.6136652434508638,-1.486362948016397,-145.1855202379186,-121.10005411570073,-90.99317073307489,-72.92898647839272,-58.4775779050245,-48.843248717444936,-36.800208881048015,-24.75682422319048,-18.734783370169303,-15.121276409021842,-12.712033294541365,-10.99093822718657,-9.699933247466856,-7.892077382568615,-150.71121469172695,-125.70261572037073,-94.44181449857699,-75.6852776400547,-60.67998483974143,-50.67639750979079,-38.171780496065466,-25.66680657071602,-19.413958860343822,-15.661957875019468,-13.160377041150056,-11.373319187461504,-10.032835666398634,-8.155694068474633],
+&quot;tau&quot;:[&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;tau&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesToCompensate&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;samplesToCompensate&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;&amp;merged_groups&quot;:[&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;],
+&quot;samplesToCompensate&quot;:[536.8852679091235,447.1695651051687,335.02481224923247,267.7378275451257,213.90808965396533,178.02145820426563,133.1628532993993,88.30339893323907,65.87281083364601,52.41375799639613,43.440463176978795,37.03045019753686,32.22248077329216,25.490195202397953,9.615765164365133,7.8426882057657235,5.62633789131294,4.296523302973266,3.2326666693810933,2.523424305030911,1.6368609370661893,0.7502695987618464,0.30694566371908766,0.04092840037068653,-0.13643577424954015,-0.2631412579676824,-0.35818525434204596,-0.49128321156583904,450.73346273057285,375.3567307214835,281.1356381797272,224.60279275466985,179.37630199200353,149.22510882329695,111.53566632602835,73.84500900585952,54.99844798340472,43.68950825064921,36.14936441990801,30.76280526866057,26.72222487526634,21.063787221225176,-11.153416653206541,-9.457526674823937,-7.337660318971588,-6.065736355187264,-5.048192502558159,-4.3698255867478695,-3.5218571196569917,-2.6738622675488144,-2.249838177542517,-1.9954021190275026,-1.82575984299344,-1.704570952150145,-1.6136652434508638,-1.486362948016397,-145.1855202379186,-121.10005411570073,-90.99317073307489,-72.92898647839272,-58.4775779050245,-48.843248717444936,-36.800208881048015,-24.75682422319048,-18.734783370169303,-15.121276409021842,-12.712033294541365,-10.99093822718657,-9.699933247466856,-7.892077382568615,-150.71121469172695,-125.70261572037073,-94.44181449857699,-75.6852776400547,-60.67998483974143,-50.67639750979079,-38.171780496065466,-25.66680657071602,-19.413958860343822,-15.661957875019468,-13.160377041150056,-11.373319187461504,-10.032835666398634,-8.155694068474633],
+&quot;tau&quot;:[&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:16.0,
+&quot;color&quot;:&quot;#000000&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;tau&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesToCompensate&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;samplesToCompensate&quot;,&quot;tau&quot;],
+&quot;disable_splitting&quot;:true
+}
+},{
+&quot;mapping&quot;:{
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;yintercept&quot;:0.0,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-los&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;win-oth&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-los&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;oth-win&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-oth&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;,&quot;los-win&quot;]
+},
+&quot;color&quot;:&quot;#000000&quot;,
+&quot;size&quot;:0.3,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;hline&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;tau&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesToCompensate&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+}],
+&quot;spec_id&quot;:&quot;12&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

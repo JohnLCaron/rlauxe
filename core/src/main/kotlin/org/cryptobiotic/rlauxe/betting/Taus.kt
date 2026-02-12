@@ -17,7 +17,6 @@ class Taus(upper: Double, use7override: Boolean = false) {
             tauValues = listOf(0.0, 0.5, 1.0, 1.5, 2.0)
             tauNames = listOf("p2o", "p1o", "noerror", "p1u", "p2u")
         } else {
-            // // [2, 1+1/2u, 2-1/2u,  1, 1-1/2u, 1/2u, 0]
             // tau = [0,       1/2u,    1-1/2u,  1,       2-1/2u,  1+1/2u,  2]
             //       [win-los, win-oth, oth-los, noerror, los-oth, oth-win, los-win]
             tauValues = listOf(0.0, u12, 1-u12, 1.0, 2-u12, 1+u12, 2.0)
@@ -115,15 +114,15 @@ data class TausRates(val rates: Map<String, Double>) {  // name -> rate over pop
     // (0-.5),      cvr has vote for loser, mvr has vote for other  : p1u = 1 vote understatement
     // (0-u)        cvr has vote for loser, mvr has vote for winner : p2u = 2 vote understatement
 
-    // bassort = (1-o/u)/(2-v/u) = tau * noerror
+    // bassort = (1-o/u) * noerror = tau * noerror
     // tau = bassort/noerror = (1-o/u)
     // tau = [0,       1/2u,    1-1/2u,  1,       1+1/2u,  1+1/2u,  2]
     //       [win-los, win-oth, oth-los, noerror, los-oth, oth-win, los-win]
     // tau = [0,   0.5,  1,       1.5, 2]  when u = 1
     //       [p2o, p1o, noerror, p1u, p2u]
     companion object {
-        val names7 = listOf("win-los", "win-oth", "oth-los", "noerror", "los-oth", "oth-win", "los-win")
-        val alias = mapOf("p2o" to "win-los", "p1o" to "win-oth", "p1u" to "los-oth", "p2u" to "los-win") // TODO problem with unmatched taus?
+        val names7 = listOf("win-los", "win-oth", "oth-los", "noerror", "oth-win", "los-oth", "los-win")
+        val alias = mapOf("p2o" to "win-los", "p1o" to "win-oth", "p1u" to "los-oth", "p2u" to "los-win")
     }
 }
 

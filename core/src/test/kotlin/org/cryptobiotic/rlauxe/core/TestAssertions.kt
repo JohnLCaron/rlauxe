@@ -48,7 +48,7 @@ class TestAssertions {
         }
 
         val firstAssertion = assertions.first()
-        assertEquals("contest 0 winner: 4 loser: 0", firstAssertion.id())
+        assertEquals("contest 0 winner: 4 loser: 0 upper: 1.0", firstAssertion.id())
 
         val expectShow = """ contestInfo: 'AvB' (0) candidates=[0, 1, 2, 3, 4] choiceFunction=PLURALITY nwinners=2 voteForN=2
     assorter:  Plurality winner=4 loser=0 dilutedMargin=22.2222% dilutedMean=61.1111%
@@ -132,7 +132,7 @@ class TestAssertions {
         assertNotEquals(firstAssertion, lastAssertion)
         assertNotEquals(firstAssertion.hashCode(), lastAssertion.hashCode())
         assertEquals(" Plurality winner=4 loser=0 dilutedMargin=24.9160% dilutedMean=62.4580%", firstAssertion.toString())
-        assertEquals("contest 0 winner: 4 loser: 0", firstAssertion.id())
+        assertEquals("contest 0 winner: 4 loser: 0 upper: 1.0", firstAssertion.id())
 
         val expectShow = """ cassorter: ClcaAssorter for contest AvB (0)
   assorter= Plurality winner=4 loser=0 dilutedMargin=24.9160% dilutedMean=62.4580%

@@ -262,6 +262,8 @@ to get an interactive plot):
 
 ## Samples needed when there are errors
 
+[Samples needed when there are errors](docs/SamplesNeeded.md)
+
 In the following simulations, errors are created between the CVRs and the MVRs, by taking _fuzzPct_ of the cards
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the CVRs and MVRs agree.
 When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. 
@@ -270,7 +272,7 @@ When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on.
 
 Here are the results of 1000 simulations of CLCA average samplesNeeded by margin for various values of fuzzPct:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.html" rel="clcaFuzzByMarginLogLog">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.html" rel="clcaFuzzByMarginLogLog">![margin2WithStdDevLinear](../docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.png)</a>
 
 The average samplesNeeded dont tell the whole picture. There is a distribution of samplesNeeded whose variance is roughly proportional 
 to the samplesNeeded; here is the standard deviation of those distributions with dependence on margin and fuzzPct:

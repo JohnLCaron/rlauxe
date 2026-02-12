@@ -123,7 +123,7 @@ data class TausRates(val rates: Map<String, Double>) {  // name -> rate over pop
     //       [p2o, p1o, noerror, p1u, p2u]
     companion object {
         val names7 = listOf("win-los", "win-oth", "oth-los", "noerror", "los-oth", "oth-win", "los-win")
-        val alias = mapOf("p2o" to "win-los", "p1o" to "win-oth", "p1u" to "los-oth", "p2u" to "los-win") // TODO problem ?
+        val alias = mapOf("p2o" to "win-los", "p1o" to "win-oth", "p1u" to "los-oth", "p2u" to "los-win") // TODO problem with unmatched taus?
     }
 }
 

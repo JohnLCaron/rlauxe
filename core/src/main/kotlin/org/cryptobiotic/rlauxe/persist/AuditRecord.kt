@@ -37,7 +37,7 @@ class AuditRecord(
     override val rounds: List<AuditRound>,  // TODO do we need to replace AuditEst ??
     mvrs: List<AuditableCard> // mvrs already sampled
 ): AuditRecordIF {
-    val previousMvrs = mutableMapOf<Long, AuditableCard>() // TODO not used ??
+    val previousMvrs = mutableMapOf<Long, AuditableCard>()
 
     init {
         mvrs.forEach { previousMvrs[it.prn] = it } // cumulative
@@ -49,7 +49,6 @@ class AuditRecord(
         val lastRoundIdx = if (rounds.isEmpty()) 1 else rounds.last().roundIdx
 
         // get complete match with sampleNums in last round
-        // TODO NEXTASK is this all prns or just new? all prns here; PROBLEM
         val sampledPrnsResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(lastRoundIdx))
         if (sampledPrnsResult is Err) {
             logger.error{ "$sampledPrnsResult" } // needed?
@@ -129,7 +128,7 @@ class AuditRecord(
                         contests!!,
                         samplePrns!!,
                     )
-                    if (auditRound is Ok) rounds.add(auditRound.unwrap() as AuditRound) else { // TODO
+                    if (auditRound is Ok) rounds.add(auditRound.unwrap() as AuditRound) else {
                         errs.addNested(auditRound.unwrapError())
                     }
                 } else {
@@ -141,7 +140,7 @@ class AuditRecord(
                             contests!!,
                             samplePrns!!,
                         )
-                        if (auditEstRound is Ok) rounds.add(auditEstRound.unwrap() as AuditRound) else { // TODO
+                        if (auditEstRound is Ok) rounds.add(auditEstRound.unwrap() as AuditRound) else {
                             errs.addNested(auditEstRound.unwrapError())
                         }
                     }

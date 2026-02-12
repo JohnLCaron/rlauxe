@@ -157,7 +157,7 @@ fun makeEstimationTasks(
             var startingTestStatistic = 1.0
             if (roundIdx > 1) {
                 // eliminate contests which have no more samples
-                val prevAuditResult = assertionRound.prevAuditResult!! // TODO another way to do this ?
+                val prevAuditResult = assertionRound.prevAuditResult!!
                 if (prevAuditResult.samplesUsed == contestRound.Npop) {
                     logger.info { "***LimitReached $contestRound" }
                     contestRound.done = true
@@ -279,7 +279,6 @@ fun estimateClcaAssertionRound(
     else
         assertionRound.previousErrorCounts()
 
-    // TODO what is totalSamples ?? Npop ??
     val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
 
     val bettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
@@ -344,7 +343,7 @@ fun estimateClcaAssertionRound(
         clcaConfig.strategy.name,
         fuzzPct = config.simFuzzPct,
         startingTestStatistic = startingTestStatistic,
-        // startingErrorRates = apriori.errorRates(), // TODO
+        startingErrorRates = measuredErrors.errorRates(), // todo
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
         simNewMvrs = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)

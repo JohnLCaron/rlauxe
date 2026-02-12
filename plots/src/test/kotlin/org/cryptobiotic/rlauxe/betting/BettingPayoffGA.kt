@@ -5,9 +5,8 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.test.Test
 
-// CANDIDATE for removal
 
-class BettingPayoffOld {
+class BettingPayoffGA {
 
     @Test
     fun showGeneralAdaptiveComparisonBet() {

@@ -117,7 +117,7 @@ class PlotErrorCompensation {
                 results.add(BettingPayoffRatio(cat=tauName, payoffRatio=samplesToCompensate, lamda=lamda, margin=margin))  }
         }
 
-        plotByMargin(results, "byUpper2", "upper=$upper (AboveThreshold) lamda=$lamda", scale = ScaleType.Linear)
+        plotByMargin(results, "byUpper2", "upper=$upper lamda=$lamda", scale = ScaleType.Linear)
     }
 
     @Test

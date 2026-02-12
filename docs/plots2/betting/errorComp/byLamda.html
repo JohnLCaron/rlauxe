@@ -1,0 +1,211 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;5b5whQ&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;5b5whQ&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;samples needed to compensate for one error&quot;,
+&quot;subtitle&quot;:&quot;upper=1.0 margin=0.01&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;lamda&quot;,
+&quot;y&quot;:&quot;samplesToCompensate&quot;,
+&quot;color&quot;:&quot;tau&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;],
+&quot;tau&quot;:[&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;],
+&quot;samplesToCompensate&quot;:[201.0270389936455,203.10983305189717,205.2510251457683,207.45344024753814,209.72010200597032,212.0542513511393,214.45936729990905,216.93919027764488,219.49774832887456,222.1393866539356,224.8688009858867,227.69107541893143,230.61172541492274,233.63674685475019,236.77267217667267,240.0266348568044,243.4064437542346,246.92066917447005,250.57874292381626,254.39107515591166,258.3691914845386,262.5258947025615,266.87545656595654,271.4338465618381,276.21900650386004,281.2511823566879,286.5533281287877,292.15160134651046,298.0759760516257,304.3610082268206,311.0468012304884,318.18023703326395,325.8165656651997,334.021484930511,342.87390275652666,352.4696684535345,362.92670927876776,374.3922558681972,387.0532610294973,401.1518615800488,417.00911304201486,435.0629228024919,455.9317201436327,480.52803818128143,510.2775750346166,547.5879806963717,597.0106352280596,668.8542815337249,796.3345917214522,null,99.50080376008047,100.00834072575152,100.52276543204694,101.04423751209774,101.57292191776038,102.10898915283678,102.6526155193465,103.2039833769285,103.7632814168654,104.33070495182689,104.90645622186297,105.49074471811505,106.08378752561129,106.68580968606663,107.29704458247785,107.91773434684153,108.54813029294989,109.18849337578892,109.83909467969976,110.50021593757673,111.17215008321918,111.85520183954924,112.54968834559767,113.25593982511228,113.97430030026167,114.70512835419058,115.4487979462616,116.20569928450149,116.97623976018073,117.76084494969001,118.55995968968043,119.3740492320204,120.20360048556701,121.0491233527467,121.91115216977694,122.79024726009948,123.68699661189635,124.60201769176058,125.53595940775841,126.48950423693725,127.46337053389003,128.4583150391889,129.47513560854023,130.51467418631768,131.57782005010625,132.66551335613096,133.77874901955943,134.91858096819004,136.0861268130998,137.2825729860634,-100.49587938319266,-99.9984904799293,-99.50768329321498,-99.0233125322188,-98.54523742129462,-98.0733215190595,-97.607432546602,-97.1474422235918,-96.69322611237547,-96.24466346972987,-95.80163710535025,-95.364033247011,-94.93174141214395,-94.50465428512668,-94.08266760027527,-93.66568003003698,-93.25359307832971,-92.84631097849271,-92.44374059574447,-92.0457913340038,-91.6523750466411,-91.26340595107585,-90.87880054709782,-90.4984775385547,-90.12235775833004,-89.75036409651796,-89.38242143148636,-89.01845656376952,-88.65839815271292,-88.30217665560713,-87.9497242692621,-87.60097487396041,-87.25586397956177,-86.91432867372023,-86.57630757216495,-86.2417407708456,-85.91056979991308,-85.58273757949588,-85.25818837709363,-84.9368677665973,-84.61872258880646,-84.30370091345141,-83.99175200256703,-83.68282627520257,-83.3768752734472,-83.07385162963767,-82.77370903473835,-82.47640220787791,-82.18188686692305,-81.89011970008346,-199.00673240452173,-197.0655562055217,-195.1742185890239,-193.33060271316492,-191.53271721761868,-189.77868671499394,-188.0667431562076,-186.39521797454051,-184.7625349271279,-183.16720356165126,-181.6078132434374,-180.08302768718283,-178.59157994360746,-177.13226779605148,-175.70394952827672,-174.30554002803663,-172.93600719559853,-171.59436862876962,-170.27968855970474,-168.99107502122942,-167.7276772221543,-166.48868311368915,-165.2733171307713,-164.0808380932601,-162.91053725387528,-161.7617364809583,-160.63378656487254,-159.52606563829943,-158.43797770154416,-157.36895124443438,-156.3184379574947,-155.2859115257015,-154.2708664984072,-153.27281722988408,-152.29129688538922,-151.32585650781607,-150.37606414068048,-149.44150400352535,-148.52177571589576,-147.6164935666584,-146.72528582545485,-145.84779409355778,-144.9836726913325,-144.13258807994862,-143.29421831515188,-142.46825253088065,-141.65439045087294,-140.85234192653868,-140.06182649931856,-139.28257298606343],
+&quot;lamda&quot;:[0.04,0.08,0.12,0.16,0.2,0.24,0.28,0.32,0.36,0.4,0.44,0.48,0.52,0.56,0.6,0.64,0.68,0.72,0.76,0.8,0.84,0.88,0.92,0.96,1.0,1.04,1.08,1.12,1.16,1.2,1.24,1.28,1.32,1.36,1.4,1.44,1.48,1.52,1.56,1.6,1.64,1.68,1.72,1.76,1.8,1.84,1.88,1.92,1.96,2.0,0.04,0.08,0.12,0.16,0.2,0.24,0.28,0.32,0.36,0.4,0.44,0.48,0.52,0.56,0.6,0.64,0.68,0.72,0.76,0.8,0.84,0.88,0.92,0.96,1.0,1.04,1.08,1.12,1.16,1.2,1.24,1.28,1.32,1.36,1.4,1.44,1.48,1.52,1.56,1.6,1.64,1.68,1.72,1.76,1.8,1.84,1.88,1.92,1.96,2.0,0.04,0.08,0.12,0.16,0.2,0.24,0.28,0.32,0.36,0.4,0.44,0.48,0.52,0.56,0.6,0.64,0.68,0.72,0.76,0.8,0.84,0.88,0.92,0.96,1.0,1.04,1.08,1.12,1.16,1.2,1.24,1.28,1.32,1.36,1.4,1.44,1.48,1.52,1.56,1.6,1.64,1.68,1.72,1.76,1.8,1.84,1.88,1.92,1.96,2.0,0.04,0.08,0.12,0.16,0.2,0.24,0.28,0.32,0.36,0.4,0.44,0.48,0.52,0.56,0.6,0.64,0.68,0.72,0.76,0.8,0.84,0.88,0.92,0.96,1.0,1.04,1.08,1.12,1.16,1.2,1.24,1.28,1.32,1.36,1.4,1.44,1.48,1.52,1.56,1.6,1.64,1.68,1.72,1.76,1.8,1.84,1.88,1.92,1.96,2.0]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;tau&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;lamda&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesToCompensate&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;lamda&quot;,
+&quot;y&quot;:&quot;samplesToCompensate&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;],
+&quot;samplesToCompensate&quot;:[201.0270389936455,203.10983305189717,205.2510251457683,207.45344024753814,209.72010200597032,212.0542513511393,214.45936729990905,216.93919027764488,219.49774832887456,222.1393866539356,224.8688009858867,227.69107541893143,230.61172541492274,233.63674685475019,236.77267217667267,240.0266348568044,243.4064437542346,246.92066917447005,250.57874292381626,254.39107515591166,258.3691914845386,262.5258947025615,266.87545656595654,271.4338465618381,276.21900650386004,281.2511823566879,286.5533281287877,292.15160134651046,298.0759760516257,304.3610082268206,311.0468012304884,318.18023703326395,325.8165656651997,334.021484930511,342.87390275652666,352.4696684535345,362.92670927876776,374.3922558681972,387.0532610294973,401.1518615800488,417.00911304201486,435.0629228024919,455.9317201436327,480.52803818128143,510.2775750346166,547.5879806963717,597.0106352280596,668.8542815337249,796.3345917214522,null,99.50080376008047,100.00834072575152,100.52276543204694,101.04423751209774,101.57292191776038,102.10898915283678,102.6526155193465,103.2039833769285,103.7632814168654,104.33070495182689,104.90645622186297,105.49074471811505,106.08378752561129,106.68580968606663,107.29704458247785,107.91773434684153,108.54813029294989,109.18849337578892,109.83909467969976,110.50021593757673,111.17215008321918,111.85520183954924,112.54968834559767,113.25593982511228,113.97430030026167,114.70512835419058,115.4487979462616,116.20569928450149,116.97623976018073,117.76084494969001,118.55995968968043,119.3740492320204,120.20360048556701,121.0491233527467,121.91115216977694,122.79024726009948,123.68699661189635,124.60201769176058,125.53595940775841,126.48950423693725,127.46337053389003,128.4583150391889,129.47513560854023,130.51467418631768,131.57782005010625,132.66551335613096,133.77874901955943,134.91858096819004,136.0861268130998,137.2825729860634,-100.49587938319266,-99.9984904799293,-99.50768329321498,-99.0233125322188,-98.54523742129462,-98.0733215190595,-97.607432546602,-97.1474422235918,-96.69322611237547,-96.24466346972987,-95.80163710535025,-95.364033247011,-94.93174141214395,-94.50465428512668,-94.08266760027527,-93.66568003003698,-93.25359307832971,-92.84631097849271,-92.44374059574447,-92.0457913340038,-91.6523750466411,-91.26340595107585,-90.87880054709782,-90.4984775385547,-90.12235775833004,-89.75036409651796,-89.38242143148636,-89.01845656376952,-88.65839815271292,-88.30217665560713,-87.9497242692621,-87.60097487396041,-87.25586397956177,-86.91432867372023,-86.57630757216495,-86.2417407708456,-85.91056979991308,-85.58273757949588,-85.25818837709363,-84.9368677665973,-84.61872258880646,-84.30370091345141,-83.99175200256703,-83.68282627520257,-83.3768752734472,-83.07385162963767,-82.77370903473835,-82.47640220787791,-82.18188686692305,-81.89011970008346,-199.00673240452173,-197.0655562055217,-195.1742185890239,-193.33060271316492,-191.53271721761868,-189.77868671499394,-188.0667431562076,-186.39521797454051,-184.7625349271279,-183.16720356165126,-181.6078132434374,-180.08302768718283,-178.59157994360746,-177.13226779605148,-175.70394952827672,-174.30554002803663,-172.93600719559853,-171.59436862876962,-170.27968855970474,-168.99107502122942,-167.7276772221543,-166.48868311368915,-165.2733171307713,-164.0808380932601,-162.91053725387528,-161.7617364809583,-160.63378656487254,-159.52606563829943,-158.43797770154416,-157.36895124443438,-156.3184379574947,-155.2859115257015,-154.2708664984072,-153.27281722988408,-152.29129688538922,-151.32585650781607,-150.37606414068048,-149.44150400352535,-148.52177571589576,-147.6164935666584,-146.72528582545485,-145.84779409355778,-144.9836726913325,-144.13258807994862,-143.29421831515188,-142.46825253088065,-141.65439045087294,-140.85234192653868,-140.06182649931856,-139.28257298606343],
+&quot;tau&quot;:[&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;],
+&quot;lamda&quot;:[0.04,0.08,0.12,0.16,0.2,0.24,0.28,0.32,0.36,0.4,0.44,0.48,0.52,0.56,0.6,0.64,0.68,0.72,0.76,0.8,0.84,0.88,0.92,0.96,1.0,1.04,1.08,1.12,1.16,1.2,1.24,1.28,1.32,1.36,1.4,1.44,1.48,1.52,1.56,1.6,1.64,1.68,1.72,1.76,1.8,1.84,1.88,1.92,1.96,2.0,0.04,0.08,0.12,0.16,0.2,0.24,0.28,0.32,0.36,0.4,0.44,0.48,0.52,0.56,0.6,0.64,0.68,0.72,0.76,0.8,0.84,0.88,0.92,0.96,1.0,1.04,1.08,1.12,1.16,1.2,1.24,1.28,1.32,1.36,1.4,1.44,1.48,1.52,1.56,1.6,1.64,1.68,1.72,1.76,1.8,1.84,1.88,1.92,1.96,2.0,0.04,0.08,0.12,0.16,0.2,0.24,0.28,0.32,0.36,0.4,0.44,0.48,0.52,0.56,0.6,0.64,0.68,0.72,0.76,0.8,0.84,0.88,0.92,0.96,1.0,1.04,1.08,1.12,1.16,1.2,1.24,1.28,1.32,1.36,1.4,1.44,1.48,1.52,1.56,1.6,1.64,1.68,1.72,1.76,1.8,1.84,1.88,1.92,1.96,2.0,0.04,0.08,0.12,0.16,0.2,0.24,0.28,0.32,0.36,0.4,0.44,0.48,0.52,0.56,0.6,0.64,0.68,0.72,0.76,0.8,0.84,0.88,0.92,0.96,1.0,1.04,1.08,1.12,1.16,1.2,1.24,1.28,1.32,1.36,1.4,1.44,1.48,1.52,1.56,1.6,1.64,1.68,1.72,1.76,1.8,1.84,1.88,1.92,1.96,2.0]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:16.0,
+&quot;color&quot;:&quot;#000000&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;tau&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;lamda&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesToCompensate&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;lamda&quot;,&quot;samplesToCompensate&quot;,&quot;tau&quot;],
+&quot;disable_splitting&quot;:true
+}
+},{
+&quot;mapping&quot;:{
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;yintercept&quot;:0.0,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;]
+},
+&quot;color&quot;:&quot;#000000&quot;,
+&quot;size&quot;:0.3,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;hline&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;tau&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;lamda&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesToCompensate&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+}],
+&quot;spec_id&quot;:&quot;15&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

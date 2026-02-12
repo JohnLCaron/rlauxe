@@ -1,0 +1,211 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;N00UgV&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;N00UgV&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;samples needed to compensate for one error&quot;,
+&quot;subtitle&quot;:&quot;upper=1.0 lamda=1.8&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;samplesToCompensate&quot;,
+&quot;color&quot;:&quot;tau&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;],
+&quot;margin&quot;:[0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;tau&quot;:[&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;],
+&quot;samplesToCompensate&quot;:[1021.9635847778693,851.4016394287654,638.1991426423307,510.2775750346166,407.9402425800391,339.71528157304397,254.43391627684412,169.15211141655288,126.51076635063215,100.9256022194716,83.8685260367704,71.68464077950563,62.54649791041474,49.75254215690585,264.43069263138386,220.14642924006787,164.79106911177584,131.57782005010625,105.00718363979364,87.29339157141649,65.15107377602841,43.00854794889624,31.93707584378167,25.294024102450862,20.865181594255727,17.701600681973773,15.328807538264904,12.006636866218702,-165.9466646372912,-138.42341622269532,-104.01933916661515,-83.3768752734472,-66.86288426384321,-55.85353847463582,-42.091814636150986,-28.329979433318034,-21.448949854185248,-17.320241929308395,-14.567694329352062,-12.601523622058696,-11.126838086489133,-9.062139068977176,-285.9285985174994,-238.38382958554124,-178.95284090523484,-143.29421831515188,-114.76728714123675,-95.74930232821849,-71.976752091241,-48.20401655056727,-36.31746244614696,-29.18537991622376,-24.43053232972381,-21.034103978462007,-18.486687000190543,-14.920071404780277]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;tau&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesToCompensate&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;samplesToCompensate&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;],
+&quot;margin&quot;:[0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;samplesToCompensate&quot;:[1021.9635847778693,851.4016394287654,638.1991426423307,510.2775750346166,407.9402425800391,339.71528157304397,254.43391627684412,169.15211141655288,126.51076635063215,100.9256022194716,83.8685260367704,71.68464077950563,62.54649791041474,49.75254215690585,264.43069263138386,220.14642924006787,164.79106911177584,131.57782005010625,105.00718363979364,87.29339157141649,65.15107377602841,43.00854794889624,31.93707584378167,25.294024102450862,20.865181594255727,17.701600681973773,15.328807538264904,12.006636866218702,-165.9466646372912,-138.42341622269532,-104.01933916661515,-83.3768752734472,-66.86288426384321,-55.85353847463582,-42.091814636150986,-28.329979433318034,-21.448949854185248,-17.320241929308395,-14.567694329352062,-12.601523622058696,-11.126838086489133,-9.062139068977176,-285.9285985174994,-238.38382958554124,-178.95284090523484,-143.29421831515188,-114.76728714123675,-95.74930232821849,-71.976752091241,-48.20401655056727,-36.31746244614696,-29.18537991622376,-24.43053232972381,-21.034103978462007,-18.486687000190543,-14.920071404780277],
+&quot;tau&quot;:[&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:16.0,
+&quot;color&quot;:&quot;#000000&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;tau&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesToCompensate&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;samplesToCompensate&quot;,&quot;tau&quot;],
+&quot;disable_splitting&quot;:true
+}
+},{
+&quot;mapping&quot;:{
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;yintercept&quot;:0.0,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p2o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1o&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p1u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;,&quot;p2u&quot;]
+},
+&quot;color&quot;:&quot;#000000&quot;,
+&quot;size&quot;:0.3,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;hline&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;tau&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesToCompensate&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+}],
+&quot;spec_id&quot;:&quot;10&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

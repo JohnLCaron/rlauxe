@@ -19,7 +19,7 @@ Click on plot images to get an interactive html plot. You can also read this doc
 **Table of Contents**
 <!-- TOC -->
 * [SHANGRLA framework](#shangrla-framework)
-* [Audit Workflow Overview](#audit-workflow-overview)
+* [Rlauxe Workflow Overview](#rlauxe-workflow-overview)
   * [Before the Audit](#before-the-audit)
   * [Creating a random seed](#creating-a-random-seed)
   * [Starting the Audit](#starting-the-audit)
@@ -93,7 +93,7 @@ in a risk-limiting audit with risk limit α:
 
 # Rlauxe Workflow Overview
 
-## Before the Audit
+1.Before the Audit
 
 For each contest:
 - Describe the contest name, candidates, contest type (eg Plurality), etc in the ContestInfo.
@@ -114,14 +114,14 @@ Committment:
 - Write the contests.json, populations.json, and cardManifest.csv files to a publically accessible "bulletin board".
 - Digitally sign these files; they constitute the "audit committment" and may not be altered once the seed is chosen.
 
-## Creating a random seed
+2.Creating a random seed
 
 - Create a random 32-bit integer "seed" in a way that allows public observers to be confident that it is truly random.
 - Publish the random seed to the bulletin board. It becomes part of the "audit committment" and may not be altered once chosen.
 - Use a PRNG (Psuedo Random Number Generator) with the random seed, and assign the generated PRNs, in order, to the auditable cards.
 - Sort the cards by PRN and write them to sortedCards.csv.
 
-## Starting the Audit
+3.Starting the Audit
 
 The Election Auditors (EA) can examine the audit committment files, run simulations to estimate how many
 cards will need to be sampled, etc. The EA can choose:
@@ -132,7 +132,7 @@ cards will need to be sampled, etc. The EA can choose:
 
 The audit configuration parameters are written to auditConfig.json.
 
-## Audit Rounds
+4.Audit Rounds
 
 The audit proceeds in rounds:
 
@@ -147,7 +147,7 @@ The audit proceeds in rounds:
 
 Each round generates samplePrns.json, sampleCards.csv, sampleMvrs.csv, and auditState.json files, which become part of the Audit Record.
 
-## Verification
+5.Verification
 
 Independently written verifiers can read the Audit Record and verify that the audit was correctly performed.
 See [Verification](docs/Verification.md).
@@ -262,17 +262,17 @@ to get an interactive plot):
 
 ## Samples needed when there are errors
 
-[Samples needed when there are errors](docs/SamplesNeeded.md)
-
 In the following simulations, errors are created between the CVRs and the MVRs, by taking _fuzzPct_ of the cards
 and randomly changing the candidate that was voted for. When fuzzPct = 0.0, the CVRs and MVRs agree.
 When fuzzPct = 0.01, 1% of the contest's votes were randomly changed, and so on. 
+
+This fuzzing mechanism is rather crude, and may not reflect any real-world pattern of errors. See[ClcaErrors](docs/ClcaErrors.md) for a deeper understanding of the effect of CLCA errors.
 
 ### CLCA with errors
 
 Here are the results of 1000 simulations of CLCA average samplesNeeded by margin for various values of fuzzPct:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.html" rel="clcaFuzzByMarginLogLog">![margin2WithStdDevLinear](../docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.html" rel="clcaFuzzByMarginLogLog">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.png)</a>
 
 The average samplesNeeded dont tell the whole picture. There is a distribution of samplesNeeded whose variance is roughly proportional 
 to the samplesNeeded; here is the standard deviation of those distributions with dependence on margin and fuzzPct:
@@ -612,48 +612,48 @@ Also see [complete list of references](docs/papers/papers.txt).
 
 ## Extensions of SHANGRLA
 
-### Populations and hasStyle
+**Populations and hasStyle**
 
 Rlauxe uses Population objects as a way to capture the information about which cards are in which sample populations,
 in order to set the diluted margins correctly.
 This allows us to refine SHANGRLA's hasStyle flag. 
 See [SamplePopulations](docs/SamplePopulations.md) for more explanation and current thinking.
 
-### CardManifest
+**CardManifest**
 
 Rlauxe uses a CardManifest, which consists of a canonical list of AuditableCards, one for each possible card in the election, 
 and the list of Populations. OneAudit pools are subtypes of Populations. The CardManifest is one of the committments that
 the Prover must make before the random seed can be generated.
 
-### General Adaptive Betting
+**General Adaptive Betting**
 
 SHANGRLA's Adaptive Betting has been generalized to work for both CLCA and OneAudit and for any assorter. 
 It uses estimated and/or measured error rates to set optimal betting values. This is currently the only betting strategy 
 used for CLCA/OneAudit.
 See [BettingRiskFunctions](docs/BettingRiskFunctions.md) for more info.
 
-### OneAudit Betting strategy
+**OneAudit Betting strategy**
 
 OneAudit uses GeneralizedAdaptiveBetting and includes the OneAudit assort values and their known
 frequencies in computing the optimal betting values.
 
-### MaxLoss for Betting
+**MaxLoss for Betting**
 
 In order to prevent stalls in BettingMart, the maximum bet is bounded by a "maximum loss" value, which is the maximum
 percent of your "winnings" you are willing to lose on any one bet.
 
-### Additional assorters
+**Additional assorters**
 
 Dhondt, AboveThreshold and BelowThreshold assorters have been added to support Belgian elections using Dhondt proportional
 scoring. These assorters have an upper bound != 1, so are an important generalization of the Plurality assorter.
 
-### OneAudit Card Style Data
+**OneAudit Card Style Data**
 
 Rlauxe adds the option that there may be CSD for OneAudit pooled data, in part to investigate the 
 difference between having CSD and not. Specifically, different OneAudit pools may have different values of
 _hasStyle_ (aka _hasSingleCardStyle_).  See [SamplePopulations](docs/SamplePopulations.md).
 
-### Multicontest audits
+**Multicontest audits**
 
 Each contest has a canonical sequence of sampled cards, namely all the cards sorted by prn, that may contain that contest.
 This sequence doesnt change when doing multicontest audits. 
@@ -663,18 +663,18 @@ the audit cant use more cards in the sample for that contest.
 
 ## Unanswered Questions
 
-### Contest is missing in the MVR
+**Contest is missing in the MVR**
 
 The main use of _hasStyle_, aka _hasSingleCardStyle_ is when deciding the assort value when an MVR is missing a contest.
 There are unanswered questions about if this allows attacks, and if it should be used for polling audits.
 See [SamplePopulations](docs/SamplePopulations.md#contest-is-missing-in-the-mvr)
 
-### Optimal value of MaxLoss
+**Optimal value of MaxLoss**
 
 Is there an algorithm for setting the MaxLoss value, which limits the maximum bet that can be placed at each round?
 
 
-## Also See:
+## Also See
 * [Developer Notes](docs/Developer.md)
 * [Rlauxe Implementation Overview](docs/Overview.md)
 * [Implementation Specificaton](docs/RlauxeSpec.md)

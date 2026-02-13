@@ -64,8 +64,4 @@ data class Population(
     }
 }
 
-class CardManifest(val cards: CloseableIterable<AuditableCard>, val populations: List<PopulationIF>) {
-    val popMap = populations.associateBy{ it.id() }
-    fun population(populationId: Int) = popMap[populationId]
-}
 

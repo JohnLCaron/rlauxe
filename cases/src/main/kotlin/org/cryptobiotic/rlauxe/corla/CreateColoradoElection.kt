@@ -33,6 +33,7 @@ open class CreateColoradoElection (
     val oaBuilders = makeOneAuditBuilders(electionDetailXml, roundContests)
     val infoMap = oaBuilders.associate { it.info.id to it.info }
     val cardPoolBuilders: List<OneAuditPoolWithBallotStyle> = convertPrecinctsToCardPools(precinctFile, infoMap)
+    val ncards: Int
 
     val cardPools: List<PopulationIF>
     val contests: List<ContestIF>
@@ -60,8 +61,9 @@ open class CreateColoradoElection (
         contests = makeContests()
 
         val infos = contests.map { it.info() }.associateBy { it.id }
-        val manifestTabs = tabulateAuditableCards(createCardManifest(), infos)
+        val (manifestTabs, count) = tabulateCardsAndCount(createCvrIter(), infos)
         val npopMap = manifestTabs.mapValues { it.value.ncardsTabulated }
+        this.ncards = count
 
         contestsUA = if (config.isOA) makeOneAuditContests(contests, npopMap, cardPoolBuilders)
                      else ContestWithAssertions.make(contests, npopMap, isClca=config.isClca, )
@@ -153,13 +155,22 @@ open class CreateColoradoElection (
         }
     }
 
-    override fun populations() = if (config.isClca) emptyList() else cardPools
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
     override fun cardManifest() = createCardManifest()
 
-    fun createCardManifest(): CloseableIterator<AuditableCard> {
-        return CvrsWithPopulationsToCardManifest(config.auditType,
+    fun createCardManifest(): CardManifest {
+        return cvrsWithPopulationsToCardManifest(
+            config.auditType,
+            Closer(CvrIteratorfromPools()),
+            ncards,
+            makePhantomCvrs(contests),
+            if (config.isClca) null else cardPoolBuilders,
+        )
+    }
+
+    fun createCvrIter(): CloseableIterator<AuditableCard> {
+        return CvrsWithPopulationsToCards(config.auditType,
             Closer(CvrIteratorfromPools()),
             makePhantomCvrs(contests),
             if (config.isClca) null else cardPoolBuilders,

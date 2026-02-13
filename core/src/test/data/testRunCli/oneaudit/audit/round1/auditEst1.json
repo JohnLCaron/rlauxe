@@ -1,0 +1,53 @@
+{
+    "roundIdx": 1,
+    "contestRounds": [
+        {
+            "id": 1,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "0/1 OneAuditTest",
+                    "roundIdx": 1,
+                    "estSampleSize": 223,
+                    "estNewSampleSize": 223,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "simulate",
+                        "fuzzPct": 0.001,
+                        "startingTestStatistic": 1.0,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [
+                            195,
+                            207,
+                            217,
+                            218,
+                            223,
+                            245,
+                            287,
+                            372,
+                            429,
+                            430
+                        ],
+                        "ntrials": 10,
+                        "simNewMvrs": 223
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                }
+            ],
+            "roundIdx": 1,
+            "maxSampleAllowed": 223,
+            "estMvrs": 223,
+            "estNewMvrs": 223,
+            "auditorWantNewMvrs": -1,
+            "done": false,
+            "included": true,
+            "status": "InProgress"
+        }
+    ],
+    "auditWasDone": false,
+    "auditIsComplete": false,
+    "nmvrs": 223,
+    "newmvrs": 223,
+    "auditorWantNewMvrs": -1,
+    "samplesNotUsed": 0
+}

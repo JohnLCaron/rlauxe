@@ -4,9 +4,11 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardManifest
 import org.cryptobiotic.rlauxe.audit.CreateAudit
-import org.cryptobiotic.rlauxe.audit.CreateElection
+import org.cryptobiotic.rlauxe.audit.CreateElectionIF
 import org.cryptobiotic.rlauxe.audit.Population
+import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
@@ -18,6 +20,7 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
@@ -241,7 +244,7 @@ class CardManifestAttack {
         println()
 
         //// create a peristent audit
-        val election = CreateElection(listOf(contestUA), cards, cardPools, null)
+        val election = CreateElectionForAttack(listOf(contestUA), cards, cardPools, null)
 
         val auditdir = "$topdir/audit"
         val config = AuditConfig(
@@ -266,6 +269,18 @@ class CardManifestAttack {
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
         }
     }
+}
+
+class CreateElectionForAttack(
+    val contestsUA: List<ContestWithAssertions>,
+    val cards: List<AuditableCard>,
+    val populations: List<PopulationIF>?,
+    val cardPools: List<OneAuditPoolFromCvrs>?,
+):  CreateElectionIF {
+
+    override fun contestsUA() = contestsUA
+    override fun cardManifest() = CardManifest.createFromIterator(cards.iterator(), cards.size, populations)
+    override fun cardPools() = cardPools
 }
 
 fun ContestWithAssertions.showSimple() = buildString {

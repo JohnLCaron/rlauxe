@@ -92,9 +92,6 @@ fun readAuditableCardCsv(line: String): AuditableCard {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
 
-    // var popId : String? = null
-    // var pcontests = intArrayOf()
-
     var idx = 0
     val desc = ttokens[idx++]
     val index = ttokens[idx++].toInt()
@@ -106,20 +103,16 @@ fun readAuditableCardCsv(line: String): AuditableCard {
     // style = possible contests or population id
     val cardStyleToken = ttokens[idx++].trim()
     val cardStyle = if (cardStyleToken.isEmpty()) null else cardStyleToken
-    /* if (styleStr.startsWith("P")) {
-        popId=styleStr
-    } else {
-        pcontests = if (styleStr.trim().isEmpty()) intArrayOf() else {
-            val pcontestsTokens = styleStr.split(" ")
-            pcontestsTokens.map { it.trim().toInt() }.toIntArray()
-        }
-    } */
 
     // if clca, list of actual contests and their votes
-    return if (idx < ttokens.size-1) {
-        val contestsStr = ttokens[idx++]
-        val contestsTokens = contestsStr.split(" ")
-        val contests = contestsTokens.map { it.trim().toInt() }
+    if (idx < ttokens.size-1) {
+        val contestsStr = ttokens[idx++].trim()
+        val contestsTokenTrimmed = contestsStr.split(" ").map { it.trim() }
+
+        val contests = mutableListOf<Int>()
+        contestsTokenTrimmed.forEach { tok ->
+            if (tok.isNotEmpty()) contests.add(tok.toInt())
+        }
 
         // detect trailing comma ?
         val hasVotes = (idx + contests.size) < ttokens.size
@@ -128,18 +121,17 @@ fun readAuditableCardCsv(line: String): AuditableCard {
             while (idx < ttokens.size && (work.size < contests.size)) {
                 val vtokens = ttokens[idx]
                 val candArray =
-                    if (vtokens.isEmpty()) intArrayOf() else vtokens.split(" ").map { it.trim().toInt() }
-                        .toIntArray()
+                    if (vtokens.isEmpty()) intArrayOf()
+                    else vtokens.split(" ").map { it.trim().toInt() }.toIntArray()
                 work.add(candArray)
                 idx++
             }
             require(contests.size == work.size) { "contests.size (${contests.size}) != votes.size (${work.size})" }
             contests.zip(work).toMap()
         }
-        AuditableCard(desc, index, sampleNum, phantom, votes, poolId, cardStyle=cardStyle)
-    } else {
-        AuditableCard(desc, index, sampleNum, phantom, null, poolId, cardStyle=cardStyle)
+        return AuditableCard(desc, index, sampleNum, phantom, votes, poolId, cardStyle = cardStyle)
     }
+    return AuditableCard(desc, index, sampleNum, phantom, null, poolId, cardStyle=cardStyle)
 }
 
 class AuditableCardCsvReader(filename: String): CloseableIterable<AuditableCard> {

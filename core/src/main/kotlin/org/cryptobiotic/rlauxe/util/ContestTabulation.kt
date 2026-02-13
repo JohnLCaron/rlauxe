@@ -256,6 +256,30 @@ fun tabulateAuditableCards(cards: CloseableIterator<AuditableCard>, infos: Map<I
     return tabs
 }
 
+fun tabulateCardsAndCount(cards: CloseableIterator<AuditableCard>, infos: Map<Int, ContestInfo>): Pair<Map<Int, ContestTabulation>, Int> {
+    val tabs = mutableMapOf<Int, ContestTabulation>()
+    var count = 0
+    cards.use { cardIter ->
+        while (cardIter.hasNext()) {
+            val card = cardIter.next()
+            count++
+            infos.forEach { (contestId, info) ->
+                if (card.hasContest(contestId)) { // TODO note that here, we believe possibleContests ...
+                    val tab = tabs.getOrPut(contestId) { ContestTabulation(info) }
+                    if (card.phantom) tab.nphantoms++
+                    if (card.votes != null && card.votes[contestId] != null) { // happens when cardStyle == all
+                        val contestVote = card.votes[contestId]!!
+                        tab.addVotes(contestVote, card.phantom)
+                    } else {
+                        tab.ncardsTabulated++
+                    }
+                }
+            }
+        }
+    }
+    return Pair(tabs, count)
+}
+
 fun showTabs(what: String, tabs: Map<Int, ContestTabulation>) = buildString {
     appendLine(what)
     tabs.forEach { (id, tab) ->

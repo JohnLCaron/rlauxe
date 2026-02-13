@@ -10,7 +10,15 @@ enum class AuditType { POLLING, CLCA, ONEAUDIT;
     fun isPolling() = (this == POLLING)
 }
 
-// TODO add directory to config
+// could have the ContestInfo here?
+data class ElectionInfo(
+    val auditType: AuditType,
+    val ncards: Int,
+    val ncontests: Int,
+    val cvrsContainUndervotes: Boolean = true,
+    val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
+)
+
 data class AuditConfig(
     val auditType: AuditType,
     val hasStyle: Boolean = true, // TODO deprecated?; perhaps useful when all pools have hasSingleCardStyle=true ?? etc

@@ -1,9 +1,5 @@
 package org.cryptobiotic.rlauxe.audit
 
-
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -18,8 +14,10 @@ import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
+import org.cryptobiotic.rlauxe.persist.json.writeElectionInfoJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writePopulationsJsonFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
+import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
@@ -31,26 +29,21 @@ import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
 import org.cryptobiotic.rlauxe.workflow.findSamples
 import kotlin.io.path.Path
 
-interface CreateElectionIF {
-    fun contestsUA(): List<ContestWithAssertions>
-    // if you immediately write to disk, you only need one pass through the iterator
-    fun cardManifest() : CloseableIterator<AuditableCard>
+class CardManifest(val cards: CloseableIterable<AuditableCard>, val ncards: Int, val populations: List<PopulationIF>) {
+    val popMap = populations.associateBy{ it.id() }
+    fun population(populationId: Int) = popMap[populationId]
 
-    fun populations(): List<PopulationIF>?
-    fun cardPools(): List<OneAuditPoolFromCvrs>?
+    companion object {
+        fun createFromIterator(cards: Iterator<AuditableCard>, ncards: Int, populations: List<PopulationIF>?) : CardManifest {
+            return CardManifest(CloseableIterable { cards.iterator() }, ncards, populations ?: emptyList())
+        }
+    }
 }
 
-class CreateElection(
-    val contestsUA: List<ContestWithAssertions>,
-    val cardManifest: List<AuditableCard>,
-    val populations: List<PopulationIF>?,
-    val cardPools: List<OneAuditPoolFromCvrs>?,
-):  CreateElectionIF {
-
-    override fun contestsUA() = contestsUA
-    override fun populations() = populations
-    override fun cardManifest() = Closer( cardManifest.iterator() )
-    override fun cardPools() = cardPools
+interface CreateElectionIF {
+    fun contestsUA(): List<ContestWithAssertions>
+    fun cardManifest() : CardManifest
+    fun cardPools(): List<OneAuditPoolFromCvrs>?
 }
 
 private val logger = KotlinLogging.logger("CreateAudit")
@@ -58,17 +51,24 @@ private val logger = KotlinLogging.logger("CreateAudit")
 class CreateAudit(val name: String, val config: AuditConfig, election: CreateElectionIF, val auditDir: String, clear: Boolean = true) {
 
     val stopwatch = Stopwatch()
+    val cardManifest = election.cardManifest()
+    val contestsUA = election.contestsUA()
 
     init {
         if (clear) clearDirectory(Path(auditDir))
 
         val publisher = Publisher(auditDir)
+        val electionInfo = ElectionInfo(config.auditType, cardManifest.ncards, contestsUA.size, config.clcaConfig.cvrsContainUndervotes, config.persistedWorkflowMode)
+        writeElectionInfoJsonFile(electionInfo, publisher.electionInfoFile())
+        logger.info{"CreateAudit writeElectionInfoJsonFile to ${publisher.electionInfoFile()}\n  $electionInfo"}
+
         writeAuditConfigJsonFile(config, publisher.auditConfigFile())
         logger.info{"CreateAudit writeAuditConfigJsonFile to ${publisher.auditConfigFile()}\n  $config"}
 
-        if (!election.populations().isNullOrEmpty()) {
-            writePopulationsJsonFile(election.populations()!!, publisher.populationsFile())
-            logger.info { "CreateAudit write ${election.populations()!!.size} populations, to ${publisher.populationsFile()}" }
+        val populations = cardManifest.populations
+        if (populations.isNotEmpty()) {
+            writePopulationsJsonFile(populations, publisher.populationsFile())
+            logger.info { "CreateAudit write ${populations.size} populations, to ${publisher.populationsFile()}" }
         }
 
         if (!election.cardPools().isNullOrEmpty()) {
@@ -76,14 +76,12 @@ class CreateAudit(val name: String, val config: AuditConfig, election: CreateEle
             logger.info { "writeCardPoolCsvFile ${election.cardPools()!!.size} pools to ${publisher.cardPoolsFile()}" }
         }
 
-        val cards = election.cardManifest()
-        val countCvrs = writeAuditableCardCsvFile(cards, publisher.cardManifestFile())
+        val cards = cardManifest.cards
+        val countCvrs = writeAuditableCardCsvFile(cards.iterator(), publisher.cardManifestFile())
         createZipFile(publisher.cardManifestFile(), delete = true)
         logger.info { "CreateAudit write ${countCvrs} cards to ${publisher.cardManifestFile()}" }
 
-        // this may change the auditStatus to misformed
-        val contestsUA = election.contestsUA()
-
+        // this may change the auditStatus to misformed. TODO maybe not done here ??
         val results = VerifyResults()
         checkContestsCorrectlyFormed(config, contestsUA, results)
         if (results.hasErrors) {

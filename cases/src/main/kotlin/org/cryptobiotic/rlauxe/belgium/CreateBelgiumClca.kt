@@ -24,15 +24,15 @@ class BelgiumClca (
         cvrs = contestd.createSimulatedCvrs()
     }
 
-    override fun populations() = null
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
     override fun cardManifest() = createCardManifest()
 
-    fun createCardManifest(): CloseableIterator<AuditableCard> {
-        return CvrsWithPopulationsToCardManifest(
+    fun createCardManifest(): CardManifest {
+        return cvrsWithPopulationsToCardManifest(
             AuditType.CLCA,
             Closer(cvrs.iterator()),
+            cvrs.size,
             makePhantomCvrs(contestsUA().map { it.contest }),
             null,
         )

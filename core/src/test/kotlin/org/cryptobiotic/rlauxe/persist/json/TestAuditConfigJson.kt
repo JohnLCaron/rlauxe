@@ -53,8 +53,6 @@ class TestAuditConfigJson {
 
     fun testRoundtripIO(target: AuditConfig) {
         val scratchFile = kotlin.io.path.createTempFile().toFile()
-
-        val target = AuditConfig(AuditType.CLCA, seed = 12356667890L)
         writeAuditConfigJsonFile(target, scratchFile.toString())
 
         val result = readAuditConfigJsonFile(scratchFile.toString())

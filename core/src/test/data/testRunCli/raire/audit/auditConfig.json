@@ -2,19 +2,22 @@
     "auditType": "CLCA",
     "hasStyle": true,
     "riskLimit": 0.05,
-    "seed": -2128595567999214057,
+    "seed": -6177093022933235908,
     "nsimEst": 100,
-    "quantile": 0.2,
+    "quantile": 0.5,
     "contestSampleCutoff": 30000,
     "removeCutoffContests": false,
-    "simFuzzPct": 0.00123,
+    "simFuzzPct": 0.001,
     "minRecountMargin": 0.005,
     "removeTooManyPhantoms": false,
     "clcaConfig": {
-        "strategy": "generalAdaptive",
+        "strategy": "generalAdaptive2",
+        "fuzzPct": 0.001,
         "d": 100,
-        "maxRisk": 0.9
+        "maxLoss": 0.9,
+        "apriori": {}
     },
+    "simulationStrategy": "optimistic",
     "version": 2.0,
     "skipContests": []
 }

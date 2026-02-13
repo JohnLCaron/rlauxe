@@ -145,7 +145,7 @@ class TestRunCliInTemp {
         val topdir = topPath.toString()
         val auditdir = "$topdir/audit"
 
-        RunRlaCreateOneAudit.main(
+        RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
                 "-minMargin", "0.01",

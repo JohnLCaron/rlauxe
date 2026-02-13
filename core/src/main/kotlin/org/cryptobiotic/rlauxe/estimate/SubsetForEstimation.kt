@@ -52,7 +52,7 @@ data class CardSamples(val cards: List<AuditableCard>, val usedByContests: Map<I
 fun getSubsetForEstimation(
     config: AuditConfig,
     contests: List<ContestRound>,
-    cards: CloseableIterable<AuditableCard>,
+    cardManifest: CardManifest,
     previousSamples: Set<Long>,
 ): CardSamples
 {
@@ -60,10 +60,10 @@ fun getSubsetForEstimation(
     if (contestsIncluded.isEmpty())
         return CardSamples(emptyList(), emptyMap())
 
-    val allInfo = tabulateDebugInfo(cards.iterator(), contestsIncluded, null)
+    val allInfos = if (debug) tabulateDebugInfo(cardManifest.cards.iterator(), contestsIncluded, null) else null
 
     // calculate how many samples are wanted for each contest.
-    val wantSampleSize: Map<Int, Int> = contestsIncluded.associate { it.id to estSamplesNeeded(config, it) }
+    val wantSampleSize: Map<Int, Int> = contestsIncluded.associate { it.id to estSamplesNeeded(config, it, cardManifest.ncards) }
     val haveSampleSize = mutableMapOf<Int, Int>() // contestId -> nmvrs in sample
     val skippedContests = mutableSetOf<Int>()
     val usedByContests = mutableMapOf<Int, MutableList<Int>>()
@@ -76,7 +76,7 @@ fun getSubsetForEstimation(
     }
 
     var countCardsLookedAt = 0
-    val sortedCardIter = cards.iterator()
+    val sortedCardIter = cardManifest.cards.iterator()
     while (sortedCardIter.hasNext()) {
         if (!contestsIncluded.any { contestWantsMoreSamples(it)} ) break
 
@@ -119,10 +119,10 @@ fun getSubsetForEstimation(
     }
 
     logger.info{ "getSubsetForEstimation sampled cards ncards = ${sampledCards.size} countCardsLookedAt = $countCardsLookedAt" }
-    if (debug) {
+    if (debug && allInfos != null) {
         val debugInfo = tabulateDebugInfo(Closer(sampledCards.iterator()), contestsIncluded, usedByContests)
         debugInfo.forEach { (contestId, debugInfo) ->
-            val allInfo = allInfo[contestId]!!
+            val allInfo = allInfos[contestId]!!
             println("  $debugInfo allPct=${df(allInfo.pct())} wantSampleSize=${wantSampleSize[contestId]}")
         }
     }
@@ -165,7 +165,7 @@ private val fac = 10 // TODO pass in? check cardManifest, just use all if not to
 
 // CLCA and OneAudit, not needed by Polling
 // we dont use this for the actual estimation....
-fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
+fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: Int): Int {
     val minAssertionRound = contestRound.minAssertion()
     if (minAssertionRound == null) {
         contestRound.minAssertion()
@@ -217,7 +217,8 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
         // TODO what to do when estimate is negetive?? Perhaps fail ??
         //val wtf = cassorter.estWithOptimalBet(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue, clcaErrorCounts)
         //throw RuntimeException("est samples $est < 0") // TODO
-        return cassorter.sampleSizeNoErrors(2 * config.clcaConfig.maxLoss, lastPvalue)
+        est =  cassorter.sampleSizeNoErrors(2 * config.clcaConfig.maxLoss, lastPvalue)
+        if (est < 0) est = ncards
     }
     return est
 }

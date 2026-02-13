@@ -31,10 +31,8 @@ class MvrManagerForTesting(
         mvrsUA = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
     }
 
-    override fun sortedCards() = CloseableIterable { Closer(sortedCards.iterator()) }
-
-    override fun populations(): List<OneAuditPoolIF>? {
-        return pools
+    override fun cardManifest() :CardManifest {
+        return CardManifest.createFromIterator(sortedCards.iterator(), sortedCards.size, pools)
     }
 
     override fun oapools(): List<OneAuditPoolFromCvrs>? {

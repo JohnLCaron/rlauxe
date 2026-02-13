@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrIF
+import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import kotlin.collections.get
 import kotlin.sequences.plus
@@ -128,8 +129,19 @@ data class AuditableCard (
     }
 }
 
-// put cards into canonical form
-class CvrsWithPopulationsToCardManifest(
+fun cvrsWithPopulationsToCardManifest(
+    type: AuditType,
+    cvrs: CloseableIterator<Cvr>,
+    ncvrs: Int,
+    phantomCvrs : List<Cvr>?,
+    populations: List<PopulationIF>?,
+): CardManifest {
+    val cards = CvrsWithPopulationsToCards(type, cvrs, phantomCvrs, populations)
+   return CardManifest.createFromIterator(cards, ncvrs, populations)
+}
+
+// put cvrs into canonical form of cards, merging population info if needed
+class CvrsWithPopulationsToCards(
     val type: AuditType,
     val cvrs: CloseableIterator<Cvr>,
     val phantomCvrs : List<Cvr>?,
@@ -172,21 +184,46 @@ class CvrsWithPopulationsToCardManifest(
     override fun close() = cvrs.close()
 }
 
-class MergePopulationsIntoCardManifest(
-    val cards: CloseableIterator<AuditableCard>,
+class MergePopulationsIntoCards(
+    val cards: List<AuditableCard>,
     populations: List<PopulationIF>?,
 ): CloseableIterator<AuditableCard> {
-
+    val cardsIter = cards.iterator()
     val popMap = populations?.associateBy{ it.name() }
 
-    override fun hasNext() = cards.hasNext()
+    override fun hasNext() = cardsIter.hasNext()
 
     // merges the populations into the cards
     override fun next(): AuditableCard {
-        val org = cards.next()
+        val org = cardsIter.next()
         val pop = if (popMap == null) null else popMap[org.cardStyle]
         return org.copy(population = pop)
     }
 
-    override fun close() = cards.close()
+    override fun close() {}
+}
+
+class MergePopulationsFromIterable(
+    val cards: CloseableIterable<AuditableCard>,
+    val populations: List<PopulationIF>?,
+): CloseableIterable<AuditableCard> {
+    override fun iterator() = MergePopulationsFromIterator(cards.iterator(), populations)
+}
+
+class MergePopulationsFromIterator(
+    val cardsIter: CloseableIterator<AuditableCard>,
+    val populations: List<PopulationIF>?,
+): CloseableIterator<AuditableCard> {
+    val popMap = populations?.associateBy { it.name() }
+
+    override fun hasNext() = cardsIter.hasNext()
+
+    // merges the populations into the cards
+    override fun next(): AuditableCard {
+        val org = cardsIter.next()
+        val pop = if (popMap == null) null else popMap[org.cardStyle]
+        return org.copy(population = pop)
+    }
+
+    override fun close() = cardsIter.close()
 }

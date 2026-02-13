@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CvrsWithPopulationsToCardManifest
+import org.cryptobiotic.rlauxe.audit.CvrsWithPopulationsToCards
 import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
@@ -179,7 +179,7 @@ fun makeCardManifest(mvrs: List<Cvr>, pool: OneAuditPoolWithBallotStyle): List<A
     // val cardStyle = Population("cardPoolStyle", pool.poolId, expandedContestIds, false)
 
     // make the cards with the expanded card style
-    val converter = CvrsWithPopulationsToCardManifest(
+    val converter = CvrsWithPopulationsToCards(
         type = AuditType.ONEAUDIT,
         cvrs = Closer(mvrs.iterator()),
         phantomCvrs = null,

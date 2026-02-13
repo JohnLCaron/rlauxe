@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardManifest
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
@@ -51,17 +52,14 @@ class SfSingleRoundAuditTask(
                 val assertionRound = AssertionRound(cassertion, 1, null)
                 val contestRound = ContestRound(contestUA, listOf(assertionRound), 1)
 
-                val mvrManager = MvrManagerClcaSingleRound(
-                    AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run),
-                    -1,
-                    emptyList()
-                )
+                val skipper = AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run)
+                val manifestWithSkipper = CardManifest(skipper, 0, rlauxAudit.mvrManager().cardManifest().populations)
 
                 val sampler =
                     ClcaSamplerErrorTracker.withNoErrors(
                         contestUA.id,
                         cassertion.cassorter,
-                        mvrManager.sortedCards().iterator(),
+                        manifestWithSkipper.cards.iterator(),
                     )
 
                 val runner = ClcaAssertionAuditor()

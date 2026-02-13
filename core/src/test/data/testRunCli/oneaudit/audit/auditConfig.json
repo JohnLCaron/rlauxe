@@ -2,23 +2,23 @@
     "auditType": "ONEAUDIT",
     "hasStyle": true,
     "riskLimit": 0.05,
-    "seed": 6992323013275957298,
+    "seed": -5930293155673787799,
     "nsimEst": 10,
-    "quantile": 0.8,
-    "contestSampleCutoff": 20000,
+    "quantile": 0.5,
+    "contestSampleCutoff": 30000,
     "removeCutoffContests": false,
     "simFuzzPct": 0.001,
     "minRecountMargin": 0.005,
     "removeTooManyPhantoms": false,
     "clcaConfig": {
-        "strategy": "generalAdaptive",
+        "strategy": "generalAdaptive2",
+        "fuzzPct": 0.001,
         "d": 100,
-        "maxRisk": 0.9
+        "maxLoss": 0.9,
+        "apriori": {}
     },
     "oaConfig": {
-        "strategy": "clca",
-        "d": 100,
-        "useFirst": false
+        "strategy": "simulate"
     },
     "persistedWorkflowMode": "testPrivateMvrs",
     "version": 2.0,

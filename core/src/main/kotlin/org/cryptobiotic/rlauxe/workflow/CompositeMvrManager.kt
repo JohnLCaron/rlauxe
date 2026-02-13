@@ -29,9 +29,9 @@ open class CompositeMvrManager(
 
     val publisher = Publisher(auditRecord.componentRecords.first().location)
 
-    override fun sortedCards() = readCardManifestComposite(publisher).cards
+    override fun cardManifest() = readCardManifestComposite(publisher)
 
-    override fun populations(): List<PopulationIF>? {
+    fun populations(): List<PopulationIF>? {
         return readPopulationsComposite(publisher)
     }
 
@@ -77,23 +77,25 @@ open class CompositeMvrManager(
     }
 
     private fun readCardManifestComposite(publisher: Publisher): CardManifest {
+        val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
 
         if (Files.exists(Path(publisher.populationsFile()))) {
             val populations = readPopulationsJsonFileUnwrapped(publisher.populationsFile())
             if (populations.isNotEmpty()) {
                 // merge population references into the Card
-                val mergedCards = CloseableIterable {
-                    MergePopulationsIntoCardManifest(
-                        readCardsCsvIterator(publisher.sortedCardsFile()),
+                val mergedCards =
+                    MergePopulationsFromIterable(
+                        sortedCards,
                         populations,
                     )
-                }
-                return CardManifest(mergedCards, populations)
+
+                // TODO ncards ??
+                return CardManifest(mergedCards, 0, populations)
             }
         }
 
-        val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
-        return CardManifest(CloseableIterable { sortedCards.iterator() }, emptyList())
+        // TODO ncards ??
+        return CardManifest(CloseableIterable { sortedCards.iterator() }, 0, emptyList())
     }
 
     private fun readPopulationsComposite(publisher: Publisher): List<PopulationIF>? {

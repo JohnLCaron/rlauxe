@@ -29,8 +29,9 @@ class TestSimulateOneAuditRaire {
 
     init {
         val minMargin = marginRange.start + Random.nextDouble(marginRange.endInclusive - marginRange.start)
+        // TODO possible OOM here when ncards = 8
         val makeRaireContestResult = simulateOneAuditRaire(
-            N = N, contestId = 111, ncands = 8, minMargin = minMargin, phantomPct = phantomPct,
+            N = N, contestId = 111, ncands = 4, minMargin = minMargin, phantomPct = phantomPct,
             poolPct = 11, quiet = true
         )
         rcontestUA = makeRaireContestResult.first

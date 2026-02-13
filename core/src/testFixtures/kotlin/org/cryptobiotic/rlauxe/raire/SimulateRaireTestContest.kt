@@ -265,7 +265,7 @@ fun solveForMinAssertion(
         null,
     )
     if (!quiet) println("call problem.solve in raire library")
-    val solution: RaireSolution = problem.solve()
+    val solution: RaireSolution = problem.solve() // TODO possible OOM here
     if (solution.solution.Err != null) {
         println("solution.solution.Err=${solution.solution.Err}")
         return null

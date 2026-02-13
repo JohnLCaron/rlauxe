@@ -12,8 +12,9 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.workflow.readCardManifest
+import org.cryptobiotic.rlauxe.workflow.makeCardIter
 import org.cryptobiotic.rlauxe.workflow.readCardPools
+import org.cryptobiotic.rlauxe.workflow.readPopulations
 import kotlin.collections.iterator
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,7 +30,7 @@ class TestSfElectionVunderFuzz {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
         val publisher = Publisher(auditdir)
         val config = readAuditConfigUnwrapped(publisher.auditConfigFile())!!
-        val cardManifest = readCardManifest(publisher)
+        val cardIter = makeCardIter(publisher)
         val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
         val infos = contests.map { it.contest.info() }.associateBy { it.id }
         val cardPools = readCardPools(publisher, infos)
@@ -37,7 +38,7 @@ class TestSfElectionVunderFuzz {
         val contestCards = mutableListOf<AuditableCard>()
         val ncards = 30_000
         var countCards = 0
-        cardManifest.cards.iterator().use { iter ->
+        cardIter.use { iter ->
             while (iter.hasNext() && countCards < ncards) {
                 val card = iter.next()
                 contestCards.add(card)
@@ -91,7 +92,6 @@ class TestSfElectionVunderFuzz {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
         val publisher = Publisher(auditdir)
         val config = readAuditConfigUnwrapped(publisher.auditConfigFile())!!
-        val cardManifest = readCardManifest(publisher)
         val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
         val infos = contests.map { it.contest.info() }.associateBy { it.id }
         val cardPools = readCardPools(publisher, infos)!!
@@ -115,16 +115,14 @@ class TestSfElectionVunderFuzz {
         val mvrDilutedMargin2 = mvrPoolAvg.margin() * 84 / 336
         println("mvr pool diluted average= ${margin2mean(mvrDilutedMargin2)} margin=${mvrDilutedMargin2}")
 
-        // val cvrPoolAvg = findPoolAverage(cardManifest.cards.iterator(), contestId, useCardPoolId, usePassorter)
-        // println("cvr poolAvg = ${cvrPoolAvg}")
-
         //// so what is the pool average in the vunder fuzzed cards ??
         //// TODO the problem is bassort, finding undervotes instead of missing contest
 
+        val cardIter = makeCardIter(publisher)
         val contestCards = mutableListOf<AuditableCard>()
         val ncards = 30_000_000 // all
         var countCards = 0
-        cardManifest.cards.iterator().use { iter ->
+        cardIter.use { iter ->
             while (iter.hasNext() && countCards < ncards) {
                 val card = iter.next()
                 contestCards.add(card)
@@ -169,8 +167,8 @@ class TestSfElectionVunderFuzz {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
         val publisher = Publisher(auditdir)
         val config = readAuditConfigUnwrapped(publisher.auditConfigFile())!!
-        val cardManifest = readCardManifest(publisher)
-        val populations = cardManifest.populations as List<OneAuditPoolIF>
+        val populations = readPopulations(publisher)
+        val pools = populations as List<OneAuditPoolIF>
         val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
 
         val privateMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.privateMvrsFile())
@@ -193,16 +191,14 @@ class TestSfElectionVunderFuzz {
         val mvrDilutedMargin2 = mvrPoolAvg.margin() * 84 / 336
         println("mvr pool diluted average= ${margin2mean(mvrDilutedMargin2)} margin=${mvrDilutedMargin2}")
 
-        // val cvrPoolAvg = findPoolAverage(cardManifest.cards.iterator(), contestId, useCardPoolId, usePassorter)
-        // println("cvr poolAvg = ${cvrPoolAvg}")
-
         //// so what is the pool average in the vunder fuzzed cards ??
         //// TODO the problem is bassort, finding undervotes instead of missing contest
 
+        val cardIter = makeCardIter(publisher)
         val contestCards = mutableListOf<AuditableCard>()
         val ncards = 30_000_000 // all
         var countCards = 0
-        cardManifest.cards.iterator().use { iter ->
+        cardIter.use { iter ->
             while (iter.hasNext() && countCards < ncards) {
                 val card = iter.next()
                 contestCards.add(card)

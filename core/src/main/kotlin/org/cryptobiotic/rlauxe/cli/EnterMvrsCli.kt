@@ -36,15 +36,11 @@ object EnterMvrsCli {
             description = "File containing new Mvrs for latest round"
         ).required()
 
-        try {
-            parser.parse(args)
-            println("EnterMvrs from audit in $inputDir with mvrFile=$mvrFile")
-            val result = enterMvrs(inputDir, mvrFile)
-            println(result)
-            require(result.isOk)
-        } catch (t: Throwable) {
-            println(t.message)
-        }
+        parser.parse(args)
+        println("EnterMvrs from audit in $inputDir with mvrFile=$mvrFile")
+        val result = enterMvrs(inputDir, mvrFile)
+        println(result)
+        require(result.isOk)
     }
 }
 

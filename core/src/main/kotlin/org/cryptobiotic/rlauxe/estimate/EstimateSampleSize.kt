@@ -41,7 +41,7 @@ private val logger = KotlinLogging.logger("EstimateSampleSizes")
 fun estimateSampleSizes(
     config: AuditConfig,
     auditRound: AuditRoundIF,
-    cardManifest: CloseableIterable<AuditableCard>, // Clca, OneAudit, ignored for Polling
+    cardManifest: CardManifest, // Clca, OneAudit, ignored for Polling
     cardPools: List<OneAuditPoolFromCvrs>?,               // only OneAudit
     previousSamples: Set<Long>,
     showTasks: Boolean = false,

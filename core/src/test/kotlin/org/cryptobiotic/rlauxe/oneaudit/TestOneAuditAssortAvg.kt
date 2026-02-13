@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CvrsWithPopulationsToCardManifest
+import org.cryptobiotic.rlauxe.audit.CvrsWithPopulationsToCards
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -30,7 +30,7 @@ class TestOneAuditAssortAvg {
 
         // note: using the mvrs
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsWithPopulationsToCardManifest(
+            CvrsWithPopulationsToCards(
                 AuditType.ONEAUDIT, Closer(mvrs.iterator()),
                 phantomCvrs = null, cardPools,
             )
@@ -72,7 +72,7 @@ class TestOneAuditAssortAvg {
 
         // note: using the mvrs
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsWithPopulationsToCardManifest(
+            CvrsWithPopulationsToCards(
                 AuditType.ONEAUDIT,  Closer(mvrs.iterator()),
                 phantomCvrs = null, cardPools,
             )
@@ -107,7 +107,7 @@ class TestOneAuditAssortAvg {
 
         // note: using the mvrs
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsWithPopulationsToCardManifest(
+            CvrsWithPopulationsToCards(
                 AuditType.ONEAUDIT, Closer(mvrs.iterator()),
                 phantomCvrs = null, cardPools,
             )

@@ -105,8 +105,8 @@ class TestSfElection {
         val auditRecord = AuditRecord.readFrom(auditdir)
             ?: throw RuntimeException("directory '$auditdir' does not contain an audit record")
         val pw = PersistedWorkflow(auditRecord, false)
-        val man: MvrManager = pw.mvrManager()
-        val populations = man.populations()!!
+        val man: CardManifest = pw.mvrManager().cardManifest()
+        val populations = man.populations
 
         val sumPools = populations.sumOf { it.ncards() }
         println("sumPools = $sumPools")

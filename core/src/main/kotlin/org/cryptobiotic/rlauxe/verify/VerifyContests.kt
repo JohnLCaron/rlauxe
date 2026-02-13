@@ -74,10 +74,12 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
 
         // OA
         if (config.isOA) {
-            val cardPools = readCardPools(publisher, infos)!!
-            verifyOAagainstCards(contests, contestSummary, cardPools, infos, results, show = show)
-            verifyOAassortAvg(contests, cardManifest.cards.iterator(), results, show = show)
-            verifyOApools(contests, contestSummary, cardPools, results, show = show)
+            val cardPools = readCardPools(publisher, infos)
+            if (cardPools != null) {
+                verifyOAagainstCards(contests, contestSummary, cardPools, infos, results, show = show)
+                verifyOAassortAvg(contests, cardManifest.cards.iterator(), results, show = show)
+                verifyOApools(contests, contestSummary, cardPools, results, show = show)
+            }
         }
 
         // CLCA

@@ -10,6 +10,7 @@ enum class AuditType { POLLING, CLCA, ONEAUDIT;
     fun isPolling() = (this == POLLING)
 }
 
+// could have the ContestInfo here?
 data class ElectionInfo(
     val auditType: AuditType,
     val ncards: Int,

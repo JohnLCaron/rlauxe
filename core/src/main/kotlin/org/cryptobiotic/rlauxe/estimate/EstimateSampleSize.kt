@@ -59,7 +59,7 @@ fun estimateSampleSizes(
         getSubsetForEstimation(
             config,
             auditRound.contestRounds,
-            cardManifest.cards,
+            cardManifest,
             previousSamples,
         )
 

@@ -1,0 +1,7 @@
+{
+    "auditType": "POLLING",
+    "ncards": 20000,
+    "ncontests": 5,
+    "cvrsContainUndervotes": true,
+    "persistedWorkflowMode": "testPrivateMvrs"
+}

@@ -1,0 +1,256 @@
+{
+    "roundIdx": 6,
+    "contestRounds": [
+        {
+            "id": 1,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "0/1 contest1",
+                    "roundIdx": 6,
+                    "estSampleSize": 3230,
+                    "estNewSampleSize": 37,
+                    "estimationResult": {
+                        "roundIdx": 6,
+                        "strategy": "default",
+                        "fuzzPct": 0.001,
+                        "startingTestStatistic": 12.497597684076714,
+                        "estimatedDistribution": [
+                            24,
+                            28,
+                            32,
+                            33,
+                            37,
+                            39,
+                            43,
+                            48,
+                            56,
+                            71
+                        ],
+                        "ntrials": 100,
+                        "simNewMvrs": 37
+                    },
+                    "prevAuditResult": {
+                        "desc": "round=5 pmin=0.0800 plast=0.0800 nmvrs=3193 samplesUsed=3193 status=LimitReached measuredCounts=empty",
+                        "roundIdx": 5,
+                        "nmvrs": 3193,
+                        "plast": 0.08001537777729137,
+                        "pmin": 0.08001537777729137,
+                        "samplesUsed": 3193,
+                        "status": "LimitReached",
+                        "params": {}
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                },
+                {
+                    "assorterDesc": "0/2 contest1",
+                    "roundIdx": 6,
+                    "estSampleSize": 3193,
+                    "estNewSampleSize": 0,
+                    "estimationResult": {
+                        "roundIdx": 6,
+                        "strategy": "default",
+                        "fuzzPct": 0.001,
+                        "startingTestStatistic": 0.9477106071343072,
+                        "estimatedDistribution": [],
+                        "ntrials": 0
+                    },
+                    "prevAuditResult": {
+                        "desc": "round=5 pmin=0.9997 plast=1.0552 nmvrs=3193 samplesUsed=3193 status=LimitReached measuredCounts=empty",
+                        "roundIdx": 5,
+                        "nmvrs": 3193,
+                        "plast": 1.0551744303293236,
+                        "pmin": 0.9997489731543993,
+                        "samplesUsed": 3193,
+                        "status": "LimitReached",
+                        "params": {}
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                },
+                {
+                    "assorterDesc": "0/3 contest1",
+                    "roundIdx": 6,
+                    "estSampleSize": 3193,
+                    "estNewSampleSize": 0,
+                    "estimationResult": {
+                        "roundIdx": 6,
+                        "strategy": "default",
+                        "fuzzPct": 0.001,
+                        "startingTestStatistic": 1.715474598030609,
+                        "estimatedDistribution": [],
+                        "ntrials": 0
+                    },
+                    "prevAuditResult": {
+                        "desc": "round=5 pmin=0.5829 plast=0.5829 nmvrs=3193 samplesUsed=3193 status=LimitReached measuredCounts=empty",
+                        "roundIdx": 5,
+                        "nmvrs": 3193,
+                        "plast": 0.5829290629823463,
+                        "pmin": 0.5829290629823463,
+                        "samplesUsed": 3193,
+                        "status": "LimitReached",
+                        "params": {}
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                }
+            ],
+            "roundIdx": 6,
+            "maxSampleAllowed": 3629,
+            "estMvrs": 3230,
+            "estNewMvrs": 37,
+            "auditorWantNewMvrs": -1,
+            "done": false,
+            "included": true,
+            "status": "InProgress"
+        },
+        {
+            "id": 2,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "3/2 contest2",
+                    "roundIdx": 6,
+                    "estSampleSize": 3629,
+                    "estNewSampleSize": 436,
+                    "estimationResult": {
+                        "roundIdx": 6,
+                        "strategy": "default",
+                        "fuzzPct": 0.001,
+                        "startingTestStatistic": 1.1781029863895074,
+                        "estimatedDistribution": [
+                            253,
+                            274,
+                            303,
+                            433,
+                            436,
+                            499,
+                            565,
+                            662,
+                            708,
+                            710
+                        ],
+                        "ntrials": 19,
+                        "simNewMvrs": 436
+                    },
+                    "prevAuditResult": {
+                        "desc": "round=5 pmin=0.7276 plast=0.8488 nmvrs=3193 samplesUsed=3193 status=LimitReached measuredCounts=empty",
+                        "roundIdx": 5,
+                        "nmvrs": 3193,
+                        "plast": 0.8488222265395204,
+                        "pmin": 0.7276180797828332,
+                        "samplesUsed": 3193,
+                        "status": "LimitReached",
+                        "params": {}
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                }
+            ],
+            "roundIdx": 6,
+            "maxSampleAllowed": 3629,
+            "estMvrs": 3629,
+            "estNewMvrs": 436,
+            "auditorWantNewMvrs": -1,
+            "done": false,
+            "included": true,
+            "status": "InProgress"
+        },
+        {
+            "id": 4,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "0/1 contest4",
+                    "roundIdx": 6,
+                    "estSampleSize": 3193,
+                    "estNewSampleSize": 0,
+                    "estimationResult": {
+                        "roundIdx": 6,
+                        "strategy": "default",
+                        "fuzzPct": 0.001,
+                        "startingTestStatistic": 1.8853723874793613,
+                        "estimatedDistribution": [],
+                        "ntrials": 0
+                    },
+                    "prevAuditResult": {
+                        "desc": "round=5 pmin=0.5304 plast=0.5304 nmvrs=3193 samplesUsed=3193 status=LimitReached measuredCounts=empty",
+                        "roundIdx": 5,
+                        "nmvrs": 3193,
+                        "plast": 0.5303991968063905,
+                        "pmin": 0.5303991968063905,
+                        "samplesUsed": 3193,
+                        "status": "LimitReached",
+                        "params": {}
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                },
+                {
+                    "assorterDesc": "0/2 contest4",
+                    "roundIdx": 6,
+                    "estSampleSize": 3193,
+                    "estNewSampleSize": 0,
+                    "estimationResult": {
+                        "roundIdx": 6,
+                        "strategy": "default",
+                        "fuzzPct": 0.001,
+                        "startingTestStatistic": 1.0471679944050376,
+                        "estimatedDistribution": [],
+                        "ntrials": 0
+                    },
+                    "prevAuditResult": {
+                        "desc": "round=5 pmin=0.9402 plast=0.9550 nmvrs=3193 samplesUsed=3193 status=LimitReached measuredCounts=empty",
+                        "roundIdx": 5,
+                        "nmvrs": 3193,
+                        "plast": 0.9549566118740702,
+                        "pmin": 0.9402192187362687,
+                        "samplesUsed": 3193,
+                        "status": "LimitReached",
+                        "params": {}
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                },
+                {
+                    "assorterDesc": "0/3 contest4",
+                    "roundIdx": 6,
+                    "estSampleSize": 3193,
+                    "estNewSampleSize": 0,
+                    "estimationResult": {
+                        "roundIdx": 6,
+                        "strategy": "default",
+                        "fuzzPct": 0.001,
+                        "startingTestStatistic": 1.8914616782605367,
+                        "estimatedDistribution": [],
+                        "ntrials": 0
+                    },
+                    "prevAuditResult": {
+                        "desc": "round=5 pmin=0.5287 plast=0.5287 nmvrs=3193 samplesUsed=3193 status=LimitReached measuredCounts=empty",
+                        "roundIdx": 5,
+                        "nmvrs": 3193,
+                        "plast": 0.5286916523308258,
+                        "pmin": 0.5286916523308258,
+                        "samplesUsed": 3193,
+                        "status": "LimitReached",
+                        "params": {}
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                }
+            ],
+            "roundIdx": 6,
+            "maxSampleAllowed": 3629,
+            "estMvrs": 3193,
+            "estNewMvrs": 0,
+            "auditorWantNewMvrs": -1,
+            "done": false,
+            "included": true,
+            "status": "InProgress"
+        }
+    ],
+    "auditWasDone": false,
+    "auditIsComplete": false,
+    "nmvrs": 3629,
+    "newmvrs": 436,
+    "auditorWantNewMvrs": -1,
+    "samplesNotUsed": 0
+}

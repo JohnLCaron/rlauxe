@@ -7,70 +7,63 @@
                 {
                     "assorterDesc": "0/1 OneAuditTest",
                     "roundIdx": 1,
-                    "estSampleSize": 344,
-                    "estNewSampleSize": 344,
+                    "estSampleSize": 223,
+                    "estNewSampleSize": 223,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "clca",
+                        "strategy": "simulate",
                         "fuzzPct": 0.001,
                         "startingTestStatistic": 1.0,
-                        "startingErrorRates": {
-                            "0.0": 0.0,
-                            "0.255050505050505": 0.0,
-                            "0.51010101010101": 0.0,
-                            "0.7651515151515151": 0.0,
-                            "1.02020202020202": 0.0
-                        },
+                        "startingErrorRates": {},
                         "estimatedDistribution": [
-                            151,
-                            161,
-                            254,
-                            307,
-                            334,
-                            338,
-                            339,
-                            344,
-                            443,
-                            444
+                            195,
+                            207,
+                            217,
+                            218,
+                            223,
+                            245,
+                            287,
+                            372,
+                            429,
+                            430
                         ],
-                        "firstSample": 334,
-                        "estNewMvrs": 344
+                        "ntrials": 10,
+                        "simNewMvrs": 223
                     },
                     "auditResult": {
-                        "desc": "round=1 pmin=0.2542 plast=0.5572 nmvrs=344 samplesUsed=344 status=LimitReached measuredCounts=no errors",
+                        "desc": "round=1 pmin=0.0497 plast=0.0497 nmvrs=223 samplesUsed=153 status=StatRejectNull measuredCounts=no errors",
                         "roundIdx": 1,
-                        "nmvrs": 344,
-                        "maxSampleIndexUsed": 344,
-                        "plast": 0.5571720683536343,
-                        "pmin": 0.2542078883069219,
-                        "samplesUsed": 344,
-                        "status": "LimitReached",
+                        "nmvrs": 223,
+                        "plast": 0.04968413675443412,
+                        "pmin": 0.04968413675443412,
+                        "samplesUsed": 153,
+                        "status": "StatRejectNull",
                         "measuredCounts": {
                             "errorCounts": {},
-                            "totalSamples": 344,
+                            "totalSamples": 153,
                             "noerror": 0.51010101010101,
                             "upper": 1.0
                         },
                         "params": {}
                     },
-                    "status": "LimitReached",
-                    "roundProved": 0
+                    "status": "StatRejectNull",
+                    "roundProved": 1
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 344,
-            "estMvrs": 344,
-            "estNewMvrs": 344,
+            "maxSampleAllowed": 223,
+            "estMvrs": 223,
+            "estNewMvrs": 223,
             "auditorWantNewMvrs": -1,
-            "done": false,
+            "done": true,
             "included": true,
-            "status": "LimitReached"
+            "status": "StatRejectNull"
         }
     ],
     "auditWasDone": true,
-    "auditIsComplete": false,
-    "nmvrs": 344,
-    "newmvrs": 344,
+    "auditIsComplete": true,
+    "nmvrs": 223,
+    "newmvrs": 223,
     "auditorWantNewMvrs": -1,
-    "samplesNotUsed": 0
+    "samplesNotUsed": 70
 }

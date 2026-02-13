@@ -259,7 +259,7 @@ class CreateBoulderElection(
     }
 
     override fun contestsUA() = contestsUA
-    override fun cardPools() = null
+    override fun cardPools() = null // dont have List<OneAuditPoolFromCvrs>
     override fun cardManifest() = createCardManifest()
 
     fun createCardManifest(): CardManifest {

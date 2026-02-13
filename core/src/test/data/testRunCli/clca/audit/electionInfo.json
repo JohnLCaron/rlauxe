@@ -1,0 +1,6 @@
+{
+    "auditType": "CLCA",
+    "ncards": 10000,
+    "ncontests": 11,
+    "cvrsContainUndervotes": true
+}

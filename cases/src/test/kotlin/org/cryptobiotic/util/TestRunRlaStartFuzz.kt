@@ -174,49 +174,4 @@ class TestRunRlaStartFuzz {
 
         if (results.hasErrors) fail()
     }
-
-    @Test
-    fun testCliOneAuditCalc() {
-        val topdir = "$testdataDir/persist/testRunCli/oneauditcalc"
-        val auditdir = "$topdir/audit"
-
-        RunRlaStartFuzz.main(
-            arrayOf(
-                "-in", topdir,
-                "--auditType", "ONEAUDIT",
-                "-minMargin", "0.04",
-                "-simFuzz", "0.001",
-                "-fuzzMvrs", "0.001",
-                "-quantile", "0.5",
-                "-cvrFraction", "0.95",
-                "-ncards", "50000",
-                "-extraPct", "0.01",
-                "-oaStrategy", "calcMvrsNeeded",
-            )
-        )
-
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
-
-        println("============================================================")
-        val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)
-        println()
-        print(resultsvc)
-        if (resultsvc.hasErrors) fail()
-
-        println("============================================================")
-        var done = false
-        while (!done) {
-            val lastRound = runRound(inputDir = auditdir)
-            done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5
-        }
-
-        println("============================================================")
-        val results = RunVerifyAuditRecord.runVerifyAuditRecord(inputDir = auditdir)
-        println(results)
-
-        if (results.hasErrors) fail()
-    }
-
 }

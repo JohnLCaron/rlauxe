@@ -246,8 +246,9 @@ data class EstimationRoundResult(
             " simNewMvrs=$simNewMvrs startingErrorRates=$startingErrorRates"
 
     fun startingErrorRates() = buildString {
-        if (startingErrorRates == null) return "N/A"
-        startingErrorRates.filter{ it.value != 0.0 }.forEach { append( "${df(it.key)}=${df(it.value)}, " ) }
+        if (startingErrorRates == null) append("N/A") else {
+            startingErrorRates.filter { it.value != 0.0 }.forEach { append("${df(it.key)}=${df(it.value)}, ") }
+        }
     }
 }
 

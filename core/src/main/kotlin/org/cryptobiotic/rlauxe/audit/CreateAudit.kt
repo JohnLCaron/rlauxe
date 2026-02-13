@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.audit
 
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -137,8 +138,8 @@ fun writeExternalSortedCards(topdir: String, outputFile: String, unsortedCards: 
 // uses private/sortedMvrs.cvs
 fun writeMvrsForRound(publisher: Publisher, round: Int): Int {
     val resultSamples = readSamplePrnsJsonFile(publisher.samplePrnsFile(round))
-    if (resultSamples is Err) logger.error{"$resultSamples"}
-    require(resultSamples is Ok)
+    if (resultSamples.isErr) logger.error{"$resultSamples"}
+    require(resultSamples.isOk)
     val sampleNumbers = resultSamples.unwrap()
 
     val sortedMvrs = readAuditableCardCsvFile(publisher.privateMvrsFile())

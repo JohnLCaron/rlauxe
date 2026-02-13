@@ -246,8 +246,8 @@ class TestContest {
         assertEquals(98/227.toDouble(), contest.reportedMargin(0,2))
 
         assertTrue(contest.percentForCand(0) >= info.minFraction!!)
-        assertTrue(contest.percentForCand(1) >= info.minFraction!!)
-        assertTrue(contest.percentForCand(2) < info.minFraction!!)
+        assertTrue(contest.percentForCand(1) >= info.minFraction)
+        assertTrue(contest.percentForCand(2) < info.minFraction)
 
         val contestUAc = ContestWithAssertions(contest, isClca = true).addStandardAssertions()
         contestUAc.clcaAssertions.forEach { println("  ${it.cassorter.assorter.desc()} ${it.cassorter}") }

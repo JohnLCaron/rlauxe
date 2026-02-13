@@ -282,7 +282,7 @@ fun makeContestInfos(
     if (show) println("contestManifest = $contestManifest")
 
     val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJsonFromZip(castVoteRecordZip, candidateManifestFile)
-    val candidateManifest = if (resultCandidateM is Ok) resultCandidateM.unwrap()
+    val candidateManifest = if (resultCandidateM .isOk) resultCandidateM.unwrap()
     else throw RuntimeException("Cannot read CandidateManifestJson from ${candidateManifestFile} err = $resultCandidateM")
 
     val contestInfos = makeContestInfos(contestManifest, candidateManifest).sortedBy { it.id }

@@ -30,10 +30,14 @@ object RunVerifyAuditRecord {
             description = "Show timing"
         ).default(false)
 
-        parser.parse(args)
-        println("RunVerifier on $inputDir")
-        val results = runVerifyAuditRecord(inputDir, nthreads, showTime)
-        println(results)
+        try {
+            parser.parse(args)
+            println("RunVerifier on $inputDir")
+            val results = runVerifyAuditRecord(inputDir, nthreads, showTime)
+            println(results)
+        } catch (t: Throwable) {
+            println(t.message)
+        }
     }
 
     fun runVerifyAuditRecord(inputDir: String, nthreads: Int = 11, showTime: Boolean = false): VerifyResults {

@@ -31,12 +31,16 @@ object RunVerifyContests {
             description = "Show details"
         ).default(false)
 
-        parser.parse(args)
-        val stopwatch = Stopwatch()
+        try {
+            parser.parse(args)
+            val stopwatch = Stopwatch()
 
-        val results = runVerifyContests(inputDir, contestId, show)
-        println("RunVerifyContests took $stopwatch")
-        println(results)
+            val results = runVerifyContests(inputDir, contestId, show)
+            println("RunVerifyContests took $stopwatch")
+            println(results)
+        } catch (t: Throwable) {
+            println(t.message)
+        }
     }
 
     fun runVerifyContests(auditDir: String, contestId: Int?, show: Boolean): VerifyResults {

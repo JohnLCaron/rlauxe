@@ -132,33 +132,19 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
         val noerror=cassorter.noerror()
         val upper=cassorter.assorter.upperBound()
-
         val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
 
         val bettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
             GeneralAdaptiveBetting(
                 contestUA.Npop,
-                startingErrors = ClcaErrorCounts.empty(cassorter.noerror(), cassorter.assorter.upperBound()),
+                startingErrors = ClcaErrorCounts.empty(noerror, upper),
                 contest.Nphantoms(),
                 oaAssortRates = null,
                 d = clcaConfig.d,
                 maxLoss = clcaConfig.maxLoss)
         } else {
-
             // the actual audit cant "look ahead" with the measured error rates, so always start empty
-            // OTOH, I think you could use apriori rates if they are set independently from the mvrs
-            // TODO see Issue #519
-
-            // class GeneralAdaptiveBetting2(
-            //    val Npop: Int, // population size for this contest
-            //    val apriori: ClcaErrorCounts, // apriori rates not counting phantoms, non-null so we have noerror and upper
-            //    val nphantoms: Int, // number of phantoms in the population
-            //    val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
-            //
-            //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
-            //    val d: Int = 100,  // trunc weight
-            //    val debug: Boolean = false,
-            //)
+            // OTOH, I think you could use apriori rates if they are set independently from the mvrs, see Issue #519
             GeneralAdaptiveBetting2(
                 contestUA.Npop,
                 aprioriCounts = apriori,

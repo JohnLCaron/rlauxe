@@ -14,7 +14,7 @@ class TestReadSfJson {
     fun testContestManifestJsonFile() {
         val filename = "src/test/data/SF2024/manifests/ContestManifest.json"
         val result: Result<ContestManifestJson, ErrorMessages> = readContestManifestJson(filename)
-        val contestManifest = if (result is Ok) result.unwrap()
+        val contestManifest = if (result .isOk) result.unwrap()
         else throw RuntimeException("Cannot read ContestManifestJson from ${filename} err = $result")
         println(contestManifest)
     }
@@ -23,7 +23,7 @@ class TestReadSfJson {
     fun testCandidateManifestJsonFile() {
         val filename = "src/test/data/SF2024/manifests/CandidateManifest.json"
         val result: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJson(filename)
-        val candidateManifest = if (result is Ok) result.unwrap()
+        val candidateManifest = if (result .isOk) result.unwrap()
         else throw RuntimeException("Cannot read CandidateManifestJson from ${filename} err = $result")
         println(candidateManifest)
     }
@@ -34,11 +34,11 @@ class TestReadSfJson {
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
 
         val resultContestM: Result<ContestManifestJson, ErrorMessages> =  readContestManifestJsonFromZip(zipFilename, "ContestManifest.json")
-        val contestManifestJson = if (resultContestM is Ok) resultContestM.unwrap()
+        val contestManifestJson = if (resultContestM .isOk) resultContestM.unwrap()
         else throw RuntimeException("Cannot read ContestManifestJson from $zipFilename err = $resultContestM")
 
         val resultCandidateM: Result<CandidateManifestJson, ErrorMessages> = readCandidateManifestJsonFromZip(zipFilename, "CandidateManifest.json")
-        val candidateManifest = if (resultCandidateM is Ok) resultCandidateM.unwrap()
+        val candidateManifest = if (resultCandidateM .isOk) resultCandidateM.unwrap()
         else throw RuntimeException("Cannot read CandidateManifestJson from ${zipFilename} err = $resultCandidateM")
 
         val contestManifest = readContestManifestFromZip(zipFilename, "ContestManifest.json")
@@ -51,7 +51,7 @@ class TestReadSfJson {
     fun testBallotTypeContestManifestJsonFile() {
         val filename = "src/test/data/SF2024/manifests/BallotTypeContestManifest.json"
         val result: Result<BallotTypeContestManifest, ErrorMessages> = readBallotTypeContestManifestJson(filename)
-        val manifest1 = if (result is Ok) result.unwrap()
+        val manifest1 = if (result .isOk) result.unwrap()
             else throw RuntimeException("Cannot read BallotTypeContestManifest from ${filename} err = $result")
         println(manifest1)
 
@@ -59,7 +59,7 @@ class TestReadSfJson {
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val ifilename = "BallotTypeContestManifest.json"
         val result2: Result<BallotTypeContestManifest, ErrorMessages> = readBallotTypeContestManifestJsonFromZip(zipFilename, ifilename)
-        val manifest2 = if (result2 is Ok) result2.unwrap()
+        val manifest2 = if (result2 .isOk) result2.unwrap()
             else throw RuntimeException("Cannot read BallotTypeContestManifest from $zipFilename/$ifilename err = $result")
         // println(manifest2)
 

@@ -12,7 +12,7 @@ class TestErrorMessages {
         assertEquals("test has errors:\n  what?", errs.toString())
 
         val err = errs.add("add")
-        assertEquals(errs, err.error)
+        assertEquals(errs, err.component2())
 
         assertNull(errs.addNull("add"))
 

@@ -109,13 +109,32 @@ class ClcaSingleRoundAssortTask(
         maxLoss: Double,
     ): TestH0Result {
 
-        val bettingFn = GeneralAdaptiveBetting(N,
+        // data class GeneralAdaptiveBetting2(
+        //    val Npop: Int, // population size for this contest
+        //    val aprioriCounts: ClcaErrorCounts, // apriori counts not counting phantoms, non-null so we have noerror and upper
+        //    val nphantoms: Int, // number of phantoms in the population
+        //    val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
+        //
+        //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
+        //    val d: Int = 100,  // trunc weight
+        //    val debug: Boolean = false,
+        val betFun = GeneralAdaptiveBetting2(
+            Npop = N,
+            aprioriCounts = ClcaErrorCounts.empty(noerror, upper),
+            nphantoms = 0,
+            maxLoss = maxLoss,
+            oaAssortRates = null,
+            d = 0,
+            debug=false,
+        )
+
+        val bettingFnOld = GeneralAdaptiveBetting(N,
             startingErrors = ClcaErrorCounts.empty(noerror, upper),
             nphantoms=0, oaAssortRates = null, d=0,  maxLoss = maxLoss, debug=false)
 
         val tracker = ClcaErrorTracker(noerror, upper)
         val testFn = BettingMart(
-            bettingFn = bettingFn,
+            bettingFn = betFun,
             N = N,
             sampleUpperBound = 2*noerror,
             riskLimit = .05,

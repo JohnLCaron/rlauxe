@@ -111,7 +111,7 @@ fun createBelgiumElection(electionName: String, stopRound:Int=0, showVerify:Bool
     println("electionName $electionName")
     val filename = belgianElectionMap[electionName]!!
     val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumElectionJson(filename)
-    val belgiumElection = if (result is Ok) result.unwrap()
+    val belgiumElection = if (result .isOk) result.unwrap()
     else throw RuntimeException("Cannot read belgiumElection from ${filename} err = $result")
 
     val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, idx+1, it.NrOfVotes) }

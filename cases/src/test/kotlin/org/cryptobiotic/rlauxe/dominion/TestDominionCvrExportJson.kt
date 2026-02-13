@@ -84,7 +84,7 @@ class TestDominionCvrExportJson {
         val filename = "src/test/data/SF2024/CvrExport_15.json"
         "$testdataDir/cases/sf2024/CvrExport_23049.json"
         val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonFile(filename)
-        val dominionCvrs = if (result is Ok) result.unwrap()
+        val dominionCvrs = if (result .isOk) result.unwrap()
             else throw RuntimeException("Cannot read DominionCvrJson from ${filename} err = $result")
         // println(dominionCvrs)
 
@@ -100,7 +100,7 @@ class TestDominionCvrExportJson {
         // val filename = "src/test/data/SF2024/CvrExport_15.json" // group 2
         val filename = "src/test/data/SF2024/CvrExport_23049.json" // group 1, precinct 31-125
         val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonFile(filename)
-        val dominionCvrs = if (result is Ok) result.unwrap()
+        val dominionCvrs = if (result .isOk) result.unwrap()
         else throw RuntimeException("Cannot read DominionCvrJson from ${filename} err = $result")
         // println(dominionCvrs)
 
@@ -198,7 +198,7 @@ class TestDominionCvrExportJson {
             filter = { path -> path.toString().contains("CvrExport_") },
             visitor = { inputStream ->
                 val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
-                val dominionCvrs = if (result is Ok) result.unwrap()
+                val dominionCvrs = if (result .isOk) result.unwrap()
                         else throw RuntimeException("Cannot read DominionCvrJson from stream err = $result")
                 countFiles++
 
@@ -279,7 +279,7 @@ class TestDominionCvrExportJson {
             filter = { path -> path.toString().contains("CvrExport_") },
             visitor = { inputStream ->
                 val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
-                val dominionCvrs = if (result is Ok) result.unwrap()
+                val dominionCvrs = if (result .isOk) result.unwrap()
                     else throw RuntimeException("Cannot read DominionCvrJson from stream err = $result")
 
                 dominionCvrs.Sessions.forEach {
@@ -313,7 +313,7 @@ class TestDominionCvrExportJson {
             filter = { path -> path.toString().contains("CvrExport_") },
             visitor = { inputStream ->
                 val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
-                val dominionCvrs = if (result is Ok) result.unwrap()
+                val dominionCvrs = if (result .isOk) result.unwrap()
                 else throw RuntimeException("Cannot read DominionCvrJson from stream err = $result")
 
                 dominionCvrs.Sessions.forEach {
@@ -352,7 +352,7 @@ class TestDominionCvrExportJson {
             filter = { path -> path.toString().contains("CvrExport_") },
             visitor = { inputStream ->
                 val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
-                val dominionCvrs = if (result is Ok) result.unwrap()
+                val dominionCvrs = if (result .isOk) result.unwrap()
                 else throw RuntimeException("Cannot read DominionCvrJson from stream err = $result")
                 countFiles++
                 dominionCvrs.Sessions.forEach { session ->

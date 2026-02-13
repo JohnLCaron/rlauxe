@@ -84,7 +84,7 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
     }
     val startingVotes = vc.makeVoteList()
 
-    val raireAssertions = solution!!.second.assertions.map {  aand ->
+    val raireAssertions = solution.second.assertions.map {  aand ->
         val votes = if (aand.assertion is NotEliminatedNext) {
             val nen = (aand.assertion as NotEliminatedNext)
             val voteSeq = VoteSequences.eliminate(startingVotes, nen.continuing.toList())

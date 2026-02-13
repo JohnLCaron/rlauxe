@@ -236,6 +236,7 @@ fun readDominionCvrExportCsv(filename: String, countyId: String): DominionCvrExp
         val inputStream = zipReader.inputStream(innerFilename)
         val reader: Reader = InputStreamReader(inputStream, "UTF-8")
         CSVParser(reader, CSVFormat.DEFAULT)
+        // dunno CSVParser.Builder.get()
 
     } else {
         CSVParser.parse(File(filename), Charset.forName("UTF-8"), CSVFormat.DEFAULT)

@@ -28,7 +28,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
 
     init {
         val auditRecordResult = AuditRecord.readFromResult(auditRecordLocation)
-        if (auditRecordResult is Ok) {
+        if (auditRecordResult .isOk) {
             auditRecord = auditRecordResult.unwrap()
         } else {
             println( auditRecordResult.toString() )
@@ -41,7 +41,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         config = auditConfigResult.unwrap()
 
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
-        contests = if (contestsResults is Ok) contestsResults.unwrap().sortedBy { it.id } else {
+        contests = if (contestsResults .isOk) contestsResults.unwrap().sortedBy { it.id } else {
             println(contestsResults)
             logger.error{ contestsResults.toString() }
             throw RuntimeException( contestsResults.toString() )

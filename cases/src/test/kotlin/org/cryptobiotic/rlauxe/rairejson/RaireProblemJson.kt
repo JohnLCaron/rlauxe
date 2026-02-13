@@ -93,7 +93,7 @@ fun RaireProblemJson.import(): RaireProblem {
 fun RaireProblem.publishJson(): RaireProblemJson {
 
     return RaireProblemJson(
-        this.metadata.publishJson() ?: RaireMetadataJson(emptyList(), null),
+        this.metadata.publishJson(),
         this.num_candidates,
         this.votes.map { it.publishJson() },
         this.winner,

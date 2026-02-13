@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.betting.BettingFn
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
 import org.cryptobiotic.rlauxe.betting.GeneralOptimalLambda
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.util.Welford
@@ -80,7 +81,26 @@ class TestOneAuditAdaptiveBetting {
         val welford = Welford()
         repeat(100) {
             sampler.reset()
-            val betFun = GeneralAdaptiveBetting(
+            // data class GeneralAdaptiveBetting2(
+            //    val Npop: Int, // population size for this contest
+            //    val aprioriCounts: ClcaErrorCounts, // apriori counts not counting phantoms, non-null so we have noerror and upper
+            //    val nphantoms: Int, // number of phantoms in the population
+            //    val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
+            //
+            //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
+            //    val d: Int = 100,  // trunc weight
+            //    val debug: Boolean = false,
+            val betFun = GeneralAdaptiveBetting2(
+                Npop = contestUA.Npop,
+                aprioriCounts = ClcaErrorCounts.empty(oaCassorter.noerror(), oaCassorter.assorter.upperBound()),
+                nphantoms = contestUA.contest.Nphantoms(),
+                maxLoss = 0.90,
+                oaAssortRates = oaErrorRates,
+                d = 100,
+                debug=true,
+            )
+
+            val betFunOld = GeneralAdaptiveBetting(
                 contestUA.Npop,
                 startingErrors = ClcaErrorCounts.empty(oaCassorter.noerror(), oaCassorter.assorter.upperBound()),
                 nphantoms=contestUA.contest.Nphantoms(),

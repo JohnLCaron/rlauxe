@@ -42,7 +42,7 @@ class TestDhondtContest {
 
         contestd.assorters.forEach {
             if (it is DHondtAssorter) {
-                val dassorter = it as DHondtAssorter
+                val dassorter = it
                 assertEquals(dassorter, dassorter)
                 assertEquals(dassorter.hashCode(), dassorter.hashCode())
                 // TODO

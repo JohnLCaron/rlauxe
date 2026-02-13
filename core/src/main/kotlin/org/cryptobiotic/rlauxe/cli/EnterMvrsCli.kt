@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.cli
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.mapOrElse
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.cli.ArgParser
@@ -34,11 +36,15 @@ object EnterMvrsCli {
             description = "File containing new Mvrs for latest round"
         ).required()
 
-        parser.parse(args)
-        println("EnterMvrs from audit in $inputDir with mvrFile=$mvrFile")
-        val result = enterMvrs(inputDir, mvrFile)
-        println(result)
-        require(result is Ok)
+        try {
+            parser.parse(args)
+            println("EnterMvrs from audit in $inputDir with mvrFile=$mvrFile")
+            val result = enterMvrs(inputDir, mvrFile)
+            println(result)
+            require(result.isOk)
+        } catch (t: Throwable) {
+            println(t.message)
+        }
     }
 }
 
@@ -53,7 +59,7 @@ fun enterMvrs(inputDir: String, mvrFile: String): Result<Boolean, ErrorMessages>
     }
 
     val result = AuditRecord.readFromResult(inputDir)
-    if (result is Err) return result
+    if (result.isErr) return Err(result.component2()!!) // TODO inelegant
 
     val auditRecord = result.unwrap() as AuditRecord
     val mvrs = AuditableCardCsvReader(mvrFile)

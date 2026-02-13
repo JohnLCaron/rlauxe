@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.core.sampleSize
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -48,7 +48,6 @@ fun CorlaContestRoundCsv.showEstimation() {
 }
 
 // Compare Corla estimate with ours.
-// TODO redo this with GeneralAdaptiveBetting I think.
 // this assumes you get the same bet each time, which is not true because mui is changing.
 // Also eps (lower bound on the estimated rate) turns out to be important.
 fun betPayoffSamples(N: Int, risk: Double, assorterMargin: Double, error: Double): Triple<Double, Double, Int> {
@@ -66,10 +65,20 @@ fun betPayoffSamples(N: Int, risk: Double, assorterMargin: Double, error: Double
     //    val maxRisk: Double, // this bounds how close lam gets to 2.0; TODO study effects of this
     //    val withoutReplacement: Boolean = true,
     //    val debug: Boolean = false,
-    val bettingFn = GeneralAdaptiveBetting(
+    //
+    // data class GeneralAdaptiveBetting2(
+    //    val Npop: Int, // population size for this contest
+    //    val aprioriCounts: ClcaErrorCounts, // apriori counts not counting phantoms, non-null so we have noerror and upper
+    //    val nphantoms: Int, // number of phantoms in the population
+    //    val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
+    //
+    //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
+    //    val d: Int = 100,  // trunc weight
+    //    val debug: Boolean = false,
+    val bettingFn = GeneralAdaptiveBetting2(
         Npop = N,
-        startingErrors = ClcaErrorCounts.empty(noerror, 1.0),
-        nphantoms=0,
+        aprioriCounts = ClcaErrorCounts.empty(noerror, 1.0),
+        nphantoms = 0,
         oaAssortRates = null,
         d = 100,
         maxLoss = .99,

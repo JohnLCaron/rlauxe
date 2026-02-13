@@ -78,7 +78,7 @@ data class AssertionAndCat(val assertion: AssertionRound, val cat: String, val m
 
 fun readAssertionAndTotal(auditDir: String, cat: String, marginOverride:Map<Int, Double>? = null): Pair<Int, List<AssertionAndCat>> {
     val auditRecord = AuditRecord.readFromResult(auditDir)
-    if (auditRecord is Err) {
+    if (auditRecord.isErr) {
         fail()
     }
 

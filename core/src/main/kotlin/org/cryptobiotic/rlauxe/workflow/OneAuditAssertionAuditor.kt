@@ -2,13 +2,11 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.betting.BettingFn
 import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
-import org.cryptobiotic.rlauxe.betting.ErrorTracker
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
@@ -31,18 +29,40 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         val oaCassorter = cassertion.cassorter as OneAuditClcaAssorter
         val clcaConfig = config.clcaConfig
 
-        val bettingFn = // if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
+        val noerror=oaCassorter.noerror()
+        val upper=oaCassorter.assorter.upperBound()
+        val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
+
+        val bettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
             GeneralAdaptiveBetting(
-                Npop = contestUA.Npop,
-                startingErrors = ClcaErrorCounts.empty(oaCassorter.noerror(), oaCassorter.assorter.upperBound()),
+                contestUA.Npop,
+                startingErrors = ClcaErrorCounts.empty(noerror, upper),
                 contestUA.contest.Nphantoms(),
                 oaAssortRates = oaCassorter.oaAssortRates,
                 d = clcaConfig.d,
-                maxLoss = clcaConfig.maxLoss
+                maxLoss = clcaConfig.maxLoss)
+        } else {
+            GeneralAdaptiveBetting2(
+                contestUA.Npop,
+                aprioriCounts = apriori,
+                nphantoms = contestUA.contest.Nphantoms(),
+                maxLoss = clcaConfig.maxLoss,
+                d = clcaConfig.d,
             )
-        val testH0Result = runBetting(config, contestUA.Npop, oaCassorter, samplerTracker, bettingFn)
+        }
 
-        val measuredCounts: ClcaErrorCounts? = if (samplerTracker is ErrorTracker) samplerTracker.measuredClcaErrorCounts() else null
+        val testFn = BettingMart(
+            bettingFn = bettingFn,
+            N = contestUA.Npop,
+            sampleUpperBound = oaCassorter.upperBound(),
+            riskLimit = config.riskLimit,
+            tracker = samplerTracker
+        )
+        testFn.setDebuggingSequences()
+
+        val terminateOnNullReject = config.auditSampleLimit == null
+        val testH0Result = testFn.testH0(samplerTracker.maxSamples(), terminateOnNullReject = terminateOnNullReject) { samplerTracker.sample() }
+
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = samplerTracker.maxSamples(),
@@ -51,30 +71,10 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
             pmin = testH0Result.pvalueMin,
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
-            measuredCounts = measuredCounts,
+            measuredCounts = samplerTracker.measuredClcaErrorCounts(),
         )
 
         if (!quiet) logger.debug{" ${contestUA.name} auditResult= ${assertionRound.auditResult}"}
         return testH0Result
-    }
-
-    fun runBetting(
-        config: AuditConfig,
-        N: Int,
-        cassorter: OneAuditClcaAssorter,
-        samplerTracker: SamplerTracker,
-        bettingFn: BettingFn,
-    ): TestH0Result {
-
-        val testFn = BettingMart(
-            bettingFn = bettingFn,
-            N = N,
-            tracker = samplerTracker,
-            sampleUpperBound = cassorter.upperBound(),
-            riskLimit = config.riskLimit,
-        )
-        testFn.setDebuggingSequences()
-
-        return testFn.testH0(samplerTracker.maxSamples(), terminateOnNullReject = true) { samplerTracker.sample() }
     }
 }

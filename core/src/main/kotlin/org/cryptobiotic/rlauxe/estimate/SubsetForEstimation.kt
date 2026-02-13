@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.math.min
 
-private val debug = false
+private val debug = true
 private val logger = KotlinLogging.logger("ConsistentSampling")
 
 data class CardSamples(val cards: List<AuditableCard>, val usedByContests: Map<Int, List<Int>>) {
@@ -194,7 +194,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound): Int {
         )
     }
 
-    val estAndBet = cassorter.estWithOptimalBet(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue, clcaErrorCounts)
+    val estAndBet = cassorter.estWithOptimalBet2(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue, clcaErrorCounts)
     val dd = if (cassorter is OneAuditClcaAssorter) {
         val sum = cassorter.oaAssortRates.sumOneAuditTerm(estAndBet.second)
         val sumneg = if (sum < 0) "**" else ""

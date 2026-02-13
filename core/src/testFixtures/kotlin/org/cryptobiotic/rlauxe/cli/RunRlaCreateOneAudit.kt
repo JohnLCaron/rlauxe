@@ -40,6 +40,11 @@ object RunRlaCreateOneAudit {
             shortName = "simFuzz",
             description = "simulation fuzzing"
         ).default(0.0)
+        val fuzzMvrs by parser.option(
+            ArgType.Double,
+            shortName = "fuzzMvrs",
+            description = "fuzz Mvrs by this percent"
+        ).default(0.0)
         val quantile by parser.option(
             ArgType.Double,
             shortName = "quantile",
@@ -86,26 +91,32 @@ object RunRlaCreateOneAudit {
             description = "calculate mvrs needed for first round"
         ).default(false)
 
-        parser.parse(args)
-        println(
-            "RunRlaCreateOneAudit on $inputDir minMargin=$minMargin fuzzMvrs=$simFuzz, cvrFraction=$cvrFraction, ncards=$ncards hasStyle=$hasStyle" +
-                    " extra=$extra cals =$calc"
-        )
-        startTestElectionOneAudit(
-            inputDir,
-            minMargin,
-            simFuzz,
-            cvrFraction=cvrFraction,
-            ncards,
-            extra,
-            calc,
-        )
+        try {
+            parser.parse(args)
+            println(
+                "RunRlaCreateOneAudit on $inputDir minMargin=$minMargin simFuzz=$simFuzz, fuzzMvrs=$fuzzMvrs, cvrFraction=$cvrFraction, ncards=$ncards hasStyle=$hasStyle" +
+                        " extra=$extra cals =$calc"
+            )
+            startTestElectionOneAudit(
+                inputDir,
+                minMargin,
+                simFuzz,
+                fuzzMvrs,
+                cvrFraction = cvrFraction,
+                ncards,
+                extra,
+                calc,
+            )
+        } catch (t: Throwable) {
+            println(t.message)
+        }
     }
 
     fun startTestElectionOneAudit(
         topdir: String,
         minMargin: Double,
-        fuzzPct: Double,
+        simFuzz: Double,
+        fuzzMvrs: Double,
         cvrFraction: Double,
         ncards: Int,
         extraPct: Double,
@@ -115,7 +126,7 @@ object RunRlaCreateOneAudit {
         clearDirectory(Path(auditDir))
 
         val config = AuditConfig(
-            AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = fuzzPct,
+            AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = simFuzz,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
             simulationStrategy = if (calc) SimulationStrategy.optimistic else SimulationStrategy.regular,
         )
@@ -148,7 +159,7 @@ object RunRlaCreateOneAudit {
         // OneAuditVunderFuzzer creates fuzzed mvrs (non-pooled) and simulated mvrs (pooled)
         // TODO use cardPools
         val vunderFuzz =
-            OneAuditVunderFuzzer(cardPools!!, infos, fuzzPct, sortedCards)
+            OneAuditVunderFuzzer(cardPools!!, infos, fuzzMvrs, sortedCards)
         val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
         val sortedMvrs = oaFuzzedPairs.map { it.first }
 

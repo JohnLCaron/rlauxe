@@ -39,8 +39,7 @@ class TestOneAuditPool {
         assertFalse(cardPool.hasContest(42))
         assertEquals(1, cardPool.regVotes().size)
 
-        assertTrue(cardPool is OneAuditPoolFromCvrs)
-        val cardPoolCvrs = cardPool as OneAuditPoolFromCvrs
+        val cardPoolCvrs = cardPool
         val cardPoolCvrs2 = cardPoolCvrs.copy()
         assertEquals(cardPoolCvrs, cardPoolCvrs)
         assertEquals(cardPoolCvrs.hashCode(), cardPoolCvrs.hashCode())

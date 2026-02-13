@@ -232,7 +232,7 @@ fun removeDuplicates(svotes : List<Int> ) : List<Int> {
 
 fun convertCvrExportJsonToCvrExports(inputStream: InputStream, contestManifest: ContestManifest): Iterator<CvrExport> {
     val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
-    val dominionCvrs = if (result is Ok) result.unwrap()
+    val dominionCvrs = if (result .isOk) result.unwrap()
         else throw RuntimeException("Cannot read DominionCvrJson err = $result")
 
     val summary = dominionCvrs.import(contestManifest)
@@ -242,7 +242,7 @@ fun convertCvrExportJsonToCvrExports(inputStream: InputStream, contestManifest: 
 // read CvrExport JSON inputStream and append CvrExport csv to outputStream
 fun convertCvrExportJsonToCsv(inputStream: InputStream, outputStream: OutputStream, contestManifest: ContestManifest): DominionCvrSummary {
     val result: Result<DominionCvrExportJson, ErrorMessages> = readDominionCvrJsonStream(inputStream)
-    val dominionCvrs = if (result is Ok) result.unwrap()
+    val dominionCvrs = if (result .isOk) result.unwrap()
     else throw RuntimeException("Cannot read DominionCvrJson err = $result")
 
     val summary = dominionCvrs.import(contestManifest)

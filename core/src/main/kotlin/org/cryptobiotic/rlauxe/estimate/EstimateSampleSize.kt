@@ -291,16 +291,6 @@ fun estimateClcaAssertionRound(
             maxLoss = clcaConfig.maxLoss,
         )
     } else {
-        // class GeneralAdaptiveBetting2(
-        //    val Npop: Int, // population size for this contest
-        //    val apriori: ClcaErrorCounts, // apriori rates not counting phantoms, non-null so we have noerror and upper
-        //    val nphantoms: Int, // number of phantoms in the population
-        //    val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
-        //
-        //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
-        //    val d: Int = 100,  // trunc weight
-        //    val debug: Boolean = false,
-        //)
         GeneralAdaptiveBetting2(
             contestUA.Npop,
             aprioriCounts = apriori,
@@ -310,6 +300,7 @@ fun estimateClcaAssertionRound(
         )
     }
 
+    // TODO can we use previousErrorCounts to generate fuzz ?
     // for one contest, this takes a list of cards and fuzzes them to use as the mvrs.
     val samplerTracker = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
         ClcaFuzzSamplerTracker(config.simFuzzPct ?: 0.0, cardSamples, contestUA, cassorter, ClcaErrorCounts.empty(noerror, upper))
@@ -343,7 +334,7 @@ fun estimateClcaAssertionRound(
         clcaConfig.strategy.name,
         fuzzPct = config.simFuzzPct,
         startingTestStatistic = startingTestStatistic,
-        startingErrorRates = measuredErrors.errorRates(), // todo
+        startingErrorRates = measuredErrors.errorRates(), // TODO
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
         simNewMvrs = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
@@ -406,29 +397,50 @@ fun estimateOneAuditAssertionRound(
     val oaCassorter = cassertion.cassorter as OneAuditClcaAssorter
     val oaConfig = config.oaConfig
     val clcaConfig = config.clcaConfig
+    val noerror=oaCassorter.noerror()
+    val upper=oaCassorter.assorter.upperBound()
 
     // one set of fuzzed pairs for all contests and assertions.
     val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
 
-    val startingErrors = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive)
+    val measuredErrors = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive)
         assertionRound.accumulatedErrorCounts(contestRound) // TODO switch to previousErrorCounts ?
     else
         assertionRound.previousErrorCounts()
 
-    val bettingFn =
+    val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
+
+    val bettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
         GeneralAdaptiveBetting(
-            Npop = contestUA.Npop,
-            startingErrors = startingErrors,
-            contestUA.contest.Nphantoms(),
+            contestUA.Npop,
+            startingErrors = measuredErrors,
+            nphantoms=contestUA.contest.Nphantoms(),
             oaAssortRates = oaCassorter.oaAssortRates,
             d = clcaConfig.d,
-            maxLoss = clcaConfig.maxLoss
+            maxLoss = clcaConfig.maxLoss,
         )
+    } else {
+        GeneralAdaptiveBetting2(
+            contestUA.Npop,
+            aprioriCounts = apriori,
+            nphantoms=contestUA.contest.Nphantoms(),
+            maxLoss = clcaConfig.maxLoss,
+            d = clcaConfig.d,
+        )
+    }
 
     // uses the vunderFuzz.mvrCvrPairs as is; each trial is a new permutation
-    val wantIndices = cardSamples.usedByContests[contestUA.contest.id]!!
-    val sampler =
+    val wantIndices = cardSamples.usedByContests[contestUA.contest.id]
+    if (wantIndices == null) {
+        throw RuntimeException("failed on cardSamples.usedByContests[${contestUA.contest.id}]")
+    }
+
+    val sampler = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
         ClcaSamplerErrorTracker.fromIndexList(contestUA.contest.id, oaCassorter, oaFuzzedPairs, wantIndices)
+    } else {
+        // start from where we left off
+        ClcaSamplerErrorTracker.fromIndexList(contestUA.contest.id, oaCassorter, oaFuzzedPairs, wantIndices, measuredErrors)
+    }
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateOneAuditAssertionRound for $name with ${config.nsimEst} trials"}
@@ -451,7 +463,7 @@ fun estimateOneAuditAssertionRound(
         roundIdx,
         oaConfig.strategy.name,
         fuzzPct = config.simFuzzPct,
-        startingErrorRates = bettingFn.estimatedErrorRates(), // TODO
+        startingErrorRates = measuredErrors.errorRates(), // TODO
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,

@@ -85,7 +85,7 @@ class ClcaFuzzSamplerTracker(
         }
         val counts = testErrors.measuredClcaErrorCounts()
 
-        val (est, bet) = cassorter.estWithOptimalBet(contestUA, .9, 0.05, counts)
+        val (est, bet) = cassorter.estWithOptimalBet2(contestUA, .9, 0.05, counts)
         val sumCounts = counts.errorCounts().map { it.value }.sum()
         val pct = sumCounts/cvrPairs.size.toDouble()
         // if (pct > 10 * fuzzPct) {

@@ -62,7 +62,7 @@ fun readSamplePrnsJsonFile(filename: String): Result<List<Long>, ErrorMessages> 
 
 fun readSamplePrns(filename: String): List<Long> {
     val resultSamples = readSamplePrnsJsonFile(filename)
-    if (resultSamples is Err) logger.error{"$resultSamples"}
-    require(resultSamples is Ok)
+    if (resultSamples.isErr) logger.error{"$resultSamples"}
+    require(resultSamples.isOk)
     return resultSamples.unwrap() // these are the samples we are going to audit.
 }

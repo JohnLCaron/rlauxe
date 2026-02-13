@@ -20,14 +20,12 @@ corresponding to whether the card has a vote for the loser, other, or winner.
 A CLCA overstatement error = cvr_assort - mvr_assort has one of 7 possible values:
 
 ````
-
     [0, .5, u] - [0, .5, u] = 0, -.5, -u,
                              .5,  0, .5-u,
                               u, u-.5, 0
 
-ordering these:
-                             
-    = [-u, -.5, .5-u, 0, .5, u-.5, u] * noerror  
+ordering these:                         
+    = [-u, -.5, .5-u, 0, .5, u-.5, u]  
     
 the corresponding names are
     cvr - mvr
@@ -35,7 +33,7 @@ the corresponding names are
                                   [oth-los, noerror, oth-win]
                                   [win-los, win-oth, noerror] 
                         
-matching this ordering [-u, -.5, .5-u, 0, .5, u-.5, u]:
+names match this ordering [-u, -.5, .5-u, 0, .5, u-.5, u]:
                                   
     ["los-win", "los-oth", "oth-win", "noerror", "oth-los", "win-oth", "win-los"] 
                                   
@@ -65,8 +63,8 @@ then the possible values of bassort = (1-o/u) * noerror are:
     (1-o/u)= [2, 1+1/2u, 2-1/2u, 1, 1-1/2u, 1/2u, 0]
     (1-o/u)= [2, 1+u12, 2-u12, 1, 1-u12, u12, 0], where u12= 1/2u
     
-taus' = (1-o/u) = [2,          1+u12,    2-u12,     1,         1-u12,     u12,       0]
-taus' names     = ["los-win", "los-oth", "oth-win", "noerror", "oth-los", "win-oth", "win-los"]
+taus = (1-o/u) = [2,          1+u12,    2-u12,     1,         1-u12,     u12,       0]
+taus names     = ["los-win", "los-oth", "oth-win", "noerror", "oth-los", "win-oth", "win-los"]
 
 in our code its more convenient to reverse the ordering:
 
@@ -78,9 +76,9 @@ Note that taus depends only on u = assorter.upperLimit
 
 For Plurality, u = 1, so the possible values are:
 ````
-    [0, .5, 1, 1.5, 2] * noerror (u=1)
+    [0, .5, 1, 1.5, 2] (u=1)
     
-we give them SHANGRLA names: tauNames = ["p2o", "p1o", "noerror", "p1u", "p2u"] corresponding to these values.
+we give them SHANGRLA names: tauNames = ["p2o", "p1o", "noerror", "p1u", "p2u"] that correspond to these values.
 
 ````
 
@@ -130,21 +128,21 @@ When the mvr is a phantom, it's the same as "los".
 ## The effects of CLCA Errors
 
 It's instructive to see the effect of each error type on the testStatistic T, which gets multiplied by the 
-payoff for that error. We will measure the effect of one error by looking at the increase in noerror samples needed.
+payoff for that error. We will calculate the effect of one error by looking at the increase in noerror samples needed.
 
-When the mvr and cvr agree, the assort value = noerror, so the payoff is (µ_i approximately 1/2):
+When the mvr and cvr agree, the assort value = noerror, so the payoff is (where µ_i is approximately 1/2):
 
     payoff_noerror = (1 + λ * (noerror − 1/2))  
 
 When the mvr and cvr disagree, the assort value = tau * noerror, and the payoff is
 
-    payoff_taus = (1 + λ * (taus * noerror − 1/2))
+    payoff_tau = (1 + λ * (tau * noerror − 1/2))
 
-How many "noerror" samples are equivilent to one sample with assort value taus * noerror ?
+How many "noerror" samples are equivilent to one sample whose assort value = tau * noerror ?
 
-    payoff_noerror^n_taus = payoff_taus
-    n_taus = ln(payoff_taus) / ln(payoff_noerror)
-    n_taus = ln((1 + λ * (taus * noerror − 1/2)) / ln(1 + λ * (noerror − 1/2))
+    payoff_noerror^n_tau = payoff_tau
+    n_tau = ln(payoff_tau) / ln(payoff_noerror)
+    n_tau = ln((1 + λ * (tau * noerror − 1/2)) / ln(1 + λ * (noerror − 1/2))
 
 This depends on lamda, as well as upper and margin, since noerror = 1/(2-margin/upper)
 

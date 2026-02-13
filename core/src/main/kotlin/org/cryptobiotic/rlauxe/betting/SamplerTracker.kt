@@ -199,6 +199,7 @@ class ClcaSamplerErrorTracker(
             cassorter: ClcaAssorter,
             pairs: List<Pair<AuditableCard, AuditableCard>>,
             wantIndices: List<Int>,
+            previousErrorCounts: ClcaErrorCounts? = null,
         ): ClcaSamplerErrorTracker {
             val extract = mutableListOf<Pair<AuditableCard, AuditableCard>>()
             var wantIdx = 0
@@ -208,7 +209,10 @@ class ClcaSamplerErrorTracker(
                     wantIdx++
                 }
             }
-            return ClcaSamplerErrorTracker(contestId, cassorter, extract)
+            val result = ClcaSamplerErrorTracker(contestId, cassorter, extract)
+            if (previousErrorCounts != null)
+                result.clcaErrorTracker.setFromPreviousCounts(previousErrorCounts)
+            return result
         }
 
         fun withMaxSample(

@@ -1,15 +1,16 @@
 package org.cryptobiotic.rlauxe.util
 
 import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Result
 
 class ErrorMessages(val id: String, private val level: Int = 1) {
     private val messages = ArrayList<String>()
     private val nested = ArrayList<ErrorMessages>()
     private val indent = Indent(level)
 
-    fun add(mess: String) : Err<ErrorMessages> {
+    fun add(mess: String) : Result<Nothing, ErrorMessages> {
         messages.add(mess)
-        return Err(this)
+        return Err(this) // TODO good enough?
     }
 
     fun addNull(mess: String) : Any? {

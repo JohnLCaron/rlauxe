@@ -33,8 +33,12 @@ object RunRlaRoundCli {
             description = "dont show progress messages"
         ).default(false)
 
-        parser.parse(args)
-        runRound(inputDir, onlyTask)
+        try {
+            parser.parse(args)
+            runRound(inputDir, onlyTask)
+        } catch (t: Throwable) {
+            println(t.message)
+        }
     }
 }
 
@@ -64,37 +68,41 @@ object RunRoundAgainCli {
             description = "assertion win/lose"
         ).default("first")
 
-        parser.parse(args)
+        try {
+            parser.parse(args)
 
-        val auditRecord = AuditRecord.readFrom(auditDir)
-        if (auditRecord == null) {
-            println("auditRecord not found at $auditDir")
-            return
-        }
-        val auditRound = if (roundIdx == -1) auditRecord.rounds.last() else auditRecord.rounds.find { it.roundIdx == roundIdx }
-        if (auditRound == null) {
-            println("AuditRound roundIdx $roundIdx not found at $auditDir")
-            return
-        }
-        val contestRound = auditRound.contestRounds.find { it.id == contest }
-        if (contestRound == null) {
-            println("contestRound with contest id = $contest not found")
-            return
-        }
-        val assertionRound = if (assertionWinLose == "first") contestRound.assertionRounds.first() else {
-            contestRound.assertionRounds.find { it.assertion.assorter.winLose().contains(assertionWinLose) }
-        }
-        if (assertionRound == null) {
-            println("assertionRound with assertion.assorter.winLose() containing '$assertionWinLose' not found")
-            return
-        }
-        if (assertionRound.auditResult == null) {
-            println("assertionRound.auditResult is null")
-            return
-        }
+            val auditRecord = AuditRecord.readFrom(auditDir)
+            if (auditRecord == null) {
+                println("auditRecord not found at $auditDir")
+                return
+            }
+            val auditRound = if (roundIdx == -1) auditRecord.rounds.last() else auditRecord.rounds.find { it.roundIdx == roundIdx }
+            if (auditRound == null) {
+                println("AuditRound roundIdx $roundIdx not found at $auditDir")
+                return
+            }
+            val contestRound = auditRound.contestRounds.find { it.id == contest }
+            if (contestRound == null) {
+                println("contestRound with contest id = $contest not found")
+                return
+            }
+            val assertionRound = if (assertionWinLose == "first") contestRound.assertionRounds.first() else {
+                contestRound.assertionRounds.find { it.assertion.assorter.winLose().contains(assertionWinLose) }
+            }
+            if (assertionRound == null) {
+                println("assertionRound with assertion.assorter.winLose() containing '$assertionWinLose' not found")
+                return
+            }
+            if (assertionRound.auditResult == null) {
+                println("assertionRound.auditResult is null")
+                return
+            }
 
-        // fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): String {
-        val result = runRoundAgain(auditDir, contestRound, assertionRound)
-        println(result)
+            // fun runAudit(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound, auditRoundResult: AuditRoundResult): String {
+            val result = runRoundAgain(auditDir, contestRound, assertionRound)
+            println(result)
+        } catch (t: Throwable) {
+            println(t.message)
+        }
     }
 }

@@ -95,7 +95,7 @@ open class ClcaAssorter(
         return N
     }
 
-    // Pair(estSampleSize, optimalBet)
+    /* Pair(estSampleSize, optimalBet)
     fun estWithOptimalBet(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorCounts: ClcaErrorCounts? = null): Pair<Int, Double> {
         val upper = assorter.upperBound()
         val betFn = GeneralAdaptiveBetting(
@@ -112,34 +112,11 @@ open class ClcaAssorter(
             sampleSizeWithErrors(optimalBet, alpha, clcaErrorCounts)
 
         return Pair(estSampleSize, optimalBet)
-    }
-
-    open fun sampleSizeWithErrorRates(bet: Double, alpha: Double, errorRates: Map<Double, Double>): Int {
-        val p0 = 1.0 - errorRates.map{ it.value }.sum()
-        val noerrorTerm = ln(1.0 + bet * (noerror - 0.5)) * p0
-
-        var sumErrors = 0.0
-        errorRates.forEach { (assortValue: Double, rate: Double) ->
-            sumErrors += ln(1.0 + bet * (assortValue - 0.5)) * rate
-        }
-        val lnPayoff = noerrorTerm + sumErrors
-
-        // N = ln(1/alpha) / (ln(1 + λc (noerror − .5))*p0 + Sum( ln(1 + λc (a_pk − .5)*p_pk))
-        val N =  roundUp((-ln(alpha) / lnPayoff))
-        return N
-    }
+    } */
 
     // Pair(estSampleSize, optimalBet)
     fun estWithOptimalBet2(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorCounts: ClcaErrorCounts? = null): Pair<Int, Double> {
         val upper = assorter.upperBound()
-        //     val Npop: Int, // population size for this contest
-        //    val apriori: ClcaErrorCounts, // apriori rates not counting phantoms, non-null so we have noerror and upper
-        //    val nphantoms: Int, // number of phantoms in the population
-        //    val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
-        //
-        //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
-        //    val d: Int = 100,  // trunc weight
-        //    val debug: Boolean = false,
         val betFn = GeneralAdaptiveBetting2(
             contest.Npop,
             clcaErrorCounts ?: ClcaErrorCounts.empty(noerror(), upper), // else no errors

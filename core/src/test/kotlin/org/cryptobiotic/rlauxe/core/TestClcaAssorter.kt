@@ -102,7 +102,7 @@ class TestClcaAssorter {
         println(" sampleSize = $sampleSize")
 
         val contestUA = ContestWithAssertions(contest, isClca = true)
-        val estSize = cassorter.estWithOptimalBet(contestUA, 0.9, .05);
+        val estSize = cassorter.estWithOptimalBet2(contestUA, 0.9, .05);
         println(" estSize = $estSize")
     }
 

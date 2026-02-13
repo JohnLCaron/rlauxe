@@ -3,7 +3,7 @@
 
 When Nc > ncvrs, we add phantom cards to make up the difference, so nphantoms = Nc - ncvrs.
 
-Assign assort_cvr = .5 to a phantom cvr. (this make the mean larger reletive to assigning 0).
+Assign assort_cvr = .5 to a phantom cvr. 
 
 A phantom cvr may have a valid ballot identifier, and only the scanned cvr is missing. (in this case it would be ideal to
 locate the ballot and rescan if possible).
@@ -14,7 +14,7 @@ locate the ballot and rescan if possible).
         bassort = (1-o/u) * noerror 
         bassort = (1-1/2u)  phantom-phantom
 
-2. If the phantom cvr gets chosen for the audit, and the ballot can be located, then we have an mvr that might have one of three    sort values [0, 1/2, u].
+2. If the phantom cvr gets chosen for the audit, and the ballot can be located, then we have an mvr that might have one of three sort values [0, 1/2, u].
 The overstatement would then be cvr_assort - mvr_assort = 1/2 - [0, 1/2, u] = [1/2, 0, 1/2-u], and the bassort value is
 
 1-(1/2-u)/u
@@ -28,8 +28,7 @@ The overstatement would then be cvr_assort - mvr_assort = 1/2 - [0, 1/2, u] = [1
             =    1          phantom-other 
             =    2-1/2u     phantom-winner 
 
-3. If the cvr exists, but the mvr cannot be found, then it is a phantom, and mvr_assort = 0. (theres probably no way to predict this in advance). The cvr  might have one of three sort values [0, 1/2, u].
-The overstatement would then be cvr_assort - mvr_assort = [0, 1/2, u], and the bassort value is
+3. If the cvr exists, but the mvr cannot be found, then it is a phantom, and mvr_assort = 0. The cvr  might have one of three sort values [0, 1/2, u]. The overstatement would then be cvr_assort - mvr_assort = [0, 1/2, u], and the bassort value is
 
            bassort = (1-o/u) * noerror
            = 1 - [0, 1/2, u]/u * noerror

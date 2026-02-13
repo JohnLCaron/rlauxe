@@ -35,12 +35,12 @@ class TruncShrinkage(
     }
 
     // estimate population mean from previous samples
-    override fun eta(tracker: Tracker): Double {
-        val lastj = tracker.numberOfSamples()
+    override fun eta(prevSampleTracker: Tracker): Double {
+        val lastj = prevSampleTracker.numberOfSamples()
         val dj1 = (d + lastj).toDouble()
 
         val sampleSum = if (lastj == 0) 0.0 else {
-            tracker.sum()
+            prevSampleTracker.sum()
         }
 
         // (2.5.2, eq 14, "truncated shrinkage")
@@ -51,7 +51,7 @@ class TruncShrinkage(
         // Choosing epsi . To allow the estimated winner’s share ηi to approach √ µi as the sample grows
         // (if the sample mean approaches µi or less), we shall take epsi := c/ sqrt(d + i − 1) for a nonnegative constant c,
         // for instance c = (η0 − µ)/2.
-        val mean = populationMeanIfH0(N, withoutReplacement, tracker)
+        val mean = populationMeanIfH0(N, withoutReplacement, prevSampleTracker)
         val e_j = c / sqrt(dj1)
         val capBelow = mean + e_j
 

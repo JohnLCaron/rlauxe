@@ -17,7 +17,7 @@ class TestAuditConfig {
   ClcaConfig(strategy=generalAdaptive2, fuzzMvrs=null, d=100, maxLoss=0.9, cvrsContainUndervotes=true, apriori=TausRates(rates={}))
 """
         assertEquals(expected, config.toString())
-        assertEquals("generalAdaptive", config.strategy())
+        assertEquals("generalAdaptive2", config.strategy())
     }
 
     @Test

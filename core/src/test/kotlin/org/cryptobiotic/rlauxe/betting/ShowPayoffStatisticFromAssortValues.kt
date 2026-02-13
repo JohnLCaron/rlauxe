@@ -38,7 +38,26 @@ class ShowPayoffStatisticFromAssortValues {
         assorts.forEach{ startingTracker.addSample(it) }
         println(startingTracker.measuredClcaErrorCounts().show())
 
-        val betFn = GeneralAdaptiveBetting(N,
+        // data class GeneralAdaptiveBetting2(
+        //    val Npop: Int, // population size for this contest
+        //    val aprioriCounts: ClcaErrorCounts, // apriori counts not counting phantoms, non-null so we have noerror and upper
+        //    val nphantoms: Int, // number of phantoms in the population
+        //    val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
+        //
+        //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
+        //    val d: Int = 100,  // trunc weight
+        //    val debug: Boolean = false,
+        val betFn = GeneralAdaptiveBetting2(
+            Npop = N,
+            aprioriCounts = ClcaErrorCounts.empty(noerror, upper),
+            nphantoms = 2,
+            maxLoss = maxLoss,
+            oaAssortRates=null,
+            d = 0,
+            debug=true,
+        )
+
+        val betFnOld = GeneralAdaptiveBetting(N,
             startingErrors = startingTracker.measuredClcaErrorCounts(),
             nphantoms = 2,
             oaAssortRates = null, d=0,  maxLoss = maxLoss, debug=true)

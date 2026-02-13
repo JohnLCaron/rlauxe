@@ -89,7 +89,7 @@ data class RaireSolution(
     override fun toString() = buildString {
         appendLine("RaireSolution(difficulty=$difficulty, margin=$margin, winner=$winner, num_candidates=$num_candidates, num_assertions=${assertions.size}" )
         appendLine(" contest='${metadata!!.contest}'")
-        appendLine(" candidates=${metadata!!.candidates}")
+        appendLine(" candidates=${metadata.candidates}")
         assertions.forEach {
             appendLine("  ${it} ")
         }

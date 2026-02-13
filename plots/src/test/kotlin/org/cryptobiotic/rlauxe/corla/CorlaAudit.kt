@@ -120,7 +120,7 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        sampling: SamplerTracker,
+        samplerTracker: SamplerTracker,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA
@@ -137,15 +137,15 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             noerror = cassorter.noerror(),
             p1 = 0.0, p2 = 0.0, p3 = 0.0, p4 = 0.0, // TODO
         )
-        val testH0Result = testFn.testH0(sampling.maxSamples(), terminateOnNullReject = true) { sampling.sample() }
+        val testH0Result = testFn.testH0(samplerTracker.maxSamples(), terminateOnNullReject = true) { samplerTracker.sample() }
         val samplesNeeded = testH0Result.sampleCount
 
         val upper = cassorter.assorter.upperBound()
-        val measuredCounts: ClcaErrorCounts? = if (sampling is ErrorTracker) sampling.measuredClcaErrorCounts() else null
+        val measuredCounts: ClcaErrorCounts? = if (samplerTracker is ErrorTracker) samplerTracker.measuredClcaErrorCounts() else null
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
-            nmvrs = sampling.nmvrs(),
+            nmvrs = samplerTracker.nmvrs(),
             // countCvrsUsedInAudit = sampling.countCvrsUsedInAudit(),
             plast = testH0Result.pvalueLast,
             pmin = testH0Result.pvalueMin,

@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.math.ln
@@ -182,7 +183,26 @@ class TestOneAuditAssortValueRates {
         // data class OneAuditAssortValueRates(val rates: Map<Double, Double>, val totalInPools: Int) {
         val oaAssortRates = OneAuditAssortValueRates(rates, npool.toInt())
 
-        val betFn = GeneralAdaptiveBetting(
+        // data class GeneralAdaptiveBetting2(
+        //    val Npop: Int, // population size for this contest
+        //    val aprioriCounts: ClcaErrorCounts, // apriori counts not counting phantoms, non-null so we have noerror and upper
+        //    val nphantoms: Int, // number of phantoms in the population
+        //    val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
+        //
+        //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
+        //    val d: Int = 100,  // trunc weight
+        //    val debug: Boolean = false,
+        val betFun = GeneralAdaptiveBetting2(
+            Npop = Npop,
+            aprioriCounts = ClcaErrorCounts.empty(noerror, upper),
+            nphantoms = 0,
+            maxLoss = maxBet/2,
+            oaAssortRates = oaAssortRates,
+            d = 100,
+            debug=false,
+        )
+
+        val betFnOld = GeneralAdaptiveBetting(
             Npop,
             ClcaErrorCounts.empty(noerror, upper),
             0,
@@ -190,7 +210,7 @@ class TestOneAuditAssortValueRates {
             maxLoss = maxBet/2,
             debug=false,
         )
-        val optimalBet = betFn.bet(ClcaErrorTracker(noerror, upper))
+        val optimalBet = betFun.bet(ClcaErrorTracker(noerror, upper))
         println("optimalBet = $optimalBet")
 
         val noerrorTerm = ln(1.0 + optimalBet * (noerror - 0.5)) * p0

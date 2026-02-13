@@ -106,24 +106,17 @@ object RunRlaStartFuzz {
             description = "add extra percent to simulate diluted margin"
         ).default(.01)
 
-        parser.parse(args)
-        println("RunRlaStartFuzz on $topdir auditType=$auditType minMargin=$minMargin fuzzMvrs=$fuzzMvrs, simFuzz=$simFuzz, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
-                " addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates quantile=$quantile")
-        when (auditType) {
-            "POLLING" -> startTestElectionPolling(topdir, minMargin, ncards, fuzzMvrs, simFuzz, quantile, pctPhantoms, ncontests)
-            // fun startTestElectionOneAudit(
-            //    topdir: String,
-            //    minMargin: Double,
-            //    fuzzMvrs: Double,
-            //    simFuzz: Double,
-            //    quantile: Double,
-            //    phantomPct: Double,
-            //    ncards: Int,
-            //    strategy: String,
-            //    cvrFraction: Double,
-            //    extraPct: Double,
-            "ONEAUDIT" ->  startTestElectionOneAudit(topdir, minMargin, fuzzMvrs, simFuzz, quantile, pctPhantoms, ncards, oaStrategy, cvrFraction, extraPct=extra)
-            else ->  startTestElectionClca(topdir, minMargin, fuzzMvrs, simFuzz, quantile, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates)
+        try {
+            parser.parse(args)
+            println("RunRlaStartFuzz on $topdir auditType=$auditType minMargin=$minMargin fuzzMvrs=$fuzzMvrs, simFuzz=$simFuzz, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
+                    " addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates quantile=$quantile")
+            when (auditType) {
+                "POLLING" -> startTestElectionPolling(topdir, minMargin, ncards, fuzzMvrs, simFuzz, quantile, pctPhantoms, ncontests)
+                "ONEAUDIT" ->  startTestElectionOneAudit(topdir, minMargin, fuzzMvrs, simFuzz, quantile, pctPhantoms, ncards, oaStrategy, cvrFraction, extraPct=extra)
+                else ->  startTestElectionClca(topdir, minMargin, fuzzMvrs, simFuzz, quantile, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates)
+            }
+        } catch (t: Throwable) {
+            println(t.message)
         }
     }
 }

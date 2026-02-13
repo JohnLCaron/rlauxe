@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
@@ -119,7 +120,26 @@ class TestSfElection {
         scontests.filter { !it.isIrv && it.minDilutedMargin()!! < .07 }.forEach { contest ->
             val minAssertion = contest.minClcaAssertion()!!
             val oaass = minAssertion.cassorter as OneAuditClcaAssorter
-            val betFn = GeneralAdaptiveBetting(
+
+            // data class GeneralAdaptiveBetting2(
+            //    val Npop: Int, // population size for this contest
+            //    val aprioriCounts: ClcaErrorCounts, // apriori counts not counting phantoms, non-null so we have noerror and upper
+            //    val nphantoms: Int, // number of phantoms in the population
+            //    val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
+            //
+            //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
+            //    val d: Int = 100,  // trunc weight
+            //    val debug: Boolean = false,
+            val betFn = GeneralAdaptiveBetting2(
+                Npop = contest.Npop,
+                aprioriCounts = ClcaErrorCounts.empty(oaass.noerror(), 1.0),
+                contest.Nphantoms,
+                maxLoss = .9,
+                oaAssortRates=oaass.oaAssortRates,
+                d = 100,
+                debug=true,
+            )
+            val betFnOld = GeneralAdaptiveBetting(
                 contest.Npop,
                 ClcaErrorCounts.empty(oaass.noerror(), 1.0),
                 contest.Nphantoms,

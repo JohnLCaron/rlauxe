@@ -1,7 +1,9 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    kotlin("jvm")
+    // alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlinx.serialization)
     id ("java-test-fixtures")
+    `java-test-fixtures`
 }
 
 group = "org.cryptobiotic.rlauxe"
@@ -15,18 +17,23 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.cli)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.oshai.logging)
+    implementation(libs.bundles.logging)
+
+    testImplementation(platform("org.junit:junit-bom:5.13.4"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testFixturesImplementation(files("../libs/raire-java-1.0.2.jar"))
     testFixturesImplementation(libs.bundles.jvmtest)
-    testFixturesImplementation(libs.kotest.property)
     testFixturesImplementation(libs.kotlinx.cli)
     testFixturesImplementation(libs.oshai.logging)
     testFixturesImplementation(libs.commons.math)
 
+    // cant use testImplementation(kotlin("test")) and kotest together as they have diffrent jupitor versions....
     testImplementation(libs.bundles.jvmtest)
     testImplementation(libs.kotest.property)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.logback.classic)
 }
 
 tasks.test {
@@ -35,16 +42,17 @@ tasks.test {
     maxHeapSize = "8g"
     jvmArgs = listOf("-Xss128m")
 
-    // Make tests run in parallel
+    /* Make tests run in parallel
     // More info: https://www.jvt.me/posts/2021/03/11/gradle-speed-parallel/
     systemProperties["junit.jupiter.execution.parallel.enabled"] = "true"
+    systemProperties["junit.jupiter.execution.parallel.config.strategy"] = "dynamic"
     systemProperties["junit.jupiter.execution.parallel.mode.default"] = "concurrent"
-    systemProperties["junit.jupiter.execution.parallel.mode.classes.default"] = "concurrent"
+    systemProperties["junit.jupiter.execution.parallel.mode.classes.default"] = "concurrent" */
 
     // kantis.github.io/posts/Faster-Kotest-startup/
-    systemProperty("kotest.framework.discovery.jar.scan.disable", "true")
-    systemProperty("kotest.framework.classpath.scanning.config.disable", "true")
-    systemProperty("kotest.framework.classpath.scanning.autoscan.disable", "true")
+    // systemProperty("kotest.framework.discovery.jar.scan.disable", "true")
+    // systemProperty("kotest.framework.classpath.scanning.config.disable", "true")
+    // systemProperty("kotest.framework.classpath.scanning.autoscan.disable", "true")
 }
 
 kotlin {

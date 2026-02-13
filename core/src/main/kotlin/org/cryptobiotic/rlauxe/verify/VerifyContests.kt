@@ -47,7 +47,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         config = auditConfigResult.unwrap()
 
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
-        allContests = if (contestsResults is Ok) contestsResults.unwrap().sortedBy { it.id } else {
+        allContests = if (contestsResults .isOk) contestsResults.unwrap().sortedBy { it.id } else {
             println(contestsResults)
             null
         }

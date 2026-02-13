@@ -15,7 +15,7 @@ class TestContestJson {
     fun testReadContestsJsonFile() {
         val filename = "src/test/data/contests.json"
         val contestsResults = readContestsJsonFile(filename)
-        val contests = if (contestsResults is Ok) contestsResults.unwrap()
+        val contests = if (contestsResults .isOk) contestsResults.unwrap()
             else throw RuntimeException("Cannot read contests from ${filename} err = $contestsResults")
         contests.forEach{
             println(" $it")

@@ -20,7 +20,7 @@ class TestBelgiumElection {
     fun testReadBelgiumElection() {
         val filename = belgianElectionMap["Namur"]!!
         val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumElectionJson(filename)
-        val belgiumElection = if (result is Ok) result.unwrap()
+        val belgiumElection = if (result .isOk) result.unwrap()
         else throw RuntimeException("Cannot read belgiumElection from ${filename} err = $result")
         println(belgiumElection)
     }
@@ -35,7 +35,7 @@ class TestBelgiumElection {
         println("ElectionName $electionName")
         val filename = belgianElectionMap[electionName]!!
         val result: Result<BelgiumElectionJson, ErrorMessages> = readBelgiumElectionJson(filename)
-        val belgiumElection = if (result is Ok) result.unwrap()
+        val belgiumElection = if (result .isOk) result.unwrap()
         else throw RuntimeException("Cannot read belgiumElection from ${filename} err = $result")
         println(belgiumElection)
 

@@ -25,7 +25,7 @@ class ShowRaireContests {
         val topDir = "$testdataDir/cases/sf2024"
         val publisher = Publisher("$topDir/clca/audit")
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
-        val contestsUA = if (contestsResults is Ok) contestsResults.unwrap()
+        val contestsUA = if (contestsResults .isOk) contestsResults.unwrap()
         else throw RuntimeException("Cannot read contests from ${publisher.contestsFile()} err = $contestsResults")
 
         val irvCounters = mutableListOf<IrvCounter>()

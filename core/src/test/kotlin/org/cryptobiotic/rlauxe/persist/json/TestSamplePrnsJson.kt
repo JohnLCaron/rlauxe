@@ -33,7 +33,7 @@ class TestSamplePrnsJson {
 
         writeSamplePrnsJsonFile(target, filename)
         val result = readSamplePrnsJsonFile(filename)
-        assertTrue(result is Ok)
+        assertTrue(result .isOk)
         val roundtripJson = result.unwrap()
         val roundtrip = roundtripJson
         assertTrue(roundtrip.equals(target))

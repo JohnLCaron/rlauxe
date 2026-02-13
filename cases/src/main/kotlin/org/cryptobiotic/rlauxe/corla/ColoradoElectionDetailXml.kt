@@ -141,7 +141,7 @@ data class Choice(
     val voteTypes: List<VoteType>,
 ) {
     override fun toString() = buildString {
-        return "Choice(key=$key, text='$text', party='$party', totalVotes=$totalVotes, voteTypes=$voteTypes)"
+        append("Choice(key=$key, text='$text', party='$party', totalVotes=$totalVotes, voteTypes=$voteTypes)")
     }
 }
 

@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.persist
 
-import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -52,8 +51,8 @@ data class CompositeRecord(
                         val auditDir = "${entry.toAbsolutePath()}/audit"
                         if (Path(auditDir).exists()) {
                             val result: Result<AuditRecordIF, ErrorMessages> = AuditRecord.readFromResult(auditDir)
-                            if (result is Err) {
-                                println("  Error: ${result.error}")
+                            if (result.isErr) {
+                                println("  Error: ${result.component2()}")
                             } else {
                                 val subRecord: AuditRecord = result.unwrap()  as AuditRecord // TODO
                                 components.add(subRecord)

@@ -2,26 +2,27 @@
 rlauxe = "0.8.0"
 
 # main dependency versions
-kotlin = "2.1.21"
+kotlin = "2.3.10"
 kotlinx-cli = "0.3.6"
 kotlinx-coroutines = "1.10.2"
-oshai-version = "7.0.0"
+oshai-version = "7.0.13"
+slf4j-version="2.0.17"
 
 # library versions
-bull-result = "1.1.18"
-commons-csv = "1.4"
+bull-result = "2.1.0"
+commons-csv = "1.14.1"
 commons-math = "3.6.1"
-commons-poi = "5.4.1"
+commons-poi = "5.5.1"
 kandy-letsPlot = "0.8.3"
 kotlin-statistics = "0.8.3"
-serialization = "1.7.1"
-xmlutil-version = "0.91.1"
+serialization = "1.10.0"
+xmlutil-version = "0.91.3"
 
 # test only dependency versions
 junit-jupiter-params = "5.13.1"
-logback = "1.5.18"
-mockk = "1.14.2"
-kotest = "6.0.3"
+logback = "1.5.29"
+mockk = "1.14.9"
+kotest = "6.1.3"
 
 [libraries]
 
@@ -44,7 +45,8 @@ pdvrieze-xmlutil-core-xml = { module = "io.github.pdvrieze.xmlutil:core-jvmcommo
 pdvrieze-xmlutil-serialization-xml = { module = "io.github.pdvrieze.xmlutil:serialization-jvm", version.ref = "xmlutil-version" }
 
 # Logging
-oshai-logging = { module = "io.github.oshai:kotlin-logging", version.ref = "oshai-version" }
+oshai-logging = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = "oshai-version" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j-version" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
 # Test
@@ -55,11 +57,11 @@ kotest-runner = { module = "io.kotest:kotest-runner-junit5", version.ref = "kote
 kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotest" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
-
 [bundles]
+logging = ["oshai-logging", "slf4j-api"]
 jvmtest = ["junit-jupiter-params", "kotlin-test-junit5", "logback-classic", "mockk", "kotest-runner", "kotest-property"]
 xmlutil = ["pdvrieze-xmlutil-core-xml", "pdvrieze-xmlutil-serialization-xml", ]
 
 [plugins]
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+# kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

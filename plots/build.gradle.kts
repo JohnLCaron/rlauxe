@@ -1,5 +1,6 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    kotlin("jvm")
+    // alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlinx.serialization)
     id ("java-test-fixtures")
 }
@@ -18,6 +19,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(libs.bull.result)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.bundles.logging)
     implementation(libs.lets.plot)
     implementation(libs.lets.plot.statistics)
 
@@ -25,6 +27,7 @@ dependencies {
     testImplementation(libs.kotest.property)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(testFixtures(project(":core")))
+    testImplementation(libs.logback.classic)
 }
 
 tasks.withType<Test>().configureEach {

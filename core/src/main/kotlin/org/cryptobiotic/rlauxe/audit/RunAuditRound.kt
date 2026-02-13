@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.audit
 
-import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
@@ -33,8 +32,8 @@ private val logger = KotlinLogging.logger("RunAuditRound")
 // called from cli and rlauxe-viewer
 fun runRound(inputDir: String, onlyTask: String? = null): AuditRoundIF? {
     val roundResult = runRoundResult(inputDir, onlyTask)
-    if (roundResult is Err) {
-        logger.error{"runRoundResult failed ${roundResult.error}"}
+    if (roundResult.isErr) {
+        logger.error{"runRoundResult failed ${roundResult.component2()}"}
         return null
     }
     return roundResult.unwrap()

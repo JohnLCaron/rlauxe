@@ -58,7 +58,7 @@ class TestAuditConfigJson {
         writeAuditConfigJsonFile(target, scratchFile.toString())
 
         val result = readAuditConfigJsonFile(scratchFile.toString())
-        assertTrue(result is Ok)
+        assertTrue(result .isOk)
         val roundtrip = result.unwrap()
         assertEquals(roundtrip, target)
         assertEquals(roundtrip, target)

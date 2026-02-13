@@ -1,10 +1,10 @@
-package org.cryptobiotic.rlauxe.estimate
+package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
-import org.cryptobiotic.rlauxe.betting.Taus
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsForClca
 import kotlin.test.Test
+
 
 // simulate multiple contests with different numbers of candidates. Fuzz the cvrs and measure the error counts.
 // convert the counts to tauErrorRates (divide out the noerror factor) and then normalize by fuzzPct.

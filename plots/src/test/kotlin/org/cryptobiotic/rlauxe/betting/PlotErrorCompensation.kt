@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
+import org.cryptobiotic.rlauxe.util.dfn
 
 import org.junit.jupiter.api.Test
 import kotlin.io.path.Path
@@ -152,6 +153,49 @@ class PlotErrorCompensation {
             xname="margin", xfld = { it.margin },
             yname="samplesToCompensate", yfld = { it.payoffRatio },
             catName="tau", catfld = { it.cat },
+            scaleType=scale,
+        )
+    }
+
+    @Test
+    fun plotPhantomsByUpper() {
+        val lamda = 1.8
+        val uppers = listOf(.526, 1.0, 10.0)
+
+        val results = mutableListOf<BettingPayoffRatio>()
+        uppers.forEach { upper ->
+            margins.forEach { margin ->
+                //   phantom-phantom tau= 0.7143 ' 1-1/2u' (oth-los) = (pha-pha)
+                val tau = 1-1/(2*upper)
+                val noerror = 1 / (2 - margin / upper)
+                val payoffNoerror = 1.0 + lamda * (noerror - 0.5)
+
+                val payoffPhantom = 1.0 + lamda * (tau*noerror - 0.5)
+                val samplesToCompensate = -ln(payoffPhantom) / ln(payoffNoerror)
+                results.add(
+                    BettingPayoffRatio(
+                        cat = dfn(upper, 3),
+                        payoffRatio = samplesToCompensate,
+                        margin = margin
+                    )
+                )
+            }
+        }
+
+        plotWithUpper(results, "phantomByUpper", "lamda=$lamda common case both cvr and mvr are phantoms", scale = ScaleType.Linear)
+    }
+
+    fun plotWithUpper(data: List<BettingPayoffRatio>, name: String, subtitle: String, scale: ScaleType = ScaleType.Linear) {
+        validateOutputDir(Path(dirName))
+
+        genericPlotter(
+            "samples needed to compensate for one phantom",
+            subtitle,
+            "$dirName/$name",
+            data,
+            xname="margin", xfld = { it.margin },
+            yname="samplesToCompensate", yfld = { it.payoffRatio },
+            catName="upper", catfld = { it.cat },
             scaleType=scale,
         )
     }

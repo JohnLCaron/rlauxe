@@ -69,7 +69,7 @@ class TestRunCliInTemp {
         RunRlaStartFuzz.main(
             arrayOf(
                 "-in", topdir,
-                "-isPolling",
+                "--auditType", "POLLING",
                 "-fuzzMvrs", ".0023",
                 "-ncards", "20000",
                 "-ncontests", "2",

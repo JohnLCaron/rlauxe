@@ -46,7 +46,7 @@ class TestTaus {
         println(taus)
         println("names = ${taus.names()}")
         println("values = ${taus.values()}")
-        assertEquals("[win-los, win-oth, oth-los, noerror, los-oth, oth-win, los-win]", taus.names().toString())
+        assertEquals("[win-los, win-oth, oth-los, noerror, oth-win, los-oth, los-win]", taus.names().toString())
 
         taus.names().forEach { name ->
             val v = taus.valueOf(name)

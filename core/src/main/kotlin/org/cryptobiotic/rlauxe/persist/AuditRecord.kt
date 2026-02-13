@@ -50,9 +50,9 @@ class AuditRecord(
 
         // get complete match with sampleNums in last round
         val sampledPrnsResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(lastRoundIdx))
-        if (sampledPrnsResult is Err) {
+        if (sampledPrnsResult.isErr) {
             logger.error{ "$sampledPrnsResult" } // needed?
-            errs.addNested(sampledPrnsResult.error)
+            errs.addNested(sampledPrnsResult.component2()!!)
             return false
         }
         val sampledPrns = sampledPrnsResult.unwrap()
@@ -75,7 +75,7 @@ class AuditRecord(
             if (compositeRecord != null) return compositeRecord
 
             val auditRecordResult = readFromResult(location)
-            if (auditRecordResult is Ok) {
+            if (auditRecordResult.isOk) {
                 return auditRecordResult.unwrap()
             } else {
                 logger.error { auditRecordResult.toString() }
@@ -88,13 +88,13 @@ class AuditRecord(
 
             val publisher = Publisher(location)
             val auditConfigResult = readAuditConfigJsonFile(publisher.auditConfigFile())
-            val config = if (auditConfigResult is Ok) auditConfigResult.unwrap() else {
+            val config = if (auditConfigResult.isOk) auditConfigResult.unwrap() else {
                 errs.addNested(auditConfigResult.unwrapError())
                 null
             }
 
             val contestsResults = readContestsJsonFile(publisher.contestsFile())
-            val contests = if (contestsResults is Ok) contestsResults.unwrap()  else {
+            val contests = if (contestsResults.isOk) contestsResults.unwrap()  else {
                 errs.addNested(contestsResults.unwrapError())
                 null
             }
@@ -105,7 +105,7 @@ class AuditRecord(
             val rounds = mutableListOf<AuditRound>()
             for (roundIdx in 1..publisher.currentRound()) {
                 val samplePrnsResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(roundIdx))
-                val samplePrns = if (samplePrnsResult is Ok) samplePrnsResult.unwrap() else {
+                val samplePrns = if (samplePrnsResult.isOk) samplePrnsResult.unwrap() else {
                     errs.addNested(samplePrnsResult.unwrapError())
                     null
                 }
@@ -128,7 +128,7 @@ class AuditRecord(
                         contests!!,
                         samplePrns!!,
                     )
-                    if (auditRound is Ok) rounds.add(auditRound.unwrap() as AuditRound) else {
+                    if (auditRound.isOk) rounds.add(auditRound.unwrap() as AuditRound) else {
                         errs.addNested(auditRound.unwrapError())
                     }
                 } else {
@@ -140,7 +140,7 @@ class AuditRecord(
                             contests!!,
                             samplePrns!!,
                         )
-                        if (auditEstRound is Ok) rounds.add(auditEstRound.unwrap() as AuditRound) else {
+                        if (auditEstRound.isOk) rounds.add(auditEstRound.unwrap() as AuditRound) else {
                             errs.addNested(auditEstRound.unwrapError())
                         }
                     }

@@ -90,7 +90,7 @@ fun readContestManifestJsonFromZip(zipFilename: String, contestManifestFilename:
 
 fun readContestManifest(filename: String): ContestManifest {
     val result: Result<ContestManifestJson, ErrorMessages> = readContestManifestJson(filename)
-    val contestManifestJson = if (result is Ok) result.unwrap()
+    val contestManifestJson = if (result .isOk) result.unwrap()
         else throw RuntimeException("Cannot read ContestManifestJson from ${filename} err = $result")
 
     val contests = mutableMapOf<Int, ContestMJson>()
@@ -106,7 +106,7 @@ fun readContestManifestFromZip(zipFilename: String, contestManifestFilename: Str
     val reader = ZipReader(zipFilename)
     val input = reader.inputStream(contestManifestFilename)
     val result: Result<ContestManifestJson, ErrorMessages> = readContestManifestJson(input, contestManifestFilename)
-    val contestManifestJson = if (result is Ok) result.unwrap()
+    val contestManifestJson = if (result .isOk) result.unwrap()
         else throw RuntimeException("Cannot read ContestManifestJson from inputStream err = $result")
 
     val contests = mutableMapOf<Int, ContestMJson>()

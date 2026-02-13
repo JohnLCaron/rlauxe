@@ -24,7 +24,7 @@ class ShowPoolSizes {
         val publisher = Publisher(where)
 
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
-        val allContests = if (contestsResults is Ok) contestsResults.unwrap().sortedBy { it.id } else null
+        val allContests = if (contestsResults .isOk) contestsResults.unwrap().sortedBy { it.id } else null
         val infos = allContests?.map{ it.contest.info() }?.associateBy { it.id }
 
         val cardManifest = readCardManifest(publisher)

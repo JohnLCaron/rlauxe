@@ -150,7 +150,7 @@ class TestOABasics {
         println(oaAssorter)
         println("oaAssortRates = ${oaAssorter.oaAssortRates.show()}")
         println("sampleSizeNoErrors = ${oaAssorter.sampleSizeNoErrors( 2 * 0.9, .05)}")
-        println("estWithOptimalBet = ${oaAssorter.estWithOptimalBet(contestUA, 0.9, .05)}")
+        println("estWithOptimalBet = ${oaAssorter.estWithOptimalBet2(contestUA, 0.9, .05)}")
     }
 
         // AffineTransform code removed 8/19/2025. See history before then to revive

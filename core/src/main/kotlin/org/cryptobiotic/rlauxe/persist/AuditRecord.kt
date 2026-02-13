@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
@@ -25,6 +26,7 @@ private val showMissing = true
 
 interface AuditRecordIF {
     val location: String
+    val electionInfo: ElectionInfo
     val config: AuditConfig
     val contests: List<ContestWithAssertions>
     val rounds: List<AuditRoundIF>
@@ -32,6 +34,7 @@ interface AuditRecordIF {
 
 class AuditRecord(
     override val location: String,
+    override val electionInfo: ElectionInfo,
     override val config: AuditConfig,
     override val contests: List<ContestWithAssertions>,
     override val rounds: List<AuditRound>,  // TODO do we need to replace AuditEst ??
@@ -87,6 +90,12 @@ class AuditRecord(
             val errs = ErrorMessages("readAuditRecord from '${location}'")
 
             val publisher = Publisher(location)
+            val electionInfoResult = readElectionInfoJsonFile(publisher.electionInfoFile())
+            val electionInfo = if (electionInfoResult.isOk) electionInfoResult.unwrap() else {
+                errs.addNested(electionInfoResult.unwrapError())
+                null
+            }
+
             val auditConfigResult = readAuditConfigJsonFile(publisher.auditConfigFile())
             val config = if (auditConfigResult.isOk) auditConfigResult.unwrap() else {
                 errs.addNested(auditConfigResult.unwrapError())
@@ -148,7 +157,7 @@ class AuditRecord(
             }
             // TODO AuditRecord or CompositeRecord ??
             return if (errs.hasErrors()) Err(errs) else
-                Ok(AuditRecord(location, config!!, contests!!, rounds, sampledMvrsAll))
+                Ok(AuditRecord(location, electionInfo!!, config!!, contests!!, rounds, sampledMvrsAll))
         }
     }
 }

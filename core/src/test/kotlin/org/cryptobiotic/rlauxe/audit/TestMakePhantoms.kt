@@ -36,7 +36,7 @@ class TestMakePhantoms {
         val phantomCvrs = makePhantomCvrs(phantomCount, prefix)
         val cvrs = CloseableIterable { phantomCvrs.iterator() }
 
-        val target = CvrsWithPopulationsToCardManifest(AuditType.CLCA,
+        val target = CvrsWithPopulationsToCards(AuditType.CLCA,
             cvrs.iterator(), phantomCvrs, null)
         assertEquals(84, target.allCvrs.asSequence().count())
 

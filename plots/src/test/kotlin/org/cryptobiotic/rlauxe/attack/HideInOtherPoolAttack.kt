@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCardManifest
+import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCards
 import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.core.Contest
@@ -218,8 +218,8 @@ class OASingleRoundWorkflowTaskGeneratorG(
             assertEquals(contest.votes, mtabs[contest.id]!!.votes)
         }
 
-        val converter = MergePopulationsIntoCardManifest(
-            cards = Closer(modifiedCards.iterator()),
+        val converter = MergePopulationsIntoCards(
+            cards = modifiedCards,
             cardStyles,
         )
         val cardManifest = mutableListOf<AuditableCard>()

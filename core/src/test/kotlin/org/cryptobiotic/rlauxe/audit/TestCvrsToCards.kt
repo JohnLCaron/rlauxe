@@ -33,12 +33,12 @@ class TestCvrsToCards {
 
         var cvr = cvrr.copy(poolId=null)
         // with no population, only the cvrs are present.
-        var target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null)
+        var target = CvrsWithPopulationsToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null)
         var card = target.next()
         testOneTarget("** clca complete cvrs", cvr, card, auditType, hasCardStyles, null)
 
         cvr = cvrr.copy(poolId=1)
-        target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null)
+        target = CvrsWithPopulationsToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null)
         card = target.next()
         testOneTarget("clca hasStyle and poolIds", cvr, card, auditType, hasCardStyles, expectStyle = null)
 
@@ -46,26 +46,26 @@ class TestCvrsToCards {
         // doesnt make sense to use; hasStyle means use cvr
         hasCardStyles = true
         cvr = cvrr.copy(poolId=1)
-        target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=listOf(cardStyle))
+        target = CvrsWithPopulationsToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=listOf(cardStyle))
         card = target.next()
         testOneTarget("clca hasStyle and poolIds and styles", cvr, card, auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
 
         // noStyle means votes isnt complete, so you need cardStyles and poolIds. should test if votes cubset of cardpool contests
         hasCardStyles = true
         cvr = cvrr.copy(poolId=1)
-        target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=listOf(cardStyle))
+        target = CvrsWithPopulationsToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=listOf(cardStyle))
         card = target.next()
         testOneTarget("** clca incomplete cvrs", cvr, card, auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
 
         // what if you dont supply the poolId?
         cvr = cvrr.copy(poolId=null)
-        target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=listOf(cardStyle))
+        target = CvrsWithPopulationsToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=listOf(cardStyle))
         card = target.next()
         assertEquals(null, card.cardStyle, "no poolId")
 
         // what if you dont supply the cardStyles? FAIL
         cvr = cvrr.copy(poolId=1)
-        target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null)
+        target = CvrsWithPopulationsToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null)
         card = target.next()
         assertEquals(null, card.cardStyle, "no pools")
     }
@@ -79,23 +79,23 @@ class TestCvrsToCards {
 
         val expectedMessage = "AuditableCard must have votes, possibleContests, cardStyle, or population"
         var cvr = cvrr.copy(poolId=null)  // no poolId
-        var target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null, )
+        var target = CvrsWithPopulationsToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null, )
         testOneTarget("** poll with no pools", cvr, target.next(), auditType, hasCardStyles, "all")
 
         cvr = cvrr.copy(poolId=1) // poolId but no pools
-        target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null)
+        target = CvrsWithPopulationsToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null)
         testOneTarget("** poll with poolid but no pool", cvr, target.next(), auditType, hasCardStyles, expectStyle = "all")
 
         // what happens if the poolId doesnt match ??
         val cardStyle = Population("cardstyle1", 1,intArrayOf(0,1,2,3,4), false)
         cvr = cvrr.copy(poolId=2) // poolId doesnt match
-        target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null)
+        target = CvrsWithPopulationsToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null)
         testOneTarget("** poll with pools but wrong poolid", cvr, target.next(), auditType, hasCardStyles, expectStyle = "all")
 
         // successfully use pool 1
         hasCardStyles = true
         cvr = cvrr.copy(poolId=1)
-        target = CvrsWithPopulationsToCardManifest(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=listOf(cardStyle))
+        target = CvrsWithPopulationsToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=listOf(cardStyle))
         testOneTarget("** poll with pool", cvr, target.next(), auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
     }
 
@@ -110,13 +110,13 @@ class TestCvrsToCards {
         var hasCardStyles = true
 
         val cardStyle = Population("oapool2", 2,intArrayOf(0,1,2), false)
-        var target = CvrsWithPopulationsToCardManifest(auditType, Closer(cvrs.iterator()), phantomCvrs=null, populations=listOf(cardStyle), )
+        var target = CvrsWithPopulationsToCards(auditType, Closer(cvrs.iterator()), phantomCvrs=null, populations=listOf(cardStyle), )
         testOneTarget("oa hasStyle", cvrc, target.next(), auditType, hasCardStyles, null)
         testOneTarget("oa hasStyle pooled", cvrp, target.next(), auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
 
         // noStyle means must supply the list of possibleContests for pooled data and cvrs
         hasCardStyles = true
-        target = CvrsWithPopulationsToCardManifest(auditType, Closer(cvrs.iterator()), phantomCvrs=null, populations=listOf(cardStyle), )
+        target = CvrsWithPopulationsToCards(auditType, Closer(cvrs.iterator()), phantomCvrs=null, populations=listOf(cardStyle), )
         testOneTarget("oa noStyle", cvrc, target.next(), auditType, hasCardStyles, null)
         testOneTarget("oa noStyle pooled", cvrp, target.next(), auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
     }

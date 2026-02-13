@@ -357,7 +357,7 @@ class TestHasStyle {
         }
 
         val infos = contests.map{ it.info }.associateBy { it.id }
-        val cardIter = CvrsWithPopulationsToCardManifest(config.auditType,
+        val cardIter = CvrsWithPopulationsToCards(config.auditType,
             Closer(testCvrs.iterator()),
             null,
             populations = cardStyles,
@@ -393,8 +393,8 @@ class TestHasStyle {
         }
 
         val infos = contests.map{ it.info }.associateBy { it.id }
-        val cardIter = MergePopulationsIntoCardManifest(
-            Closer(testCards.iterator()),
+        val cardIter = MergePopulationsIntoCards(
+            testCards,
             populations = cardStyles,
         )
         val tabs = tabulateAuditableCards(cardIter, infos)
@@ -440,7 +440,7 @@ fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestWithAssertions>
     estimateSampleSizes(
         config,
         auditRound,
-        cardManifest = mvrManager.sortedCards(),
+        cardManifest = mvrManager.cardManifest(),
         cardPools = mvrManager.oapools(),
         previousSamples = emptySet(),
         // nthreads=1,
@@ -448,7 +448,7 @@ fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestWithAssertions>
 
     sampleWithContestCutoff(
         config,
-        mvrManager,
+        mvrManager.cardManifest(),
         auditRound,
         emptySet(),
         quiet = false

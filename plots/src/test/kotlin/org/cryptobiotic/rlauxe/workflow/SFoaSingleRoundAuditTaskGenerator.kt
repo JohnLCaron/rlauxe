@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardManifest
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
@@ -61,20 +62,17 @@ class SfoaSingleRoundAuditTask(
                 val assertionRound = AssertionRound(cassertion, 1, null)
                 val contestRound = ContestRound(contestUA, listOf(assertionRound), 1)
 
-                val mvrManager = MvrManagerClcaSingleRound(
-                    AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run),
-                    -1,
-                    rlauxAudit.mvrManager().populations()!!
-                )
+                val skipper = AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run)
+                val manifestWithSkipper = CardManifest(skipper, 0, rlauxAudit.mvrManager().cardManifest().populations)
 
                 val sampler =
                     ClcaSamplerErrorTracker.withNoErrors(
                         contestUA.id,
                         cassertion.cassorter,
-                        mvrManager.sortedCards().iterator(),
+                        manifestWithSkipper.cards.iterator(),
                     )
 
-                val runner = OneAuditAssertionAuditor(mvrManager.populations() as List<OneAuditPoolIF>)
+                val runner = OneAuditAssertionAuditor(rlauxAudit.mvrManager().oapools() as List<OneAuditPoolIF>)
 
                 val result: TestH0Result = runner.run(
                     rlauxAudit.auditConfig(),
@@ -103,33 +101,4 @@ class SfoaSingleRoundAuditTask(
         println("SfoaSingleRoundAuditTask finish ${name()}")
         return wresults
     }
-}
-
-class MvrManagerClcaSingleRound(val sortedCards: CloseableIterable<AuditableCard>, val maxSamples: Int = -1,
-    val populations: List<PopulationIF>) : MvrManager {
-
-    override fun sortedCards() = sortedCards
-
-    override fun populations() = populations
-
-    override fun oapools(): List<OneAuditPoolFromCvrs>? {
-        return null
-    }
-
-    override fun makeMvrCardPairsForRound(round: Int): List<Pair<Cvr, AuditableCard>> {
-        val cvrs = mutableListOf<Cvr>()
-        var count = 0
-        var countPool = 0
-        sortedCards().iterator().use { cardIter ->
-            while (cardIter.hasNext() && (maxSamples < 0 || count < maxSamples)) {
-                val cvr = cardIter.next().cvr()
-                cvrs.add(cvr)
-                count++
-                if (cvr.poolId != null) countPool++
-            }
-        }
-        println("makeCvrPairsForRound: count=$count poolCount=$countPool")
-        return cvrs.zip(AuditableCard.fromCvrs(cvrs))
-    }
-
 }

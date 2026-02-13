@@ -30,6 +30,7 @@ class ClcaDistributions {
         val auditConfig = AuditConfig(AuditType.CLCA, true,
             nsimEst = nsimEst, simFuzzPct = simFuzzPct, quantile = 0.5,
             persistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
+            simulationStrategy = SimulationStrategy.regular,
             clcaConfig = ClcaConfig(fuzzMvrs=mvrsFuzzPct),
         )
 
@@ -85,10 +86,10 @@ class ClcaDistributions {
         return estimateSampleSizes(
             config,
             auditRound,
-            cardManifest = mvrManager.sortedCards(),
+            cardManifest = mvrManager.cardManifest(),
             cardPools = emptyList(),
             previousSamples = emptySet(),
-            )
+        )
     }
 
     // calculate 100 simulated audits, return "samplesNeeded", single contest, fuzzed, no phantoms

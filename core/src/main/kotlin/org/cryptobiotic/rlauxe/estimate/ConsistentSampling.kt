@@ -14,7 +14,7 @@ private val logger = KotlinLogging.logger("ConsistentSampling")
 // also called by rlauxe-viewer
 fun sampleWithContestCutoff(
     config: AuditConfig,
-    mvrManager : MvrManager,
+    cardManifest: CardManifest,
     auditRound: AuditRoundIF,
     previousSamples: Set<Long>,
     quiet: Boolean
@@ -23,7 +23,7 @@ fun sampleWithContestCutoff(
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }.toMutableList()
 
     while (contestsNotDone.isNotEmpty()) {
-        consistentSampling( auditRound, mvrManager, previousSamples)
+        consistentSampling( auditRound, cardManifest, previousSamples)
 
         //// the rest of this implements contestSampleCutoff
         if (!config.removeCutoffContests || config.contestSampleCutoff == null || auditRound.samplePrns.size <= config.contestSampleCutoff) {
@@ -52,7 +52,7 @@ fun sampleWithContestCutoff(
 //    contestRound.maxSampleAllowed = sampledCards.size
 fun consistentSampling(
     auditRound: AuditRoundIF,
-    mvrManager: MvrManager,
+    cardManifest: CardManifest,
     previousSamples: Set<Long> = emptySet(),
 ) {
     val contestsIncluded = auditRound.contestRounds.filter { !it.done && it.included}
@@ -71,7 +71,7 @@ fun consistentSampling(
     val sampledCards = mutableListOf<AuditableCard>()
     var cardIndex = 0  // track maximum index (not done yet)
 
-    val sortedCardIter = mvrManager.sortedCards().iterator()
+    val sortedCardIter = cardManifest.cards.iterator()
     while (
         sortedCardIter.hasNext() &&
         // ((auditRound.auditorWantNewMvrs < 0) || (newMvrs < auditRound.auditorWantNewMvrs)) && // TODO REDO or delete?

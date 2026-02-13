@@ -45,9 +45,9 @@ class PersistedWorkflow(
                 // TODO PersistedWorkflowMode
                 CompositeMvrManager(auditRecord, config, auditContests)
             (mode == PersistedWorkflowMode.testSimulated) ->
-                PersistedMvrManagerTest(auditRecord.location, config, auditContests)
+                PersistedMvrManagerTest(auditRecord.location, auditRecord.electionInfo, config, auditContests)
             else ->
-                PersistedMvrManager(auditRecord.location, config, auditContests, mvrWrite=mvrWrite)
+                PersistedMvrManager(auditRecord.location, auditRecord.electionInfo, config, auditContests, mvrWrite=mvrWrite)
         }
     }
 

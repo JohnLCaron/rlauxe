@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.ContestRound
+import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import kotlin.io.path.Path
@@ -19,6 +20,7 @@ private val showMissing = true
 
 data class CompositeRecord(
     override val location: String,
+    override val electionInfo: ElectionInfo,
     override val config: AuditConfig,
     override val contests: List<ContestWithAssertions>,
     override val rounds: List<AuditRoundIF>,
@@ -42,6 +44,7 @@ data class CompositeRecord(
             val components = mutableListOf<AuditRecord>()
             val contests = mutableListOf<ContestWithAssertions>()
             var config: AuditConfig? = null
+            var electionInfo: ElectionInfo? = null
 
             // find all subdirectories
             val path = Path(location)
@@ -58,6 +61,7 @@ data class CompositeRecord(
                                 components.add(subRecord)
                                 contests.addAll(subRecord.contests)
                                 if (config == null) config = subRecord.config // TODO all configs are the same ??
+                                if (electionInfo == null) electionInfo = subRecord.electionInfo // TODO all electionInfo are the same ??
                                 // println("  auditDir found and added: ${auditDir}")
                             }
                         }
@@ -67,7 +71,7 @@ data class CompositeRecord(
             return if (config != null) {
                 contests.sortBy { it.name }
                 val auditRounds = makeAuditRounds(components)
-                CompositeRecord(location, config, contests, auditRounds, components)
+                CompositeRecord(location, electionInfo!!, config, contests, auditRounds, components)
             } else {
                 null
             }

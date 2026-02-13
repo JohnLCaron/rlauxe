@@ -3,7 +3,6 @@ package org.cryptobiotic.util
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
-import org.cryptobiotic.rlauxe.cli.RunRlaCreateOneAudit
 import org.cryptobiotic.rlauxe.cli.RunRlaStartFuzz
 import org.cryptobiotic.rlauxe.cli.RunVerifyAuditRecord
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests

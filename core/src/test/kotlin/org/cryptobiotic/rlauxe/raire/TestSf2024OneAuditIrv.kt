@@ -4,6 +4,7 @@ import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardManifest
+import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
@@ -11,7 +12,9 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
+import org.cryptobiotic.rlauxe.persist.json.readAuditConfigUnwrapped
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
+import org.cryptobiotic.rlauxe.persist.json.readElectionInfoUnwrapped
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -31,6 +34,7 @@ import kotlin.use
 
 class TestSf2024OneAuditIrv() {
     val config: AuditConfig
+    val electionInfo: ElectionInfo
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
     val cardManifest: CardManifest
@@ -40,19 +44,19 @@ class TestSf2024OneAuditIrv() {
     init {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
         val publisher = Publisher(auditdir)
-        val auditConfigResult = readAuditConfigJsonFile(publisher.auditConfigFile())
-        config = auditConfigResult.unwrap()
+        config = readAuditConfigUnwrapped(publisher.auditConfigFile())!!
+        electionInfo = readElectionInfoUnwrapped(publisher.electionInfoFile())!!
 
         contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
         infos = contests.map{ it.contest.info() }.associateBy { it.id }
 
-        cardManifest = readCardManifest(publisher)
+        cardManifest = readCardManifest(publisher, electionInfo.ncards)
         cardPools = readCardPools(publisher, infos)!!
 
         // use the cvrs from the clca as the mvrs
         val cvrdir = "$testdataDir/cases/sf2024/clca/audit"
         val cvrPublisher = Publisher(cvrdir)
-        mvrs = readCardManifest(cvrPublisher).cards
+        mvrs = readCardManifest(cvrPublisher, electionInfo.ncards).cards
     }
 
     @Test

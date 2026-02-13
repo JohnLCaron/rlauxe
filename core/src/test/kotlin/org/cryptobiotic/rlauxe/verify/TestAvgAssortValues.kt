@@ -2,8 +2,8 @@ package org.cryptobiotic.rlauxe.verify
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCardManifest
-import org.cryptobiotic.rlauxe.audit.CvrsWithPopulationsToCardManifest
+import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCards
+import org.cryptobiotic.rlauxe.audit.CvrsWithPopulationsToCards
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.simulateCvrsWithDilutedMargin
@@ -33,7 +33,7 @@ class TestAvgAssortValues {
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsWithPopulationsToCardManifest(
+            CvrsWithPopulationsToCards(
                 AuditType.CLCA, Closer(testCvrs.iterator()),
                 phantomCvrs=null, populations = null,
             )
@@ -80,7 +80,7 @@ class TestAvgAssortValues {
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsWithPopulationsToCardManifest(
+            CvrsWithPopulationsToCards(
                 AuditType.CLCA, Closer(testCvrs.iterator()),
                 phantomCvrs=null, populations = null,
             )
@@ -123,7 +123,7 @@ class TestAvgAssortValues {
         val testCvrs = test.makeCvrsFromContests()
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsWithPopulationsToCardManifest(
+            CvrsWithPopulationsToCards(
                 AuditType.CLCA,Closer(testCvrs.iterator()),
                 phantomCvrs=null, populations = null,
             )
@@ -166,8 +166,8 @@ class TestAvgAssortValues {
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeAuditableCardCsv(it)}") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            MergePopulationsIntoCardManifest(
-                Closer(testCards.iterator()),
+            MergePopulationsIntoCards(
+                testCards,
                 populations = test.populations,
             )
         }
@@ -215,8 +215,8 @@ class TestAvgAssortValues {
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeAuditableCardCsv(it)}") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            MergePopulationsIntoCardManifest(
-                Closer(testCards.iterator()),
+            MergePopulationsIntoCards(
+                testCards,
                 populations = modStyles,
             )
         }

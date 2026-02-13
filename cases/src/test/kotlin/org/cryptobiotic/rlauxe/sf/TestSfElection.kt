@@ -14,6 +14,7 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
+import org.cryptobiotic.rlauxe.persist.json.readElectionInfoUnwrapped
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.workflow.MvrManager
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
@@ -42,7 +43,9 @@ class TestSfElection {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
 
         val publisher = Publisher(auditdir)
-        val cardManifest = readCardManifest(publisher)
+        val electionInfo = readElectionInfoUnwrapped(publisher.electionInfoFile())!!
+
+        val cardManifest = readCardManifest(publisher, electionInfo.ncards)
         val populationNcards = cardManifest.populations.sumOf { it.ncards() }
         println("manifestSumPools = $populationNcards")
 

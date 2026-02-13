@@ -12,8 +12,8 @@ import org.cryptobiotic.rlauxe.persist.json.readSamplePrns
 private val logger = KotlinLogging.logger("PersistedMvrManagerTest")
 private val checkValidity = true
 
-class PersistedMvrManagerTest(auditDir: String, config: AuditConfig, contestsUA: List<ContestWithAssertions>)
-    : MvrManagerTestIF, PersistedMvrManager(auditDir, config, contestsUA) {
+class PersistedMvrManagerTest(auditDir: String, electionInfo: ElectionInfo, config: AuditConfig, contestsUA: List<ContestWithAssertions>)
+    : MvrManagerTestIF, PersistedMvrManager(auditDir, electionInfo, config, contestsUA) {
 
     // extract the cards with sampleNumbers from the cardManifest, optionally fuzz them, and write them to sampleMvrsFile
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCard> {

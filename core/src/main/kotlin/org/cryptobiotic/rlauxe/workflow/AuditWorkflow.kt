@@ -42,7 +42,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         estimateSampleSizes(
             auditConfig,
             auditRound,
-            cardManifest = mvrManager().sortedCards(),
+            cardManifest = mvrManager().cardManifest(),
             cardPools = mvrManager().oapools(),
             previousSamples,
             // nthreads=1,
@@ -55,7 +55,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         //    auditRound.samplePrns = sampledCards.map { it.prn }
         sampleWithContestCutoff(
             auditConfig,
-            mvrManager(),
+            mvrManager().cardManifest(),
             auditRound,
             previousSamples = previousSamples,
             quiet)

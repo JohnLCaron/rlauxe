@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.CardManifest
-import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCardManifest
+import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCards
 import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.util.makePhantomCards
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
@@ -125,8 +125,8 @@ data class MultiContestTestData(
 
         // here we put the pool data into a single pool, and combine their contestIds, to get a diluted margin for testing
         val cardManifest = mutableListOf<AuditableCard>()
-        val converter = MergePopulationsIntoCardManifest(
-            cards = Closer(mvrs.iterator()),
+        val converter = MergePopulationsIntoCards(
+            cards = mvrs,
             expandedCardStyles,
         )
         converter.forEach { cardManifest.add(it) }
@@ -145,8 +145,8 @@ data class MultiContestTestData(
     }
 
     fun makeCardLocationManifest(): CardManifest {
-        val cards = CloseableIterable { makeCardsFromContests().iterator() }
-        return CardManifest(cards, populations)
+        val cards = makeCardsFromContests()
+        return CardManifest(CloseableIterable { cards.iterator() }, cards.size, populations)
     }
 
     override fun toString() = buildString {

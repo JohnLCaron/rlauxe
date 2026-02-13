@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.sf
 
-import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -24,7 +23,7 @@ import org.cryptobiotic.rlauxe.raire.makeRaireContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.ErrorMessages
-import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
+import org.cryptobiotic.rlauxe.util.tabulateCardsAndCount
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.Boolean
 import kotlin.collections.component1
@@ -46,7 +45,7 @@ class CreateSfElection(
     val cardPools: List<OneAuditPoolFromCvrs>
     val phantomCount: Map<Int, Int>  // id -> nphantoms
     val contestsUA: List<ContestWithAssertions>
-    val cardCount: Int
+    val ncards: Int
 
     init {
         val (contestNcs, contestInfos) = makeContestInfos(
@@ -69,15 +68,15 @@ class CreateSfElection(
         cardPoolMapByName = allCardPools.filter { it.value.poolName != unpooled } // exclude the unpooled
         cardPools = cardPoolMapByName.values.toList() // exclude the unpooled
         val unpooledPool = allCardPools[unpooled]!! // this does not have the diluted count
-        this.cardCount = ncards
 
         // we need Nc to make the phantom cvrs in createCardManifest()
         phantomCount = countPhantoms(allCvrTabs, contestNcs)
 
         // we need to know the diluted Nb before we can create the assertions: another pass through the cvrExports
-        val manifestTabs = tabulateAuditableCards( createCardManifest(config.auditType), infos)
+        val (manifestTabs, count) = tabulateCardsAndCount( createCardIter(config.auditType), infos)
         val contestNbs = manifestTabs.mapValues { it.value.ncardsTabulated }
         println("contestNbs= ${contestNbs}")
+        this.ncards = count
 
         // make contests based on cvr tabulations
         contestsUA = if (config.isClca) {
@@ -160,23 +159,27 @@ class CreateSfElection(
         return result
     }
 
-    override fun populations() = if (config.isClca) emptyList() else cardPools
     override fun cardPools() = if (config.isClca) emptyList() else cardPools
     override fun contestsUA() = contestsUA
-    override fun cardManifest() = createCardManifest(config.auditType)
+    override fun cardManifest() = createCardManifest()
+
+    fun createCardManifest(): CardManifest {
+        val populations = if (config.isClca) emptyList() else cardPools
+        return CardManifest.createFromIterator(createCardIter(config.auditType), ncards, populations)
+    }
 
     // these are the same cvrs for CLCA and OneAudit
-    fun createCardManifest(auditType: AuditType): CloseableIterator<AuditableCard> {
+    fun createCardIter(auditType: AuditType): CloseableIterator<AuditableCard> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
         val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPools.associate { it.name() to it.id() })
 
-        return if (auditType == AuditType.ONEAUDIT) CvrsWithPopulationsToCardManifest(
+        return if (auditType == AuditType.ONEAUDIT) CvrsWithPopulationsToCards(
             auditType,
             cvrIter,
             makePhantomCvrs(phantomCount),
             cardPools)
         else
-            CvrsWithPopulationsToCardManifest(
+            CvrsWithPopulationsToCards(
                 auditType,
                 cvrIter,
                 makePhantomCvrs(phantomCount),

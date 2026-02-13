@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.verify
 
-import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
@@ -13,8 +12,6 @@ import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.existsOrZip
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
-import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.workflow.readCardManifest
 
 private val logger = KotlinLogging.logger("VerifyAuditRecord")
 
@@ -24,7 +21,6 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
     val config: AuditConfig
     val contests: List<ContestWithAssertions>
     val allInfos: Map<Int, ContestInfo>?
-    val cards: CloseableIterable<AuditableCard>
 
     init {
         val auditRecordResult = AuditRecord.readFromResult(auditRecordLocation)
@@ -48,7 +44,6 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         }
 
         allInfos = contests.map{ it.contest.info() }?.associateBy { it.id }
-        cards = readCardManifest(publisher).cards
     }
 
     fun verify(): VerifyResults {

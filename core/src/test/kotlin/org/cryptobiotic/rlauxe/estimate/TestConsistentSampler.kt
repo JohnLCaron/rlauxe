@@ -34,7 +34,7 @@ class TestConsistentSampler {
         //    auditRound: AuditRound,
         //    ballotCards: BallotCards,
         //    previousSamples: Set<Int> = emptySet(),
-        consistentSampling(auditRound, mvrManager)
+        consistentSampling(auditRound, mvrManager.cardManifest())
         println("nsamples needed = ${auditRound.samplePrns.size}\n")
         assertEquals(auditRound.samplePrns.size, auditRound.nmvrs)
         assertEquals(auditRound.nmvrs, auditRound.newmvrs)
@@ -70,7 +70,7 @@ class TestConsistentSampler {
         val mvrManager = MvrManagerForTesting(cvrs, cvrs, Random.nextLong())
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
-        consistentSampling(auditRound, mvrManager)
+        consistentSampling(auditRound, mvrManager.cardManifest())
         println("nsamples needed = ${auditRound.samplePrns.size}\n")
 
         // must be ordered

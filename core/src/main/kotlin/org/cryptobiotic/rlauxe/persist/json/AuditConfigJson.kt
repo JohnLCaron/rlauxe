@@ -310,5 +310,6 @@ fun readAuditConfigJsonFile(filename: String): Result<AuditConfig, ErrorMessages
 }
 
 fun readAuditConfigUnwrapped(filename: String): AuditConfig? {
-    return readAuditConfigJsonFile(filename).unwrap()
+    val result = readAuditConfigJsonFile(filename)
+    return if (result.isOk) result.unwrap() else null
 }

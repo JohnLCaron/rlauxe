@@ -2,40 +2,30 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.CvrIF
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.json.readPopulationsJsonFileUnwrapped
-import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
-import java.nio.file.Files
-import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("PersistedMvrManager")
 private val checkValidity = true
 
 // assumes that the mvrs have been set externally into the election record, eg by EnterMvrsCli.
 // skip writing when doing runRoundAgain
-open class PersistedMvrManager(val auditDir: String, val electionInfo: ElectionInfo, val config: AuditConfig,
-                               val contestsUA: List<ContestWithAssertions>, val mvrWrite: Boolean = true): MvrManager {
-    val publisher = Publisher(auditDir)
-    val cardManifest = readCardManifest(publisher, electionInfo.ncards)
+open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boolean = true): MvrManager {
+    val config = auditRecord.config
+    val contestsUA = auditRecord.contests.filter { it.preAuditStatus == TestH0Status.InProgress }
+    val publisher = Publisher(auditRecord.location)
+
+    val cardManifest = auditRecord.readCardManifest()
 
     override fun cardManifest() = cardManifest
+    override fun oapools() = auditRecord.readCardPools()
 
-    override fun oapools(): List<OneAuditPoolFromCvrs>?  {
-        val infos = contestsUA.associate { it.id to it.contest.info()  }
-        return readCardPools(publisher, infos)
-    }
-
-    // AuditableCardCsv, complete mvrs used for this round; matches samplePrnsX.csv
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
         val mvrsForRound = readMvrsForRound(round)
         val sampleNumbers = mvrsForRound.map { it.prn }
@@ -63,8 +53,8 @@ open class PersistedMvrManager(val auditDir: String, val electionInfo: ElectionI
 
     // the sampleMvrsFile is added externally for real audits, and by MvrManagerTestFromRecord for test audits
     // it must be in the same order as the sorted cards
-    // it is placed into publisher.sampleMvrsFile, and this just reads from that file.
-    // AuditableCardCsv, complete mvrs used for this round; matches samplePrnsX.csv
+    // it is placed into publisher.sampleMvrsFile(round), and this method just reads from that file.
+    // return complete list of mvrs used for this round
     private fun readMvrsForRound(round: Int): List<AuditableCard> {
         return readAuditableCardCsvFile(publisher.sampleMvrsFile(round))
     }
@@ -72,53 +62,9 @@ open class PersistedMvrManager(val auditDir: String, val electionInfo: ElectionI
     fun auditableCards(): CloseableIterator<AuditableCard> = cardManifest.cards.iterator()
 }
 
-fun makeCardIter(publisher: Publisher): CloseableIterator<AuditableCard> {
-
-    if (Files.exists(Path(publisher.populationsFile()))) {
-        val populations = readPopulationsJsonFileUnwrapped(publisher.populationsFile())
-        if (populations.isNotEmpty()) {
-            // merge population references into the Card
-            return MergePopulationsFromIterator(
-                    readCardsCsvIterator(publisher.sortedCardsFile()),
-                    populations,
-                )
-        }
-    }
-
-    return readCardsCsvIterator(publisher.sortedCardsFile())
-}
-
-fun readCardManifest(publisher: Publisher, ncards: Int): CardManifest {
-
-    if (Files.exists(Path(publisher.populationsFile()))) {
-        val populations = readPopulationsJsonFileUnwrapped(publisher.populationsFile())
-        if (populations.isNotEmpty()) {
-            // merge population references into the Card
-            val mergedCards =
-                MergePopulationsFromIterable(
-                    CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
-                    populations,
-                )
-
-            return CardManifest(mergedCards, ncards, populations)
-        }
-    }
-
-    val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
-    return CardManifest(CloseableIterable { sortedCards.iterator() }, ncards, emptyList())
-}
-
-fun readPopulations(publisher: Publisher): List<PopulationIF>? {
-    return if (!Files.exists(Path(publisher.populationsFile()))) null else
-        readPopulationsJsonFileUnwrapped(publisher.populationsFile())
-}
-
-fun readCardPools(publisher: Publisher, infos: Map<Int, ContestInfo>): List<OneAuditPoolFromCvrs>? {
-    return if (!Files.exists(Path(publisher.cardPoolsFile()))) null else
-        readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
-}
-
 // for viewer
 fun readMvrsForRound(publisher: Publisher, roundIdx: Int): List<AuditableCard> {
     return readAuditableCardCsvFile(publisher.sampleMvrsFile(roundIdx))
 }
+
+

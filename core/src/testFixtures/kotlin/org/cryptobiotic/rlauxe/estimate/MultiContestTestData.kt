@@ -3,13 +3,13 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.audit.CardManifest
 import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCards
 import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.util.makePhantomCards
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.Int
 import kotlin.String
 import kotlin.math.abs

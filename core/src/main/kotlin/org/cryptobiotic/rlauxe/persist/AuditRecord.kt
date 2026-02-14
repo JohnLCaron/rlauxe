@@ -11,18 +11,24 @@ import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
+import org.cryptobiotic.rlauxe.audit.MergePopulationsFromIterable
+import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.workflow.CardManifest
 import org.cryptobiotic.rlauxe.workflow.findSamples
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("AuditRecord")
-private val showMissing = true
 
 interface AuditRecordIF {
     val location: String
@@ -40,12 +46,14 @@ class AuditRecord(
     override val rounds: List<AuditRound>,  // TODO do we need to replace AuditEst ??
     mvrs: List<AuditableCard> // mvrs already sampled
 ): AuditRecordIF {
-    val previousMvrs = mutableMapOf<Long, AuditableCard>()
+    val previousMvrs = mutableMapOf<Long, AuditableCard>() // cumulative
+    val publisher = Publisher(location)
 
     init {
-        mvrs.forEach { previousMvrs[it.prn] = it } // cumulative
+        mvrs.forEach { previousMvrs[it.prn] = it }
     }
 
+    // TODO maybe better on workflow ??
     // TODO new mvrs vs mvrs may confuse people. Build interface to manage this process?
     fun enterMvrs(mvrs: CloseableIterable<AuditableCard>, errs: ErrorMessages): Boolean {
         val publisher = Publisher(location)
@@ -68,6 +76,36 @@ class AuditRecord(
 
         sampledMvrs.forEach { previousMvrs[it.prn] = it } // cumulative
         return true
+    }
+
+    fun readCardManifest(): CardManifest {
+        if (Files.exists(Path(publisher.populationsFile()))) {
+            val populations = readPopulationsJsonFileUnwrapped(publisher.populationsFile())
+            if (populations.isNotEmpty()) {
+                // merge population references into the Card
+                val mergedCards =
+                    MergePopulationsFromIterable(
+                        CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
+                        populations,
+                    )
+
+                return CardManifest(mergedCards, electionInfo.ncards, populations)
+            }
+        }
+        // no population so you dont need to merge
+        val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
+        return CardManifest(sortedCards, electionInfo.ncards, emptyList())
+    }
+
+    fun readPopulations(): List<PopulationIF>? {
+        return if (!Files.exists(Path(publisher.populationsFile()))) null else
+            readPopulationsJsonFileUnwrapped(publisher.populationsFile())
+    }
+
+    fun readCardPools(): List<OneAuditPoolFromCvrs>? {
+        val infos = contests.map { it.contest.info() }.associateBy { it.id }
+        return if (!Files.exists(Path(publisher.cardPoolsFile()))) null else
+            readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
     }
 
     companion object {

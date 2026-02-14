@@ -5,10 +5,16 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.json.readPopulationsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import java.nio.file.Files
+import kotlin.io.path.Path
 
 private val logger = KotlinLogging.logger("MvrManagerForTesting")
 
@@ -32,7 +38,7 @@ class MvrManagerForTesting(
     }
 
     override fun cardManifest() :CardManifest {
-        return CardManifest.createFromIterator(sortedCards.iterator(), sortedCards.size, pools)
+        return CardManifest.createFromList(sortedCards, pools)
     }
 
     override fun oapools(): List<OneAuditPoolFromCvrs>? {
@@ -108,5 +114,40 @@ fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boole
         }
     }
 
+    if (nextRound == null)
+        print("")
+
     return nextRound
+}
+
+/////////////////////////////////////////////////////////////////
+// moved from PersistedMvrManager
+
+fun readCardManifest(publisher: Publisher, ncards: Int): CardManifest {
+    if (Files.exists(Path(publisher.populationsFile()))) {
+        val populations = readPopulationsJsonFileUnwrapped(publisher.populationsFile())
+        if (populations.isNotEmpty()) {
+            // merge population references into the Card
+            val mergedCards =
+                MergePopulationsFromIterable(
+                    CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
+                    populations,
+                )
+
+            return CardManifest(mergedCards, ncards, populations)
+        }
+    }
+    // no population so you dont need to merge
+    val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
+    return CardManifest(sortedCards, ncards, emptyList())
+}
+
+fun readPopulations(publisher: Publisher): List<PopulationIF>? {
+    return if (!Files.exists(Path(publisher.populationsFile()))) null else
+        readPopulationsJsonFileUnwrapped(publisher.populationsFile())
+}
+
+fun readCardPools(publisher: Publisher, infos: Map<Int, ContestInfo>): List<OneAuditPoolFromCvrs>? {
+    return if (!Files.exists(Path(publisher.cardPoolsFile()))) null else
+        readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
 }

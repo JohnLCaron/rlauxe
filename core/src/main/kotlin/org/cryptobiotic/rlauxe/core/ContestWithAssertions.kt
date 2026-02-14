@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 // note mutability
 open class ContestWithAssertions(
     val contest: ContestIF,
-    val isClca: Boolean = true,
+    val isClca: Boolean = true,  // clca or oneaudit
     NpopIn: Int? = null,
 ) {
     val id = contest.id

@@ -22,9 +22,9 @@ import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
-import org.cryptobiotic.rlauxe.workflow.makeCardIter
 import org.cryptobiotic.rlauxe.workflow.readCardPools
 import kotlin.io.path.Path
 import kotlin.math.min
@@ -194,15 +194,17 @@ class TestClcaElection(
         println()
     }
 
+    override fun populations() = null
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
-    override fun cardManifest() : CardManifest {
-        val cardIter = CvrsWithPopulationsToCards(
+    override fun ncards() = allCvrs.size
+
+    override fun cards() : CloseableIterator<AuditableCard> {
+        return CvrsToCardsAddStyles(
             config.auditType,
             Closer(allCvrs.iterator()),
             null, null
         )
-        return CardManifest.createFromIterator(cardIter, allCvrs.size, null)
     }
 
 }
@@ -271,7 +273,7 @@ class TestPollingElection(
         cvrs = testData.makeCvrsFromContests()
         testMvrs =  makeFuzzedCvrsForClca(contests.map{ it.info() } , cvrs, fuzzMvrs)
 
-        val makum = ContestWithAssertions.make(testData.contests, cardIter(), isClca=false)
+        val makum = ContestWithAssertions.make(testData.contests, cards(), isClca=false)
         // not setting Npop, so it defaults to Nc
         //val regularContests = testData.contests.map {
         //    ContestUnderAudit(it, isClca=true, hasStyle=config.hasStyle).addStandardAssertions()
@@ -289,17 +291,17 @@ class TestPollingElection(
         writeUnsortedPrivateMvrs(Publisher(auditdir), testMvrs, seed=config.seed)
     }
 
+    override fun populations() = pops
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
-    override fun cardManifest() : CardManifest {
-        return CardManifest.createFromIterator(cardIter(), cvrs.size, pops)
-    }
-    fun cardIter() : CloseableIterator<AuditableCard> {
-        return CvrsWithPopulationsToCards(
+    override fun ncards() = cvrs.size
+
+    override fun cards() : CloseableIterator<AuditableCard> {
+        return CvrsToCardsAddStyles(
             config.auditType,
             Closer(cvrs.iterator()),
             null,
-            pops,
+            populations(),
         )
     }
 }
@@ -336,6 +338,7 @@ fun startTestElectionOneAudit(
     //    phantomPct: Double,
     //    extraPct: Double,
     val election = TestOneAuditElection(
+        auditDir,
         config,
         minMargin,
         cvrFraction = cvrFraction,
@@ -354,7 +357,8 @@ fun startTestElectionOneAudit(
     val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
     val infos = contests.map{ it.contest.info() }.associateBy { it.id }
     val cardPools = readCardPools(publisher, infos)
-    val scardIter = makeCardIter(publisher)
+
+    val scardIter = readCardsCsvIterator(publisher.sortedCardsFile())
     val sortedCards = mutableListOf<AuditableCard>()
     scardIter.forEach { sortedCards.add(it) }
 
@@ -368,6 +372,7 @@ fun startTestElectionOneAudit(
 }
 
 class TestOneAuditElection(
+    val auditDir: String,
     val config: AuditConfig,
     minMargin: Double,
     cvrFraction: Double,
@@ -395,15 +400,13 @@ class TestOneAuditElection(
         this.cardPools = pools
     }
 
+    override fun populations() = cardPools
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
-    override fun cardManifest() : CardManifest {
-        return CardManifest.createFromIterator(cardIter(), cards.size, cardPools)
-    }
-    fun cardIter() : CloseableIterator<AuditableCard> {
-        return MergePopulationsIntoCards(
-            cards,
-            cardPools,
-        )
+    override fun ncards() = cards.size
+
+    override fun cards() : CloseableIterator<AuditableCard> {
+        val publisher = Publisher(auditDir)
+        return readCardsCsvIterator(publisher.sortedCardsFile()) // populations not merged
     }
 }

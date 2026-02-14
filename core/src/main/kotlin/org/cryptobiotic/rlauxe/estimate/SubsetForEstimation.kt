@@ -5,11 +5,11 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TausRateTable
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.math.min
 
 private val debug = true
@@ -117,6 +117,9 @@ fun getSubsetForEstimation(
 
         cardIndex++
     }
+
+    if (sampledCards.size == 0)
+        logger.warn { "sampledCards.size == 0" }
 
     logger.info{ "getSubsetForEstimation sampled cards ncards = ${sampledCards.size} countCardsLookedAt = $countCardsLookedAt" }
     if (debug && allInfos != null) {

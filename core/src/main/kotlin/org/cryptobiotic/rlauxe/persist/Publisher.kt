@@ -14,18 +14,19 @@ private val logger = KotlinLogging.logger("Publisher")
     $auditdir/
         auditConfig.json      // AuditConfigJson
         auditSeed.json        // PrnJson
-        cardManifest.csv      // AuditableCardCsv, may be zipped
-        cardPools.csv         // CardPoolCsv (OneAudit only)
+        cardManifest.csv      // AuditableCard, may be zipped
+        cardPools.csv         // OneAuditPoolFromCvrs (OneAudit only)
         contests.json         // ContestsUnderAuditJson
         electionInfo.json     // ElectionInfoJson
+        populations.json      // PopulationJson: PopulationIF -> Population
         sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
 
         roundX/
             auditEstX.json       // AuditRoundJson,  an audit state with estimation, ready for auditinf
             auditStateX.json     // AuditRoundJson,  the results of the audit for this round
-            sampleCardsX.csv     // AuditableCardCsv, complete cards used for this round; MvrManager called from runClcaAuditRound, runPollingAuditRound
-            sampleMvrsX.csv      // AuditableCardCsv, complete mvrs used for this round; PersistedWorkflow runAuditRound, startNewRound
-            samplePrnsX.json     // SamplePrnsJson, complete sample prns for this round, in order;
+            sampleCardsX.csv     // AuditableCardCsv, complete sorted cards used for this round; MvrManager called from runClcaAuditRound, runPollingAuditRound
+            sampleMvrsX.csv      // AuditableCardCsv, complete sorted mvrs used for this round; PersistedWorkflow runAuditRound, startNewRound
+            samplePrnsX.json     // SamplePrnsJson, complete sorted sample prns for this round
 
         private/
             sortedMvrs.csv       // AuditableCardCsv, sorted by prn, matches sortedCards.csv, may be zipped

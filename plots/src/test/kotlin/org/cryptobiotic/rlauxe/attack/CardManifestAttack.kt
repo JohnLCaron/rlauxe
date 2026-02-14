@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardManifest
 import org.cryptobiotic.rlauxe.audit.CreateAudit
 import org.cryptobiotic.rlauxe.audit.CreateElectionIF
 import org.cryptobiotic.rlauxe.audit.Population
@@ -279,8 +278,10 @@ class CreateElectionForAttack(
 ):  CreateElectionIF {
 
     override fun contestsUA() = contestsUA
-    override fun cardManifest() = CardManifest.createFromIterator(cards.iterator(), cards.size, populations)
+    override fun populations() = populations
+    override fun cards() = Closer( cards.iterator() )
     override fun cardPools() = cardPools
+    override fun ncards() = cards.size
 }
 
 fun ContestWithAssertions.showSimple() = buildString {

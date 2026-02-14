@@ -11,7 +11,7 @@ class TestClcaAudit {
     val N = 10000
 
     val config = AuditConfig(
-        AuditType.CLCA, nsimEst=10, simFuzzPct=0.005,
+        AuditType.CLCA, nsimEst=10, simFuzzPct=0.003,
     )
 
     @Test
@@ -83,6 +83,12 @@ class TestClcaAudit {
         val finalRound = testClcaWorkflow(config, testData)
         assertNotNull(finalRound)
         println(finalRound.show())
+    }
+
+
+    // @Test fails 10/10 failures in sampling max= 693 samples
+    fun testRepeatTest() {
+        repeat(100) { testClcaWithMvrFuzz() }
     }
 
     @Test

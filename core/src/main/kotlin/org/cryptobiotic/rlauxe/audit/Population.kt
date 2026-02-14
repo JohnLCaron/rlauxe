@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.audit
 
-import org.cryptobiotic.rlauxe.util.CloseableIterable
 import kotlin.collections.contains
 
 /*

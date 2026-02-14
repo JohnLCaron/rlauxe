@@ -15,6 +15,7 @@ class TestPersistentConsistentSampling {
             println("auditRecord not found at $auditDir")
             return
         }
+        require(auditRecord is AuditRecord)
 
         val auditRound = auditRecord.rounds.last()
 

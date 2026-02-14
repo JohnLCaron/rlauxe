@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.workflow.MvrManager
+import org.cryptobiotic.rlauxe.workflow.CardManifest
 
 private val debugConsistent = false
 private val logger = KotlinLogging.logger("ConsistentSampling")

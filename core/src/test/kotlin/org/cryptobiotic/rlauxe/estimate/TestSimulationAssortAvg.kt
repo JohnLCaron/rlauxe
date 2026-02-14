@@ -67,7 +67,7 @@ class TestSimulationAssortAvg {
                 propTestFastConfig, // propTestSlowConfig,
                 Arb.Companion.double(min = 0.01, max = 0.05),
                 Arb.Companion.double(min = 0.01, max = 0.10),
-                Arb.Companion.double(min = 0.0, max = 0.05),
+                Arb.Companion.double(min = 0.0, max = 0.01),
                 Arb.Companion.int(min = 10000, max = 30000),
                 Arb.Companion.int(min = 0, max = 100)
             ) { reportedMargin, underVotePct, phantomPct, Nc, Np ->

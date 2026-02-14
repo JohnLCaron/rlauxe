@@ -2,18 +2,15 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsForClca
-import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readSamplePrns
 
 private val logger = KotlinLogging.logger("PersistedMvrManagerTest")
-private val checkValidity = true
 
-class PersistedMvrManagerTest(auditDir: String, electionInfo: ElectionInfo, config: AuditConfig, contestsUA: List<ContestWithAssertions>)
-    : MvrManagerTestIF, PersistedMvrManager(auditDir, electionInfo, config, contestsUA) {
+class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, PersistedMvrManager(auditRecord) {
 
     // extract the cards with sampleNumbers from the cardManifest, optionally fuzz them, and write them to sampleMvrsFile
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCard> {
@@ -86,7 +83,6 @@ class PersistedMvrManagerTest(auditDir: String, electionInfo: ElectionInfo, conf
             mvrs2
         }
 
-        val publisher = Publisher(auditDir)
         writeAuditableCardCsvFile(sampledMvrs, publisher.sampleMvrsFile(round)) // test sampleMvrs
         logger.info{"setMvrsBySampleNumber write sampledMvrs to '${publisher.sampleMvrsFile(round)}"}
         return sampledMvrs
@@ -94,7 +90,6 @@ class PersistedMvrManagerTest(auditDir: String, electionInfo: ElectionInfo, conf
 
     // get the wanted sampleNumbers from samplePrnsFile, and call setMvrsBySampleNumber(sampledMvrs) with them.
     fun setMvrsForRoundIdx(roundIdx: Int): List<AuditableCard> {
-        val publisher = Publisher(auditDir)
         val sampleNumbers = readSamplePrns(publisher.samplePrnsFile(roundIdx))
 
         return if (sampleNumbers.isEmpty()) {

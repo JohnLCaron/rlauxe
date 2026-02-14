@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 
 private val logger = KotlinLogging.logger("RlauxAuditIF")
 
+// abstract superclass of "one round at a time" workflows
  abstract class AuditWorkflow {
     abstract fun auditConfig() : AuditConfig
     abstract fun mvrManager() : MvrManager
@@ -38,11 +39,14 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         val previousSamples = auditRounds.previousSamples(roundIdx)
         val stopwatch = Stopwatch()
 
+        val mvrManager = mvrManager()
+        val cardManifest = mvrManager.cardManifest()
+
         // for each contest, estimate how many samples are needed to satisfy the risk function,
         estimateSampleSizes(
             auditConfig,
             auditRound,
-            cardManifest = mvrManager().cardManifest(),
+            cardManifest = cardManifest,
             cardPools = mvrManager().oapools(),
             previousSamples,
             // nthreads=1,
@@ -69,5 +73,5 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
     // AuditRecord.enterMvrs(mvrFile: String)
 
     // 6. _Run the audit_
-    abstract fun runAuditRound(auditRound: AuditRound, onlyTask: String? = null, quiet: Boolean = true): Boolean  // return complete
+    abstract fun runAuditRound(auditRound: AuditRound, onlyTask: String? = null, quiet: Boolean = true): Boolean  // return true if audit is complete
 }

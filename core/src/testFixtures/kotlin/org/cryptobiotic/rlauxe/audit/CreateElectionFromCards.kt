@@ -14,15 +14,16 @@ class CreateElectionFromCards (
     val config: AuditConfig,
 ): CreateElectionIF {
 
+    override fun populations() = cardPools
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
-    override fun cardManifest() = createCardManifest()
+    override fun cards() = createCards()
+    override fun ncards() = cards.size
 
-    fun createCardManifest(): CardManifest {
-        val mergedCards = MergePopulationsIntoCards(
+    fun createCards(): CloseableIterator<AuditableCard> {
+        return MergePopulationsIntoCards(
             cards,
             populations = cardPools ?: cardStyles,
         )
-        return CardManifest.createFromIterator(mergedCards.iterator(), cards.size, cardPools)
     }
 }

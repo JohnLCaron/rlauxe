@@ -1,5 +1,5 @@
 # Developer Notes
-_01/27/2026_
+_02/14/2026_
 
 ## Prerequisites
 
@@ -138,7 +138,7 @@ if you download a new version of the library, you will possibly have to regenera
 before viewing them.
 
 
-# Random notes and stats
+# Notes and stats
 
 ## Code Coverage (Lines of Codes)
 
@@ -161,18 +161,7 @@ before viewing them.
 | 01/18/2026 | 90.2 % | 5677/6294       |
 | 01/27/2026 | 87.6 % | 6021/6871       |
 | 01/27/2026 | 87.8 % | 5847/6658       |
-
- **core + cases test coverage** 
-
-| date       | pct    | cover/total LOC |
-|------------|--------|-----------------|
-| 11/28/2025 | 79.3 % | 6417/8094       |
-| 11/29/2025 | 79.6 % | 6434/8087       |
-| 11/29/2025 | 81.4 % | 6479/7962       |
-| 12/04/2025 | 81.7 % | 6530/7994       |
-| 12/10/2025 | 78.4 % | 6597/8412       |
-| 12/13/2025 | 80.7 % | 6606/8187       |
-| 12/23/2025 | 81.0 % | 6634/8186       |
+| 02/13/2026 | 87.2 % | 6116/7014       |
 
 
 ## UML
@@ -181,10 +170,6 @@ last changed: 01/07/2026
 ![rlauxe core UML](images/coreUML.svg)
 
 ![rlauxe Audit UML](images/auditUML.svg)
-
-
-
-/////////////////////////////////////////
 
 you could say theres two kinds of Contests, Regular and Irv
 you could say theres two kinds of Audits, Polling and Clca
@@ -200,39 +185,119 @@ if a Clca has pools, then its a OneAudit with ClcaAssorterOneAudit
 | clca    | irv     | ClcaAssorterOneAudit with RaireAssorter |
 
 ContestIF
-    Contest
-        DhondtContest
-    RaireContest
+Contest
+DhondtContest
+RaireContest
 
 ContestUnderAudit
-    hasa ContestIF
-    hasa List<PrimitiveAssorter>
-    hasa List<ClcaAssorter>, (if Clca): (if ClcaAssorterOneAudit, then its OneAudit)
+hasa ContestIF
+hasa List<PrimitiveAssorter>
+hasa List<ClcaAssorter>, (if Clca): (if ClcaAssorterOneAudit, then its OneAudit)
 
 ->subclass RaireContestUnderAudit
-    hasa RaireContest
-    hasa List<RaireAssorter>
-    hasa List<ClcaAssorter>, (if Clca): (if ClcaAssorterOneAudit, then its OneAudit)
+hasa RaireContest
+hasa List<RaireAssorter>
+hasa List<ClcaAssorter>, (if Clca): (if ClcaAssorterOneAudit, then its OneAudit)
 
 AssorterIF (aka PrimitiveAssorter)
-    PluralityAssorter
-    AboveThreshold
-    BelowThreshold
-    DhondtAssorter
-    RaireAssorter
+PluralityAssorter
+AboveThreshold
+BelowThreshold
+DhondtAssorter
+RaireAssorter
 
 ClcaAssorter
-    hasa AssorterIF
+hasa AssorterIF
 
 ->subclass ClcaAssorterOneAudit
 
 Assertion
-    hasa AssorterIF
+hasa AssorterIF
 
 ->subclass ClcaAssertion
-        hasa ClcaAssorter
+hasa ClcaAssorter
 
-////////////////////////////////////////////////////////
+## Persistence
+
+````
+ $auditdir/
+        auditConfig.json      // AuditConfigJson
+        auditSeed.json        // PrnJson
+        cardManifest.csv      // AuditableCard, may be zipped
+        cardPools.csv         // OneAuditPoolFromCvrs (OneAudit only)
+        contests.json         // ContestsUnderAuditJson
+        electionInfo.json     // ElectionInfoJson
+        populations.json      // PopulationJson: PopulationIF -> Population
+        sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
+
+        roundX/
+            auditEstX.json       // AuditRoundJson,  an audit state with estimation, ready for auditinf
+            auditStateX.json     // AuditRoundJson,  the results of the audit for this round
+            sampleCardsX.csv     // AuditableCardCsv, complete sorted cards used for this round; MvrManager called from runClcaAuditRound, runPollingAuditRound
+            sampleMvrsX.csv      // AuditableCardCsv, complete sorted mvrs used for this round; PersistedWorkflow runAuditRound, startNewRound
+            samplePrnsX.json     // SamplePrnsJson, complete sorted sample prns for this round
+
+        private/
+            sortedMvrs.csv       // AuditableCardCsv, sorted by prn, matches sortedCards.csv, may be zipped
+
+
+org.cryptobiotic.rlauxe.persist
+
+class AuditRecord(
+    override val location: String,
+    override val electionInfo: ElectionInfo,
+    override val config: AuditConfig,
+    override val contests: List<ContestWithAssertions>,
+    override val rounds: List<AuditRound>,  // TODO do we need to replace AuditEst ??
+    mvrs: List<AuditableCard> // mvrs already sampled
+) {
+   // TODO maybe better on workflow ??
+    fun enterMvrs(mvrs: CloseableIterable<AuditableCard>, errs: ErrorMessages): Boolean
+   
+   fun readCardManifest(publisher: Publisher, ncards: Int): CardManifest {
+   fun readPopulations(publisher: Publisher): List<PopulationIF>? {
+   fun readCardPools(publisher: Publisher, infos: Map<Int, ContestInfo>): List<OneAuditPoolFromCvrs>? { 
+}
+
+package org.cryptobiotic.rlauxe.workflow
+
+ abstract class AuditWorkflow {
+    abstract fun auditConfig() : AuditConfig
+    abstract fun mvrManager() : MvrManager
+    abstract fun auditRounds(): MutableList<AuditRoundIF>
+    abstract fun contestsUA(): List<ContestWithAssertions>
+    abstract fun runAuditRound(auditRound: AuditRound, onlyTask: String? = null, quiet: Boolean = true): Boolean  // return complete
+    
+   open fun startNewRound(quiet: Boolean = true, onlyTask: String? = null): AuditRound
+}
+class WorkflowTesterTYPE
+class CobraAudit
+class CorlaAudit
+
+class PersistedWorkflow(
+    val auditRecord: AuditRecordIF,
+    val mvrWrite: Boolean = true,
+)
+
+interface MvrManager {
+    fun cardManifest(): CardManifest
+    // fun sortedCards(): CloseableIterable<AuditableCard>  // most uses will just need the first n samples
+    fun oapools(): List<OneAuditPoolFromCvrs>?
+    // fun populations(): List<PopulationIF>?
+    fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  // Pair(mvr, cvr)
+    
+   // test only
+    fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCard>
+}
+class MvrManagerForTesting
+class MvrManagerFromManifest
+class CompositeMvrManager
+
+class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boolean = true): MvrManager
+````
+
+
+## Documents
 
 README
 
@@ -253,7 +318,8 @@ README
         (Corla.md)
     docs/Clca.md
 
-////////////////////////////////////////////
+## Fuzzing notes
+
 Simulation 02/06/2026
 
 * vetted
@@ -341,22 +407,22 @@ OneAuditTest : One OA contest
 simulateRaireTestContest: single raire contest
 
 
-///////////////////////////////////////////////////////////////
+# TODO
 
-# TODO 12/11/25 (Belgium)
+## TODO 12/11/25 (Belgium)
 
 * include undervotes
 * assertions that look at coalitions of parties. (Vanessa)
 * choose an audit size and measure the risk.
 
-# TODO 12/20/25
+## TODO 12/20/25
 
 * investigate the effect of population.hasSingleCardStyle = hasStyle.
 * investigate possible attacks with mvr_assort = 0.5 when the mvr is missing the contest.
 * review strategies and fuzzing in estimation and auditing
 * replace old plots
 
-# TODO 01/04/26
+## TODO 01/04/26
 
 * maxRisk does it help? reduce lamda tradeoff
 * 2D plotting
@@ -364,7 +430,7 @@ simulateRaireTestContest: single raire contest
 * mix_betting_mart: "Finds a simple discrete mixture martingale as a (flat) average of D TSMs each with fixed bet 'lam'"
 * review COBRA 3.2, 4.3 (Diversified betting)
 
-# TODO 2/6/26
+## TODO 2/6/26
 
 * replace SimulateIrvTestData with Vunder: we need the VoteConsolidator info
 * can we use Vunder in MultiContestTestData (68) ?

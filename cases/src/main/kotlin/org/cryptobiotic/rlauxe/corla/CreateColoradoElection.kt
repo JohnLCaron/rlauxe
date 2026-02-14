@@ -61,7 +61,7 @@ open class CreateColoradoElection (
         contests = makeContests()
 
         val infos = contests.map { it.info() }.associateBy { it.id }
-        val (manifestTabs, count) = tabulateCardsAndCount(createCvrIter(), infos)
+        val (manifestTabs, count) = tabulateCardsAndCount(createCards(), infos)
         val npopMap = manifestTabs.mapValues { it.value.ncardsTabulated }
         this.ncards = count
 
@@ -155,22 +155,14 @@ open class CreateColoradoElection (
         }
     }
 
+    override fun populations() = if (config.isClca) emptyList() else cardPools
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
-    override fun cardManifest() = createCardManifest()
+    override fun cards() = createCards()
+    override fun ncards() = ncards
 
-    fun createCardManifest(): CardManifest {
-        return cvrsWithPopulationsToCardManifest(
-            config.auditType,
-            Closer(CvrIteratorfromPools()),
-            ncards,
-            makePhantomCvrs(contests),
-            if (config.isClca) null else cardPoolBuilders,
-        )
-    }
-
-    fun createCvrIter(): CloseableIterator<AuditableCard> {
-        return CvrsWithPopulationsToCards(config.auditType,
+    fun createCards(): CloseableIterator<AuditableCard> {
+        return CvrsToCardsAddStyles(config.auditType,
             Closer(CvrIteratorfromPools()),
             makePhantomCvrs(contests),
             if (config.isClca) null else cardPoolBuilders,

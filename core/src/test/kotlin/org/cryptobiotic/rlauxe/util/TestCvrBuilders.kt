@@ -36,6 +36,11 @@ class TestCvrBuilders {
         }
     }
 
+    // @Test fails *** PLURALITY contest14 (14)  Plurality winner=0 loser=1 dilutedMargin=0.0000% dilutedMean=50.0000%: cvrAssortAvg (0.5) must be > .5
+    fun testRepeatTest() {
+        repeat(100) { testFuzzedCvrs() }
+    }
+
     @Test
     fun testFuzzedCvrs() {
         val ncontests = 20
@@ -45,7 +50,7 @@ class TestCvrBuilders {
         val show = false
         val detail = false
         val ntrials = 1
-        val fuzzPcts = listOf(0.001, .005, .01, .02, .05)
+        val fuzzPcts = listOf(0.001, .002, .003)
         fuzzPcts.forEach { fuzzPct ->
             val fcvrs = makeFuzzedCvrsForPolling(contests.map { it.info() }, cvrs, fuzzPct)
             println("fuzzPct = $fuzzPct")

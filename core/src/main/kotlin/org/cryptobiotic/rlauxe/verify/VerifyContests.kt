@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.verify
 
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -9,10 +7,7 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
-import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.json.readAuditConfigUnwrapped
-import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
-import org.cryptobiotic.rlauxe.persist.json.readElectionInfoUnwrapped
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.raire.RaireAssorter
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -23,8 +18,7 @@ import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateCardManifest
-import org.cryptobiotic.rlauxe.workflow.readCardManifest
-import org.cryptobiotic.rlauxe.workflow.readCardPools
+import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -35,27 +29,18 @@ import kotlin.use
 // for all audit types. Cards and CardPools must already be published, contests might not,
 // but only if you call cerify with the contests' note only then do you get contestUA.preAuditStatus saved
 class VerifyContests(val auditRecordLocation: String, val show: Boolean = false) {
-    val publisher: Publisher
+    val auditRecord: AuditRecord
     val config: AuditConfig
     val allContests: List<ContestWithAssertions>?
     val allInfos: Map<Int, ContestInfo>?
-    val electionInfo: ElectionInfo
     val cardManifest: CardManifest
 
     init {
-        publisher = Publisher(auditRecordLocation)
-        electionInfo = readElectionInfoUnwrapped(publisher.electionInfoFile())!!
-        config = readAuditConfigUnwrapped(publisher.auditConfigFile())!!
-
-        val contestsResults = readContestsJsonFile(publisher.contestsFile())
-        allContests = if (contestsResults .isOk) contestsResults.unwrap().sortedBy { it.id } else {
-            println(contestsResults)
-            null
-        }
-        allInfos = allContests?.map{ it.contest.info() }?.associateBy { it.id }
-
-        cardManifest = readCardManifest(publisher, electionInfo.ncards)
-
+        auditRecord = AuditRecord.readFrom(auditRecordLocation) as AuditRecord
+        config = auditRecord.config
+        allContests = auditRecord.contests.sortedBy { it.id }
+        allInfos = allContests.map{ it.contest.info() }.associateBy { it.id }
+        cardManifest = auditRecord.readCardManifest()
     }
 
     fun verify() = verify( allContests!!, show = show)
@@ -74,7 +59,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
 
         // OA
         if (config.isOA) {
-            val cardPools = readCardPools(publisher, infos)
+            val cardPools = auditRecord.readCardPools()
             if (cardPools != null) {
                 verifyOAagainstCards(contests, contestSummary, cardPools, infos, results, show = show)
                 verifyOAassortAvg(contests, cardManifest.cards.iterator(), results, show = show)

@@ -39,6 +39,7 @@ fun runRound(inputDir: String, onlyTask: String? = null): AuditRoundIF? {
     return roundResult.unwrap()
 }
 
+// run one round and get ready to run the next round; or get ready to run the first round.
 fun runRoundResult(auditDir: String, onlyTask: String? = null): Result<AuditRoundIF, ErrorMessages> {
     val errs = ErrorMessages("runRoundResult")
 
@@ -50,6 +51,7 @@ fun runRoundResult(auditDir: String, onlyTask: String? = null): Result<AuditRoun
         if (auditRecord == null) {
             return errs.add("directory '$auditDir' does not contain an audit record")
         }
+        require(auditRecord is AuditRecord)
 
         val workflow = PersistedWorkflow(auditRecord)
         var roundIdx = 0
@@ -117,6 +119,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
             return "directory '$auditDir' does not contain an audit record"
         }
         logger.info { "runRoundAgain in $auditDir for round $roundIdx, contest $contestId, and assertion $cassertion" }
+        require(auditRecord is AuditRecord)
 
         val workflow = PersistedWorkflow(auditRecord, mvrWrite = false)
         val cvrPairs = workflow.mvrManager().makeMvrCardPairsForRound(roundIdx)

@@ -11,23 +11,17 @@ import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
-import org.cryptobiotic.rlauxe.persist.json.readElectionInfoUnwrapped
 import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.workflow.MvrManager
+import org.cryptobiotic.rlauxe.workflow.CardManifest
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
-import org.cryptobiotic.rlauxe.workflow.readCardManifest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
 import kotlin.use
 
 class TestSfElection {
-    val sfDir = "$testdataDir/cases/sf2024"
-    val zipFilename = "$sfDir/CVR_Export_20241202143051.zip"
-    val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
 
     @Test
     fun testRunVerifySFoa() {
@@ -42,10 +36,8 @@ class TestSfElection {
     fun testSFoaPopulations() {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
 
-        val publisher = Publisher(auditdir)
-        val electionInfo = readElectionInfoUnwrapped(publisher.electionInfoFile())!!
-
-        val cardManifest = readCardManifest(publisher, electionInfo.ncards)
+        val auditRecord = AuditRecord.readFrom(auditdir) as AuditRecord
+        val cardManifest = auditRecord.readCardManifest()
         val populationNcards = cardManifest.populations.sumOf { it.ncards() }
         println("manifestSumPools = $populationNcards")
 
@@ -69,7 +61,7 @@ class TestSfElection {
         println("contest49 pool/cards = ${count49pools/count49.toDouble()}")
         println()
 
-        val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
+        val contests = auditRecord.contests
         val contest49 = contests.find { it.id == 49 }!!
         println("contest49 = $contest49")
         contest49.clcaAssertions.forEach {
@@ -82,7 +74,7 @@ class TestSfElection {
         }
         assertEquals(count49, contest49.Npop)
 
-
+        val publisher = Publisher(auditdir)
         val sortedMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.privateMvrsFile())
         countCards = 0
         count49 = 0
@@ -102,8 +94,6 @@ class TestSfElection {
         println("count cards with contest49 = $count49  and in pools =  $count49pools")
         println("contest49 pool/cards = ${count49pools/count49.toDouble()}")
 
-        val auditRecord = AuditRecord.readFrom(auditdir)
-            ?: throw RuntimeException("directory '$auditdir' does not contain an audit record")
         val pw = PersistedWorkflow(auditRecord, false)
         val man: CardManifest = pw.mvrManager().cardManifest()
         val populations = man.populations

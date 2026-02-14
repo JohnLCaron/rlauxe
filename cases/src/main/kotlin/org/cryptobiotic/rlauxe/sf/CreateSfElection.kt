@@ -73,7 +73,7 @@ class CreateSfElection(
         phantomCount = countPhantoms(allCvrTabs, contestNcs)
 
         // we need to know the diluted Nb before we can create the assertions: another pass through the cvrExports
-        val (manifestTabs, count) = tabulateCardsAndCount( createCardIter(config.auditType), infos)
+        val (manifestTabs, count) = tabulateCardsAndCount( createCards(config.auditType), infos)
         val contestNbs = manifestTabs.mapValues { it.value.ncardsTabulated }
         println("contestNbs= ${contestNbs}")
         this.ncards = count
@@ -159,27 +159,24 @@ class CreateSfElection(
         return result
     }
 
+    override fun populations() = if (config.isClca) emptyList() else cardPools
     override fun cardPools() = if (config.isClca) emptyList() else cardPools
     override fun contestsUA() = contestsUA
-    override fun cardManifest() = createCardManifest()
-
-    fun createCardManifest(): CardManifest {
-        val populations = if (config.isClca) emptyList() else cardPools
-        return CardManifest.createFromIterator(createCardIter(config.auditType), ncards, populations)
-    }
+    override fun cards() = createCards(config.auditType)
+    override fun ncards() = ncards
 
     // these are the same cvrs for CLCA and OneAudit
-    fun createCardIter(auditType: AuditType): CloseableIterator<AuditableCard> {
+    fun createCards(auditType: AuditType): CloseableIterator<AuditableCard> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
         val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPools.associate { it.name() to it.id() })
 
-        return if (auditType == AuditType.ONEAUDIT) CvrsWithPopulationsToCards(
+        return if (auditType == AuditType.ONEAUDIT) CvrsToCardsAddStyles(
             auditType,
             cvrIter,
             makePhantomCvrs(phantomCount),
             cardPools)
         else
-            CvrsWithPopulationsToCards(
+            CvrsToCardsAddStyles(
                 auditType,
                 cvrIter,
                 makePhantomCvrs(phantomCount),

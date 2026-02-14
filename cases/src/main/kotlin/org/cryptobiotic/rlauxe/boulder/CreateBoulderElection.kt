@@ -62,7 +62,7 @@ class CreateBoulderElection(
         contests = makeContests()
         simulatedCvrs = makeRedactedCvrs()
 
-        val (manifestTabs, count) = tabulateCardsAndCount(createCardIter(), infoMap)
+        val (manifestTabs, count) = tabulateCardsAndCount(createCards(), infoMap)
         val npopMap = manifestTabs.mapValues { it.value.ncardsTabulated }
         this.ncards = count
 
@@ -258,19 +258,17 @@ class CreateBoulderElection(
         }
     }
 
+
     override fun contestsUA() = contestsUA
-    override fun cardPools() = null // dont have List<OneAuditPoolFromCvrs>
-    override fun cardManifest() = createCardManifest()
+    override fun populations() = if (isClca) emptyList() else cardPoolBuilders
+    override fun cardPools() = null
+    override fun cards() = createCards()
+    override fun ncards() = ncards
 
-    fun createCardManifest(): CardManifest {
-        val populations = if (isClca) emptyList() else cardPoolBuilders
-        return CardManifest.createFromIterator(createCardIter(), ncards, populations)
-    }
-
-    fun createCardIter(): CloseableIterator<AuditableCard> {
+    fun createCards(): CloseableIterator<AuditableCard> {
         return if (isClca) { // TODO and hasUndervotes
             val cvrs =  exportCvrs + simulatedCvrs
-            CvrsWithPopulationsToCards(
+            CvrsToCardsAddStyles(
                 AuditType.CLCA,
                 Closer(cvrs.iterator()),
                 makePhantomCvrs(contests),
@@ -279,7 +277,7 @@ class CreateBoulderElection(
         } else {
             val poolCards =  createCvrsFromPools()
             val cvrs =  exportCvrs + poolCards
-            CvrsWithPopulationsToCards(
+            CvrsToCardsAddStyles(
                 AuditType.ONEAUDIT,
                 Closer(cvrs.iterator()),
                 makePhantomCvrs(contests),

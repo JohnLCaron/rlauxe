@@ -14,17 +14,18 @@ class CreateElectionFromCvrs (
     val config: AuditConfig,
 ): CreateElectionIF {
 
+    override fun populations() = cardPools
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
-    override fun cardManifest() = createCardManifest()
+    override fun cards() = createCards()
+    override fun ncards() = cvrs.size
 
-    fun createCardManifest(): CardManifest {
-        val mergedCards = CvrsWithPopulationsToCards(
+    fun createCards(): CloseableIterator<AuditableCard> {
+        return CvrsWithPopulationsToCards(
             config.auditType,
             Closer(cvrs.iterator()),
-            null,
+            phantomCvrs = null,
             populations = cardPools ?: cardStyles,
         )
-        return CardManifest.createFromIterator(mergedCards.iterator(), cvrs.size, cardPools ?: cardStyles)
     }
 }

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardManifest
+import org.cryptobiotic.rlauxe.workflow.CardManifest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -39,7 +39,7 @@ class MvrManagerFromManifest(
     }
 
     override fun cardManifest() :CardManifest {
-        return CardManifest.createFromIterator(sortedCards.iterator(), sortedCards.size, pools)
+        return CardManifest.createFromList(sortedCards, pools)
     }
 
     override fun oapools(): List<OneAuditPoolFromCvrs>? {

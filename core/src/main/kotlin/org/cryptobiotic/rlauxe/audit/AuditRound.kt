@@ -113,8 +113,17 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     }
 
     fun minAssertion(): AssertionRound? {
-        val minAssertion = contestUA.minAssertion()!!
-        return assertionRounds.find { it.assertion == minAssertion }
+        // cant use contestUA.minAssertion, since some of the assertions may have finished being audit, ie are not in assertionRounds
+        if (assertionRounds.isEmpty()) return null
+        if (contestUA.isClca) {
+            val margins = assertionRounds.map { Pair(it, it.noerror) }
+            val minMargin = margins.sortedBy { it.second }
+            return minMargin.first().first
+        } else {
+            val margins = assertionRounds.map { Pair(it, it.assertion.assorter.dilutedMargin()) }
+            val minMargin = margins.sortedBy { it.second }
+            return minMargin.first().first
+        }
     }
 
     fun calcMvrsNeeded(config: AuditConfig): Int {

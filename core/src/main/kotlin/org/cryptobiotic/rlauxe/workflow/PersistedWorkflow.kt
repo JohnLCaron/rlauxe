@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.persist.AuditRecordIF
 import org.cryptobiotic.rlauxe.persist.CompositeRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
@@ -21,7 +20,7 @@ enum class PersistedWorkflowMode {
 
 /** AuditWorkflow with persistent state. */
 class PersistedWorkflow(
-    val auditRecord: AuditRecordIF,
+    val auditRecord: AuditRecord,
     val mvrWrite: Boolean = true,
 ): AuditWorkflow() {
     val auditDir = auditRecord.location
@@ -45,9 +44,9 @@ class PersistedWorkflow(
                 // TODO PersistedWorkflowMode
                 CompositeMvrManager(auditRecord, config, auditContests)
             (mode == PersistedWorkflowMode.testSimulated) ->
-                PersistedMvrManagerTest(auditRecord.location, auditRecord.electionInfo, config, auditContests)
+                PersistedMvrManagerTest(auditRecord)
             else ->
-                PersistedMvrManager(auditRecord.location, auditRecord.electionInfo, config, auditContests, mvrWrite=mvrWrite)
+                PersistedMvrManager(auditRecord, mvrWrite=mvrWrite)
         }
     }
 
@@ -113,7 +112,7 @@ class PersistedWorkflow(
         fun readFrom(location: String): PersistedWorkflow? {
             val auditRecord = AuditRecord.readFrom(location)
             return if (auditRecord == null) null
-            else PersistedWorkflow(auditRecord)
+            else PersistedWorkflow(auditRecord as AuditRecord) // TODO CompositeRecord
         }
     }
 }

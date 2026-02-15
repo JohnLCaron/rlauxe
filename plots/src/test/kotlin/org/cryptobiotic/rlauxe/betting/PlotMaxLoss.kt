@@ -36,40 +36,10 @@ class PlotMaxLoss {
         margins.forEach { v ->
             maxLosses.forEach { maxLoss ->
                 val noerror = 1/(2-v) // upper = 1
+                val maxBet = 2 * maxLoss
 
-                // tj = 1 + 2 * maxLoss * (noerror − 0.5)
-                // tj = 1 + maxLoss * (v/(2-v))
-                // n = -ln(1 - maxLoss) / ln(1 + maxLoss * (v/(2-v)))
-                // v = diluted margin
-
-                val loss = 1 / (1 - maxLoss)
-                val tj = (1.0 + maxLoss * (v / (2 - v)))
-                val samplesNeededToCompensate = ln(loss) / ln(tj)
-                val samplesNeededNoErrors = ln(1/.05) / ln(tj) // samples need no errors
-                results.add(MaxLoss(v, maxLoss, samplesNeededNoErrors=samplesNeededNoErrors, samplesNeededToCompensate=samplesNeededToCompensate))
-
-                // t is the payoff
-
-                // t_noerror = 1 + λc * (noerror − 0.5)
-                // t_noerror = 1 + 2 * maxLoss * (noerror − 0.5)
-
-                val t_noerror = 1 + 2 * maxLoss * (noerror - 0.5)
-                require(doubleIsClose(tj, t_noerror, doublePrecision))
-
-                // t_p2o = 1 - maxLoss
-
-                // To compensate for one p2o sample, we need n_p2o noerror samples, such that
-                //    t_noerror^n_p2o = 1 / (1 - maxLoss)
-                //    n_p2o = -ln(1 - maxLoss) / ln(t_noerror)
-                val samplesNeededToCompensate2 = ln(loss) / ln(t_noerror)
-                require(doubleIsClose(samplesNeededToCompensate, samplesNeededToCompensate2, doublePrecision))
-
-                // if there are no errors we need
-                //   t_noerror^n = 1 / alpha
-                //   n = -ln(alpha) / ln(t_noerror)
-                val samplesNeededNoErrors2 = -ln(.05) / ln(t_noerror)
-                require(doubleIsClose(samplesNeededNoErrors, samplesNeededNoErrors2, doublePrecision))
-                println()
+                val (n, n_p2o) = calcNtau(maxBet, noerror, 0.0)
+                results.add(MaxLoss(v, maxLoss, samplesNeededNoErrors=n, samplesNeededToCompensate=n_p2o))
             }
         }
 
@@ -143,6 +113,7 @@ class PlotMaxLoss {
         )
     }
 
+
     @Test
     fun p2oAgainstLosses() {
 
@@ -150,7 +121,9 @@ class PlotMaxLoss {
         val results = mutableListOf<MaxLoss>()
         margins.forEach { v ->
             repeat(50) { idx ->
-                val maxLoss =.5 + .01 * idx
+                val maxLoss = .5 + .01 * idx
+                val maxBet = 2 * maxLoss
+                val noerror = 1/(2-v) // upper = 1
 
                 // tj = 1 + 2 * maxLoss * (noerror − 0.5)
                 // tj = 1 + maxLoss * (v/(2-v))
@@ -161,10 +134,17 @@ class PlotMaxLoss {
                 val samplesNeededToCompensate = ln(loss) / ln(tj)
                 val samplesNeededNoErrors = ln(1/.05) / ln(tj)
 
+                val (n, n_p2o) = calcNtau(maxBet, noerror, 0.0)
+
+                val close = doubleIsClose(n_p2o, samplesNeededToCompensate, doublePrecision)
+                val close2 = doubleIsClose(n, samplesNeededNoErrors, doublePrecision)
+                if (!close || !close2)
+                    println("")
+
                 repeat(6) {
                     val nloss = it
-                    val totalNeeded = samplesNeededNoErrors + nloss*samplesNeededToCompensate
-                    results.add(MaxLoss(v, maxLoss, samplesNeededNoErrors, samplesNeededToCompensate, totalNeeded = totalNeeded, nloss))
+                    val totalNeeded = n + nloss*n_p2o
+                    results.add(MaxLoss(v, maxLoss, n, n_p2o, totalNeeded = totalNeeded, nloss))
                 }
             }
         }
@@ -176,13 +156,15 @@ class PlotMaxLoss {
 
     @Test
     fun p1oAgainstLosses() {
-
+        val upper = 1.0
         val margins = listOf(.01, .05)
         val results = mutableListOf<MaxLoss>()
         margins.forEach { v ->
             repeat(50) { idx ->
                 val maxLoss =.5 + .01 * idx
                 val noerror = 1/(2-v) // upper = 1
+                val tau = 1.0 - 1.0 / (2.0 * upper)
+                val (n, n_p1o) = calcNtau(maxLoss*2, noerror, tau)
 
                 // t is the payoff
 

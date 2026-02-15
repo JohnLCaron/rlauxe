@@ -15,7 +15,7 @@ Read [BettingRiskFunctions](BettingRiskFunctions.md) for background. Here are ne
 ## CLCA assort values
 
 We do an affine transformation of our assorters so that they all return one of three values [0, 1/2, upper] * noerror,
-corresponding to whether the card has a vote for the loser, other, or winner.
+corresponding to whether the card has a vote for the loser, other, or winner. 
 
 A CLCA overstatement error = cvr_assort - mvr_assort has one of 7 possible values:
 
@@ -24,7 +24,7 @@ A CLCA overstatement error = cvr_assort - mvr_assort has one of 7 possible value
                              .5,  0, .5-u,
                               u, u-.5, 0
 
-ordering these:                         
+ordering these from low to high:                         
     = [-u, -.5, .5-u, 0, .5, u-.5, u]  
     
 the corresponding names are
@@ -33,8 +33,7 @@ the corresponding names are
                                   [oth-los, noerror, oth-win]
                                   [win-los, win-oth, noerror] 
                         
-names match this ordering [-u, -.5, .5-u, 0, .5, u-.5, u]:
-                                  
+names matching this ordering [-u, -.5, .5-u, 0, .5, u-.5, u]:
     ["los-win", "los-oth", "oth-win", "noerror", "oth-los", "win-oth", "win-los"] 
                                   
 ````
@@ -42,43 +41,35 @@ names match this ordering [-u, -.5, .5-u, 0, .5, u-.5, u]:
 The CLCA assorter (aka bassort) does an affine transformation of the overstatement error:
 
 ````
-   bassort = (1-o/u)*noerror = taus * noerror
+   bassort = (1-o/u)*noerror = tau * noerror
    where
      o = overstatement error
-     u = assorter upper value
-     v = reported margin
+     u = assorter upper bound
+     v = reported assorter margin
+     tau = (1-o/u)
      noerror = 1/(2-v/u)
 
 then the possible values of bassort = (1-o/u) * noerror are:
 
-    o = [u, u-.5, .5, 0, .5-u, -.5, -u]
-    (1-o/u) = [1-u/u, 1-(u-.5)/u, 1-.5/u, 0, 1-(.5-u)/u, 1--.5/u, 1- -u/u]
-    (1-o/u) = [0, 1-(u/u-.5/u), 1-.5/u, 0, 1-(.5/u-u/u), 1+.5/u, 1+u/u]
-    (1-o/u) = [0, -.5/u), 1-.5/u, 0, 2-.5/u, 1+.5/u, 2]
+    o = [u, u-.5, .5, 1, .5-u, -.5, -u]
+    (1-o/u) = [1-u/u, 1-(u-.5)/u, 1-.5/u, 1,   1-(.5-u)/u, 1-(-.5/u), 1- (-u/u)]
+    (1-o/u) = [0,   1-(u/u-.5/u), 1-.5/u, 1, 1-(.5/u-u/u),    1+.5/u, 1+u/u]
+    (1-o/u) = [0,           .5/u, 1-.5/u, 1,       2-.5/u,    1+.5/u, 2]
     
-          o= [-u, -.5, .5-u, 0, .5, u-.5, u]
-    (1-o/u)= [1- -u/u, 1- -.5/u, 1-(.5-u)/u, 1, 1-.5/u, 1-(u-.5)/u, 1-u/u]
-    (1-o/u)= [1+u/u, 1+.5/u, 1-(.5/u-u/u), 1, 1-.5/u, 1-(u/u-.5/u), 1-u/u]
-    (1-o/u)= [2, 1+.5/u, 2-.5/u, 1, 1-.5/u, .5/u, 0]
-    (1-o/u)= [2, 1+1/2u, 2-1/2u, 1, 1-1/2u, 1/2u, 0]
-    (1-o/u)= [2, 1+u12, 2-u12, 1, 1-u12, u12, 0], where u12= 1/2u
-    
-taus = (1-o/u) = [2,          1+u12,    2-u12,     1,         1-u12,     u12,       0]
-taus names     = ["los-win", "los-oth", "oth-win", "noerror", "oth-los", "win-oth", "win-los"]
+taus=(1-o/u)= [0,            u12,  1-u12, 1,        2-u12,     1+u12, 2] where u12= .5u
 
-in our code its more convenient to reverse the ordering:
+the corresponding names are
 
-taus =       [0.0,       u12,       1-u12,     1.0,       2-u12,     1+u12,     2.0]
-taus names = ["win-los", "win-oth", "oth-los", "noerror", "oth-win", "los-oth", "los-win"]
-
-Note that taus depends only on u = assorter.upperLimit
+tauNames = ["win-los", "win-oth", "oth-los", "noerror", "oth-win", "los-oth", "los-win"]
 ````
 
-For Plurality, u = 1, so the possible values are:
+Note that taus depend only on u, while noerror depends on v and u.
+
+For Plurality, u = 1, and the possible values are:
 ````
     [0, .5, 1, 1.5, 2] (u=1)
     
-we give them SHANGRLA names: tauNames = ["p2o", "p1o", "noerror", "p1u", "p2u"] that correspond to these values.
+we give them SHANGRLA names: tauNames = ["p2o", "p1o", "noerror", "p1u", "p2u"]
 
 ````
 
@@ -130,23 +121,22 @@ When the mvr is a phantom, it's the same as "los".
 It's instructive to see the effect of each error type on the testStatistic T, which gets multiplied by the 
 payoff for that error. We will calculate the effect of one error by looking at the increase in noerror samples needed.
 
-When the mvr and cvr agree, the assort value = noerror, so the payoff is (where µ_i is approximately 1/2):
+When the mvr and cvr agree, the assort value = noerror:
 
-    payoff_noerror = (1 + λ * (noerror − 1/2))  
+    payoff_noerror = (1 + λ * (noerror − 1/2))  ;  (µ_i is approximately 1/2)
 
 When the mvr and cvr disagree, the assort value = tau * noerror, and the payoff is
 
     payoff_tau = (1 + λ * (tau * noerror − 1/2))
 
-How many "noerror" samples are equivilent to one sample whose assort value = tau * noerror ?
+How many "noerror" samples are equivilent to a single sample whose assort value = tau * noerror ?
 
-    payoff_noerror^n_tau = payoff_tau
-    n_tau = ln(payoff_tau) / ln(payoff_noerror)
-    n_tau = ln((1 + λ * (tau * noerror − 1/2)) / ln(1 + λ * (noerror − 1/2))
+    payoff_noerror^n_tau * payoff_tau = 1.0
+    n_tau = -ln(payoff_tau) / ln(payoff_noerror)
+    n_tau = -ln((1 + λ * (tau * noerror − 1/2)) / ln(1 + λ * (noerror − 1/2))
 
-This depends on lamda, as well as upper and margin, since noerror = 1/(2-margin/upper)
-
-First we fix margin = .01 and upper = 1.0, and show the dependence on lamda:
+n_tau depends on lamda, as well as upper and margin, since noerror = 1/(2-margin/upper).
+To examine this, first we set the margin = .01 and upper = 1.0, and show the dependence on lamda:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/byLamda.html" rel="byLamda">![byLamda](plots2/betting/errorComp/byLamda.png)</a>
 
@@ -157,13 +147,13 @@ Then we fix lamda = 1.8 and show the dependence on margin for various values of 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/byUpperUnder1.html" rel="byUpperUnder1">![byUpperUnder1](plots2/betting/errorComp/byUpperUnder1.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/byUpper10.html" rel="byUpper10">![byUpper10](plots2/betting/errorComp/byUpper10.png)</a>
 
-The last two plots correspond to the BelowThreshold and AboveThreshhold assorters with 5% threshold, as used in Belgian D'hondt elections.
+(The last two plots correspond to the BelowThreshold and AboveThreshold assorters with 5% threshold, as used in Belgian D'hondt elections.)
 
 * Understatement errors have the effect of decreasing the number of samples needed, shown on the plots as negetive numbers.
 
-* It is sobering to see how many extra samples are needed for just one error. For example, for a single p2o error, a plurality contest (upper=1) needs 100 extra samples when the margin is .05, and 500 extra when the margin is .01. These are absolute numbers, not dependent on the population size.
+* It is sobering to see how many extra samples are needed for just one error. For example, for a single p2o error, a plurality contest (upper=1) needs 100 extra samples when the margin is .05, and 500 extra when the margin is .01. (These are absolute numbers, not dependent on the population size.)
 
-* Extra samples needed appear to scale linearly with upper: when upper=10, one needs 1000 and 5000 extra ballots for margins of .05 and .01, and so on.
+* The extra samples appear to scale linearly with upper: when upper=10, one needs 1000 and 5000 extra ballots for margins of .05 and .01, and so on.
 
 * When applied to a real audit, one must take into account the probability of encountering an error in the sampled population. This will roughly be
   nerrors * sampleSize / populationSize.

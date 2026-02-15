@@ -203,55 +203,55 @@ MaxLoss is a user settable parameter which limits the maximum bet that can be pl
 
 How many noerror samples are needed to offset an assort value of 0.0, ie a 2-vote overstatement error (p2o) ?
 
-Suppose the bet is constant at λc = 2 * (1 - maxLoss). Approximate µ_i as 0.5. then
+The payoff for the jth bet:
 
-    tj = 1 + λ_i * (x_i − µ_i)
-    t_noerror = 1 + λc * (noerror − 0.5)
-    
-    noerror = 1 / (2 - dilutedMargin / assorter.upperBound()) 
-            = 1/(2-v) when u = 1
-    
-    noerror-0.5 = 1/(2-v) − 1/2       
-                = 2/2(2-v) - (2-v)/2(2-v)  
-                = (2 - (2-v) / 2(2-v)
-                = v / 2(2-v)
-
-so:
-
-    t_noerror = 1 + λc * (noerror − 0.5)
-    t_noerror = (1 + λc * (v / 2(2-v)))
-    t_noerror = (1 +  λc/2 * (v / (2-v)))
+    tj = 1 + λ_j * (x_j − µ_j)      (approximate µ_i as 0.5)
 
 A p2o assort value of x = 0.0, gives the smallest possible value of tj:
 
     tj = 1 + λ_j * (x_i − µ_j)
     tj = 1 + λ_j * (0 − .5)
-    tj = 1 - λ_j /2
+    tj = 1 - λ_j / 2
+
+Which is smallest when λ_j = maxBet = 2 * maxLoss
+
     t_min = 1 - maxBet /2
     t_min = 1 - maxLoss
 
-which is how we choose maxLoss; whats the largest loss we are willing to suffer on a p2o sample? If maxLoss = .9, then t_p2o = .1, and we
-lose 90% of our "winnings", aka the testStatistic T.
+which is how we choose maxLoss: whats the largest loss we are willing to suffer on a single sample? If maxLoss = .9, then t_p2o = .1, and we
+lose 90% of our "winnings" (aka the testStatistic T).
 
-To compensate for one p2o sample, we need ncomp noerror samples, such that
+To compensate for one p2o sample at the maximum bet, we need n_p2o noerror samples, such that
 
-    t_noerror^ncomp = 1 / (1 - maxLoss)
+    payoff_noerror^n_p2o * payoff_p2o = 1.0
+
+where
+
+    payoff_noerror = 1 + maxBet * (noerror − 0.5)     
+    payoff_p2o = = 1 - maxBet /2     
+
+so
+
+    n_p2o = -ln(payoff_p2o) / ln(payoff_noerror)
+    n_p2o = -ln(1 - maxBet/2) / ln(1 + maxBet * (noerror − 0.5))
+
+(see [The effects of CLCA Errors](ClcaErrors.md) for the general case).
+
+    payoff_noerror^ncomp = 1 / (1 - maxLoss)
     ncomp = -ln(1 - maxLoss) / ln(1 + maxLoss * (v/(2-v)))
 
 If there are no p2o samples, then the number of noerror samples we need to reject the null hypothesis is
 
-    t_noerror^n = 1 / alpha
+    payoff_noerror^n = 1 / alpha
     n = -ln(alpha) / ln(1 + maxLoss * (v/(2-v)))
 
 Ignoring other types of errors, the number of samples needed when there are k p2o errors are:
 
-    ntotal = n + k * ncomp
-    ntotal = -ln(alpha) / ln(1 + maxLoss * (v/(2-v))) + k * -ln(1 - maxLoss) / ln(1 + maxLoss * (v/(2-v)))
-    ntotal = -(ln(alpha) + k * ln(1 - maxLoss)) / ln(1 + maxLoss * (v/(2-v)))
+    nsamples = n + k * n_p2o
 
-Here is a plot of ntotal for values of k (0..5) and two different margins v = .01 and .05:
+Here is a plot of nsamples for values of k (0 .. 5) and two different margins v = .01 and .05:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxLoss.nloss.LogLog.html" rel="BettingPayoff">![maxLossLog](plots2/betting/maxloss/maxLoss.nloss.LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxloss.p2oErrors.LogLog.html" rel="BettingPayoff">![maxLossLog](plots2/betting/maxloss/maxloss.p2oErrors.LogLog.png)</a>
 
 * When k > 0 there is a value of maxLoss that minimizes the number of samples needed.
 * Informally you can see that the optimal maxLoss is the same for both margins. (click on the image to get an interactive html plot)
@@ -261,7 +261,7 @@ Here is a plot of ntotal for values of k (0..5) and two different margins v = .0
   to 0.9, we cut off possible increased sample sizes to the right of that.
 * The presence of even a single p2o error has a strong effect on the samples needed. The linear plot shows that more clearly:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxLoss.nloss.Linear.html" rel="BettingPayoff">![maxLossLinear](plots2/betting/maxloss/maxLoss.nloss.Linear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxloss.p2oErrors.Linear.html" rel="BettingPayoff">![maxLossLinear](plots2/betting/maxloss/maxloss.p2oErrors.Linear.png)</a>
 
 Reducing maxLoss causes the ratio optimal/needed to be reduced by approximately the same percent (or less), as this table shows.
 Note the table also shows assort upper > 1 and < 1, as well as equaling 1.

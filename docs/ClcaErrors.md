@@ -1,6 +1,14 @@
 # CLCA errors
 2/12/2026
 
+<!-- TOC -->
+* [CLCA errors](#clca-errors)
+  * [CLCA assort values](#clca-assort-values)
+  * [The effects of CLCA Errors](#the-effects-of-clca-errors)
+  * [Phantom ballots](#phantom-ballots)
+    * [The effect of Phantoms on samples needed](#the-effect-of-phantoms-on-samples-needed)
+<!-- TOC -->
+
 Read [BettingRiskFunctions](BettingRiskFunctions.md) for background. Here are necessary definitions:
 
     x_i = the assort value, 0 <= x_i <= upper
@@ -166,6 +174,104 @@ and a 10% decrease in lamda approximately increases the samples needed by 10-15%
 It seems that there's an unavoidable choice between optimistically assuming there are few to no errors, and trying to minimize the effects of errors if they are found. 
 
 Also see [Choosing MaxLoss](https://github.com/JohnLCaron/rlauxe/blob/main/docs/BettingRiskFunctions.md#choosing-maxloss)
+
+
+## Phantom ballots
+
+See ["Limiting Risk by Turning Manifest Phantoms into Evil Zombies" (P2Z) paper](https://arxiv.org/pdf/1207.3413) for background.
+
+When Nc > ncvrs, we add phantom cards to make up the difference, so nphantoms = Nc - ncvrs.
+
+A phantom CVR has an assort value = .5.
+
+A phantom cvr may have a valid ballot identifier, and only the scanned cvr is missing. (in this case it would be ideal to
+locate the ballot and rescan if possible).
+
+1. If the phantom cvr gets chosen for the audit, and the ballot cannot be located (the common case), then the mvr
+   is assigned assort = 0, so overstatement = 1/2 - 0 = 1/2
+
+        bassort = (1-o/u) * noerror 
+        bassort = (1-1/2u)  phantom-phantom
+
+2. If the phantom cvr gets chosen for the audit, and the ballot can be located, then we have an mvr that might have one of three sort values [0, 1/2, u].
+   The overstatement would then be cvr_assort - mvr_assort = 1/2 - [0, 1/2, u] = [1/2, 0, 1/2-u], and the bassort value is
+
+````
+    bassort = (1-o/u) * noerror 
+            = 1 - [1/2, 0, 1/2-u]/u * noerror
+            = [1-1/2u, 1,  2-1/2u] * noerror      for mvr = loser, oth, winner
+            =    1-1/2u     phantom-loser 
+            =    1          phantom-other 
+            =    2-1/2u     phantom-winner 
+````
+
+3. If the cvr exists, but the mvr cannot be found, then it is a phantom, and mvr_assort = 0. The cvr  might have one of three sort values [0, 1/2, u]. The overstatement would then be cvr_assort - mvr_assort = [0, 1/2, u], and the bassort value is
+
+````
+   bassort = (1-o/u) * noerror
+           = 1 - [0, 1/2, u]/u * noerror
+           = [1, 1/2u,  0] * noerror      for cvr = loser, oth, winner
+           =    1       loser-phantom
+           =    1-1/2u  other-phantom
+           =    0       winner-phantom
+````
+
+Example implementation with u !=1, for example, a Dhondt assorter with u = 1.75:
+
+       winner-loser tau= 0.0000 '      0' (win-los)
+       winner-phantom tau= 0.0000 '      0' (win-los)   
+       winner-other tau= 0.2857 '   1/2u' (win-oth)
+       other-loser tau= 0.7143 ' 1-1/2u' (oth-los)
+       other-phantom tau= 0.7143 ' 1-1/2u' (oth-los)    
+       phantom-loser tau= 0.7143 ' 1-1/2u' (oth-los)    
+       phantom-phantom tau= 0.7143 ' 1-1/2u' (oth-los)     common case
+       winner-winner tau= 1.0000 'noerror' (noerror)
+       other-other tau= 1.0000 'noerror' (noerror)
+       loser-loser tau= 1.0000 'noerror' (noerror)
+       loser-phantom tau= 1.0000 'noerror' (noerror)    
+       phantom-other tau= 1.0000 'noerror' (noerror)    
+       loser-other tau= 1.2857 ' 1+1/2u' (oth-win)
+       other-winner tau= 1.7143 ' 2-1/2u' (los-oth)
+       phantom-winner tau= 1.7143 ' 2-1/2u' (los-oth)   
+       loser-winner tau= 2.0000 '      2' (los-win)
+
+when u=1:
+
+        cvr-mvr overstatement phantom-win = -0.5 bassort=1.5       (cvr is phantom, mvr found)
+        cvr-mvr overstatement phantom-los = 0.5 bassort=0.5            "
+        cvr-mvr overstatement phantom-oth = 0.0 bassort=1.0            "
+        cvr-mvr overstatement win-phantom = 1.0 bassort=0.0        (cvr is not phantom, mvr not found)
+        cvr-mvr overstatement los-phantom = 0.0 bassort=1.0            "
+        cvr-mvr overstatement oth-phantom = 0.5 bassort=0.5            "
+        cvr-mvr overstatement phantom-phantom = 0.5 bassort=0.5    common case
+
+
+### The effect of Phantoms on samples needed
+
+Here we apply the general case as treated above to the specifics of the commmon case, namely when
+both the cvr and the mvr are phantoms.
+
+A phantom-phantom bassort = (1-1/2u) * noerror. How many noerror samples are needed to offset this assort value?
+
+    payoff_noerror = (1 + λ * (noerror − 1/2))  ;  (µ_i is approximately 1/2)
+    payoff_phantom = (1 + λ * ((1-1/2u)* noerror − 1/2))
+
+How many "noerror" samples are equivilent to a single sample whose assort value = tau * noerror ?
+
+    payoff_noerror^n_phantom  * payoff_phantom  = 1.0
+    n_phantom  = -ln(payoff_n_phantom ) / ln(payoff_noerror)
+
+Here is a plot of n_phantom for several values of upper:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/phantomByUpper.html" rel="phantomByUpper">![phantomByUpper](plots2/betting/errorComp/phantomByUpper.png)</a>
+
+* Understatement errors have the effect of decreasing the number of samples needed, shown on the plots as negetive numbers.
+
+* The extra samples are non-trivial up to say, margins of .05 for plurality contests, and larger for D'Hondt contests when
+  upper gets close to 1/2.
+
+* When applied to a real audit, one must take into account the probability of encountering a phantom in the sampled population. This will roughly be
+  nphantlms * sampleSize / populationSize.
 
 
 

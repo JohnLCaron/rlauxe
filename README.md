@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 02/12/2026_
+_last changed: 02/15/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -324,6 +324,7 @@ Varying phantom percent, up to and over the margin of 4.5%, with errors generate
 
 * Increased phantoms have a strong effect on sample size.
 * All audits go to hand count when phantomPct gets close to the margin, as they should.
+* See [The effect of Phantoms on samples needed](docs/ClcaErrors.md#phantom-ballots) that shows how many extra ballots are needed when a phantom ballot is sampled.
 
 # Sample Populations and diluted margins
 

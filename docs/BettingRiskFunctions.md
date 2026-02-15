@@ -1,5 +1,5 @@
 # Risk and betting functions
-_last changed 02/12/2026_
+_last changed 02/15/2026_
 
 <!-- TOC -->
 * [Risk and betting functions](#risk-and-betting-functions)
@@ -251,7 +251,7 @@ Ignoring other types of errors, the number of samples needed when there are k p2
 
 Here is a plot of nsamples for values of k (0 .. 5) and two different margins v = .01 and .05:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxloss.p2oErrors.LogLog.html" rel="BettingPayoff">![maxLossLog](plots2/betting/maxloss/maxloss.p2oErrors.LogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxloss2.p2oErrors.LogLog.html" rel="maxLossLog">![maxLossLog](plots2/betting/maxloss/maxloss2.p2oErrors.LogLog.png)</a>
 
 * When k > 0 there is a value of maxLoss that minimizes the number of samples needed.
 * Informally you can see that the optimal maxLoss is the same for both margins. (click on the image to get an interactive html plot)
@@ -261,7 +261,7 @@ Here is a plot of nsamples for values of k (0 .. 5) and two different margins v 
   to 0.9, we cut off possible increased sample sizes to the right of that.
 * The presence of even a single p2o error has a strong effect on the samples needed. The linear plot shows that more clearly:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxloss.p2oErrors.Linear.html" rel="BettingPayoff">![maxLossLinear](plots2/betting/maxloss/maxloss.p2oErrors.Linear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxloss2.p2oErrors.Linear.html" rel="maxLossLinear">![maxLossLinear](plots2/betting/maxloss/maxloss2.p2oErrors.Linear.png)</a>
 
 Reducing maxLoss causes the ratio optimal/needed to be reduced by approximately the same percent (or less), as this table shows.
 Note the table also shows assort upper > 1 and < 1, as well as equaling 1.

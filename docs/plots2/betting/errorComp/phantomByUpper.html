@@ -1,0 +1,211 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;0Cqv2x&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;0Cqv2x&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;samples needed to compensate for one phantom&quot;,
+&quot;subtitle&quot;:&quot;lamda=1.8 common case both cvr and mvr are phantoms&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;samplesToCompensate&quot;,
+&quot;color&quot;:&quot;upper&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;&amp;merged_groups&quot;:[&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;],
+&quot;upper&quot;:[&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;],
+&quot;samplesToCompensate&quot;:[450.73346273057285,375.3567307214835,281.1356381797272,224.60279275466985,179.37630199200353,149.22510882329695,111.53566632602835,73.84500900585952,54.99844798340472,43.68950825064921,36.14936441990801,30.76280526866057,26.72222487526634,21.063787221225176,264.43069263138386,220.14642924006787,164.79106911177584,131.57782005010625,105.00718363979364,87.29339157141649,65.15107377602841,43.00854794889624,31.93707584378167,25.294024102450862,20.865181594255727,17.701600681973773,15.328807538264904,12.006636866218702,203.61682286321644,169.51020146114692,126.87692449104908,101.29695807703726,80.8329846847646,67.19033551483017,50.13702350843178,33.08371005074382,24.55705186984873,19.44105579891348,16.030390782336724,13.594200653424542,11.76705732883267,9.209054925915632]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;upper&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesToCompensate&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;samplesToCompensate&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;&amp;merged_groups&quot;:[&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;],
+&quot;upper&quot;:[&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;],
+&quot;samplesToCompensate&quot;:[450.73346273057285,375.3567307214835,281.1356381797272,224.60279275466985,179.37630199200353,149.22510882329695,111.53566632602835,73.84500900585952,54.99844798340472,43.68950825064921,36.14936441990801,30.76280526866057,26.72222487526634,21.063787221225176,264.43069263138386,220.14642924006787,164.79106911177584,131.57782005010625,105.00718363979364,87.29339157141649,65.15107377602841,43.00854794889624,31.93707584378167,25.294024102450862,20.865181594255727,17.701600681973773,15.328807538264904,12.006636866218702,203.61682286321644,169.51020146114692,126.87692449104908,101.29695807703726,80.8329846847646,67.19033551483017,50.13702350843178,33.08371005074382,24.55705186984873,19.44105579891348,16.030390782336724,13.594200653424542,11.76705732883267,9.209054925915632]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:16.0,
+&quot;color&quot;:&quot;#000000&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;upper&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesToCompensate&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;samplesToCompensate&quot;,&quot;upper&quot;],
+&quot;disable_splitting&quot;:true
+}
+},{
+&quot;mapping&quot;:{
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;yintercept&quot;:0.0,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;]
+},
+&quot;color&quot;:&quot;#000000&quot;,
+&quot;size&quot;:0.3,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;hline&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;upper&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesToCompensate&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

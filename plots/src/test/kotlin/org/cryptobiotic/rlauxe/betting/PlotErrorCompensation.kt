@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.doubleIsClose
 
 import org.junit.jupiter.api.Test
 import kotlin.io.path.Path
@@ -21,25 +22,29 @@ class PlotErrorCompensation {
         val taus = Taus(upper)
 
         val results = mutableListOf<BettingPayoffRatio>()
-        // margins.forEach { margin ->
-            val margin = .01
-            val noerror = 1 / (2 - margin / upper)
-            repeat(nsteps) { step ->
-                val lamda = (step + 1) * 2.0 / nsteps   // 1.9 is the arbitrary upper limit for plotting lamda
+        val margin = .01
+        val noerror = 1 / (2 - margin / upper)
+        repeat(nsteps) { step ->
+            val lamda = (step + 1) * 2.0 / nsteps   // 1.9 is the arbitrary upper limit for plotting lamda
+            val payoffNoerror = 1.0 + lamda * (noerror - 0.5)
 
-                val payoffNoerror = 1.0 + lamda * (noerror - 0.5)
+            // how many noerror do we need to offset one error?
+            // payoffNoerror^n = payoffError
+            // n = ln(payoffError) / ln(payoffNoerror)
 
-                // how many noerror do we need to offset one error?
-                // payoffNoerror^n = payoffError
-                // n = ln(payoffError) / ln(payoffNoerror)
+            taus.namesNoErrors().forEach { tauName ->
+                val tauValue = taus.valueOf(tauName)
+                val payoffErr = 1.0 + lamda * (noerror * tauValue - 0.5)
+                val samplesToCompensate = -ln(payoffErr) / ln(payoffNoerror)
 
-                taus.namesNoErrors().forEach { tauName ->
-                    val tauValue = taus.valueOf(tauName)
-                    val payoffErr = 1.0 + lamda * (noerror * tauValue - 0.5)
-                    val samplesToCompensate = -ln(payoffErr) / ln(payoffNoerror)
-                    results.add(BettingPayoffRatio(cat=tauName, payoffRatio=samplesToCompensate, lamda=lamda))  }
+                val (n, ntau) = calcNtau(lamda, noerror, tauValue)
+                if (!ntau.isInfinite()) {  // tau = 0, lamda = 2
+                    if (!doubleIsClose(ntau, samplesToCompensate))
+                        print("HEY")
+                    results.add(BettingPayoffRatio(cat = tauName, payoffRatio = ntau, lamda = lamda))
                 }
-        // }
+            }
+        }
 
         plotByLamda(results, "byLamda", "upper=$upper margin=$margin")
     }
@@ -73,6 +78,10 @@ class PlotErrorCompensation {
                 val tauValue = taus.valueOf(tauName)
                 val payoffErr = 1.0 + lamda * (noerror * tauValue - 0.5)
                 val samplesToCompensate = -ln(payoffErr) / ln(payoffNoerror)
+
+                val (n, ntau) = calcNtau(lamda, noerror, tauValue)
+                if (!doubleIsClose(ntau, samplesToCompensate))
+                    print("HEY")
                 results.add(BettingPayoffRatio(cat=tauName, payoffRatio=samplesToCompensate, lamda=lamda, margin=margin))  }
         }
 
@@ -94,6 +103,10 @@ class PlotErrorCompensation {
                 val tauValue = taus.valueOf(tauName)
                 val payoffErr = 1.0 + lamda * (noerror * tauValue - 0.5)
                 val samplesToCompensate = -ln(payoffErr) / ln(payoffNoerror)
+
+                val (n, ntau) = calcNtau(lamda, noerror, tauValue)
+                if (!doubleIsClose(ntau, samplesToCompensate))
+                    print("HEY")
                 results.add(BettingPayoffRatio(cat=tauName, payoffRatio=samplesToCompensate, lamda=lamda, margin=margin))  }
         }
 
@@ -115,6 +128,10 @@ class PlotErrorCompensation {
                 val tauValue = taus.valueOf(tauName)
                 val payoffErr = 1.0 + lamda * (noerror * tauValue - 0.5)
                 val samplesToCompensate = -ln(payoffErr) / ln(payoffNoerror)
+
+                val (n, ntau) = calcNtau(lamda, noerror, tauValue)
+                if (!doubleIsClose(ntau, samplesToCompensate))
+                    print("HEY")
                 results.add(BettingPayoffRatio(cat=tauName, payoffRatio=samplesToCompensate, lamda=lamda, margin=margin))  }
         }
 
@@ -136,6 +153,10 @@ class PlotErrorCompensation {
                 val tauValue = taus.valueOf(tauName)
                 val payoffErr = 1.0 + lamda * (noerror * tauValue - 0.5)
                 val samplesToCompensate = -ln(payoffErr) / ln(payoffNoerror)
+
+                val (n, ntau) = calcNtau(lamda, noerror, tauValue)
+                if (!doubleIsClose(ntau, samplesToCompensate))
+                    print("HEY")
                 results.add(BettingPayoffRatio(cat=tauName, payoffRatio=samplesToCompensate, lamda=lamda, margin=margin))  }
         }
 
@@ -172,6 +193,11 @@ class PlotErrorCompensation {
 
                 val payoffPhantom = 1.0 + lamda * (tau*noerror - 0.5)
                 val samplesToCompensate = -ln(payoffPhantom) / ln(payoffNoerror)
+
+                val (n, ntau) = calcNtau(lamda, noerror, tau)
+                if (!doubleIsClose(ntau, samplesToCompensate))
+                    print("HEY")
+
                 results.add(
                     BettingPayoffRatio(
                         cat = dfn(upper, 3),
@@ -209,6 +235,20 @@ data class BettingPayoffRatio(
     val margin: Double = 0.0,
     val noerror: Double = 0.0,
 )
+
+
+fun calcNtau(bet: Double, noerror: Double, tau: Double): Pair<Double, Double> {
+    //    payoff_noerror = (1 + λ * (noerror − 1/2))  ;  (µ_i is approximately 1/2)
+    //    payoff_tau = (1 + λ * (tau * noerror − 1/2))
+    //    payoff_noerror^n_tau * payoff_tau = 1.0
+    //    n_tau = -ln(payoff_tau) / ln(payoff_noerror)
+
+    val payoff_p2o = 1 + bet * (tau * noerror - 0.5)
+    val payoff_noerror = 1 + bet * (noerror - 0.5)
+    val n_p2o = -ln(payoff_p2o) / ln(payoff_noerror)
+    val n = ln(1/.05) / ln(payoff_noerror)
+    return Pair(n, n_p2o)
+}
 
 /*
 // payoff vs margin, categories upper

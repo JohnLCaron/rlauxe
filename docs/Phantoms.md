@@ -95,7 +95,9 @@ Ignoring other types of errors, the number of samples needed when there are k p1
 
 Here is a plot of ntotal for values of k (0..5) and two different margins v = .01 and .05, with upper = 1:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxLoss.nloss.LogLog.html" rel="BettingPayoff">![maxLossLog](plots2/betting/maxloss/maxLoss.nloss.LogLog.png)</a>
+TODO 
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxloss.p2oErrors.LogLog.html" rel="BettingPayoff">![maxLossLog](plots2/betting/maxloss/maxloss.p2oErrors.LogLog.png)</a>
 
 ////////////////////////////////////////////////////////////////////////////////
 

@@ -3,14 +3,21 @@
 <head>
     <title>number of rounds</title>
     <style>
-        .container {
-            display: flex; /* Uses Flexbox for layout */
+        body, html
+        {
+            margin: 0; padding: 0; height: 100%; overflow: hidden;
         }
-        .container > iframe {
-            flex: 1; /* Makes each iframe take up equal space */
-            height: 600;
-            border: 1px solid #ccc; /* Optional border */
-            margin: 5px;
+
+        iframe {
+            display: block;      /* Iframes are inline by default */
+            border: none;        /* Removes the default border */
+            width: 100%;         /* Takes the full width of the container (body) */
+            height: 100%;        /* Takes the full height of the container (body) */
+        }
+
+        #content
+        {
+            position:absolute; left: 0; right: 0; bottom: 0; top: 0px;
         }
     </style>
 </head>
@@ -19,7 +26,7 @@
 
 <h3>number of rounds</h3>
 
-<div class="container">
+<div class="iframe">
     <h2>Fuzz .001</h2>
     <iframe src="https://johnlcaron.github.io/rlauxe/docs/plots2/extra2/extraVsMarginCalc001ga3NroundsLinear.html"> </iframe>
     <h2>Fuzz .002</h2>

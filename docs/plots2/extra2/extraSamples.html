@@ -3,14 +3,14 @@
 <head>
     <title>extra samples</title>
     <style>
-        .container {
-            display: flex; /* Uses Flexbox for layout */
+        body, html
+        {
+            margin: 0; padding: 0; height: 100%; overflow: hidden;
         }
-        .container > iframe {
-            flex: 1; /* Makes each iframe take up equal space */
-            height: 600;
-            border: 1px solid #ccc; /* Optional border */
-            margin: 5px;
+
+        #content
+        {
+            position:absolute; left: 0; right: 0; bottom: 0; top: 0px;
         }
     </style>
 </head>
@@ -21,11 +21,11 @@
 
 <div class="iframe-container">
     <h2>Fuzz .001</h2>
-    <iframe src="https://johnlcaron.github.io/rlauxe/docs/plots2/extra2/extraVsMarginCalc001ga3Linear.html"> </iframe>
+    <iframe width="100%" height="100%" frameborder="0" src="https://johnlcaron.github.io/rlauxe/docs/plots2/extra2/extraVsMarginCalc001ga3Linear.html"> </iframe>
     <h2>Fuzz .002</h2>
-    <iframe src="https://johnlcaron.github.io/rlauxe/docs/plots2/extra2/extraVsMarginCalc002ga3Linear.html"> </iframe>
+    <iframe width="100%" height="100%" frameborder="0" src="https://johnlcaron.github.io/rlauxe/docs/plots2/extra2/extraVsMarginCalc002ga3Linear.html"> </iframe>
     <h2>Fuzz .003</h2>
-    <iframe src="https://johnlcaron.github.io/rlauxe/docs/plots2/extra2/extraVsMarginCalc003ga3Linear.html"> </iframe>
+    <iframe width="100%" height="100%" frameborder="0"  src="https://johnlcaron.github.io/rlauxe/docs/plots2/extra2/extraVsMarginCalc003ga3Linear.html"> </iframe>
 </div>
 
 </body>

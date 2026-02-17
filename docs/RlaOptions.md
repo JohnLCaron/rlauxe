@@ -1,6 +1,8 @@
 # RLA Options
 11/4/2024 (DRAFT)
 
+TODO rewrite
+
 I am trying to see what "user visible" options need to be allowed, where user is, eg, Colorado DOS, 
 or a consultant working with them configuring the library for their needs. 
 So I wanted to leave out all the research questions, its our job to answer those, 

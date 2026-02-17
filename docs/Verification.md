@@ -1,6 +1,8 @@
 # Verification
 _last changed 10/19/2025_
 
+TODO review/bring up to date
+
 ## ContestInfo correctly formed
 
 ````

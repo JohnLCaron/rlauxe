@@ -502,9 +502,6 @@ the outcome of the ith wager. The value Mj is the gambler’s wealth after the j
 gambler is not permitted to borrow money, so to ensure that when X_i = 0 (corresponding to
 losing the ith bet) the gambler does not end up in debt (Mi < 0), λi cannot exceed 1/µi.
 
-See Cobra section 4.2 and SHANGRLA Section 3.2. See [CLCA Risk function](Clca.md) for more algorithm details.
-
-
 ### The CLCA betting function
 
 The "Estimating means of bounded random variables by betting" paper (BETTING) presents general techniques for estimating an unknown mean from bounded observations.
@@ -541,8 +538,6 @@ EF[Ti] = p0 [1 + λ(a − mu_i)] + p1 [1 + λ(a/2 − mu_i)] + p2 [1 − λ*mu_i
 
 We follow the code in https://github.com/spertus/comparison-RLA-betting/blob/main/comparison_audit_simulations.R, to
 find the value of lamda that maximizes EF\[Ti], _using org.apache.commons.math3.optim.univariate.BrentOptimizer_.
-
-See [CLCA AdaptiveBetting](AdaptiveBetting.md) for details on the AdaptiveBetting algorithm.
 
 See [GeneralizedAdaptiveBetting](docs/BettingRiskFunction.md) for more info.
 

@@ -420,8 +420,6 @@ simulateRaireTestContest: single raire contest
 
 * investigate the effect of population.hasSingleCardStyle = hasStyle.
 * investigate possible attacks with mvr_assort = 0.5 when the mvr is missing the contest.
-* review strategies and fuzzing in estimation and auditing
-* replace old plots
 
 ## TODO 01/04/26
 

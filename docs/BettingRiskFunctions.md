@@ -17,10 +17,10 @@ Rlauxe has two risk functions, one for CLCA audits (BettingMart) and one for pol
 AlphaMart is formally equivilent to BettingMart, so we will just describe BettingMart.
 
 We have a sequence of ballot cards that have been randomly selected from the population of all ballot cards for a contest in an election.
-For each assertion, each card is assigned an _assort value_ which is a floating point number. So we have a sequence of
+For each assertion, each card is assigned an _assort value_ which is a floating point number less than **upper**. So we have a sequence of
 numbers (aka a "sequence of samples") that are fed into the risk function. For the ith sample:
 
-    x_i = the assort value, 0 <= x_i <= upper
+    x_i = the assort value, 0 <= x_i <= assort upper bound
     1/2 < upper < unbounded but known
     µ_i = the expected value of the sample mean, if the assertion is false (very close to 1/2 usually)
     λ_i = the "bet" placed on the ith sample, based on the previous samples, 0 < λ_i < 2 .
@@ -33,7 +33,7 @@ T_i must be >= 20 to accept the assertion.
 
 ## Estimating samples needed for CLCA
 
-For CLCA, the x_i are constant when the mvr and the cvr agree. Call that value noerror; it is always > .5. 
+For CLCA, the x_i are constant when the mvr and the cvr agree. Call that value **noerror**; it is always > .5. 
 
 If we approximate µ_i = .5 and use a constant bet of λc, then for the nth testStatistic  
 

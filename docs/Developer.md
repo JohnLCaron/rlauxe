@@ -434,4 +434,8 @@ simulateRaireTestContest: single raire contest
 * replace SimulateIrvTestData with Vunder: we need the VoteConsolidator info
 * can we use Vunder in MultiContestTestData (68) ?
 
+## TODO 2/17
+
+* investigate assigning costs to mallots sampled and nrounds, and minimize the cost.
+
 

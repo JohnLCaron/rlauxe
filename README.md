@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 02/15/2026_
+_last changed: 02/17/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -39,7 +39,6 @@ Click on plot images to get an interactive html plot. You can also read this doc
   * [Deterministic sampling order for each Contest](#deterministic-sampling-order-for-each-contest)
 * [Reference Papers](#reference-papers)
 * [Appendices](#appendices)
-  * [Attacks](#attacks)
   * [Extensions of SHANGRLA](#extensions-of-shangrla)
   * [Unanswered Questions](#unanswered-questions)
   * [Also See](#also-see)
@@ -196,12 +195,12 @@ population mean](docs/AlphaMart.md#truncated-shrinkage-estimate-of-the-populatio
 # Comparing Sample Sizes by Audit type
 
 In this section we characterize the number of samples needed for each audit type. For clarity of presentaton, we
-assume we have only one contest, and ignore the need to estimate a batch size for each audit round. This is called a 
+assume we have only one contest, and also ignore the need to estimate a batch size for each audit round. This is called a 
 "one sample at a time" audit, which terminates as soon as the risk limit is confirmed or rejected. 
 
 In the section [Estimating Sample Batch sizes](#estimating-sample-batch-sizes) below, we deal with the 
 need to estimate a batch size, and the extra overhead of audit rounds. In the section 
-[Multiple Contest Auditinguditing](#multiple-contest-auditing) below, we deal with the complexity of having multiple contests
+[Multiple Contest Auditing](#multiple-contest-auditing) below, we deal with the complexity of having multiple contests
 on ballots.
 
 In general, samplesNeeded is independent of the population size N. Rather, samplesNeeded depends on the _diluted margin_ 
@@ -218,9 +217,9 @@ The following plots are simulations, averaging the results from the stated numbe
 The audit type needing the least samples is CLCA when there are no errors in the CVRs, and no phantom ballots. In that case, 
 the samplesNeeded depend only on the margin, and is a straight line vs margin on a log-log plot. 
 
-The smallest sample size for CLCA when there are no errors is when you always bet the maximum (approximately 2). 
-However, if there are errors and the assort value is 0.0, the maximum bet will "stall" the audit and the audit cant recover 
-[details](docs/BettingRiskFunctions.md#stalled-audits-and-maximum-bets). To avoid this, rlauxe limits how close the bet can be
+The smallest sample size for CLCA when there are no errors is when you always bet the maximum (1/µ_i, approximately 2). 
+However, if there are errors and the assort value is 0.0, the maximum bet will "stall" the audit and the audit cant recover
+([see details](docs/BettingRiskFunctions.md#stalled-audits-and-maximum-bets)). To avoid this, rlauxe limits how close the bet can be
 to the maximum. Here is a plot of CLCA no-error audits with the bet limited to 70, 80, 90, and 100% of the maximum:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaNoErrorsMaxRisk/clcaNoErrorsMaxRiskLogLog.html" rel="clcaNoErrorsMaxRiskLogLog">![clcaNoErrorsMaxRiskLogLog](docs/plots2/samplesNeeded/clcaNoErrorsMaxRisk/clcaNoErrorsMaxRiskLogLog.png)</a>
@@ -350,8 +349,8 @@ For each contest we simulate the audit with manufactured data that has the same 
 guess at the error rates. 
 
 For each contest assertion we run _auditConfig.nsimEst_ (default 100) simulations and collect the distribution of samples
-needed to satisfy the risk limit. We then choose the (_auditConfig.quantile_) sample size as our estimate for that assertion,
-and the contest's estimated sample size is the maximum of the contest's assertion estimates.
+needed to satisfy the risk limit. We then choose the (_auditConfig.quantile_) sample size as our estimate for that assertion.
+The contest's estimated sample size is the maximum over the contest's assertions.
 
 If the simulation is accurate, the audit should succeed _auditConfig.quantile_ fraction of the time (default 80%). 
 Since we dont know the actual error rates, or the order that the errors will be sampled, these simulation results are just estimates.
@@ -360,14 +359,12 @@ Since we dont know the actual error rates, or the order that the errors will be 
 
 Once we have all of the contests' estimated sample sizes, we next choose which ballots/cards to sample.
 This step depends on the CardManifest and Population information, which tells which cards
-may have which contests. The number of cards that may have a contest on it is called the population size (Npop)
+may have which contests. The number of cards that may have a contest on it is called the contests's population size (Npop)
 and is used as the denominator of the _diluted margin_ for the contest. The sampling must be uniform over the
-contests' population for a statistically valid audit.
+contest's populations for a statistically valid audit.
 
 The Population objects are a generalization of SHANGRLA's Card Style Data, allowing for partial information about which cards
-have which contests.
-
-When you know exactly what contests are on each card, the diluted margin is at a maximum, and the samples needed
+have which contests. When you know exactly what contests are on each card, the diluted margin is at a maximum, and the samples needed
 is at a minimum. If you dont know exactly what contests are on each card, the cards may be divided up into populations in a
 way that minimizes the number of cards that might have the contest.
 See [SamplePopulations](docs/SamplePopulations.md) for more explanation and current thinking.
@@ -375,7 +372,7 @@ See [SamplePopulations](docs/SamplePopulations.md) for more explanation and curr
 For CLCA audits, the generated Cast Vote Records (CVRs) tell you exactly which cards have which
 contests, as long as the CVR records the undervotes (contests where no vote was cast).
 For Polling audits and OneAudit pools (and the case where _cvrsContainUndervotes_ = false),
-the Populations describe which contests are on which cards.
+the Populations describe which contests may be on which cards.
 
 Note that each round does its own sampling without regard to the previous round's results.
 However, since the seed remains the same, the ballot ordering is the same throughout the audit. We choose the lowest ordered ballots first,
@@ -430,10 +427,11 @@ fuzz (fuzzMvrs). Note that these are averages over 1000 trials. The reason is pr
 underestimating the sample size on the first round, and then on the second round using the measured error rates to estimate 
 how many are left to do. 
 
-The trade off here is that the average number of rounds goes up.
+And trade off is that the average number of rounds goes up.
 
-Based on this finding, we designed the "optimistic" strategy, which uses the calculated number of samples needed if there are no errors, for round 1.
-For subsequent rounds, it uses the measured error rates from round 1 to simulate a distribution, and takes the 80% percentile as its estimate.
+Based on these finding, we designed the "optimistic" strategy, which uses the calculated number of samples needed if there are no errors, for round 1.
+For subsequent rounds, it uses the measured error rates from round 1 to simulate a distribution, and takes auditConfig.quantile (default 80%) 
+percentile as its estimate.
 The results of this strategy are shown here:
 
 <p>
@@ -456,7 +454,7 @@ Here are the average extra samples vs the average number of rounds for mvrs with
   <img alt="Half" src="./docs/plots2/extra2/extraVsMarginCalc003ga3NroundsLinear.png" width="45%">
 </p>
 
-Here are the interactive plots for more detail:
+Here are interactive plots to zoom in on more detail:
 
 * [interactive extra samples plots](https://johnlcaron.github.io/rlauxe/docs/plots2/extra2/extraSamples.html)
 * [interactive number of rounds plots](https://johnlcaron.github.io/rlauxe/docs/plots2/extra2/numberOfRounds.html)
@@ -498,7 +496,7 @@ and the first n cards in the contest's sequence are sampled.
 The total set of cards sampled in a round is just the union of the individual contests' set. 
 The extra efficiency of a multi-contest audit comes when the same card is chosen for more than one contest.
 
-It may happen that after a contest's estimated sample size has been satisfied, further cards are chosen because they contain a contest whose sample size has not been satisfied. Those extra cards can be used in the audit for a contest as long as the audit sees the canonical sequence. If a card that contains the contest is not used in the sample, the canonical sequence is broken and any further cards that contain the contest are not used in the audit. This ensures that the audit only uses the canonical sequence for each contest, which ensures that the sample is random.
+It may happen that after a contest's estimated sample size has been satisfied, further cards are chosen because they contain a contest whose sample size has not been satisfied. Those extra cards can be used in the audit for a contest as long as the contest's canonical sequence in unbroken . If a card that contains the contest is not used in the sample, the canonical sequence is broken and any further cards that contain the contest are not used in the audit. This ensures that the audit only uses the canonical sequence for each contest, which ensures that the sample is random.
 
 The set of contests that will continue to the next round is not known, so the set of ballots sampled at each round is not known in advance. Nonetheless, for each contest, and for each round, the sequence of ballots seen by the audit is fixed when the PRNG is chosen.
 
@@ -620,7 +618,7 @@ Is there an algorithm for setting the MaxLoss value, which limits the maximum be
 * [Raire notes](docs/Raire.md)
 * [Dhondt notes](docs/Dhondt.md)
 
-## Other, possible outdated
+**Other, possible outdated**
 * [Rlauxe Implementation Overview](docs/Overview.md)
 * [Implementation Specificaton](docs/RlauxeSpec.md)
 * [CLCA details](docs/Clca.md)

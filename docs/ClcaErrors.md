@@ -1,5 +1,5 @@
 # CLCA errors
-2/12/2026
+2/15/2026
 
 <!-- TOC -->
 * [CLCA errors](#clca-errors)
@@ -265,13 +265,11 @@ Here is a plot of n_phantom for several values of upper:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/phantomByUpper.html" rel="phantomByUpper">![phantomByUpper](plots2/betting/errorComp/phantomByUpper.png)</a>
 
-* Understatement errors have the effect of decreasing the number of samples needed, shown on the plots as negetive numbers.
-
 * The extra samples are non-trivial up to say, margins of .05 for plurality contests, and larger for D'Hondt contests when
   upper gets close to 1/2.
 
 * When applied to a real audit, one must take into account the probability of encountering a phantom in the sampled population. This will roughly be
-  nphantlms * sampleSize / populationSize.
+  nphantoms * sampleSize / populationSize.
 
 
 

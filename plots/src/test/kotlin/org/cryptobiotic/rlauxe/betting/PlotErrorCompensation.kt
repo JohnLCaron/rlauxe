@@ -208,8 +208,41 @@ class PlotErrorCompensation {
             }
         }
 
-        plotWithUpper(results, "phantomByUpper", "lamda=$lamda common case both cvr and mvr are phantoms", scale = ScaleType.Linear)
+        plotWithUpper(results, "phantomByUpper", "lamda=$lamda tau=(oth-los), eg cvr and mvr are both phantoms", scale = ScaleType.Linear)
     }
+
+    @Test
+    fun plotPhantomMvr() {
+        val lamda = 1.8
+        val uppers = listOf(.526, 1.0, 10.0)
+
+        val results = mutableListOf<BettingPayoffRatio>()
+        uppers.forEach { upper ->
+            margins.forEach { margin ->
+                val tau = 0.0
+                val noerror = 1 / (2 - margin / upper)
+                val payoffNoerror = 1.0 + lamda * (noerror - 0.5)
+
+                val payoffPhantom = 1.0 + lamda * (tau*noerror - 0.5)
+                val samplesToCompensate = -ln(payoffPhantom) / ln(payoffNoerror)
+
+                val (n, ntau) = calcNtau(lamda, noerror, tau)
+                if (!doubleIsClose(ntau, samplesToCompensate))
+                    print("HEY")
+
+                results.add(
+                    BettingPayoffRatio(
+                        cat = dfn(upper, 3),
+                        payoffRatio = samplesToCompensate,
+                        margin = margin
+                    )
+                )
+            }
+        }
+
+        plotWithUpper(results, "phantomMvr", "lamda=$lamda cvr is winner and mvr is phantom", scale = ScaleType.Linear)
+    }
+
 
     fun plotWithUpper(data: List<BettingPayoffRatio>, name: String, subtitle: String, scale: ScaleType = ScaleType.Linear) {
         validateOutputDir(Path(dirName))

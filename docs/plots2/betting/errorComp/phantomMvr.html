@@ -5,7 +5,7 @@
        &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
    &lt;/head>
    &lt;body>
-          &lt;div id=&quot;qKUZuP&quot;>&lt;/div>
+          &lt;div id=&quot;WTQVve&quot;>&lt;/div>
    &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
    
    (function() {
@@ -30,7 +30,7 @@
        };
    }
    
-   const containerDiv = document.getElementById(&quot;qKUZuP&quot;);
+   const containerDiv = document.getElementById(&quot;WTQVve&quot;);
    let fig = null;
    
    function renderPlot() {
@@ -38,7 +38,7 @@
            const plotSpec = {
 &quot;ggtitle&quot;:{
 &quot;text&quot;:&quot;samples needed to compensate for one phantom&quot;,
-&quot;subtitle&quot;:&quot;lamda=1.8 tau=(oth-los), eg cvr and mvr are both phantoms&quot;
+&quot;subtitle&quot;:&quot;lamda=1.8 cvr is winner and mvr is phantom&quot;
 },
 &quot;mapping&quot;:{
 },
@@ -70,10 +70,10 @@
 },
 &quot;stat&quot;:&quot;identity&quot;,
 &quot;data&quot;:{
-&quot;&amp;merged_groups&quot;:[&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;],
 &quot;margin&quot;:[0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;&amp;merged_groups&quot;:[&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;],
 &quot;upper&quot;:[&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;],
-&quot;samplesToCompensate&quot;:[450.73346273057285,375.3567307214835,281.1356381797272,224.60279275466985,179.37630199200353,149.22510882329695,111.53566632602835,73.84500900585952,54.99844798340472,43.68950825064921,36.14936441990801,30.76280526866057,26.72222487526634,21.063787221225176,264.43069263138386,220.14642924006787,164.79106911177584,131.57782005010625,105.00718363979364,87.29339157141649,65.15107377602841,43.00854794889624,31.93707584378167,25.294024102450862,20.865181594255727,17.701600681973773,15.328807538264904,12.006636866218702,203.61682286321644,169.51020146114692,126.87692449104908,101.29695807703726,80.8329846847646,67.19033551483017,50.13702350843178,33.08371005074382,24.55705186984873,19.44105579891348,16.030390782336724,13.594200653424542,11.76705732883267,9.209054925915632]
+&quot;samplesToCompensate&quot;:[536.8852679091235,447.1695651051687,335.02481224923247,267.7378275451257,213.90808965396533,178.02145820426563,133.1628532993993,88.30339893323907,65.87281083364601,52.41375799639613,43.440463176978795,37.03045019753686,32.22248077329216,25.490195202397953,1021.9635847778693,851.4016394287654,638.1991426423307,510.2775750346166,407.9402425800391,339.71528157304397,254.43391627684412,169.15211141655288,126.51076635063215,100.9256022194716,83.8685260367704,71.68464077950563,62.54649791041474,49.75254215690585,10232.304345905057,8526.685749864806,6394.662498333337,5115.448540504431,4092.0773664621606,3409.8299098968023,2557.020572980989,1704.211192813598,1277.8064594495418,1021.9635847778693,851.4016394287654,729.5716536719206,638.1991426423307,510.2775750346166]
 },
 &quot;sampling&quot;:&quot;none&quot;,
 &quot;inherit_aes&quot;:false,
@@ -102,10 +102,10 @@
 },
 &quot;stat&quot;:&quot;identity&quot;,
 &quot;data&quot;:{
-&quot;&amp;merged_groups&quot;:[&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;],
 &quot;margin&quot;:[0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1,0.005,0.006,0.008,0.01,0.0125,0.015,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.1],
+&quot;&amp;merged_groups&quot;:[&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;],
 &quot;upper&quot;:[&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;0.526&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;1.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;,&quot;10.000&quot;],
-&quot;samplesToCompensate&quot;:[450.73346273057285,375.3567307214835,281.1356381797272,224.60279275466985,179.37630199200353,149.22510882329695,111.53566632602835,73.84500900585952,54.99844798340472,43.68950825064921,36.14936441990801,30.76280526866057,26.72222487526634,21.063787221225176,264.43069263138386,220.14642924006787,164.79106911177584,131.57782005010625,105.00718363979364,87.29339157141649,65.15107377602841,43.00854794889624,31.93707584378167,25.294024102450862,20.865181594255727,17.701600681973773,15.328807538264904,12.006636866218702,203.61682286321644,169.51020146114692,126.87692449104908,101.29695807703726,80.8329846847646,67.19033551483017,50.13702350843178,33.08371005074382,24.55705186984873,19.44105579891348,16.030390782336724,13.594200653424542,11.76705732883267,9.209054925915632]
+&quot;samplesToCompensate&quot;:[536.8852679091235,447.1695651051687,335.02481224923247,267.7378275451257,213.90808965396533,178.02145820426563,133.1628532993993,88.30339893323907,65.87281083364601,52.41375799639613,43.440463176978795,37.03045019753686,32.22248077329216,25.490195202397953,1021.9635847778693,851.4016394287654,638.1991426423307,510.2775750346166,407.9402425800391,339.71528157304397,254.43391627684412,169.15211141655288,126.51076635063215,100.9256022194716,83.8685260367704,71.68464077950563,62.54649791041474,49.75254215690585,10232.304345905057,8526.685749864806,6394.662498333337,5115.448540504431,4092.0773664621606,3409.8299098968023,2557.020572980989,1704.211192813598,1277.8064594495418,1021.9635847778693,851.4016394287654,729.5716536719206,638.1991426423307,510.2775750346166]
 },
 &quot;size&quot;:1.0,
 &quot;shape&quot;:16.0,

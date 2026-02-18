@@ -9,10 +9,9 @@ The Rlauxe library is an independent implementation of the SHANGRLA framework, b
 
 The [SHANGRLA python library](https://github.com/pbstark/SHANGRLA) is the work of Philip Stark and collaborators, released under the AGPL-3.0 license.
 
-Rlauxe uses the [Raire Java library](https://github.com/DemocracyDevelopers/raire-java) for Ranked Choice contests, also
-called Instant runoff Voting (IRV).
+Rlauxe uses the [Raire Java library](https://github.com/DemocracyDevelopers/raire-java) for Ranked Choice contests, also called Instant runoff Voting (IRV).
 Raire-Java is Copyright 2023-2025 Democracy Developers. It is based on software (c) Michelle Blom in C++
-https://github.com/michelleblom/audit-irv-cp/tree/raire-branch , and released under the GNU General Public License v3.0.
+https://github.com/michelleblom/audit-irv-cp/tree/raire-branch, and released under the GNU General Public License v3.0.
 
 Click on plot images to get an interactive html plot. You can also read this document on [github.io](https://johnlcaron.github.io/rlauxe/).
 

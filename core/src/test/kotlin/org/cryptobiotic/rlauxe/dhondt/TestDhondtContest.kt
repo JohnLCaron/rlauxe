@@ -83,6 +83,7 @@ class TestDhondtContest {
                 println(" diff = $diff")
                 val gmean = diff/contestd.Nc
                 println(" diff/Nc = ${diff/contestd.Nc}")
+
                 val hmean = it.h2(gmean)
                 println(" hmean = ${it.h2(gmean)}")
                 assertEquals(it.dilutedMean(), hmean, doublePrecision)
@@ -94,6 +95,8 @@ class TestDhondtContest {
                 println(" diff = $diff")
                 val gmean = diff/contestd.Nc
                 println(" diff/Nc = ${diff/contestd.Nc}")
+                assertEquals(diff/contestd.Nc, contestd.recountMargin(it), doublePrecision)
+
                 val hmean = it.h2(gmean)
                 println(" hmean = ${it.h2(gmean)}")
                 assertEquals(it.dilutedMean(), hmean, doublePrecision)
@@ -105,6 +108,8 @@ class TestDhondtContest {
                 println(" diff = $diff")
                 val gmean = diff/contestd.Nc
                 println(" diff/Nc = ${diff/contestd.Nc}")
+                assertEquals(diff/contestd.Nc, contestd.recountMargin(it), doublePrecision)
+
                 val hmean = it.h2(gmean)
                 println(" hmean = ${it.h2(gmean)}")
                 assertEquals(it.dilutedMean(), hmean, doublePrecision)
@@ -113,6 +118,9 @@ class TestDhondtContest {
             println(" dilutedMargin = ${it.dilutedMargin()}")
             println(" calcMarginFromRegVotes = ${it.calcMarginFromRegVotes(contestd.votes, contestd.Nc)}")
             assertEquals(it.dilutedMargin(), it.calcMarginFromRegVotes(contestd.votes, contestd.Nc), doublePrecision)
+
+            println("recountMargin = ${contestd.recountMargin(it)}")
+            println("showDifficulty = ${contestd.showAssertionDifficulty(it)}")
             println()
         }
     }

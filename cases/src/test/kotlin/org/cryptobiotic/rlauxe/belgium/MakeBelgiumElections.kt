@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.belgium
 
-import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir

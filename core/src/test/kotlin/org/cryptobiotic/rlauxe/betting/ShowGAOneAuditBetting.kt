@@ -92,15 +92,6 @@ class ShowGAOneAuditBetting {
             debug=true,
         )
 
-        val betFnOld = GeneralAdaptiveBetting(
-            N,
-            startingErrors = ClcaErrorCounts.empty(noerror, upper),
-            nphantoms = oaContest.contest.Nphantoms(),
-            oaErrorRates,
-            d=0,
-            maxLoss = maxLoss,
-            debug=true)
-
         // bet from first half
         val tracker = ClcaErrorTracker(noerror, upper)
         assorts.subList(0, N/2).forEach{ tracker.addSample(it) }

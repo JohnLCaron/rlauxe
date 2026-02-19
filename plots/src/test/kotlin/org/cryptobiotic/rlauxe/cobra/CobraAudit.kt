@@ -3,13 +3,11 @@ package org.cryptobiotic.rlauxe.cobra
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.*
@@ -108,8 +106,6 @@ class AuditCobraAssertion(
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
 
-        // val sampler = ClcaWithoutReplacement(contest.id, cvrPairs, cassorter, allowReset = false)
-
         val betFun = GeneralAdaptiveBetting2(
             Npop = contestUA.Npop,
             aprioriCounts = ClcaErrorCounts.empty(cassorter.noerror(), upper = cassorter.assorter.upperBound()),
@@ -119,15 +115,6 @@ class AuditCobraAssertion(
             d = config.clcaConfig.d,
             debug=false,
         )
-        val adaptiveOld = GeneralAdaptiveBetting(
-            Npop = contestUA.Npop,
-            startingErrors = ClcaErrorCounts.empty(cassorter.noerror(), upper = cassorter.assorter.upperBound()),
-            nphantoms = 0,
-            oaAssortRates = null,
-            d = config.clcaConfig.d,
-            maxLoss = config.clcaConfig.maxLoss,
-        )
-        val tracker = PluralityErrorTracker(cassorter.noerror())
 
         val testFn = BettingMart(
             bettingFn = betFun,

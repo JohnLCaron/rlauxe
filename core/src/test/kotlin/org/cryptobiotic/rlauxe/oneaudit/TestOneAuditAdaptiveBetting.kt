@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.oneaudit
 import org.cryptobiotic.rlauxe.betting.BettingFn
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
 import org.cryptobiotic.rlauxe.betting.GeneralOptimalLambda
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
@@ -100,15 +99,6 @@ class TestOneAuditAdaptiveBetting {
                 debug=true,
             )
 
-            val betFunOld = GeneralAdaptiveBetting(
-                contestUA.Npop,
-                startingErrors = ClcaErrorCounts.empty(oaCassorter.noerror(), oaCassorter.assorter.upperBound()),
-                nphantoms=contestUA.contest.Nphantoms(),
-                oaAssortRates = oaErrorRates,
-                d = 100,
-                maxLoss = 0.90,
-                debug = false
-            )
             val tracker = ClcaErrorTracker(oaCassorter.noerror(), oaCassorter.assorter.upperBound())
             val nsamples = runSamplesNeeded(contestUA.Npop, betFun, sampler, tracker, show = false)
             sampleSizes.add(nsamples)

@@ -209,19 +209,11 @@ open class Contest(
     }
 
     override fun showCandidates() = buildString {
-        if (votes() != null) {
-            val votes = votes()!!
-            info().candidateNames.forEach { (name, id) ->
-                val win = if (winners().contains(id)) " (winner)" else ""
-                appendLine("   $id '$name': votes=${votes[id]} $win")
-            }
-            append("    Total=${votes.values.sum()}")
-        } else {
-            info().candidateNames.forEach { (name, id) ->
-                val win = if (winners().contains(id)) " (winner)" else ""
-                appendLine("   $id '$name' $win")
-            }
+        info().candidateNames.forEach { (name, id) ->
+            val win = if (winners().contains(id)) " (winner)" else ""
+            appendLine("   $id '$name': votes=${votes[id]} $win")
         }
+        append("    Total=${votes.values.sum()}")
     }
 
     override fun toString() = buildString {

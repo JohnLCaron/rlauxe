@@ -128,10 +128,6 @@ class ClcaSingleRoundAssortTask(
             debug=false,
         )
 
-        val bettingFnOld = GeneralAdaptiveBetting(N,
-            startingErrors = ClcaErrorCounts.empty(noerror, upper),
-            nphantoms=0, oaAssortRates = null, d=0,  maxLoss = maxLoss, debug=false)
-
         val tracker = ClcaErrorTracker(noerror, upper)
         val testFn = BettingMart(
             bettingFn = betFun,

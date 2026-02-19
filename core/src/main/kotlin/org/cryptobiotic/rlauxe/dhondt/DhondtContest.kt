@@ -157,7 +157,6 @@ data class ProtoContest(val name: String, val id: Int, val parties: List<DhondtC
                 result.assorters.add(useAssorter)
             } else {
                 result.assorters.add(AboveThreshold.makeFromVotes(info, partyId = party.id, votes, minFraction, useNc))
-                    // result.assorters.add(AboveThresholdB.makeFromVotes(info, partyId = party.id, votes, minFraction, useNc))
             }
         }
 
@@ -213,7 +212,6 @@ class DHondtContest(
             is DHondtAssorter -> {
                 val winnerScore = votes[assorter.winner()]!! / assorter.lastSeatWon.toDouble()
                 val loserScore = votes[assorter.loser()]!! / assorter.firstSeatLost.toDouble()
-
                 (winnerScore - loserScore) / winnerScore
             }
             is BelowThreshold -> {
@@ -259,7 +257,7 @@ class DHondtContest(
                 // val nvotes = votes.values.sum() does not include undervotes
                 assorter.difficulty(votes[assorter.winner()]!!, nvotes)
             }
-            else -> throw RuntimeException()
+            else -> throw RuntimeException("unknown assorter type= ${assorter.javaClass.simpleName}")
         }
     }
 

@@ -45,7 +45,7 @@ class CardBuilder(
         return AuditableCard(location, index, prn, phantom,
             votes= if (votes.isEmpty()) null else votes,
             poolId=poolId ?: this.poolId,
-            cardStyle=cardStyle)
+            populationName=cardStyle)
     }
 
     companion object {
@@ -54,10 +54,10 @@ class CardBuilder(
             card.index,
             card.prn,
             card.phantom,
-            card.contests(), // TODO bogus
+            card.contests(), // TODO doesnt deal with "all"
             card.votes,
             card.poolId,
-            card.cardStyle
+            card.populationName
         )
 
     }

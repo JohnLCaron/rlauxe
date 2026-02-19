@@ -28,8 +28,8 @@ val AuditableCardHeader = "location, index, prn, phantom, poolId, style, cvr con
 fun writeAuditableCardCsv(card: AuditableCard) = buildString {
     append("${card.location}, ${card.index}, ${card.prn}, ${if(card.phantom) "yes," else ","} ")
     if (card.poolId == null) append(", ") else append("${card.poolId}, ")
-    if (card.cardStyle != null) {
-        append("${card.cardStyle}, ")
+    if (card.populationName != null) {
+        append("${card.populationName}, ")
     } else if (card.population != null)
         append("${card.population.name()}, ")
     else
@@ -129,9 +129,9 @@ fun readAuditableCardCsv(line: String): AuditableCard {
             require(contests.size == work.size) { "contests.size (${contests.size}) != votes.size (${work.size})" }
             contests.zip(work).toMap()
         }
-        return AuditableCard(desc, index, sampleNum, phantom, votes, poolId, cardStyle = cardStyle)
+        return AuditableCard(desc, index, sampleNum, phantom, votes, poolId, populationName = cardStyle)
     }
-    return AuditableCard(desc, index, sampleNum, phantom, null, poolId, cardStyle=cardStyle)
+    return AuditableCard(desc, index, sampleNum, phantom, null, poolId, populationName=cardStyle)
 }
 
 class AuditableCardCsvReader(filename: String): CloseableIterable<AuditableCard> {

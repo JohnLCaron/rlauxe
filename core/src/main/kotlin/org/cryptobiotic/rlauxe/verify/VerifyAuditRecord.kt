@@ -43,7 +43,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
             throw RuntimeException( contestsResults.toString() )
         }
 
-        allInfos = contests.map{ it.contest.info() }?.associateBy { it.id }
+        allInfos = contests.map{ it.contest.info() }.associateBy { it.id }
     }
 
     fun verify(): VerifyResults {

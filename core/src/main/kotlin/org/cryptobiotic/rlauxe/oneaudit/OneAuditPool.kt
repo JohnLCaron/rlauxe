@@ -43,7 +43,7 @@ interface OneAuditPoolIF: PopulationIF {
 
     fun show() = buildString {
         appendLine("OneAuditPool(poolName='$poolName', poolId=$poolId, ncards=${ncards()} hasSingleCardStyle=${hasSingleCardStyle()},")
-        appendLine("    contests = ${contests().contentToString()} ")
+        appendLine("    contests = ${possibleContests().contentToString()} ")
         regVotes().toSortedMap().forEach{
             appendLine("    contest ${it.key} votes= ${it.value.votes}, ncards= ${it.value.ncards()}, undervotes= ${it.value.undervotes()} ")
         }
@@ -83,7 +83,7 @@ data class OneAuditPoolWithBallotStyle(
 
     override fun assortAvg() = assortAvg
     override fun hasContest(contestId: Int) = voteTotals.contains(contestId)
-    override fun contests() = voteTotals.map { it.key }.toSortedSet().toIntArray()
+    override fun possibleContests() = voteTotals.map { it.key }.toSortedSet().toIntArray()
 
     override fun regVotes(): Map<Int, ContestVotesIF> {
         return voteTotals.mapValues { (id, contestTab) ->
@@ -173,7 +173,7 @@ data class OneAuditPoolFromCvrs(
 
     override fun assortAvg() = assortAvg
     override fun hasContest(contestId: Int) = contestTabs.contains(contestId)
-    override fun contests() = (contestTabs.map { it.key }).toSortedSet().toIntArray()
+    override fun possibleContests() = (contestTabs.map { it.key }).toSortedSet().toIntArray()
     fun contestTab(contestId: Int) = contestTabs[contestId]
 
     override fun regVotes() = contestTabs
@@ -264,7 +264,7 @@ fun calcOneAuditPoolsFromMvrs(
     // The styles have the name, poolId, and contest list
     val poolsFromCvrs = populations.map { style ->
         val poolFromCvr = OneAuditPoolFromCvrs(style.name(), style.id(), style.hasSingleCardStyle(), infos)
-        style.contests().forEach { poolFromCvr.contestTabs[it]  = ContestTabulation( infos[it]!!) }
+        style.possibleContests().forEach { poolFromCvr.contestTabs[it]  = ContestTabulation( infos[it]!!) }
         poolFromCvr
     }.associateBy { it.poolId }
 

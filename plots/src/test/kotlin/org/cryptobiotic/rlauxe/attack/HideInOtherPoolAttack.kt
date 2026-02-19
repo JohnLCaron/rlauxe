@@ -162,7 +162,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
         val cardsp = cardsu.map { mcard ->
             if (countPool < Npool) { // put first Npool into the pool
                 countPool++
-                mcard.copy(poolId=1, cardStyle = "group1")
+                mcard.copy(poolId=1, populationName = "group1")
             } else
                 mcard
         }
@@ -181,7 +181,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
         val mvrs = cardsp.map { mcard ->
             val org = mcard.cvr()
 
-            if (countFlips < wantFlips && mcard.cardStyle == "group1" && mcard.votes!!.contains(1)) {
+            if (countFlips < wantFlips && mcard.populationName == "group1" && mcard.votes!!.contains(1)) {
                 val votesForContest1 = mcard.votes!!.get(1)!!
                 if (votesForContest1.contains(2)) { // if they voted for candB
                     countFlips++

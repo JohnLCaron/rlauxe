@@ -16,14 +16,14 @@ data class AuditableCard (
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
 
-    val votes: Map<Int, IntArray>?, // if not null and population == null, then hasStyle = true. TODO too obscure?
+    val votes: Map<Int, IntArray>?,
     val poolId: Int?,               // must be set if its from a OneAudit pool
-    val cardStyle: String? = null,  // hijacked for population name
-    val population: PopulationIF? = null, // must have this if !hasStyle
+    val populationName: String? = null,  // population name or "all"; aka "cardStyle" ?
+    val population: PopulationIF? = null, // must have population or population name, otherwise hasSingleCardStyle is assumed to be true
 ): CvrIF {
 
     init {
-        if (population == null && cardStyle == null && votes == null && poolId == null) {
+        if (population == null && populationName == null && votes == null && poolId == null) {
             throw RuntimeException("AuditableCard must have poolId, votes, cardStyle, or population")
         }
     }
@@ -36,7 +36,7 @@ data class AuditableCard (
     override fun toString() = buildString {
         append("AuditableCard(desc='$location', index=$index, sampleNum=$prn, phantom=$phantom")
         if (poolId != null) append(", poolId=$poolId")
-        if (cardStyle != null) append(", cardStyle='$cardStyle'")
+        if (populationName != null) append(", cardStyle='$populationName'")
         if (population != null) append(", population='${population.name()}'")
         append(")")
         if (votes != null) {
@@ -52,7 +52,7 @@ data class AuditableCard (
     override fun votes(contestId: Int): IntArray? = votes?.get(contestId)
 
     override fun hasContest(contestId: Int): Boolean {
-        return if (cardStyle == "all") true
+        return if (populationName == "all") true
             else if (population != null) population.hasContest(contestId)
             else if (votes != null) votes[contestId] != null
             else false
@@ -60,7 +60,7 @@ data class AuditableCard (
 
     // TODO deprecated? Dont have a list for "all"
     fun contests(): IntArray {
-        return if (population != null) population.contests().toList().sorted().toIntArray()
+        return if (population != null) population.possibleContests().toList().sorted().toIntArray()
             else if (votes != null) votes.keys.toList().sorted().toIntArray()
             else intArrayOf()
     }
@@ -68,9 +68,8 @@ data class AuditableCard (
     // TODO better if every card has a population
     fun exactContests(): Boolean {
         return if (population != null) population.hasSingleCardStyle()
-        else if (cardStyle == "all") false
+        else if (populationName == "all") false
         else true // else config.cvrsHaveUndervotes?
-
     }
 
     // Let 1candidate(bi) = 1 if ballot i has a mark for candidate, and 0 if not; SHANGRLA section 2, page 4
@@ -91,7 +90,7 @@ data class AuditableCard (
         if (poolId != other.poolId) return false
         if (location != other.location) return false
         // if (!possibleContests.contentEquals(other.possibleContests)) return false
-        if (cardStyle != other.cardStyle) return false
+        if (populationName != other.populationName) return false
         if (population != other.population) return false
 
         if ((votes == null) != (other.votes == null)) return false
@@ -113,7 +112,7 @@ data class AuditableCard (
         result = 31 * result + (poolId ?: 0)
         result = 31 * result + location.hashCode()
         // result = 31 * result + possibleContests.contentHashCode()
-        result = 31 * result + (cardStyle?.hashCode() ?: 0)
+        result = 31 * result + (populationName?.hashCode() ?: 0)
         result = 31 * result + (population?.hashCode() ?: 0)
         votes?.forEach { (contestId, candidates) -> result = 31 * result + contestId.hashCode() + candidates.contentHashCode() }
         return result
@@ -141,7 +140,7 @@ class MergePopulationsIntoCards(
     // merges the populations into the cards
     override fun next(): AuditableCard {
         val org = cardsIter.next()
-        val pop = if (popMap == null) null else popMap[org.cardStyle]
+        val pop = if (popMap == null) null else popMap[org.populationName]
         return org.copy(population = pop)
     }
 
@@ -168,7 +167,7 @@ class MergePopulationsFromIterable(
         // merges the populations into the cards
         override fun next(): AuditableCard {
             val org = cardsIter.next()
-            val pop = if (popMap == null) null else popMap[org.cardStyle]
+            val pop = if (popMap == null) null else popMap[org.populationName]
             return org.copy(population = pop)
         }
 
@@ -219,7 +218,7 @@ class CvrsToCardsAddStyles(
         return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
             votes,
             if (type.isOA()) org.poolId else null,
-            cardStyle = cardStyle,
+            populationName = cardStyle,
             population = pop,
         )
     }
@@ -227,7 +226,7 @@ class CvrsToCardsAddStyles(
     override fun close() = cvrs.close()
 }
 
-// used in testing - move to testFixtures
+// used only in testing - could move to testFixtures
 // was CvrsWithPopulationsToCardManifest
 class CvrsWithPopulationsToCards(
     val type: AuditType,
@@ -264,7 +263,7 @@ class CvrsWithPopulationsToCards(
         return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
             votes,
             if (type.isOA()) org.poolId else null,
-            cardStyle = cardStyle,
+            populationName = cardStyle,
             population = pop,
         )
     }

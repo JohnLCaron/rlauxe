@@ -42,7 +42,7 @@ class TestOneAuditFuzzers {
         println(cardPool.show())
         assertTrue(cardPool.hasContest(info.id))
         assertFalse(cardPool.hasContest(42))
-        assertEquals(2, cardPool.contests().size) // when extraPct > 0
+        assertEquals(2, cardPool.possibleContests().size) // when extraPct > 0
 
         val countPoolCards = cards.count { it.poolId == cardPool.poolId }
         assertEquals(countPoolCards, cardPool.ncards())

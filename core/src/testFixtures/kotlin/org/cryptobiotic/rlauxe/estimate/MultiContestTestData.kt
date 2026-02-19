@@ -100,7 +100,7 @@ data class MultiContestTestData(
     // set contest.ncards
     fun countCards() {
         populations.forEach { bs ->
-            bs.contests().forEach { contestId ->
+            bs.possibleContests().forEach { contestId ->
                 val contest = contestTestBuilders.find { it.info.id == contestId }!!
                 contest.ncards += bs.ncards
             }
@@ -113,7 +113,7 @@ data class MultiContestTestData(
         val mvrs = makeCardsFromContests()
 
         // the union of the first two styles
-        val expandedContestIds = (populations[0].contests() + populations[1].contests()).toSet().sorted().toIntArray()
+        val expandedContestIds = (populations[0].possibleContests() + populations[1].possibleContests()).toSet().sorted().toIntArray()
 
         val infos = contests.associate { it.id to it.info() }
 

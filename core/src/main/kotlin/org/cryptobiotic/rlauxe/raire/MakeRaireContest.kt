@@ -202,9 +202,9 @@ fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, N
     rcontestUA.assertions.forEach { assertion ->
         val irvVotes = contestTab.irvVotes.makeVotes(info.candidateIds.size)
         val raireAssorter = assertion.assorter as RaireAssorter
-        val margin = raireAssorter.calcMargin(irvVotes, rcontestUA.Npop)
+        val margin = raireAssorter.calcMarginFromVotes(irvVotes, rcontestUA.Npop)
         if (!doubleIsClose(margin,raireAssorter.dilutedMargin())) {
-            raireAssorter.calcMargin(irvVotes, rcontestUA.Npop)
+            raireAssorter.calcMarginFromVotes(irvVotes, rcontestUA.Npop)
             println("margin $margin != ${raireAssorter.dilutedMargin()} raireAssorter.dilutedMargin()")
         }
     }
@@ -246,7 +246,7 @@ fun setPoolAssorterAveragesForRaire(
                 if (cardPool.hasContest(contestId)) {
                     val tab = cardPool.contestTabs[oaContest.id]!! // assumes that the cardPool has the irvVotes
                     val irvVotes: Votes = tab.irvVotes.makeVotes(oaContest.ncandidates)
-                    val poolMargin = raireAssorter.calcMargin(irvVotes, cardPool.ncards())
+                    val poolMargin = raireAssorter.calcMarginFromVotes(irvVotes, cardPool.ncards())
                     assortAverages[cardPool.poolId] = margin2mean(poolMargin)
                 }
             }

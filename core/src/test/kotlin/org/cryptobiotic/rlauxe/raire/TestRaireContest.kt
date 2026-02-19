@@ -26,9 +26,9 @@ class TestRaireContest {
         assertEquals(info.choiceFunction, contest.choiceFunction)
         assertEquals(211, contest.Nc)
         assertEquals(1, contest.undervotes)
-        assertEquals(listOf(1), contest.winners)
-        assertEquals(listOf(0, 2, 3, 4, 42), contest.losers)
-        assertEquals(listOf("cand1"), contest.winnerNames)
+        assertEquals(listOf(1), contest.winners())
+        assertEquals(listOf(0, 2, 3, 4, 42), contest.losers())
+        assertEquals(listOf("cand1"), contest.winnerNames())
         assertEquals( "RaireContest(info='testContestInfo' (0) candidates=[0, 1, 2, 3, 4, 42] choiceFunction=IRV nwinners=1 voteForN=1, winners=[1], Nc=211, Ncast=210, undervotes=1)",
             contest.toString()
         )

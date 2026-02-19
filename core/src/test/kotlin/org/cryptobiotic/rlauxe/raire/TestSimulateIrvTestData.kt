@@ -84,6 +84,6 @@ class TestSimulateIrvTestData {
 
         val cvrTab = tabulateCvrs(cvrs.iterator(), infos).values.first()
         val irvVotes = cvrTab.irvVotes.makeVotes(target.ncandidates)
-        println("rassorter calcMargin = ${rassorter.calcMargin(irvVotes, N)}")
+        println("rassorter calcMargin = ${rassorter.calcMarginFromVotes(irvVotes, N)}")
     }
 }

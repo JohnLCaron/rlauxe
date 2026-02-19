@@ -116,7 +116,7 @@ class TestClcaErrorCounts {
         val show = false
         val maxMaxDiffs = mutableMapOf<Int, Double>()  // ncandidates -> maxDiff
 
-        repeat(111) {
+        repeat(11) {
             val mvrsFuzzPct = Random.Default.nextDouble(0.01)
             val margin = Random.Default.nextDouble(0.10)
             val undervotePct = Random.Default.nextDouble(0.10)

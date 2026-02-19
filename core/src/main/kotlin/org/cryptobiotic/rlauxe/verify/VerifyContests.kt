@@ -455,7 +455,7 @@ fun verifyOApools(
                 val cvrMargin = if (contestUA.isIrv) {
                     val rassorter = passorter as RaireAssorter
                     val cvrVotes = cvrTab.irvVotes.makeVotes(contestUA.ncandidates)
-                    rassorter.calcMargin(cvrVotes, cvrTab.ncardsTabulated)
+                    rassorter.calcMarginFromVotes(cvrVotes, cvrTab.ncardsTabulated)
                 } else {
                     passorter.calcMarginFromRegVotes(cvrTab.votes, cvrTab.ncardsTabulated)
                 }

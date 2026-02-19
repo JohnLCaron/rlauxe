@@ -260,7 +260,7 @@ Using eq 1 above, here is a plot of number of noerror samples needed to compenda
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/phantomByUpper.html" rel="phantomByUpper">![phantomByUpper](plots2/betting/errorComp/phantomByUpper.png)</a>
 
-* The extra samples are non-trivial up to say, margins of .05 for plurality contests, and larger for D'Hondt contests when
+* The extra samples are non-trivial up to say, margins of .05 for u=1 contests, and larger for D'Hondt contests when
   upper gets close to 1/2.
 
 The other problematic case is when the CVR has a vote for the winner, but the MVR cant be found. Then tau = "win-los" (aka "p2o") = 0:

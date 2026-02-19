@@ -88,8 +88,8 @@ Create the Card Manifest:
 - If this is a CLCA, attach the Cast Vote Record (CVR) from the vote tabulation system, to its AuditableCard.
 - Optionally create Populations (eg OneAudit Pools) that describe each unique "population" of cards, and which contests are
   contained in the population. Cards that do not have complete CVRs should reference the population they are contained in.
-- The Card Manifest is the ordered list of AuditableCards.
-- Write the Card Manifest to cardManifest.csv, and optionally the Populations to populations.json.
+- The Card Manifest is the ordered list of AuditableCards and the list of Populations.
+- Write the Card Manifest to cardManifest.csv, and the Populations to populations.json.
 
 Commitment:
 - Write the contests.json, populations.json, and cardManifest.csv files to a publically accessible "bulletin board".

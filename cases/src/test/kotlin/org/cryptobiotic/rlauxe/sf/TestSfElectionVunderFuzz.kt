@@ -76,7 +76,7 @@ class TestSfElectionVunderFuzz {
             if (cvr.poolId != null && showCards < 3) {
                 println("mvr $mvr")
                 println("cvr $cvr")
-                println("pool ${cardPoolMap[cvr.poolId]?.contests().contentToString()}")
+                println("pool ${cardPoolMap[cvr.poolId]?.possibleContests().contentToString()}")
                 println()
                 showCards++
             }
@@ -164,14 +164,14 @@ class TestSfElectionVunderFuzz {
 
     @Test
     fun testSFvunderPoolAvgIRV() {
-        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigUnwrapped(publisher.auditConfigFile())!!
-        val populations = readPopulations(publisher)
-        val pools = populations as List<OneAuditPoolIF>
-        val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
+        //val auditdir = "$testdataDir/cases/sf2024/oa/audit"
+        //val publisher = Publisher(auditdir)
+        //val config = readAuditConfigUnwrapped(publisher.auditConfigFile())!!
+        // val populations = readPopulations(publisher)
+        // val pools = populations as List<OneAuditPoolIF>
+        //val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
 
-        val privateMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.privateMvrsFile())
+        //val privateMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.privateMvrsFile())
 
         val contestId = 18
         val useContest = contests.find { it.id == contestId }!!
@@ -180,7 +180,8 @@ class TestSfElectionVunderFuzz {
         println(useContest)
         println(usePassorter)
 
-        val populationMap = populations.associateBy { it.poolId }
+        requireNotNull (cardPools)
+        val populationMap = cardPools.associateBy { it.poolId }
         val useCardPoolId = 3744
         val usePopulation = populationMap[useCardPoolId]
         println(usePopulation)
@@ -208,7 +209,7 @@ class TestSfElectionVunderFuzz {
         // simulate the card pools for all OneAudit contests; do it here one time for all contests
         val infos = contests.map { it.contest.info() }.associateBy { it.id }
 
-        val cardPools = readCardPoolCsvFile(publisher.cardPoolsFile(),  infos)
+        // val cardPools = readCardPoolCsvFile(publisher.cardPoolsFile(),  infos)
         val cardPoolMap = cardPools.associateBy { it.poolId }
         val useCardPool = cardPoolMap[useCardPoolId]!!
         // println(useCardPool)

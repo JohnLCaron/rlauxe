@@ -42,7 +42,7 @@ class VunderPools(pools: List<OneAuditPoolFromCvrs>) {
 
     init {
         vunderPools = pools.map { pool ->
-            val vunders = pool.contests().associate { contestId ->
+            val vunders = pool.possibleContests().associate { contestId ->
                 Pair( contestId, pool.votesAndUndervotes(contestId))
             }
             VunderPool(vunders, pool.poolName, pool.poolId)

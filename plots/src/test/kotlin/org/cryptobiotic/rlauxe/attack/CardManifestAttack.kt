@@ -301,7 +301,7 @@ data class OneAuditPool(override val poolName: String, override val poolId: Int,
     override fun hasContest(contestId: Int) = regVotes[contestId] != null
     override fun ncards() = ncards
 
-    override fun contests() = regVotes.keys.toList().sorted().toIntArray()
+    override fun possibleContests() = regVotes.keys.toList().sorted().toIntArray()
     override fun assortAvg() = assortAvg
 
     override fun votesAndUndervotes(contestId: Int,): Vunder {

@@ -198,7 +198,7 @@ open class CreateColoradoElection (
         val cvrs: Iterator<Cvr>
 
         init {
-            val poolVunders = cardPool.contests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
+            val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
             /* val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
             cardPool.voteTotals.forEach { (contestId, contestTab) ->
                 val oaContest: OneAuditBuilderCorla = oaContestMap[contestId]!!

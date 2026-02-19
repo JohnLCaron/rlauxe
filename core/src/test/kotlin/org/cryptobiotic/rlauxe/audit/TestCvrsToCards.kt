@@ -61,13 +61,13 @@ class TestCvrsToCards {
         cvr = cvrr.copy(poolId=null)
         target = CvrsWithPopulationsToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=listOf(cardStyle))
         card = target.next()
-        assertEquals(null, card.cardStyle, "no poolId")
+        assertEquals(null, card.populationName, "no poolId")
 
         // what if you dont supply the cardStyles? FAIL
         cvr = cvrr.copy(poolId=1)
         target = CvrsWithPopulationsToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, populations=null)
         card = target.next()
-        assertEquals(null, card.cardStyle, "no pools")
+        assertEquals(null, card.populationName, "no pools")
     }
 
     @Test
@@ -142,7 +142,7 @@ class TestCvrsToCards {
 
         assertEquals(cvr.id, card.location)
         assertEquals(cvr.phantom, card.phantom)
-        assertEquals(expectStyle, card.cardStyle, "cardStyle")
+        assertEquals(expectStyle, card.populationName, "cardStyle")
 
         val styleContests = expectPop?.possibleContests?.toList()?.toSet() ?: emptySet()
         val expectContests = when (auditType) {
@@ -155,7 +155,7 @@ class TestCvrsToCards {
                     styleContests
             }
             AuditType.CLCA -> if (hasCardStyles) styleContests else card.votes!!.keys.toSet()
-            AuditType.POLLING -> expectPop?.contests()?.toSet() ?: emptySet()
+            AuditType.POLLING -> expectPop?.possibleContests()?.toSet() ?: emptySet()
         }
         if (expectContests != card.contests().toSet())
             print("${card.contests()}")
@@ -179,6 +179,6 @@ fun AuditableCard.show() = buildString {
     }
     append(" poolId=$poolId")
     append(" contests=${contests().contentToString()}")
-    append(" cardStyle=$cardStyle")
+    append(" cardStyle=$populationName")
 
 }

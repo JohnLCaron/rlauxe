@@ -143,7 +143,7 @@ fun makeMvrs(
     }
 
     // add the pooled cvrs
-    pool.contests().forEach { contestId ->
+    pool.possibleContests().forEach { contestId ->
         val vunderPool = pool.votesAndUndervotes(contestId)
         val poolCvrs = makeVunderCvrs(mapOf(info.id to vunderPool), pool.poolName, poolId = pool.poolId)
         if (pool.ncards() != poolCvrs.size)

@@ -74,8 +74,8 @@ class TestBoulderUndervotes {
             val cardStyle = cardStyles[gcardStyle]
             if (cardStyle != null) {
                 val gids = rgroup.contestVotes.map { it.key }.sorted().toIntArray()
-                if (cardStyle.contests().contentEquals(gids))
-                    println("*** rgroup '${rgroup.ballotType}'\n $gids !=\n ${cardStyle.contests()} (${gcardStyle})")
+                if (cardStyle.possibleContests().contentEquals(gids))
+                    println("*** rgroup '${rgroup.ballotType}'\n $gids !=\n ${cardStyle.possibleContests()} (${gcardStyle})")
             } else {
                 println("***dont have cardStyle ${gcardStyle}")
             }

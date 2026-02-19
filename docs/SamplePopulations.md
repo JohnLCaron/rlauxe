@@ -5,7 +5,7 @@ _01/18/26_
 
 The most efficient audit has CVRs (that include undervotes) for all ballots.
 
-Otherwise, we need to create "Population" card containers that know which contests are in it, and use these when choosing audit samples.
+Otherwise, we need to create "Population" card containers that know which contests are in it, and use these to set Npop and when choosing audit samples.
 
 Each population sets "hasSingleCardStyle" = true if all cards in the population have one CardType (i.e all cards in the population have the same contests).  This is set independently on each population, and replaces the global hasStyle (aka use_style) flag.
 
@@ -156,7 +156,6 @@ We expect to see (n-1)/n cards without the contest, and 1/n with the contest, so
 mvr_assort = 0 when mvr doesnt have the contest, since that will happen a lot. We need to set it to 0.5.
 
 So we need to set mvr_assort based on hasSingleCardStyle, just as with CLCA and OneAudit.
-
 
 ## What about Ncast and Nphantom?
 

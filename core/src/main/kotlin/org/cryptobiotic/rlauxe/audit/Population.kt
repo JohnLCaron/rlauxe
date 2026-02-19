@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.audit
 
 import kotlin.collections.contains
 
-/*
+/* from SamplePopulations.md
 * CardStyle = the full and exact list of contests on a card.
 * card.exactContests = list of contests that are on this card = CardStyle = "we know exactly what contests are on this card".
 * card.possibleContests = list of contests that might be on this card.
@@ -14,8 +14,8 @@ import kotlin.collections.contains
 interface PopulationIF {
     fun name(): String
     fun id(): Int
-    fun contests(): IntArray // the set of contests that might be on any card in the population
-    fun hasSingleCardStyle(): Boolean // aka hasStyle: if all cards have exactly the contests in possibleContests
+    fun possibleContests(): IntArray // the set of contests that might be on any card in the population
+    fun hasSingleCardStyle(): Boolean // aka hasStyle: if all cards have exactly the contests in possibleContests()
     fun ncards(): Int
     fun hasContest(contestId: Int): Boolean
 }
@@ -24,8 +24,8 @@ interface PopulationIF {
 data class Population(
     val name: String,
     val id: Int,
-    val possibleContests: IntArray, // the list of possible contests.
-    val hasSingleCardStyle: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
+    val possibleContests: IntArray,      // the list of possible contests.
+    val hasSingleCardStyle: Boolean,     // aka hasStyle: if all cards have exactly the contests in hasSingleCardStyle
 ) : PopulationIF {
     var ncards = 0
     fun setNcards(ncards: Int): Population {
@@ -38,7 +38,7 @@ data class Population(
     override fun hasSingleCardStyle() = hasSingleCardStyle
     override fun ncards() = ncards
     override fun hasContest(contestId: Int) = possibleContests.contains(contestId)
-    override fun contests() = possibleContests
+    override fun possibleContests() = possibleContests
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

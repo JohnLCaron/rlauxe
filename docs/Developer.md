@@ -163,7 +163,7 @@ before viewing them.
 | 01/27/2026 | 87.8 % | 5847/6658       |
 | 02/13/2026 | 87.2 % | 6116/7014       |
 | 02/14/2026 | 87.8 % | 6174/7034       |
-| 02/19/2026 | 88.2 % | 6227/7057       |
+| 02/19/2026 | 89.1 % | 6251/7017       |
 
 
 ## UML
@@ -173,13 +173,13 @@ last changed: 01/07/2026
 
 ![rlauxe Audit UML](images/auditUML.svg)
 
-you could say theres two kinds of Contests, Regular (with votes) and Irv (with VoteConsolidator's)
-you could say theres two kinds of Audits, Polling and Clca
+you could say there are  two kinds of Contests, Regular (with votes) and Irv (with VoteConsolidator's)
+you could say there are two kinds of Audits, Polling and Clca
 if a Clca has pools, then its a OneAudit with OneAuditClcaAssorter's
 
 | audit   | contest | assorters                               |
 |---------|---------|-----------------------------------------|
-| polling | regular | PAssorter                               |
+| polling | regular | PluralityAssorter                       |
 | polling | irv     | RaireAssorter                           |
 | clca    | regular | ClcaAssorter                            |
 | clca    | regular | ClcaAssorterOneAudit                    |

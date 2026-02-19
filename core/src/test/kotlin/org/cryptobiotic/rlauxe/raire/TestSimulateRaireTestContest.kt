@@ -5,7 +5,7 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestRaireContestTestData {
+class TestSimulateRaireTestContest {
     val N = 50000
     val ncontests = 40
     val nbs = 11

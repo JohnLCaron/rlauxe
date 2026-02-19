@@ -94,7 +94,7 @@ class TestSimulateOneAuditRaire {
 
         val cvrTab = tabulateCvrs(cvrs.iterator(), infos).values.first()
         val irvVotes = cvrTab.irvVotes.makeVotes(rcontestUA.ncandidates)
-        println("rassorter calcMargin = ${rassorter.calcMargin(irvVotes, N)}")
+        println("rassorter calcMargin = ${rassorter.calcMarginFromVotes(irvVotes, N)}")
     }
 
     @Test
@@ -111,7 +111,7 @@ class TestSimulateOneAuditRaire {
 
         val cvrTab = tabulateCvrs(cvrs.iterator(), infos).values.first()
         val irvVotes = cvrTab.irvVotes.makeVotes(rcontestUA.ncandidates)
-        println("rassorter calcMargin = ${rassorter.calcMargin(irvVotes, N)}")
+        println("rassorter calcMargin = ${rassorter.calcMarginFromVotes(irvVotes, N)}")
 
         // cvrs ignore pools
         val avgIgnorePool = AssortAvg()
@@ -141,7 +141,7 @@ class TestSimulateOneAuditRaire {
         println("assortAvg.margin = ${avgWithPool.margin()}")
 
         assertEquals(cassorter.dilutedMargin, rassorter.dilutedMargin(), doublePrecision)
-        assertEquals(cassorter.dilutedMargin, rassorter.calcMargin(irvVotes, N), doublePrecision)
+        assertEquals(cassorter.dilutedMargin, rassorter.calcMarginFromVotes(irvVotes, N), doublePrecision)
         assertEquals(cassorter.dilutedMargin, avgIgnorePool.margin(), doublePrecision)
         assertEquals(cassorter.dilutedMargin, avgWithPool.margin(), doublePrecision)
 
@@ -152,7 +152,7 @@ class TestSimulateOneAuditRaire {
 
         val pool = pools.first()
         val poolIrvVotes = pool.contestTabs[rcontestUA.id]!!.irvVotes.makeVotes(rcontestUA.ncandidates)
-        val poolIrvMargin = rassorter.calcMargin(poolIrvVotes, pool.ncards())
+        val poolIrvMargin = rassorter.calcMarginFromVotes(poolIrvVotes, pool.ncards())
         println("rassorter pool calcMargin = ${poolIrvMargin}")
 
         assertEquals(cassorterPoolMargin, poolIrvMargin, doublePrecision)

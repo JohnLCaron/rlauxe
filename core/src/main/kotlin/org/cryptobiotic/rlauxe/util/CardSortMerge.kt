@@ -18,16 +18,15 @@ class SortMerge<T>(
     val seed: Long,
     val maxChunk: Int = maxChunkDefault) {
 
-    fun run(cardIter: CloseableIterator<T>, cvrs: List<Cvr>, toAuditableCard: (from: T, index: Int, prn: Long) -> AuditableCard) {
+    fun run(cardIter: CloseableIterator<T>, toAuditableCard: (from: T, index: Int, prn: Long) -> AuditableCard) {
         // out of memory sort by sampleNum()
-        sortCards(cardIter, cvrs, scratchDirectory, seed, toAuditableCard)
+        sortCards(cardIter, scratchDirectory, seed, toAuditableCard)
         mergeCards(scratchDirectory, outputFile)
     }
 
     // out of memory sorting
     fun sortCards(
         cardIterator: CloseableIterator<T>,
-        cvrs: List<Cvr>, // phantoms
         scratchDirectory: String,
         seed: Long,
         toAuditableCard: (from: T, index: Int, prn: Long) -> AuditableCard
@@ -42,7 +41,6 @@ class SortMerge<T>(
             while (cardIter.hasNext()) {
                 cardSorter.add(cardIter.next())
             }
-            cvrs.forEach { cardSorter.add(it) }
         }
 
         cardSorter.writeSortedChunk()
@@ -76,17 +74,6 @@ private class ChunkSorter<T>(val workingDirectory: String, val prng: Prng, val m
 
     fun add(from: T) {
         val card = toAuditableCard(from, index, prng.next()) // , false, pools = pools, showPoolVotes)
-        cards.add(card)
-        index++
-        count++
-
-        if (count > max) {
-            writeSortedChunk()
-        }
-    }
-
-    fun add(cvr: Cvr) {
-        val card = AuditableCard.fromCvr(cvr, index=index, prn=prng.next())
         cards.add(card)
         index++
         count++

@@ -76,7 +76,7 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
         if (usePhantoms && cvr.isPhantom()) return 0.0 // worst case
         val w = cvr.hasMarkFor(info.id, winner)
         val l = cvr.hasMarkFor(info.id, loser)
-        return (w - l + 1) * 0.5
+        return (w - l + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
     }
 
     override fun upperBound() = 1.0 // upper bound of assorter.assort()

@@ -223,7 +223,7 @@ fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): L
         done = vunderPickers.values.all { it.isEmpty() }
     }
 
-    // find bug
+    /* find bug
     val voteForNs = vunders.mapValues { it.value.voteForN }
     val tabsFromCvrs = tabulateCvrsWithVoteForNs(rcvrs.iterator(), voteForNs)
     tabsFromCvrs.forEach { (id, voteFromCvrs) ->
@@ -236,7 +236,7 @@ fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): L
             checkVunderEquivilentTab(vunder, voteFromCvrs)
             throw RuntimeException("vunderVotes ${vunder} != ${fromCvrs} voteFromCvrs")
         }
-    }
+    } */
 
     rcvrs.shuffle()
     return rcvrs

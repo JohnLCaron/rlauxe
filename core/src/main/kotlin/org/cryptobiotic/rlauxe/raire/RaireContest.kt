@@ -295,13 +295,13 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
         return this
     }
 
-    fun calcMargin(votes: Votes, N: Int): Double {
-        return calcMarginInVotes(votes) / N.toDouble()
+    fun calcMarginFromVotes(votes: Votes, N: Int): Double {
+        return calcVoteMargin(votes) / N.toDouble()
     }
 
     // uses raire-java to find the marginInVotes from an arbitrary set of Votes. used to get assorter pool averages
     // Note this may be negetive when loser had more votes than winner in this pool
-    fun calcMarginInVotes(votes: Votes): Int {
+    fun calcVoteMargin(votes: Votes): Int {
         val winnerLoser = winnerLoserVotes(votes)
         return winnerLoser.first - winnerLoser.second
     }
@@ -340,7 +340,7 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
     override fun hashcodeDesc() = "${rassertion.assertionType.shortName} ${winLose()} ${rassertion.eliminated}" // must be unique for serialization
 
     override fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double {
-        throw RuntimeException("RaireAssorter can't calculate margin from Regular Voes")
+        throw RuntimeException("RaireAssorter can't calculate margin from Regular Votes; use calcMarginFromVotes")
     }
 
     override fun assort(cvr: CvrIF, usePhantoms: Boolean): Double {

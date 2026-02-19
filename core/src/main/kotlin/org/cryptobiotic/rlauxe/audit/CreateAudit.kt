@@ -117,7 +117,6 @@ fun writeExternalSortedCards(topdir: String, outputFile: String, unsortedCards: 
     val sorter = SortMerge<AuditableCard>("$topdir/sortChunks", outputFile = outputFile, seed = seed)
     sorter.run(
         cardIter = unsortedCards,
-        cvrs = emptyList(),
         toAuditableCard = { from: AuditableCard, index: Int, prn: Long -> from.copy(index = index, prn = prn) }
     )
     createZipFile(outputFile, delete = true)

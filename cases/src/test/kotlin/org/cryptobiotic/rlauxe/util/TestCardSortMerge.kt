@@ -35,7 +35,6 @@ class TestCardSortMerge {
         )
         sorter.run(
             cardIter = cvrExportCsvIterator(filename = cvrExportFile),
-            cvrs = emptyList(),
             toAuditableCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
         )
 
@@ -62,7 +61,6 @@ class TestCardSortMerge {
 
         sorter.run(
             cardIter = cvrExportCsvIterator(filename = "$cvrExportFile.zip"),
-            cvrs = emptyList(),
             toAuditableCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
         )
 
@@ -89,7 +87,6 @@ class TestCardSortMerge {
 
         sorter.run(
             cardIter = cvrExportCsvIterator(filename = "$cvrExportFile.zip"),
-            cvrs = emptyList(),
             toAuditableCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
         )
 

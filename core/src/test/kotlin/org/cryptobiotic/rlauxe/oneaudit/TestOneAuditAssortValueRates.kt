@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundUp
@@ -199,15 +198,6 @@ class TestOneAuditAssortValueRates {
             maxLoss = maxBet/2,
             oaAssortRates = oaAssortRates,
             d = 100,
-            debug=false,
-        )
-
-        val betFnOld = GeneralAdaptiveBetting(
-            Npop,
-            ClcaErrorCounts.empty(noerror, upper),
-            0,
-            oaAssortRates = oaAssortRates,
-            maxLoss = maxBet/2,
             debug=false,
         )
         val optimalBet = betFun.bet(ClcaErrorTracker(noerror, upper))

@@ -45,13 +45,6 @@ class TestGABetting {
             debug=true,
         )
 
-        val gaBettingOld = GeneralAdaptiveBetting(
-            N,
-            startingErrors = ClcaErrorCounts.empty(noerror, upper),
-            nphantoms = nphantoms,
-            oaAssortRates = null, d = 0, maxLoss = maxLoss, debug = false
-        )
-
         val tracker = ClcaErrorTracker(noerror, upper)
         repeat(1000) { tracker.addSample(noerror) }
 

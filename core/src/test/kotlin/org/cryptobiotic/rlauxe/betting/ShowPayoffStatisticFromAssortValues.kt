@@ -57,11 +57,6 @@ class ShowPayoffStatisticFromAssortValues {
             debug=true,
         )
 
-        val betFnOld = GeneralAdaptiveBetting(N,
-            startingErrors = startingTracker.measuredClcaErrorCounts(),
-            nphantoms = 2,
-            oaAssortRates = null, d=0,  maxLoss = maxLoss, debug=true)
-
         val emptyTracker = ClcaErrorTracker(noerror, upper)
         val bet = betFn.bet(emptyTracker)
         println("bet = $bet maxLoss = $maxLoss")

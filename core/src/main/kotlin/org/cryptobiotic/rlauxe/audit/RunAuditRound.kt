@@ -12,6 +12,7 @@ import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.persist.CompositeRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -104,6 +105,7 @@ fun runRoundResult(auditDir: String, onlyTask: String? = null): Result<AuditRoun
 // for debugging, transparency. rlauxe-viewer
 fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: AssertionRound): String {
     val contestId = contestRound.contestUA.id
+    val contestName = contestRound.contestUA.name
     try {
         if (notExists(Path.of(auditDir))) {
             logger.warn { "Audit Directory $auditDir does not exist" }
@@ -118,10 +120,15 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         if (auditRecord == null) {
             return "directory '$auditDir' does not contain an audit record"
         }
-        logger.info { "runRoundAgain in $auditDir for round $roundIdx, contest $contestId, and assertion $cassertion" }
-        require(auditRecord is AuditRecord)
+        logger.info { "runRoundAgain in $auditDir for round $roundIdx, contest '$contestName', and assertion $cassertion" }
 
-        val workflow = PersistedWorkflow(auditRecord, mvrWrite = false)
+        val useAuditRecord = if (auditRecord is CompositeRecord) {
+            auditRecord.findComponentWithContest(contestRound.contestUA.name)
+        } else auditRecord
+        if (useAuditRecord == null) return "Cant find contest named ${contestRound.contestUA.name}"
+
+        require( useAuditRecord is AuditRecord)
+        val workflow = PersistedWorkflow(useAuditRecord, mvrWrite = false)
         val cvrPairs = workflow.mvrManager().makeMvrCardPairsForRound(roundIdx)
         val sampler = PairSampler(contestId, cvrPairs)
 

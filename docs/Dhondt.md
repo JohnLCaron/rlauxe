@@ -214,7 +214,7 @@ The lower bound is −m/d(LB ), again substituting in to Equation 2 gives
 ### Results from createAllBelgiumElections() 
 
 ````
-                |                                minAssorter |  noerror |     mean |    upper |  nmvrs | minMvrs | pct % |
+                |                                minAssorter |  noerror |     mean |    upper |  nmvrs | minMvrs | pct %  |
          Anvers |                   DHondt w/l='CD&V'/'PVDA' | 0.500134 | 0.500267 | 1.000000 |  12383 |   11203 | 1.04 % |
       Bruxelles |                       DHondt w/l='PS'/'MR' | 0.500210 | 0.500472 | 1.125000 |   7870 |    7137 | 1.52 % |
     FlandreWest |                   DHondt w/l='PVDA'/'CD&V' | 0.501659 | 0.506614 | 2.000000 |   1005 |     904 | 0.12 % |

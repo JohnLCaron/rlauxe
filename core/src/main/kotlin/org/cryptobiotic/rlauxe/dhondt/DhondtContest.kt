@@ -12,7 +12,6 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
-import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
@@ -218,10 +217,12 @@ class DHondtContest(
                 (winnerScore - loserScore) / winnerScore
             }
             is BelowThreshold -> {
+                // val nvotes = votes.values.sum() does not include undervotes ??
                 assorter.t - votes[assorter.winner()]!! / nvotes.toDouble()
             }
 
             is AboveThreshold -> {
+                // val nvotes = votes.values.sum() does not include undervotes
                 votes[assorter.winner()]!! / nvotes.toDouble() - assorter.t
             }
             else -> throw RuntimeException()
@@ -231,21 +232,32 @@ class DHondtContest(
     override fun showAssertionDifficulty(assorter: AssorterIF): String {
         return when (assorter) {
             is DHondtAssorter -> {
-                val winnerScore = votes[assorter.winner()]!! / assorter.lastSeatWon.toDouble()
-                val loserScore = votes[assorter.loser()]!! / assorter.firstSeatLost.toDouble()
-                val recountMargin = (winnerScore - loserScore) / winnerScore
-                "fw/fl=${dfn(winnerScore, 1)}/${dfn(loserScore, 1)}" +
-                        " diff=${dfn(winnerScore - loserScore, 0)} (w-l)/w =${dfn(recountMargin, 5)}"
+                assorter.showAssertionDifficulty(votes[assorter.winner()]!!, votes[assorter.loser()]!!)
             }
             is BelowThreshold -> {
-                val votesFor = votes[assorter.winner()]!!
-                val pct = 100.0 * votesFor / nvotes
-                "votesFor=$votesFor pct=${dfn(pct, 4)} diff=${votesFor - assorter.t * nvotes} votes"
+                // val nvotes = votes.values.sum() does not include undervotes
+                assorter.showAssertionDifficulty(votes[assorter.winner()]!!, nvotes)
             }
             is AboveThreshold -> {
-                val votesFor = votes[assorter.winner()]!!
-                val pct = 100.0 * votesFor / nvotes
-                "votesFor=$votesFor pct=${dfn(pct, 4)} diff=${votesFor - assorter.t * nvotes} votes"
+                // val nvotes = votes.values.sum() does not include undervotes
+                assorter.showAssertionDifficulty(votes[assorter.winner()]!!, nvotes)
+            }
+            else -> throw RuntimeException()
+        }
+    }
+
+    fun difficulty(assorter: AssorterIF): Double {
+        return when (assorter) {
+            is DHondtAssorter -> {
+                assorter.difficulty(votes[assorter.winner()]!!, votes[assorter.loser()]!!)
+            }
+            is BelowThreshold -> {
+                // val nvotes = votes.values.sum() does not include undervotes
+                assorter.difficulty(votes[assorter.winner()]!!, nvotes)
+            }
+            is AboveThreshold -> {
+                // val nvotes = votes.values.sum() does not include undervotes
+                assorter.difficulty(votes[assorter.winner()]!!, nvotes)
             }
             else -> throw RuntimeException()
         }
@@ -362,9 +374,54 @@ private data class AssorterBuilder(val contest: ProtoContest, val winner: Dhondt
      .setDilutedMean(hmean)
 }
 
+// ### Section 5.1 highest averages
+//
+//A highest averages method is parameterized by a set of divisors d(1), d(2), . . . d(S) where S is the number of seats.
+//The divisors for D’Hondt are d(i) = i. Sainte-Laguë has divisors d(i) = 2i − 1.
+//
+//Define
+//
+//    fe,s = Te/d(s) for entity e and seat s.
+//
+// ### Section 5.2 Simple D’Hondt: Party-only voting
+//
+//In the simplest form of highest averages methods, seats are allocated to each
+//entity (party) based on individual entity tallies. Let We be the number of seats
+//won and Le the number of the first seat lost by entity e. That is:
+//
+//    We = max{s : (e, s) ∈ W}; ⊥ if e has no winners. this is e's lowest winner.
+//    Le = min{s : (e, s) !∈ W}; ⊥ if e won all the seats. this is e's highest loser.
+//
+//The inequalities that define the winners are, for all parties A with at least
+//one winner, for all parties B (different from A) with at least one loser, as follows:
+//
+//    fA,WA > fB,LB    A’s lowest winner beat party B’s highest loser
+//    TA/d(WA) > TB/d(LB)
+//    TA/d(WA) - TB/d(LB) > 0
+//
+//From this, we define the proto-assorter for any ballot b as
+//
+//    g_AB(b) = 1/d(WA) if b is a vote for A
+//            = -1/d(WB) if b is a vote for B
+//            = 0 otherwisa
+//
+//    or equivilantly, g_AB(b) = bA/d(WA) - bB/d(WB)
+//
+//g lower bound is -1/d(WB) = -1/first (lowest winner)
+//g upper bound is 1/d(WA)  = 1/last   (highest loser)
+//c = -1.0 / (2 * lower) = first/2
+//h upper bound is h(g upper) = h(1/last) * c + 1/2 = (1/last) * first/2 + 1/2 = (first/last+1)/2
+//
+//first and last both range from 1 to nseats, so
+//    min upper is (1/nseats + 1)/2 which is between 1/2 and 1
+//    max upper is (nseats + 1)/2 which is >= 1
+
+// winner,loser: candidate ids
+// lastSeatWon: last seat won by winner
+// firstSeatLost: last seat lost by loser
 data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int, val lastSeatWon: Int, val firstSeatLost: Int): AssorterIF  {
-    val upperg = 1.0 / lastSeatWon  // upper bound of g
-    val lowerg = -1.0 / firstSeatLost  // lower bound of g
+    val upperg = 1.0 / lastSeatWon  // upper bound of g = 1/d(WA)  = 1/lastSeatWon   (highest loser)
+    val lowerg = -1.0 / firstSeatLost  // lower bound of g = -1/d(WB) = -1/firstSeatLost (lowest winner)
     val c = -1.0 / (2 * lowerg)  // first/2
     private var dilutedMean: Double = 0.0
 
@@ -385,7 +442,7 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     }
 
     // l = h(-1/first) = -1/first * first/2 + 1/2 = 0
-    // u = h(1/last) = 1/last * first/2 + 1/2 = (first/last+1)/2
+    // u = h(1/last) = 1/last * first/2 + 1/2 = (firstSeatLost/lastSeatWon+1)/2
     fun h2(g: Double): Double {
         return c * g + 0.5
     }
@@ -406,10 +463,22 @@ data class DHondtAssorter(val info: ContestInfo, val winner: Int, val loser: Int
     }
 
     override fun desc() = buildString {
-        append("${shortName()}: dilutedMean=${pfn(dilutedMean)} upperBound=${df(upperBound())}")
+        append("${shortName()}: winner firstSeatLost=$firstSeatLost loser lastSeatWon=$lastSeatWon upperBound=(first/last+1)/2=${df(upperBound())}")
     }
     override fun shortName() = "DHondt w/l='${info.candidateIdToName[winner()]}'/'${info.candidateIdToName[loser()]}'"
     override fun hashcodeDesc() = "${winLose()} ${info.name}" // must be unique for serialization
+
+    fun showAssertionDifficulty(votesForWinner: Int, votesForLoser: Int): String {
+        val winnerScore = votesForWinner / lastSeatWon.toDouble()
+        val loserScore = votesForLoser / firstSeatLost.toDouble()
+        return "fw=${dfn(winnerScore, 1)} fl=${dfn(loserScore, 1)} fw-fl=${dfn(winnerScore - loserScore, 0)}"
+    }
+
+    fun difficulty(votesForWinner: Int, votesForLoser: Int): Double {
+        val winnerScore = votesForWinner / lastSeatWon.toDouble()
+        val loserScore = votesForLoser / firstSeatLost.toDouble()
+        return winnerScore - loserScore
+    }
 
     override fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double {
         if (useVotes == null || N <= 0) {

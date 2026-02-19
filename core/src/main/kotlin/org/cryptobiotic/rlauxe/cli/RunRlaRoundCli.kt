@@ -62,6 +62,11 @@ object RunRoundAgainCli {
             shortName = "contest",
             description = "contest id"
         ).default(1)
+        val contestName by parser.option(
+            ArgType.String,
+            shortName = "contestName",
+            description = "contest name"
+        )
         val assertionWinLose by parser.option(
             ArgType.String,
             shortName = "assertion",
@@ -81,9 +86,11 @@ object RunRoundAgainCli {
                 println("AuditRound roundIdx $roundIdx not found at $auditDir")
                 return
             }
-            val contestRound = auditRound.contestRounds.find { it.id == contest }
+            val contestRound = if (contestName != null) auditRound.contestRounds.find { it.name == contestName }
+                               else auditRound.contestRounds.find { it.id == contest }
             if (contestRound == null) {
-                println("contestRound with contest id = $contest not found")
+                if (contestName != null) println("contestRound with contest name = $contestName not found")
+                else println("contestRound with contest id = $contest not found")
                 return
             }
             val assertionRound = if (assertionWinLose == "first") contestRound.assertionRounds.first() else {

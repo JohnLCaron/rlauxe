@@ -33,7 +33,7 @@ data class AuditConfig(
 
     // audit sample size control
     val removeCutoffContests: Boolean = false, // remove contests that need more samples than contestSampleCutoff
-    val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
+    val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin TODO really it should be noerror
     val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
     val auditSampleLimit: Int? = null, // limit audit sample size; audit all samples, ignore risk limit
 

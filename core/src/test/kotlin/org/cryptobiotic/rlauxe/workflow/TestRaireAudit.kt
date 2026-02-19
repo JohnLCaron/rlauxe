@@ -16,11 +16,6 @@ class TestRaireAudit {
         testRaireWorkflow(AuditConfig(AuditType.CLCA, nsimEst=10))
     }
 
-    @Test
-    fun testRaireClcaNoStyle() { // TODO hasStyle=false
-        testRaireWorkflow(AuditConfig(AuditType.CLCA, hasStyle=false, nsimEst=10))
-    }
-
     fun testRaireWorkflow(auditConfig: AuditConfig) {
         val (rcontest, testCvrs) = simulateRaireTestContest(N=20000, contestId=111, ncands=3, minMargin=.04, quiet = true)
         val workflow = WorkflowTesterClca(auditConfig, emptyList(), listOf(rcontest),

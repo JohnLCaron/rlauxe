@@ -26,15 +26,13 @@ class ClcaContestAuditTaskGenerator(
 
     override fun generateNewTask(): SingleContestAuditTask {
         val useConfig = config ?:
-        AuditConfig(
-            AuditType.CLCA, true, nsimEst = nsimEst,
-            clcaConfig = clcaConfigIn ?: ClcaConfig()
-        )
+        AuditConfig(AuditType.CLCA, nsimEst = nsimEst, clcaConfig = clcaConfigIn ?: ClcaConfig())
 
         var (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         var testMvrs = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
-        if (!useConfig.hasStyle && Npop > Nc) { // TODO test this
+        // was if (!useConfig.hasStyle && Npop > Nc) {
+        if (Npop > Nc) { // TODO test this
             val otherContestId = 42
             val otherCvrs = List<Cvr>(Npop - Nc) { makeUndervoteForContest(otherContestId) }
             testCvrs = testCvrs + otherCvrs
@@ -73,10 +71,7 @@ class ClcaSingleRoundAuditTaskGenerator(
 
     override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
         val useConfig = config ?:
-        AuditConfig(
-            AuditType.CLCA, true,
-            clcaConfig = clcaConfigIn ?: ClcaConfig()
-        )
+        AuditConfig(AuditType.CLCA, clcaConfig = clcaConfigIn ?: ClcaConfig())
 
         val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         val testMvrs =  if (p2flips != null || p1flips != null) {

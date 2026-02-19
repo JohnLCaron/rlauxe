@@ -185,7 +185,7 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
         }
         assertTrue(mvrVotes[1]!! > mvrVotes[2]!!)
 
-        val config = AuditConfig(AuditType.CLCA, hasStyle = hasStyle, seed = 12356667890L)
+        val config = AuditConfig(AuditType.CLCA, seed = 12356667890L)
 
         val Nbs = mapOf(1 to Nc)
 

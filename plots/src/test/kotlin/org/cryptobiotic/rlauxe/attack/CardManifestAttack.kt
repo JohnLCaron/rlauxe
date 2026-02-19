@@ -247,7 +247,7 @@ class CardManifestAttack {
 
         val auditdir = "$topdir/audit"
         val config = AuditConfig(
-            AuditType.ONEAUDIT, hasStyle = hasStyle, contestSampleCutoff = 20000, nsimEst = 10,
+            AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10,
         )
         CreateAudit("hideInOtherPoolAttack", config, election, auditDir = "$topdir/audit",)
 

@@ -30,7 +30,7 @@ class OaPhantomAttack {
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=phantomPct, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "reportedMean", "fuzzPct" to fuzzPct),
                 auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true, nsimEst = nsimEst,
+                    AuditType.ONEAUDIT, nsimEst = nsimEst,
                 ),
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorReportedMean))
@@ -39,7 +39,7 @@ class OaPhantomAttack {
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=phantomPct, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "simulate", "fuzzPct" to fuzzPct),
                 auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true, nsimEst = nsimEst,
+                    AuditType.ONEAUDIT, nsimEst = nsimEst,
                     oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.simulate)
                 ),
             )
@@ -49,7 +49,7 @@ class OaPhantomAttack {
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=phantomPct, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "calcMvrsNeeded", "fuzzPct" to fuzzPct),
                 auditConfigIn = AuditConfig(
-                    AuditType.ONEAUDIT, true, nsimEst = nsimEst,
+                    AuditType.ONEAUDIT, nsimEst = nsimEst,
                     simulationStrategy = SimulationStrategy.optimistic,
                 ),
             )

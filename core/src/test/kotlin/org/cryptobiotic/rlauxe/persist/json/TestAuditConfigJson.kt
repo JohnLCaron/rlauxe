@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.persist.json
 
-import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import kotlin.test.Test
@@ -25,14 +24,14 @@ class TestAuditConfigJson {
         )
         testRoundtrips(
             AuditConfig(
-                AuditType.POLLING, hasStyle=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50, simFuzzPct=.111,
+                AuditType.POLLING, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50, simFuzzPct=.111,
                 contestSampleCutoff=10000,  version=2.0,
             pollingConfig= PollingConfig(d = 99)
         )
         )
         testRoundtrips(
             AuditConfig(
-                AuditType.ONEAUDIT, hasStyle=false, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50, simFuzzPct=.111,
+                AuditType.ONEAUDIT, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50, simFuzzPct=.111,
                 contestSampleCutoff=10000,  version=2.0,
             )
         )

@@ -22,7 +22,7 @@ class PollingContestAuditTaskGenerator(
 
     override fun generateNewTask(): ConcurrentTaskG<WorkflowResult> {
         val useConfig = auditConfig ?: AuditConfig(
-            AuditType.POLLING, true, nsimEst = nsimEst, simFuzzPct = mvrsFuzzPct,
+            AuditType.POLLING, nsimEst = nsimEst, simFuzzPct = mvrsFuzzPct,
         )
 
         val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
@@ -55,7 +55,7 @@ class PollingSingleRoundAuditTaskGenerator(
 
     override fun generateNewTask(): PollingSingleRoundAuditTask {
         val useConfig = auditConfig ?: AuditConfig(
-            AuditType.POLLING, true, simFuzzPct = mvrsFuzzPct
+            AuditType.POLLING, simFuzzPct = mvrsFuzzPct
         )
 
         val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)

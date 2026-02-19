@@ -65,6 +65,30 @@ class Taus(upper: Double, use7override: Boolean = false) {
     }
 }
 
+/*
+from ClcaErrors.md
+
+| cvr - mvr       | value  | name     | SHANGRLA name |
+|-----------------|--------|----------|---------------|
+| winner-loser    | 0      | win-los  | p2o           |
+| winner-phantom  | 0      | win-los  |               |
+| winner-other    | 1/2u   | win-oth  | p1o           |
+| other-loser     | 1-1/2u | oth-los  | p1o           |
+| other-phantom   | 1-1/2u | oth-los  |               |
+| phantom-loser   | 1-1/2u | oth-los  |               |
+| phantom-phantom | 1-1/2u | oth-los  |               |
+| winner-winner   | 1/2    | noerror  |               |
+| other-other     | 1/2    | noerror  |               |
+| loser-loser     | 1/2    | noerror  |               |
+| loser-phantom   | 1/2    | noerror  |               |
+| phantom-other   | 1/2    | noerror  |               |
+| loser-other     | 1+1/2u | los-oth  | p1u           |
+| other-winner    | 2-1/2u | oth-win  | p1u           |
+| phantom-winner  | 2-1/2u | oth-win  |               |
+| loser-winner    | 2      | los-win  | p2u           |
+
+ */
+
 // uses all 7 names, but may have only a subset. Use getNamedRate() to look for name aliases.
 // the rate must be multiplied by noerror to get bassort values.
 data class TausRates(val rates: Map<String, Double>) {  // name -> rate over population

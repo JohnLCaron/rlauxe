@@ -31,7 +31,7 @@ class OneAuditWithErrors {
             fuzzPcts.forEach { fuzzPct ->
                 val oneauditGenerator = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                     N, margin, 0.0, 0.0, cvrPercent, mvrsFuzzPct = fuzzPct,
-                    auditConfigIn = AuditConfig(AuditType.ONEAUDIT, true),
+                    auditConfigIn = AuditConfig(AuditType.ONEAUDIT),
                     parameters = mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "cat" to margin)
                 )
                 tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))

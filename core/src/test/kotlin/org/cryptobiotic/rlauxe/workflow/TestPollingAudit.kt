@@ -12,44 +12,6 @@ import kotlin.test.assertEquals
 
 class TestPollingAudit {
 
-   // @Test
-    fun testPollingNoStyleRepeat() {
-        repeat(100) { testPollingNoStyle() }
-    }
-
-    @Test
-    fun testPollingNoStyle() { // TODO hasStyle=false
-        val auditConfig = AuditConfig(AuditType.POLLING, hasStyle = false, nsimEst = 10)
-
-        // each contest has a specific margin between the top two vote getters.
-        val N = 100000
-        val ncontests = 11
-        val nbs = 4
-        val marginRange= 0.05 .. 0.10
-        val underVotePct= 0.02..0.02
-        val phantomPct= 0.005..0.005
-        val multiContestTest = MultiContestTestData(
-            ncontests,
-            nbs,
-            N,
-            marginRange = marginRange,
-            underVotePctRange = underVotePct,
-            phantomPctRange = phantomPct
-        )
-        val contests: List<Contest> = multiContestTest.contests
-
-        println("Start testPollingNoStyle N=$N")
-        contests.forEach{ println(" $it")}
-        println()
-
-        // Synthetic cvrs for testing reflecting the exact contest votes. In practice, we dont actually have the cvrs.
-        val cvrs = multiContestTest.makeCvrsFromContests()
-        val mvrManager = MvrManagerForTesting(cvrs, cvrs, Random.nextLong())
-        val workflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)
-
-        runTestAuditToCompletion("testPollingNoStyle", workflow)
-    }
-
     // @Test
     fun testPollingWithStyleRepeat() {
         repeat(100) { testPollingWithStyle() }

@@ -27,7 +27,7 @@ class GenRaireNoErrorsPlots {
         val margins =
             listOf(.005, .006, .008, .01, .012, .016, .02, .03, .04, .05)
 
-        val config = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst)
+        val config = AuditConfig(AuditType.CLCA, nsimEst = nsimEst)
 
         val stopwatch = Stopwatch()
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()

@@ -59,7 +59,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         //    auditRound.samplePrns = sampledCards.map { it.prn }
         sampleWithContestCutoff(
             auditConfig,
-            mvrManager().cardManifest(),
+            cardManifest,
             auditRound,
             previousSamples = previousSamples,
             quiet)

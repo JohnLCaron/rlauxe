@@ -10,7 +10,6 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 
 private val logger = KotlinLogging.logger("MvrManager")
 
-
 class CardManifest(val cards: CloseableIterable<AuditableCard>, val ncards: Int, val populations: List<PopulationIF>) {
     val popMap = populations.associateBy{ it.id() }
     fun population(populationId: Int) = popMap[populationId]

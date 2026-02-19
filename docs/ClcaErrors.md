@@ -64,7 +64,7 @@ then the possible values of bassort = (1-o/u) * noerror are:
     (1-o/u) = [0,   1-(u/u-.5/u), 1-.5/u, 1, 1-(.5/u-u/u),    1+.5/u, 1+u/u]
     (1-o/u) = [0,           .5/u, 1-.5/u, 1,       2-.5/u,    1+.5/u, 2]
     
-taus=(1-o/u)= [0,            u12,  1-u12, 1,        2-u12,     1+u12, 2] where u12= .5u
+taus=(1-o/u)= [0,            u12,  1-u12, 1,        2-u12,     1+u12, 2] where u12= 1/2u
 
 the corresponding names are
 
@@ -115,7 +115,7 @@ When the MVR and CVR disagree, the assort value = tau * noerror, and the payoff 
 
 How many "noerror" samples are equivilent to a single sample whose assort value = tau * noerror ?
 
-    payoff_noerror^n_tau * payoff_tau = 1.0                         (eq 1)
+    payoff_noerror^n_tau * payoff_tau = 1.0                             (eq 1)
     n_tau = -ln(payoff_tau) / ln(payoff_noerror)
     n_tau = -ln((1 + λ * (tau * noerror − 1/2)) / ln(1 + λ * (noerror − 1/2))
 
@@ -124,7 +124,9 @@ To examine this, first we set the margin = .01 and upper = 1.0, and show the dep
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/byLamda.html" rel="byLamda">![byLamda](plots2/betting/errorComp/byLamda.png)</a>
 
-Then we fix lamda = 1.8 and show the dependence on margin for various values of upper:
+Only p2o is strongly dependent on the choice of lamda.
+
+Now we fix lamda = 1.8 and show the dependence on margin for various values of upper:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/byMargin.html" rel="byMargin">![byLamda](plots2/betting/errorComp/byMargin.png)</a>
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/byUpper2.html" rel="byUpper2">![byUpper2](plots2/betting/errorComp/byUpper2.png)</a>
@@ -251,8 +253,8 @@ When the MVR is a phantom, it's the same as "los".
 
 There are three cases involving phantoms where tau = "oth-los" (aka "p1o") = (1-1/2u)
 * both the CVR and the MVR are phantoms, which we expect to be the common case
-* CVR is phantom, MVR is loser
-* CVR is other, MVR not found
+* CVR is a phantom, MVR has vote for loser
+* CVR has vote for other, MVR not found
 
 Using eq 1 above, here is a plot of number of noerror samples needed to compendate for one "oth-los" error for several values of upper:
 
@@ -261,11 +263,11 @@ Using eq 1 above, here is a plot of number of noerror samples needed to compenda
 * The extra samples are non-trivial up to say, margins of .05 for plurality contests, and larger for D'Hondt contests when
   upper gets close to 1/2.
 
-The other problematic case is when CVR has a vote for the winner, but the MVR cant be found. Then tau = "win-los" (aka "p2o") = 0:
+The other problematic case is when the CVR has a vote for the winner, but the MVR cant be found. Then tau = "win-los" (aka "p2o") = 0:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/phantomMvr.html" rel="phantomMvr">![phantomMvr](plots2/betting/errorComp/phantomMvr.png)</a>
 
-The possibility that MVRs can't be located during the audit adds a big element of uncertainty.
+The possibility that MVRs can't be located during the audit adds a big element of uncertainty to home many samples are needed.
 
 
 

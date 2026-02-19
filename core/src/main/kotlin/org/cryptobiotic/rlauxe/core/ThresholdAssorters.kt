@@ -1,9 +1,11 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
+import org.cryptobiotic.rlauxe.util.roundToClosest
 
 // pA < t
 // TA/TL < t
@@ -58,7 +60,7 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
         return this
     }
 
-    fun g (vote: Int): Double {
+    fun g(vote: Int): Double {
         return if (vote == candId) lowerg else upperg
     }
 
@@ -99,7 +101,15 @@ data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double)
     override fun dilutedMean() = dilutedMean
     override fun dilutedMargin() = mean2margin(dilutedMean)
 
-    // TODO test
+    fun showAssertionDifficulty(votesForWinner: Int, nvotes: Int): String {
+        val pct = 100.0 * votesForWinner / nvotes
+        return "votesForWinner=$votesForWinner pct=${dfn(pct, 4)} diff=${roundToClosest(t * nvotes - votesForWinner)} votes"
+    }
+
+    fun difficulty(votesForWinner: Int, nvotes: Int): Double {
+        return t * nvotes - votesForWinner
+    }
+
     override fun calcMarginFromRegVotes(useVotes: Map<Int, Int>?, N: Int): Double {
         if (useVotes == null || N <= 0) {
             return 0.0
@@ -285,6 +295,15 @@ data class AboveThreshold(val info: ContestInfo, val winner: Int, val t: Double)
         val hmean = (winnerVotes * winnerweight + otherVotes * otherweight + nuetralVotes * 0.5) / N.toDouble()
 
         return mean2margin(hmean)
+    }
+
+    fun showAssertionDifficulty(votesForWinner: Int, nvotes: Int): String {
+        val pct = 100.0 * votesForWinner / nvotes
+        return "votesForWinner=$votesForWinner pct=${dfn(pct, 4)} diff=${roundToClosest(votesForWinner - t * nvotes)} votes"
+    }
+
+    fun difficulty(votesForWinner: Int, nvotes: Int): Double {
+        return votesForWinner - t * nvotes
     }
 
     /* Olivier has:

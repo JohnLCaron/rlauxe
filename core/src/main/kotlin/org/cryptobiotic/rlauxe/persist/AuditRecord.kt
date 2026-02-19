@@ -36,6 +36,8 @@ interface AuditRecordIF {
     val config: AuditConfig
     val contests: List<ContestWithAssertions>
     val rounds: List<AuditRoundIF>
+
+    fun readCardManifest(): CardManifest
 }
 
 class AuditRecord(
@@ -78,7 +80,7 @@ class AuditRecord(
         return true
     }
 
-    fun readCardManifest(): CardManifest {
+    override fun readCardManifest(): CardManifest {
         if (Files.exists(Path(publisher.populationsFile()))) {
             val populations = readPopulationsJsonFileUnwrapped(publisher.populationsFile())
             if (populations.isNotEmpty()) {

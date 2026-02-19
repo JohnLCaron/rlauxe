@@ -70,7 +70,7 @@ class TestRunRoundAgainCli {
         RunRoundAgainCli.main(
             arrayOf(
                 "-auditDir", auditDir,
-                "-contest", "1",
+                "-contestName", "Namur",
                 "-round", "1",
                 "-assertion", "first",
             )

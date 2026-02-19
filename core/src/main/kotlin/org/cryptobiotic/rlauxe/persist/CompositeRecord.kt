@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
@@ -35,6 +36,21 @@ data class CompositeRecord(
         contests.forEach{ appendLine("  $it")}
         appendLine("rounds")
         rounds.forEach{ appendLine(it)}
+    }
+
+    override fun readCardManifest(): CardManifest {
+        return componentRecords.first().readCardManifest() // TODO
+    }
+
+    fun findComponentWithContest(wantContestName: String): AuditRecord? {
+        var want: AuditRecord? = null
+        for (component in componentRecords) {
+            if (component.contests.find { contestUA -> contestUA.name == wantContestName } != null) {
+                want = component
+                break
+            }
+        }
+        return want
     }
 
     companion object {

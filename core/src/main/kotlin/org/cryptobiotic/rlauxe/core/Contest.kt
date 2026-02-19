@@ -22,9 +22,9 @@ data class ContestInfo(
     val id: Int,
     val candidateNames: Map<String, Int>, // candidate name -> candidate id
     val choiceFunction: SocialChoiceFunction,  // electionguard has "VoteVariationType"
-    val nwinners: Int = 1,          // aka "numberElected"
-    val voteForN: Int = nwinners,   // aka "contestSelectionLimit" or "optionSelectionLimit"
-    val minFraction: Double? = null, // threshold, dhondt only.
+    val nwinners: Int = 1,              // aka "numberElected"
+    val voteForN: Int = nwinners,       // aka "contestSelectionLimit" or "optionSelectionLimit"
+    val minFraction: Double? = null,    // threshold and Dhondt assorters only.
 ) {
     val candidateIds: List<Int> // same order as candidateNames
     val metadata = mutableMapOf<String, Int>()

@@ -26,7 +26,7 @@ class ClcaPhantomAttack {
         val allMargins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .025, .03, .04, .05, .06, .07, .08, .10)
         val stopwatch = Stopwatch()
 
-        val config = AuditConfig(AuditType.CLCA, true, nsimEst = nsimEst)
+        val config = AuditConfig(AuditType.CLCA, nsimEst = nsimEst)
 
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
         allMargins.forEach { margin ->

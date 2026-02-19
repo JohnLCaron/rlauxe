@@ -231,7 +231,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
 
         // TODO need the fake mvrs i think ??
         val fakeMvrs = cardsp.map { it.cvr() }
-        val config = AuditConfig(AuditType.ONEAUDIT, hasStyle = hasStyle, seed = 12356667890L)
+        val config = AuditConfig(AuditType.ONEAUDIT, seed = 12356667890L)
         val (contestsUA, cardPools) =
             makeOneAuditTestContests(
                 infos,

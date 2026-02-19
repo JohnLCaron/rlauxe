@@ -57,7 +57,7 @@ data class AuditConfig(
 @Serializable
 data class AuditConfigJson(
     val auditType: String,
-    val hasStyle: Boolean,
+    // val hasStyle: Boolean,
     val riskLimit: Double,
     val seed: Long,
 
@@ -85,7 +85,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
     return when (this.auditType) {
         AuditType.CLCA -> AuditConfigJson(
             this.auditType.name,
-            this.hasStyle,
+            //this.hasStyle,
             this.riskLimit,
             this.seed,
             this.nsimEst,
@@ -107,7 +107,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
 
         AuditType.POLLING -> AuditConfigJson(
             this.auditType.name,
-            this.hasStyle,
+            //this.hasStyle,
             this.riskLimit,
             this.seed,
             this.nsimEst,
@@ -129,7 +129,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
 
         AuditType.ONEAUDIT -> AuditConfigJson(
             this.auditType.name,
-            this.hasStyle,
+            //this.hasStyle,
             this.riskLimit,
             this.seed,
             this.nsimEst,
@@ -157,7 +157,7 @@ fun AuditConfigJson.import(): AuditConfig {
     return when (auditType) {
         AuditType.CLCA -> AuditConfig(
             auditType,
-            this.hasStyle,
+            //this.hasStyle,
             this.riskLimit,
             this.seed,
             this.nsimEst,
@@ -179,7 +179,7 @@ fun AuditConfigJson.import(): AuditConfig {
 
         AuditType.POLLING -> AuditConfig(
             auditType,
-            this.hasStyle,
+            //this.hasStyle,
             this.riskLimit,
             this.seed,
             this.nsimEst,
@@ -201,7 +201,7 @@ fun AuditConfigJson.import(): AuditConfig {
 
         AuditType.ONEAUDIT -> AuditConfig(
             auditType,
-            this.hasStyle,
+            //this.hasStyle,
             this.riskLimit,
             this.seed,
             this.nsimEst,

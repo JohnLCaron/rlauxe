@@ -139,47 +139,6 @@ private fun wantSampleSizeSimple(contestsNotDone: List<ContestRound>): Map<Int, 
 }
 
 
-////////////////////////////////////////////////////////////////////////////
-//val minSamples = -ln(.05) / ln(2 * minAssorter.noerror())
-
-// (1 - lam * noerror)^n < alpha
-// n * ln(1 - maxLam * noerror) < ln(alpha)
-
-// ttj is how much you win or lose
-// ttj = 1 + lamj * (xj - mj)
-// ttj = 1 + lamj * (noerror - mj)
-// ttj = 1 + 2 * noerror - 1        // lamj ~ 2, mj ~ 1/2
-// ttj = 2 * noerror
-
-// (2 * noerror)^n > 1/alpha
-// n * log(2 * noerror) > -log(alpha)
-// n ~ -log(alpha) / log(2 * noerror)
-
-// how about when lamj = maxBet < 2 ?
-// maxBet = maxRisk / mj
-
-// ttj = 1 + lamj * (noerror - mj)
-// ttj = 1 + maxRisk / mj * (noerror - mj)
-// ttj = 1 + maxRisk * noerror / mj - maxRisk
-// ttj = 1 - maxRisk + 2 * maxRisk * noerror       // mj ~ 1/2
-
-// (1 - maxRisk + 2 * maxRisk * noerror)^n > 1/alpha
-// n * log(1 - maxRisk + 2 * maxRisk * noerror) > -log(alpha)
-// n ~ -log(alpha) / log(1 - maxRisk + 2 * maxRisk * noerror)
-// n ~ -log(alpha) / log(2 * noerror)  // when maxRisk = 1.0
-
-// ?????
-// 1 - maxRisk + 2 * maxRisk * noerror > 2 * noerror when maxRisk < 1.0 ?
-// 1 - maxRisk > 0
-// maxRisk * noerror < noerror
-// (1 - maxRisk) * noerror < noerror
-
-
-// n ~ -log(alpha) / log(1 - maxRisk + 2 * maxRisk * noerror)
-// n ~ -log(alpha) / log(1 + maxRisk * (2 * noerror - 1))
-// noerror > 1/2, so (2 * noerror - 1) > 0, so ???
-
-
 //// TODO  this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set
 // for each contest, return map contestId -> wantSampleSize. used in ConsistentSampling
 private fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedCards : CloseableIterator<AuditableCard>, debug: Boolean = false): Map<Int, Int> {

@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.audit
 
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.core.Contest
@@ -24,6 +25,7 @@ import kotlin.test.fail
 private val showDetails = false
 
 // replicate examples in MoreStyles paper
+// was using hasStyle, now removed
 class TestHasStyle {
 
     @Test
@@ -348,11 +350,11 @@ class TestHasStyle {
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         // val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
         val config = if (isPolling) {
-            AuditConfig(AuditType.POLLING, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
+            AuditConfig(AuditType.POLLING, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
                 pollingConfig = PollingConfig())
         } else {
-            AuditConfig(AuditType.CLCA, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
-                // clcaConfig = ClcaConfig(strategy= ClcaStrategyType.apriori, pluralityErrorRates=errorRates)
+            AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
+                clcaConfig = ClcaConfig(apriori = TausRates(mapOf("win-oth" to .001))),
             )
         }
 
@@ -384,11 +386,11 @@ class TestHasStyle {
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         // val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
         val config = if (isPolling) {
-            AuditConfig(AuditType.POLLING, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
+            AuditConfig(AuditType.POLLING, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
                 pollingConfig = PollingConfig())
         } else {
-            AuditConfig(AuditType.CLCA, hasStyle = hasStyle, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
-               //clcaConfig = ClcaConfig(strategy= ClcaStrategyType.apriori, pluralityErrorRates=errorRates)
+            AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
+               clcaConfig = ClcaConfig(apriori = TausRates(mapOf("win-oth" to .001))),
             )
         }
 
@@ -406,12 +408,6 @@ class TestHasStyle {
             ContestWithAssertions(it, isClca=true, NpopIn=Nb).addStandardAssertions()
         }
 
-        // class TestCreateElection (
-        //    val contestsUA: List<ContestUnderAudit>,
-        //    val cvrs: List<Cvr>,
-        //    val cardPools: List<CardPoolIF>? = null,
-        //    val config: AuditConfig,
-        //):
         val election =
             CreateElectionFromCards(contestsUA, testCards, cardPools = null, cardStyles = cardStyles, config = config)
 
@@ -421,7 +417,7 @@ class TestHasStyle {
     }
 }
 
-fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestWithAssertions>): AuditRoundIF {
+private fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestWithAssertions>): AuditRoundIF {
     val auditdir = "$topdir/audit"
     val publisher = Publisher(auditdir)
     val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()

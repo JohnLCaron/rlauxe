@@ -27,7 +27,7 @@ class ClcaDistributions {
 
     @Test
     fun plotClcaDistributions() {
-        val auditConfig = AuditConfig(AuditType.CLCA, true,
+        val auditConfig = AuditConfig(AuditType.CLCA,
             nsimEst = nsimEst, simFuzzPct = simFuzzPct, quantile = 0.5,
             persistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
             simulationStrategy = SimulationStrategy.regular,

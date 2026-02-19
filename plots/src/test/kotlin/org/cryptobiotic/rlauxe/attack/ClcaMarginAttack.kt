@@ -25,7 +25,7 @@ class ClcaMarginAttack {
         val allMargins = listOf(.001, .002, .003, .004, .005, .006, .008, .01)
         val margins = allMargins.filter { it > phantomPct }
         val stopwatch = Stopwatch()
-        val config = AuditConfig(AuditType.CLCA, true)
+        val config = AuditConfig(AuditType.CLCA)
         val extra = 1.001 // to ensure margin goes below 0
 
         val tasks = mutableListOf<RepeatedWorkflowRunner>()

@@ -77,7 +77,7 @@ in a risk-limiting audit with risk limit α:
 **1.Before the Audit**
 
 For each contest:
-- Describe the contest name, candidates, contest type (eg Plurality), etc in the ContestInfo.
+- Describe the contest name, candidates, contest type (eg Plurality), etc. in the ContestInfo.
 - Count the votes in the usual way. The reported winner(s) and the reported margins are based on this vote count.
 - Determine the total number of valid cards (Nc), and number of votes cast (Ncast) for the contest.
 - The software generates the assertions needed to prove (or not) that the winners are correct.
@@ -91,7 +91,7 @@ Create the Card Manifest:
 - The Card Manifest is the ordered list of AuditableCards.
 - Write the Card Manifest to cardManifest.csv, and optionally the Populations to populations.json.
 
-Committment:
+Commitment:
 - Write the contests.json, populations.json, and cardManifest.csv files to a publically accessible "bulletin board".
 - Digitally sign these files; they constitute the "audit committment" and may not be altered once the seed is chosen.
 
@@ -119,7 +119,7 @@ The audit proceeds in rounds:
 
 1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk limit
 2. _Choosing contests and sample sizes_: the EA decides which contests and how many samples will be audited.
- This may be done with an automated algorithm, or the Auditor may make individual contest choices.
+   This may be done with an automated algorithm, or the Auditor may make individual contest choices.
 3. _Random sampling_: The actual ballots to be sampled are selected in order from the sorted Card Manifest until the sample size is satisfied.
 4. _Manual Audit_: find the chosen paper ballots that were selected to audit and do a manual audit of each.
 5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.

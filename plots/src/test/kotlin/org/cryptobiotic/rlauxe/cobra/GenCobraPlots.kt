@@ -24,7 +24,7 @@ class GenCobraPlots {
         val reportedMeans = listOf(0.501, 0.502, 0.503, 0.504, 0.505, 0.506, 0.5075, 0.508, 0.51, 0.52, 0.53, 0.54, 0.55, 0.56, 0.58, 0.6,)
 
         val config = AuditConfig(
-            AuditType.CLCA, true, nsimEst = nsimEst,
+            AuditType.CLCA, nsimEst = nsimEst,
         )
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()

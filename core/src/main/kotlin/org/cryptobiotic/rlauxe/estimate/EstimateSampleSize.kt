@@ -91,19 +91,6 @@ fun estimateSampleSizes(
         val estNewSamples = task.assertionRound.estimationResult!!.simNewMvrs
         task.assertionRound.estNewMvrs = estNewSamples
         task.assertionRound.estMvrs = min(estNewSamples + task.prevSampleSize, task.contestRound.Npop)
-
-        if (debug) println(result.showSampleDist(estResult.task.contestRound.id))
-        if (debugSampleSmall && result.avgSamplesNeeded() < 10) {
-            println(" ** avgSamplesNeeded ${result.avgSamplesNeeded()} < 10; task=${task.name()}")
-        }
-        if (debugSampleDist) {
-            println(
-                "---debugSampleDist for '${task.name()}' ${auditRound.roundIdx} ntrials=${config.nsimEst} pctSamplesNeeded=" +
-                        "${df(result.pctSamplesNeeded())} estSampleSize=${task.assertionRound.estMvrs}" +
-                        " totalSamplesNeeded=${result.totalSamplesNeeded} nsuccess=${result.nsuccess}" +
-                        "\n  sampleDist = ${result.showSampleDist(estResult.task.contestRound.id)}"
-            )
-        }
     }
 
     // put results into contestRounds

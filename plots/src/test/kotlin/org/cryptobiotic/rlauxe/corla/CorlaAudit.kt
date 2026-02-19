@@ -28,7 +28,7 @@ class CorlaSingleRoundAuditTaskGenerator(
 
     override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
         val useConfig = auditConfig ?: AuditConfig(
-            AuditType.CLCA, true, nsimEst = nsimEst,
+            AuditType.CLCA, nsimEst = nsimEst,
             clcaConfig = clcaConfigIn ?: ClcaConfig()
         )
 
@@ -65,7 +65,7 @@ class CorlaContestAuditTaskGenerator(
     override fun generateNewTask(): SingleContestAuditTask {
         val auditConfig = auditConfigIn ?:
         AuditConfig(
-            AuditType.CLCA, true, nsimEst = 10,
+            AuditType.CLCA, nsimEst = 10,
             clcaConfig = clcaConfigIn ?: ClcaConfig(fuzzMvrs=mvrsFuzzPct)
         )
 

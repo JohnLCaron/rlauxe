@@ -10,7 +10,7 @@ enum class AuditType { POLLING, CLCA, ONEAUDIT;
     fun isPolling() = (this == POLLING)
 }
 
-// could have the ContestInfo here?
+// TODO not compelling; could have the ContestInfo here?
 data class ElectionInfo(
     val auditType: AuditType,
     val ncards: Int,
@@ -21,7 +21,7 @@ data class ElectionInfo(
 
 data class AuditConfig(
     val auditType: AuditType,
-    val hasStyle: Boolean = true, // TODO deprecated?; perhaps useful when all pools have hasSingleCardStyle=true ?? etc
+    // val hasStyle: Boolean = true, // perhaps useful when all pools have hasSingleCardStyle=true ?? etc
     val riskLimit: Double = 0.05,
     val seed: Long = secureRandom.nextLong(), // determines sample order. set carefully to ensure truly random.
 

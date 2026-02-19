@@ -1,21 +1,14 @@
 package org.cryptobiotic.rlauxe.dhondt
 
 import org.cryptobiotic.rlauxe.audit.AuditConfig
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.AboveThreshold
 import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.doublePrecision
-import org.cryptobiotic.rlauxe.util.Welford
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.workflow.CardManifest
-import org.cryptobiotic.rlauxe.workflow.readCardManifest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

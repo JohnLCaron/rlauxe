@@ -9,14 +9,14 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 
 private val logger = KotlinLogging.logger("RlauxAuditIF")
 
-// abstract superclass of "one round at a time" workflows
+// abstract superclass of workflows
  abstract class AuditWorkflow {
     abstract fun auditConfig() : AuditConfig
     abstract fun mvrManager() : MvrManager
     abstract fun auditRounds(): MutableList<AuditRoundIF>
     abstract fun contestsUA(): List<ContestWithAssertions>
 
-    // start new round and create estimate
+    // start new round and create estimated sample sizes
     open fun startNewRound(quiet: Boolean = true, onlyTask: String? = null): AuditRound {
         val auditRounds = auditRounds()
         val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
@@ -54,9 +54,11 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         )
         logger.debug{"Estimate round ${roundIdx} took ${stopwatch}"}
 
+        // this sets the following fields:
         //    auditRound.nmvrs = sampledCards.size
         //    auditRound.newmvrs = newMvrs
         //    auditRound.samplePrns = sampledCards.map { it.prn }
+        //    contestRound.maxSampleAllowed = sampledCards.size
         sampleWithContestCutoff(
             auditConfig,
             cardManifest,
@@ -68,9 +70,9 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
     }
 
     // 5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
-    // fun setMvrsBySampleNumber(sampleNumbers: List<Long>)
-    // fun setMvrsForRound(mvrs: List<AuditableCard>)
-    // AuditRecord.enterMvrs(mvrFile: String)
+    //   fun setMvrsBySampleNumber(sampleNumbers: List<Long>)
+    //   fun setMvrsForRound(mvrs: List<AuditableCard>)
+    //   AuditRecord.enterMvrs(mvrFile: String)
 
     // 6. _Run the audit_
     abstract fun runAuditRound(auditRound: AuditRound, onlyTask: String? = null, quiet: Boolean = true): Boolean  // return true if audit is complete

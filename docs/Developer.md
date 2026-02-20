@@ -21,11 +21,6 @@ _02/20/2026_
   * [Documents](#documents)
   * [Fuzzing notes](#fuzzing-notes)
 * [TODO](#todo)
-  * [TODO 12/11/25 (Belgium)](#todo-121125-belgium)
-  * [TODO 12/20/25](#todo-122025)
-  * [TODO 01/04/26](#todo-010426)
-  * [TODO 2/6/26](#todo-2626)
-  * [TODO 2/17](#todo-217)
 <!-- TOC -->
 
 # Getting Started
@@ -351,18 +346,15 @@ README
     docs/DHondt.md
 
 maybe:
+    docs/Attacks.md
     docs/Overview.md
     docs/RlauxeSpec.md
-    docs/Clca.md
-    docs/Attacks.md
-    docs/Corla.md
     docs/VerifierSpec.md
 
-not:
+not:           
+    docs/Clca.md
     docs/GeneralizedAdaptiveBetting.md
     docs/RlaOptions.md
-
-
 
 ## Fuzzing notes
 
@@ -455,18 +447,18 @@ simulateRaireTestContest: single raire contest
 
 # TODO
 
-## TODO 12/11/25 (Belgium)
+**TODO 12/11/25 (Belgium)**
 
 * include undervotes
 * assertions that look at coalitions of parties. (Vanessa)
 * choose an audit size and measure the risk.
 
-## TODO 12/20/25
+**TODO 12/20/25**
 
 * investigate the effect of population.hasSingleCardStyle = hasStyle.
 * investigate possible attacks with mvr_assort = 0.5 when the mvr is missing the contest.
 
-## TODO 01/04/26
+**TODO 01/04/26**
 
 * maxRisk does it help? reduce lamda tradeoff
 * 2D plotting
@@ -474,12 +466,12 @@ simulateRaireTestContest: single raire contest
 * mix_betting_mart: "Finds a simple discrete mixture martingale as a (flat) average of D TSMs each with fixed bet 'lam'"
 * review COBRA 3.2, 4.3 (Diversified betting)
 
-## TODO 2/6/26
+**TODO 2/6/26**
 
 * replace SimulateIrvTestData with Vunder: we need the VoteConsolidator info
 * can we use Vunder in MultiContestTestData (68) ?
 
-## TODO 2/17
+**TODO 2/17**
 
 * investigate assigning costs to mallots sampled and nrounds, and minimize the cost.
 

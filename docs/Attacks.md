@@ -4,6 +4,63 @@
 _Attacks_ are scenarios where the actual winner is not the reported winner. They may be intentional, due to malicious
 actors, or unintentional, due to mistakes in the process or bugs in the software.
 
+## CLCA with styles
+
+The CVRs are the manifest. Nc=1000 ballots for contest C for candidates A and B. A=525, B=475. The margin of victory for A is 50.
+
+        val mvr_assort = if (mvr.isPhantom || (hasStyle && !mvr.hasContest(contest.id))) 0.0
+                         else A_wℓ(mvr, usePhantoms = false)
+        val cvr_assort = if (cvr.isPhantom) .5 else A_wℓ(cvr, usePhantoms = false)
+        overstatement = cvr_assort - mvr_assort
+        assort = (1.0 - overstatement / u) * noerror
+
+### Case 1. Prover changes CVR votes for A to B.
+
+Prover changes 50 CVRs that voted for A to voting for B.  A=475, B=525.
+
+Sample a changed ballot:
+
+    cvr_assort = 1
+    mvr_assort = 0
+    overstatement = 1
+    assort = 0
+
+Audit detects this with probability 1 - risk.
+
+### Case 2. Prover changes CVR votes for A to undervotes.
+
+Prover changes 100 CVRs that voted for A to undervotes.  A=425, B=475.
+
+Sample a changed ballot:
+
+    cvr_assort = 1
+    mvr_assort = if (hasStyle && !mvr.hasContest(contest.id)) 0.0
+    overstatement = 1
+    assort = 0
+
+Audit detects this with probability 1 - risk.
+
+### Case 3. Prover removes CVR ballots.
+
+Prover removes 100 CVRs that voted for A. A=425, B=475.
+Since Nc = 1000, we add 100 phantoms.
+
+Sample a removed ballot:
+
+    cvr_assort = 1
+    mvr_assort = if (isPhantom) 0.0
+    overstatement = 1
+    assort = 0
+
+Audit detects this with probability 1 - risk.
+
+### Case 4. Prover removes CVR ballots and modifies Nc.
+
+Prover removes 100 ballots that voted for A from the CVRs. A=425, B=475. Prover changes Nc to 900.
+
+We cannot detect this.
+
+
 ## Attack with phantoms
 
 Here we investigate what happens when the percentage of phantoms is high enough to flip the election, but the reported margin
@@ -78,3 +135,4 @@ the percent of false positives stays below the risk limit (here its 5%):
   In the mvrs, switch (diff + 1) cvrs from candB to candA
 
 * the cardManifest tabulation fails for Clca, since the cvrs must be present.
+

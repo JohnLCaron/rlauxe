@@ -16,8 +16,8 @@ class MakeSfElection {
     val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
 
     @Test
-    fun makeSFElectionOAcalc() {
-        val topdir = "$testdataDir/cases/sf2024/oacalc"
+    fun makeSFElectionOA() {
+        val topdir = "$testdataDir/cases/sf2024/oa"
 
         createSfElection(
             topdir,
@@ -45,7 +45,7 @@ class MakeSfElection {
 
     @Test
     fun makeSFElectionClca() {
-        val topdir = "$testdataDir/cases/sf2024/clca3"
+        val topdir = "$testdataDir/cases/sf2024/clca"
 
         createSfElection(
             topdir,
@@ -55,7 +55,7 @@ class MakeSfElection {
             cvrExportCsv = cvrExportCsv,
             auditType = AuditType.CLCA,
             poolsHaveOneCardStyle=false,
-            mvrFuzz = .003,
+            mvrFuzz = 0.0,
         )
 
         val publisher = Publisher("$topdir/audit")

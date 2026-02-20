@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 02/17/2026_
+_last changed: 02/20/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -13,7 +13,9 @@ Rlauxe uses the [Raire Java library](https://github.com/DemocracyDevelopers/rair
 Raire-Java is Copyright 2023-2025 Democracy Developers. It is based on software (c) Michelle Blom in C++
 https://github.com/michelleblom/audit-irv-cp/tree/raire-branch, and released under the GNU General Public License v3.0.
 
-Click on plot images to get an interactive html plot. You can also read this document on [github.io](https://johnlcaron.github.io/rlauxe/).
+See [Getting Started](docs/Developer.md#getting-started) if you are a developer wanting to compile and use the library.
+
+You can also read this document on [github.io](https://johnlcaron.github.io/rlauxe/).
 
 **Table of Contents**
 <!-- TOC -->
@@ -41,8 +43,11 @@ Click on plot images to get an interactive html plot. You can also read this doc
   * [Extensions of SHANGRLA](#extensions-of-shangrla)
   * [Unanswered Questions](#unanswered-questions)
   * [Also See](#also-see)
+  * [Case Studies](#case-studies)
+  * [Documentation Index](#documentation-index)
 <!-- TOC -->
 
+Click on plot images to get an interactive html plot. 
 
 # SHANGRLA framework
 
@@ -77,56 +82,60 @@ in a risk-limiting audit with risk limit α:
 **1.Before the Audit**
 
 For each contest:
-- Describe the contest name, candidates, contest type (eg Plurality), etc. in the ContestInfo.
+- Describe the contest name, candidates, contest type (eg Plurality), etc. in the _ContestInfo_.
 - Count the votes in the usual way. The reported winner(s) and the reported margins are based on this vote count.
-- Determine the total number of valid cards (Nc), and number of votes cast (Ncast) for the contest.
-- The software generates the assertions needed to prove (or not) that the winners are correct.
-- Write the ContestWithAssertions to contests.json file
+  Use the votes, the number of valid cards (Nc), the number of votes cast (Ncast), and the ContestInfo to create the _Contest_.
+- If this is a multicontest election, you may need to create _Populations_ that describe which cards
+  might contain which contests (see [SamplePopulations](docs/SamplePopulations.md)). Find the number of cards that
+  might contain the contest (_Npop_).
+- The software generates the assertions needed to prove (or not) that the winners are correct. Add the assertions and Npop
+  to the Contest to get the  _ContestWithAssertion_.
 
 Create the Card Manifest:
-- Create a Card Manifest, in which every physical card has a unique entry (called the AuditableCard). 
+- Create a _Card Manifest_, in which every physical card (and any phantom cards) have a unique entry (called the _AuditableCard_). 
 - If this is a CLCA, attach the Cast Vote Record (CVR) from the vote tabulation system, to its AuditableCard.
-- Optionally create Populations (eg OneAudit Pools) that describe each unique "population" of cards, and which contests are
+- Optionally create _Populations_ (eg OneAudit Pools) that describe each unique "population" of cards, and which contests are
   contained in the population. Cards that do not have complete CVRs should reference the population they are contained in.
-- The Card Manifest is the ordered list of AuditableCards and the list of Populations.
-- Write the Card Manifest to cardManifest.csv, and the Populations to populations.json.
+- The Card Manifest is the ordered list of AuditableCard's and the list of Population's.
+- Write the Card Manifest to _cardManifest.csv_, and the Populations to _populations.json_.
 
 Commitment:
-- Write the contests.json, populations.json, and cardManifest.csv files to a publically accessible "bulletin board".
-- Digitally sign these files; they constitute the "audit committment" and may not be altered once the seed is chosen.
+- Write the _contests.json, populations.json, and cardManifest.csv_ files to a publically accessible "bulletin board".
+- Digitally sign these files; they constitute the "audit commitment" and may not be altered once the seed is chosen.
 
 **2.Creating a random seed**
 
 - Create a random 32-bit integer "seed" in a way that allows public observers to be confident that it is truly random.
-- Publish the random seed to the bulletin board. It becomes part of the "audit committment" and may not be altered once chosen.
-- Use a PRNG (Psuedo Random Number Generator) with the random seed, and assign the generated PRNs, in order, to the auditable cards.
-- Sort the cards by PRN and write them to sortedCards.csv.
+- Publish the random seed to the bulletin board. It becomes part of the "audit commitment" and may not be altered once chosen.
+- Use the PRNG (Psuedo Random Number Generator) with the random seed, and assign the generated PRNs (Psuedo Random Number), 
+  in order, to the auditable cards.
+- Sort the cards by PRN and write them to _sortedCards.csv_.
 
 **3.Starting the Audit**
 
-The Election Auditors (EA) can examine the audit committment files, run simulations to estimate how many
+The Election Auditors (EA) can examine the audit commitment files, run simulations to estimate how many
 cards will need to be sampled, etc. The EA can choose:
 
 * which contests will be included in the Audit
 * the risk limit 
 * other audit configuration parameters
 
-The audit configuration parameters are written to auditConfig.json.
+The audit configuration parameters are written to _auditConfig.json_. 
 
 **4.Audit Rounds**
 
 The audit proceeds in rounds:
 
-1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk limit
-2. _Choosing contests and sample sizes_: the EA decides which contests and how many samples will be audited.
+1. **Estimation**: for each contest, estimate how many samples are needed to satisfy the risk limit
+2. **Choosing contests and sample sizes**: the EA decides which contests and how many samples will be audited.
    This may be done with an automated algorithm, or the Auditor may make individual contest choices.
-3. _Random sampling_: The actual ballots to be sampled are selected in order from the sorted Card Manifest until the sample size is satisfied.
-4. _Manual Audit_: find the chosen paper ballots that were selected to audit and do a manual audit of each.
-5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
-6. _Run the audit_: For each contest, using the MVRs, calculate if the risk limit is satisfied.
-7. _Decide on Next Round_: for each contest not satisfied, decide whether to continue to another round, or call for a hand recount.
+3. **Choosing ballots**: The actual ballots to be sampled are selected, in order, from the sorted Card Manifest until the sample size is satisfied.
+4. **Manual Audit**: find the chosen paper ballots that were selected to audit and do a manual audit of each.
+5. **Create MVRs**: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
+6. **Run the audit**: For each contest, using the MVRs, calculate if the risk limit is satisfied.
+7. **Decide on Next Round**: for each contest not satisfied, decide whether to continue to another round, or call for a hand recount.
 
-Each round generates samplePrns.json, sampleCards.csv, sampleMvrs.csv, and auditState.json files, which become part of the Audit Record.
+Each round generates _samplePrns.json, sampleCards.csv, sampleMvrs.csv, and auditState.json_ files, which become part of the Audit Record.
 
 **5.Verification**
 
@@ -137,9 +146,9 @@ See [Verification](docs/Verification.md).
 
 In all cases:
 
-* There must be a Card Location Manifest defining the population of ballots, that contains a unique identifier or location description
-  that can be used to find the corresponding physical ballot.
-* For each contest, there must be an independently determined upper bound on the number of cast cards/ballots that contain the contest.
+* There must be a _Card Manifest_ defining the population of ballots, that contains a unique identifier or location description
+  used to find the corresponding physical ballot.
+* For each contest, there must be an independently determined upper bound on the number of cast cards/ballots that contain the contest (Nc).
 
 ## Card Level Comparison Audits (CLCA)
 
@@ -151,25 +160,25 @@ results than other methods.
 The requirements for CLCA audits:
 
 * The election system must be able to generate machine-readable Cast Vote Records (CVRs) for each ballot.
-* Unique identifiers must be assigned to each physical ballot, and recorded on the CVR, in order to find the physical ballot that matches the sampled CVR.
+* Unique identifiers must be assigned to each physical ballot, and recorded on the CVR, that allows finding the physical ballot that matches the sampled CVR.
 
 For the _risk function_, rlauxe uses the **BettingMart** function with the **GeneralAdaptiveBetting** _betting function_.
 GeneralAdaptiveBetting uses estimates/measurements of the error rates between the Cvrs and the Mvrs. 
 If the error estimates are correct, one gets optimal "sample sizes", the number of ballots needed to prove the election is correct.
 
-See [Betting risk function](docs/BettingRiskFunctions.md) for overview of the risk and betting functions.
+See [Betting risk function](docs/BettingRiskFunctions.md) for an overview of the risk and betting functions.
 
 ## OneAudit CLCA
 
-OneAudit is a type of CLCA audit, based on the ideas and mathematics of the ONEAudit papers (see appendix).
+OneAudit is a type of CLCA audit, based on the ideas and mathematics of the ONEAudit papers (see reference papers below).
 It deals with the cases where:
-1. CVRS are not available for all ballots, and the remaining ballots are in one or more "pools" for which subtotals are available.
+1. CVRS are available for some ballots, and the non-CVR ballots are in one or more _pools_ for which subtotals are available.
    (This is the Boulder "redacted votes" case.)
-2. CVRS are available for all ballots, but some cannot be matched to physical ballots. (This is the San Francisco case where
-   mail-in ballots have matched CVRS, and in-person precinct votes have unmatched CVRs. Each precinct's ballots
-   are kept in a separate pool.)
+2. CVRS are available for all ballots, but some CVRs cannot be matched to physical ballots. The unmatched ballots
+   are in one or more _pools_ for which subtotals are available. (This is the San Francisco case where
+   mail-in ballots have matched CVRS, and in-person precinct votes have unmatched CVRs).
 
-In both cases we create an “overstatement-net-equivalent” (ONE) CVR for each pool, 
+In both cases we create an _overstatement-net-equivalent_ (ONE) CVR for each pool, 
 and use the average assorter value in that pool as the value of the (missing) CVR in the CLCA overstatement.
 When a ballot has been chosen for hand audit:
 
@@ -178,13 +187,13 @@ When a ballot has been chosen for hand audit:
 
 Thus, all cards must either have a CVR or be contained in a pool.
 
-See [Betting with OneAudit Pools](docs/BettingRiskFunctions.md#betting-with-oneaudit-pools) for overview of OneAudit betting.
+See [Betting with OneAudit Pools](docs/BettingRiskFunctions.md#betting-with-oneaudit-pools) for an overview of OneAudit betting.
 
 For details of OneAudit use cases, see [OneAudit Use Cases](docs/OneAuditUseCases.md).
 
 ## Polling Audits
 
-When CVRs are not available, a Polling audit can be done instead. A Polling audit  
+When CVRs are not available, a Polling audit can be done. A Polling audit  
 creates an MVR for each ballot card selected for sampling, just as with a CLCA, except without the CVR.
 
 For the risk function, Rlaux uses the [AlphaMart risk function](docs/AlphaMart.md)  with the [ShrinkTrunkage estimation of the true
@@ -195,7 +204,7 @@ population mean](docs/AlphaMart.md#truncated-shrinkage-estimate-of-the-populatio
 
 In this section we characterize the number of samples needed for each audit type. For clarity of presentaton, we
 assume we have only one contest, and also ignore the need to estimate a batch size for each audit round. This is called a 
-"one sample at a time" audit, which terminates as soon as the risk limit is confirmed or rejected. 
+_one sample at a time_ audit, which terminates as soon as the risk limit is confirmed or rejected. 
 
 In the section [Estimating Sample Batch sizes](#estimating-sample-batch-sizes) below, we deal with the 
 need to estimate a batch size, and the extra overhead of audit rounds. In the section 
@@ -203,43 +212,41 @@ need to estimate a batch size, and the extra overhead of audit rounds. In the se
 on ballots.
 
 In general, samplesNeeded is independent of the population size N. Rather, samplesNeeded depends on the _diluted margin_ 
-as well as the random sequence of ballots chosen to be hand audited.
-
-(Actually there is a slight dependence on N for "without replacement"
-audits when the sample size approaches N,
-but that case approaches a full hand audit, and isnt very interesting.)
+as well as the random sequence of ballots chosen to be hand audited. (Actually there is a slight dependence on N for 
+_without replacement_ audits when the sample size approaches N, but that case approaches a full hand audit, so isnt very interesting.)
 
 The following plots are simulations, averaging the results from the stated number of runs.
 
 ## Samples needed with no errors
 
-The audit type needing the least samples is CLCA when there are no errors in the CVRs, and no phantom ballots. In that case, 
+The audit type needing the least samples is CLCA when there are no errors in the CVRs, and no phantom ballots. Then 
 the samplesNeeded depend only on the margin, and is a straight line vs margin on a log-log plot. 
 
 The smallest sample size for CLCA when there are no errors is when you always bet the maximum (1/µ_i, approximately 2). 
 However, if there are errors and the assort value is 0.0, the maximum bet will "stall" the audit and the audit cant recover
 ([see details](docs/BettingRiskFunctions.md#stalled-audits-and-maximum-bets)). To avoid this, rlauxe limits how close the bet can be
-to the maximum. Here is a plot of CLCA no-error audits with the bet limited to 70, 80, 90, and 100% of the maximum:
+to the maximum. Here is a plot of CLCA no-error audits with the bet limited to 70, 80, 90, and 100% of the maximum
+(click on plot images to get an interactive html plot):
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaNoErrorsMaxRisk/clcaNoErrorsMaxRiskLogLog.html" rel="clcaNoErrorsMaxRiskLogLog">![clcaNoErrorsMaxRiskLogLog](docs/plots2/samplesNeeded/clcaNoErrorsMaxRisk/clcaNoErrorsMaxRiskLogLog.png)</a>
 
 We call this bet limit the "maximum risk", expressed as a percent of the maximum bet.
 At any setting of maximum risk, the CLCA assort value is always the same when there are no errors, and so there is no variance:
-the plot above shows the exact numebr of samples needed as a function of margin and maximum risk.
+the plot above shows the exact number of samples needed as a function of margin and maximum risk.
 
 For polling, the assort values vary, and the number of samples needed depends on the order the samples are drawn.
 Here we show the average and standard deviation over 100 independent trials at each reported margin, when no errors are found:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/pollingWithStdDev/pollingWithStdDevLinear.html" rel="pollingWithStdDev">![pollingWithStdDev](docs/plots2/samplesNeeded/pollingWithStdDev/pollingWithStdDevLinear.png)</a>
 
-For OneAudit, results depend on the percent of CVRs vs pooled data, the pool averages and if there are multiple card styles in the pools.
-The following is a best case scenario with no errors in the CVRs, a single pool with the same margin and a single card style, 
+For OneAudit, results depend on the percent of CVRs vs pooled data, the pool averages, and if there are multiple card styles in the pools.
+The following is a best case scenario with no errors in the CVRs, a single pool with the same margin, and a single card style, 
 with several values of the CVR percentage, as a function of margin, and maxRisk = .9:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrorsLogLinear.html" rel="OneAuditNoErrorsLogLinear">![OneAuditNoErrorsLogLinear](docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrorsLogLinear.png)</a>
 
 However, OneAudit has a large variance due to the random sequence of pool values. Here are the one sigma intervals for
-a "best case" 90% CVR OneAudit (for example, a 2% margin contest has a one-sigma interval of (466, 2520), click on the image
+a "best case" 90% CVR OneAudit. For example, a 2% margin contest has a one-sigma interval of (466, 2520) (click on the image
 to get an interactive plot):
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditWithStdDev/OneAuditWithStdDevLinear.html" rel="OneAuditWithStdDevLinear">![OneAuditWithStdDevLinear](docs/plots2/oneaudit/OneAuditWithStdDev/OneAuditWithStdDevLinear.png)</a>
@@ -334,9 +341,9 @@ Audits are done in rounds. The auditors must decide how many cards/ballots they 
 more efficient to do a full handcount than the more elaborate process of tracking down ballots that have been randomly
 selected for the sample.
 
-Theres a tradeoff between the overall number of ballots sampled and the number of rounds. But we would like to minimize both.
+There is a tradeoff between the overall number of ballots audited and the number of rounds. But we would like to minimize both.
 
-Note that in this section we are plotting _nmvrs_ = overall number of ballots sampled, which includes the inaccuracies of the
+Note that in this section we are plotting _nmvrs_ = overall number of ballots audited, which includes the inaccuracies of the
 estimation. Above we have been plotting _samples needed_, as if we were doing "one ballot at a time" auditing.
 
 There are two phases to sampling: estimating the sample batch sizes for each contest, and then choosing ballots that
@@ -348,10 +355,10 @@ For each contest we simulate the audit with manufactured data that has the same 
 guess at the error rates. 
 
 For each contest assertion we run _auditConfig.nsimEst_ (default 100) simulations and collect the distribution of samples
-needed to satisfy the risk limit. We then choose the (_auditConfig.quantile_) sample size as our estimate for that assertion.
+needed to satisfy the risk limit. We then choose the _auditConfig.quantile_ (default 80%) sample size as our estimate for that assertion.
 The contest's estimated sample size is the maximum over the contest's assertions.
 
-If the simulation is accurate, the audit should succeed _auditConfig.quantile_ fraction of the time (default 80%). 
+If the simulation is accurate, the audit should succeed _auditConfig.quantile_ fraction of the time. 
 Since we dont know the actual error rates, or the order that the errors will be sampled, these simulation results are just estimates.
 
 ## Choosing ballots
@@ -382,8 +389,7 @@ so previously audited MVRS are always used again in subsequent rounds, for conte
 Overestimating sample sizes uses more hand-counted MVRs than needed. Underestimating sample sizes forces more rounds than needed.
 Over/under estimation is strongly influenced by over/under estimating error rates. 
 
-The following plots show approximate distribution of estimated and actual sample sizes, using our standard
-betting function with weight parameter d = 100, for margin=2% and errors in the MVRs generated with 2% fuzz.
+The following plots show approximate distributions of estimated and actual sample sizes, for margin=2% and errors in the MVRs generated with 2% fuzz.
 
 When the estimated error rates are equal to the actual error rates:
 
@@ -422,14 +428,15 @@ Here are the average extra samples vs the average number of rounds for mvrs with
 </p>
 
 In all three cases, using 0% simulation has the lowest extra samples, better than using simFuzzPct that matches the true
-fuzz (fuzzMvrs). Note that these are averages over 1000 trials. The reason is probably that with a large variance, one is better off
-underestimating the sample size on the first round, and then on the second round using the measured error rates to estimate 
-how many are left to do. 
+fuzz (fuzzMvrs). Note that these are averages over 1000 trials. The reason 0% simulation has the lowest extra samples 
+is probably that with a large variance, one is better off underestimating the sample size on the first round, 
+and then on the second round using the measured error rates to estimate how many are left to do. 
 
-And trade off is that the average number of rounds goes up.
+The trade off in using 0% simulation is that the average number of rounds goes up. (In the future, we could allow the
+auitors to assign a cost to sampling n ballots and a cost to an audit round, and attempt to minimize the overall costs.)
 
-Based on these finding, we designed the "optimistic" strategy, which uses the calculated number of samples needed if there are no errors, for round 1.
-For subsequent rounds, it uses the measured error rates from round 1 to simulate a distribution, and takes auditConfig.quantile (default 80%) 
+Based on these findings, we assed the _optimistic_ strategy, which uses the calculated number of samples needed when there are no errors, for round 1.
+For subsequent rounds, it uses the measured error rates from round 1 to simulate a distribution, and takes auditConfig.quantile 
 percentile as its estimate.
 The results of this strategy are shown here:
 
@@ -460,16 +467,16 @@ Here are interactive plots to zoom in on more detail:
 
 # Multiple Contest Auditing
 
-An election often consists of several or many contests, and it is likely to be more efficient to audit all of the contests at once.
+An American election typically consists of several or many contests, and it is likely to be more efficient to audit all the contests at once.
 We have several mechanisms for choosing contests to remove from the audit to keep the sample sizes reasonable.
 
 Before the audit begins:
 1. Any contest whose minimum recount margin is less than _auditConfig.minRecountMargin_ (or if there is a tie) is removed from the audit with failure code MinMargin.
-2. If auditConfig.removeTooManyPhantoms is true, Any contest whose reported margin is less than its phantomPct (Np/Nc) is removed from the audit with failure code TooManyPhantoms.
+2. If _auditConfig.removeTooManyPhantoms_ is true, any contest whose reported margin is less than its phantomPct (Np/Nc) is removed from the audit with failure code _TooManyPhantoms_.
 
 For each Estimation round:
 1. A contest's estimated samplesNeeded may not exceed _auditConfig.contestSampleCutoff_.
-2. If _auditConfig.removeCutoffContests_ is true, and the total sample size exceeds _auditConfig.sampleCutoff_, the contest with the largest estimated samplesNeeded is removed from the audit with failure code FailMaxSamplesAllowed. The sampling is then redone without that contest, and the check on the total number of ballots is repeated, until the total sample size is less than _auditConfig.sampleCutoff
+2. If _auditConfig.removeCutoffContests_ is true, and the total sample size exceeds auditConfig.sampleCutoff, the contest with the largest estimated samplesNeeded is removed from the audit with failure code _FailMaxSamplesAllowed_. The sampling is then redone without that contest, and the check on the total number of ballots is repeated, until the total sample size is less than auditConfig.sampleCutoff.
 
 These rules are somewhat arbitrary but allow us to test audits without human intervention. In a real audit,
 auditors might hand select which contests to audit, interacting with the estimated samplesNeeded from the estimation stage,
@@ -490,10 +497,10 @@ on the various percentages the contests appear on the same ballot, as well as th
 For any given contest, the sequence of ballots/CVRS to be used by that contest is fixed when the PRNG is chosen. This 
 is called the _canonical sequence_ for that contest.
 
-In a multi-contest audit, at each round, the estimate sample size (n) of the number of cards needed for each contest is calculated, 
-and the first n cards in the contest's sequence are sampled.
-The total set of cards sampled in a round is just the union of the individual contests' set. 
-The extra efficiency of a multi-contest audit comes when the same card is chosen for more than one contest.
+In a multi-contest audit, at each round, the estimated sample size (n_est) of the number of cards needed for each contest is calculated, 
+and the first n_est cards in the contest's sequence are sampled.
+The total set of cards sampled in a round is the union of the individual contests' set. 
+The added efficiency of a multi-contest audit comes when the same card is chosen for more than one contest.
 
 It may happen that after a contest's estimated sample size has been satisfied, further cards are chosen because they contain a contest whose sample size has not been satisfied. Those extra cards can be used in the audit for a contest as long as the contest's canonical sequence in unbroken . If a card that contains the contest is not used in the sample, the canonical sequence is broken and any further cards that contain the contest are not used in the audit. This ensures that the audit only uses the canonical sequence for each contest, which ensures that the sample is random.
 
@@ -563,19 +570,20 @@ the Prover must make before the random seed can be generated.
 **General Adaptive Betting**
 
 SHANGRLA's Adaptive Betting has been generalized to work for both CLCA and OneAudit and for any assorter. 
-It uses apriori and measured error rates as well as phantom ballot rates to set optimal betting values. 
-This is currently the only betting strategy used for CLCA/OneAudit.
+It uses apriori and measured error rates as well as phantom ballot rates to set optimal betting values.
 See [BettingRiskFunctions](docs/BettingRiskFunctions.md) for more info.
 
 **OneAudit Betting strategy**
 
 OneAudit uses GeneralizedAdaptiveBetting and includes the OneAudit assort values and their known
-frequencies in computing the optimal betting values.
+frequencies in computing the optimal betting values. See [Betting with oneaudit pools](docs/BettingRiskFunctions.md#betting-with-oneaudit-pools) 
+to see how this improves OneAudit sample sizes.
 
 **MaxLoss for Betting**
 
 In order to prevent stalls in BettingMart, the maximum bet is bounded by a "maximum loss" value, which is the maximum
-percent of your "winnings" you are willing to lose on any one bet.
+percent of your "winnings" you are willing to lose on any one bet. The maximum loss can also be thought of as the percent
+of the maximum bet allowed.
 
 **Additional assorters**
 
@@ -584,13 +592,13 @@ scoring. These assorters have an upper bound != 1, so are an important generaliz
 
 **OneAudit Card Style Data**
 
-Rlauxe adds the option that there may be CSD for OneAudit pooled data, in part to investigate the 
+Rlauxe adds the option that there may be Card Style Data (CSD) for OneAudit pooled data, in part to investigate the 
 difference between having CSD and not. Specifically, different OneAudit pools may have different values of
-_hasStyle_ (aka _hasSingleCardStyle_).  See [SamplePopulations](docs/SamplePopulations.md).
+_hasSingleCardStyle_ (aka _hasStyle_).  See [SamplePopulations](docs/SamplePopulations.md).
 
 **Multicontest audits**
 
-Each contest has a canonical sequence of sampled cards, namely all the cards sorted by prn, that may contain that contest.
+Each contest has a canonical sequence of sampled cards, namely all the cards sorted by PRN, that may contain that contest.
 This sequence doesnt change when doing multicontest audits. 
 Multicontest audits choose what cards are sampled based on each contests' estimated sample size. An audit can take advantage
 of "extra" samples for a contest in the sample, as long as the canonical sequence is always used. Once a card in the sequence is skipped,
@@ -602,27 +610,38 @@ the audit cant use more cards in the sample for that contest.
 
 The main use of _hasStyle_, aka _hasSingleCardStyle_ is when deciding the assort value when an MVR is missing a contest.
 There are unanswered questions about if this allows attacks, and if it should be used for polling audits.
-See [SamplePopulations](docs/SamplePopulations.md#contest-is-missing-in-the-mvr)
+See [SamplePopulations](docs/SamplePopulations.md#contest-is-missing-in-the-mvr) and
+[Issue 552](https://github.com/JohnLCaron/rlauxe/issues/552).
 
 **Optimal value of MaxLoss**
 
-Is there an algorithm for setting the MaxLoss value, which limits the maximum bet that can be placed at each round?
-
+How to set MaxLoss in an optimal way?
 
 ## Also See
-* [Developer Notes](docs/Developer.md)
+* [Getting Started](docs/Developer.md#getting-started)
+* [Issues](https://github.com/JohnLCaron/rlauxe/issues)
 * [Rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer)
-* [Verification](docs/Verification.md)
-* [Case Studies](docs/CaseStudies.md)
-* [Raire notes](docs/Raire.md)
-* [Dhondt notes](docs/Dhondt.md)
+* [Reference papers](docs/papers/papers.txt)
 
-**Other, possible outdated**
-* [Rlauxe Implementation Overview](docs/Overview.md)
-* [Implementation Specificaton](docs/RlauxeSpec.md)
-* [CLCA details](docs/Clca.md)
+## Case Studies
+* [Belgium 2024](docs/cases/Belgium2024.md)
+* [Boulder County 2024](docs/cases/Boulder2024.md)
+* [Colorado Statewide Election 2024](docs/cases/Colorado2024.md)
+* [San Francisco County 2024](docs/cases/SF2024.md)
+
+## Documentation Index
+* [AlphaMart](docs/AlphaMart.md)
 * [Attacks](docs/Attacks.md)
-* [Corla](docs/Corla.md)
-
+* [BettingRiskFunctions](docs/BettingRiskFunctions.md)
+* [CLCA details](docs/Clca.md)
+* [Clca Errors](docs/ClcaErrors.md)
+* [Developer Notes](docs/Developer.md)
+* [Dhondt](docs/Dhondt.md)
+* [OneAudit Use Cases](docs/OneAuditUseCases.md)
+* [Raire (Instance Runoff)](docs/Raire.md)
+* [Rlauxe Implementation Overview](docs/Overview.md)
+* [Rlauxe Implementation Specificaton](docs/RlauxeSpec.md)
+* [Sample Populations](docs/SamplePopulations.md)
+* [Verification](docs/Verification.md)
 
 

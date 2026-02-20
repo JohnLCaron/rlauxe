@@ -84,7 +84,7 @@ class CreateAudit(val name: String, val config: AuditConfig, election: CreateEle
         writeContestsJsonFile(contestsUA, publisher.contestsFile())
         logger.info{"CreateAudit write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
 
-        // cant write the sorted cards until after seed is generated, after committment to cardManifest
+        // cant write the sorted cards until after seed is generated, after commitment to cardManifest
     }
 }
 

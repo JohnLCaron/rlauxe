@@ -3,7 +3,7 @@
 
 ## 2024 Data
 
-Download the summary data in json from 
+Downloaded the summary data in json from 
 https://resultatselection.belgium.be/fr/search/chambre-des-repr%C3%A9sentants/2024/circonscription-%C3%A9lectorale
 
 and placed in _cases/src/test/data/belgium2024_.
@@ -12,22 +12,19 @@ Olivier's python code is at https://git-crypto.elen.ucl.ac.be/opereira/rlabelgiu
 
 ## Creating the election
 
-Use _cases/src/test/kotlin/org/cryptobiotic/rlauxe/belgium/MakeBelgiumElections.kt_
+1. Set testdataDir in _core/src/testFixtures/kotlin/org/cryptobiotic/rlauxe/TestUtils.kt_ to a convenient location on your local machine.
 
-1. Set testdataDir in core/src/testFixtures/kotlin/org/cryptobiotic/rlauxe/TestUtils.kt to a convenient location on your local machine.
-
-2. Run createAllBelgiumElections() in _cases/src/test/kotlin/org/cryptobiotic/rlauxe/belgium/MakeBelgiumElections.kt_,
-which calls calls _cases/src/main/kotlin/org/cryptobiotic/rlauxe/belgium/CreateBelgiumClca.kt_.
+2. Using _cases/src/test/kotlin/org/cryptobiotic/rlauxe/util/TestGenerateAllUseCases.kt_, run _createAllBelgiumElections()_ to create all the elections.
 
 3. The elections will be created under toptopdir = _$testdataDir/cases/belgium/2024/_.
 
-View the all results in rlauxe-viewer by pointing to $toptopDir, or an individual contest by pointing to _$toptopDir/$contestName/audit_.
+View all results in rlauxe-viewer by pointing to $toptopDir, or an individual contest by pointing to _$toptopDir/$contestName/audit_.
 
 ### Details
 
 - Each contest creates its own set of cvrs by creating one cvr for each vote in the election.
-- It also creates mvrs from the cvrs for use in the audit. The default case is to just copy the cvrs, so there are no errors.
-- You can also generate the mvrs with some "fuzz" amount by changing the line around 57 in CreateBelgiumClca
+- It also creates mvrs from the cvrs for use in the audit. The default is to just copy the cvrs, so there are no errors.
+- You can also generate the mvrs with some "fuzz" amount by changing line ~57 in CreateBelgiumClca
 
             clcaConfig = ClcaConfig(fuzzMvrs=0.0)
 
@@ -44,7 +41,7 @@ In all 426 assertions in Belgium 2024 election, only 13 need more than 1000 samp
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/cases/BelgiumResultsScatterLogLog.html" rel="BelgiumResultsScatter">![BelgiumResultsScatter](../plots2/cases/BelgiumResultsScatterLogLog.png)</a>
 
 Because upper varies for each assorter, noerror = 1/(2-margin/upper) is much better to plot against. Furthermore, when there are no
-errors, samplesNeeded depends only on noerror: samplesNeeded = -ln(alpha) / ln(1 + maxBet * (noerror − 1/2)).
+errors, samplesNeeded depends only on noerror: samplesNeeded = -ln(alpha) / ln(1 + maxBet * (noerror − 1/2)), which is why the plot is smooth.
 
 ### Results from createAllBelgiumElections()
 

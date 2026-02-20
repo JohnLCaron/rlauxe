@@ -132,7 +132,7 @@ simulated and written to sampleMvrsX.csv. The matching cards are written to samp
 
 ## Creating a Persistent Audit 
 
-1.  Pre-audit committment
+1.  Pre-audit commitment
 
 implement CreateElectionIF and call CreateAudit
 

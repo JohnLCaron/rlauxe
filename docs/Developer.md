@@ -1,11 +1,40 @@
 # Developer Notes
-_02/14/2026_
+_02/20/2026_
+
+<!-- TOC -->
+* [Developer Notes](#developer-notes)
+* [Getting Started](#getting-started)
+  * [Prerequisites](#prerequisites)
+  * [Download the git repository](#download-the-git-repository)
+  * [Build the library](#build-the-library)
+  * [Run tests](#run-tests)
+  * [Set the test data directory](#set-the-test-data-directory)
+    * [Run the core tests using gradle](#run-the-core-tests-using-gradle)
+  * [Using IntelliJ](#using-intellij)
+  * [Modules](#modules)
+  * [Test Cases](#test-cases)
+  * [rlauxe viewer](#rlauxe-viewer)
+* [Notes and stats](#notes-and-stats)
+  * [Code Coverage (Lines of Codes)](#code-coverage-lines-of-codes)
+  * [UML](#uml)
+  * [Persistence](#persistence)
+  * [Documents](#documents)
+  * [Fuzzing notes](#fuzzing-notes)
+* [TODO](#todo)
+  * [TODO 12/11/25 (Belgium)](#todo-121125-belgium)
+  * [TODO 12/20/25](#todo-122025)
+  * [TODO 01/04/26](#todo-010426)
+  * [TODO 2/6/26](#todo-2626)
+  * [TODO 2/17](#todo-217)
+<!-- TOC -->
+
+# Getting Started
 
 ## Prerequisites
 
-1. A git client that is compatible with github.
+1. A git client that is compatible with GitHub.
 2. **Java 21+**. Install as needed, and make it your default JVM when working with rlauxe.
-3. The correct version of gradle and kotlin will be installed when you invoke a gradle command.
+3. The correct version of Gradle and kotlin will be installed when you invoke a gradle command.
 4. You need internet access to download the dependencies.
 
 
@@ -25,8 +54,8 @@ cd <devhome>/rlauxe
 ./gradlew clean assemble
 ```
 
-Normally rlauxe-vierer keeps the current rlauxe library inside its own repo.
-However, if the library has changed on github and you need to rebuild it:
+Normally rlauxe-viewer keeps the current rlauxe library inside its own repo.
+However, if the library has changed on GitHub and you need to rebuild it:
 
 ````
 cd <devhome>/rlauxe
@@ -90,7 +119,7 @@ IntelliJ will create and populate an IntelliJ project with the rlauxe sources.
 To build the library, from the topmenu:  Build / Build Project (Ctrl-F9)
 
 To run the core tests, from the left Project Panel source tree, navigate to the _core/src/test/kotlin/org/cryptobiotic/rlauxe_
-directory, right click on the directory name, choose "Run tests in ...". If that menu option isnt shown, check if you're in the 
+directory, right click on the directory name, choose "Run tests in ...". If that menu option isn't shown, check if you're in the 
 main source tree instead of the test source tree.
 
 To run individual tests, go to the test source; IntelliJ will place a clickable green button in the left margin wherever 
@@ -114,12 +143,12 @@ The repo contains all the test case data, except for San Francisco. Download
 
   [SF2024 data](https://www.sfelections.org/results/20241105/data/20241203/CVR_Export_20241202143051.zip)
 
-into testdataDir/cases/sf2024/ (where _testdataDir_ is as you chose in the "Set the test data directory" step above)
+into $testdataDir/cases/sf2024/ (where _$testdataDir_ is as you chose in the "Set the test data directory" step above)
 
 Then run _createSf2024CvrExport()_ test in _cases/src/test/kotlin/org/cryptobiotic/rlauxe/sf/CreateSf2024CvrExport.kt_
 to generate _testdataDir/cases/sf2024/crvExport.csv_. This only needs to be done one time.
 
-All the test cases can be generated from:
+All the test cases can now be generated from:
 
 _cases/src/test/kotlin/org/cryptobiotic/util/TestGenerateAllUseCases.kt_.
 
@@ -175,7 +204,7 @@ last changed: 01/07/2026
 
 you could say there are  two kinds of Contests, Regular (with votes) and Irv (with VoteConsolidator's)
 you could say there are two kinds of Audits, Polling and Clca
-if a Clca has pools, then its a OneAudit with OneAuditClcaAssorter's
+if a Clca has pools, then it's a OneAudit with OneAuditClcaAssorter's
 
 | audit   | contest | assorters                               |
 |---------|---------|-----------------------------------------|
@@ -303,22 +332,37 @@ class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boolean = 
 
 README
 
+    docs/SamplePopulations.md
+    docs/Verification.md
     docs/BettingRiskFunctions.md
     docs/OneAuditUseCases.md
-    docs/SamplePopulations.md
     docs/AlphaMart.md  
         (https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=662624429#gid=662624429)
         (https://docs.google.com/spreadsheets/d/1bw23WFTB4F0xEP2-TFEu293wKvBdh802juC7CeRjp-g/edit?gid=1185506629#gid=1185506629)
+    docs/ClcaErrors.md  
+    docs/CaseStudies.md  
 
     docs/papers/papers.txt
     docs/Developer.md
-    docs/Overview.md
-    docs/RlauxeSpec.md
-        (AdaptiveBetting.md)
     docs/Verification.md
     docs/CaseStudies.md
         (Corla.md)
+    docs/Raire.md
+    docs/DHondt.md
+
+maybe:
+    docs/Overview.md
+    docs/RlauxeSpec.md
     docs/Clca.md
+    docs/Attacks.md
+    docs/Corla.md
+    docs/VerifierSpec.md
+
+not:
+    docs/GeneralizedAdaptiveBetting.md
+    docs/RlaOptions.md
+
+
 
 ## Fuzzing notes
 
@@ -337,7 +381,7 @@ Simulation 02/06/2026
 
 Polling: for each contest independently:
     * SimulateIrvTestData (IRV)
-        simulate cvrs for a RaireContest, doesnt call raire-java for the assertions
+        simulate cvrs for a RaireContest, doesn't call raire-java for the assertions
     * CvrSimulation.simulateCvrsWithDilutedMargin(contestRound.contestUA, config) (IRV not ok) to match contest totals, undervotes and phantoms
     * uses PollingFuzzSamplerTracker for the sampler with these cvrs and optional fuzzing
         takes existing cvrs and fuzzes before sampling

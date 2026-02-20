@@ -8,7 +8,7 @@ The Prover must supply an ordered list of CVRs which constitutes the Find, CVR a
     If CVR(i) == ⊥ the Prover does not claim to be able to retrieve i.
 
 * The CVRs have the ballot identifier.
-* The CVRs may not be changed in any way after committment.
+* The CVRs may not be changed in any way after commitment.
 * The CVRS may have multiple contests.
 * The CVR comittment must be made before the seed is drawn.
 

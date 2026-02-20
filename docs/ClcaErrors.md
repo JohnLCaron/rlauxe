@@ -256,7 +256,7 @@ There are three cases involving phantoms where tau = "oth-los" (aka "p1o") = (1-
 * CVR is a phantom, MVR has vote for loser
 * CVR has vote for other, MVR not found
 
-Using eq 1 above, here is a plot of number of noerror samples needed to compendate for one "oth-los" error for several values of upper:
+Using eq 1 above, here is a plot of number of noerror samples needed to compensate for one "oth-los" error for several values of upper:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/phantomByUpper.html" rel="phantomByUpper">![phantomByUpper](plots2/betting/errorComp/phantomByUpper.png)</a>
 
@@ -267,7 +267,7 @@ The other problematic case is when the CVR has a vote for the winner, but the MV
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/errorComp/phantomMvr.html" rel="phantomMvr">![phantomMvr](plots2/betting/errorComp/phantomMvr.png)</a>
 
-The possibility that MVRs can't be located during the audit adds a big element of uncertainty to home many samples are needed.
+The possibility that MVRs can't be located during the audit adds a big element of uncertainty to how many samples are needed.
 
 
 

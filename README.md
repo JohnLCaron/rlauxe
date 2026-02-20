@@ -45,6 +45,7 @@ You can also read this document on [github.io](https://johnlcaron.github.io/rlau
   * [Also See](#also-see)
   * [Case Studies](#case-studies)
   * [Documentation Index](#documentation-index)
+    * [Pending Review](#pending-review)
 <!-- TOC -->
 
 Click on plot images to get an interactive html plot. 
@@ -631,17 +632,18 @@ How to set MaxLoss in an optimal way?
 
 ## Documentation Index
 * [AlphaMart](docs/AlphaMart.md)
-* [Attacks](docs/Attacks.md)
 * [BettingRiskFunctions](docs/BettingRiskFunctions.md)
-* [CLCA details](docs/Clca.md)
 * [Clca Errors](docs/ClcaErrors.md)
 * [Developer Notes](docs/Developer.md)
 * [Dhondt](docs/Dhondt.md)
 * [OneAudit Use Cases](docs/OneAuditUseCases.md)
-* [Raire (Instance Runoff)](docs/Raire.md)
-* [Rlauxe Implementation Overview](docs/Overview.md)
-* [Rlauxe Implementation Specificaton](docs/RlauxeSpec.md)
+* [Raire (Instant Runoff Voting)](docs/Raire.md)
 * [Sample Populations](docs/SamplePopulations.md)
 * [Verification](docs/Verification.md)
 
+### Pending Review
+* [Attacks](docs/Attacks.md)
+* [Rlauxe Implementation Overview](docs/Overview.md)
+* [Rlauxe Implementation Specificaton](docs/RlauxeSpec.md)
+* [VerifierSpec](docs/VerifierSpec.md)
 

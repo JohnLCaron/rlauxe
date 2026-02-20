@@ -161,20 +161,20 @@ fun <T> genericScatter(
             points {
                 x(xname) { scale = xScale }
                 y(yname) { scale = yScale }
-                size = 0.667
-                // symbol = Symbol.CIRCLE_SMALL
-                symbol(catName) {
+                size = 1.0
+                symbol = Symbol.CIRCLE_SMALL
+                /* symbol(catName) {
                     scale = categorical(
-                        "CLCA" to Symbol.CIRCLE_FILLED,
+                        "CLCA" to Symbol.CIRCLE_SMALL,
                         "OneAudit" to Symbol.CIRCLE_SMALL,
                         "OneAuditNS" to Symbol.CIRCLE_SMALL
                     )
-                }
+                } */
                 color(catName) {
                     scale = categorical(
-                        "CLCA" to Color.RED,
-                        "OneAudit" to Color.LIGHT_BLUE,
-                        "OneAuditNS" to Color.PURPLE
+                        "DHondt" to Color.RED,
+                        "Above" to Color.LIGHT_BLUE,
+                        "Below" to Color.PURPLE
                     )
                 }
 

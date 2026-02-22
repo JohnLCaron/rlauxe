@@ -37,8 +37,9 @@ fun sampleWithContestCutoff(
 
         /// remove maxContest from the audit
         // information we want in the persisted record
-        maxContest.done = true
         maxContest.status = TestH0Status.FailMaxSamplesAllowed
+        maxContest.included = false
+        maxContest.done = true
         contestsNotDone.remove(maxContest)
     }
     logger.debug{"sampleWithContestCutoff success on ${auditRound.contestRounds.count { !it.done }} contests: round ${auditRound.roundIdx} took ${stopwatch}"}
@@ -93,7 +94,7 @@ fun consistentSampling(
 
         if (include) {
             sampledCards.add(card)
-            if (!previousSamples.contains(card.prn))
+            if (!previousSamples.contains(card.prn)) // TODO this doesnt work, doesnt take into account maxSampleIndex ??
                 newMvrs++
         }
 

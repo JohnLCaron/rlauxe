@@ -114,7 +114,7 @@ open class ClcaAssorter(
     } */
 
     // Pair(estSampleSize, optimalBet)
-    fun estWithOptimalBet2(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorCounts: ClcaErrorCounts? = null): Pair<Int, Double> {
+    open fun estWithOptimalBet2(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorCounts: ClcaErrorCounts? = null): Pair<Int, Double> {
         val upper = assorter.upperBound()
         val betFn = GeneralAdaptiveBetting2(
             contest.Npop,

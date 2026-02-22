@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.collections.component1
@@ -110,6 +112,8 @@ class OneAuditClcaAssorter(
         return tau * noerror   // Bi eq (7)
     }
 
+    fun poolAverage(poolId: Int?) = poolAverages.assortAverage[poolId]
+
     // B(bi, ci)
     override fun bassort(mvr: CvrIF, cvr: CvrIF, hasStyle: Boolean): Double {
         if (cvr.poolId() == null) {
@@ -117,7 +121,7 @@ class OneAuditClcaAssorter(
         }
 
         // TODO add verifier of poolAvg existence
-        val poolAverage = poolAverages.assortAverage[cvr.poolId()]
+        val poolAverage = poolAverage(cvr.poolId())
         if (poolAverage == null) {
             throw RuntimeException("OneAuditClcaAssorter couldnt find pool Avg for pool ${cvr.poolId()}")
         }
@@ -181,6 +185,24 @@ class OneAuditClcaAssorter(
         // N = ln(1/alpha) / (ln(1 + λc (noerror − .5))*p0 + Sum( ln(1 + λc (a_pk − .5)*p_pk))
         val N =  roundUp((-ln(alpha) / lnPayoff))
         return N
+    }
+
+    override fun estWithOptimalBet2(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorCounts: ClcaErrorCounts?): Pair<Int, Double> {
+        val upper = assorter.upperBound()
+        val betFn = GeneralAdaptiveBetting2(
+            contest.Npop,
+            clcaErrorCounts ?: ClcaErrorCounts.empty(noerror(), upper), // else no errors
+            contest.Nphantoms,
+            maxLoss = maxLoss,
+            oaAssortRates = oaAssortRates,
+            debug = false,
+        )
+        val optimalBet = betFn.bet(ClcaErrorTracker(noerror(), upper))
+
+        val estSampleSize = if (clcaErrorCounts == null) sampleSizeNoErrors(optimalBet, alpha) else
+            sampleSizeWithErrors(optimalBet, alpha, clcaErrorCounts)
+
+        return Pair(estSampleSize, optimalBet)
     }
 
     // for Viewer: loser, other, winner

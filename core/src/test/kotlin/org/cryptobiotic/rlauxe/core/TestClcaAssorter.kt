@@ -99,7 +99,9 @@ class TestClcaAssorter {
         println(" assortValuesN in $assortValuesN")
 
         val sampleSize = cassorter.sampleSizeNoErrors(2 * 0.9, .05);
-        println(" sampleSize = $sampleSize")
+        println(" sampleSize = ${cassorter.sampleSizeNoErrors(2 * 0.9, .05)} for alpha = .05")
+        println(" sampleSize = ${cassorter.sampleSizeNoErrors(2 * 0.9, .025)} for alpha = .025")
+        println(" sampleSize = ${cassorter.sampleSizeNoErrors(2 * 0.9, .1)} for alpha = .1")
 
         val contestUA = ContestWithAssertions(contest, isClca = true)
         val estSize = cassorter.estWithOptimalBet2(contestUA, 0.9, .05);

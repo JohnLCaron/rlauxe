@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.cli
 
+import org.cryptobiotic.rlauxe.audit.AuditRoundIF
+import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 
@@ -8,7 +10,7 @@ class TestRunRoundCli {
 
     @Test
     fun testRunRoundCli() {
-        val topdir = "$testdataDir/cases/sf2024/clca3"
+        val topdir = "$testdataDir/cases/sf2024/oa"
         val auditdir = "$topdir/audit"
 
         RunRlaRoundCli.main(
@@ -17,5 +19,30 @@ class TestRunRoundCli {
                 // "--onlyTask", "28-NEN 107/102",
             )
         )
+    }
+
+    @Test
+    fun testRunAllRoundsCli() {
+        val topdir = "$testdataDir/cases/sf2024/oa"
+        val auditdir = "$topdir/audit"
+
+        RunRlaRoundCli.main(
+            arrayOf(
+                "-in", auditdir,
+                // "--onlyTask", "28-NEN 107/102",
+            )
+        )
+
+        val stopRound = 7
+        println("============================================================")
+        var done = false
+        var finalRound: AuditRoundIF? = null
+        while (!done) {
+            val lastRound = runRound(inputDir = auditdir)
+            if (lastRound != null) finalRound = lastRound
+            done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx == stopRound
+        }
+
+        print(finalRound)
     }
 }

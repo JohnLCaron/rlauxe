@@ -5,31 +5,29 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.persist.csv.*
-import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.util.*
 
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.workflow.CardManifest
-import org.cryptobiotic.rlauxe.workflow.readPopulations
 import kotlin.collections.iterator
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.use
 
 class TestSfElectionVunderFuzz {
+    val auditdir = "$testdataDir/cases/sf2024/oa/audit"
+    val publisher = Publisher(auditdir)
+
     val cardManifest: CardManifest
     val config: AuditConfig
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
 
     val cardPools: List<OneAuditPoolFromCvrs>?
-    val privateMvrs: CloseableIterator<AuditableCard>
 
     init {
-        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
         val auditRecord = AuditRecord.readFrom(auditdir) as AuditRecord
         cardManifest = auditRecord.readCardManifest()
         config = auditRecord.config
@@ -37,9 +35,6 @@ class TestSfElectionVunderFuzz {
         infos = contests.map { it.contest.info() }.associateBy { it.id }
 
         cardPools = auditRecord.readCardPools()
-
-        val publisher = Publisher(auditdir)
-        privateMvrs = readCardsCsvIterator(publisher.privateMvrsFile())
     }
 
     @Test
@@ -48,6 +43,7 @@ class TestSfElectionVunderFuzz {
         val ncards = 30_000
         var countCards = 0
 
+        // use the first 30_000 actual cards
         cardManifest.cards.iterator().use { iter ->
             while (iter.hasNext() && countCards < ncards) {
                 val card = iter.next()
@@ -64,6 +60,7 @@ class TestSfElectionVunderFuzz {
 
         val cardPoolMap = cardPools.associateBy { it.poolId }
 
+        // look in detail at contest49
         var countMvr49 = 0
         var countCvr49 = 0
         var showCards = 0
@@ -86,6 +83,7 @@ class TestSfElectionVunderFuzz {
         println()
         assertEquals(countCvr49, countMvr49)
 
+        // contest tabulations for both mvr and cvr
         val mvrTabs = tabulateCards(PairAdapter(pairs.iterator()) { it.first }, infos)
         val cvrTabs = tabulateCards(PairAdapter(pairs.iterator()) { it.second }, infos).toSortedMap()
 
@@ -98,163 +96,154 @@ class TestSfElectionVunderFuzz {
     }
 
     @Test
-    fun testSFvunderPoolAvg() {
-        val contestId = 29
-        val useContest = contests.find { it.id == contestId }!!
-        val useCassorter = useContest.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
-        val usePassorter = useCassorter.assorter
-        println(useContest)
-
-        val cardPoolMap = cardPools!!.associateBy { it.poolId }
-        val useCardPoolId = 3744
-        val useCardPool = cardPoolMap[useCardPoolId]
-        println(useCardPool)
-        println("cvr assort calculated average for contest=${contestId} pool=$useCardPoolId = ${useCassorter.poolAverages.assortAverage[useCardPoolId]}")
-
-        val mvrPoolAvg = findPoolAverage(privateMvrs, contestId, useCardPoolId, usePassorter)
-        println("mvr poolAvg = ${mvrPoolAvg}")
-        val mvrDilutedMargin2 = mvrPoolAvg.margin() * 84 / 336
-        println("mvr pool diluted average= ${margin2mean(mvrDilutedMargin2)} margin=${mvrDilutedMargin2}")
-
-        //// so what is the pool average in the vunder fuzzed cards ??
-        //// TODO the problem is bassort, finding undervotes instead of missing contest
-
-        val contestCards = mutableListOf<AuditableCard>()
-        val ncards = 30_000_000 // all
-        var countCards = 0
-        cardManifest.cards.iterator().use { iter ->
-            while (iter.hasNext() && countCards < ncards) {
-                val card = iter.next()
-                contestCards.add(card)
-                countCards++
-            }
-        }
-
-        // simulate the card pools for all OneAudit contests; do it here one time for all contests
-        val vunderFuzz = OneAuditVunderFuzzer(cardPools, infos, config.simFuzzPct ?: 0.0, contestCards)
-        val pairs = vunderFuzz.mvrCvrPairs
-        println(" pairs = ${pairs.size}")
-        val fuzzedMvrIter = PairAdapter(pairs.iterator()) { it.first }
-
-        /*
-        val mvrTabs = tabulateCards(PairAdapter(pairs.iterator()) { it.first }, infos)
-        val cvrTabs = tabulateCards(PairAdapter(pairs.iterator()) { it.second }, infos).toSortedMap()
-        println("mvrTab = ${mvrTabs[contestId]}")
-        println("cvrTab = ${cvrTabs[contestId]}")
-
-        // duplicate Vunders that vunderFuzz uses
-        val vunderPools =  VunderPools(cardPools, infos)
-        val vunderPool = vunderPools.vunderPools[useCardPoolId]!!
-        println("vunderPool = ${vunderPool}") */
-
-        val assortAvg = AssortAvg()
-        for (mvr in fuzzedMvrIter) {
-            if (mvr.poolId == useCardPoolId) {
-                if (mvr.hasContest(contestId)) {
-                    val assortVal = usePassorter.assort(mvr.cvr(), usePhantoms = false)
-                    assortAvg.totalAssort += assortVal
-                    assortAvg.ncards++
-                }
-            }
-        }
-
-        val dilutedMargin = usePassorter.dilutedMargin()
-        println("fuzzed poolAvg = ${assortAvg}")
+    fun showSFvunderPoolAvg2() {
+        testSFvunderPoolAvg2(29, 3744)
+        testSFvunderPoolAvg2(18, 3744)
     }
 
-    @Test
-    fun testSFvunderPoolAvgIRV() {
-        //val auditdir = "$testdataDir/cases/sf2024/oa/audit"
-        //val publisher = Publisher(auditdir)
-        //val config = readAuditConfigUnwrapped(publisher.auditConfigFile())!!
-        // val populations = readPopulations(publisher)
-        // val pools = populations as List<OneAuditPoolIF>
-        //val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
+    fun testSFvunderPoolAvg2(contestId: Int, useCardPoolId: Int) {
+        println("--------------------------------------------------")
 
-        //val privateMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.privateMvrsFile())
-
-        val contestId = 18
         val useContest = contests.find { it.id == contestId }!!
-        val useCassorter = useContest.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
-        val usePassorter = useCassorter.assorter
-        println(useContest)
-        println(usePassorter)
+        println("useContest = $useContest")
+        val cassorter = useContest.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
+        val passorter = cassorter.assorter
 
-        requireNotNull (cardPools)
-        val populationMap = cardPools.associateBy { it.poolId }
-        val useCardPoolId = 3744
-        val usePopulation = populationMap[useCardPoolId]
-        println(usePopulation)
-        println("cvr assort calculated average for contest=${contestId} pool=$useCardPoolId = ${useCassorter.poolAverages.assortAverage[useCardPoolId]}")
-
-        val mvrPoolAvg = findPoolAverage(privateMvrs, contestId, useCardPoolId, usePassorter)
-        println("mvr poolAvg = ${mvrPoolAvg}")
-        val mvrDilutedMargin2 = mvrPoolAvg.margin() * 84 / 336
-        println("mvr pool diluted average= ${margin2mean(mvrDilutedMargin2)} margin=${mvrDilutedMargin2}")
-
-        //// so what is the pool average in the vunder fuzzed cards ??
-        //// TODO the problem is bassort, finding undervotes instead of missing contest
-
-        val contestCards = mutableListOf<AuditableCard>()
-        val ncards = 30_000_000 // all
-        var countCards = 0
-        cardManifest.cards.iterator().use { iter ->
-            while (iter.hasNext() && countCards < ncards) {
-                val card = iter.next()
-                contestCards.add(card)
-                countCards++
-            }
-        }
-
-        // simulate the card pools for all OneAudit contests; do it here one time for all contests
-        val infos = contests.map { it.contest.info() }.associateBy { it.id }
-
-        // val cardPools = readCardPoolCsvFile(publisher.cardPoolsFile(),  infos)
-        val cardPoolMap = cardPools.associateBy { it.poolId }
+        val cardPoolMap = cardPools!!.associateBy { it.poolId }
         val useCardPool = cardPoolMap[useCardPoolId]!!
-        // println(useCardPool)
+        print(useCardPool)
         val tab = useCardPool.contestTabs[contestId]
         println(tab)
 
+        val poolAvg = cassorter.poolAverages.assortAverage[useCardPoolId]!!
+        println(
+            "cvr assort calculated average for contest=${contestId} pool=$useCardPoolId = ${poolAvg} margin = ${mean2margin(poolAvg)}"
+        )
+        // could be reproduced as (non-IRV) val poolMargin = assertion.assorter.calcMarginFromRegVotes(regVotes.votes, cardPool.ncards())
+        println()
+
+        // over all cards
+        val countCardsInPool = countCardsInPool(cardManifest.cards.iterator(), contestId, useCardPoolId)
+        println("countCardsInPool=${countCardsInPool}")
+
+        val privateMvrs = readCardsCsvIterator(publisher.privateMvrsFile())
+        val mvrPoolAvg = findPoolAverage(privateMvrs, contestId, useCardPoolId, passorter)
+        println("mvr poolAvg = ${mvrPoolAvg}")
+
+        val cvrPoolAvg = findPoolAverage(cardManifest.cards.iterator(), contestId, useCardPoolId, passorter)
+        println("cvrPoolAvg = ${cvrPoolAvg}")
+
+        // over all mvr, cvr pairs
+        val privateMvrs2 = readCardsCsvIterator(publisher.privateMvrsFile())
+        val clcaPoolAvg =
+            findPoolAverageB(privateMvrs2, cardManifest.cards.iterator(), contestId, useCardPoolId, cassorter)
+        println("clcaPoolAvg = ${clcaPoolAvg}")
+
+        // TODO what can we test?
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        val contestCards = mutableListOf<AuditableCard>()
+        val ncards = 100_000 // all
+        var countCards = 0
+        cardManifest.cards.iterator().use { iter ->
+            while (iter.hasNext() && countCards < ncards) {
+                val card = iter.next()
+                contestCards.add(card)
+                countCards++
+            }
+        }
+
+        // simulate the card pools for all OneAudit contests; do it here one time for all contests
         val vunderFuzz = OneAuditVunderFuzzer(cardPools, infos, config.simFuzzPct ?: 0.0, contestCards)
-        val pairs = vunderFuzz.mvrCvrPairs
-        println(" pairs = ${pairs.size}")
-        val fuzzedMvrIter = PairAdapter(pairs.iterator()) { it.first }
+        val vunderPool = vunderFuzz.vunderPools.vunderPools[useCardPoolId]!!
+        val vunderPicker = vunderPool.vunderPickers[contestId]!!
+        println("vunder= ${vunderPicker.vunder}")
 
-        /*
-    val mvrTabs = tabulateCards(PairAdapter(pairs.iterator()) { it.first }, infos)
-    val cvrTabs = tabulateCards(PairAdapter(pairs.iterator()) { it.second }, infos).toSortedMap()
-    println("mvrTab = ${mvrTabs[contestId]}")
-    println("cvrTab = ${cvrTabs[contestId]}")
+        val mvrCvrPairs = vunderFuzz.mvrCvrPairs
+        val vunderAvg = findPoolAverageB(mvrCvrPairs, contestId, useCardPoolId, cassorter)
 
-    // duplicate Vunders that vunderFuzz uses
-    val vunderPools =  VunderPools(cardPools, infos)
-    val vunderPool = vunderPools.vunderPools[useCardPoolId]!!
-    println("vunderPool = ${vunderPool}") */
+        println("vunderAvg = ${vunderAvg}")
+    }
 
-        val assortAvg = AssortAvg()
-        vunderFuzz.mvrCvrPairs.forEach { (mvr, cvr) ->
-            if (mvr.poolId == useCardPoolId) {
-                if (mvr.hasContest(contestId)) {
-                    val assortVal = usePassorter.assort(mvr.cvr(), usePhantoms = false)
+    /*
+    useContest = PROPOSITION 2 (29) votes={108=290905, 109=91500} Nc=409893 Npop=567428 minDilutedMargin=0.3514
+    OneAuditPoolFromCvrs(poolName='811-0', poolId=3744, totalCards=336
+    ContestTabulation(id=29 isIrv=false, voteForN=1, votes=[108=67, 109=13], nvotes=80 ncards=84, undervotes=4, novote=4, overvotes=0)
+    cvr assort calculated average for contest=29 pool=3744 = 0.5803571428571429 margin = 0.1607142857142858
+
+    countCardsInPool=336
+    mvr poolAvg = AssortAvg(ncards=84, totalAssort=69.0 avg=0.8214285714285714 margin=0.6428571428571428)
+    cvrPoolAvg = AssortAvg(ncards=336, totalAssort=168.0 avg=0.5 margin=0.0)
+    missingInMvr= 252
+    clcaPoolAvg = AssortAvg(ncards=336, totalAssort=203.8116459333505 avg=0.6065822795635432 margin=0.21316455912708632)
+    vunder= id=29, voteForN=1, votes={108=67, 109=13}, nvotes=80 ncards=336, undervotes=4, missing=252
+    missingInMvr= 13
+    vunderAvg = AssortAvg(ncards=17, totalAssort=10.089846310954364 avg=0.5935203712326097 margin=0.1870407424652194)
+    --------------------------------------------------
+    useContest = MAYOR (18) Nc=410105 Npop=567598 winner 57 losers [54, 55, 56, 58, 59, 60, 61, 62, 63, 64, 65, 66, 173, 175, 176] minMargin=0.0536
+    OneAuditPoolFromCvrs(poolName='811-0', poolId=3744, totalCards=336
+    ContestTabulation(id=18 isIrv=true, voteForN=1, votes=[], nvotes=81 ncards=84, undervotes=3, novote=3, overvotes=0)
+    cvr assort calculated average for contest=18 pool=3744 = 0.5119047619047619 margin = 0.023809523809523725
+
+    countCardsInPool=336
+    mvr poolAvg = AssortAvg(ncards=84, totalAssort=46.0 avg=0.5476190476190477 margin=0.09523809523809534)
+    cvrPoolAvg = AssortAvg(ncards=336, totalAssort=168.0 avg=0.5 margin=0.0)
+    missingInMvr= 252
+    clcaPoolAvg = AssortAvg(ncards=336, totalAssort=172.62697269745865 avg=0.5137707520757698 margin=0.027541504151539664)
+    vunder= id=18, voteForN=1, votes={55=1, 57=1, 58=1, 61=1, 62=1, 64=1, 66=1}, nvotes=81 ncards=336, undervotes=3, missing=252
+    missingInMvr= 13
+    vunderAvg = AssortAvg(ncards=17, totalAssort=8.887010747215463 avg=0.5227653380714978 margin=0.04553067614299566)
+    */
+}
+
+fun findPoolAverageB(mvrs: CloseableIterator<AuditableCard>, cvrs: Iterator<AuditableCard>, contestId: Int, poolId: Int, cassorter: ClcaAssorter): AssortAvg {
+    var missingInMvr = 0
+    val assortAvg = AssortAvg()
+    mvrs.use { iter ->
+        for (mvr in iter) {
+            val cvr = cvrs.next()
+            if (cvr.poolId == poolId) {
+                if (cvr.hasContest(contestId)) {
+                    if (!mvr.hasContest(contestId)) {
+                        missingInMvr++
+                    }
+                    val assortVal = cassorter.bassort(mvr, cvr, hasStyle = false)
                     assortAvg.totalAssort += assortVal
                     assortAvg.ncards++
                 }
             }
         }
-
-        println("fuzzed poolAvg = ${assortAvg}")
     }
+    println("  missingInMvr= $missingInMvr")
+    return assortAvg
+}
 
+fun findPoolAverageB(mvrCvrPairs: List<Pair<AuditableCard, AuditableCard>>, contestId: Int, poolId: Int, cassorter: ClcaAssorter): AssortAvg {
+    var missingInMvr = 0
+    val assortAvg = AssortAvg()
+    mvrCvrPairs.forEach { (mvr, cvr) ->
+        if (cvr.poolId == poolId) {
+            if (cvr.hasContest(contestId)) {
+                if (!mvr.hasContest(contestId)) {
+                    missingInMvr++
+                }
+                val assortVal = cassorter.bassort(mvr, cvr, hasStyle = false)
+                assortAvg.totalAssort += assortVal
+                assortAvg.ncards++
+            }
+        }
+    }
+    println("  missingInMvr pairs= $missingInMvr")
+    return assortAvg
 }
 
 fun findPoolAverage(cardIter: CloseableIterator<AuditableCard>, contestId: Int, poolId: Int, passorter: AssorterIF): AssortAvg {
     val assortAvg = AssortAvg()
     cardIter.use { iter ->
-        for (mvr in iter) {
-            if (mvr.poolId == poolId) {
-                if (mvr.hasContest(contestId)) {
-                    val assortVal = passorter.assort(mvr.cvr(), usePhantoms = false)
+        for (card in iter) {
+            if (card.poolId == poolId) {
+                if (card.hasContest(contestId)) {
+                    val assortVal = passorter.assort(card.cvr(), usePhantoms = false)
                     assortAvg.totalAssort += assortVal
                     assortAvg.ncards++
                     // println("${mvr.location} ${mvr.poolId} votes[$contestId]=${mvr.votes!![contestId].contentToString()}")
@@ -265,8 +254,23 @@ fun findPoolAverage(cardIter: CloseableIterator<AuditableCard>, contestId: Int, 
     return assortAvg
 }
 
+fun countCardsInPool(cardIter: CloseableIterator<AuditableCard>, contestId: Int, poolId: Int): Int {
+    var ncards = 0
+    cardIter.use { iter ->
+        for (mvr in iter) {
+            if (mvr.poolId == poolId) {
+                if (mvr.hasContest(contestId)) {
+                    ncards++
+                    // println("${mvr.location} ${mvr.poolId} votes[$contestId]=${mvr.votes!![contestId].contentToString()}")
+                }
+            }
+        }
+    }
+    return ncards
+}
+
 class PairAdapter(val org: Iterator<Pair<AuditableCard, AuditableCard>>,
-                      val trans: (Pair<AuditableCard, AuditableCard>) -> AuditableCard)
+                  val trans: (Pair<AuditableCard, AuditableCard>) -> AuditableCard)
     : AbstractIterator<AuditableCard>() {
 
     override fun computeNext() {

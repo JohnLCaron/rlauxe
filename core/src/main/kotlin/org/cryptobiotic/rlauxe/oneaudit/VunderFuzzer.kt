@@ -10,7 +10,10 @@ import org.cryptobiotic.rlauxe.util.VunderPicker
 ////////////////////////////////////////////////////////////////////////////////
 // OneAudit Estimation Sampling
 
-// OneAuditVunderFuzzer creates fuzzed mvrs (non-pooled) and simulated mvrs (pooled), including IRV
+// OneAuditVunderFuzzer takes as input the actual cards of the contest.
+// it simulates the pooled cards based on the pool totals
+// it optionally fuzzes the Cvrs.
+// the mvrCvrPairs are the (mvr, cvr) pairs suitable for CLCA audit
 class OneAuditVunderFuzzer(
     pools: List<OneAuditPoolFromCvrs>,
     val infos: Map<Int, ContestInfo>,
@@ -19,9 +22,9 @@ class OneAuditVunderFuzzer(
 ) {
     val isIRV = infos.mapValues { it.value.isIrv }
     var mvrCvrPairs: List<Pair<AuditableCard, AuditableCard>>  // mvr, cvr pairs
+    val vunderPools =  VunderPools(pools)
 
     init {
-        val vunderPools =  VunderPools(pools)
         val mvrs = cards.map { card ->
             val onecard = if (card.poolId != null) {
                 vunderPools.simulatePooledCard(card, card.poolId)

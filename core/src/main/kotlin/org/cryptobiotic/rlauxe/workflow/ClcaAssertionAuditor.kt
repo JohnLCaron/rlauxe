@@ -42,6 +42,7 @@ fun runClcaAuditRound(
 
     // given the cvrPairs, and each ContestRound's maxSampleIndexUsed, count the cvrs that were not used
     val contestCounts = mutableMapOf<Int, Int>()
+    var countUsed = 0
     var countUnused = 0
     cvrPairs.forEachIndexed { idx, mvrCardPair ->
         val card = mvrCardPair.second
@@ -53,11 +54,10 @@ fun runClcaAuditRound(
                 contestCounts[contest.id] = count + 1
             }
         }
-        if (!wasUsed) countUnused++
-        //if (idx % 100 == 0)
-        //    println("$idx, $countUnused")
+        if (wasUsed) countUsed++ else countUnused++
     }
-    auditRound.samplesNotUsed =  countUnused
+    auditRound.mvrsUnused =  countUnused
+    auditRound.mvrsUsed =  countUsed
 
     return if (complete.isEmpty()) true else complete.reduce { acc, b -> acc && b }
 }
@@ -87,6 +87,7 @@ class RunClcaContestTask(
                         contestRound.id,
                         cassorter,
                         cvrPairs,
+                        maxSampleIndex = contestRound.maxSampleAllowed,
                     )
 
                     val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, roundIdx)

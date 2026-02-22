@@ -44,8 +44,9 @@ data class AuditRoundJson(
     val auditIsComplete: Boolean,
     val nmvrs: Int,
     var newmvrs: Int,
+    var mvrsUnused: Int,
+    var mvrsUsed: Int,
     var auditorWantNewMvrs: Int,
-    var samplesNotUsed: Int,
 )
 
 fun AuditRoundIF.publishJson() : AuditRoundJson {
@@ -56,8 +57,9 @@ fun AuditRoundIF.publishJson() : AuditRoundJson {
         this.auditIsComplete,
         this.nmvrs,
         this.newmvrs,
+        this.mvrsUsed,
+        this.mvrsUnused,
         this.auditorWantNewMvrs,
-        this.samplesNotUsed,
     )
 }
 
@@ -75,8 +77,9 @@ fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: L
         samplePrns,
         this.nmvrs,
         this.newmvrs,
+        this.mvrsUsed,
+        this.mvrsUnused,
         this.auditorWantNewMvrs,
-        this.samplesNotUsed,
     )
 }
 
@@ -228,7 +231,7 @@ fun AssertionRoundJson.import(assertion: Assertion): AssertionRound {
 data class EstimationRoundResultJson(
     val roundIdx: Int,
     val strategy: String,
-    val fuzzPct: Double?,
+    val calcMvrsNeeded: Int,
     val startingTestStatistic: Double,
     val startingErrorRates: Map<Double, Double>? = null, // error rates used for estimation
     val estimatedDistribution: List<Int>,
@@ -239,18 +242,18 @@ data class EstimationRoundResultJson(
 fun EstimationRoundResult.publishJson() = EstimationRoundResultJson(
     this.roundIdx,
     this.strategy,
-    this.fuzzPct,
+    this.calcNewMvrsNeeded,
     this.startingTestStatistic,
     this.startingErrorRates,
     this.estimatedDistribution,
     this.ntrials,
-    this.simNewMvrs,
+    this.simNewMvrsNeeded,
 )
 
 fun EstimationRoundResultJson.import() = EstimationRoundResult(
         this.roundIdx,
         this.strategy,
-        this.fuzzPct,
+        this.calcMvrsNeeded,
         this.startingTestStatistic,
         this.startingErrorRates,
         this.estimatedDistribution,
@@ -260,21 +263,19 @@ fun EstimationRoundResultJson.import() = EstimationRoundResult(
 
 // data class AuditRoundResult(
 //    val roundIdx: Int,
-//    val nmvrs: Int,               // number of mvrs available for this contest for this round
-//    val maxBallotIndexUsed: Int,  // maximum ballot index (for multicontest audits)
-//    val pvalue: Double,       // last pvalue when testH0 terminates
-//    val samplesUsed: Int,     // sample count when testH0 terminates
-//    val status: TestH0Status, // testH0 status
+//    val nmvrs: Int,                 // number of mvrs available for this contest for this round
+//    val plast: Double,              // last pvalue when testH0 terminates
+//    val pmin: Double,               // minimum pvalue reached
+//    val samplesUsed: Int,           // sample count when testH0 terminates
+//    val status: TestH0Status,       // testH0 status
 //    val measuredCounts: ClcaErrorCounts? = null, // measured error counts (clca only)
 //    val params: Map<String, Double> = emptyMap(),
-//)
 
 @Serializable
 data class AuditRoundResultJson(
     val desc: String,
     val roundIdx: Int,
     val nmvrs: Int,   // estimated sample size
-    // val maxSampleIndexUsed: Int,   // max index used
     val plast: Double,       // last pvalue when testH0 terminates
     val pmin: Double,       // minimum pvalue reached
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
@@ -286,28 +287,26 @@ data class AuditRoundResultJson(
 fun AuditRoundResult.publishJson() = AuditRoundResultJson(
     this.toString(),
     this.roundIdx,
-    this.nmvrs,
-    // this.countCvrsUsedInAudit,
-    this.plast,
-    this.pmin,
-    this.samplesUsed,
-    this.status.name,
-    this.measuredCounts?.publishJson(),
-    params,
+    nmvrs = this.nmvrs,
+    plast = this.plast,
+    pmin = this.pmin,
+    samplesUsed = this.samplesUsed,
+    status = this.status.name,
+    measuredCounts = this.measuredCounts?.publishJson(),
+    params = params,
 )
 
 fun AuditRoundResultJson.import() : AuditRoundResult {
     val status = enumValueOf(this.status, TestH0Status.entries) ?: TestH0Status.InProgress
     return AuditRoundResult(
         this.roundIdx,
-        this.nmvrs,
-        // this.maxSampleIndexUsed,
-        this.plast,
-        this.pmin,
-        this.samplesUsed,
-        status,
-        this.measuredCounts?.import(),
-        params,
+        nmvrs=this.nmvrs,
+        plast=this.plast,
+        pmin=this.pmin,
+        samplesUsed=this.samplesUsed,
+        status=status,
+        measuredCounts=this.measuredCounts?.import(),
+        params=params,
     )
 }
 

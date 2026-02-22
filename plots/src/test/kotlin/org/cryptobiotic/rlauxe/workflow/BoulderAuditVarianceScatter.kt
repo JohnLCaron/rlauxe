@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericScatter
 import org.cryptobiotic.rlauxe.util.nfn
+import org.jetbrains.kotlinx.kandy.util.color.Color
 import kotlin.io.path.Path
 import kotlin.test.Test
 
@@ -51,6 +52,9 @@ class BoulderAuditVarianceScatter {
             yfld = { it.samplesUsed().toDouble() },
             catfld = { it.cat },
             scaleType=scaleType,
+            colors=mapOf("CLCA" to Color.RED,
+                "OneAudit" to Color.LIGHT_BLUE,
+            ),
         )
     }
 }

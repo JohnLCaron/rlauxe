@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericScatter
+import org.jetbrains.kotlinx.kandy.util.color.Color
 import kotlin.io.path.Path
 import kotlin.test.Test
 
@@ -51,6 +52,10 @@ class BelgiumResultsScatter {
             yfld = { it.sampleSize.toDouble() },
             catfld = { it.cat },
             scaleType=scaleType,
+            colors=mapOf("DHondt" to Color.RED,
+                "Above" to Color.LIGHT_BLUE,
+                "Below" to Color.PURPLE
+            ),
         )
     }
 }

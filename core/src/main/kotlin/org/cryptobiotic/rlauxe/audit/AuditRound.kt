@@ -17,7 +17,8 @@ interface AuditRoundIF {
     var nmvrs: Int
     var newmvrs: Int
     var auditorWantNewMvrs: Int
-    var samplesNotUsed: Int
+    var mvrsUsed: Int
+    var mvrsUnused: Int
 
     fun show(): String
     fun createNextRound(): AuditRound
@@ -31,10 +32,11 @@ data class AuditRound(
     override var auditIsComplete: Boolean = false,
     override var samplePrns: List<Long>, // card prns to sample for this round (complete, not just new).
                                          // duplicates samplePrnsFile, so no need to serialze
-    override var nmvrs: Int = 0,
-    override var newmvrs: Int = 0,
+    override var nmvrs: Int = 0,    // mvrs in the round
+    override var newmvrs: Int = 0,  // new mvrs in the round
+    override var mvrsUnused: Int = 0,
+    override var mvrsUsed: Int = 0,
     override var auditorWantNewMvrs: Int = -1,
-    override var samplesNotUsed: Int = 0,
 ) : AuditRoundIF {
 
     override fun show() =
@@ -126,10 +128,11 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         }
     }
 
+    // TODO used by viewer ??
     fun calcMvrsNeeded(config: AuditConfig): Int {
         var maxNeeded = 0
         assertionRounds.forEach { round ->
-            val pair = round.calcMvrsNeeded(contestUA, config.clcaConfig.maxLoss, config.riskLimit, config)
+            val pair = round.calcNewMvrsNeeded(contestUA, config.clcaConfig.maxLoss, config.riskLimit)
             val estSamplesNeeded = pair.component1()
             maxNeeded = max( maxNeeded, estSamplesNeeded)
         }
@@ -218,41 +221,37 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
         return ClcaErrorCounts(prevResult.measuredCounts!!.errorCounts, prevResult.samplesUsed, noerror, upper)
     }
 
-    // return (calculated mvrs needed, optimalBet) based on prevAuditResult.measuredCounts or apriori.errorCounts
-    fun calcMvrsNeeded(contest: ContestWithAssertions, maxLoss: Double, riskLimit: Double, config: AuditConfig): Pair<Int, Double> {
+    // return (calculated new mvrs needed, optimalBet) based on prevAuditResult.measuredCounts or apriori.errorCounts
+    // TODO  maxLoss: Double, riskLimit: Double, config always come from config
+    fun calcNewMvrsNeeded(contest: ContestWithAssertions, maxLoss: Double, riskLimit: Double): Pair<Int, Double> {
         require(assertion is ClcaAssertion)
 
-        val alpha = this.prevAuditResult?.plast ?: riskLimit
-        val cassorter = assertion.cassorter
-            /* val clcaErrorCounts = if (fuzzPct == null || fuzzPct == 0.0) null else {
-                TausRateTable.makeErrorCounts(
-                    contest.ncandidates,
-                    fuzzPct,
-                    contest.Npop,
-                    cassorter.noerror(),
-                    cassorter.assorter.upperBound()
-                )
-            } */
-        val errorCounts = if (roundIdx == 1 || prevAuditResult == null || prevAuditResult!!.measuredCounts == null) {
-            config.clcaConfig.apriori.makeErrorCounts(contest.Npop, noerror, upper)
-        } else previousErrorCounts()
+        // payoff^n = Tprev
+        // Tprev * Tnow = T = 1/risklimit
+        // Tnow = T / Tprev = (1/risklimit) / (1/plast)
+        // alpha_now = 1 / Tnow = = (1/plast) / (1/risklimit) = risklimit/plast
 
-        return cassorter.estWithOptimalBet2(contest, maxLoss, alpha, errorCounts)
+        // because we start from previous rounds, we are calculating new mvrs
+        var alpha = riskLimit
+        if (this.prevAuditResult != null) {
+            alpha /= this.prevAuditResult!!.plast
+        }
+        return assertion.cassorter.estWithOptimalBet2(contest, maxLoss, alpha, previousErrorCounts())
     }
 }
 
 data class EstimationRoundResult(
     val roundIdx: Int,
     val strategy: String,
-    val fuzzPct: Double?,
+    val calcNewMvrsNeeded: Int, // could just calculate on the fly ?
     val startingTestStatistic: Double,
     val startingErrorRates: Map<Double, Double>? = null, // error rates used for estimation
     val estimatedDistribution: List<Int>,   // distribution of estimated sample size as deciles
     val ntrials: Int,
-    val simNewMvrs: Int,
+    val simNewMvrsNeeded: Int,
 ) {
-    override fun toString() = "round=$roundIdx estimatedDistribution=$estimatedDistribution ($ntrials) fuzzPct=$fuzzPct " +
-            " simNewMvrs=$simNewMvrs startingErrorRates=$startingErrorRates"
+    override fun toString() = "round=$roundIdx strategy=$strategy calcMvrsNeeded=$calcNewMvrsNeeded estimatedDistribution=$estimatedDistribution ($ntrials) " +
+            "simNewMvrs=$simNewMvrsNeeded startingErrorRates=$startingErrorRates"
 
     fun startingErrorRates() = buildString {
         if (startingErrorRates == null) append("N/A") else {

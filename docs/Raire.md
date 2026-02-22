@@ -1,19 +1,22 @@
-
-## Instant Runoff Voting (IRV)
+# Instant Runoff Voting (IRV)
+02/21/2026
 
 Also known as Ranked Choice Voting, this allows voters to rank their choices by preference.
 In each round, the candidate with the fewest first-preferences (among the remaining candidates) is eliminated.
 This continues until only one candidate is left. Only 1 winner is allowed.
 
-In principle one could use polling audits for IRV, but the information
-needed to create the Raire Assertions all but necessitates CVRs.
-So currently we only support IRV with CLCA and OneAudit.
+We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate the assertions needed for proving the winner of the IRV.
+To do this we need the count, over all ballots cast, of each unique ranking of the candidates in the contest.
+Each IRV contest needs a VoteConsolidator with this information. In principle one could run polling audits for IRV if you 
+had the VoteConsolidator. In practice CVRs are needed to construct the VoteConsolidator, and so we only support IRV for 
+CLCA and OneAudit (the SanFrancisco 2024 use case is an example where the VoteConsolidators are available for OneAudit pools).
 
-We use the [RAIRE java library](https://github.com/DemocracyDevelopers/raire-java) to generate assertions that fit into the SHANGRLA framework.
-We convert the output of the raire library into RaireAssorters, which assigns the assort values. The ClcaAssorter then can be used with
-RaireAssorter transparently.
+Each _raire.java AssertionAndDifficulty_ is converted to a _rlauxe.raire.RaireAssertion_ and a _RaireAssorter_. 
+The ClcaAssorter and OneAuditClcaAssorter then use RaireAssorter transparently.
 
-The RaireAssorters function `A_wℓ(bi)` for winner w and loser ℓ operating on the ith ballot bi is
+# RaireAssorter
+
+The RaireAssorter function `A_wℓ(bi)` for winner w and loser ℓ operating on the ith ballot bi is
 
 ````
 if (usePhantoms && mvr.isPhantom) return 0.5
@@ -77,10 +80,14 @@ The upper bound is 1.
 
 ## Democracy Developers Notes
 
+See https://github.com/DemocracyDevelopers/Colorado-irv-rla-educational-materials for an in-depth explanation of
+Raire.
+
 A Guide to Risk Limiting Audits with RAIRE
 Part 1: Auditing IRV Elections with RAIRE
 
-Not Eliminated Before (NEB) Assertions
+### Not Eliminated Before (NEB) Assertions
+
 Alice NEB Bob is an assertion saying that Alice cannot be eliminated before Bob, irrespective of which
 other candidates are continuing. In other words, no outcome is possible in which Alice is eliminated
 before Bob. When expressed as a comparison of tallies, this assertion says that the smallest number of
@@ -90,7 +97,7 @@ ballots on which she is ranked first. The largest number of votes Bob can have w
 is the number of ballots on which he is ranked higher than Alice, or he is ranked and Alice is not.
 
     // aka NEB
-    fun assortWinnerOnly(rcvr: CvrIF): Double {
+    fun assortNotEliminatedBefore(rcvr: CvrIF): Double {
         // CVR is a vote for the winner only if it has the winner as its first preference (rank == 1)
         val awinner = if (raire_get_rank(rcvr, contestId, rassertion.winnerId) == 1) 1 else 0
         // CVR is a vote for the loser if they appear and the winner does not, or they appear before the winner
@@ -98,7 +105,9 @@ is the number of ballots on which he is ranked higher than Alice, or he is ranke
         return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
     }
 
-Not Eliminated Next (NEN) Assertions
+
+### Not Eliminated Next (NEN) Assertions
+
 NEN assertions compare the tallies of two candidates under the assumption that a specific set of can-
 didates have been eliminated. An instance of this kind of assertion could look like this: NEN: Alice >
 Bob if only {Alice, Bob, Diego} remain. This means that in the context where Chuan has been eliminated,
@@ -113,10 +122,11 @@ sertion NEN: Diego > Bob if only {Bob,Diego} remain says that Diego has more vot
 context where those two are the only continuing candidates.
 
     // aka NEN
-    fun assortIrvElimination(rcvr: CvrIF): Double {
+    fun assortNotEliminatedNext(rcvr: CvrIF): Double {
         // Context is that all candidates in "already_eliminated" have been
         // eliminated and their votes distributed to later preferences
         val awinner = raire_votefor_elim(rcvr, contestId, rassertion.winnerId, remaining)
         val aloser = raire_votefor_elim(rcvr, contestId, rassertion.loserId, remaining)
         return (awinner - aloser + 1) * 0.5 // affine transform from (-1, 1) -> (0, 1)
-    }
+
+

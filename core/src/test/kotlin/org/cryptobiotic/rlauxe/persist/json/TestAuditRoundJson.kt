@@ -1,7 +1,5 @@
 package org.cryptobiotic.rlauxe.persist.json
 
-import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
@@ -305,7 +303,8 @@ fun check(s1: AuditRoundIF, s2: AuditRoundIF) {
     assertEquals(s1.nmvrs, s2.nmvrs)
     assertEquals(s1.newmvrs, s2.newmvrs)
     assertEquals(s1.auditorWantNewMvrs, s2.auditorWantNewMvrs)
-    assertEquals(s1.samplesNotUsed, s2.samplesNotUsed)
+    assertEquals(s1.mvrsUsed, s2.mvrsUsed)
+    assertEquals(s1.mvrsUnused, s2.mvrsUnused)
 
     assertEquals(s1.contestRounds.size, s2.contestRounds.size)
     s1.contestRounds.forEachIndexed { idx, c1 ->

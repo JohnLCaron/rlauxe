@@ -636,14 +636,14 @@ How to set MaxLoss in an optimal way?
 * [Clca Errors](docs/ClcaErrors.md)
 * [Developer Notes](docs/Developer.md)
 * [Dhondt](docs/Dhondt.md)
+* [Instant Runoff Voting (Raire)](docs/Raire.md)
 * [OneAudit Use Cases](docs/OneAuditUseCases.md)
-* [Raire (Instant Runoff Voting)](docs/Raire.md)
 * [Sample Populations](docs/SamplePopulations.md)
-* [Verification](docs/Verification.md)
 
 ### Pending Review
 * [Attacks](docs/Attacks.md)
 * [Rlauxe Implementation Overview](docs/Overview.md)
 * [Rlauxe Implementation Specificaton](docs/RlauxeSpec.md)
+* [Verification](docs/Verification.md)
 * [VerifierSpec](docs/VerifierSpec.md)
 

@@ -8,17 +8,13 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.io.path.Path
 import kotlin.test.Test
 
-// NOT USED
-// audit variance for SF2024 OA contest 18 (mayoral)
-// the cvrExports are already extracted with createSF2024cvrs90().
-// the audit and contests are already setup with createSfElectionFromCsvExportOA().
-// each repetition will choose a new prn and do a full sort. (alternatively could segment sortedCards by sampleLimit).
+// first plot on OneAuditUseCases.md
 class SfAuditVariance {
-    val nruns = 1 // no variance when there are no errors
+    val nruns = 1 // no variance when there are no errors NOT TRUE, this is oa
     val nsimEst = 10
     val mvrsFuzzPct = .00
 
-    val topDir = "$testdataDir/cases/sf2024"
+    val topDir = "$testdataDir/cases/sf2024/oa"
     val auditDir = "$topDir/audit"
 
     val name = "sf2024AuditVariance"

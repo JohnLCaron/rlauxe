@@ -110,6 +110,8 @@ class BettingMart(
             // – S ← S + Xj
             // tracker.addSample(xj)
             pvalueLast = 1.0 / testStatistic
+            if (pvalueLast > 100_000)
+                println("BettingMart wtf")
             if (pvalueLast < pvalueMin) pvalueMin = pvalueLast
 
             if (terminateOnNullReject && (pvalueLast < riskLimit)) {
@@ -130,8 +132,19 @@ class BettingMart(
             }
         }
 
-        return TestH0Result(status, sampleCount = sampleNumber, pvalueMin, pvalueLast,
-            if (sequences.isOn) sequences else null)
+        // data class TestH0Result(
+        //    val status: TestH0Status,  // how did the test conclude?
+        //    val sampleCount: Int,      // number of samples used in testH0
+        //    val pvalueMin: Double,     // smallest pvalue in the sequence.
+        //    val pvalueLast: Double,    // last pvalue.
+        //    val sequences: DebuggingSequences? = null,
+        //)
+        return TestH0Result(status,
+            sampleCount = sampleNumber,
+            pvalueMin=pvalueMin,
+            pvalueLast=pvalueLast,
+            if (sequences.isOn) sequences else null
+        )
     }
 
     fun setDebuggingSequences(): DebuggingSequences {

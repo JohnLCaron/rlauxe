@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 
+// only used by SfAuditVariance
 class SfSingleRoundAuditTaskGenerator(
     val run: Int,
     val auditDir: String,
@@ -32,6 +33,9 @@ class SfSingleRoundAuditTaskGenerator(
     }
 }
 
+// doing all the assertions in a single task, so its slow
+// skips 8000 cards each run
+// 1. original probably didnt use diluted margin
 class SfSingleRoundAuditTask(
     val run: Int,
     val auditDir: String,

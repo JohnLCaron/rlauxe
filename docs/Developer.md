@@ -475,4 +475,11 @@ simulateRaireTestContest: single raire contest
 
 * investigate assigning costs to mallots sampled and nrounds, and minimize the cost.
 
+**TODO 2/21**
+
+* undervote Pct = totalVotes / (ncards * voteFor)
+  maybe ok for Plurality with nwinners > 1
+  but for IRV seems misleading. perhaps IRV should mean "didnt vote in the contest"?
+
+
 

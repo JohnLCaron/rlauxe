@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
 import org.cryptobiotic.rlauxe.betting.Taus
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.betting.TestH0Result
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeRecord
@@ -115,6 +116,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         val cassertion = assertionRound.assertion as ClcaAssertion // only for clca ??
         val noerror = cassertion.cassorter.noerror()
         val taus = Taus(cassertion.assorter.upperBound())
+        val oaAssorter: OneAuditClcaAssorter? = if (cassertion.cassorter is OneAuditClcaAssorter) cassertion.cassorter else null
 
         val auditRecord = AuditRecord.readFrom(auditDir)
         if (auditRecord == null) {
@@ -145,6 +147,8 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
 
         return if (testH0Result == null) "failed" else buildString {
             appendLine("contest $contestId assertion win/lose = ${cassertion.assorter.winLose()}")
+            var countPoolCards = 0
+            var countPoolCardsMissing = 0
             val seq = testH0Result.sequences
             if (seq != null) {
                 val pvalues = seq.pvalues()
@@ -153,21 +157,29 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
                 appendLine("${sfn("location", 25)}, ${sfn("mvr votes", 10)}, ${sfn("card", 10)}")
                 repeat(count) {
                     val x = seq.xs[it]
-                    val err = if (x == noerror) "" else "*${taus.nameOf(x/noerror)}"
-                    append("${nfn(it+1, 4)}, ${df(x)}$err, ${df(seq.bets[it])}, ${df(seq.tjs[it])}")
-                    append(", ${trunc(seq.testStatistics[it].toString(), 6)}, ${trunc(pvalues[it].toString(), 8)}")
                     val pair = sampler.next()
                     val mvrVotes = pair.first.votes(contestId)?.contentToString() ?: "missing"
                     val card = pair.second
                     val cardVotes = card.votes(contestId)?.contentToString() ?: "N/A"
+                    val err = if ((x == noerror) || (card.poolId() != null)) "" else "*${taus.nameOf(x/noerror)}"
+                    if (card.poolId() != null) {
+                        countPoolCards++
+                        if (mvrVotes == "missing") countPoolCardsMissing++
+                    }
+
+                    append("${nfn(it+1, 4)}, ${df(x)}$err, ${df(seq.bets[it])}, ${df(seq.tjs[it])}")
+                    append(", ${trunc(seq.testStatistics[it].toString(), 6)}, ${trunc(pvalues[it].toString(), 8)}")
                     append(", ${sfn(pair.first.location(), 25)}")
                     append(", ${sfn(mvrVotes, 10)}")
-                    if (card.poolId() != null) append(", pool=${card.poolId()}, ")  // TODO show pool average
+                    if (card.poolId() != null) append(", pool=${card.poolId()}, poolAvg=${df(oaAssorter?.poolAverage(card.poolId()))}")
                         else append(", votes=${cardVotes}")
                     appendLine()
                     if (!card.hasContest(contestId))
                         logger.warn{"possible=${card.hasContest(contestId)}"}
                 }
+                appendLine("\ncardsInPool $countPoolCards pct= ${countPoolCards/seq.xs.size.toDouble()}")
+                appendLine("cardsInPoolMissing $countPoolCardsMissing pct= ${countPoolCardsMissing/countPoolCards.toDouble()}")
+                appendLine("cardsInPoolNotMissing ${countPoolCards-countPoolCardsMissing} pct= ${(countPoolCards-countPoolCardsMissing) / seq.xs.size.toDouble()}")
             }
         }
 

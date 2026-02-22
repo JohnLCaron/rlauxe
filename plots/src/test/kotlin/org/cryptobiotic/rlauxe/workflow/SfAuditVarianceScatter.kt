@@ -10,11 +10,12 @@ import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericScatter
 import org.cryptobiotic.rlauxe.util.nfn
+import org.jetbrains.kotlinx.kandy.util.color.Color
 import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.fail
 
-// comnpare audit variance across SF, SFoa and SFaNS
+// compare audit variance across SF, SFoa and SFaNS
 class SfAuditVarianceScatter {
     val nruns = 10 // no variance when there are no errors
 
@@ -39,16 +40,17 @@ class SfAuditVarianceScatter {
             totalOA.add(total)
         }
 
+        /*
         val totalOANS = mutableListOf<Int>()
         repeat(10) { run ->
             // overrride the margins
             val (total, clcaAssertions) = readAssertionAndTotal("$testdataDir/cases/sf2024oaNS/audit$run", "OneAuditNS", marginOverride)
             allAssertions.addAll(clcaAssertions)
             totalOANS.add(total)
-        }
+        } */
         println("totalClca    = ${nfn(totalClca,6)}")
         println("totalOA avg  = ${nfn(totalOA.average().toInt(),6)}  ${totalOA.sorted()} ")
-        println("totalOANS avg= ${nfn(totalOANS.average().toInt(), 6)} ${totalOANS.sorted()}")
+        // println("totalOANS avg= ${nfn(totalOANS.average().toInt(), 6)} ${totalOANS.sorted()}")
 
         val title = "$name est nmvrs vs margin, no errors"
         val subtitle = "compare SF 2024 audit variances, Ntrials=$nruns useRealSample"
@@ -66,6 +68,9 @@ class SfAuditVarianceScatter {
             yfld = { it.assertion.estMvrs.toDouble() },
             catfld = { it.cat },
             scaleType=scaleType,
+            colors=mapOf("CLCA" to Color.RED,
+                "OneAudit" to Color.LIGHT_BLUE,
+            ),
         )
     }
 }

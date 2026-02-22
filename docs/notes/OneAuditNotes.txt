@@ -112,6 +112,89 @@ So each ballot is assigned a group with assorter value computed as in (A),
 When a ballot is selected to sample, auditors have to find it and create an MVR for it.
 The cassort value is computed as in (B).
 
+
+// See OneAudit Section 2.3.
+
+ Let bi be the ith Mvr
+ Let ci be the ith Cvr
+
+ Suppose we have a CVR ci for every ballot card whose index i is in C. The cardinality of C is |C|.
+ Ballot cards not in C are partitioned into G ≥ 1 disjoint groups {Gg} for which reported assorter subtotals are available.
+
+ Let
+    Āc = SUM{ A(ci) i..N} / N        = AVG_N(A(ci))    average assort value over all Cvrs
+    Āc_C = SUM{ A(ci) i in C}/|C|    = AVG_C(A(ci))    average assort value over Cvrs that have CVRs
+    Āc_Gg = SUM{ A(ci) i in Gg}/|Gg| = AVG_Gg(A(ci))   average assort value over Cvrs in group g
+    Âc_Gg = AVG_Gg(A(ci))   reported assorter mean for group g (TODO whats with Ā vs Â ?)
+
+    Āb = AVG_N(A(bi))       average assort value over all Mvrs
+    Āb_C = AVG_C(A(bi))     average assort value over all Mvrs that have Cvrs
+    Āb_Gg = AVG_Gg(A(bi))   average assort value over all Mvrs in group g
+
+    Āc = ( SUM{ A(ci) i in C} + SUM{ SUM{ A(ci) i in Gg }, g in G} )/N
+
+We dont have A(ci) for i in Gg, so we declare A(ci) := Âc_Gg, the average value in group Gg.
+and substitut the average value Âc_Gg for the SUM{ A(ci) i in Gg}, weighted by |Gg|:
+
+    Āc = ( SUM{ A(ci) i in C} + SUM{ |Gg| * Âc_Gg, g in G} )/N
+
+ The assertion is the claim Āb > 1/2.
+ The reported assorter mean Āc > 1/2.
+
+     Āb > 1/2   iff
+    -Āb < -1/2  iff
+    Āc - Āb < Āc - 1/2    (eq 2)
+
+ define v = 2Āc - 1
+   so v/2 = Āc - 1/2
+and (2) is true if
+
+   Āc - Āb < v/2
+   Sum { A(ci) - A(bi), i=1..N }/N < v/2   (eq 5)
+
+and claim that we can use A(ci) = Âc_Gg.
+
+let bassort(c, b) = (1 - o(c, b)/u) *noerror
+
+            o(c, b) = A(c) - A(b)
+
+Suppose youre in a pool with avg p
+suppose the mvr does not contain the contest, so = A(b) = .5
+
+then bassort = (p - .5) * noerror
+the payoff is = (1 + λ_i ((p - .5) − µ_i))
+              = 1 + λ_i * p - λ_i/2 − λ_i * µ_i
+
+ at λ_i = maxBet = maxLoss/µ_i
+ payoff = 1 + maxBet * (p - 1/2) - maxLoss
+
+
+ (p - .5) − µ_i  ~ p - 1
+
+
+
+ From eq 7 define
+
+    B(bi, ci) ≡ (1 − (ωi / u)) / (2 − v/u)
+              = (u - A(ci) + A(bi)) / (2u - v) in [0, 2u/(2u-v)]] (OA 6)
+
+    B̄b  = AVG_N((u - A(ci) + A(bi)) / (2u - v)
+        =  u - AVG_N(A(ci)) + AVG_N(A(bi)) / (2u - v)
+        = (u - Āc + Āb)  / (2u - v)
+
+  define v := 2Āc − 1 ≤ 2u − 1 < 2u     [show that (2u - 2Āc + 1) > 0, so dont flip the sign]
+
+        Bb = (u - Āc + Āb)  / (2u - 2Āc + 1)       (OA 7)
+
+        So B̄b > 1/2  iff  (u - Āc + Āb) / (2u - 2Āc + 1) > 1/2
+                     iff  (u - Āc + Āb) > (u - Āc + 1/2)
+                     iff  Āb > 1/2   (OA 8)
+
+ If the reported tallies are correct, i.e., if Āc = Āb = (v + 1)/2, then
+
+        B̄b = u /(2u − v)       (OA 9)
+
+
 3. Auditing using batch subtotals (oa-batch)
 
 Also see in oa_batch.ipynb

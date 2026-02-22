@@ -16,8 +16,8 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.listToMap
 import kotlin.random.Random
 
-// Simulation of Raire Contest; pass in the parameters to make RaireContest with and simulate the cvrs;
-// then call raire library to generate the assertions to get  RaireContestUnderAudit
+// Simulation of Raire Contest; pass in the parameters to make RaireContest and simulate the cvrs;
+// then call raire library to generate the assertions to get RaireContestUnderAudit
 // used for testing only
 fun simulateRaireTestContest(N: Int, contestId: Int, ncands:Int, minMargin: Double,
                              undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true)
@@ -39,7 +39,7 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
     if (!quiet) println("===================================\nRound $round")
     var solution = solveForMinAssertion(testContest.info, testCvrs, quiet)
     if (solution == null) {
-        println("round 1 solution is null")
+        println("round $round solution is null ncands=$ncands, minMargin=$minMargin")
         return null
     }
 
@@ -68,7 +68,7 @@ private fun trytoMakeRaireContest(N: Int, contestId: Int, ncands:Int, minMargin:
         if (!quiet) println("===================================\nRound $round")
         solution = solveForMinAssertion(testContest.info, testCvrs, quiet)
         if (solution == null) {
-            println("round $round solution is null")
+            println("round $round solution is null ncands=$ncands, minMargin=$minMargin")
             return null
         }
         marginPct = solution.second.margin / testContest.ncards.toDouble()

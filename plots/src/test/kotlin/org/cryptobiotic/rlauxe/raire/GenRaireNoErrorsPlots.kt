@@ -5,12 +5,14 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.WorkflowResultsIO
 import org.cryptobiotic.rlauxe.rlaplots.category
 import org.cryptobiotic.rlauxe.rlaplots.wrsPlot
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
+import kotlin.io.path.Path
 import kotlin.test.Test
 
 // candidate for removal
@@ -20,12 +22,12 @@ class GenRaireNoErrorsPlots {
     val nsimEst = 100
     val N = 20000
     val name = "raireNoErrors"
-    val dirName = "$testdataDir/$name"
+    val dirName = "$testdataDir/plots/$name"
 
     @Test
     fun raireNoErrorsPlots() {
         val margins =
-            listOf(.005, .006, .008, .01, .012, .016, .02, .03, .04, .05)
+            listOf(.005, .0075, .01, .012, .016, .02, .03, .04, .05)
 
         val config = AuditConfig(AuditType.CLCA, nsimEst = nsimEst)
 
@@ -51,6 +53,7 @@ class GenRaireNoErrorsPlots {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
+        validateOutputDir(Path(dirName))
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
@@ -63,6 +66,7 @@ class GenRaireNoErrorsPlots {
         // fun showSampleSizesVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType, catName: String) {
         showSampleSizesVsMargin(dirName, name, subtitle, ScaleType.Linear, catName = "cat")
         showSampleSizesVsMargin(dirName, name, subtitle, ScaleType.LogLinear, catName = "cat")
+        showSampleSizesVsMargin(dirName, name, subtitle, ScaleType.LogLog, catName = "cat")
     }
 }
 

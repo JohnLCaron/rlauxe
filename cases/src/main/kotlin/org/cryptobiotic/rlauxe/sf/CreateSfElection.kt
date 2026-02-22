@@ -350,14 +350,15 @@ fun createSfElection(
             //    so we need the config at create time, and the config at run time...
             simFuzzPct=mvrFuzz, persistedWorkflowMode=PersistedWorkflowMode.testSimulated,
             simulationStrategy = SimulationStrategy.optimistic,
-            clcaConfig = ClcaConfig(ClcaStrategyType.generalAdaptive2, fuzzMvrs=mvrFuzz)
+            clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
         )
 
         (auditType ==  AuditType.ONEAUDIT) -> AuditConfig(
             AuditType.ONEAUDIT, riskLimit = .05, nsimEst = 20,
+            contestSampleCutoff = 20_000, removeCutoffContests = true,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
             simulationStrategy = SimulationStrategy.optimistic,
-            clcaConfig = ClcaConfig(ClcaStrategyType.generalAdaptive2, fuzzMvrs=mvrFuzz)
+            clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
         )
 
         else -> AuditConfig(

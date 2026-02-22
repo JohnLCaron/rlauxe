@@ -119,6 +119,7 @@ fun <T> genericScatter(
     yfld: (T) -> Double,
     catfld: (T) -> String,
     scaleType: ScaleType = ScaleType.Linear,
+    colors: Map<String, Color>,
 ) {
     val groups = makeGGroups(data, catfld)
 
@@ -171,11 +172,11 @@ fun <T> genericScatter(
                     )
                 } */
                 color(catName) {
-                    scale = categorical(
-                        "DHondt" to Color.RED,
+                    scale = categorical( *colorChoices(colors) )
+                    /*     "DHondt" to Color.RED,
                         "Above" to Color.LIGHT_BLUE,
                         "Below" to Color.PURPLE
-                    )
+                    ) */
                 }
 
                 // tooltips(variables, formats, title, anchor, minWidth, hide)
@@ -192,4 +193,12 @@ fun <T> genericScatter(
     plot.save("${writeFile}.png")
     plot.save("${writeFile}.html")
     println("saved to $writeFile")
+}
+
+fun colorChoices(cats: Map<String, Color>): Array<Pair<String, Color>> {
+    val result = mutableListOf<Pair<String, Color>>()
+    cats.forEach { (key, value) ->
+        result.add( Pair(key, value))
+    }
+    return result.toTypedArray()
 }

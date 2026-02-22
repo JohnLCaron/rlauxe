@@ -251,8 +251,13 @@ data class OneAuditPoolFromCvrs(
 
     override fun toString() = buildString {
         appendLine("OneAuditPoolFromCvrs(poolName='$poolName', poolId=$poolId, totalCards=$totalCards")
+    }
+
+    fun showTabs() = buildString {
+        appendLine("OneAuditPoolFromCvrs(poolName='$poolName', poolId=$poolId, totalCards=$totalCards")
         contestTabs.values.forEach { appendLine("  $it")}
     }
+
 }
 
 fun calcOneAuditPoolsFromMvrs(

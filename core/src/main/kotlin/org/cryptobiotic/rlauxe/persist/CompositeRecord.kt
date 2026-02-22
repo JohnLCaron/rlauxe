@@ -137,9 +137,9 @@ data class CompositeAuditRound(
     override var samplePrns: List<Long>, // card prns to sample for this round (complete, not just new)
     override var nmvrs: Int = 0,
     override var newmvrs: Int = 0,
-
+    override var mvrsUsed: Int = 0,
+    override var mvrsUnused: Int = 0,
     override var auditorWantNewMvrs: Int = -1,
-    override var samplesNotUsed: Int = 0,
 ) : AuditRoundIF {
 
     init {
@@ -147,7 +147,8 @@ data class CompositeAuditRound(
         auditIsComplete = auditRounds.all { it.auditIsComplete }
         nmvrs = contestRounds.map { it.estMvrs }.sum()
         newmvrs = contestRounds.map { it.estNewMvrs }.sum()
-        samplesNotUsed = auditRounds.map { it.samplesNotUsed }.sum()
+        mvrsUsed = auditRounds.map { it.mvrsUsed }.sum()
+        mvrsUnused = auditRounds.map { it.mvrsUnused }.sum()
     }
 
     //// called from viewer

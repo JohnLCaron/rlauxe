@@ -14,9 +14,9 @@ class TestRunRoundAgainCli {
         RunRoundAgainCli.main(
             arrayOf(
                 "-auditDir", auditDir,
-                "-contest", "23",
+                "-contest", "52",
                 "-round", "1",
-                "-assertion", "76/75",
+                "-assertion", "154/155",
             )
         )
     }

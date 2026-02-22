@@ -2,18 +2,7 @@ package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.betting.AlphaMart
-import org.cryptobiotic.rlauxe.betting.BettingFn
-import org.cryptobiotic.rlauxe.betting.BettingMart
-import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
-import org.cryptobiotic.rlauxe.betting.EstimFn
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
-import org.cryptobiotic.rlauxe.betting.SamplerTracker
-import org.cryptobiotic.rlauxe.betting.TestH0Status
-import org.cryptobiotic.rlauxe.betting.TruncShrinkage
+import org.cryptobiotic.rlauxe.betting.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
@@ -21,11 +10,8 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.raire.SimulateIrvTestData
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.workflow.CardManifest
-import kotlin.collections.List
-import kotlin.collections.mutableListOf
 import kotlin.math.min
 
 private val debug = false
@@ -46,13 +32,8 @@ fun estimateSampleSizes(
     previousSamples: Set<Long>,
     showTasks: Boolean = false,
     nthreads: Int = 32,
-    onlyTask: String? = null
+    onlyTask: String? = null,
 ): List<RunRepeatedResult> {
-
-    if ((config.isClca || config.isOA ) && auditRound.roundIdx == 1 && config.simulationStrategy == SimulationStrategy.optimistic) {
-        calculateSampleSizes(config, auditRound)
-        return emptyList()
-    }
 
     // choose a subset of the cards for the estimation for speed
     val cardSamples: CardSamples? = if (config.isPolling) null else
@@ -88,7 +69,7 @@ fun estimateSampleSizes(
         if (task.assertionRound.estimationResult != null) {
             task.assertionRound.estimationResult!!.simNewMvrs = estNewSamples
         } */
-        val estNewSamples = task.assertionRound.estimationResult!!.simNewMvrs
+        val estNewSamples = task.assertionRound.estimationResult!!.simNewMvrsNeeded
         task.assertionRound.estNewMvrs = estNewSamples
         task.assertionRound.estMvrs = min(estNewSamples + task.prevSampleSize, task.contestRound.Npop)
     }
@@ -100,6 +81,10 @@ fun estimateSampleSizes(
         val newSampleSizes = estResults.filter { it.task.contestRound.id == contest.id }.map { it.task.assertionRound.estNewMvrs }
         contest.estNewMvrs = if (newSampleSizes.isEmpty()) 0 else newSampleSizes.max()
         if (!quiet) logger.info{" ** contest ${contest.id} avgSamplesNeeded ${contest.estMvrs} task=${contest.estNewMvrs}"}
+    }
+
+    if ((config.isClca || config.isOA ) && auditRound.roundIdx == 1 && config.simulationStrategy == SimulationStrategy.optimistic) {
+        calculateSampleSizes(config, auditRound, config.isClca) // dont overwrite for OneAudit
     }
 
     // return repeatedResults for debugging and diagnostics
@@ -115,15 +100,16 @@ fun makeEstimationTasks(
     cardSamples: CardSamples?,
     vunderFuzz: OneAuditVunderFuzzer?,
     moreParameters: Map<String, Double> = emptyMap(),
-    onlyTask: String?
+    onlyTask: String?,
 ): List<EstimateSampleSizeTask> {
     val stopwatch = Stopwatch()
     val tasks = mutableListOf<EstimateSampleSizeTask>()
-
+    var estStrategy = "not set"
     // simulate the polling mvrs once for all the assertions for this contest
     val mvrsForPolling = if (config.isPolling) {
             val contest = contestRound.contestUA.contest
             if (!contest.isIrv()) {
+                estStrategy = "simulateCvrsWithDilutedMargin"
                 simulateCvrsWithDilutedMargin(contestRound.contestUA, config)
             } else {
                 // TODO this just makes sure the winner is chosen first (ncards * minMargin) more than any other candidate.
@@ -133,6 +119,7 @@ fun makeEstimationTasks(
                     minMargin,
                     sampleLimits = config.contestSampleCutoff
                 )
+                estStrategy = "SimulateIrvTestData"
                 sim.makeCvrs()
             }
         } else null
@@ -166,6 +153,7 @@ fun makeEstimationTasks(
                         contestRound,
                         assertionRound,
                         startingTestStatistic,
+                        estStrategy,
                         prevSampleSize,
                         moreParameters
                     )
@@ -188,6 +176,7 @@ class EstimateSampleSizeTask(
     val contestRound: ContestRound,
     val assertionRound: AssertionRound,
     val startingTestStatistic: Double, // T, must grow to 1/riskLimit
+    val estStrategy: String,
     val prevSampleSize: Int,
     val moreParameters: Map<String, Double> = emptyMap(),
 ) : ConcurrentTaskG<EstimationResult> {
@@ -205,7 +194,7 @@ class EstimateSampleSizeTask(
                     cardSamples!!,
                     contestRound,
                     assertionRound,
-                    startingTestStatistic
+                    startingTestStatistic,
                 )
             AuditType.POLLING ->
                 estimatePollingAssertionRound(
@@ -215,6 +204,7 @@ class EstimateSampleSizeTask(
                     mvrsForPolling!!,
                     assertionRound,
                     startingTestStatistic,
+                    estStrategy,
                     moreParameters=moreParameters,
                 )
             AuditType.ONEAUDIT ->
@@ -287,7 +277,6 @@ fun estimateClcaAssertionRound(
         )
     }
 
-    // TODO can we use previousErrorCounts to generate fuzz ?
     // for one contest, this takes a list of cards and fuzzes them to use as the mvrs.
     val samplerTracker = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
         ClcaFuzzSamplerTracker(config.simFuzzPct ?: 0.0, cardSamples, contestUA, cassorter, ClcaErrorCounts.empty(noerror, upper))
@@ -314,17 +303,16 @@ fun estimateClcaAssertionRound(
         moreParameters
     )
 
-    // The result is a distribution of ntrials sampleSizes
-    // what makes this simNewMvrs? because of startingTestStatistic?
-    assertionRound. estimationResult = EstimationRoundResult(
+    val (calcMvrsNeeded, _) = assertionRound.calcNewMvrsNeeded(contestRound.contestUA, config.clcaConfig.maxLoss, config.riskLimit)
+    assertionRound.estimationResult = EstimationRoundResult(
         roundIdx,
-        clcaConfig.strategy.name,
-        fuzzPct = config.simFuzzPct,
+        "${config.simFuzzPct} ClcaFuzzSamplerTracker ",
+        calcNewMvrsNeeded = calcMvrsNeeded,
         startingTestStatistic = startingTestStatistic,
         startingErrorRates = measuredErrors.errorRates(), // TODO
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
-        simNewMvrs = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
+        simNewMvrsNeeded = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
     )
 
     logger.debug{"estimateClcaAssertionRound $roundIdx ${name} ${makeDeciles(result.sampleCount)} took=$stopwatch"}
@@ -446,15 +434,20 @@ fun estimateOneAuditAssertionRound(
         moreParameters
     )
 
+    val (calcMvrsNeeded, _) = assertionRound.calcNewMvrsNeeded(contestRound.contestUA, config.clcaConfig.maxLoss, config.riskLimit)
     assertionRound.estimationResult = EstimationRoundResult(
         roundIdx,
-        oaConfig.strategy.name,
-        fuzzPct = config.simFuzzPct,
+        "${vunderFuzz.fuzzPct} OneAuditVunderFuzzer",
+        calcNewMvrsNeeded = calcMvrsNeeded,
         startingErrorRates = measuredErrors.errorRates(), // TODO
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
-        simNewMvrs = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
+        simNewMvrsNeeded = when {               // maybe just for OneAudit?
+            (result.sampleCount.size == 0) -> 0
+            (roundIdx == 1) -> result.findQuantile(.50)
+            else -> result.findQuantile(config.quantile)
+        }
     )
 
     logger.info{ "($stopwatch) estimateOneAuditAssertion round $roundIdx ${name} ${makeDeciles(result.sampleCount)}" }
@@ -493,6 +486,7 @@ fun estimatePollingAssertionRound(
     mvrs: List<Cvr>,
     assertionRound: AssertionRound,
     startingTestStatistic: Double = 1.0,
+    estStrategy: String,
     moreParameters: Map<String, Double> = emptyMap(),
 ): RunRepeatedResult {
     val assorter = assertionRound.assertion.assorter
@@ -520,12 +514,12 @@ fun estimatePollingAssertionRound(
 
     assertionRound.estimationResult = EstimationRoundResult(
         roundIdx,
-        "default",
-        fuzzPct = useFuzz,
+        estStrategy,
+        calcNewMvrsNeeded = 0, // TODO
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
-        simNewMvrs = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
+        simNewMvrsNeeded = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
     )
 
     logger.debug{"estimatePollingAssertionRound $roundIdx ${name} ${makeDeciles(result.sampleCount)} took=$stopwatch"}

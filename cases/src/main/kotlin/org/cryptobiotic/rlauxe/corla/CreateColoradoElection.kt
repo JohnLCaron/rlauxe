@@ -281,7 +281,7 @@ fun createColoradoElectionP(
     }
     val election = CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, config, poolsHaveOneCardStyle)
 
-    CreateAudit("corla", config, election, auditDir = "$topdir/audit", clear = clear)
+    CreateAuditRecord("corla", config, election, auditDir = "$topdir/audit", clear = clear)
     println("createColoradoOneAudit took $stopwatch")
 }
 

@@ -42,6 +42,19 @@ fun sampleWithContestCutoff(
         maxContest.done = true
         contestsNotDone.remove(maxContest)
     }
+
+    if (config.removeCutoffContests && config.contestSampleCutoff != null) {
+        contestsNotDone.forEach { contestRound ->
+            val maxCalc = contestRound.assertionRounds.maxOfOrNull { it.estimationResult?.calcNewMvrsNeeded ?: 0 }
+            if (maxCalc != null && maxCalc > config.contestSampleCutoff) {
+                contestRound.status = TestH0Status.FailMaxSamplesAllowed
+                contestRound.included = false
+                contestRound.done = true
+                logger.warn{" *** calcNewMvrsNeeded ${maxCalc} too large, remove contest ${contestRound.id} with status FailMaxSamplesAllowed"}
+            }
+        }
+    }
+
     logger.debug{"sampleWithContestCutoff success on ${auditRound.contestRounds.count { !it.done }} contests: round ${auditRound.roundIdx} took ${stopwatch}"}
 }
 

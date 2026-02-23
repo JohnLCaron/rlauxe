@@ -61,6 +61,7 @@ fun calculateSampleSizes(
             maxNewEstMvrs = max( maxNewEstMvrs, calcNewSamples)
             maxEstMvrs = max( maxNewEstMvrs, assertionRound.estMvrs)
         }
+
         if (overwrite) {
             contestRound.estNewMvrs = maxNewEstMvrs
             contestRound.estMvrs = maxEstMvrs

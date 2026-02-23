@@ -110,8 +110,6 @@ class BettingMart(
             // – S ← S + Xj
             // tracker.addSample(xj)
             pvalueLast = 1.0 / testStatistic
-            if (pvalueLast > 100_000)
-                println("BettingMart wtf")
             if (pvalueLast < pvalueMin) pvalueMin = pvalueLast
 
             if (terminateOnNullReject && (pvalueLast < riskLimit)) {

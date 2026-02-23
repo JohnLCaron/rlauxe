@@ -343,7 +343,7 @@ fun createBoulderElection(
 
     val election = CreateBoulderElection(export, sovo, isClca = auditType.isClca(), poolsHaveOneCardStyle)
 
-    CreateAudit("boulder", config, election, auditDir = auditDir, clear = clear)
+    CreateAuditRecord("boulder", config, election, auditDir = auditDir, clear = clear)
     println("createBoulderElectionOAnew took $stopwatch")
 }
 

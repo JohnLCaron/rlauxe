@@ -152,7 +152,7 @@ fun startTestElectionClca(
         addRaire,
         addRaireCandidates)
 
-    CreateAudit("startTestElectionClca", config, election, auditDir = "$topdir/audit", clear = false)
+    CreateAuditRecord("startTestElectionClca", config, election, auditDir = "$topdir/audit", clear = false)
 }
 
 class TestClcaElection(
@@ -238,7 +238,7 @@ fun startTestElectionPolling(
     )
 
     // dont clear, we've already started writing
-    CreateAudit("startTestElectionPolling", config, election, auditDir = auditDir, clear=false)
+    CreateAuditRecord("startTestElectionPolling", config, election, auditDir = auditDir, clear=false)
 }
 
 class TestPollingElection(
@@ -347,7 +347,7 @@ fun startTestElectionOneAudit(
         extraPct=extraPct,
     )
 
-    CreateAudit("RunRlaStartOneAudit", config, election, auditDir = "$topdir/audit", clear = false)
+    CreateAuditRecord("RunRlaStartOneAudit", config, election, auditDir = "$topdir/audit", clear = false)
 
     // write the sorted cards: why isnt this part of CreateAudit? Because seed must be generated after commitment to cardManifest
     val publisher = Publisher(auditDir)

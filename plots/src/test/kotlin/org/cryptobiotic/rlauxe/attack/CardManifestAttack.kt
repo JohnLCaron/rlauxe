@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CreateAudit
+import org.cryptobiotic.rlauxe.audit.CreateAuditRecord
 import org.cryptobiotic.rlauxe.audit.CreateElectionIF
 import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.audit.PopulationIF
@@ -249,7 +249,7 @@ class CardManifestAttack {
         val config = AuditConfig(
             AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10,
         )
-        CreateAudit("hideInOtherPoolAttack", config, election, auditDir = "$topdir/audit",)
+        CreateAuditRecord("hideInOtherPoolAttack", config, election, auditDir = "$topdir/audit",)
 
         val publisher = Publisher(auditdir)
         writeSortedCardsInternalSort(publisher, config.seed)

@@ -375,7 +375,7 @@ class TestHasStyle {
         val election =
             CreateElectionFromCvrs(contestsUA, testCvrs, cardPools = null, cardStyles = cardStyles, config = config)
 
-        CreateAudit("testOneCardBallots", config, election, auditDir = "$topdir/audit", clear = true)
+        CreateAuditRecord("testOneCardBallots", config, election, auditDir = "$topdir/audit", clear = true)
 
         return runTestPersistedAudit(topdir, contestsUA)
     }
@@ -411,7 +411,7 @@ class TestHasStyle {
         val election =
             CreateElectionFromCards(contestsUA, testCards, cardPools = null, cardStyles = cardStyles, config = config)
 
-        CreateAudit("testOneCardBallots", config, election, auditDir = "$topdir/audit", clear = true)
+        CreateAuditRecord("testOneCardBallots", config, election, auditDir = "$topdir/audit", clear = true)
 
         return runTestPersistedAudit(topdir, contestsUA)
     }

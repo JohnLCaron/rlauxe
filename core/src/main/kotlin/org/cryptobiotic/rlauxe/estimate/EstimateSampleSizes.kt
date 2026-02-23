@@ -48,6 +48,7 @@ fun estimateSampleSizes(
     // uses config.simFuzzPct to fuzz the non-pooled cvrs; the pooled cvrs are simulated using Vunder
     val vunderFuzz = if (!config.isOA) null else {
         val infos = auditRound.contestRounds.map { it.contestUA.contest.info() }.associateBy { it.id }
+        // TODO need cardPools always?
         OneAuditVunderFuzzer(cardPools!!, infos, config.simFuzzPct ?: 0.0, cardSamples!!.cards)
     }
 

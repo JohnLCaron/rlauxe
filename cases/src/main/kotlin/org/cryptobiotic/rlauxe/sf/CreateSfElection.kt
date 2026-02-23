@@ -373,7 +373,7 @@ fun createSfElection(
         config = config,
         poolsHaveOneCardStyle=poolsHaveOneCardStyle,
     )
-    CreateAudit("sf2024", config, election, auditDir = "$topdir/audit", )
+    CreateAuditRecord("sf2024", config, election, auditDir = "$topdir/audit", )
 
     // convert the cvrExports to the private mvrs
     val unsortedMvrs = election.createUnsortedMvrs()

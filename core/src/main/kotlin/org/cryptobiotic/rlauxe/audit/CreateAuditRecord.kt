@@ -39,7 +39,7 @@ interface CreateElectionIF {
 
 private val logger = KotlinLogging.logger("CreateAudit")
 
-class CreateAudit(val name: String, val config: AuditConfig, election: CreateElectionIF, val auditDir: String, clear: Boolean = true) {
+class CreateAuditRecord(val name: String, val config: AuditConfig, election: CreateElectionIF, val auditDir: String, clear: Boolean = true) {
 
     val stopwatch = Stopwatch()
     val contestsUA = election.contestsUA()

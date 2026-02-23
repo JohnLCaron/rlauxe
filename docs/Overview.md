@@ -269,28 +269,6 @@ is the core abstraction, used by assorters and all the core routines. It represe
 
 is used to make the CardLocationManifest (aka Ballot Manifest), especially when there are no CVRs.
 
-## Audit details
-
-The purpose of the audit is to determine whether the reported winner(s) are correct, to within the chosen risk limit.
-Contests are removed from the audit if:
-- The contest has no losers (e.g. the number of candidate <= number of winners); the contest is marked NoLosers.
-- The contest has no winners (e.g. no candidates receive minFraction of the votes in a SUPERMAJORITY contest); the contest is marked NoWinners.
-- The contest is a tie, or its reported margin is less than _auditConfig.minMargin_; the contest is marked MinMargin.
-- The contest's reported margin is less than its phantomPct (Np/Nc); the audit is marked TooManyPhantoms.
-- The contest internal fields are inconsistent; the audit is marked ContestMisformed.
-- The contest is manually removed by the Auditors; the audit is marked AuditorRemoved.
-
-For each audit round:
-1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function,
-   by running simulations of the contest with its votes and margins, and an estimate of the error rates.
-2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited.
-   This may be done with an automated algorithm, or the Auditor may make individual contest choices.
-3. _Random sampling_: The actual ballots to be sampled are selected from the sorted Manifest until the sample size is satisfied.
-4. _Manual Audit_: find the chosen paper ballots that were selected to audit and do a manual audit of each.
-5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
-6. _Run the audit_: For each contest, calculate if the risk limit is satisfied, based on the manual audits.
-7. _Decide on Next Round_: for each contest not satisfied, decide whether to continue to another round, or call for a hand recount.
-
 ## MVRs 
 
 For testing, we simulate the MVRs and place them into auditDir/private/testMvrs.csv. For a real audit, we might still use simulated
@@ -330,3 +308,51 @@ Each audit type has specialized processing for creating the AuditableCards and t
       OneAudit with styles=true, where the margin adjustment is zero.
 
 4. **Polling audit**: we create simulated CVRs that exactly match the reported vote count, ncards and undervotes to use as the test MVRs.
+
+
+## Audit Workflow
+
+1. Create the election
+   1. Implement CreateElectionIF for the specifics of your election
+   2. Run CreateAuditRecord to write the election AuditRecord
+      1. This calls checkContestsCorrectlyFormed() to check the AuditRecord is well-formed.
+   3. Choose the random seed and save into the AuditRecord
+   4. Sort the cardManifest by the PRNG
+2. Initial estimation of sample sizes
+   1. Call runRound to estimate the sample sizes.
+   2. Use rlauxe-viewer to examine the estimates, and modify which contests to audit.
+3A. Run a Test Audit Round 
+   1. Call runRound to simulate the mvrs and run the audit round..
+   2. If not all contests are complete, runRound will estimate the next round's sample sizes.
+   3. Use rlauxe-viewer to examine the audit results and estimates for the next round, and modify which contests to audit.
+   4. Repeat as needed
+3B. Run a Real Audit Round
+   1. Gather the ballots selected to hand audit and create MVRs for them.
+   2. Call runRound to run the audit round.
+   3. If not all contests are complete, runRound will estimate the next round's sample sizes.
+   4. Use rlauxe-viewer to examine the audit results and estimates for the next round, and modify which contests to audit.
+   5. Repeat as needed
+4. Run Verifier on the AuditRecord to check for problems.
+
+
+## Audit details
+
+The purpose of the audit is to determine whether the reported winner(s) are correct, to within the chosen risk limit.
+Contests are removed from the audit if:
+- The contest has no losers (e.g. the number of candidate <= number of winners); the contest is marked NoLosers.
+- The contest has no winners (e.g. no candidates receive minFraction of the votes in a SUPERMAJORITY contest); the contest is marked NoWinners.
+- The contest is a tie, or its reported margin is less than _auditConfig.minMargin_; the contest is marked MinMargin.
+- The contest's reported margin is less than its phantomPct (Np/Nc); the audit is marked TooManyPhantoms.
+- The contest internal fields are inconsistent; the audit is marked ContestMisformed.
+- The contest is manually removed by the Auditors; the audit is marked AuditorRemoved.
+
+For each audit round:
+1. _Estimation_: for each contest, estimate how many samples are needed to satisfy the risk function,
+   by running simulations of the contest with its votes and margins, and an estimate of the error rates.
+2. _Choosing sample sizes_: the Auditor decides which contests and how many samples will be audited.
+   This may be done with an automated algorithm, or the Auditor may make individual contest choices.
+3. _Random sampling_: The actual ballots to be sampled are selected from the sorted Manifest until the sample size is satisfied.
+4. _Manual Audit_: find the chosen paper ballots that were selected to audit and do a manual audit of each.
+5. _Create MVRs_: enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
+6. _Run the audit_: For each contest, calculate if the risk limit is satisfied, based on the manual audits.
+7. _Decide on Next Round_: for each contest not satisfied, decide whether to continue to another round, or call for a hand recount.

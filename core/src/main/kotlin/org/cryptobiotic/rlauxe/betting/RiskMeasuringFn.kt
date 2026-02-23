@@ -26,20 +26,24 @@ enum class TestH0Status(val rank: Int, val complete: Boolean, val success: Boole
     // starting state
     InProgress(0,false, false),
 
-    // "pre-audit" contest status
+    // preAuditStatus contest status set by ContestWithAssertions
     NoLosers(1,true, true),  // no losers, ie ncandidates <= nwinners
     NoWinners(2,true, true),  // no winners, eg all candidates have < minFraction
+
+    // preAuditStatus contest status set by checkContestsCorrectlyFormed and VerifyContests
     ContestMisformed(3,true, false), // Contest incorrectly formed
     MinMargin(4,true, false), // margin too small for RLA to efficiently work
     TooManyPhantoms(5,true, false), // too many phantoms, makes margin < 0
 
+    // set by sampleWithContestCutoff
     FailMaxSamplesAllowed(6,true, false),  // estimated samples greater than maximum samples allowed
-    AuditorRemoved(7,true, false),  // auditor decide to remove it
+    // set manually by auditor
+    AuditorRemoved(7,true, false),  // auditor decided to remove it
 
-    // possible returns from RiskTestingFn
+    //// possible returns from RiskTestingFn
     LimitReached(10,false, false),  // cant tell from the number of samples available
     StatRejectNull(11,true, true), // statistical rejection of H0
-    //// only happens when sampling without replacement all the way close to Nc
+    // only happens when sampling without replacement all the way close to Nc
     SampleSumRejectNull(12,true, true), // SampleSum > Nc / 2, so we know H0 is false
     AcceptNull(13,true, false), // SampleSum + (all remaining ballots == 1) < Nc / 2, so we know that H0 is true.
 }

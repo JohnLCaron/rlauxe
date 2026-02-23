@@ -36,7 +36,7 @@ class TestPersistedWorkflow {
         val contestsUA = contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
-        CreateAudit("testPersistedSingleClca", config, election, auditDir = auditdir, clear = true)
+        CreateAuditRecord("testPersistedSingleClca", config, election, auditDir = auditdir, clear = true)
 
         writeUnsortedPrivateMvrs(Publisher(auditdir), testMvrs, config.seed)
 
@@ -63,7 +63,7 @@ class TestPersistedWorkflow {
         val contestsUA = contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
 
         val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
-        CreateAudit("testPersistedAuditClca",  config, election, auditDir = auditdir,  clear = true)
+        CreateAuditRecord("testPersistedAuditClca",  config, election, auditDir = auditdir,  clear = true)
 
         // have to write this here, where we know the mvrs
         writeUnsortedPrivateMvrs(Publisher(auditdir), testMvrs, config.seed)
@@ -134,7 +134,7 @@ class TestPersistedWorkflow {
         val contestsUA = listOf(contestOA)
 
         val election = CreateElectionFromCvrs(contestsUA, mvrs, cardPools, config=config)
-        CreateAudit("testPersistedAuditPolling", config, election, auditDir = "$topdir/audit", clear = true)
+        CreateAuditRecord("testPersistedAuditPolling", config, election, auditDir = "$topdir/audit", clear = true)
 
         runPersistedAudit(topdir, test=false)
     }

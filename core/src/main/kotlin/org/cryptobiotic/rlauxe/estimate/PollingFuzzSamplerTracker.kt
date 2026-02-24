@@ -93,17 +93,13 @@ fun makeFuzzedCvrsForPolling(infoList: List<ContestInfo>,
         val r = Random.nextDouble(1.0)
         cvrb.contests.forEach { (_, cvb) ->
         if (r < fuzzPct) {
-                val ccontest: CvrContest = cvb.contest
-                if (isIRV[ccontest.name]!!) {
-                    switchCandidateRankings(cvb, ccontest.candidateIds)
-                } else {
-                    val currId: Int? = if (cvb.votes.size == 0) null else cvb.votes[0] // TODO only one vote allowed
-                    cvb.votes.clear()
-                    // choose a different candidate, or none.
-                    val ncandId = chooseNewCandidate(currId, ccontest.candidateIds) // from ClcaFuzzSamplerTracker
-                    if (ncandId != null) {
-                        cvb.votes.add(ncandId)
-                    }
+            val ccontest: CvrContest = cvb.contest
+                val currId: Int? = if (cvb.votes.size == 0) null else cvb.votes[0] // TODO only one vote allowed
+                cvb.votes.clear()
+                // choose a different candidate, or none.
+                val ncandId = chooseNewCandidate(currId, ccontest.candidateIds) // from ClcaFuzzSamplerTracker
+                if (ncandId != null) {
+                    cvb.votes.add(ncandId)
                 }
             }
         }
@@ -115,22 +111,4 @@ fun makeFuzzedCvrsForPolling(infoList: List<ContestInfo>,
     if (welford != null) { welford.update(fuzzPct - got) }
     // println("   fuzzPct=$fuzzPct expect=$expect count: $count")
     return cvrbs.map { it.build() }
-}
-
-// for IRV
-fun switchCandidateRankings(cvb: ContestVoteBuilder, candidateIds: List<Int>) {
-    val ncands = candidateIds.size
-    val size = cvb.votes.size
-    if (size == 0) { // no votes -> random one vote
-        val candIdx = Random.nextInt(ncands)
-        cvb.votes.add(candidateIds[candIdx])
-    } else if (size == 1) { // one votes -> no votes
-        cvb.votes.clear()
-    } else { // switch two randomly selected votes
-        val ncandIdx1 = Random.nextInt(size)
-        val ncandIdx2 = Random.nextInt(size)
-        val save = cvb.votes[ncandIdx1]
-        cvb.votes[ncandIdx1] = cvb.votes[ncandIdx2]
-        cvb.votes[ncandIdx2] = save
-    }
 }

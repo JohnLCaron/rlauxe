@@ -7,14 +7,10 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.raire.RaireContest
-import org.cryptobiotic.rlauxe.raire.VoteConsolidator
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.VunderPicker
 import org.cryptobiotic.rlauxe.util.roundToClosest
-import kotlin.collections.component1
-import kotlin.collections.component2
 import kotlin.math.min
 import kotlin.math.round
 
@@ -59,7 +55,7 @@ fun simulateCvrsWithDilutedMargin(contestUA: ContestWithAssertions, config: Audi
     return makeVunderCvrs(vunder, nphantoms, "simCvr", limit, null)
 }
 
-// If youre going to simulate IRV, you need the VoteConsolidator (or the Cvrs).
+/* If youre going to simulate IRV, you need the VoteConsolidator (or the Cvrs).
 // We have the VoteConsolidator in the pools for OneAudit, but not otherwise
 fun simulateCvrsForIrv(contestUA: ContestWithAssertions, config: AuditConfig, irvVotes: VoteConsolidator): List<Cvr> {
     val contest = contestUA.contest as RaireContest
@@ -77,7 +73,7 @@ fun simulateCvrsForIrv(contestUA: ContestWithAssertions, config: AuditConfig, ir
     val vunder = Vunder(contest.id, null, voteCounts, undervotes, missing, 1)
     val ncvrs = min( contest.Nc, config.contestSampleCutoff ?: Int.MAX_VALUE)
     return makeVunderCvrs(vunder, contest.Nphantoms(), "simIrv", ncvrs, null)
-}
+} */
 
 fun makeVunderCvrs(vunder: Vunder, phantomCount: Int, prefix: String, limit: Int, poolId: Int?): List<Cvr> {
     val vunderPicker = VunderPicker(vunder)

@@ -67,32 +67,10 @@ class ClcaFuzzSamplerTracker(
         lastVal = null
         clcaErrorTracker.reset()
         clcaErrorTracker.setFromPreviousCounts(previousErrorCounts)
-
-        // if (contest.id == 28) checkFuzzed()
     }
 
     fun remakeFuzzed(): List<AuditableCard> {
         return makeFuzzedCardsForClca(listOf(contest.info()), samples, simFuzzPct)
-    }
-
-    fun checkFuzzed() {
-        val testErrors = ClcaErrorTracker2(cassorter.noerror(), cassorter.assorter.upperBound())
-        cvrPairs.forEach { (mvr, card) ->
-            if (card.hasContest(contest.id)) { // should always be true
-                val nextVal = cassorter.bassort(mvr, card, hasStyle = card.exactContests())
-                testErrors.addSample(nextVal, card.poolId == null)
-            }
-        }
-        val counts = testErrors.measuredClcaErrorCounts()
-
-        val (est, bet) = cassorter.estWithOptimalBet2(contestUA, .9, 0.05, counts)
-        val sumCounts = counts.errorCounts().map { it.value }.sum()
-        val pct = sumCounts/cvrPairs.size.toDouble()
-        // if (pct > 10 * fuzzPct) {
-            val logt = counts.expectedValueLogt(bet)
-            println("simulation $simulation bet=$bet est=$est counts = ${counts.show()} totalSamples=${counts.totalSamples}")
-        // }
-        simulation++
     }
 
     override fun maxSamples() = maxSamples

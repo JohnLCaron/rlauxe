@@ -30,6 +30,7 @@ fun sampleWithContestCutoff(
             break
         }
 
+        // TODO TEST
         // find the contest with the largest estimation size eligible for removal, remove it
         val maxEstimation = contestsNotDone.maxOf { it.estSampleSizeEligibleForRemoval() }
         val maxContest = contestsNotDone.first { it.estSampleSizeEligibleForRemoval() == maxEstimation }

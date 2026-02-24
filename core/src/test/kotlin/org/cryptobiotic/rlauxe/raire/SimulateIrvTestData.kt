@@ -41,11 +41,11 @@ data class SimulateIrvTestData(
     // make candidate choices where candidate 0 is the first choice
     private fun makeCvrWithLeading0(cvrIdx: Int): Cvr {
         // vote for a random number of candidates, including 0
-        val nprefs = 1 + Random.nextInt(ncands - 1)
+        val nprefs = 1 + Random.Default.nextInt(ncands - 1)
         val prefs = mutableListOf<Int>()
         prefs.add(0) // vote for zero first
         while (prefs.size < nprefs) {
-            val voteFor = Random.nextInt(ncands)
+            val voteFor = Random.Default.nextInt(ncands)
             if (!prefs.contains(voteFor)) prefs.add(voteFor)
         }
         return Cvr("cvr$cvrIdx", mapOf(contest.id to prefs.toIntArray()))
@@ -54,10 +54,10 @@ data class SimulateIrvTestData(
     // make candidate choices randomly
     private fun makeCvr(cvrIdx: Int): Cvr {
         // vote for a random number of candidates, including 0
-        val nprefs = Random.nextInt(ncands)
+        val nprefs = Random.Default.nextInt(ncands)
         val prefs = mutableListOf<Int>()
         while (prefs.size < nprefs) {
-            val voteFor = Random.nextInt(ncands)
+            val voteFor = Random.Default.nextInt(ncands)
             if (!prefs.contains(voteFor)) prefs.add(voteFor)
         }
         return Cvr("cvr$cvrIdx", mapOf(contest.id to prefs.toIntArray()))

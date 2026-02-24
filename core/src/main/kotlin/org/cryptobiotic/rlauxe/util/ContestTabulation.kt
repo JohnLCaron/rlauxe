@@ -244,11 +244,3 @@ fun tabulateCardsAndCount(cards: CloseableIterator<AuditableCard>, infos: Map<In
     }
     return Pair(tabs, count)
 }
-
-fun showTabs(what: String, tabs: Map<Int, ContestTabulation>) = buildString {
-    appendLine(what)
-    tabs.forEach { (id, tab) ->
-        appendLine(" $tab")
-    }
-    appendLine()
-}

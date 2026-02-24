@@ -7,16 +7,10 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
-import org.cryptobiotic.rlauxe.raire.RaireContest
-import org.cryptobiotic.rlauxe.raire.SimulateIrvTestData
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.math.min
-
-private val debug = false
-private val debugSampleDist = false
-private val debugSampleSmall = false
 
 private val logger = KotlinLogging.logger("EstimateSampleSizes")
 
@@ -64,9 +58,10 @@ fun estimateSampleSizes(
     // put results into assertionRounds
     estResults.forEach { estResult ->
         val task = estResult.task
-        val result = estResult.repeatedResult
 
-        /* val estNewSamples = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
+        /*
+        val result = estResult.repeatedResult
+        val estNewSamples = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
         if (task.assertionRound.estimationResult != null) {
             task.assertionRound.estimationResult!!.simNewMvrs = estNewSamples
         } */
@@ -106,14 +101,15 @@ fun makeEstimationTasks(
     val stopwatch = Stopwatch()
     val tasks = mutableListOf<EstimateSampleSizeTask>()
     var estStrategy = "not set"
+
     // simulate the polling mvrs once for all the assertions for this contest
     val mvrsForPolling = if (config.isPolling) {
             val contest = contestRound.contestUA.contest
-            if (!contest.isIrv()) {
+            // if (!contest.isIrv()) {
                 estStrategy = "simulateCvrsWithDilutedMargin"
                 simulateCvrsWithDilutedMargin(contestRound.contestUA, config)
-            } else {
-                // TODO this just makes sure the winner is chosen first (ncards * minMargin) more than any other candidate.
+            /* } else {  / cant do IRV Polling
+                // this just makes sure the winner is chosen first (ncards * minMargin) more than any other candidate.
                 val minMargin = contestRound.contestUA.minDilutedMargin()!! // not sure about this...
                 val sim = SimulateIrvTestData(
                     contest as RaireContest,
@@ -122,7 +118,7 @@ fun makeEstimationTasks(
                 )
                 estStrategy = "SimulateIrvTestData"
                 sim.makeCvrs()
-            }
+            } */
         } else null
 
     contestRound.assertionRounds.filter { !it.status.complete }.map { assertionRound ->
@@ -252,10 +248,7 @@ fun estimateClcaAssertionRound(
     val noerror=cassorter.noerror()
     val upper=cassorter.assorter.upperBound()
 
-    val measuredErrors = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive)
-        assertionRound.accumulatedErrorCounts(contestRound) // TODO switch to previousErrorCounts ?
-    else
-        assertionRound.previousErrorCounts()
+    val measuredErrors = assertionRound.previousErrorCounts()
 
     val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
 
@@ -379,10 +372,7 @@ fun estimateOneAuditAssertionRound(
     // one set of fuzzed pairs for all contests and assertions.
     val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
 
-    val measuredErrors = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive)
-        assertionRound.accumulatedErrorCounts(contestRound) // TODO switch to previousErrorCounts ?
-    else
-        assertionRound.previousErrorCounts()
+    val measuredErrors = assertionRound.previousErrorCounts()
 
     val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
 

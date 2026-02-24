@@ -7,37 +7,37 @@
                 {
                     "assorterDesc": "0/1 OneAuditTest",
                     "roundIdx": 1,
-                    "estSampleSize": 223,
-                    "estNewSampleSize": 223,
+                    "estSampleSize": 197,
+                    "estNewSampleSize": 197,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "simulate",
-                        "fuzzPct": 0.001,
+                        "strategy": "0.001 OneAuditVunderFuzzer",
+                        "calcMvrsNeeded": 224,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            195,
+                            123,
+                            171,
+                            173,
+                            186,
+                            197,
                             207,
-                            217,
-                            218,
-                            223,
-                            245,
-                            287,
-                            372,
-                            429,
-                            430
+                            222,
+                            252,
+                            279,
+                            280
                         ],
                         "ntrials": 10,
-                        "simNewMvrs": 223
+                        "simNewMvrs": 197
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 223,
-            "estMvrs": 223,
-            "estNewMvrs": 223,
+            "maxSampleAllowed": 197,
+            "estMvrs": 197,
+            "estNewMvrs": 197,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -46,8 +46,9 @@
     ],
     "auditWasDone": false,
     "auditIsComplete": false,
-    "nmvrs": 223,
-    "newmvrs": 223,
-    "auditorWantNewMvrs": -1,
-    "samplesNotUsed": 0
+    "nmvrs": 197,
+    "newmvrs": 197,
+    "mvrsUnused": 0,
+    "mvrsUsed": 0,
+    "auditorWantNewMvrs": -1
 }

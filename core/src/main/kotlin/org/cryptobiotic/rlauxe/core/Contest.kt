@@ -63,7 +63,7 @@ data class ContestInfo(
 
     override fun toString() = desc()
 
-    fun show() = buildString {
+    fun show() = buildString {  // used by viewer
         appendLine("$name ($id) choiceFunction=${choiceFunction} nwinners=$nwinners")
         candidateNames.forEach { (name, id) -> appendLine("  $name -> $id") }
     }

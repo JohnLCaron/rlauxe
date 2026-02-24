@@ -47,7 +47,7 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
         }
     }
 
-    fun expectedValueLogt(lam: Double): Double {
+    /* fun expectedValueLogt(lam: Double): Double {
         val p0 = 1.0 - sumRates()
         val mui = 0.5
         val noerrorTerm = ln(1.0 + lam * (noerror - mui)) * p0
@@ -58,7 +58,7 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
         }
         val total = noerrorTerm + sumClcaTerm
         return total
-    }
+    } */
 
     override fun toString() = buildString {
         appendLine("ClcaErrorCounts(totalSamples=$totalSamples, noerror=$noerror, upper=$upper")

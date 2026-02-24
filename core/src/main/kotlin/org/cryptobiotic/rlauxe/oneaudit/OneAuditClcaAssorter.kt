@@ -106,12 +106,6 @@ class OneAuditClcaAssorter(
     // TODO may be very large, may not want to serialize to Json, perhaps rehydrate from cardPool.csv
     var oaAssortRates = OneAuditAssortValueRates(emptyMap(), 0)
 
-    fun bassortOld(mvr: CvrIF, cvr:CvrIF, hasStyle:Boolean=true): Double {
-        val overstatement = overstatementError(mvr, cvr, hasStyle) // ωi eq (1)
-        val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
-        return tau * noerror   // Bi eq (7)
-    }
-
     fun poolAverage(poolId: Int?) = poolAverages.assortAverage[poolId]
 
     // B(bi, ci)
@@ -127,9 +121,9 @@ class OneAuditClcaAssorter(
         }
 
         val overstatement = overstatementPoolError(mvr, poolAverage, hasStyle) // ωi
-        val tau = (1.0 - overstatement / this.assorter.upperBound())
+        val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
 
-        val result =  tau * noerror()
+        val result =  tau * noerror()  // Bi eq (7)
         if (result > upperBound()) {
             throw RuntimeException("OneAuditClcaAssorter result $result > upper ${upperBound()}")
         }

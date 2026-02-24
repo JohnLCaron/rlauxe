@@ -26,7 +26,6 @@ import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
-import org.cryptobiotic.rlauxe.util.showTabs
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
@@ -317,4 +316,12 @@ data class ContestVotes(
 ) {
     fun ncards() = ncards
     fun undervotes() = undervotes
+}
+
+fun showTabs(what: String, tabs: Map<Int, ContestTabulation>) = buildString {
+    appendLine(what)
+    tabs.forEach { (id, tab) ->
+        appendLine(" $tab")
+    }
+    appendLine()
 }

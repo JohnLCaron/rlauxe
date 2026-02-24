@@ -9,7 +9,9 @@ import org.cryptobiotic.rlauxe.dominion.ContestVotes
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
+import org.cryptobiotic.rlauxe.raire.VoteConsolidator
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -191,6 +193,25 @@ class CreateBoulderElection(
         return cvrs
     }
 
+    private fun checkVunderEquivilentTab(vunder: Vunder, contestTab: ContestTabulation): Boolean {
+        val tabNcards = (contestTab.nvotes() + contestTab.undervotes) / contestTab.voteForN
+        val vncards = (vunder.nvotes + vunder.undervotes) / vunder.voteForN + vunder.missing
+        var allOk = true
+        allOk = allOk && (vunder.nvotes == contestTab.nvotes())
+        //allOk = allOk && (vunder.undervotes == contestTab.undervotes)
+        //allOk = allOk && (vunder.ncards - vunder.missing == contestTab.ncards())
+        // data class Vunder2(val contestId: Int, val poolId: Int, val voteCounts: List<Pair<IntArray, Int>>, val undervotes: Int, val missing: Int, val voteForN: Int) {
+        if (contestTab.isIrv) {
+            // val irvPairs = contestTab.irvVotes.votes.map { (harr, count) -> Pair(harr.array, count) }
+            val vunderVc = VoteConsolidator()
+            vunder.voteCounts.forEach { (cands, count) -> vunderVc.addVotes(cands, count) }
+            allOk = allOk && vunderVc.equals(contestTab.irvVotes)
+        } else {
+            allOk = allOk && checkEquivilentVotes(vunder.cands(), contestTab.votes)
+        }
+        return allOk
+    }
+
     fun makeOAContests(): List<OneAuditContestBoulder> {
         val oa2Contests = mutableListOf<OneAuditContestBoulder>()
         infoList.forEach { info ->
@@ -261,7 +282,7 @@ class CreateBoulderElection(
 
     override fun contestsUA() = contestsUA
     override fun populations() = if (isClca) emptyList() else cardPoolBuilders
-    override fun cardPools() = null
+    override fun makeCardPools() = if (isClca) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
     override fun cards() = createCards()
     override fun ncards() = ncards
 
@@ -296,7 +317,7 @@ class CreateBoulderElection(
                     Cvr(
                         id = "pool${cleanName} card ${poolIndex + 1}",
                         phantom = false,
-                        votes = pool.regVotes().mapValues { intArrayOf() }, // empty votes
+                        votes = pool.voteTotals.mapValues { intArrayOf() }, // empty votes
                         poolId = pool.poolId
                     )
                 )

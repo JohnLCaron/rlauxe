@@ -39,7 +39,6 @@ class TestOneAuditFuzzers {
 
         assertEquals(1, pools.size)
         val cardPool = pools.first()
-        println(cardPool.show())
         assertTrue(cardPool.hasContest(info.id))
         assertFalse(cardPool.hasContest(42))
         assertEquals(2, cardPool.possibleContests().size) // when extraPct > 0
@@ -66,7 +65,7 @@ class TestOneAuditFuzzers {
             populations = listOf(Population("fuzzedPool", 42, intArrayOf(1, 2), false)),
             fuzzedMvrs.map { it.cvr() },
         )
-        println("fuzzedPool= ${fuzzedPool.first().show()}")
+        println("fuzzedPool= ${fuzzedPool.first()}")
         println()
 
         /* cvrs arent exact ??

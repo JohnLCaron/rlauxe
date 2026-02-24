@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.random.Random
@@ -10,7 +10,7 @@ import kotlin.random.Random
 // Try using in San Francisco, since we could generate the VoteConsolidators from the cvrs in the pool
 fun simulateOneAuditRaire(N: Int, contestId: Int, ncands:Int, minMargin: Double, poolPct: Int,
                              undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true)
-        : Triple<RaireContestWithAssertions, List<Cvr>, List<OneAuditPoolFromCvrs>> {
+        : Triple<RaireContestWithAssertions, List<Cvr>, List<OneAuditPool>> {
 
     val (raireCUA, cvrs) = simulateRaireTestContest(N, contestId, ncands, minMargin, undervotePct, phantomPct, quiet)
 
@@ -37,7 +37,7 @@ fun simulateOneAuditRaire(N: Int, contestId: Int, ncands:Int, minMargin: Double,
         infos,
         listOf(pop),
         cvrsWithPools,
-    )
+    ).map { it.toOneAuditPool() }
 
     val raireOAUA = makeRaireOneAuditContest(info, cvrTab, N, Nbin=N, pools)
     if (!quiet) println(raireOAUA)

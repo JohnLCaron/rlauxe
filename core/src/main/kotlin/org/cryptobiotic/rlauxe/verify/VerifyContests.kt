@@ -4,9 +4,8 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.betting.TestH0Status
-import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.raire.RaireAssorter
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -15,9 +14,10 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
+import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
-import org.cryptobiotic.rlauxe.util.tabulateCardManifest
+import org.cryptobiotic.rlauxe.util.tabulateOneAuditPools
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -227,7 +227,7 @@ fun verifyManifest(
 fun verifyOAagainstCards(
     contests: List<ContestWithAssertions>,
     contestSummary: ContestSummary,
-    cardPools: List<OneAuditPoolFromCvrs>,
+    cardPools: List<OneAuditPool>,
     infos: Map<Int, ContestInfo>,
     result: VerifyResults,
     show: Boolean = false
@@ -235,7 +235,7 @@ fun verifyOAagainstCards(
     val nonpoolCvrVotes = contestSummary.nonpooled
 
 
-    val poolSums = tabulateCardManifest(cardPools, infos)
+    val poolSums = tabulateOneAuditPools(cardPools, infos)
     val sumWithPools = mutableMapOf<Int, ContestTabulation>()
     sumWithPools.sumContestTabulations(nonpoolCvrVotes)
     sumWithPools.sumContestTabulations(poolSums)
@@ -431,7 +431,7 @@ fun verifyOAassortAvg(
 fun verifyOApools(
     contestsUA: List<ContestWithAssertions>,
     contestSummary: ContestSummary,
-    cardPools: List<OneAuditPoolFromCvrs>,
+    cardPools: List<OneAuditPool>,
     result: VerifyResults,
     show: Boolean = false
 ): VerifyResults {
@@ -495,4 +495,17 @@ fun checkEquivilentVotes(votes1: Map<Int, Int>, votes2: Map<Int, Int>, ) : Boole
     val votes1z = votes1.filter{ (_, vote) -> vote != 0 }
     val votes2z = votes2.filter{ (_, vote) -> vote != 0 }
     return votes1z == votes2z
+}
+
+
+// for calculating average from running total, see addOAClcaAssorters
+class AssortAvg() {
+    var ncards = 0
+    var totalAssort = 0.0
+    fun avg() : Double = if (ncards == 0) 0.0 else totalAssort / ncards
+    fun margin() : Double = mean2margin(avg())
+
+    override fun toString(): String {
+        return "AssortAvg(ncards=$ncards, totalAssort=$totalAssort avg=${avg()} margin=${margin()})"
+    }
 }

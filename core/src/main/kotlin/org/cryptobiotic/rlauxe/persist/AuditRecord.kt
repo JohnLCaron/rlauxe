@@ -14,7 +14,7 @@ import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MergePopulationsFromIterable
 import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -104,10 +104,10 @@ class AuditRecord(
             readPopulationsJsonFileUnwrapped(publisher.populationsFile())
     }
 
-    fun readCardPools(): List<OneAuditPoolFromCvrs>? {
+    fun readCardPools(): List<OneAuditPool>? {
         val infos = contests.map { it.contest.info() }.associateBy { it.id }
-        return if (!Files.exists(Path(publisher.cardPoolsFile()))) null else
-            readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
+        return if (!Files.exists(Path(publisher.cardPoolsFile()))) null
+               else readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
     }
 
     companion object {

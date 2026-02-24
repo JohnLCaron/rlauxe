@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.CvrIF
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.persist.CompositeRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -35,7 +35,7 @@ open class CompositeMvrManager(
         return readPopulationsComposite(publisher)
     }
 
-    override fun oapools(): List<OneAuditPoolFromCvrs>? {
+    override fun oapools(): List<OneAuditPool>? {
         return null   // TODO ??
     }
 

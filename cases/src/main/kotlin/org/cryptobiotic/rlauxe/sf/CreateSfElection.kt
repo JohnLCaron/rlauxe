@@ -16,6 +16,7 @@ import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.raire.makeRaireOneAuditContest
@@ -42,7 +43,8 @@ class CreateSfElection(
         poolsHaveOneCardStyle: Boolean,
     ): CreateElectionIF {
     val cardPoolMapByName: Map<String, OneAuditPoolFromCvrs>
-    val cardPools: List<OneAuditPoolFromCvrs>
+    val cardPoolBuilders: List<OneAuditPoolFromCvrs>
+    val cardPools: List<OneAuditPool>
     val phantomCount: Map<Int, Int>  // id -> nphantoms
     val contestsUA: List<ContestWithAssertions>
     val ncards: Int
@@ -66,7 +68,7 @@ class CreateSfElection(
         )
 
         cardPoolMapByName = allCardPools.filter { it.value.poolName != unpooled } // exclude the unpooled
-        cardPools = cardPoolMapByName.values.toList() // exclude the unpooled
+        cardPoolBuilders = cardPoolMapByName.values.toList() // exclude the unpooled
         val unpooledPool = allCardPools[unpooled]!! // this does not have the diluted count
 
         // we need Nc to make the phantom cvrs in createCardManifest()
@@ -79,10 +81,11 @@ class CreateSfElection(
         this.ncards = count
 
         // make contests based on cvr tabulations
+        cardPools = cardPoolBuilders.map { it.toOneAuditPool() }
         contestsUA = if (config.isClca) {
             makeClcaContestsSF(infos, allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
         } else if (config.isOA) {
-            makeOneAuditContestsSF(infos, allCvrTabs, contestNcs, contestNbs, unpooledPool, cardPools).sortedBy { it.id }
+            makeOneAuditContestsSF(infos, allCvrTabs, contestNcs, contestNbs, unpooledPool, cardPools).sortedBy { it.id } // TODO
         } else {
             makePollingContestsSF(infos, allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
         }
@@ -159,8 +162,8 @@ class CreateSfElection(
         return result
     }
 
-    override fun populations() = if (config.isClca) emptyList() else cardPools
-    override fun cardPools() = if (config.isClca) emptyList() else cardPools
+    override fun populations() = if (config.isClca) emptyList() else cardPoolBuilders
+    override fun makeCardPools() = cardPools
     override fun contestsUA() = contestsUA
     override fun cards() = createCards(config.auditType)
     override fun ncards() = ncards
@@ -168,13 +171,13 @@ class CreateSfElection(
     // these are the same cvrs for CLCA and OneAudit
     fun createCards(auditType: AuditType): CloseableIterator<AuditableCard> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
-        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPools.associate { it.name() to it.id() })
+        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPoolBuilders.associate { it.name() to it.id() })
 
         return if (auditType == AuditType.ONEAUDIT) CvrsToCardsAddStyles(
             auditType,
             cvrIter,
             makePhantomCvrs(phantomCount),
-            cardPools)
+            cardPoolBuilders)
         else
             CvrsToCardsAddStyles(
                 auditType,
@@ -185,7 +188,7 @@ class CreateSfElection(
 
     fun createUnsortedMvrs(): List<Cvr> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
-        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPools.associate { it.name() to it.id() })
+        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPoolBuilders.associate { it.name() to it.id() })
 
         val unsortedMvrs = mutableListOf<Cvr>()
         cvrIter.use { iter ->
@@ -214,7 +217,7 @@ fun makeClcaContestsSF(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, Contes
 }
 
 fun makeOneAuditContestsSF(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>,
-                           unpooledPool: OneAuditPoolFromCvrs, oneAuditPools: List<OneAuditPoolFromCvrs>): List<ContestWithAssertions> {
+                           unpooledPool: OneAuditPoolFromCvrs, oneAuditPools: List<OneAuditPool>): List<ContestWithAssertions> {
     val contestsUAs = mutableListOf<ContestWithAssertions>()
 
     // make non IRV contests

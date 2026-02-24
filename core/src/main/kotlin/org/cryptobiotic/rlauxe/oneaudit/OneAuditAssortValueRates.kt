@@ -42,9 +42,9 @@ class OneAuditRatesFromPools(val pools: List<OneAuditPoolIF>) {
             if (poolAvg != null) {
                 val taus = TausOA(oaCassorter.assorter.upperBound(), poolAvg)
 
-                val votes = pool.regVotes()[contestUA.id]!!
-                val winnerCounts: Int = votes.votes[oaCassorter.assorter.winner()] ?: 0
-                val loserCounts: Int = votes.votes[oaCassorter.assorter.loser()] ?: 0
+                val tab = pool.contestTab(contestUA.id)!!
+                val winnerCounts: Int = tab.votes[oaCassorter.assorter.winner()] ?: 0
+                val loserCounts: Int = tab.votes[oaCassorter.assorter.loser()] ?: 0
 
                 val otherCounts = pool.ncards() - winnerCounts - loserCounts
                 totalInPools += pool.ncards()
@@ -79,8 +79,8 @@ class OneAuditRatesFromPools(val pools: List<OneAuditPoolIF>) {
             if (poolAvg != null) {
                 val taus = TausOA(oaCassorter.assorter.upperBound(), poolAvg)
 
-                if (pool is OneAuditPoolFromCvrs) {
-                    val tab = pool.contestTabs[contestUA.id]!! // assumes that the cardPool has the irvVotes
+                val tab = pool.contestTab(contestUA.id)!!
+                if (tab.irvVotes.votes.isNotEmpty()) {
                     val irvVotes: Votes = tab.irvVotes.makeVotes(contestUA.ncandidates)
                     val winnerLoser = raire.winnerLoserVotes(irvVotes)
                     val winnerCounts: Int = winnerLoser.first
@@ -95,7 +95,7 @@ class OneAuditRatesFromPools(val pools: List<OneAuditPoolIF>) {
                     pairs.add(Pair(taus.tausOA[1].first * oaCassorter.noerror(), otherCounts / dencards))  // other
                     pairs.add(Pair(taus.tausOA[2].first * oaCassorter.noerror(), winnerCounts / dencards))  // winner
                 } else {
-                    throw RuntimeException("oaErrorRatesIrv needs OneAuditPoolFromCvrs")
+                    throw RuntimeException("oaErrorRatesIrv needs tab.irvVotes.votes.isNotEmpty()")
                 }
             }
         }

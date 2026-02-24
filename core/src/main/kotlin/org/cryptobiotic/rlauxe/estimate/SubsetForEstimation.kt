@@ -30,20 +30,6 @@ data class CardSamples(val cards: List<AuditableCard>, val usedByContests: Map<I
         }
         return extract
     }
-
-    fun extractSubsetByIndex(contestId: Int, pairs: List<Pair<CvrIF, AuditableCard>>): List<Pair<CvrIF, AuditableCard>> {
-        val extract = mutableListOf<Pair<CvrIF, AuditableCard>>()
-        val want = usedByContests[contestId]!!
-        var wantIdx = 0
-        pairs.forEachIndexed { idx, it ->
-            if (wantIdx < want.size && idx == want[wantIdx]) {
-                extract.add(it)
-                wantIdx++
-            }
-        }
-        return extract
-    }
-
 }
 
 // bit simpler than consistentSampling, but tempting to try to combine the two

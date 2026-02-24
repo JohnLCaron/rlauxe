@@ -4,7 +4,7 @@ import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
@@ -34,7 +34,7 @@ interface CreateElectionIF {
     fun cards() : CloseableIterator<AuditableCard> // doesnt need merged populations i think
     fun ncards(): Int
     fun populations(): List<PopulationIF>?
-    fun cardPools(): List<OneAuditPoolFromCvrs>?
+    fun makeCardPools(): List<OneAuditPool>?
 }
 
 private val logger = KotlinLogging.logger("CreateAudit")
@@ -61,9 +61,10 @@ class CreateAuditRecord(val name: String, val config: AuditConfig, election: Cre
             logger.info { "CreateAudit write ${populations.size} populations, to ${publisher.populationsFile()}" }
         }
 
-        if (!election.cardPools().isNullOrEmpty()) {
-            writeCardPoolCsvFile(election.cardPools()!!, publisher.cardPoolsFile())
-            logger.info { "writeCardPoolCsvFile ${election.cardPools()!!.size} pools to ${publisher.cardPoolsFile()}" }
+        val cardPools = election.makeCardPools()
+        if (!cardPools.isNullOrEmpty()) {
+            writeCardPoolCsvFile(cardPools, publisher.cardPoolsFile())
+            logger.info { "writeCardPoolCsvFile ${cardPools.size} pools to ${publisher.cardPoolsFile()}" }
         }
 
         val cards = election.cards()

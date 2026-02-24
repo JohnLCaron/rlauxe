@@ -7,7 +7,7 @@ import kotlin.test.fail
 
 class TestRunVerifyContests {
     val show = true
-    val useLocal = false
+    val useLocal = true
 
     @Test
     fun testRunVerifyClca() {

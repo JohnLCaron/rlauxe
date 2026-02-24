@@ -3,8 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -23,7 +22,7 @@ class MvrManagerForTesting(
     cvrs: List<Cvr>,
     mvrs: List<Cvr>,
     seed: Long,
-    val pools: List<OneAuditPoolFromCvrs>? = null,
+    val pools: List<OneAuditPool>? = null,
 ) : MvrManager, MvrManagerTestIF {
 
     val sortedCards: List<AuditableCard>
@@ -41,7 +40,7 @@ class MvrManagerForTesting(
         return CardManifest.createFromList(sortedCards, pools)
     }
 
-    override fun oapools(): List<OneAuditPoolFromCvrs>? {
+    override fun oapools(): List<OneAuditPool>? {
         return pools
     }
 
@@ -147,7 +146,8 @@ fun readPopulations(publisher: Publisher): List<PopulationIF>? {
         readPopulationsJsonFileUnwrapped(publisher.populationsFile())
 }
 
-fun readCardPools(publisher: Publisher, infos: Map<Int, ContestInfo>): List<OneAuditPoolFromCvrs>? {
-    return if (!Files.exists(Path(publisher.cardPoolsFile()))) null else
-        readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
+fun readCardPools(publisher: Publisher, infos: Map<Int, ContestInfo>): List<OneAuditPool>? {
+    return null /// TODO
+    //return if (!Files.exists(Path(publisher.cardPoolsFile()))) null else
+    //    readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
 }

@@ -35,7 +35,7 @@ class TestRunRoundAgainCli {
         )
     }
 
-    @Test
+    // @Test only for OA, CLCA
     fun testRunRoundAgainPolling() {
         val auditDir = "$testdataDir/persist/testRunCli/polling/audit"
 

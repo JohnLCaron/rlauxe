@@ -14,7 +14,7 @@ data class ContestMvrCardAndPops(
     val contestUA: ContestWithAssertions,
     val mvrs: List<Cvr>,
     val cards: List<AuditableCard>,
-    val pools: List<OneAuditPoolFromCvrs>,
+    val pools: List<OneAuditPool>,
 )
 
 // simulate OneAudit Contest with extra cards in pool, to get Npop > Nc, and test hasStyle
@@ -119,7 +119,7 @@ fun makeOneAuditTest(
 
     val (oaUA, cardPools) = makeOneAuditTestContests(infos, listOf(contest), listOf(pool), cardManifest, mvrs)
 
-    return ContestMvrCardAndPops(oaUA.first(), mvrs, cardManifest, cardPools)
+    return ContestMvrCardAndPops(oaUA.first(), mvrs, cardManifest, cardPools.map { it.toOneAuditPool() })
 }
 
 // these are the mvr truth
@@ -146,8 +146,6 @@ fun makeMvrs(
     pool.possibleContests().forEach { contestId ->
         val vunderPool = pool.votesAndUndervotes(contestId)
         val poolCvrs = makeVunderCvrs(mapOf(info.id to vunderPool), pool.poolName, poolId = pool.poolId)
-        if (pool.ncards() != poolCvrs.size)
-            print("ppp")
         require(pool.ncards() == poolCvrs.size)
         mvrs.addAll(poolCvrs)
     }
@@ -156,8 +154,6 @@ fun makeMvrs(
     repeat(contest.Nphantoms()) {
         mvrs.add(Cvr("phantom$it", mapOf(contest.info().id to intArrayOf()), phantom = true))
     }
-    if (contest.Nc() != mvrs.size)
-        print("hhh")
     require(contest.Nc() == mvrs.size)
 
     // add the extra cvrs: these are also in the pool, and they cause the margin to be diluted
@@ -223,4 +219,25 @@ fun makeOneAuditTestContests(
     val contestsUA = makeOneAuditContests(contestsToAudit, npopMap, poolsFromCvrs)
 
     return Pair(contestsUA, poolsFromCvrs)
+}
+
+fun calcOneAuditPoolsFromMvrs(
+    infos: Map<Int, ContestInfo>,
+    populations: List<PopulationIF>,
+    mvrs: List<Cvr>,
+): List<OneAuditPoolFromCvrs> {  // poolId -> CardPoolFromCvrs
+
+    // The styles have the name, poolId, and contest list
+    val poolsFromCvrs = populations.map { style ->
+        val poolFromCvr = OneAuditPoolFromCvrs(style.name(), style.id(), style.hasSingleCardStyle(), infos)
+        style.possibleContests().forEach { poolFromCvr.contestTabs[it]  = ContestTabulation( infos[it]!!) }
+        poolFromCvr
+    }.associateBy { it.poolId }
+
+    // populate the pool counts from the mvrs
+    mvrs.filter{ it.poolId != null }.forEach {
+        val pool = poolsFromCvrs[it.poolId]
+        if (pool != null) pool.accumulateVotes(it)
+    }
+    return poolsFromCvrs.values.toList()
 }

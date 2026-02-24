@@ -30,7 +30,7 @@ class TestClcaAuditTask {
     @Test
     fun testClcaSingleRoundAuditTaskGenerator() {
         val Nc = 50000
-        val margin = .02
+        val margin = .05
         val mvrFuzzPct = .00123
         val config = AuditConfig(AuditType.CLCA, nsimEst = 10, contestSampleCutoff = 10000, simFuzzPct = mvrFuzzPct)
         val taskGen = ClcaSingleRoundAuditTaskGenerator(

@@ -106,7 +106,7 @@ data class ContestRoundJson(
     var assertionRounds: List<AssertionRoundJson>,
     val roundIdx: Int,
 
-    val maxSampleAllowed: Int,
+    val maxSampleAllowed: Int?,
     val estMvrs: Int,
     val estNewMvrs: Int,
     // val actualMvrs: Int,

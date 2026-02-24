@@ -139,7 +139,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         // run the audit, capture the sequences
         val testH0Result =  when (config.auditType) {
             AuditType.CLCA -> runClcaAudit(config, cvrPairs, contestRound, assertionRound)
-            AuditType.POLLING -> runPollingAudit(config, cvrPairs, contestRound, assertionRound)
+            AuditType.POLLING -> throw RuntimeException("runRoundAgain only for CLCA, OneAudit") // runPollingAudit(config, cvrPairs, contestRound, assertionRound)
             AuditType.ONEAUDIT -> runOneAudit(config, cvrPairs,
                 workflow.mvrManager().oapools()!!,
                 contestRound, assertionRound)
@@ -235,6 +235,7 @@ fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>,
     }
 }
 
+/*
 fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, CvrIF>>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
     try {
         val assertion = assertionRound.assertion
@@ -255,7 +256,7 @@ fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, CvrIF>>, con
         t.printStackTrace()
         return null
     }
-}
+} */
 
 class PairSampler(
     val contestId: Int,

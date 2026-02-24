@@ -137,8 +137,8 @@ class TestVunder {
             makeOneAuditTest(margin, Nc, cvrFraction = cvrFraction, undervoteFraction = 0.0, phantomFraction = 0.0)
 
         val cardPool = cardPools.first()
-        val votes = cardPool.regVotes()[contestOA.id]!!
-        println("cardPool=${cardPool.show()}  nvotes = ${votes.votes.values.sum()} poolFraction=${1-cvrFraction}")
+        val tab = cardPool.contestTab(contestOA.id)!!
+        println("cardPool=${cardPool}  nvotes = ${tab.votes.values.sum()} poolFraction=${1-cvrFraction}")
 
         val info2 = ContestInfo("contest2", 2,  mapOf("Wes" to 1), SocialChoiceFunction.PLURALITY)
         val infos = mapOf(contestOA.id to contestOA.contest.info(), 2 to info2)
@@ -155,7 +155,7 @@ class TestVunder {
             listOf(Population("pool42", 42, intArrayOf(1, 2), false)),
             fuzzedMvrs.map { it.cvr() },
         )
-        println("fuzzedPool= ${fuzzedPool.first().show()}")
+        println("fuzzedPool= ${fuzzedPool.first()}")
 
         // what if we choose the first 1000 ballots ??
         val limit = 1000
@@ -174,7 +174,7 @@ class TestVunder {
             listOf(Population(cardPool.name(), cardPool.poolId, intArrayOf(1,2), false )),
             limitedMvrs.map { it.cvr() },
         )
-        println("limitedPool= ${limitedPool.first().show()}")
+        println("limitedPool= ${limitedPool.first()}")
     }
 
 }

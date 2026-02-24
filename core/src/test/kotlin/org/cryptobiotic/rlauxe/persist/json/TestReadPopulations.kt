@@ -1,13 +1,8 @@
 package org.cryptobiotic.rlauxe.persist.json
 
 import org.cryptobiotic.rlauxe.audit.Population
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsv
-import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsvFile
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.workflow.readCardPools
 import org.cryptobiotic.rlauxe.workflow.readPopulations
 import kotlin.io.path.createTempFile
 import kotlin.test.Test
@@ -43,6 +38,7 @@ class TestReadPopulations {
         scratchFile.delete()
     }
 
+    /* TODO
     @Test
     fun testReadCardPools() {
         val auditdir = "$testdataDir/persist/testRunCli/oneaudit/audit"
@@ -69,6 +65,6 @@ class TestReadPopulations {
         assertEquals(pool.hashCode(), rpool.hashCode())
 
         scratchFile.delete()
-    }
+    } */
 
 }

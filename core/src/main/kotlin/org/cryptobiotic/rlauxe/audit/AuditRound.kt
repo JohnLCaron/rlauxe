@@ -64,7 +64,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     val name = contestUA.name
     val Npop = contestUA.Npop
 
-    var maxSampleAllowed = 0 // maximum index in the sample allowed to use
+    var maxSampleAllowed: Int? = null // maximum index in the sample allowed to use
     var estMvrs = 0 // Estimate of the mvrs required to confirm the contest
     var estNewMvrs = 0 // Estimate of the new mvrs required to confirm the contest
 
@@ -94,24 +94,11 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
                else estMvrs
     }
 
-
     fun createNextRound() : ContestRound {
         val nextAssertions =  assertionRounds.filter { !it.status.complete }.map{
             AssertionRound(it.assertion, roundIdx + 1, it.auditResult)
         }
         return ContestRound(contestUA, nextAssertions, roundIdx + 1)
-    }
-
-    fun resultsForAssertion(assorterDesc: String): Pair<List<EstimationRoundResult>, List<AuditRoundResult>> {
-        val estList = mutableListOf<EstimationRoundResult>()
-        val auditList = mutableListOf<AuditRoundResult>()
-        assertionRounds.filter { it.assertion.assorter.hashcodeDesc() == assorterDesc }
-            .forEach { assertionRound ->
-                if (assertionRound.estimationResult != null) estList.add(assertionRound.estimationResult!!)
-                if (assertionRound.prevAuditResult != null) auditList.add(assertionRound.prevAuditResult!!)
-            }
-
-        return Pair(estList, auditList)
     }
 
     fun minAssertion(): AssertionRound? {
@@ -126,17 +113,6 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
             val minMargin = margins.sortedBy { it.second }
             return minMargin.first().first
         }
-    }
-
-    // TODO used by viewer ??
-    fun calcMvrsNeeded(config: AuditConfig): Int {
-        var maxNeeded = 0
-        assertionRounds.forEach { round ->
-            val pair = round.calcNewMvrsNeeded(contestUA, config.clcaConfig.maxLoss, config.riskLimit)
-            val estSamplesNeeded = pair.component1()
-            maxNeeded = max( maxNeeded, estSamplesNeeded)
-        }
-        return maxNeeded
     }
 
     fun countCvrsUsedInAudit(): Int {
@@ -190,26 +166,6 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     var auditResult: AuditRoundResult? = null
     var status = TestH0Status.InProgress
     var roundProved = 0           // round when set to proved or disproved
-
-    // call only if assertion is ClcaAssertion; deprecated
-    fun accumulatedErrorCounts(contestRound: ContestRound): ClcaErrorCounts {
-        require(assertion is ClcaAssertion)
-        val (_, auditRoundResults) = contestRound.resultsForAssertion(assertion.assorter.hashcodeDesc())
-
-        val sumOfCounts = mutableMapOf<Double, Int>()
-        var totalSamples = 0
-        auditRoundResults.forEach { auditRoundResult ->
-            if (auditRoundResult.measuredCounts != null) {
-                totalSamples += auditRoundResult.samplesUsed
-                auditRoundResult.measuredCounts.errorCounts.forEach { (key, value) ->
-                    val sum =  sumOfCounts.getOrPut(key) { 0 }
-                    sumOfCounts[key] = sum + value
-                }
-            }
-        }
-
-        return ClcaErrorCounts(sumOfCounts, totalSamples, noerror, upper)
-    }
 
     // we get the results from the audit, not the estimation
     fun previousErrorCounts(): ClcaErrorCounts {

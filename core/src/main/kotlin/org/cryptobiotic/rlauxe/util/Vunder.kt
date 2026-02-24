@@ -41,11 +41,6 @@ data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pai
             val voteCounts = candVotes.map { Pair(intArrayOf(it.key), it.value) }
             return Vunder(contestId, -1, voteCounts, undervotes, missing, voteForN)
         }
-        fun fromContestVotes(contestVotes: ContestVotesIF): Vunder {
-            val missing = contestVotes.ncards() - (contestVotes.undervotes() + contestVotes.votes.values.sum()) / contestVotes.voteForN
-            val voteCounts = contestVotes.votes.map { Pair(intArrayOf(it.key), it.value) }
-            return Vunder(contestVotes.contestId, -1, voteCounts, contestVotes.undervotes(), missing, contestVotes.voteForN)
-        }
         // data class Vunder(val contestId: Int, val candVotes: Map<Int, Int>, val undervotes: Int, val missing: Int, val voteForN: Int) {
         fun fromCandVotes(contestId: Int, candVotes: Map<Int, Int>, undervotes: Int, missing: Int, voteForN: Int): Vunder {
             val voteCounts = candVotes.map { Pair(intArrayOf(it.key), it.value) }
@@ -240,27 +235,6 @@ fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): L
 
     rcvrs.shuffle()
     return rcvrs
-}
-
-private val show = false
-
-fun checkVunderEquivilentTab(vunder: Vunder, contestTab: ContestTabulation): Boolean {
-    val tabNcards = (contestTab.nvotes() + contestTab.undervotes) / contestTab.voteForN
-    val vncards = (vunder.nvotes + vunder.undervotes) / vunder.voteForN + vunder.missing
-    var allOk = true
-    allOk = allOk && (vunder.nvotes == contestTab.nvotes())
-    //allOk = allOk && (vunder.undervotes == contestTab.undervotes)
-    //allOk = allOk && (vunder.ncards - vunder.missing == contestTab.ncards())
-    // data class Vunder2(val contestId: Int, val poolId: Int, val voteCounts: List<Pair<IntArray, Int>>, val undervotes: Int, val missing: Int, val voteForN: Int) {
-    if (contestTab.isIrv) {
-        // val irvPairs = contestTab.irvVotes.votes.map { (harr, count) -> Pair(harr.array, count) }
-        val vunderVc = VoteConsolidator()
-        vunder.voteCounts.forEach { (cands, count) -> vunderVc.addVotes(cands, count) }
-        allOk = allOk && vunderVc.equals(contestTab.irvVotes)
-    } else {
-        allOk = allOk && checkEquivilentVotes(vunder.cands(), contestTab.votes)
-    }
-    return allOk
 }
 
 /////////////////////////////////////////////

@@ -1,5 +1,8 @@
 package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -68,8 +71,10 @@ class TestContestTabulation {
         val phantoms = listOf(2, 7, 0)
         val voteForNs = listOf(1, 2, 1)
         val missings = listOf(11, 211, 111)
-        val (contests, cvrs) = makeContestsWithUndervotesAndPhantoms(candVotes,
-            undervotes=undervotes, phantoms=phantoms, voteForNs = voteForNs, missings = missings)
+        val (contests, cvrs) = makeContestsWithUndervotesAndPhantoms(
+            candVotes,
+            undervotes = undervotes, phantoms = phantoms, voteForNs = voteForNs, missings = missings
+        )
 
         val contestMap = contests.associate { Pair(it.id, it) }
         val infos = contests.associate { Pair(it.id, it.info) }
@@ -83,7 +88,7 @@ class TestContestTabulation {
 
             assertEquals(voteForNs[id], tab.voteForN)
             assertEquals(contest.Nc, tab.ncardsTabulated)
-            assertEquals(contest.undervotes , tab.undervotes)
+            assertEquals(contest.undervotes, tab.undervotes)
             assertTrue(
                 checkEquivilentVotes(candVotes[id], tab.votes),
                 "${candVotes[id].toSortedMap()} != ${tab.votes.toSortedMap()}"
@@ -99,6 +104,21 @@ class TestContestTabulation {
         val contestTabs2: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infos)
         assertEquals(contestTabs2, contestTabs)
         assertEquals(contestTabs2.hashCode(), contestTabs.hashCode())
+
     }
 
+    @Test
+    fun testTabulateCardsAndCount() {
+        val test = MultiContestTestData(20, 11, 20000)
+        val cards = test.makeCardsFromContests()
+        val infos = test.contests.map { it.info }.associateBy { it.id }
+
+        val (tabs, count) = tabulateCardsAndCount(Closer (cards.iterator()), infos)
+        assertEquals(cards.size, count)
+
+        val tab2 = tabulateAuditableCards(Closer (cards.iterator()), infos)
+        tabs.forEach { println(it) }
+
+        assertEquals(tabs, tab2)
+    }
 }

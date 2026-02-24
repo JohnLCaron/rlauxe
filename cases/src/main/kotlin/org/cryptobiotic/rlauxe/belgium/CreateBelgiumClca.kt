@@ -25,7 +25,7 @@ class BelgiumClca (
     }
 
     override fun populations() = null
-    override fun cardPools() = null
+    override fun makeCardPools() = null
     override fun contestsUA() = contestsUA
     override fun cards() = createCardManifest()
     override fun ncards() = cvrs.size

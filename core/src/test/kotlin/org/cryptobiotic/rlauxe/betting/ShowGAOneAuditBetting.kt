@@ -38,16 +38,16 @@ class ShowGAOneAuditBetting {
         //    val contestUA: ContestWithAssertions,
         //    val mvrs: List<Cvr>,
         //    val cards: List<AuditableCard>,
-        //    val pools: List<OneAuditPoolIF>,
+        //    val pools: List<OneAuditPool>,
         //)
         val (oaContest, mvrs, cards, cardPools) =
             makeOneAuditTest(margin, N, cvrFraction = 1 - poolPct, undervoteFraction = 0.0, phantomFraction = 0.0)
 
         // only one pool, only one contest
-        val cardPool = cardPools.first() as OneAuditPoolIF
+        val cardPool = cardPools.first()
         assertTrue(cardPool.hasContest(oaContest.id))
         assertFalse(cardPool.hasContest(42))
-        assertEquals(1, cardPool.regVotes().size)
+        assertEquals(1, cardPool.contestTabs.size)
         val minAssertion = oaContest.minClcaAssertion()!!
         val minCassorter = minAssertion.cassorter as OneAuditClcaAssorter
 

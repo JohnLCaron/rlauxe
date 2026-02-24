@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.core.CvrIF
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 
@@ -25,7 +25,7 @@ class CardManifest(val cards: CloseableIterable<AuditableCard>, val ncards: Int,
 interface MvrManager {
     fun cardManifest(): CardManifest
     // fun sortedCards(): CloseableIterable<AuditableCard>  // most uses will just need the first n samples
-    fun oapools(): List<OneAuditPoolFromCvrs>?
+    fun oapools(): List<OneAuditPool>?
     // fun populations(): List<PopulationIF>?
     fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  // Pair(mvr, cvr)
 }

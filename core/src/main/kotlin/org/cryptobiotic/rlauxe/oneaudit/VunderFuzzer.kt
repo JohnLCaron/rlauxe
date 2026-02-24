@@ -15,7 +15,7 @@ import org.cryptobiotic.rlauxe.util.VunderPicker
 // it optionally fuzzes the Cvrs.
 // the mvrCvrPairs are the (mvr, cvr) pairs suitable for CLCA audit
 class OneAuditVunderFuzzer(
-    pools: List<OneAuditPoolFromCvrs>,
+    pools: List<OneAuditPool>,
     val infos: Map<Int, ContestInfo>,
     val fuzzPct: Double,
     cards: List<AuditableCard>
@@ -40,7 +40,7 @@ class OneAuditVunderFuzzer(
 }
 
 // for all pools
-class VunderPools(pools: List<OneAuditPoolFromCvrs>) {
+class VunderPools(pools: List<OneAuditPool>) {
     val vunderPools: Map<Int, VunderPool>  // poolId -> VunderPool
 
     init {

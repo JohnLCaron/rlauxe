@@ -37,15 +37,12 @@ class TestOneAuditPool {
         val cardPool = cardPools.first()
         assertTrue(cardPool.hasContest(info.id))
         assertFalse(cardPool.hasContest(42))
-        assertEquals(1, cardPool.regVotes().size)
+        assertEquals(1, cardPool.contestTabs.size)
 
         val cardPoolCvrs = cardPool
         val cardPoolCvrs2 = cardPoolCvrs.copy()
-        assertEquals(cardPoolCvrs, cardPoolCvrs)
-        assertEquals(cardPoolCvrs.hashCode(), cardPoolCvrs.hashCode())
-
-        assertNotEquals(cardPoolCvrs2, cardPoolCvrs)
-        assertNotEquals(cardPoolCvrs2.hashCode(), cardPoolCvrs.hashCode())
+        assertEquals(cardPoolCvrs2, cardPoolCvrs)
+        assertEquals(cardPoolCvrs2.hashCode(), cardPoolCvrs.hashCode())
 
         val poolTabs = mutableMapOf<Int, ContestTabulation>()
         cardPool.addTo(poolTabs)

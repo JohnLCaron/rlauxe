@@ -219,7 +219,7 @@ class ClcaSamplerErrorTracker(
             contestId: Int,
             cassorter: ClcaAssorter,
             cvrPairs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
-            maxSampleIndex: Int? = null,  // if maxSampleIndexIn != null then reset = false)
+            maxSampleIndex: Int? = null,  // if maxSampleIndex != null then reset = false)
         ): ClcaSamplerErrorTracker {
             val maxIndex = maxSampleIndex ?: Int.MAX_VALUE
             val extract = mutableListOf<Pair<CvrIF, AuditableCard>>()

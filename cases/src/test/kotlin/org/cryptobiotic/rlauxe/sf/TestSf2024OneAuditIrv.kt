@@ -4,9 +4,8 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -23,6 +22,7 @@ import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
+import org.cryptobiotic.rlauxe.verify.AssortAvg
 import org.cryptobiotic.rlauxe.workflow.readCardManifest
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.math.roundToInt
@@ -34,7 +34,7 @@ class TestSf2024OneAuditIrv() {
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
     val cardManifest: CardManifest
-    val cardPools: List<OneAuditPoolFromCvrs>
+    val cardPools: List<OneAuditPool>
     val mvrs: CloseableIterable<AuditableCard>
 
     init {

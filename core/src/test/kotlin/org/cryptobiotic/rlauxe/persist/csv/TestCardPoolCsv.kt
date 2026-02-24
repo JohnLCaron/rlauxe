@@ -3,24 +3,15 @@ package org.cryptobiotic.rlauxe.persist.csv
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
-import org.cryptobiotic.rlauxe.raire.HashableIntArray
 import org.cryptobiotic.rlauxe.raire.RaireContestTestData
-import org.cryptobiotic.rlauxe.raire.VoteConsolidator
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.createZipFile
 import org.cryptobiotic.rlauxe.util.makeContestsWithUndervotesAndPhantoms
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
-import kotlin.collections.component1
-import kotlin.collections.component2
 import kotlin.collections.forEach
-import kotlin.io.path.createTempFile
-import kotlin.test.assertNotEquals
-import kotlin.test.assertTrue
 
 class TestCardPoolCsv {
 
@@ -53,7 +44,7 @@ class TestCardPoolCsv {
         assertEquals(target, roundtrip)
     }
 
-    fun makeRegPool(infos: MutableMap<Int, ContestInfo>): OneAuditPoolFromCvrs {
+    fun makeRegPool(infos: MutableMap<Int, ContestInfo>): OneAuditPool {
         val candVotes = mutableListOf<Map<Int, Int>>()
         candVotes.add(mapOf(0 to 200, 1 to 123, 2 to 17))
         candVotes.add(mapOf(0 to 71, 1 to 123, 2 to 0, 3 to 77, 4 to 99))
@@ -81,10 +72,10 @@ class TestCardPoolCsv {
         val pool = OneAuditPoolFromCvrs("testRegVotes", 1, true, infos)
         pool.totalCards = 42
         pool.contestTabs.putAll(tabs)
-        return pool
+        return pool.toOneAuditPool()
     }
 
-    fun makeIrvPool(infos: MutableMap<Int, ContestInfo>): OneAuditPoolFromCvrs {
+    fun makeIrvPool(infos: MutableMap<Int, ContestInfo>): OneAuditPool {
         val N = 20000
         val minMargin = .05
         val undervotePct = 0.0
@@ -108,7 +99,7 @@ class TestCardPoolCsv {
         pool.totalCards = 99
         pool.contestTabs.putAll(tabs)
 
-        return pool
+        return pool.toOneAuditPool()
     }
 
 }

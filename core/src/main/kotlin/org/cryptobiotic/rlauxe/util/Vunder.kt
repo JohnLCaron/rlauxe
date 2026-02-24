@@ -41,11 +41,6 @@ data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pai
             val voteCounts = candVotes.map { Pair(intArrayOf(it.key), it.value) }
             return Vunder(contestId, -1, voteCounts, undervotes, missing, voteForN)
         }
-        fun fromContestVotes(contestVotes: ContestVotesIF): Vunder {
-            val missing = contestVotes.ncards() - (contestVotes.undervotes() + contestVotes.votes.values.sum()) / contestVotes.voteForN
-            val voteCounts = contestVotes.votes.map { Pair(intArrayOf(it.key), it.value) }
-            return Vunder(contestVotes.contestId, -1, voteCounts, contestVotes.undervotes(), missing, contestVotes.voteForN)
-        }
         // data class Vunder(val contestId: Int, val candVotes: Map<Int, Int>, val undervotes: Int, val missing: Int, val voteForN: Int) {
         fun fromCandVotes(contestId: Int, candVotes: Map<Int, Int>, undervotes: Int, missing: Int, voteForN: Int): Vunder {
             val voteCounts = candVotes.map { Pair(intArrayOf(it.key), it.value) }

@@ -261,7 +261,7 @@ class CreateBoulderElection(
 
     override fun contestsUA() = contestsUA
     override fun populations() = if (isClca) emptyList() else cardPoolBuilders
-    override fun cardPools() = null
+    override fun makeCardPools() = if (isClca) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
     override fun cards() = createCards()
     override fun ncards() = ncards
 
@@ -296,7 +296,7 @@ class CreateBoulderElection(
                     Cvr(
                         id = "pool${cleanName} card ${poolIndex + 1}",
                         phantom = false,
-                        votes = pool.regVotes().mapValues { intArrayOf() }, // empty votes
+                        votes = pool.voteTotals.mapValues { intArrayOf() }, // empty votes
                         poolId = pool.poolId
                     )
                 )

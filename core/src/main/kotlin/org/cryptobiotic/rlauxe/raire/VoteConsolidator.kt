@@ -19,6 +19,8 @@ import kotlin.collections.getOrPut
 class VoteConsolidator {
     val votes = mutableMapOf<HashableIntArray, Int>() // candidate ranks -> nvotes
 
+    fun isEmpty() = votes.isEmpty()
+
     fun nvotes() = votes.values.sum()
 
     fun votes(): List<Pair<IntArray, Int>> {

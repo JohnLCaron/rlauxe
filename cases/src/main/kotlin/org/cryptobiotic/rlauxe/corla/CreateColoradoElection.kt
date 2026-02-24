@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.boulder.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestBuilderIF
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 // import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolWithBallotStyle
@@ -156,7 +157,7 @@ open class CreateColoradoElection (
     }
 
     override fun populations() = if (config.isClca) emptyList() else cardPools
-    override fun cardPools() = null
+    override fun makeCardPools() = if (config.isClca) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
     override fun contestsUA() = contestsUA
     override fun cards() = createCards()
     override fun ncards() = ncards

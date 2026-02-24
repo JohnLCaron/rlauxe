@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.raire.RaireContest
 import org.cryptobiotic.rlauxe.raire.SimulateIrvTestData
@@ -28,7 +28,7 @@ fun estimateSampleSizes(
     config: AuditConfig,
     auditRound: AuditRoundIF,
     cardManifest: CardManifest, // Clca, OneAudit, ignored for Polling
-    cardPools: List<OneAuditPoolFromCvrs>?,               // only OneAudit
+    cardPools: List<OneAuditPool>?,               // only OneAudit
     previousSamples: Set<Long>,
     showTasks: Boolean = false,
     nthreads: Int = 32,

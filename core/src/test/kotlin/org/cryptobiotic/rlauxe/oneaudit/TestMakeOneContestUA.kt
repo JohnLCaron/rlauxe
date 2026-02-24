@@ -18,7 +18,6 @@ import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.fail
 
-
 class TestMakeOneContestUA {
     val Nc = 10000
 
@@ -108,9 +107,8 @@ class TestMakeOneContestUA {
         val Nc2=10000
         println("======================================================================================================")
         println("margin=$margin cvrPercent=$cvrPercent phantomPercent=$phantomPercent undervotePercent=$undervotePercent")
-        val (contestOA, mvrs, cards, populations) =
+        val (contestOA, mvrs, cards, cardPools) =
             makeOneAuditTest(margin, Nc2, cvrFraction = cvrPercent, undervoteFraction = undervotePercent, phantomFraction = phantomPercent)
-        val cardPools = populations as List<OneAuditPoolIF>
         checkBasics(contestOA, cardPools, margin, cvrPercent, Nc2)
         checkAgainstCvrs(contestOA, cardPools, mvrs, cvrPercent, undervotePercent, phantomPercent)
         checkAgainstVerify(contestOA, cardPools, mvrs)

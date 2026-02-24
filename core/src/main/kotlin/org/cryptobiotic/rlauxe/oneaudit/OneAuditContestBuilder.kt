@@ -51,10 +51,10 @@ fun setPoolAssorterAverages(
             val assortAverages = mutableMapOf<Int, Double>() // poolId -> average assort value
             pools.forEach { cardPool ->
                 if (cardPool.hasContest(contestId)) {
-                    val regVotes = cardPool.regVotes()[oaContest.id]!! // Irv is seperate
+                    val tab = cardPool.contestTab(oaContest.id)!! // Irv not done here
                     if (cardPool.ncards() > 0) {
                         // note: using cardPool.ncards(), this is the diluted count
-                        val poolMargin = assertion.assorter.calcMarginFromRegVotes(regVotes.votes, cardPool.ncards())
+                        val poolMargin = assertion.assorter.calcMarginFromRegVotes(tab.votes, cardPool.ncards())
                         assortAverages[cardPool.poolId] = margin2mean(poolMargin)
                     }
                 }

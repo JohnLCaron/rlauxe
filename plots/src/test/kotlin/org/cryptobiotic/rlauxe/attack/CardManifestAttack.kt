@@ -12,22 +12,18 @@ import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.audit.writeUnsortedPrivateMvrs
-import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.ContestVotes
-import org.cryptobiotic.rlauxe.util.ContestVotesIF
 import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.showTabs
@@ -189,7 +185,7 @@ class CardManifestAttack {
 
         val cardStyle = Population("groupB", 1, groupBcontests, false)
         val realPools = calcOneAuditPoolsFromMvrs(infos, listOf(cardStyle), mvrs)
-        realPools.forEach{ println(it.show()) }
+        realPools.forEach{ println(it) }
         println("--------------------- end truth")
         ////
 
@@ -201,7 +197,7 @@ class CardManifestAttack {
         //// make the CardPool with reported votes (lies)
         // OneAuditPool(override val poolName: String, override val poolId: Int, val exactContests: Boolean,
         //                        val ncards: Int, val regVotes: Map<Int, RegVotesIF>)
-        val cardPool = OneAuditPool(
+        val cardPool = OneAuditPoolForAttack(
             "groupB", 1, false, 100,
             regVotes = mapOf(
                 1 to ContestVotes(1, 1,mapOf(1 to 0, 2 to 25), 75, undervotes = 50), // false
@@ -209,7 +205,7 @@ class CardManifestAttack {
                 2 to ContestVotes(2, 1, mapOf(1 to 0, 2 to 25), 25, undervotes = 0),  // unchanged
             )
         )
-        print(cardPool.show())
+        println(cardPool)
         val cardPools = listOf(cardPool)
 
         // The sample poulation sizes come from the cards
@@ -274,13 +270,13 @@ class CreateElectionForAttack(
     val contestsUA: List<ContestWithAssertions>,
     val cards: List<AuditableCard>,
     val populations: List<PopulationIF>?,
-    val cardPools: List<OneAuditPoolFromCvrs>?,
+    val cardPools: List<OneAuditPool>?,
 ):  CreateElectionIF {
 
     override fun contestsUA() = contestsUA
     override fun populations() = populations
     override fun cards() = Closer( cards.iterator() )
-    override fun cardPools() = cardPools
+    override fun makeCardPools() = cardPools
     override fun ncards() = cards.size
 }
 
@@ -290,22 +286,35 @@ fun ContestWithAssertions.showSimple() = buildString {
     append("Contest ($id) votes=$votesByName Npop=${Npop} Nc=${contestWithVotes.Nc()} undervotes=${contestWithVotes.Nundervotes()}")
 }
 
-data class OneAuditPool(override val poolName: String, override val poolId: Int, val hasSingleCardStyle: Boolean,
-                        val ncards: Int, val regVotes: Map<Int, ContestVotesIF>) : OneAuditPoolIF {
-    val assortAvg = mutableMapOf<Int, MutableMap<AssorterIF, AssortAvg>>()  // contest -> assorter -> average
+////////////////////////////////////////////
+// TODO get rid of
+data class OneAuditPoolForAttack(override val poolName: String, override val poolId: Int, val hasSingleCardStyle: Boolean,
+                        val ncards: Int, val regVotes: Map<Int, ContestVotes>) : OneAuditPoolIF {
     override fun name() = poolName
     override fun id() = poolId
     override fun hasSingleCardStyle() = hasSingleCardStyle
 
-    override fun regVotes() = regVotes
     override fun hasContest(contestId: Int) = regVotes[contestId] != null
     override fun ncards() = ncards
 
     override fun possibleContests() = regVotes.keys.toList().sorted().toIntArray()
-    override fun assortAvg() = assortAvg
+    override fun contestTab(contestId: Int): ContestTabulation? {
+        TODO("Not yet implemented")
+    }
 
     override fun votesAndUndervotes(contestId: Int,): Vunder {
         val regVotes = regVotes[contestId]!!         // empty for IRV ...
         return Vunder.fromNpop(contestId, regVotes.undervotes(), ncards(), regVotes.votes, regVotes.voteForN)
     }
+}
+
+data class ContestVotes(
+    val contestId: Int,
+    val voteForN: Int,
+    val votes: Map<Int, Int>,
+    val ncards: Int,
+    val undervotes: Int
+) {
+    fun ncards() = ncards
+    fun undervotes() = undervotes
 }

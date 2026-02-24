@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.util
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.raire.VoteConsolidator
 import kotlin.collections.component1
@@ -11,40 +10,21 @@ import kotlin.collections.component2
 import kotlin.collections.iterator
 import kotlin.collections.toMap
 
-interface ContestVotesIF {
-    val contestId: Int
-    val voteForN: Int
-    val votes: Map<Int, Int> // IRV have empty votes
-    fun ncards(): Int // including undervotes
-    fun undervotes(): Int // including undervotes
-}
-
-data class ContestVotes(
-    override val contestId: Int,
-    override val voteForN: Int,
-    override val votes: Map<Int, Int>,
-    val ncards: Int,
-    val undervotes: Int
-): ContestVotesIF {
-    override fun ncards() = ncards
-    override fun undervotes() = undervotes
-}
-
 // tabulate contest votes from cards or cvrs; can handle both regular and irv voting
 class ContestTabulation(
-    override val contestId: Int,
+    val contestId: Int,
     voteForNin: Int, //
     val isIrv: Boolean,
     val candidateIds: List<Int>
-): ContestVotesIF {
+) {
 
     constructor(info: ContestInfo) : this(info.id, info.voteForN, info.isIrv, info.candidateIds)
     constructor(other: ContestTabulation) : this(other.contestId, other.voteForN, other.isIrv, other.candidateIds)
 
-    override val voteForN = if (isIrv) 1 else voteForNin
+    val voteForN = if (isIrv) 1 else voteForNin
     val candidateIdToIdx by lazy { candidateIds.mapIndexed { idx, id -> Pair(id, idx) }.toMap() }
 
-    override val votes = mutableMapOf<Int, Int>() // cand -> votes
+    val votes = mutableMapOf<Int, Int>() // cand -> votes
     val irvVotes = VoteConsolidator() // candidate indexes
     val notfound = mutableMapOf<Int, Int>() // candidate -> nvotes; track candidates on the cvr but not in the contestInfo, for debugging
 
@@ -59,8 +39,8 @@ class ContestTabulation(
         this.ncardsTabulated = ncards
     }
 
-    override fun ncards() = ncardsTabulated
-    override fun undervotes() = undervotes
+    fun ncards() = ncardsTabulated
+    fun undervotes() = undervotes
 
     fun nvotes() = if (isIrv) irvVotes.nvotes() else votes.map { it.value }.sum()
     fun missing() = voteForN * ncards() - nvotes()
@@ -178,28 +158,13 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
 fun tabulateOneAuditPools(cardPools: List<OneAuditPoolIF>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val poolSums = infos.mapValues { ContestTabulation(it.value) }
     cardPools.forEach { cardPool ->
-        cardPool.regVotes().forEach { (contestId, regVotes: ContestVotesIF) ->
+        infos.keys.forEach { contestId ->
+            val tab = cardPool.contestTab(contestId)!!
             val poolSum = poolSums[contestId]
             if (poolSum != null) {
-                regVotes.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
-                poolSum.ncardsTabulated += regVotes.ncards()
-                poolSum.undervotes += regVotes.undervotes()
-            }
-        }
-    }
-    return poolSums
-}
-
-// now accumulates regular votes and IRV
-fun tabulateCardManifest(cardPools: List<OneAuditPoolFromCvrs>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
-    val poolSums = infos.mapValues { ContestTabulation(it.value) }
-    cardPools.forEach { cardPool ->
-        cardPool.regVotes().forEach { (contestId, regVotes: ContestVotesIF) ->
-            val poolSum = poolSums[contestId]
-            if (poolSum != null) {
-                regVotes.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
-                poolSum.ncardsTabulated += regVotes.ncards()
-                poolSum.undervotes += regVotes.undervotes()
+                tab.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
+                poolSum.ncardsTabulated += tab.ncards()
+                poolSum.undervotes += tab.undervotes()
             }
         }
     }

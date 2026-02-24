@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.verify.AssortAvg
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.collections.iterator
 import kotlin.test.Test
@@ -25,7 +26,7 @@ class TestSfElectionVunderFuzz {
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
 
-    val cardPools: List<OneAuditPoolFromCvrs>?
+    val cardPools: List<OneAuditPool>?
 
     init {
         val auditRecord = AuditRecord.readFrom(auditdir) as AuditRecord

@@ -2,27 +2,20 @@ package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.workflow.CardManifest
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.SubsetIterator
-import org.cryptobiotic.rlauxe.util.doubleIsClose
-import org.cryptobiotic.rlauxe.util.margin2mean
 
 import org.cryptobiotic.rlauxe.util.mean2margin
-import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.workflow.readCardManifest
 import org.junit.jupiter.api.Assertions.assertEquals
-import kotlin.math.roundToInt
 import kotlin.test.Test
 import kotlin.use
 
@@ -30,8 +23,7 @@ class TestSf2024OneAuditIrv() {
     val config: AuditConfig
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
-    // val cardManifest: CardManifest
-    val cardPools: List<OneAuditPoolFromCvrs>
+    val cardPools: List<OneAuditPool>
     val mvrsIterable: CloseableIterable<AuditableCard>
     val mvrs = mutableListOf<AuditableCard>()
 
@@ -65,7 +57,7 @@ class TestSf2024OneAuditIrv() {
         println("  ${rcontest.showCandidates()}")
 
         val poolId = 3464
-        val cardPool: OneAuditPoolFromCvrs = cardPools.find { it.poolId == poolId }!! //random pool with contest 24 in it
+        val cardPool = cardPools.find { it.poolId == poolId }!! //random pool with contest 24 in it
         val poolTab = cardPool.contestTabs[24]!!
 
         rcontestUA.clcaAssertions.forEach { assertion ->

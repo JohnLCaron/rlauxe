@@ -234,7 +234,6 @@ fun verifyOAagainstCards(
 ) {
     val nonpoolCvrVotes = contestSummary.nonpooled
 
-
     val poolSums = tabulateOneAuditPools(cardPools, infos)
     val sumWithPools = mutableMapOf<Int, ContestTabulation>()
     sumWithPools.sumContestTabulations(nonpoolCvrVotes)

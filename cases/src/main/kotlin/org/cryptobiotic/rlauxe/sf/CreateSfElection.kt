@@ -168,7 +168,7 @@ class CreateSfElection(
     override fun cards() = createCards(config.auditType)
     override fun ncards() = ncards
 
-    // these are the same cvrs for CLCA and OneAudit
+    // same cvrs for CLCA and OneAudit
     fun createCards(auditType: AuditType): CloseableIterator<AuditableCard> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
         val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPoolBuilders.associate { it.name() to it.id() })
@@ -186,6 +186,7 @@ class CreateSfElection(
                 null)
     }
 
+    // must be in same order as createCards
     fun createUnsortedMvrs(): List<Cvr> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
         val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPoolBuilders.associate { it.name() to it.id() })
@@ -347,7 +348,7 @@ fun createSfElection(
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
 
-        (auditType ==  AuditType.CLCA) -> AuditConfig(
+        (auditType == AuditType.CLCA) -> AuditConfig(
             AuditType.CLCA, riskLimit = .05, nsimEst=20,
             // TODO, this should be set when running the audit, so can test same election with differenct scenarios
             //    so we need the config at create time, and the config at run time...
@@ -356,7 +357,7 @@ fun createSfElection(
             clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
         )
 
-        (auditType ==  AuditType.ONEAUDIT) -> AuditConfig(
+        (auditType == AuditType.ONEAUDIT) -> AuditConfig(
             AuditType.ONEAUDIT, riskLimit = .05, nsimEst = 20,
             contestSampleCutoff = 20_000, removeCutoffContests = true,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private

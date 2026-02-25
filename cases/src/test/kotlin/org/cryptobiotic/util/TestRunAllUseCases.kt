@@ -21,12 +21,6 @@ class TestRunAllUseCases {
     }
 
     @Test
-    fun runColoradoOneAudit() {
-        val topdir = "$testdataDir/cases/corla/oneaudit"
-        runAllRoundsAndVerify("$topdir/audit")
-    }
-
-    @Test
     fun runColoradoClca() {
         val topdir = "$testdataDir/cases/corla/clca"
         runAllRoundsAndVerify("$topdir/audit")

@@ -48,7 +48,7 @@ fun runRepeated(
         // this can fail when you have limited the number of samples
         if (testH0Result.status == TestH0Status.LimitReached) {
             fail++
-            logger.info { "$name:  $trial failed in sampling max= ${samplerTracker.maxSamples()} samples" }
+            // logger.info { "$name:  $trial failed in sampling max= ${samplerTracker.maxSamples()} samples" }
         } else {
             nsuccess++
 
@@ -62,9 +62,9 @@ fun runRepeated(
 
     if (fail > 0) {
         logger.warn { "$name:  $fail/$ntrials failures in sampling max= ${samplerTracker.maxSamples()} samples" }
-    } else {
-        logger.info { "$name:  $fail/$ntrials failures in sampling max= ${samplerTracker.maxSamples()} samples took $stopwatch" }
-    }
+    } // else {
+    //    logger.info { "$name:  $fail/$ntrials failures in sampling max= ${samplerTracker.maxSamples()} samples took $stopwatch" }
+    // }
 
     val (_, variance, _) = welford.result()
     return RunRepeatedResult(testParameters=testParameters, N=N, totalSamplesNeeded=totalSamplesNeeded, nsuccess=nsuccess,

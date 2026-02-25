@@ -154,14 +154,14 @@ fun MutableMap<Int, ContestTabulation>.sumContestTabulations(other: Map<Int, Con
 
 //// also see Vunder
 
-// TODO only accumulates regular votes, not IRV
+// TODO only accumulates regular votes, not IRV; fix that
 fun tabulateOneAuditPools(cardPools: List<OneAuditPoolIF>, infos: Map<Int, ContestInfo>): Map<Int, ContestTabulation> {
     val poolSums = infos.mapValues { ContestTabulation(it.value) }
     cardPools.forEach { cardPool ->
         infos.keys.forEach { contestId ->
-            val tab = cardPool.contestTab(contestId)!!
-            val poolSum = poolSums[contestId]
-            if (poolSum != null) {
+            val tab = cardPool.contestTab(contestId)
+            if (tab != null) {
+                val poolSum = poolSums[contestId]!!
                 tab.votes.forEach { (candId, nvotes) -> poolSum.addVote(candId, nvotes) }
                 poolSum.ncardsTabulated += tab.ncards()
                 poolSum.undervotes += tab.undervotes()
@@ -243,4 +243,20 @@ fun tabulateCardsAndCount(cards: CloseableIterator<AuditableCard>, infos: Map<In
         }
     }
     return Pair(tabs, count)
+}
+
+// TODO is cvr.hasContest(contestId) same as the card.hasContest(contestId) ??
+fun tabulateNpops(cvrs: List<Cvr>, infos: Map<Int, ContestInfo>): Pair<Map<Int, Int>, Int> {
+    val npops = mutableMapOf<Int, Int>()
+    var count = 0
+    cvrs.forEach { cvr ->
+        count++
+        infos.forEach { (contestId, info) ->
+            if (cvr.hasContest(contestId)) {
+                val npop = npops.getOrPut(contestId) { 0 }
+                npops[contestId] = npop + 1
+            }
+        }
+    }
+    return Pair(npops, count)
 }

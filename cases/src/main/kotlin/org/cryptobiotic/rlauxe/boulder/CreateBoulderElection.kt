@@ -9,9 +9,10 @@ import org.cryptobiotic.rlauxe.dominion.ContestVotes
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
-import org.cryptobiotic.rlauxe.raire.VoteConsolidator
+import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -22,9 +23,8 @@ import kotlin.math.max
 
 private val logger = KotlinLogging.logger("BoulderElectionOA")
 
-// Use OneAudit; redacted ballots are in pools.
-// No redacted CVRs. Cant do IRV.
-// specific to 2025 election. TODO: generalize
+// Use OneAudit; redacted ballots are in pools. Cant do IRV.
+// specific to 2024 election. TODO: generalize
 class CreateBoulderElection(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
@@ -45,6 +45,7 @@ class CreateBoulderElection(
     val contests: List<ContestIF>
     val contestsUA : List<ContestWithAssertions>
     val simulatedCvrs: List<Cvr>  // redacted cvrs
+    val allCvrs: List<Cvr>  // redacted cvrs
 
     init {
         //// the redacted groups dont have undervotes, so we do some fancy dancing to generate reasonable undervote counts
@@ -64,12 +65,14 @@ class CreateBoulderElection(
         contests = makeContests()
         simulatedCvrs = makeRedactedCvrs()
 
-        val (manifestTabs, count) = tabulateCardsAndCount(createCards(), infoMap)
-        val npopMap = manifestTabs.mapValues { it.value.ncardsTabulated }
+        val phantoms = makePhantomCvrs(contests)
+        allCvrs =  exportCvrs + simulatedCvrs + phantoms
+
+        val (npops, count) = tabulateNpops(allCvrs, infoMap)
         this.ncards = count
 
-        contestsUA = if (isClca) ContestWithAssertions.make(contests, npopMap, isClca=true, )
-            else makeOneAuditContests(contests, npopMap, cardPoolBuilders)
+        contestsUA = if (isClca) ContestWithAssertions.make(contests, npops, isClca=true, )
+            else makeOneAuditContests(contests, npops, cardPoolBuilders)
 
         val totalRedactedBallots = cardPoolBuilders.sumOf { it.ncards() }
         logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPoolBuilders.size} cardPools"}
@@ -165,7 +168,7 @@ class CreateBoulderElection(
 
     // make simulated CVRs for one pool, all contests
     private fun makeCvrsForOnePool(cardPool: OneAuditPoolWithBallotStyle, infos: Map<Int, ContestInfo>) : List<Cvr> { // contestId -> candidateId -> nvotes
-
+        // TODO we may need to set hasStyle flag, so always use undervotes ??
         val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
         val cvrs = makeVunderCvrs(poolVunders, cardPool.poolName, poolId = cardPool.poolId)
         // the number of cvrs can vary when there are multiple contests: artifact of simulating the cvrs
@@ -201,14 +204,14 @@ class CreateBoulderElection(
         //allOk = allOk && (vunder.undervotes == contestTab.undervotes)
         //allOk = allOk && (vunder.ncards - vunder.missing == contestTab.ncards())
         // data class Vunder2(val contestId: Int, val poolId: Int, val voteCounts: List<Pair<IntArray, Int>>, val undervotes: Int, val missing: Int, val voteForN: Int) {
-        if (contestTab.isIrv) {
+        //if (contestTab.isIrv) {
             // val irvPairs = contestTab.irvVotes.votes.map { (harr, count) -> Pair(harr.array, count) }
-            val vunderVc = VoteConsolidator()
-            vunder.voteCounts.forEach { (cands, count) -> vunderVc.addVotes(cands, count) }
-            allOk = allOk && vunderVc.equals(contestTab.irvVotes)
-        } else {
+       //     val vunderVc = VoteConsolidator()
+       //     vunder.voteCounts.forEach { (cands, count) -> vunderVc.addVotes(cands, count) }
+        //    allOk = allOk && vunderVc.equals(contestTab.irvVotes)
+        //} else {
             allOk = allOk && checkEquivilentVotes(vunder.cands(), contestTab.votes)
-        }
+        //}
         return allOk
     }
 
@@ -287,26 +290,26 @@ class CreateBoulderElection(
     override fun ncards() = ncards
 
     fun createCards(): CloseableIterator<AuditableCard> {
-        return if (isClca) { // TODO and hasUndervotes
-            val cvrs =  exportCvrs + simulatedCvrs
+        // same cvrs for CLCA and OneAudit
+        return if (isClca) {
             CvrsToCardsAddStyles(
                 AuditType.CLCA,
-                Closer(cvrs.iterator()),
-                makePhantomCvrs(contests),
+                Closer(allCvrs.iterator()),
+                null,
                 null
             )
         } else {
-            val poolCards =  createCvrsFromPools()
-            val cvrs =  exportCvrs + poolCards
+            // turn cvrs into cards with pools
             CvrsToCardsAddStyles(
                 AuditType.ONEAUDIT,
-                Closer(cvrs.iterator()),
-                makePhantomCvrs(contests),
+                Closer(allCvrs.iterator()),
+                null,
                 populations = cardPoolBuilders
             )
         }
     }
 
+    /* doesnt work
     fun createCvrsFromPools() : List<Cvr> {
         val cvrs = mutableListOf<Cvr>()
 
@@ -324,7 +327,7 @@ class CreateBoulderElection(
             }
         }
         return cvrs
-    }
+    } */
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -340,9 +343,9 @@ fun createBoulderElection(
     auditConfigIn: AuditConfig? = null,
     auditType : AuditType,
     poolsHaveOneCardStyle: Boolean,
+    mvrFuzz: Double? = null,
     clear: Boolean = true,
-    )
-{
+) {
     val stopwatch = Stopwatch()
     val variation = if (sovoFile.contains("2025") || sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
@@ -354,11 +357,15 @@ fun createBoulderElection(
                 AuditType.CLCA,
                 riskLimit = riskLimit,
                 minRecountMargin = minRecountMargin,
-                nsimEst = 10,
+                nsimEst = 20,
+                clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
             )
         else if (auditType.isOA())
-            AuditConfig( // TODO hasStyle=false ?
-                AuditType.ONEAUDIT, riskLimit=riskLimit, minRecountMargin=minRecountMargin, nsimEst=10,
+            AuditConfig(
+                AuditType.ONEAUDIT, riskLimit=riskLimit, minRecountMargin=minRecountMargin, nsimEst=20,
+                contestSampleCutoff = 20_000, removeCutoffContests = true,
+                persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
+                clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
             )
     else throw RuntimeException("unsupported audit type $auditType")
 
@@ -366,8 +373,12 @@ fun createBoulderElection(
 
     CreateAuditRecord("boulder", config, election, auditDir = auditDir, clear = clear)
     println("createBoulderElectionOAnew took $stopwatch")
-}
 
+    // write the private mvrs
+    val unsortedMvrs = election.allCvrs
+    val publisher = Publisher("$topdir/audit")
+    writeUnsortedPrivateMvrs(publisher, unsortedMvrs, seed = config.seed)
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 

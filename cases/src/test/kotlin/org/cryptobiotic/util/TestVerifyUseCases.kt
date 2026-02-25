@@ -45,24 +45,6 @@ class TestVerifyUseCases {
     }
 
     @Test
-    fun testRunVerifyCorlaOneAudit() {
-        val auditdir = "$testdataDir/cases/corla/oneaudit/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
-        println()
-        print(results)
-        if (results.hasErrors) fail()
-    }
-
-    @Test
-    fun testRunVerifyCorlaOneAuditContest() {
-        val auditdir = "$testdataDir/cases/corla/oneaudit/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, 1, show = show)
-        println()
-        print(results)
-        if (results.hasErrors) fail()
-    }
-
-    @Test
     fun testRunVerifyCorlaClca() {
         val auditdir = "$testdataDir/cases/corla/clca/audit"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)

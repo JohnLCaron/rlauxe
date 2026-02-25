@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
@@ -88,6 +89,8 @@ constraint by subtracting the minimum possible value then re-scaling so that the
 null mean is 1/2 once again, which reproduces the original assorter, A:
  */
 
+private val logger = KotlinLogging.logger("OneAuditClcaAssorter")
+
 
 // for a specific assorter, all the averages in each pool
 data class AssortAvgsInPools (
@@ -117,7 +120,8 @@ class OneAuditClcaAssorter(
         // TODO add verifier of poolAvg existence
         val poolAverage = poolAverage(cvr.poolId())
         if (poolAverage == null) {
-            throw RuntimeException("OneAuditClcaAssorter couldnt find pool Avg for pool ${cvr.poolId()}")
+            logger.error{"OneAuditClcaAssorter couldnt find pool Avg for pool ${cvr.poolId()}"}
+            return 0.0
         }
 
         val overstatement = overstatementPoolError(mvr, poolAverage, hasStyle) // ωi

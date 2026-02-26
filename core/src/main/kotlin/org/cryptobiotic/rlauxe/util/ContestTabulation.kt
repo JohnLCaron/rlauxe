@@ -94,16 +94,46 @@ class ContestTabulation(
         this.overvotes += other.overvotes
     }
 
-    fun votesAndUndervotes(poolId: Int, npop: Int): Vunder {
-        return if (!isIrv) Vunder.fromNpop(contestId, undervotes, npop, votes, voteForN) else {
-            val missing = npop - undervotes - irvVotes.nvotes()
-            val voteCounts = irvVotes.votes.map { (hIntArray, count) ->
-                // convert indices back to ids
-                val idArray: List<Int> = hIntArray.array.map { candidateIds[it] }
-                Pair(idArray.toIntArray(), count)
-            }
-            Vunder(contestId, poolId, voteCounts, undervotes, missing, 1)
+    fun votesAndUndervotes(poolId: Int, npop: Int, hasSingleCardStyle: Boolean): Vunder {
+        if (isIrv) return votesAndUndervotesIrv(poolId, npop, hasSingleCardStyle)
+
+        val voteCounts = votes.map { Pair(intArrayOf(it.key), it.value) }
+        val voteSum = votes.values.sum()
+
+        val result = if (hasSingleCardStyle) {
+            // if hasSingleCardStyle, then missing has to be zero
+            // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
+            // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
+            val undervotes = npop - voteSum / voteForN
+            Vunder(contestId, poolId, voteCounts, undervotes, 0, voteForN)
+        } else {
+            val missing = npop - (this.undervotes + voteSum) / voteForN
+            Vunder(contestId, poolId, voteCounts, this.undervotes, missing, voteForN)
         }
+
+        return result
+    }
+
+    fun votesAndUndervotesIrv(poolId: Int, npop: Int, hasSingleCardStyle: Boolean): Vunder {
+
+        val voteCounts = this.irvVotes.votes.map { (hIntArray, count) ->
+            // convert indices back to ids
+            val idArray: List<Int> = hIntArray.array.map { candidateIds[it] }
+            Pair(idArray.toIntArray(), count)
+        }
+
+        val result = if (hasSingleCardStyle) {
+            // if hasSingleCardStyle, then missing has to be zero
+            // val missing = npop - undervotes - irvVotes.nvotes()
+            // 0 = npop - undervotes - irvVotes.nvotes()
+            val undervotes = npop - irvVotes.nvotes()
+            Vunder(contestId, poolId, voteCounts, undervotes, 0, voteForN)
+        } else {
+            val missing = npop - this.undervotes - this.irvVotes.nvotes()
+            Vunder(contestId, poolId, voteCounts, this.undervotes, missing, voteForN)
+        }
+
+        return result
     }
 
     override fun toString(): String {

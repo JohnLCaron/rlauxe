@@ -637,7 +637,6 @@ How to set MaxLoss in an optimal way?
 * [Developer Notes](docs/Developer.md)
 * [Dhondt](docs/Dhondt.md)
 * [Instant Runoff Voting (Raire)](docs/Raire.md)
-* [OneAudit Use Cases](docs/OneAuditUseCases.md)
 * [Sample Populations](docs/SamplePopulations.md)
 
 ### Pending Review

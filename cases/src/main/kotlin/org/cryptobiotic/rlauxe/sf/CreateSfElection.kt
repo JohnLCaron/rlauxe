@@ -334,7 +334,7 @@ fun makeContestNcs(contestManifest: ContestManifest, contestInfos: List<ContestI
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 fun createSfElection(
-    topdir: String,
+    auditdir: String,
     castVoteRecordZip: String,
     contestManifestFilename: String,
     candidateManifestFile: String,
@@ -377,11 +377,11 @@ fun createSfElection(
         config = config,
         poolsHaveOneCardStyle=poolsHaveOneCardStyle,
     )
-    CreateAuditRecord("sf2024", config, election, auditDir = "$topdir/audit", )
+    CreateAuditRecord("sf2024", config, election, auditDir = auditdir, )
 
     // convert the cvrExports to the private mvrs
     val unsortedMvrs = election.createUnsortedMvrs()
-    val publisher = Publisher("$topdir/audit")
+    val publisher = Publisher(auditdir)
     writeUnsortedPrivateMvrs(publisher, unsortedMvrs, seed = config.seed)
 
     println("createSfElection took $stopwatch")

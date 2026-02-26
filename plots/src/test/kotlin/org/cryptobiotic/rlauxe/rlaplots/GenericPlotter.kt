@@ -119,6 +119,7 @@ fun <T> genericScatter(
     yfld: (T) -> Double,
     catfld: (T) -> String,
     scaleType: ScaleType = ScaleType.Linear,
+    symbols: Map<String, Symbol> = mapOf("all" to Symbol.CIRCLE_OPEN),
     colors: Map<String, Color>,
 ) {
     val groups = makeGGroups(data, catfld)
@@ -163,20 +164,15 @@ fun <T> genericScatter(
                 x(xname) { scale = xScale }
                 y(yname) { scale = yScale }
                 size = 1.0
-                symbol = Symbol.CIRCLE_SMALL
-                /* symbol(catName) {
-                    scale = categorical(
-                        "CLCA" to Symbol.CIRCLE_SMALL,
+                symbol(catName) {
+                    scale = categorical(*symbolChoices(symbols) )
+                    /*    "CLCA" to Symbol.CIRCLE_SMALL,
                         "OneAudit" to Symbol.CIRCLE_SMALL,
                         "OneAuditNS" to Symbol.CIRCLE_SMALL
-                    )
-                } */
+                    ) */
+                }
                 color(catName) {
                     scale = categorical( *colorChoices(colors) )
-                    /*     "DHondt" to Color.RED,
-                        "Above" to Color.LIGHT_BLUE,
-                        "Below" to Color.PURPLE
-                    ) */
                 }
 
                 // tooltips(variables, formats, title, anchor, minWidth, hide)
@@ -197,6 +193,14 @@ fun <T> genericScatter(
 
 fun colorChoices(cats: Map<String, Color>): Array<Pair<String, Color>> {
     val result = mutableListOf<Pair<String, Color>>()
+    cats.forEach { (key, value) ->
+        result.add( Pair(key, value))
+    }
+    return result.toTypedArray()
+}
+
+fun symbolChoices(cats: Map<String, Symbol>): Array<Pair<String, Symbol>> {
+    val result = mutableListOf<Pair<String, Symbol>>()
     cats.forEach { (key, value) ->
         result.add( Pair(key, value))
     }

@@ -3,10 +3,14 @@ package org.cryptobiotic.rlauxe.sf
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.boulder.createBoulderElection
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
+import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
+import org.cryptobiotic.util.runAllRoundsAndVerify
 import kotlin.test.Test
 import kotlin.test.fail
 
@@ -17,10 +21,10 @@ class MakeSfElection {
 
     @Test
     fun makeSFElectionOA() {
-        val topdir = "$testdataDir/cases/sf2024/oa"
+        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
 
         createSfElection(
-            topdir,
+            auditdir=auditdir,
             zipFilename,
             "ContestManifest.json",
             "CandidateManifest.json",
@@ -29,7 +33,7 @@ class MakeSfElection {
             poolsHaveOneCardStyle=false,
         )
 
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
     }
@@ -45,10 +49,10 @@ class MakeSfElection {
 
     @Test
     fun makeSFElectionClca() {
-        val topdir = "$testdataDir/cases/sf2024/clca"
+        val auditdir = "$testdataDir/cases/sf2024/clca/audit"
 
         createSfElection(
-            topdir,
+            auditdir=auditdir,
             zipFilename,
             "ContestManifest.json",
             "CandidateManifest.json",
@@ -58,9 +62,50 @@ class MakeSfElection {
             mvrFuzz = 0.0,
         )
 
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
+    }
+
+    @Test
+    fun createSFOArepeat() {
+        val topdir = "$testdataDir/cases/sf2024oa"
+
+        val tasks = mutableListOf<ConcurrentTaskG<Boolean>>()
+        repeat(20) { run ->
+            tasks.add( RunAuditTask(run+1, topdir) )
+        }
+
+        val estResults = ConcurrentTaskRunnerG<Boolean>().run(tasks, nthreads=10) // OOM, reduce threads
+        println(estResults)
+    }
+
+    inner class RunAuditTask(
+        val runIndex: Int,
+        val topdir: String,
+    ) : ConcurrentTaskG<Boolean> {
+        val auditdir = "$topdir/audit$runIndex"
+
+        override fun name() = "createSFElection $runIndex"
+
+        override fun run(): Boolean {
+
+            createSfElection(
+                auditdir=auditdir,
+                zipFilename,
+                "ContestManifest.json",
+                "CandidateManifest.json",
+                cvrExportCsv = cvrExportCsv,
+                auditType = AuditType.ONEAUDIT,
+                poolsHaveOneCardStyle=false,
+            )
+
+            val publisher = Publisher(auditdir)
+            val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+            writeSortedCardsInternalSort(publisher, config.seed)
+
+            return runAllRoundsAndVerify(auditdir)
+        }
     }
 
     /* @Test

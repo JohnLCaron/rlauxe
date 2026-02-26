@@ -80,7 +80,7 @@ fun estimateSampleSizes(
     }
 
     if ((config.isClca || config.isOA ) && auditRound.roundIdx == 1 && config.simulationStrategy == SimulationStrategy.optimistic) {
-        calculateSampleSizes(config, auditRound, config.isClca) // dont overwrite for OneAudit
+        calculateSampleSizes(config, auditRound, overwrite = false)
     }
 
     // return repeatedResults for debugging and diagnostics
@@ -306,7 +306,11 @@ fun estimateClcaAssertionRound(
         startingErrorRates = measuredErrors.errorRates(), // TODO
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
-        simNewMvrsNeeded = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
+        simNewMvrsNeeded = when {
+            (result.sampleCount.size == 0) -> 0
+            (roundIdx == 1) -> result.findQuantile(.50) // TODO put in AuditConfig ??
+            else -> result.findQuantile(config.quantile)
+        }
     )
 
     logger.debug{"estimateClcaAssertionRound $roundIdx ${name} ${makeDeciles(result.sampleCount)} took=$stopwatch"}
@@ -408,6 +412,27 @@ fun estimateOneAuditAssertionRound(
         ClcaSamplerErrorTracker.fromIndexList(contestUA.contest.id, oaCassorter, oaFuzzedPairs, wantIndices, measuredErrors)
     }
 
+    /*
+    if (contestRound.contestUA.id == 17) {
+        val tab = ContestTabulation(contestRound.contestUA.contest.info())
+        var idx = 0
+        val test = ClcaSamplerErrorTracker.fromIndexList(contestUA.contest.id, oaCassorter, oaFuzzedPairs, wantIndices, measuredErrors)
+        while (idx < wantIndices.size) {
+            val wantIdx = test.permutedIndex[idx]
+            val (mvr, card) = test.samples[wantIdx]
+            if (mvr.poolId() == 18) {
+                val cands = mvr.votes(17)
+                if (cands != null) {
+                    tab.addVotes(cands, mvr.isPhantom())
+                    println("mvr ${mvr.location()} ${cands.contentToString()}")
+                }
+            }
+            idx++
+        }
+        println("tab for contest 17 and pool 18  = $tab")
+        println()
+    } */
+
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateOneAuditAssertionRound for $name with ${config.nsimEst} trials"}
     val stopwatch = Stopwatch()
@@ -434,9 +459,9 @@ fun estimateOneAuditAssertionRound(
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
-        simNewMvrsNeeded = when {               // maybe just for OneAudit?
+        simNewMvrsNeeded = when {
             (result.sampleCount.size == 0) -> 0
-            (roundIdx == 1) -> result.findQuantile(.50)
+            (roundIdx == 1) -> result.findQuantile(.50) // TODO put in AuditConfig ??
             else -> result.findQuantile(config.quantile)
         }
     )
@@ -510,7 +535,11 @@ fun estimatePollingAssertionRound(
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
-        simNewMvrsNeeded = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
+        simNewMvrsNeeded = when {
+            (result.sampleCount.size == 0) -> 0
+            (roundIdx == 1) -> result.findQuantile(.50) // TODO put in AuditConfig ??
+            else -> result.findQuantile(config.quantile)
+        }
     )
 
     logger.debug{"estimatePollingAssertionRound $roundIdx ${name} ${makeDeciles(result.sampleCount)} took=$stopwatch"}

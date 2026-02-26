@@ -22,9 +22,9 @@ class SfAuditVarianceCompare {
     @Test
     fun genSfAuditVarianceComparePlots() {
         val allAssertions = mutableListOf<AssertionAndCat>()
-        val clcaAssertions = readAssertionAndTotal("$testdataDir/cases/sf2024/clca/audit", "CLCA").second
+        val clcaAssertions = readAssertionAndTotal("$testdataDir/cases/sf2024/clca/audit", "CLCA")!!.second
         allAssertions.addAll( clcaAssertions)
-        allAssertions.addAll( readAssertionAndTotal("$testdataDir/cases/sf2024/oa/audit", "OneAudit").second)
+        allAssertions.addAll( readAssertionAndTotal("$testdataDir/cases/sf2024/oa/audit", "OneAudit")!!.second)
 
         // overrride the margins
         val marginOverride = clcaAssertions.associate { it.assertion.assertion.id().hashCode() to it.assertion.assertion.assorter.dilutedMargin() }

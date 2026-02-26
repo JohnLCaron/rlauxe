@@ -5,6 +5,8 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.unwrap
 
 import org.cryptobiotic.rlauxe.audit.AssertionRound
+import org.cryptobiotic.rlauxe.audit.AuditRound
+import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
@@ -15,7 +17,7 @@ import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.fail
 
-// compare audit variance across SF, SFoa and SFaNS
+// compare audit variance across SF and SFoa
 class SfAuditVarianceScatter {
     val nruns = 10 // no variance when there are no errors
 
@@ -29,28 +31,21 @@ class SfAuditVarianceScatter {
     @Test
     fun genSfAuditVarianceComparePlots() {
         val allAssertions = mutableListOf<AssertionAndCat>()
-        val (totalClca, clcaAssertions) = readAssertionAndTotal("$testdataDir/cases/sf2024/audit0", "CLCA")
+        val (totalClca, clcaAssertions) = readAssertionAndTotal("$testdataDir/cases/sf2024/audit0", "CLCA")!!
         val marginOverride = clcaAssertions.associate { it.assertion.assertion.id().hashCode() to it.assertion.assertion.assorter.dilutedMargin() }
         allAssertions.addAll( clcaAssertions)
 
         val totalOA = mutableListOf<Int>()
         repeat(10) { run ->
-            val (total, clcaAssertions) = readAssertionAndTotal("$testdataDir/cases/sf2024oa/audit$run", "OneAudit")
-            allAssertions.addAll(clcaAssertions)
-            totalOA.add(total)
+            val pair = readAssertionAndTotal("$testdataDir/cases/sf2024oa/audit$run", "OneAudit")
+            if (pair != null) {
+                totalOA.add(pair.first)
+                allAssertions.addAll(pair.second)
+            }
         }
 
-        /*
-        val totalOANS = mutableListOf<Int>()
-        repeat(10) { run ->
-            // overrride the margins
-            val (total, clcaAssertions) = readAssertionAndTotal("$testdataDir/cases/sf2024oaNS/audit$run", "OneAuditNS", marginOverride)
-            allAssertions.addAll(clcaAssertions)
-            totalOANS.add(total)
-        } */
         println("totalClca    = ${nfn(totalClca,6)}")
         println("totalOA avg  = ${nfn(totalOA.average().toInt(),6)}  ${totalOA.sorted()} ")
-        // println("totalOANS avg= ${nfn(totalOANS.average().toInt(), 6)} ${totalOANS.sorted()}")
 
         val title = "$name est nmvrs vs margin, no errors"
         val subtitle = "compare SF 2024 audit variances, Ntrials=$nruns useRealSample"
@@ -81,26 +76,28 @@ data class AssertionAndCat(val assertion: AssertionRound, val cat: String, val m
     }
 }
 
-fun readAssertionAndTotal(auditDir: String, cat: String, marginOverride:Map<Int, Double>? = null): Pair<Int, List<AssertionAndCat>> {
+fun readAssertionAndTotal(auditDir: String, cat: String, marginOverride:Map<Int, Double>? = null): Pair<Int, List<AssertionAndCat>>? {
     val auditRecord = AuditRecord.readFromResult(auditDir)
     if (auditRecord.isErr) {
-        fail()
+        return null
     }
 
     val auditRounds = auditRecord.unwrap().rounds
-    require( auditRounds.size >= 1)
-    val auditRound = auditRounds[0]
-
-    val allAssertions = mutableListOf<AssertionAndCat>()
-    val contestRounds = auditRound.contestRounds
-    contestRounds.forEach { contestRound ->
-        contestRound.assertionRounds.forEach { assertionRound ->
-            val margin = if (marginOverride == null) assertionRound.assertion.assorter.dilutedMargin() else
-                marginOverride[assertionRound.assertion.id().hashCode()] ?: 0.0
-            if (assertionRound.auditResult != null) {
-                allAssertions.add(AssertionAndCat(assertionRound, cat, margin))
+    var totalMvrs = 0
+    val allAssertions = mutableMapOf<Int, AssertionAndCat>()
+    auditRounds.forEach { auditRound ->
+        totalMvrs += auditRound.newmvrs
+        val contestRounds = auditRound.contestRounds
+        contestRounds.forEach { contestRound ->
+            contestRound.assertionRounds.forEach { assertionRound ->
+                val margin = if (marginOverride == null) assertionRound.assertion.assorter.dilutedMargin() else
+                    marginOverride[assertionRound.assertion.id().hashCode()] ?: 0.0
+                if (assertionRound.auditResult != null) {
+                    allAssertions[contestRound.contestUA.id] = AssertionAndCat(assertionRound, cat, margin)
+                }
             }
         }
     }
-    return Pair(auditRound.nmvrs, allAssertions)
+    println("read $auditDir")
+    return Pair(totalMvrs, allAssertions.values.toList())
 }

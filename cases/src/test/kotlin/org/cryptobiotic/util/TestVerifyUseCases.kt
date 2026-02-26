@@ -20,7 +20,7 @@ class TestVerifyUseCases {
     @Test
     fun testRunVerifyBoulder24oaContest() {
         val auditdir = "$testdataDir/cases/boulder24/oa/audit"
-        val results = RunVerifyContests.runVerifyContests(auditdir, 20, show = true)
+        val results = RunVerifyContests.runVerifyContests(auditdir, 17, show = true)
         println()
         print(results)
         if (results.hasErrors) fail()

@@ -1,10 +1,56 @@
-# Boulder County 2024
-02/20/2026
+# Boulder County, CO, 2024 general election
+02/25/2026
+
+* 396,681 cards
+* 65 contests (no IRV)
+* 12,297 redacted cards (3%) in 60 pools. 
+* Risk limit is 3% per Colorado law.
+* Two contests fall below the _automatic recount threshold_ of 0.5%, and so are removed from the audit.
+
+* Both the cvrs and the redacted pool totals reference a BallotType, which we use for Card Style Data.
+* For pooled data, we simulate cvrs that match the adjusted pool totals.
+* The simulated mvrs are the cvrs with optional fuzzing. 
+
+## OneAudit for Redacted data
+
+Some of the CVRs were redacted to protect voter anonymity. The redacted ballots were grouped 
+(apparently) by BallotType and just the pool subtotals were published.
+These _redacted ballot pools_ are a good fit for using OneAudit. 
+Unfortunately, the total number of cards in each pool is (apparently) not published, so we have to estimate it,
+and adjust the contest Nc to be consistent. See below for details.
+
+We are interested in comparing the CLCA audit which has full CVRs against the OneAudit which has the redacted ballots
+in OneAudit pools.
+
+Here are 1 CLCA and 10 trials of OneAudit for Boulder2024. The total number of MVRS sampled were:
+
+| type       | avg   | deciles of distribution                                                | 
+|------------|-------|------------------------------------------------------------------------|
+| CLCA       | 5135  | [5135]                                                                 | 
+| OneAudit   | 12995 | [12668, 12838, 12959, 13023, 13168, 13288, 13321, 13362, 13545, 13555] | 
+
+The spread among all the trials (click to get an interactive chart):
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/cases/Boulder2024AuditVarianceScatterLogLog.html" rel="Boulder2024AuditVarianceScatterLogLog">![Boulder2024AuditVarianceScatterLogLog](../docs/plots2/cases/Boulder2024AuditVarianceScatterLogLog.png)</a>
+
+* This is the simulated number of mvrs needed, including the extra samples needed from estimating each round.
+* Each run has a different PRN seed, to make sure we are seeing independent variations.
+* CLCA is smooth because it has no variance when there are no errors, while OneAudit shows scatter at the same margins.
+* Arguably OneAudit is similar to CLCA at high margins.
+* Most of the difference in total samples comes from the lowest margin assertions.
+
+Findings so far:
+
+1. Boulder County must publish the number of ballots in each pool to do a real audit.
+2. The redacted pools should always use a single BallotType, so we can sample with styles.
+3. To do IRV with redacted ballots, VoteConsolidations for the redacted ballots would have to be provided.
+4. OneAudit is comparable to CLCA at this low percent (3%) of pooled ballots.
+
 
 ## Downloaded files
 
-These files have already been downloaded into cases/src/test/data/Boulder2024 and converted to csv files by reading into 
-Libre Office and exporting to csv.
+The following files have already been downloaded into cases/src/test/data/Boulder2024 and converted to csv files by reading into 
+Libre Office and exporting to csv:
 
 From: https://bouldercounty.gov/elections/results/
 
@@ -23,7 +69,9 @@ Using _cases/src/test/kotlin/org/cryptobiotic/rlauxe/util/TestGenerateAllUseCase
 
 ### Boulder election notes:
 
-The XXX_Cast-Vote-Record.xlsx files may be a standard "export to excel" function from Dominion. The CvrExport_xxxxx.json files are not available on the website. These are read by readDominionCvrExportCsv().
+The XXX_Cast-Vote-Record.xlsx files may be a standard "export to excel" function from Dominion.
+These are read by readDominionCvrExportCsv().
+(the CvrExport_xxxxx.json files seem to be no longer available on the website) 
 
 The XXX_Statement-of-Votes.xlsx files may be in a bespoke format specific to Boulder County. Each election Ive looked at is slightly different. These
 are read by readBoulderStatementOfVotes(), which uses the filename to choose the variation.

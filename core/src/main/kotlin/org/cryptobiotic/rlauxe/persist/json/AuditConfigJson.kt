@@ -67,7 +67,8 @@ data class AuditConfigJson(
     val removeCutoffContests: Boolean?,
     val simFuzzPct: Double?,
 
-    val minRecountMargin: Double, // should be minRecountMargin
+    val minRecountMargin: Double,
+    val minMargin: Double,
     val removeTooManyPhantoms: Boolean,
     val auditSampleLimit: Int?,
 
@@ -95,6 +96,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.simFuzzPct,
 
             this.minRecountMargin,
+            this.minMargin,
             this.removeTooManyPhantoms,
             this.auditSampleLimit,
             clcaConfig = this.clcaConfig.publishJson(),
@@ -117,6 +119,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.simFuzzPct,
 
             this.minRecountMargin,
+            this.minMargin,
             this.removeTooManyPhantoms,
             this.auditSampleLimit,
             pollingConfig = this.pollingConfig.publishJson(),
@@ -139,6 +142,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
             this.simFuzzPct,
 
             this.minRecountMargin,
+            this.minMargin,
             this.removeTooManyPhantoms,
             this.auditSampleLimit,
             clcaConfig = this.clcaConfig.publishJson(),
@@ -167,6 +171,7 @@ fun AuditConfigJson.import(): AuditConfig {
 
             this.removeCutoffContests ?: (this.contestSampleCutoff != null),
             this.minRecountMargin,
+            this.minMargin,
             this.removeTooManyPhantoms,
             auditSampleLimit = this.auditSampleLimit,
             clcaConfig = this.clcaConfig!!.import(),
@@ -189,6 +194,7 @@ fun AuditConfigJson.import(): AuditConfig {
 
             this.removeCutoffContests ?: (this.contestSampleCutoff != null),
             this.minRecountMargin,
+            this.minMargin,
             this.removeTooManyPhantoms,
             auditSampleLimit = this.auditSampleLimit,
             pollingConfig = this.pollingConfig!!.import(),
@@ -211,6 +217,7 @@ fun AuditConfigJson.import(): AuditConfig {
 
             this.removeCutoffContests ?: (this.contestSampleCutoff != null),
             this.minRecountMargin,
+            this.minMargin,
             this.removeTooManyPhantoms,
             auditSampleLimit = this.auditSampleLimit,
             clcaConfig = this.clcaConfig?.import() ?: ClcaConfig(),

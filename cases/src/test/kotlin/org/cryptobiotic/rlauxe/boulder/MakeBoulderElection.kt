@@ -1,13 +1,25 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.audit.AssertionRound
+import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.cli.RunRlaRoundCli
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
+import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.estimate.CardSamples
+import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
+import org.cryptobiotic.rlauxe.estimate.EstimateSampleSizeTask
+import org.cryptobiotic.rlauxe.estimate.EstimationResult
+import org.cryptobiotic.rlauxe.estimate.makeEstimationTasks
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
+import org.cryptobiotic.util.runAllRoundsAndVerify
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -17,28 +29,19 @@ class MakeBoulderElection {
     // looks like the 2024-Boulder-County-General-Redacted-Cast-Vote-Record.xlsx got saved with incorrect character encoding (?).
     // hand corrected "Claudia De la Cruz / Karina García"
 
-    /* @Test
-    fun createBoulder24oa() {
-        createBoulderElectionOA(
-            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "$testdataDir/cases/boulder24oa/audit",
-            clear = true,
-        )
-    } */
-
     @Test
     fun createBoulder24oa() {
-        val topdir = "$testdataDir/cases/boulder24/oa"
+        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            topdir = topdir,
+            auditdir = auditdir,
             auditType = AuditType.ONEAUDIT,
             poolsHaveOneCardStyle=true,
+            minMargin = .011
         )
 
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
     }
@@ -54,16 +57,16 @@ class MakeBoulderElection {
 
     @Test
     fun createBoulder24clca() { // simulate CVRs
-        val topdir = "$testdataDir/cases/boulder24/clca"
+        val auditdir = "$testdataDir/cases/boulder24/clca/audit"
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            topdir = topdir,
+            auditdir = auditdir,
             auditType = AuditType.CLCA,
             poolsHaveOneCardStyle=true,
         )
 
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
     }
@@ -80,68 +83,60 @@ class MakeBoulderElection {
     @Test
     fun createBoulder25clca() { // simulate CVRs
         val datadir = "$testdataDir/cases/boulder2025"
-        val topdir = "$testdataDir/cases/boulder2025/clca"
+        val auditdir = "$testdataDir/cases/boulder2025/clca/audit"
         createBoulderElection(
             "$datadir/Redacted-CVR-PUBLIC.utf8.csv",
             "$datadir/2025C-Boulder-County-Official-Statement-of-Votes.utf8.csv",
-            topdir = topdir,
+            auditdir = auditdir,
             auditType = AuditType.CLCA,
             poolsHaveOneCardStyle=true,
             )
 
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
     }
 
-    // @Test
+    @Test
     fun createBoulderOArepeat() {
-        val topdir = "$testdataDir/cases/boulder24oa"
+        val topdir = "$testdataDir/cases/boulder24oa2"
 
-        repeat(10) { run ->
-            val auditDir = "$topdir/audit$run"
+        val tasks = mutableListOf<ConcurrentTaskG<Boolean>>()
+        repeat(20) { run ->
+            tasks.add( RunAuditTask(run+1, topdir) )
+        }
 
+        val estResults = ConcurrentTaskRunnerG<Boolean>().run(tasks, nthreads=10) // OOM, reduce threads
+        println(estResults)
+    }
+
+    class RunAuditTask(
+        val runIndex: Int,
+        val topdir: String,
+    ) : ConcurrentTaskG<Boolean> {
+        val auditdir = "$topdir/audit$runIndex"
+
+        override fun name() = "createBoulderElection $runIndex"
+
+        override fun run(): Boolean {
             createBoulderElection(
                 "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
                 "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-                topdir = topdir,
-                auditDir = auditDir,
+                auditdir = auditdir,
                 auditType = AuditType.ONEAUDIT,
                 poolsHaveOneCardStyle=true,
-                )
-        }
-        runBoulderOArepeat()
-    }
-
-    // @Test
-    fun runBoulderOArepeat() {
-        val topDir = "$testdataDir/cases/boulder24oa"
-
-        repeat(10) { run ->
-            val auditDir = "$topDir/audit$run"
-            RunRlaRoundCli.main(
-                arrayOf(
-                    "-in", auditDir,
-                )
+                // minMargin = .011
             )
-            RunRlaRoundCli.main(
-                arrayOf(
-                    "-in", auditDir,
-                )
-            )
+
+            val publisher = Publisher(auditdir)
+            val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+            writeSortedCardsInternalSort(publisher, config.seed)
+
+            return runAllRoundsAndVerify(auditdir)
         }
     }
 
     /*
-
-       @Test
-    fun createBoulder24() {
-        createBoulderElection(
-            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "$testdataDir/cases/boulder24",
-        )
-    }
 
     @Test
     fun createBoulder24recount() {
@@ -177,17 +172,6 @@ class MakeBoulderElection {
             "$testdataDir/cases/boulder23recount",
             sovo,
             minRecountMargin = 0.0,
-        )
-    }
-
-    pooled votes only, simulating a "batch level comparison audit"
-    @Test
-    fun createBoulder24blca() {
-        createBoulderElectionOneAudit(
-            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditDir = "$testdataDir/cases/boulder24blca",
-            includeCvrs = false,
         )
     }
 

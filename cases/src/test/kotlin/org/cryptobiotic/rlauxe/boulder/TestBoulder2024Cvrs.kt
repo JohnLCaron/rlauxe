@@ -5,10 +5,16 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
+import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.collections.component1
 import kotlin.collections.component2
+import kotlin.collections.contentToString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -116,6 +122,30 @@ class TestBoulder2024Cvrs {
         // println(compareRedactions(redactedCvrVotes, redactedDirect))
         assertEquals(redactedCvrVotes, redactedDirect)
         println("redactedCvrVotes agrees with redactedDirect")
+    }
+
+    @Test
+    fun testMvrs() {
+        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
+        val publisher = Publisher(auditdir)
+        val sortedMvrs = readCardsCsvIterator(publisher.privateMvrsFile())
+
+        val tab = ContestTabulation(17, 1, false, listOf(0,1))
+
+        sortedMvrs.use { mvrIter ->
+            while (mvrIter.hasNext()) {
+                val mvr = mvrIter.next()
+                if (mvr.poolId() == 18) {
+                    val cands = mvr.votes(17)
+                    if (cands != null) {
+                        tab.addVotes(cands, mvr.isPhantom())
+                        println("mvr ${mvr.location()} ${cands.contentToString()}")
+                    }
+                }
+            }
+        }
+        println("privateMvrs tab for contest 17 and pool 18  = $tab")
+        println("============================================")
     }
 
     /* code is currently specialized to 2025 general election TODO

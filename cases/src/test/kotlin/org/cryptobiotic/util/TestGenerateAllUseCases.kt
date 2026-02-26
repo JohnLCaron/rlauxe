@@ -25,33 +25,35 @@ class TestGenerateAllUseCases {
 
     @Test
     fun createBoulder24oa() {
-        val topdir = "$testdataDir/cases/boulder24/oa"
+        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
 
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            topdir = topdir,
+            auditdir = auditdir,
             auditType = AuditType.ONEAUDIT,
             poolsHaveOneCardStyle=true,
+            // minMargin = .011
         )
 
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
     }
 
     @Test
     fun createBoulder24clca() { // simulate CVRs
-        val topdir = "$testdataDir/cases/boulder24/clca"
+        val auditdir = "$testdataDir/cases/boulder24/clca/audit"
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            topdir = "$testdataDir/cases/boulder24/clca",
+            auditdir = auditdir,
             auditType = AuditType.CLCA,
             poolsHaveOneCardStyle=true,
+            // minMargin = .011
         )
 
-        val publisher = Publisher("$topdir/audit")
+        val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
         writeSortedCardsInternalSort(publisher, config.seed)
     }

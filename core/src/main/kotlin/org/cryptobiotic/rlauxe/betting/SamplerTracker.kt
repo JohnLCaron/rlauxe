@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.doublePrecision
@@ -160,6 +161,30 @@ class ClcaSamplerErrorTracker(
         clcaErrorTracker.reset()
         idx = 0
         lastVal = null
+        // debug()
+    }
+
+    fun debug() {
+        //     val contestId: Int,
+        //    voteForNin: Int, //
+        //    val isIrv: Boolean,
+        //    val candidateIds: List<Int>
+        val tab = ContestTabulation(18, 1, false, listOf(0,1))
+        var idx = 0
+        while (idx < this.samples.size) {
+            val wantIdx = this.permutedIndex[idx]
+            val (mvr, card) = this.samples[wantIdx]
+            if (mvr.poolId() == 18) {
+                val cands = mvr.votes(17)
+                if (cands != null) {
+                    tab.addVotes(cands, mvr.isPhantom())
+                    println("mvr ${mvr.location()} ${cands.contentToString()}")
+                }
+            }
+            idx++
+        }
+        println("reset tab for contest 17 and pool 18  = $tab")
+        println("============================================")
     }
 
     override fun maxSamples() = samples.size

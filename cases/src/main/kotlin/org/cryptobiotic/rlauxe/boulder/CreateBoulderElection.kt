@@ -168,7 +168,6 @@ class CreateBoulderElection(
 
     // make simulated CVRs for one pool, all contests
     private fun makeCvrsForOnePool(cardPool: OneAuditPoolWithBallotStyle, infos: Map<Int, ContestInfo>) : List<Cvr> { // contestId -> candidateId -> nvotes
-        // TODO we may need to set hasStyle flag, so always use undervotes ??
         val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
         val cvrs = makeVunderCvrs(poolVunders, cardPool.poolName, poolId = cardPool.poolId)
         // the number of cvrs can vary when there are multiple contests: artifact of simulating the cvrs
@@ -336,10 +335,10 @@ class CreateBoulderElection(
 fun createBoulderElection(
     cvrExportFile: String,
     sovoFile: String,
-    topdir: String,
-    auditDir: String = "$topdir/audit",
+    auditdir: String,
     riskLimit: Double = 0.03,
     minRecountMargin: Double = .005,
+    minMargin: Double = 0.0,
     auditConfigIn: AuditConfig? = null,
     auditType : AuditType,
     poolsHaveOneCardStyle: Boolean,
@@ -357,12 +356,17 @@ fun createBoulderElection(
                 AuditType.CLCA,
                 riskLimit = riskLimit,
                 minRecountMargin = minRecountMargin,
+                minMargin = minMargin,
                 nsimEst = 20,
                 clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
             )
         else if (auditType.isOA())
             AuditConfig(
-                AuditType.ONEAUDIT, riskLimit=riskLimit, minRecountMargin=minRecountMargin, nsimEst=20,
+                AuditType.ONEAUDIT,
+                riskLimit=riskLimit,
+                minRecountMargin=minRecountMargin,
+                minMargin=minMargin,
+                nsimEst=20,
                 contestSampleCutoff = 20_000, removeCutoffContests = true,
                 persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
                 clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
@@ -371,12 +375,12 @@ fun createBoulderElection(
 
     val election = CreateBoulderElection(export, sovo, isClca = auditType.isClca(), poolsHaveOneCardStyle)
 
-    CreateAuditRecord("boulder", config, election, auditDir = auditDir, clear = clear)
+    CreateAuditRecord("boulder", config, election, auditDir = auditdir, clear = clear)
     println("createBoulderElectionOAnew took $stopwatch")
 
     // write the private mvrs
     val unsortedMvrs = election.allCvrs
-    val publisher = Publisher("$topdir/audit")
+    val publisher = Publisher(auditdir)
     writeUnsortedPrivateMvrs(publisher, unsortedMvrs, seed = config.seed)
 }
 

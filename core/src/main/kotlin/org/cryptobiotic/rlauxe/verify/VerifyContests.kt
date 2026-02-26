@@ -437,7 +437,7 @@ fun verifyOApools(
     result.addMessage("verifyOApools")
     var allOk = true
 
-    val cvrTabs = contestSummary.nonpooled // corla has nothing nonpooled
+    val cvrTabs = contestSummary.nonpooled
 
     contestsUA.forEach { contestUA ->
         val contestId = contestUA.id

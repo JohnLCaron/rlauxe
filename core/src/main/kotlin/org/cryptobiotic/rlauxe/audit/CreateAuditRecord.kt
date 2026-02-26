@@ -130,6 +130,7 @@ fun writeMvrsForRound(publisher: Publisher, round: Int): Int {
     require(resultSamples.isOk)
     val sampleNumbers = resultSamples.unwrap()
 
+    // TODO this reads entire list into memory: use readCardsCsvIterator I think
     val sortedMvrs = readAuditableCardCsvFile(publisher.privateMvrsFile())
 
     val sampledMvrs = findSamples(sampleNumbers, Closer(sortedMvrs.iterator()))

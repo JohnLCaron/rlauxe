@@ -66,7 +66,27 @@ data class OneAuditPoolWithBallotStyle(
         return ncards() * info.voteForN - voteSum
     }
 
+    // TODO IRV allowed ?
     override fun votesAndUndervotes(contestId: Int): Vunder {
+        val poolUndervotes = undervoteForContest(contestId)
+        val contestTab = voteTotals[contestId]!!
+
+        val voteCounts = contestTab.votes.map { Pair(intArrayOf(it.key), it.value) }
+        val voteSum = contestTab.votes.values.sum()
+
+        return if (hasSingleCardStyle) {
+            // if hasSingleCardStyle, then missing has to be zero
+            // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
+            // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
+            val undervotes = ncards() - voteSum / contestTab.voteForN
+            Vunder(contestId, poolId, voteCounts, undervotes, 0, contestTab.voteForN)
+        } else {
+            val missing = ncards() - (poolUndervotes + voteSum) / contestTab.voteForN
+            Vunder(contestId, poolId, voteCounts, poolUndervotes, missing, contestTab.voteForN)
+        }
+    }
+
+    fun votesAndUndervotesPrev(contestId: Int): Vunder {
         val poolUndervotes = undervoteForContest(contestId)
         val contestTab = voteTotals[contestId]!!
         return Vunder.fromNpop(contestId, poolUndervotes, ncards(), contestTab.votes, contestTab.voteForN)

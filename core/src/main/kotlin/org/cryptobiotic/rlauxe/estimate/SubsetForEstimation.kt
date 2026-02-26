@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.math.min
 
-private val debug = true
+private val debug = false
 private val logger = KotlinLogging.logger("ConsistentSampling")
 
 data class CardSamples(val cards: List<AuditableCard>, val usedByContests: Map<Int, List<Int>>) {
@@ -40,8 +40,7 @@ fun getSubsetForEstimation(
     contests: List<ContestRound>,
     cardManifest: CardManifest,
     previousSamples: Set<Long>,
-): CardSamples
-{
+): CardSamples  {
     val contestsIncluded = contests.filter { !it.done && it.included }
     if (contestsIncluded.isEmpty())
         return CardSamples(emptyList(), emptyMap())
@@ -160,6 +159,9 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: In
         contestRound.minAssertion()
         return 0
     }
+
+    if (contestRound.contestUA.id == 17)
+        print("")
 
     val lastPvalue = minAssertionRound.auditResult?.plast ?: config.riskLimit
     val minAssertion = minAssertionRound.assertion

@@ -80,7 +80,7 @@ class OneAuditRatesFromPools(val pools: List<OneAuditPoolIF>) {
                 val taus = TausOA(oaCassorter.assorter.upperBound(), poolAvg)
 
                 val tab = pool.contestTab(contestUA.id)!!
-                if (tab.irvVotes.votes.isNotEmpty()) {
+                // if (tab.irvVotes.votes.isNotEmpty()) {
                     val irvVotes: Votes = tab.irvVotes.makeVotes(contestUA.ncandidates)
                     val winnerLoser = raire.winnerLoserVotes(irvVotes)
                     val winnerCounts: Int = winnerLoser.first
@@ -94,9 +94,11 @@ class OneAuditRatesFromPools(val pools: List<OneAuditPoolIF>) {
                     pairs.add(Pair(taus.tausOA[0].first * oaCassorter.noerror(), loserCounts / dencards))  // loser
                     pairs.add(Pair(taus.tausOA[1].first * oaCassorter.noerror(), otherCounts / dencards))  // other
                     pairs.add(Pair(taus.tausOA[2].first * oaCassorter.noerror(), winnerCounts / dencards))  // winner
-                } else {
-                    throw RuntimeException("oaErrorRatesIrv needs tab.irvVotes.votes.isNotEmpty()")
-                }
+                // }
+                // I guess you could have no votes ??
+                //else {
+                  //  throw RuntimeException("oaErrorRatesIrv needs tab.irvVotes.votes.isNotEmpty()")
+                //}
             }
         }
 

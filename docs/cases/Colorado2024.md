@@ -1,5 +1,5 @@
 # Colorado Statewide Election 2024
-02/20/206
+02/25/2026
 
 ## Downloaded files
 
@@ -98,18 +98,10 @@ IRV contests.
 **createColoradoClca()** assumes we can match the CVRs to physical ballots and does a regular CLCA.
 This allows us to compare the cost of OneAudit vs CLCA.
 
-### precinct pools for OneAudit
+### simulated OneAudit
 
-We also run a OneAudit with the precinct as the pools.
-
-* They do record when a Candidate total votes = 0.
-* We have Nc from contestRound.contestBallotCardCount
-* We dont have the number of cards for each precinct, so we add undervotes to minimize phantoms.
-
-**createColoradoOneAudit():** has all ballots in OneAudit pools by precinct.
-Assume that the contest list constitutes the ballot style for that precinct pool.
-In this case we use Card Style Data to do style sampling, which is equivilent to assuming we can match the CardLocations to the MRV,
-but there are no votes.
+TODO: choose a few rural counties that might be foing hand counts; put them into OneAudit pools, probably by county. 
+See how the sample saizes compare to CLCA.
 
 ### Next Steps
 

@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.persist.json
 
-import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode

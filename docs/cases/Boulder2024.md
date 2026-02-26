@@ -31,7 +31,7 @@ Here are 1 CLCA and 10 trials of OneAudit for Boulder2024. The total number of M
 
 The spread among all the trials (click to get an interactive chart):
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/cases/Boulder2024AuditVarianceScatterLogLog.html" rel="Boulder2024AuditVarianceScatterLogLog">![Boulder2024AuditVarianceScatterLogLog](../docs/plots2/cases/Boulder2024AuditVarianceScatterLogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/cases/Boulder2024AuditVarianceScatterLogLog.html" rel="Boulder2024AuditVarianceScatterLogLog">![Boulder2024AuditVarianceScatterLogLog](../plots2/cases/Boulder2024AuditVarianceScatterLogLog.png)</a>
 
 * This is the simulated number of mvrs needed, including the extra samples needed from estimating each round.
 * Each run has a different PRN seed, to make sure we are seeing independent variations.

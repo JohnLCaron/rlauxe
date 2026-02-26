@@ -484,7 +484,7 @@ auditors might hand select which contests to audit, interacting with the estimat
 and try out different scenarios before committing to which contests continue on to the next round. 
 
 * See the prototype [rlauxe Viewer](https://github.com/JohnLCaron/rlauxe-viewer) to see how an auditor might control the estimation phase before committing to a sample for the round.
-* See [Case Studies](docs/CaseStudies.md) for simulated audits on real election data.
+* See [Case Studies](#case-studies) for simulated audits on real election data.
 
 ## Efficiency
 

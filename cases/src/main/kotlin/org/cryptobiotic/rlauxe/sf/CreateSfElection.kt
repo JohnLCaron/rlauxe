@@ -35,13 +35,13 @@ private val logger = KotlinLogging.logger("CreateSfElection")
 
 // SanFrancisco 2024 General Election.
 class CreateSfElection(
-        castVoteRecordZip: String,
-        contestManifestFilename: String,
-        candidateManifestFile: String,
-        val cvrExportCsv: String,
-        val config: AuditConfig,
-        poolsHaveOneCardStyle: Boolean,
-    ): CreateElectionIF {
+    castVoteRecordZip: String,
+    contestManifestFilename: String,
+    candidateManifestFile: String,
+    val cvrExportCsv: String,
+    val auditConfig: AuditConfig,
+    poolsHaveOneCardStyle: Boolean,
+): CreateElectionIF {
     val cardPoolMapByName: Map<String, OneAuditPoolFromCvrs>
     val cardPoolBuilders: List<OneAuditPoolFromCvrs>
     val cardPools: List<OneAuditPool>
@@ -75,16 +75,16 @@ class CreateSfElection(
         phantomCount = countPhantoms(allCvrTabs, contestNcs)
 
         // we need to know the diluted Nb before we can create the assertions: another pass through the cvrExports
-        val (manifestTabs, count) = tabulateCardsAndCount( createCards(config.auditType), infos)
+        val (manifestTabs, count) = tabulateCardsAndCount( createCards(auditConfig.auditType), infos)
         val contestNbs = manifestTabs.mapValues { it.value.ncardsTabulated }
         println("contestNbs= ${contestNbs}")
         this.ncards = count
 
         // make contests based on cvr tabulations
         cardPools = cardPoolBuilders.map { it.toOneAuditPool() }
-        contestsUA = if (config.isClca) {
+        contestsUA = if (auditConfig.isClca) {
             makeClcaContestsSF(infos, allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
-        } else if (config.isOA) {
+        } else if (auditConfig.isOA) {
             makeOneAuditContestsSF(infos, allCvrTabs, contestNcs, contestNbs, unpooledPool, cardPools).sortedBy { it.id } // TODO
         } else {
             makePollingContestsSF(infos, allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
@@ -162,10 +162,10 @@ class CreateSfElection(
         return result
     }
 
-    override fun populations() = if (config.isClca) emptyList() else cardPoolBuilders
+    override fun populations() = if (auditConfig.isClca) emptyList() else cardPoolBuilders
     override fun makeCardPools() = cardPools
     override fun contestsUA() = contestsUA
-    override fun cards() = createCards(config.auditType)
+    override fun cards() = createCards(auditConfig.auditType)
     override fun ncards() = ncards
 
     // same cvrs for CLCA and OneAudit
@@ -374,7 +374,7 @@ fun createSfElection(
         contestManifestFilename,
         candidateManifestFile,
         cvrExportCsv,
-        config = config,
+        auditConfig = config,
         poolsHaveOneCardStyle=poolsHaveOneCardStyle,
     )
     CreateAuditRecord("sf2024", config, election, auditDir = auditdir, )

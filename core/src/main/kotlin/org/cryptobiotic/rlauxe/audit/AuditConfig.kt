@@ -19,6 +19,7 @@ data class ElectionInfo(
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
 )
 
+// wed like the AuditConfig to not be needed for election creation.
 data class AuditConfig(
     val auditType: AuditType,
     // val hasStyle: Boolean = true, // perhaps useful when all pools have hasSingleCardStyle=true ?? etc

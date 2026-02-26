@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.workflow
+package org.cryptobiotic.rlauxe.cases
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.persist.AuditRecord
@@ -52,12 +52,13 @@ class CaseStudiesVarianceScatter {
         val catPoints = mutableListOf<CatPoint>()
         val (totalClca, clcaAssertionMap) = readAuditRecord(clcaAuditDir, "CLCA")!!
         catPoints.addAll( clcaAssertionMap.values)
-
+        println("CLCA has ${clcaAssertionMap.size} assertions")
         val clcaMargins = clcaAssertionMap.mapValues { it.value.margin }
 
         val totalOA = mutableListOf<Int>()
         repeat(20) { run ->
             val pair = readAuditRecord("$oaAuditDir/audit$run", "OneAudit")
+            println("OneAudit $run has ${clcaAssertionMap.size} assertions")
             if (pair != null) {
                 totalOA.add(pair.first)
                 val cats = if (!useClcaMargins) pair.second.values else {

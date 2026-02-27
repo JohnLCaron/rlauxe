@@ -19,10 +19,17 @@ data class ElectionInfo(
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
 )
 
+data class ElectionInfo2(
+    val auditType: AuditType,
+    val ncards: Int,
+    val ncontests: Int,
+    val cvrsContainUndervotes: Boolean,
+    val poolsHaveOneCardStyle: Boolean,
+)
+
 // wed like the AuditConfig to not be needed for election creation.
 data class AuditConfig(
     val auditType: AuditType,
-    // val hasStyle: Boolean = true, // perhaps useful when all pools have hasSingleCardStyle=true ?? etc
     val riskLimit: Double = 0.05,
     val seed: Long = secureRandom.nextLong(), // determines sample order. set carefully to ensure truly random.
 
@@ -36,6 +43,7 @@ data class AuditConfig(
     val removeCutoffContests: Boolean = (contestSampleCutoff != null), // remove contests that need more samples than contestSampleCutoff
     val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin TODO really it should be noerror?
     val minMargin: Double = 0.0, // do not audit contests less than this margin
+    val removeMinContests: Int? = null, // remove top n min-margin contests
     val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
     val auditSampleLimit: Int? = null, // limit audit sample size; audit all samples, ignore risk limit
 
@@ -63,7 +71,8 @@ data class AuditConfig(
 
     override fun toString() = buildString {
         appendLine("AuditConfig(auditType=$auditType, riskLimit=$riskLimit, seed=$seed persistedWorkflowMode=$persistedWorkflowMode" )
-        append("  minRecountMargin=$minRecountMargin removeTooManyPhantoms=$removeTooManyPhantoms")
+        append("  minRecountMargin=$minRecountMargin minMargin=$minMargin removeTooManyPhantoms=$removeTooManyPhantoms")
+        if (removeMinContests != null) { append(" removeMinContests=$removeMinContests") }
         if (contestSampleCutoff != null) { append(" contestSampleCutoff=$contestSampleCutoff removeCutoffContests=$removeCutoffContests") }
         if (auditSampleLimit != null) { append(" auditSampleLimit=$auditSampleLimit (risk measuring audit)") }
         appendLine()

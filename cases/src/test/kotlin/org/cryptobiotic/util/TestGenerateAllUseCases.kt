@@ -93,17 +93,13 @@ class TestGenerateAllUseCases {
 
         createSfElection(
             topdir,
+            AuditType.ONEAUDIT,
             sfZipFile,
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
-            auditType = AuditType.ONEAUDIT,
             poolsHaveOneCardStyle=false,
         )
-
-        val publisher = Publisher("$topdir/audit")
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
     }
 
     @Test
@@ -112,17 +108,13 @@ class TestGenerateAllUseCases {
 
         createSfElection(
             topdir,
+            AuditType.CLCA,
             sfZipFile,
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
-            auditType = AuditType.CLCA,
             poolsHaveOneCardStyle=false,
         )
-
-        val publisher = Publisher("$topdir/audit")
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
     }
 
     @Test

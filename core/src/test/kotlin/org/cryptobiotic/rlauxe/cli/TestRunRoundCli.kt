@@ -9,14 +9,27 @@ import kotlin.test.Test
 class TestRunRoundCli {
 
     @Test
-    fun testRunRoundCli() {
-        val topdir = "$testdataDir/cases/boulder24/oa"
-        val auditdir = "$topdir/audit"
+    fun testStartAuditFirstRound() {
+        val topdir = "$testdataDir/cases/sf2024/clca"
+        val auditdir = "$topdir/audit2"
 
         RunRlaRoundCli.main(
             arrayOf(
                 "-in", auditdir,
-                "--onlyTask", "17-1/0",
+                // "--onlyTask", "17-1/0",
+            )
+        )
+    }
+
+    @Test
+    fun testRunRoundCli() {
+        val topdir = "$testdataDir/cases/sf2024/clca"
+        val auditdir = "$topdir/audit2"
+
+        RunRlaRoundCli.main(
+            arrayOf(
+                "-in", auditdir,
+                // "--onlyTask", "17-1/0",
             )
         )
     }

@@ -128,6 +128,6 @@ fun readAuditRecord(auditDir: String, cat: String, marginOverride:Map<Int, Doubl
             }
         }
     }
-    println("read $auditDir")
+    println("read $auditDir totalMvrs=$totalMvrs prevSamples=${(auditRecord as AuditRecord).previousMvrs.size} ")
     return Pair(totalMvrs, allAssertions)
 }

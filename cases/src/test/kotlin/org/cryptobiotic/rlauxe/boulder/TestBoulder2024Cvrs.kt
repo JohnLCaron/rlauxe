@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.boulder
 
+import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -43,7 +44,7 @@ class TestBoulder2024Cvrs {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val maker = CreateBoulderElection(export, sovo, isClca=true, poolsHaveOneCardStyle=true)
+        val maker = CreateBoulderElection( AuditType.CLCA, export, sovo, poolsHaveOneCardStyle=true)
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
@@ -96,7 +97,7 @@ class TestBoulder2024Cvrs {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val electionSimCvrs = CreateBoulderElection(export, sovo, isClca = true, poolsHaveOneCardStyle=true)
+        val electionSimCvrs = CreateBoulderElection(AuditType.CLCA,  export, sovo, poolsHaveOneCardStyle=true)
         val infos = electionSimCvrs.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 

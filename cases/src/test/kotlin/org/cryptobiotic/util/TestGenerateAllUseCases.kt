@@ -32,13 +32,8 @@ class TestGenerateAllUseCases {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
             auditType = AuditType.ONEAUDIT,
-            poolsHaveOneCardStyle=true,
             // minMargin = .011
         )
-
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
     }
 
     @Test
@@ -49,13 +44,8 @@ class TestGenerateAllUseCases {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
             auditType = AuditType.CLCA,
-            poolsHaveOneCardStyle=true,
             // minMargin = .011
         )
-
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
     }
 
     @Test
@@ -98,7 +88,6 @@ class TestGenerateAllUseCases {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
-            poolsHaveOneCardStyle=false,
         )
     }
 
@@ -113,7 +102,6 @@ class TestGenerateAllUseCases {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
-            poolsHaveOneCardStyle=false,
         )
     }
 

@@ -69,6 +69,7 @@ data class AuditConfigJson(
 
     val minRecountMargin: Double,
     val minMargin: Double,
+    val removeMinContests: Int? = null, // remove top n min-margin contests
     val removeTooManyPhantoms: Boolean,
     val auditSampleLimit: Int?,
 
@@ -97,6 +98,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
 
             this.minRecountMargin,
             this.minMargin,
+            this.removeMinContests,
             this.removeTooManyPhantoms,
             this.auditSampleLimit,
             clcaConfig = this.clcaConfig.publishJson(),
@@ -120,6 +122,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
 
             this.minRecountMargin,
             this.minMargin,
+            this.removeMinContests,
             this.removeTooManyPhantoms,
             this.auditSampleLimit,
             pollingConfig = this.pollingConfig.publishJson(),
@@ -143,6 +146,7 @@ fun AuditConfig.publishJson() : AuditConfigJson {
 
             this.minRecountMargin,
             this.minMargin,
+            this.removeMinContests,
             this.removeTooManyPhantoms,
             this.auditSampleLimit,
             clcaConfig = this.clcaConfig.publishJson(),
@@ -172,6 +176,7 @@ fun AuditConfigJson.import(): AuditConfig {
             this.removeCutoffContests ?: (this.contestSampleCutoff != null),
             this.minRecountMargin,
             this.minMargin,
+            this.removeMinContests,
             this.removeTooManyPhantoms,
             auditSampleLimit = this.auditSampleLimit,
             clcaConfig = this.clcaConfig!!.import(),
@@ -195,6 +200,7 @@ fun AuditConfigJson.import(): AuditConfig {
             this.removeCutoffContests ?: (this.contestSampleCutoff != null),
             this.minRecountMargin,
             this.minMargin,
+            this.removeMinContests,
             this.removeTooManyPhantoms,
             auditSampleLimit = this.auditSampleLimit,
             pollingConfig = this.pollingConfig!!.import(),
@@ -218,6 +224,7 @@ fun AuditConfigJson.import(): AuditConfig {
             this.removeCutoffContests ?: (this.contestSampleCutoff != null),
             this.minRecountMargin,
             this.minMargin,
+            this.removeMinContests,
             this.removeTooManyPhantoms,
             auditSampleLimit = this.auditSampleLimit,
             clcaConfig = this.clcaConfig?.import() ?: ClcaConfig(),

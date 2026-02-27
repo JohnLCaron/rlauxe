@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.boulder
 
+import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
@@ -100,7 +101,7 @@ class TestBoulderUndervotes {
     fun showSovoContestDetail2() {
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
 
-        val election2 = CreateBoulderElection(export, sovo, isClca=false)
+        val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
         println()
         election2.oaContests.forEach { (_, oa) ->
             println(BoulderContestVotes.header)
@@ -114,7 +115,7 @@ class TestBoulderUndervotes {
 
         println("votes, undervotes")
 
-        val election2 = CreateBoulderElection(export, sovo, isClca=false)
+        val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
         val contestIds = election2.infoList.map { it.id }
         showPoolVotes(contestIds, election2.cardPoolBuilders)
     }
@@ -134,7 +135,7 @@ class TestBoulderUndervotes {
     fun showRedactedUndervotes2() {
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
         // val election1 = BoulderElectionOAsim(export, sovo)
-        val election2 = CreateBoulderElection(export, sovo, isClca=false)
+        val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -198,7 +199,7 @@ class TestBoulderUndervotes {
     @Test
     fun showRedactedNcards() {
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
-        val election2 = CreateBoulderElection(export, sovo, isClca=false)
+        val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 
@@ -267,7 +268,7 @@ class TestBoulderUndervotes {
     @Test
     fun showNcards() {
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
-        val election2 = CreateBoulderElection(export, sovo, isClca=false)
+        val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
 
         val contestIds = election2.infoList.map { it.id }
 

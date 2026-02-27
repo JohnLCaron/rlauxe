@@ -34,16 +34,16 @@ class CaseStudiesVarianceScatter {
 
     @Test
     fun caseStudiesSF() {
-        val name = "SF2024AuditVarianceScatter"
+        val name = "SF2024AuditVarianceTrueMargins"
         val dirName = "$testdataDir/plots/sf2024/$name"
 
         validateOutputDir(Path(dirName))
         caseStudiesVariancePlots(
             name,
             dirName,
-            "$testdataDir/cases/sf2024/clca/audit",
+            "$testdataDir/cases/sf2024/clca/audit2",
             "$testdataDir/cases/sf2024oa/",
-            true
+            false
         )
     }
 
@@ -53,15 +53,15 @@ class CaseStudiesVarianceScatter {
         val (totalClca, clcaAssertionMap) = readAuditRecord(clcaAuditDir, "CLCA")!!
         catPoints.addAll( clcaAssertionMap.values)
         println("CLCA has ${clcaAssertionMap.size} assertions")
-        val clcaMargins = clcaAssertionMap.mapValues { it.value.margin }
+        val clcaMargins = if (useClcaMargins) clcaAssertionMap.mapValues { it.value.margin } else null
 
         val totalOA = mutableListOf<Int>()
         repeat(20) { run ->
-            val pair = readAuditRecord("$oaAuditDir/audit$run", "OneAudit")
-            println("OneAudit $run has ${clcaAssertionMap.size} assertions")
+            val pair = readAuditRecord("$oaAuditDir/audit${run+1}", "OneAudit")
+            println("OneAudit ${run+1} has ${clcaAssertionMap.size} assertions")
             if (pair != null) {
                 totalOA.add(pair.first)
-                val cats = if (!useClcaMargins) pair.second.values else {
+                val cats = if (clcaMargins == null) pair.second.values else {
                     pair.second.map { (key, value) ->
                         value.copy(margin = clcaMargins[key]!!)
                     }
@@ -107,12 +107,14 @@ class CaseStudiesVarianceScatter {
 data class CatPoint(val cat: String, val samplesUsed: Int, val margin: Double)
 
 fun readAuditRecord(auditDir: String, cat: String, marginOverride:Map<Int, Double>? = null): Pair<Int, Map<String, CatPoint>>? {
-    val auditRecord = AuditRecord.readFromResult(auditDir)
-    if (auditRecord.isErr) {
+    val auditRecordResult = AuditRecord.readFromResult(auditDir)
+    if (auditRecordResult.isErr) {
+        println(auditRecordResult)
         return null
     }
+    val auditRecord = auditRecordResult.unwrap() as AuditRecord
+    val auditRounds = auditRecord.rounds
 
-    val auditRounds = auditRecord.unwrap().rounds
     var totalMvrs = 0
     val allAssertions = mutableMapOf<String, CatPoint>()
     auditRounds.forEach { auditRound ->
@@ -128,6 +130,6 @@ fun readAuditRecord(auditDir: String, cat: String, marginOverride:Map<Int, Doubl
             }
         }
     }
-    println("read $auditDir")
+    println("read $auditDir totalMvrs=$totalMvrs prevSamples=${auditRecord.previousMvrs.size} ")
     return Pair(totalMvrs, allAssertions)
 }

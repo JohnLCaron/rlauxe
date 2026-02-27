@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.ContestRound
-import org.cryptobiotic.rlauxe.audit.ElectionInfo
+import org.cryptobiotic.rlauxe.audit.ElectionInfo2
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.workflow.CardManifest
@@ -21,7 +21,7 @@ private val showMissing = true
 
 data class CompositeRecord(
     override val location: String,
-    override val electionInfo: ElectionInfo,
+    override val electionInfo: ElectionInfo2,
     override val config: AuditConfig,
     override val contests: List<ContestWithAssertions>,
     override val rounds: List<AuditRoundIF>,
@@ -60,7 +60,7 @@ data class CompositeRecord(
             val components = mutableListOf<AuditRecord>()
             val contests = mutableListOf<ContestWithAssertions>()
             var config: AuditConfig? = null
-            var electionInfo: ElectionInfo? = null
+            var electionInfo: ElectionInfo2? = null
 
             // find all subdirectories
             val path = Path(location)

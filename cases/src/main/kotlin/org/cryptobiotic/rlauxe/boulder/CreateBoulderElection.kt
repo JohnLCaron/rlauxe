@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.boulder
 
+import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.RedactedGroup
@@ -9,7 +10,6 @@ import org.cryptobiotic.rlauxe.dominion.ContestVotes
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
-import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
@@ -26,12 +26,12 @@ private val logger = KotlinLogging.logger("BoulderElectionOA")
 // Use OneAudit; redacted ballots are in pools. Cant do IRV.
 // specific to 2024 election. TODO: generalize
 class CreateBoulderElection(
+    val auditType: AuditType,
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
-    val isClca: Boolean,
     val poolsHaveOneCardStyle: Boolean = true,
     val distributeOvervotes: List<Int> = listOf(0, 63),
-): CreateElectionIF {
+): CreateElectionIF2 {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convertToCvr() }
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infoMap = infoList.associateBy { it.id }
@@ -71,7 +71,7 @@ class CreateBoulderElection(
         val (npops, count) = tabulateNpops(allCvrs, infoMap)
         this.ncards = count
 
-        contestsUA = if (isClca) ContestWithAssertions.make(contests, npops, isClca=true, )
+        contestsUA = if (auditType.isClca()) ContestWithAssertions.make(contests, npops, isClca=true, )
             else makeOneAuditContests(contests, npops, cardPoolBuilders)
 
         val totalRedactedBallots = cardPoolBuilders.sumOf { it.ncards() }
@@ -281,16 +281,18 @@ class CreateBoulderElection(
         }
     }
 
-
+    override fun electionInfo() = ElectionInfo2(auditType, ncards(), contestsUA.size, true, poolsHaveOneCardStyle)
     override fun contestsUA() = contestsUA
-    override fun populations() = if (isClca) emptyList() else cardPoolBuilders
-    override fun makeCardPools() = if (isClca) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
+    override fun populations() = if (auditType.isClca()) emptyList() else cardPoolBuilders
+    override fun makeCardPools() = if (auditType.isClca()) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
+    override fun createUnsortedMvrs() = allCvrs
+
     override fun cards() = createCards()
     override fun ncards() = ncards
 
     fun createCards(): CloseableIterator<AuditableCard> {
         // same cvrs for CLCA and OneAudit
-        return if (isClca) {
+        return if (auditType.isClca()) {
             CvrsToCardsAddStyles(
                 AuditType.CLCA,
                 Closer(allCvrs.iterator()),
@@ -307,26 +309,6 @@ class CreateBoulderElection(
             )
         }
     }
-
-    /* doesnt work
-    fun createCvrsFromPools() : List<Cvr> {
-        val cvrs = mutableListOf<Cvr>()
-
-        cardPoolBuilders.forEach { pool ->
-            val cleanName = cleanCsvString(pool.poolName)
-            repeat(pool.ncards()) { poolIndex ->
-                cvrs.add(
-                    Cvr(
-                        id = "pool${cleanName} card ${poolIndex + 1}",
-                        phantom = false,
-                        votes = pool.voteTotals.mapValues { intArrayOf() }, // empty votes
-                        poolId = pool.poolId
-                    )
-                )
-            }
-        }
-        return cvrs
-    } */
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -336,19 +318,23 @@ fun createBoulderElection(
     cvrExportFile: String,
     sovoFile: String,
     auditdir: String,
+    auditType : AuditType,
     riskLimit: Double = 0.03,
     minRecountMargin: Double = .005,
     minMargin: Double = 0.0,
     auditConfigIn: AuditConfig? = null,
-    auditType : AuditType,
-    poolsHaveOneCardStyle: Boolean,
     mvrFuzz: Double? = null,
-    clear: Boolean = true,
-) {
+    removeCutoffContests: Boolean = true,
+): Result<AuditRoundIF, ErrorMessages> {
     val stopwatch = Stopwatch()
+
     val variation = if (sovoFile.contains("2025") || sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
     val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
+
+    val election = CreateBoulderElection(auditType, export, sovo, poolsHaveOneCardStyle=true)
+    createElectionRecord("boulder2024", election, auditDir = auditdir)
+    println("CreateBoulderElection took $stopwatch")
 
     val config = if (auditConfigIn != null) auditConfigIn
         else if (auditType.isClca())
@@ -367,21 +353,19 @@ fun createBoulderElection(
                 minRecountMargin=minRecountMargin,
                 minMargin=minMargin,
                 nsimEst=20,
-                contestSampleCutoff = 20_000, removeCutoffContests = true,
+                contestSampleCutoff = 20_000, removeCutoffContests = removeCutoffContests,
                 persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
                 clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
             )
     else throw RuntimeException("unsupported audit type $auditType")
 
-    val election = CreateBoulderElection(export, sovo, isClca = auditType.isClca(), poolsHaveOneCardStyle)
+    createAuditRecord(config, election, auditDir = auditdir)
 
-    CreateAuditRecord("boulder", config, election, auditDir = auditdir, clear = clear)
-    println("createBoulderElectionOAnew took $stopwatch")
+    val result = startFirstRound(auditdir)
+    if (result.isErr) logger.error{ result.toString() }
+    logger.info{"startFirstBoulderRound took $stopwatch"}
 
-    // write the private mvrs
-    val unsortedMvrs = election.allCvrs
-    val publisher = Publisher(auditdir)
-    writeUnsortedPrivateMvrs(publisher, unsortedMvrs, seed = config.seed)
+    return result
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

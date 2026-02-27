@@ -6,12 +6,37 @@ import kotlinx.cli.required
 import kotlinx.cli.default
 import org.cryptobiotic.rlauxe.audit.runRoundAgain
 import org.cryptobiotic.rlauxe.audit.runRound
+import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import kotlin.String
 
-/** Run one round of a PersistentAudit that has already been started. */
+/** Run first estimate round of an election that has already been created and auditConfig exists. */
+object StartAuditFirstRound {
 
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val parser = ArgParser("StartFirstRound")
+        val inputDir by parser.option(
+            ArgType.String,
+            shortName = "in",
+            description = "Directory containing input election record"
+        ).required()
+        val onlyTask by parser.option(
+            ArgType.String,
+            shortName = "estTaskName",
+            description = "run only this estimate task"
+        )
+
+        try {
+            parser.parse(args)
+            startFirstRound(inputDir, onlyTask)
+        } catch (t: Throwable) {
+            println(t.message)
+        }
+    }
+}
+
+/** Run one round of a PersistentAudit that has already been started. */
 object RunRlaRoundCli {
 
     @JvmStatic

@@ -18,7 +18,6 @@ import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
-import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.raire.makeRaireOneAuditContest
 import org.cryptobiotic.rlauxe.raire.makeRaireContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -39,9 +38,9 @@ class CreateSfElection(
     contestManifestFilename: String,
     candidateManifestFile: String,
     val cvrExportCsv: String,
-    val auditConfig: AuditConfig,
-    poolsHaveOneCardStyle: Boolean,
-): CreateElectionIF {
+    val auditType: AuditType,
+    val poolsHaveOneCardStyle: Boolean,
+): CreateElectionIF2 {
     val cardPoolMapByName: Map<String, OneAuditPoolFromCvrs>
     val cardPoolBuilders: List<OneAuditPoolFromCvrs>
     val cardPools: List<OneAuditPool>
@@ -56,7 +55,7 @@ class CreateSfElection(
             candidateManifestFile
         )
         val infos = contestInfos.associateBy { it.id }
-        println("contestNcs ${contestNcs}")
+        // println("contestNcs ${contestNcs}")
 
         // pass 1 through cvrs, make card pools, including unpooled
         val (allCardPools: Map<String, OneAuditPoolFromCvrs>, allCvrTabs: Map<Int, ContestTabulation>, ncards) = createCardPools(
@@ -75,16 +74,16 @@ class CreateSfElection(
         phantomCount = countPhantoms(allCvrTabs, contestNcs)
 
         // we need to know the diluted Nb before we can create the assertions: another pass through the cvrExports
-        val (manifestTabs, count) = tabulateCardsAndCount( createCards(auditConfig.auditType), infos)
+        val (manifestTabs, count) = tabulateCardsAndCount( createCards(auditType), infos)
         val contestNbs = manifestTabs.mapValues { it.value.ncardsTabulated }
-        println("contestNbs= ${contestNbs}")
+        // println("contestNbs= ${contestNbs}")
         this.ncards = count
 
         // make contests based on cvr tabulations
         cardPools = cardPoolBuilders.map { it.toOneAuditPool() }
-        contestsUA = if (auditConfig.isClca) {
+        contestsUA = if (auditType.isClca()) {
             makeClcaContestsSF(infos, allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
-        } else if (auditConfig.isOA) {
+        } else if (auditType.isOA()) {
             makeOneAuditContestsSF(infos, allCvrTabs, contestNcs, contestNbs, unpooledPool, cardPools).sortedBy { it.id } // TODO
         } else {
             makePollingContestsSF(infos, allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
@@ -162,10 +161,14 @@ class CreateSfElection(
         return result
     }
 
-    override fun populations() = if (auditConfig.isClca) emptyList() else cardPoolBuilders
+    override fun electionInfo() = ElectionInfo2(
+        auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = poolsHaveOneCardStyle,
+    )
+
+    override fun populations() = if (auditType.isClca()) emptyList() else cardPoolBuilders
     override fun makeCardPools() = cardPools
     override fun contestsUA() = contestsUA
-    override fun cards() = createCards(auditConfig.auditType)
+    override fun cards() = createCards(auditType)
     override fun ncards() = ncards
 
     // same cvrs for CLCA and OneAudit
@@ -186,8 +189,8 @@ class CreateSfElection(
                 null)
     }
 
-    // must be in same order as createCards
-    fun createUnsortedMvrs(): List<Cvr> {
+    // convert the cvrExports to the private mvrs; must be in same order as createCards
+    override fun createUnsortedMvrs(): List<Cvr> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
         val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPoolBuilders.associate { it.name() to it.id() })
 
@@ -335,23 +338,36 @@ fun makeContestNcs(contestManifest: ContestManifest, contestInfos: List<ContestI
 
 fun createSfElection(
     auditdir: String,
+    auditType : AuditType,
     castVoteRecordZip: String,
     contestManifestFilename: String,
     candidateManifestFile: String,
     cvrExportCsv: String,
     auditConfigIn: AuditConfig? = null,
-    poolsHaveOneCardStyle: Boolean,
-    auditType : AuditType,
+    poolsHaveOneCardStyle: Boolean = false,
     mvrFuzz: Double? = null,
-) {
+    removeMinContests: Int? = null,
+): Result<AuditRoundIF, ErrorMessages> {
     val stopwatch = Stopwatch()
+
+    val election = CreateSfElection(
+        castVoteRecordZip,
+        contestManifestFilename,
+        candidateManifestFile,
+        cvrExportCsv,
+        auditType = auditType,
+        poolsHaveOneCardStyle=poolsHaveOneCardStyle,
+    )
+    createElectionRecord("sf2024", election, auditDir = auditdir)
+    logger.info{"createSfElection took $stopwatch"}
+    stopwatch.start()
+
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
 
         (auditType == AuditType.CLCA) -> AuditConfig(
             AuditType.CLCA, riskLimit = .05, nsimEst=20,
-            // TODO, this should be set when running the audit, so can test same election with differenct scenarios
-            //    so we need the config at create time, and the config at run time...
+            removeMinContests = removeMinContests,
             simFuzzPct=mvrFuzz, persistedWorkflowMode=PersistedWorkflowMode.testSimulated,
             simulationStrategy = SimulationStrategy.optimistic,
             clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
@@ -359,7 +375,8 @@ fun createSfElection(
 
         (auditType == AuditType.ONEAUDIT) -> AuditConfig(
             AuditType.ONEAUDIT, riskLimit = .05, nsimEst = 20,
-            contestSampleCutoff = 20_000, removeCutoffContests = true,
+            removeMinContests = removeMinContests,
+            contestSampleCutoff = 20_000, removeCutoffContests = false,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
             simulationStrategy = SimulationStrategy.optimistic,
             clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
@@ -369,20 +386,11 @@ fun createSfElection(
             AuditType.POLLING, riskLimit = .05, contestSampleCutoff = 10000, nsimEst = 20) // TODO
     }
 
-    val election = CreateSfElection(
-        castVoteRecordZip,
-        contestManifestFilename,
-        candidateManifestFile,
-        cvrExportCsv,
-        auditConfig = config,
-        poolsHaveOneCardStyle=poolsHaveOneCardStyle,
-    )
-    CreateAuditRecord("sf2024", config, election, auditDir = auditdir, )
+    createAuditRecord(config, election, auditDir = auditdir)
 
-    // convert the cvrExports to the private mvrs
-    val unsortedMvrs = election.createUnsortedMvrs()
-    val publisher = Publisher(auditdir)
-    writeUnsortedPrivateMvrs(publisher, unsortedMvrs, seed = config.seed)
+    val result = startFirstRound(auditdir)
+    if (result.isErr) logger.error{ result.toString() }
+    logger.info{"startFirstSfRound took $stopwatch"}
 
-    println("createSfElection took $stopwatch")
+    return result
 }

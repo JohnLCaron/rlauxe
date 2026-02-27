@@ -37,7 +37,7 @@ interface CreateElectionIF {
     fun makeCardPools(): List<OneAuditPool>?
 }
 
-private val logger = KotlinLogging.logger("CreateAudit")
+private val logger = KotlinLogging.logger("CreateAuditRecord")
 
 class CreateAuditRecord(val name: String, val config: AuditConfig, election: CreateElectionIF, val auditDir: String, clear: Boolean = true) {
 
@@ -63,8 +63,8 @@ class CreateAuditRecord(val name: String, val config: AuditConfig, election: Cre
 
         val cardPools = election.makeCardPools()
         if (!cardPools.isNullOrEmpty()) {
-            writeCardPoolCsvFile(cardPools, publisher.cardPoolsFile())
-            logger.info { "writeCardPoolCsvFile ${cardPools.size} pools to ${publisher.cardPoolsFile()}" }
+            writeCardPoolCsvFile(cardPools, publisher.oneauditPoolsFile())
+            logger.info { "writeCardPoolCsvFile ${cardPools.size} pools to ${publisher.oneauditPoolsFile()}" }
         }
 
         val cards = election.cards()

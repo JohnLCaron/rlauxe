@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.boulder
 
+import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -61,7 +62,7 @@ class TestBoulder2025Cvrs {
         assertEquals(32, export.schema.contests.size)
         assertEquals(120529, export.cvrs.size)
 
-        val maker = CreateBoulderElection(export, sovo, isClca=true, distributeOvervotes=emptyList(),  poolsHaveOneCardStyle=true)
+        val maker = CreateBoulderElection(AuditType.CLCA, export, sovo, distributeOvervotes=emptyList(),  poolsHaveOneCardStyle=true)
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
@@ -109,7 +110,7 @@ class TestBoulder2025Cvrs {
         // redaction lines are present
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
 
-        val electionSimCvrs = CreateBoulderElection(export, sovo, isClca = true,  poolsHaveOneCardStyle=true)
+        val electionSimCvrs = CreateBoulderElection(AuditType.CLCA, export, sovo,  poolsHaveOneCardStyle=true)
         val infos = electionSimCvrs.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 

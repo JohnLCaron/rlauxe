@@ -37,7 +37,6 @@ class MakeBoulderElection {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
             auditType = AuditType.ONEAUDIT,
-            poolsHaveOneCardStyle=true,
             minMargin = .011
         )
 
@@ -57,13 +56,12 @@ class MakeBoulderElection {
 
     @Test
     fun createBoulder24clca() { // simulate CVRs
-        val auditdir = "$testdataDir/cases/boulder24/clca/audit"
+        val auditdir = "$testdataDir/cases/boulder24/clca/audit2"
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
             auditType = AuditType.CLCA,
-            poolsHaveOneCardStyle=true,
         )
 
         val publisher = Publisher(auditdir)
@@ -73,7 +71,7 @@ class MakeBoulderElection {
 
     @Test
     fun testRunVerifyBoulder24clca() {
-        val auditdir = "$testdataDir/cases/boulder24/clca/audit"
+        val auditdir = "$testdataDir/cases/boulder24/clca/audit2"
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = false)
         println()
         print(results)
@@ -89,12 +87,7 @@ class MakeBoulderElection {
             "$datadir/2025C-Boulder-County-Official-Statement-of-Votes.utf8.csv",
             auditdir = auditdir,
             auditType = AuditType.CLCA,
-            poolsHaveOneCardStyle=true,
             )
-
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
     }
 
     @Test
@@ -124,14 +117,8 @@ class MakeBoulderElection {
                 "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
                 auditdir = auditdir,
                 auditType = AuditType.ONEAUDIT,
-                poolsHaveOneCardStyle=true,
                 // minMargin = .011
             )
-
-            val publisher = Publisher(auditdir)
-            val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-            writeSortedCardsInternalSort(publisher, config.seed)
-
             return runAllRoundsAndVerify(auditdir)
         }
     }

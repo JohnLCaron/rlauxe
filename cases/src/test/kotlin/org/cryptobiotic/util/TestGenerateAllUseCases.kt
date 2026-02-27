@@ -32,13 +32,8 @@ class TestGenerateAllUseCases {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
             auditType = AuditType.ONEAUDIT,
-            poolsHaveOneCardStyle=true,
             // minMargin = .011
         )
-
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
     }
 
     @Test
@@ -49,13 +44,8 @@ class TestGenerateAllUseCases {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
             auditType = AuditType.CLCA,
-            poolsHaveOneCardStyle=true,
             // minMargin = .011
         )
-
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
     }
 
     @Test
@@ -93,17 +83,12 @@ class TestGenerateAllUseCases {
 
         createSfElection(
             topdir,
+            AuditType.ONEAUDIT,
             sfZipFile,
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
-            auditType = AuditType.ONEAUDIT,
-            poolsHaveOneCardStyle=false,
         )
-
-        val publisher = Publisher("$topdir/audit")
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
     }
 
     @Test
@@ -112,17 +97,12 @@ class TestGenerateAllUseCases {
 
         createSfElection(
             topdir,
+            AuditType.CLCA,
             sfZipFile,
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
-            auditType = AuditType.CLCA,
-            poolsHaveOneCardStyle=false,
         )
-
-        val publisher = Publisher("$topdir/audit")
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
     }
 
     @Test

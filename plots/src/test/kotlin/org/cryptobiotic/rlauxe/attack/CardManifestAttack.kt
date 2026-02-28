@@ -4,14 +4,14 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CreateAuditRecord
-import org.cryptobiotic.rlauxe.audit.CreateElectionIF
+import org.cryptobiotic.rlauxe.audit.CreateElectionIF2
+import org.cryptobiotic.rlauxe.audit.ElectionInfo2
 import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.audit.PopulationIF
-import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
+import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
-import org.cryptobiotic.rlauxe.audit.writeUnsortedPrivateMvrs
+import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -21,7 +21,6 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
-import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Vunder
@@ -238,17 +237,15 @@ class CardManifestAttack {
         println()
 
         //// create a peristent audit
-        val election = CreateElectionForAttack(listOf(contestUA), cards, cardPools, null)
+        val election = CreateElectionForAttack(listOf(contestUA), cards, mvrs, cardPools, null)
 
         val auditdir = "$topdir/audit"
         val config = AuditConfig(
             AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10,
         )
-        CreateAuditRecord("hideInOtherPoolAttack", config, election, auditDir = "$topdir/audit",)
 
-        val publisher = Publisher(auditdir)
-        writeSortedCardsInternalSort(publisher, config.seed)
-        writeUnsortedPrivateMvrs(publisher, mvrs, config.seed)
+        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+        startFirstRound(auditdir)
 
         println("============================================================")
         val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, true)
@@ -268,10 +265,13 @@ class CardManifestAttack {
 class CreateElectionForAttack(
     val contestsUA: List<ContestWithAssertions>,
     val cards: List<AuditableCard>,
+    val mvrs: List<Cvr>,
     val populations: List<PopulationIF>?,
     val cardPools: List<OneAuditPool>?,
-):  CreateElectionIF {
+): CreateElectionIF2 {
 
+    override fun electionInfo() = ElectionInfo2(AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
+    override fun createUnsortedMvrs() = mvrs
     override fun contestsUA() = contestsUA
     override fun populations() = populations
     override fun cards() = Closer( cards.iterator() )

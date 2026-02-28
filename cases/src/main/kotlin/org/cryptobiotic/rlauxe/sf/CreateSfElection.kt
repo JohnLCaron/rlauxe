@@ -346,7 +346,10 @@ fun createSfElection(
     auditConfigIn: AuditConfig? = null,
     poolsHaveOneCardStyle: Boolean = false,
     mvrFuzz: Double? = null,
-    removeMinContests: Int? = null,
+    minRecountMargin: Double = 0.005,
+    minMargin: Double = 0.0,
+    removeCutoffContests: Boolean = true,
+    removeMaxContests: Int? = null,
 ): Result<AuditRoundIF, ErrorMessages> {
     val stopwatch = Stopwatch()
 
@@ -367,7 +370,10 @@ fun createSfElection(
 
         (auditType == AuditType.CLCA) -> AuditConfig(
             AuditType.CLCA, riskLimit = .05, nsimEst=20,
-            removeMinContests = removeMinContests,
+            minRecountMargin=minRecountMargin,
+            minMargin=minMargin,
+            removeMaxContests = removeMaxContests,
+            removeCutoffContests = removeCutoffContests,
             simFuzzPct=mvrFuzz, persistedWorkflowMode=PersistedWorkflowMode.testSimulated,
             simulationStrategy = SimulationStrategy.optimistic,
             clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
@@ -375,8 +381,10 @@ fun createSfElection(
 
         (auditType == AuditType.ONEAUDIT) -> AuditConfig(
             AuditType.ONEAUDIT, riskLimit = .05, nsimEst = 20,
-            removeMinContests = removeMinContests,
-            contestSampleCutoff = 20_000, removeCutoffContests = false,
+            minRecountMargin=minRecountMargin,
+            minMargin=minMargin,
+            removeMaxContests = removeMaxContests,
+            contestSampleCutoff = 20_000, removeCutoffContests = removeCutoffContests,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
             simulationStrategy = SimulationStrategy.optimistic,
             clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)

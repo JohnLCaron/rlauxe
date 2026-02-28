@@ -34,7 +34,7 @@ data class ElectionInfo2Json(
     val ncards: Int,
     val ncontests: Int,
     val cvrsContainUndervotes: Boolean,
-    val poolsHaveOneCardStyle: Boolean,
+    val poolsHaveOneCardStyle: Boolean?,
 )
 
 fun ElectionInfo2.publishJson() = ElectionInfo2Json(
@@ -43,7 +43,7 @@ fun ElectionInfo2.publishJson() = ElectionInfo2Json(
     ncontests = this.ncontests,
     cvrsContainUndervotes = this.cvrsContainUndervotes,
     poolsHaveOneCardStyle = this.poolsHaveOneCardStyle,
-    )
+)
 
 fun ElectionInfo2Json.import() = ElectionInfo2(
     enumValueOf(this.auditType, AuditType.entries) ?: throw RuntimeException("unknown AuditType ${this.auditType}"),

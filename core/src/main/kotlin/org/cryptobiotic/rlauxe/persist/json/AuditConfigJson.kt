@@ -24,31 +24,32 @@ import java.nio.file.StandardOpenOption
 /*
 data class AuditConfig(
     val auditType: AuditType,
-    val hasStyle: Boolean, // has Card Style Data (CSD), i.e. we know which contests each card/ballot contains
     val riskLimit: Double = 0.05,
     val seed: Long = secureRandom.nextLong(), // determines sample order. set carefully to ensure truly random.
 
     // simulation control
     val nsimEst: Int = 100, // number of simulation estimation trials
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
-    val contestSampleCutoff: Int? = 30000, // use this number of cvrs in the estimation, set to null to use all
-    val simFuzzPct: Double = 0.0, // for simulating the estimation and testMvr fuzzing
+    val simFuzzPct: Double? = null, // for simulating the estimation fuzzing
 
     // audit sample size control
-    val removeCutoffContests: Boolean = false, // remove contests that need more samples than contestSampleCutoff
-    val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
+    val contestSampleCutoff: Int? = 30000, // use this number of cvrs in the estimation, set to null to use all
+    val removeCutoffContests: Boolean = (contestSampleCutoff != null), // remove contests that need more samples than contestSampleCutoff
+    val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin TODO really it should be noerror?
+    val minMargin: Double = 0.0, // do not audit contests less than this margin
+    val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / contestNc) greater than this
+    val removeMaxContests: Int? = null, // remove top n estimated nmvrs contests
     val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
+
+    // this turns the audit into a "risk measuring" audit
     val auditSampleLimit: Int? = null, // limit audit sample size; audit all samples, ignore risk limit
 
-    // old config, replace by error strategies
     val pollingConfig: PollingConfig = PollingConfig(),
-    val clcaConfig: ClcaConfig = ClcaConfig(ClcaStrategyType.previous),
-    val oaConfig: OneAuditConfig = OneAuditConfig(OneAuditStrategyType.optimalComparison, useFirst = false),
+    val clcaConfig: ClcaConfig = ClcaConfig(),
+    val oaConfig: OneAuditConfig = OneAuditConfig(),
 
-    // default error strategies
-    val pollingErrorStrategy: PollingErrorStrategy = PollingErrorStrategy(),
-    val clcaBettingStrategy: ClcaBettingStrategy = ClcaBettingStrategy(),
-    val oaBettingStrategy: OneAuditBettingStrategy = OneAuditBettingStrategy(),
+    val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
+    val simulationStrategy: SimulationStrategy =  SimulationStrategy.optimistic,
 
     val skipContests: List<Int> = emptyList(),
     val version: Double = 2.0,
@@ -57,20 +58,21 @@ data class AuditConfig(
 @Serializable
 data class AuditConfigJson(
     val auditType: String,
-    // val hasStyle: Boolean,
     val riskLimit: Double,
     val seed: Long,
 
     val nsimEst: Int,
     val quantile: Double,
-    val contestSampleCutoff: Int?,
-    val removeCutoffContests: Boolean?,
     val simFuzzPct: Double?,
 
+    val contestSampleCutoff: Int?,
+    val removeCutoffContests: Boolean,
     val minRecountMargin: Double,
     val minMargin: Double,
-    val removeMinContests: Int? = null, // remove top n min-margin contests
+    val maxSamplePct: Double,
+    val removeMaxContests: Int? = null, // remove top n min-margin contests
     val removeTooManyPhantoms: Boolean,
+
     val auditSampleLimit: Int?,
 
     val pollingConfig: PollingConfigJson? = null,
@@ -83,159 +85,65 @@ data class AuditConfigJson(
     val skipContests: List<Int>?  = null,
 )
 
-fun AuditConfig.publishJson() : AuditConfigJson {
-    return when (this.auditType) {
-        AuditType.CLCA -> AuditConfigJson(
-            this.auditType.name,
-            //this.hasStyle,
-            this.riskLimit,
-            this.seed,
-            this.nsimEst,
-            this.quantile,
-            this.contestSampleCutoff,
-            this.removeCutoffContests,
-            this.simFuzzPct,
+fun AuditConfig.publishJson() = AuditConfigJson(
+    this.auditType.name,
+    this.riskLimit,
+    this.seed,
 
-            this.minRecountMargin,
-            this.minMargin,
-            this.removeMinContests,
-            this.removeTooManyPhantoms,
-            this.auditSampleLimit,
-            clcaConfig = this.clcaConfig.publishJson(),
+    this.nsimEst,
+    this.quantile,
+    this.simFuzzPct,
 
-            persistedWorkflowMode = this.persistedWorkflowMode,
-            simulationStrategy = this.simulationStrategy,
-            skipContests = skipContests,
-            version = this.version,
-        )
+    this.contestSampleCutoff,
+    this.removeCutoffContests,
+    this.minRecountMargin,
+    this.minMargin,
+    this.maxSamplePct,
+    this.removeMaxContests,
+    this.removeTooManyPhantoms,
 
-        AuditType.POLLING -> AuditConfigJson(
-            this.auditType.name,
-            //this.hasStyle,
-            this.riskLimit,
-            this.seed,
-            this.nsimEst,
-            this.quantile,
-            this.contestSampleCutoff,
-            this.removeCutoffContests,
-            this.simFuzzPct,
+    this.auditSampleLimit,
 
-            this.minRecountMargin,
-            this.minMargin,
-            this.removeMinContests,
-            this.removeTooManyPhantoms,
-            this.auditSampleLimit,
-            pollingConfig = this.pollingConfig.publishJson(),
+    clcaConfig = if (!this.auditType.isPolling()) this.clcaConfig.publishJson() else null,
+    oaConfig = if (this.auditType.isOA()) this.oaConfig.publishJson() else null,
+    pollingConfig = if (this.auditType.isPolling()) this.pollingConfig.publishJson() else null,
 
-            persistedWorkflowMode = this.persistedWorkflowMode,
-            simulationStrategy = this.simulationStrategy,
-            skipContests = skipContests,
-            version = this.version,
-        )
-
-        AuditType.ONEAUDIT -> AuditConfigJson(
-            this.auditType.name,
-            //this.hasStyle,
-            this.riskLimit,
-            this.seed,
-            this.nsimEst,
-            this.quantile,
-            this.contestSampleCutoff,
-            this.removeCutoffContests,
-            this.simFuzzPct,
-
-            this.minRecountMargin,
-            this.minMargin,
-            this.removeMinContests,
-            this.removeTooManyPhantoms,
-            this.auditSampleLimit,
-            clcaConfig = this.clcaConfig.publishJson(),
-            oaConfig = this.oaConfig.publishJson(),
-
-            persistedWorkflowMode = this.persistedWorkflowMode,
-            simulationStrategy = this.simulationStrategy,
-            skipContests = skipContests,
-            version = this.version,
-        )
-    }
-}
+    persistedWorkflowMode = this.persistedWorkflowMode,
+    simulationStrategy = this.simulationStrategy,
+    skipContests = skipContests,
+    version = this.version,
+)
 
 fun AuditConfigJson.import(): AuditConfig {
     val auditType = enumValueOf(this.auditType, AuditType.entries) ?: AuditType.CLCA
-    return when (auditType) {
-        AuditType.CLCA -> AuditConfig(
-            auditType,
-            //this.hasStyle,
-            this.riskLimit,
-            this.seed,
-            this.nsimEst,
-            this.quantile,
-            this.contestSampleCutoff,
-            this.simFuzzPct,
+    return AuditConfig(
+        auditType,
+        this.riskLimit,
+        this.seed,
 
-            this.removeCutoffContests ?: (this.contestSampleCutoff != null),
-            this.minRecountMargin,
-            this.minMargin,
-            this.removeMinContests,
-            this.removeTooManyPhantoms,
-            auditSampleLimit = this.auditSampleLimit,
-            clcaConfig = this.clcaConfig!!.import(),
+        this.nsimEst,
+        this.quantile,
+        this.simFuzzPct,
 
-            persistedWorkflowMode = this.persistedWorkflowMode,
-            simulationStrategy = this.simulationStrategy,
-            skipContests = skipContests?: emptyList(),
-            version = this.version,
-        )
+        this.contestSampleCutoff,
+        this.removeCutoffContests,
+        this.minRecountMargin,
+        this.minMargin,
+        this.maxSamplePct,
+        this.removeMaxContests,
+        this.removeTooManyPhantoms,
 
-        AuditType.POLLING -> AuditConfig(
-            auditType,
-            //this.hasStyle,
-            this.riskLimit,
-            this.seed,
-            this.nsimEst,
-            this.quantile,
-            this.contestSampleCutoff,
-            this.simFuzzPct,
+        this.auditSampleLimit,
 
-            this.removeCutoffContests ?: (this.contestSampleCutoff != null),
-            this.minRecountMargin,
-            this.minMargin,
-            this.removeMinContests,
-            this.removeTooManyPhantoms,
-            auditSampleLimit = this.auditSampleLimit,
-            pollingConfig = this.pollingConfig!!.import(),
+        clcaConfig = if (this.clcaConfig != null) this.clcaConfig.import() else ClcaConfig(),
+        oaConfig = if (this.oaConfig != null) this.oaConfig.import() else OneAuditConfig(),
+        pollingConfig = if (this.pollingConfig != null) this.pollingConfig.import() else PollingConfig(),
 
-            persistedWorkflowMode = this.persistedWorkflowMode,
-            simulationStrategy = this.simulationStrategy,
-            skipContests = skipContests?: emptyList(),
-            version = this.version,
-        )
-
-        AuditType.ONEAUDIT -> AuditConfig(
-            auditType,
-            //this.hasStyle,
-            this.riskLimit,
-            this.seed,
-            this.nsimEst,
-            this.quantile,
-            this.contestSampleCutoff,
-            this.simFuzzPct,
-
-            this.removeCutoffContests ?: (this.contestSampleCutoff != null),
-            this.minRecountMargin,
-            this.minMargin,
-            this.removeMinContests,
-            this.removeTooManyPhantoms,
-            auditSampleLimit = this.auditSampleLimit,
-            clcaConfig = this.clcaConfig?.import() ?: ClcaConfig(),
-            oaConfig = this.oaConfig!!.import(),
-
-            persistedWorkflowMode = this.persistedWorkflowMode,
-            simulationStrategy = this.simulationStrategy,
-            skipContests = skipContests?: emptyList(),
-            version = this.version,
-        )
-    }
+        persistedWorkflowMode = this.persistedWorkflowMode,
+        simulationStrategy = this.simulationStrategy,
+        skipContests = skipContests?: emptyList(),
+        version = this.version,
+    )
 }
 
 @Serializable
@@ -246,14 +154,14 @@ data class PollingConfigJson(
 fun PollingConfig.publishJson() = PollingConfigJson(this.d)
 fun PollingConfigJson.import() = PollingConfig(this.d)
 
-// enum class ClcaStrategyType { generalAdaptive, apriori, fuzzPct, oracle  }
+// enum class ClcaStrategyType { generalAdaptive, generalAdaptive2}
 //data class ClcaConfig(
-//    val cvrsContainUndervotes: Boolean = true,
-//    val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive,
-//    val fuzzPct: Double? = null, // use to generate apriori errorRates for simulation, only used when ClcaStrategyType = fuzzPct
-//    val pluralityErrorRates: PluralityErrorRates? = null, // use as apriori errorRates for simulation and audit.
+//    val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive2,
+//    val fuzzMvrs: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs when persistedWorkflowMode=testSimulate
 //    val d: Int = 100,  // shrinkTrunc weight for error rates
-//    val maxLoss: Double = 0.90,  // max risk on any one bet
+//    val maxLoss: Double = 0.90,  // max loss on any one bet, 0 < maxLoss < 1
+//    val cvrsContainUndervotes: Boolean = true,
+//    val apriori: TausRates = TausRates(emptyMap()),
 //)
 @Serializable
 data class ClcaConfigJson(
@@ -261,7 +169,6 @@ data class ClcaConfigJson(
     val fuzzPct: Double?,
     val d: Int,
     val maxLoss: Double?,
-    val cvrsContainUndervotes: Boolean=true,
     val apriori:  Map<String, Double>?,
 )
 
@@ -270,7 +177,6 @@ fun ClcaConfig.publishJson() = ClcaConfigJson(
     this.fuzzMvrs,
     this.d,
     this.maxLoss,
-    this.cvrsContainUndervotes,
     this.apriori.rates,
 )
 
@@ -279,7 +185,6 @@ fun ClcaConfigJson.import() = ClcaConfig(
         this.fuzzPct,
         this.d,
         this.maxLoss ?: 0.90,
-        this.cvrsContainUndervotes,
         apriori=TausRates(this.apriori ?: emptyMap()),
     )
 

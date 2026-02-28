@@ -28,6 +28,7 @@ dependencies {
     testFixturesImplementation(libs.kotlinx.cli)
     testFixturesImplementation(libs.oshai.logging)
     testFixturesImplementation(libs.commons.math)
+    testFixturesImplementation(libs.bull.result)
 
     // cant use testImplementation(kotlin("test")) and kotest together as they have diffrent jupitor versions....
     testImplementation(libs.bundles.jvmtest)

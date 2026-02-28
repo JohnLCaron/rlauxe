@@ -106,7 +106,7 @@ fun getSubsetForEstimation(
     if (sampledCards.size == 0)
         logger.warn { "sampledCards.size == 0" }
 
-    logger.info{ "getSubsetForEstimation sampled cards ncards = ${sampledCards.size} countCardsLookedAt = $countCardsLookedAt" }
+    if (debug) logger.info{ "getSubsetForEstimation sampled cards ncards = ${sampledCards.size} countCardsLookedAt = $countCardsLookedAt" }
     if (debug && allInfos != null) {
         val debugInfo = tabulateDebugInfo(Closer(sampledCards.iterator()), contestsIncluded, usedByContests)
         debugInfo.forEach { (contestId, debugInfo) ->
@@ -133,8 +133,6 @@ fun tabulateDebugInfo(cards: CloseableIterator<AuditableCard>, contests: List<Co
             val card = cardIter.next()
             sampleIndex++
             contests.forEach { contest ->
-                if (usedByContests != null && usedByContests[contest.id] == null)
-                    print("how")
                 val useCard = usedByContests == null || usedByContests[contest.id]!!.contains(sampleIndex)
                 if (useCard && card.hasContest(contest.id)) {
                     val tab = tabs.getOrPut(contest.id) { ContestDebugInfo(contest.id, 0, 0) }
@@ -201,7 +199,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: In
 
     var est =  min( contest.Npop, needed)
     if (config.contestSampleCutoff != null) est = min(config.contestSampleCutoff, est)
-    logger.info { "getSubsetForEstimation ${contest.id}-${assorter.winLose()} estSamplesNeeded=$est margin=${assorter.dilutedMargin()} " +
+    if (debug) logger.info { "getSubsetForEstimation ${contest.id}-${assorter.winLose()} estSamplesNeeded=$est margin=${assorter.dilutedMargin()} " +
             "estAndBet=${estAndBet.first}, ${df(estAndBet.second)} stddev=$stddev; $dd" }
 
     if (est < 0) {

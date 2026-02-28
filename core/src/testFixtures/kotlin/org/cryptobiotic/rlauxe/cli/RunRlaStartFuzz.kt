@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.cli
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.default
@@ -13,21 +14,15 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
-import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
-import org.cryptobiotic.rlauxe.workflow.readCardPools
-import kotlin.io.path.Path
 import kotlin.math.min
+
+private val logger = KotlinLogging.logger("RunRlaStartFuzz")
 
 /** Create a multicontest audit, with fuzzed test data, TODO: stored in private record? */
 object RunRlaStartFuzz {
@@ -134,36 +129,36 @@ fun startTestElectionClca(
     addRaire: Boolean,
     addRaireCandidates: Int,
 ) {
-    val auditDir = "$topdir/audit"
-    clearDirectory(Path(auditDir))
+    val auditdir = "$topdir/audit"
 
-    val config = AuditConfig(
-        AuditType.CLCA, nsimEst = 100, simFuzzPct = simFuzz, quantile = quantile,
-        clcaConfig = ClcaConfig(fuzzMvrs=fuzzMvrs)
-    )
-
-    clearDirectory(Path(auditDir))
     val election = TestClcaElection(
-        config,
         minMargin,
         pctPhantoms,
         ncards,
         ncontests,
         addRaire,
         addRaireCandidates)
+    createElectionRecord("startTestElectionClca", election, auditDir = auditdir)
 
-    CreateAuditRecord("startTestElectionClca", config, election, auditDir = "$topdir/audit", clear = false)
+    val config = AuditConfig(
+        AuditType.CLCA, nsimEst = 100, simFuzzPct = simFuzz, quantile = quantile,
+        clcaConfig = ClcaConfig(fuzzMvrs=fuzzMvrs)
+    )
+
+    createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+
+    val result = startFirstRound(auditdir)
+    if (result.isErr) error{ result.toString() }
 }
 
 class TestClcaElection(
-    val config: AuditConfig,
     minMargin: Double,
     pctPhantoms: Double?,
     ncards: Int,
     ncontests: Int,
     addRaire: Boolean,
     addRaireCandidates: Int,
-): CreateElectionIF {
+): CreateElectionIF2 {
     val contestsUA = mutableListOf<ContestWithAssertions>()
     val allCvrs = mutableListOf<Cvr>()
 
@@ -194,6 +189,10 @@ class TestClcaElection(
         println()
     }
 
+    override fun electionInfo() = ElectionInfo2(
+        AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
+    )
+    override fun createUnsortedMvrs() = allCvrs
     override fun populations() = null
     override fun makeCardPools() = null
     override fun contestsUA() = contestsUA
@@ -201,7 +200,7 @@ class TestClcaElection(
 
     override fun cards() : CloseableIterator<AuditableCard> {
         return CvrsToCardsAddStyles(
-            config.auditType,
+            AuditType.CLCA,
             Closer(allCvrs.iterator()),
             null, null
         )
@@ -221,35 +220,35 @@ fun startTestElectionPolling(
     pctPhantoms: Double = 0.0,
     ncontests: Int = 11,
 ) {
-    val auditDir = "$topdir/audit"
-    clearDirectory(Path(auditDir))
-    val config = AuditConfig(AuditType.POLLING, nsimEst = 100, simFuzzPct = simFuzz,
-        persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs, quantile=quantile)
+    val auditdir = "$topdir/audit"
 
-    clearDirectory(Path(auditDir))
     val election = TestPollingElection(
-        auditDir,
-        config,
+        auditdir,
         minMargin,
         fuzzMvrs,
         pctPhantoms,
         ncards,
         ncontests,
     )
+    createElectionRecord("startTestElectionPolling", election, auditDir = auditdir)
 
-    // dont clear, we've already started writing
-    CreateAuditRecord("startTestElectionPolling", config, election, auditDir = auditDir, clear=false)
+    val config = AuditConfig(AuditType.POLLING, nsimEst = 100, simFuzzPct = simFuzz,
+        persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs, quantile=quantile)
+
+    createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+
+    val result = startFirstRound(auditdir)
+    if (result.isErr) logger.error{ result.toString() }
 }
 
 class TestPollingElection(
     val auditdir: String,
-    val config: AuditConfig,
     minMargin: Double,
     fuzzMvrs: Double,
     pctPhantoms: Double?,
     ncards: Int,
     ncontests: Int,
-): CreateElectionIF {
+): CreateElectionIF2 {
     val contestsUA = mutableListOf<ContestWithAssertions>()
     val cvrs: List<Cvr>
     val testMvrs: List<Cvr>
@@ -281,16 +280,12 @@ class TestPollingElection(
         contestsUA.addAll(makum)
         contestsUA.forEach { println("  $it") }
         println()
-
-        val infos = contestsUA().map { it.contest.info() }.associateBy { it.id }
-        val mvrTabs = tabulateCvrs(testMvrs.iterator(), infos)
-        println("testMvrs = ${mvrTabs}")
-        println()
-
-        // have to write this here, where we know the mvrs
-        writeUnsortedPrivateMvrs(Publisher(auditdir), testMvrs, seed=config.seed)
     }
 
+    override fun electionInfo() = ElectionInfo2(
+        AuditType.POLLING, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
+    )
+    override fun createUnsortedMvrs() = testMvrs
     override fun populations() = pops
     override fun makeCardPools() = null
     override fun contestsUA() = contestsUA
@@ -298,7 +293,7 @@ class TestPollingElection(
 
     override fun cards() : CloseableIterator<AuditableCard> {
         return CvrsToCardsAddStyles(
-            config.auditType,
+            AuditType.POLLING,
             Closer(cvrs.iterator()),
             null,
             populations(),
@@ -321,7 +316,17 @@ fun startTestElectionOneAudit(
     extraPct: Double,
 ) {
     val auditDir = "$topdir/audit"
-    clearDirectory(Path(auditDir))
+
+    val election = TestOneAuditElection(
+        auditDir,
+        minMargin,
+        cvrFraction = cvrFraction,
+        ncards,
+        phantomPct=phantomPct,
+        extraPct=extraPct,
+        fuzzMvrs=fuzzMvrs,
+    )
+    createElectionRecord("RunRlaStartOneAudit", election, auditDir = auditDir, clear = true)
 
     val config = AuditConfig(
         AuditType.ONEAUDIT, nsimEst = 10, simFuzzPct = simFuzz, quantile = quantile,
@@ -329,60 +334,26 @@ fun startTestElectionOneAudit(
         clcaConfig = ClcaConfig(fuzzMvrs=fuzzMvrs),
         simulationStrategy = if (strategy == "calc") SimulationStrategy.optimistic else SimulationStrategy.regular,
     )
-    clearDirectory(Path(auditDir))
 
-    //     val config: AuditConfig,
-    //    minMargin: Double,
-    //    cvrFraction: Double,
-    //    ncards: Int,
-    //    phantomPct: Double,
-    //    extraPct: Double,
-    val election = TestOneAuditElection(
-        auditDir,
-        config,
-        minMargin,
-        cvrFraction = cvrFraction,
-        ncards,
-        phantomPct=phantomPct,
-        extraPct=extraPct,
-    )
+    createAuditRecord(config, election, auditDir = auditDir, externalSortDir=topdir)
 
-    CreateAuditRecord("RunRlaStartOneAudit", config, election, auditDir = "$topdir/audit", clear = false)
-
-    // write the sorted cards: why isnt this part of CreateAudit? Because seed must be generated after commitment to cardManifest
-    val publisher = Publisher(auditDir)
-    writeSortedCardsInternalSort(publisher, config.seed)
-
-    // simulate the mvrs, write to private dir
-    val contests = readContestsJsonFileUnwrapped(publisher.contestsFile())
-    val infos = contests.map{ it.contest.info() }.associateBy { it.id }
-    val cardPools = readCardPools(publisher, infos)
-
-    val scardIter = readCardsCsvIterator(publisher.sortedCardsFile())
-    val sortedCards = mutableListOf<AuditableCard>()
-    scardIter.forEach { sortedCards.add(it) }
-
-    // OneAuditVunderFuzzer creates fuzzed mvrs (non-pooled) and simulated mvrs (pooled)
-    val vunderFuzz = OneAuditVunderFuzzer(cardPools!!, infos, fuzzMvrs, sortedCards)
-    val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
-    val sortedMvrs = oaFuzzedPairs.map { it.first }
-
-    // have to write this here, where we know the mvrs
-    writePrivateMvrs(publisher, sortedMvrs)
+    val result = startFirstRound(auditDir)
+    if (result.isErr) error{ result.toString() }
 }
 
 class TestOneAuditElection(
     val auditDir: String,
-    val config: AuditConfig,
     minMargin: Double,
     cvrFraction: Double,
     ncards: Int,
     phantomPct: Double,
     extraPct: Double,
-): CreateElectionIF {
+    fuzzMvrs: Double,
+): CreateElectionIF2 {
     val contestsUA = mutableListOf<ContestWithAssertions>()
     val cardPools: List<OneAuditPool>
     val cards: List<AuditableCard>
+    val fuzzedMvrs: List<Cvr>
 
     init {
         // one contest
@@ -398,8 +369,16 @@ class TestOneAuditElection(
         contestsUA.add(contestOA)
         this.cards = cards
         this.cardPools = pools
+
+        // just need to fuzz the mvrs
+        val infoList = listOf(contestOA.contest.info())
+        this.fuzzedMvrs = makeFuzzedCvrsForClca(infoList, mvrs, fuzzMvrs)
     }
 
+    override fun electionInfo() = ElectionInfo2(
+        AuditType.ONEAUDIT, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = true,
+    )
+    override fun createUnsortedMvrs() = fuzzedMvrs
     override fun populations() = cardPools
     override fun makeCardPools() = cardPools
     override fun contestsUA() = contestsUA

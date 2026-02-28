@@ -15,14 +15,14 @@ fun checkContestsCorrectlyFormed(config: AuditConfig, contestsUA: List<ContestWi
 
     checkContestInfos(contestsUA, results)
 
-    if (config.removeMinContests != null && config.removeMinContests > 0) {
+    /* if (config.removeMinContests != null && config.removeMinContests > 0) {
         val sortedByMargin : List<ContestWithAssertions> = contestsUA.sortedBy { it.minDilutedMargin() }
         repeat(config.removeMinContests) { idx ->
             val contest = sortedByMargin[idx]
             contest.preAuditStatus = TestH0Status.AuditorRemoved
             logger.info{"*** removeMinContests contest ${contest.id} minMargin ${contest.minDilutedMargin()}"}
         }
-    }
+    } */
 
     contestsUA.forEach { contestUA ->
         checkWinners(contestUA, results)

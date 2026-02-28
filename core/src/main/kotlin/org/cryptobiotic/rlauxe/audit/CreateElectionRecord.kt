@@ -23,7 +23,7 @@ interface CreateElectionIF2 {
     fun ncards(): Int
     fun populations(): List<PopulationIF>?
     fun makeCardPools(): List<OneAuditPool>?
-    fun createUnsortedMvrs(): List<Cvr>
+    fun createUnsortedMvrs(): List<Cvr>  // TODO this should be CloseableIterator<Cvr> for out-of-memory case
 }
 
 private val logger = KotlinLogging.logger("CreateElectionRecord")

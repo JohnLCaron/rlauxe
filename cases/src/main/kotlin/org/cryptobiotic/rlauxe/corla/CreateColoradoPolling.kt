@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.corla
 
-
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
@@ -10,12 +9,11 @@ import kotlin.math.max
 private val logger = KotlinLogging.logger("ColoradoPolling")
 
 // // Create poliing audits where precincts are used to calculate Nb
-class ColoradoPolling (
+class CreateColoradoPolling (
     electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
-    config: AuditConfig,
-): CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, config) {
+): CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, AuditType.POLLING) {
 
     val contestsPolling: List<ContestWithAssertions>
 
@@ -46,37 +44,4 @@ class ColoradoPolling (
 
     override fun contestsUA() = contestsPolling
 }
-
-////////////////////////////////////////////////////////////////////
-// Create poliing audits where precincts are used to calculate Nb
-fun createColoradoPolling(
-    topdir: String,
-    electionDetailXmlFile: String,
-    contestRoundFile: String,
-    precinctFile: String,
-    auditConfigIn: AuditConfig? = null,
-    clear: Boolean = true,
-)
-{
-    val stopwatch = Stopwatch()
-
-    val config = when {
-        (auditConfigIn != null) -> auditConfigIn
-        else -> AuditConfig(
-            AuditType.POLLING, riskLimit = .03, nsimEst = 100, quantile = 0.5,
-            pollingConfig = PollingConfig()
-        )
-    }
-    // open class CreateColoradoElection (
-    //    electionDetailXmlFile: String,
-    //    contestRoundFile: String,
-    //    precinctFile: String,
-    //    val config: AuditConfig,
-    //    val poolsHaveOneCardStyle:Boolean = false,
-    val election = CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, config)
-
-    CreateAuditRecord("corla", config, election, auditDir = "$topdir/audit", clear = clear)
-    println("createColoradoPolling took $stopwatch")
-}
-
 

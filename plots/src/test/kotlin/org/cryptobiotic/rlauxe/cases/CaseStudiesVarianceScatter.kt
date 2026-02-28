@@ -14,7 +14,6 @@ import kotlin.String
 import kotlin.io.path.Path
 import kotlin.test.Test
 
-// comnpare audit variance across SF, SFoa and SFaNS
 class CaseStudiesVarianceScatter {
 
     @Test

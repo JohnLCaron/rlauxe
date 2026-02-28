@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
-import org.cryptobiotic.rlauxe.estimate.sampleWithContestCutoff
+import org.cryptobiotic.rlauxe.estimate.sampleAndRemoveContests
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
 private val logger = KotlinLogging.logger("RlauxAuditIF")
@@ -59,7 +59,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         //    auditRound.newmvrs = newMvrs
         //    auditRound.samplePrns = sampledCards.map { it.prn }
         //    contestRound.maxSampleAllowed = sampledCards.size
-        sampleWithContestCutoff(
+        sampleAndRemoveContests(
             auditConfig,
             cardManifest,
             auditRound,

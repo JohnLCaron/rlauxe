@@ -6,10 +6,9 @@
 * 12,297 redacted cards (3%) in 60 pools. 
 * Risk limit is 3% per Colorado law.
 * Two contests fall below the _automatic recount threshold_ of 0.5%, and so are removed from the audit.
-
-* Both the cvrs and the redacted pool totals reference a BallotType, which we use for Card Style Data.
-* For pooled data, we simulate cvrs that match the adjusted pool totals.
-* The simulated mvrs are the cvrs with optional fuzzing. 
+* Both the CVRs and the redacted pool totals reference a BallotType, which we use for Card Style Data.
+* For pooled data, we simulate CVRs that match the adjusted pool totals.
+* The simulated MVRs are the CVRs with optional fuzzing. 
 
 ## OneAudit for Redacted data
 
@@ -31,13 +30,21 @@ Here are 1 CLCA and 10 trials of OneAudit for Boulder2024. The total number of M
 
 The spread among all the trials (click to get an interactive chart):
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/cases/Boulder2024AuditVarianceScatterLogLog.html" rel="Boulder2024AuditVarianceScatterLogLog">![Boulder2024AuditVarianceScatterLogLog](../plots2/cases/Boulder2024AuditVarianceScatterLogLog.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/cases/Boulder2024AuditVarianceScatterLogLog.html" rel="Boulder2024AuditVarianceScatter">![Boulder2024AuditVarianceScatter](../plots2/cases/Boulder2024AuditVarianceScatterLogLog.png)</a>
 
 * This is the simulated number of mvrs needed, including the extra samples needed from estimating each round.
 * Each run has a different PRN seed, to make sure we are seeing independent variations.
 * CLCA is smooth because it has no variance when there are no errors, while OneAudit shows scatter at the same margins.
 * Arguably OneAudit is similar to CLCA at high margins.
-* Most of the difference in total samples comes from the lowest margin assertions.
+
+The total mvrs needed are dominated by the assertions with the lowest margin. 
+Here we explore how CLCA and OneAudit differ when the n contests with the largest estimated nmvrs are removed from the audit.
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/cases/Boulder24RemoveNmaxLinear.html" rel="Boulder24RemoveNmax">![Boulder24RemoveNmax](../plots2/cases/Boulder24RemoveNmaxLinear.png)</a>
+
+* For CLCA, removing the top three contests cuts the nmvrs to around 1000, with marginal improvement after that.
+* OneAudit averages are 2-7x higher than CLCA.
+
 
 Findings so far:
 

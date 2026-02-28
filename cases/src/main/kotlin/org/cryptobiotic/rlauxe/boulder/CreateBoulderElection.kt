@@ -322,10 +322,13 @@ fun createBoulderElection(
     riskLimit: Double = 0.03,
     minRecountMargin: Double = .005,
     minMargin: Double = 0.0,
+    maxSamplePct: Double = 0.0,
     auditConfigIn: AuditConfig? = null,
     mvrFuzz: Double? = null,
     removeCutoffContests: Boolean = true,
+    removeMaxContests: Int? = null,
 ): Result<AuditRoundIF, ErrorMessages> {
+
     val stopwatch = Stopwatch()
 
     val variation = if (sovoFile.contains("2025") || sovoFile.contains("2024")) "Boulder2024" else "Boulder2023"
@@ -343,7 +346,10 @@ fun createBoulderElection(
                 riskLimit = riskLimit,
                 minRecountMargin = minRecountMargin,
                 minMargin = minMargin,
+                maxSamplePct=maxSamplePct,
                 nsimEst = 20,
+                removeMaxContests=removeMaxContests,
+                removeCutoffContests = removeCutoffContests,
                 clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
             )
         else if (auditType.isOA())
@@ -352,8 +358,10 @@ fun createBoulderElection(
                 riskLimit=riskLimit,
                 minRecountMargin=minRecountMargin,
                 minMargin=minMargin,
+                maxSamplePct=maxSamplePct,
                 nsimEst=20,
-                contestSampleCutoff = 20_000, removeCutoffContests = removeCutoffContests,
+                removeMaxContests=removeMaxContests,
+                contestSampleCutoff = 100_000, removeCutoffContests = removeCutoffContests,
                 persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
                 clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
             )

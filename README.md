@@ -190,8 +190,6 @@ Thus, all cards must either have a CVR or be contained in a pool.
 
 See [Betting with OneAudit Pools](docs/BettingRiskFunctions.md#betting-with-oneaudit-pools) for an overview of OneAudit betting.
 
-For details of OneAudit use cases, see [OneAudit Use Cases](docs/OneAuditUseCases.md).
-
 ## Polling Audits
 
 When CVRs are not available, a Polling audit can be done. A Polling audit  
@@ -402,7 +400,7 @@ When the estimated error rates are double the actual error rates:
 
 When the estimated error rates are half the actual error rates:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/dist2/estErrorRatesHalf.html" rel="estErrorRatesHalf">![estErrorRatesHalf](./docs/plots2/dist/estErrorRatesHalf.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/dist/estErrorRatesHalf.html" rel="estErrorRatesHalf">![estErrorRatesHalf](./docs/plots2/dist/estErrorRatesHalf.png)</a>
 
 These are generated without using rounds. When using rounds, surprisingly its better to start with an initial guess of
 no simulated fuzzing, as these plots show:

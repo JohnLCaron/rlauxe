@@ -4,15 +4,12 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
-import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
@@ -122,13 +119,9 @@ fun createBelgiumElection(electionName: String, stopRound:Int=0, showVerify:Bool
     val contestd = dcontest.createContest(Nc = totalVotes, Ncast = totalVotes)
 
     val topdir = "$toptopdir/$electionName"
+    createBelgiumClca(topdir=topdir, contestd)
+
     val auditdir = "$topdir/audit"
-    createBelgiumClca(auditdir, contestd)
-
-    val publisher = Publisher(auditdir)
-    val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-    writeSortedCardsExternalSort(topdir, publisher, config.seed)
-
     val results = RunVerifyContests.runVerifyContests(auditdir, null, show = showVerify)
     println()
     print(results)

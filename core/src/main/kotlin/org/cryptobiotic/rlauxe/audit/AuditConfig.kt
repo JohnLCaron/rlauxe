@@ -24,7 +24,7 @@ data class ElectionInfo2(
     val ncards: Int,
     val ncontests: Int,
     val cvrsContainUndervotes: Boolean,
-    val poolsHaveOneCardStyle: Boolean,
+    val poolsHaveOneCardStyle: Boolean?,
 )
 
 // wed like the AuditConfig to not be needed for election creation.
@@ -36,15 +36,18 @@ data class AuditConfig(
     // simulation control
     val nsimEst: Int = 100, // number of simulation estimation trials
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
-    val contestSampleCutoff: Int? = 30000, // use this number of cvrs in the estimation, set to null to use all
     val simFuzzPct: Double? = null, // for simulating the estimation fuzzing
 
     // audit sample size control
+    val contestSampleCutoff: Int? = 30000, // use this number of cvrs in the estimation, set to null to use all
     val removeCutoffContests: Boolean = (contestSampleCutoff != null), // remove contests that need more samples than contestSampleCutoff
     val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin TODO really it should be noerror?
     val minMargin: Double = 0.0, // do not audit contests less than this margin
-    val removeMinContests: Int? = null, // remove top n min-margin contests
+    val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / contestNc) greater than this
+    val removeMaxContests: Int? = null, // remove top n estimated nmvrs contests
     val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
+
+    // this turns the audit into a "risk measuring" audit
     val auditSampleLimit: Int? = null, // limit audit sample size; audit all samples, ignore risk limit
 
     val pollingConfig: PollingConfig = PollingConfig(),
@@ -72,7 +75,7 @@ data class AuditConfig(
     override fun toString() = buildString {
         appendLine("AuditConfig(auditType=$auditType, riskLimit=$riskLimit, seed=$seed persistedWorkflowMode=$persistedWorkflowMode" )
         append("  minRecountMargin=$minRecountMargin minMargin=$minMargin removeTooManyPhantoms=$removeTooManyPhantoms")
-        if (removeMinContests != null) { append(" removeMinContests=$removeMinContests") }
+        if (removeMaxContests != null) { append(" removeMaxContests=$removeMaxContests") }
         if (contestSampleCutoff != null) { append(" contestSampleCutoff=$contestSampleCutoff removeCutoffContests=$removeCutoffContests") }
         if (auditSampleLimit != null) { append(" auditSampleLimit=$auditSampleLimit (risk measuring audit)") }
         appendLine()
@@ -97,12 +100,29 @@ data class AuditConfig(
     }
 }
 
+data class SimControl(
+    // simulation control
+    val nsimEst: Int = 100, // number of simulation estimation trials
+    val quantile: Double = 0.80, // use this percentile success for estimated sample size
+    val simFuzzPct: Double? = null, // for simulating the estimation fuzzing
+)
+
+data class ContestSampleControl(
+    val contestSampleCutoff: Int? = 30000, // use this number of cvrs in the estimation, set to null to use all
+    val removeCutoffContests: Boolean = (contestSampleCutoff != null), // remove contests that need more samples than contestSampleCutoff
+    val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin TODO really it should be noerror?
+    val minMargin: Double = 0.0, // do not audit contests less than this margin
+    val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / contestNc) greater than this
+    val removeMaxContests: Int? = null, // remove top n estimated nmvrs contests
+    val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
+)
+
 // optimistic: round 1 assume no errors, subsequent rounds use measured error rates
 enum class SimulationStrategy { regular, optimistic  }
 
-// uses AlphaMart
+// could be called AlphaMartConfig
 data class PollingConfig(
-    val d: Int = 100,  // shrinkTrunc weight TODO study what this should be, eg for noerror assumption?
+    val d: Int = 100,  // shrinkTrunc weight
 )
 
 enum class ClcaStrategyType { generalAdaptive, generalAdaptive2}
@@ -111,10 +131,10 @@ data class ClcaConfig(
     val fuzzMvrs: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs when persistedWorkflowMode=testSimulate
     val d: Int = 100,  // shrinkTrunc weight for error rates
     val maxLoss: Double = 0.90,  // max loss on any one bet, 0 < maxLoss < 1
-    val cvrsContainUndervotes: Boolean = true,
     val apriori: TausRates = TausRates(emptyMap()),
 )
 
+// TODO dont need this
 // simulate: simulate for estimation
 enum class OneAuditStrategyType { simulate }
 data class OneAuditConfig(

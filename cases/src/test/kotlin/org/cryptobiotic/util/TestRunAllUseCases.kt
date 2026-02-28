@@ -39,7 +39,7 @@ class TestRunAllUseCases {
     }
 }
 
-fun runAllRoundsAndVerify(auditdir: String, maxRounds:Int=7): Boolean {
+fun runAllRoundsAndVerify(auditdir: String, maxRounds:Int=7, verify:Boolean = true): Boolean {
     println("============================================================")
     var done = false
     var lastRound: AuditRoundIF? = null
@@ -59,8 +59,11 @@ fun runAllRoundsAndVerify(auditdir: String, maxRounds:Int=7): Boolean {
 
     println("============================================================")
 
-    val verifyResults = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
-    println()
-    print(verifyResults)
-    return (!verifyResults.hasErrors)
+    if (verify) {
+        val verifyResults = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
+        println()
+        print(verifyResults)
+        return (!verifyResults.hasErrors)
+    }
+    return true
 }

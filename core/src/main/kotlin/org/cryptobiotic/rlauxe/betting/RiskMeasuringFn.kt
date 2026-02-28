@@ -37,6 +37,7 @@ enum class TestH0Status(val rank: Int, val complete: Boolean, val success: Boole
 
     // set by sampleWithContestCutoff
     FailMaxSamplesAllowed(6,true, false),  // estimated samples greater than maximum samples allowed
+
     // set manually by auditor
     AuditorRemoved(7,true, false),  // auditor decided to remove it
 

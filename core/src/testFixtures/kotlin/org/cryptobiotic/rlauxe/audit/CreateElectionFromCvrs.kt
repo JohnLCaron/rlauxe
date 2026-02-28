@@ -9,11 +9,15 @@ import org.cryptobiotic.rlauxe.util.Closer
 class CreateElectionFromCvrs (
     val contestsUA: List<ContestWithAssertions>,
     val cvrs: List<Cvr>, // includes phantoms
+    val auditType: AuditType,
     val cardPools: List<OneAuditPool>? = null,
     val cardStyles: List<PopulationIF>? = null,
-    val config: AuditConfig,
-): CreateElectionIF {
+): CreateElectionIF2 {
 
+    override fun electionInfo() = ElectionInfo2(
+        auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
+    )
+    override fun createUnsortedMvrs() = cvrs
     override fun populations() = cardPools
     override fun makeCardPools() = cardPools
     override fun contestsUA() = contestsUA
@@ -22,7 +26,7 @@ class CreateElectionFromCvrs (
 
     fun createCards(): CloseableIterator<AuditableCard> {
         return CvrsWithPopulationsToCards(
-            config.auditType,
+            auditType,
             Closer(cvrs.iterator()),
             phantomCvrs = null,
             populations = cardPools ?: cardStyles,

@@ -1,18 +1,12 @@
 package org.cryptobiotic.util
 
-import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
-import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
 import org.cryptobiotic.rlauxe.belgium.belgianElectionMap
 import org.cryptobiotic.rlauxe.belgium.createBelgiumElection
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
-import org.cryptobiotic.rlauxe.corla.createColoradoElectionP
-import org.cryptobiotic.rlauxe.corla.createColoradoPolling
-import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.corla.createColoradoElection
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
-import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.sf.createSfElection
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.sfn
@@ -55,12 +49,7 @@ class TestGenerateAllUseCases {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoElectionP(topdir, detailXmlFile, contestRoundFile, precinctFile,
-            auditType = AuditType.CLCA, poolsHaveOneCardStyle=false)
-
-        val publisher = Publisher("$topdir/audit")
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsExternalSort(topdir, publisher, config.seed)
+        createColoradoElection(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType = AuditType.CLCA)
     }
 
     @Test
@@ -70,19 +59,15 @@ class TestGenerateAllUseCases {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoPolling(topdir, detailXmlFile, contestRoundFile, precinctFile, clear=true)
-
-        val publisher = Publisher("$topdir/audit")
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsExternalSort(topdir, publisher, config.seed)
+        createColoradoElection(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType = AuditType.POLLING)
     }
 
     @Test
     fun createSFElectionOA() {
-        val topdir = "$testdataDir/cases/sf2024/oa"
+        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
 
         createSfElection(
-            topdir,
+            auditdir = auditdir,
             AuditType.ONEAUDIT,
             sfZipFile,
             "ContestManifest.json",
@@ -93,10 +78,10 @@ class TestGenerateAllUseCases {
 
     @Test
     fun createSFElectionClca() {
-        val topdir = "$testdataDir/cases/sf2024/clca"
+        val auditdir = "$testdataDir/cases/sf2024/clca/audit"
 
         createSfElection(
-            topdir,
+            auditdir = auditdir,
             AuditType.CLCA,
             sfZipFile,
             "ContestManifest.json",

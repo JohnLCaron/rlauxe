@@ -98,13 +98,10 @@ class ClcaFuzzSamplerTracker(
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO this is pretty crude, just randomly changing shit.
 
-fun makeFuzzedCvrsForClca(infoList: List<ContestInfo>,
-                          cvrs: List<Cvr>,
-                          fuzzPct: Double?,
-) : List<Cvr> {
+fun makeFuzzedCvrsForClca(infoList: List<ContestInfo>, cvrs: List<Cvr>, fuzzPct: Double?) : List<Cvr> {
     if (fuzzPct == null || fuzzPct == 0.0) return cvrs
     val infos = infoList.associate{ it.id to it }
-    val isIRV = infoList.associate { it.id to it.isIrv}
+    val isIRV = infoList.associate { it.id to it.isIrv }
     var countChanged = 0
     val result =  cvrs.mapIndexed { idx, cvr ->
         val card = AuditableCard.fromCvr( cvr, idx, Random.nextLong() )

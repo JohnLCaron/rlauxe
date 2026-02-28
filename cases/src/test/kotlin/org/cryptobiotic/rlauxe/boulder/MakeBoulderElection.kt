@@ -1,24 +1,17 @@
 package org.cryptobiotic.rlauxe.boulder
 
-import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.audit.AssertionRound
-import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.ContestRound
-import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
-import org.cryptobiotic.rlauxe.cli.RunRlaRoundCli
+import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.estimate.CardSamples
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
-import org.cryptobiotic.rlauxe.estimate.EstimateSampleSizeTask
-import org.cryptobiotic.rlauxe.estimate.EstimationResult
-import org.cryptobiotic.rlauxe.estimate.makeEstimationTasks
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
+import org.cryptobiotic.rlauxe.persist.json.readAuditConfigUnwrapped
+import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
+import org.cryptobiotic.rlauxe.util.makeDeciles
+import org.cryptobiotic.rlauxe.util.secureRandom
 import org.cryptobiotic.util.runAllRoundsAndVerify
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -31,7 +24,7 @@ class MakeBoulderElection {
 
     @Test
     fun createBoulder24oa() {
-        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
+        val auditdir = "$testdataDir/cases/boulder24/oa/audit2"
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
@@ -39,10 +32,6 @@ class MakeBoulderElection {
             auditType = AuditType.ONEAUDIT,
             minMargin = .011
         )
-
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
     }
 
     @Test
@@ -63,10 +52,6 @@ class MakeBoulderElection {
             auditdir = auditdir,
             auditType = AuditType.CLCA,
         )
-
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
     }
 
     @Test
@@ -90,20 +75,21 @@ class MakeBoulderElection {
             )
     }
 
+    //// generates the OneAudits for CaseStudiesVarianceScatter
     @Test
-    fun createBoulderOArepeat() {
+    fun createBoulderOAvariance() {
         val topdir = "$testdataDir/cases/boulder24oa2"
 
         val tasks = mutableListOf<ConcurrentTaskG<Boolean>>()
         repeat(20) { run ->
-            tasks.add( RunAuditTask(run+1, topdir) )
+            tasks.add( RunOneAuditVarianceTask(run+1, topdir) )
         }
 
         val estResults = ConcurrentTaskRunnerG<Boolean>().run(tasks, nthreads=10) // OOM, reduce threads
         println(estResults)
     }
 
-    class RunAuditTask(
+    class RunOneAuditVarianceTask(
         val runIndex: Int,
         val topdir: String,
     ) : ConcurrentTaskG<Boolean> {
@@ -119,7 +105,86 @@ class MakeBoulderElection {
                 auditType = AuditType.ONEAUDIT,
                 // minMargin = .011
             )
-            return runAllRoundsAndVerify(auditdir)
+            return runAllRoundsAndVerify(auditdir, verify=false)
+        }
+    }
+
+
+    //// generates the CLCA for CaseStudiesRemoveNmax
+    @Test
+    fun createBoulderRemoveNclca() {
+        val auditdir = "$testdataDir/cases/boulder24/clca/audit2"
+
+        val task = RunRemoveMaxContestsTask(1, auditdir, AuditType.CLCA)
+
+        val estResults: List<Pair<Int,Int>> = task.run()
+        println("CLCA results")
+        estResults.forEach{ println(it) }
+    }
+
+    //// generates the OA for CaseStudiesRemoveNmax
+    @Test
+    fun createBoulderRemoveNoa() {
+        val results = mutableMapOf<Int, MutableList<Int>>()
+
+        val tasks = mutableListOf<ConcurrentTaskG<List<Pair<Int, Int>>>>()
+        // do 10 times in different directories and tasks
+        repeat(10) {
+            // all the removeN are in a single task
+            val auditDir = "$testdataDir/cases/boulder24/oan/audit$it"
+            tasks.add(RunRemoveMaxContestsTask(it, auditDir, AuditType.ONEAUDIT))
+        }
+
+        val estResults: List<Pair<Int,Int>> = ConcurrentTaskRunnerG<List<Pair<Int, Int>>>().run(tasks, nthreads = 1).flatten()
+
+        println("OneAudit results")
+        estResults.forEach { (removeN, nmvrs) ->
+            println("$removeN, $nmvrs")
+            val list = results.getOrPut(removeN) { mutableListOf() }
+            list.add(nmvrs)
+        }
+
+        results.forEach { removeN, nmvrs ->
+            val deciles = makeDeciles(nmvrs)
+            println("$removeN, ${nmvrs.average()}, $deciles")
+        }
+    }
+
+    class RunRemoveMaxContestsTask(
+        val idx: Int,
+        val auditDir: String,
+        val auditType: AuditType,
+    ) : ConcurrentTaskG<List<Pair<Int, Int>>> {
+
+        override fun name() = "removeN for run $idx"
+
+        override fun run(): List<Pair<Int, Int>> {
+
+            createBoulderElection(
+                "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
+                "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
+                auditdir = auditDir,
+                auditType = auditType,
+                removeCutoffContests = false,
+                minRecountMargin = 0.0,
+                minMargin = 0.005,
+                maxSamplePct = .90,
+            )
+
+            val publisher = Publisher(auditDir)
+            val results = mutableListOf<Pair<Int, Int>>()
+            repeat(11) { removeN ->
+                val config = readAuditConfigUnwrapped(publisher.auditConfigFile())!!
+                val nconfig = config.copy(removeMaxContests = removeN, seed = secureRandom.nextLong())
+                writeAuditConfigJsonFile(nconfig, publisher.auditConfigFile())
+                println("${name()} removeN=$removeN")
+                startFirstRound(auditDir)
+                runAllRoundsAndVerify(auditDir, verify=false)
+
+                val auditRecord = AuditRecord.readFrom(auditDir)!!
+                results.add(Pair(removeN, (auditRecord as AuditRecord).previousMvrs.size))
+            }
+            return results
         }
     }
 

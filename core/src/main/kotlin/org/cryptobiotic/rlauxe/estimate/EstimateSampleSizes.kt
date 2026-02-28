@@ -58,25 +58,23 @@ fun estimateSampleSizes(
     // put results into assertionRounds
     estResults.forEach { estResult ->
         val task = estResult.task
-
-        /*
-        val result = estResult.repeatedResult
-        val estNewSamples = if (result.sampleCount.size == 0) 0 else result.findQuantile(config.quantile)
-        if (task.assertionRound.estimationResult != null) {
-            task.assertionRound.estimationResult!!.simNewMvrs = estNewSamples
-        } */
         val estNewSamples = task.assertionRound.estimationResult!!.simNewMvrsNeeded
         task.assertionRound.estNewMvrs = estNewSamples
         task.assertionRound.estMvrs = min(estNewSamples + task.prevSampleSize, task.contestRound.Npop)
     }
 
     // put results into contestRounds
-    auditRound.contestRounds.filter { !it.done }.forEach { contest ->
-        val sampleSizes = estResults.filter { it.task.contestRound.id == contest.id }.map { it.task.assertionRound.estMvrs }
-        contest.estMvrs = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
-        val newSampleSizes = estResults.filter { it.task.contestRound.id == contest.id }.map { it.task.assertionRound.estNewMvrs }
-        contest.estNewMvrs = if (newSampleSizes.isEmpty()) 0 else newSampleSizes.max()
-        if (!quiet) logger.info{" ** contest ${contest.id} avgSamplesNeeded ${contest.estMvrs} task=${contest.estNewMvrs}"}
+    auditRound.contestRounds.filter { !it.done }.forEach { contestRound ->
+        val sampleSizes = estResults.filter { it.task.contestRound.id == contestRound.id }.map { it.task.assertionRound.estMvrs }
+        contestRound.estMvrs = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+        val newSampleSizes = estResults.filter { it.task.contestRound.id == contestRound.id }.map { it.task.assertionRound.estNewMvrs }
+        contestRound.estNewMvrs = if (newSampleSizes.isEmpty()) 0 else newSampleSizes.max()
+        if (contestRound.estNewMvrs == 0) { // estimation failed
+            contestRound.done = true
+            contestRound.status = TestH0Status.FailMaxSamplesAllowed
+            logger.warn{" *** remove contest ${contestRound.id} with status FailMaxSamplesAllowed: estimation failed"}
+        }
+        if (!quiet) logger.info{" ** contest ${contestRound.id} avgSamplesNeeded ${contestRound.estMvrs} task=${contestRound.estNewMvrs}"}
     }
 
     if ((config.isClca || config.isOA ) && auditRound.roundIdx == 1 && config.simulationStrategy == SimulationStrategy.optimistic) {
@@ -127,10 +125,10 @@ fun makeEstimationTasks(
             var prevSampleSize = 0
             var startingTestStatistic = 1.0
             if (roundIdx > 1) {
-                // eliminate contests which have no more samples
+                // eliminate contests whose prevAuditResult hit the limit TODO HEY LOOK
                 val prevAuditResult = assertionRound.prevAuditResult!!
                 if (prevAuditResult.samplesUsed == contestRound.Npop) {
-                    logger.info { "***LimitReached $contestRound" }
+                    logger.warn{" *** remove contest ${contestRound.id} with status LimitReached: no more samples"}
                     contestRound.done = true
                     contestRound.status = TestH0Status.LimitReached
                 }

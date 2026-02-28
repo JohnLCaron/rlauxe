@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.corla
 
-
+import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
@@ -17,15 +17,14 @@ import kotlin.math.max
 
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
-// making OneAudit pools from the precinct results
+// making OneAudit pools from the precinct results, then generate CVRs from pools
 // TODO vary percent cards in pools, show plot
 open class CreateColoradoElection (
     electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
-    val config: AuditConfig,
-    val poolsHaveOneCardStyle:Boolean = false,
-): CreateElectionIF {
+    val auditType: AuditType,
+): CreateElectionIF2 {
     val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
 
@@ -64,8 +63,9 @@ open class CreateColoradoElection (
         val npopMap = manifestTabs.mapValues { it.value.ncardsTabulated }
         this.ncards = count
 
-        contestsUA = if (config.isOA) makeOneAuditContests(contests, npopMap, cardPoolBuilders)
-                     else ContestWithAssertions.make(contests, npopMap, isClca=config.isClca, )
+        // in case we decide to support OA
+        contestsUA = if (auditType.isOA()) makeOneAuditContests(contests, npopMap, cardPoolBuilders)
+                     else ContestWithAssertions.make(contests, npopMap, isClca=auditType.isClca(), )
     }
 
     private fun makeOneAuditBuilders(electionDetailXml: ElectionDetailXml, roundContests: List<CorlaContestRoundCsv>): List<OneAuditBuilderCorla> {
@@ -135,7 +135,8 @@ open class CreateColoradoElection (
                     }
                 }
             }
-            OneAuditPoolWithBallotStyle("${precinct.county}-${precinct.precinct}", idx, poolsHaveOneCardStyle,contestTabs, infoMap)
+            OneAuditPoolWithBallotStyle("${precinct.county}-${precinct.precinct}", idx,
+                hasSingleCardStyle = false,contestTabs, infoMap)
         }
     }
 
@@ -154,17 +155,19 @@ open class CreateColoradoElection (
         }
     }
 
-    override fun populations() = if (config.isClca) emptyList() else cardPools
-    override fun makeCardPools() = if (config.isClca) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
+    override fun electionInfo() = ElectionInfo2(auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
+    override fun populations() = if (auditType.isClca()) emptyList() else cardPools
+    override fun makeCardPools() = if (auditType.isClca()) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
     override fun contestsUA() = contestsUA
     override fun cards() = createCards()
     override fun ncards() = ncards
+    override fun createUnsortedMvrs() = emptyList<Cvr>() // TODO only needed for private mvrs for OneAudit
 
     fun createCards(): CloseableIterator<AuditableCard> {
-        return CvrsToCardsAddStyles(config.auditType,
+        return CvrsToCardsAddStyles(auditType,
             Closer(CvrIteratorfromPools()),
             makePhantomCvrs(contests),
-            if (config.isClca) null else cardPoolBuilders,
+            if (auditType.isClca()) null else cardPoolBuilders,
         )
     }
 
@@ -211,7 +214,7 @@ open class CreateColoradoElection (
                     print("why?")
             } */
 
-            cvrs = makeVunderCvrs(poolVunders, cardPool.poolName, poolId = if (config.isClca) null else cardPool.poolId).iterator()
+            cvrs = makeVunderCvrs(poolVunders, cardPool.poolName, poolId = if (auditType.isClca()) null else cardPool.poolId).iterator()
         }
 
         override fun next() = cvrs.next()
@@ -256,32 +259,39 @@ class OneAuditBuilderCorla(val info: ContestInfo, detailContest: ElectionDetailC
 
 ////////////////////////////////////////////////////////////////////
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
-fun createColoradoElectionP(
+fun createColoradoElection(
     topdir: String,
     electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
     auditConfigIn: AuditConfig? = null,
     auditType : AuditType,
-    poolsHaveOneCardStyle:Boolean = false,
     clear: Boolean = true,
-    )
+    ): Result<AuditRoundIF, ErrorMessages>
 {
     val stopwatch = Stopwatch()
+    val auditdir = "$topdir/audit"
+
+    val election = if (auditType.isClca()) CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, auditType)
+                    else CreateColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile)
+    createElectionRecord("corla", election, auditDir = auditdir, clear = clear)
 
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
-
         auditType.isClca() -> AuditConfig(AuditType.CLCA, contestSampleCutoff = 20000, riskLimit = .03, nsimEst=10)
-
-        else -> AuditConfig( // // TODO hasStyle=false
-            AuditType.ONEAUDIT, riskLimit = .03, nsimEst = 10,
+        auditType.isPolling() -> AuditConfig(
+            AuditType.POLLING, riskLimit = .03, nsimEst = 100, quantile = 0.5,
         )
+        else -> throw RuntimeException("Unsupported audit type ${auditType.name}")
     }
-    val election = CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, config, poolsHaveOneCardStyle)
 
-    CreateAuditRecord("corla", config, election, auditDir = "$topdir/audit", clear = clear)
-    println("createColoradoOneAudit took $stopwatch")
+    createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+
+    val result = startFirstRound(auditdir)
+    if (result.isErr) logger.error{ result.toString() }
+    logger.info {"createCorla took $stopwatch" }
+
+    return result
 }
 
 

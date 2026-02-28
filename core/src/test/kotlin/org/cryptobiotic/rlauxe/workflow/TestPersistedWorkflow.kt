@@ -35,10 +35,10 @@ class TestPersistedWorkflow {
         val testMvrs = testData.makeCvrsFromContests()
         val contestsUA = contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
 
-        val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
-        CreateAuditRecord("testPersistedSingleClca", config, election, auditDir = auditdir, clear = true)
-
-        writeUnsortedPrivateMvrs(Publisher(auditdir), testMvrs, config.seed)
+        val election = CreateElectionFromCvrs(contestsUA, testMvrs, AuditType.CLCA)
+        createElectionRecord("persistWorkflowOA", election, auditDir = auditdir)
+        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+        startFirstRound(auditdir)
 
         runPersistedAudit(topdir, test=false)
     }
@@ -62,11 +62,10 @@ class TestPersistedWorkflow {
         val testMvrs = testData.makeCvrsFromContests()
         val contestsUA = contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
 
-        val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
-        CreateAuditRecord("testPersistedAuditClca",  config, election, auditDir = auditdir,  clear = true)
-
-        // have to write this here, where we know the mvrs
-        writeUnsortedPrivateMvrs(Publisher(auditdir), testMvrs, config.seed)
+        val election = CreateElectionFromCvrs(contestsUA, testMvrs, AuditType.CLCA)
+        createElectionRecord("persistWorkflowOA", election, auditDir = auditdir)
+        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+        startFirstRound(auditdir)
 
         runPersistedAudit(topdir, test=false)
     }
@@ -133,8 +132,10 @@ class TestPersistedWorkflow {
 
         val contestsUA = listOf(contestOA)
 
-        val election = CreateElectionFromCvrs(contestsUA, mvrs, cardPools, config=config)
-        CreateAuditRecord("testPersistedAuditPolling", config, election, auditDir = "$topdir/audit", clear = true)
+        val election = CreateElectionFromCvrs(contestsUA, mvrs, AuditType.ONEAUDIT, cardPools = cardPools)
+        createElectionRecord("persistWorkflowOA", election, auditDir = auditdir)
+        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+        startFirstRound(auditdir)
 
         runPersistedAudit(topdir, test=false)
     }

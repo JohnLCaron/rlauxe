@@ -125,15 +125,15 @@ fun AuditConfigJson.import(): AuditConfig {
         this.quantile,
         this.simFuzzPct,
 
-        this.contestSampleCutoff,
-        this.removeCutoffContests,
-        this.minRecountMargin,
-        this.minMargin,
-        this.maxSamplePct,
-        this.removeMaxContests,
-        this.removeTooManyPhantoms,
+        contestSampleCutoff = this.contestSampleCutoff,
+        removeCutoffContests = this.removeCutoffContests,
+        minRecountMargin = this.minRecountMargin,
+        minMargin = this.minMargin,
+        maxSamplePct = this.maxSamplePct,
+        removeMaxContests = this.removeMaxContests,
+        removeTooManyPhantoms = this.removeTooManyPhantoms,
 
-        this.auditSampleLimit,
+        auditSampleLimit = this.auditSampleLimit,
 
         clcaConfig = if (this.clcaConfig != null) this.clcaConfig.import() else ClcaConfig(),
         oaConfig = if (this.oaConfig != null) this.oaConfig.import() else OneAuditConfig(),

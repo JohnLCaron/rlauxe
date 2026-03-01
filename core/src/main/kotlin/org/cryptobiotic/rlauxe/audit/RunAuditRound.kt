@@ -82,7 +82,7 @@ fun runRoundResult(auditDir: String, onlyTask: String? = null): Result<AuditRoun
             val roundStopwatch = Stopwatch()
             val nextRound = workflow.startNewRound(quiet = false, onlyTask)
 
-            if (auditRecord.config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs) {
+            if (!nextRound.auditIsComplete && auditRecord.config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs) {
                 val publisher = Publisher(auditDir)
                 val ncards = writeMvrsForRound(publisher, roundIdx)
                 logger.info{"writeMvrsForRound ${ncards} cards to ${publisher.sampleMvrsFile(roundIdx)}"}

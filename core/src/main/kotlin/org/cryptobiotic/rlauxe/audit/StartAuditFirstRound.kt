@@ -34,7 +34,7 @@ import kotlin.use
 private val logger = KotlinLogging.logger("StartAudit")
 
 // one could rerun this to overwrite config and sorted cards, using the same election record
-fun createAuditRecord(config: AuditConfig, election: CreateElectionIF2, auditDir: String, externalSortDir: String? = null) {
+fun createAuditRecord(config: AuditConfig, election: CreateElectionIF, auditDir: String, externalSortDir: String? = null) {
     val publisher = Publisher(auditDir)
 
     writeAuditConfigJsonFile(config, publisher.auditConfigFile())

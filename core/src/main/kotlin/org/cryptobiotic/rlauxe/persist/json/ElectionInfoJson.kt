@@ -13,7 +13,6 @@ import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.enumValueOf
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 
 import java.io.FileOutputStream
 import java.nio.file.Files
@@ -26,7 +25,7 @@ data class ElectionInfo(
     val ncards: Int,
     val ncontests: Int,
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
-    val cvrsContainUndervotes: Boolean = true,
+    val poolsHaveOneCardStyle: Boolean,
 ) */
 @Serializable
 data class ElectionInfoJson(
@@ -34,7 +33,7 @@ data class ElectionInfoJson(
     val ncards: Int,
     val ncontests: Int,
     val cvrsContainUndervotes: Boolean,
-    val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
+    val poolsHaveOneCardStyle: Boolean?,
 )
 
 fun ElectionInfo.publishJson() = ElectionInfoJson(
@@ -42,15 +41,15 @@ fun ElectionInfo.publishJson() = ElectionInfoJson(
     ncards = this.ncards,
     ncontests = this.ncontests,
     cvrsContainUndervotes = this.cvrsContainUndervotes,
-    persistedWorkflowMode = this.persistedWorkflowMode,
-    )
+    poolsHaveOneCardStyle = this.poolsHaveOneCardStyle,
+)
 
 fun ElectionInfoJson.import() = ElectionInfo(
     enumValueOf(this.auditType, AuditType.entries) ?: throw RuntimeException("unknown AuditType ${this.auditType}"),
     ncards = this.ncards,
     ncontests = this.ncontests,
     cvrsContainUndervotes = this.cvrsContainUndervotes,
-    persistedWorkflowMode = this.persistedWorkflowMode,
+    poolsHaveOneCardStyle = this.poolsHaveOneCardStyle,
 )
 
 /////////////////////////////////////////////////////////////////////////////////

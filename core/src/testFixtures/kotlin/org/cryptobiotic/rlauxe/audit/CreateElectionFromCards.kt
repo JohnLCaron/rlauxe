@@ -11,9 +11,9 @@ class CreateElectionFromCards (
     val cardPools: List<OneAuditPool>? = null,
     val cardStyles: List<PopulationIF>? = null,
     val auditType: AuditType,
-): CreateElectionIF2 {
+): CreateElectionIF {
 
-    override fun electionInfo() = ElectionInfo2(
+    override fun electionInfo() = ElectionInfo(
         auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
     )
     override fun createUnsortedMvrs() = emptyList<Cvr>() // TODO only needed for ONEAUDIT with private mvrs

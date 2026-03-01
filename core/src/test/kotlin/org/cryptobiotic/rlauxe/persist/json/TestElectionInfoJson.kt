@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.persist.json
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.io.path.createTempFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -14,17 +13,17 @@ import kotlin.test.assertNotNull
 //    val auditType: AuditType,
 //    val ncards: Int,
 //    val ncontests: Int,
-//    val cvrsContainUndervotes: Boolean = true,
-//    val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
-//)
+//    val cvrsContainUndervotes: Boolean,
+//    val poolsHaveOneCardStyle: Boolean?,
+// )
 class TestElectionInfoJson {
 
     @Test
     fun testRoundtrip() {
-        testRoundtrips(ElectionInfo(AuditType.CLCA, ncards=42, ncontests=99))
-        testRoundtrips(ElectionInfo(AuditType.POLLING, ncards=42, ncontests=99, cvrsContainUndervotes=false))
-        testRoundtrips(ElectionInfo(AuditType.ONEAUDIT, ncards=42, ncontests=99, persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs))
-        testRoundtrips(ElectionInfo(AuditType.CLCA, ncards=42, ncontests=99, false, PersistedWorkflowMode.real))
+        testRoundtrips(ElectionInfo(AuditType.CLCA, 42, 99, true, true))
+        testRoundtrips(ElectionInfo(AuditType.POLLING, ncards=412, ncontests=63, cvrsContainUndervotes=false, poolsHaveOneCardStyle=true))
+        testRoundtrips(ElectionInfo(AuditType.ONEAUDIT, cvrsContainUndervotes = true, poolsHaveOneCardStyle=null, ncards=42, ncontests=9339))
+        testRoundtrips(ElectionInfo(AuditType.CLCA, ncards=42, ncontests=9, false, false))
     }
 
     fun testRoundtrips(target: ElectionInfo) {

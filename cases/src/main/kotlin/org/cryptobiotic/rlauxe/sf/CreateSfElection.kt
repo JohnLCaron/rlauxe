@@ -40,7 +40,7 @@ class CreateSfElection(
     val cvrExportCsv: String,
     val auditType: AuditType,
     val poolsHaveOneCardStyle: Boolean,
-): CreateElectionIF2 {
+): CreateElectionIF {
     val cardPoolMapByName: Map<String, OneAuditPoolFromCvrs>
     val cardPoolBuilders: List<OneAuditPoolFromCvrs>
     val cardPools: List<OneAuditPool>
@@ -161,7 +161,7 @@ class CreateSfElection(
         return result
     }
 
-    override fun electionInfo() = ElectionInfo2(
+    override fun electionInfo() = ElectionInfo(
         auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = poolsHaveOneCardStyle,
     )
 

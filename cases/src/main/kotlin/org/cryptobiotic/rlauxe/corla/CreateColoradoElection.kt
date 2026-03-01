@@ -24,7 +24,7 @@ open class CreateColoradoElection (
     contestRoundFile: String,
     precinctFile: String,
     val auditType: AuditType,
-): CreateElectionIF2 {
+): CreateElectionIF {
     val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
 
@@ -155,7 +155,7 @@ open class CreateColoradoElection (
         }
     }
 
-    override fun electionInfo() = ElectionInfo2(auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
+    override fun electionInfo() = ElectionInfo(auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
     override fun populations() = if (auditType.isClca()) emptyList() else cardPools
     override fun makeCardPools() = if (auditType.isClca()) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
     override fun contestsUA() = contestsUA

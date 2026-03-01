@@ -31,7 +31,7 @@ class CreateBoulderElection(
     val sovo: BoulderStatementOfVotes,
     val poolsHaveOneCardStyle: Boolean = true,
     val distributeOvervotes: List<Int> = listOf(0, 63),
-): CreateElectionIF2 {
+): CreateElectionIF {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convertToCvr() }
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infoMap = infoList.associateBy { it.id }
@@ -281,7 +281,7 @@ class CreateBoulderElection(
         }
     }
 
-    override fun electionInfo() = ElectionInfo2(auditType, ncards(), contestsUA.size, true, poolsHaveOneCardStyle)
+    override fun electionInfo() = ElectionInfo(auditType, ncards(), contestsUA.size, true, poolsHaveOneCardStyle)
     override fun contestsUA() = contestsUA
     override fun populations() = if (auditType.isClca()) emptyList() else cardPoolBuilders
     override fun makeCardPools() = if (auditType.isClca()) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }

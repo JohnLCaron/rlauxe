@@ -77,7 +77,6 @@ data class AuditConfigJson(
 
     val pollingConfig: PollingConfigJson? = null,
     val clcaConfig: ClcaConfigJson? = null,
-    val oaConfig: OneAuditConfigJson?  = null,
 
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
     val simulationStrategy: SimulationStrategy =  SimulationStrategy.regular,
@@ -105,7 +104,6 @@ fun AuditConfig.publishJson() = AuditConfigJson(
     this.auditSampleLimit,
 
     clcaConfig = if (!this.auditType.isPolling()) this.clcaConfig.publishJson() else null,
-    oaConfig = if (this.auditType.isOA()) this.oaConfig.publishJson() else null,
     pollingConfig = if (this.auditType.isPolling()) this.pollingConfig.publishJson() else null,
 
     persistedWorkflowMode = this.persistedWorkflowMode,
@@ -136,7 +134,6 @@ fun AuditConfigJson.import(): AuditConfig {
         auditSampleLimit = this.auditSampleLimit,
 
         clcaConfig = if (this.clcaConfig != null) this.clcaConfig.import() else ClcaConfig(),
-        oaConfig = if (this.oaConfig != null) this.oaConfig.import() else OneAuditConfig(),
         pollingConfig = if (this.pollingConfig != null) this.pollingConfig.import() else PollingConfig(),
 
         persistedWorkflowMode = this.persistedWorkflowMode,
@@ -186,16 +183,6 @@ fun ClcaConfigJson.import() = ClcaConfig(
         this.d,
         this.maxLoss ?: 0.90,
         apriori=TausRates(this.apriori ?: emptyMap()),
-    )
-
-@Serializable
-data class OneAuditConfigJson(
-    val strategy: String,
-)
-
-fun OneAuditConfig.publishJson() = OneAuditConfigJson(this.strategy.name)
-fun OneAuditConfigJson.import() = OneAuditConfig(
-        enumValueOf(this.strategy, OneAuditStrategyType.entries) ?: OneAuditStrategyType.simulate,
     )
 
 /////////////////////////////////////////////////////////////////////////////////

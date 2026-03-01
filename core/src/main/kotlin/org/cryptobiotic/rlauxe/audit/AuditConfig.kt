@@ -10,16 +10,7 @@ enum class AuditType { POLLING, CLCA, ONEAUDIT;
     fun isPolling() = (this == POLLING)
 }
 
-// TODO not compelling; could have the ContestInfo here?
 data class ElectionInfo(
-    val auditType: AuditType,
-    val ncards: Int,
-    val ncontests: Int,
-    val cvrsContainUndervotes: Boolean = true,
-    val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
-)
-
-data class ElectionInfo2(
     val auditType: AuditType,
     val ncards: Int,
     val ncontests: Int,
@@ -55,7 +46,6 @@ data class AuditConfig(
 
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(),
-    val oaConfig: OneAuditConfig = OneAuditConfig(),
 
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
 
@@ -86,21 +76,37 @@ data class AuditConfig(
         if (skipContests.isNotEmpty()) { appendLine("  skipContests=$skipContests") }
         when (auditType) {
             AuditType.POLLING -> appendLine("  $pollingConfig")
-            AuditType.CLCA -> appendLine("  $clcaConfig")
-            AuditType.ONEAUDIT -> {
-                appendLine("  $oaConfig")
-            }
+            AuditType.CLCA, AuditType.ONEAUDIT -> appendLine("  $clcaConfig")
         }
     }
 
     fun strategy() : String {
         return when (auditType) {
             AuditType.POLLING -> "polling"
-            AuditType.CLCA -> clcaConfig.strategy.toString()
-            AuditType.ONEAUDIT -> oaConfig.strategy.toString()
+            AuditType.CLCA, AuditType.ONEAUDIT -> clcaConfig.strategy.toString()
         }
     }
 }
+
+// optimistic: round 1 assume no errors, subsequent rounds use measured error rates
+enum class SimulationStrategy { regular, optimistic  }
+
+// could be called AlphaMartConfig
+data class PollingConfig(
+    val d: Int = 100,  // shrinkTrunc weight
+)
+
+enum class ClcaStrategyType { generalAdaptive, generalAdaptive2 }
+data class ClcaConfig(
+    val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive2,
+    val fuzzMvrs: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs when persistedWorkflowMode=testSimulate
+    val d: Int = 100,  // shrinkTrunc weight for error rates
+    val maxLoss: Double = 0.90,  // max loss on any one bet, 0 < maxLoss < 1
+    val apriori: TausRates = TausRates(emptyMap()),
+)
+
+/////////////////////////////////////////////
+// speculative
 
 data class SimControl(
     // simulation control
@@ -119,27 +125,4 @@ data class ContestSampleControl(
     val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
 )
 
-// optimistic: round 1 assume no errors, subsequent rounds use measured error rates
-enum class SimulationStrategy { regular, optimistic  }
-
-// could be called AlphaMartConfig
-data class PollingConfig(
-    val d: Int = 100,  // shrinkTrunc weight
-)
-
-enum class ClcaStrategyType { generalAdaptive, generalAdaptive2}
-data class ClcaConfig(
-    val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive2,
-    val fuzzMvrs: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs when persistedWorkflowMode=testSimulate
-    val d: Int = 100,  // shrinkTrunc weight for error rates
-    val maxLoss: Double = 0.90,  // max loss on any one bet, 0 < maxLoss < 1
-    val apriori: TausRates = TausRates(emptyMap()),
-)
-
-// TODO dont need this
-// simulate: simulate for estimation
-enum class OneAuditStrategyType { simulate }
-data class OneAuditConfig(
-    val strategy: OneAuditStrategyType = OneAuditStrategyType.simulate,
-)
 

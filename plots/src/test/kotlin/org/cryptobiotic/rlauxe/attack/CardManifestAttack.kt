@@ -4,8 +4,8 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CreateElectionIF2
-import org.cryptobiotic.rlauxe.audit.ElectionInfo2
+import org.cryptobiotic.rlauxe.audit.CreateElectionIF
+import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
@@ -268,9 +268,9 @@ class CreateElectionForAttack(
     val mvrs: List<Cvr>,
     val populations: List<PopulationIF>?,
     val cardPools: List<OneAuditPool>?,
-): CreateElectionIF2 {
+): CreateElectionIF {
 
-    override fun electionInfo() = ElectionInfo2(AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
+    override fun electionInfo() = ElectionInfo(AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
     override fun createUnsortedMvrs() = mvrs
     override fun contestsUA() = contestsUA
     override fun populations() = populations

@@ -158,7 +158,7 @@ class TestClcaElection(
     ncontests: Int,
     addRaire: Boolean,
     addRaireCandidates: Int,
-): CreateElectionIF2 {
+): CreateElectionIF {
     val contestsUA = mutableListOf<ContestWithAssertions>()
     val allCvrs = mutableListOf<Cvr>()
 
@@ -189,7 +189,7 @@ class TestClcaElection(
         println()
     }
 
-    override fun electionInfo() = ElectionInfo2(
+    override fun electionInfo() = ElectionInfo(
         AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
     )
     override fun createUnsortedMvrs() = allCvrs
@@ -248,7 +248,7 @@ class TestPollingElection(
     pctPhantoms: Double?,
     ncards: Int,
     ncontests: Int,
-): CreateElectionIF2 {
+): CreateElectionIF {
     val contestsUA = mutableListOf<ContestWithAssertions>()
     val cvrs: List<Cvr>
     val testMvrs: List<Cvr>
@@ -282,7 +282,7 @@ class TestPollingElection(
         println()
     }
 
-    override fun electionInfo() = ElectionInfo2(
+    override fun electionInfo() = ElectionInfo(
         AuditType.POLLING, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
     )
     override fun createUnsortedMvrs() = testMvrs
@@ -349,7 +349,7 @@ class TestOneAuditElection(
     phantomPct: Double,
     extraPct: Double,
     fuzzMvrs: Double,
-): CreateElectionIF2 {
+): CreateElectionIF {
     val contestsUA = mutableListOf<ContestWithAssertions>()
     val cardPools: List<OneAuditPool>
     val cards: List<AuditableCard>
@@ -375,7 +375,7 @@ class TestOneAuditElection(
         this.fuzzedMvrs = makeFuzzedCvrsForClca(infoList, mvrs, fuzzMvrs)
     }
 
-    override fun electionInfo() = ElectionInfo2(
+    override fun electionInfo() = ElectionInfo(
         AuditType.ONEAUDIT, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = true,
     )
     override fun createUnsortedMvrs() = fuzzedMvrs

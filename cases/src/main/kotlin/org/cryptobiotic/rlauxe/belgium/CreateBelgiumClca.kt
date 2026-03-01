@@ -7,13 +7,12 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 
 private val logger = KotlinLogging.logger("BelgiumClca")
 
 class BelgiumClca (
     contestd: DHondtContest,
-): CreateElectionIF2 {
+): CreateElectionIF {
 
     val infoMap: Map<Int, ContestInfo>
     val contestsUA: List<ContestWithAssertions>
@@ -26,7 +25,7 @@ class BelgiumClca (
         allCvrs = contestd.createSimulatedCvrs()
     }
 
-    override fun electionInfo() = ElectionInfo2(AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
+    override fun electionInfo() = ElectionInfo(AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
     override fun populations() = null
     override fun makeCardPools() = null
     override fun contestsUA() = contestsUA

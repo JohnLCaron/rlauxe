@@ -12,9 +12,9 @@ class CreateElectionFromCvrs (
     val auditType: AuditType,
     val cardPools: List<OneAuditPool>? = null,
     val cardStyles: List<PopulationIF>? = null,
-): CreateElectionIF2 {
+): CreateElectionIF {
 
-    override fun electionInfo() = ElectionInfo2(
+    override fun electionInfo() = ElectionInfo(
         auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
     )
     override fun createUnsortedMvrs() = cvrs

@@ -9,14 +9,14 @@ import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
-import org.cryptobiotic.rlauxe.persist.json.writeElectionInfo2JsonFile
+import org.cryptobiotic.rlauxe.persist.json.writeElectionInfoJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writePopulationsJsonFile
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.createZipFile
 import kotlin.io.path.Path
 
-interface CreateElectionIF2 {
-    fun electionInfo(): ElectionInfo2
+interface CreateElectionIF {
+    fun electionInfo(): ElectionInfo
     fun contestsUA(): List<ContestWithAssertions>
     // if you immediately write to disk, you only need one pass through the iterator
     fun cards() : CloseableIterator<AuditableCard> // doesnt need merged populations i think?
@@ -28,12 +28,12 @@ interface CreateElectionIF2 {
 
 private val logger = KotlinLogging.logger("CreateElectionRecord")
 
-fun createElectionRecord(name: String, election: CreateElectionIF2, auditDir: String, clear: Boolean = true) {
+fun createElectionRecord(name: String, election: CreateElectionIF, auditDir: String, clear: Boolean = true) {
     if (clear) clearDirectory(Path(auditDir))
 
     val publisher = Publisher(auditDir)
     val electionInfo = election.electionInfo()
-    writeElectionInfo2JsonFile(electionInfo, publisher.electionInfoFile())
+    writeElectionInfoJsonFile(electionInfo, publisher.electionInfoFile())
     logger.info{"CreateAuditRecord writeElectionInfoJsonFile to ${publisher.electionInfoFile()}\n  $electionInfo"}
 
     val populations = election.populations()

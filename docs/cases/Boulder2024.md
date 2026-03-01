@@ -1,8 +1,8 @@
 # Boulder County, CO, 2024 general election
-02/25/2026
+03/01/2026
 
 * 396,681 cards
-* 65 contests (no IRV)
+* 65 contests (no IRV), 3 contests were uncontested
 * 12,297 redacted cards (3%) in 60 pools. 
 * Risk limit is 3% per Colorado law.
 * Two contests fall below the _automatic recount threshold_ of 0.5%, and so are removed from the audit.
@@ -21,37 +21,66 @@ and adjust the contest Nc to be consistent. See below for details.
 We are interested in comparing the CLCA audit which has full CVRs against the OneAudit which has the redacted ballots
 in OneAudit pools.
 
-Here are 1 CLCA and 10 trials of OneAudit for Boulder2024. The total number of MVRS sampled were:
-
-| type       | avg   | deciles of distribution                                                | 
-|------------|-------|------------------------------------------------------------------------|
-| CLCA       | 5135  | [5135]                                                                 | 
-| OneAudit   | 12995 | [12668, 12838, 12959, 13023, 13168, 13288, 13321, 13362, 13545, 13555] | 
-
-The spread among all the trials (click to get an interactive chart):
+Here we show 10 OneAudit's (with different PRN seeds each time), and compare it to the CLCA audits.
+In all cases there are no errors, but some of the contests have a small number of phantoms. 
+Over 62 contests there are ? assertions, each with a different margin. Here is the spread of the OneAudits reletive to
+the CLCA, for each of the ? assertions:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/cases/Boulder2024AuditVarianceScatterLogLog.html" rel="Boulder2024AuditVarianceScatter">![Boulder2024AuditVarianceScatter](../plots2/cases/Boulder2024AuditVarianceScatterLogLog.png)</a>
 
 * This is the simulated number of mvrs needed, including the extra samples needed from estimating each round.
+* The audit risk limit is 3%, per Colorado law.
 * Each run has a different PRN seed, to make sure we are seeing independent variations.
 * CLCA is smooth because it has no variance when there are no errors, while OneAudit shows scatter at the same margins.
-* Arguably OneAudit is similar to CLCA at high margins.
 
 The total mvrs needed are dominated by the assertions with the lowest margin. 
-Here we explore how CLCA and OneAudit differ when the n contests with the largest estimated nmvrs are removed from the audit.
+Here we explore how CLCA and OneAudit differ when n contests with the largest estimated nmvrs are removed from the audit:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/cases/Boulder24RemoveNmaxLinear.html" rel="Boulder24RemoveNmax">![Boulder24RemoveNmax](../plots2/cases/Boulder24RemoveNmaxLinear.png)</a>
 
-* For CLCA, removing the top three contests cuts the nmvrs to around 1000, with marginal improvement after that.
-* OneAudit averages are 2-7x higher than CLCA.
+In practice, even for CLCA, contests with very small margins and/or that require a large percentage of the ballots for that contest
+are likely to be removed. For Boulder2024, the top 2 contests are under the Colorado automatic recount margin of .005, and
+would go to a full hand count immediately. So its only after the first 2 contests are removed that the results become interesting.
 
+With OneAudit, the other two contests in the top 4 require more than 85% of the available ballots, and would also probably just go to a hand count.
+The top 3 or 4 contests always fail and are removed from the audit, which is why the number of successful contests for OneAudit (OA nsuccess)
+are less than the number of successful CLCA contests.
+
+The takeaway is that by the time you remove these 4 contests, OneAudit needs about 2x more nmvrs than CLCA for Boulder24.
+This is a much better result than for [SanFrancisco](SF2024.md), and is due to the lower percentand of ballots in pools (3% vs 13%), and
+also because the Boulder pools have a single Ballot Style, and so the margin is not diluted.
+
+| n   | nsuccess | OA nsuccess | CLCA est | OA est avg | ratio | One Audit Spread                                                       | 
+|-----|----------|-------------|----------|------------|-------|------------------------------------------------------------------------|
+| 0   | 62       | 58.8        | 16292    | 53706      | 3.3   | [46930, 53432, 53553, 53706, 54285, 55184, 56259, 60528, 62340, 62341] |
+| 1   | 61       | 58.3        | 8804     | 21121      | 2.4   | [20885, 20901, 20965, 21079, 21097, 21185, 21352, 21412, 21453, 21454] |
+| 2   | 60       | 58.2        | 5147     | 17093      | 3.3   | [12662, 12719, 17608, 18511, 18557, 18745, 18810, 18832, 22338, 22339] |
+| 3   | 59       | 58.4        | 3070     | 10517      | 3.4   | [9297, 9558, 9721, 10184, 10307, 10496, 10646, 11862, 14157, 14158]    |
+| 4   | 58       | 57.6        | 1343     | 5011       | 3.7   | [4419, 4717, 4892, 4964, 5018, 5025, 5377, 5453, 5938, 5939]           |
+| 5   | 57       | 57.0        | 708      | 1386       | 2.0   | [1123, 1230, 1253, 1374, 1449, 1539, 1551, 1663, 1776, 1777]           |
+| 6   | 56       | 56.0        | 706      | 1346       | 1.9   | [1102, 1230, 1242, 1360, 1439, 1484, 1485, 1568, 1672, 1673]           |
+| 7   | 55       | 55.0        | 665      | 1283       | 1.9   | [958, 1139, 1226, 1361, 1382, 1442, 1448, 1472, 1627, 1628]            |
+| 8   | 54       | 54.0        | 625      | 1008       | 1.6   | [667, 681, 709, 849, 1060, 1262, 1359, 1401, 1476, 1477]               |
+| 9   | 53       | 53.0        | 516      | 753        | 1.5   | [539, 544, 587, 605, 607, 648, 987, 1099, 1368, 1369]                  |
+| 10  | 52       | 52.0        | 415      | 481        | 1.2   | [442, 457, 460, 475, 485, 490, 501, 511, 541, 542]                     |
+
+````
+where 
+   n = remove top n estimated-nmvrs contests
+   nsuccess = number of contests successfully audited by CLCA
+   OA nsuccess = average number of contests successfully audited by OneAudit
+   CLCA est = estimated nmvrs needed by CLCA
+   OA est avg = average estimated nmvrs needed by OneAudit
+   ratio = OA est avg / CLCA est
+   One Audit Spread = spread of estimated nmvrs needed by OneAudit
+````
 
 Findings so far:
 
 1. Boulder County must publish the number of ballots in each pool to do a real audit.
-2. The redacted pools should always use a single BallotType, so we can sample with styles.
+2. The redacted pools should always use a single BallotType, so we can sample "with style".
 3. To do IRV with redacted ballots, VoteConsolidations for the redacted ballots would have to be provided.
-4. OneAudit is comparable to CLCA at this low percent (3%) of pooled ballots.
+4. OneAudit needs 2x more nmvrs than CLCA after removing the top 4 contests from the audit.
 
 
 ## Downloaded files

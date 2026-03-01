@@ -37,14 +37,17 @@ data class AuditConfig(
     val nsimEst: Int = 100, // number of simulation estimation trials
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
     val simFuzzPct: Double? = null, // for simulating the estimation fuzzing
+    val simulationStrategy: SimulationStrategy =  SimulationStrategy.optimistic,
 
-    // audit sample size control
+    // consistentSampling: contestRound.status
     val contestSampleCutoff: Int? = 30000, // use this number of cvrs in the estimation, set to null to use all
     val removeCutoffContests: Boolean = (contestSampleCutoff != null), // remove contests that need more samples than contestSampleCutoff
-    val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin TODO really it should be noerror?
-    val minMargin: Double = 0.0, // do not audit contests less than this margin
     val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / contestNc) greater than this
     val removeMaxContests: Int? = null, // remove top n estimated nmvrs contests
+
+    // checkContestsCorrectlyFormed: preAuditStatus
+    val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin TODO really it should be noerror?
+    val minMargin: Double = 0.0, // do not audit contests less than this margin
     val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
 
     // this turns the audit into a "risk measuring" audit
@@ -55,7 +58,6 @@ data class AuditConfig(
     val oaConfig: OneAuditConfig = OneAuditConfig(),
 
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
-    val simulationStrategy: SimulationStrategy =  SimulationStrategy.optimistic,
 
     val skipContests: List<Int> = emptyList(),
     val version: Double = 2.0,

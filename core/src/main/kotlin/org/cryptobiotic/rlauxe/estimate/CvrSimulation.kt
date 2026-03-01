@@ -17,6 +17,7 @@ import kotlin.math.round
 // val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
 //var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
 
+// only used by test
 fun simulateCvrsWithDilutedMargin(Nc: Int, margin: Double, undervotePct: Double, phantomPct: Double,
                                   Npop: Int = Nc,
                                   limit: Int? = null): Pair<ContestWithAssertions, List<Cvr>> {
@@ -37,9 +38,7 @@ fun simulateCvrsWithDilutedMargin(Nc: Int, margin: Double, undervotePct: Double,
 }
 
 
-// simulates Cvrs consistent with vote totals, up to min(Nc, config.contestSampleCutoff)
-// handles Polling, CLCA, regular or IRV
-
+// simulate the polling mvrs once for all the assertions for this contest
 fun simulateCvrsWithDilutedMargin(contestUA: ContestWithAssertions, config: AuditConfig): List<Cvr> {
     val contest = contestUA.contest as Contest
     val ncvrs = min( contest.Nc, config.contestSampleCutoff ?: Int.MAX_VALUE)
@@ -75,7 +74,7 @@ fun simulateCvrsForIrv(contestUA: ContestWithAssertions, config: AuditConfig, ir
     return makeVunderCvrs(vunder, contest.Nphantoms(), "simIrv", ncvrs, null)
 } */
 
-fun makeVunderCvrs(vunder: Vunder, phantomCount: Int, prefix: String, limit: Int, poolId: Int?): List<Cvr> {
+private fun makeVunderCvrs(vunder: Vunder, phantomCount: Int, prefix: String, limit: Int, poolId: Int?): List<Cvr> {
     val vunderPicker = VunderPicker(vunder)
     val contestId = vunder.contestId
 

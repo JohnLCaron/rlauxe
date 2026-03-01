@@ -1,0 +1,147 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;oSEPC7&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;oSEPC7&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;SF2024RemoveNmax nmvrs vs nRemoved, no errors&quot;,
+&quot;subtitle&quot;:&quot;compare CLCA and OneAudit's nmvrs&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;shape&quot;,
+&quot;values&quot;:[1.0,19.0],
+&quot;limits&quot;:[&quot;CLCA&quot;,&quot;OneAudit&quot;]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;values&quot;:[&quot;#ee6666&quot;,&quot;#73c0de&quot;],
+&quot;limits&quot;:[&quot;CLCA&quot;,&quot;OneAudit&quot;]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;n max-estimation contests removed&quot;,
+&quot;y&quot;:&quot;nmvrs&quot;,
+&quot;shape&quot;:&quot;type&quot;,
+&quot;color&quot;:&quot;type&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;],
+&quot;nmvrs&quot;:[13562.0,3498.0,1771.0,1093.0,1024.0,820.0,742.0,727.0,597.0,552.0,459.0,6522.0,6851.0,7800.0,11176.0,12977.0,14759.0,21078.0,27154.0,36046.0,36047.0,6352.0,6417.0,6646.0,7132.0,8749.0,9350.0,10692.0,13905.0,28337.0,28338.0,5347.0,5353.0,6414.0,7528.0,8223.0,9219.0,9433.0,12804.0,23822.0,23823.0,3972.0,4742.0,4853.0,5139.0,6631.0,6835.0,10186.0,11417.0,13866.0,13867.0,3212.0,3272.0,3299.0,3959.0,5127.0,5145.0,5155.0,5839.0,8307.0,8308.0,2844.0,3387.0,3916.0,4369.0,4375.0,4519.0,5849.0,6290.0,7074.0,7075.0,2292.0,2468.0,2595.0,2686.0,3055.0,3064.0,3079.0,3823.0,5014.0,5015.0,1747.0,1779.0,1859.0,2130.0,2246.0,2609.0,2814.0,2890.0,2985.0,2986.0,1516.0,1870.0,2032.0,2092.0,2195.0,2222.0,2994.0,3419.0,3465.0,3466.0,1107.0,1123.0,1176.0,1311.0,1396.0,1509.0,1572.0,1687.0,2483.0,2484.0,879.0,965.0,1082.0,1181.0,1233.0,1245.0,1444.0,1525.0,1700.0,1701.0],
+&quot;type&quot;:[&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;CLCA&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;,&quot;OneAudit&quot;],
+&quot;n max-estimation contests removed&quot;:[0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,5.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,6.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,7.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,8.0,9.0,9.0,9.0,9.0,9.0,9.0,9.0,9.0,9.0,9.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0,10.0]
+},
+&quot;size&quot;:1.0,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;type&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;n max-estimation contests removed&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;nmvrs&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;n max-estimation contests removed&quot;,&quot;nmvrs&quot;,&quot;type&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

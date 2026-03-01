@@ -1,13 +1,17 @@
 package org.cryptobiotic.rlauxe.cli
 
+import com.github.michaelbull.result.Result
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
 import kotlinx.cli.default
+import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.runRoundAgain
 import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.audit.startFirstRound
+import org.cryptobiotic.rlauxe.estimate.OnlyTask
 import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.util.ErrorMessages
 import kotlin.String
 
 /** Run first estimate round of an election that has already been created and auditConfig exists. */
@@ -29,7 +33,8 @@ object StartAuditFirstRound {
 
         try {
             parser.parse(args)
-            startFirstRound(inputDir, onlyTask)
+            val result: Result<AuditRoundIF, ErrorMessages> = startFirstRound(inputDir, OnlyTask.parse(onlyTask))
+            if (result.isErr) println(result)
         } catch (t: Throwable) {
             println(t.message)
         }
@@ -60,7 +65,7 @@ object RunRlaRoundCli {
 
         try {
             parser.parse(args)
-            runRound(inputDir, onlyTask)
+            runRound(inputDir, OnlyTask.parse(onlyTask))
         } catch (t: Throwable) {
             println(t.message)
         }

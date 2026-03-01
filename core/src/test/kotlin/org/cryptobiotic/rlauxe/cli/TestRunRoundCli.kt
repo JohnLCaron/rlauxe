@@ -10,13 +10,12 @@ class TestRunRoundCli {
 
     @Test
     fun testStartAuditFirstRound() {
-        val topdir = "$testdataDir/cases/sf2024/clca"
-        val auditdir = "$topdir/audit2"
+        val auditdir = "$testdataDir/cases/sf2024/oan/audit0t"
 
-        RunRlaRoundCli.main(
+        StartAuditFirstRound.main(
             arrayOf(
                 "-in", auditdir,
-                // "--onlyTask", "17-1/0",
+                // "--onlyTask", "14-37/35",
             )
         )
     }
@@ -36,8 +35,7 @@ class TestRunRoundCli {
 
     @Test
     fun testRunAllRoundsCli() {
-        val topdir = "$testdataDir/cases/sf2024/oa"
-        val auditdir = "$topdir/audit"
+        val auditdir = "$testdataDir/cases/sf2024/oan/audit3"
 
         RunRlaRoundCli.main(
             arrayOf(
@@ -56,6 +54,6 @@ class TestRunRoundCli {
             done = lastRound == null || lastRound.auditIsComplete || lastRound.roundIdx > 5 || lastRound.roundIdx == stopRound
         }
 
-        print(finalRound)
+        print("auditIsComplete = ${finalRound?.auditIsComplete}")
     }
 }

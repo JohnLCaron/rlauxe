@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
+import org.cryptobiotic.rlauxe.estimate.OnlyTask
 
 private val logger = KotlinLogging.logger("ClcaAudit")
 
@@ -24,7 +25,7 @@ fun runClcaAuditRound(
     mvrManager: MvrManager,
     roundIdx: Int,
     auditor: ClcaAssertionAuditorIF,
-    onlyTask: String? = null,
+    onlyTask: OnlyTask? = null,
 ): Boolean {
     val cvrPairs = mvrManager.makeMvrCardPairsForRound(roundIdx)
 
@@ -68,7 +69,7 @@ class RunClcaContestTask(
     val cvrPairs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
     val auditor: ClcaAssertionAuditorIF,
     val roundIdx: Int,
-    val onlyTask: String? = null,
+    val onlyTask: OnlyTask? = null,
 ): ConcurrentTaskG<Boolean> {
 
     override fun name() = "RunContestTask for ${contestRound.contestUA.name} round $roundIdx nassertions ${contestRound.assertionRounds.size}"
@@ -77,7 +78,7 @@ class RunClcaContestTask(
         val contestAssertionStatus = mutableListOf<TestH0Status>()
         contestRound.assertionRounds.forEach { assertionRound ->
             val taskName = "${contestRound.contestUA.id}-${assertionRound.assertion.assorter.shortName()}"
-            if (onlyTask == null || onlyTask == taskName) {
+            if (onlyTask == null || onlyTask.taskName == taskName) {
 
                 if (!assertionRound.status.complete) {
                     val cassertion = assertionRound.assertion as ClcaAssertion

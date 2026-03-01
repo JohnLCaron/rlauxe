@@ -20,21 +20,20 @@ fun sampleAndRemoveContests(
     quiet: Boolean
 ) {
     val stopwatch = Stopwatch()
-    val contestsNotDone = auditRound.contestRounds.filter { !it.done }.toMutableList()
 
     // remove removeMaxContests - to generate plot comparisions
     if (auditRound.roundIdx == 1 && config.removeMaxContests != null && config.removeMaxContests > 0) {
-        val sortedByMargin : List<ContestRound> = contestsNotDone.sortedByDescending { it.estMvrs }
+        val sortedByMargin : List<ContestRound> = auditRound.contestRounds.sortedByDescending { it.estMvrs }
         repeat(config.removeMaxContests) { idx ->
             val maxContest = sortedByMargin[idx]
             maxContest.status = TestH0Status.FailMaxSamplesAllowed
             maxContest.included = false
-            maxContest.done = true
-            contestsNotDone.remove(maxContest)
+            maxContest.done = true // this will remove from contestsNotDone
             logger.info{"*** removeMaxContests contest ${maxContest.id} estimated Mvrs ${maxContest.estMvrs}"}
         }
     }
 
+    val contestsNotDone = auditRound.contestRounds.filter { !it.done }.toMutableList()
     // limit total samples to less than contestSampleCutoff
     while (contestsNotDone.isNotEmpty()) {
         // create a strawman sample

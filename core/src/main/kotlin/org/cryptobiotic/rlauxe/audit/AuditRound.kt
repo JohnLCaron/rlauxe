@@ -39,6 +39,8 @@ data class AuditRound(
     override var auditorWantNewMvrs: Int = -1,
 ) : AuditRoundIF {
 
+    override fun toString() = show()
+
     override fun show() =
         "AuditState(round = $roundIdx, nmvrs=$nmvrs, auditWasDone=$auditWasDone, auditIsComplete=$auditIsComplete)" +
                 " ncontests=${contestRounds.size} ncontestsDone=${contestRounds.count { it.done }}"

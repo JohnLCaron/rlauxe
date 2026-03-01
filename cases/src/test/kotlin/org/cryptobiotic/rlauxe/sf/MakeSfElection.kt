@@ -133,11 +133,11 @@ class MakeSfElection {
         val tasks = mutableListOf<ConcurrentTaskG<List<AuditResult>>>()
         repeat(11) { removeN ->
             val auditDir = "$testdataDir/cases/sf2024/oan/audit$removeN"
-            tasks.add(RunRemoveSFtask(removeN, 1, auditDir, AuditType.ONEAUDIT))
+            tasks.add(RunRemoveSFtask(removeN, 20, auditDir, AuditType.ONEAUDIT))
         }
 
         val estResults: List<AuditResult> =
-            ConcurrentTaskRunnerG<List<AuditResult>>().run(tasks, nthreads = 5).flatten()
+            ConcurrentTaskRunnerG<List<AuditResult>>().run(tasks, nthreads = 7).flatten()
 
         val results = mutableMapOf<Int, MutableList<AuditResult>>()
         println("OneAudit results")

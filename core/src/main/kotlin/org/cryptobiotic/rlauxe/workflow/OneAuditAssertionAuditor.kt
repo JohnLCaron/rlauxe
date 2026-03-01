@@ -14,7 +14,7 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 
 private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
 
-// allows to run OneAudit with runClcaAuditRound
+// allows running OneAudit with RunClcaContestTask
 class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boolean = true) : ClcaAssertionAuditorIF {
 
     override fun run(
@@ -63,6 +63,8 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         val terminateOnNullReject = config.auditSampleLimit == null
         val testH0Result = testFn.testH0(samplerTracker.maxSamples(), terminateOnNullReject = terminateOnNullReject) { samplerTracker.sample() }
 
+        if (contestRound.id == 52)
+            print("")
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = samplerTracker.maxSamples(),

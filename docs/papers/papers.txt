@@ -95,3 +95,8 @@ RLA papers
 
 2025    Dice, but don’t slice: Optimizing the efficiency of ONEAudit,   Spertus, Glazer and Stark,       July 25 2025
     https://arxiv.org/pdf/2507.22179; https://github.com/spertus/UI-TS
+
+2026    Risk-Limiting Audits Are Interactive Proofs — How Do We Guarantee They Are Sound?
+    submitted to "The 47th IEEE Symposium on Security and Privacy (IEEE S&P 2026)"
+    https://cycle2.sp2026.ieee-security.org/doc/sp2026c2-paper147.pdf
+

@@ -6,10 +6,10 @@ import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
-import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
 import org.cryptobiotic.rlauxe.betting.Taus
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.betting.TestH0Result
+import org.cryptobiotic.rlauxe.estimate.OnlyTask
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
@@ -32,7 +32,7 @@ import java.nio.file.Path
 private val logger = KotlinLogging.logger("RunAuditRound")
 
 // called from cli and rlauxe-viewer
-fun runRound(inputDir: String, onlyTask: String? = null): AuditRoundIF? {
+fun runRound(inputDir: String, onlyTask: OnlyTask? = null): AuditRoundIF? {
     val roundResult = runRoundResult(inputDir, onlyTask)
     if (roundResult.isErr) {
         logger.error{"runRoundResult failed ${roundResult.component2()}"}
@@ -42,7 +42,7 @@ fun runRound(inputDir: String, onlyTask: String? = null): AuditRoundIF? {
 }
 
 // run one round and get ready to run the next round; or get ready to run the first round.
-fun runRoundResult(auditDir: String, onlyTask: String? = null): Result<AuditRoundIF, ErrorMessages> {
+fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRoundIF, ErrorMessages> {
     val errs = ErrorMessages("runRoundResult")
 
     try {

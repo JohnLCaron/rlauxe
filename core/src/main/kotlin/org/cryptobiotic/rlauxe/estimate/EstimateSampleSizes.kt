@@ -10,7 +10,6 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.workflow.CardManifest
-import kotlin.math.min
 
 private val logger = KotlinLogging.logger("EstimateSampleSizes")
 
@@ -26,7 +25,7 @@ fun estimateSampleSizes(
     previousSamples: Set<Long>,
     showTasks: Boolean = false,
     nthreads: Int = 32,
-    onlyTask: String? = null,
+    onlyTask: OnlyTask? = null,
 ): List<RunRepeatedResult> {
 
     // choose a subset of the cards for the estimation for speed
@@ -48,7 +47,7 @@ fun estimateSampleSizes(
 
     // create the estimation tasks for each contest and assertion
     val tasks = mutableListOf<EstimateSampleSizeTask>()
-    auditRound.contestRounds.filter { !it.done }.forEach { contestRound ->
+    auditRound.contestRounds.filter { !it.done }.filter{ onlyTask == null || it.id == onlyTask.contestId }.forEach { contestRound ->
         tasks.addAll(makeEstimationTasks(config, contestRound, auditRound.roundIdx, cardSamples,  vunderFuzz, onlyTask=onlyTask))
     }
 
@@ -60,16 +59,16 @@ fun estimateSampleSizes(
         val task = estResult.task
         val estNewSamples = task.assertionRound.estimationResult!!.simNewMvrsNeeded
         task.assertionRound.estNewMvrs = estNewSamples
-        task.assertionRound.estMvrs = min(estNewSamples + task.prevSampleSize, task.contestRound.Npop)
+        task.assertionRound.estMvrs = estNewSamples + task.prevSampleSize
     }
 
     // put results into contestRounds
     auditRound.contestRounds.filter { !it.done }.forEach { contestRound ->
         val sampleSizes = estResults.filter { it.task.contestRound.id == contestRound.id }.map { it.task.assertionRound.estMvrs }
-        contestRound.estMvrs = if (sampleSizes.isEmpty()) 0 else sampleSizes.max()
+        contestRound.estMvrs = sampleSizes.max() // TODO cant be empty?
         val newSampleSizes = estResults.filter { it.task.contestRound.id == contestRound.id }.map { it.task.assertionRound.estNewMvrs }
-        contestRound.estNewMvrs = if (newSampleSizes.isEmpty()) 0 else newSampleSizes.max()
-        if (contestRound.estNewMvrs == 0) { // estimation failed
+        contestRound.estNewMvrs = newSampleSizes.max() // TODO cant be empty?
+        if (contestRound.estNewMvrs <= 0 || contestRound.estMvrs > contestRound.contestUA.Npop) { // estimation failed
             contestRound.done = true
             contestRound.status = TestH0Status.FailMaxSamplesAllowed
             logger.warn{" *** remove contest ${contestRound.id} with status FailMaxSamplesAllowed: estimation failed"}
@@ -94,7 +93,7 @@ fun makeEstimationTasks(
     cardSamples: CardSamples?,
     vunderFuzz: OneAuditVunderFuzzer?,
     moreParameters: Map<String, Double> = emptyMap(),
-    onlyTask: String?,
+    onlyTask: OnlyTask?,
 ): List<EstimateSampleSizeTask> {
     val stopwatch = Stopwatch()
     val tasks = mutableListOf<EstimateSampleSizeTask>()
@@ -121,7 +120,7 @@ fun makeEstimationTasks(
 
     contestRound.assertionRounds.filter { !it.status.complete }.map { assertionRound ->
         val taskName = "${contestRound.contestUA.id}-${assertionRound.assertion.assorter.shortName()}"
-        if (onlyTask == null || onlyTask == taskName) {
+        if (onlyTask == null || onlyTask.taskName == taskName) {
             var prevSampleSize = 0
             var startingTestStatistic = 1.0
             if (roundIdx > 1) {
@@ -280,15 +279,15 @@ fun estimateClcaAssertionRound(
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateClcaAssertionRound for $name with ${config.nsimEst} trials"}
     val stopwatch = Stopwatch()
+    val ntrials = config.nsimEst
 
     // run the simulation ntrials (=config.nsimEst) times
     val result: RunRepeatedResult = runRepeatedBettingMart(
         name,
+        ntrials,
         config,
         samplerTracker=samplerTracker,
         bettingFn,
-        noerror=cassorter.noerror(),
-        upper=cassorter.assorter.upperBound(),
         clcaUpper=cassorter.upperBound(),
         contestUA.Npop,
         startingTestStatistic,
@@ -318,11 +317,10 @@ fun estimateClcaAssertionRound(
 
 fun runRepeatedBettingMart(
     name: String,
+    ntrials: Int,
     config: AuditConfig,
     samplerTracker: SamplerTracker,
     bettingFn: BettingFn,
-    noerror: Double,
-    upper: Double, // cassorter.assorter.upperBound(),
     clcaUpper: Double, // clca assorter
     N: Int,
     startingTestStatistic: Double = 1.0, // T, must grow to 1/riskLimit
@@ -337,10 +335,10 @@ fun runRepeatedBettingMart(
         sampleUpperBound = clcaUpper,
     )
 
-    // run the simulation ntrials (config.nsimEst) times
+    // run the simulation ntrials times
     val result: RunRepeatedResult = runRepeated(
         name = name,
-        ntrials = config.nsimEst,
+        ntrials = ntrials,
         testFn = testFn,
         testParameters = moreParameters,
         startingTestStatistic = startingTestStatistic,
@@ -366,7 +364,6 @@ fun estimateOneAuditAssertionRound(
     val contestUA = contestRound.contestUA
     val cassertion = assertionRound.assertion as ClcaAssertion
     val oaCassorter = cassertion.cassorter as OneAuditClcaAssorter
-    val oaConfig = config.oaConfig
     val clcaConfig = config.clcaConfig
     val noerror=oaCassorter.noerror()
     val upper=oaCassorter.assorter.upperBound()
@@ -431,17 +428,17 @@ fun estimateOneAuditAssertionRound(
         println()
     } */
 
-    val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
+    val name = "${contestUA.id}-${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateOneAuditAssertionRound for $name with ${config.nsimEst} trials"}
     val stopwatch = Stopwatch()
+    val ntrials = config.nsimEst
 
     val result = runRepeatedBettingMart(
         name,
+        ntrials,
         config,
         sampler,
         bettingFn,
-        oaCassorter.noerror(),
-        oaCassorter.assorter.upperBound(),
         clcaUpper=oaCassorter.upperBound(),
         contestUA.Npop,
         startingTestStatistic,
@@ -458,7 +455,7 @@ fun estimateOneAuditAssertionRound(
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
         simNewMvrsNeeded = when {
-            (result.sampleCount.size == 0) -> 0
+            (result.sampleCount.size < ntrials/2) -> calcMvrsNeeded
             (roundIdx == 1) -> result.findQuantile(.50) // TODO put in AuditConfig ??
             else -> result.findQuantile(config.quantile)
         }
@@ -582,4 +579,14 @@ fun runRepeatedAlphaMart(
         N = N,
     )
     return result
+}
+
+data class OnlyTask(val contestId: Int, val taskName: String) {
+    companion object {
+        fun parse(taskName: String?): OnlyTask? {
+            if (taskName == null) return null
+            val tokens = taskName.split("-")
+            return OnlyTask(tokens[0].toInt(), taskName)
+        }
+    }
 }

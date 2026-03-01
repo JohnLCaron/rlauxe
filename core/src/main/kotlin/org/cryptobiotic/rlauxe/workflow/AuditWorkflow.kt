@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.estimate.OnlyTask
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sampleAndRemoveContests
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -17,7 +18,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
     abstract fun contestsUA(): List<ContestWithAssertions>
 
     // start new round and create estimated sample sizes
-    open fun startNewRound(quiet: Boolean = true, onlyTask: String? = null): AuditRound {
+    open fun startNewRound(quiet: Boolean = true, onlyTask: OnlyTask? = null): AuditRound {
         val auditRounds = auditRounds()
         val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
         val roundIdx = auditRounds.size + 1
@@ -27,6 +28,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
             // first time, create the round
             val contestRounds = contestsUA()
                 .filter { !auditConfig.skipContests.contains(it.id) }
+                .filter{ onlyTask == null || it.id == onlyTask.contestId }
                 .map { ContestRound(it, roundIdx) }
             AuditRound(roundIdx, contestRounds = contestRounds, samplePrns = emptyList())
         } else {
@@ -75,5 +77,5 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
     //   AuditRecord.enterMvrs(mvrFile: String)
 
     // 6. _Run the audit_
-    abstract fun runAuditRound(auditRound: AuditRound, onlyTask: String? = null, quiet: Boolean = true): Boolean  // return true if audit is complete
+    abstract fun runAuditRound(auditRound: AuditRound, onlyTask: OnlyTask? = null, quiet: Boolean = true): Boolean  // return true if audit is complete
 }

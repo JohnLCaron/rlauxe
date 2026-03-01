@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.estimate.OnlyTask
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.AuditRecordIF
 import org.cryptobiotic.rlauxe.persist.CompositeRecord
@@ -52,7 +53,7 @@ class PersistedWorkflow(
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestWithAssertions> = auditContests
 
-    override fun startNewRound(quiet: Boolean, onlyTask: String?): AuditRound {
+    override fun startNewRound(quiet: Boolean, onlyTask: OnlyTask?): AuditRound {
 
         val nextRound = super.startNewRound(quiet, onlyTask)
 
@@ -75,7 +76,7 @@ class PersistedWorkflow(
         return nextRound
     }
 
-    override fun runAuditRound(auditRound: AuditRound, onlyTask: String?, quiet: Boolean): Boolean  { // return complete
+    override fun runAuditRound(auditRound: AuditRound, onlyTask: OnlyTask?, quiet: Boolean): Boolean  { // return complete
         val roundIdx = auditRound.roundIdx
 
         //   in a real audit, need to set the real mvrs externally with EnterMvrsCli, which calls auditRecord.enterMvrs(mvrs)

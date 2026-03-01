@@ -5,6 +5,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.estimate.OnlyTask
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
@@ -53,7 +54,7 @@ fun createAuditRecord(config: AuditConfig, election: CreateElectionIF2, auditDir
     }
 }
 
-fun startFirstRound(auditDir: String, onlyTask: String? = null): Result<AuditRoundIF, ErrorMessages> {
+fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRoundIF, ErrorMessages> {
     val errs = ErrorMessages("startFirstRound")
 
     try {

@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.estimate.OnlyTask
 
 class WorkflowTesterPolling(
     val auditConfig: AuditConfig,
@@ -19,7 +20,7 @@ class WorkflowTesterPolling(
         require (auditConfig.auditType == AuditType.POLLING)
     }
 
-    override fun runAuditRound(auditRound: AuditRound, onlyTask: String?, quiet: Boolean): Boolean  {
+    override fun runAuditRound(auditRound: AuditRound, onlyTask: OnlyTask?, quiet: Boolean): Boolean  {
         val complete = runPollingAuditRound(auditConfig, auditRound, mvrManager, auditRound.roundIdx, quiet)
         auditRound.auditWasDone = true
         auditRound.auditIsComplete = complete

@@ -22,7 +22,7 @@ We are interested in comparing the CLCA audit which has full CVRs against the On
 in OneAudit pools.
 
 Here we show 10 OneAudit's (with different PRN seeds each time), and compare it to the CLCA audits.
-In all cases there are no errors, but some of the contests have a small number of phantoms. 
+In all cases there are no errors (but some of the contests have a small number of phantoms). 
 Over 62 contests there are ? assertions, each with a different margin. Here is the spread of the OneAudits reletive to
 the CLCA, for each of the ? assertions:
 
@@ -47,7 +47,7 @@ The top 3 or 4 contests always fail and are removed from the audit, which is why
 are less than the number of successful CLCA contests.
 
 The takeaway is that by the time you remove these 4 contests, OneAudit needs about 2x more nmvrs than CLCA for Boulder24.
-This is a much better result than for [SanFrancisco](SF2024.md), and is due to the lower percentand of ballots in pools (3% vs 13%), and
+This is a much better result than for [SanFrancisco](SF2024.md), and is due to the lower percentage of ballots in pools (3% vs 13%), and
 also because the Boulder pools have a single Ballot Style, and so the margin is not diluted.
 
 | n   | nsuccess | OA nsuccess | CLCA est | OA est avg | ratio | One Audit Spread                                                       | 
@@ -80,8 +80,8 @@ Findings so far:
 1. Boulder County must publish the number of ballots in each pool to do a real audit.
 2. The redacted pools should always use a single BallotType, so we can sample "with style".
 3. To do IRV with redacted ballots, VoteConsolidations for the redacted ballots would have to be provided.
-4. OneAudit needs 2x more nmvrs than CLCA after removing the top 4 contests from the audit.
-
+4. Sample size are greatly reduced after removing contests with very small margins or that require a large percentage of the ballots.
+5. OneAudit needs ~2x more nmvrs than CLCA after removing the top 4 contests from the audit.
 
 ## Downloaded files
 

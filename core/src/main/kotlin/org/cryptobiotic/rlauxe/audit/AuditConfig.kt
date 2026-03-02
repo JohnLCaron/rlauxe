@@ -35,7 +35,6 @@ data class AuditConfig(
 
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated,
 
-    // val skipContests: List<Int> = emptyList(), // TODO remove
     val version: Double = 2.0,
 ) {
     val isClca = auditType == AuditType.CLCA

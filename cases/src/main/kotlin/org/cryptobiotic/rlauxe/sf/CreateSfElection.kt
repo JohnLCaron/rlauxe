@@ -175,13 +175,13 @@ class CreateSfElection(
         return if (auditType == AuditType.ONEAUDIT) CvrsToCardsAddStyles(
             auditType,
             cvrIter,
-            makePhantomCvrs(phantomCount),
+            null, // there are no phantoms
             cardPoolBuilders)
         else
             CvrsToCardsAddStyles(
                 auditType,
                 cvrIter,
-                makePhantomCvrs(phantomCount),
+                null, // there are no phantoms
                 null)
     }
 

@@ -150,7 +150,6 @@ class MergePopulationsIntoCards(
 
 ////////////////////////////////////////////
 
-// TODO investigate not merging
 class MergePopulationsFromIterable(
     val cards: CloseableIterable<AuditableCard>,
     val populations: List<PopulationIF>?,

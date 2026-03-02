@@ -1,7 +1,16 @@
 package org.cryptobiotic.rlauxe.betting
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.apache.commons.math3.analysis.UnivariateFunction
+import org.apache.commons.math3.optim.MaxEval
+import org.apache.commons.math3.optim.nonlinear.scalar.GoalType
+import org.apache.commons.math3.optim.univariate.BrentOptimizer
+import org.apache.commons.math3.optim.univariate.SearchInterval
+import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction
+import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditAssortValueRates
+import org.cryptobiotic.rlauxe.util.dfn
+import kotlin.math.ln
 
 private val logger = KotlinLogging.logger("GeneralAdaptiveBetting")
 
@@ -102,3 +111,89 @@ fun makeAprioriErrorRates(apriori: ClcaErrorCounts, phantomRate: Double): Map<Do
     }
     return startingRates
 }
+
+
+
+class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, Double>, val oaErrorRates: Map<Double, Double>?,
+                           val mui: Double, val maxBet: Double, val debug: Boolean=false) {
+    var p0: Double
+
+    init {
+        require (mui > 0.0) {
+            "mui=$mui"
+        }
+        require (maxBet > 0.0)
+
+        val oasum = if (oaErrorRates == null) 0.0 else oaErrorRates.map{ it.value }.sum()
+        val clcasum = clcaErrorRates.map{ it.value }.sum()
+        p0 = 1.0 - clcasum - oasum    // calculate against other values to get it exact
+        if (p0 < 0.0) {
+            // logger.warn{"p0 less than 0 = $p0"}
+            p0 = 0.0
+        }
+        require (p0 >= 0.0)
+        if (debug) {
+            print("GeneralOptimalLambda init: mui=$mui ")
+            expectedValueLogt(maxBet, true)
+        }
+    }
+
+    fun solve(): Double {
+        val function = UnivariateFunction { lam -> expectedValueLogt(lam) }  // The function to be optimized
+
+        // org.apache.commons.math3.optim.univariate.BrentOptimizer
+        // BrentOptimizer: For a function defined on some interval (lo, hi),
+        // this class finds an approximation x to the point at which the function attains its minimum.
+        // It implements Richard Brent's algorithm (from his book "Algorithms for Minimization without Derivatives", p. 79)
+        // for finding minima of real univariate functions.
+        // This code is an adaptation, partly based on the Python code from SciPy (module "optimize.py" v0.5);
+        // the original algorithm is also modified to use an initial guess provided by the user,
+        // to ensure that the best point encountered is the one returned.
+        // Also see https://en.wikipedia.org/wiki/Brent%27s_method
+        val optimizer = BrentOptimizer(1e-6, 1e-6)
+
+        // Optimize the function within the given range [start, end]
+        val start = 0.0
+        val end = maxBet
+        val result: UnivariatePointValuePair = optimizer.optimize(
+            UnivariateObjectiveFunction(function),
+            SearchInterval(start, end),
+            GoalType.MAXIMIZE,
+            MaxEval(1000)
+        )
+        // if (debug) println("  gKelly: ${valueTracker.valueCounter} point=${result.point}")
+        return result.point
+    }
+
+    fun expectedValueLogt(lam: Double, show: Boolean = false): Double {
+        val noerrorTerm = ln(1.0 + lam * (noerror - mui)) * p0
+
+        var sumClcaTerm = 0.0
+        clcaErrorRates.forEach { (sampleValue: Double, rate: Double) ->
+            sumClcaTerm += ln(1.0 + lam * (sampleValue - mui)) * rate
+        }
+
+        var sumOneAuditTerm = 0.0
+        if (oaErrorRates != null) {
+            oaErrorRates.forEach { (assortValue: Double, rate: Double) ->
+                sumOneAuditTerm += ln(1.0 + lam * (assortValue - mui)) * rate
+            }
+        }
+        val total = noerrorTerm + sumClcaTerm + sumOneAuditTerm
+
+        if (debug)
+            println("  lam=$lam, noerrorTerm=${dfn(noerrorTerm, 6)} sumClcaTerm=${dfn(sumClcaTerm, 6)} " +
+                    "sumOneAuditTerm=${dfn(sumOneAuditTerm, 6)} expectedValueLogt=${total} ")
+
+        return total
+    }
+}
+
+// Sum (1.0 + lam * (sampleValue - mui)) * rate)
+// Sum(rate) + lam * Sum( (sampleValue_k - mui) * rate_k)
+// 1 + lam * Sum( (sampleValue_k - mui) * rate_k)
+
+// val tj = 1.0 + lamj * (xj - mj)
+// Tj = Prod(tj)
+// ln (Tj) = Sum(ln(tj)) = Sum( ln(1.0 + lamj * (xk - mj)) * prob(k))
+

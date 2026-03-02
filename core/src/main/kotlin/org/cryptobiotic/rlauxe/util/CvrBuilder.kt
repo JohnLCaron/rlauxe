@@ -52,14 +52,6 @@ class CvrBuilders(startCvrId: Int = 0) {
         return builders.map { it.build() }
     }
 
-    fun show() = buildString {
-        val cvrs = this@CvrBuilders.build()
-        print(buildString{
-            contests.forEach{ appendLine("${it.key}: ${it.value.id}")}
-            cvrs.forEach{ appendLine(it) }
-        })
-    }
-
     companion object {
         fun convertCvrsToBuilders(contests:List<ContestInfo>, cvrs: List<Cvr>): List<CvrBuilder> {
             val cvrsbs = CvrBuilders()

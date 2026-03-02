@@ -3,9 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.BettingMart
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
@@ -33,15 +31,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         val upper=oaCassorter.assorter.upperBound()
         val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
 
-        val bettingFn = if (clcaConfig.strategy == ClcaStrategyType.generalAdaptive) {
-            GeneralAdaptiveBetting(
-                contestUA.Npop,
-                startingErrors = ClcaErrorCounts.empty(noerror, upper),
-                contestUA.contest.Nphantoms(),
-                oaAssortRates = oaCassorter.oaAssortRates,
-                d = clcaConfig.d,
-                maxLoss = clcaConfig.maxLoss)
-        } else {
+        val bettingFn =
             GeneralAdaptiveBetting2(
                 contestUA.Npop,
                 aprioriCounts = apriori,
@@ -49,7 +39,6 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
                 maxLoss = clcaConfig.maxLoss,
                 d = clcaConfig.d,
             )
-        }
 
         val testFn = BettingMart(
             bettingFn = bettingFn,

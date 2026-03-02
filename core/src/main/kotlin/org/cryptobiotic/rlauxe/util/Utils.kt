@@ -20,13 +20,6 @@ fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8)
 fun roundToClosest(x: Double) = round(x).toInt()
 fun roundUp(x: Double) = ceil(x).toInt()
 
-fun ceilDiv(numerator: Int, denominator: Int): Int {
-    val frac = numerator.toDouble() / denominator
-    val fracFloor = frac.toInt()
-    val fracCeil = if (frac == fracFloor.toDouble()) fracFloor else fracFloor + 1
-    return fracCeil
-}
-
 fun listToMap(vararg names: String): Map<String, Int> {
     return names.mapIndexed { idx, value -> value to idx }.toMap()
 }
@@ -74,8 +67,6 @@ fun <T : Enum<T>> enumValueOf(name: String, entries: EnumEntries<T>): T? {
     return null
 }
 
-private val regex = Regex("[,]") // Matches '!', ',' or any digit
-fun cleanCsvString(originalString: String) = originalString.replace(regex, "")
 
 
 

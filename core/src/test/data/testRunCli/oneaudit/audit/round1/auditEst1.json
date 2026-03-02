@@ -7,8 +7,8 @@
                 {
                     "assorterDesc": "0/1 OneAuditTest",
                     "roundIdx": 1,
-                    "estSampleSize": 197,
-                    "estNewSampleSize": 197,
+                    "estSampleSize": 257,
+                    "estNewSampleSize": 257,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "0.001 OneAuditVunderFuzzer",
@@ -16,28 +16,28 @@
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            123,
-                            171,
-                            173,
-                            186,
-                            197,
-                            207,
-                            222,
-                            252,
-                            279,
-                            280
+                            158,
+                            165,
+                            185,
+                            236,
+                            257,
+                            273,
+                            330,
+                            330,
+                            436,
+                            437
                         ],
                         "ntrials": 10,
-                        "simNewMvrs": 197
+                        "simNewMvrs": 257
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 197,
-            "estMvrs": 197,
-            "estNewMvrs": 197,
+            "maxSampleAllowed": 257,
+            "estMvrs": 257,
+            "estNewMvrs": 257,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -46,8 +46,8 @@
     ],
     "auditWasDone": false,
     "auditIsComplete": false,
-    "nmvrs": 197,
-    "newmvrs": 197,
+    "nmvrs": 257,
+    "newmvrs": 257,
     "mvrsUnused": 0,
     "mvrsUsed": 0,
     "auditorWantNewMvrs": -1

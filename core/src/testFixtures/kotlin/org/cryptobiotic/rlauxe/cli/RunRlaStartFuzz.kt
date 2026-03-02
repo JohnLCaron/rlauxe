@@ -145,7 +145,7 @@ fun startTestElectionClca(
         clcaConfig = ClcaConfig(fuzzMvrs=fuzzMvrs)
     )
 
-    createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+    createAuditRecord(config, election, auditDir = auditdir)
 
     val result = startFirstRound(auditdir)
     if (result.isErr) error{ result.toString() }
@@ -235,7 +235,7 @@ fun startTestElectionPolling(
     val config = AuditConfig(AuditType.POLLING, nsimEst = 100, simFuzzPct = simFuzz,
         persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs, quantile=quantile)
 
-    createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+    createAuditRecord(config, election, auditDir = auditdir)
 
     val result = startFirstRound(auditdir)
     if (result.isErr) logger.error{ result.toString() }
@@ -335,7 +335,7 @@ fun startTestElectionOneAudit(
         simulationStrategy = if (strategy == "calc") SimulationStrategy.optimistic else SimulationStrategy.regular,
     )
 
-    createAuditRecord(config, election, auditDir = auditDir, externalSortDir=topdir)
+    createAuditRecord(config, election, auditDir = auditDir)
 
     val result = startFirstRound(auditDir)
     if (result.isErr) error{ result.toString() }

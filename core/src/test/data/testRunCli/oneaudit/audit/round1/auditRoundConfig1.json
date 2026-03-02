@@ -1,0 +1,20 @@
+{
+    "simulation": {
+        "nsimEst": 10,
+        "quantile": 0.5,
+        "simFuzzPct": 0.001
+    },
+    "sampling": {
+        "minRecountMargin": 0.005,
+        "minMargin": 0.0,
+        "maxSamplePct": 0.0,
+        "contestSampleCutoff": 30000,
+        "removeCutoffContests": true
+    },
+    "alphaMart": {
+        "d": 100
+    },
+    "bettingMart": {
+        "aprioriRates": {}
+    }
+}

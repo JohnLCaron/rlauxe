@@ -4,7 +4,8 @@ _last changed 03/02/2026_
 A complete _Audit Record_ has the following files in it:
 
     $auditdir/
-        auditCreationConfig.json // auditCreationConfigJson
+        auditConfig.json    // auditConfigJson (old way)
+        auditCreationConfig.json // auditCreationConfigJson (new way)
         cardManifest.csv      // AuditableCardCsv, may be zipped
         contests.json         // ContestsUnderAuditJson
         electionInfo.json     // ElectionInfoJson 
@@ -13,7 +14,7 @@ A complete _Audit Record_ has the following files in it:
         sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
         
         roundX/
-            auditRoundConfigX.json  // configuration parameters for round X
+            auditRoundConfigX.json  // configuration parameters for round X (new way)
             auditEstX.json       // AuditRoundJson,  the state of the estimation for this round
             auditStateX.json     // AuditRoundJson,  the state of the audit for this round
             sampleCardsX.csv     // AuditableCardCsv, complete cards used for this round; matches samplePrnsX.csv

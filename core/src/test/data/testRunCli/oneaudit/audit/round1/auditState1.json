@@ -1,0 +1,70 @@
+{
+    "roundIdx": 1,
+    "contestRounds": [
+        {
+            "id": 1,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "0/1 OneAuditTest",
+                    "roundIdx": 1,
+                    "estSampleSize": 257,
+                    "estNewSampleSize": 257,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "0.001 OneAuditVunderFuzzer",
+                        "calcMvrsNeeded": 224,
+                        "startingTestStatistic": 1.0,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [
+                            158,
+                            165,
+                            185,
+                            236,
+                            257,
+                            273,
+                            330,
+                            330,
+                            436,
+                            437
+                        ],
+                        "ntrials": 10,
+                        "simNewMvrs": 257
+                    },
+                    "auditResult": {
+                        "desc": "round=1 pmin=0.0494 plast=0.0494 nmvrs=257 samplesUsed=123 status=StatRejectNull measuredCounts=no errors",
+                        "roundIdx": 1,
+                        "nmvrs": 257,
+                        "plast": 0.049371004566286805,
+                        "pmin": 0.049371004566286805,
+                        "samplesUsed": 123,
+                        "status": "StatRejectNull",
+                        "measuredCounts": {
+                            "errorCounts": {},
+                            "totalSamples": 123,
+                            "noerror": 0.51010101010101,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "StatRejectNull",
+                    "roundProved": 1
+                }
+            ],
+            "roundIdx": 1,
+            "maxSampleAllowed": 257,
+            "estMvrs": 257,
+            "estNewMvrs": 257,
+            "auditorWantNewMvrs": -1,
+            "done": true,
+            "included": true,
+            "status": "StatRejectNull"
+        }
+    ],
+    "auditWasDone": true,
+    "auditIsComplete": true,
+    "nmvrs": 257,
+    "newmvrs": 257,
+    "mvrsUnused": 123,
+    "mvrsUsed": 134,
+    "auditorWantNewMvrs": -1
+}

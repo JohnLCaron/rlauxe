@@ -78,7 +78,7 @@ data class AuditConfigJson(
     val pollingConfig: PollingConfigJson? = null,
     val clcaConfig: ClcaConfigJson? = null,
 
-    val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
+    val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated,
     val simulationStrategy: SimulationStrategy =  SimulationStrategy.regular,
     val version : Double,
 )

@@ -142,6 +142,9 @@ class AuditRecord(
                 null
             }
 
+            // new way of storing config
+            val auditCreationConfig = readAuditCreationConfigUnwrapped(publisher.auditCreationConfigFile())
+
             val contestsResults = readContestsJsonFile(publisher.contestsFile())
             val contests = if (contestsResults.isOk) contestsResults.unwrap()  else {
                 errs.addNested(contestsResults.unwrapError())
@@ -194,6 +197,16 @@ class AuditRecord(
                         }
                     }
                 }
+
+                // new way of storing config
+                val auditRoundConfig = readAuditRoundConfigUnwrapped(publisher.auditRoundConfigFile(roundIdx))
+                val auditConfigNew = AuditConfig.fromRoundConfig(auditCreationConfig!!, auditRoundConfig!!)
+                if (auditConfigNew != config) {
+                    println(config)
+                    println(auditConfigNew)
+                    println()
+                }
+
             }
             // TODO AuditRecord or CompositeRecord ??
             return if (errs.hasErrors()) Err(errs) else

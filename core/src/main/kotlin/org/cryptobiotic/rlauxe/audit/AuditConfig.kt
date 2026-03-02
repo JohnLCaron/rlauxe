@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.audit
 import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.util.secureRandom
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
+import kotlin.Int
 
 data class AuditConfig(
     val auditType: AuditType,
@@ -32,7 +33,7 @@ data class AuditConfig(
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(),
 
-    val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
+    val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated,
 
     // val skipContests: List<Int> = emptyList(), // TODO remove
     val version: Double = 2.0,
@@ -45,8 +46,7 @@ data class AuditConfig(
     fun mvrFuzzPct(): Double {
         return when (auditType) {
             AuditType.POLLING -> 0.0
-            AuditType.CLCA -> clcaConfig.fuzzMvrs  ?: 0.0
-            AuditType.ONEAUDIT -> clcaConfig.fuzzMvrs  ?: 0.0
+            AuditType.CLCA, AuditType.ONEAUDIT -> clcaConfig.fuzzMvrs  ?: 0.0
         }
     }
 
@@ -70,6 +70,42 @@ data class AuditConfig(
         return when (auditType) {
             AuditType.POLLING -> "polling"
             AuditType.CLCA, AuditType.ONEAUDIT -> clcaConfig.strategy.toString()
+        }
+    }
+
+    companion object {
+        fun fromCreationConfig(cc: AuditCreationConfig): AuditConfig {
+            return AuditConfig(
+                auditType = cc.auditType,
+                riskLimit = cc.riskLimit,
+                seed = cc.seed,
+                auditSampleLimit = cc.auditSampleLimit,
+                persistedWorkflowMode = cc.persistedWorkflowMode,
+                clcaConfig = ClcaConfig(fuzzMvrs = cc.fuzzMvrs)
+            )
+        }
+        fun fromRoundConfig(cc: AuditCreationConfig, arc: AuditRoundConfig): AuditConfig {
+            return AuditConfig(
+                auditType = cc.auditType,
+                riskLimit = cc.riskLimit,
+                seed = cc.seed,
+                auditSampleLimit = cc.auditSampleLimit,
+                persistedWorkflowMode = cc.persistedWorkflowMode,
+
+                nsimEst = arc.simulation.nsimEst,
+                quantile = arc.simulation.quantile,
+                simFuzzPct = arc.simulation.simFuzzPct,
+
+                minRecountMargin = arc.sampling.minRecountMargin,
+                minMargin = arc.sampling.minMargin,
+                contestSampleCutoff = arc.sampling.contestSampleCutoff,
+                removeCutoffContests = arc.sampling.removeCutoffContests,
+                maxSamplePct = arc.sampling.maxSamplePct,
+                removeMaxContests = arc.sampling.removeMaxContests,
+
+                clcaConfig = arc.makeClcaConfig(cc.fuzzMvrs),
+                pollingConfig = PollingConfig(arc.alphaMart.d)
+            )
         }
     }
 }

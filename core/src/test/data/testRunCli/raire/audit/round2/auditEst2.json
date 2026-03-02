@@ -2,120 +2,20 @@
     "roundIdx": 2,
     "contestRounds": [
         {
-            "id": 111,
+            "id": 2,
             "assertionRounds": [
                 {
-                    "assorterDesc": "NEN 0/1 [2, 3, 4]",
+                    "assorterDesc": "2/1 contest2",
                     "roundIdx": 2,
-                    "estSampleSize": 170,
-                    "estNewSampleSize": 19,
-                    "estimationResult": {
-                        "roundIdx": 2,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 29,
-                        "startingTestStatistic": 12.535177500777976,
-                        "startingErrorRates": {
-                            "0.25728105382319644": 0.019867549668874173,
-                            "0.7718431614695893": 0.006622516556291391
-                        },
-                        "estimatedDistribution": [
-                            19,
-                            19,
-                            19,
-                            19,
-                            19,
-                            19,
-                            19,
-                            19,
-                            19,
-                            43
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 19
-                    },
-                    "prevAuditResult": {
-                        "desc": "round=1 pmin=0.0798 plast=0.0798 nmvrs=151 samplesUsed=151 status=LimitReached measuredCounts=[p1o=3, p1u=1, ]",
-                        "roundIdx": 1,
-                        "nmvrs": 151,
-                        "plast": 0.07977549579476928,
-                        "pmin": 0.07977549579476928,
-                        "samplesUsed": 151,
-                        "status": "LimitReached",
-                        "measuredCounts": {
-                            "errorCounts": {
-                                "0.25728105382319644": 3,
-                                "0.7718431614695893": 1
-                            },
-                            "totalSamples": 151,
-                            "noerror": 0.5145621076463929,
-                            "upper": 1.0
-                        },
-                        "params": {}
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "NEN 0/2 [1, 3, 4]",
-                    "roundIdx": 2,
-                    "estSampleSize": 230,
-                    "estNewSampleSize": 79,
-                    "estimationResult": {
-                        "roundIdx": 2,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 188,
-                        "startingTestStatistic": 3.8651984023946975,
-                        "startingErrorRates": {
-                            "0.25580681469354344": 0.019867549668874173
-                        },
-                        "estimatedDistribution": [
-                            79,
-                            79,
-                            79,
-                            79,
-                            79,
-                            79,
-                            79,
-                            108,
-                            108,
-                            166
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 79
-                    },
-                    "prevAuditResult": {
-                        "desc": "round=1 pmin=0.2587 plast=0.2587 nmvrs=151 samplesUsed=151 status=LimitReached measuredCounts=[p1o=3, ]",
-                        "roundIdx": 1,
-                        "nmvrs": 151,
-                        "plast": 0.25871893131810425,
-                        "pmin": 0.25871893131810425,
-                        "samplesUsed": 151,
-                        "status": "LimitReached",
-                        "measuredCounts": {
-                            "errorCounts": {
-                                "0.25580681469354344": 3
-                            },
-                            "totalSamples": 151,
-                            "noerror": 0.5116136293870869,
-                            "upper": 1.0
-                        },
-                        "params": {}
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "NEN 0/3 [1, 2, 4]",
-                    "roundIdx": 2,
-                    "estSampleSize": 216,
+                    "estSampleSize": 379,
                     "estNewSampleSize": 65,
                     "estimationResult": {
                         "roundIdx": 2,
                         "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 141,
-                        "startingTestStatistic": 4.778283467954798,
+                        "calcMvrsNeeded": 81,
+                        "startingTestStatistic": 10.926637357262669,
                         "startingErrorRates": {
-                            "0.25620004099200655": 0.019867549668874173
+                            "0.2526273241713824": 0.0031847133757961785
                         },
                         "estimatedDistribution": [
                             65,
@@ -125,527 +25,27 @@
                             65,
                             65,
                             65,
-                            92,
-                            92,
-                            147
+                            65,
+                            65,
+                            129
                         ],
                         "ntrials": 100,
                         "simNewMvrs": 65
                     },
                     "prevAuditResult": {
-                        "desc": "round=1 pmin=0.2093 plast=0.2093 nmvrs=151 samplesUsed=151 status=LimitReached measuredCounts=[p1o=3, ]",
+                        "desc": "round=1 pmin=0.0915 plast=0.0915 nmvrs=314 samplesUsed=314 status=LimitReached measuredCounts=[p1o=1, ]",
                         "roundIdx": 1,
-                        "nmvrs": 151,
-                        "plast": 0.20928017492189938,
-                        "pmin": 0.20928017492189938,
-                        "samplesUsed": 151,
+                        "nmvrs": 314,
+                        "plast": 0.09151946452540813,
+                        "pmin": 0.09151946452540813,
+                        "samplesUsed": 314,
                         "status": "LimitReached",
                         "measuredCounts": {
                             "errorCounts": {
-                                "0.25620004099200655": 3
+                                "0.2526273241713824": 1
                             },
-                            "totalSamples": 151,
-                            "noerror": 0.5124000819840131,
-                            "upper": 1.0
-                        },
-                        "params": {}
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "NEN 0/4 [1, 2, 3]",
-                    "roundIdx": 2,
-                    "estSampleSize": 240,
-                    "estNewSampleSize": 89,
-                    "estimationResult": {
-                        "roundIdx": 2,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 223,
-                        "startingTestStatistic": 3.4039833826962784,
-                        "startingErrorRates": {
-                            "0.25557145777959517": 0.019867549668874173
-                        },
-                        "estimatedDistribution": [
-                            89,
-                            89,
-                            89,
-                            89,
-                            89,
-                            89,
-                            119,
-                            119,
-                            119,
-                            180
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 89
-                    },
-                    "prevAuditResult": {
-                        "desc": "round=1 pmin=0.2938 plast=0.2938 nmvrs=151 samplesUsed=151 status=LimitReached measuredCounts=[p1o=3, ]",
-                        "roundIdx": 1,
-                        "nmvrs": 151,
-                        "plast": 0.29377346701613594,
-                        "pmin": 0.29377346701613594,
-                        "samplesUsed": 151,
-                        "status": "LimitReached",
-                        "measuredCounts": {
-                            "errorCounts": {
-                                "0.25557145777959517": 3
-                            },
-                            "totalSamples": 151,
-                            "noerror": 0.5111429155591903,
-                            "upper": 1.0
-                        },
-                        "params": {}
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "NEN 0/1 [3, 4]",
-                    "roundIdx": 2,
-                    "estSampleSize": 158,
-                    "estNewSampleSize": 7,
-                    "estimationResult": {
-                        "roundIdx": 2,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 10,
-                        "startingTestStatistic": 16.903841020922634,
-                        "startingErrorRates": {
-                            "0.2578382838283828": 0.019867549668874173,
-                            "0.7735148514851484": 0.006622516556291391
-                        },
-                        "estimatedDistribution": [
-                            7,
-                            7,
-                            7,
-                            7,
-                            7,
-                            7,
-                            7,
-                            7,
-                            7,
-                            29
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 7
-                    },
-                    "prevAuditResult": {
-                        "desc": "round=1 pmin=0.0592 plast=0.0592 nmvrs=151 samplesUsed=151 status=LimitReached measuredCounts=[p1o=3, p1u=1, ]",
-                        "roundIdx": 1,
-                        "nmvrs": 151,
-                        "plast": 0.059158152207078596,
-                        "pmin": 0.059158152207078596,
-                        "samplesUsed": 151,
-                        "status": "LimitReached",
-                        "measuredCounts": {
-                            "errorCounts": {
-                                "0.2578382838283828": 3,
-                                "0.7735148514851484": 1
-                            },
-                            "totalSamples": 151,
-                            "noerror": 0.5156765676567656,
-                            "upper": 1.0
-                        },
-                        "params": {}
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "NEN 0/1 [2, 4]",
-                    "roundIdx": 2,
-                    "estSampleSize": 160,
-                    "estNewSampleSize": 9,
-                    "estimationResult": {
-                        "roundIdx": 2,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 14,
-                        "startingTestStatistic": 15.741246602606047,
-                        "startingErrorRates": {
-                            "0.2577053911967839": 0.019867549668874173,
-                            "0.7731161735903516": 0.006622516556291391
-                        },
-                        "estimatedDistribution": [
-                            9,
-                            9,
-                            9,
-                            9,
-                            9,
-                            9,
-                            9,
-                            9,
-                            9,
-                            32
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 9
-                    },
-                    "prevAuditResult": {
-                        "desc": "round=1 pmin=0.0635 plast=0.0635 nmvrs=151 samplesUsed=151 status=LimitReached measuredCounts=[p1o=3, p1u=1, ]",
-                        "roundIdx": 1,
-                        "nmvrs": 151,
-                        "plast": 0.06352737017882971,
-                        "pmin": 0.06352737017882971,
-                        "samplesUsed": 151,
-                        "status": "LimitReached",
-                        "measuredCounts": {
-                            "errorCounts": {
-                                "0.2577053911967839": 3,
-                                "0.7731161735903516": 1
-                            },
-                            "totalSamples": 151,
-                            "noerror": 0.5154107823935677,
-                            "upper": 1.0
-                        },
-                        "params": {}
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "NEN 0/1 [2, 3]",
-                    "roundIdx": 2,
-                    "estSampleSize": 158,
-                    "estNewSampleSize": 7,
-                    "estimationResult": {
-                        "roundIdx": 2,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 10,
-                        "startingTestStatistic": 16.66459333755202,
-                        "startingErrorRates": {
-                            "0.2578116943384552": 0.019867549668874173,
-                            "0.7734350830153656": 0.006622516556291391
-                        },
-                        "estimatedDistribution": [
-                            7,
-                            7,
-                            7,
-                            7,
-                            7,
-                            7,
-                            7,
-                            7,
-                            7,
-                            30
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 7
-                    },
-                    "prevAuditResult": {
-                        "desc": "round=1 pmin=0.0600 plast=0.0600 nmvrs=151 samplesUsed=151 status=LimitReached measuredCounts=[p1o=3, p1u=1, ]",
-                        "roundIdx": 1,
-                        "nmvrs": 151,
-                        "plast": 0.06000746491344607,
-                        "pmin": 0.06000746491344607,
-                        "samplesUsed": 151,
-                        "status": "LimitReached",
-                        "measuredCounts": {
-                            "errorCounts": {
-                                "0.2578116943384552": 3,
-                                "0.7734350830153656": 1
-                            },
-                            "totalSamples": 151,
-                            "noerror": 0.5156233886769104,
-                            "upper": 1.0
-                        },
-                        "params": {}
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "NEN 0/2 [1, 3]",
-                    "roundIdx": 2,
-                    "estSampleSize": 221,
-                    "estNewSampleSize": 70,
-                    "estimationResult": {
-                        "roundIdx": 2,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 158,
-                        "startingTestStatistic": 4.389478347691521,
-                        "startingErrorRates": {
-                            "0.25604260548955343": 0.019867549668874173
-                        },
-                        "estimatedDistribution": [
-                            70,
-                            70,
-                            70,
-                            70,
-                            70,
-                            70,
-                            70,
-                            98,
-                            98,
-                            127
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 70
-                    },
-                    "prevAuditResult": {
-                        "desc": "round=1 pmin=0.2278 plast=0.2278 nmvrs=151 samplesUsed=151 status=LimitReached measuredCounts=[p1o=3, ]",
-                        "roundIdx": 1,
-                        "nmvrs": 151,
-                        "plast": 0.2278175037646357,
-                        "pmin": 0.2278175037646357,
-                        "samplesUsed": 151,
-                        "status": "LimitReached",
-                        "measuredCounts": {
-                            "errorCounts": {
-                                "0.25604260548955343": 3
-                            },
-                            "totalSamples": 151,
-                            "noerror": 0.5120852109791069,
-                            "upper": 1.0
-                        },
-                        "params": {}
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "NEN 0/3 [1, 4]",
-                    "roundIdx": 2,
-                    "estSampleSize": 212,
-                    "estNewSampleSize": 61,
-                    "estimationResult": {
-                        "roundIdx": 2,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 131,
-                        "startingTestStatistic": 5.056600386146062,
-                        "startingErrorRates": {
-                            "0.2563051055977035": 0.019867549668874173
-                        },
-                        "estimatedDistribution": [
-                            61,
-                            61,
-                            61,
-                            61,
-                            61,
-                            61,
-                            61,
-                            61,
-                            88,
-                            116
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 61
-                    },
-                    "prevAuditResult": {
-                        "desc": "round=1 pmin=0.1978 plast=0.1978 nmvrs=151 samplesUsed=151 status=LimitReached measuredCounts=[p1o=3, ]",
-                        "roundIdx": 1,
-                        "nmvrs": 151,
-                        "plast": 0.1977613265109446,
-                        "pmin": 0.1977613265109446,
-                        "samplesUsed": 151,
-                        "status": "LimitReached",
-                        "measuredCounts": {
-                            "errorCounts": {
-                                "0.2563051055977035": 3
-                            },
-                            "totalSamples": 151,
-                            "noerror": 0.512610211195407,
-                            "upper": 1.0
-                        },
-                        "params": {}
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "NEN 0/3 [1, 2]",
-                    "roundIdx": 2,
-                    "estSampleSize": 195,
-                    "estNewSampleSize": 44,
-                    "estimationResult": {
-                        "roundIdx": 2,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 87,
-                        "startingTestStatistic": 6.809634913171308,
-                        "startingErrorRates": {
-                            "0.25685811157916366": 0.019867549668874173
-                        },
-                        "estimatedDistribution": [
-                            44,
-                            44,
-                            44,
-                            44,
-                            44,
-                            44,
-                            44,
-                            44,
-                            69,
-                            119
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 44
-                    },
-                    "prevAuditResult": {
-                        "desc": "round=1 pmin=0.1469 plast=0.1469 nmvrs=151 samplesUsed=151 status=LimitReached measuredCounts=[p1o=3, ]",
-                        "roundIdx": 1,
-                        "nmvrs": 151,
-                        "plast": 0.14685075084800558,
-                        "pmin": 0.14685075084800558,
-                        "samplesUsed": 151,
-                        "status": "LimitReached",
-                        "measuredCounts": {
-                            "errorCounts": {
-                                "0.25685811157916366": 3
-                            },
-                            "totalSamples": 151,
-                            "noerror": 0.5137162231583273,
-                            "upper": 1.0
-                        },
-                        "params": {}
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "NEN 0/1 [4]",
-                    "roundIdx": 2,
-                    "estSampleSize": 157,
-                    "estNewSampleSize": 6,
-                    "estimationResult": {
-                        "roundIdx": 2,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 9,
-                        "startingTestStatistic": 17.146551622341292,
-                        "startingErrorRates": {
-                            "0.25786487880350695": 0.019867549668874173,
-                            "0.7735946364105208": 0.006622516556291391
-                        },
-                        "estimatedDistribution": [
-                            6,
-                            6,
-                            6,
-                            6,
-                            6,
-                            6,
-                            6,
-                            6,
-                            6,
-                            29
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 6
-                    },
-                    "prevAuditResult": {
-                        "desc": "round=1 pmin=0.0583 plast=0.0583 nmvrs=151 samplesUsed=151 status=LimitReached measuredCounts=[p1o=3, p1u=1, ]",
-                        "roundIdx": 1,
-                        "nmvrs": 151,
-                        "plast": 0.05832076454935923,
-                        "pmin": 0.05832076454935923,
-                        "samplesUsed": 151,
-                        "status": "LimitReached",
-                        "measuredCounts": {
-                            "errorCounts": {
-                                "0.25786487880350695": 3,
-                                "0.7735946364105208": 1
-                            },
-                            "totalSamples": 151,
-                            "noerror": 0.5157297576070139,
-                            "upper": 1.0
-                        },
-                        "params": {}
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "NEN 0/1 [2]",
-                    "roundIdx": 2,
-                    "estSampleSize": 162,
-                    "estNewSampleSize": 11,
-                    "estimationResult": {
-                        "roundIdx": 2,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 17,
-                        "startingTestStatistic": 14.869450185176433,
-                        "startingErrorRates": {
-                            "0.2575991756826378": 0.019867549668874173,
-                            "0.7727975270479134": 0.006622516556291391
-                        },
-                        "estimatedDistribution": [
-                            11,
-                            11,
-                            11,
-                            11,
-                            11,
-                            11,
-                            11,
-                            11,
-                            11,
-                            35
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 11
-                    },
-                    "prevAuditResult": {
-                        "desc": "round=1 pmin=0.0673 plast=0.0673 nmvrs=151 samplesUsed=151 status=LimitReached measuredCounts=[p1o=3, p1u=1, ]",
-                        "roundIdx": 1,
-                        "nmvrs": 151,
-                        "plast": 0.06725198225533008,
-                        "pmin": 0.06725198225533008,
-                        "samplesUsed": 151,
-                        "status": "LimitReached",
-                        "measuredCounts": {
-                            "errorCounts": {
-                                "0.2575991756826378": 3,
-                                "0.7727975270479134": 1
-                            },
-                            "totalSamples": 151,
-                            "noerror": 0.5151983513652756,
-                            "upper": 1.0
-                        },
-                        "params": {}
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "NEN 0/3 [1]",
-                    "roundIdx": 2,
-                    "estSampleSize": 205,
-                    "estNewSampleSize": 54,
-                    "estimationResult": {
-                        "roundIdx": 2,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 110,
-                        "startingTestStatistic": 5.7440727520569865,
-                        "startingErrorRates": {
-                            "0.2565418163160595": 0.019867549668874173
-                        },
-                        "estimatedDistribution": [
-                            54,
-                            54,
-                            54,
-                            54,
-                            54,
-                            54,
-                            54,
-                            54,
-                            79,
-                            106
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 54
-                    },
-                    "prevAuditResult": {
-                        "desc": "round=1 pmin=0.1741 plast=0.1741 nmvrs=151 samplesUsed=151 status=LimitReached measuredCounts=[p1o=3, ]",
-                        "roundIdx": 1,
-                        "nmvrs": 151,
-                        "plast": 0.1740925025091115,
-                        "pmin": 0.1740925025091115,
-                        "samplesUsed": 151,
-                        "status": "LimitReached",
-                        "measuredCounts": {
-                            "errorCounts": {
-                                "0.2565418163160595": 3
-                            },
-                            "totalSamples": 151,
-                            "noerror": 0.513083632632119,
+                            "totalSamples": 314,
+                            "noerror": 0.5052546483427648,
                             "upper": 1.0
                         },
                         "params": {}
@@ -655,9 +55,133 @@
                 }
             ],
             "roundIdx": 2,
-            "maxSampleAllowed": 240,
-            "estMvrs": 240,
-            "estNewMvrs": 89,
+            "maxSampleAllowed": 379,
+            "estMvrs": 379,
+            "estNewMvrs": 65,
+            "auditorWantNewMvrs": -1,
+            "done": false,
+            "included": true,
+            "status": "InProgress"
+        },
+        {
+            "id": 7,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "0/1 contest7",
+                    "roundIdx": 2,
+                    "estSampleSize": 131,
+                    "estNewSampleSize": 61,
+                    "estimationResult": {
+                        "roundIdx": 2,
+                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
+                        "calcMvrsNeeded": 166,
+                        "startingTestStatistic": 1.557894562413559,
+                        "startingErrorRates": {
+                            "0.0": 0.014285714285714285
+                        },
+                        "estimatedDistribution": [
+                            61,
+                            61,
+                            61,
+                            61,
+                            61,
+                            61,
+                            61,
+                            61,
+                            61,
+                            120
+                        ],
+                        "ntrials": 100,
+                        "simNewMvrs": 61
+                    },
+                    "prevAuditResult": {
+                        "desc": "round=1 pmin=0.6419 plast=0.6419 nmvrs=70 samplesUsed=70 status=LimitReached measuredCounts=[p2o=1, ]",
+                        "roundIdx": 1,
+                        "nmvrs": 70,
+                        "plast": 0.6418919637608568,
+                        "pmin": 0.6418919637608568,
+                        "samplesUsed": 70,
+                        "status": "LimitReached",
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.0": 1
+                            },
+                            "totalSamples": 70,
+                            "noerror": 0.5240130751822982,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                }
+            ],
+            "roundIdx": 2,
+            "maxSampleAllowed": 438,
+            "estMvrs": 131,
+            "estNewMvrs": 61,
+            "auditorWantNewMvrs": -1,
+            "done": false,
+            "included": true,
+            "status": "InProgress"
+        },
+        {
+            "id": 9,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "2/3 contest9",
+                    "roundIdx": 2,
+                    "estSampleSize": 81,
+                    "estNewSampleSize": 11,
+                    "estimationResult": {
+                        "roundIdx": 2,
+                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
+                        "calcMvrsNeeded": 13,
+                        "startingTestStatistic": 12.693575426960086,
+                        "startingErrorRates": {
+                            "0.2626008064516129": 0.014285714285714285
+                        },
+                        "estimatedDistribution": [
+                            11,
+                            11,
+                            11,
+                            11,
+                            11,
+                            11,
+                            11,
+                            11,
+                            11,
+                            12
+                        ],
+                        "ntrials": 100,
+                        "simNewMvrs": 11
+                    },
+                    "prevAuditResult": {
+                        "desc": "round=1 pmin=0.0788 plast=0.0788 nmvrs=70 samplesUsed=70 status=LimitReached measuredCounts=[p1o=1, ]",
+                        "roundIdx": 1,
+                        "nmvrs": 70,
+                        "plast": 0.07878001007313386,
+                        "pmin": 0.07878001007313386,
+                        "samplesUsed": 70,
+                        "status": "LimitReached",
+                        "measuredCounts": {
+                            "errorCounts": {
+                                "0.2626008064516129": 1
+                            },
+                            "totalSamples": 70,
+                            "noerror": 0.5252016129032258,
+                            "upper": 1.0
+                        },
+                        "params": {}
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                }
+            ],
+            "roundIdx": 2,
+            "maxSampleAllowed": 438,
+            "estMvrs": 81,
+            "estNewMvrs": 11,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -666,8 +190,8 @@
     ],
     "auditWasDone": false,
     "auditIsComplete": false,
-    "nmvrs": 240,
-    "newmvrs": 89,
+    "nmvrs": 438,
+    "newmvrs": 91,
     "mvrsUnused": 0,
     "mvrsUsed": 0,
     "auditorWantNewMvrs": -1

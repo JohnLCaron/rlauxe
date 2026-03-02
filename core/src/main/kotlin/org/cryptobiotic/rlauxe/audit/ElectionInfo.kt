@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.audit
 
+import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.util.secureRandom
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
@@ -10,7 +11,7 @@ enum class AuditType { POLLING, CLCA, ONEAUDIT;
     fun isPolling() = (this == POLLING)
 }
 
-// commit to at Election Creation
+// commit at Election Creation
 data class ElectionInfo(
     val auditType: AuditType,
     val ncards: Int,
@@ -19,7 +20,7 @@ data class ElectionInfo(
     val poolsHaveOneCardStyle: Boolean?,
 )
 
-// commit to at Audit Creation
+// commit at Audit Creation
 data class AuditCreationConfig(
     val auditType: AuditType, // must agree with ElectionInfo
     val riskLimit: Double = 0.05,
@@ -30,6 +31,13 @@ data class AuditCreationConfig(
     val fuzzMvrs: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs when persistedWorkflowMode=testSimulate
 ) {
     fun isRiskMeasuringAudit() = auditSampleLimit != null
+
+    companion object {
+        fun fromAuditConfig(config: AuditConfig): AuditCreationConfig {
+            return AuditCreationConfig(config.auditType, config.riskLimit, config.seed, config.auditSampleLimit,
+                config.persistedWorkflowMode, config.clcaConfig.fuzzMvrs)
+        }
+    }
 }
 
 // could vary by round; do we really need to retain this ?
@@ -38,13 +46,28 @@ data class AuditRoundConfig(
     val sampling: ContestSampleControl,
     val alphaMart: AlphaMartConfig,
     val bettingMart: BettingMartConfig,
-)
+) {
+    fun makeClcaConfig(fuzzMvrs: Double?) = ClcaConfig(fuzzMvrs=fuzzMvrs, d=bettingMart.d, maxLoss=bettingMart.maxLoss, apriori=bettingMart.apriori)
+
+    companion object {
+        fun fromAuditConfig(config: AuditConfig): AuditRoundConfig {
+            val simulation =
+                SimulationControl(config.nsimEst, config.quantile, config.simFuzzPct)
+            val sampling = ContestSampleControl(
+                config.minRecountMargin, config.minMargin, config.maxSamplePct, config.removeMaxContests,
+                config.contestSampleCutoff, config.removeCutoffContests
+            )
+            val alphaMart = AlphaMartConfig(config.pollingConfig.d)
+            val bettingMart = BettingMartConfig(config.clcaConfig.d, config.clcaConfig.maxLoss, config.clcaConfig.apriori, )
+            return AuditRoundConfig(simulation, sampling, alphaMart, bettingMart)
+        }
+    }
+}
 
 data class SimulationControl(
     val nsimEst: Int = 100, // number of simulation estimation trials
     val quantile: Double = 0.80, // use this percentile success for estimated sample size
     val simFuzzPct: Double? = null, // for simulating the estimation fuzzing
-    val simulationStrategy: SimulationStrategy =  SimulationStrategy.optimistic,
 )
 
 // a teach round the EA manually reviews the removed contests
@@ -52,7 +75,6 @@ data class ContestSampleControl(
     //// checkContestsCorrectlyFormed: preAuditStatus
     val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
     val minMargin: Double = 0.0, // do not audit contests less than this margin TODO really it should be noerror?
-    val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin // TODO not needed
 
     //// consistentSampling: contestRound.status, depends on having estimation
     val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / contestNc) greater than this

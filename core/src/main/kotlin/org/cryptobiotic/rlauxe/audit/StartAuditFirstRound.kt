@@ -37,8 +37,8 @@ private val logger = KotlinLogging.logger("StartAudit")
 fun createAuditRecord(config: AuditConfig, election: CreateElectionIF, auditDir: String, externalSortDir: String? = null) {
     val publisher = Publisher(auditDir)
 
-    writeAuditConfigJsonFile(config, publisher.auditConfigFile())
-    logger.info{"createAuditRecord writeAuditConfigJsonFile to ${publisher.auditConfigFile()}\n  $config"}
+    // write AuditConfig and AuditCreationConfig
+    publisher.writeAuditConfig(config)
 
     if (externalSortDir == null) {
         writeSortedCardsInternalSort(publisher, config.seed)

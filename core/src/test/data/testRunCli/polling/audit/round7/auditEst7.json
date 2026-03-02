@@ -1,0 +1,63 @@
+{
+    "roundIdx": 7,
+    "contestRounds": [
+        {
+            "id": 0,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "0/1 contest0",
+                    "roundIdx": 7,
+                    "estSampleSize": 10453,
+                    "estNewSampleSize": 883,
+                    "estimationResult": {
+                        "roundIdx": 7,
+                        "strategy": "simulateCvrsWithDilutedMargin",
+                        "calcMvrsNeeded": 0,
+                        "startingTestStatistic": 3.7617647441138597,
+                        "estimatedDistribution": [
+                            242,
+                            344,
+                            495,
+                            687,
+                            883,
+                            1175,
+                            1386,
+                            1544,
+                            1757,
+                            2109
+                        ],
+                        "ntrials": 100,
+                        "simNewMvrs": 883
+                    },
+                    "prevAuditResult": {
+                        "desc": "round=6 pmin=0.2658 plast=0.2658 nmvrs=9570 samplesUsed=9570 status=LimitReached measuredCounts=empty",
+                        "roundIdx": 6,
+                        "nmvrs": 9570,
+                        "plast": 0.2658326790809363,
+                        "pmin": 0.2658326790809363,
+                        "samplesUsed": 9570,
+                        "status": "LimitReached",
+                        "params": {}
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                }
+            ],
+            "roundIdx": 7,
+            "maxSampleAllowed": 10453,
+            "estMvrs": 10453,
+            "estNewMvrs": 883,
+            "auditorWantNewMvrs": -1,
+            "done": false,
+            "included": true,
+            "status": "InProgress"
+        }
+    ],
+    "auditWasDone": false,
+    "auditIsComplete": false,
+    "nmvrs": 10453,
+    "newmvrs": 883,
+    "mvrsUnused": 0,
+    "mvrsUsed": 0,
+    "auditorWantNewMvrs": -1
+}

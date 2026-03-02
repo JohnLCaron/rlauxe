@@ -1,0 +1,6 @@
+{
+    "auditType": "CLCA",
+    "riskLimit": 0.05,
+    "seed": 2217188212129390743,
+    "fuzzMvrs": 0.001
+}

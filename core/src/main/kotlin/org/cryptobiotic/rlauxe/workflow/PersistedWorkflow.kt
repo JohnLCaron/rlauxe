@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.AuditRecordIF
 import org.cryptobiotic.rlauxe.persist.CompositeRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
 
@@ -16,7 +17,7 @@ private val logger = KotlinLogging.logger("PersistedWorkflow")
 
 enum class PersistedWorkflowMode {
     real,           // use PersistedMvrManager;  sampleMvrs$round.csv must be written from external program.
-    testSimulated,  // use PersistedMvrManagerTest which fuzzes the mvrs on the fly (not for polling)  TODO change to testClcaSimulated
+    testClcaSimulated,  // use PersistedMvrManagerTest which fuzzes the mvrs on the fly (not for polling)
     testPrivateMvrs  // use PersistedMvrManager; use private/sortedMvrs.csv to write sampleMvrs$round.csv
 }
 
@@ -43,7 +44,7 @@ class PersistedWorkflow(
 
         mvrManager = when {
             (auditRecord is CompositeRecord) -> CompositeMvrManager(auditRecord, config, auditContests)
-            (mode == PersistedWorkflowMode.testSimulated) -> PersistedMvrManagerTest(auditRecord as AuditRecord)
+            (mode == PersistedWorkflowMode.testClcaSimulated) -> PersistedMvrManagerTest(auditRecord as AuditRecord)
             else -> PersistedMvrManager(auditRecord as AuditRecord, mvrWrite=mvrWrite)
         }
     }
@@ -65,6 +66,10 @@ class PersistedWorkflow(
             if (config.auditSampleLimit != null ) {
                 nextRound.samplePrns = nextRound.samplePrns.subList(0, config.auditSampleLimit)
             }
+
+            val auditRoundConfig = AuditRoundConfig.fromAuditConfig(config)
+            writeAuditRoundConfigJsonFile(auditRoundConfig, publisher.auditRoundConfigFile(nextRound.roundIdx))
+            logger.info {"startNewRound writeAuditRoundConfig to ${publisher.auditRoundConfigFile(nextRound.roundIdx)}"}
 
             writeAuditRoundJsonFile(nextRound, publisher.auditEstFile(nextRound.roundIdx))
             logger.info {"startNewRound writeAuditEstimation to ${publisher.auditEstFile(nextRound.roundIdx)}"}

@@ -34,7 +34,7 @@ class ExtraVsMarginByFuzzDiff {
             val simFuzzPct = fuzzMvrs+fuzzDiff
             val auditConfig = AuditConfig(
                 AuditType.CLCA, nsimEst = nsimEst, simFuzzPct = simFuzzPct,
-                persistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
+                persistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated,
                 simulationStrategy = SimulationStrategy.optimistic,
                 clcaConfig = ClcaConfig(fuzzMvrs=fuzzMvrs, strategy=ClcaStrategyType.generalAdaptive2)
             )

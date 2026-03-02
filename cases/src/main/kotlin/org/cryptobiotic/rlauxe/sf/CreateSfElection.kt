@@ -370,7 +370,7 @@ fun createSfElection(
             minMargin=minMargin,
             removeMaxContests = removeMaxContests,
             removeCutoffContests = removeCutoffContests,
-            simFuzzPct=mvrFuzz, persistedWorkflowMode=PersistedWorkflowMode.testSimulated,
+            simFuzzPct=mvrFuzz, persistedWorkflowMode=PersistedWorkflowMode.testClcaSimulated,
             simulationStrategy = SimulationStrategy.optimistic,
             clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
         )

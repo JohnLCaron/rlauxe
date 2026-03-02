@@ -3,5 +3,5 @@
     "ncards": 50500,
     "ncontests": 1,
     "cvrsContainUndervotes": true,
-    "persistedWorkflowMode": "testPrivateMvrs"
+    "poolsHaveOneCardStyle": true
 }

@@ -1,19 +1,20 @@
 {
     "auditType": "POLLING",
     "riskLimit": 0.05,
-    "seed": 2789296267598242280,
+    "seed": 7618822678634947639,
     "nsimEst": 100,
     "quantile": 0.5,
+    "simFuzzPct": 0.001,
     "contestSampleCutoff": 30000,
     "removeCutoffContests": true,
-    "simFuzzPct": 0.001,
     "minRecountMargin": 0.005,
+    "minMargin": 0.0,
+    "maxSamplePct": 0.0,
     "removeTooManyPhantoms": false,
     "pollingConfig": {
         "d": 100
     },
     "persistedWorkflowMode": "testPrivateMvrs",
     "simulationStrategy": "optimistic",
-    "version": 2.0,
-    "skipContests": []
+    "version": 2.0
 }

@@ -7,36 +7,64 @@
                 {
                     "assorterDesc": "0/1 contest0",
                     "roundIdx": 1,
-                    "estSampleSize": 1213,
-                    "estNewSampleSize": 1213,
+                    "estSampleSize": 971,
+                    "estNewSampleSize": 971,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "simulateCvrsWithDilutedMargin",
                         "calcMvrsNeeded": 0,
                         "startingTestStatistic": 1.0,
                         "estimatedDistribution": [
-                            277,
-                            450,
-                            749,
-                            950,
-                            1213,
-                            1498,
-                            1842,
-                            2155,
-                            2538,
-                            4257
+                            139,
+                            328,
+                            411,
+                            411,
+                            971,
+                            1034,
+                            1034,
+                            1446,
+                            1710,
+                            1711
+                        ],
+                        "ntrials": 7,
+                        "simNewMvrs": 971
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                },
+                {
+                    "assorterDesc": "0/2 contest0",
+                    "roundIdx": 1,
+                    "estSampleSize": 36,
+                    "estNewSampleSize": 36,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "simulateCvrsWithDilutedMargin",
+                        "calcMvrsNeeded": 0,
+                        "startingTestStatistic": 1.0,
+                        "estimatedDistribution": [
+                            28,
+                            31,
+                            32,
+                            34,
+                            36,
+                            38,
+                            40,
+                            41,
+                            44,
+                            61
                         ],
                         "ntrials": 100,
-                        "simNewMvrs": 1213
+                        "simNewMvrs": 36
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 3907,
-            "estMvrs": 1213,
-            "estNewMvrs": 1213,
+            "maxSampleAllowed": 3242,
+            "estMvrs": 971,
+            "estNewMvrs": 971,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -46,94 +74,38 @@
             "id": 1,
             "assertionRounds": [
                 {
-                    "assorterDesc": "2/0 contest1",
+                    "assorterDesc": "1/0 contest1",
                     "roundIdx": 1,
-                    "estSampleSize": 870,
-                    "estNewSampleSize": 870,
+                    "estSampleSize": 344,
+                    "estNewSampleSize": 344,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "simulateCvrsWithDilutedMargin",
                         "calcMvrsNeeded": 0,
                         "startingTestStatistic": 1.0,
                         "estimatedDistribution": [
-                            334,
-                            453,
-                            611,
-                            723,
-                            870,
-                            1019,
-                            1147,
-                            1324,
-                            1563,
-                            2303
+                            142,
+                            234,
+                            253,
+                            316,
+                            344,
+                            689,
+                            940,
+                            1040,
+                            1951,
+                            1952
                         ],
-                        "ntrials": 100,
-                        "simNewMvrs": 870
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "2/1 contest1",
-                    "roundIdx": 1,
-                    "estSampleSize": 61,
-                    "estNewSampleSize": 61,
-                    "estimationResult": {
-                        "roundIdx": 1,
-                        "strategy": "simulateCvrsWithDilutedMargin",
-                        "calcMvrsNeeded": 0,
-                        "startingTestStatistic": 1.0,
-                        "estimatedDistribution": [
-                            44,
-                            49,
-                            56,
-                            58,
-                            61,
-                            68,
-                            78,
-                            88,
-                            110,
-                            139
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 61
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "2/3 contest1",
-                    "roundIdx": 1,
-                    "estSampleSize": 49,
-                    "estNewSampleSize": 49,
-                    "estimationResult": {
-                        "roundIdx": 1,
-                        "strategy": "simulateCvrsWithDilutedMargin",
-                        "calcMvrsNeeded": 0,
-                        "startingTestStatistic": 1.0,
-                        "estimatedDistribution": [
-                            35,
-                            38,
-                            42,
-                            46,
-                            49,
-                            51,
-                            56,
-                            61,
-                            73,
-                            90
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 49
+                        "ntrials": 9,
+                        "simNewMvrs": 344
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 3907,
-            "estMvrs": 870,
-            "estNewMvrs": 870,
+            "maxSampleAllowed": 3242,
+            "estMvrs": 344,
+            "estNewMvrs": 344,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -145,27 +117,27 @@
                 {
                     "assorterDesc": "1/0 contest2",
                     "roundIdx": 1,
-                    "estSampleSize": 60,
-                    "estNewSampleSize": 60,
+                    "estSampleSize": 63,
+                    "estNewSampleSize": 63,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "simulateCvrsWithDilutedMargin",
                         "calcMvrsNeeded": 0,
                         "startingTestStatistic": 1.0,
                         "estimatedDistribution": [
-                            42,
                             50,
                             53,
-                            56,
-                            60,
-                            67,
+                            58,
+                            61,
+                            63,
+                            65,
+                            68,
                             70,
-                            81,
-                            88,
-                            104
+                            75,
+                            92
                         ],
                         "ntrials": 100,
-                        "simNewMvrs": 60
+                        "simNewMvrs": 63
                     },
                     "status": "InProgress",
                     "roundProved": 0
@@ -173,64 +145,24 @@
                 {
                     "assorterDesc": "1/2 contest2",
                     "roundIdx": 1,
-                    "estSampleSize": 195,
-                    "estNewSampleSize": 195,
+                    "estSampleSize": 0,
+                    "estNewSampleSize": 0,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "simulateCvrsWithDilutedMargin",
                         "calcMvrsNeeded": 0,
                         "startingTestStatistic": 1.0,
-                        "estimatedDistribution": [
-                            112,
-                            131,
-                            158,
-                            173,
-                            195,
-                            232,
-                            252,
-                            293,
-                            326,
-                            794
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 195
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "1/3 contest2",
-                    "roundIdx": 1,
-                    "estSampleSize": 1227,
-                    "estNewSampleSize": 1227,
-                    "estimationResult": {
-                        "roundIdx": 1,
-                        "strategy": "simulateCvrsWithDilutedMargin",
-                        "calcMvrsNeeded": 0,
-                        "startingTestStatistic": 1.0,
-                        "estimatedDistribution": [
-                            507,
-                            647,
-                            758,
-                            1034,
-                            1227,
-                            1331,
-                            1524,
-                            1673,
-                            2117,
-                            3102
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 1227
+                        "estimatedDistribution": [],
+                        "ntrials": 0
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 3907,
-            "estMvrs": 1227,
-            "estNewMvrs": 1227,
+            "maxSampleAllowed": 3242,
+            "estMvrs": 63,
+            "estNewMvrs": 63,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -242,36 +174,36 @@
                 {
                     "assorterDesc": "1/0 contest3",
                     "roundIdx": 1,
-                    "estSampleSize": 3907,
-                    "estNewSampleSize": 3907,
+                    "estSampleSize": 3242,
+                    "estNewSampleSize": 3242,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "simulateCvrsWithDilutedMargin",
                         "calcMvrsNeeded": 0,
                         "startingTestStatistic": 1.0,
                         "estimatedDistribution": [
-                            1129,
-                            1853,
-                            2538,
-                            3050,
-                            3907,
-                            4408,
-                            5137,
-                            5886,
-                            6377,
-                            7365
+                            682,
+                            934,
+                            1640,
+                            2151,
+                            3242,
+                            4045,
+                            4665,
+                            5180,
+                            5938,
+                            7416
                         ],
                         "ntrials": 100,
-                        "simNewMvrs": 3907
+                        "simNewMvrs": 3242
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 3907,
-            "estMvrs": 3907,
-            "estNewMvrs": 3907,
+            "maxSampleAllowed": 3242,
+            "estMvrs": 3242,
+            "estNewMvrs": 3242,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -281,66 +213,82 @@
             "id": 4,
             "assertionRounds": [
                 {
-                    "assorterDesc": "1/0 contest4",
+                    "assorterDesc": "3/0 contest4",
                     "roundIdx": 1,
-                    "estSampleSize": 1390,
-                    "estNewSampleSize": 1390,
+                    "estSampleSize": 75,
+                    "estNewSampleSize": 75,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "simulateCvrsWithDilutedMargin",
                         "calcMvrsNeeded": 0,
                         "startingTestStatistic": 1.0,
                         "estimatedDistribution": [
-                            563,
-                            724,
-                            846,
-                            1026,
-                            1390,
-                            1586,
-                            1999,
-                            2374,
-                            2772,
-                            3798
+                            61,
+                            66,
+                            70,
+                            72,
+                            75,
+                            81,
+                            85,
+                            90,
+                            97,
+                            110
                         ],
                         "ntrials": 100,
-                        "simNewMvrs": 1390
+                        "simNewMvrs": 75
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 },
                 {
-                    "assorterDesc": "1/2 contest4",
+                    "assorterDesc": "3/1 contest4",
                     "roundIdx": 1,
-                    "estSampleSize": 24,
-                    "estNewSampleSize": 24,
+                    "estSampleSize": 0,
+                    "estNewSampleSize": 0,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "simulateCvrsWithDilutedMargin",
+                        "calcMvrsNeeded": 0,
+                        "startingTestStatistic": 1.0,
+                        "estimatedDistribution": [],
+                        "ntrials": 0
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                },
+                {
+                    "assorterDesc": "3/2 contest4",
+                    "roundIdx": 1,
+                    "estSampleSize": 73,
+                    "estNewSampleSize": 73,
                     "estimationResult": {
                         "roundIdx": 1,
                         "strategy": "simulateCvrsWithDilutedMargin",
                         "calcMvrsNeeded": 0,
                         "startingTestStatistic": 1.0,
                         "estimatedDistribution": [
-                            16,
-                            19,
-                            21,
-                            22,
-                            24,
-                            26,
-                            28,
-                            31,
-                            35,
-                            52
+                            56,
+                            60,
+                            64,
+                            68,
+                            73,
+                            77,
+                            79,
+                            82,
+                            86,
+                            98
                         ],
                         "ntrials": 100,
-                        "simNewMvrs": 24
+                        "simNewMvrs": 73
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 3907,
-            "estMvrs": 1390,
-            "estNewMvrs": 1390,
+            "maxSampleAllowed": 3242,
+            "estMvrs": 75,
+            "estNewMvrs": 75,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -349,8 +297,8 @@
     ],
     "auditWasDone": false,
     "auditIsComplete": false,
-    "nmvrs": 3907,
-    "newmvrs": 3907,
+    "nmvrs": 3242,
+    "newmvrs": 3242,
     "mvrsUnused": 0,
     "mvrsUsed": 0,
     "auditorWantNewMvrs": -1

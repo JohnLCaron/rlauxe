@@ -1,13 +1,15 @@
 {
     "auditType": "ONEAUDIT",
     "riskLimit": 0.05,
-    "seed": -7401946275715398044,
+    "seed": 7083842436108803150,
     "nsimEst": 10,
     "quantile": 0.5,
+    "simFuzzPct": 0.001,
     "contestSampleCutoff": 30000,
     "removeCutoffContests": true,
-    "simFuzzPct": 0.001,
     "minRecountMargin": 0.005,
+    "minMargin": 0.0,
+    "maxSamplePct": 0.0,
     "removeTooManyPhantoms": false,
     "clcaConfig": {
         "strategy": "generalAdaptive2",
@@ -16,10 +18,6 @@
         "maxLoss": 0.9,
         "apriori": {}
     },
-    "oaConfig": {
-        "strategy": "simulate"
-    },
     "persistedWorkflowMode": "testPrivateMvrs",
-    "version": 2.0,
-    "skipContests": []
+    "version": 2.0
 }

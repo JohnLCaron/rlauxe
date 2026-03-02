@@ -1,6 +1,10 @@
 package org.cryptobiotic.rlauxe.persist
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
+import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
+import org.cryptobiotic.rlauxe.persist.json.writeAuditCreationConfigJsonFile
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.File
 import java.nio.file.Files
@@ -63,7 +67,8 @@ class Publisher(val auditDir: String) {
     }
 
     fun auditConfigFile() = "$auditDir/auditConfig.json"
-    fun auditSeedFile() = "$auditDir/auditSeed.json"
+    fun auditCreationConfigFile() = "$auditDir/auditCreationConfig.json"
+    // fun auditSeedFile() = "$auditDir/auditSeed.json"
     fun cardManifestFile() = "$auditDir/cardManifest.csv" // cardManifest
     fun contestsFile() = "$auditDir/contests.json"
     fun electionInfoFile() = "$auditDir/electionInfo.json"
@@ -71,6 +76,12 @@ class Publisher(val auditDir: String) {
     fun populationsFile() = "$auditDir/populations.json"
     fun privateMvrsFile() = "$auditDir/private/sortedMvrs.csv"
     fun sortedCardsFile() = "$auditDir/sortedCards.csv" // sorted cardManifest
+
+    fun auditRoundConfigFile(round: Int): String {
+        val dir = "$auditDir/round$round"
+        validateOutputDir(Path.of(dir), ErrorMessages("auditStateFile"))
+        return "$dir/auditRoundConfig$round.json"
+    }
 
     fun auditEstFile(round: Int): String {
         val dir = "$auditDir/round$round"
@@ -109,6 +120,15 @@ class Publisher(val auditDir: String) {
             roundIdx++
         }
         return roundIdx - 1
+    }
+
+    fun writeAuditConfig(config: AuditConfig) {
+        writeAuditConfigJsonFile(config, this.auditConfigFile())
+        logger.info{"writeAuditConfig to ${this.auditConfigFile()}\n  $config"}
+
+        val auditCreationConfig = AuditCreationConfig.fromAuditConfig(config)
+        writeAuditCreationConfigJsonFile(auditCreationConfig, this.auditCreationConfigFile())
+        logger.info{"writeAuditCreationConfig to ${this.auditCreationConfigFile()}\n  $auditCreationConfig"}
     }
 }
 

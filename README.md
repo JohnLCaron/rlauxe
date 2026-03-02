@@ -630,6 +630,7 @@ How to set MaxLoss in an optimal way?
 
 ## Documentation Index
 * [AlphaMart](docs/AlphaMart.md)
+* [Audit Record](docs/AuditRecord.md)
 * [BettingRiskFunctions](docs/BettingRiskFunctions.md)
 * [Clca Errors](docs/ClcaErrors.md)
 * [Developer Notes](docs/Developer.md)
@@ -639,7 +640,6 @@ How to set MaxLoss in an optimal way?
 
 ### Pending Review
 * [Attacks](docs/Attacks.md)
-* [Rlauxe Implementation Overview](docs/Overview.md)
 * [Rlauxe Implementation Specificaton](docs/RlauxeSpec.md)
 * [Verification](docs/Verification.md)
 * [VerifierSpec](docs/VerifierSpec.md)

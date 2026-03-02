@@ -46,6 +46,7 @@ fun createAuditRecord(config: AuditConfig, election: CreateElectionIF, auditDir:
         writeSortedCardsExternalSort(externalSortDir, publisher, config.seed)
     }
 
+    // save testPrivateMvrs if needed
     // cant write the sorted mvrs until after sortedCards is written
     if (config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs) {
         val unsortedMvrs = election.createUnsortedMvrs()
@@ -81,7 +82,6 @@ fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditR
 
         val workflow = PersistedWorkflow(auditRecord)
         val roundIdx = 1
-        // probably should overwrite round1 and delete other rounds ??
 
         //// heres where we can remove contests as needed
         // this may change the auditStatus to misformed.
@@ -96,18 +96,16 @@ fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditR
         // start next round and estimate sample sizes
         logger.info { "startFirstRound using ${workflow}" }
         val roundStopwatch = Stopwatch()
-
-        // this writes auditEstFile and samplePrns files
         val nextRound = workflow.startNewRound(quiet = false, onlyTask)
 
-        // save testPrivateMvrs if needed
+        // get matching mvrs if needed
         if (auditRecord.config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs) {
             val publisher = Publisher(auditDir)
             val ncards = writeMvrsForRound(publisher, roundIdx)
             logger.info{"writeMvrsForRound ${ncards} cards to ${publisher.sampleMvrsFile(roundIdx)}"}
         }
-        logger.info { "startFirstRound took ${roundStopwatch}: ${nextRound.show()}" }
 
+        logger.info { "startFirstRound took ${roundStopwatch}: ${nextRound.show()}" }
         return Ok(nextRound)
 
     } catch (t: Throwable) {

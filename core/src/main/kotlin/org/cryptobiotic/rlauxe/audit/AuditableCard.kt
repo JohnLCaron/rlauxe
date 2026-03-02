@@ -7,8 +7,9 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import kotlin.collections.get
 import kotlin.sequences.plus
 
-// A generalization of Cvr, allowing votes to be null, eg for Polling or OneAudit pools.
-// Also, cardStyle/population represents the sample population information.
+// The information we have on each physical card in the audit; the complete set is the CardManifest.
+// Contains the CVR information is there is one.
+// The populationName/population represents the sample population information.
 
 data class AuditableCard (
     val location: String, // info to find the card for a manual audit. Aka ballot identifier.

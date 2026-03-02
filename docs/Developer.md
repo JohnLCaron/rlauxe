@@ -138,7 +138,7 @@ The repo contains all the test case data, except for San Francisco. Download
 
   [SF2024 data](https://www.sfelections.org/results/20241105/data/20241203/CVR_Export_20241202143051.zip)
 
-into $testdataDir/cases/sf2024/ (where _$testdataDir_ is as you chose in the "Set the test data directory" step above)
+into $testdataDir/cases/sf2024/ (where you chose _$testdataDir_ in the "Set the test data directory" step above)
 
 Then run _createSf2024CvrExport()_ test in _cases/src/test/kotlin/org/cryptobiotic/rlauxe/sf/CreateSf2024CvrExport.kt_
 to generate _testdataDir/cases/sf2024/crvExport.csv_. This only needs to be done one time.
@@ -244,86 +244,6 @@ hasa AssorterIF
 ->subclass ClcaAssertion
 hasa ClcaAssorter
 
-## Persistence
-
-````
- $auditdir/
-        auditConfig.json      // AuditConfigJson
-        auditSeed.json        // PrnJson
-        cardManifest.csv      // AuditableCard, may be zipped
-        cardPools.csv         // OneAuditPoolFromCvrs (OneAudit only)
-        contests.json         // ContestsUnderAuditJson
-        electionInfo.json     // ElectionInfoJson
-        populations.json      // PopulationJson: PopulationIF -> Population
-        sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
-
-        roundX/
-            auditEstX.json       // AuditRoundJson,  an audit state with estimation, ready for auditinf
-            auditStateX.json     // AuditRoundJson,  the results of the audit for this round
-            sampleCardsX.csv     // AuditableCardCsv, complete sorted cards used for this round; MvrManager called from runClcaAuditRound, runPollingAuditRound
-            sampleMvrsX.csv      // AuditableCardCsv, complete sorted mvrs used for this round; PersistedWorkflow runAuditRound, startNewRound
-            samplePrnsX.json     // SamplePrnsJson, complete sorted sample prns for this round
-
-        private/
-            sortedMvrs.csv       // AuditableCardCsv, sorted by prn, matches sortedCards.csv, may be zipped
-
-
-org.cryptobiotic.rlauxe.persist
-
-class AuditRecord(
-    override val location: String,
-    override val electionInfo: ElectionInfo,
-    override val config: AuditConfig,
-    override val contests: List<ContestWithAssertions>,
-    override val rounds: List<AuditRound>,  // TODO do we need to replace AuditEst ??
-    mvrs: List<AuditableCard> // mvrs already sampled
-) {
-   // TODO maybe better on workflow ??
-    fun enterMvrs(mvrs: CloseableIterable<AuditableCard>, errs: ErrorMessages): Boolean
-   
-   fun readCardManifest(publisher: Publisher, ncards: Int): CardManifest {
-   fun readPopulations(publisher: Publisher): List<PopulationIF>? {
-   fun readCardPools(publisher: Publisher, infos: Map<Int, ContestInfo>): List<OneAuditPoolFromCvrs>? { 
-}
-
-package org.cryptobiotic.rlauxe.workflow
-
- abstract class AuditWorkflow {
-    abstract fun auditConfig() : AuditConfig
-    abstract fun mvrManager() : MvrManager
-    abstract fun auditRounds(): MutableList<AuditRoundIF>
-    abstract fun contestsUA(): List<ContestWithAssertions>
-    abstract fun runAuditRound(auditRound: AuditRound, onlyTask: String? = null, quiet: Boolean = true): Boolean  // return complete
-    
-   open fun startNewRound(quiet: Boolean = true, onlyTask: String? = null): AuditRound
-}
-class WorkflowTesterTYPE
-class CobraAudit
-class CorlaAudit
-
-class PersistedWorkflow(
-    val auditRecord: AuditRecordIF,
-    val mvrWrite: Boolean = true,
-)
-
-interface MvrManager {
-    fun cardManifest(): CardManifest
-    // fun sortedCards(): CloseableIterable<AuditableCard>  // most uses will just need the first n samples
-    fun oapools(): List<OneAuditPoolFromCvrs>?
-    // fun populations(): List<PopulationIF>?
-    fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  // Pair(mvr, cvr)
-    
-   // test only
-    fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCard>
-}
-class MvrManagerForTesting
-class MvrManagerFromManifest
-class CompositeMvrManager
-
-class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boolean = true): MvrManager
-````
-
-
 ## Documents
 
 README
@@ -348,7 +268,7 @@ README
 
 maybe:
     docs/Attacks.md
-    docs/Overview.md
+    docs/AuditRecord.md
     docs/RlauxeSpec.md
     docs/VerifierSpec.md
 
@@ -480,7 +400,7 @@ simulateRaireTestContest: single raire contest
 
 * undervote Pct = totalVotes / (ncards * voteFor)
   maybe ok for Plurality with nwinners > 1
-  but for IRV seems misleading. perhaps IRV should mean "didnt vote in the contest"?
+  but for IRV seems misleading. perhaps IRV undervote should mean "didnt vote in the contest"?
 
 
 

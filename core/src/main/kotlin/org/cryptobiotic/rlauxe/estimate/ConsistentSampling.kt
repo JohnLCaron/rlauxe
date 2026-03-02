@@ -71,7 +71,7 @@ private fun checkSampleLimits(
         }
     }
 
-    // limit contest sample to be less than contestSampleCutoff TODO this is new Mvrs
+    // limit contest sample to be less than contestSampleCutoff TODO this is new Mvrs ??
     if (config.removeCutoffContests && config.contestSampleCutoff != null) {
         contestsNotDone.forEach { contestRound ->
             val maxCalc = contestRound.assertionRounds.maxOfOrNull { it.estimationResult?.calcNewMvrsNeeded ?: 0 }

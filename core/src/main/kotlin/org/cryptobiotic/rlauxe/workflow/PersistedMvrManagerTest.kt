@@ -19,8 +19,8 @@ class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, Persi
         var lastRN = 0L
         cards.forEachIndexed { idx, mvr ->
             if (mvr.prn <= lastRN) {
-                logger.error { "findSamples of order prn" }
-                throw RuntimeException("findSamples of order prn")
+                logger.error { "findSamples are out of order ${mvr.prn} <= ${lastRN}" }
+                throw RuntimeException("findSamples are out of order ${mvr.prn} <= ${lastRN}")
             }
             lastRN = mvr.prn
         }

@@ -166,7 +166,7 @@ open class CreateColoradoElection (
     fun createCards(): CloseableIterator<AuditableCard> {
         return CvrsToCardsAddStyles(auditType,
             Closer(CvrIteratorfromPools()),
-            makePhantomCvrs(contests),
+            null, // there are no phantoms
             if (auditType.isClca()) null else cardPoolBuilders,
         )
     }

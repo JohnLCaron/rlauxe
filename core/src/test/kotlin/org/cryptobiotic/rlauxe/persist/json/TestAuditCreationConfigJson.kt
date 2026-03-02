@@ -51,6 +51,10 @@ class TestAuditCreationConfigJson {
         assertNotNull(roundtrip)
         assertEquals(roundtrip, target)
         assertTrue(roundtrip.equals(target))
+
+        val config2 = AuditConfig.fromCreationConfig(roundtrip)
+        val roundtrip2 = AuditCreationConfig.fromAuditConfig(config2)
+        assertEquals(roundtrip2, target)
     }
 
     fun testRoundtripIO(config: AuditConfig) {

@@ -7,12 +7,13 @@ import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
 class TestDhondtContest {
     val minPct = 0.05
 
     @Test
-    fun testMakeDhondtContest1() {
+    fun testMakeDhondtContest() {
         val dcontest = makeProtoContest("contest1", 1, listOf(DhondtCandidate(1, 10000), DhondtCandidate(2, 6000), DhondtCandidate(3, 1500)), 8, 0, minPct)
         val contestd = dcontest.createContest()
         println(contestd.show())
@@ -23,15 +24,16 @@ class TestDhondtContest {
         assertEquals(listOf(3), contestd.losers)
         assertEquals(mapOf(1 to 5, 2 to 3), contestd.winnerSeats)
         assertEquals(8, contestd.winnerSeats.map { it.value }.sum())
-    }
 
-    @Test
-    fun testMakeDhondtContest2() {
-        val dcontest = makeProtoContest("contest2", 2, listOf(DhondtCandidate(1, 11000), DhondtCandidate(2, 7000), DhondtCandidate(3, 2500)), 11, 0, minPct)
-        val contestd = dcontest.createContest()
+        val dcontest2 = makeProtoContest("contest2", 2, listOf(DhondtCandidate(1, 11000), DhondtCandidate(2, 7000), DhondtCandidate(3, 2500)), 11, 0, minPct)
+        val contestd2 = dcontest2.createContest()
         println(contestd.show())
-    }
 
+        assertEquals(contestd, contestd)
+        assertEquals(contestd.hashCode(), contestd.hashCode())
+        assertNotEquals(contestd, contestd2)
+        assertNotEquals(contestd.hashCode(), contestd2.hashCode())
+    }
 
     @Test
     fun testCvrs() {

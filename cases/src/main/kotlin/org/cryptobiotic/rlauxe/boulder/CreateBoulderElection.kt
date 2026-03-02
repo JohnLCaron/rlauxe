@@ -424,3 +424,24 @@ fun parseIrvContestName(name: String) : Pair<String, Int> {
     val ncand = tokens[1].substringBefore(",").toInt()
     return Pair(namet, ncand)
 }
+
+
+// TODO is cvr.hasContest(contestId) same as the card.hasContest(contestId) ??
+fun tabulateNpops(cvrs: List<Cvr>, infos: Map<Int, ContestInfo>): Pair<Map<Int, Int>, Int> {
+    val npops = mutableMapOf<Int, Int>()
+    var count = 0
+    cvrs.forEach { cvr ->
+        count++
+        infos.forEach { (contestId, info) ->
+            if (cvr.hasContest(contestId)) {
+                val npop = npops.getOrPut(contestId) { 0 }
+                npops[contestId] = npop + 1
+            }
+        }
+    }
+    return Pair(npops, count)
+}
+
+private val regex = Regex("[,]") // Matches '!', ',' or any digit
+fun cleanCsvString(originalString: String) = originalString.replace(regex, "")
+

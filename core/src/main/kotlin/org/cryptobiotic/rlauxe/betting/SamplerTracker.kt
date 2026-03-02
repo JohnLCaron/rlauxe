@@ -164,7 +164,7 @@ class ClcaSamplerErrorTracker(
         // debug()
     }
 
-    fun debug() {
+    /* fun debug() {
         //     val contestId: Int,
         //    voteForNin: Int, //
         //    val isIrv: Boolean,
@@ -185,7 +185,7 @@ class ClcaSamplerErrorTracker(
         }
         println("reset tab for contest 17 and pool 18  = $tab")
         println("============================================")
-    }
+    } */
 
     override fun maxSamples() = samples.size
     override fun countCvrsUsedInAudit() = idx  // count of cvrs used in the audit

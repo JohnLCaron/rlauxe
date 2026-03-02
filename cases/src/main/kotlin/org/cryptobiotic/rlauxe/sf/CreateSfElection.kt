@@ -60,8 +60,6 @@ class CreateSfElection(
         // pass 1 through cvrs, make card pools, including unpooled
         val (allCardPools: Map<String, OneAuditPoolFromCvrs>, allCvrTabs: Map<Int, ContestTabulation>, ncards) = createCardPools(
             infos,
-            castVoteRecordZip,
-            contestManifestFilename,
             cvrExportCsv,
             poolsHaveOneCardStyle,
         )
@@ -92,8 +90,6 @@ class CreateSfElection(
 
     fun createCardPools(
         contestInfos: Map<Int, ContestInfo>,
-        castVoteRecordZip: String,
-        contestManifestFilename: String,
         cvrExportCsv: String,
         poolsHaveOneCardStyle: Boolean,
     ): Triple<Map<String, OneAuditPoolFromCvrs>, Map<Int, ContestTabulation>, Int> {

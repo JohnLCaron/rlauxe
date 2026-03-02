@@ -232,7 +232,7 @@ class TestHasStyle {
         val cardStyles = listOf(Population("all", 1, contests.map{ it.id}.toIntArray(), false))
 
         val topdir = "$testdataDir/persist/testHasStylePollingSingleCard"
-        val auditRound = createAndRunTestAuditCvrs(topdir, AuditType.POLLING, contests, emptyList(), hasStyle, testCvrs, cardStyles)
+        val auditRound = createAndRunTestAuditCvrs(topdir, AuditType.POLLING, contests, hasStyle, testCvrs, cardStyles)
 
         println("==========================")
         println("testHasStylePollingSingleCard hasStyle=${hasStyle} audit estimates we need ${auditRound.nmvrs}")
@@ -344,7 +344,7 @@ class TestHasStyle {
         //  card, we would expect to sample 2 × 608 + 2 × 608 = 2,432 ballot cards if the contests are on different cards."
     }
 
-    fun createAndRunTestAuditCvrs(topdir: String, auditType: AuditType, contests: List<Contest>, skipContests: List<Int>, hasStyle: Boolean,
+    fun createAndRunTestAuditCvrs(topdir: String, auditType: AuditType, contests: List<Contest>, hasStyle: Boolean,
                                   testCvrs: List<Cvr>, cardStyles:List<PopulationIF>?): AuditRoundIF {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
@@ -371,10 +371,10 @@ class TestHasStyle {
         createElectionRecord("startTestElectionClca", election, auditDir = auditdir)
 
         val config = if (auditType.isPolling()) {
-            AuditConfig(AuditType.POLLING, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
+            AuditConfig(AuditType.POLLING, seed = 12356667890L, nsimEst = 100,
                 pollingConfig = PollingConfig())
         } else {
-            AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
+            AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst = 100,
                 clcaConfig = ClcaConfig(apriori = TausRates(mapOf("win-oth" to .001))),
             )
         }
@@ -390,10 +390,10 @@ class TestHasStyle {
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         // val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
         val config = if (auditType.isPolling()) {
-            AuditConfig(AuditType.POLLING, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
+            AuditConfig(AuditType.POLLING, seed = 12356667890L, nsimEst = 100, // skipContests=skipContests,
                 pollingConfig = PollingConfig())
         } else {
-            AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst = 100, skipContests=skipContests,
+            AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst = 100, // skipContests=skipContests,
                clcaConfig = ClcaConfig(apriori = TausRates(mapOf("win-oth" to .001))),
             )
         }

@@ -18,7 +18,7 @@ import kotlin.math.max
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
 // making OneAudit pools from the precinct results, then generate CVRs from pools
-// TODO vary percent cards in pools, show plot
+// TODO experiment with OneAudit with small counties that do hand counts
 open class CreateColoradoElection (
     electionDetailXmlFile: String,
     contestRoundFile: String,

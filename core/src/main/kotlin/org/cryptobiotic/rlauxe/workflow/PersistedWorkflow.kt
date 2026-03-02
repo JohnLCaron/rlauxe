@@ -16,7 +16,7 @@ private val logger = KotlinLogging.logger("PersistedWorkflow")
 
 enum class PersistedWorkflowMode {
     real,           // use PersistedMvrManager;  sampleMvrs$round.csv must be written from external program.
-    testSimulated,  // use PersistedMvrManagerTest which fuzzes the mvrs on the fly
+    testSimulated,  // use PersistedMvrManagerTest which fuzzes the mvrs on the fly (not for polling)  TODO change to testClcaSimulated
     testPrivateMvrs  // use PersistedMvrManager; use private/sortedMvrs.csv to write sampleMvrs$round.csv
 }
 
@@ -42,7 +42,7 @@ class PersistedWorkflow(
         auditRounds.addAll(auditRecord.rounds)
 
         mvrManager = when {
-            (auditRecord is CompositeRecord) -> CompositeMvrManager(auditRecord, config, auditContests) // TODO PersistedWorkflowMode
+            (auditRecord is CompositeRecord) -> CompositeMvrManager(auditRecord, config, auditContests)
             (mode == PersistedWorkflowMode.testSimulated) -> PersistedMvrManagerTest(auditRecord as AuditRecord)
             else -> PersistedMvrManager(auditRecord as AuditRecord, mvrWrite=mvrWrite)
         }

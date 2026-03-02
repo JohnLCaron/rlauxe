@@ -15,6 +15,8 @@ import kotlin.math.min
 private val debug = false
 private val logger = KotlinLogging.logger("ConsistentSampling")
 
+// cant use the "maxSampleIndex", because we need to run permutations.
+// so we have to send back the list of sample indices for each contest
 data class CardSamples(val cards: List<AuditableCard>, val usedByContests: Map<Int, List<Int>>) {
 
     fun extractSubsetByIndex(contestId: Int): List<AuditableCard> {
@@ -32,9 +34,7 @@ data class CardSamples(val cards: List<AuditableCard>, val usedByContests: Map<I
     }
 }
 
-// bit simpler than consistentSampling, but tempting to try to combine the two
-// cant use the "maxSampleIndex", because we need to run permutaiuons.
-// so we have to send back the list of sample indices for each contest
+// cardManifest may not fit into memory, so extract in-memory subset of cardManifest to use for the estimations.
 fun getSubsetForEstimation(
     config: AuditConfig,
     contests: List<ContestRound>,
@@ -197,6 +197,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: In
     // Approximately 95.45% / 99.73% of the data in a normal distribution falls within two / three standard deviations of the mean.
     val needed = if (stddev > 0) roundUp(nsamples + fac * stddev) else fac * nsamples
 
+    // TODO using contestSampleCutoff as maximum
     var est =  min( contest.Npop, needed)
     if (config.contestSampleCutoff != null) est = min(config.contestSampleCutoff, est)
     if (debug) logger.info { "getSubsetForEstimation ${contest.id}-${assorter.winLose()} estSamplesNeeded=$est margin=${assorter.dilutedMargin()} " +
@@ -205,9 +206,9 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: In
     if (est < 0) {
         // TODO what to do when estimate is negetive?? Perhaps fail ??
         //val wtf = cassorter.estWithOptimalBet(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue, clcaErrorCounts)
-        //throw RuntimeException("est samples $est < 0") // TODO
+        //throw RuntimeException("est samples $est < 0")
         est =  cassorter.sampleSizeNoErrors(2 * config.clcaConfig.maxLoss, lastPvalue)
-        if (est < 0) est = ncards
+        if (est < 0) est = ncards // TODO bail out and just use ncards cause we think this only happens for small subsets??
     }
     return est
 }

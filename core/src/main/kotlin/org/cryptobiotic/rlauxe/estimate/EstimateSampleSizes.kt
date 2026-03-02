@@ -304,8 +304,8 @@ fun estimateClcaAssertionRound(
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
         simNewMvrsNeeded = when {
-            (result.sampleCount.size == 0) -> 0
-            (roundIdx == 1) -> result.findQuantile(.50) // TODO put in AuditConfig ??
+            (result.sampleCount.size < ntrials/2) -> calcMvrsNeeded // more than half the simulations fail
+            (roundIdx == 1) -> result.findQuantile(.50) // TODO value put in AuditConfig ??
             else -> result.findQuantile(config.quantile)
         }
     )
@@ -455,8 +455,8 @@ fun estimateOneAuditAssertionRound(
         estimatedDistribution = makeDeciles(result.sampleCount),
         ntrials = result.sampleCount.size,
         simNewMvrsNeeded = when {
-            (result.sampleCount.size < ntrials/2) -> calcMvrsNeeded
-            (roundIdx == 1) -> result.findQuantile(.50) // TODO put in AuditConfig ??
+            (result.sampleCount.size < ntrials/2) -> calcMvrsNeeded // more than half the simulations fail
+            (roundIdx == 1) -> result.findQuantile(.50) // TODO value put in AuditConfig ??
             else -> result.findQuantile(config.quantile)
         }
     )

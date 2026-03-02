@@ -59,7 +59,7 @@ data class AuditConfig(
 data class AuditConfigJson(
     val auditType: String,
     val riskLimit: Double,
-    val seed: Long,
+    val seed: Long,   // convenient for testing
 
     val nsimEst: Int,
     val quantile: Double,
@@ -81,7 +81,6 @@ data class AuditConfigJson(
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
     val simulationStrategy: SimulationStrategy =  SimulationStrategy.regular,
     val version : Double,
-    val skipContests: List<Int>?  = null,
 )
 
 fun AuditConfig.publishJson() = AuditConfigJson(
@@ -108,7 +107,7 @@ fun AuditConfig.publishJson() = AuditConfigJson(
 
     persistedWorkflowMode = this.persistedWorkflowMode,
     simulationStrategy = this.simulationStrategy,
-    skipContests = skipContests,
+    // skipContests = skipContests,
     version = this.version,
 )
 
@@ -138,7 +137,7 @@ fun AuditConfigJson.import(): AuditConfig {
 
         persistedWorkflowMode = this.persistedWorkflowMode,
         simulationStrategy = this.simulationStrategy,
-        skipContests = skipContests?: emptyList(),
+        // skipContests = skipContests?: emptyList(),
         version = this.version,
     )
 }

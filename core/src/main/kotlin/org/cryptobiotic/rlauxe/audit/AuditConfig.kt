@@ -4,21 +4,6 @@ import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.util.secureRandom
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 
-enum class AuditType { POLLING, CLCA, ONEAUDIT;
-    fun isClca() = (this == CLCA)
-    fun isOA() = (this == ONEAUDIT)
-    fun isPolling() = (this == POLLING)
-}
-
-data class ElectionInfo(
-    val auditType: AuditType,
-    val ncards: Int,
-    val ncontests: Int,
-    val cvrsContainUndervotes: Boolean,
-    val poolsHaveOneCardStyle: Boolean?,
-)
-
-// wed like the AuditConfig to not be needed for election creation.
 data class AuditConfig(
     val auditType: AuditType,
     val riskLimit: Double = 0.05,
@@ -37,11 +22,11 @@ data class AuditConfig(
     val removeMaxContests: Int? = null, // remove top n estimated nmvrs contests
 
     // checkContestsCorrectlyFormed: preAuditStatus
-    val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin TODO really it should be noerror?
-    val minMargin: Double = 0.0, // do not audit contests less than this margin
+    val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
+    val minMargin: Double = 0.0, // do not audit contests less than this margin TODO really it should be noerror?
     val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
 
-    // this turns the audit into a "risk measuring" audit
+    // this turns the audit into a "risk measuring" audit; terminateOnNullReject = false;
     val auditSampleLimit: Int? = null, // limit audit sample size; audit all samples, ignore risk limit
 
     val pollingConfig: PollingConfig = PollingConfig(),
@@ -49,16 +34,17 @@ data class AuditConfig(
 
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
 
-    val skipContests: List<Int> = emptyList(),
+    // val skipContests: List<Int> = emptyList(), // TODO remove
     val version: Double = 2.0,
 ) {
     val isClca = auditType == AuditType.CLCA
     val isOA = auditType == AuditType.ONEAUDIT
     val isPolling = auditType == AuditType.POLLING
 
+    // only used in PersistedMvrManagerTest
     fun mvrFuzzPct(): Double {
         return when (auditType) {
-            AuditType.POLLING -> clcaConfig.fuzzMvrs ?: 0.0
+            AuditType.POLLING -> 0.0
             AuditType.CLCA -> clcaConfig.fuzzMvrs  ?: 0.0
             AuditType.ONEAUDIT -> clcaConfig.fuzzMvrs  ?: 0.0
         }
@@ -73,7 +59,7 @@ data class AuditConfig(
         appendLine()
         appendLine("  nsimEst=$nsimEst, quantile=$quantile, simFuzzPct=${simFuzzPct}, simulationStrategy=$simulationStrategy, mvrFuzzPct=${mvrFuzzPct()},")
 
-        if (skipContests.isNotEmpty()) { appendLine("  skipContests=$skipContests") }
+        // if (skipContests.isNotEmpty()) { appendLine("  skipContests=$skipContests") }
         when (auditType) {
             AuditType.POLLING -> appendLine("  $pollingConfig")
             AuditType.CLCA, AuditType.ONEAUDIT -> appendLine("  $clcaConfig")
@@ -87,6 +73,7 @@ data class AuditConfig(
         }
     }
 }
+
 
 // optimistic: round 1 assume no errors, subsequent rounds use measured error rates
 enum class SimulationStrategy { regular, optimistic  }
@@ -104,25 +91,3 @@ data class ClcaConfig(
     val maxLoss: Double = 0.90,  // max loss on any one bet, 0 < maxLoss < 1
     val apriori: TausRates = TausRates(emptyMap()),
 )
-
-/////////////////////////////////////////////
-// speculative
-
-data class SimControl(
-    // simulation control
-    val nsimEst: Int = 100, // number of simulation estimation trials
-    val quantile: Double = 0.80, // use this percentile success for estimated sample size
-    val simFuzzPct: Double? = null, // for simulating the estimation fuzzing
-)
-
-data class ContestSampleControl(
-    val contestSampleCutoff: Int? = 30000, // use this number of cvrs in the estimation, set to null to use all
-    val removeCutoffContests: Boolean = (contestSampleCutoff != null), // remove contests that need more samples than contestSampleCutoff
-    val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin TODO really it should be noerror?
-    val minMargin: Double = 0.0, // do not audit contests less than this margin
-    val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / contestNc) greater than this
-    val removeMaxContests: Int? = null, // remove top n estimated nmvrs contests
-    val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
-)
-
-

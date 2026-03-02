@@ -15,7 +15,7 @@ import java.io.Reader
 import java.lang.StrictMath.sqrt
 import java.nio.charset.Charset
 
-// this reads csv files from "Dominion CVR export files", maybe standard Dominion format ?
+// this reads csv files from "Dominion CVR export files", probably standard Dominion format ?
 // We are getting these files from Boulder County, used by createBoulderElection()
 // Note these record the cvr undervotes, but not for the redacted votes
 

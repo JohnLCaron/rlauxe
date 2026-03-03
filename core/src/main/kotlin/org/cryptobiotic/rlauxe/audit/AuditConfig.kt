@@ -25,7 +25,7 @@ data class AuditConfig(
     // checkContestsCorrectlyFormed: preAuditStatus
     val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
     val minMargin: Double = 0.0, // do not audit contests less than this margin TODO really it should be noerror?
-    val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin
+    val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin TODO deprecated
 
     // this turns the audit into a "risk measuring" audit; terminateOnNullReject = false;
     val auditSampleLimit: Int? = null, // limit audit sample size; audit all samples, ignore risk limit
@@ -51,7 +51,7 @@ data class AuditConfig(
 
     override fun toString() = buildString {
         appendLine("AuditConfig(auditType=$auditType, riskLimit=$riskLimit, seed=$seed persistedWorkflowMode=$persistedWorkflowMode" )
-        append("  minRecountMargin=$minRecountMargin minMargin=$minMargin removeTooManyPhantoms=$removeTooManyPhantoms")
+        append("  minRecountMargin=$minRecountMargin minMargin=$minMargin")
         if (removeMaxContests != null) { append(" removeMaxContests=$removeMaxContests") }
         if (contestSampleCutoff != null) { append(" contestSampleCutoff=$contestSampleCutoff removeCutoffContests=$removeCutoffContests") }
         if (auditSampleLimit != null) { append(" auditSampleLimit=$auditSampleLimit (risk measuring audit)") }

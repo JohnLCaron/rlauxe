@@ -103,7 +103,7 @@ open class ContestWithAssertions(
     }
 
     fun makeClcaAssorter(assertion: Assertion): ClcaAssorter {
-        return ClcaAssorter(contest.info(), assertion.assorter, dilutedMargin=assertion.assorter.dilutedMargin())
+        return ClcaAssorter(contest.info(), assertion.assorter)
     }
 
     fun assertions(): List<Assertion> {

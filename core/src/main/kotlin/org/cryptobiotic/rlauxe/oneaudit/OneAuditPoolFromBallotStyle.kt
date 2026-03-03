@@ -10,11 +10,10 @@ import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.math.max
 
-data class OneAuditPoolWithBallotStyle(
+data class OneAuditPoolFromBallotStyle(
     override val poolName: String,
     override val poolId: Int,
     val hasSingleCardStyle: Boolean,
-    // passed in, rather than accumulated
     val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes; must include contests with no votes
     val infos: Map<Int, ContestInfo>, // all infos
 ): OneAuditPoolIF, PopulationIF {
@@ -78,7 +77,7 @@ data class OneAuditPoolWithBallotStyle(
             // if hasSingleCardStyle, then missing has to be zero
             // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
             // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
-            val undervotes = ncards() - voteSum / contestTab.voteForN
+            val undervotes = ncards() * contestTab.voteForN - voteSum
             Vunder(contestId, poolId, voteCounts, undervotes, 0, contestTab.voteForN)
         } else {
             val missing = ncards() - (poolUndervotes + voteSum) / contestTab.voteForN
@@ -98,7 +97,7 @@ data class OneAuditPoolWithBallotStyle(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is OneAuditPoolWithBallotStyle) return false
+        if (other !is OneAuditPoolFromBallotStyle) return false
 
         if (poolId != other.poolId) return false
         if (hasSingleCardStyle != other.hasSingleCardStyle) return false

@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestBuilderIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolWithBallotStyle
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromBallotStyle
 import org.cryptobiotic.rlauxe.util.mergeReduce
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.collections.component1
@@ -114,6 +114,8 @@ class OneAuditContestBoulder(val info: ContestInfo,
     override fun poolTotalCards() = poolTotalCards
 
     override fun adjustPoolInfo(cardPools: List<OneAuditPoolIF>) {
+        if (info.id == 18)
+            print("")
         poolTotalCards = cardPools.filter{ it.hasContest(info.id)}.sumOf { it.ncards() }
     }
 
@@ -145,7 +147,7 @@ class OneAuditContestBoulder(val info: ContestInfo,
 
 //////////////////////////////////////////////////////////////////
 
-fun distributeExpectedOvervotes(oaContest: OneAuditContestBuilderIF, cardPools: List<OneAuditPoolWithBallotStyle>) {
+fun distributeExpectedOvervotes(oaContest: OneAuditContestBuilderIF, cardPools: List<OneAuditPoolFromBallotStyle>) {
     val contestId = oaContest.contestId
     val poolCards = oaContest.poolTotalCards()
     val expectedCards = oaContest.expectedPoolNCards()

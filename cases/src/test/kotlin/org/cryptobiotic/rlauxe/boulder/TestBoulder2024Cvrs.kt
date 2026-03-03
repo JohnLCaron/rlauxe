@@ -44,7 +44,7 @@ class TestBoulder2024Cvrs {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val maker = CreateBoulderElection( AuditType.CLCA, export, sovo, poolsHaveOneCardStyle=true)
+        val maker = CreateBoulderElection( AuditType.CLCA, export, sovo)
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
@@ -97,7 +97,7 @@ class TestBoulder2024Cvrs {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             "Boulder2024")
 
-        val electionSimCvrs = CreateBoulderElection(AuditType.CLCA,  export, sovo, poolsHaveOneCardStyle=true)
+        val electionSimCvrs = CreateBoulderElection(AuditType.CLCA,  export, sovo)
         val infos = electionSimCvrs.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 

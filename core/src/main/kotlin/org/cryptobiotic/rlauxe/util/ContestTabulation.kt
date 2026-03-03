@@ -104,7 +104,7 @@ class ContestTabulation(
             // if hasSingleCardStyle, then missing has to be zero
             // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
             // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
-            val undervotes = npop - voteSum / voteForN
+            val undervotes = npop * voteForN - voteSum
             Vunder(contestId, poolId, voteCounts, undervotes, 0, voteForN)
         } else {
             val missing = npop - (this.undervotes + voteSum) / voteForN

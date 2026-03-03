@@ -22,7 +22,7 @@ private val logger = KotlinLogging.logger("ClcaAssorter")
  * Then Āb = Āc − ω̄, so
  *     Āb > 1/2  iff  ω̄ < Āc − 1/2.   (2)
  * We know that Āc > 1/2 (or the assertion would not be true for the CVRs), so 2Āc − 1 > 0,
- * so we can divide without flipping the inequality:
+ * and we can divide without flipping the inequality:
  *    ω̄ < Āc − 1/2  <==>  ω̄ / (2Āc − 1) < (Āc − 1/2) / (2Āc − 1) = (2Āc − 1) / 2(2Āc − 1) = 1/2
  * that is,
  *    Āb > 1/2  iff  ω̄ / (2Āc − 1) < 1/2    (3)
@@ -39,14 +39,15 @@ private val logger = KotlinLogging.logger("ClcaAssorter")
 open class ClcaAssorter(
     val info: ContestInfo,
     val assorter: AssorterIF,   // A
-    val dilutedMargin: Double, // dilutedMargin of the primitive assorter; note its only used in dilutedMargin / assorter.upperBound()
     val check: Boolean = true,
 ) {
+    val assorterMargin = assorter.dilutedMargin() // dilutedMargin of the primitive assorter; note its only used in dilutedMargin / assorter.upperBound()
+
     open fun classname() = this::class.simpleName
 
     // Define v ≡ 2Ā − 1, the assorter margin
     // when A(ci) == A(bi), ωi = 0, so then "noerror" B(bi, ci) = 1 / (2 − v/u) from eq (7)
-    val noerror: Double = 1.0 / (2.0 - dilutedMargin / assorter.upperBound()) // clca assort value when no error
+    val noerror: Double = 1.0 / (2.0 - assorterMargin / assorter.upperBound()) // clca assort value when no error
 
     // upper bound of clca assorter;
     // A ranges from [0, u], so ωi ≡ A(ci) − A(bi) ranges from +/- u,
@@ -93,25 +94,6 @@ open class ClcaAssorter(
         val N =  roundUp((-ln(alpha) / lnPayoff))
         return N
     }
-
-    /* Pair(estSampleSize, optimalBet)
-    fun estWithOptimalBet(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorCounts: ClcaErrorCounts? = null): Pair<Int, Double> {
-        val upper = assorter.upperBound()
-        val betFn = GeneralAdaptiveBetting(
-            contest.Npop,
-            clcaErrorCounts ?: ClcaErrorCounts.empty(noerror(), upper), // else no errors
-            contest.Nphantoms,
-            null,
-            maxLoss = maxLoss,
-            debug=false,
-        )
-        val optimalBet = betFn.bet(ClcaErrorTracker(noerror(), upper))
-
-        val estSampleSize = if (clcaErrorCounts == null) sampleSizeNoErrors(optimalBet, alpha) else
-            sampleSizeWithErrors(optimalBet, alpha, clcaErrorCounts)
-
-        return Pair(estSampleSize, optimalBet)
-    } */
 
     // Pair(estSampleSize, optimalBet)
     open fun estWithOptimalBet2(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorCounts: ClcaErrorCounts? = null): Pair<Int, Double> {
@@ -278,7 +260,7 @@ open class ClcaAssorter(
     override fun toString() = buildString {
         appendLine("${classname()} for contest ${info.name} (${info.id})")
         appendLine("  assorter=${assorter.desc()}")
-        append("  dilutedMargin=${dfn(dilutedMargin, 8)} dilutedMean=${dfn(margin2mean(dilutedMargin), 8)}")
+        append("  dilutedMargin=${dfn(assorterMargin, 8)} dilutedMean=${dfn(margin2mean(assorterMargin), 8)}")
         append(" assortUpper=${dfn(assorter.upperBound(), 8)}")
         append(" noerror=${dfn(noerror, 8)}")
     }
@@ -289,7 +271,7 @@ open class ClcaAssorter(
         if (this === other) return true
         if (other !is ClcaAssorter) return false
 
-        if (dilutedMargin != other.dilutedMargin) return false
+        if (assorterMargin != other.assorterMargin) return false
         if (info != other.info) return false
         if (assorter != other.assorter) return false
 
@@ -298,7 +280,7 @@ open class ClcaAssorter(
 
     override fun hashCode(): Int {
         var result = info.hashCode()
-        result = 31 * result + dilutedMargin.hashCode()
+        result = 31 * result + assorterMargin.hashCode()
         result = 31 * result + assorter.hashCode()
         return result
     }

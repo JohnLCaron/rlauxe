@@ -76,7 +76,7 @@ class TestSf2024OneAuditIrv() {
         val minAssertion = rcontestUA.minClcaAssertion()!!
         println(minAssertion)
         val cassorter = minAssertion.cassorter as OneAuditClcaAssorter
-        println("cassorter dilutedMargin = ${cassorter.dilutedMargin}")
+        println("cassorter dilutedMargin = ${cassorter.assorterMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
         println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean)}")
@@ -125,7 +125,7 @@ class TestSf2024OneAuditIrv() {
         val minAssertion = rcontestUA.minClcaAssertion()!!
         println(minAssertion)
         val cassorter = minAssertion.cassorter as OneAuditClcaAssorter
-        println("cassorter dilutedMargin = ${cassorter.dilutedMargin}")
+        println("cassorter dilutedMargin = ${cassorter.assorterMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
         println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean)}")
@@ -162,7 +162,7 @@ class TestSf2024OneAuditIrv() {
         val minAssertion = rcontestUA.minClcaAssertion()!!
         println(minAssertion)
         val cassorter = minAssertion.cassorter as OneAuditClcaAssorter
-        println("cassorter dilutedMargin = ${cassorter.dilutedMargin}")
+        println("cassorter dilutedMargin = ${cassorter.assorterMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
         println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean)}")
@@ -227,7 +227,7 @@ class TestSf2024OneAuditIrv() {
         val minAssertion = rcontestUA.minClcaAssertion()!!
         println(minAssertion)
         val cassorter = minAssertion.cassorter as OneAuditClcaAssorter
-        println("cassorter dilutedMargin = ${cassorter.dilutedMargin}")
+        println("cassorter dilutedMargin = ${cassorter.assorterMargin}")
 
         val passorter = minAssertion.assorter
         val rassorter = minAssertion.assorter as RaireAssorter

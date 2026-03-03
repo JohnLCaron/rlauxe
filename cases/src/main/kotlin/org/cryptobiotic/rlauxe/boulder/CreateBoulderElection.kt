@@ -29,7 +29,6 @@ class CreateBoulderElection(
     val auditType: AuditType,
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
-    val poolsHaveOneCardStyle: Boolean = true,
     val distributeOvervotes: List<Int> = listOf(0, 63),
 ): CreateElectionIF {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convertToCvr() }
@@ -39,7 +38,7 @@ class CreateBoulderElection(
     val countCvrVotes = countCvrVotes()
     val countRedactedVotes = countRedactedVotes() // wrong
     val oaContests: Map<Int, OneAuditContestBoulder> = makeOAContests().associate { it.info.id to it}
-    val cardPoolBuilders: List<OneAuditPoolWithBallotStyle> = convertRedactedToCardPool()
+    val cardPoolBuilders: List<OneAuditPoolFromBallotStyle> = convertRedactedToCardPool()
     val ncards: Int
 
     val contests: List<ContestIF>
@@ -59,7 +58,6 @@ class CreateBoulderElection(
             distributeExpectedOvervotes(oaContest, cardPoolBuilders)
             oaContests.values.forEach { it.adjustPoolInfo(cardPoolBuilders)}
         }
-        // cardPools = cardPoolBuilders.map { it.toOneAuditPool() } // why ?
 
         // we need to know the diluted Nb before we can create the UAs
         contests = makeContests()
@@ -114,7 +112,7 @@ class CreateBoulderElection(
         }
     }
 
-    private fun convertRedactedToCardPool(): List<OneAuditPoolWithBallotStyle> {
+    private fun convertRedactedToCardPool(): List<OneAuditPoolFromBallotStyle> {
         return export.redacted.mapIndexed { redactedIdx, redacted: RedactedGroup ->
             // each group becomes a pool
             // correct bug adding contest 12 to pool 06
@@ -126,6 +124,9 @@ class CreateBoulderElection(
             // for this pass we are just setting the vote totals, ignoring ncards and undervotes.
             val contestTabs = useContestVotes.mapValues{ ContestTabulation(infoMap[it.key]!!, it.value, ncards=0) }
 
+            if (redactedIdx == 24)
+                print("")
+
             // data class Population(
             //    val name: String,
             //    val id: Int,
@@ -135,7 +136,7 @@ class CreateBoulderElection(
             //    var ncards = 0
             val name = cleanCsvString(redacted.ballotType)
             val id = redactedIdx
-            OneAuditPoolWithBallotStyle(name, id, hasSingleCardStyle=poolsHaveOneCardStyle, contestTabs, infoMap)
+            OneAuditPoolFromBallotStyle(name, id, hasSingleCardStyle=true, contestTabs, infoMap)
         }
     }
 
@@ -167,7 +168,7 @@ class CreateBoulderElection(
     }
 
     // make simulated CVRs for one pool, all contests
-    private fun makeCvrsForOnePool(cardPool: OneAuditPoolWithBallotStyle, infos: Map<Int, ContestInfo>) : List<Cvr> { // contestId -> candidateId -> nvotes
+    private fun makeCvrsForOnePool(cardPool: OneAuditPoolFromBallotStyle, infos: Map<Int, ContestInfo>) : List<Cvr> { // contestId -> candidateId -> nvotes
         val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
         val cvrs = makeVunderCvrs(poolVunders, cardPool.poolName, poolId = cardPool.poolId)
         // the number of cvrs can vary when there are multiple contests: artifact of simulating the cvrs
@@ -281,7 +282,7 @@ class CreateBoulderElection(
         }
     }
 
-    override fun electionInfo() = ElectionInfo(auditType, ncards(), contestsUA.size, true, poolsHaveOneCardStyle)
+    override fun electionInfo() = ElectionInfo(auditType, ncards(), contestsUA.size, true, poolsHaveOneCardStyle=true)
     override fun contestsUA() = contestsUA
     override fun populations() = if (auditType.isClca()) emptyList() else cardPoolBuilders
     override fun makeCardPools() = if (auditType.isClca()) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
@@ -335,7 +336,7 @@ fun createBoulderElection(
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
     val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
 
-    val election = CreateBoulderElection(auditType, export, sovo, poolsHaveOneCardStyle=true)
+    val election = CreateBoulderElection(auditType, export, sovo)
     createElectionRecord("boulder2024", election, auditDir = auditdir)
     println("CreateBoulderElection took $stopwatch")
 

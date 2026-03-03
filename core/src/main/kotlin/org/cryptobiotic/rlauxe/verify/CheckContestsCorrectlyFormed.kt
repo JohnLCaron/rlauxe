@@ -15,15 +15,6 @@ fun checkContestsCorrectlyFormed(config: AuditConfig, contestsUA: List<ContestWi
 
     checkContestInfos(contestsUA, results)
 
-    /* if (config.removeMinContests != null && config.removeMinContests > 0) {
-        val sortedByMargin : List<ContestWithAssertions> = contestsUA.sortedBy { it.minDilutedMargin() }
-        repeat(config.removeMinContests) { idx ->
-            val contest = sortedByMargin[idx]
-            contest.preAuditStatus = TestH0Status.AuditorRemoved
-            logger.info{"*** removeMinContests contest ${contest.id} minMargin ${contest.minDilutedMargin()}"}
-        }
-    } */
-
     contestsUA.forEach { contestUA ->
         checkWinners(contestUA, results)
 
@@ -32,16 +23,16 @@ fun checkContestsCorrectlyFormed(config: AuditConfig, contestsUA: List<ContestWi
 
             // see if margin is too small
             if ((contestUA.minRecountMargin()?: 0.0) <= config.minRecountMargin) {
-                logger.info{"*** MinMargin contest ${contestUA} recountMargin ${contestUA.minRecountMargin()} <= ${config.minRecountMargin}"}
+                logger.info{"*** MinMargin contest ${contestUA.id} recountMargin ${contestUA.minRecountMargin()} <= ${config.minRecountMargin}"}
                 contestUA.preAuditStatus = TestH0Status.MinMargin
             } else if ((contestUA.minDilutedMargin()?: 0.0) <= config.minMargin) {
-                logger.info{"*** MinMargin contest ${contestUA} minMargin ${contestUA.minDilutedMargin()} <= ${config.minMargin}"}
+                logger.info{"*** MinMargin contest ${contestUA.id} minMargin ${contestUA.minDilutedMargin()} <= ${config.minMargin}"}
                 contestUA.preAuditStatus = TestH0Status.MinMargin
             } else { // see if too many phantoms
                 val minMargin = contestUA.minDilutedMargin() ?: 0.0
                 val adjustedMargin = minMargin - contestUA.phantomRate()
                 if (config.removeTooManyPhantoms && adjustedMargin <= 0.0) {
-                    logger.warn{"***TooManyPhantoms contest ${contestUA} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.phantomRate()} < 0.0"}
+                    logger.warn{"***TooManyPhantoms contest ${contestUA.id} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.phantomRate()} < 0.0"}
                     contestUA.preAuditStatus = TestH0Status.TooManyPhantoms
                 }
             }

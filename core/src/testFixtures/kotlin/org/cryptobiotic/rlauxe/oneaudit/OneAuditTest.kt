@@ -92,7 +92,7 @@ fun makeOneAuditTest(
     val poolUnderVotes = roundToClosest(undervotes - cvrUndervotes)
 
     val poolNcards = votesPoolSum + poolUnderVotes
-    val pool = OneAuditPoolWithBallotStyle(
+    val pool = OneAuditPoolFromBallotStyle(
             "pool42",
             42, // poolId
             voteTotals = mapOf(1 to ContestTabulation(info1, votesNoCvr, ncards=noCvrSize)),
@@ -167,7 +167,7 @@ fun makeMvrs(
 }
 
 // make the card manifest
-fun makeCardManifest(mvrs: List<Cvr>, pool: OneAuditPoolWithBallotStyle): List<AuditableCard> {
+fun makeCardManifest(mvrs: List<Cvr>, pool: OneAuditPoolFromBallotStyle): List<AuditableCard> {
     // the union of the first two styles
     val expandedContestIds = pool.infos.keys.toList().toIntArray()
 

@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.Population
 import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolWithBallotStyle
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromBallotStyle
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.mergeReduce
 import org.cryptobiotic.rlauxe.util.nfn
@@ -120,7 +120,7 @@ class TestBoulderUndervotes {
         showPoolVotes(contestIds, election2.cardPoolBuilders)
     }
 
-    fun showPoolVotes(contestIds: List<Int>, cardPools: List<OneAuditPoolWithBallotStyle>, width:Int = 4) {
+    fun showPoolVotes(contestIds: List<Int>, cardPools: List<OneAuditPoolFromBallotStyle>, width:Int = 4) {
         println("votes, undervotes")
         print("${trunc("poolName", 9)}:")
         contestIds.forEach {  print("${nfn(it, width)}|") }
@@ -360,7 +360,7 @@ class TestBoulderUndervotes {
     //      2|      2|      2|      2|     -5|     -3|     -1|      5|      4|     -2|     -4|      2|      4|      2|      2|      2|      0|     -5|     -3|     -2|    233|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      2|      0|      0|      0|      0|      0|     11|     11|     11|     14|      3|    -13|     -7|     13|    -40|     -1|     -1|      2|      2|      7|      7|      0|    -10|
 }
 
-fun OneAuditPoolWithBallotStyle.showVotes(contestIds: Collection<Int>, width: Int=4) = buildString {
+fun OneAuditPoolFromBallotStyle.showVotes(contestIds: Collection<Int>, width: Int=4) = buildString {
     append("${trunc(name(), 9)}:")
 
     contestIds.forEach { id ->

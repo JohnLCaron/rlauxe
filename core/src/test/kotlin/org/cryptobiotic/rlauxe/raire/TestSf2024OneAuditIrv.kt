@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.testdataDir
@@ -84,7 +83,7 @@ class TestSf2024OneAuditIrv() {
         val minAssertion = rcontestUA.minClcaAssertion()!!
         println(minAssertion)
         val cassorter = minAssertion.cassorter as OneAuditClcaAssorter
-        println("cassorter dilutedMargin = ${cassorter.dilutedMargin}")
+        println("cassorter dilutedMargin = ${cassorter.assorterMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
         println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean)}")

@@ -77,7 +77,7 @@ class TestSimulateIrvTestData {
         val minAssertion = target.minClcaAssertion()!!
         println(minAssertion)
         val cassorter = minAssertion.cassorter
-        println("cassorter dilutedMargin = ${cassorter.dilutedMargin}")
+        println("cassorter dilutedMargin = ${cassorter.assorterMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
         println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean)}")

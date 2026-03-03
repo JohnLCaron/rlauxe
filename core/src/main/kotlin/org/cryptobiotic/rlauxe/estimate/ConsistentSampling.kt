@@ -65,13 +65,13 @@ private fun checkSampleLimits(
                 contestRound.status = TestH0Status.FailMaxSamplesAllowed
                 contestRound.included = false
                 contestRound.done = true
-                logger.warn{" *** remove contest ${contestRound.id} with status FailMaxSamplesAllowed: maxSamplePct ${pct} > ${config.maxSamplePct}"}
+                logger.warn{"*** remove contest ${contestRound.id} with status FailMaxSamplesAllowed: maxSamplePct ${pct} > ${config.maxSamplePct}"}
                 removeContests.add(contestRound)
             }
         }
     }
 
-    // limit contest sample to be less than contestSampleCutoff TODO this is new Mvrs ??
+    // limit each contest sample to be less than contestSampleCutoff TODO this is new Mvrs ??
     if (config.removeCutoffContests && config.contestSampleCutoff != null) {
         contestsNotDone.forEach { contestRound ->
             val maxCalc = contestRound.assertionRounds.maxOfOrNull { it.estimationResult?.calcNewMvrsNeeded ?: 0 }
@@ -85,18 +85,24 @@ private fun checkSampleLimits(
         }
     }
 
-    // check if overall contestSampleCutoff is exceeded TODO this is all Mvrs ?
-    if (config.removeCutoffContests && config.contestSampleCutoff != null && auditRound.samplePrns.size > config.contestSampleCutoff) {
-        // find the contest with the largest estimation size eligible for removal, remove it
-        val maxEstimation = contestsNotDone.maxOf { it.estSampleSizeEligibleForRemoval() }
-        val maxContest = contestsNotDone.first { it.estSampleSizeEligibleForRemoval() == maxEstimation }
+    // if above checks remove contests, rerun consistentSampling before checking for this total contestSampleCutoff
+    if (removeContests.isEmpty()) {
+        // check if overall contestSampleCutoff is exceeded TODO this is all Mvrs ?
+        if (config.removeCutoffContests && config.contestSampleCutoff != null && auditRound.samplePrns.size > config.contestSampleCutoff) {
+            // find the contest with the largest estimation size eligible for removal, remove it
+            val maxEstimation = contestsNotDone.maxOf { it.estSampleSizeEligibleForRemoval() }
+            val maxContest = contestsNotDone.first { it.estSampleSizeEligibleForRemoval() == maxEstimation }
 
-        /// remove maxContest from the audit
-        maxContest.status = TestH0Status.FailMaxSamplesAllowed
-        maxContest.included = false
-        maxContest.done = true
-        logger.warn { " ***too many samples= ${maxEstimation}, remove contest ${maxContest.id} with status FailMaxSamplesAllowed" }
-        removeContests.add(maxContest)
+            /// remove maxContest from the audit
+            maxContest.status = TestH0Status.FailMaxSamplesAllowed
+            maxContest.included = false
+            maxContest.done = true
+            logger.warn {
+                "*** too many samples ${auditRound.samplePrns.size} > ${config.contestSampleCutoff}, " +
+                        "remove contest ${maxContest.id} with largest sample size = ${maxContest.estMvrs}"
+            }
+            removeContests.add(maxContest)
+        }
     }
 
     return removeContests

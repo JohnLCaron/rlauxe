@@ -49,7 +49,7 @@ data class Welford(
     }
 
     fun show(): String {
-        return "mean = ${dfn(mean, 4)} stddev = ${dfn(sqrt(variance()), 4)}"
+        return "count=${this.count}, mean=${dfn(mean, 4)} stddev=${dfn(sqrt(variance()), 4)}"
     }
 
     fun show2(): String {

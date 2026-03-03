@@ -4,11 +4,10 @@ import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.boulder.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestBuilderIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolWithBallotStyle
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromBallotStyle
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.component1
@@ -30,7 +29,7 @@ open class CreateColoradoElection (
 
     val oaBuilders = makeOneAuditBuilders(electionDetailXml, roundContests)
     val infoMap = oaBuilders.associate { it.info.id to it.info }
-    val cardPoolBuilders: List<OneAuditPoolWithBallotStyle> = convertPrecinctsToCardPools(precinctFile, infoMap)
+    val cardPoolBuilders: List<OneAuditPoolFromBallotStyle> = convertPrecinctsToCardPools(precinctFile, infoMap)
     val ncards: Int
 
     val cardPools: List<PopulationIF>
@@ -110,7 +109,7 @@ open class CreateColoradoElection (
         return contests
     }
 
-    private fun convertPrecinctsToCardPools(precinctFile: String, infoMap: Map<Int, ContestInfo>): List<OneAuditPoolWithBallotStyle> {
+    private fun convertPrecinctsToCardPools(precinctFile: String, infoMap: Map<Int, ContestInfo>): List<OneAuditPoolFromBallotStyle> {
         val reader = ZipReader(precinctFile)
         val input = reader.inputStream("2024GeneralPrecinctLevelResults.csv")
         val precincts = readColoradoPrecinctLevelResults(input)
@@ -135,8 +134,8 @@ open class CreateColoradoElection (
                     }
                 }
             }
-            OneAuditPoolWithBallotStyle("${precinct.county}-${precinct.precinct}", idx,
-                hasSingleCardStyle = false,contestTabs, infoMap)
+            OneAuditPoolFromBallotStyle("${precinct.county}-${precinct.precinct}", idx,
+                hasSingleCardStyle=false, contestTabs, infoMap)
         }
     }
 
@@ -196,7 +195,7 @@ open class CreateColoradoElection (
     }
 
     // these are chosen randomly, so in order for mvrs and cvrs to match, the cvrs have to be made from the mvrs.
-    inner class CardsFromPool(val cardPool: OneAuditPoolWithBallotStyle, val oaContestMap: Map<Int, OneAuditBuilderCorla>) : Iterator<Cvr> {
+    inner class CardsFromPool(val cardPool: OneAuditPoolFromBallotStyle, val oaContestMap: Map<Int, OneAuditBuilderCorla>) : Iterator<Cvr> {
         val cvrs: Iterator<Cvr>
 
         init {
@@ -248,7 +247,7 @@ class OneAuditBuilderCorla(val info: ContestInfo, detailContest: ElectionDetailC
         poolTotalCards = cardPools.filter{ it.hasContest(info.id) }.sumOf { it.ncards() }
     }
 
-    fun oapoolUndervote(cardPools: List<OneAuditPoolWithBallotStyle>): Int {
+    fun oapoolUndervote(cardPools: List<OneAuditPoolFromBallotStyle>): Int {
         return cardPools.sumOf { it.undervoteForContest(contestId) }
     }
 

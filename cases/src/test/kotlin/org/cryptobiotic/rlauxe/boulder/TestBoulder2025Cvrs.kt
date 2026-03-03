@@ -62,7 +62,7 @@ class TestBoulder2025Cvrs {
         assertEquals(32, export.schema.contests.size)
         assertEquals(120529, export.cvrs.size)
 
-        val maker = CreateBoulderElection(AuditType.CLCA, export, sovo, distributeOvervotes=emptyList(),  poolsHaveOneCardStyle=true)
+        val maker = CreateBoulderElection(AuditType.CLCA, export, sovo, distributeOvervotes=emptyList())
         val infos = maker.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 
@@ -110,7 +110,7 @@ class TestBoulder2025Cvrs {
         // redaction lines are present
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrFilename, "Boulder")
 
-        val electionSimCvrs = CreateBoulderElection(AuditType.CLCA, export, sovo,  poolsHaveOneCardStyle=true)
+        val electionSimCvrs = CreateBoulderElection(AuditType.CLCA, export, sovo)
         val infos = electionSimCvrs.makeContestInfo()
         println("ncontests with info = ${infos.size}")
 

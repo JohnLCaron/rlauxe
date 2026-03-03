@@ -111,7 +111,7 @@ class TestOneAuditPool {
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
         val cvrTabs = tabulateCvrs(cvrs.iterator(), infos)
 
-        val cardPool = OneAuditPoolWithBallotStyle("pool42", 42, false, cvrTabs, infos)
+        val cardPool = OneAuditPoolFromBallotStyle("pool42", 42, false, cvrTabs, infos)
         println(cardPool)
 
         assertEquals(cardPool, cardPool)

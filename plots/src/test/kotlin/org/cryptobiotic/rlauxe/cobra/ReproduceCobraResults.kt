@@ -1,23 +1,9 @@
 package org.cryptobiotic.rlauxe.cobra
 
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.doubleIsClose
-import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.doublePrecision
-import org.cryptobiotic.rlauxe.plots.geometricMean
-import org.cryptobiotic.rlauxe.estimate.ClcaAttackSampler
-import org.cryptobiotic.rlauxe.estimate.runRepeated
-import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSampler
 import org.cryptobiotic.rlauxe.makeStandardContest
 import org.cryptobiotic.rlauxe.makeStandardPluralityAssorter
-import org.cryptobiotic.rlauxe.util.showDeciles
-import org.cryptobiotic.rlauxe.workflow.makeClcaNoErrorSamplerTracker
 import kotlin.math.ln
-import kotlin.test.Test
-import kotlin.test.assertTrue
 
 // TODO
 class ReproduceCobraResults {
@@ -414,5 +400,5 @@ fun optimal_comparison(alpha: Double, u: Double, rate_error_2: Double = 1e-4): D
 // deprecated
 private fun makeStandardComparisonAssorter(avgCvrAssortValue: Double, Nc: Int): ClcaAssorter {
     val assort = makeStandardPluralityAssorter(Nc)
-    return ClcaAssorter(makeStandardContest(Nc).info, assort, dilutedMargin=assort.dilutedMargin(), check=false)
+    return ClcaAssorter(makeStandardContest(Nc).info, assort, check=false)
 }

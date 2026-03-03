@@ -251,7 +251,6 @@ fun setPoolAssorterAveragesForRaire(
                 }
             }
             val oaAssorter = OneAuditClcaAssorter(assertion.info, assertion.assorter,
-                dilutedMargin = assertion.assorter.dilutedMargin(),
                 poolAverages = AssortAvgsInPools(assortAverages))
 
             oaAssorter.oaAssortRates = oneAuditErrorsFromPools.oaErrorRatesIrv(oaContest, oaAssorter, raireAssorter)

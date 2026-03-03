@@ -58,7 +58,7 @@ class TestOABasics {
         val assortAvgFromCvrs = assorter.calcAssortAvgFromCvrs(contestUA.id, mvrs)
         val assorterMargin = mean2margin(assortAvgFromCvrs)
 
-        val dilutedMargin = oaAssorter.dilutedMargin
+        val dilutedMargin = oaAssorter.assorterMargin
         val dilutedMean = margin2mean(dilutedMargin)
         println("assortAvgFromCvrs = $assortAvgFromCvrs dilutedMean=$dilutedMean")
         assertEquals(assortAvgFromCvrs, dilutedMean, doublePrecision)

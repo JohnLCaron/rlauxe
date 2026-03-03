@@ -87,7 +87,7 @@ class TestSimulateOneAuditRaire {
         val minAssertion = rcontestUA.minClcaAssertion()!!
         println(minAssertion)
         val cassorter = minAssertion.cassorter
-        println("cassorter dilutedMargin = ${cassorter.dilutedMargin}")
+        println("cassorter dilutedMargin = ${cassorter.assorterMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
         println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean)}")
@@ -104,7 +104,7 @@ class TestSimulateOneAuditRaire {
         val minAssertion = rcontestUA.minClcaAssertion()!!
         println(minAssertion)
         val cassorter = minAssertion.cassorter as OneAuditClcaAssorter
-        println("cassorter dilutedMargin = ${cassorter.dilutedMargin}")
+        println("cassorter dilutedMargin = ${cassorter.assorterMargin}")
 
         val rassorter = minAssertion.assorter as RaireAssorter
         println("rassorter dilutedMargin = ${mean2margin(rassorter.dilutedMean)}")
@@ -140,10 +140,10 @@ class TestSimulateOneAuditRaire {
         println(avgWithPool)
         println("assortAvg.margin = ${avgWithPool.margin()}")
 
-        assertEquals(cassorter.dilutedMargin, rassorter.dilutedMargin(), doublePrecision)
-        assertEquals(cassorter.dilutedMargin, rassorter.calcMarginFromVotes(irvVotes, N), doublePrecision)
-        assertEquals(cassorter.dilutedMargin, avgIgnorePool.margin(), doublePrecision)
-        assertEquals(cassorter.dilutedMargin, avgWithPool.margin(), doublePrecision)
+        assertEquals(cassorter.assorterMargin, rassorter.dilutedMargin(), doublePrecision)
+        assertEquals(cassorter.assorterMargin, rassorter.calcMarginFromVotes(irvVotes, N), doublePrecision)
+        assertEquals(cassorter.assorterMargin, avgIgnorePool.margin(), doublePrecision)
+        assertEquals(cassorter.assorterMargin, avgWithPool.margin(), doublePrecision)
 
         // pool margin
         println("cassorter.poolAverages.assortAverage = ${cassorter.poolAverages.assortAverage[42]}")

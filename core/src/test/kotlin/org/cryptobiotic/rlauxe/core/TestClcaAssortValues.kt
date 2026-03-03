@@ -29,7 +29,7 @@ class TestClcaAssortValues {
         assertNotEquals(assorter2, assorter)
         assertNotEquals(assorter2.hashCode(), assorter.hashCode())
 
-        val cassorter = ClcaAssorter(info, assorter, dilutedMargin=assorter.dilutedMargin())
+        val cassorter = ClcaAssorter(info, assorter)
         println(cassorter)
 
         val winner = Cvr("winner", mapOf(0 to intArrayOf(0)))
@@ -79,7 +79,7 @@ class TestClcaAssortValues {
         val votes = mapOf(0 to 1010, 1 to 990) // Map<Int, Int>
         val contest =  Contest(info, votes, 2000, Ncast=2000)
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
-        val cassorter = ClcaAssorter(info, assorter, dilutedMargin=assorter.dilutedMargin())
+        val cassorter = ClcaAssorter(info, assorter)
 
         val winner = Cvr("winner", mapOf(0 to intArrayOf(0)))
         val loser =  Cvr("loser", mapOf(0 to intArrayOf(1)))
@@ -124,7 +124,7 @@ class TestClcaAssortValues {
         val votes = mapOf(0 to 1010, 1 to 990) // Map<Int, Int>
         val contest =  Contest(info, votes, 2000, Ncast=2000)
         val assorter = PluralityAssorter.makeWithVotes(contest, winner = 0, loser = 1)
-        val cassorter = ClcaAssorter(info, assorter, dilutedMargin=assorter.dilutedMargin())
+        val cassorter = ClcaAssorter(info, assorter)
 
         val winner = Cvr("winner", mapOf(0 to intArrayOf(0)))
         val loser =  Cvr("loser", mapOf(0 to intArrayOf(1)))

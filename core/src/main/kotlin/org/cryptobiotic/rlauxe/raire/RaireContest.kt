@@ -330,7 +330,8 @@ data class RaireAssorter(val info: ContestInfo, val rassertion: RaireAssertion):
     override fun loser() = rassertion.loserId   // candidate id, not index
     override fun dilutedMargin() = mean2margin(dilutedMean)
     override fun dilutedMean() = dilutedMean
-    override fun shortName() = "${rassertion.assertionType.shortName} ${winner()}/${loser()}"
+    override fun shortName() = "${rassertion.assertionType.shortName} ${winner()}/${loser()}" // TODO may have same win/lose but different remaining;
+                                                                                              //   check for duplicate name and mark (1), (2), etc
 
     override fun desc() = buildString {
         append("Raire ${rassertion.assertionType.shortName} winner/loser=${rassertion.winnerId}/${rassertion.loserId} marginInVotes=${rassertion.marginInVotes} difficulty=${rassertion.difficulty}")

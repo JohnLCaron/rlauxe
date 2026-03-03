@@ -47,7 +47,7 @@ class TestSamplerTrackers {
     @Test
     fun testClcaSampling() {
         // was hasUndervotes=false
-        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, dilutedMargin=assertion.assorter.dilutedMargin(), true)
+        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, true)
         val cvrPairs = cvrs.zip( AuditableCard.fromCvrs(cvrs))
 
         val target = ClcaSamplerErrorTracker.withMaxSample(0, cassorter, cvrPairs)
@@ -70,7 +70,7 @@ class TestSamplerTrackers {
     @Test
     fun testClcaSamplerErrorTrackerWithNoErrors() {
         // was hasUndervotes=false
-        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, dilutedMargin=assertion.assorter.dilutedMargin(), true)
+        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, true)
         val cards = AuditableCard.fromCvrs(cvrs)
 
         val target = ClcaSamplerErrorTracker.withNoErrors(0, cassorter, cards.iterator())
@@ -94,7 +94,7 @@ class TestSamplerTrackers {
     @Test
     fun testClcaSamplerErrorTrackerFromIndexList() {
         // was hasUndervotes=false
-        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, dilutedMargin=assertion.assorter.dilutedMargin(), true)
+        val cassorter =  ClcaAssorter(assertion.info, assertion.assorter,true)
         val cards = AuditableCard.fromCvrs(cvrs)
         val cvrPairs = cards.zip( cards)
         val wantIndices = List(cards.size) { it }

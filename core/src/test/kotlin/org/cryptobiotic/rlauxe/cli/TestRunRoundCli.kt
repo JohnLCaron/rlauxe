@@ -10,7 +10,7 @@ class TestRunRoundCli {
 
     @Test
     fun testStartAuditFirstRound() {
-        val auditdir = "$testdataDir/cases/sf2024/oan/audit0t"
+        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
 
         StartAuditFirstRound.main(
             arrayOf(
@@ -35,7 +35,7 @@ class TestRunRoundCli {
 
     @Test
     fun testRunAllRoundsCli() {
-        val auditdir = "$testdataDir/cases/sf2024/oan/audit3"
+        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
 
         RunRlaRoundCli.main(
             arrayOf(

@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 // replicate SHANGRLA tests in test_Assertion.py
 class TestShangrlaAssertions {
@@ -194,7 +193,7 @@ class TestShangrlaAssertions {
         //                        - CVR.as_vote(c.get_vote_for("AvB", losr))
         //                        + 1)/2), upper_bound=1))
         val aliceVsBob = PluralityAssorter.makeWithVotes(plur_con_test, winner = 0, loser = 1)
-        val cassorter = ClcaAssorter(plur_con_test.info, aliceVsBob, dilutedMargin=aliceVsBob.dilutedMargin() )
+        val cassorter = ClcaAssorter(plur_con_test.info, aliceVsBob)
 
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=True) == 0
         //        assert aVb.assorter.overstatement(mvrs[0], cvrs[0], use_style=False) == 0
@@ -295,7 +294,7 @@ class TestShangrlaAssertions {
     fun test_overstatement_plurality() { // agrees with SHANGRLA
         // winner = alice, loser = bob
         val aliceVsBobP = PluralityAssorter(plur_con_test.info, winner = 0, loser = 1).setDilutedMean(margin2mean(0.2))
-        val cassorterHasStyle = ClcaAssorter(plur_con_test.info, aliceVsBobP, dilutedMargin=aliceVsBobP.dilutedMargin())
+        val cassorterHasStyle = ClcaAssorter(plur_con_test.info, aliceVsBobP)
 
         // mvr == cvr, always get noerror
         assertEquals(0.0, cassorterHasStyle.overstatementError(aliceMvr, aliceMvr, hasStyle = true)) // 1
@@ -363,7 +362,7 @@ class TestShangrlaAssertions {
     fun test_overstatement_plurality_assort() { // agrees with SHANGRLA
         // winner = alice, loser = bob
         val aliceVsBobP = PluralityAssorter(plur_con_test.info, winner = 0, loser = 1).setDilutedMean(margin2mean(0.2))
-        val cassorterHasStyle = ClcaAssorter(plur_con_test.info, aliceVsBobP, dilutedMargin=aliceVsBobP.dilutedMargin())
+        val cassorterHasStyle = ClcaAssorter(plur_con_test.info, aliceVsBobP)
 
         // mvr == cvr, always get noerror
         assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(aliceMvr, aliceMvr)) // 1
@@ -395,7 +394,7 @@ class TestShangrlaAssertions {
         assertEquals("hasCompleteCvrs==True but cvr=wrongContest (false)  1: [1] does not contain contest AvB (0)", mess) */
 
         /////////////
-        val cassorterNoStyle = ClcaAssorter(plur_con_test.info, aliceVsBobP, dilutedMargin=aliceVsBobP.dilutedMargin())
+        val cassorterNoStyle = ClcaAssorter(plur_con_test.info, aliceVsBobP)
 
         // You have cvrs but use_style = false, which must mean that undervotes werent recorded. Now we examine an mvr
         // that doesnt have that contest on it, and neither does the cvr.

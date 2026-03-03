@@ -141,9 +141,9 @@ class TestAssortAvg {
     }
 }
 
-private val show = false
+val show = false
 
-private class AssorterMarginTracker(val contestId: Int, val assorter: AssorterIF) {
+class AssorterMarginTracker(val contestId: Int, val assorter: AssorterIF) {
     val welford = Welford()
     val winner = assorter.winner()
     val loser = assorter.loser()

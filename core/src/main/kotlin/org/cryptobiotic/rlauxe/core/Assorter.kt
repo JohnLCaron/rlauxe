@@ -128,8 +128,8 @@ open class PluralityAssorter(val info: ContestInfo, val winner: Int, val loser: 
             val winnerVotes = useVotes[winner] ?: 0
             val loserVotes = useVotes[loser] ?: 0
             val totalVotes = Npop ?: contest.Nc()
-            val dilutedMean = margin2mean((winnerVotes - loserVotes) / totalVotes.toDouble())
-            return PluralityAssorter(contest.info(), winner, loser).setDilutedMean(dilutedMean)
+            val dilutedMargin = (winnerVotes - loserVotes) / totalVotes.toDouble()
+            return PluralityAssorter(contest.info(), winner, loser).setDilutedMean(margin2mean(dilutedMargin))
         }
     }
 }

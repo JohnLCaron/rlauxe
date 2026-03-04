@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardFromCard
 import org.cryptobiotic.rlauxe.util.CardBuilder
+import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.Vunder
 import org.cryptobiotic.rlauxe.util.VunderPicker
 
@@ -80,4 +81,20 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
         }
         return cardb.build()
     }
+
+    // used for implementing pools with hasSingleCardStyle
+    fun simulatePooledCvr(cvb2: CvrBuilder2) {
+        vunderPickers.forEach { (contestId, vunderPicker) ->
+            if (vunderPicker.isEmpty())
+                cvb2.replaceContestVotes(contestId, intArrayOf())
+            else {
+                val cands = vunderPicker.pickRandomCandidatesAndDecrement()
+                if (cands != null) {
+                    cvb2.replaceContestVotes(contestId, cands) // ok if no contests on it ??
+                }
+            }
+        }
+    }
+
+    fun done() = vunderPickers.values.all { it.isEmpty() }
 }

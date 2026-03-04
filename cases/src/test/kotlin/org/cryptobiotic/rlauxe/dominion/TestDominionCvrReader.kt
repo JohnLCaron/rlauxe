@@ -391,7 +391,7 @@ class TestDominionCvrReader {
 fun makeCvr(id: Int, votes: Map<Int, IntArray>): Cvr {
     val cvrb = CvrBuilder2(id.toString(),  false)
     votes.forEach {
-        cvrb.addContest(it.key, it.value)
+        cvrb.replaceContestVotes(it.key, it.value)
     }
     return cvrb.build()
 }

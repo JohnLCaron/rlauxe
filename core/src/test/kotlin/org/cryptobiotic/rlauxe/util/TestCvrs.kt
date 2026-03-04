@@ -41,17 +41,17 @@ class TestCvrs {
 
         // can we replace with CvrBuilder2? not as convenient?
         val cvrs2 = listOf(
-            CvrBuilder2.addSeq().addContest(0, intArrayOf()).build(),
-            CvrBuilder2.addSeq().addContest(0, intArrayOf(1)).build(),
-            CvrBuilder2.addSeq().addContest(0, intArrayOf(2)).build(),
-            CvrBuilder2.addSeq().addContest(0, intArrayOf(2)).build(),
-            CvrBuilder2.addSeq().addContest(0, intArrayOf(2)).build(),
-            CvrBuilder2.addSeq().addContest(0, intArrayOf(2)).build(),
-            CvrBuilder2.addSeq().addContest(0, intArrayOf()).build(),
-            CvrBuilder2.addSeq().addContest(0, intArrayOf(4)).build(),
-            CvrBuilder2.addSeq().addContest(0, intArrayOf(4)).build(),
-            CvrBuilder2.addSeq().addContest(0, intArrayOf(4)).build(),
-            CvrBuilder2.addSeq().addContest(0, intArrayOf(4)).build(),
+            CvrBuilder2.addSeq().replaceContestVotes(0, intArrayOf()).build(),
+            CvrBuilder2.addSeq().replaceContestVotes(0, intArrayOf(1)).build(),
+            CvrBuilder2.addSeq().replaceContestVotes(0, intArrayOf(2)).build(),
+            CvrBuilder2.addSeq().replaceContestVotes(0, intArrayOf(2)).build(),
+            CvrBuilder2.addSeq().replaceContestVotes(0, intArrayOf(2)).build(),
+            CvrBuilder2.addSeq().replaceContestVotes(0, intArrayOf(2)).build(),
+            CvrBuilder2.addSeq().replaceContestVotes(0, intArrayOf()).build(),
+            CvrBuilder2.addSeq().replaceContestVotes(0, intArrayOf(4)).build(),
+            CvrBuilder2.addSeq().replaceContestVotes(0, intArrayOf(4)).build(),
+            CvrBuilder2.addSeq().replaceContestVotes(0, intArrayOf(4)).build(),
+            CvrBuilder2.addSeq().replaceContestVotes(0, intArrayOf(4)).build(),
         )
         cvrs.forEachIndexed { idx, it ->
             assertEquals(it, cvrs2[idx])

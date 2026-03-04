@@ -4,17 +4,18 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.core.CvrIF
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.core.ClcaAssertion
+import org.cryptobiotic.rlauxe.core.ClcaAssorter
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.util.Welford
+import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.util.mean2margin
-import org.cryptobiotic.rlauxe.verify.AssortAvg
+import org.cryptobiotic.rlauxe.workflow.CardManifest
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.String
 import kotlin.use
@@ -36,12 +37,12 @@ object RunCalcAssortAvg {
             ArgType.Int,
             shortName = "contest",
             description = "contest id"
-        ).required()
+        )
         val assertionName by parser.option(
             ArgType.String,
             shortName = "assertion",
             description = "assertion short name"
-        ).required()
+        )
 
         try {
             parser.parse(args)
@@ -55,69 +56,48 @@ object RunCalcAssortAvg {
             val config = auditRecord.config
             println("auditRecord in $auditDir isOA=${config.isOA}")
 
-            val contest = auditRecord.contests.find { it.id == contestId }
-            if (contest == null) {
-                println("contest id = $contestId not found")
-                return
+            var onlyContest: ContestWithAssertions? = null
+            var onlyAssertion: ClcaAssertion? = null
+            if (contestId != null) {
+                onlyContest = auditRecord.contests.find { it.id == contestId }
+                if (onlyContest == null) {
+                    println("contest id = $contestId not found")
+                    return
+                } else {
+                    if (assertionName != null) {
+                        onlyAssertion = onlyContest.clcaAssertions.find { it.assorter.shortName() == assertionName }
+                        if (onlyAssertion == null) {
+                            println("assertion with assertionName = '$assertionName' for contest $contestId not found")
+                            return
+                        } else {
+                            println("want contest $contestId with assertion=$assertionName")
+                        }
+                    } else {
+                        println("want contest $contestId with all assertions")
+                    }
+                }
+            } else {
+                println("want all contests and all assertions")
             }
-            println("contest $contestId has Npop=${contest.Npop}")
 
-            val clcaAssertion = contest.clcaAssertions.find { it.assorter.shortName() == assertionName }
-            if (clcaAssertion == null) {
-                println("assertion with assorter.winLose() = '$assertionName' not found")
-                return
+            val expectations = if (onlyContest != null) {
+                if (onlyAssertion != null) {
+                    listOf(Expectation(onlyContest, onlyAssertion.cassorter))
+                } else {
+                    onlyContest.clcaAssertions.map { Expectation(onlyContest, it.cassorter) }
+                }
+            } else {
+                auditRecord.contests.map { contest -> contest.clcaAssertions.map { Expectation(contest, it.cassorter) } }.flatten()
             }
-            val cassorter = clcaAssertion.cassorter
-            println("contest $contestId assertion $assertionName has noerror=${cassorter.noerror}")
-            val mean = margin2mean(cassorter.assorterMargin)
-            val umean =  margin2mean(cassorter.assorterMargin * contest.Npop / contest.Nc)
-            println("  margin=${cassorter.assorterMargin} mean=$mean undiluted=$umean")
-            val assorter = clcaAssertion.assorter
-            val tracker = if (config.isOA) OaAssorterMarginTracker(contestId, cassorter as OneAuditClcaAssorter) else null
 
             val cardManifest = auditRecord.readCardManifest()
             val publisher = Publisher(auditDir)
+            println("cardManifest has ${cardManifest.ncards} cards")
 
             val usePrivate = (config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs)
-            val mvrIter = if (usePrivate) {
-                readCardsCsvIterator(publisher.privateMvrsFile()).iterator()
-            } else {
-                null
-            }
-            println("cardManifest has ${cardManifest.ncards}")
+            val mvrIter = if (usePrivate) readCardsCsvIterator(publisher.privateMvrsFile()).iterator() else null
 
-            val bwelford = Welford()
-            val mvrWelford = Welford()
-            var count = 0
-            cardManifest.cards.iterator().use { cardIter ->
-                while (cardIter.hasNext()) {
-                    val card = cardIter.next()
-                    val mvr = if (usePrivate) mvrIter!!.next() else card
-                    if (usePrivate) {
-                        require(mvr.prn == card.prn)
-                    }
-                    if (card.hasContest(contestId)) {
-                        // might want to run it through ClcaSamplerErrorTracker adapted for iterator....
-                        val bassort = cassorter.bassort(mvr, card, hasStyle=card.exactContests())
-                        bwelford.update(bassort)
-                        if (tracker != null) tracker.addBassort(card, mvr)
-
-                        val mvrAssort = assorter.assort(mvr, usePhantoms = false)
-                        mvrWelford.update(mvrAssort)
-                    }
-                    count++
-                    if (count % 10_000 == 0) { print(" $count,")}
-                    if (count % 100_000 == 0) { println() }
-                }
-            }
-            println("contest $contestId assertion $assertionName\n    bassort = ${bwelford.show()}\n  mvrAssort = ${mvrWelford.show()}")
-            require(doubleIsClose(cassorter.noerror,bwelford.mean, .00001)) { "*** FAIL noerror ${cassorter.noerror} != ${bwelford.mean}"}
-            require(doubleIsClose(mean,mvrWelford.mean, .00001)) { "*** FAIL assort average ${mean} != ${mvrWelford.mean}"}
-
-            if (tracker != null) {
-                tracker.checkPoolAverages()
-                // println(tracker.show())
-            }
+            runCards(expectations, cardManifest, mvrIter, usePrivate)
 
         } catch (t: Throwable) {
             println(t.message)
@@ -125,6 +105,78 @@ object RunCalcAssortAvg {
     }
 }
 
+val tol = doublePrecision
+
+fun runCards(expectations: List<Expectation>, cardManifest: CardManifest, mvrIter: Iterator<AuditableCard>?, usePrivate: Boolean) {
+    var count = 0
+    cardManifest.cards.iterator().use { cardIter ->
+        while (cardIter.hasNext()) {
+            val card = cardIter.next()
+            val mvr = if (usePrivate) mvrIter!!.next() else card
+            if (usePrivate) {
+                require(mvr.prn == card.prn)
+            }
+            expectations.forEach { expect ->
+                if (card.hasContest(expect.id)) {
+                    val bassort = expect.cassorter.bassort(mvr, card, hasStyle = card.exactContests())
+                    expect.bwelford.update(bassort)
+
+                    val mvrAssort = expect.assorter.assort(mvr, usePhantoms = false)
+                    expect.mvrWelford.update(mvrAssort)
+                }
+            }
+            count++
+            if (count % 10_000 == 0) {
+                print(" $count,")
+            }
+            if (count % 100_000 == 0) {
+                println()
+            }
+        }
+    }
+    println()
+    expectations.forEach { expect ->
+        print( "contest=${expect.id}, cassorter=${expect.cassorter.shortName()}, Npop ${expect.contest.Npop} count ${expect.bwelford.count}" )
+
+        if (expect.bwelford.count != expect.contest.Npop) println( " *** FAIL ${(expect.bwelford.count - expect.contest.Npop)}" )
+        else println()
+    }
+
+    var lastContest = -1
+    expectations.forEach { expect ->
+        if (expect.id != lastContest) println()
+        lastContest = expect.id
+        println(expect)
+
+        if(!doubleIsClose(expect.expectBassortMean(), expect.bwelford.mean, tol))
+            println( "*** FAIL expectBassortMean ${expect.expectBassortMean()} != ${expect.bwelford.mean}" )
+        if (!doubleIsClose(expect.mean, expect.mvrWelford.mean, tol))
+            println( "*** FAIL expectMean ${expect.mean} != ${expect.mvrWelford.mean}" )
+       //if (expect.bwelford.count != expect.contest.Npop)
+       //     println( "*** FAIL contest Npop ${expect.contest.Npop} != ${expect.bwelford.count} count" )
+    }
+}
+
+data class Expectation(val contest: ContestWithAssertions, val cassorter: ClcaAssorter) {
+    val assorter = cassorter.assorter
+    val mean = margin2mean(cassorter.assorterMargin)
+    val noerror = cassorter.noerror  // TODO can we predict bassortMean based on nphantoms and pool avgs ??
+
+    val id = contest.id
+    val bwelford = Welford()
+    val mvrWelford = Welford()
+
+    fun expectBassortMean(): Double =
+        // phantoms are tau = 1/2 * noerror
+        cassorter.noerror * (1.0 - contest.Nphantoms / (2.0 * contest.Npop))
+
+    override fun toString() = buildString {
+        append("contest=$id, cassorter=${cassorter.shortName()}, mean=${dfn(mean, 8)} == mvr assortMean=${dfn(mvrWelford.mean, 8)}; ")
+        append("expectBassortMean=${dfn(expectBassortMean(), 8)} == bassortMean=${dfn(bwelford.mean, 8)}; Npop=${contest.Npop}")
+    }
+}
+
+/*
 class OaAssorterMarginTracker(val contestId: Int, val oaAssorter: OneAuditClcaAssorter) {
     val passorter = oaAssorter.assorter
 
@@ -166,4 +218,4 @@ class OaAssorterMarginTracker(val contestId: Int, val oaAssorter: OneAuditClcaAs
             appendLine("        bassortAvg $bassortAvg calc=$calcBassortAvg") // these are bassort values
         }
     }
-}
+} */

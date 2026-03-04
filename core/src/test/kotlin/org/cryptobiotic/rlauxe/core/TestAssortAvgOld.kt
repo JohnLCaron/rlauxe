@@ -306,7 +306,7 @@ private data class ContestTestDataNWinners(
             val candidates = cvrVoteTracker.chooseCandidates()
 
             val candidatesFiltered = candidates.filter { it != overvote }.toIntArray()
-            cvrb.addContest(info.id, candidatesFiltered)
+            cvrb.replaceContestVotes(info.id, candidatesFiltered)
             result.add(cvrb.build())
         }
         cvrVoteTracker.trackVotesRemaining.forEach { require(it.second == 0) }

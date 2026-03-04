@@ -48,7 +48,6 @@ class CreateBoulderElection(
 
     init {
         //// the redacted groups dont have undervotes, so we do some fancy dancing to generate reasonable undervote counts
-        // todo this seems to depend on ncards, which we set to 0
         oaContests.values.forEach { it.adjustPoolInfo(cardPoolBuilders)}
         // 2024
         // first even up with contest 0, since it has the fewest undervotes
@@ -64,9 +63,9 @@ class CreateBoulderElection(
         simulatedCvrs = makeRedactedCvrs()
 
         val phantoms = makePhantomCvrs(contests)
-        allCvrs =  exportCvrs + simulatedCvrs + phantoms
+        allCvrs = exportCvrs + simulatedCvrs + phantoms
 
-        val (npops, count) = tabulateNpops(allCvrs, infoMap)
+        val (npops, count) = tabulateNpops(allCvrs, infoList)
         this.ncards = count
 
         contestsUA = if (auditType.isClca()) ContestWithAssertions.make(contests, npops, isClca=true, )
@@ -74,6 +73,19 @@ class CreateBoulderElection(
 
         val totalRedactedBallots = cardPoolBuilders.sumOf { it.ncards() }
         logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPoolBuilders.size} cardPools"}
+
+        val (npops2, count2) = tabulateNpopsFromCards(createCards(), infoList)
+        if (npops2 != npops || count2 != count) {
+            print("tabulateNpopsFromCvrs != tabulateNpopsFromCards")
+            println("     $count2 ? $count")
+            npops2.forEach { (key2, value2) ->
+                val value1 = npops[key2]
+                if (value2 != value1) {
+                    println("   contest $key2:  card: $value2 != $value1 cvr")
+                }
+            }
+            checkHasContest(allCvrs, createCards(), infoList)
+        }
     }
 
     // make ContestInfo from BoulderStatementOfVotes, and matching export.schema.contests
@@ -144,7 +156,7 @@ class CreateBoulderElection(
     fun makeRedactedCvrs(show: Boolean = false) : List<Cvr> { // contestId -> candidateId -> nvotes
         val rcvrs = mutableListOf<Cvr>()
         cardPoolBuilders.forEach { cardPool ->
-            rcvrs.addAll(makeCvrsForOnePool(cardPool, infoMap))
+            rcvrs.addAll(makeCvrsForOnePool(cardPool))
         }
 
         /*
@@ -168,28 +180,29 @@ class CreateBoulderElection(
     }
 
     // make simulated CVRs for one pool, all contests
-    private fun makeCvrsForOnePool(cardPool: OneAuditPoolFromBallotStyle, infos: Map<Int, ContestInfo>) : List<Cvr> { // contestId -> candidateId -> nvotes
+    private fun makeCvrsForOnePool(cardPool: OneAuditPoolFromBallotStyle) : List<Cvr> { // contestId -> candidateId -> nvotes
         val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
-        val cvrs = makeVunderCvrs(poolVunders, cardPool.poolName, poolId = cardPool.poolId)
-        // the number of cvrs can vary when there are multiple contests: artifact of simulating the cvrs
+        val cvrs = makeCvrsForPoolWithSingleCardStyle(poolVunders, cardPool.poolName, poolId = cardPool.poolId)
+        // TODO is it true that the number of cvrs can vary when there are multiple contests ?
         //if (cardPool.ncards() != cvrs.size)
-        //    logger.info{"cardPool.ncards ${cardPool.ncards()} cvrs.size = ${cvrs.size}"}
+        //    logger.warn{"cardPool.ncards ${cardPool.ncards()} != cvrs.size = ${cvrs.size}"}
 
         // check it
-        val contestTabs: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infoMap)
-        poolVunders.forEach { (contestId, vunders) ->
-            val tv = contestTabs[contestId]!!
-            if (!checkVunderEquivilentTab(vunders, tv)) {
-                println("cvrs differ from cardPool")
-                /* println("  info=${infoMap[contestId]}")
-                println("  cardPool=${cardPool.voteTotals[contestId]}")
-                println("  poolVotes=${poolVunders[contestId]}")
-                println("    vunders= ${vunders.candVotesSorted}")
-                val tvVotesSorted: Map<Int, Int> = tv.votes.toList().sortedBy{ it.second }.reversed().toMap() // reverse sort by largest vote
-                println("         tv= ${tvVotesSorted}")
-                println("  cvrsTab=${tv}\n")
-                // TODO track down why this happens; maybe just inexact simulation? cause verification to fail?
-                require(checkEquivilentVotes(vunders.candVotesSorted, tv.votes)) */
+        val cvrTabs: Map<Int, ContestTabulation> = tabulateCvrs(cvrs.iterator(), infoMap)
+        poolVunders.forEach { (contestId, vunder) ->
+            val poolTab = cardPool.voteTotals[contestId]!!
+            val cvrTab = cvrTabs[contestId]!!
+            if (!checkEquivilentVotes(vunder.cands(), cvrTab.votes)) {
+                logger.warn{"cvrs differ from cardPool"}
+                println("  info=${infoMap[contestId]}")
+                println("  cardPool.ncards=${cardPool.ncards()} cvrs.size=${cvrs.size}")
+                println("  cardPoolTab=$poolTab")
+                println("  cvrTab=$cvrTab")
+                println("  vunder= ${vunder}")
+                // TODO track down why this happens; maybe just inexact simulation? causes verification to fail?
+                println("  checkEquivilentVotes=${checkEquivilentVotes(vunder.cands(), cvrTab.votes)}")
+                println()
+                throw RuntimeException("makeCvrsForOnePool fails")
             }
         }
 
@@ -197,21 +210,17 @@ class CreateBoulderElection(
     }
 
     private fun checkVunderEquivilentTab(vunder: Vunder, contestTab: ContestTabulation): Boolean {
-        val tabNcards = (contestTab.nvotes() + contestTab.undervotes) / contestTab.voteForN
-        val vncards = (vunder.nvotes + vunder.undervotes) / vunder.voteForN + vunder.missing
+        // if hasSingleCardStyle, then missing has to be zero
+        // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
+        // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
+        // val undervotes = npop * voteForN - voteSum
+        val npop = (vunder.undervotes + vunder.nvotes) / vunder.voteForN
+
         var allOk = true
+        allOk = allOk && checkEquivilentVotes(vunder.cands(), contestTab.votes)
         allOk = allOk && (vunder.nvotes == contestTab.nvotes())
-        //allOk = allOk && (vunder.undervotes == contestTab.undervotes)
-        //allOk = allOk && (vunder.ncards - vunder.missing == contestTab.ncards())
-        // data class Vunder2(val contestId: Int, val poolId: Int, val voteCounts: List<Pair<IntArray, Int>>, val undervotes: Int, val missing: Int, val voteForN: Int) {
-        //if (contestTab.isIrv) {
-            // val irvPairs = contestTab.irvVotes.votes.map { (harr, count) -> Pair(harr.array, count) }
-       //     val vunderVc = VoteConsolidator()
-       //     vunder.voteCounts.forEach { (cands, count) -> vunderVc.addVotes(cands, count) }
-        //    allOk = allOk && vunderVc.equals(contestTab.irvVotes)
-        //} else {
-            allOk = allOk && checkEquivilentVotes(vunder.cands(), contestTab.votes)
-        //}
+        allOk = allOk && (vunder.undervotes == contestTab.undervotes) // no
+        allOk = allOk && (npop == contestTab.ncards())
         return allOk
     }
 
@@ -296,7 +305,7 @@ class CreateBoulderElection(
         return if (auditType.isClca()) {
             CvrsToCardsAddStyles(
                 AuditType.CLCA,
-                Closer(allCvrs.iterator()),
+                Closer(allCvrs.iterator()), // use the mvrs as the cvrs
                 null,
                 null
             )
@@ -426,22 +435,62 @@ fun parseIrvContestName(name: String) : Pair<String, Int> {
     return Pair(namet, ncand)
 }
 
-
 // TODO is cvr.hasContest(contestId) same as the card.hasContest(contestId) ??
-fun tabulateNpops(cvrs: List<Cvr>, infos: Map<Int, ContestInfo>): Pair<Map<Int, Int>, Int> {
+fun tabulateNpops(cvrs: List<Cvr>, infos: List<ContestInfo>): Pair<Map<Int, Int>, Int> {
     val npops = mutableMapOf<Int, Int>()
     var count = 0
     cvrs.forEach { cvr ->
         count++
-        infos.forEach { (contestId, info) ->
-            if (cvr.hasContest(contestId)) {
-                val npop = npops.getOrPut(contestId) { 0 }
-                npops[contestId] = npop + 1
+        infos.forEach { info ->
+            if (cvr.hasContest(info.id)) {
+                val npop = npops.getOrPut(info.id) { 0 }
+                npops[info.id] = npop + 1
             }
         }
     }
     return Pair(npops, count)
 }
+
+fun tabulateNpopsFromCards(cards: CloseableIterator<AuditableCard>, infos: List<ContestInfo>): Pair<Map<Int, Int>, Int> {
+    val npops = mutableMapOf<Int, Int>()
+    var count = 0
+    cards.use { cardIter ->
+        while (cardIter.hasNext()) {
+            val card = cardIter.next()
+            count++
+            infos.forEach { info ->
+                if (card.hasContest(info.id)) {
+                    val npop = npops.getOrPut(info.id) { 0 }
+                    npops[info.id] = npop + 1
+                }
+            }
+        }
+    }
+    return Pair(npops, count)
+}
+
+fun checkHasContest(cvrs: List<Cvr>, cards: CloseableIterator<AuditableCard>, infos: List<ContestInfo>) {
+    cards.use { cardIter ->
+        var count = 0
+        cvrs.forEach { cvr ->
+            val card = cardIter.next()
+            for (info in infos) {
+                if (card.location != cvr.id) {
+                    print("${card.location} != ${cvr.id}")
+                    break
+                }
+                if (card.hasContest(info.id) != cvr.hasContest(info.id)) {
+                    println(card)
+                    println("Cvr: $cvr ($count)")
+                    println()
+                    break
+                }
+            }
+            count++
+        }
+    }
+}
+
 
 private val regex = Regex("[,]") // Matches '!', ',' or any digit
 fun cleanCsvString(originalString: String) = originalString.replace(regex, "")

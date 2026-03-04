@@ -321,7 +321,7 @@ fun verifyClcaAssortAvg(
     var allOk = true
 
     // sum all the assorter values in one pass across all the cvrs, including Pools
-    val cardAssortAvgs = mutableMapOf<Int, MutableMap<String, AssortAvg>>()  // contest -> assorter -> average
+    val cardAssortAvgs = mutableMapOf<Int, MutableMap<String, AssortAvg>>()  // contest -> assorter -> AssortAvg
 
     cards.use { cardIter ->
         while (cardIter.hasNext()) {

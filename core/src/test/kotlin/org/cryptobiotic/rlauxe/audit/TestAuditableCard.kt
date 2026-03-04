@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
-import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -63,7 +62,7 @@ fun makeCvr(id: Int, ncontests: Int, ncandidates: Int, poolId:Int?=null): Cvr {
         val contestId = Random.nextInt(ncontests)
         val votesForN = Random.nextInt(ncandidates)
         val candidates = IntArray(votesForN) { Random.nextInt(ncandidates) }
-        cvrb.addContest(contestId, candidates)
+        cvrb.replaceContestVotes(contestId, candidates)
     }
     return cvrb.build()
 }

@@ -130,7 +130,7 @@ data class CastVoteRecord(
     fun convertToCvr(): Cvr {
         val cvrb = CvrBuilder2(this.imprintedId,  false)
         this.contestVotes.forEach{
-            cvrb.addContest(it.contestId, it.candVotes.toIntArray())
+            cvrb.replaceContestVotes(it.contestId, it.candVotes.toIntArray())
         }
         return cvrb.build()
     }

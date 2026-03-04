@@ -17,7 +17,6 @@ class ContestTabulation(
     val isIrv: Boolean,
     val candidateIds: List<Int>
 ) {
-
     constructor(info: ContestInfo) : this(info.id, info.voteForN, info.isIrv, info.candidateIds)
     constructor(other: ContestTabulation) : this(other.contestId, other.voteForN, other.isIrv, other.candidateIds)
 

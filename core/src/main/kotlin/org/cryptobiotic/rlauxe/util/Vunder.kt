@@ -2,8 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.raire.VoteConsolidator
-import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
+import org.cryptobiotic.rlauxe.oneaudit.VunderPool
 import kotlin.Int
 import kotlin.random.Random
 
@@ -186,12 +185,13 @@ class VunderPicker(val vunder: Vunder) {
     }
 }
 
+
 // combines Vunder for multiple contests into cvrs for one pool
 // make cvrs until we exhaust the votes
 // this algorithm puts as many contests as possible on each cvr
 // the number of cvrs can vary when there are multiple contests
 
-// vunders: contest id -> Vunder
+// used for creating Cvrs for pools with hasSingleCardStyle=false
 fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): List<Cvr> {
     val vunderPickers = vunders.mapValues { VunderPicker(it.value) }
 
@@ -207,7 +207,7 @@ fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): L
                 val useCandidates = vunderPicker.pickRandomCandidatesAndDecrement()
                 // add the contest to cvr unless its a novote
                 if (useCandidates != null) {
-                    cvb2.addContest(contestId, useCandidates)
+                    cvb2.replaceContestVotes(contestId, useCandidates)
                 }
             }
         }
@@ -218,20 +218,24 @@ fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): L
         done = vunderPickers.values.all { it.isEmpty() }
     }
 
-    /* find bug
-    val voteForNs = vunders.mapValues { it.value.voteForN }
-    val tabsFromCvrs = tabulateCvrsWithVoteForNs(rcvrs.iterator(), voteForNs)
-    tabsFromCvrs.forEach { (id, voteFromCvrs) ->
-        val fromCvrs = voteFromCvrs.votes.toSortedMap()
-        val vunder = vunders[id]!!
-        if (!checkVunderEquivilentTab(vunder, voteFromCvrs)) {
-            println("\nfail")
-            println("                       vunder ${vunder}")
-            println(voteFromCvrs)
-            checkVunderEquivilentTab(vunder, voteFromCvrs)
-            throw RuntimeException("vunderVotes ${vunder} != ${fromCvrs} voteFromCvrs")
-        }
-    } */
+    rcvrs.shuffle()
+    return rcvrs
+}
+
+
+// used for creating Cvrs for pools with hasSingleCardStyle=true
+fun makeCvrsForPoolWithSingleCardStyle(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): List<Cvr> {
+    val vunderpool = VunderPool(vunders, poolName, poolId!!)
+
+    val rcvrs = mutableListOf<Cvr>()
+    var count = 1
+    while (!vunderpool.done()) {
+        val cvrId = "${poolName}-${count}"
+        val cvb2 = CvrBuilder2(cvrId, phantom = false, poolId = poolId)
+        vunderpool.simulatePooledCvr(cvb2)
+        rcvrs.add(cvb2.build())
+        count++
+    }
 
     rcvrs.shuffle()
     return rcvrs

@@ -89,7 +89,7 @@ private fun makeVunderCvrs(vunder: Vunder, phantomCount: Int, prefix: String, li
             val useCandidates = vunderPicker.pickRandomCandidatesAndDecrement()
             // add the contest to cvr unless its a novote
             if (useCandidates != null) {
-                cvb2.addContest(contestId, useCandidates)
+                cvb2.replaceContestVotes(contestId, useCandidates)
             }
         }
 
@@ -101,7 +101,7 @@ private fun makeVunderCvrs(vunder: Vunder, phantomCount: Int, prefix: String, li
 
     repeat(phantomCount) {
         val cvrb = CvrBuilder2("$prefix-${count++}", phantom=true)
-        cvrb.addContest(contestId, intArrayOf())
+        cvrb.replaceContestVotes(contestId, intArrayOf())
         rcvrs.add(cvrb.build())
     }
 

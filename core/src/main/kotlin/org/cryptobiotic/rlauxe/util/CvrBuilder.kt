@@ -165,7 +165,7 @@ class CvrBuilder2(
 ) {
     val allVotes = mutableMapOf<Int, IntArray>()
 
-    fun addContest(contestId: Int, votes: IntArray): CvrBuilder2  {
+    fun replaceContestVotes(contestId: Int, votes: IntArray): CvrBuilder2  {
         allVotes[contestId] = votes
         return this
     }
@@ -184,7 +184,7 @@ class CvrBuilder2(
 
         fun fromCvr(cvr: Cvr): CvrBuilder2 {
             val result = CvrBuilder2(cvr.id, cvr.phantom, cvr.poolId)
-            cvr.votes.forEach{ id, votes -> result.addContest(id, votes) }
+            cvr.votes.forEach{ id, votes -> result.replaceContestVotes(id, votes) }
             return result
         }
 

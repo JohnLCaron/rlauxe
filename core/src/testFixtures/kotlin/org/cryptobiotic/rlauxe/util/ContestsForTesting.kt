@@ -2,6 +2,9 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.oneaudit.Vunder
+import org.cryptobiotic.rlauxe.oneaudit.makeVunderCvrs
+import org.cryptobiotic.rlauxe.oneaudit.tabulateVotesFromCvrs
 import kotlin.random.Random
 
 fun makeContestFromCvrs(

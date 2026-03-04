@@ -4,8 +4,6 @@ import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.Vunder
-import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.Test
@@ -75,7 +73,7 @@ class TestOneAuditPool {
             contestVotes[contestUA.id] = Vunder.fromNpop(contestUA.id, underVotes, contestUA.contest.Ncast(), candVotes, voteForN)
         }
 
-        val cvrs = makeVunderCvrs(contestVotes, "poolName", poolId = 42)
+        val cvrs = makeCvrsForPoolWithSingleCardStyle(contestVotes, "poolName", poolId = 42)
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
 
         val cardPools = calcOneAuditPoolsFromMvrs(infos, test.populations, cvrs)
@@ -107,7 +105,7 @@ class TestOneAuditPool {
             contestVotes[contestUA.id] = Vunder.fromNpop(contestUA.id, underVotes, contestUA.contest.Ncast(), candVotes, voteForN)
         }
 
-        val cvrs = makeVunderCvrs(contestVotes, "poolName", poolId = 42)
+        val cvrs = makeCvrsForPoolWithSingleCardStyle(contestVotes, "poolName", poolId = 42)
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
         val cvrTabs = tabulateCvrs(cvrs.iterator(), infos)
 

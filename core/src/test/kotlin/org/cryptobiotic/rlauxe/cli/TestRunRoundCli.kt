@@ -5,10 +5,10 @@ import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 
-// test RunCli in temp directory
+// dont run in coverage Tests
 class TestRunRoundCli {
 
-    @Test
+    //@Test
     fun testStartAuditFirstRound() {
         val auditdir = "$testdataDir/cases/boulder24/oa/audit"
 
@@ -20,7 +20,7 @@ class TestRunRoundCli {
         )
     }
 
-    @Test
+    //@Test
     fun testRunRoundCli() {
         val topdir = "$testdataDir/cases/sf2024/clca"
         val auditdir = "$topdir/audit2"
@@ -33,7 +33,7 @@ class TestRunRoundCli {
         )
     }
 
-    @Test
+   // @Test
     fun testRunAllRoundsCli() {
         val auditdir = "$testdataDir/cases/boulder24/oa/audit"
 

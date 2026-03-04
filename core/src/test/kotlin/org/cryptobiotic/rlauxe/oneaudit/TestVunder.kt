@@ -10,11 +10,7 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.cryptobiotic.rlauxe.util.Vunder
-import org.cryptobiotic.rlauxe.util.makeVunderCvrs
 import org.cryptobiotic.rlauxe.util.tabulateCards
-import org.cryptobiotic.rlauxe.util.tabulateCvrsWithVoteForNs
-import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.collections.List
 import kotlin.test.Test
@@ -180,8 +176,11 @@ class TestVunder {
 }
 
 fun makeContestsWithVunder(
-    candsv: List<Map<Int, Int>>, undervotes: List<Int>, phantoms: List<Int>, voteForNs: List<Int>? = null)
-        : Pair<List<Contest>, List<Cvr>> {
+    candsv: List<Map<Int, Int>>,
+    undervotes: List<Int>,
+    phantoms: List<Int>,
+    voteForNs: List<Int>? = null): Pair<List<Contest>, List<Cvr>> {
+
     val candsMap = candsv.mapIndexed { idx, it -> Pair(idx, it ) }.toMap()
     val phantomMap = phantoms.mapIndexed { idx, it -> Pair(idx, it ) }.toMap()
 

@@ -5,8 +5,6 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardFromCard
 import org.cryptobiotic.rlauxe.util.CardBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
-import org.cryptobiotic.rlauxe.util.Vunder
-import org.cryptobiotic.rlauxe.util.VunderPicker
 
 ////////////////////////////////////////////////////////////////////////////////
 // OneAudit Estimation Sampling

@@ -143,7 +143,11 @@ class AuditRecord(
             }
 
             // new way of storing config
-            val auditCreationConfig = readAuditCreationConfigUnwrapped(publisher.auditCreationConfigFile())
+            val auditCreationConfigResult = readAuditCreationConfigJsonFile(publisher.auditCreationConfigFile())
+            val auditCreationConfig = if (auditCreationConfigResult.isOk) auditCreationConfigResult.unwrap() else {
+                errs.addNested(auditCreationConfigResult.unwrapError())
+                null
+            }
 
             val contestsResults = readContestsJsonFile(publisher.contestsFile())
             val contests = if (contestsResults.isOk) contestsResults.unwrap()  else {
@@ -199,12 +203,20 @@ class AuditRecord(
                 }
 
                 // new way of storing config
-                val auditRoundConfig = readAuditRoundConfigUnwrapped(publisher.auditRoundConfigFile(roundIdx))
-                val auditConfigNew = AuditConfig.fromRoundConfig(auditCreationConfig!!, auditRoundConfig!!)
-                if (auditConfigNew != config) {
-                    println(config)
-                    println(auditConfigNew)
-                    println()
+                // readAuditRoundConfigJsonFile(filename: String): Result<AuditRoundConfig, ErrorMessages>
+                val auditRoundConfigResult = readAuditRoundConfigJsonFile(publisher.auditRoundConfigFile(roundIdx))
+                val auditRoundConfig = if (auditRoundConfigResult.isOk) auditRoundConfigResult.unwrap() else {
+                    errs.addNested(auditRoundConfigResult.unwrapError())
+                    null
+                }
+
+                if (auditCreationConfig != null && auditRoundConfig != null) {
+                    val auditConfigNew = AuditConfig.fromRoundConfig(auditCreationConfig, auditRoundConfig)
+                    if (auditConfigNew != config) {
+                        println(config)
+                        println(auditConfigNew)
+                        println()
+                    }
                 }
 
             }

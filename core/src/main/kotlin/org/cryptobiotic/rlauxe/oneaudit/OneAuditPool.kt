@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.util.Vunder
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach

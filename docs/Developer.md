@@ -191,6 +191,7 @@ before viewing them.
 | 02/24/2026 | 90.2 % | 6252/6934       |
 | 03/02/2026 | 90.6 % | 6427/7090       |
 | 03/03/2026 | 91.5 % | 6510/7116       |
+| 03/03/2026 | 90.1 % | 6497/7208       |
 
 
 ## UML
@@ -386,8 +387,8 @@ simulateRaireTestContest: single raire contest
 * maxRisk does it help? reduce lamda tradeoff
 * 2D plotting
 * betting on the error rate
-* mix_betting_mart: "Finds a simple discrete mixture martingale as a (flat) average of D TSMs each with fixed bet 'lam'"
-* review COBRA 3.2, 4.3 (Diversified betting)
+* mix_betting_mart: "Finds a simple discrete mixture martingale as a (flat) average of D TSMs each with fixed bet 'lam'".
+  review COBRA 3.2, 4.3 (Diversified betting)
 
 **TODO 2/6/26**
 
@@ -396,7 +397,7 @@ simulateRaireTestContest: single raire contest
 
 **TODO 2/17**
 
-* investigate assigning costs to mallots sampled and nrounds, and minimize the cost.
+* investigate assigning costs to ballots sampled and nrounds, and minimize the cost.
 
 **TODO 2/21**
 

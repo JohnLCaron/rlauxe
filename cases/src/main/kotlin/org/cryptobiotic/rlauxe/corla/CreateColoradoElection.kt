@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestBuilderIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromBallotStyle
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
+import org.cryptobiotic.rlauxe.oneaudit.makeVunderCvrs
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -213,7 +214,11 @@ open class CreateColoradoElection (
                     print("why?")
             } */
 
-            cvrs = makeVunderCvrs(poolVunders, cardPool.poolName, poolId = if (auditType.isClca()) null else cardPool.poolId).iterator()
+            cvrs = makeVunderCvrs(
+                poolVunders,
+                cardPool.poolName,
+                poolId = if (auditType.isClca()) null else cardPool.poolId
+            ).iterator()
         }
 
         override fun next() = cvrs.next()

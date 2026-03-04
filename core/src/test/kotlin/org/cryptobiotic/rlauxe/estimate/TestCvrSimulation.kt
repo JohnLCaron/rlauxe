@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.cryptobiotic.rlauxe.util.tabulateVotesFromCvrs
+import org.cryptobiotic.rlauxe.oneaudit.tabulateVotesFromCvrs
 import org.junit.jupiter.api.Test
 import kotlin.math.abs
 import kotlin.math.max

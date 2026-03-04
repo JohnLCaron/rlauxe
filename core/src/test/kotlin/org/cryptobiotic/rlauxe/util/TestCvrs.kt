@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.oneaudit.tabulateVotesFromCvrs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

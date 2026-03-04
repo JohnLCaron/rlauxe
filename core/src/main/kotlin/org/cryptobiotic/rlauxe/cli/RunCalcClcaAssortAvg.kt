@@ -1,5 +1,7 @@
 package org.cryptobiotic.rlauxe.cli
 
+import com.github.michaelbull.result.unwrap
+import com.github.michaelbull.result.unwrapError
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ArgType
 import kotlinx.cli.required
@@ -21,7 +23,7 @@ import kotlin.String
 import kotlin.use
 
 /** Calculate CLCA Assort averages by reading throun the entire CardManifest.
- * TODO: perhaps this only works when there are no errors ??
+ * TODO: probably this only works when there are no errors ??
  */
 object RunCalcAssortAvg {
 
@@ -47,9 +49,10 @@ object RunCalcAssortAvg {
         try {
             parser.parse(args)
 
-            val auditRecord = AuditRecord.readFrom(auditDir)
-            if (auditRecord == null) {
+            val auditRecordResult = AuditRecord.readFromResult(auditDir)
+            val auditRecord = if (auditRecordResult.isOk) auditRecordResult.unwrap() else {
                 println("auditRecord not found at $auditDir")
+                println(auditRecordResult.unwrapError())
                 return
             }
             require (auditRecord is AuditRecord)

@@ -12,8 +12,8 @@ class TestRunCalcAssortAvg {
         RunCalcAssortAvg.main(
             arrayOf(
                 "-in", auditdir,
-                "-contest", "0",
-                "-assertion", "0/1"
+               "-contest", "50", // use name for composite ??
+               "-assertion", "1/0"
             )
         )
     }

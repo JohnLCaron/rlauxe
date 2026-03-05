@@ -28,16 +28,6 @@ data class CompositeRecord(
     val componentRecords: List<AuditRecord>,
 ): AuditRecordIF  {
 
-    override fun toString() = buildString {
-        append("CompositeRecord location='$location'\n$config")
-        appendLine("components")
-        componentRecords.forEach{ appendLine("  ${it.location}")}
-        appendLine("contests")
-        contests.forEach{ appendLine("  $it")}
-        appendLine("rounds")
-        rounds.forEach{ appendLine(it)}
-    }
-
     override fun readCardManifest(): CardManifest {
         return componentRecords.first().readCardManifest() // TODO
     }
@@ -53,6 +43,16 @@ data class CompositeRecord(
         return want
     }
 
+    override fun toString() = buildString {
+        append("CompositeRecord location='$location'\n$config")
+        appendLine("components")
+        componentRecords.forEach{ appendLine("  ${it.location}")}
+        appendLine("contests")
+        contests.forEach{ appendLine("  $it")}
+        appendLine("rounds")
+        rounds.forEach{ appendLine(it)}
+    }
+
     companion object {
 
         // used by viewer
@@ -63,9 +63,10 @@ data class CompositeRecord(
             var electionInfo: ElectionInfo? = null
 
             // find all subdirectories
+            var componentId = 1
             val path = Path(location)
             if (path.isDirectory()) {
-                path.listDirectoryEntries().forEach { entry ->
+                path.listDirectoryEntries().sorted().forEach { entry ->
                     if (entry.isDirectory()) {
                         val auditDir = "${entry.toAbsolutePath()}/audit"
                         if (Path(auditDir).exists()) {
@@ -73,19 +74,20 @@ data class CompositeRecord(
                             if (result.isErr) {
                                 println("  Error: ${result.component2()}")
                             } else {
-                                val subRecord: AuditRecord = result.unwrap()  as AuditRecord // TODO
-                                components.add(subRecord)
-                                contests.addAll(subRecord.contests)
-                                if (config == null) config = subRecord.config // TODO all configs are the same ??
-                                if (electionInfo == null) electionInfo = subRecord.electionInfo // TODO all electionInfo are the same ??
-                                // println("  auditDir found and added: ${auditDir}")
+                                val orgRecord: AuditRecord = result.unwrap() as AuditRecord
+                                val modRecord = modifyRecord(orgRecord, componentId)
+                                components.add(modRecord)
+                                contests.addAll(modRecord.contests)
+                                if (config == null) config = modRecord.config // TODO all configs are the same ??
+                                if (electionInfo == null) electionInfo = modRecord.electionInfo // TODO all electionInfo are the same ??
+                                componentId++
                             }
                         }
                     }
                 }
             }
             return if (config != null) {
-                contests.sortBy { it.name }
+                // contests.sortBy { it.name }
                 val auditRounds = makeAuditRounds(components)
                 CompositeRecord(location, electionInfo!!, config, contests, auditRounds, components)
             } else {
@@ -93,6 +95,11 @@ data class CompositeRecord(
             }
         }
     }
+}
+
+// TODO. problem is that contest id is replicated everywhere in assertions, contestRound etc
+fun modifyRecord(orgRecord: AuditRecord, componentId: Int): AuditRecord {
+    return orgRecord
 }
 
 fun makeAuditRounds(records: List<AuditRecord>) : List<AuditRoundIF> {
@@ -151,13 +158,13 @@ data class CompositeAuditRound(
         mvrsUnused = auditRounds.map { it.mvrsUnused }.sum()
     }
 
+    override fun createNextRound(): AuditRound {
+        TODO("Not yet implemented")
+    }
+
     //// called from viewer
     override fun show(): String {
         return toString()
-    }
-
-    override fun createNextRound(): AuditRound {
-        TODO("Not yet implemented")
     }
 
     override fun toString() = buildString {

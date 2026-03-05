@@ -5,18 +5,20 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
+import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
 import org.jetbrains.kotlinx.kandy.util.color.Color
+import kotlin.io.path.Path
 
 class CompareCorlaPlots {
-    val nruns = 100
-    val nsimEst = 100
+    val nruns = 10
+    val nsimEst = 10
     val name = "corlaWithPhantoms2"
-    val dirName = "$testdataDir/corla/$name"
+    val dirName = "$testdataDir/plots/corla/$name"
     val N = 100000
 
     @Test
@@ -106,6 +108,7 @@ class CompareCorlaPlots {
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
+        validateOutputDir(Path(dirName))
         val writer = WorkflowResultsIO("$dirName/${name}.csv")
         writer.writeResults(results)
 
@@ -118,7 +121,7 @@ class CompareCorlaPlots {
         showSampleSizesVsTheta(name, dirName, subtitle, ScaleType.Linear)
         showSampleSizesVsTheta(name, dirName, subtitle, ScaleType.LogLinear)
         showSampleSizesVsTheta(name, dirName, subtitle, ScaleType.LogLog)
-        //showFailuresVsMargin(name, dirName, subtitle)
+        // showFailuresVsMargin(name, dirName, subtitle)
     }
 }
 
@@ -151,13 +154,4 @@ fun showFailuresVsMargin(name:String, dirName: String, subtitle: String) {
         catName = "flipPct", catfld = { category(it) },
         colorChoices = { colorChoices(it) },
     )
-}
-
-fun colorChoices(cats: Set<String>): Array<Pair<String, Color>> {
-    val result = mutableListOf<Pair<String, Color>>()
-    cats.forEach { cat ->
-        val color = if (cat.contains("corla")) Color.ORANGE else Color.LIGHT_GREEN
-        result.add( Pair(cat, color))
-    }
-    return result.toTypedArray()
 }

@@ -1,5 +1,33 @@
 # Colorado Statewide Election 2024
-02/25/2026
+03/05/2026
+
+* 3,241,120 ballot cast (Colorado 2024 General Election) in 3199 precincts.
+* 260 contests, no IRV.
+* CO doesnt publically publish the CVRs, just precinct totals, see _2024GeneralPrecinctLevelResults.csv/zip/xlsx_.
+* CORLA does an RLA, so they do have access to the CVRs. A "publically verifiable" RLA requires the CVRs to be publically verifiable. But we can still do the RLA as long as they are "privately available".
+
+We use the precinct totals to simulate CVRs, and use those to estimate how Rlauxe would preform in a real audit.
+
+# Comparing CORLA and Rlauxe
+
+The Colorado RLA software uses a "Conservative approximation of the Kaplan-Markov P-value" for its risk measuring function
+[from "Gentle Introduction" and "Super Simple" papers](../notes/notes.txt). It makes use of measured error rates as they are sampled.
+
+We have a Kotlin port of the CORLA Java code in order to compare performance with our CLCA algorithm. Its possible
+that our port does not accurately reflect the actual CORLA code.
+
+The following plots compare our Corla implementation against the Rlauxe algorithm [see BettingRiskFunctions](docs/BettingRiskFunctions.md).
+These are "ballot-at-a-time" plots, so we dont limit the number of samples, or use the estimation rounds.
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/cases/compareCorlaAndRlauxeLogLinear.html" rel="compareCorlaAndRlauxeLogLinear">![compareCorlaAndRlauxeLogLinear](../plots2/cases/compareCorlaAndRlauxeLogLinear.png)</a>
+
+* CORLA is impressively good in the absence of errors.
+* It does progressively worse as the error rate increases and the margin decreases.
+
+If you arbitrarily set the maximum sample size to 10,000, Rlauxe can audit down to .5% margin and 1% fuzz rates. 
+CORLA can audit down to .5% margin at .25% fuzz rates. If you are confident in keeping errors low, CORLA is quite good.
+Note that phantom ballots contribute to error rates (see [effects of phantoms on samples needed](../ClcaErrors.md#phantom-ballots))
+and also must be kept low for Corla to be effective. Also see [Corla Notes](../notes/CorlaNotes.md).
 
 ## Downloaded files
 
@@ -36,17 +64,8 @@ We use it to make the contests.
 
 Using _cases/src/test/kotlin/org/cryptobiotic/rlauxe/util/TestGenerateAllUseCases.kt_:
 
-* run createColoradoOneAudit() to create a OneAudit elction in  _$testdataDir/cases/corla/oa/audit_
+* run createColoradoOneAudit() to create a OneAudit election in  _$testdataDir/cases/corla/oa/audit_
 * run createColoradoClca() to create a CLCA elction in  _$testdataDir/cases/corla/clca/audit_
-
-
-## Corla 2024 characteristics
-
-
-* 3,241,120 ballot cast (Colorado 2024 General Election) in 3199 precincts.
-* 260 contests, no IRV.
-* CO doesnt publically publish the CVRs, just precinct totals, see _2024GeneralPrecinctLevelResults.csv/zip/xlsx_.
-* CORLA does an RLA, so they do have access to the CVRs. A "publically verifiable" RLA requires the CVRs to be publically verifiable. But we can still do the RLA as long as they are "privately available".
 
 ### Corla election notes:
 
@@ -100,8 +119,8 @@ This allows us to compare the cost of OneAudit vs CLCA.
 
 ### simulated OneAudit
 
-TODO: choose a few rural counties that might be foing hand counts; put them into OneAudit pools, probably by county. 
-See how the sample saizes compare to CLCA.
+Not currently done. TODO: choose a few rural counties that might be doing hand counts; put them into OneAudit pools, probably by county. 
+See how the sample sizes compare to CLCA.
 
 ### Next Steps
 
@@ -123,14 +142,5 @@ From "Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program" (Mark Lin
     be drawn from just those ballots that contain the contest. While allowing samples to be restricted to ballots 
     reported to contain a particular contest is not essential in the short run, it will be necessary eventually to 
     make it feasible to audit smaller contests.
-
-As far as anyone can tell me, none of this work has been done. Colorado did hire Democracy Developers to add IRV RLA into
-the CORLA software, to be used in 2025 Nov election.
-
-* Points 1 and 3: would be best to replace CORLA with RLAUXE.
-    * TODO investigate integrating RLAUXE into CORLA.
-    * TODO investigate integrating RLAUXE into Dominion.
-* On point 2, we can use OneAudit, and put each non-CVR county into a pool, as long as we know the undervotes.
-  This is an evolution from the time the paper was written (2017), before OneAudit was developed.
 
 Also see [Corla Notes](../notes/CorlaNotes.md).

@@ -1,8 +1,6 @@
 # CORLA notes
 _last changed 03/25/2025_
 
-**_NEEDS UPDATING_**
-
 The report [Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program](papers/Corla.pdf) (2018) suggest the following
 issues should be addressed:
 
@@ -15,45 +13,6 @@ issues should be addressed:
   just those ballots that contain the contest.
 
 Its not clear what the current version of colorado-rla is, or if any of these issues have been addressed.
-
-# Comparing CORLA and Rlauxe
-
-The Colorado RLA software uses a "Conservative approximation of the Kaplan-Markov P-value" for its risk measuring function
-(from "Gentle Introduction" and "Super Simple" papers). It makes use of measured error rates as they are sampled.
-
-We have a Kotlin port of the CORLA Java code in order to compare performance with our CLCA algorithm. Its possible
-that our port does not accurately reflect what CORLA does. 
-
-The following plots compare our Corla implementation with the Rlauxe algorithm based on Philip Stark's SHANGRLA framework. 
-They differ in that CORLA uses the Kaplan-Markov bound (eq 10 of SuperSimple)
-for the risk estimation function, while CLCA uses the BettingMart supermartingale and Adaptive / Optimal betting as described in
-the COBRA paper. Also note that Rlauxe AdaptiveBetting uses a "floor" (default 1.0e-5) for the estimated error rates, to prevent betting
-(and losing) everything.
-
-These are "one-round" plots, so we dont limit the number of samples, or use the estimation algorithms.
-
-## Compare CORLA and Rlauxe with no errors
-
-Comparison when there are no errors found in the MVRs, so they always agree with the CVRs:
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaNoErrors/corlaNoErrors2LogLog.html" rel="corlaNoErrors2LogLog">![corlaNoErrors2LogLog](plots/corla/corlaNoErrors/corlaNoErrors2LogLog.png)</a>
-
-* The algorithms give essentially the same results. One needs about 700 ballots to successfully audit a contest with a margin of 1%, 
-  when the risk limit is 3% and there are no errors.
-
-## Compare CORLA and Rlauxe with errors
-
-Here we add random errors between the MVRS and CVRS at rates of 2 per 1000 ballots (.002), 5 per 1000 ballots (.005),
-1 per 100 ballots (.01), and 2 per 100 ballots (.02):
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithErrors/corlaWithErrorsLinear.html" rel="corlaWithErrorsLinear">![corlaWithErrorsLinear](plots/corla/corlaWithErrors/corlaWithErrorsLinear.png)</a>
-
-The same plot on a log-log scale. A straight line means that the sample size is proportional to 1/margin.
-
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots/corla/corlaWithErrors/corlaWithErrorsLogLog.html" rel="corlaWithErrorsLogLog">![corlaWithErrorsLogLog](plots/corla/corlaWithErrors/corlaWithErrorsLogLog.png)</a>
-
-* CORLA is impressively good in the absence of errors.
-* It does progressively worse as the error rate increases and the margin decreases.
 
 # Notes on CORLA implementation
 

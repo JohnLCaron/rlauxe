@@ -1,0 +1,184 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;RdkAoa&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;RdkAoa&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;Corla vs Rlauxe&quot;,
+&quot;subtitle&quot;:&quot;Nc=100000 nruns=100 riskLimit=0.03&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;values&quot;:[&quot;#fc8452&quot;,&quot;#fc8452&quot;,&quot;#fc8452&quot;,&quot;#fc8452&quot;,&quot;#fc8452&quot;,&quot;#fc8452&quot;,&quot;#91cc75&quot;,&quot;#91cc75&quot;,&quot;#91cc75&quot;,&quot;#91cc75&quot;,&quot;#91cc75&quot;,&quot;#91cc75&quot;],
+&quot;limits&quot;:[&quot;corla0.0&quot;,&quot;corla0.001&quot;,&quot;corla0.0025&quot;,&quot;corla0.005&quot;,&quot;corla0.0075&quot;,&quot;corla0.01&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.01&quot;]
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;true margin&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;color&quot;:&quot;type.fuzz&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;],
+&quot;samplesNeeded&quot;:[1443.0,1203.0,902.0,721.0,601.0,450.0,360.0,240.0,179.0,143.0,71.0,2019.7699999999995,1550.7,1202.6600000000008,870.2099999999997,680.7000000000002,502.31999999999994,411.58000000000015,250.97000000000006,185.83999999999997,143.84,71.60999999999999,9676.57,4363.660000000002,2135.839999999999,1333.0700000000004,1066.5499999999997,607.0800000000004,445.46000000000015,258.51000000000005,198.48999999999998,153.50000000000006,74.87000000000002,70689.99,44867.03,14237.419999999998,4308.800000000001,1902.2200000000014,939.9799999999998,561.47,306.95,226.33999999999995,203.49999999999997,74.95999999999998,83264.48,69582.55,52896.23,30266.33,11723.46,1894.9900000000005,1043.18,462.8,260.63000000000005,187.02999999999997,86.89999999999998,85251.49,79255.47,65324.5,64269.87,36238.87,9433.670000000002,2400.670000000001,627.3999999999999,345.43999999999994,227.45999999999995,89.4,1545.0,1289.0,968.0,775.0,646.0,484.0,387.0,258.0,193.0,154.0,76.0,2228.0499999999997,1787.69,1067.57,909.7100000000002,724.4399999999999,565.5300000000002,425.56999999999994,262.2200000000001,203.92999999999995,163.29999999999998,77.23000000000002,3312.700000000001,2582.2300000000005,1466.6400000000003,1102.2899999999997,936.0299999999999,621.9399999999994,480.5899999999999,290.22999999999996,221.28,163.36,77.98999999999998,5453.919999999998,4041.359999999999,2127.8000000000015,1410.31,1326.2899999999997,733.6800000000001,562.0,340.03999999999985,215.75000000000006,181.47000000000003,80.64000000000001,7948.6,5473.210000000001,3267.2799999999997,2099.3999999999996,1776.9299999999998,1053.5800000000002,661.7600000000001,382.8499999999998,254.25999999999996,187.60000000000005,82.68000000000002,9546.379999999997,8296.860000000002,3874.7900000000004,3116.0999999999985,2183.7000000000003,1090.1200000000001,842.18,396.29000000000013,273.99000000000024,195.08999999999997,89.10999999999997],
+&quot;true margin&quot;:[0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000096,0.040000000000000036,0.04999999999999991,0.09999999999999983,0.005001100000000003,0.005981599999999993,0.00800569999999999,0.009964200000000005,0.0119645,0.0159918,0.019962699999999993,0.029937700000000005,0.0399265,0.04990460000000001,0.0998493,0.004998041237113406,0.005942399999999994,0.007935499999999993,0.009939899999999996,0.011964100000000004,0.015950799999999994,0.0199154,0.029867499999999988,0.03987560000000003,0.04980210000000002,0.09962040000000001,0.005046666666666673,0.005981403508771938,0.0079345652173913,0.009859393939393942,0.011899800000000006,0.015889999999999994,0.019836200000000002,0.029730300000000015,0.03969979999999999,0.04962359999999996,0.09930129999999998,0.005028235294117647,0.005910645161290337,0.008066458333333327,0.0098938888888889,0.011979157894736825,0.0158383,0.01976440000000001,0.029706100000000017,0.039516399999999986,0.049375199999999994,0.0988441,0.004923333333333332,0.0059638095238095145,0.007818285714285705,0.00980138888888891,0.011804153846153848,0.015851595744680858,0.019795400000000015,0.029611799999999997,0.039446600000000005,0.04922220000000003,0.09843999999999996,0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000096,0.040000000000000036,0.04999999999999991,0.09999999999999983,0.004977200000000004,0.006011899999999997,0.0079826,0.009982300000000001,0.011983299999999988,0.015965800000000002,0.019976199999999996,0.0299491,0.03994879999999999,0.04991989999999999,0.09984370000000001,0.004962100000000009,0.005982,0.007958099999999997,0.010016700000000007,0.011976600000000009,0.015990599999999987,0.019948999999999998,0.02991740000000001,0.03987629999999998,0.04981609999999999,0.0996204,0.005053700000000003,0.005931499999999994,0.0079569,0.009870799999999996,0.011918899999999987,0.01589650000000001,0.019787799999999994,0.02973709999999999,0.039733600000000015,0.049649099999999995,0.09920700000000007,0.004967599999999994,0.005913599999999992,0.007949900000000001,0.009853499999999998,0.011870899999999993,0.015857400000000008,0.019762700000000005,0.029623899999999984,0.039516199999999994,0.04941789999999997,0.09886300000000002,0.004958400000000001,0.005845099999999996,0.007857000000000001,0.009848900000000008,0.011775400000000005,0.015706800000000007,0.01978720000000001,0.029639599999999974,0.03944,0.0492159,0.09848880000000002],
+&quot;type.fuzz&quot;:[&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;type.fuzz&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;true margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;true margin&quot;,
+&quot;y&quot;:&quot;samplesNeeded&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;],
+&quot;true margin&quot;:[0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000096,0.040000000000000036,0.04999999999999991,0.09999999999999983,0.005001100000000003,0.005981599999999993,0.00800569999999999,0.009964200000000005,0.0119645,0.0159918,0.019962699999999993,0.029937700000000005,0.0399265,0.04990460000000001,0.0998493,0.004998041237113406,0.005942399999999994,0.007935499999999993,0.009939899999999996,0.011964100000000004,0.015950799999999994,0.0199154,0.029867499999999988,0.03987560000000003,0.04980210000000002,0.09962040000000001,0.005046666666666673,0.005981403508771938,0.0079345652173913,0.009859393939393942,0.011899800000000006,0.015889999999999994,0.019836200000000002,0.029730300000000015,0.03969979999999999,0.04962359999999996,0.09930129999999998,0.005028235294117647,0.005910645161290337,0.008066458333333327,0.0098938888888889,0.011979157894736825,0.0158383,0.01976440000000001,0.029706100000000017,0.039516399999999986,0.049375199999999994,0.0988441,0.004923333333333332,0.0059638095238095145,0.007818285714285705,0.00980138888888891,0.011804153846153848,0.015851595744680858,0.019795400000000015,0.029611799999999997,0.039446600000000005,0.04922220000000003,0.09843999999999996,0.004999999999999893,0.006000000000000005,0.008000000000000007,0.010000000000000009,0.01200000000000001,0.016000000000000014,0.020000000000000018,0.030000000000000096,0.040000000000000036,0.04999999999999991,0.09999999999999983,0.004977200000000004,0.006011899999999997,0.0079826,0.009982300000000001,0.011983299999999988,0.015965800000000002,0.019976199999999996,0.0299491,0.03994879999999999,0.04991989999999999,0.09984370000000001,0.004962100000000009,0.005982,0.007958099999999997,0.010016700000000007,0.011976600000000009,0.015990599999999987,0.019948999999999998,0.02991740000000001,0.03987629999999998,0.04981609999999999,0.0996204,0.005053700000000003,0.005931499999999994,0.0079569,0.009870799999999996,0.011918899999999987,0.01589650000000001,0.019787799999999994,0.02973709999999999,0.039733600000000015,0.049649099999999995,0.09920700000000007,0.004967599999999994,0.005913599999999992,0.007949900000000001,0.009853499999999998,0.011870899999999993,0.015857400000000008,0.019762700000000005,0.029623899999999984,0.039516199999999994,0.04941789999999997,0.09886300000000002,0.004958400000000001,0.005845099999999996,0.007857000000000001,0.009848900000000008,0.011775400000000005,0.015706800000000007,0.01978720000000001,0.029639599999999974,0.03944,0.0492159,0.09848880000000002],
+&quot;samplesNeeded&quot;:[1443.0,1203.0,902.0,721.0,601.0,450.0,360.0,240.0,179.0,143.0,71.0,2019.7699999999995,1550.7,1202.6600000000008,870.2099999999997,680.7000000000002,502.31999999999994,411.58000000000015,250.97000000000006,185.83999999999997,143.84,71.60999999999999,9676.57,4363.660000000002,2135.839999999999,1333.0700000000004,1066.5499999999997,607.0800000000004,445.46000000000015,258.51000000000005,198.48999999999998,153.50000000000006,74.87000000000002,70689.99,44867.03,14237.419999999998,4308.800000000001,1902.2200000000014,939.9799999999998,561.47,306.95,226.33999999999995,203.49999999999997,74.95999999999998,83264.48,69582.55,52896.23,30266.33,11723.46,1894.9900000000005,1043.18,462.8,260.63000000000005,187.02999999999997,86.89999999999998,85251.49,79255.47,65324.5,64269.87,36238.87,9433.670000000002,2400.670000000001,627.3999999999999,345.43999999999994,227.45999999999995,89.4,1545.0,1289.0,968.0,775.0,646.0,484.0,387.0,258.0,193.0,154.0,76.0,2228.0499999999997,1787.69,1067.57,909.7100000000002,724.4399999999999,565.5300000000002,425.56999999999994,262.2200000000001,203.92999999999995,163.29999999999998,77.23000000000002,3312.700000000001,2582.2300000000005,1466.6400000000003,1102.2899999999997,936.0299999999999,621.9399999999994,480.5899999999999,290.22999999999996,221.28,163.36,77.98999999999998,5453.919999999998,4041.359999999999,2127.8000000000015,1410.31,1326.2899999999997,733.6800000000001,562.0,340.03999999999985,215.75000000000006,181.47000000000003,80.64000000000001,7948.6,5473.210000000001,3267.2799999999997,2099.3999999999996,1776.9299999999998,1053.5800000000002,661.7600000000001,382.8499999999998,254.25999999999996,187.60000000000005,82.68000000000002,9546.379999999997,8296.860000000002,3874.7900000000004,3116.0999999999985,2183.7000000000003,1090.1200000000001,842.18,396.29000000000013,273.99000000000024,195.08999999999997,89.10999999999997],
+&quot;type.fuzz&quot;:[&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.0&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.001&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.0025&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.005&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.0075&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;corla0.01&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.0&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.001&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.0025&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.005&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.0075&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;,&quot;rlauxe0.01&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;type.fuzz&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;true margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;samplesNeeded&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;true margin&quot;,&quot;samplesNeeded&quot;,&quot;type.fuzz&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;6&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

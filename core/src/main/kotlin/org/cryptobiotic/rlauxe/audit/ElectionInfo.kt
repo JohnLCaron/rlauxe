@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.audit
 
-import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.util.secureRandom
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
@@ -74,11 +73,12 @@ data class SimulationControl(
 data class ContestSampleControl(
     //// checkContestsCorrectlyFormed: preAuditStatus
     val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
-    val minMargin: Double = 0.0, // do not audit contests less than this margin TODO really it should be noerror?
+    val minMargin: Double = 0.0, // do not audit contests less than this margin TODO really it should be noerror for clca?
 
     //// consistentSampling: contestRound.status, depends on having estimation
     val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / contestNc) greater than this
     val removeMaxContests: Int? = null, // remove top n estimated nmvrs contests, for plotting CaseStudiesRemoveNmax
+
     // conflating maximum in SubsetForEstimation, and maximum sample size per contest and maximum overall sample size
     val contestSampleCutoff: Int? = 30000, // use this number of cvrs in the estimation, set to null to use all
     val removeCutoffContests: Boolean = (contestSampleCutoff != null), // remove contests that need more samples than contestSampleCutoff

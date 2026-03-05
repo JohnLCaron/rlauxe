@@ -15,8 +15,6 @@ https://github.com/michelleblom/audit-irv-cp/tree/raire-branch, and released und
 
 See [Getting Started](docs/Developer.md#getting-started) if you are a developer wanting to compile and use the library.
 
-You can also read this document on [github.io](https://johnlcaron.github.io/rlauxe/).
-
 **Table of Contents**
 <!-- TOC -->
 * [SHANGRLA framework](#shangrla-framework)

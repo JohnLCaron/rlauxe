@@ -11,7 +11,6 @@ _last changed 02/15/2026_
   * [Choosing MaxLoss](#choosing-maxloss)
 <!-- TOC -->
 
-
 A _risk function_ evaluates the probability that an assertion about an election is true or not. 
 Rlauxe has two risk functions, one for CLCA audits (BettingMart) and one for polling audits (AlphaMart).
 AlphaMart is formally equivilent to BettingMart, so we will just describe BettingMart.

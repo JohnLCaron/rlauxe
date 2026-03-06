@@ -23,6 +23,7 @@ fun runClcaAuditRound(
     mvrManager: MvrManager,
     roundIdx: Int,
     auditor: ClcaAssertionAuditorIF,
+    parameters: Map<String, Any> = emptyMap(),
     onlyTask: OnlyTask? = null,
 ): Boolean {
     val cvrPairs = mvrManager.makeMvrCardPairsForRound(roundIdx)
@@ -31,7 +32,7 @@ fun runClcaAuditRound(
     val contestsNotDone = auditRound.contestRounds.filter{ !it.done }
     val auditContestTasks = mutableListOf<RunClcaContestTask>()
     contestsNotDone.forEach { contest ->
-        auditContestTasks.add(RunClcaContestTask(config, contest, cvrPairs, auditor, roundIdx, onlyTask))
+        auditContestTasks.add( RunClcaContestTask(config, contest, cvrPairs, auditor, roundIdx, parameters, onlyTask) )
     }
 
     // run all tasks
@@ -67,6 +68,7 @@ class RunClcaContestTask(
     val cvrPairs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
     val auditor: ClcaAssertionAuditorIF,
     val roundIdx: Int,
+    val parameters: Map<String, Any>,
     val onlyTask: OnlyTask? = null,
 ): ConcurrentTaskG<Boolean> {
 
@@ -82,11 +84,13 @@ class RunClcaContestTask(
                     val cassertion = assertionRound.assertion as ClcaAssertion
                     val cassorter = cassertion.cassorter
 
+                    val debuggingId = parameters["cat"]?.toString() + "-" + parameters["phantom"]?.toString() // debugging
                     val sampler = ClcaSamplerErrorTracker.withMaxSample(
                         contestRound.id,
                         cassorter,
                         cvrPairs,
                         maxSampleIndex = contestRound.maxSampleAllowed,
+                        name = debuggingId,
                     )
 
                     val testH0Result = auditor.run(config, contestRound, assertionRound, sampler, roundIdx)

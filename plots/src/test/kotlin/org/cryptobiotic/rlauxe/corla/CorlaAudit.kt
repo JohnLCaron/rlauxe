@@ -10,6 +10,8 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.workflow.*
 
+// Corla uses all the mechanism of rlauxe execpt the RiskMeasuringFn
+// TODO is that the same as what Corla java library does ?
 class CorlaSingleRoundAuditTaskGenerator(
     val Nc: Int,
     val margin: Double,
@@ -41,14 +43,14 @@ class CorlaSingleRoundAuditTaskGenerator(
         return ClcaSingleRoundWorkflowTask(
             name(),
             clcaWorkflow,
-            auditor = AuditCorlaAssertion(),
+            auditor = CorlaAuditor(),
             testMvrs,
-            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0),
-            quiet,
+            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "phantomPct" to phantomPct),
         )
     }
 }
 
+// not used
 class CorlaContestAuditTaskGenerator(
     val Nc: Int,
     val margin: Double,
@@ -73,10 +75,15 @@ class CorlaContestAuditTaskGenerator(
         val testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
             makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
-        val clca = CorlaAudit(auditConfig, listOf(cu.contest as Contest), MvrManagerForTesting(testCvrs, testMvrs, auditConfig.seed), quiet = true)
+        val clcaWorkflow = CorlaAudit(
+            auditConfig,
+            listOf(cu.contest as Contest),
+            MvrManagerForTesting(testCvrs, testMvrs, auditConfig.seed),
+            quiet = true)
+
         return SingleContestAuditTask(
             "genAuditWithErrorsPlots mvrsFuzzPct = $mvrsFuzzPct",
-            clca,
+            clcaWorkflow,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0)
         )
     }
@@ -98,7 +105,7 @@ class CorlaAudit(
 
     override fun runAuditRound(auditRound: AuditRound, onlyTask: OnlyTask?, quiet: Boolean): Boolean  {
         val complete = runClcaAuditRound(auditConfig, auditRound, mvrManagerForTesting, auditRound.roundIdx,
-            auditor = AuditCorlaAssertion()
+            auditor = CorlaAuditor()
         )
         auditRound.auditWasDone = true
         auditRound.auditIsComplete = complete
@@ -114,7 +121,7 @@ class CorlaAudit(
 /////////////////////////////////////////////////////////////////////////////////
 
 // See ComparisonAudit.riskMeasurement() in colorado-rla us.freeandfair.corla.model
-class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
+class CorlaAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
     override fun run(
         config: AuditConfig,
@@ -126,7 +133,6 @@ class AuditCorlaAssertion(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val contestUA = contestRound.contestUA
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-        // val sampler = ClcaWithoutReplacement(contest.id, cvrPairs, cassorter, allowReset = false)
 
         // Corla(val N: Int, val riskLimit: Double, val reportedMargin: Double, val noerror: Double,
         //    val p1: Double, val p2: Double, val p3: Double, val p4: Double): RiskTestingFn

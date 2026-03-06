@@ -257,7 +257,7 @@ fun wrsScatterPlot(
             points {
                 x(xname) { scale = xScale }
                 y(yname) { scale = yScale }
-                size = 0.50
+                // size = 0.50
                 symbol = Symbol.CIRCLE_SMALL
                 color = Color.LIGHT_PURPLE
 
@@ -292,7 +292,8 @@ fun wrsErrorBars(
     ylowerFld: (WorkflowResult) -> Double,
     catName: String,
     catFld: (WorkflowResult) -> String,
-    writeFile: String
+    writeFile: String,
+    colorChoices: ((Set<String>) -> Array<Pair<String, Color>>)? = null
 ) {
     //val xvalues = mutableListOf<Double>()
     //val yvalues = mutableListOf<Double>()
@@ -344,7 +345,13 @@ fun wrsErrorBars(
             }
             line {
                 y(yname)
-                color(catName)
+                if (colorChoices != null) {
+                    color(catName) {
+                        scale = categorical(*colorChoices(groups.keys))
+                    }
+                } else {
+                    color(catName)
+                }
             }
             points {
                 y(yname)

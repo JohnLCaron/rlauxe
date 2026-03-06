@@ -36,6 +36,7 @@ fun makePhantomCvrs(
             phantombs[it].contests.add(contest.id)
         }
     }
+    // println("nphantoms = ${phantombs.size}")
     return phantombs.map { it.buildCvr() }
 }
 

@@ -32,6 +32,13 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
         return if (totalSamples == 0) 0.0 else errorCount / totalSamples.toDouble()
     }
 
+    fun getNamedCount(name: String): Int? {
+        val tauValue = taus.getNamedValue(name)
+        if (tauValue == null) return null
+        val bassort = tauValue * noerror
+        return errorCounts[bassort]
+    }
+
     fun show() = buildString {
         // appendLine("totalSamples=$totalSamples, noerror=$noerror, upper=$upper")
         if (errorCounts.isNotEmpty()) {

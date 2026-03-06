@@ -103,7 +103,7 @@ class TestBoulderUndervotes {
 
         val election2 = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
         println()
-        election2.oaContests.forEach { (_, oa) ->
+        election2.boulderContestBuilders.forEach { (_, oa) ->
             println(BoulderContestVotes.header)
             println(oa.details())
         }
@@ -141,7 +141,7 @@ class TestBoulderUndervotes {
 
         // show the sums and compare to sovo
         // val list1 = election1.cardPools.map { it.undervotes() }
-        val list2 = election2.cardPoolBuilders.map { it.undervotes() }
+        val list2 = election2.cardPoolBuilders.map { it.undervotesSingleBallotStyle() }
 
         //val sum1 = mutableMapOf<Int, Int>()
         //sum1.mergeReduce(list1)
@@ -157,7 +157,7 @@ class TestBoulderUndervotes {
             appendLine()
 
             contestIds.forEach { id ->
-                val oaContest = election2.oaContests[id]
+                val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
                     ("     |")
                 else {
@@ -178,7 +178,7 @@ class TestBoulderUndervotes {
 
             contestIds.forEach { id ->
                 val undervote2 = sum2[id]!!
-                val oaContest = election2.oaContests[id]
+                val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
                     ("     |")
                 else {
@@ -216,7 +216,7 @@ class TestBoulderUndervotes {
             appendLine()
 
             contestIds.forEach { id ->
-                val oaContest = election2.oaContests[id]
+                val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
                     ("     |")
                 else {
@@ -237,7 +237,7 @@ class TestBoulderUndervotes {
 
             contestIds.forEach { id ->
                 val poolCards = sum2[id]!!
-                val oaContest = election2.oaContests[id]
+                val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
                     ("     |")
                 else {
@@ -288,7 +288,7 @@ class TestBoulderUndervotes {
             appendLine()
 
             contestIds.forEach { id ->
-                val oaContest = election2.oaContests[id]
+                val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
                     ("     |")
                 else {
@@ -298,7 +298,7 @@ class TestBoulderUndervotes {
             appendLine()
 
             contestIds.forEach { id ->
-                val oaContest = election2.oaContests[id]
+                val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
                     ("     |")
                 else {
@@ -308,7 +308,7 @@ class TestBoulderUndervotes {
             appendLine()
 
             contestIds.forEach { id ->
-                val oaContest = election2.oaContests[id]
+                val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
                     ("     |")
                 else {
@@ -318,7 +318,7 @@ class TestBoulderUndervotes {
             appendLine()
 
             contestIds.forEach { id ->
-                val oaContest = election2.oaContests[id]
+                val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
                     ("     |")
                 else {
@@ -328,7 +328,7 @@ class TestBoulderUndervotes {
             appendLine()
 
             contestIds.forEach { id ->
-                val oaContest = election2.oaContests[id]
+                val oaContest = election2.boulderContestBuilders[id]
                 if (oaContest == null)
                     ("     |")
                 else {

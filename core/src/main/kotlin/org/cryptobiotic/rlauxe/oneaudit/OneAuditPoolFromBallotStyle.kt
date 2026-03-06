@@ -19,15 +19,16 @@ data class OneAuditPoolFromBallotStyle(
 
     val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
     val maxMinCardsNeeded: Int
-    var adjustCards = 0 // TODO simplify relationship with undervotes
+    var adjustCards = 0 // adjusted number of cards, using distributeExpectedOvervotes() on one or more contests
 
     init {
         voteTotals.forEach { (contestId, contestTab) ->
             val voteSum = contestTab.nvotes()
             val info = infos[contestId]!!
-            // need at least this many cards would you need for this contest?
+            // based on the contest's votes, you need at least this many cards for this contest
             minCardsNeeded[contestId] = roundUp(voteSum.toDouble() / info.voteForN)
         }
+        // you need at least this many cards for this pool
         maxMinCardsNeeded = minCardsNeeded.values.max()
     }
 
@@ -48,7 +49,7 @@ data class OneAuditPoolFromBallotStyle(
     override fun contestTab(contestId: Int) = voteTotals[contestId]
 
     // undervotes per contest when single BallotStyle, no blanks
-    fun undervotes(): Map<Int, Int> {  // contest -> undervote
+    fun undervotesSingleBallotStyle(): Map<Int, Int> {  // contest -> undervote
         val undervote = voteTotals.map { (id, contestTab) ->
             val voteSum = contestTab.nvotes()
             val info = infos[id]!!
@@ -57,6 +58,19 @@ data class OneAuditPoolFromBallotStyle(
         return undervote.toMap().toSortedMap()
     }
 
+    //        val result = if (hasSingleCardStyle) {
+    //            // if hasSingleCardStyle, then missing has to be zero
+    //            // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
+    //            // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
+    //            val undervotes = npop * voteForN - voteSum
+    //            Vunder(contestId, poolId, voteCounts, undervotes, 0, voteForN)
+    //        } else {
+    //            val missing = npop - (this.undervotes + voteSum) / voteForN
+    //            Vunder(contestId, poolId, voteCounts, this.undervotes, missing, voteForN)
+    //        }
+
+    // TODO how to distinguish between undervotes and missing ?? You need independent setting for pool ncards
+    // this assumes missing = 0; but then should set SingleBallotStyle = true ?
     fun undervoteForContest(contestId: Int): Int {
         val contestTab = voteTotals[contestId] ?: return 0
         val voteSum = contestTab.nvotes()

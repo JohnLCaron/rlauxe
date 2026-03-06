@@ -97,7 +97,6 @@ class OneAuditSingleRoundAuditTaskGeneratorWithFlips(
             auditor = OneAuditAssertionAuditor(pools),
             oaMvrs,
             parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 1.0),
-            quiet,
         )
     }
 }
@@ -145,8 +144,7 @@ class OneAuditSingleRoundWithDilutedMargin(
             oneaudit,
             auditor = OneAuditAssertionAuditor(pools),
             mvrs,
-            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 1.0),
-            quiet,
+            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "phantomPct" to phantomPct),
         )
     }
 }

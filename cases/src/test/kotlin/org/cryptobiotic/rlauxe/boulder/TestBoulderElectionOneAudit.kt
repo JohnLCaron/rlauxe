@@ -19,16 +19,16 @@ class TestBoulderElectionOneAudit {
         val export: DominionCvrExportCsv = readDominionCvrExportCsv(filename, "Boulder")
 
         val election = CreateBoulderElection(AuditType.ONEAUDIT, export, sovo)
-        val infos = election.oaContests.mapValues { it.value.info }
+        val infos = election.boulderContestBuilders.mapValues { it.value.info }
         val cards = election.cards()
         val allTab = tabulateAuditableCards(cards, infos).toSortedMap()
 
-        election.oaContests.forEach { (contestId, oaContest) ->
+        election.boulderContestBuilders.forEach { (contestId, oaContest) ->
             oaContest.checkCvrs(allTab[contestId]!!)
         }
         println()
 
-        election.oaContests.forEach { (contestId, oaContest) ->
+        election.boulderContestBuilders.forEach { (contestId, oaContest) ->
             oaContest.checkNcards(allTab[contestId]!!)
         }
 

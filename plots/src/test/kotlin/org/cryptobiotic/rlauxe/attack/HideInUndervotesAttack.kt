@@ -97,7 +97,6 @@ class ClcaSingleRoundWorkflowTaskGeneratorU(
             auditor = ClcaAssertionAuditor(),
             manager.sortedMvrs,
             otherParameters,
-            quiet,
         )
     }
 

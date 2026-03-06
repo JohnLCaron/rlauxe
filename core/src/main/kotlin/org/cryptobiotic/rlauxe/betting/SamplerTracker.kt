@@ -119,6 +119,7 @@ class ClcaSamplerErrorTracker(
     val cassorter: ClcaAssorter,
     val samples: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
     val allowReset: Boolean = true,  // needed ?
+    val name: String? = null,
 ): SamplerTracker, ErrorTracker {
     val permutedIndex = MutableList(samples.size) { it }
     val clcaErrorTracker = ClcaErrorTracker2(cassorter.noerror, cassorter.assorter.upperBound())
@@ -202,7 +203,10 @@ class ClcaSamplerErrorTracker(
     override fun done() {
         if (lastVal != null) welford.update(lastVal!!)
         lastVal = null
+        if (debugPhantoms && name != null)
+            println("  ClcaSamplerErrorTracker $name done nsamples=${welford.count} p1o = ${measuredClcaErrorCounts().getNamedCount("p1o")}")
     }
+    val debugPhantoms = false
 
     //// ErrorTracker
     override fun measuredClcaErrorCounts(): ClcaErrorCounts = clcaErrorTracker.measuredClcaErrorCounts()
@@ -245,6 +249,7 @@ class ClcaSamplerErrorTracker(
             cassorter: ClcaAssorter,
             cvrPairs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
             maxSampleIndex: Int? = null,  // if maxSampleIndex != null then reset = false)
+            name: String?=null,
         ): ClcaSamplerErrorTracker {
             val maxIndex = maxSampleIndex ?: Int.MAX_VALUE
             val extract = mutableListOf<Pair<CvrIF, AuditableCard>>()
@@ -253,7 +258,7 @@ class ClcaSamplerErrorTracker(
                     extract.add(pair)
                 }
             }
-            return ClcaSamplerErrorTracker(contestId, cassorter, extract)
+            return ClcaSamplerErrorTracker(contestId, cassorter, extract, name=name)
         }
 
         fun withNoErrors(

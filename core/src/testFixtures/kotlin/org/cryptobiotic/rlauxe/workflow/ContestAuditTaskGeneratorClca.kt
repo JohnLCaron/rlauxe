@@ -64,6 +64,7 @@ class ClcaSingleRoundAuditTaskGenerator(
     val p2flips: Double? = null,  // used in attack
     val p1flips: Double? = null,
 ): ContestAuditTaskGenerator {
+    var countGeneratedTasks = 0
 
     override fun name(): String {
         return "ClcaSingleRoundAuditTaskGenerator"
@@ -79,6 +80,10 @@ class ClcaSingleRoundAuditTaskGenerator(
         } else {
             makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
         }
+
+        //val nphantoms = testCvrs.count { it.phantom }
+        //println("ClcaSingleRoundAuditTaskGenerator $countGeneratedTasks phantomPct=$phantomPct nphantoms = $nphantoms")
+        countGeneratedTasks++ // multithreaded?
 
         // TODO not adding the Nbs...
         val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(cu.contest), emptyList(),
@@ -100,8 +105,7 @@ class ClcaSingleRoundAuditTaskGenerator(
             clcaWorkflow,
             auditor = ClcaAssertionAuditor(),
             testMvrs,
-            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 3.0),
-            quiet,
+            parameters,
         )
     }
 }
@@ -112,15 +116,14 @@ class ClcaSingleRoundWorkflowTask(
     val workflow: AuditWorkflow,
     val auditor: ClcaAssertionAuditorIF, // can be used for both Clca and OneAudit
     val testMvrs: List<Cvr>, // needed for tracking the true margin of the mvrs, for plotting
-    val otherParameters: Map<String, Any> = emptyMap(),
-    val quiet: Boolean = true,
+    val parameters: Map<String, Any> = emptyMap(),
 ) : ConcurrentTaskG<WorkflowResult> {
 
     override fun name() = name
 
     override fun run(): WorkflowResult {
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
-        val nmvrs = runClcaSingleRoundAudit(workflow, contestRounds, quiet = quiet, auditor)
+        val nmvrs = runClcaSingleRoundAudit(workflow, contestRounds, auditor, parameters)
 
         val contest = contestRounds.first()
         val minAssertion = contest.minAssertion()!!
@@ -134,7 +137,7 @@ class ClcaSingleRoundWorkflowTask(
                 assorter.dilutedMargin(),
                 TestH0Status.ContestMisformed,
                 0.0, 0.0, 0.0,
-                otherParameters,
+                parameters,
             )
         } else {
             val lastRound = minAssertion.auditResult!!
@@ -146,7 +149,7 @@ class ClcaSingleRoundWorkflowTask(
                 nrounds = minAssertion.roundProved.toDouble(),
                 samplesUsed = lastRound.samplesUsed.toDouble(),
                 nmvrs = nmvrs.toDouble(),
-                otherParameters + lastRound.params,
+                parameters + lastRound.params,
                 failPct = if (lastRound.status != TestH0Status.StatRejectNull) 100.0 else 0.0,
                 wtf = (nmvrs - lastRound.samplesUsed) / minAssertion.roundProved.toDouble(),
 
@@ -159,15 +162,16 @@ class ClcaSingleRoundWorkflowTask(
 }
 
 // keep this seperate function for testing
-fun runClcaSingleRoundAudit(workflow: AuditWorkflow, contestRounds: List<ContestRound>, quiet: Boolean = true,
-                            auditor: ClcaAssertionAuditorIF
+fun runClcaSingleRoundAudit(
+    workflow: AuditWorkflow,
+    contestRounds: List<ContestRound>,
+    auditor: ClcaAssertionAuditorIF,
+    parameters: Map<String, Any>,
 ): Int {
-    val stopwatch = Stopwatch()
-
     val oneRound = AuditRound(1, contestRounds, samplePrns = emptyList())
 
-    runClcaAuditRound(workflow.auditConfig(), oneRound, workflow.mvrManager(), 1, auditor = auditor)
-    if (!quiet) println("runClcaSingleRoundAudit took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms")
+    runClcaAuditRound(workflow.auditConfig(), oneRound, workflow.mvrManager(), 1,
+        auditor = auditor, parameters=parameters)
 
     var maxSamples = 0
     contestRounds.forEach { contest->

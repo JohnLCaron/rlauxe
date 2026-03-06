@@ -92,7 +92,8 @@ class PersistedWorkflow(
         }
 
         val complete =  when (config.auditType) {
-            AuditType.CLCA -> runClcaAuditRound(config, auditRound, mvrManager, auditRound.roundIdx, auditor = ClcaAssertionAuditor(quiet), onlyTask=onlyTask)
+            AuditType.CLCA -> runClcaAuditRound(config, auditRound, mvrManager, auditRound.roundIdx,
+                auditor = ClcaAssertionAuditor(quiet), onlyTask=onlyTask)
             AuditType.POLLING -> runPollingAuditRound(config, auditRound, mvrManager, auditRound.roundIdx, quiet)
             AuditType.ONEAUDIT -> runClcaAuditRound(config, auditRound, mvrManager, auditRound.roundIdx,
                 auditor = OneAuditAssertionAuditor(mvrManager().oapools()!!, quiet), onlyTask=onlyTask, )

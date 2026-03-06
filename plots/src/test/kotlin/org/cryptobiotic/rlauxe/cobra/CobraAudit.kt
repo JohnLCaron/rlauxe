@@ -55,7 +55,6 @@ class CobraSingleRoundAuditTaskGenerator(
             auditor = AuditCobraAssertion(p2prior),
             mvrs,
             parameters + mapOf("p2oracle" to p2oracle, "p2prior" to p2prior),
-            quiet,
         )
     }
 }

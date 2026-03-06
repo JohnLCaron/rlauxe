@@ -84,8 +84,7 @@ class RaireSingleRoundAuditTaskGenerator(
             raireAudit,
             auditor = ClcaAssertionAuditor(),
             testMvrs,
-            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "auditType" to 4.0),
-            quiet = true,
+            parameters + mapOf("mvrsFuzzPct" to mvrsFuzzPct, "phantomPct" to phantomPct),
         )
     }
 }

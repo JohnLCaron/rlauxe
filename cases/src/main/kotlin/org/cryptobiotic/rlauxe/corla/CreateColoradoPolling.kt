@@ -23,8 +23,8 @@ class CreateColoradoPolling (
     }
 
     fun makePollingContests(tabs: Map<Int, ContestTabulation>): List<ContestWithAssertions> {
-        val infoList= oaBuilders.map { it.info }.sortedBy { it.id }
-        val contestMap= oaBuilders.associateBy { it.info.id }
+        val infoList= corlaContestBuilders.map { it.info }.sortedBy { it.id }
+        val contestMap= corlaContestBuilders.associateBy { it.info.id }
 
         println("ncontests with info = ${infoList.size}")
 

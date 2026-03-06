@@ -41,9 +41,9 @@ fun CorlaContestRoundCsv.showEstimation() {
         val est = optimistic(riskLimit, dilutedMargin, gamma)
         val (bet, payoff, samples) = betPayoffSamples(ballotCardCount, risk=riskLimit, assorterMargin=dilutedMargin, 0.0)
 
-        // println("dilutedMargin = $dilutedMargin estSamples = ${est.toInt()} corlaEst=$optimisticSamplesToAudit rauxEst=$samples")
+        println("dilutedMargin = $dilutedMargin estSamples = ${est.toInt()} corlaEst=$optimisticSamplesToAudit rauxEst=$samples")
         require(optimisticSamplesToAudit == est.toInt())
-        // println("   rauxe bet = $bet payoff = $payoff rauxeEst=$samples")
+        println("   rlauxe bet = $bet payoff = $payoff rauxeEst=$samples")
     }
 }
 
@@ -81,7 +81,7 @@ fun betPayoffSamples(N: Int, risk: Double, assorterMargin: Double, error: Double
         nphantoms = 0,
         oaAssortRates = null,
         d = 100,
-        maxLoss = .99,
+        maxLoss = .9,
     )
 
     val samples = ClcaErrorTracker(noerror, 1.0)

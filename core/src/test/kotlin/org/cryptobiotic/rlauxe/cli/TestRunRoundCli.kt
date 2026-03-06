@@ -33,9 +33,9 @@ class TestRunRoundCli {
         )
     }
 
-   // @Test
+    // @Test
     fun testRunAllRoundsCli() {
-        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
+        val auditdir = "$testdataDir/cases/corla/clca/audit"
 
         RunRlaRoundCli.main(
             arrayOf(

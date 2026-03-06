@@ -22,6 +22,7 @@ import kotlin.collections.set
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger("BoulderElectionOA")
+private val debugUndervotes = true
 
 // Use OneAudit; redacted ballots are in pools. Cant do IRV.
 // specific to 2024 election. TODO: generalize
@@ -37,7 +38,7 @@ class CreateBoulderElection(
 
     val countCvrVotes = countCvrVotes()
     val countRedactedVotes = countRedactedVotes() // wrong
-    val oaContests: Map<Int, OneAuditContestBoulder> = makeOAContests().associate { it.info.id to it}
+    val boulderContestBuilders: Map<Int, BoulderContestBuilder> = makeBoulderContestBuilders().associate { it.info.id to it}
     val cardPoolBuilders: List<OneAuditPoolFromBallotStyle> = convertRedactedToCardPool()
     val ncards: Int
 
@@ -48,14 +49,28 @@ class CreateBoulderElection(
 
     init {
         //// the redacted groups dont have undervotes, so we do some fancy dancing to generate reasonable undervote counts
-        oaContests.values.forEach { it.adjustPoolInfo(cardPoolBuilders)}
+        boulderContestBuilders.values.forEach { it.adjustPoolInfo(cardPoolBuilders)}
+
+        // estimate undervotes based on each precinct having a single ballot style
+        val undervotesByContest = mutableMapOf<BoulderContestBuilder, Int>() // contestId ->
+        boulderContestBuilders.values.forEach {
+            undervotesByContest[it] = it.poolTotalCards() - it.expectedPoolNCards()
+        }
+
         // 2024
         // first even up with contest 0, since it has the fewest undervotes
         // then contest 63 has fewest undervotes for card Bs
         distributeOvervotes.forEach { contestId ->
-            val oaContest = oaContests[contestId]!!
+            val oaContest = boulderContestBuilders[contestId]!!
             distributeExpectedOvervotes(oaContest, cardPoolBuilders)
-            oaContests.values.forEach { it.adjustPoolInfo(cardPoolBuilders)}
+            boulderContestBuilders.values.forEach { it.adjustPoolInfo(cardPoolBuilders)}
+        }
+
+        if (debugUndervotes) {
+            undervotesByContest.forEach { (cb, before) ->
+                val needAfter = cb.poolTotalCards() - cb.expectedPoolNCards()
+                println("  ${cb.contestId} $before $needAfter ")
+            }
         }
 
         // we need to know the diluted Nb before we can create the UAs
@@ -224,14 +239,14 @@ class CreateBoulderElection(
         return allOk
     }
 
-    fun makeOAContests(): List<OneAuditContestBoulder> {
-        val oa2Contests = mutableListOf<OneAuditContestBoulder>()
+    fun makeBoulderContestBuilders(): List<BoulderContestBuilder> {
+        val oa2Contests = mutableListOf<BoulderContestBuilder>()
         infoList.forEach { info ->
             val sovoContest = sovo.contests.find { it.contestTitle == info.name }
             if (sovoContest != null) {
                 if (countCvrVotes[info.id] != null && countRedactedVotes[info.id] != null) {
                     oa2Contests.add(
-                        OneAuditContestBoulder(info, sovoContest, countCvrVotes[info.id]!!, countRedactedVotes[info.id]!!)
+                        BoulderContestBuilder(info, sovoContest, countCvrVotes[info.id]!!, countRedactedVotes[info.id]!!)
                     )
                 }
             }
@@ -282,7 +297,7 @@ class CreateBoulderElection(
         println("ncontests with info = ${infoList.size}")
 
         return infoList.filter { !it.isIrv }.map { info ->
-            val oaContest = oaContests[info.id]!!
+            val oaContest = boulderContestBuilders[info.id]!!
             val candVotes = oaContest.candVoteTotals().filter { info.candidateIds.contains(it.key) } // remove Write-Ins
             val ncards = oaContest.ncards()
             val useNc = max( ncards, oaContest.Nc())

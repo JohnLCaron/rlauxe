@@ -54,7 +54,7 @@ class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Bo
         task: ConcurrentTaskG<T>,
     ): T {
         val stopwatch = Stopwatch()
-        val result =  task.run()
+        val result = task.run()
         if (showTaskResult) println("${task.name()} (${results.size}): ${stopwatch.elapsed(TimeUnit.SECONDS)}")
         return result
     }

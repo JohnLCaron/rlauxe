@@ -17,6 +17,8 @@ import kotlin.math.max
 
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
+private val debugUndervotes = false
+
 // making OneAudit pools from the precinct results, then generate CVRs from pools
 // TODO experiment with OneAudit with small counties that do hand counts
 open class CreateColoradoElection (
@@ -28,34 +30,38 @@ open class CreateColoradoElection (
     val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
 
-    val oaBuilders = makeOneAuditBuilders(electionDetailXml, roundContests)
-    val infoMap = oaBuilders.associate { it.info.id to it.info }
-    val cardPoolBuilders: List<OneAuditPoolFromBallotStyle> = convertPrecinctsToCardPools(precinctFile, infoMap)
+    val corlaContestBuilders = makeOneAuditBuilders(electionDetailXml, roundContests)
+    val infoMap = corlaContestBuilders.associate { it.info.id to it.info }
+
+    val cardPools: List<OneAuditPoolFromBallotStyle> = convertPrecinctsToCardPools(precinctFile, infoMap)
     val ncards: Int
 
-    val cardPools: List<PopulationIF>
+    val populations: List<PopulationIF>
     val contests: List<ContestIF>
     val contestsUA: List<ContestWithAssertions>
 
     init {
-        // add pool counts into contests
-        oaBuilders.forEach { it.adjustPoolInfo(cardPoolBuilders) }
-        val undervotes = mutableMapOf<Int, MutableList<Int>>()
-        oaBuilders.forEach {
-            val undervote = undervotes.getOrPut(it.info.id) { mutableListOf() }
-            undervote.add(it.oapoolUndervote(cardPoolBuilders))
+        // set contest total cards as sum over pools
+        corlaContestBuilders.forEach { it.adjustPoolInfo(cardPools) }
+
+        // estimate undervotes based on each precinct having a single ballot style
+        val undervotesByContest = mutableMapOf<CorlaContestBuilder, Int>() // contestId ->
+        corlaContestBuilders.forEach {
+            undervotesByContest[it] = it.expectedPoolNCards() - it.poolTotalCards()
         }
 
-        // first do contest 0, since it likely has the fewest undervotes
-        distributeExpectedOvervotes(oaBuilders[0], cardPoolBuilders)
-        oaBuilders.forEach { it.adjustPoolInfo(cardPoolBuilders) }
+        // adjust so contest 0 has 0 undervotes. needed since we dont know number of cards in precincts or missing
+        distributeExpectedOvervotes(corlaContestBuilders[0], cardPools)
+        corlaContestBuilders.forEach { it.adjustPoolInfo(cardPools) }
 
-        oaBuilders.forEach {
-            val undervote = undervotes.getOrPut(it.info.id) { mutableListOf() }
-            undervote.add(it.oapoolUndervote(cardPoolBuilders))
+        if (debugUndervotes) {
+            undervotesByContest.forEach { (cb, before) ->
+                val needAfter = cb.expectedPoolNCards() - cb.poolTotalCards()
+                println("  ${cb.contestId} $before $needAfter ")
+            }
         }
 
-        cardPools = cardPoolBuilders
+        populations = cardPools
         contests = makeContests()
 
         val infos = contests.map { it.info() }.associateBy { it.id }
@@ -64,14 +70,14 @@ open class CreateColoradoElection (
         this.ncards = count
 
         // in case we decide to support OA
-        contestsUA = if (auditType.isOA()) makeOneAuditContests(contests, npopMap, cardPoolBuilders)
+        contestsUA = if (auditType.isOA()) makeOneAuditContests(contests, npopMap, cardPools)
                      else ContestWithAssertions.make(contests, npopMap, isClca=auditType.isClca(), )
     }
 
-    private fun makeOneAuditBuilders(electionDetailXml: ElectionDetailXml, roundContests: List<CorlaContestRoundCsv>): List<OneAuditBuilderCorla> {
+    private fun makeOneAuditBuilders(electionDetailXml: ElectionDetailXml, roundContests: List<CorlaContestRoundCsv>): List<CorlaContestBuilder> {
         val roundContestMap = roundContests.associateBy { mutatisMutandi(contestNameCleanup(it.contestName)) }
 
-        val contests = mutableListOf<OneAuditBuilderCorla>()
+        val contests = mutableListOf<CorlaContestBuilder>()
         electionDetailXml.contests.forEachIndexed { detailIdx, detailContest ->
             val contestName = contestNameCleanup(detailContest.text)
             var roundContest = roundContestMap[contestName]
@@ -97,7 +103,7 @@ open class CreateColoradoElection (
 
                 // they dont have precinct data for contest >= 260, so we'll just skip them
                 if (info.id < 260) {
-                    val contest = OneAuditBuilderCorla(
+                    val contest = CorlaContestBuilder(
                         info,
                         detailContest,
                         roundContest,
@@ -130,19 +136,20 @@ open class CreateColoradoElection (
                         if (candId == null) {
                             // logger.warn{"*** precinct ${precinct} candidate ${choiceName} writein missing in info ${info.id} $contestName infoNames= ${info.candidateNames}"}
                         } else {
-                            contestTab.addVote(candId, choice.totalVotes) // TODO use addVotes
+                            contestTab.addVote(candId, choice.totalVotes) // cant use addVotes
                         }
                     }
                 }
             }
+            // TODO hasSingleCardStyle=false ?
             OneAuditPoolFromBallotStyle("${precinct.county}-${precinct.precinct}", idx,
                 hasSingleCardStyle=false, contestTabs, infoMap)
         }
     }
 
     fun makeContests(): List<ContestIF> {
-        val infoList= oaBuilders.map { it.info }.sortedBy { it.id }
-        val contestMap= oaBuilders.associateBy { it.info.id }
+        val infoList= corlaContestBuilders.map { it.info }.sortedBy { it.id }
+        val contestMap= corlaContestBuilders.associateBy { it.info.id }
         println("ncontests with info = ${infoList.size}")
 
         return infoList.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
@@ -156,8 +163,8 @@ open class CreateColoradoElection (
     }
 
     override fun electionInfo() = ElectionInfo(auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
-    override fun populations() = if (auditType.isClca()) emptyList() else cardPools
-    override fun makeCardPools() = if (auditType.isClca()) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
+    override fun populations() = if (auditType.isClca()) emptyList() else populations
+    override fun makeCardPools() = if (auditType.isClca()) emptyList() else cardPools.map { it.toOneAuditPool() }
     override fun contestsUA() = contestsUA
     override fun cards() = createCards()
     override fun ncards() = ncards
@@ -166,15 +173,15 @@ open class CreateColoradoElection (
     fun createCards(): CloseableIterator<AuditableCard> {
         return CvrsToCardsAddStyles(auditType,
             Closer(CvrIteratorfromPools()),
-            null, // there are no phantoms
-            if (auditType.isClca()) null else cardPoolBuilders,
+            makePhantomCvrs(contests), // yes there are phantoms
+            if (auditType.isClca()) null else cardPools,
         )
     }
 
     // dont load into memory all at once, just one pool at a time
     inner class CvrIteratorfromPools(): Iterator<Cvr> {
-        val oaContestMap = oaBuilders.associateBy { it.info.id }
-        val cardPoolIter = cardPoolBuilders.iterator()
+        val oaContestMap = corlaContestBuilders.associateBy { it.info.id }
+        val cardPoolIter = cardPools.iterator()
         var innerIter: CardsFromPool
 
         init {
@@ -196,7 +203,7 @@ open class CreateColoradoElection (
     }
 
     // these are chosen randomly, so in order for mvrs and cvrs to match, the cvrs have to be made from the mvrs.
-    inner class CardsFromPool(val cardPool: OneAuditPoolFromBallotStyle, val oaContestMap: Map<Int, OneAuditBuilderCorla>) : Iterator<Cvr> {
+    inner class CardsFromPool(val cardPool: OneAuditPoolFromBallotStyle, val oaContestMap: Map<Int, CorlaContestBuilder>) : Iterator<Cvr> {
         val cvrs: Iterator<Cvr>
 
         init {
@@ -226,7 +233,7 @@ open class CreateColoradoElection (
     }
 }
 
-class OneAuditBuilderCorla(val info: ContestInfo, detailContest: ElectionDetailContest, contestRound: CorlaContestRoundCsv): OneAuditContestBuilderIF {
+class CorlaContestBuilder(val info: ContestInfo, detailContest: ElectionDetailContest, contestRound: CorlaContestRoundCsv): OneAuditContestBuilderIF {
     override val contestId = info.id
     val Nc: Int
     val candidateVotes: Map<Int, Int>
@@ -252,6 +259,7 @@ class OneAuditBuilderCorla(val info: ContestInfo, detailContest: ElectionDetailC
         poolTotalCards = cardPools.filter{ it.hasContest(info.id) }.sumOf { it.ncards() }
     }
 
+    // this maximizes undervotes, assumes missing = 0
     fun oapoolUndervote(cardPools: List<OneAuditPoolFromBallotStyle>): Int {
         return cardPools.sumOf { it.undervoteForContest(contestId) }
     }

@@ -1,8 +1,8 @@
 # Colorado Statewide Election 2024
-03/05/2026
+03/06/2026
 
 * 3,241,120 ballot cast (Colorado 2024 General Election) in 3199 precincts.
-* 260 contests, no IRV.
+* 146 contests, no IRV.
 * CO doesnt publically publish the CVRs, just precinct totals, see _2024GeneralPrecinctLevelResults.csv/zip/xlsx_.
 * CORLA does an RLA, so they do have access to the CVRs. A "publically verifiable" RLA requires the CVRs to be publically verifiable. But we can still do the RLA as long as they are "privately available".
 
@@ -11,12 +11,12 @@ We use the precinct totals to simulate CVRs, and use those to estimate how Rlaux
 # Comparing CORLA and Rlauxe
 
 The Colorado RLA software uses a "Conservative approximation of the Kaplan-Markov P-value" for its risk measuring function
-[from "Gentle Introduction" and "Super Simple" papers](../notes/notes.txt). It makes use of measured error rates as they are sampled.
+from the ["Gentle Introduction" and "Super Simple" papers](../notes/notes.txt). It makes use of measured error rates as they are sampled.
 
 We have a Kotlin port of the CORLA Java code in order to compare performance with our CLCA algorithm. Its possible
 that our port does not accurately reflect the actual CORLA code.
 
-The following plots compare our Corla implementation against the Rlauxe algorithm [see BettingRiskFunctions](docs/BettingRiskFunctions.md).
+The following compares our Corla implementation against the Rlauxe algorithm [see BettingRiskFunctions](docs/BettingRiskFunctions.md).
 These are "ballot-at-a-time" plots, so we dont limit the number of samples, or use the estimation rounds.
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/cases/compareCorlaAndRlauxeLogLinear.html" rel="compareCorlaAndRlauxeLogLinear">![compareCorlaAndRlauxeLogLinear](../plots2/cases/compareCorlaAndRlauxeLogLinear.png)</a>
@@ -31,7 +31,7 @@ and also must be kept low for Corla to be effective. Also see [Corla Notes](../n
 
 ## Downloaded files
 
-Detail XLS (295 contests, 92k zipped, 2.6M unzipped )
+1. Detail XLS (295 contests, 92k zipped, 2.6M unzipped )
 has a separate sheet for every contest with vote count, by county
 https://results.enr.clarityelections.com//CO//122598/355977/reports/detailxls.zip
 can also get it as an XML (56k zipped, 780k unzipped ):
@@ -39,11 +39,17 @@ https://results.enr.clarityelections.com//CO//122598/355977/reports/detailxml.zi
 
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
 
-PrecinctLevelResults are apparently no longer available, or were moved.
-We got them from:
-https://www.sos.state.co.us/pubs/elections/resultsData.html
+
+2. PrecinctLevelResults are apparently no longer available, or were moved.
+
+We got them from https://www.sos.state.co.us/pubs/elections/resultsData.html
 https://www.sos.state.co.us/pubs/elections/Results/2024/2024GeneralPrecinctLevelResults.xlsx
-convert to cvs and zip to corla/src/test/data/2024election/2024GeneralPrecinctLevelResults.zip
+
+        corla/src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.xlsx
+
+convert to cvs and zip to 
+
+        corla/src/test/data/2024election/2024GeneralPrecinctLevelResults.zip
 
 looks like:
 
@@ -51,25 +57,31 @@ County	Precinct	Contest	Choice	Party	Total Votes
 ADAMS	4215601243	Presidential Electors	Kamala D. Harris / Tim Walz	DEM	224
 ADAMS	4215601244	Presidential Electors	Kamala D. Harris / Tim Walz	DEM	237
 ADAMS	4215601245	Presidential Electors	Kamala D. Harris / Tim Walz	DEM	64
+...
 
-        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.xlsx"
+3. https://www.coloradosos.gov/pubs/elections/RLA/2024/general/round1/contest.csv
+This file is also no longer available.
 
-This file is also no longer available, and Im looking for where they were originally downloaded from:
-
-        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
+        corla/src/test/data/corla/2024audit/round1/contest.csv
 
 We use it to make the contests.
 
 ## Generating the election
 
-Using _cases/src/test/kotlin/org/cryptobiotic/rlauxe/util/TestGenerateAllUseCases.kt_:
+Run createColoradoClca() to create a CLCA elction in  _$testdataDir/cases/corla/clca/audit_
 
-* run createColoradoOneAudit() to create a OneAudit election in  _$testdataDir/cases/corla/oa/audit_
-* run createColoradoClca() to create a CLCA elction in  _$testdataDir/cases/corla/clca/audit_
+1. detailxml and contest.csv are used to define a CorlaContestBuilder for each contest.
+   Set Nc from contest.csv field name contestBallotCardCount.
+2. 2024GeneralPrecinctLevelResults are used to create an OneAuditPoolFromBallotStyle for each precinct.
+3. Assumes that each precinct has one BallotStyle; we need total ballots per precinct per contest to fix that.
+   The precinct ballot style is used for the AuditableCards from that precinct.
+4. Adjust pool ncards so contest 0 has 0 undervotes; needed since we dont know number of cards in precincts or missing.
+   Adjust Nc up if needed. This is rather arbitrary; lots of other ways to guess at it. 
+5. The sum over precincts gives us Ncast, the difference from Nc gives us nphantoms.
 
 ### Corla election notes:
 
-* The _detail.xls_ file has summary by contest broken out by county, in a multipage excel file. _detail.xml_ has same info in xml file
+* The _detail.xml_ file has summary by contest broken out by county.
 * The _round1/contest.csv_ file has a summary of each round; we use these fields from it to make the contest:
 ````
   contest_name
@@ -85,7 +97,7 @@ Using _cases/src/test/kotlin/org/cryptobiotic/rlauxe/util/TestGenerateAllUseCase
 
 Note that this gives us the number of samples estimated for each audit round, from the CORLA "super simple" algorithm. We can compare these estimates with the CORLA software's estimates (estimates can be seen in Rlauxe Viewer _AuditRoundsTable_).
 
-There are 725 contests listed on round1/contest.csv. There are 295 listed in detail.xml. I was told they dont have precinct data (or CVRs?) for contests \>= 260. So we restrict our attention to those 260 contests.
+There are 725 contests listed on round1/contest.csv. There are 295 listed in detail.xml. I was told they dont have precinct data (or CVRs?) for contests \>= 260. So we ignore contests with id > 260.
 
 The file corla/2024audit/_targetedContests.xlsx_ shows contests selected for audit, eg:
 
@@ -111,16 +123,21 @@ Not exactly consistent, eg 1728159 - 1377441 = 350718 != 350348, but close enoug
 
 ### simulated CVRs for CLCA audit
 
-We use the published precinct level results to create simulated CVRs and run simulated RLAs. Note that we need CVRs to do IRV contests, so we cant handle
-IRV contests.
+We use the published precinct level results to create simulated CVRs and run simulated RLAs. Note that we would need CVRs to do IRV contests, so we cant handle IRV contests.
 
 **createColoradoClca()** assumes we can match the CVRs to physical ballots and does a regular CLCA.
 This allows us to compare the cost of OneAudit vs CLCA.
 
 ### simulated OneAudit
 
-Not currently done. TODO: choose a few rural counties that might be doing hand counts; put them into OneAudit pools, probably by county. 
-See how the sample sizes compare to CLCA.
+Not currently done. 
+
+TODO: choose a few rural counties that might be doing hand counts; put them into OneAudit pools, probably by county. 
+See how the sample sizes compare to CLCA. Maybe Mesa (107,447	74,421), and El Paso (469,368 voters; 288,059 cast)? This would be
+11% of the total vote.
+
+"Ballots are counted using voting systems in every county except San Juan County, which hand-counts ballots".
+San Juan (746, 566). With a single pool that small, the effect would be negligible (566/3241120) = .0001746.
 
 ### Next Steps
 

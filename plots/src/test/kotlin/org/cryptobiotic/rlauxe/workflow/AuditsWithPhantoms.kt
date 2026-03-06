@@ -15,14 +15,14 @@ class AuditsWithPhantoms {
     val name = "AuditsWithPhantoms"
     val dirName = "$testdataDir/plots/phantoms/$name"
 
-    val mvrFuzzPct = .01
+    val mvrFuzzPct = 0.0
     val nruns = 200  // number of times to run workflow
     val N = 50000
-    val margin = .045
+    val margin = .045 // TODO
 
     @Test
     fun genAuditWithPhantomsPlots() {
-        val phantoms = listOf(.00, .005, .01, .02, .03, .04, .05)
+        val phantoms = listOf(.00, .001, .002, .005, .01, .02, .03, .04, .05)
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
@@ -44,7 +44,7 @@ class AuditsWithPhantoms {
         }
 
         // run tasks concurrently and average the results
-        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
+        val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks, nthreads=1)
         println(stopwatch.took())
 
         validateOutputDir(Path(dirName))
@@ -58,22 +58,8 @@ class AuditsWithPhantoms {
     fun regenPlots() {
         val subtitle = "margin=${df(margin)} Nc=${N} nruns=${nruns} mvrFuzz=${mvrFuzzPct}"
         showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.Linear, catName="auditType")
-    }
-
-    fun showSampleSizesVsPhantomPct(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
-                                      catName: String, catfld: ((WorkflowResult) -> String) = { category(it) } ) {
-        val io = WorkflowResultsIO("$dirName/${name}.csv")
-        val data = io.readResults()
-        wrsPlot(
-            titleS = "$name samples needed",
-            subtitleS = subtitle,
-            writeFile = "$dirName/${name}${scaleType.name}",
-            wrs = data,
-            xname = "phantomPct", xfld = { it.Dparam("phantom") },
-            yname = "samplesNeeded", yfld = { it.samplesUsed },
-            catName = catName, catfld = catfld,
-            scaleType = scaleType
-        )
+        showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.LogLinear, catName="auditType")
+        showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.LogLog, catName="auditType")
     }
 
     @Test
@@ -116,4 +102,21 @@ class AuditsWithPhantoms {
         showSampleSizesVsPhantomPct(dirName, name, subtitle, ScaleType.LogLog, catName="auditType")
     }
 
+}
+
+
+fun showSampleSizesVsPhantomPct(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
+                                catName: String, catfld: ((WorkflowResult) -> String) = { category(it) } ) {
+    val io = WorkflowResultsIO("$dirName/${name}.csv")
+    val data = io.readResults()
+    wrsPlot(
+        titleS = "$name samples needed",
+        subtitleS = subtitle,
+        writeFile = "$dirName/${name}${scaleType.name}",
+        wrs = data,
+        xname = "phantomPct", xfld = { it.Dparam("phantom") },
+        yname = "samplesNeeded", yfld = { it.samplesUsed },
+        catName = catName, catfld = catfld,
+        scaleType = scaleType
+    )
 }

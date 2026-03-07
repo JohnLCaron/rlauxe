@@ -99,24 +99,22 @@ data class TausRates(val rates: Map<String, Double>) {  // name -> rate over pop
     }
 
     // convert to ClcaErrorCounts by multiplying by totalSamples, and noerror.
-    fun makeErrorCounts(totalSamples: Int, noerror: Double, upper: Double): ClcaErrorCounts {
+    fun makeErrorRates(noerror: Double, upper: Double): ClcaErrorRates {
         val taus = Taus(upper)
 
         // each tau generates an errorCount
-        val errorCounts = mutableMapOf<Double, Int>()
+        val errorRates = mutableMapOf<Double, Double>()
         taus.names().filter { it != "noerror" }.forEach { tauName ->
             val errorRate = getNamedRate(tauName)
             if (errorRate != null) {
-                // error count = errorRate * totalSamples
-                val errorCount = (totalSamples * errorRate).toInt()
                 // tau is assort value / noerror, so assort value = tau * noerror
                 val tau = taus.valueOf(tauName)
-                errorCounts[tau * noerror] = errorCount
+                errorRates[tau * noerror] = errorRate
             }
         }
 
         // data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double)
-        return ClcaErrorCounts(errorCounts, totalSamples, noerror, upper)
+        return ClcaErrorRates(noerror, upper, errorRates)
     }
 
     // will look for both 7 names and 5 names.
@@ -160,8 +158,8 @@ data class TausRates(val rates: Map<String, Double>) {  // name -> rate over pop
 object TausRateTable {
     private val normalizedRates = mutableMapOf<Int, TausRates>() // ncands -> tauDesc -> tauRate
 
-    // return ClcaErrorCounts by multiplying by fuzzPct, totalSamples, and noerror.
-    fun makeErrorCounts(ncandidates: Int, fuzzPct: Double, totalSamples: Int, noerror: Double, upper: Double): ClcaErrorCounts {
+    // return ClcaErrorRates by multiplying by fuzzPct, totalSamples, and noerror.
+    fun makeErrorRates(ncandidates: Int, fuzzPct: Double, totalSamples: Int, noerror: Double, upper: Double): ClcaErrorRates {
         val useCand = when  {
             ncandidates < 2 -> 2
             ncandidates > 10 -> 10
@@ -172,18 +170,15 @@ object TausRateTable {
         val taus = Taus(upper)
 
         // each tau generates an errorCount
-        val errorCounts = taus.names().filter { it != "noerror" }.map { tauName ->
+        val errorRates = taus.names().filter { it != "noerror" }.map { tauName ->
             // errorRate = tausRate * fuzzPct
             val errorRate = tauRateForNCand.getNamedRate(tauName)!! * fuzzPct
-            // error count = errorRate * totalSamples
-            val errorCount = (totalSamples * errorRate).toInt()
             // tau is assort value / noerror, so assort value = tau * noerror
             val tau = taus.valueOf(tauName)
-            Pair(tau * noerror, errorCount)
+            Pair(tau * noerror, errorRate)
         }.toMap()
 
-        // data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double)
-        return ClcaErrorCounts(errorCounts, totalSamples, noerror, upper)
+        return ClcaErrorRates(noerror, upper, errorRates)
     }
 
     // Experimental - do not use
@@ -194,24 +189,23 @@ object TausRateTable {
     // fuzzPct = error count / tausRate / totalSamples
     // fuzzPct = error rate / tausRate
 
-    fun calcFuzzPct(ncandidates: Int, errorCounts: ClcaErrorCounts) : List<Double> {
+    fun calcFuzzPct(ncandidates: Int, errorRates: ClcaErrorRates) : List<Double> {
         val useCand = when  {
             ncandidates < 2 -> 2
             ncandidates > 10 -> 10
             else -> ncandidates
         }
         val tauRateForNCand = normalizedRates[useCand]!!
-        val taus = errorCounts.taus
-        val errorRates = errorCounts.errorRates()
+        val taus = errorRates.taus
+        val rates = errorRates.errorRates
 
         // different fuzzPct for each tau
-        val fuzzPcts = errorCounts.errorCounts.map { (assortValue, count) ->
-            val tau = assortValue / errorCounts.noerror
+        val fuzzPcts = rates.map { (assortValue, rate) ->
+            val tau = assortValue / errorRates.noerror
             val name = taus.nameOf(tau)
             val tauRate = tauRateForNCand.getNamedRate(name) ?: throw RuntimeException("calcFuzzPct cant find tauRateForNCand $name ncand=$ncandidates")
-            val errorRate = errorRates[assortValue] ?: 0.0
             // fuzzPct = error rate / tauRate
-            errorRate / tauRate
+            rate / tauRate
         }
         return fuzzPcts
     }

@@ -14,6 +14,8 @@ import kotlin.test.Test
 import org.jetbrains.kotlinx.kandy.util.color.Color
 import kotlin.io.path.Path
 
+// not that interesting, maybe delete
+
 class CompareCorlaPlots {
     val nruns = 10
     val nsimEst = 10

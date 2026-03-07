@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.core.PluralityErrorRates
+import org.cryptobiotic.rlauxe.estimate.estimateSampleSizeSimple
 import kotlin.test.Test
 
 class TestOptimalEstimate {
@@ -68,7 +69,7 @@ fun compareCorlaAndOptimal(dilutedMargin: Double, twoOver: Int, oneOver: Int, on
     // TODO why does this need a rate and other number ?
 
     val N = 1000.0
-    val optimal = estimateSampleSizeOptimalLambda(
+    val optimal = estimateSampleSizeCobraOptimalLamda(
         riskLimit,
         dilutedMargin,
         1.0,

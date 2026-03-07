@@ -1,11 +1,12 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.betting.TestH0Status
+import org.cryptobiotic.rlauxe.betting.makeAprioriErrorRates
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.estimate.estimateSampleSizeSimple
 import org.cryptobiotic.rlauxe.util.df
-import kotlin.math.ceil
-import kotlin.math.max
 
 interface AuditRoundIF {
     val roundIdx: Int
@@ -104,7 +105,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     }
 
     fun minAssertion(): AssertionRound? {
-        // cant use contestUA.minAssertion, since some of the assertions may have finished being audit, ie are not in assertionRounds
+        // cant use contestUA.minAssertion, since some of the assertions may have finished being audited, ie are not in assertionRounds
         if (assertionRounds.isEmpty()) return null
         if (contestUA.isClca) {
             val margins = assertionRounds.map { Pair(it, it.noerror) }
@@ -119,6 +120,35 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
 
     fun countCvrsUsedInAudit(): Int {
         return assertionRounds.maxOfOrNull { it.auditResult?.samplesUsed ?: 0 } ?: 0
+    }
+
+    // called by viewer
+    fun corlaCalc(alpha: Double): Int {
+        val minAssertion = minAssertion()
+        if (minAssertion == null) return 0
+        val lastResult = minAssertion.auditResult ?: minAssertion.prevAuditResult
+        if (lastResult == null) return 0
+
+        val errorCounts = lastResult.measuredCounts
+
+        // fun estimateSampleSizeSimple(
+        //    riskLimit: Double,
+        //    dilutedMargin: Double,
+        //    gamma: Double = 1.03905,
+        //    twoOver: Int = 0,
+        //    oneOver: Int = 0,
+        //    oneUnder: Int = 0,
+        //    twoUnder: Int = 0,
+        //)
+
+        return estimateSampleSizeSimple(
+            alpha,
+            dilutedMargin = minAssertion.assertion.assorter.dilutedMargin(),
+            twoOver = errorCounts?.getNamedCount("p2o") ?: 0,
+            oneOver = errorCounts?.getNamedCount("p1o") ?: 0,
+            oneUnder = errorCounts?.getNamedCount("p1u") ?: 0,
+            twoUnder = errorCounts?.getNamedCount("p2u") ?: 0,
+        )
     }
 
     override fun equals(other: Any?): Boolean {
@@ -180,21 +210,39 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     }
 
     // return (calculated new mvrs needed, optimalBet) based on prevAuditResult.measuredCounts or apriori.errorCounts
-    // TODO  maxLoss: Double, riskLimit: Double, config always come from config
-    fun calcNewMvrsNeeded(contest: ContestWithAssertions, maxLoss: Double, riskLimit: Double): Pair<Int, Double> {
+    fun calcNewMvrsNeeded(contest: ContestWithAssertions, auditConfig : AuditConfig): Int {
         require(assertion is ClcaAssertion)
+        val cassorter = assertion.cassorter
 
+        // because we start from previous rounds, we are calculating new mvrs
         // payoff^n = Tprev
         // Tprev * Tnow = T = 1/risklimit
         // Tnow = T / Tprev = (1/risklimit) / (1/plast)
         // alpha_now = 1 / Tnow = = (1/plast) / (1/risklimit) = risklimit/plast
-
-        // because we start from previous rounds, we are calculating new mvrs
-        var alpha = riskLimit
+        var alpha = auditConfig.riskLimit
         if (this.prevAuditResult != null) {
             alpha /= this.prevAuditResult!!.plast
         }
-        return assertion.cassorter.estWithOptimalBet2(contest, maxLoss, alpha, previousErrorCounts())
+
+        val maxBet = 2 * auditConfig.clcaConfig.maxLoss
+        val aprioriRates = auditConfig.clcaConfig.apriori.makeErrorRates(noerror, upper)
+        val totalRates =  makeAprioriErrorRates(aprioriRates, contest.Nphantoms/contest.Npop.toDouble())
+        val result = cassorter.sampleSizeWithErrors(maxBet, alpha, ClcaErrorRates(noerror, upper, totalRates))
+        return result
+
+        /*
+        return if (cassorter is OneAuditClcaAssorter) {
+            assertion.cassorter.estWithOptimalBet2(contest, maxLoss, alpha, previousErrorCounts())
+        } else {
+            // fun estimateSampleSizePayloads(
+            //    alpha: Double,
+            //    gamma: Double = 1.03905,
+            //    errors: ClcaErrorCounts, // (val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double) {
+            //    )
+            // need to add the phantom rates like in estWithOptimalBet2
+            val est = estimateSampleSizePayloads(alpha, previousErrorCounts())
+            Pair(est, 2*maxLoss)
+        } */
     }
 }
 

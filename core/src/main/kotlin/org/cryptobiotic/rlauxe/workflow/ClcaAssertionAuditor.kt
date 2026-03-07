@@ -136,7 +136,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
         val noerror=cassorter.noerror()
         val upper=cassorter.assorter.upperBound()
-        val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
+        val apriori = clcaConfig.apriori.makeErrorRates(noerror, upper)
 
         val bettingFn =
             // the actual audit cant "look ahead" with the measured error rates, so always start empty

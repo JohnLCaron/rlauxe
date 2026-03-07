@@ -22,7 +22,7 @@ private val logger = KotlinLogging.logger("GeneralAdaptiveBetting")
 
 data class GeneralAdaptiveBetting(
     val Npop: Int, // population size for this contest
-    val aprioriCounts: ClcaErrorCounts, // apriori counts not counting phantoms, non-null so we have noerror and upper
+    val aprioriCounts: ClcaErrorRates, // apriori rates not counting phantoms, non-null so we always have noerror and upper
     val nphantoms: Int, // number of phantoms in the population
     val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
 
@@ -95,8 +95,8 @@ data class GeneralAdaptiveBetting(
 // apriori: apriori rates not counting phantoms
 // phantomRate: nphantoms / Npop
 // return full errorRates (all taus except noerrors)
-fun makeAprioriErrorRates(apriori: ClcaErrorCounts, phantomRate: Double): Map<Double, Double> { // bassort -> rate
-    val startingRates = mutableMapOf<Double, Double>()
+fun makeAprioriErrorRates(apriori: ClcaErrorRates, phantomRate: Double): Map<Double, Double> { // bassort -> rate
+    val errorsWithPhantoms = mutableMapOf<Double, Double>()
 
     val noerror = apriori.noerror
     val upper = apriori.upper
@@ -106,10 +106,10 @@ fun makeAprioriErrorRates(apriori: ClcaErrorCounts, phantomRate: Double): Map<Do
         val tauValue = taus.valueOf(name)
         val bassort = tauValue * noerror
         val aprioriRate = apriori.getNamedRate(name) // may be null
-        val phantom = if (apriori.isPhantom(tauValue) && phantomRate > 0.0) phantomRate else 0.0
-        startingRates[bassort] = (aprioriRate?: 0.0) + phantom
+        val phantom = if (apriori.isPhantom(bassort) && phantomRate > 0.0) phantomRate else 0.0
+        errorsWithPhantoms[bassort] = (aprioriRate?: 0.0) + phantom
     }
-    return startingRates
+    return errorsWithPhantoms
 }
 
 class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, Double>, val oaErrorRates: Map<Double, Double>?,

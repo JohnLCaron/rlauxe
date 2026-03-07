@@ -247,7 +247,7 @@ fun estimateClcaAssertionRound(
 
     val measuredErrors = assertionRound.previousErrorCounts()
 
-    val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
+    val apriori = clcaConfig.apriori.makeErrorRates(noerror, upper)
 
     val bettingFn =
         GeneralAdaptiveBetting(
@@ -284,7 +284,7 @@ fun estimateClcaAssertionRound(
         moreParameters
     )
 
-    val (calcMvrsNeeded, _) = assertionRound.calcNewMvrsNeeded(contestRound.contestUA, config.clcaConfig.maxLoss, config.riskLimit)
+    val calcMvrsNeeded = assertionRound.calcNewMvrsNeeded(contestRound.contestUA, config)
     assertionRound.estimationResult = EstimationRoundResult(
         roundIdx,
         "${config.simFuzzPct} ClcaFuzzSamplerTracker ",
@@ -363,7 +363,7 @@ fun estimateOneAuditAssertionRound(
 
     val measuredErrors = assertionRound.previousErrorCounts()
 
-    val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
+    val apriori = clcaConfig.apriori.makeErrorRates(noerror, upper)
 
     val bettingFn =
         GeneralAdaptiveBetting(
@@ -425,7 +425,7 @@ fun estimateOneAuditAssertionRound(
         moreParameters
     )
 
-    val (calcMvrsNeeded, _) = assertionRound.calcNewMvrsNeeded(contestRound.contestUA, config.clcaConfig.maxLoss, config.riskLimit)
+    val calcMvrsNeeded = assertionRound.calcNewMvrsNeeded(contestRound.contestUA, config)
     assertionRound.estimationResult = EstimationRoundResult(
         roundIdx,
         "${vunderFuzz.fuzzPct} OneAuditVunderFuzzer",

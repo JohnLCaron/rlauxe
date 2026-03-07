@@ -15,7 +15,7 @@ class BettingMart(
     val tracker: SamplerTracker,
     val sampleUpperBound: Double,  // the upper bound of the values of the sequence; bassort for CLCA
     val riskLimit: Double = 0.05, // α ∈ (0, 1)
-    val withoutReplacement: Boolean = true,
+    val withoutReplacement: Boolean = true, // TODO are we really supporting with replacement ??
 ): RiskMeasuringFn {
     private val showEachSample = false
     private val sequences = DebuggingSequences()
@@ -31,9 +31,9 @@ class BettingMart(
                         startingTestStatistic: Double,  // T, must grow to 1/riskLimit
                         drawSample : () -> Double) : TestH0Result {
 
-        var sampleNumber = 0        // – j ← 0: sample number
+        var sampleNumber = 0        // j ← 0: sample number
         var testStatistic = startingTestStatistic     // – T ← 1: test statistic
-        var mj = 0.5                // – m = µ_j = 1/2: population mean under the null hypothesis = H0
+        var mj = 0.5                // m = µ_j = 1/2: population mean under the null hypothesis = H0
 
         var pvalueLast = 1.0
         var pvalueMin = 1.0
@@ -59,34 +59,6 @@ class BettingMart(
             require(xj >= 0.0)
             require(xj <= sampleUpperBound)
 
-            // rlabelgium Nonnegmean line 163
-            //         terms[m>u] = 0                                       # true mean is certainly less than hypothesized
-            //        terms[np.isclose(0, m, atol=atol)] = 1               # ignore
-            //        terms[np.isclose(u, m, atol=atol, rtol=rtol)] = 1    # ignore
-            //        terms[np.isclose(0, terms, atol=atol)] = 1           # martingale effectively vanishes; p-value 1
-            //        terms[m<0] = np.inf                                  # true mean certainly greater than hypothesized
-            //        terms[-1] = (np.inf if Stot > N*t else terms[-1])    # final sample makes the total greater than the null
-
-            // SHANGRLA NonnegMean line 226
-            // 1       terms[m > u] = 0                                   # true mean is certainly less than hypothesized
-            // 2       terms[np.isclose(0, m, atol=atol)] = 1             # ignore
-            // 3       terms[np.isclose(u, m, atol=atol, rtol=rtol)] = 1  # ignore
-            // 4       terms[np.isclose(0, terms, atol=atol)] = (
-            //            1                                             # martingale effectively vanishes; p-value 1
-            //        )
-            // 5       terms[m < 0] = np.inf                            # true mean certainly greater than hypothesized
-            // 6       terms[-1] = (
-            //            np.inf if Stot > N * t else terms[-1]
-            //        )                                                 # final sample makes the total greater than the null
-
-            // 1           m[i] > u -> terms[i] = 0.0   # true mean is certainly less than 1/2
-            // 2           isCloseToZero(m[i], atol) -> terms[i] = 1.0
-            // 3           isCloseToU(m[i], u, atol, rtol) -> terms[i] = 1.0
-            // 4           isCloseToZero(terms[i], atol) -> terms[i] = 1.0      LOOK SHANGRLA original code cant be used here
-            // 5           m[i] < 0 -> terms[i] = Double.POSITIVE_INFINITY # true mean certainly greater than 1/2
-            // 6           else -> terms[i] = if (Stot > N * t) Double.POSITIVE_INFINITY else terms[i]
-
-
             val tj = if (doubleIsClose(0.0, mj) || doubleIsClose(sampleUpperBound, mj)) { // 2, 3
                 1.0
             } else {
@@ -107,7 +79,7 @@ class BettingMart(
             // if (sampleNumber % 1000 == 0)
             //    println(sampleNumber)
 
-            // – S ← S + Xj
+            // S ← S + Xj
             // tracker.addSample(xj)
             pvalueLast = 1.0 / testStatistic
             if (pvalueLast < pvalueMin) pvalueMin = pvalueLast
@@ -130,14 +102,8 @@ class BettingMart(
             }
         }
 
-        // data class TestH0Result(
-        //    val status: TestH0Status,  // how did the test conclude?
-        //    val sampleCount: Int,      // number of samples used in testH0
-        //    val pvalueMin: Double,     // smallest pvalue in the sequence.
-        //    val pvalueLast: Double,    // last pvalue.
-        //    val sequences: DebuggingSequences? = null,
-        //)
-        return TestH0Result(status,
+        return TestH0Result(
+            status,
             sampleCount = sampleNumber,
             pvalueMin=pvalueMin,
             pvalueLast=pvalueLast,
@@ -154,3 +120,31 @@ class BettingMart(
         private val logger = KotlinLogging.logger("BettingMart")
     }
 }
+
+
+// rlabelgium Nonnegmean line 163
+//         terms[m>u] = 0                                       # true mean is certainly less than hypothesized
+//        terms[np.isclose(0, m, atol=atol)] = 1               # ignore
+//        terms[np.isclose(u, m, atol=atol, rtol=rtol)] = 1    # ignore
+//        terms[np.isclose(0, terms, atol=atol)] = 1           # martingale effectively vanishes; p-value 1
+//        terms[m<0] = np.inf                                  # true mean certainly greater than hypothesized
+//        terms[-1] = (np.inf if Stot > N*t else terms[-1])    # final sample makes the total greater than the null
+
+// SHANGRLA NonnegMean line 226
+// 1       terms[m > u] = 0                                   # true mean is certainly less than hypothesized
+// 2       terms[np.isclose(0, m, atol=atol)] = 1             # ignore
+// 3       terms[np.isclose(u, m, atol=atol, rtol=rtol)] = 1  # ignore
+// 4       terms[np.isclose(0, terms, atol=atol)] = (
+//            1                                             # martingale effectively vanishes; p-value 1
+//        )
+// 5       terms[m < 0] = np.inf                            # true mean certainly greater than hypothesized
+// 6       terms[-1] = (
+//            np.inf if Stot > N * t else terms[-1]
+//        )                                                 # final sample makes the total greater than the null
+
+// 1           m[i] > u -> terms[i] = 0.0   # true mean is certainly less than 1/2
+// 2           isCloseToZero(m[i], atol) -> terms[i] = 1.0
+// 3           isCloseToU(m[i], u, atol, rtol) -> terms[i] = 1.0
+// 4           isCloseToZero(terms[i], atol) -> terms[i] = 1.0      LOOK SHANGRLA original code cant be used here
+// 5           m[i] < 0 -> terms[i] = Double.POSITIVE_INFINITY # true mean certainly greater than 1/2
+// 6           else -> terms[i] = if (Stot > N * t) Double.POSITIVE_INFINITY else terms[i]

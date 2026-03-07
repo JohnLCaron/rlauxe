@@ -11,9 +11,19 @@ import kotlin.math.max
 import kotlin.math.min
 
 // The RiskMeasuringFn that colorado-rla uses, from SuperSimple paper
-// Corla doesnt use this "sample at a time" algorithm, it audits its list of selected ballots and finds the CLCA errors (plurality and IRV only)
+// Corla doesnt use this "sample at a time" algorithm, it audits its list of selected ballots and finds the CLCA errors
 // in the entire batch, then computes the Kaplan-Markov P-value.
-// Maybe its one contest at a time ?? TODO does it ensure contest canonical sequence ?? allow more samples than estimated ??
+// Maybe its one contest at a time ??
+// Im guessing its "with replacement"; only audits minimum assertion; upper must = 1.0 (plurality and IRV).
+
+// TODO does it ensure contest canonical sequence ?? allow more samples than estimated ??
+//   From ComparisonAudit.recordDiscrepancy(): If the discrepancy is for this Contest
+//   * but from a CVR/ballot that was not selected for this Contest (selected for
+//   * another Contest), it does not contribute to the counts and calculations. It
+//   * is still recorded, though, for informational purposes. The valid range is
+//   * -2 .. 2: -2 and -1 are understatements, 0 is a discrepancy that doesn't
+//   * affect the RLA calculations, and 1 and 2 are overstatements.
+// so probably ensure contest canonical sequence = yes, allow more samples than estimated = no
 /*
   public BigDecimal riskMeasurement() {
     if (my_audited_sample_count > 0
@@ -116,6 +126,8 @@ class Corla(
  *
  * Implements equation (10) of Philip B. Stark's paper, Super-Simple
  * Simultaneous Single-Ballot Risk-Limiting Audits.
+ * 1. Extended to include p1u and p2u.
+ * 2. Uses minimum margin of the contest's assertions, not minimum over all contests.
  *
  * Translated from Stark's implementation under the heading "A simple
  * approximation" at the following URL:
@@ -137,8 +149,8 @@ class Corla(
  */
 fun pValueApproximation(
     n: Int, // n = auditedBallots the number of ballots audited so far
-    dilutedMargin: Double, // V is the smallest reported margin = min_c { min w∈Wc ∈Lc (V_wl) } over contests c
-    gamma: Double,  // use 1.01 or 1.10 ??
+    dilutedMargin: Double, // probably minimum margin of the contest's assertions,
+    gamma: Double,  // “inflator” γ > 1; same purpose as MaxRisk I think. Corla uses 1.03905.
     p2o: Int, // twoOver
     p1o: Int, // oneOver
     p1u: Int = 0, // oneUnder
@@ -171,5 +183,5 @@ fun pValueApproximation(
     val term4n = pow(term4, -p2u.toDouble())
 
     val result = termn * term1n * term2n * term3n * term4n
-    return min(1.0, result)
+    return min(1.0, result)  // TODO cant be bigger than 1.0. discuss
 }

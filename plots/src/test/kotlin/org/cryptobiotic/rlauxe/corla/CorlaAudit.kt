@@ -10,8 +10,8 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.workflow.*
 
-// Corla uses all the mechanism of rlauxe execpt the RiskMeasuringFn
-// TODO is that the same as what Corla java library does ?
+// TODO Corla uses all the mechanism of rlauxe execpt the RiskMeasuringFn
+//      is that what Corla java library does ?
 class CorlaSingleRoundAuditTaskGenerator(
     val Nc: Int,
     val margin: Double,

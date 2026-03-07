@@ -282,7 +282,7 @@ fun createColoradoElection(
     ): Result<AuditRoundIF, ErrorMessages>
 {
     val stopwatch = Stopwatch()
-    val auditdir = "$topdir/audit"
+    val auditdir = "$topdir/audit2"
 
     val election = if (auditType.isClca()) CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, auditType)
                     else CreateColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile)

@@ -90,7 +90,8 @@ data class AlphaMartConfig(
 
 data class BettingMartConfig(
     val d: Int = 100,  // shrinkTrunc weight for error rates
-    val maxLoss: Double = 0.90,  // max loss on any one bet, 0 < maxLoss < 1
+    val maxLoss: Double = 1.0 / 1.03905,  // max loss on any one bet, 0 < maxLoss < 1 //  = .9624 from Corla gamma = 1.03905;
+                                          // SHANGRLA has gamma = 1.1 which is ~ 1/.9
     val apriori: TausRates = TausRates(emptyMap()),
 )
 

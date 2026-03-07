@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.corla
 
+import org.cryptobiotic.rlauxe.estimate.estimateSampleSizeSimple
 import kotlin.test.Test
 
 class TestEstimateSampleSizeSimple {

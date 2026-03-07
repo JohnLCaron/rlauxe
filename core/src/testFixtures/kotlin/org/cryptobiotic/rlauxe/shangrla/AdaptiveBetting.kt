@@ -146,8 +146,9 @@ class OracleComparison(
 }
 
 /**
- * This follows the code in https://github.com/spertus/comparison-RLA-betting/blob/main/comparison_audit_simulations.R
- * Not completely sure of the relationship to COBRA section 3.2.
+ * This is an earlier version of GeneralOptimalLambda.
+ * This follows the code in COBRA https://github.com/spertus/comparison-RLA-betting/blob/main/comparison_audit_simulations.R
+ * Probably the same as the math in COBRA section 3.2.
  * Has been generalized to allow p3 and p4 errors and sampling without replacement (WoR) by setting mui.
  * Note if (lam < 1.0) "**** betting against"
  * a := compareAssorter.noerror
@@ -161,7 +162,7 @@ class OracleComparison(
  * p1u := #{xi = 3a/2}/N is the rate of 1-vote understatements.
  * p2u := #{xi = 2a}/N is the rate of 2-vote understatements.
  */
-class OptimalLambda(val a: Double, val errorRates: PluralityErrorRates, val mui: Double = 0.5) {
+class OptimalLambda(val noerror: Double, val errorRates: PluralityErrorRates, val mui: Double = 0.5) {
     val p2o = errorRates.p2o
     val p1o = errorRates.p1o
     val p1u = errorRates.p1u
@@ -207,11 +208,11 @@ class OptimalLambda(val a: Double, val errorRates: PluralityErrorRates, val mui:
     fun expectedValueLogt(lam: Double): Double {
 
         // TODO HOLY PLURALITY BATMAN!!
-        return ln(1.0 + lam * (a - mui)) * p0 +
+        return ln(1.0 + lam * (noerror - mui)) * p0 +
                 ln(1.0 - lam * mui) * p2o +
-                ln(1.0 + lam * (a*0.5 - mui)) * p1o +
-                ln(1.0 + lam * (a*1.5 - mui)) * p1u +
-                ln(1.0 + lam * (a*2.0 - mui)) * p2u
+                ln(1.0 + lam * (noerror*0.5 - mui)) * p1o +
+                ln(1.0 + lam * (noerror*1.5 - mui)) * p1u +
+                ln(1.0 + lam * (noerror*2.0 - mui)) * p2u
     }
 
     /* why not just use

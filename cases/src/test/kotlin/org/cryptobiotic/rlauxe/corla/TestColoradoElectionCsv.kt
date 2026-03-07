@@ -1,9 +1,10 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
+import org.cryptobiotic.rlauxe.estimate.estimateSampleSizeSimple
 import org.cryptobiotic.rlauxe.shangrla.sampleSize
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
@@ -38,7 +39,7 @@ fun CorlaContestRoundCsv.showEstimation() {
     // TODO they use ballotCardCount instead of contestBallotCardCount for some reason
     val dilutedMargin = minMargin.toDouble() / ballotCardCount
     if (dilutedMargin > 0) {
-        val est = estimateSampleSizeSimple(riskLimit, dilutedMargin, gamma)
+        val est = estimateSampleSizeSimple(riskLimit, dilutedMargin, gamma) // no errors
         val (bet, payoff, samples) = betPayoffSamples(ballotCardCount, risk=riskLimit, assorterMargin=dilutedMargin, 0.0)
 
         println("dilutedMargin = $dilutedMargin estSamples = ${est} corlaEst=$optimisticSamplesToAudit rauxEst=$samples")
@@ -77,7 +78,7 @@ fun betPayoffSamples(N: Int, risk: Double, assorterMargin: Double, error: Double
     //    val debug: Boolean = false,
     val bettingFn = GeneralAdaptiveBetting(
         Npop = N,
-        aprioriCounts = ClcaErrorCounts.empty(noerror, 1.0),
+        aprioriCounts = ClcaErrorRates.empty(noerror, 1.0),
         nphantoms = 0,
         oaAssortRates = null,
         d = 100,
@@ -90,6 +91,6 @@ fun betPayoffSamples(N: Int, risk: Double, assorterMargin: Double, error: Double
     val mj = populationMeanIfH0(N=N, true, samples)
 
     val payoff = 1.0 + bet * (noerror - mj)
-    val samplesSize = sampleSize(risk, payoff)
+    val samplesSize = sampleSize(risk, payoff) // fun sampleSize(risk: Double, payoff:Double) = -ln(risk) / ln(payoff)
     return Triple(bet, payoff, roundUp(samplesSize))
 }

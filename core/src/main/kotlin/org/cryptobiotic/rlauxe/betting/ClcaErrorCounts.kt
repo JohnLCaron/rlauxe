@@ -2,17 +2,40 @@ package org.cryptobiotic.rlauxe.betting
 
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.doubleIsClose
+import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.math.ln
+
+// bassortValue -> rate
+data class ClcaErrorRates(val noerror: Double, val upper: Double, val errorRates: Map<Double, Double>) {
+    val taus = Taus(upper)
+
+    fun sumRates() = errorRates.map{ it.value }.sum()
+
+    fun getNamedRate(name: String): Double? {
+        val tauValue = taus.getNamedValue(name)
+        if (tauValue == null) return null
+        val bassort = tauValue * noerror
+        return errorRates[bassort]
+    }
+
+    // is this bassort value the one that a phantom would generate?
+    fun isPhantom(bassort: Double): Boolean {
+        return taus.isPhantom(bassort / noerror)
+    }
+
+    companion object {
+        fun empty(noerror: Double, upper: Double) = ClcaErrorRates(noerror, upper, emptyMap())
+    }
+}
 
 data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double) {
     val taus = Taus(upper)
 
     // errorCounts divided by totalSamples
-    fun errorRates() : Map<Double, Double> = errorCounts.mapValues { if (totalSamples == 0) 0.0 else it.value / totalSamples.toDouble() }  // bassortValue -> rate
+    fun errorRates() = errorCounts.mapValues { if (totalSamples == 0) 0.0 else it.value / totalSamples.toDouble() } // bassortValue -> rate
+    fun clcaErrorRates() = ClcaErrorRates(noerror, upper, errorRates())
     fun errorCounts() = errorCounts // bassortValue -> count
-    fun sumRates() = errorRates().map{ it.value }.sum()  // hey this includes noerror ??
 
     fun bassortValues(): List<Double> {
         return taus.values().map { it * noerror }
@@ -21,15 +44,6 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
     // is this bassort value the one that a phantom would generate?
     fun isPhantom(bassort: Double): Boolean {
         return taus.isPhantom(bassort / noerror)
-    }
-
-    fun getNamedRate(name: String): Double? {
-        val tauValue = taus.getNamedValue(name)
-        if (tauValue == null) return null
-        val bassort = tauValue * noerror
-        val errorCount: Int? = errorCounts[bassort]
-        if (errorCount == null) return null
-        return if (totalSamples == 0) 0.0 else errorCount / totalSamples.toDouble()
     }
 
     fun getNamedCount(name: String): Int? {

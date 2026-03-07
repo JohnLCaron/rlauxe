@@ -47,7 +47,7 @@ class ShowPayoffStatisticFromAssortValues {
         //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
         //    val d: Int = 100,  // trunc weight
         //    val debug: Boolean = false,
-        val betFn = GeneralAdaptiveBetting2(
+        val betFn = GeneralAdaptiveBetting(
             Npop = N,
             aprioriCounts = ClcaErrorCounts.empty(noerror, upper),
             nphantoms = 2,

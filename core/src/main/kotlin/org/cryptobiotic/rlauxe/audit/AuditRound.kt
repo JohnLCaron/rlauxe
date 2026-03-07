@@ -218,8 +218,6 @@ data class EstimationRoundResult(
     }
 }
 
-fun roundUp(x: Double) = ceil(x).toInt()
-
 data class AuditRoundResult(
     val roundIdx: Int,
     val nmvrs: Int,                 // number of mvrs available for this contest for this round

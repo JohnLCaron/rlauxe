@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.math.ln
@@ -191,7 +191,7 @@ class TestOneAuditAssortValueRates {
         //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
         //    val d: Int = 100,  // trunc weight
         //    val debug: Boolean = false,
-        val betFun = GeneralAdaptiveBetting2(
+        val betFun = GeneralAdaptiveBetting(
             Npop = Npop,
             aprioriCounts = ClcaErrorCounts.empty(noerror, upper),
             nphantoms = 0,

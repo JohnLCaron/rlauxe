@@ -21,7 +21,7 @@ class PValueTest {
     }
 }
 
-fun pValue(row: T3row) = pValueApproximation2(row.n, row.mu, row.gamma, row.n2, row.n1)
+fun pValue(row: T3row) = pValueApproximation(row.n, row.mu, row.gamma, row.n2, row.n1)
 
 // n is the number of samples. interesting that N isnt needed
 // mu is the dilutedMargin

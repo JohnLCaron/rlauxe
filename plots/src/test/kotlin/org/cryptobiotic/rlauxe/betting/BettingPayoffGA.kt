@@ -17,7 +17,7 @@ class BettingPayoffGA {
             println("errors = $error")
             for (margin in margins) {
                 val noerror = 1 / (2 - margin)
-                val betFun = GeneralAdaptiveBetting2(
+                val betFun = GeneralAdaptiveBetting(
                     Npop = N,
                     aprioriCounts = ClcaErrorCounts.empty(noerror, 1.0),
                     nphantoms = 0,
@@ -58,7 +58,7 @@ class BettingPayoffGA {
                 //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
                 //    val d: Int = 100,  // trunc weight
                 //    val debug: Boolean = false,
-                val betFun = GeneralAdaptiveBetting2(
+                val betFun = GeneralAdaptiveBetting(
                     Npop = N,
                     aprioriCounts = ClcaErrorCounts.empty(noerror, 1.0),
                     nphantoms = 0,

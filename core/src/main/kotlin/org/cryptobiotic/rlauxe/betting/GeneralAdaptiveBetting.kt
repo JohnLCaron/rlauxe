@@ -20,7 +20,7 @@ private val logger = KotlinLogging.logger("GeneralAdaptiveBetting")
 //  audit always starts from beginning
 //  bets will do shrinkTrunc of starting and measured.
 
-data class GeneralAdaptiveBetting2(
+data class GeneralAdaptiveBetting(
     val Npop: Int, // population size for this contest
     val aprioriCounts: ClcaErrorCounts, // apriori counts not counting phantoms, non-null so we have noerror and upper
     val nphantoms: Int, // number of phantoms in the population
@@ -39,7 +39,7 @@ data class GeneralAdaptiveBetting2(
         aprioriRates = makeAprioriErrorRates(aprioriCounts, nphantoms/Npop.toDouble())
     }
 
-    fun estimatedErrorRates2(trackerErrors: ClcaErrorCounts? = null): Map<Double, Double> { // bassort -> rate
+    fun estimatedErrorRates(trackerErrors: ClcaErrorCounts? = null): Map<Double, Double> { // bassort -> rate
         if (trackerErrors == null || trackerErrors.errorCounts.isEmpty()) return aprioriRates
 
         val errorRates = trackerErrors.errorRates()
@@ -81,7 +81,7 @@ data class GeneralAdaptiveBetting2(
         val errorTracker = prevSamples as ErrorTracker
         val trackerErrors = errorTracker.measuredClcaErrorCounts()
 
-        val estRates = estimatedErrorRates2(trackerErrors)
+        val estRates = estimatedErrorRates(trackerErrors)
         val mui = populationMeanIfH0(Npop, withoutReplacement=true, prevSamples)
 
         val maxBet = maxLoss / mui
@@ -111,8 +111,6 @@ fun makeAprioriErrorRates(apriori: ClcaErrorCounts, phantomRate: Double): Map<Do
     }
     return startingRates
 }
-
-
 
 class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, Double>, val oaErrorRates: Map<Double, Double>?,
                            val mui: Double, val maxBet: Double, val debug: Boolean=false) {

@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.betting
 
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditRatesFromPools
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.TausOA
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.util.df
@@ -82,7 +81,7 @@ class ShowGAOneAuditBetting {
         //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
         //    val d: Int = 100,  // trunc weight
         //    val debug: Boolean = false,
-        val betFn = GeneralAdaptiveBetting2(
+        val betFn = GeneralAdaptiveBetting(
             Npop = N,
             aprioriCounts = ClcaErrorCounts.empty(noerror, upper),
             nphantoms = oaContest.contest.Nphantoms(),

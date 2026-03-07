@@ -1,6 +1,7 @@
-package org.cryptobiotic.rlauxe.estimate.corla
+package org.cryptobiotic.rlauxe.corla
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class TestCorlaEstimate {
     @Test
@@ -48,7 +49,7 @@ fun runEstimateSimple(dilutedMargin: Double, twoUnder: Int, oneUnder: Int, oneOv
     val riskLimit = 0.05
     val gamma = 1.2
 
-    val rlauxe = estimateSampleSizeSimple(
+    val est2 = estimateSampleSizeSimple(
         riskLimit,
         dilutedMargin,
         gamma,
@@ -58,5 +59,5 @@ fun runEstimateSimple(dilutedMargin: Double, twoUnder: Int, oneUnder: Int, oneOv
         twoOver = twoOver
     )
 
-    println("   [$twoOver, $oneOver, $oneUnder, $twoUnder] -> $rlauxe")
+    println("   [$twoOver, $oneOver, $oneUnder, $twoUnder] -> $est2")
 }

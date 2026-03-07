@@ -118,7 +118,7 @@ class ClcaSingleRoundAssortTask(
         //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
         //    val d: Int = 100,  // trunc weight
         //    val debug: Boolean = false,
-        val betFun = GeneralAdaptiveBetting2(
+        val betFun = GeneralAdaptiveBetting(
             Npop = N,
             aprioriCounts = ClcaErrorCounts.empty(noerror, upper),
             nphantoms = 0,

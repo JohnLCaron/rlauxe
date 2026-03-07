@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.collections.component1
@@ -188,7 +188,7 @@ class OneAuditClcaAssorter(
 
     override fun estWithOptimalBet2(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorCounts: ClcaErrorCounts?): Pair<Int, Double> {
         val upper = assorter.upperBound()
-        val betFn = GeneralAdaptiveBetting2(
+        val betFn = GeneralAdaptiveBetting(
             contest.Npop,
             clcaErrorCounts ?: ClcaErrorCounts.empty(noerror(), upper), // else no errors
             contest.Nphantoms,

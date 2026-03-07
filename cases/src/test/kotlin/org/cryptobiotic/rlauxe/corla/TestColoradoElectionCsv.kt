@@ -2,9 +2,9 @@ package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
-import org.cryptobiotic.rlauxe.core.sampleSize
+import org.cryptobiotic.rlauxe.shangrla.sampleSize
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.test.Test
@@ -38,11 +38,11 @@ fun CorlaContestRoundCsv.showEstimation() {
     // TODO they use ballotCardCount instead of contestBallotCardCount for some reason
     val dilutedMargin = minMargin.toDouble() / ballotCardCount
     if (dilutedMargin > 0) {
-        val est = optimistic(riskLimit, dilutedMargin, gamma)
+        val est = estimateSampleSizeSimple(riskLimit, dilutedMargin, gamma)
         val (bet, payoff, samples) = betPayoffSamples(ballotCardCount, risk=riskLimit, assorterMargin=dilutedMargin, 0.0)
 
-        println("dilutedMargin = $dilutedMargin estSamples = ${est.toInt()} corlaEst=$optimisticSamplesToAudit rauxEst=$samples")
-        require(optimisticSamplesToAudit == est.toInt())
+        println("dilutedMargin = $dilutedMargin estSamples = ${est} corlaEst=$optimisticSamplesToAudit rauxEst=$samples")
+        require(optimisticSamplesToAudit == est)
         println("   rlauxe bet = $bet payoff = $payoff rauxeEst=$samples")
     }
 }
@@ -75,7 +75,7 @@ fun betPayoffSamples(N: Int, risk: Double, assorterMargin: Double, error: Double
     //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
     //    val d: Int = 100,  // trunc weight
     //    val debug: Boolean = false,
-    val bettingFn = GeneralAdaptiveBetting2(
+    val bettingFn = GeneralAdaptiveBetting(
         Npop = N,
         aprioriCounts = ClcaErrorCounts.empty(noerror, 1.0),
         nphantoms = 0,

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.cobra
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.core.*
@@ -105,7 +105,7 @@ class AuditCobraAssertion(
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
 
-        val betFun = GeneralAdaptiveBetting2(
+        val betFun = GeneralAdaptiveBetting(
             Npop = contestUA.Npop,
             aprioriCounts = ClcaErrorCounts.empty(cassorter.noerror(), upper = cassorter.assorter.upperBound()),
             nphantoms = 0,

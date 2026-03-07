@@ -123,6 +123,6 @@ data class ClcaConfig(
     val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive2,
     val fuzzMvrs: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs when persistedWorkflowMode=testSimulate
     val d: Int = 100,  // shrinkTrunc weight for error rates
-    val maxLoss: Double = 0.90,  // max loss on any one bet, 0 < maxLoss < 1
+    val maxLoss: Double = 1.0 / 1.03905,  // max loss on any one bet, 0 < maxLoss < 1
     val apriori: TausRates = TausRates(emptyMap()),
 )

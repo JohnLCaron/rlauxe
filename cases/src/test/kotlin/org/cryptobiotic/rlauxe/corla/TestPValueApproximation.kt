@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class PValueTest {
+class TestPValueApproximation {
 
     @Test
     fun checkTable3() {
@@ -23,6 +23,7 @@ class PValueTest {
 
 fun pValue(row: T3row) = pValueApproximation(row.n, row.mu, row.gamma, row.n2, row.n1)
 
+// Table 3 of "Super SImple"
 // n is the number of samples. interesting that N isnt needed
 // mu is the dilutedMargin
 data class T3row(val n: Int, val mu: Double, val gamma: Double, val n1: Int, val n2: Int, val expect: Double)

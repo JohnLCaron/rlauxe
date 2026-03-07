@@ -1,14 +1,12 @@
 package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
-import kotlin.collections.component1
-import kotlin.collections.component2
 import kotlin.math.ln
 
 private val logger = KotlinLogging.logger("ClcaAssorter")
@@ -80,12 +78,14 @@ open class ClcaAssorter(
     }
 
     // expected sample size if there are clca errors
-    open fun sampleSizeWithErrors(bet: Double, alpha: Double, clcaErrorCounts: ClcaErrorCounts): Int {
-        val p0 = 1.0 - clcaErrorCounts.sumRates()
+    // TODO same as estimateSampleSizePayloads I think
+    // TODO clcaErrorCounts with phantoms added; use AssertionRound.calcNewMvrsNeeded()
+    open fun sampleSizeWithErrors(bet: Double, alpha: Double, clcaErrorRates: ClcaErrorRates): Int {
+        val p0 = 1.0 - clcaErrorRates.sumRates()
         val noerrorTerm = ln(1.0 + bet * (noerror - 0.5)) * p0
 
         var sumErrors = 0.0
-        clcaErrorCounts.errorRates().forEach { (assortValue: Double, rate: Double) ->
+        clcaErrorRates.errorRates.forEach { (assortValue: Double, rate: Double) ->
             sumErrors += ln(1.0 + bet * (assortValue - 0.5)) * rate
         }
         val lnPayoff = noerrorTerm + sumErrors
@@ -95,20 +95,21 @@ open class ClcaAssorter(
         return N
     }
 
+    // TODO deprecated
     // Pair(estSampleSize, optimalBet)
-    open fun estWithOptimalBet2(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorCounts: ClcaErrorCounts? = null): Pair<Int, Double> {
+    open fun estWithOptimalBet2(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorRates: ClcaErrorRates? = null): Pair<Int, Double> {
         val upper = assorter.upperBound()
         val betFn = GeneralAdaptiveBetting(
             contest.Npop,
-            clcaErrorCounts ?: ClcaErrorCounts.empty(noerror(), upper), // else no errors
+            clcaErrorRates ?: ClcaErrorRates.empty(noerror(), upper), // else no errors
             contest.Nphantoms,
             maxLoss = maxLoss,
             debug = false,
         )
         val optimalBet = betFn.bet(ClcaErrorTracker(noerror(), upper))
 
-        val estSampleSize = if (clcaErrorCounts == null) sampleSizeNoErrors(optimalBet, alpha) else
-            sampleSizeWithErrors(optimalBet, alpha, clcaErrorCounts)
+        val estSampleSize = if (clcaErrorRates == null) sampleSizeNoErrors(optimalBet, alpha) else
+            sampleSizeWithErrors(optimalBet, alpha, clcaErrorRates)
 
         return Pair(estSampleSize, optimalBet)
     }

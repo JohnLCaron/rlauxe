@@ -109,27 +109,26 @@ class TestTaus {
 
     @Test
     fun testTausRates() {
-        val rates = TausRates(mapOf("win-oth" to .001))
-        assertEquals(.001, rates.getNamedRate("p1o"))
-        assertEquals(rates.getNamedRate("p1o"), rates.getNamedRate("win-oth"))
-        println(rates)
+        val tausRates = TausRates(mapOf("win-oth" to .001))
+        assertEquals(.001, tausRates.getNamedRate("p1o"))
+        assertEquals(tausRates.getNamedRate("p1o"), tausRates.getNamedRate("win-oth"))
+        println(tausRates)
 
         val noerror = .532
-        val errorCounts: ClcaErrorCounts = rates.makeErrorCounts(42000, noerror, 1.0)
-        println(errorCounts)
-        val assort = noerror * errorCounts.taus.valueOf("p1o")
-        assertEquals(42, errorCounts.errorCounts[assort])
-        assertEquals(.001, errorCounts.getNamedRate("p1o"))
+        val rates: ClcaErrorRates = tausRates.makeErrorRates(noerror, 1.0)
+        println(rates)
+        val assort = noerror * rates.taus.valueOf("p1o")
+        assertEquals(.001, rates.getNamedRate("p1o"))
 
-        val errorRates = errorCounts.errorRates()
+        val errorRates = rates.errorRates
         assertEquals(.001, errorRates[assort])
     }
 
     @Test
     fun testAuditConfig() {
         val config = AuditConfig(AuditType.CLCA)
-        val apriori = config.clcaConfig.apriori.makeErrorCounts(42, .542, 1.0)
-        assertTrue(apriori.errorRates().isEmpty())
+        val apriori = config.clcaConfig.apriori.makeErrorRates(.542, 1.0)
+        assertTrue(apriori.errorRates.isEmpty())
     }
 
 }

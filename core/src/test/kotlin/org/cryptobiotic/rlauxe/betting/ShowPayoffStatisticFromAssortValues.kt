@@ -49,7 +49,7 @@ class ShowPayoffStatisticFromAssortValues {
         //    val debug: Boolean = false,
         val betFn = GeneralAdaptiveBetting(
             Npop = N,
-            aprioriCounts = ClcaErrorCounts.empty(noerror, upper),
+            aprioriCounts = ClcaErrorRates.empty(noerror, upper),
             nphantoms = 2,
             maxLoss = maxLoss,
             oaAssortRates=null,

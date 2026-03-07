@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.TausRateTable
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
@@ -29,11 +30,41 @@ class TestClcaErrorCounts {
 
         val fuzz = .01
         var bassorts = computeBassortValues(noerror = noerror, upper = upper)
-        var errorCounts = bassorts.associate { it to (fuzz * totalSamples).toInt() }
+        var errorCounts = bassorts.associate { it to fuzz }
 
-        val cerr2 = ClcaErrorCounts(errorCounts, 1000, noerror, upper)
+        val cerr2 = ClcaErrorRates(noerror, upper, errorCounts)
         println(cerr2.sumRates())
         assertEquals(fuzz * bassorts.size, cerr2.sumRates(), doublePrecision)
+
+        // what if upper is < 1 ?
+        upper = 0.5678
+        noerror = 1.0 / (2.0 - dilutedMargin / upper)
+
+        bassorts = computeBassortValues(noerror = noerror, upper = upper)
+        errorCounts = bassorts.associate { it to fuzz }
+
+        val cerr3 = ClcaErrorRates(noerror, upper, errorCounts)
+        println(cerr3.sumRates())
+        assertEquals(fuzz * bassorts.size, cerr3.sumRates(), doublePrecision)
+
+        println(cerr3)
+    }
+
+    @Test
+    fun testClcaErrorCounts() {
+        var upper = 1.0
+        val u12 = 1.0 / (2 * upper)
+        val computeTaus = listOf(0.0, u12, 1 - u12, 2 - u12, 1 + u12, 2.0)
+        val totalSamples = 1000
+
+        // what if upper is > 1 ?
+        upper = 10.0
+        val dilutedMargin = .02
+        var noerror: Double = 1.0 / (2.0 - dilutedMargin / upper)
+
+        val fuzz = .01
+        var bassorts = computeBassortValues(noerror = noerror, upper = upper)
+        var errorCounts = bassorts.associate { it to (fuzz * totalSamples).toInt() }
 
         // what if upper is < 1 ?
         upper = 0.5678
@@ -43,9 +74,6 @@ class TestClcaErrorCounts {
         errorCounts = bassorts.associate { it to (fuzz * totalSamples).toInt() }
 
         val cerr3 = ClcaErrorCounts(errorCounts, 1000, noerror, upper)
-        println(cerr3.sumRates())
-        assertEquals(fuzz * bassorts.size, cerr3.sumRates(), doublePrecision)
-
         println(cerr3.show())
     }
 
@@ -144,17 +172,17 @@ class TestClcaErrorCounts {
                 val cassorter = assertion.cassorter
 
                 //     fun makeErrorRates(ncandidates: Int, fuzzPct: Double, totalSamples: Int, noerror: Double, upper: Double): ClcaErrorCounts {
-                val errorCounts = TausRateTable.makeErrorCounts(
+                val errorRates = TausRateTable.makeErrorRates(
                     contestUA.ncandidates,
                     mvrsFuzzPct,
                     contestUA.Npop,
                     cassorter.noerror(),
                     cassorter.assorter.upperBound()
                 )
-                if (show) println("ncand=${contestUA.ncandidates} mvrsFuzzPct=$mvrsFuzzPct errors=${errorCounts.errorCounts}")
+                if (show) println("ncand=${contestUA.ncandidates} mvrsFuzzPct=$mvrsFuzzPct errors=${errorRates}")
 
                 // TODO actually fuzz the cvrs
-                val fuzzPcts = TausRateTable.calcFuzzPct(contestUA.ncandidates, errorCounts)
+                val fuzzPcts = TausRateTable.calcFuzzPct(contestUA.ncandidates, errorRates)
                 var maxDiff = 0.0
                 fuzzPcts.forEach { fuzzPct ->
                     maxDiff = max(maxDiff, abs(fuzzPct - mvrsFuzzPct))

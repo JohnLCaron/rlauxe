@@ -28,7 +28,7 @@ class TestGABetting {
 
         val gaBetting = GeneralAdaptiveBetting(
             Npop = N,
-            aprioriCounts = ClcaErrorCounts.empty(noerror, upper),
+            aprioriCounts = ClcaErrorRates.empty(noerror, upper),
             nphantoms = nphantoms,
             maxLoss = maxLoss,
             oaAssortRates=null,

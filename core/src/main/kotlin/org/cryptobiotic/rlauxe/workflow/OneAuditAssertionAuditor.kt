@@ -29,7 +29,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
 
         val noerror=oaCassorter.noerror()
         val upper=oaCassorter.assorter.upperBound()
-        val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
+        val apriori = clcaConfig.apriori.makeErrorRates(noerror, upper)
 
         val bettingFn =
             GeneralAdaptiveBetting(

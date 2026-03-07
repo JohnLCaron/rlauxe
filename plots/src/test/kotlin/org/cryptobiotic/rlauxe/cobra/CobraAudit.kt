@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
+import org.cryptobiotic.rlauxe.betting.Taus
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -89,6 +90,7 @@ class CobraAudit(
 }
 
 /////////////////////////////////////////////////////////////////////////////////
+// theres no apparent difference with regular ClcaAssertionAuditor
 
 class AuditCobraAssertion(
     val p2prior: Double, // apriori rate of 2-vote overstatements
@@ -105,10 +107,14 @@ class AuditCobraAssertion(
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
 
+        val totalSamples = contestUA.Npop
+        val p2count = roundToClosest(p2prior * totalSamples) // TODO Note losing precision on the rate; make alternate constructor
+        val aprioriCounts = ClcaErrorCounts(mapOf(0.0 to p2count), totalSamples, cassorter.noerror(), cassorter.assorter.upperBound())
+
         val betFun = GeneralAdaptiveBetting(
             Npop = contestUA.Npop,
-            aprioriCounts = ClcaErrorCounts.empty(cassorter.noerror(), upper = cassorter.assorter.upperBound()),
-            nphantoms = 0,
+            aprioriCounts = aprioriCounts.clcaErrorRates(),
+            nphantoms = contestUA.Nphantoms,
             maxLoss = config.clcaConfig.maxLoss,
             oaAssortRates = null,
             d = config.clcaConfig.d,

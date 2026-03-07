@@ -150,6 +150,7 @@ fun tabulateDebugInfo(cards: CloseableIterator<AuditableCard>, contests: List<Co
 private val fac = 10 // TODO pass in? check cardManifest, just use all if not too big, because this
                      //     algorithm isnt so great for small samples.... this sucks
 
+// TODO feels wrong
 // CLCA and OneAudit, not needed by Polling
 // we dont use this for the actual estimation....
 fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: Int): Int {
@@ -175,7 +176,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: In
     // ClcaErrorCounts(errorCounts, contest.Nc, cassorter.noerror(), cassorter.assorter.upperBound())
     // ClcaErrorTable.getErrorRates(contest.ncandidates, config.simFuzzPct)
     val clcaErrorCounts = if (config.simFuzzPct == null || config.simFuzzPct == 0.0) null else {
-        TausRateTable.makeErrorCounts(
+        TausRateTable.makeErrorRates(
             contest.ncandidates,
             config.simFuzzPct,
             contest.Npop,
@@ -184,7 +185,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: In
         )
     }
 
-    val estAndBet = cassorter.estWithOptimalBet2(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue, clcaErrorCounts)
+    val estAndBet = cassorter.estWithOptimalBet2(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue, null) // TODO NEXT
     val dd = if (cassorter is OneAuditClcaAssorter) {
         val sum = cassorter.oaAssortRates.sumOneAuditTerm(estAndBet.second)
         val sumneg = if (sum < 0) "**" else ""

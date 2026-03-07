@@ -7,8 +7,8 @@ class TestColoradoPrecinctLevelResults {
 
     @Test
     fun testRead() {
-        val filename = "src/test/data/2024election/2024GeneralPrecinctLevelResults.zip"
-        val reader = ZipReader(filename)
+        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
+        val reader = ZipReader(precinctFile)
         val input = reader.inputStream("2024GeneralPrecinctLevelResults.csv")
         val precincts = readColoradoPrecinctLevelResults(input)
         println(precincts[0])
@@ -22,7 +22,7 @@ class TestColoradoPrecinctLevelResults {
         // the problem of turning into CVRS is we dont know the undervotes
         // could assume that all contests are on all ballots for each precinct
 
-        val summaryFile = "src/test/data/2024election/summary.csv"
+        val summaryFile = "src/test/data/corla/2024election/summary.csv"
         val scontests = readColoradoElectionSummaryCsv(summaryFile)
         val scontestMap = scontests.associateBy {
             removeCruft(it.contestName)

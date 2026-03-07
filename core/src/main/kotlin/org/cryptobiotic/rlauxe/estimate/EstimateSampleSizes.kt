@@ -250,7 +250,7 @@ fun estimateClcaAssertionRound(
     val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
 
     val bettingFn =
-        GeneralAdaptiveBetting2(
+        GeneralAdaptiveBetting(
             contestUA.Npop,
             aprioriCounts = apriori,
             nphantoms = contest.Nphantoms(),
@@ -366,7 +366,7 @@ fun estimateOneAuditAssertionRound(
     val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
 
     val bettingFn =
-        GeneralAdaptiveBetting2(
+        GeneralAdaptiveBetting(
             contestUA.Npop,
             aprioriCounts = apriori,
             nphantoms=contestUA.contest.Nphantoms(),

@@ -1,7 +1,8 @@
-package org.cryptobiotic.rlauxe.estimate.corla
+package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.core.PluralityErrorRates
-import org.cryptobiotic.rlauxe.core.OptimalLambda
+import org.cryptobiotic.rlauxe.shangrla.OptimalLambda
+import org.cryptobiotic.rlauxe.util.roundUp
 import java.lang.Math.pow
 import kotlin.math.ceil
 import kotlin.math.ln
@@ -9,7 +10,8 @@ import kotlin.math.max
 
 /**
  * From colorado-rla Audit.optimistic().
- * Based on SuperSimple paper, generalization of equations in section 2.
+ * Based on SuperSimple paper, generalization of equations in section 4.1, esp eq 24.
+ * Computes the expected number of ballots to audit overall given the specified numbers of over- and understatements.
  *
  * @param gamma the "error inflator" parameter. error inflation factor γ ≥ 100%.
  *   γ controls a tradeoff between initial sample size and the amount of additional counting required when the
@@ -40,9 +42,11 @@ fun estimateSampleSizeSimple(
     val r = ceil(rho / dilutedMargin)  // round up
     val over_under_sum = (twoUnder + oneUnder + oneOver + twoOver).toDouble()
     // println("   rho=$rho r=$r")
-    return max(r, over_under_sum).toInt()
+    return roundUp(max(r, over_under_sum))
 }
 
+// From COBRA
+//
 // COBRA equation 1 is a deterministic lower bound on sample size, dependent on margin and risk limit.
 // COBRA equation 2 has the maximum expected value for given over/understatement rates. See OptimalLambda class for implementation.
 

@@ -16,7 +16,7 @@ class MakeColoradoElection {
 
     @Test
     fun testReadColoradoElectionDetail() {
-        val detailXmlFile = "src/test/data/2024election/detail.xml"
+        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val electionResultXml: ElectionDetailXml = readColoradoElectionDetail(detailXmlFile)
         println(electionResultXml)
         println("  number of contests = ${electionResultXml.contests.size}")
@@ -42,9 +42,9 @@ class MakeColoradoElection {
         createColoradoElection(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.POLLING)
     }
 
-    @Test
+    // @Test
     fun testPrecinctTree() {
-        val cvrsDir = "$testdataDir/cases/corla/old/cvrexport"
+        val cvrsDir = "$testdataDir/cases/corla/old/cvrexport" // lost?
         val tour = TreeReaderTour(cvrsDir, silent = false) { path -> precinctLine(path) }
         println("county, precinct")
         val total = tour.tourFiles()
@@ -64,7 +64,7 @@ class MakeColoradoElection {
     fun testCountySampleLists() {
         val countyPrecincts = mutableListOf<CountyAndPrecinct>()
 
-        val topDir = "$testdataDir/cases/corla/old"
+        val topDir = "$testdataDir/cases/corla/old" // lost?
         val tour = TreeReaderTour("$topDir/cvrexport") { path -> countyPrecincts.add(precinctLine(path)) }
         tour.tourFiles()
 

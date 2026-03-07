@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
@@ -32,7 +32,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         val apriori = clcaConfig.apriori.makeErrorCounts(contestUA.Npop, noerror, upper)
 
         val bettingFn =
-            GeneralAdaptiveBetting2(
+            GeneralAdaptiveBetting(
                 contestUA.Npop,
                 aprioriCounts = apriori,
                 nphantoms = contestUA.contest.Nphantoms(),

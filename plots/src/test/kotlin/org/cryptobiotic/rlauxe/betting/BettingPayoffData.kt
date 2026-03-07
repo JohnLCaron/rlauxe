@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.core.sampleSize
+import org.cryptobiotic.rlauxe.shangrla.sampleSize
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter

@@ -1,13 +1,11 @@
-package org.cryptobiotic.rlauxe.betting
+package org.cryptobiotic.rlauxe.shangrla
 
-import org.cryptobiotic.rlauxe.core.OptimalComparisonNoP1
-import org.cryptobiotic.rlauxe.core.OptimalLambda
+import org.cryptobiotic.rlauxe.betting.eps
+import org.cryptobiotic.rlauxe.betting.etaToLam
 import org.cryptobiotic.rlauxe.core.PluralityErrorRates
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
-// CANDIDATE for removal
 
 class TestOptimalComparisonNoP1 {
 

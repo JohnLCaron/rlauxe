@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.persist.csv.*
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.AuditRecord
@@ -122,7 +122,7 @@ class TestSfElection {
             //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
             //    val d: Int = 100,  // trunc weight
             //    val debug: Boolean = false,
-            val betFn = GeneralAdaptiveBetting2(
+            val betFn = GeneralAdaptiveBetting(
                 Npop = contest.Npop,
                 aprioriCounts = ClcaErrorCounts.empty(oaass.noerror(), 1.0),
                 contest.Nphantoms,

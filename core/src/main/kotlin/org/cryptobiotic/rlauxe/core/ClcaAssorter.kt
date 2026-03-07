@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.core
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
@@ -98,7 +98,7 @@ open class ClcaAssorter(
     // Pair(estSampleSize, optimalBet)
     open fun estWithOptimalBet2(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorCounts: ClcaErrorCounts? = null): Pair<Int, Double> {
         val upper = assorter.upperBound()
-        val betFn = GeneralAdaptiveBetting2(
+        val betFn = GeneralAdaptiveBetting(
             contest.Npop,
             clcaErrorCounts ?: ClcaErrorCounts.empty(noerror(), upper), // else no errors
             contest.Nphantoms,

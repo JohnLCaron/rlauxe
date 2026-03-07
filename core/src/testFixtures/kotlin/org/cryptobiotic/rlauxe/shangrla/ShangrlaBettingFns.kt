@@ -1,10 +1,11 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.shangrla
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.betting.BettingFn
 import org.cryptobiotic.rlauxe.betting.Tracker
 import org.cryptobiotic.rlauxe.betting.etaToLam
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
+import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
@@ -119,9 +120,6 @@ class AgrapaBet(
  *   eta = (1-u*(1-p2))/(2-2*u) + u*(1-p2) - 1/2.
  */
 // A bug in BettingMart that removed stalls probably made this look better than it is
-// CANDIDATE for removal
-// TODO just stop using it....
-// TODO check to see if this is correct, esp with assorter upper bound
 // CORBA has u := 2/(2 − v) = 2a, should be  clcaUpper := 2/(2 − v/assortUpper) = 2 * noerror
 // ALPHA has lam = (eta/mui - 1)/(u-mui) = etaToLam
 class OptimalComparisonNoP1(
@@ -169,4 +167,42 @@ class OptimalComparisonNoP1(
     companion object {
         private val logger = KotlinLogging.logger("OptimalComparisonNoP1")
     }
+}
+
+// this is optimal_comparison_noP1, a bet, not a sample estimate.
+// see cobra p 5
+fun optimal_comparison(alpha: Double, u: Double, rate_error_2: Double = 1e-4): Double {
+    /*
+    The value of eta corresponding to the "bet" that is optimal for ballot-level comparison audits,
+    for which overstatement assorters take a small number of possible values and are concentrated
+    on a single value when the CVRs have no errors.
+
+    Let p0 be the rate of error-free CVRs, p1=0 the rate of 1-vote overstatements,
+    and p2= 1-p0-p1 = 1-p0 the rate of 2-vote overstatements. Then
+
+    eta = (1-u*p0)/(2-2*u) + u*p0 - 1/2, where p0 is the rate of error-free CVRs.
+
+    Translating to p2=1-p0 gives:
+
+    eta = (1-u*(1-p2))/(2-2*u) + u*(1-p2) - 1/2.
+
+    Parameters
+    ----------
+    x: input data
+    rate_error_2: hypothesized rate of two-vote overstatements
+
+    Returns
+    -------
+    eta: estimated alternative mean to use in alpha
+    */
+
+    // python doesnt check (2 - 2 * self.u) != 0; self.u = 1
+    if (u == 1.0)
+        throw RuntimeException("optimal_comparison: u ${u} must != 1")
+
+    val p2 = rate_error_2 // getattr(self, "rate_error_2", 1e-4)  // rate of 2-vote overstatement errors
+    val bet = (1 - u * (1 - p2)) / (2 - 2 * u) + u * (1 - p2) - .5
+    // 1 / alpha = bet ^ size
+    val size = -ln(alpha) / ln(bet)
+    return size
 }

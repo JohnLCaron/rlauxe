@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting2
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.betting.TestH0Status
@@ -141,7 +141,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val bettingFn =
             // the actual audit cant "look ahead" with the measured error rates, so always start empty
             // OTOH, I think you could use apriori rates if they are set independently from the mvrs, see Issue #519
-            GeneralAdaptiveBetting2(
+            GeneralAdaptiveBetting(
                 contestUA.Npop,
                 aprioriCounts = apriori,
                 nphantoms = contest.Nphantoms(),

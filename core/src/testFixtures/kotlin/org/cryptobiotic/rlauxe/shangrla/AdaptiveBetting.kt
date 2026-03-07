@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.core
+package org.cryptobiotic.rlauxe.shangrla
 
 
 import org.apache.commons.math3.analysis.UnivariateFunction
@@ -11,11 +11,11 @@ import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair
 import org.cryptobiotic.rlauxe.betting.BettingFn
 import org.cryptobiotic.rlauxe.betting.Tracker
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
+import org.cryptobiotic.rlauxe.core.PluralityErrorRates
+import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
-
-// CANDIDATE for removal
 
 // betting functions that use Kelly optimization of lambda parameter for the BettingFn
 
@@ -75,7 +75,7 @@ import kotlin.math.min
 private val showRates = false
 private val showBets = false
 
-// specialized for plurality assorter
+// specialized for plurality assorter; gheneralized by GeneralAdaptiveBetting
 class AdaptiveBetting(
     val N: Int, // max number of cards for this contest
     val withoutReplacement: Boolean = true,

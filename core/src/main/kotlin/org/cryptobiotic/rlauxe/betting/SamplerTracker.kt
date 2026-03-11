@@ -119,7 +119,7 @@ class ClcaSamplerErrorTracker(
     val cassorter: ClcaAssorter,
     val samples: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
     val allowReset: Boolean = true,  // needed ?
-    val name: String? = null,
+    val name: String? = null, // debugging
 ): SamplerTracker, ErrorTracker {
     val permutedIndex = MutableList(samples.size) { it }
     val clcaErrorTracker = ClcaErrorTracker2(cassorter.noerror, cassorter.assorter.upperBound())
@@ -223,6 +223,7 @@ class ClcaSamplerErrorTracker(
     }
 
     companion object {
+        // pull the desired samples out
         fun fromIndexList(
             contestId: Int,
             cassorter: ClcaAssorter,

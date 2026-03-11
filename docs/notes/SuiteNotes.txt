@@ -1,4 +1,5 @@
-Suite Notes
+"Stratified Union-Intersection" 12/9/2018
+_Notes from 1/11/25_
 
 https://github.com/pbstark/CORLA18
 
@@ -56,7 +57,7 @@ by combining P -values from different strata using Fisher’s combining function
 (or a suitable replacement).
 
 ===================
-Sweeter Notes
+"Sweeter than SUITE: Supermartingale Stratified Union-Intersection Tests of Elections" 25/7/2022
 
 Suite was written before SHANGRLA and ALPHA
 https://github.com/spertus/sweeter-than-SUITE (R code)

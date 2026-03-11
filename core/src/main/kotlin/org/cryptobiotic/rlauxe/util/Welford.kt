@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.betting.Tracker
 import kotlin.math.sqrt
 
 /**
@@ -8,9 +9,9 @@ import kotlin.math.sqrt
  */
 data class Welford(
     var count: Int = 0,      // number of samples
-    var mean: Double = 0.0,  // mean accumulates the mean of the entire dataset
+    var mean: Double = 0.0,  // mean accumulates the mean of the entire sequence
     var M2: Double = 0.0,    // M2 aggregates the squared distance from the mean
-) {
+): Tracker {
 
     // Update with new value
     fun update(newValue: Double) {
@@ -40,9 +41,11 @@ data class Welford(
         return Triple(mean, variance, sampleVariance)
     }
 
-    // current variance
-    fun variance() = if (count == 0) 0.0 else M2 / count
-    fun sum() = mean * count
+    /// Tracker
+    override fun variance() = if (count == 0) 0.0 else M2 / count
+    override fun numberOfSamples() = count
+    override fun sum() = mean * count
+    override fun mean() = mean
 
     override fun toString(): String {
         return "(count, mean, variance, sampleVariance, stddev) = ${this.count}, ${this.result()}, ${sqrt(variance())}"

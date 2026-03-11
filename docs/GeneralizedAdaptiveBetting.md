@@ -1,4 +1,4 @@
-# Generalized Adaptive Betting
+# Generalized Adaptive Betting (to be removed in favor of BettingRiskFunctions)
 _last updated 01/08/26_
 
 See [Betting risk function](docs/BettingRiskFunctions.md) for overview of the risk and betting functions.

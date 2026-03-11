@@ -51,7 +51,7 @@ data class AuditRoundConfig(
     companion object {
         fun fromAuditConfig(config: AuditConfig): AuditRoundConfig {
             val simulation =
-                SimulationControl(config.nsimEst, config.quantile, config.simFuzzPct)
+                SimulationControl(config.nsimEst, config.quantile, config.quantile1, config.simFuzzPct)
             val sampling = ContestSampleControl(
                 config.minRecountMargin, config.minMargin, config.maxSamplePct, config.removeMaxContests,
                 config.contestSampleCutoff, config.removeCutoffContests
@@ -65,7 +65,8 @@ data class AuditRoundConfig(
 
 data class SimulationControl(
     val nsimEst: Int = 100, // number of simulation estimation trials
-    val quantile: Double = 0.80, // use this percentile success for estimated sample size
+    val quantile1: Double = 0.80, // use this percentile success for estimated sample size in round 1
+    val quantile: Double = 0.80, // use this percentile success for estimated sample size in rounds > 1
     val simFuzzPct: Double? = null, // for simulating the estimation fuzzing
 )
 

@@ -34,7 +34,7 @@ import java.nio.file.StandardOpenOption
 //)
 
 // one in each roundXX subdirectory
-// note dont store samplePrns: List<Long>, these are kept im seperate file
+// note dont store samplePrns: List<Long>, these are kept in seperate file
 // TODO keeping seperate AuditEst from AuditState, cound serialize differently if needed
 @Serializable
 data class AuditRoundJson(
@@ -63,10 +63,11 @@ fun AuditRoundIF.publishJson() : AuditRoundJson {
     )
 }
 
-fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: List<Long>): AuditRound {
+fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: List<Long>, prevAuditRound: AuditRound?): AuditRound {
     val contestUAmap = contestUAs.associateBy { it.id }
+    val prevContestMap = prevAuditRound?.contestRounds?.associateBy { it.id } ?: emptyMap()
     val contestRounds = this.contestRounds.map {
-        it.import( contestUAmap[it.id]!! )
+        it.import( contestUAmap[it.id]!!, prevContestMap[it.id])
     }
     // TODO Composite needed to serialize ??
     return AuditRound(
@@ -135,15 +136,16 @@ fun ContestRound.publishJson() : ContestRoundJson {
     )
 }
 
-fun ContestRoundJson.import(contestUA: ContestWithAssertions): ContestRound {
-    val assertionMap = contestUA.assertions().associateBy { it.assorter.hashcodeDesc() }
-    val assertionRounds = assertionRounds.map {
-        val ref = assertionMap[it.assorterDesc]
+fun ContestRoundJson.import(contestUA: ContestWithAssertions, prevContestRound: ContestRound?): ContestRound {
+    val prevAssertionMap = prevContestRound?.assertionRounds?.associateBy { it.assertion.assorter.hashcodeDesc() } ?: emptyMap()
+    val assorterMap = contestUA.assertions().associateBy { it.assorter.hashcodeDesc() } // tricky
+    val assertionRounds = assertionRounds.map { assertionRound ->
+        val ref = assorterMap[assertionRound.assorterDesc]
         if (ref == null) {
-            assertionMap.forEach { key, value -> println("$key = ${value.assorter}") }
-            throw RuntimeException("ContestRoundJson.assorter desc='${it.assorterDesc}' is missing")
+            assorterMap.forEach { key, value -> println("$key = ${value.assorter}") }
+            throw RuntimeException("ContestRoundJson.assorter desc='${assertionRound.assorterDesc}' is missing")
         }
-        it.import( ref )
+        assertionRound.import( ref, prevAssertionMap[assertionRound.assorterDesc] )
     }
     val contestRound = ContestRound(contestUA, assertionRounds, this.roundIdx)
 
@@ -180,7 +182,7 @@ data class AssertionRoundJson(
     val estNewSampleSize: Int,
     val estimationResult: EstimationRoundResultJson?,
     val auditResult: AuditRoundResultJson?,
-    val prevAuditResult: AuditRoundResultJson?,
+    // val prevAuditResult: AuditRoundResultJson?,
 
     val status: TestH0Status, // or its own enum ??
     val roundProved: Int,
@@ -194,23 +196,19 @@ fun AssertionRound.publishJson() : AssertionRoundJson {
         this.estNewMvrs,
         this.estimationResult?.publishJson(),
         this.auditResult?.publishJson(),
-        this.prevAuditResult?.publishJson(),
+        // this.prevAuditResult?.publishJson(),
         this.status,
         this.roundProved,
     )
 }
 
-fun AssertionRoundJson.import(assertion: Assertion): AssertionRound {
-    val prevAuditResult = this.prevAuditResult?.import()
-    val assertionRound = AssertionRound(assertion, this.roundIdx, prevAuditResult)
-    //    if (this.assertion != null) AssertionRound(this.assertion.import(), this.roundIdx, prevAuditResult)
-   //     else AssertionRound(this.clcaAssertion!!.import(), this.roundIdx, prevAuditResult)
+fun AssertionRoundJson.import(assertion: Assertion, prevRound: AssertionRound?): AssertionRound {
+    val assertionRound = AssertionRound(assertion, this.roundIdx, prevRound)
 
     assertionRound.estMvrs = this.estSampleSize
     assertionRound.estNewMvrs = this.estNewSampleSize
     assertionRound.estimationResult = this.estimationResult?.import()
     assertionRound.auditResult = this.auditResult?.import()
-    assertionRound.prevAuditResult = this.prevAuditResult?.import()
     assertionRound.status = this.status
     assertionRound.roundProved = this.roundProved
 
@@ -235,8 +233,11 @@ data class EstimationRoundResultJson(
     val startingTestStatistic: Double,
     val startingErrorRates: Map<Double, Double>? = null, // error rates used for estimation
     val estimatedDistribution: List<Int>,
+    val lastIndex: Int = 0,
+    val quantile: Int = 0,
     val ntrials: Int,
     val simNewMvrs: Int = 0,
+    val simMvrs: Int = 0,
 )
 
 fun EstimationRoundResult.publishJson() = EstimationRoundResultJson(
@@ -246,8 +247,11 @@ fun EstimationRoundResult.publishJson() = EstimationRoundResultJson(
     this.startingTestStatistic,
     this.startingErrorRates,
     this.estimatedDistribution,
+    this.lastIndex,
+    this.quantile,
     this.ntrials,
     this.simNewMvrsNeeded,
+    this.simMvrsNeeded,
 )
 
 fun EstimationRoundResultJson.import() = EstimationRoundResult(
@@ -257,8 +261,11 @@ fun EstimationRoundResultJson.import() = EstimationRoundResult(
         this.startingTestStatistic,
         this.startingErrorRates,
         this.estimatedDistribution,
+        this.lastIndex,
+        this.quantile,
         this.ntrials,
         this.simNewMvrs,
+        this.simMvrs,
     )
 
 // data class AuditRoundResult(
@@ -349,6 +356,7 @@ fun readAuditRoundJsonFile(
     auditRoundFile: String,
     contests: List<ContestWithAssertions>,
     samplePrns: List<Long>,
+    prevAuditRound: AuditRound?,
 ): Result<AuditRoundIF, ErrorMessages> {
 
     val errs = ErrorMessages("readAuditRoundJsonFile '${auditRoundFile}'")
@@ -361,7 +369,7 @@ fun readAuditRoundJsonFile(
     return try {
         Files.newInputStream(filepath, StandardOpenOption.READ).use { inp ->
             val json = jsonReader.decodeFromStream<AuditRoundJson>(inp)
-            val AuditRound = json.import(contests, samplePrns)
+            val AuditRound = json.import(contests, samplePrns, prevAuditRound)
             if (errs.hasErrors()) Err(errs) else Ok(AuditRound)
         }
     } catch (t: Throwable) {

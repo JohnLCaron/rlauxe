@@ -4,6 +4,7 @@ import java.security.SecureRandom
 import kotlin.enums.EnumEntries
 import kotlin.math.abs
 import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.round
 
 val secureRandom = SecureRandom.getInstanceStrong()!!
@@ -19,6 +20,7 @@ fun doubleIsClose(a: Double, b: Double, rtol: Double=1.0e-5, atol:Double=1.0e-8)
 
 fun roundToClosest(x: Double) = round(x).toInt()
 fun roundUp(x: Double) = ceil(x).toInt()
+fun roundDown(x: Double) = floor(x).toInt()
 
 fun listToMap(vararg names: String): Map<String, Int> {
     return names.mapIndexed { idx, value -> value to idx }.toMap()

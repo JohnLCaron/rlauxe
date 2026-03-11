@@ -30,9 +30,9 @@ class Taus(upper: Double, use7override: Boolean = false) {
         return if (idx < 0) "unknown" else tauNames[idx]
     }
 
-    fun valueOf(wantName: String) : Double {
+    fun valueOf(wantName: String) : Double? {
         val idx = tauNames.indexOfFirst { it == wantName }
-        return if (idx < 0) 0.0 else tauValues[idx]
+        return if (idx < 0) null else tauValues[idx]
     }
 
     // can use 5 names for 7, but not 7 names for 5.
@@ -58,6 +58,10 @@ class Taus(upper: Double, use7override: Boolean = false) {
     fun isPhantom(tausValue: Double): Boolean {
         val name = nameOf(tausValue)
         return name == "oth-los" || name == "p1o"
+    }
+
+    fun phantomTausValue(): Double {
+        return (valueOf("oth-los") ?: valueOf("p1o"))!!
     }
 
     override fun toString(): String {
@@ -98,22 +102,21 @@ data class TausRates(val rates: Map<String, Double>) {  // name -> rate over pop
         rates.forEach { require(names7.contains(it.key)) }
     }
 
-    // convert to ClcaErrorCounts by multiplying by totalSamples, and noerror.
+    // convert to ClcaErrorRates by multiplying by noerror.
     fun makeErrorRates(noerror: Double, upper: Double): ClcaErrorRates {
         val taus = Taus(upper)
 
-        // each tau generates an errorCount
+        // each tau generates an errorRate
         val errorRates = mutableMapOf<Double, Double>()
         taus.names().filter { it != "noerror" }.forEach { tauName ->
             val errorRate = getNamedRate(tauName)
             if (errorRate != null) {
                 // tau is assort value / noerror, so assort value = tau * noerror
-                val tau = taus.valueOf(tauName)
+                val tau = taus.valueOf(tauName)!!
                 errorRates[tau * noerror] = errorRate
             }
         }
 
-        // data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double)
         return ClcaErrorRates(noerror, upper, errorRates)
     }
 
@@ -174,7 +177,7 @@ object TausRateTable {
             // errorRate = tausRate * fuzzPct
             val errorRate = tauRateForNCand.getNamedRate(tauName)!! * fuzzPct
             // tau is assort value / noerror, so assort value = tau * noerror
-            val tau = taus.valueOf(tauName)
+            val tau = taus.valueOf(tauName)!!
             Pair(tau * noerror, errorRate)
         }.toMap()
 

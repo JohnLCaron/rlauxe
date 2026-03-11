@@ -18,14 +18,16 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.nfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
+import org.cryptobiotic.rlauxe.verify.VerifyResults
+import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
 import org.cryptobiotic.rlauxe.workflow.ClcaAssertionAuditor
 import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
-import org.cryptobiotic.rlauxe.workflow.auditPollingAssertion
 import java.nio.file.Files.notExists
 import java.nio.file.Path
 
@@ -80,8 +82,21 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRo
             // start next round and estimate sample sizes
             logger.info { "Start startNewRound $roundIdx using ${workflow}" }
             val roundStopwatch = Stopwatch()
+
+            if (roundIdx == 1) {
+                //// heres where we can remove contests as needed
+                // this may change the auditStatus to misformed.
+                val results = VerifyResults()
+                checkContestsCorrectlyFormed(auditRecord.config, auditRecord.contests, results)
+                if (results.hasErrors) {
+                    logger.warn{ results.toString() }
+                } else {
+                    logger.info{ results.toString() }
+                }
+            }
             val nextRound = workflow.startNewRound(quiet = false, onlyTask)
 
+            // get matching mvrs if needed
             if (!nextRound.auditIsComplete && auditRecord.config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs) {
                 val publisher = Publisher(auditDir)
                 val ncards = writeMvrsForRound(publisher, roundIdx)
@@ -153,7 +168,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
             if (seq != null) {
                 val pvalues = seq.pvalues()
                 val count = seq.xs.size
-                append("${sfn("idx", 4)}, ${sfn("xs", 6)}, ${sfn("bet", 6)}, ${sfn("payoff", 6)}, ${sfn("Tj", 6)}, ${sfn("pvalue", 8)}, ")
+                append("${sfn("idx", 4)}, ${sfn("xs", 8)}, ${sfn("bet", 8)}, ${sfn("payoff", 8)}, ${sfn("Tj", 8)}, ${sfn("pvalue", 8)}, ")
                 appendLine("${sfn("location", 25)}, ${sfn("mvr votes", 10)}, ${sfn("card", 10)}")
                 repeat(count) {
                     val x = seq.xs[it]
@@ -167,8 +182,8 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
                         if (mvrVotes == "missing") countPoolCardsMissing++
                     }
 
-                    append("${nfn(it+1, 4)}, ${df(x)}$err, ${df(seq.bets[it])}, ${df(seq.tjs[it])}")
-                    append(", ${trunc(seq.testStatistics[it].toString(), 6)}, ${trunc(pvalues[it].toString(), 8)}")
+                    append("${nfn(it+1, 4)}, ${dfn(x, 8)}$err, ${dfn(seq.bets[it], 8)}, ${dfn(seq.tjs[it], 8)}")
+                    append(", ${trunc(seq.testStatistics[it].toString(), 8)}, ${trunc(pvalues[it].toString(), 8)}")
                     append(", ${sfn(pair.first.location(), 25)}")
                     append(", ${sfn(mvrVotes, 10)}")
                     if (card.poolId() != null) append(", pool=${card.poolId()}, poolAvg=${df(oaAssorter?.poolAverage(card.poolId()))}")

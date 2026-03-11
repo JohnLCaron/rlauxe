@@ -14,13 +14,13 @@ private const val debug = false
 
 private val logger = KotlinLogging.logger("ClcaFuzzSamplerTracker")
 
-// used by estimateClcaAssertionRound
+// used by estimateClcaAssertionRound for OneAudit
 class ClcaFuzzSamplerTracker(
     val simFuzzPct: Double,
     val cardSamples: CardSamples, // these are new each round and need to be fuzzed
     val contestUA: ContestWithAssertions,
     val cassorter: ClcaAssorter,
-    val previousErrorCounts: ClcaErrorCounts,
+    val previousErrorCounts: ClcaErrorCounts?,
 ): SamplerTracker, ErrorTracker {
 
     val contest = contestUA.contest
@@ -37,6 +37,8 @@ class ClcaFuzzSamplerTracker(
     init {
         val mvrs = remakeFuzzed()
         cvrPairs = mvrs.zip(samples)
+        if (previousErrorCounts != null)
+            clcaErrorTracker.setFromPreviousCounts(previousErrorCounts)
     }
 
     override fun sample(): Double {
@@ -66,7 +68,8 @@ class ClcaFuzzSamplerTracker(
         welford = Welford()
         lastVal = null
         clcaErrorTracker.reset()
-        clcaErrorTracker.setFromPreviousCounts(previousErrorCounts)
+        if (previousErrorCounts != null)
+            clcaErrorTracker.setFromPreviousCounts(previousErrorCounts)
     }
 
     fun remakeFuzzed(): List<AuditableCard> {

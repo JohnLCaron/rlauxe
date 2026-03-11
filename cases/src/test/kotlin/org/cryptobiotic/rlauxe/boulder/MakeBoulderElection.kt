@@ -25,7 +25,7 @@ class MakeBoulderElection {
 
     @Test
     fun createBoulder24oa() {
-        val auditdir = "$testdataDir/cases/boulder24/oa/audit"
+        val auditdir = "$testdataDir/cases/boulder24/oa/audit2"
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",

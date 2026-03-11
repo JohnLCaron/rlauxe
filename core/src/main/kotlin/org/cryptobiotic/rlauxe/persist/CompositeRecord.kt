@@ -158,7 +158,7 @@ data class CompositeAuditRound(
         mvrsUnused = auditRounds.map { it.mvrsUnused }.sum()
     }
 
-    override fun createNextRound(): AuditRound {
+    override fun createNextRound(prevAuditRound: AuditRound?): AuditRound {
         TODO("Not yet implemented")
     }
 

@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TausRateTable
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -16,6 +17,7 @@ import kotlin.math.min
 private val debug = false
 private val logger = KotlinLogging.logger("ConsistentSampling")
 
+// TODO not needed I think
 // cant use the "maxSampleIndex", because we need to run permutations.
 // so we have to send back the list of sample indices for each contest
 data class CardSamples(val cards: List<AuditableCard>, val usedByContests: Map<Int, List<Int>>) {
@@ -61,6 +63,7 @@ fun getSubsetForEstimation(
         return (haveSampleSize[c.id] ?: 0) < (wantSampleSize[c.id] ?: 0)
     }
 
+    var countPhantoms = 0
     var countCardsLookedAt = 0
     val sortedCardIter = cardManifest.cards.iterator()
     while (sortedCardIter.hasNext()) {
@@ -84,6 +87,7 @@ fun getSubsetForEstimation(
 
         if (include) {
             sampledCards.add(card)
+            if (card.isPhantom()) countPhantoms++
         }
 
         // update the haveSampleSize count and maxSampleIndexAllowed
@@ -106,6 +110,25 @@ fun getSubsetForEstimation(
 
     if (sampledCards.size == 0)
         logger.warn { "sampledCards.size == 0" }
+
+    // you could just count the damn number of phantoms you are going to see....
+    // you could run a mini audit to track the phantoms and just keep adding cards until you pass the risk limit.
+    // is that kosher? It might solve the "variance due to phantoms" problem.
+    // maybe you should not do incremental, just start over each time ???
+    // maybe its bogus to have so many phantoms - they should be undervotes....
+    // corla contest 116 - margin .133, noerror is .536 (payoff 1.0685) and phantom pct is 6% (payoff .5531)
+    //  (1.0684)^n * (.5531) = 1
+    // n = -ln(.5531) / ln(1.0684) = 9
+    // n_payoffRisk = ln (.03) ÷ ln(1.0685) = 52
+    // n_payoffPhantoms = nphantoms * n
+    // nphantoms = phantomPct * sampleSize
+    // sampleSize = n_payoffRisk + phantomPct * sampleSize * 9
+    // sampleSize = n_payoffRisk / (1 - phantomPct * 9)
+    // phantomPct = .06, sampleSize = 113,
+    // phantomPct = .08, sampleSize = 185,
+    // phantomPct = .09, sampleSize = 274,
+    // phantomPct = .10, sampleSize = 520 (!) close to the margin
+    println("nphantoms = $countPhantoms = ${countPhantoms/sampledCards.size.toDouble()}")
 
     if (debug) logger.info{ "getSubsetForEstimation sampled cards ncards = ${sampledCards.size} countCardsLookedAt = $countCardsLookedAt" }
     if (debug && allInfos != null) {
@@ -160,10 +183,9 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: In
         return 0
     }
 
-    if (contestRound.contestUA.id == 17)
+    if (contestRound.contestUA.id == 15)
         print("")
 
-    val lastPvalue = minAssertionRound.auditResult?.plast ?: config.riskLimit
     val minAssertion = minAssertionRound.assertion
     val cassorter = (minAssertion as ClcaAssertion).cassorter
 
@@ -185,14 +207,8 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: In
         )
     }
 
-    val estAndBet = cassorter.estWithOptimalBet2(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue, null) // TODO NEXT
-    val dd = if (cassorter is OneAuditClcaAssorter) {
-        val sum = cassorter.oaAssortRates.sumOneAuditTerm(estAndBet.second)
-        val sumneg = if (sum < 0) "**" else ""
-        "sumOneAuditTerm=${dfn(sum, 6)} $sumneg"
-    } else ""
+    val nsamples = minAssertionRound.calcNewMvrsNeeded(contest, config) // TODO NEXT
 
-    val nsamples =  estAndBet.first
     // TODO underestimates when nsamples is low ?
     val stddev = .586 * nsamples - 23.85 // see https://github.com/JohnLCaron/rlauxe?tab=readme-ov-file#clca-with-errors
 
@@ -202,15 +218,26 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: In
     // TODO using contestSampleCutoff as maximum
     var est =  min( contest.Npop, needed)
     if (config.contestSampleCutoff != null) est = min(config.contestSampleCutoff, est)
-    if (debug) logger.info { "getSubsetForEstimation ${contest.id}-${assorter.winLose()} estSamplesNeeded=$est margin=${assorter.dilutedMargin()} " +
-            "estAndBet=${estAndBet.first}, ${df(estAndBet.second)} stddev=$stddev; $dd" }
 
     if (est < 0) {
         // TODO what to do when estimate is negetive?? Perhaps fail ??
         //val wtf = cassorter.estWithOptimalBet(contest, maxLoss = config.clcaConfig.maxLoss, lastPvalue, clcaErrorCounts)
         //throw RuntimeException("est samples $est < 0")
+        logger.warn { " *** getSubsetForEstimation ${contest.id}-${assorter.winLose()} estSamplesNeeded=$est margin=${assorter.dilutedMargin()} " +
+                "nsamples=${nsamples}, stddev=$stddev" }
+
+        val lastPvalue = minAssertionRound.auditResult?.plast ?: config.riskLimit
         est =  cassorter.sampleSizeNoErrors(2 * config.clcaConfig.maxLoss, lastPvalue)
-        if (est < 0) est = ncards // TODO bail out and just use ncards cause we think this only happens for small subsets??
+        if (est < 0) { // barf
+            est = 0
+            contestRound.status = TestH0Status.FailMaxSamplesAllowed
+            contestRound.included = false
+            contestRound.done = true
+            logger.info{"*** removeMaxContests contest ${contestRound.id} with status FailMaxSamplesAllowed"}
+        }
+    } else {
+        logger.info { "getSubsetForEstimation ${contest.id}-${assorter.winLose()} estSamplesNeeded=$est margin=${assorter.dilutedMargin()} " +
+                "nsamples=${nsamples}, stddev=$stddev" }
     }
     return est
 }

@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
-import org.cryptobiotic.rlauxe.betting.Taus
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -113,7 +112,7 @@ class AuditCobraAssertion(
 
         val betFun = GeneralAdaptiveBetting(
             Npop = contestUA.Npop,
-            aprioriCounts = aprioriCounts.clcaErrorRates(),
+            aprioriErrorRates = aprioriCounts.clcaErrorRates(),
             nphantoms = contestUA.Nphantoms,
             maxLoss = config.clcaConfig.maxLoss,
             oaAssortRates = null,

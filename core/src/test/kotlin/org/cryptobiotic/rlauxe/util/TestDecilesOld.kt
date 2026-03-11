@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.util.doublePrecision
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

@@ -19,7 +19,7 @@ class BettingPayoffGA {
                 val noerror = 1 / (2 - margin)
                 val betFun = GeneralAdaptiveBetting(
                     Npop = N,
-                    aprioriCounts = ClcaErrorRates.empty(noerror, 1.0),
+                    aprioriErrorRates = ClcaErrorRates.empty(noerror, 1.0),
                     nphantoms = 0,
                     maxLoss = .99,
                     oaAssortRates = null,
@@ -60,7 +60,7 @@ class BettingPayoffGA {
                 //    val debug: Boolean = false,
                 val betFun = GeneralAdaptiveBetting(
                     Npop = N,
-                    aprioriCounts = ClcaErrorRates.empty(noerror, 1.0),
+                    aprioriErrorRates = ClcaErrorRates.empty(noerror, 1.0),
                     nphantoms = 0,
                     maxLoss = .90,
                     oaAssortRates = null,

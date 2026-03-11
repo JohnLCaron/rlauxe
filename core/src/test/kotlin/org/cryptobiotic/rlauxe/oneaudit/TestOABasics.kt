@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.doublePrecision
@@ -141,7 +142,7 @@ class TestOABasics {
         val (contestUA, mvrs, cards, cardPools) = makeOneAuditTest(
             20000,
             18000,
-            cvrFraction = .66,
+            cvrFraction = .86,
             undervoteFraction = .0,
             phantomFraction = .0,
         )
@@ -150,7 +151,8 @@ class TestOABasics {
         println(oaAssorter)
         println("oaAssortRates = ${oaAssorter.oaAssortRates.show()}")
         println("sampleSizeNoErrors = ${oaAssorter.sampleSizeNoErrors( 2 * 0.9, .05)}")
-        println("estWithOptimalBet = ${oaAssorter.estWithOptimalBet2(contestUA, 0.9, .05)}")
+        println("sampleSizeWithErrors = ${oaAssorter.sampleSizeWithErrors(2 * 0.9, .05, 
+            ClcaErrorRates.empty(0.505, 1.0))}")
     }
 
         // AffineTransform code removed 8/19/2025. See history before then to revive

@@ -13,7 +13,13 @@ import kotlin.math.min
 
 private val logger = KotlinLogging.logger("CalculateSampleSizes")
 
-// not setting assertionRound.estNewMvrs, contestRound.estNewMvrs; maybe only informative ??
+// originally this was to replace estimation for round 1.
+// Now, after estimation, calculateSampleSizes() is called and assertionRound.calcNewMvrsNeeded is written to
+// assertionRound.estNewMvrs, assertionRound.estMvrs,
+// estimationResult.calcNewMvrsNeeded
+// and if (overwrite) contestRound.estNewMvrs, contestRound.maxNewEstMvrs
+
+// TODO not needed I think
 fun calculateSampleSizes(
     config: AuditConfig,
     auditRound: AuditRoundIF,
@@ -47,19 +53,11 @@ fun calculateSampleSizes(
                     startingErrorRates = null,
                     estimatedDistribution = emptyList(),
                     ntrials = 0,
-                    simNewMvrsNeeded = calcNewSamples
+                    simNewMvrsNeeded = calcNewSamples,
+                    quantile=0, lastIndex=0,
                 )
             } else {
                 assertionRound.estimationResult = simResult.copy(calcNewMvrsNeeded = calcNewSamples)
-                    /* auditRound.roundIdx,
-                    "calculateSampleSizes",
-                    calcNewMvrsNeeded = calcNewSamples,
-                    startingTestStatistic = 1.0,
-                    startingErrorRates = simResult.startingErrorRates,
-                    estimatedDistribution = simResult.estimatedDistribution,
-                    ntrials = simResult.ntrials,
-                    simNewMvrsNeeded = simResult.simNewMvrsNeeded
-                ) */
             }
 
             maxNewEstMvrs = max( maxNewEstMvrs, calcNewSamples)

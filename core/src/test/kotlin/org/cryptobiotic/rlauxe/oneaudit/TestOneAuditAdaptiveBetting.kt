@@ -92,7 +92,7 @@ class TestOneAuditAdaptiveBetting {
             //    val debug: Boolean = false,
             val betFun = GeneralAdaptiveBetting(
                 Npop = contestUA.Npop,
-                aprioriCounts = ClcaErrorRates.empty(oaCassorter.noerror(), oaCassorter.assorter.upperBound()),
+                aprioriErrorRates = ClcaErrorRates.empty(oaCassorter.noerror(), oaCassorter.assorter.upperBound()),
                 nphantoms = contestUA.contest.Nphantoms(),
                 maxLoss = 0.90,
                 oaAssortRates = oaErrorRates,

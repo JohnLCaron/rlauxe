@@ -78,7 +78,7 @@ fun betPayoffSamples(N: Int, risk: Double, assorterMargin: Double, error: Double
     //    val debug: Boolean = false,
     val bettingFn = GeneralAdaptiveBetting(
         Npop = N,
-        aprioriCounts = ClcaErrorRates.empty(noerror, 1.0),
+        aprioriErrorRates = ClcaErrorRates.empty(noerror, 1.0),
         nphantoms = 0,
         oaAssortRates = null,
         d = 100,

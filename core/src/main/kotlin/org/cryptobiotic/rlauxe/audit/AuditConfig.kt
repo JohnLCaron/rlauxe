@@ -35,6 +35,7 @@ data class AuditConfig(
 
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated,
 
+    val quantile1: Double = 0.50, // use this percentile success for estimated sample size
     val version: Double = 2.0,
 ) {
     val isClca = auditType == AuditType.CLCA
@@ -56,7 +57,7 @@ data class AuditConfig(
         if (contestSampleCutoff != null) { append(" contestSampleCutoff=$contestSampleCutoff removeCutoffContests=$removeCutoffContests") }
         if (auditSampleLimit != null) { append(" auditSampleLimit=$auditSampleLimit (risk measuring audit)") }
         appendLine()
-        appendLine("  nsimEst=$nsimEst, quantile=$quantile, simFuzzPct=${simFuzzPct}, simulationStrategy=$simulationStrategy, mvrFuzzPct=${mvrFuzzPct()},")
+        appendLine("  nsimEst=$nsimEst, quantile1=$quantile1, quantile=$quantile, simFuzzPct=${simFuzzPct}, simulationStrategy=$simulationStrategy, mvrFuzzPct=${mvrFuzzPct()},")
 
         // if (skipContests.isNotEmpty()) { appendLine("  skipContests=$skipContests") }
         when (auditType) {
@@ -118,7 +119,7 @@ data class PollingConfig(
     val d: Int = 100,  // shrinkTrunc weight
 )
 
-enum class ClcaStrategyType { generalAdaptive, generalAdaptive2 }
+enum class ClcaStrategyType { generalAdaptive2 }
 data class ClcaConfig(
     val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive2,
     val fuzzMvrs: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs when persistedWorkflowMode=testSimulate

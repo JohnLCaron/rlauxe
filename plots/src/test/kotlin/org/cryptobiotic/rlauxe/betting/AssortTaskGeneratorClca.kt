@@ -120,7 +120,7 @@ class ClcaSingleRoundAssortTask(
         //    val debug: Boolean = false,
         val betFun = GeneralAdaptiveBetting(
             Npop = N,
-            aprioriCounts = ClcaErrorRates.empty(noerror, upper),
+            aprioriErrorRates = ClcaErrorRates.empty(noerror, upper),
             nphantoms = 0,
             maxLoss = maxLoss,
             oaAssortRates = null,

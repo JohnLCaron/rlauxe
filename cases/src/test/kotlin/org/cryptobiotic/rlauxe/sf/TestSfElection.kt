@@ -124,7 +124,7 @@ class TestSfElection {
             //    val debug: Boolean = false,
             val betFn = GeneralAdaptiveBetting(
                 Npop = contest.Npop,
-                aprioriCounts = ClcaErrorRates.empty(oaass.noerror(), 1.0),
+                aprioriErrorRates = ClcaErrorRates.empty(oaass.noerror(), 1.0),
                 contest.Nphantoms,
                 maxLoss = .9,
                 oaAssortRates=oaass.oaAssortRates,

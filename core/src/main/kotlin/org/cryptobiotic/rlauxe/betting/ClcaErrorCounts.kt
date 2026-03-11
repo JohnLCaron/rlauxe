@@ -100,9 +100,10 @@ class ClcaErrorTracker(val noerror: Double, val upper: Double): ErrorTracker {
     private var last = 0.0
     private var sum = 0.0
     private var welford = Welford()
+    private var prevTotalSamples = 0
 
     fun last() = last
-    override fun numberOfSamples() = welford.count
+    override fun numberOfSamples() = prevTotalSamples + welford.count
     override fun sum() = sum
     override fun mean() = welford.mean
     override fun variance() = welford.variance()
@@ -110,6 +111,15 @@ class ClcaErrorTracker(val noerror: Double, val upper: Double): ErrorTracker {
     val valueCounter = mutableMapOf<Double, Int>()
     var noerrorCount = 0
     var sequences: DebuggingSequences?=null
+
+    fun setFromPreviousCounts(prevCounts: ClcaErrorCounts) {
+        require(prevCounts.noerror == noerror)
+        require(prevCounts.upper == upper)
+        prevTotalSamples = prevCounts.totalSamples
+        prevCounts.errorCounts.forEach { bassort, count ->
+            valueCounter[bassort] = count
+        }
+    }
 
     fun setDebuggingSequences(sequences: DebuggingSequences) {
         this.sequences = sequences
@@ -140,7 +150,7 @@ class ClcaErrorTracker(val noerror: Double, val upper: Double): ErrorTracker {
 
     override fun noerror() = noerror
     override fun measuredClcaErrorCounts(): ClcaErrorCounts {
-        val clcaErrors = valueCounter.toList().filter { (key, value) -> taus.isClcaError(key / noerror) }.toMap().toSortedMap()
+        val clcaErrors = valueCounter.toList().filter { (key, _) -> taus.isClcaError(key / noerror) }.toMap().toSortedMap()
         return ClcaErrorCounts(clcaErrors, numberOfSamples(), noerror, upper)
     }
 

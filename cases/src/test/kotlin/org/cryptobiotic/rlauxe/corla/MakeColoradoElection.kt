@@ -1,12 +1,9 @@
 package org.cryptobiotic.rlauxe.corla
 
-import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
 import kotlin.test.Test
@@ -29,7 +26,8 @@ class MakeColoradoElection {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoElection(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType = AuditType.CLCA)
+        createColoradoElection(topdir, "$topdir/audit2",
+            detailXmlFile, contestRoundFile, precinctFile, auditType = AuditType.CLCA)
     }
 
     @Test
@@ -39,7 +37,8 @@ class MakeColoradoElection {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoElection(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.POLLING)
+        createColoradoElection(topdir, "$topdir/audit",
+            detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.POLLING)
     }
 
     // @Test

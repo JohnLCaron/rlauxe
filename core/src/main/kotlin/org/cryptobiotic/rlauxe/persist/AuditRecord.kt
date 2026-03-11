@@ -158,6 +158,7 @@ class AuditRecord(
 
             val sampledMvrsAll = mutableListOf<AuditableCard>()
 
+            var prevAuditRound : AuditRound? = null
             val rounds = mutableListOf<AuditRound>()
             for (roundIdx in 1..publisher.currentRound()) {
                 val samplePrnsResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(roundIdx))
@@ -183,8 +184,12 @@ class AuditRecord(
                         auditStateFile,
                         contests!!,
                         samplePrns!!,
+                        prevAuditRound,
                     )
-                    if (auditRound.isOk) rounds.add(auditRound.unwrap() as AuditRound) else {
+                    if (auditRound.isOk) {
+                        prevAuditRound = auditRound.unwrap() as AuditRound
+                        rounds.add(prevAuditRound)
+                    } else {
                         errs.addNested(auditRound.unwrapError())
                     }
                 } else {
@@ -195,8 +200,12 @@ class AuditRecord(
                             auditEstFile,
                             contests!!,
                             samplePrns!!,
+                            prevAuditRound,
                         )
-                        if (auditEstRound.isOk) rounds.add(auditEstRound.unwrap() as AuditRound) else {
+                        if (auditEstRound.isOk) {
+                            prevAuditRound = auditEstRound.unwrap() as AuditRound
+                            rounds.add(auditEstRound.unwrap() as AuditRound)
+                        } else {
                             errs.addNested(auditEstRound.unwrapError())
                         }
                     }
@@ -213,9 +222,9 @@ class AuditRecord(
                 if (auditCreationConfig != null && auditRoundConfig != null) {
                     val auditConfigNew = AuditConfig.fromRoundConfig(auditCreationConfig, auditRoundConfig)
                     if (auditConfigNew != config) {
-                        println(config)
-                        println(auditConfigNew)
-                        println()
+                        // println("readAuditConfigJsonFile= $config")
+                       // println("fromRoundConfig= ${auditConfigNew}")
+                        println("auditConfigNew != config")
                     }
                 }
 

@@ -49,7 +49,8 @@ class TestGenerateAllUseCases {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoElection(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType = AuditType.CLCA)
+        createColoradoElection(topdir, "$topdir/audit",
+            detailXmlFile, contestRoundFile, precinctFile, auditType = AuditType.CLCA)
     }
 
     @Test
@@ -59,7 +60,8 @@ class TestGenerateAllUseCases {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoElection(topdir, detailXmlFile, contestRoundFile, precinctFile, auditType = AuditType.POLLING)
+        createColoradoElection(topdir, "$topdir/audit",
+            detailXmlFile, contestRoundFile, precinctFile, auditType = AuditType.POLLING)
     }
 
     @Test

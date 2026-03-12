@@ -6,7 +6,10 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.betting.makeAprioriErrorRates
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizeSimple
+import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
+import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.df
+import org.cryptobiotic.rlauxe.util.roundUp
 
 interface AuditRoundIF {
     val roundIdx: Int
@@ -22,7 +25,7 @@ interface AuditRoundIF {
     var mvrsUnused: Int
 
     fun show(): String
-    fun createNextRound(): AuditRound
+    fun createNextRound(prevAuditRound: AuditRound?): AuditRound
 }
 
 data class AuditRound(
@@ -46,8 +49,11 @@ data class AuditRound(
         "AuditState(round = $roundIdx, nmvrs=$nmvrs, auditWasDone=$auditWasDone, auditIsComplete=$auditIsComplete)" +
                 " ncontests=${contestRounds.size} ncontestsDone=${contestRounds.count { it.done }}"
 
-    override fun createNextRound(): AuditRound {
-        val nextContests = contestRounds.filter { !it.status.complete }.map { it.createNextRound() }
+    override fun createNextRound(prevAuditRound: AuditRound?): AuditRound {
+        val nextContests = contestRounds.filter { !it.status.complete }.map { contestRound ->
+            val prevContestRound = prevAuditRound?.contestRounds?.find { it.id == contestRound.id }
+            contestRound.createNextRound(prevContestRound)
+        }
         return AuditRound(roundIdx + 1, nextContests, samplePrns = emptyList())
     }
 }
@@ -97,9 +103,11 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
                else estMvrs
     }
 
-    fun createNextRound() : ContestRound {
-        val nextAssertions =  assertionRounds.filter { !it.status.complete }.map{
-            AssertionRound(it.assertion, roundIdx + 1, it.auditResult)
+    fun createNextRound(prevContestRound: ContestRound?) : ContestRound {
+        val nextAssertions =  assertionRounds.filter { !it.status.complete }.map{ assertionRound ->
+            val assertion = assertionRound.assertion
+            val prevAssertionRound = prevContestRound?.assertionRounds?.find { it.assertion.assorter.hashcodeDesc() == assertion.assorter.hashcodeDesc() }
+            AssertionRound(assertion, roundIdx + 1, prevAssertionRound)
         }
         return ContestRound(contestUA, nextAssertions, roundIdx + 1)
     }
@@ -108,9 +116,9 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         // cant use contestUA.minAssertion, since some of the assertions may have finished being audited, ie are not in assertionRounds
         if (assertionRounds.isEmpty()) return null
         if (contestUA.isClca) {
-            val margins = assertionRounds.map { Pair(it, it.noerror) }
-            val minMargin = margins.sortedBy { it.second }
-            return minMargin.first().first
+            val noerrors = assertionRounds.map { Pair(it, it.noerror) }
+            val sortedNoerrors = noerrors.sortedBy { it.second }
+            return sortedNoerrors.first().first
         } else {
             val margins = assertionRounds.map { Pair(it, it.assertion.assorter.dilutedMargin()) }
             val minMargin = margins.sortedBy { it.second }
@@ -183,11 +191,15 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         return result
     }
 
+    override fun toString(): String {
+        return "ContestRound(roundIdx=$roundIdx, id=$id, estMvrs=$estMvrs, estNewMvrs=$estNewMvrs, status=$status)"
+    }
 }
 
-data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevAuditResult: AuditRoundResult?) {
+data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevAssertionRound: AssertionRound?) {
     val noerror = if (assertion is ClcaAssertion) assertion.cassorter.noerror() else 0.0
     val upper = assertion.upper
+    val prevAuditResult = prevAssertionRound?.auditResult
 
     // these values are set during estimateSampleSizes()
     var estMvrs = 0   // estimated sample size for current round
@@ -200,13 +212,13 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     var roundProved = 0           // round when set to proved or disproved
 
     // we get the results from the audit, not the estimation
-    fun previousErrorCounts(): ClcaErrorCounts {
+    fun previousErrorCounts(): ClcaErrorCounts? {
         require(assertion is ClcaAssertion)
-        if (roundIdx == 1 || prevAuditResult == null || prevAuditResult!!.measuredCounts == null)
-            return ClcaErrorCounts.empty(noerror, upper)
+        if (roundIdx == 1 || prevAuditResult == null || prevAuditResult.measuredCounts == null)
+            return null
 
-        val prevResult = prevAuditResult!!
-        return ClcaErrorCounts(prevResult.measuredCounts!!.errorCounts, prevResult.samplesUsed, noerror, upper)
+        val prevResult = prevAuditResult
+        return ClcaErrorCounts(prevResult.measuredCounts.errorCounts, prevResult.samplesUsed, noerror, upper)
     }
 
     // return (calculated new mvrs needed, optimalBet) based on prevAuditResult.measuredCounts or apriori.errorCounts
@@ -221,28 +233,24 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
         // alpha_now = 1 / Tnow = = (1/plast) / (1/risklimit) = risklimit/plast
         var alpha = auditConfig.riskLimit
         if (this.prevAuditResult != null) {
-            alpha /= this.prevAuditResult!!.plast
+            alpha /= this.prevAuditResult.plast
         }
 
-        val maxBet = 2 * auditConfig.clcaConfig.maxLoss
         val aprioriRates = auditConfig.clcaConfig.apriori.makeErrorRates(noerror, upper)
-        val totalRates =  makeAprioriErrorRates(aprioriRates, contest.Nphantoms/contest.Npop.toDouble())
-        val result = cassorter.sampleSizeWithErrors(maxBet, alpha, ClcaErrorRates(noerror, upper, totalRates))
-        return result
+        val ratesWithPhantoms =  makeAprioriErrorRates(aprioriRates, contest.Nphantoms/contest.Npop.toDouble())
 
-        /*
         return if (cassorter is OneAuditClcaAssorter) {
-            assertion.cassorter.estWithOptimalBet2(contest, maxLoss, alpha, previousErrorCounts())
+            val clcaErrorRates =  ClcaErrorRates(noerror, upper, ratesWithPhantoms)
+            val pair = assertion.cassorter.estWithOptimalBet2(contest, auditConfig.clcaConfig.maxLoss, alpha, clcaErrorRates)
+            pair.first
         } else {
-            // fun estimateSampleSizePayloads(
-            //    alpha: Double,
-            //    gamma: Double = 1.03905,
-            //    errors: ClcaErrorCounts, // (val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double) {
-            //    )
-            // need to add the phantom rates like in estWithOptimalBet2
-            val est = estimateSampleSizePayloads(alpha, previousErrorCounts())
-            Pair(est, 2*maxLoss)
-        } */
+            val maxBet = 2 * auditConfig.clcaConfig.maxLoss // TODO ??
+            cassorter.sampleSizeWithErrors(maxBet, alpha, ClcaErrorRates(noerror, upper, ratesWithPhantoms))
+        }
+    }
+
+    override fun toString(): String {
+        return "AssertionRound(roundIdx=$roundIdx, estMvrs=$estMvrs, estNewMvrs=$estNewMvrs, status=$status)"
     }
 }
 
@@ -251,10 +259,13 @@ data class EstimationRoundResult(
     val strategy: String,
     val calcNewMvrsNeeded: Int, // could just calculate on the fly ?
     val startingTestStatistic: Double,
-    val startingErrorRates: Map<Double, Double>? = null, // error rates used for estimation
-    val estimatedDistribution: List<Int>,   // distribution of estimated sample size as deciles
+    val startingErrorRates: Map<Double, Double>? = null, // error rates used for estimation; informational
+    val estimatedDistribution: List<Int>,   // distribution of estimated sample sizes
+    val lastIndex: Int,
+    val quantile: Int,
     val ntrials: Int,
     val simNewMvrsNeeded: Int,
+    val simMvrsNeeded: Int = 0,
 ) {
     override fun toString() = "round=$roundIdx strategy=$strategy calcMvrsNeeded=$calcNewMvrsNeeded estimatedDistribution=$estimatedDistribution ($ntrials) " +
             "simNewMvrs=$simNewMvrsNeeded startingErrorRates=$startingErrorRates"
@@ -264,6 +275,13 @@ data class EstimationRoundResult(
             startingErrorRates.filter { it.value != 0.0 }.forEach { append("${df(it.key)}=${df(it.value)}, ") }
         }
     }
+
+    fun deciles(): List<Int> {
+        val decilePcts = IntArray(10) { 10 * (it+1) }
+        val wtf: MutableMap<Int?, Double?> = percentiles().indexes(*decilePcts).compute(*estimatedDistribution.toIntArray())
+        return wtf.values.map { roundUp(it!!) }
+    }
+
 }
 
 data class AuditRoundResult(

@@ -117,18 +117,15 @@ class ClcaSingleRoundAssortTask(
         //
         //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
         //    val d: Int = 100,  // trunc weight
-        //    val debug: Boolean = false,
         val betFun = GeneralAdaptiveBetting(
             Npop = N,
-            aprioriCounts = ClcaErrorRates.empty(noerror, upper),
+            aprioriErrorRates = ClcaErrorRates.empty(noerror, upper),
             nphantoms = 0,
             maxLoss = maxLoss,
             oaAssortRates = null,
             d = 0,
-            debug=false,
         )
 
-        val tracker = ClcaErrorTracker(noerror, upper)
         val testFn = BettingMart(
             bettingFn = betFun,
             N = N,
@@ -137,7 +134,6 @@ class ClcaSingleRoundAssortTask(
             withoutReplacement = true,
             tracker=samplerTracker
         )
-        tracker.setDebuggingSequences(testFn.setDebuggingSequences())
 
         val testH0Result = testFn.testH0(
             sampling.maxSamples(),

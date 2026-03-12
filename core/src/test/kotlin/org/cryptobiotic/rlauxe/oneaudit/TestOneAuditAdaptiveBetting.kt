@@ -92,13 +92,13 @@ class TestOneAuditAdaptiveBetting {
             //    val debug: Boolean = false,
             val betFun = GeneralAdaptiveBetting(
                 Npop = contestUA.Npop,
-                aprioriCounts = ClcaErrorRates.empty(oaCassorter.noerror(), oaCassorter.assorter.upperBound()),
+                aprioriErrorRates = ClcaErrorRates.empty(oaCassorter.noerror(), oaCassorter.assorter.upperBound()),
                 nphantoms = contestUA.contest.Nphantoms(),
                 maxLoss = 0.90,
                 oaAssortRates = oaErrorRates,
                 d = 100,
-                debug=true,
             )
+            betFun.debug = true
 
             val tracker = ClcaErrorTracker(oaCassorter.noerror(), oaCassorter.assorter.upperBound())
             val nsamples = runSamplesNeeded(contestUA.Npop, betFun, sampler, tracker, show = false)

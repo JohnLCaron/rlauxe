@@ -3,8 +3,6 @@ package org.cryptobiotic.rlauxe.betting
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.doublePrecision
@@ -119,11 +117,10 @@ class ClcaSamplerErrorTracker(
     val cassorter: ClcaAssorter,
     val samples: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
     val allowReset: Boolean = true,  // needed ?
-    val name: String? = null,
+    val name: String? = null, // debugging
 ): SamplerTracker, ErrorTracker {
     val permutedIndex = MutableList(samples.size) { it }
-    val clcaErrorTracker = ClcaErrorTracker2(cassorter.noerror, cassorter.assorter.upperBound())
-    val oaTracker = if (cassorter is OneAuditClcaAssorter) OneAuditTracker2(contestId, cassorter) else null
+    val clcaErrorTracker = ClcaErrorTracker(cassorter.noerror, cassorter.assorter.upperBound())
 
     private var idx = 0
     private var welford = Welford()
@@ -142,8 +139,8 @@ class ClcaSamplerErrorTracker(
             val nextVal = cassorter.bassort(mvr, card, hasStyle=card.exactContests())
 
             clcaErrorTracker.addSample(nextVal, card.poolId == null) // dont track errors from oa pools
-            if (oaTracker != null && card.poolId != null) oaTracker.addSample(mvr, card)
 
+            //// lastVal seems unneeded; inconsistent welford and clcaErrorTracker
             if (lastVal != null) welford.update(lastVal!!)
             lastVal = nextVal
             return nextVal
@@ -223,6 +220,7 @@ class ClcaSamplerErrorTracker(
     }
 
     companion object {
+        // pull the desired samples out
         fun fromIndexList(
             contestId: Int,
             cassorter: ClcaAssorter,
@@ -278,33 +276,114 @@ class ClcaSamplerErrorTracker(
     }
 }
 
-class ClcaErrorTracker2(val noerror: Double, val upper: Double) {
+// tracks errors from paassed-in assort values; ClcaSamplerErrorTracker is also a SamplerTracker
+class ClcaErrorTracker(val noerror: Double, val upper: Double): ErrorTracker {
     val taus = Taus(upper)
+
     private var totalSamples = 0
     private var countTrackError = 0
+    private var welford = Welford()
 
-    val valueCounter = mutableMapOf<Double, Int>()
-    var noerrorCount = 0
+    private val errorCounts = mutableMapOf<Double, Int>() // assort value -> count
+    private var noerrorCount = 0
 
+    // this seems bogus; what about sum, variance, etc ?
     fun setFromPreviousCounts(prevCounts: ClcaErrorCounts) {
         require(prevCounts.noerror == noerror)
         require(prevCounts.upper == upper)
         totalSamples = prevCounts.totalSamples
         prevCounts.errorCounts.forEach { bassort, count ->
-            valueCounter[bassort] = count
+            errorCounts[bassort] = count
         }
     }
 
     // when the sample is from an OA pool, the value is not a CLCA error
-    fun addSample(sample : Double, trackError: Boolean) {
+    fun addSample(sample : Double, trackError: Boolean = true) {
         totalSamples++
         if (trackError) countTrackError++
+        welford.update(sample)
 
         if (trackError && noerror != 0.0) {
             if (doubleIsClose(sample, noerror, doublePrecision))
                 noerrorCount++
             else if (sample != noerror) {
                 // println("  $sample taus=${sample / noerror} name=${taus.nameOf(sample / noerror)}")
+                val counter = errorCounts.getOrPut(sample) { 0 }
+                errorCounts[sample] = counter + 1
+            }
+        }
+    }
+
+    fun reset() {
+        errorCounts.clear()
+        totalSamples = 0
+        countTrackError = 0
+        noerrorCount = 0
+        welford = Welford()
+    }
+
+    fun errorRates() = errorCounts.mapValues { it.value / numberOfSamples().toDouble() }.toSortedMap()
+    fun errorCounts() = errorCounts.toSortedMap()
+    fun noerrorCount() = noerrorCount
+
+    override fun measuredClcaErrorCounts(): ClcaErrorCounts {
+        val clcaErrors = errorCounts.toList().filter { (key, _) -> taus.isClcaError(key / noerror) }.toMap().toSortedMap()
+        return ClcaErrorCounts(clcaErrors, totalSamples, noerror, upper)
+    }
+
+    override fun toString(): String {
+        return "ClcaErrorTracker(noerror=$noerror, noerrorCount=$noerrorCount, valueCounter=${errorCounts.toSortedMap()}, count=$totalSamples countTrackError=$countTrackError)"
+    }
+
+    override fun numberOfSamples() = totalSamples
+    override fun sum() = welford.sum()
+    override fun mean() = welford.mean
+    override fun variance() = welford.variance()
+    override fun noerror() = noerror
+}
+
+
+// lightweight ErrorTracker for GeneralAdaptiveBetting.bet(), not a full blown SamplerTracker
+class ClcaErrorTrackerOld(val noerror: Double, val upper: Double): ErrorTracker {
+    val taus = Taus(upper)
+
+    private var last = 0.0
+    private var sum = 0.0
+    private var welford = Welford()
+    private var prevTotalSamples = 0
+
+    override fun numberOfSamples() = prevTotalSamples + welford.count
+    override fun sum() = sum
+    override fun mean() = welford.mean
+    override fun variance() = welford.variance()
+    override fun noerror() = noerror
+
+    val valueCounter = mutableMapOf<Double, Int>()
+    var noerrorCount = 0
+    var sequences: DebuggingSequences?=null
+
+    fun setFromPreviousCounts(prevCounts: ClcaErrorCounts) {
+        require(prevCounts.noerror == noerror)
+        require(prevCounts.upper == upper)
+        prevTotalSamples = prevCounts.totalSamples
+        prevCounts.errorCounts.forEach { bassort, count ->
+            valueCounter[bassort] = count
+        }
+    }
+
+    fun setDebuggingSequences(sequences: DebuggingSequences) {
+        this.sequences = sequences
+    }
+
+    fun addSample(sample : Double) {
+        last = sample
+        sum += sample
+        welford.update(sample)
+
+        if (noerror != 0.0) {
+            if (doubleIsClose(sample, noerror))
+                noerrorCount++
+            else if (taus.isClcaError(sample / noerror)) {
                 val counter = valueCounter.getOrPut(sample) { 0 }
                 valueCounter[sample] = counter + 1
             }
@@ -312,46 +391,24 @@ class ClcaErrorTracker2(val noerror: Double, val upper: Double) {
     }
 
     fun reset() {
+        last = 0.0
+        sum = 0.0
+        welford = Welford()
         valueCounter.clear()
-        totalSamples = 0
-        countTrackError = 0
         noerrorCount = 0
     }
 
-    fun measuredClcaErrorCounts(): ClcaErrorCounts {
+    override fun measuredClcaErrorCounts(): ClcaErrorCounts {
         val clcaErrors = valueCounter.toList().filter { (key, _) -> taus.isClcaError(key / noerror) }.toMap().toSortedMap()
-        return ClcaErrorCounts(clcaErrors, totalSamples, noerror, upper)
+        return ClcaErrorCounts(clcaErrors, numberOfSamples(), noerror, upper)
     }
+
+    fun errorRates() = valueCounter.mapValues { it.value / numberOfSamples().toDouble() }.toSortedMap()
+    fun errorCounts() = valueCounter.toSortedMap()
 
     override fun toString(): String {
-        return "ClcaErrorTracker(noerror=$noerror, noerrorCount=$noerrorCount, valueCounter=${valueCounter.toSortedMap()}, count=$totalSamples countTrackError=$countTrackError)"
+        return "ClcaErrorTracker(noerror=$noerror, noerrorCount=$noerrorCount, valueCounter=${valueCounter.toSortedMap()}, N=${numberOfSamples()})"
     }
 }
 
-class OneAuditTracker2(val contestId: Int, val cassorter : OneAuditClcaAssorter) {
-    private var count = 0
-    private var countTrackError = 0
 
-    val welford = Welford()
-    var noerrorCount = 0
-
-    // not really sure what im doing here
-    fun addSample(mvr : CvrIF, card: AuditableCard) {
-        count++
-        val poolAvg = cassorter.poolAverages.assortAverage[card.poolId]
-        if (poolAvg != null) {
-            val nextVal = cassorter.bassort(mvr, card, hasStyle=card.exactContests())
-            welford.update(nextVal)
-
-            val mvr_assort =
-                if (mvr.isPhantom()) 0.0
-                else if (!mvr.hasContest(contestId)) { if (card.exactContests()) 0.0 else 0.5 }
-                else cassorter.assorter.assort(mvr, usePhantoms = false)
-
-            // TODO val cvr_assort = if (cvr.phantom) .5 else poolAvgAssortValue
-            val overstatement = poolAvg - mvr_assort
-        }
-
-    }
-
-}

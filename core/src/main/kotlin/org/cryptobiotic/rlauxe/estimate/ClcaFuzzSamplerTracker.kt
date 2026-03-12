@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker2
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.ErrorTracker
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.core.*
@@ -14,20 +14,20 @@ private const val debug = false
 
 private val logger = KotlinLogging.logger("ClcaFuzzSamplerTracker")
 
-// used by estimateClcaAssertionRound
+// used by estimateClcaAssertionRound for OneAudit
 class ClcaFuzzSamplerTracker(
     val simFuzzPct: Double,
     val cardSamples: CardSamples, // these are new each round and need to be fuzzed
     val contestUA: ContestWithAssertions,
     val cassorter: ClcaAssorter,
-    val previousErrorCounts: ClcaErrorCounts,
+    val previousErrorCounts: ClcaErrorCounts?,
 ): SamplerTracker, ErrorTracker {
 
     val contest = contestUA.contest
     val samples = cardSamples.extractSubsetByIndex(contest.id)
     val maxSamples = samples.size
     val permutedIndex = MutableList(samples.size) { it }
-    val clcaErrorTracker = ClcaErrorTracker2(cassorter.noerror(), cassorter.assorter.upperBound())
+    val clcaErrorTracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound())
 
     var welford = Welford()
     var cvrPairs: List<Pair<AuditableCard, AuditableCard>> // (mvr, cvr)
@@ -37,6 +37,8 @@ class ClcaFuzzSamplerTracker(
     init {
         val mvrs = remakeFuzzed()
         cvrPairs = mvrs.zip(samples)
+        if (previousErrorCounts != null)
+            clcaErrorTracker.setFromPreviousCounts(previousErrorCounts)
     }
 
     override fun sample(): Double {
@@ -66,7 +68,8 @@ class ClcaFuzzSamplerTracker(
         welford = Welford()
         lastVal = null
         clcaErrorTracker.reset()
-        clcaErrorTracker.setFromPreviousCounts(previousErrorCounts)
+        if (previousErrorCounts != null)
+            clcaErrorTracker.setFromPreviousCounts(previousErrorCounts)
     }
 
     fun remakeFuzzed(): List<AuditableCard> {

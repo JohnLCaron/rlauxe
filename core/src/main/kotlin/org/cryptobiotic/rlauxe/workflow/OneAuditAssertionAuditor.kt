@@ -34,9 +34,10 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         val bettingFn =
             GeneralAdaptiveBetting(
                 contestUA.Npop,
-                aprioriCounts = apriori,
+                aprioriErrorRates = apriori,
                 nphantoms = contestUA.contest.Nphantoms(),
                 maxLoss = clcaConfig.maxLoss,
+                oaAssortRates=oaCassorter.oaAssortRates, // OMG
                 d = clcaConfig.d,
             )
 
@@ -52,8 +53,6 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         val terminateOnNullReject = config.auditSampleLimit == null
         val testH0Result = testFn.testH0(samplerTracker.maxSamples(), terminateOnNullReject = terminateOnNullReject) { samplerTracker.sample() }
 
-        if (contestRound.id == 52)
-            print("")
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = samplerTracker.maxSamples(),

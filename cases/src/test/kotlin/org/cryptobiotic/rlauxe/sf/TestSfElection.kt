@@ -124,14 +124,15 @@ class TestSfElection {
             //    val debug: Boolean = false,
             val betFn = GeneralAdaptiveBetting(
                 Npop = contest.Npop,
-                aprioriCounts = ClcaErrorRates.empty(oaass.noerror(), 1.0),
+                aprioriErrorRates = ClcaErrorRates.empty(oaass.noerror(), 1.0),
                 contest.Nphantoms,
                 maxLoss = .9,
                 oaAssortRates=oaass.oaAssortRates,
                 d = 100,
-                debug=true,
             )
+            betFn.debug = true
             val bet = betFn.bet(ClcaErrorTracker(oaass.noerror(), 1.0))
+            betFn.debug = false
 
             println("${contest.id}-${minAssertion.assorter.winLose()} bet = $bet")
         }

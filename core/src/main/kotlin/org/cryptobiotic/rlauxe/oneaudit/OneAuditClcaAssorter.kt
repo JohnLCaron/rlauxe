@@ -189,7 +189,7 @@ class OneAuditClcaAssorter(
         return N
     }
 
-    override fun estWithOptimalBet2(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorRates: ClcaErrorRates?): Pair<Int, Double> {
+    fun estWithOptimalBet2(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorRates: ClcaErrorRates?): Pair<Int, Double> {
         val upper = assorter.upperBound()
         val betFn = GeneralAdaptiveBetting(
             contest.Npop,
@@ -197,7 +197,6 @@ class OneAuditClcaAssorter(
             contest.Nphantoms,
             maxLoss = maxLoss,
             oaAssortRates = oaAssortRates,
-            debug = false,
         )
         val optimalBet = betFn.bet(ClcaErrorTracker(noerror(), upper))
 

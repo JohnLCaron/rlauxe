@@ -17,6 +17,7 @@ class TestTaus {
 
         taus.names().forEach { name ->
             val v = taus.valueOf(name)
+            assertNotNull(v)
             val trip = taus.nameOf(v)
             assertEquals(name, trip)
         }
@@ -50,6 +51,7 @@ class TestTaus {
 
         taus.names().forEach { name ->
             val v = taus.valueOf(name)
+            assertNotNull(v)
             val trip = taus.nameOf(v)
             if (name != trip) println("$trip confused with $name")
         }
@@ -84,6 +86,7 @@ class TestTaus {
 
         tausNotOne.names().forEach { name ->
             val v = tausNotOne.valueOf(name)
+            assertNotNull(v)
             val trip = tausNotOne.nameOf(v)
             assertEquals(name, trip)
         }
@@ -117,7 +120,7 @@ class TestTaus {
         val noerror = .532
         val rates: ClcaErrorRates = tausRates.makeErrorRates(noerror, 1.0)
         println(rates)
-        val assort = noerror * rates.taus.valueOf("p1o")
+        val assort = noerror * rates.taus.valueOf("p1o")!!
         assertEquals(.001, rates.getNamedRate("p1o"))
 
         val errorRates = rates.errorRates

@@ -20,7 +20,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
     // start new round and create estimated sample sizes
     open fun startNewRound(quiet: Boolean = true, onlyTask: OnlyTask? = null): AuditRound {
         val auditRounds = auditRounds()
-        val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last()
+        val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last() as AuditRound
         val roundIdx = auditRounds.size + 1
 
         val auditConfig = auditConfig()
@@ -33,7 +33,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
             AuditRound(roundIdx, contestRounds = contestRounds, samplePrns = emptyList())
         } else {
             // next time, create from previous round
-            previousRound.createNextRound()
+            previousRound.createNextRound(previousRound)
         }
         auditRounds.add(auditRound)
 

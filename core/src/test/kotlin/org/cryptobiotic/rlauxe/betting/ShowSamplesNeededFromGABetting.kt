@@ -41,13 +41,13 @@ class ShowSamplesNeededFromGABetting {
         //    val debug: Boolean = false,
         val betFn = GeneralAdaptiveBetting(
             Npop = N,
-            aprioriCounts = ClcaErrorRates.empty(noerror, upper),
+            aprioriErrorRates = ClcaErrorRates.empty(noerror, upper),
             nphantoms = nphantoms,
             maxLoss = maxLoss,
             oaAssortRates=null,
             d = 0,
-            debug=true,
         )
+        betFn.debug = true
 
         val tracker = ClcaErrorTracker(noerror, upper)
         repeat(1000) { tracker.addSample(noerror) }

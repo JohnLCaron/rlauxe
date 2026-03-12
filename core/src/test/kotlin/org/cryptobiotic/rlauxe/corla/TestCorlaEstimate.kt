@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.estimate.estimateSampleSizeSimple
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizePayloads
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.util.doubleIsClose
+import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.math.abs
 import kotlin.test.Test
 
@@ -21,20 +21,47 @@ class TestCorlaEstimate {
 
     @Test
     fun testCorlaCalc() {
-        val auditdir = "$testdataDir/cases/corla/clca/audit2"
+        val auditdir = "$testdataDir/cases/corla/clca/audit3"
         val auditRecord = AuditRecord.readFrom(auditdir)!!
         val sorted = auditRecord.contests.sortedBy { it.Nphantoms }.reversed()
         auditRecord.contests.forEach { contestUA ->
             val corlaEst = contestUA.contest.info().metadata.get("CORLAsample")
             println("contest ${contestUA.id}  corlaEst= $corlaEst nphantoms=${contestUA.Nphantoms}")
             auditRecord.rounds.forEach { round ->
-                round.contestRounds.filter{ it.contestUA.id == contestUA.id }.forEach { contestRound ->
+                round.contestRounds.filter { it.contestUA.id == contestUA.id }.forEach { contestRound ->
                     val corlaCalc = corlaCalc(auditRecord.config, contestRound)
                     println("  round ${round.roundIdx} corlaCalc= $corlaCalc")
                 }
             }
         }
     }
+
+    @Test
+    fun testCountPhantoms() {
+        val auditdir = "$testdataDir/cases/corla/clca/audit3"
+        val auditRecord = AuditRecord.readFrom(auditdir)!!
+        countPhantoms(auditRecord.readCardManifest(), 116)
+    }
+}
+
+fun countPhantoms(cardManifest: CardManifest, contestId: Int) {
+    var count = 0
+    var countPhantoms = 0
+    var lastPhantoms = 0
+    cardManifest.cards.iterator().use { cardIter ->
+        while (cardIter.hasNext()) {
+            val card = cardIter.next()
+            if (card.isPhantom() && card.contests().contains(contestId)) {
+                countPhantoms++
+            }
+            count++
+            if (count % 10000 == 0) {
+                // println("$count ${countPhantoms - lastPhantoms}")
+                lastPhantoms = countPhantoms
+            }
+        }
+    }
+    println("\nnphantoms = $countPhantoms for contest $contestId")
 }
 
 fun corlaCalc(config: AuditConfig, contestRound: ContestRound): SampleEst? {

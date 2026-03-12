@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
+import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.workflow.*
@@ -19,6 +20,29 @@ import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
 
 class TestAuditRoundJson {
+
+    @Test
+    fun testSf24oa() {
+        val auditdir = "/home/stormy/rla/cases/sf2024/oa/audit"
+        val record = AuditRecord.readFrom(auditdir) as AuditRecord
+        val contestsUAs = record.contests
+
+        val scratchFile = createTempFile().toFile()
+
+        var prevRound: AuditRound? = null
+        record.rounds.forEach { target ->
+            writeAuditRoundJsonFile(target, scratchFile.toString())
+            val result = readAuditRoundJsonFile(scratchFile.toString(), contestsUAs, target.samplePrns, prevRound)
+            assertTrue(result.isOk)
+            val roundtrip = result.unwrap()
+            check(target, roundtrip)
+            assertTrue(roundtrip.equals(target))
+            assertEquals(roundtrip, target)
+            prevRound = roundtrip as AuditRound
+        }
+
+        scratchFile.delete()
+    }
 
     @Test
     fun testRoundtrip() {
@@ -56,7 +80,7 @@ class TestAuditRoundJson {
             nmvrs = 42,
         )
         val json = target.publishJson()
-        val roundtrip = json.import(contestsUAs, target.samplePrns)
+        val roundtrip = json.import(contestsUAs, target.samplePrns, null)
         assertNotNull(roundtrip)
         check(target, roundtrip)
         assertTrue(roundtrip.equals(target))
@@ -92,7 +116,7 @@ class TestAuditRoundJson {
         val scratchFile = createTempFile().toFile()
 
         writeAuditRoundJsonFile(target, scratchFile.toString())
-        val result = readAuditRoundJsonFile(scratchFile.toString(), contestsUAs, target.samplePrns)
+        val result = readAuditRoundJsonFile(scratchFile.toString(), contestsUAs, target.samplePrns, null)
         assertTrue(result.isOk)
         val roundtrip = result.unwrap()
         check(target, roundtrip)
@@ -137,7 +161,7 @@ class TestAuditRoundJson {
             auditorWantNewMvrs = 33334533,
         )
         val json = target.publishJson()
-        val roundtrip = json.import(clcaWorkflow.contestsUA(), target.samplePrns)
+        val roundtrip = json.import(clcaWorkflow.contestsUA(), target.samplePrns, null)
         assertNotNull(roundtrip)
         check(target, roundtrip)
         assertEquals(roundtrip, target)
@@ -145,7 +169,7 @@ class TestAuditRoundJson {
         val scratchFile = createTempFile().toFile()
 
         writeAuditRoundJsonFile(target, scratchFile.toString())
-        val result = readAuditRoundJsonFile(scratchFile.toString(), clcaWorkflow.contestsUA(), target.samplePrns)
+        val result = readAuditRoundJsonFile(scratchFile.toString(), clcaWorkflow.contestsUA(), target.samplePrns, null)
         if (result.isErr) println("result = $result")
         assertTrue(result.isOk)
         val roundtripIO = result.unwrap()
@@ -217,7 +241,7 @@ class TestAuditRoundJson {
             auditorWantNewMvrs = 33733,
         )
         val json = target.publishJson()
-        val roundtrip: AuditRound = json.import(clcaWorkflow.contestsUA(), target.samplePrns)
+        val roundtrip: AuditRound = json.import(clcaWorkflow.contestsUA(), target.samplePrns, null)
         assertNotNull(roundtrip)
         check(target, roundtrip)
         // assertEquals(roundtrip, target) fails on raire
@@ -225,7 +249,7 @@ class TestAuditRoundJson {
         val scratchFile = createTempFile().toFile()
 
         writeAuditRoundJsonFile(target, scratchFile.toString())
-        val result = readAuditRoundJsonFile(scratchFile.toString(), clcaWorkflow.contestsUA(), target.samplePrns)
+        val result = readAuditRoundJsonFile(scratchFile.toString(), clcaWorkflow.contestsUA(), target.samplePrns, null)
         assertTrue(result.isOk)
         val roundtripIO = result.unwrap()
         check(target, roundtripIO)
@@ -268,7 +292,7 @@ class TestAuditRoundJson {
             auditorWantNewMvrs = 333,
         )
         val json = target.publishJson()
-        val roundtrip: AuditRound = json.import(clcaWorkflow.contestsUA(), target.samplePrns)
+        val roundtrip: AuditRound = json.import(clcaWorkflow.contestsUA(), target.samplePrns, null)
         assertNotNull(roundtrip)
         check(target, roundtrip)
         assertEquals(roundtrip, target)
@@ -276,7 +300,7 @@ class TestAuditRoundJson {
         val scratchFile = createTempFile().toFile()
 
         writeAuditRoundJsonFile(target, scratchFile.toString())
-        val result = readAuditRoundJsonFile(scratchFile.toString(), clcaWorkflow.contestsUA(), target.samplePrns)
+        val result = readAuditRoundJsonFile(scratchFile.toString(), clcaWorkflow.contestsUA(), target.samplePrns, null)
         assertTrue(result.isOk)
         val roundtripIO = result.unwrap()
         assertTrue(roundtripIO.equals(target))
@@ -375,6 +399,7 @@ fun check(a1: AssertionRound, a2: AssertionRound): Boolean {
     if (a1.auditResult != null )
         check(a1.auditResult!!, a2.auditResult!!)
 
+    println(a1.prevAuditResult)
     assertEquals(a1.prevAuditResult == null, a2.prevAuditResult == null)
     if (a1.prevAuditResult != null )
         check(a1.prevAuditResult!!, a2.prevAuditResult!!)

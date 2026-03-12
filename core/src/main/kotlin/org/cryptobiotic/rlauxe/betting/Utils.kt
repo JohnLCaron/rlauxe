@@ -13,7 +13,7 @@ package org.cryptobiotic.rlauxe.betting
 
 // note µ = 1/2 here
 fun populationMeanIfH0(N: Int, withoutReplacement: Boolean, tracker: Tracker): Double {
-    val sampleNum = tracker.numberOfSamples()
+    val sampleNum = tracker.numberOfSamples() // TODO errorTracker may have prevSampleCOunt, which I think is right.
     val sum = tracker.sum()
     return if ((sampleNum == 0) || !withoutReplacement) 0.5 else (N * 0.5 - sum) / (N - sampleNum)
     /* if (result > .5) {

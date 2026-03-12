@@ -26,7 +26,7 @@ class OneAuditVunderFuzzer(
     init {
         val mvrs = cards.map { card ->
             val onecard = if (card.poolId != null) {
-                vunderPools.simulatePooledCard(card, card.poolId)
+                vunderPools.simulatePooledCard(card)
             } else if (card.votes != null) {
                 makeFuzzedCardFromCard(infos, isIRV, card, fuzzPct)  // in ClcaFuzzSamplerTracker
             } else {
@@ -52,8 +52,8 @@ class VunderPools(pools: List<OneAuditPool>) {
     }
 
     // for the given pooled card with no votes, simulate one with votes, staying within the pool vote totals.
-    fun simulatePooledCard(card: AuditableCard, poolId: Int): AuditableCard {
-        val vunderPool = vunderPools[poolId]
+    fun simulatePooledCard(card: AuditableCard): AuditableCard {
+        val vunderPool = vunderPools[card.poolId]
         return vunderPool!!.simulatePooledCard(card)
     }
 }

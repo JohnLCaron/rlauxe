@@ -43,6 +43,7 @@ interface AssorterIF {
         return 1.0 / (2.0 - ratio)
     }
 
+    // must be unique within the contest, see ContestRoundJson.import()
     fun hashcodeDesc(): String // Used as unique reference, DO NOT CHANGE!
     fun shortName() = winLose()
     fun winLose() = "${winner()}/${loser()}"

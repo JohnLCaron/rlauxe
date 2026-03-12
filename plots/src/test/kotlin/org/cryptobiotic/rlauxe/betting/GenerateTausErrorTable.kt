@@ -119,7 +119,7 @@ class TauErrorRatesCumul {
     // rate is sum of normalizedCount / totalSamples
     fun rates(): Map<String, Double> {
         return taus.names().map { name ->
-            val tau = taus.valueOf(name)
+            val tau = taus.valueOf(name)!!
             val ncount = tauCounts[tau] ?: 0.0
             Pair(name, ncount/totalSamples)
         }.toMap()
@@ -128,7 +128,7 @@ class TauErrorRatesCumul {
 
     fun ratesString() = buildString {
         taus.names().forEach { name ->
-            val tau = taus.valueOf(name)
+            val tau = taus.valueOf(name)!!
             val ncount = tauCounts[tau] ?: 0.0
             append("\"$name\" to ${ncount/totalSamples}, ")
         }

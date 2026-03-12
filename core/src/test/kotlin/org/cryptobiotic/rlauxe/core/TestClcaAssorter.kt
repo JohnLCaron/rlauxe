@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.core
 
+import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.makeCvr
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactCount
@@ -98,13 +99,11 @@ class TestClcaAssorter {
         val assortValuesN = assortValues.map { it / noerror / 2 }
         println(" assortValuesN in $assortValuesN")
 
-        val sampleSize = cassorter.sampleSizeNoErrors(2 * 0.9, .05);
         println(" sampleSize = ${cassorter.sampleSizeNoErrors(2 * 0.9, .05)} for alpha = .05")
         println(" sampleSize = ${cassorter.sampleSizeNoErrors(2 * 0.9, .025)} for alpha = .025")
         println(" sampleSize = ${cassorter.sampleSizeNoErrors(2 * 0.9, .1)} for alpha = .1")
 
-        val contestUA = ContestWithAssertions(contest, isClca = true)
-        val estSize = cassorter.estWithOptimalBet2(contestUA, 0.9, .05);
+        val estSize = cassorter.sampleSizeWithErrors(2 * 0.9, .05, ClcaErrorRates.empty(noerror, 1.0));
         println(" estSize = $estSize")
     }
 

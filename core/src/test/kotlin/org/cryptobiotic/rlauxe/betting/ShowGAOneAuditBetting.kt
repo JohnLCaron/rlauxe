@@ -83,12 +83,11 @@ class ShowGAOneAuditBetting {
         //    val debug: Boolean = false,
         val betFn = GeneralAdaptiveBetting(
             Npop = N,
-            aprioriCounts = ClcaErrorRates.empty(noerror, upper),
+            aprioriErrorRates = ClcaErrorRates.empty(noerror, upper),
             nphantoms = oaContest.contest.Nphantoms(),
             maxLoss = .9,
             oaAssortRates=oaErrorRates,
             d = 0,
-            debug=true,
         )
 
         // bet from first half
@@ -96,8 +95,10 @@ class ShowGAOneAuditBetting {
         assorts.subList(0, N/2).forEach{ tracker.addSample(it) }
         println(tracker.measuredClcaErrorCounts().show())
 
+        betFn.debug = true
         val bet = betFn.bet(tracker)
         println("bet = $bet maxLoss = $maxLoss")
+        betFn.debug = false
 
         assorts.shuffle(Random)
         findSamplesNeededUsingAssorts(N, margin, upper, bet, assorts, taus)

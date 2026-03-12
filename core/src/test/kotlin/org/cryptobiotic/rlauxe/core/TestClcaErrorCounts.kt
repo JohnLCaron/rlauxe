@@ -115,14 +115,14 @@ class TestClcaErrorCounts {
             }
         }
 
-        tracker.valueCounter.forEach { (bassort, count) ->
+        tracker.errorCounts().forEach { (bassort, count) ->
             val idx = bassorts.indexOf(bassort)
             assertEquals((idx * fuzz * clcaSamples).toInt(), count)
         }
 
-        val countedTotal = tracker.valueCounter.values.sum()
+        val countedTotal = tracker.errorCounts().values.sum()
         assertEquals(countedTotal, tracker.numberOfSamples())
-        assertEquals(0, tracker.noerrorCount)
+        assertEquals(0, tracker.noerrorCount())
 
         var errorCounts: ClcaErrorCounts = tracker.measuredClcaErrorCounts()
         assertEquals(upper, errorCounts.upper)
@@ -134,7 +134,7 @@ class TestClcaErrorCounts {
             tracker.addSample(noerror)
         }
         assertEquals(countedTotal + 11, tracker.numberOfSamples())
-        assertEquals(11, tracker.noerrorCount)
+        assertEquals(11, tracker.noerrorCount())
     }
 
     @Test

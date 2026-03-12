@@ -30,7 +30,7 @@ class TestEstimatedErrorRates {
         val sampleNumber = startingErrors.totalSamples + (trackerErrors?.totalSamples ?: 0)
 
         val estRates = taus.namesNoErrors().map { name ->
-            val tauValue = taus.valueOf(name)
+            val tauValue = taus.valueOf(name)!!
             val bassort = tauValue * noerror
             val startCount = (startingErrors.errorCounts()[bassort] ?: 0)
             val trackCount = (trackerErrors?.errorCounts()[bassort] ?: 0)
@@ -76,7 +76,7 @@ class TestEstimatedErrorRates {
         val startingRates = mutableMapOf<Double, Double>()
 
         taus.namesNoErrors().forEach { name ->
-            val tauValue = taus.valueOf(name)
+            val tauValue = taus.valueOf(name)!!
             val bassort = tauValue * noerror
             val aprioriRate = apriori.getNamedRate(name) // may be null
             val phantom = if (taus.isPhantom(tauValue) && phantomRate > 0.0) phantomRate else 0.0
@@ -92,7 +92,7 @@ class TestEstimatedErrorRates {
         val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.totalInPools) / Npop.toDouble()
 
         val estRates = taus.namesNoErrors().map { name ->
-            val tauValue = taus.valueOf(name)
+            val tauValue = taus.valueOf(name)!!
             val bassort = tauValue * noerror
             val aprioriRate = startingRates[bassort] ?: 0.0
             val rate = scaled * shrinkTruncEstimateRate2(

@@ -33,7 +33,7 @@ class PlotErrorCompensation {
             // n = ln(payoffError) / ln(payoffNoerror)
 
             taus.namesNoErrors().forEach { tauName ->
-                val tauValue = taus.valueOf(tauName)
+                val tauValue = taus.valueOf(tauName)!!
                 val payoffErr = 1.0 + lamda * (noerror * tauValue - 0.5)
                 val samplesToCompensate = -ln(payoffErr) / ln(payoffNoerror)
 
@@ -75,7 +75,7 @@ class PlotErrorCompensation {
             val payoffNoerror = 1.0 + lamda * (noerror - 0.5)
 
             taus.namesNoErrors().forEach { tauName ->
-                val tauValue = taus.valueOf(tauName)
+                val tauValue = taus.valueOf(tauName)!!
                 val payoffErr = 1.0 + lamda * (noerror * tauValue - 0.5)
                 val samplesToCompensate = -ln(payoffErr) / ln(payoffNoerror)
 
@@ -100,7 +100,7 @@ class PlotErrorCompensation {
             val payoffNoerror = 1.0 + lamda * (noerror - 0.5)
 
             taus.namesNoErrors().forEach { tauName ->
-                val tauValue = taus.valueOf(tauName)
+                val tauValue = taus.valueOf(tauName)!!
                 val payoffErr = 1.0 + lamda * (noerror * tauValue - 0.5)
                 val samplesToCompensate = -ln(payoffErr) / ln(payoffNoerror)
 
@@ -125,7 +125,7 @@ class PlotErrorCompensation {
             val payoffNoerror = 1.0 + lamda * (noerror - 0.5)
 
             taus.namesNoErrors().forEach { tauName ->
-                val tauValue = taus.valueOf(tauName)
+                val tauValue = taus.valueOf(tauName)!!
                 val payoffErr = 1.0 + lamda * (noerror * tauValue - 0.5)
                 val samplesToCompensate = -ln(payoffErr) / ln(payoffNoerror)
 
@@ -150,7 +150,7 @@ class PlotErrorCompensation {
             val payoffNoerror = 1.0 + lamda * (noerror - 0.5)
 
             taus.namesNoErrors().forEach { tauName ->
-                val tauValue = taus.valueOf(tauName)
+                val tauValue = taus.valueOf(tauName)!!
                 val payoffErr = 1.0 + lamda * (noerror * tauValue - 0.5)
                 val samplesToCompensate = -ln(payoffErr) / ln(payoffNoerror)
 

@@ -12,7 +12,6 @@ import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.oneaudit.unpooled
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
@@ -346,7 +345,7 @@ fun createSfElection(
     minMargin: Double = 0.0,
     removeCutoffContests: Boolean = true,
     removeMaxContests: Int? = null,
-): Result<AuditRoundIF, ErrorMessages> {
+ ): Result<AuditRoundIF, ErrorMessages> {
     val stopwatch = Stopwatch()
 
     val election = CreateSfElection(

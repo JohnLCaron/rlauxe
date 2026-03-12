@@ -2,8 +2,6 @@ package org.cryptobiotic.rlauxe.core
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
@@ -95,7 +93,7 @@ open class ClcaAssorter(
         return N
     }
 
-    // TODO deprecated
+    /* TODO deprecated
     // Pair(estSampleSize, optimalBet)
     open fun estWithOptimalBet2(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorRates: ClcaErrorRates? = null): Pair<Int, Double> {
         val upper = assorter.upperBound()
@@ -112,7 +110,7 @@ open class ClcaAssorter(
             sampleSizeWithErrors(optimalBet, alpha, clcaErrorRates)
 
         return Pair(estSampleSize, optimalBet)
-    }
+    } */
 
     // B(bi, ci) = (1-o/u)/(2-v/u), where
     //                o is the overstatement

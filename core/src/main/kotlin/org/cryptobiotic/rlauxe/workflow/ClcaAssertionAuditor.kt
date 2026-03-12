@@ -143,9 +143,10 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             // OTOH, I think you could use apriori rates if they are set independently from the mvrs, see Issue #519
             GeneralAdaptiveBetting(
                 contestUA.Npop,
-                aprioriCounts = apriori,
+                aprioriErrorRates = apriori,
                 nphantoms = contest.Nphantoms(),
                 maxLoss = clcaConfig.maxLoss,
+                oaAssortRates=null,
                 d = clcaConfig.d,
             )
 

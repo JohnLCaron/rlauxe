@@ -22,21 +22,21 @@ private val logger = KotlinLogging.logger("GeneralAdaptiveBetting")
 
 data class GeneralAdaptiveBetting(
     val Npop: Int, // population size for this contest
-    val aprioriCounts: ClcaErrorRates, // apriori rates not counting phantoms, non-null so we always have noerror and upper
+    val aprioriErrorRates: ClcaErrorRates, // apriori rates not counting phantoms, non-null so we always have noerror and upper
     val nphantoms: Int, // number of phantoms in the population
     val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
 
-    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
+    val oaAssortRates: OneAuditAssortValueRates?, // non-null for OneAudit
     val d: Int = 100,  // trunc weight
-    val debug: Boolean = false,
 ) : BettingFn {
-    val noerror = aprioriCounts.noerror
-    val upper = aprioriCounts.upper
+    val noerror = aprioriErrorRates.noerror
+    val upper = aprioriErrorRates.upper
     val taus = Taus(upper)
     val aprioriRates: Map<Double, Double>  // bassort -> rate
+    var debug = false
 
     init {
-        aprioriRates = makeAprioriErrorRates(aprioriCounts, nphantoms/Npop.toDouble())
+        aprioriRates = makeAprioriErrorRates(aprioriErrorRates, nphantoms/Npop.toDouble())
     }
 
     fun estimatedErrorRates(trackerErrors: ClcaErrorCounts? = null): Map<Double, Double> { // bassort -> rate
@@ -46,7 +46,7 @@ data class GeneralAdaptiveBetting(
         val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.totalInPools) / Npop.toDouble()
 
         val estRates = taus.namesNoErrors().map { name ->
-            val tauValue = taus.valueOf(name)
+            val tauValue = taus.valueOf(name)!!
             val bassort = tauValue * noerror
             val aprioriRate = aprioriRates[bassort] ?: 0.0
             val rate = scaled * shrinkTruncEstimateRate2(
@@ -83,11 +83,12 @@ data class GeneralAdaptiveBetting(
 
         val estRates = estimatedErrorRates(trackerErrors)
         val mui = populationMeanIfH0(Npop, withoutReplacement=true, prevSamples)
-
         val maxBet = maxLoss / mui
+
+        if (estRates.isEmpty()) return maxBet // TODO better
+
         val kelly = GeneralOptimalLambda(errorTracker.noerror(), estRates, oaAssortRates?.rates, mui=mui, maxBet=maxBet, debug = debug)
         val bet = kelly.solve()
-
         return bet
     }
 }
@@ -103,7 +104,7 @@ fun makeAprioriErrorRates(apriori: ClcaErrorRates, phantomRate: Double): Map<Dou
     val taus = Taus(upper)
 
     taus.namesNoErrors().forEach { name ->
-        val tauValue = taus.valueOf(name)
+        val tauValue = taus.valueOf(name)!!
         val bassort = tauValue * noerror
         val aprioriRate = apriori.getNamedRate(name) // may be null
         val phantom = if (apriori.isPhantom(bassort) && phantomRate > 0.0) phantomRate else 0.0
@@ -131,7 +132,7 @@ class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, 
         }
         require (p0 >= 0.0)
         if (debug) {
-            print("GeneralOptimalLambda init: mui=$mui ")
+            println("GeneralOptimalLambda init: mui=$mui ")
             expectedValueLogt(maxBet, true)
         }
     }

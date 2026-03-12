@@ -157,7 +157,9 @@ fun consistentSampling(
 
         if (include) {
             sampledCards.add(card)
-            if (!previousSamples.contains(card.prn)) // TODO this doesnt work, doesnt take into account maxSampleIndex ??
+            // TODO this doesnt work, doesnt take into account maxSampleIndex, true ??
+            //   Well, if you assume that asll contests were audited, then this reflects ballots already done.
+            if (!previousSamples.contains(card.prn))
                 newMvrs++
         }
 
@@ -181,6 +183,7 @@ fun consistentSampling(
         cardIndex++
     }
 
+    // TODO why would this happen ??
     val wantMore = contestsIncluded.any { (haveSampleSize[it.id] ?: 0) < (wantSampleSize[it.id] ?: 0) }
     if (wantMore) {
         contestsIncluded.forEach {

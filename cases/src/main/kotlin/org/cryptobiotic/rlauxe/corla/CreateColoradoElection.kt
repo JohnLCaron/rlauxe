@@ -273,6 +273,7 @@ class CorlaContestBuilder(val info: ContestInfo, detailContest: ElectionDetailCo
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
 fun createColoradoElection(
     topdir: String,
+    auditdir: String,
     electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
@@ -282,7 +283,6 @@ fun createColoradoElection(
     ): Result<AuditRoundIF, ErrorMessages>
 {
     val stopwatch = Stopwatch()
-    val auditdir = "$topdir/audit"
 
     val election = if (auditType.isClca()) CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, auditType)
                     else CreateColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile)

@@ -22,7 +22,7 @@ import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.String
 import kotlin.use
 
-/** Calculate CLCA Assort averages by reading throun the entire CardManifest.
+/** Calculate CLCA Assort averages by reading through the entire CardManifest.
  * TODO: probably this only works when there are no errors ??
  */
 object RunCalcAssortAvg {

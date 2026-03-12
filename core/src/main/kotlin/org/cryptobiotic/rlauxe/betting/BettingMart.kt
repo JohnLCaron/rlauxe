@@ -88,7 +88,6 @@ class BettingMart(
                 break
             }
         }
-        tracker.done()
 
         // if you have sampled the entire population, then you know if it passed
         val status = if (sampleNumber == N) {

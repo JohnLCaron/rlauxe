@@ -86,7 +86,7 @@ fun calculateSampleSizes(
  * @param oneUnder the number of one-vote understatements
  * @param twoUnder the number of two-vote understatements
  */
-fun estimateSampleSizeSimple(
+fun estimateCorla(
     riskLimit: Double,
     dilutedMargin: Double,
     gamma: Double = 1.03905,

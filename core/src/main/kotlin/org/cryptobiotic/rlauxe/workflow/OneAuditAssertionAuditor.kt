@@ -3,9 +3,9 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.BettingMart
+import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
-import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
@@ -19,7 +19,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        samplerTracker: SamplerTracker,
+        samplerTracker: ClcaSamplerErrorTracker,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA
@@ -60,7 +60,7 @@ class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boole
             pmin = testH0Result.pvalueMin,
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
-            measuredCounts = samplerTracker.measuredClcaErrorCounts(),
+            clcaErrorTracker = samplerTracker.clcaErrorTracker,
         )
 
         if (!quiet) logger.debug{" ${contestUA.name} auditResult= ${assertionRound.auditResult}"}

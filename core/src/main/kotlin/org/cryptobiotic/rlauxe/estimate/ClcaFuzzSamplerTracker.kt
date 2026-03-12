@@ -20,14 +20,13 @@ class ClcaFuzzSamplerTracker(
     val cardSamples: CardSamples, // these are new each round and need to be fuzzed
     val contestUA: ContestWithAssertions,
     val cassorter: ClcaAssorter,
-    val previousErrorCounts: ClcaErrorCounts?,
+    val clcaErrorTracker: ClcaErrorTracker,
 ): SamplerTracker, ErrorTracker {
 
     val contest = contestUA.contest
     val samples = cardSamples.extractSubsetByIndex(contest.id)
     val maxSamples = samples.size
     val permutedIndex = MutableList(samples.size) { it }
-    val clcaErrorTracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound())
 
     var welford = Welford()
     var cvrPairs: List<Pair<AuditableCard, AuditableCard>> // (mvr, cvr)
@@ -37,8 +36,6 @@ class ClcaFuzzSamplerTracker(
     init {
         val mvrs = remakeFuzzed()
         cvrPairs = mvrs.zip(samples)
-        if (previousErrorCounts != null)
-            clcaErrorTracker.setFromPreviousCounts(previousErrorCounts)
     }
 
     override fun sample(): Double {
@@ -48,8 +45,7 @@ class ClcaFuzzSamplerTracker(
             if (card.hasContest(contest.id)) { // should always be true
                 val nextVal = cassorter.bassort(mvr, card, hasStyle=card.exactContests())
                 clcaErrorTracker.addSample(nextVal, card.poolId == null) // dont track errors from oa pools
-                if (lastVal != null) welford.update(lastVal!!)
-                lastVal = nextVal
+                welford.update(nextVal)
                 return nextVal
             } else {
                 logger.error{"cardSamples for contest ${contest.id} list card does not contain the contest at index ${permutedIndex[idx-1]}"}
@@ -66,10 +62,7 @@ class ClcaFuzzSamplerTracker(
         permutedIndex.shuffle(Random) // also, a new permutation....
         idx = 0
         welford = Welford()
-        lastVal = null
         clcaErrorTracker.reset()
-        if (previousErrorCounts != null)
-            clcaErrorTracker.setFromPreviousCounts(previousErrorCounts)
     }
 
     fun remakeFuzzed(): List<AuditableCard> {
@@ -83,15 +76,8 @@ class ClcaFuzzSamplerTracker(
     override fun hasNext() = (welford.count + 1 < maxSamples)
     override fun next() = sample()
 
-    // tracker reflects "previous sequence"
-    var lastVal: Double? = null
     override fun numberOfSamples() = welford.count
     override fun welford() = welford
-
-    override fun done() {
-        if (lastVal != null) welford.update(lastVal!!)
-        lastVal = null
-    }
 
     //// ErrorTracker
     override fun measuredClcaErrorCounts(): ClcaErrorCounts = clcaErrorTracker.measuredClcaErrorCounts()

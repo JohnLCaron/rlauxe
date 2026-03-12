@@ -31,8 +31,9 @@ data class CompositeRecord(
     override fun readCardManifest(): CardManifest {
         return componentRecords.first().readCardManifest() // TODO
     }
+    override fun readOneShotMvrs() = emptyMap<Int, Int>()
 
-    fun findComponentWithContest(wantContestName: String): AuditRecord? {
+   fun findComponentWithContest(wantContestName: String): AuditRecord? {
         var want: AuditRecord? = null
         for (component in componentRecords) {
             if (component.contests.find { contestUA -> contestUA.name == wantContestName } != null) {

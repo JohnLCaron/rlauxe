@@ -38,9 +38,9 @@ class PollingFuzzSamplerTracker(
             val mvr = mvrs[permutedIndex[idx]]
             idx++
             if (mvr.hasContest(contest.id)) {
-                if (lastVal != null) welford.update(lastVal!!)
-                lastVal =  assorter.assort(mvr, usePhantoms = true)
-                return lastVal!!
+                val assortVal =  assorter.assort(mvr, usePhantoms = true)
+                welford.update(assortVal)
+                return assortVal
             }
         }
         throw RuntimeException("no samples left for ${contest.id} and Assorter ${assorter}")
@@ -65,15 +65,9 @@ class PollingFuzzSamplerTracker(
     override fun hasNext() = (welford.count + 1 < maxSamples)
     override fun next() = sample()
 
-    // tracker reflects "previous sequence"
-    var lastVal: Double? = null
     override fun numberOfSamples() = welford.count
     override fun measuredClcaErrorCounts() = ClcaErrorCounts.empty(0.0, 0.0)
     override fun welford() = welford
-    override fun done() {
-        if (lastVal != null) welford.update(lastVal!!)
-        lastVal = null
-    }
 }
 
 // includes undervotes i think, IRV ok

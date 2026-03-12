@@ -184,6 +184,7 @@ class CreateSfElection(
                 null)
     }
 
+    // TODO add optional fuzz or some other error method
     // convert the cvrExports to the private mvrs; must be in same order as createCards
     override fun createUnsortedMvrs(): List<Cvr> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
@@ -369,7 +370,7 @@ fun createSfElection(
             minMargin=minMargin,
             removeMaxContests = removeMaxContests,
             removeCutoffContests = removeCutoffContests,
-            simFuzzPct=mvrFuzz, persistedWorkflowMode=PersistedWorkflowMode.testClcaSimulated,
+            simFuzzPct=mvrFuzz, persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs,
             simulationStrategy = SimulationStrategy.optimistic,
             clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
         )

@@ -75,6 +75,7 @@ class Publisher(val auditDir: String) {
     fun oneauditPoolsFile() = "$auditDir/oneauditPools.csv"
     fun populationsFile() = "$auditDir/populations.json"
     fun privateMvrsFile() = "$auditDir/private/sortedMvrs.csv"
+    fun privateOneshotFile() = "$auditDir/private/oneshot.txt"
     fun sortedCardsFile() = "$auditDir/sortedCards.csv" // sorted cardManifest
 
     fun auditRoundConfigFile(round: Int): String {

@@ -1,14 +1,14 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.estimate.estimateSampleSizeSimple
+import org.cryptobiotic.rlauxe.estimate.estimateCorla
 import kotlin.test.Test
 
-class TestEstimateSampleSizeSimple {
+class TestEstimateCorla {
     val riskLimit = .03
     val gamma = 1.03905
 
     @Test
-    fun testEstimateSampleSizeSimple() {
+    fun testEstimateCorla() {
         // round1/contest.csv
         // ballot card count = 396121
         // contest_ballot_card_count = 44675
@@ -19,15 +19,15 @@ class TestEstimateSampleSizeSimple {
         // estimated_samples_to_audit = 105
 
         var dilutedMargin = 27538.0 / 44675.0
-        println("dilutedMargin = $dilutedMargin estSamples = ${estimateSampleSizeSimple(riskLimit, dilutedMargin, gamma)}")
+        println("dilutedMargin = $dilutedMargin estSamples = ${estimateCorla(riskLimit, dilutedMargin, gamma)}")
 
         dilutedMargin = 27538.0 / 396121.0
-        println("dilutedMargin = $dilutedMargin estSamples = ${estimateSampleSizeSimple(riskLimit, dilutedMargin, gamma)}")
+        println("dilutedMargin = $dilutedMargin estSamples = ${estimateCorla(riskLimit, dilutedMargin, gamma)}")
 
         // targetedContests.xlsx
         // Boulder	    State Representative 10	1	23,460	    3,720	    19,740	6.99%	104	    29,261	    2 ballot cards per ballot
         dilutedMargin = .0699
-        println("dilutedMargin = $dilutedMargin estSamples = ${estimateSampleSizeSimple(riskLimit, dilutedMargin, gamma)}")
+        println("dilutedMargin = $dilutedMargin estSamples = ${estimateCorla(riskLimit, dilutedMargin, gamma)}")
 
         // dilutedMargin = 0.6164073866815892 estSamples = 12.0
         // dilutedMargin = 0.0695191620742147 estSamples = 105.0

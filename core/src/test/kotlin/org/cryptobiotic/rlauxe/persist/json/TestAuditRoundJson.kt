@@ -427,7 +427,7 @@ fun check(a1: AuditRoundResult, a2: AuditRoundResult): Boolean {
     assertEquals(a1.pmin, a2.pmin)
     assertEquals(a1.samplesUsed, a2.samplesUsed)
     assertEquals(a1.status, a2.status)
-    assertEquals(a1.measuredCounts, a2.measuredCounts)
+    assertEquals(a1.clcaErrorTracker, a2.clcaErrorTracker)
     assertEquals(a1.params, a2.params)
 
     assertEquals(a1, a2)

@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.AlphaMart
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
@@ -100,13 +101,15 @@ fun auditPollingAssertion(
 
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=true) { sampler.sample() }
 
-    assertionRound.auditResult = AuditRoundResult(roundIdx,
+    assertionRound.auditResult = AuditRoundResult(
+        roundIdx,
         nmvrs = sampler.nmvrs(),
         // countCvrsUsedInAudit = sampler.countCvrsUsedInAudit(),
         plast = testH0Result.pvalueLast,
         pmin = testH0Result.pvalueMin,
         samplesUsed = testH0Result.sampleCount,
         status = testH0Result.status,
+        clcaErrorTracker = ClcaErrorTracker(0.0, 0.0), // TODO
     )
 
     if (!quiet) logger.debug{" ${contestUA.name} ${assertionRound.auditResult}"}

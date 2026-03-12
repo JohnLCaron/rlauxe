@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.core.PluralityErrorRates
-import org.cryptobiotic.rlauxe.estimate.estimateSampleSizeSimple
+import org.cryptobiotic.rlauxe.estimate.estimateCorla
 import kotlin.test.Test
 
 class TestOptimalEstimate {
@@ -51,7 +51,7 @@ fun compareCorlaAndOptimal(dilutedMargin: Double, twoOver: Int, oneOver: Int, on
     val riskLimit = 0.05
     val gamma = 1.2
 
-    val corla = estimateSampleSizeSimple(
+    val corla = estimateCorla(
         riskLimit,
         dilutedMargin,
         gamma,

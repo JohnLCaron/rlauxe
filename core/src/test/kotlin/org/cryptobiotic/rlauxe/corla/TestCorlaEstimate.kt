@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
-import org.cryptobiotic.rlauxe.estimate.estimateSampleSizeSimple
+import org.cryptobiotic.rlauxe.estimate.estimateCorla
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizePayloads
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
@@ -70,7 +70,7 @@ fun corlaCalc(config: AuditConfig, contestRound: ContestRound): SampleEst? {
     val lastResult = minAssertion.auditResult
     if (lastResult == null) return null
 
-    val errorCounts = lastResult.measuredCounts
+    val errorCounts = lastResult.clcaErrorTracker.measuredClcaErrorCounts()
 
     // fun estimateSampleSizeSimple(
     //    riskLimit: Double,
@@ -83,13 +83,13 @@ fun corlaCalc(config: AuditConfig, contestRound: ContestRound): SampleEst? {
     //)
 
     // these 3 are oracles - we know the actual errors
-    val est1 = estimateSampleSizeSimple(
+    val est1 = estimateCorla(
         config.riskLimit,
         dilutedMargin = minAssertion.assertion.assorter.dilutedMargin(),
-        twoOver = errorCounts?.getNamedCount("p2o") ?: 0,
-        oneOver = errorCounts?.getNamedCount("p1o") ?: 0,
-        oneUnder = errorCounts?.getNamedCount("p1u") ?: 0,
-        twoUnder = errorCounts?.getNamedCount("p2u") ?: 0,
+        twoOver = errorCounts.getNamedCount("p2o") ?: 0,
+        oneOver = errorCounts.getNamedCount("p1o") ?: 0,
+        oneUnder = errorCounts.getNamedCount("p1u") ?: 0,
+        twoUnder = errorCounts.getNamedCount("p2u") ?: 0,
     )
 
     val est2 = estimateSampleSizePayloads(
@@ -152,7 +152,7 @@ fun runEstimateSimple(dilutedMargin: Double, twoUnder: Int, oneUnder: Int, oneOv
     val riskLimit = 0.05
     val gamma = 1.2
 
-    val est2 = estimateSampleSizeSimple(
+    val est2 = estimateCorla(
         riskLimit,
         dilutedMargin,
         gamma,

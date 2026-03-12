@@ -123,7 +123,7 @@ class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, 
         }
         require (maxBet > 0.0)
 
-        val oasum = if (oaErrorRates == null) 0.0 else oaErrorRates.map{ it.value }.sum()
+        val oasum = if (oaErrorRates == null) 0.0 else oaErrorRates.map{ it.value }.sum() // TODO these could be calculated once
         val clcasum = clcaErrorRates.map{ it.value }.sum()
         p0 = 1.0 - clcasum - oasum    // calculate against other values to get it exact
         if (p0 < 0.0) {

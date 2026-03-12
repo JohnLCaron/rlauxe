@@ -45,14 +45,9 @@ class SampleFromArray(val array: DoubleArray): SamplerTracker {
     }
 
     override fun numberOfSamples() = index
-
     override fun welford() = welford
     override fun measuredClcaErrorCounts() = ClcaErrorCounts.empty(0.0, 0.0)
-
-    override fun done() {}
-
     override fun next() = sample()
-
     override fun hasNext() = index < array.size - 1
 }
 

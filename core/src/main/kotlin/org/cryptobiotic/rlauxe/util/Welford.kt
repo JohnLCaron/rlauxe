@@ -41,6 +41,12 @@ data class Welford(
         return Triple(mean, variance, sampleVariance)
     }
 
+    fun reset() {
+        count = 0
+        mean = 0.0
+        M2= 0.0
+    }
+
     /// Tracker
     override fun variance() = if (count == 0) 0.0 else M2 / count
     override fun numberOfSamples() = count

@@ -29,16 +29,8 @@ fun estimateSampleSizes(
 ): List<RunRepeatedResult> {
 
     if (config.simulationStrategy == SimulationStrategy.optimistic) {
-        if (config.isClca && auditRound.roundIdx == 1) {
-            val optimistic = EstimateClcaNoErrors(config, auditRound.contestRounds, cardManifest)
-            return optimistic.run()
-        } else if (config.isOA) {
-            val optimistic = EstimateOneAudit(config,  auditRound.roundIdx, auditRound.contestRounds, cardPools!!, cardManifest)
-            return optimistic.run()
-        } // else if (config.isOA) {
-            // val optimistic2 = EstimateOneAudit2(config, auditRound.roundIdx, auditRound.contestRounds, cardPools!!, cardManifest)
-            // return optimistic2.run()
-        // }
+        val optimistic = EstimateAudit(config,  auditRound.roundIdx, auditRound.contestRounds, cardPools, cardManifest)
+        return optimistic.run()
     }
 
     // choose a subset of the cards for the estimation for speed
@@ -271,12 +263,11 @@ fun estimateClcaAssertionRound(
             d = clcaConfig.d,
         )
 
-    val previousErrorCounts = assertionRound.previousErrorCounts()
+    // start from where we left off
+    val previousErrorTracker = assertionRound.previousErrorTracker()
     // for one contest, this takes a list of cards and optionally fuzzes them to use as the mvrs.
     val samplerTracker =
-        // start from where we left off
-        ClcaFuzzSamplerTracker(config.simFuzzPct ?: 0.0, cardSamples, contestUA, cassorter, previousErrorCounts)
-
+        ClcaFuzzSamplerTracker(config.simFuzzPct ?: 0.0, cardSamples, contestUA, cassorter, previousErrorTracker)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateClcaAssertionRound for $name with ${config.nsimEst} trials"}
@@ -301,7 +292,7 @@ fun estimateClcaAssertionRound(
         val aprioriRates = config.clcaConfig.apriori.makeErrorRates(noerror, upper)
         makeAprioriErrorRates(aprioriRates, contestUA.Nphantoms/contestUA.Npop.toDouble())
     } else {
-        if (previousErrorCounts == null) emptyMap() else previousErrorCounts.errorRates()
+        previousErrorTracker.errorRates()
     }
 
     val calcMvrsNeeded = assertionRound.calcNewMvrsNeeded(contestRound.contestUA, config)
@@ -403,10 +394,10 @@ fun estimateOneAuditAssertionRound(
     }
 
     val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
-    val previousErrorCounts = assertionRound.previousErrorCounts()
+    val previousErrorTracker = assertionRound.previousErrorTracker()
     val sampler =
         // start from where we left off
-        ClcaSamplerErrorTracker.fromIndexList(contestUA.contest.id, oaCassorter, oaFuzzedPairs, wantIndices, previousErrorCounts)
+        ClcaSamplerErrorTracker.fromIndexList(contestUA.contest.id, oaCassorter, oaFuzzedPairs, wantIndices, previousErrorTracker)
 
     val name = "${contestUA.id}-${assertionRound.assertion.assorter.shortName()}"
     logger.debug{ "estimateOneAuditAssertionRound for $name with ${config.nsimEst} trials"}
@@ -430,7 +421,7 @@ fun estimateOneAuditAssertionRound(
         val aprioriRates = config.clcaConfig.apriori.makeErrorRates(noerror, upper)
         makeAprioriErrorRates(aprioriRates, contestUA.Nphantoms/contestUA.Npop.toDouble())
     } else {
-        if (previousErrorCounts == null) emptyMap() else previousErrorCounts.errorRates()
+        previousErrorTracker.errorRates()
     }
 
     val calcMvrsNeeded = assertionRound.calcNewMvrsNeeded(contestRound.contestUA, config)

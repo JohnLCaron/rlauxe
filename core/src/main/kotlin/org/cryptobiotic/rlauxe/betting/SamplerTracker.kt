@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.doubleIsClose
-import org.cryptobiotic.rlauxe.util.doublePrecision
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import kotlin.random.Random
@@ -35,7 +34,6 @@ interface SamplerTracker: Tracker, Iterator<Double> {
 
     fun reset()   // start over again with different permutation (may be prohibited)
     fun measuredClcaErrorCounts(): ClcaErrorCounts // empty when polling
-    fun done()    // end of sampling, update statistics to final form
     fun welford(): Welford   // running mean, variance, stddev
 
     /// Tracker : keeps track of the latest sample, number of samples, and the sample sum, mean and variance.
@@ -105,10 +103,6 @@ class PollingSamplerTracker(
     override fun measuredClcaErrorCounts() = ClcaErrorCounts.empty(0.0, 0.0)
 
     override fun welford() = welford
-    override fun done() {
-        if (lastVal != null) welford.update(lastVal!!)
-        lastVal = null
-    }
 }
 
 //// For clca/oa audits, assumes card.hasContest(contestId) for all samples
@@ -116,33 +110,33 @@ class ClcaSamplerErrorTracker(
     val contestId: Int,
     val cassorter: ClcaAssorter,
     val samples: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
+    val clcaErrorTracker: ClcaErrorTracker,
     val allowReset: Boolean = true,  // needed ?
     val name: String? = null, // debugging
 ): SamplerTracker, ErrorTracker {
-    val permutedIndex = MutableList(samples.size) { it }
-    val clcaErrorTracker = ClcaErrorTracker(cassorter.noerror, cassorter.assorter.upperBound())
 
-    private var idx = 0
-    private var welford = Welford()
+    constructor(contestId: Int, cassorter: ClcaAssorter, samples:List<Pair<CvrIF, AuditableCard>>, name: String? = null)
+            : this(contestId, cassorter, samples, ClcaErrorTracker(cassorter.noerror, cassorter.assorter.upperBound()),
+                   name = name)
 
     init {
+        require(cassorter.noerror == clcaErrorTracker.noerror)
+        require(cassorter.assorter.upperBound() == clcaErrorTracker.upper)
         samples.forEach { (mvr, card) ->
             require(mvr.location() == card.location())  { "mvr location ${mvr.location()} != card.location ${card.location()}"}
             require(card.hasContest(contestId))  { " card.location ${card.location()} does not have contest $contestId" }
         }
     }
 
+    val permutedIndex = MutableList(samples.size) { it }
+    private var idx = 0
+
     override fun sample(): Double {
         while (idx < samples.size) {
             val (mvr, card) = samples[permutedIndex[idx]]
             idx++
             val nextVal = cassorter.bassort(mvr, card, hasStyle=card.exactContests())
-
             clcaErrorTracker.addSample(nextVal, card.poolId == null) // dont track errors from oa pools
-
-            //// lastVal seems unneeded; inconsistent welford and clcaErrorTracker
-            if (lastVal != null) welford.update(lastVal!!)
-            lastVal = nextVal
             return nextVal
         }
         logger.error{"ClcaSamplerErrorTracker no samples left for contest ${contestId} and ComparisonAssorter ${cassorter.shortName()}"}
@@ -155,35 +149,9 @@ class ClcaSamplerErrorTracker(
             throw RuntimeException("ClcaSamplerErrorTracker reset not allowed")
         }
         permutedIndex.shuffle(Random)
-        welford = Welford()
         clcaErrorTracker.reset()
         idx = 0
-        lastVal = null
-        // debug()
     }
-
-    /* fun debug() {
-        //     val contestId: Int,
-        //    voteForNin: Int, //
-        //    val isIrv: Boolean,
-        //    val candidateIds: List<Int>
-        val tab = ContestTabulation(18, 1, false, listOf(0,1))
-        var idx = 0
-        while (idx < this.samples.size) {
-            val wantIdx = this.permutedIndex[idx]
-            val (mvr, card) = this.samples[wantIdx]
-            if (mvr.poolId() == 18) {
-                val cands = mvr.votes(17)
-                if (cands != null) {
-                    tab.addVotes(cands, mvr.isPhantom())
-                    println("mvr ${mvr.location()} ${cands.contentToString()}")
-                }
-            }
-            idx++
-        }
-        println("reset tab for contest 17 and pool 18  = $tab")
-        println("============================================")
-    } */
 
     override fun maxSamples() = samples.size
     override fun countCvrsUsedInAudit() = idx  // count of cvrs used in the audit
@@ -192,18 +160,8 @@ class ClcaSamplerErrorTracker(
     override fun hasNext() = (idx < samples.size)
     override fun next() = sample()
 
-    // tracker reflects "previous sequence"
-    var lastVal: Double? = null
-    override fun numberOfSamples() = welford.count
-    override fun welford() = welford
-
-    override fun done() {
-        if (lastVal != null) welford.update(lastVal!!)
-        lastVal = null
-        if (debugPhantoms && name != null)
-            println("  ClcaSamplerErrorTracker $name done nsamples=${welford.count} p1o = ${measuredClcaErrorCounts().getNamedCount("p1o")}")
-    }
-    val debugPhantoms = false
+    override fun numberOfSamples() = clcaErrorTracker.numberOfSamples()
+    override fun welford() = clcaErrorTracker.welford
 
     //// ErrorTracker
     override fun measuredClcaErrorCounts(): ClcaErrorCounts = clcaErrorTracker.measuredClcaErrorCounts()
@@ -226,7 +184,7 @@ class ClcaSamplerErrorTracker(
             cassorter: ClcaAssorter,
             pairs: List<Pair<AuditableCard, AuditableCard>>,
             wantIndices: List<Int>,
-            previousErrorCounts: ClcaErrorCounts? = null,
+            clcaErrorTracker: ClcaErrorTracker? = null,
         ): ClcaSamplerErrorTracker {
             val extract = mutableListOf<Pair<AuditableCard, AuditableCard>>()
             var wantIdx = 0
@@ -236,10 +194,8 @@ class ClcaSamplerErrorTracker(
                     wantIdx++
                 }
             }
-            val result = ClcaSamplerErrorTracker(contestId, cassorter, extract)
-            if (previousErrorCounts != null)
-                result.clcaErrorTracker.setFromPreviousCounts(previousErrorCounts)
-            return result
+            return ClcaSamplerErrorTracker(contestId, cassorter, extract,
+                clcaErrorTracker ?: ClcaErrorTracker(cassorter.noerror, cassorter.assorter.upperBound()))
         }
 
         fun withMaxSample(
@@ -276,38 +232,18 @@ class ClcaSamplerErrorTracker(
     }
 }
 
-// tracks errors from paassed-in assort values; ClcaSamplerErrorTracker is also a SamplerTracker
-class ClcaErrorTracker(val noerror: Double, val upper: Double): ErrorTracker {
+// tracks errors from passed-in assort values; use ClcaSamplerErrorTracker if you want a SamplerTracker
+class ClcaErrorTracker(val noerror: Double, val upper: Double, val welford:Welford, val errorCounts: MutableMap<Double, Int>): ErrorTracker {
     val taus = Taus(upper)
 
-    private var totalSamples = 0
-    private var countTrackError = 0
-    private var welford = Welford()
-
-    private val errorCounts = mutableMapOf<Double, Int>() // assort value -> count
-    private var noerrorCount = 0
-
-    // this seems bogus; what about sum, variance, etc ?
-    fun setFromPreviousCounts(prevCounts: ClcaErrorCounts) {
-        require(prevCounts.noerror == noerror)
-        require(prevCounts.upper == upper)
-        totalSamples = prevCounts.totalSamples
-        prevCounts.errorCounts.forEach { bassort, count ->
-            errorCounts[bassort] = count
-        }
-    }
+    constructor(noerror: Double, upper: Double) : this(noerror, upper, Welford(), mutableMapOf<Double, Int>())
 
     // when the sample is from an OA pool, the value is not a CLCA error
-    fun addSample(sample : Double, trackError: Boolean = true) {
-        totalSamples++
-        if (trackError) countTrackError++
+    fun addSample(sample : Double, isClcaError: Boolean = true) {
         welford.update(sample)
 
-        if (trackError && noerror != 0.0) {
-            if (doubleIsClose(sample, noerror, doublePrecision))
-                noerrorCount++
-            else if (sample != noerror) {
-                // println("  $sample taus=${sample / noerror} name=${taus.nameOf(sample / noerror)}")
+        if (isClcaError && noerror != 0.0) {
+            if (sample != noerror) {
                 val counter = errorCounts.getOrPut(sample) { 0 }
                 errorCounts[sample] = counter + 1
             }
@@ -316,99 +252,24 @@ class ClcaErrorTracker(val noerror: Double, val upper: Double): ErrorTracker {
 
     fun reset() {
         errorCounts.clear()
-        totalSamples = 0
-        countTrackError = 0
-        noerrorCount = 0
-        welford = Welford()
+        welford.reset()
     }
 
     fun errorRates() = errorCounts.mapValues { it.value / numberOfSamples().toDouble() }.toSortedMap()
     fun errorCounts() = errorCounts.toSortedMap()
-    fun noerrorCount() = noerrorCount
 
     override fun measuredClcaErrorCounts(): ClcaErrorCounts {
         val clcaErrors = errorCounts.toList().filter { (key, _) -> taus.isClcaError(key / noerror) }.toMap().toSortedMap()
-        return ClcaErrorCounts(clcaErrors, totalSamples, noerror, upper)
+        return ClcaErrorCounts(clcaErrors, welford.count, noerror, upper)
     }
 
     override fun toString(): String {
-        return "ClcaErrorTracker(noerror=$noerror, noerrorCount=$noerrorCount, valueCounter=${errorCounts.toSortedMap()}, count=$totalSamples countTrackError=$countTrackError)"
+        return "ClcaErrorTracker(noerror=$noerror, valueCounter=${errorCounts.toSortedMap()}, count=${welford.count})"
     }
 
-    override fun numberOfSamples() = totalSamples
+    override fun numberOfSamples() = welford.count
     override fun sum() = welford.sum()
     override fun mean() = welford.mean
     override fun variance() = welford.variance()
     override fun noerror() = noerror
 }
-
-
-// lightweight ErrorTracker for GeneralAdaptiveBetting.bet(), not a full blown SamplerTracker
-class ClcaErrorTrackerOld(val noerror: Double, val upper: Double): ErrorTracker {
-    val taus = Taus(upper)
-
-    private var last = 0.0
-    private var sum = 0.0
-    private var welford = Welford()
-    private var prevTotalSamples = 0
-
-    override fun numberOfSamples() = prevTotalSamples + welford.count
-    override fun sum() = sum
-    override fun mean() = welford.mean
-    override fun variance() = welford.variance()
-    override fun noerror() = noerror
-
-    val valueCounter = mutableMapOf<Double, Int>()
-    var noerrorCount = 0
-    var sequences: DebuggingSequences?=null
-
-    fun setFromPreviousCounts(prevCounts: ClcaErrorCounts) {
-        require(prevCounts.noerror == noerror)
-        require(prevCounts.upper == upper)
-        prevTotalSamples = prevCounts.totalSamples
-        prevCounts.errorCounts.forEach { bassort, count ->
-            valueCounter[bassort] = count
-        }
-    }
-
-    fun setDebuggingSequences(sequences: DebuggingSequences) {
-        this.sequences = sequences
-    }
-
-    fun addSample(sample : Double) {
-        last = sample
-        sum += sample
-        welford.update(sample)
-
-        if (noerror != 0.0) {
-            if (doubleIsClose(sample, noerror))
-                noerrorCount++
-            else if (taus.isClcaError(sample / noerror)) {
-                val counter = valueCounter.getOrPut(sample) { 0 }
-                valueCounter[sample] = counter + 1
-            }
-        }
-    }
-
-    fun reset() {
-        last = 0.0
-        sum = 0.0
-        welford = Welford()
-        valueCounter.clear()
-        noerrorCount = 0
-    }
-
-    override fun measuredClcaErrorCounts(): ClcaErrorCounts {
-        val clcaErrors = valueCounter.toList().filter { (key, _) -> taus.isClcaError(key / noerror) }.toMap().toSortedMap()
-        return ClcaErrorCounts(clcaErrors, numberOfSamples(), noerror, upper)
-    }
-
-    fun errorRates() = valueCounter.mapValues { it.value / numberOfSamples().toDouble() }.toSortedMap()
-    fun errorCounts() = valueCounter.toSortedMap()
-
-    override fun toString(): String {
-        return "ClcaErrorTracker(noerror=$noerror, noerrorCount=$noerrorCount, valueCounter=${valueCounter.toSortedMap()}, N=${numberOfSamples()})"
-    }
-}
-
-

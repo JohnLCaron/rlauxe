@@ -159,7 +159,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         }
 
         return if (testH0Result == null) "failed" else buildString {
-            appendLine("contest $contestId assertion win/lose = ${cassertion.assorter.winLose()}")
+            appendLine("contest $contestId assertion = ${cassertion.assorter.shortName()}")
             var countPoolCards = 0
             var countPoolCardsMissing = 0
             val seq = testH0Result.sequences

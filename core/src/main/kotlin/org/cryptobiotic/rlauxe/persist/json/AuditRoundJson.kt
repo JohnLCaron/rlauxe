@@ -10,10 +10,11 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.enumValueOf
 
 import java.io.FileOutputStream
@@ -275,8 +276,9 @@ fun EstimationRoundResultJson.import() = EstimationRoundResult(
 //    val pmin: Double,               // minimum pvalue reached
 //    val samplesUsed: Int,           // sample count when testH0 terminates
 //    val status: TestH0Status,       // testH0 status
-//    val measuredCounts: ClcaErrorCounts? = null, // measured error counts (clca only)
+//    val clcaErrorTracker: ClcaErrorTracker, // measured error counts (clca only)
 //    val params: Map<String, Double> = emptyMap(),
+//)
 
 @Serializable
 data class AuditRoundResultJson(
@@ -287,7 +289,7 @@ data class AuditRoundResultJson(
     val pmin: Double,       // minimum pvalue reached
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
     val status: String, // testH0 status
-    val measuredCounts: ClcaErrorCountsJson?,
+    val clcaErrorTracker: ClcaErrorTrackerJson,
     val params: Map<String, Double>
 )
 
@@ -299,7 +301,7 @@ fun AuditRoundResult.publishJson() = AuditRoundResultJson(
     pmin = this.pmin,
     samplesUsed = this.samplesUsed,
     status = this.status.name,
-    measuredCounts = this.measuredCounts?.publishJson(),
+    clcaErrorTracker = this.clcaErrorTracker.publishJson(),
     params = params,
 )
 
@@ -312,33 +314,48 @@ fun AuditRoundResultJson.import() : AuditRoundResult {
         pmin=this.pmin,
         samplesUsed=this.samplesUsed,
         status=status,
-        measuredCounts=this.measuredCounts?.import(),
+        clcaErrorTracker=this.clcaErrorTracker.import(),
         params=params,
     )
 }
 
-//data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double): ClcaErrorRatesIF {
-
+/**
+ * class ClcaErrorTracker(
+ * val noerror: Double,
+ * val upper: Double,
+ * val welford:Welford,
+ * val errorCounts: MutableMap<Double, Int>)
+ */
 @Serializable
-data class ClcaErrorCountsJson(
-    val errorCounts: Map<Double, Int>,
-    val totalSamples: Int,
+data class ClcaErrorTrackerJson(
     val noerror: Double,
-    val upper: Double
+    val upper: Double,
+    val errorCounts: Map<Double, Int>,
+    val count: Int,
+    val mean: Double,
+    val M2: Double,
 )
 
-fun ClcaErrorCounts.publishJson() = ClcaErrorCountsJson(
-        errorCounts,
-        totalSamples,
-        noerror,
-        upper,
-    )
-
-fun ClcaErrorCountsJson.import() = ClcaErrorCounts(
-    errorCounts,
-    totalSamples,
+// looks like you just needf welford?
+// data class Welford(
+//    var count: Int = 0,      // number of samples
+//    var mean: Double = 0.0,  // mean accumulates the mean of the entire sequence
+//    var M2: Double = 0.0,    // M2 aggregates the squared distance from the mean
+//)
+fun ClcaErrorTracker.publishJson() = ClcaErrorTrackerJson(
     noerror,
     upper,
+    errorCounts,
+    welford.count,
+    welford.mean,
+    welford.M2,
+)
+
+fun ClcaErrorTrackerJson.import() = ClcaErrorTracker(
+    noerror,
+    upper,
+    Welford(count, mean, M2),
+    errorCounts.toMutableMap(),
 )
 
 /////////////////////////////////////////////////////////////////////////////////

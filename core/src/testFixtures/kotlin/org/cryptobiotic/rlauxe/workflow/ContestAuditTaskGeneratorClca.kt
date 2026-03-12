@@ -4,8 +4,6 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.*
-import org.cryptobiotic.rlauxe.util.Stopwatch
-import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
 // Simulate single Contest, do regular audit
@@ -155,7 +153,7 @@ class ClcaSingleRoundWorkflowTask(
 
                 mvrMargin=mvrMargin,
                 startingRates=null,
-                measuredCounts=lastRound.measuredCounts,
+                measuredCounts=lastRound.clcaErrorTracker.measuredClcaErrorCounts(),
             )
         }
     }

@@ -122,7 +122,6 @@ class TestClcaErrorCounts {
 
         val countedTotal = tracker.errorCounts().values.sum()
         assertEquals(countedTotal, tracker.numberOfSamples())
-        assertEquals(0, tracker.noerrorCount())
 
         var errorCounts: ClcaErrorCounts = tracker.measuredClcaErrorCounts()
         assertEquals(upper, errorCounts.upper)
@@ -134,7 +133,6 @@ class TestClcaErrorCounts {
             tracker.addSample(noerror)
         }
         assertEquals(countedTotal + 11, tracker.numberOfSamples())
-        assertEquals(11, tracker.noerrorCount())
     }
 
     @Test
@@ -145,9 +143,9 @@ class TestClcaErrorCounts {
         val maxMaxDiffs = mutableMapOf<Int, Double>()  // ncandidates -> maxDiff
 
         repeat(11) {
-            val mvrsFuzzPct = Random.Default.nextDouble(0.01)
-            val margin = Random.Default.nextDouble(0.10)
-            val undervotePct = Random.Default.nextDouble(0.10)
+            val mvrsFuzzPct = Random.nextDouble(0.01)
+            val margin = Random.nextDouble(0.10)
+            val undervotePct = Random.nextDouble(0.10)
             // data class MultiContestTestData(
             //    val ncontest: Int,
             //    val nballotStyles: Int,

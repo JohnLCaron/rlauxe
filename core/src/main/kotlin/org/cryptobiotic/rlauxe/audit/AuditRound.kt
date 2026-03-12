@@ -2,10 +2,11 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.betting.makeAprioriErrorRates
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.estimateSampleSizeSimple
+import org.cryptobiotic.rlauxe.estimate.estimateCorla
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.df
@@ -137,7 +138,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         val lastResult = minAssertion.auditResult ?: minAssertion.prevAuditResult
         if (lastResult == null) return 0
 
-        val errorCounts = lastResult.measuredCounts
+        val errorCounts = lastResult.clcaErrorTracker.measuredClcaErrorCounts()
 
         // fun estimateSampleSizeSimple(
         //    riskLimit: Double,
@@ -149,13 +150,13 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         //    twoUnder: Int = 0,
         //)
 
-        return estimateSampleSizeSimple(
+        return estimateCorla(
             alpha,
             dilutedMargin = minAssertion.assertion.assorter.dilutedMargin(),
-            twoOver = errorCounts?.getNamedCount("p2o") ?: 0,
-            oneOver = errorCounts?.getNamedCount("p1o") ?: 0,
-            oneUnder = errorCounts?.getNamedCount("p1u") ?: 0,
-            twoUnder = errorCounts?.getNamedCount("p2u") ?: 0,
+            twoOver = errorCounts.getNamedCount("p2o") ?: 0,
+            oneOver = errorCounts.getNamedCount("p1o") ?: 0,
+            oneUnder = errorCounts.getNamedCount("p1u") ?: 0,
+            twoUnder = errorCounts.getNamedCount("p2u") ?: 0,
         )
     }
 
@@ -214,11 +215,15 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     // we get the results from the audit, not the estimation
     fun previousErrorCounts(): ClcaErrorCounts? {
         require(assertion is ClcaAssertion)
-        if (roundIdx == 1 || prevAuditResult == null || prevAuditResult.measuredCounts == null)
+        if (roundIdx == 1 || prevAuditResult == null)
             return null
 
-        val prevResult = prevAuditResult
-        return ClcaErrorCounts(prevResult.measuredCounts.errorCounts, prevResult.samplesUsed, noerror, upper)
+        return ClcaErrorCounts(prevAuditResult.clcaErrorTracker.errorCounts, prevAuditResult.samplesUsed, noerror, upper)
+    }
+
+    fun previousErrorTracker(): ClcaErrorTracker {
+        require(assertion is ClcaAssertion)
+        return prevAuditResult?.clcaErrorTracker ?: ClcaErrorTracker(assertion.noerror, assertion.assorter.upperBound())
     }
 
     // return (calculated new mvrs needed, optimalBet) based on prevAuditResult.measuredCounts or apriori.errorCounts
@@ -291,7 +296,7 @@ data class AuditRoundResult(
     val pmin: Double,               // minimum pvalue reached
     val samplesUsed: Int,           // sample count when testH0 terminates
     val status: TestH0Status,       // testH0 status
-    val measuredCounts: ClcaErrorCounts? = null, // measured error counts (clca only)
+    val clcaErrorTracker: ClcaErrorTracker, // allows to start estimation from where we left off
     val params: Map<String, Double> = emptyMap(),
 ) {
 
@@ -301,8 +306,8 @@ data class AuditRoundResult(
     }
 
     fun measuredCounts() = buildString {
-        if (measuredCounts == null) append("empty") else {
-            append(measuredCounts.show())
+        if (clcaErrorTracker.errorCounts.isEmpty()) append("empty") else {
+            append(clcaErrorTracker.errorCounts.toString())
         }
     }
 

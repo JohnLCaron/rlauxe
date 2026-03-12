@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.workflow.CardManifest
 
 private val logger = KotlinLogging.logger("EstimateClcaNoErrors")
 
+// not needed
 class EstimateClcaNoErrors(
     val config: AuditConfig,
     val contests: List<ContestRound>,

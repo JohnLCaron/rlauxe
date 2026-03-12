@@ -24,6 +24,7 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 import org.cryptobiotic.rlauxe.workflow.findSamples
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.Path
@@ -38,6 +39,7 @@ interface AuditRecordIF {
     val rounds: List<AuditRoundIF>
 
     fun readCardManifest(): CardManifest
+    fun readOneShotMvrs(): Map<Int, Int>
 }
 
 class AuditRecord(
@@ -108,6 +110,26 @@ class AuditRecord(
         val infos = contests.map { it.contest.info() }.associateBy { it.id }
         return if (!Files.exists(Path(publisher.oneauditPoolsFile()))) null
                else readCardPoolCsvFile(publisher.oneauditPoolsFile(), infos)
+    }
+
+    // contestId -> nmvrs
+    override fun readOneShotMvrs(): Map<Int, Int> {
+        if (!Files.exists(Path(publisher.privateOneshotFile()))) {
+            return emptyMap()
+        }
+        val file = File(publisher.privateOneshotFile())
+
+        val result = mutableMapOf<Int, Int>()
+        file.useLines { lines ->
+            lines.forEach { line ->
+                val tokens = line.split(":")
+                val id = tokens[0].trim().toInt()
+                val nmvrs = tokens[1].trim().toInt()
+                result[id] = nmvrs
+
+            }
+        }
+        return result
     }
 
     companion object {

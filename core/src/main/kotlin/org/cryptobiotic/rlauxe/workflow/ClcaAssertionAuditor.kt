@@ -114,7 +114,7 @@ fun interface ClcaAssertionAuditorIF {
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        samplerTracker: SamplerTracker,
+        samplerTracker: ClcaSamplerErrorTracker,
         roundIdx: Int,
     ): TestH0Result
 }
@@ -125,7 +125,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        samplerTracker: SamplerTracker,
+        samplerTracker: ClcaSamplerErrorTracker,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA
@@ -174,7 +174,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             pmin = testH0Result.pvalueMin,
             samplesUsed = testH0Result.sampleCount,
             status = testH0Result.status,
-            measuredCounts = samplerTracker.measuredClcaErrorCounts(),
+            clcaErrorTracker = samplerTracker.clcaErrorTracker,
         )
 
         if (!quiet) {

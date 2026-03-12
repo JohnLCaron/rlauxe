@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
-import org.cryptobiotic.rlauxe.estimate.estimateSampleSizeSimple
+import org.cryptobiotic.rlauxe.estimate.estimateCorla
 import org.cryptobiotic.rlauxe.shangrla.sampleSize
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
@@ -39,7 +39,7 @@ fun CorlaContestRoundCsv.showEstimation() {
     // TODO they use ballotCardCount instead of contestBallotCardCount for some reason
     val dilutedMargin = minMargin.toDouble() / ballotCardCount
     if (dilutedMargin > 0) {
-        val est = estimateSampleSizeSimple(riskLimit, dilutedMargin, gamma) // no errors
+        val est = estimateCorla(riskLimit, dilutedMargin, gamma) // no errors
         val (bet, payoff, samples) = betPayoffSamples(ballotCardCount, risk=riskLimit, assorterMargin=dilutedMargin, 0.0)
 
         println("dilutedMargin = $dilutedMargin estSamples = ${est} corlaEst=$optimisticSamplesToAudit rauxEst=$samples")

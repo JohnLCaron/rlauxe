@@ -2,33 +2,25 @@ package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.audit.EstimationRoundResult
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
-import org.cryptobiotic.rlauxe.betting.Taus
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
-import org.cryptobiotic.rlauxe.oneaudit.VunderPools
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.dfn
-import org.cryptobiotic.rlauxe.util.roundUp
-import org.cryptobiotic.rlauxe.workflow.CardManifest
-import kotlin.Double
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
 import kotlin.Int
-import kotlin.collections.sortedBy
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.use
 
-private val logger = KotlinLogging.logger("OneShotOA")
+private val logger = KotlinLogging.logger("OneShotAudit")
 
-class OneShotOA(
+// AuditRecord must have privateMvrs
+class OneShotAudit(
     val auditdir: String,
 ) {
     val record = AuditRecord.readFrom(auditdir) as AuditRecord
@@ -37,8 +29,8 @@ class OneShotOA(
     val cardPools = record.readCardPools()
     val mvrs = readCardsCsvIterator(Publisher(auditdir).privateMvrsFile())
 
-    fun run(skipContests: List<Int>) {
-        println("exclude $skipContests")
+    fun run(skipContests: List<Int>, writeFile: String? = null) {
+        println("OneShotAudit exclude $skipContests on $auditdir")
 
         val stopwatch = Stopwatch()
         val mvrsIter = mvrs.iterator()
@@ -100,12 +92,18 @@ class OneShotOA(
         }
         println()
         maxAssertions.toSortedMap().forEach { (id, count) -> println("$id: $count") }
+
+        if (writeFile != null) {
+            val writer: OutputStreamWriter = FileOutputStream(writeFile).writer()
+            maxAssertions.toSortedMap().forEach { (id, count) -> writer.write("$id: $count\n") }
+            writer.close()
+        }
     }
 
     inner class AssertionAudit(val contestUA: ContestWithAssertions, val cassertion: ClcaAssertion) {
         val id = contestUA.id
         val endingTestStatistic = 1 / config.riskLimit
-        val cassorter: OneAuditClcaAssorter = cassertion.cassorter as OneAuditClcaAssorter
+        val cassorter = cassertion.cassorter
         val passorter = cassorter.assorter
 
         val errorTracker: ClcaErrorTracker
@@ -121,13 +119,14 @@ class OneShotOA(
             //    val d: Int = 100,  // trunc weight
             //    val debug: Boolean = false,
             val aprioriErrorRates = config.clcaConfig.apriori.makeErrorRates(cassorter.noerror, passorter.upperBound())
+            val oaAssortRates = if (config.isOA) (cassorter as OneAuditClcaAssorter).oaAssortRates else null
 
             bettingFun = GeneralAdaptiveBetting(
                 contestUA.Npop, // population size for this contest
                 aprioriErrorRates = aprioriErrorRates, // apriori rates not counting phantoms, non-null so we always have noerror and upper
                 contestUA.Nphantoms,
                 config.clcaConfig.maxLoss,
-                oaAssortRates=cassorter.oaAssortRates,
+                oaAssortRates=oaAssortRates,
             )
 
             errorTracker = ClcaErrorTracker(cassorter.noerror, passorter.upperBound())
@@ -144,30 +143,21 @@ class OneShotOA(
 
             val assortValue = cassorter.bassort(mvr, card, hasStyle = false) // hasStyle??
 
-            if (id == 15 && passorter.shortName() == "49/42" && countUsed == 82) {
-            }
-                // TODO errorTracker will have prevSampleCount, which I think is right.
+            // TODO errorTracker will have prevSampleCount, which I think is right.
             val mui = populationMeanIfH0(contestUA.Npop, true, errorTracker)
             val maxBet = bettingFun.bet(errorTracker)
 
-            if (id == 15 && passorter.shortName() == "49/42" && countUsed == 83) {
-                bettingFun.debug = true
-                bettingFun.bet(errorTracker)
-                bettingFun.debug = false
-            }
-
             val payoff = (1 + maxBet * (assortValue - mui))
             testStatistic *= payoff
-            if (testStatistic > endingTestStatistic) {
-                maxIndex = cardSortedIndex
-            } // once we set maxUsed then wantsMore == false
+            if (testStatistic > endingTestStatistic) maxIndex = cardSortedIndex // once we set maxUsed then wantsMore == false
 
-            if (id == 15 && passorter.shortName() == "49/42") {
-                val mvrVotes = mvr.votes(15)?.contentToString() ?: "missing"
-                val cardVotes = card.votes(15)?.contentToString() ?: "N/A"
+            /* val wantId = 28
+            if (id == wantId && passorter.shortName() == "NEN 107/102") {
+                val mvrVotes = mvr.votes(wantId)?.contentToString() ?: "missing"
+                val cardVotes = card.votes(wantId)?.contentToString() ?: "N/A"
                 println("$countUsed, ${dfn(assortValue, 8)}, ${dfn(maxBet, 8)}, ${dfn(payoff, 8)}, ${dfn(testStatistic, 8)}, " +
                         "${mvr.location}, ${mvrVotes}, ${cardVotes}")
-            }
+            } */
 
             // welford.update(assortValue) // error tracker has a welford...
             errorTracker.addSample(assortValue, card.poolId == null)

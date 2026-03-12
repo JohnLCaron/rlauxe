@@ -3,8 +3,8 @@ package org.cryptobiotic.rlauxe.cobra
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
+import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
-import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -99,7 +99,7 @@ class AuditCobraAssertion(
         config: AuditConfig,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
-        samplerTracker: SamplerTracker,
+        samplerTracker: ClcaSamplerErrorTracker,
         roundIdx: Int,
     ): TestH0Result {
         val contestUA = contestRound.contestUA
@@ -138,6 +138,7 @@ class AuditCobraAssertion(
             pmin = testH0Result.pvalueMin,
             samplesUsed = samplesNeeded,
             status = testH0Result.status,
+            clcaErrorTracker = samplerTracker.clcaErrorTracker,
         )
 
         // println(" ${contest.info.name} ${assertionRound.auditResult}")

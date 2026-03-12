@@ -155,9 +155,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         val testH0Result =  when (config.auditType) {
             AuditType.CLCA -> runClcaAudit(config, cvrPairs, contestRound, assertionRound)
             AuditType.POLLING -> throw RuntimeException("runRoundAgain only for CLCA, OneAudit") // runPollingAudit(config, cvrPairs, contestRound, assertionRound)
-            AuditType.ONEAUDIT -> runOneAudit(config, cvrPairs,
-                workflow.mvrManager().oapools()!!,
-                contestRound, assertionRound)
+            AuditType.ONEAUDIT -> runOneAudit(config, cvrPairs, workflow.mvrManager().oapools()!!, contestRound, assertionRound)
         }
 
         return if (testH0Result == null) "failed" else buildString {

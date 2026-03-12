@@ -129,9 +129,10 @@ class TestSfElection {
                 maxLoss = .9,
                 oaAssortRates=oaass.oaAssortRates,
                 d = 100,
-                debug=true,
             )
+            betFn.debug = true
             val bet = betFn.bet(ClcaErrorTracker(oaass.noerror(), 1.0))
+            betFn.debug = false
 
             println("${contest.id}-${minAssertion.assorter.winLose()} bet = $bet")
         }

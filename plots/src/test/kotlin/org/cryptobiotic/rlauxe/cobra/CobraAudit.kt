@@ -117,7 +117,6 @@ class AuditCobraAssertion(
             maxLoss = config.clcaConfig.maxLoss,
             oaAssortRates = null,
             d = config.clcaConfig.d,
-            debug=false,
         )
 
         val testFn = BettingMart(

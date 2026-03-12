@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.estimate
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker2
+import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.ErrorTracker
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.core.*
@@ -27,7 +27,7 @@ class ClcaFuzzSamplerTracker(
     val samples = cardSamples.extractSubsetByIndex(contest.id)
     val maxSamples = samples.size
     val permutedIndex = MutableList(samples.size) { it }
-    val clcaErrorTracker = ClcaErrorTracker2(cassorter.noerror(), cassorter.assorter.upperBound())
+    val clcaErrorTracker = ClcaErrorTracker(cassorter.noerror(), cassorter.assorter.upperBound())
 
     var welford = Welford()
     var cvrPairs: List<Pair<AuditableCard, AuditableCard>> // (mvr, cvr)

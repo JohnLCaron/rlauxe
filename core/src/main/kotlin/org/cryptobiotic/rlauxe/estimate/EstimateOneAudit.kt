@@ -249,7 +249,7 @@ class ContestTrial(val config: AuditConfig, val contest: ContestRound): ContestT
         } // once we set maxUsed then wantsMore == false
 
         // welford.update(assortValue) // error tracker has a welford...
-        errorTracker.addSample(assortValue)
+        errorTracker.addSample(assortValue, card.poolId == null)
     }
 
     override fun toString(): String {

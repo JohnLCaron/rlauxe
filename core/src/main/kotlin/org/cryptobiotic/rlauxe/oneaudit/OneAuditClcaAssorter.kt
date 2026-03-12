@@ -197,7 +197,6 @@ class OneAuditClcaAssorter(
             contest.Nphantoms,
             maxLoss = maxLoss,
             oaAssortRates = oaAssortRates,
-            debug = false,
         )
         val optimalBet = betFn.bet(ClcaErrorTracker(noerror(), upper))
 

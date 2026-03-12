@@ -28,12 +28,12 @@ data class GeneralAdaptiveBetting(
 
     val oaAssortRates: OneAuditAssortValueRates?, // non-null for OneAudit
     val d: Int = 100,  // trunc weight
-    val debug: Boolean = false,
 ) : BettingFn {
     val noerror = aprioriErrorRates.noerror
     val upper = aprioriErrorRates.upper
     val taus = Taus(upper)
     val aprioriRates: Map<Double, Double>  // bassort -> rate
+    var debug = false
 
     init {
         aprioriRates = makeAprioriErrorRates(aprioriErrorRates, nphantoms/Npop.toDouble())
@@ -132,7 +132,7 @@ class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, 
         }
         require (p0 >= 0.0)
         if (debug) {
-            print("GeneralOptimalLambda init: mui=$mui ")
+            println("GeneralOptimalLambda init: mui=$mui ")
             expectedValueLogt(maxBet, true)
         }
     }

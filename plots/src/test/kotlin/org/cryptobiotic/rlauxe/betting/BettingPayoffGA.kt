@@ -24,7 +24,6 @@ class BettingPayoffGA {
                     maxLoss = .99,
                     oaAssortRates = null,
                     d = 0,
-                    debug=false,
                 )
 
                 val dvalues = DoubleArray(10) { noerror }
@@ -65,7 +64,6 @@ class BettingPayoffGA {
                     maxLoss = .90,
                     oaAssortRates = null,
                     d = 0,
-                    debug=false,
                 )
 
                 val dvalues = DoubleArray(10) { noerror }

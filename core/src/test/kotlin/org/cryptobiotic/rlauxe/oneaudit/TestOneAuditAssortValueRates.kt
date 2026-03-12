@@ -198,7 +198,6 @@ class TestOneAuditAssortValueRates {
             maxLoss = maxBet/2,
             oaAssortRates = oaAssortRates,
             d = 100,
-            debug=false,
         )
         val optimalBet = betFun.bet(ClcaErrorTracker(noerror, upper))
         println("optimalBet = $optimalBet")

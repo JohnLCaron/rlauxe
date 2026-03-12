@@ -33,8 +33,8 @@ class TestGABetting {
             maxLoss = maxLoss,
             oaAssortRates=null,
             d = 0,
-            debug=true,
         )
+        gaBetting.debug = true
 
         val tracker = ClcaErrorTracker(noerror, upper)
         repeat(1000) { tracker.addSample(noerror) }

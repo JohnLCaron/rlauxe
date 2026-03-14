@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.betting.makeAprioriErrorRates
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.estimateCorla
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.df
@@ -131,7 +130,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         return assertionRounds.maxOfOrNull { it.auditResult?.samplesUsed ?: 0 } ?: 0
     }
 
-    // called by viewer
+    /* called by viewer
     fun corlaCalc(alpha: Double): Int {
         val minAssertion = minAssertion()
         if (minAssertion == null) return 0
@@ -158,7 +157,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
             oneUnder = errorCounts.getNamedCount("p1u") ?: 0,
             twoUnder = errorCounts.getNamedCount("p2u") ?: 0,
         )
-    }
+    } */
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

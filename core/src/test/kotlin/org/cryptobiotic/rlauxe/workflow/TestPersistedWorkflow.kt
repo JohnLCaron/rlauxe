@@ -72,41 +72,9 @@ class TestPersistedWorkflow {
 
     @Test
     fun testPersistedAuditPolling() {
-            // val topdir = kotlin.io.path.createTempDirectory().toString()
         val topdir = "$testdataDir/persist/persistWorkflow/polling"
-        val auditdir = "$topdir/audit"
         val N = 50000
-
-        // fun startTestElectionPolling(
-        //    topdir: String,
-        //    minMargin: Double,
-        //    fuzzMvrs: Double,
-        //    simFuzz: Double,
-        //    quantile: Double,
-        //    pctPhantoms: Double?,
-        //    ncards: Int,
-        //    ncontests: Int = 11,
-        //)
         startTestElectionPolling(topdir, minMargin = .03, fuzzMvrs = .00, pctPhantoms = 0.00, ncards = N, ncontests = 1)
-
-/*
-        val config = AuditConfig(AuditType.POLLING, hasStyle=true, seed = 12356667890L, nsimEst=10, simFuzzPct = .01)
-
-        val testData = MultiContestTestDataP(1, 4, N, marginRange=0.03..0.05)
-
-        val contests: List<Contest> = testData.contests
-        println("Start testPersistedAuditPolling $testData")
-
-        // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.
-        val testMvrs = testData.makeCvrsFromContests()
-
-        // have to write this here, where we know the mvrs
-        writeUnsortedMvrs(Publisher(auditdir), testMvrs, config.seed)
-
-        val contestsUA = contests.map { ContestUnderAudit(it, isClca = true, hasStyle = config.hasStyle).addStandardAssertions() }
-        val election = CreateElectionFromCvrs(contestsUA, testMvrs, config=config)
-        CreateAuditP("testPersistedAuditPolling", config, election, auditDir = auditdir, clear = true) */
-
         runPersistedAudit(topdir, test=false)
     }
 

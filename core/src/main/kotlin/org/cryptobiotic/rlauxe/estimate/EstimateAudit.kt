@@ -26,6 +26,7 @@ import kotlin.math.min
 import kotlin.use
 
 private val logger = KotlinLogging.logger("EstimateAudit")
+private val showWork = false
 
 // TODO  round > 1 we want to incorporate the measured errors from previous rounds
 //   cant we use vunderPool to do so, that only uses fuzz
@@ -77,7 +78,7 @@ class EstimateAudit(
 
             contestResults.forEach {
                 if (it.wantsMore()) {
-                    println(" wantsMore $it")
+                    if (showWork) println(" wantsMore $it")
                 }
                 // require( !contestResults.any { it.wantsMore() })
             }
@@ -123,7 +124,7 @@ class EstimateAudit(
                 }
             }
 
-            println("  ${contestRound.id} quantile = $pct uses $newMvrs from ${distribution} lastIndex= ${useTrial.maxIndex()}")
+            if (showWork) println("  ${contestRound.id} quantile = $pct uses $newMvrs from ${distribution} lastIndex= ${useTrial.maxIndex()}")
         }
         logger.info { "EstimateAudit ntrials=${ntrials} ncontests=${contestsToAudit.size} took $stopwatch" }
 
@@ -269,13 +270,14 @@ class ContestClcaTrial(val run: Int,
         // welford.update(assortValue) // error tracker has a welford...
         errorTracker.addSample(assortValue, card.poolId == null)
 
+        /*
         val wantId = 0
         if (run == 1 && contest.id == wantId && countUsed < 1000) {
             val mvrVotes = mvr?.votes(wantId)?.contentToString() ?: "missing"
             val cardVotes = card.votes(wantId)?.contentToString() ?: "N/A"
             println("$countUsed, ${dfn(assortValue, 8)}, ${dfn(maxBet, 8)}, ${dfn(payoff, 8)}, ${dfn(testStatistic, 8)}, " +
                     "${card.location}, ${mvrVotes}, ${cardVotes}")
-        }
+        } */
     }
 
     override fun toString(): String {
@@ -359,7 +361,7 @@ class ContestPollingTrial(val run: Int,
 
         errorTracker.addSample(assortValue)
 
-        val wantId = 120
+        /* val wantId = 120
         if (run == 1 && contest.id == wantId && countUsed < 1000) {
             val mvrVotes = cvr?.votes(wantId)?.contentToString() ?: "missing"
             val cardVotes = card.votes(wantId)?.contentToString() ?: "N/A"
@@ -367,7 +369,7 @@ class ContestPollingTrial(val run: Int,
                     "${card.location}, ${cardSortedIndex}, mvr=${mvrVotes}, cvr=${cardVotes}")
             if (countUsed == 999)
                 print("")
-        }
+        } */
     }
 
     override fun toString(): String {

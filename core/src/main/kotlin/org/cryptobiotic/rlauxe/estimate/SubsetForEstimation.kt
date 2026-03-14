@@ -17,7 +17,8 @@ import kotlin.math.min
 private val debug = false
 private val logger = KotlinLogging.logger("ConsistentSampling")
 
-// TODO not needed I think
+// TODO obsolete
+
 // cant use the "maxSampleIndex", because we need to run permutations.
 // so we have to send back the list of sample indices for each contest
 data class CardSamples(val cards: List<AuditableCard>, val usedByContests: Map<Int, List<Int>>) {

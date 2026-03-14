@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.betting.RiskMeasuringFn
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
+import org.cryptobiotic.rlauxe.util.roundUp
 import java.lang.Math.pow
 import kotlin.math.ceil
 import kotlin.math.ln
@@ -184,4 +185,42 @@ fun pValueApproximation(
 
     val result = termn * term1n * term2n * term3n * term4n
     return min(1.0, result)  // TODO cant be bigger than 1.0. discuss
+}
+
+
+/**
+ * From colorado-rla Audit.optimistic().
+ * Based on SuperSimple paper, generalization of equations in section 4.1, esp eq 24.
+ * Computes the expected number of ballots to audit overall given the specified numbers of over- and understatements.
+ *
+ * @param gamma the "error inflator" parameter. error inflation factor γ ≥ 100%.
+ *   γ controls a tradeoff between initial sample size and the amount of additional counting required when the
+ *   sample finds too many overstatements, especially two-vote overstatements.
+ *   The larger γ is, the larger the initial sample needs to be, but the less additional counting will be required
+ *   if the sample finds a two-vote overstatement or a large number of one-vote maximum overstatements. (paper has 1.1)
+ * @param twoOver the number of two-vote overstatements
+ * @param oneOver the number of one-vote overstatements
+ * @param oneUnder the number of one-vote understatements
+ * @param twoUnder the number of two-vote understatements
+ */
+fun estimateCorla(
+    riskLimit: Double,
+    dilutedMargin: Double,
+    gamma: Double = 1.03905,
+    twoOver: Int = 0,
+    oneOver: Int = 0,
+    oneUnder: Int = 0,
+    twoUnder: Int = 0,
+): Int {
+    val two_under_term = twoUnder * ln( 1 + 1 / gamma)
+    val one_under_term = oneUnder * ln( 1 + 1 / (2 * gamma))
+    val one_over_term = oneOver * ln( 1 - 1 / (2 * gamma))
+    val two_over_term = twoOver * ln( 1 - 1 / gamma)
+
+    // "sample-size multiplier" rho is independent of margin
+    val rho: Double = -(2.0 * gamma) * (ln(riskLimit) + two_under_term + one_under_term + one_over_term + two_over_term)
+    val r = ceil(rho / dilutedMargin)  // round up
+    val over_under_sum = (twoUnder + oneUnder + oneOver + twoOver).toDouble()
+    // println("   rho=$rho r=$r")
+    return roundUp(max(r, over_under_sum))
 }

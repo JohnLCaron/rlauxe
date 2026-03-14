@@ -2,13 +2,18 @@ package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.ContestRound
+import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
-import org.cryptobiotic.rlauxe.estimate.estimateCorla
-import org.cryptobiotic.rlauxe.estimate.estimateSampleSizePayloads
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.workflow.CardManifest
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.ln
+import kotlin.math.max
 import kotlin.test.Test
 
 class TestCorlaEstimate {
@@ -21,7 +26,7 @@ class TestCorlaEstimate {
 
     @Test
     fun testCorlaCalc() {
-        val auditdir = "$testdataDir/cases/corla/clca/audit3"
+        val auditdir = "$testdataDir/cases/corla/clca/audit"
         val auditRecord = AuditRecord.readFrom(auditdir)!!
         val sorted = auditRecord.contests.sortedBy { it.Nphantoms }.reversed()
         auditRecord.contests.forEach { contestUA ->
@@ -163,4 +168,41 @@ fun runEstimateSimple(dilutedMargin: Double, twoUnder: Int, oneUnder: Int, oneOv
     )
 
     println("   [$twoOver, $oneOver, $oneUnder, $twoUnder] -> $est2")
+}
+
+// TODO not including the phantoms ....
+fun estimateSampleSizePayloads(
+    alpha: Double,
+    errors: ClcaErrorCounts, // (val errorCounts: Map<Double, Int>, val totalSamples: Int, val noerror: Double, val upper: Double) {
+): Int {
+    // noerror = 1/(2-v/u) = 1/(2-v) when u = 1
+    // probably λ = 2 / gamma
+    val maxRisk = 1.0 / 1.03905
+    val lam = 2 * maxRisk
+    val noerror = errors.noerror
+
+    // payoff_noerror = (1 + λ * (noerror − 1/2))
+    val payoffNoerror = 1 + lam * (noerror - 0.5)
+    val lnPayoffNoerror = ln(payoffNoerror)
+
+    // payoff the risk
+    // payoff_noerror^n_risk > (1 / alpha)
+    // n_risk = -ln(alpha) / ln(payoff_noerror)
+    val n_risk = -ln(alpha) / lnPayoffNoerror
+
+    // payoff the errors
+    // payoff_tau = (1 + λ * (tau * noerror − 1/2))
+    // payoff_noerror^n_tau * payoff_tau = 1.0                             (eq 1)
+    // n_tau = -ln(payoff_tau) / ln(payoff_noerror)
+
+    // estimated samples =
+    // n = n_risk + Sum_taus { count * nTaus }
+
+    val sumNTaus = errors.errorCounts.map { (bassort, count) ->
+        val payoff = 1 + lam * (bassort - 0.5)
+        val n_tau = -ln(payoff) / lnPayoffNoerror
+        count * n_tau
+    }.sum()
+
+    return roundUp(n_risk + sumNTaus )
 }

@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.estimate.estimateCorla
 import kotlin.test.Test
 
 class TestEstimateCorla {

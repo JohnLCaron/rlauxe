@@ -11,6 +11,8 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 
+// TODO obsolete
+
 private val logger = KotlinLogging.logger("EstimateSampleSizes")
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -82,10 +84,6 @@ fun estimateSampleSizes(
         if (!quiet) logger.info{" ** contest ${contestRound.id} avgSamplesNeeded ${contestRound.estMvrs} task=${contestRound.estNewMvrs}"}
     }
 
-    //if ((config.isClca || config.isOA ) && auditRound.roundIdx == 1 && config.simulationStrategy == SimulationStrategy.optimistic) {
-    //    calculateSampleSizes(config, auditRound, overwrite = false)
-    //}
-
     // return repeatedResults for debugging and diagnostics
     return estResults.map { it.repeatedResult }
 }
@@ -107,21 +105,8 @@ fun makeEstimationTasks(
 
     // simulate the polling mvrs once for all the assertions for this contest
     val mvrsForPolling = if (config.isPolling) {
-            val contest = contestRound.contestUA.contest
-            // if (!contest.isIrv()) {
-                estStrategy = "simulateCvrsWithDilutedMargin"
-                simulateCvrsForContest(contestRound.contestUA, config)
-            /* } else {  / cant do IRV Polling
-                // this just makes sure the winner is chosen first (ncards * minMargin) more than any other candidate.
-                val minMargin = contestRound.contestUA.minDilutedMargin()!! // not sure about this...
-                val sim = SimulateIrvTestData(
-                    contest as RaireContest,
-                    minMargin,
-                    sampleLimits = config.contestSampleCutoff
-                )
-                estStrategy = "SimulateIrvTestData"
-                sim.makeCvrs()
-            } */
+            estStrategy = "simulateCvrsWithDilutedMargin"
+            simulateCvrsForContest(contestRound.contestUA, config)
         } else null
 
     contestRound.assertionRounds.filter { !it.status.complete }.map { assertionRound ->
@@ -446,27 +431,6 @@ fun estimateOneAuditAssertionRound(
     logger.info{ "($stopwatch) estimateOneAuditAssertion round $roundIdx ${name} ${makeDeciles(result.sampleCount)}" }
     return result
 }
-
-/* for OneAudit IRV contests
-fun estSamplesSimple(config: AuditConfig, assertionRound: AssertionRound, fac: Double, startingTestStatistic: Double): Int {
-    val lastPvalue = assertionRound.auditResult?.plast ?: config.riskLimit
-    val cassertion = assertionRound.assertion as ClcaAssertion
-
-    val cassorter = cassertion.cassorter
-    val est = roundUp(fac * cassorter.sampleSizeNoErrors(2 * config.clcaConfig.maxLoss, lastPvalue))
-
-    assertionRound.estimationResult = EstimationRoundResult(
-        assertionRound.roundIdx,
-        "estSamplesSimple",
-        fuzzPct = config.simFuzzPct, // TODO used ??
-        startingErrorRates = null,
-        startingTestStatistic = startingTestStatistic,
-        estimatedDistribution = makeDeciles(listOf(est)),
-        ntrials = est.size,
-        firstSample = est,
-    )
-    return est
-} */
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -38,7 +38,7 @@ class TestOneShot {
             populations = record.readPopulations(),
             cardManifest = record.readSortedManifest(),
         )
-        estaudit.run(contestOnly = 28)
+        estaudit.run(20)
     }
 
 }

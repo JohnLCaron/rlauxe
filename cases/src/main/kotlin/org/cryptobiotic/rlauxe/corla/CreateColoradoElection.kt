@@ -16,6 +16,7 @@ import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.collections.component1
 import kotlin.collections.component2

@@ -41,7 +41,7 @@ fun runPollingAuditRound(
                     contest.id,
                     assorter,
                     pairs,
-                    contest.maxSampleAllowed!!)
+                    contest.maxSampleAllowed)
 
                 val testH0Result = auditPollingAssertion(config, contest.contestUA, assertionRound, sampler, roundIdx, quiet)
                 assertionRound.status = testH0Result.status

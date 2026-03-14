@@ -12,7 +12,7 @@ class TestAuditConfig {
         )
         val expected =
 """AuditConfig(auditType=CLCA, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testClcaSimulated
-  minRecountMargin=0.005 minMargin=0.0 contestSampleCutoff=30000 removeCutoffContests=true
+  minRecountMargin=0.005 minMargin=0.0 contestSampleCutoff=20000 auditSampleCutoff=100000 removeCutoffContests=true
   nsimEst=10, quantile=0.8, simFuzzPct=null, simulationStrategy=optimistic, mvrFuzzPct=0.0,
   ClcaConfig(strategy=generalAdaptive2, fuzzMvrs=null, d=100, maxLoss=0.9624175929935999, apriori=TausRates(rates={}))
 """
@@ -27,7 +27,7 @@ class TestAuditConfig {
         )
         val expected =
             """AuditConfig(auditType=POLLING, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testClcaSimulated
-  minRecountMargin=0.005 minMargin=0.0 contestSampleCutoff=30000 removeCutoffContests=true
+  minRecountMargin=0.005 minMargin=0.0 contestSampleCutoff=20000 auditSampleCutoff=100000 removeCutoffContests=true
   nsimEst=10, quantile=0.8, simFuzzPct=null, simulationStrategy=optimistic, mvrFuzzPct=0.0,
   PollingConfig(d=100)
 """
@@ -42,7 +42,7 @@ class TestAuditConfig {
         )
         val expected =
             """AuditConfig(auditType=ONEAUDIT, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testClcaSimulated
-  minRecountMargin=0.005 minMargin=0.0 contestSampleCutoff=30000 removeCutoffContests=true
+  minRecountMargin=0.005 minMargin=0.0 contestSampleCutoff=20000 auditSampleCutoff=100000 removeCutoffContests=true
   nsimEst=10, quantile=0.8, simFuzzPct=null, simulationStrategy=optimistic, mvrFuzzPct=0.0,
   ClcaConfig(strategy=generalAdaptive2, fuzzMvrs=null, d=100, maxLoss=0.9624175929935999, apriori=TausRates(rates={}))
 """

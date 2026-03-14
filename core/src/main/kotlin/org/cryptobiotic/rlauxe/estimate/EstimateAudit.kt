@@ -12,6 +12,7 @@ import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.oneaudit.VunderPool
 import org.cryptobiotic.rlauxe.oneaudit.VunderPools
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -148,7 +149,11 @@ class AuditTrialTask(
         val stopwatch = Stopwatch()
         // used for OA and Polling; different simulated pool data each run
         val vunderPools = if (pools != null && !config.isClca) VunderPools(pools) else null
-        // TODO Polling without pools, only populations
+        val vunderPool = if (vunderPools == null && config.isPolling) VunderPool.fromContests(contestsToAudit.map { it.contestUA }, 42) else null
+
+        // TODO Polling without pools, only populations; auto generate OnePool based on contest totals
+        //     can just use contest totals. a contest can generate a Vunder
+
         // val vunderPopulations = if (config.isPolling && populations != null) VunderPopulations(populations) else null
 
         val contestTrials: List<AssertionTrialIF> = contestsToAudit.map {
@@ -167,8 +172,11 @@ class AuditTrialTask(
 
                 // get the next card in sorted order
                 val card = sortedCardIter.next()
-                val mvr = if (card.poolId == null || vunderPools == null) null else
-                    vunderPools.simulatePooledCard(card) // simulate differently each trial to get a distribution
+                val mvr = when  {
+                    (card.poolId != null && vunderPools != null) -> vunderPools.simulatePooledCard(card)
+                    (vunderPool != null) -> vunderPool.simulatePooledCard(card)
+                    else -> null
+                }
 
                 var include = false
                 contestTrials.forEach { contestTrial ->

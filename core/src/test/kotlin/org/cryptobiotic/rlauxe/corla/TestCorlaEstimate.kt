@@ -43,7 +43,7 @@ class TestCorlaEstimate {
 
     @Test
     fun testCountPhantoms() {
-        val auditdir = "$testdataDir/cases/corla/clca/audit3"
+        val auditdir = "$testdataDir/cases/corla/clca/audit"
         val auditRecord = AuditRecord.readFrom(auditdir)!!
         countPhantoms(auditRecord.readSortedManifest(), 116)
     }

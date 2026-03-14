@@ -138,7 +138,7 @@ fun makeMvrs(
     // add the regular cvrs
     if (cvrNcards > 0) {
         val vunderCvrs = Vunder.fromNpop(contest.id, cvrUndervotes, cvrNcards, cvrVotes, info.voteForN)
-        val cvrCvrs = makeCvrsForPool(mapOf(info.id to vunderCvrs), "regularCvr", poolId = pool.id(), pool.hasSingleCardStyle())
+        val cvrCvrs = makeCvrsForPool(mapOf(info.id to vunderCvrs), "regularCvr", poolId = null, pool.hasSingleCardStyle())
         mvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     }
 

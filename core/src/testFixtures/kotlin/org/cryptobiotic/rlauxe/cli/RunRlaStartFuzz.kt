@@ -294,7 +294,7 @@ class TestPollingElection(
     override fun createUnsortedMvrsInternal() = testMvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null
     override fun populations() = null
-    override fun makeCardPools() = listOf(pool)
+    override fun makeCardPools() = null // listOf(pool)
     override fun contestsUA() = contestsUA
     override fun ncards() = cvrs.size
 
@@ -310,6 +310,8 @@ class TestPollingElection(
 
 fun makeOnePool(poolId: Int, contests: List<Contest>, cvrs: List<Cvr>): OneAuditPool {
     val infos = contests.associate { it.id to it.info() }
+
+    // can just use contest totals. a contest can generate a Vunder
     val contestTabs = tabulateCvrs(cvrs.iterator(), infos)
     return OneAuditPool("all", poolId, hasSingleCardStyle=true, infos, contestTabs, cvrs.size)
 }

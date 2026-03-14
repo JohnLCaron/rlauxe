@@ -148,7 +148,8 @@ class TestAuditRoundJson {
 
         val clcaWorkflow = WorkflowTesterClca(config, contests, emptyList(),
             MvrManagerForTesting(testCvrs, testMvrs, config.seed))
-        val lastRound = runTestAuditToCompletion("testComparisonWorkflow", clcaWorkflow, quiet = true)
+        val lastRound = runTestAuditToCompletion("testComparisonWorkflow", clcaWorkflow, quiet = true) as AuditRound
+        val prevRound = if (lastRound.roundIdx > 1) clcaWorkflow.auditRounds()[lastRound.roundIdx-2] as AuditRound else null
         assertNotNull(lastRound)
 
         val target = AuditRound(
@@ -161,7 +162,7 @@ class TestAuditRoundJson {
             auditorWantNewMvrs = 33334533,
         )
         val json = target.publishJson()
-        val roundtrip = json.import(clcaWorkflow.contestsUA(), target.samplePrns, null)
+        val roundtrip = json.import(clcaWorkflow.contestsUA(), target.samplePrns, prevRound)
         assertNotNull(roundtrip)
         check(target, roundtrip)
         assertEquals(roundtrip, target)
@@ -169,7 +170,7 @@ class TestAuditRoundJson {
         val scratchFile = createTempFile().toFile()
 
         writeAuditRoundJsonFile(target, scratchFile.toString())
-        val result = readAuditRoundJsonFile(scratchFile.toString(), clcaWorkflow.contestsUA(), target.samplePrns, null)
+        val result = readAuditRoundJsonFile(scratchFile.toString(), clcaWorkflow.contestsUA(), target.samplePrns, prevRound)
         if (result.isErr) println("result = $result")
         assertTrue(result.isOk)
         val roundtripIO = result.unwrap()
@@ -400,9 +401,11 @@ fun check(a1: AssertionRound, a2: AssertionRound): Boolean {
         check(a1.auditResult!!, a2.auditResult!!)
 
     println(a1.prevAuditResult)
+    if ((a1.prevAuditResult == null) != (a2.prevAuditResult == null))
+        print("")
     assertEquals(a1.prevAuditResult == null, a2.prevAuditResult == null)
     if (a1.prevAuditResult != null )
-        check(a1.prevAuditResult!!, a2.prevAuditResult!!)
+        check(a1.prevAuditResult, a2.prevAuditResult!!)
     return true
 }
 

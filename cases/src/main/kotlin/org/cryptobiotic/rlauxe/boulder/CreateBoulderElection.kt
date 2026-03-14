@@ -11,6 +11,8 @@ import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.utils.checkNpops
+import org.cryptobiotic.rlauxe.utils.tabulateNpops
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.collections.component1
@@ -22,7 +24,7 @@ import kotlin.collections.set
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger("BoulderElectionOA")
-private val debugUndervotes = true
+private val debugUndervotes = false
 
 // Use OneAudit; redacted ballots are in pools. Cant do IRV.
 // specific to 2024 election. TODO: generalize
@@ -80,8 +82,8 @@ class CreateBoulderElection(
         val phantoms = makePhantomCvrs(contests)
         allCvrs = exportCvrs + simulatedCvrs + phantoms
 
-        val (npops, count) = tabulateNpops(allCvrs, infoList)
-        this.ncards = count
+        val npops = tabulateNpops(allCvrs, infoList)
+        this.ncards = allCvrs.size
 
         contestsUA = if (auditType.isClca()) ContestWithAssertions.make(contests, npops, isClca=true, )
             else makeOneAuditContests(contests, npops, cardPoolBuilders)
@@ -89,18 +91,7 @@ class CreateBoulderElection(
         val totalRedactedBallots = cardPoolBuilders.sumOf { it.ncards() }
         logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPoolBuilders.size} cardPools"}
 
-        val (npops2, count2) = tabulateNpopsFromCards(createCards(), infoList)
-        if (npops2 != npops || count2 != count) {
-            print("tabulateNpopsFromCvrs != tabulateNpopsFromCards")
-            println("     $count2 ? $count")
-            npops2.forEach { (key2, value2) ->
-                val value1 = npops[key2]
-                if (value2 != value1) {
-                    println("   contest $key2:  card: $value2 != $value1 cvr")
-                }
-            }
-            checkHasContest(allCvrs, createCards(), infoList)
-        }
+        checkNpops(allCvrs, createCards(), infoList)
     }
 
     // make ContestInfo from BoulderStatementOfVotes, and matching export.schema.contests
@@ -151,16 +142,6 @@ class CreateBoulderElection(
             // for this pass we are just setting the vote totals, ignoring ncards and undervotes.
             val contestTabs = useContestVotes.mapValues{ ContestTabulation(infoMap[it.key]!!, it.value, ncards=0) }
 
-            if (redactedIdx == 24)
-                print("")
-
-            // data class Population(
-            //    val name: String,
-            //    val id: Int,
-            //    val possibleContests: IntArray, // the list of possible contests.
-            //    val exactContests: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
-            //) : PopulationIF {
-            //    var ncards = 0
             val name = cleanCsvString(redacted.ballotType)
             val id = redactedIdx
             OneAuditPoolFromBallotStyle(name, id, hasSingleCardStyle=true, contestTabs, infoMap)
@@ -450,62 +431,6 @@ fun parseIrvContestName(name: String) : Pair<String, Int> {
     val namet = tokens[0].trim()
     val ncand = tokens[1].substringBefore(",").toInt()
     return Pair(namet, ncand)
-}
-
-// TODO is cvr.hasContest(contestId) same as the card.hasContest(contestId) ??
-fun tabulateNpops(cvrs: List<Cvr>, infos: List<ContestInfo>): Pair<Map<Int, Int>, Int> {
-    val npops = mutableMapOf<Int, Int>()
-    var count = 0
-    cvrs.forEach { cvr ->
-        count++
-        infos.forEach { info ->
-            if (cvr.hasContest(info.id)) {
-                val npop = npops.getOrPut(info.id) { 0 }
-                npops[info.id] = npop + 1
-            }
-        }
-    }
-    return Pair(npops, count)
-}
-
-fun tabulateNpopsFromCards(cards: CloseableIterator<AuditableCard>, infos: List<ContestInfo>): Pair<Map<Int, Int>, Int> {
-    val npops = mutableMapOf<Int, Int>()
-    var count = 0
-    cards.use { cardIter ->
-        while (cardIter.hasNext()) {
-            val card = cardIter.next()
-            count++
-            infos.forEach { info ->
-                if (card.hasContest(info.id)) {
-                    val npop = npops.getOrPut(info.id) { 0 }
-                    npops[info.id] = npop + 1
-                }
-            }
-        }
-    }
-    return Pair(npops, count)
-}
-
-fun checkHasContest(cvrs: List<Cvr>, cards: CloseableIterator<AuditableCard>, infos: List<ContestInfo>) {
-    cards.use { cardIter ->
-        var count = 0
-        cvrs.forEach { cvr ->
-            val card = cardIter.next()
-            for (info in infos) {
-                if (card.location != cvr.id) {
-                    print("${card.location} != ${cvr.id}")
-                    break
-                }
-                if (card.hasContest(info.id) != cvr.hasContest(info.id)) {
-                    println(card)
-                    println("Cvr: $cvr ($count)")
-                    println()
-                    break
-                }
-            }
-            count++
-        }
-    }
 }
 
 

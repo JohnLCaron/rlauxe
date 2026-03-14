@@ -1,6 +1,22 @@
 # Sample Populations
 _01/18/26_
 
+## 3/14/2026
+
+We cant simulate mvrs for PollingAudits if we dont have Pools. All our use cases so far have pools.
+If we only have Populations, can anything be done for estimation or is that like not having populations??
+
+Populations are Pools without vote totals. Still useful for managing dilution. Example is we know what are possible contests for
+precinct/city/county, and we know what precinct a card is from, but we dont have subtotals for the precinct. Only a problem for
+Polling.
+
+No need to save both Populations and Pools.
+
+Using AuditableCard.poolId to hold population id. Redundant with name, perhaps we dont need name, but we can rehydrate when we add Population reference.
+Polling audits are using pools, so need to set the poolId. OA audits use poolId to know if its pooled or cvr data. 
+Clca audits want cards to not have pools (why?), but that seems wrong.
+
+
 ## TL;DR
 
 The most efficient audit has CVRs (that include undervotes) for all ballots.

@@ -2,6 +2,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardFromCard
 import org.cryptobiotic.rlauxe.util.CardBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
@@ -65,11 +66,13 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
     val vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
 
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
-        require (card.poolId == poolId)
+        require (poolName == "all" || card.poolId == poolId)
         val cardb = CardBuilder.fromCard(card)
         card.contests().forEach { contestId ->
-            val vunderPicker = vunderPickers[contestId]!!
-            if (vunderPicker.isEmpty()) {
+            val vunderPicker = vunderPickers[contestId]
+            if (vunderPicker == null) {
+                print("") // ignore
+            } else if (vunderPicker.isEmpty()) {
                 if (hasSingleCardStyle) cardb.replaceContestVotes(contestId, intArrayOf()) // missing not allowed
             } else {
                 val cands = vunderPicker.pickRandomCandidatesAndDecrement()
@@ -95,7 +98,15 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
     }
 
     fun done() = vunderPickers.values.all { it.isEmpty() }
+
+    companion object {
+        fun fromContests(contests:List<ContestWithAssertions>, poolId: Int): VunderPool {
+            val vunders = contests.associate { it.id to Vunder.fromContest(it, poolId) }
+            return VunderPool(vunders, "all", poolId, true)
+        }
+    }
 }
+
 
 
 /*

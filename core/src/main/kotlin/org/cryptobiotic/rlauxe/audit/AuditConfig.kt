@@ -55,7 +55,7 @@ data class AuditConfig(
         appendLine("AuditConfig(auditType=$auditType, riskLimit=$riskLimit, seed=$seed persistedWorkflowMode=$persistedWorkflowMode" )
         append("  minRecountMargin=$minRecountMargin minMargin=$minMargin")
         if (removeMaxContests != null) { append(" removeMaxContests=$removeMaxContests") }
-        if (contestSampleCutoff != null) { append(" contestSampleCutoff=$contestSampleCutoff removeCutoffContests=$removeCutoffContests") }
+        if (contestSampleCutoff != null) { append(" contestSampleCutoff=$contestSampleCutoff auditSampleCutoff=$auditSampleCutoff removeCutoffContests=$removeCutoffContests") }
         if (auditSampleLimit != null) { append(" auditSampleLimit=$auditSampleLimit (risk measuring audit)") }
         appendLine()
         appendLine("  nsimEst=$nsimEst, quantile1=$quantile1, quantile=$quantile, simFuzzPct=${simFuzzPct}, simulationStrategy=$simulationStrategy, mvrFuzzPct=${mvrFuzzPct()},")

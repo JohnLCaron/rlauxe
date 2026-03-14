@@ -4,7 +4,6 @@ import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
-import org.cryptobiotic.rlauxe.estimate.estimateCorla
 import org.cryptobiotic.rlauxe.shangrla.sampleSize
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp

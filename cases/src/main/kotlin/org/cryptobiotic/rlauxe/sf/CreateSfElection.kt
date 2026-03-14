@@ -22,7 +22,8 @@ import org.cryptobiotic.rlauxe.raire.makeRaireContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.ErrorMessages
-import org.cryptobiotic.rlauxe.util.tabulateCardsAndCount
+import org.cryptobiotic.rlauxe.utils.countPhantoms
+import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.Boolean
 import kotlin.collections.component1
@@ -144,16 +145,6 @@ class CreateSfElection(
         } */
 
         return Triple(allCardPools, allCvrTabs, cardCount)
-    }
-
-    fun countPhantoms(contestTabSums: Map<Int, ContestTabulation>, contestNcs: Map<Int, Int>): Map<Int, Int> {
-        val result = mutableMapOf<Int, Int>()
-        contestTabSums.forEach { (_, contestSumTab) ->
-            val useNc = contestNcs[contestSumTab.contestId] ?: contestSumTab.ncardsTabulated
-            val Ncast = contestSumTab.ncardsTabulated
-            result[contestSumTab.contestId] = useNc - Ncast
-        }
-        return result
     }
 
     override fun electionInfo() = ElectionInfo(

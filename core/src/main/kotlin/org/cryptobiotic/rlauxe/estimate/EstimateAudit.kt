@@ -12,6 +12,7 @@ import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.oneaudit.VunderPool
 import org.cryptobiotic.rlauxe.oneaudit.VunderPools
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -26,6 +27,7 @@ import kotlin.math.min
 import kotlin.use
 
 private val logger = KotlinLogging.logger("EstimateAudit")
+private val showWork = false
 
 // TODO  round > 1 we want to incorporate the measured errors from previous rounds
 //   cant we use vunderPool to do so, that only uses fuzz
@@ -77,7 +79,7 @@ class EstimateAudit(
 
             contestResults.forEach {
                 if (it.wantsMore()) {
-                    println(" wantsMore $it")
+                    if (showWork) println(" wantsMore $it")
                 }
                 // require( !contestResults.any { it.wantsMore() })
             }
@@ -123,7 +125,7 @@ class EstimateAudit(
                 }
             }
 
-            println("  ${contestRound.id} quantile = $pct uses $newMvrs from ${distribution} lastIndex= ${useTrial.maxIndex()}")
+            if (showWork) println("  ${contestRound.id} quantile = $pct uses $newMvrs from ${distribution} lastIndex= ${useTrial.maxIndex()}")
         }
         logger.info { "EstimateAudit ntrials=${ntrials} ncontests=${contestsToAudit.size} took $stopwatch" }
 
@@ -147,7 +149,11 @@ class AuditTrialTask(
         val stopwatch = Stopwatch()
         // used for OA and Polling; different simulated pool data each run
         val vunderPools = if (pools != null && !config.isClca) VunderPools(pools) else null
-        // TODO Polling without pools, only populations
+        val vunderPool = if (vunderPools == null && config.isPolling) VunderPool.fromContests(contestsToAudit.map { it.contestUA }, 42) else null
+
+        // TODO Polling without pools, only populations; auto generate OnePool based on contest totals
+        //     can just use contest totals. a contest can generate a Vunder
+
         // val vunderPopulations = if (config.isPolling && populations != null) VunderPopulations(populations) else null
 
         val contestTrials: List<AssertionTrialIF> = contestsToAudit.map {
@@ -166,8 +172,11 @@ class AuditTrialTask(
 
                 // get the next card in sorted order
                 val card = sortedCardIter.next()
-                val mvr = if (card.poolId == null || vunderPools == null) null else
-                    vunderPools.simulatePooledCard(card) // simulate differently each trial to get a distribution
+                val mvr = when  {
+                    (card.poolId != null && vunderPools != null) -> vunderPools.simulatePooledCard(card)
+                    (vunderPool != null) -> vunderPool.simulatePooledCard(card)
+                    else -> null
+                }
 
                 var include = false
                 contestTrials.forEach { contestTrial ->
@@ -269,13 +278,14 @@ class ContestClcaTrial(val run: Int,
         // welford.update(assortValue) // error tracker has a welford...
         errorTracker.addSample(assortValue, card.poolId == null)
 
+        /*
         val wantId = 0
         if (run == 1 && contest.id == wantId && countUsed < 1000) {
             val mvrVotes = mvr?.votes(wantId)?.contentToString() ?: "missing"
             val cardVotes = card.votes(wantId)?.contentToString() ?: "N/A"
             println("$countUsed, ${dfn(assortValue, 8)}, ${dfn(maxBet, 8)}, ${dfn(payoff, 8)}, ${dfn(testStatistic, 8)}, " +
                     "${card.location}, ${mvrVotes}, ${cardVotes}")
-        }
+        } */
     }
 
     override fun toString(): String {
@@ -359,7 +369,7 @@ class ContestPollingTrial(val run: Int,
 
         errorTracker.addSample(assortValue)
 
-        val wantId = 120
+        /* val wantId = 120
         if (run == 1 && contest.id == wantId && countUsed < 1000) {
             val mvrVotes = cvr?.votes(wantId)?.contentToString() ?: "missing"
             val cardVotes = card.votes(wantId)?.contentToString() ?: "N/A"
@@ -367,7 +377,7 @@ class ContestPollingTrial(val run: Int,
                     "${card.location}, ${cardSortedIndex}, mvr=${mvrVotes}, cvr=${cardVotes}")
             if (countUsed == 999)
                 print("")
-        }
+        } */
     }
 
     override fun toString(): String {

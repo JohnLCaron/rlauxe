@@ -14,6 +14,8 @@ import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.math.min
 import kotlin.math.round
 
+// TODO obsolete ??
+
 // val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
 //var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
 

@@ -104,11 +104,11 @@ class PollingSamplerTracker(
             contestId: Int,
             assorter: AssorterIF,
             completeSamples: List<Pair<CvrIF, CvrIF>>, // Pair(mvr, card)
-            maxSampleIndex: Int,  // index into complete sample list
+            maxSampleIndex: Int?,  // index into complete sample list
         ): PollingSamplerTracker {
             val extract = mutableListOf<Pair<CvrIF, CvrIF>>()
             completeSamples.forEachIndexed { idx, pair ->
-                if (pair.second.hasContest(contestId) && idx < maxSampleIndex) {
+                if (pair.second.hasContest(contestId) && (maxSampleIndex == null || idx < maxSampleIndex)) {
                     extract.add(pair)
                 }
             }
@@ -247,7 +247,7 @@ class ClcaSamplerErrorTracker(
 
 // tracks errors from passed-in assort values; use ClcaSamplerErrorTracker if you want a SamplerTracker
 // noerror = 0.0 turns off the error tracking part, just does welford tracking
-class ClcaErrorTracker(val noerror: Double, val upper: Double, val welford:Welford, val errorCounts: MutableMap<Double, Int>): ErrorTracker {
+data class ClcaErrorTracker(val noerror: Double, val upper: Double, val welford:Welford, val errorCounts: MutableMap<Double, Int>): ErrorTracker {
     val taus = Taus(upper)
 
     constructor(noerror: Double, upper: Double) : this(noerror, upper, Welford(), mutableMapOf<Double, Int>())

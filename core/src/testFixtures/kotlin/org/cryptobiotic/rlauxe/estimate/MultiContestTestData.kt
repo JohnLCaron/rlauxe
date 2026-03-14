@@ -163,7 +163,7 @@ data class MultiContestTestData(
     }
 
     // TODO not positive I have the poolId correct
-    fun makeCvrsFromContests(): List<Cvr> {
+    fun makeCvrsFromContests(poolId: Int? = null): List<Cvr> {
         contestTestBuilders.forEach { it.resetTracker() } // startFresh
         val cvrbs = CvrBuilders().addContests(contestTestBuilders.map { it.info })
         val result = mutableListOf<Cvr>()
@@ -171,7 +171,7 @@ data class MultiContestTestData(
             val fcontests = contestTestBuilders.filter { cardStyle.hasContest(it.info.id) }
             repeat(cardStyle.ncards) {
                 // add regular Cvrs including undervotes
-                val poolId = if ((poolPct != null) && cardStyle.id  < 2) 1 else null
+                val poolId = poolId // if ((poolPct != null) && cardStyle.id  < 2) 1 else null
                 result.add(makeCvr(cvrbs, fcontests, poolId = poolId)) // TODO always just add ??
             }
         }

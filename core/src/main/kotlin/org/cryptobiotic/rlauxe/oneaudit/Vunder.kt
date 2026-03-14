@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
@@ -44,10 +46,21 @@ data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pai
             val voteCounts = candVotes.map { Pair(intArrayOf(it.key), it.value) }
             return Vunder(contestId, -1, voteCounts, undervotes, missing, voteForN)
         }
+
         // data class Vunder(val contestId: Int, val candVotes: Map<Int, Int>, val undervotes: Int, val missing: Int, val voteForN: Int) {
         fun fromCandVotes(contestId: Int, candVotes: Map<Int, Int>, undervotes: Int, missing: Int, voteForN: Int): Vunder {
             val voteCounts = candVotes.map { Pair(intArrayOf(it.key), it.value) }
             return Vunder(contestId, -1, voteCounts, undervotes, missing, voteForN)
+        }
+
+        fun fromContest(contestUA: ContestWithAssertions, poolId: Int): Vunder {
+            val contest = contestUA.contest as Contest
+            val sumVotes = contest.votes.map{ it.value }.sum()
+            val voteCounts = contest.votes.map { Pair(intArrayOf(it.key), it.value) }
+            val undervotes = contest.Nundervotes()
+            val voteForN = contest.info().voteForN
+            val missing = contestUA.Npop - (undervotes + sumVotes) / voteForN
+            return Vunder(contestUA.id, poolId, voteCounts, undervotes, missing, voteForN)
         }
     }
 }
@@ -189,13 +202,7 @@ class VunderPicker(val vunder: Vunder) {
     }
 }
 
-
-// combines Vunder for multiple contests into cvrs for one pool
-// make cvrs until we exhaust the votes
-// this algorithm puts as many contests as possible on each cvr
-// the number of cvrs can vary when there are multiple contests
-
-// used for creating Cvrs for pools with hasSingleCardStyle=false // old
+// used for creating Cvrs for pools with hasSingleCardStyle=false
 fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): List<Cvr> {
     val vunderPickers = vunders.mapValues { VunderPicker(it.value) }
 
@@ -208,10 +215,10 @@ fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): L
         vunderPickers.entries.forEach { (contestId, vunderPicker) ->
             if (vunderPicker.isNotEmpty()) {
                 // pick random candidates for the contest
-                val cands = vunderPicker.pickRandomCandidatesAndDecrement()
+                val useCandidates = vunderPicker.pickRandomCandidatesAndDecrement()
                 // add the contest to cvr unless its a novote
-                if (cands != null) {
-                    cvb2.replaceContestVotes(contestId, cands)
+                if (useCandidates != null) {
+                    cvb2.replaceContestVotes(contestId, useCandidates)
                 }
             }
         }
@@ -226,10 +233,9 @@ fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): L
     return rcvrs
 }
 
-
 // set Vunder.missing to 0 for hasSingleCardStyle=true
-fun makeCvrsForPool(vunders: Map<Int, Vunder>, poolName: String, poolId: Int, hasSingleCardStyle: Boolean): List<Cvr> {
-    val vunderpool = VunderPool(vunders, poolName, poolId, hasSingleCardStyle)
+fun makeCvrsForPool(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, hasSingleCardStyle: Boolean): List<Cvr> {
+    val vunderpool = VunderPool(vunders, poolName, poolId ?: -1, hasSingleCardStyle)
 
     val rcvrs = mutableListOf<Cvr>()
     var count = 1
@@ -237,46 +243,6 @@ fun makeCvrsForPool(vunders: Map<Int, Vunder>, poolName: String, poolId: Int, ha
         val cvrId = "${poolName}-${count}"
         val cvb2 = CvrBuilder2(cvrId, phantom = false, poolId = poolId)
         vunderpool.simulatePooledCvr(cvb2)
-        rcvrs.add(cvb2.build())
-        count++
-    }
-
-    rcvrs.shuffle()
-    return rcvrs
-}
-
-// combine hasSingleCardStyle true or false
-fun makeCvrsForPool2(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, hasSingleCardStyle: Boolean = false): List<Cvr> {
-    val vunderpool = VunderPool(vunders, poolName, poolId!!, hasSingleCardStyle)
-
-    val rcvrs = mutableListOf<Cvr>()
-    var count = 1
-    while (!vunderpool.done()) {
-        val cvrId = "${poolName}-${count}"
-        val cvb2 = CvrBuilder2(cvrId, phantom = false, poolId = poolId)
-        if (hasSingleCardStyle) {
-            vunderpool.vunderPickers.forEach { (contestId, vunderPicker) ->
-                if (vunderPicker.isEmpty()) {
-                    cvb2.replaceContestVotes(contestId, intArrayOf()) // cant be missing so add an undervote
-                } else {
-                    val cands = vunderPicker.pickRandomCandidatesAndDecrement()
-                    if (cands != null) {
-                        cvb2.replaceContestVotes(contestId, cands)
-                    }
-                }
-            }
-        } else {
-            vunderpool.vunderPickers.entries.forEach { (contestId, vunderPicker) ->
-                if (vunderPicker.isEmpty()) {
-                    if (hasSingleCardStyle) cvb2.replaceContestVotes(contestId, intArrayOf()) // cant be missing so add an undervote
-                } else {
-                    val cands = vunderPicker.pickRandomCandidatesAndDecrement()
-                    if (cands != null) {
-                        cvb2.replaceContestVotes(contestId, cands)
-                    }
-                }
-            }
-        }
         rcvrs.add(cvb2.build())
         count++
     }

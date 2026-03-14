@@ -19,6 +19,8 @@ import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
+import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
+import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.math.min
 
@@ -250,35 +252,38 @@ class TestPollingElection(
     ncards: Int,
     ncontests: Int,
 ): CreateElectionIF {
-    val contestsUA = mutableListOf<ContestWithAssertions>()
+    val contestsUA: List<ContestWithAssertions>
     val cvrs: List<Cvr>
     val testMvrs: List<Cvr>
-    val pops: List<Population>
+    val pool: OneAuditPool
 
     init {
         val maxMargin = .08
         val useMin = min(minMargin, maxMargin)
         val phantomPctRange: ClosedFloatingPointRange<Double> =
             if (pctPhantoms == null) 0.00..0.005 else pctPhantoms..pctPhantoms
-        val testData = MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin, phantomPctRange = phantomPctRange)
+        val testData = MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin,
+            phantomPctRange = phantomPctRange) // always poolid = 1
 
         val contests: List<Contest> = testData.contests
         println("Start testPersistentWorkflowPolling $testData")
         contests.forEach { println("  $it") }
-        println()
-        val pop = Population("all", 1, contests.map { it.id }.toIntArray(), hasSingleCardStyle=false)
-        pops = listOf(pop)
 
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
-        cvrs = testData.makeCvrsFromContests()
+        cvrs = testData.makeCvrsFromContests(42)
         testMvrs =  makeFuzzedCvrsForClca(contests.map{ it.info() } , cvrs, fuzzMvrs)
 
-        val makum = ContestWithAssertions.make(testData.contests, cards(), isClca=false)
-        // not setting Npop, so it defaults to Nc
-        //val regularContests = testData.contests.map {
-        //    ContestUnderAudit(it, isClca=true, hasStyle=config.hasStyle).addStandardAssertions()
-        //}
-        contestsUA.addAll(makum)
+        contestsUA = ContestWithAssertions.make(testData.contests, cards(), isClca=false)
+        val infos = contests.associate { it.id to it.info() }
+        val contestTabs = tabulateAuditableCards(cards(), infos)
+
+        //     override val poolName: String,
+        //    override val poolId: Int,
+        //    val hasSingleCardStyle: Boolean,
+        //    val infos: Map<Int, ContestInfo>,
+        //    val contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
+        //    val totalCards: Int,
+        pool = makeOnePool(42, contests, cvrs)
         contestsUA.forEach { println("  $it") }
         println()
     }
@@ -288,8 +293,8 @@ class TestPollingElection(
     )
     override fun createUnsortedMvrsInternal() = testMvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null
-    override fun populations() = pops
-    override fun makeCardPools() = null
+    override fun populations() = null
+    override fun makeCardPools() = null // listOf(pool)
     override fun contestsUA() = contestsUA
     override fun ncards() = cvrs.size
 
@@ -301,6 +306,14 @@ class TestPollingElection(
             populations(),
         )
     }
+}
+
+fun makeOnePool(poolId: Int, contests: List<Contest>, cvrs: List<Cvr>): OneAuditPool {
+    val infos = contests.associate { it.id to it.info() }
+
+    // can just use contest totals. a contest can generate a Vunder
+    val contestTabs = tabulateCvrs(cvrs.iterator(), infos)
+    return OneAuditPool("all", poolId, hasSingleCardStyle=true, infos, contestTabs, cvrs.size)
 }
 
 ////////////////////////////////

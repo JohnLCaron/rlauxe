@@ -35,14 +35,14 @@ class TestRunRoundAgainCli {
         )
     }
 
-    // @Test only for OA, CLCA
+    @Test // only for OA, CLCA
     fun testRunRoundAgainPolling() {
-        val auditDir = "$testdataDir/persist/testRunCli/polling/audit"
+        val auditDir = "$testdataDir/cases/corla/polling/audit"
 
         RunRoundAgainCli.main(
             arrayOf(
                 "-auditDir", auditDir,
-                "-contest", "1",
+                "-contest", "120",
                 "-round", "1",
                 "-assertion", "first",
             )

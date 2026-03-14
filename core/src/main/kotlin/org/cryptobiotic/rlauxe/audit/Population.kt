@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.audit
 
+import org.cryptobiotic.rlauxe.oneaudit.Vunder
 import kotlin.collections.contains
 
 /* from SamplePopulations.md
@@ -18,6 +19,8 @@ interface PopulationIF {
     fun hasSingleCardStyle(): Boolean // aka hasStyle: if all cards have exactly the contests in possibleContests()
     fun ncards(): Int
     fun hasContest(contestId: Int): Boolean
+    // if you have this, then youre a Pool
+    // fun votesAndUndervotes(contestId: Int): Vunder // , voteForN: Int): Vunder
 }
 
 // serialization turns into this

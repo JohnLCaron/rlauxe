@@ -20,8 +20,9 @@ private val logger = KotlinLogging.logger("EstimateSampleSizes")
 fun estimateSampleSizes(
     config: AuditConfig,
     auditRound: AuditRoundIF,
-    cardManifest: CardManifest, // Clca, OneAudit, ignored for Polling
+    sortedManifest: CardManifest,
     cardPools: List<OneAuditPool>?,               // only OneAudit
+    populations: List<PopulationIF>?,               // only OneAudit
     previousSamples: Set<Long>,
     showTasks: Boolean = false,
     nthreads: Int = 32,
@@ -29,7 +30,7 @@ fun estimateSampleSizes(
 ): List<RunRepeatedResult> {
 
     if (config.simulationStrategy == SimulationStrategy.optimistic) {
-        val optimistic = EstimateAudit(config,  auditRound.roundIdx, auditRound.contestRounds, cardPools, cardManifest)
+        val optimistic = EstimateAudit(config,  auditRound.roundIdx, auditRound.contestRounds, cardPools, populations, sortedManifest)
         return optimistic.run()
     }
 
@@ -38,7 +39,7 @@ fun estimateSampleSizes(
         getSubsetForEstimation(
             config,
             auditRound.contestRounds,
-            cardManifest,
+            sortedManifest,
             previousSamples,
         )
 
@@ -109,7 +110,7 @@ fun makeEstimationTasks(
             val contest = contestRound.contestUA.contest
             // if (!contest.isIrv()) {
                 estStrategy = "simulateCvrsWithDilutedMargin"
-                simulateCvrsWithDilutedMargin(contestRound.contestUA, config)
+                simulateCvrsForContest(contestRound.contestUA, config)
             /* } else {  / cant do IRV Polling
                 // this just makes sure the winner is chosen first (ncards * minMargin) more than any other candidate.
                 val minMargin = contestRound.contestUA.minDilutedMargin()!! // not sure about this...

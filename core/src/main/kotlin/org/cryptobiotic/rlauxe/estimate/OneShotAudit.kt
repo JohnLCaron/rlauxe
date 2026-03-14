@@ -25,9 +25,9 @@ class OneShotAudit(
 ) {
     val record = AuditRecord.readFrom(auditdir) as AuditRecord
     val config = record.config
-    val cardManifest = record.readCardManifest()
+    val cardManifest = record.readSortedManifest()
     val cardPools = record.readCardPools()
-    val mvrs = readCardsCsvIterator(Publisher(auditdir).privateMvrsFile())
+    val mvrs = readCardsCsvIterator(Publisher(auditdir).sortedMvrsFile())
 
     fun run(skipContests: List<Int>, writeFile: String? = null) {
         println("OneShotAudit exclude $skipContests on $auditdir")
@@ -36,12 +36,23 @@ class OneShotAudit(
         val mvrsIter = mvrs.iterator()
         val contestsUAs = record.contests.filter { it.id !in skipContests }
 
-        val assertionAudits = mutableListOf<AssertionAudit>()
+        val assertionAudits = mutableListOf<AssertionTrialIF>()
         contestsUAs.forEach { contestUA ->
-            contestUA.clcaAssertions.forEach {
-                assertionAudits.add( AssertionAudit(contestUA, it))
+            contestUA.assertions().forEach { assertion ->
+                val assertionRound = AssertionRound(assertion, 1, null)
+                val aa = if (config.isPolling) ContestPollingTrial(1, config, contestUA, assertionRound)
+                         else ContestClcaTrial(1, config, contestUA, assertionRound)
+                assertionAudits.add( aa)
             }
         }
+
+        val assertionAuditsOld = mutableListOf<AssertionAudit>()
+        contestsUAs.forEach { contestUA ->
+            contestUA.clcaAssertions.forEach {
+                assertionAuditsOld.add( AssertionAudit(contestUA, it))
+            }
+        }
+
         val naudits = assertionAudits.size
 
         var countCards = 1 // 1 based
@@ -60,7 +71,7 @@ class OneShotAudit(
                 var include = false
                 assertionAudits.forEach { assertionAudit ->
                     // does this contest want this card ?
-                    if (assertionAudit.wantsMore() && card.hasContest(assertionAudit.id)) {
+                    if (assertionAudit.wantsMore() && card.hasContest(assertionAudit.id())) {
                         include = true
                         assertionAudit.addCard(mvr, card, countCards)
                     }
@@ -71,15 +82,15 @@ class OneShotAudit(
                     if (card.poolId != null) countPoolCards++
                 }
                 countCards++
-
+/*
                 if (countCards % 100 == 0 && countCards < 1000) {
-                    val more = assertionAudits.filter { it.wantsMore() }.map { it.id }
+                    val more = assertionAudits.filter { it.wantsMore() }.map { it.id() }
                     println(" $countCards ${more.size}/$naudits = $more")
 
                 } else if (countCards % 1000 == 0) {
-                    val more = assertionAudits.filter { it.wantsMore() }.map { it.id }
-                    println(" $countCards ${more.size}/$naudits = $more")
-                }
+                    val more = assertionAudits.filter { it.wantsMore() }.map { it.id() }
+                    println(" $co untCards ${more.size}/$naudits = $more")
+                } */
             }
         }
         println("\ncountCards=$countCards countIncludedCards=$countCardsIncluded took $stopwatch\n")
@@ -87,8 +98,8 @@ class OneShotAudit(
         val maxAssertions = mutableMapOf<Int, Int>()
         assertionAudits.forEach {
             println(it)
-            val maxSamples = maxAssertions.getOrPut(it.id) { 0 }
-            maxAssertions[it.id] = max( maxSamples, it.countUsed )
+            val maxSamples = maxAssertions.getOrPut(it.id()) { 0 }
+            maxAssertions[it.id()] = max( maxSamples, it.nmvrs() )
         }
         println()
         maxAssertions.toSortedMap().forEach { (id, count) -> println("$id: $count") }
@@ -100,8 +111,8 @@ class OneShotAudit(
         }
     }
 
-    inner class AssertionAudit(val contestUA: ContestWithAssertions, val cassertion: ClcaAssertion) {
-        val id = contestUA.id
+    inner class AssertionAudit(val contest: ContestWithAssertions, val cassertion: ClcaAssertion) {
+        val id = contest.id
         val endingTestStatistic = 1 / config.riskLimit
         val cassorter = cassertion.cassorter
         val passorter = cassorter.assorter
@@ -110,21 +121,13 @@ class OneShotAudit(
         val bettingFun : GeneralAdaptiveBetting
 
         init {
-            //     val Npop: Int, // population size for this contest
-            //    val aprioriCounts: ClcaErrorRates, // apriori rates not counting phantoms, non-null so we always have noerror and upper
-            //    val nphantoms: Int, // number of phantoms in the population
-            //    val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
-            //
-            //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
-            //    val d: Int = 100,  // trunc weight
-            //    val debug: Boolean = false,
             val aprioriErrorRates = config.clcaConfig.apriori.makeErrorRates(cassorter.noerror, passorter.upperBound())
             val oaAssortRates = if (config.isOA) (cassorter as OneAuditClcaAssorter).oaAssortRates else null
 
             bettingFun = GeneralAdaptiveBetting(
-                contestUA.Npop, // population size for this contest
+                contest.Npop, // population size for this contest
                 aprioriErrorRates = aprioriErrorRates, // apriori rates not counting phantoms, non-null so we always have noerror and upper
-                contestUA.Nphantoms,
+                this@AssertionAudit.contest.Nphantoms,
                 config.clcaConfig.maxLoss,
                 oaAssortRates=oaAssortRates,
             )
@@ -144,7 +147,7 @@ class OneShotAudit(
             val assortValue = cassorter.bassort(mvr, card, hasStyle = false) // hasStyle??
 
             // TODO errorTracker will have prevSampleCount, which I think is right.
-            val mui = populationMeanIfH0(contestUA.Npop, true, errorTracker)
+            val mui = populationMeanIfH0(contest.Npop, true, errorTracker)
             val maxBet = bettingFun.bet(errorTracker)
 
             val payoff = (1 + maxBet * (assortValue - mui))
@@ -164,7 +167,7 @@ class OneShotAudit(
         }
 
         override fun toString(): String {
-            return "AssertionAudit(contest=${contestUA.id} assertion=${passorter.shortName()} countUsed=${countUsed} maxIndex=${maxIndex} testStatistic=${testStatistic} )"
+            return "AssertionAudit(contest=${contest.id} assertion=${passorter.shortName()} countUsed=${countUsed} maxIndex=${maxIndex} testStatistic=${testStatistic} )"
         }
     }
 }

@@ -9,23 +9,32 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestBuilderIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromBallotStyle
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
-import org.cryptobiotic.rlauxe.oneaudit.makeVunderCvrs
+import org.cryptobiotic.rlauxe.oneaudit.makeCvrsForPool
+import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.clearDirectory
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.collections.component1
 import kotlin.collections.component2
+import kotlin.io.path.Path
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger("ColoradoOneAudit")
 
 private val debugUndervotes = false
 
-// making OneAudit pools from the precinct results, then generate CVRs from pools
+// make pools from the precinct results, then generate CVRs from pools
 // TODO experiment with OneAudit with small counties that do hand counts
 open class CreateColoradoElection (
     electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
     val auditType: AuditType,
+    val auditdir: String,
+    val hasSingleCardStyle: Boolean,
 ): CreateElectionIF {
     val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
@@ -39,6 +48,7 @@ open class CreateColoradoElection (
     val populations: List<PopulationIF>
     val contests: List<ContestIF>
     val contestsUA: List<ContestWithAssertions>
+    val publisher = Publisher(auditdir)
 
     init {
         // set contest total cards as sum over pools
@@ -64,17 +74,24 @@ open class CreateColoradoElection (
         populations = cardPools
         contests = makeContests()
 
-        val infos = contests.map { it.info() }.associateBy { it.id }
-        val (manifestTabs, count) = tabulateCardsAndCount(createCards(), infos)
-        val npopMap = manifestTabs.mapValues { it.value.ncardsTabulated }
-        this.ncards = count
+        // have to save the mvrs while we know them
+        ncards = createAndSaveMvrs()
 
-        // in case we decide to support OA
-        contestsUA = if (auditType.isOA()) makeOneAuditContests(contests, npopMap, cardPools)
-                     else ContestWithAssertions.make(contests, npopMap, isClca=auditType.isClca(), )
+        val infos = contests.map { it.info() }.associateBy { it.id }
+        val mvrs = readCardsCsvIterator(publisher.unsortedMvrsFile())
+        val (manifestTabs, count) = tabulateCardsAndCount(mvrs, infos)
+        require(ncards == count)
+
+        val npopMap = manifestTabs.mapValues { it.value.ncardsTabulated }
+
+        contestsUA = if (auditType.isOA()) makeOneAuditContests(contests, npopMap, cardPools) // in case we decide to support OA
+                     else ContestWithAssertions.make(contests, npopMap, isClca = auditType.isClca(),)
     }
 
-    private fun makeOneAuditBuilders(electionDetailXml: ElectionDetailXml, roundContests: List<CorlaContestRoundCsv>): List<CorlaContestBuilder> {
+    private fun makeOneAuditBuilders(
+        electionDetailXml: ElectionDetailXml,
+        roundContests: List<CorlaContestRoundCsv>
+    ): List<CorlaContestBuilder> {
         val roundContestMap = roundContests.associateBy { mutatisMutandi(contestNameCleanup(it.contestName)) }
 
         val contests = mutableListOf<CorlaContestBuilder>()
@@ -116,7 +133,11 @@ open class CreateColoradoElection (
         return contests
     }
 
-    private fun convertPrecinctsToCardPools(precinctFile: String, infoMap: Map<Int, ContestInfo>): List<OneAuditPoolFromBallotStyle> {
+    // we create the simulated mvrs from the pools; used for both CLCA and Polling; OA is not feasible
+    private fun convertPrecinctsToCardPools(
+        precinctFile: String,
+        infoMap: Map<Int, ContestInfo>
+    ): List<OneAuditPoolFromBallotStyle> {
         val reader = ZipReader(precinctFile)
         val input = reader.inputStream("2024GeneralPrecinctLevelResults.csv")
         val precincts = readColoradoPrecinctLevelResults(input)
@@ -141,51 +162,94 @@ open class CreateColoradoElection (
                     }
                 }
             }
-            // TODO hasSingleCardStyle=false ?
-            OneAuditPoolFromBallotStyle("${precinct.county}-${precinct.precinct}", idx,
-                hasSingleCardStyle=false, contestTabs, infoMap)
+            OneAuditPoolFromBallotStyle(
+                "${precinct.county}-${precinct.precinct}", idx,
+                hasSingleCardStyle = hasSingleCardStyle, contestTabs, infoMap
+            )
         }
     }
 
     fun makeContests(): List<ContestIF> {
-        val infoList= corlaContestBuilders.map { it.info }.sortedBy { it.id }
-        val contestMap= corlaContestBuilders.associateBy { it.info.id }
+        val infoList = corlaContestBuilders.map { it.info }.sortedBy { it.id }
+        val contestMap = corlaContestBuilders.associateBy { it.info.id }
         println("ncontests with info = ${infoList.size}")
 
         return infoList.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
             val oaContest = contestMap[info.id]!!
             val candVotes = oaContest.candidateVotes.filter { info.candidateIds.contains(it.key) } // remove Write-Ins
             val ncards = oaContest.poolTotalCards()
-            val useNc = max( ncards, oaContest.Nc)
+            val useNc = max(ncards, oaContest.Nc)
             info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
             Contest(info, candVotes, useNc, ncards)
         }
     }
 
-    override fun electionInfo() = ElectionInfo(auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
+    override fun electionInfo() =
+        ElectionInfo(auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
+
     override fun populations() = if (auditType.isClca()) emptyList() else populations
     override fun makeCardPools() = if (auditType.isClca()) emptyList() else cardPools.map { it.toOneAuditPool() }
     override fun contestsUA() = contestsUA
-    override fun cards() = createCards()
     override fun ncards() = ncards
-    override fun createUnsortedMvrs() = emptyList<Cvr>() // TODO only needed for private mvrs for OneAudit
 
-    fun createCards(): CloseableIterator<AuditableCard> {
-        return CvrsToCardsAddStyles(auditType,
-            Closer(CvrIteratorfromPools()),
-            makePhantomCvrs(contests), // yes there are phantoms
-            if (auditType.isClca()) null else cardPools,
-        )
+    override fun cards(): CloseableIterator<AuditableCard> {
+        val unsortedMvrs = readCardsCsvIterator(publisher.unsortedMvrsFile())
+        return TransformingIterator(unsortedMvrs) { mvr ->
+            when {
+                mvr.isPhantom() -> mvr
+                auditType.isClca() -> mvr.copy(poolId = null)
+                auditType.isPolling() -> mvr.copy(votes = null)
+                else -> throw IllegalStateException("Unknown what to do with mvr: $mvr")
+            }
+        }
     }
 
+    override fun createUnsortedMvrsInternal() = null
+    override fun createUnsortedMvrsExternal() = readCardsCsvIterator(publisher.unsortedMvrsFile())
+
+    // CvrsToCardsAddStyles is random, so in order to match the mvrs and cvrs, we must generate the mvrs first,
+    // the create manifest from them. This is nonstandard, so we will do it here.
+    // Could put this into createAuditRecord(reverse = true) ??
+    // return number of cards
+    fun createAndSaveMvrs(): Int {
+        val unsortedMvrIterator = MvrsToCardsAddStyles(
+            Closer(CvrIteratorfromPools()),
+            makePhantomCvrs(contests), // yes there are phantoms, heres where we need the contests
+            cardPools,
+        )
+
+        clearDirectory(Path(auditdir))
+        validateOutputDirOfFile(publisher.unsortedMvrsFile())
+
+        writeAuditableCardCsvFile(unsortedMvrIterator, publisher.unsortedMvrsFile())
+        logger.info{"CreateColoradoElection unsortedMvrsFile to ${publisher.unsortedMvrsFile()}"}
+
+        return unsortedMvrIterator.cardIndex
+    }
+
+    /*
+    fun wtf(externalSortDir: String, seed: Long) {
+        // oh damn jumping the gun on the seed aka sorting. but cant get mvrs from the auditable cards .....
+        writeSortedCardsExternal(externalSortDir, publisher, unsortedMvrIterator, seed = seed, zip = false)
+        logger.info { "createAuditRecord wrotePrivateMvrs to ${publisher.privateMvrsFile()}" }
+
+        // mvrs are sorted, dont need to sort cards.
+        val sortedMvrs = readCardsCsvIterator(publisher.privateMvrsFile())
+        // class TransformingIterator<R, T> (val org: CloseableIterator<R>, val transform: (R) -> T) : CloseableIterator<T> {
+        val sortedCvrs = TransformingIterator(sortedMvrs) { mvr ->
+            if (mvr.isPhantom()) mvr else mvr.copy(votes = null) // just remove the votes for non-phantoms
+        }
+        writeAuditableCardCsvFile(sortedCvrs, publisher.cardManifestFile())
+    } */
+
     // dont load into memory all at once, just one pool at a time
-    inner class CvrIteratorfromPools(): Iterator<Cvr> {
-        val oaContestMap = corlaContestBuilders.associateBy { it.info.id }
+    // this is random, cant do more than once. must do mvrs first
+    inner class CvrIteratorfromPools() : Iterator<Cvr> {
         val cardPoolIter = cardPools.iterator()
         var innerIter: CardsFromPool
 
         init {
-            innerIter = CardsFromPool(cardPoolIter.next(), oaContestMap)
+            innerIter = CardsFromPool(cardPoolIter.next())
         }
 
         override fun next(): Cvr {
@@ -195,7 +259,7 @@ open class CreateColoradoElection (
         override fun hasNext(): Boolean {
             if (innerIter.hasNext()) return true
             if (cardPoolIter.hasNext()) {
-                innerIter = CardsFromPool(cardPoolIter.next(), oaContestMap)
+                innerIter = CardsFromPool(cardPoolIter.next())
                 return hasNext()
             }
             return false
@@ -203,34 +267,24 @@ open class CreateColoradoElection (
     }
 
     // these are chosen randomly, so in order for mvrs and cvrs to match, the cvrs have to be made from the mvrs.
-    inner class CardsFromPool(val cardPool: OneAuditPoolFromBallotStyle, val oaContestMap: Map<Int, CorlaContestBuilder>) : Iterator<Cvr> {
+    class CardsFromPool(val cardPool: OneAuditPoolFromBallotStyle) : Iterator<Cvr> {
         val cvrs: Iterator<Cvr>
 
         init {
-            val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
-            /* val contestVotes = mutableMapOf<Int, Vunder>() // contestId -> VotesAndUndervotes
-            cardPool.voteTotals.forEach { (contestId, contestTab) ->
-                val oaContest: OneAuditBuilderCorla = oaContestMap[contestId]!!
-                val sumVotes = contestTab.nvotes()
-                val underVotes = cardPool.ncards() * oaContest.info.voteForN - sumVotes
-                contestVotes[contestId] = Vunder.fromNpop(contestId,  underVotes, cardPool.ncards(), contestTab.votes, oaContest.info.voteForN)
-            }
-            poolVunders.forEach{ (id, vunder) ->
-                val otherVunder =  contestVotes[id]!!
-                if (vunder != otherVunder)
-                    print("why?")
-            } */
+            val poolVunders = cardPool.possibleContests().map { Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
 
-            cvrs = makeVunderCvrs(
+            cvrs = makeCvrsForPool(
                 poolVunders,
                 cardPool.poolName,
-                poolId = if (auditType.isClca()) null else cardPool.poolId
+                poolId = cardPool.poolId,
+                cardPool.hasSingleCardStyle
             ).iterator()
         }
 
         override fun next() = cvrs.next()
         override fun hasNext() = cvrs.hasNext()
     }
+
 }
 
 class CorlaContestBuilder(val info: ContestInfo, detailContest: ElectionDetailContest, contestRound: CorlaContestRoundCsv): OneAuditContestBuilderIF {
@@ -279,25 +333,35 @@ fun createColoradoElection(
     precinctFile: String,
     auditConfigIn: AuditConfig? = null,
     auditType : AuditType,
-    clear: Boolean = true,
+    hasSingleCardStyle: Boolean = true,
     ): Result<AuditRoundIF, ErrorMessages>
 {
     val stopwatch = Stopwatch()
 
-    val election = if (auditType.isClca()) CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, auditType)
-                    else CreateColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile)
-    createElectionRecord("corla", election, auditDir = auditdir, clear = clear)
+    val election = if (auditType.isClca()) CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, auditType, auditdir, hasSingleCardStyle=hasSingleCardStyle)
+                    else CreateColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile, auditdir, hasSingleCardStyle=hasSingleCardStyle)
+    createElectionRecord("corla", election, auditDir = auditdir, clear = false)
 
     val config = when {
         (auditConfigIn != null) -> auditConfigIn
-        auditType.isClca() -> AuditConfig(AuditType.CLCA, contestSampleCutoff = 20000, riskLimit = .03, nsimEst=10)
+        auditType.isClca() -> AuditConfig(
+            AuditType.CLCA,
+            contestSampleCutoff = 10000,
+            auditSampleCutoff = 20000,
+            riskLimit = .03,
+            nsimEst=10,
+            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
+        )
         auditType.isPolling() -> AuditConfig(
-            AuditType.POLLING, riskLimit = .03, nsimEst = 100, quantile = 0.5,
+            AuditType.POLLING, riskLimit = .03, nsimEst = 20, quantile = 0.5,
+            contestSampleCutoff = 20000,
+            auditSampleCutoff = 100000,
+            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
         )
         else -> throw RuntimeException("Unsupported audit type ${auditType.name}")
     }
 
-    createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+    createAuditRecord(config, election, auditDir = auditdir, externalSortDir = topdir)
 
     val result = startFirstRound(auditdir)
     if (result.isErr) logger.error{ result.toString() }

@@ -54,7 +54,7 @@ class TestMakeFuzzedCvrs {
         val choiceChanges = mutableListOf<MutableMap<String, Int>>()
         fuzzPcts.forEach { fuzzPct ->
             margins.forEach { margin ->
-                val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = N, margin, undervotePct = .1, phantomPct = .01)
+                val (cu, testCvrs) = simulateCvrsFromMargin(Nc = N, margin, undervotePct = .1, phantomPct = .01)
                 val fuzzed = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, fuzzPct)
                 val choiceChange = mutableMapOf<String, Int>()
                 testCvrs.zip(fuzzed).forEach { (cvr, fuzzedCvr) ->

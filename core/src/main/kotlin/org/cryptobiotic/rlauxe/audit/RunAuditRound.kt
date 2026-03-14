@@ -6,6 +6,7 @@ import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
+import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
 import org.cryptobiotic.rlauxe.betting.Taus
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.betting.TestH0Result
@@ -28,6 +29,7 @@ import org.cryptobiotic.rlauxe.workflow.ClcaAssertionAuditor
 import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
+import org.cryptobiotic.rlauxe.workflow.auditPollingAssertion
 import java.nio.file.Files.notExists
 import java.nio.file.Path
 
@@ -128,16 +130,17 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
             return "Audit Directory $auditDir does not exist"
         }
         val roundIdx = assertionRound.roundIdx
-        val cassertion = assertionRound.assertion as ClcaAssertion // only for clca ??
-        val noerror = cassertion.cassorter.noerror()
-        val taus = Taus(cassertion.assorter.upperBound())
-        val oaAssorter: OneAuditClcaAssorter? = if (cassertion.cassorter is OneAuditClcaAssorter) cassertion.cassorter else null
+        val assertion = assertionRound.assertion
+        val cassertion: ClcaAssertion? = if (assertion is ClcaAssertion) assertion else null // only for clca ??
+        val noerror = cassertion?.cassorter?.noerror()
+        val taus = Taus(assertion.assorter.upperBound())
+        val oaAssorter: OneAuditClcaAssorter? = if (cassertion?.cassorter is OneAuditClcaAssorter) cassertion.cassorter else null
 
         val auditRecord = AuditRecord.readFrom(auditDir)
         if (auditRecord == null) {
             return "directory '$auditDir' does not contain an audit record"
         }
-        logger.info { "runRoundAgain in $auditDir for round $roundIdx, contest '$contestName', and assertion $cassertion" }
+        logger.info { "runRoundAgain in $auditDir for round $roundIdx, contest '$contestName', and assertion $assertion" }
 
         val useAuditRecord = if (auditRecord is CompositeRecord) {
             auditRecord.findComponentWithContest(contestRound.contestUA.name)
@@ -154,12 +157,12 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         // run the audit, capture the sequences
         val testH0Result =  when (config.auditType) {
             AuditType.CLCA -> runClcaAudit(config, cvrPairs, contestRound, assertionRound)
-            AuditType.POLLING -> throw RuntimeException("runRoundAgain only for CLCA, OneAudit") // runPollingAudit(config, cvrPairs, contestRound, assertionRound)
+            AuditType.POLLING -> runPollingAudit(config, cvrPairs, contestRound, assertionRound)
             AuditType.ONEAUDIT -> runOneAudit(config, cvrPairs, workflow.mvrManager().oapools()!!, contestRound, assertionRound)
         }
 
         return if (testH0Result == null) "failed" else buildString {
-            appendLine("contest $contestId assertion = ${cassertion.assorter.shortName()}")
+            appendLine("contest $contestId assertion = ${assertion.assorter.shortName()}")
             var countPoolCards = 0
             var countPoolCardsMissing = 0
             val seq = testH0Result.sequences
@@ -174,7 +177,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
                     val mvrVotes = pair.first.votes(contestId)?.contentToString() ?: "missing"
                     val card = pair.second
                     val cardVotes = card.votes(contestId)?.contentToString() ?: "N/A"
-                    val err = if ((x == noerror) || (card.poolId() != null)) "" else "*${taus.nameOf(x/noerror)}"
+                    val err = if (noerror == null || x == noerror || (card.poolId() != null)) "" else "*${taus.nameOf(x/noerror)}"
                     if (card.poolId() != null) {
                         countPoolCards++
                         if (mvrVotes == "missing") countPoolCardsMissing++
@@ -248,16 +251,16 @@ fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>,
     }
 }
 
-/*
 fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, CvrIF>>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
     try {
         val assertion = assertionRound.assertion
         val assorter = assertion.assorter
-        val sampler = PollingSamplerTracker(
+
+        val sampler = PollingSamplerTracker.withMaxSample(
             contestRound.id,
             assorter,
             cvrPairs,
-            maxSampleIndex = contestRound.maxSampleAllowed
+            maxSampleIndex = contestRound.maxSampleAllowed!!
         )
 
         val testH0Result = auditPollingAssertion(config, contestRound.contestUA, assertionRound, sampler, assertionRound.roundIdx)
@@ -269,7 +272,7 @@ fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, CvrIF>>, con
         t.printStackTrace()
         return null
     }
-} */
+}
 
 class PairSampler(
     val contestId: Int,

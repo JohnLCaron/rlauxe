@@ -4,8 +4,10 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.audit.EstimationRoundResult
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.EstimAdapter
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.Taus
+import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
@@ -13,6 +15,8 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.oneaudit.VunderPools
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.Double
@@ -31,6 +35,7 @@ class EstimateAudit(
     val roundIdx: Int,
     val contests: List<ContestRound>,
     val pools: List<OneAuditPool>?,
+    val populations: List<PopulationIF>?,
     val cardManifest: CardManifest,
 ) {
 
@@ -48,19 +53,22 @@ class EstimateAudit(
         // TODO use 1 when CLCA with no errors
         val ntrials = if (config.isClca) 1 else config.nsimEst
         repeat(ntrials) { run ->
-            tasks.add(AuditTrialTask(roundIdx, run+1, config, contestsToAudit, pools, cardManifest))
+            tasks.add(AuditTrialTask(roundIdx, run+1, config, contestsToAudit, pools, populations, cardManifest))
         }
-        val trialResults: List<List<ContestTrial>> = ConcurrentTaskRunnerG<List<ContestTrial>>().run(tasks)
+        val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunnerG<List<AssertionTrialIF>>().run(tasks)
 
-        val trackerResults = mutableMapOf<Int, MutableList<ContestTrial>>()
+        val trackerResults = mutableMapOf<Int, MutableList<AssertionTrialIF>>()
         contestsToAudit.forEach { trackerResults[it.id] = mutableListOf() }
         trialResults.forEach { result ->
-            result.forEach { trackerResults[it.contest.id]!!.add(it) }
+            result.forEach { trackerResults[it.contest().id]!!.add(it) }
         }
 
         // transfer info to contestRound and minAssertion
         contestsToAudit.forEach { contestRound ->
-            val contestResults: List<ContestTrial> = trackerResults[contestRound.id]!!
+            val contestResults: List<AssertionTrialIF> = trackerResults[contestRound.id]!!
+            // seems like this should take into account the number of new mvrs wanted.
+            // high pct when small, conservative when large ??
+            // hard to get a one-size-fits-all. could try letting userr have control....
             val pct = when (roundIdx) {
                 1 -> 50
                 2 -> 80
@@ -71,7 +79,7 @@ class EstimateAudit(
                 if (it.wantsMore()) {
                     println(" wantsMore $it")
                 }
-                require( !contestResults.any { it.wantsMore() })
+                // require( !contestResults.any { it.wantsMore() })
             }
 
             val useTrial = findQuantileTrial(contestResults, .01 * pct)
@@ -93,10 +101,12 @@ class EstimateAudit(
                 useAssertionRound.estMvrs = estMvrs
                 useAssertionRound.estNewMvrs = newMvrs
 
+                val calcNewMvrsNeeded = if (config.isPolling) 0 else useAssertionRound.calcNewMvrsNeeded(contestRound.contestUA, config)
+
                 val estimatiomResult = EstimationRoundResult(
                     roundIdx,
                     "EstimateAudit",
-                    calcNewMvrsNeeded = useAssertionRound.calcNewMvrsNeeded(contestRound.contestUA, config),
+                    calcNewMvrsNeeded = calcNewMvrsNeeded,
                     startingTestStatistic = useTrial.startingTestStatistic(), // TODO
                     startingErrorRates = emptyMap(), // TODO capture nphantoms ?
                     estimatedDistribution = distribution,
@@ -128,21 +138,26 @@ class AuditTrialTask(
     val config: AuditConfig,
     val contestsToAudit: List<ContestRound>,
     val pools: List<OneAuditPool>?,
-    val cardManifest: CardManifest) : ConcurrentTaskG<List<ContestTrial>> {
+    val populations: List<PopulationIF>?,
+    val cardManifest: CardManifest) : ConcurrentTaskG<List<AssertionTrialIF>> {
 
     override fun name() = "roundIdx $roundIdx Run $run"
 
-    override fun run(): List<ContestTrial> {
+    override fun run(): List<AssertionTrialIF> {
         val stopwatch = Stopwatch()
-        val vunderPools = if (pools != null) VunderPools(pools) else null // different simulated pool data each run
+        // used for OA and Polling; different simulated pool data each run
+        val vunderPools = if (pools != null && !config.isClca) VunderPools(pools) else null
+        // TODO Polling without pools, only populations
+        // val vunderPopulations = if (config.isPolling && populations != null) VunderPopulations(populations) else null
 
-        val contestTrials = contestsToAudit.map {
-            ContestTrial(run, config, it)
+        val contestTrials: List<AssertionTrialIF> = contestsToAudit.map {
+            if (config.isPolling) ContestPollingTrial(run, config, it.contestUA, it.minAssertion()!!)
+            else ContestClcaTrial(run, config, it.contestUA, it.minAssertion()!!)
         }
 
         var cardSortedIndex = 1 // 1 based
 
-        var countCardsIncluded = 0
+        var countEstimatedCards = 0
         var countPoolCards = 0
         cardManifest.cards.iterator().use { sortedCardIter ->
             while (sortedCardIter.hasNext()) {
@@ -151,14 +166,13 @@ class AuditTrialTask(
 
                 // get the next card in sorted order
                 val card = sortedCardIter.next()
-                val mvr = if (card.poolId == null) null else {
-                    vunderPools!!.simulatePooledCard(card) // simulate differently each trial to get a distribution
-                }
+                val mvr = if (card.poolId == null || vunderPools == null) null else
+                    vunderPools.simulatePooledCard(card) // simulate differently each trial to get a distribution
 
                 var include = false
                 contestTrials.forEach { contestTrial ->
                     // does this contest want this card ?
-                    if (contestTrial.wantsMore() && card.hasContest(contestTrial.contest.id) && !contestTrial.skip()) {
+                    if (contestTrial.wantsMore() && card.hasContest(contestTrial.contest().id) && !contestTrial.skip()) {
                         include = true
                         contestTrial.addCard(mvr, card, cardSortedIndex)
                     }
@@ -166,24 +180,26 @@ class AuditTrialTask(
 
                 if (include) {
                     // sampledCards.add(card)
-                    countCardsIncluded++
+                    countEstimatedCards++
                     if (card.poolId != null) countPoolCards++
                 }
                 cardSortedIndex++
             }
         }
-        logger.info { "roundIdx $roundIdx $run countCardsIncluded=$countCardsIncluded took $stopwatch" }
+        logger.info { "roundIdx $roundIdx $run countEstimatedCards=$countEstimatedCards took $stopwatch" }
 
         return contestTrials
     }
 }
 
-// 1 trial, 1 contest
-class ContestTrial(val run: Int, val config: AuditConfig, val contest: ContestRound): ContestTrialIF {
+// 1 trial, 1 Clca contest
+class ContestClcaTrial(val run: Int,
+                       val config: AuditConfig,
+                       val contest: ContestWithAssertions,
+                       val assertionRound: AssertionRound,
+): AssertionTrialIF {
     val endingTestStatistic = 1 / config.riskLimit
 
-    // TODO always uses "min noerror" assertion. but not taking into account startingTestStatistic for round > 1
-    val assertionRound = contest.minAssertion()!!// minimum noerror
     val cassertion = assertionRound.assertion as ClcaAssertion // minimum noerror
     val cassorter = cassertion.cassorter
     val passorter = cassorter.assorter
@@ -195,21 +211,13 @@ class ContestTrial(val run: Int, val config: AuditConfig, val contest: ContestRo
     val prevSamplesUsed: Int
 
     init {
-        //     val Npop: Int, // population size for this contest
-        //    val aprioriCounts: ClcaErrorRates, // apriori rates not counting phantoms, non-null so we always have noerror and upper
-        //    val nphantoms: Int, // number of phantoms in the population
-        //    val maxLoss: Double, // between 0 and 1; this bounds how close lam can get to 2.0; maxBet = maxLoss / mui
-        //
-        //    val oaAssortRates: OneAuditAssortValueRates? = null, // non-null for OneAudit
-        //    val d: Int = 100,  // trunc weight
-        //    val debug: Boolean = false,
         val aprioriErrorRates = config.clcaConfig.apriori.makeErrorRates(cassorter.noerror, passorter.upperBound())
         val oaAssortRates = if (config.isOA) (cassorter as OneAuditClcaAssorter).oaAssortRates else null
 
         bettingFun = GeneralAdaptiveBetting(
             contest.Npop, // population size for this contest
             aprioriErrorRates = aprioriErrorRates, // apriori rates not counting phantoms, non-null so we always have noerror and upper
-            contest.contestUA.Nphantoms,
+            contest.Nphantoms,
             config.clcaConfig.maxLoss,
             oaAssortRates=oaAssortRates,
         )
@@ -226,27 +234,22 @@ class ContestTrial(val run: Int, val config: AuditConfig, val contest: ContestRo
     var maxIndex = 0
     var countSkip = 0
     var countUsed = 0
-    var firstUse: Int? = null
 
-    fun skip(): Boolean {
+    override fun skip(): Boolean {
         countSkip++
         return countSkip <= prevSamplesUsed
     }
 
-    fun wantsMore() = maxIndex == 0
+    override fun wantsMore() = maxIndex == 0
 
+    override fun contest() = contest
     override fun assertionRound() = assertionRound
     override fun maxIndex() = maxIndex
     override fun nmvrs() = countUsed
     override fun startingTestStatistic() = startingTestStatistic
 
-    fun addCard(mvr: AuditableCard?, card: AuditableCard, cardSortedIndex: Int) {
+    override fun addCard(mvr: AuditableCard?, card: AuditableCard, cardSortedIndex: Int) {
         countUsed++
-
-        if (firstUse == null) {
-            firstUse = cardSortedIndex
-            // println(" ${contest.id} firstUse=$firstUse")
-        }
 
         val assortValue = if (mvr != null) {
             cassorter.bassort(mvr, card, hasStyle = false) // hasStyle??
@@ -254,7 +257,6 @@ class ContestTrial(val run: Int, val config: AuditConfig, val contest: ContestRo
             if (card.isPhantom()) phantomAssortValue * cassorter.noerror else cassorter.noerror
         }
 
-        // TODO errorTracker will have prevSampleCount, which I think is right.
         val mui = populationMeanIfH0(contest.Npop, true, errorTracker)
         val maxBet = bettingFun.bet(errorTracker)
 
@@ -267,31 +269,130 @@ class ContestTrial(val run: Int, val config: AuditConfig, val contest: ContestRo
         // welford.update(assortValue) // error tracker has a welford...
         errorTracker.addSample(assortValue, card.poolId == null)
 
-        /*val wantId = 28
+        val wantId = 0
         if (run == 1 && contest.id == wantId && countUsed < 1000) {
             val mvrVotes = mvr?.votes(wantId)?.contentToString() ?: "missing"
             val cardVotes = card.votes(wantId)?.contentToString() ?: "N/A"
             println("$countUsed, ${dfn(assortValue, 8)}, ${dfn(maxBet, 8)}, ${dfn(payoff, 8)}, ${dfn(testStatistic, 8)}, " +
                     "${card.location}, ${mvrVotes}, ${cardVotes}")
-        } */
+        }
     }
 
     override fun toString(): String {
-        return "ContestTracker(contest=${contest.id} nmvrs=${nmvrs()} maxIndex=${maxIndex} testStatistic=${testStatistic} )"
+        return "ContestClcaTrial(contest=${contest.id} nmvrs=${nmvrs()} maxIndex=${maxIndex} testStatistic=${testStatistic} )"
     }
 }
 
-interface ContestTrialIF {
+// 1 trial, 1 Polling contest
+class ContestPollingTrial(val run: Int,
+                          val config: AuditConfig,
+                          val contest: ContestWithAssertions,
+                          val assertionRound: AssertionRound): AssertionTrialIF {
+    val endingTestStatistic = 1 / config.riskLimit
+
+    val assertion = assertionRound.assertion
+    val assorter = assertion.assorter
+    val phantomAssortValue: Double = 0.0
+
+    val startingTestStatistic: Double
+    val prevSamplesUsed: Int
+
+    val bettingFn: EstimAdapter
+    val errorTracker: ClcaErrorTracker
+
+    init {
+        val eta0 = margin2mean(assorter.dilutedMargin())
+
+        val estimFn = TruncShrinkage(
+            N = contest.Npop,
+            withoutReplacement = true,
+            upperBound = assorter.upperBound(),
+            d = config.pollingConfig.d,
+            eta0 = eta0,
+        )
+
+        bettingFn = EstimAdapter(contest.Npop, withoutReplacement=true, assorter.upperBound(), estimFn)
+
+        val prevAuditResult = assertionRound.prevAssertionRound?.auditResult
+        prevSamplesUsed = prevAuditResult?.samplesUsed ?: 0
+        errorTracker = prevAuditResult?.clcaErrorTracker ?: ClcaErrorTracker(0.0, assorter.upperBound())
+
+        val plast = prevAuditResult?.plast
+        startingTestStatistic = if (plast == null) 1.0 else 1.0 / plast
+    }
+
+    var testStatistic = startingTestStatistic // aka T
+    var maxIndex = 0
+    var countSkip = 0
+    var countUsed = 0
+
+    override fun skip(): Boolean {
+        countSkip++
+        return countSkip <= prevSamplesUsed
+    }
+
+    override fun wantsMore() = maxIndex == 0
+
+    override fun contest() = contest
+    override fun assertionRound() = assertionRound
+    override fun maxIndex() = maxIndex
+    override fun nmvrs() = countUsed
+    override fun startingTestStatistic() = startingTestStatistic
+
+    override fun addCard(cvr: AuditableCard?, card: AuditableCard, cardSortedIndex: Int) {
+        countUsed++
+
+        val assortValue = if (card.isPhantom()) phantomAssortValue else {
+            if (cvr == null)
+                print("why")
+            assorter.assort(cvr!!, usePhantoms = true)
+        }
+
+        val mui = populationMeanIfH0(contest.Npop, true, errorTracker)
+        val maxBet = bettingFn.bet(errorTracker)
+
+        val payoff = (1 + maxBet * (assortValue - mui))
+        testStatistic *= payoff
+        if (testStatistic > endingTestStatistic) {
+            maxIndex = cardSortedIndex
+        }
+
+        errorTracker.addSample(assortValue)
+
+        val wantId = 120
+        if (run == 1 && contest.id == wantId && countUsed < 1000) {
+            val mvrVotes = cvr?.votes(wantId)?.contentToString() ?: "missing"
+            val cardVotes = card.votes(wantId)?.contentToString() ?: "N/A"
+            println("$countUsed, ${dfn(assortValue, 8)}, ${dfn(maxBet, 8)}, ${dfn(payoff, 8)}, ${dfn(testStatistic, 8)}, " +
+                    "${card.location}, ${cardSortedIndex}, mvr=${mvrVotes}, cvr=${cardVotes}")
+            if (countUsed == 999)
+                print("")
+        }
+    }
+
+    override fun toString(): String {
+        return "ContestPollingTrial(contest=${contest.id} nmvrs=${nmvrs()} maxIndex=${maxIndex} testStatistic=${testStatistic} )"
+    }
+}
+
+
+interface AssertionTrialIF {
+    fun id() = contest().id
+    fun contest(): ContestWithAssertions
     fun assertionRound(): AssertionRound
     fun maxIndex(): Int
     fun nmvrs(): Int
     fun startingTestStatistic(): Double
+
+    fun skip(): Boolean
+    fun wantsMore(): Boolean
+    fun addCard(mvr: AuditableCard?, card: AuditableCard, cardSortedIndex: Int)
 }
 
-fun findQuantileTrial(data: List<ContestTrialIF>, quantile: Double): ContestTrialIF {
+fun findQuantileTrial(data: List<AssertionTrialIF>, quantile: Double): AssertionTrialIF {
     require(data.isNotEmpty())
 
-    val sortedData: List<ContestTrialIF> = data.sortedBy { it.nmvrs() }
+    val sortedData: List<AssertionTrialIF> = data.sortedBy { it.nmvrs() }
     val deciles = mutableListOf<Int>()
     val n = sortedData.size
     repeat(9) {

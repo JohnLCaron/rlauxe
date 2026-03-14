@@ -83,6 +83,8 @@ data class OneAuditPoolFromBallotStyle(
         val poolUndervotes = undervoteForContest(contestId)
         val contestTab = voteTotals[contestId]!!
 
+        // TODO why not use contestTab.votesAndUndervotes() ??
+
         val voteCounts = contestTab.votes.map { Pair(intArrayOf(it.key), it.value) }
         val voteSum = contestTab.votes.values.sum()
 
@@ -96,12 +98,6 @@ data class OneAuditPoolFromBallotStyle(
             val missing = ncards() - (poolUndervotes + voteSum) / contestTab.voteForN
             Vunder(contestId, poolId, voteCounts, poolUndervotes, missing, contestTab.voteForN)
         }
-    }
-
-    fun votesAndUndervotesPrev(contestId: Int): Vunder {
-        val poolUndervotes = undervoteForContest(contestId)
-        val contestTab = voteTotals[contestId]!!
-        return Vunder.fromNpop(contestId, poolUndervotes, ncards(), contestTab.votes, contestTab.voteForN)
     }
 
     override fun toString(): String {

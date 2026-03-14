@@ -1,13 +1,11 @@
 package org.cryptobiotic.rlauxe.belgium
 
-import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.audit.AuditConfig
-import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
+import org.cryptobiotic.rlauxe.audit.sortManifestExternal
 import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
@@ -61,7 +59,7 @@ fun createBelgiumElectionLimited(electionName: String)  {
     createBelgiumClca(auditdir, contestd, auditConfigIn = config)
 
     val publisher = Publisher(auditdir)
-    writeSortedCardsExternalSort(topdir, publisher, config.seed)
+    sortManifestExternal(topdir, publisher, config.seed)
 
     // get estimate, set up first round
     runRound(inputDir = auditdir)

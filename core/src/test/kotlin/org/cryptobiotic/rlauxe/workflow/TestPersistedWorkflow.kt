@@ -145,7 +145,7 @@ fun runPersistedAudit(topdir: String, test:Boolean) {
     val auditdir = "$topdir/audit"
     val publisher = Publisher(auditdir)
     val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-    writeSortedCardsExternalSort(topdir, publisher, config.seed)
+    sortManifestExternal(topdir, publisher, config.seed)
 
     val verifyResults = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
     println()

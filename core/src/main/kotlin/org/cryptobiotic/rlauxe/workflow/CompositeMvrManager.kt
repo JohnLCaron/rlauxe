@@ -29,9 +29,9 @@ open class CompositeMvrManager(
 
     val publisher = Publisher(auditRecord.componentRecords.first().location)
 
-    override fun cardManifest() = readCardManifestComposite(publisher)
+    override fun sortedManifest() = readCardManifestComposite(publisher)
 
-    fun populations(): List<PopulationIF>? {
+    override fun populations(): List<PopulationIF>? {
         return readPopulationsComposite(publisher)
     }
 

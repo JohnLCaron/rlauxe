@@ -197,7 +197,7 @@ class CreateBoulderElection(
     // make simulated CVRs for one pool, all contests
     private fun makeCvrsForOnePool(cardPool: OneAuditPoolFromBallotStyle) : List<Cvr> { // contestId -> candidateId -> nvotes
         val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
-        val cvrs = makeCvrsForPoolWithSingleCardStyle(poolVunders, cardPool.poolName, poolId = cardPool.poolId)
+        val cvrs = makeCvrsForPool(poolVunders, cardPool.poolName, poolId = cardPool.poolId, cardPool.hasSingleCardStyle)
         // TODO is it true that the number of cvrs can vary when there are multiple contests ?
         //if (cardPool.ncards() != cvrs.size)
         //    logger.warn{"cardPool.ncards ${cardPool.ncards()} != cvrs.size = ${cvrs.size}"}
@@ -310,7 +310,8 @@ class CreateBoulderElection(
     override fun contestsUA() = contestsUA
     override fun populations() = if (auditType.isClca()) emptyList() else cardPoolBuilders
     override fun makeCardPools() = if (auditType.isClca()) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
-    override fun createUnsortedMvrs() = allCvrs
+    override fun createUnsortedMvrsInternal() = allCvrs
+    override fun createUnsortedMvrsExternal() = null
 
     override fun cards() = createCards()
     override fun ncards() = ncards
@@ -375,6 +376,7 @@ fun createBoulderElection(
                 nsimEst = 20,
                 removeMaxContests=removeMaxContests,
                 removeCutoffContests = removeCutoffContests,
+                persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
                 clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
             )
         else if (auditType.isOA())

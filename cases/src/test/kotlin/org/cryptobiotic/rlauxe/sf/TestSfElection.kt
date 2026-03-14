@@ -36,7 +36,7 @@ class TestSfElection {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
 
         val auditRecord = AuditRecord.readFrom(auditdir) as AuditRecord
-        val cardManifest = auditRecord.readCardManifest()
+        val cardManifest = auditRecord.readSortedManifest()
         val populationNcards = cardManifest.populations.sumOf { it.ncards() }
         println("manifestSumPools = $populationNcards")
 
@@ -74,7 +74,7 @@ class TestSfElection {
         assertEquals(count49, contest49.Npop)
 
         val publisher = Publisher(auditdir)
-        val sortedMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.privateMvrsFile())
+        val sortedMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.sortedMvrsFile())
         countCards = 0
         count49 = 0
         count49pools = 0
@@ -94,7 +94,7 @@ class TestSfElection {
         println("contest49 pool/cards = ${count49pools/count49.toDouble()}")
 
         val pw = PersistedWorkflow(auditRecord, false)
-        val man: CardManifest = pw.mvrManager().cardManifest()
+        val man: CardManifest = pw.mvrManager().sortedManifest()
         val populations = man.populations
 
         val sumPools = populations.sumOf { it.ncards() }

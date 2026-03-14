@@ -53,7 +53,7 @@ class TestConsistentSamplerFromShangrla {
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
 
         val ballotCards = MvrManagerForTesting(cvrs, cvrs, 12345678901L)
-        consistentSampling(auditRound, ballotCards.cardManifest())
+        consistentSampling(auditRound, ballotCards.sortedManifest())
         assertEquals(3, auditRound.samplePrns.size)  // TODO was 5
 
         // assertEquals(listOf(3, 2, 1, 5, 0), auditRound.sampleNumbers)
@@ -102,7 +102,7 @@ class TestConsistentSamplerFromShangrla {
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
         val ballotCards = MvrManagerForTesting(cvrs, cvrs, 123456789012L)
-        consistentSampling(auditRound, ballotCards.cardManifest())
+        consistentSampling(auditRound, ballotCards.sortedManifest())
         assertEquals(7, auditRound.samplePrns.size)
     }
 }

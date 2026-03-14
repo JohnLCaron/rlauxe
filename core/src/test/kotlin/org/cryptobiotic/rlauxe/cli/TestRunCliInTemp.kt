@@ -1,12 +1,10 @@
 package org.cryptobiotic.rlauxe.cli
 
 import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.audit.AuditRoundIF
-import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
+import org.cryptobiotic.rlauxe.audit.sortManifestInternal
 import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
-import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
@@ -34,7 +32,7 @@ class TestRunCliInTemp {
         )
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
+        sortManifestInternal(publisher, config.seed)
 
         println("============================================================")
         RunVerifyContests.main(arrayOf("-in", auditdir))
@@ -80,7 +78,7 @@ class TestRunCliInTemp {
 
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
+        sortManifestInternal(publisher, config.seed)
 
         var done = false
         while (!done) {
@@ -121,7 +119,7 @@ class TestRunCliInTemp {
         )
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
+        sortManifestInternal(publisher, config.seed)
 
         println("============================================================")
         val results = RunVerifyContests.runVerifyContests(auditdir, null, false)
@@ -157,7 +155,7 @@ class TestRunCliInTemp {
         )
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
+        sortManifestInternal(publisher, config.seed)
 
         println("============================================================")
         val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)

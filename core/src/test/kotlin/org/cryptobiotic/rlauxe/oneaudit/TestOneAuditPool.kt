@@ -73,7 +73,8 @@ class TestOneAuditPool {
             contestVotes[contestUA.id] = Vunder.fromNpop(contestUA.id, underVotes, contestUA.contest.Ncast(), candVotes, voteForN)
         }
 
-        val cvrs = makeCvrsForPoolWithSingleCardStyle(contestVotes, "poolName", poolId = 42)
+        //  TODO val cvrs2 = makeCvrsFromPopulations(test.populations)
+        val cvrs = makeCvrsForPool(contestVotes, "poolName", poolId = 42, test.hasSingleCardStyle)
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
 
         val cardPools = calcOneAuditPoolsFromMvrs(infos, test.populations, cvrs)
@@ -105,7 +106,8 @@ class TestOneAuditPool {
             contestVotes[contestUA.id] = Vunder.fromNpop(contestUA.id, underVotes, contestUA.contest.Ncast(), candVotes, voteForN)
         }
 
-        val cvrs = makeCvrsForPoolWithSingleCardStyle(contestVotes, "poolName", poolId = 42)
+        // TODO val cvrs2 = makeCvrsFromPopulations(test.populations)
+        val cvrs = makeCvrsForPool(contestVotes, "poolName", poolId = 42, hasSingleCardStyle = false)
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
         val cvrTabs = tabulateCvrs(cvrs.iterator(), infos)
 

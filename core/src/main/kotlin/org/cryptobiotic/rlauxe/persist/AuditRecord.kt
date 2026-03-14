@@ -38,7 +38,7 @@ interface AuditRecordIF {
     val contests: List<ContestWithAssertions>
     val rounds: List<AuditRoundIF>
 
-    fun readCardManifest(): CardManifest
+    fun readSortedManifest(): CardManifest
     fun readOneShotMvrs(): Map<Int, Int>
 }
 
@@ -82,7 +82,7 @@ class AuditRecord(
         return true
     }
 
-    override fun readCardManifest(): CardManifest {
+    override fun readSortedManifest(): CardManifest {
         if (Files.exists(Path(publisher.populationsFile()))) {
             val populations = readPopulationsJsonFileUnwrapped(publisher.populationsFile())
             if (populations.isNotEmpty()) {

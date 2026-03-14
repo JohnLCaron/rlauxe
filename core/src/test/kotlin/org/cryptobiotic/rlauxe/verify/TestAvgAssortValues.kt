@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCards
 import org.cryptobiotic.rlauxe.audit.CvrsWithPopulationsToCards
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.simulateCvrsWithDilutedMargin
+import org.cryptobiotic.rlauxe.estimate.simulateCvrsFromMargin
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -26,7 +26,7 @@ class TestAvgAssortValues {
         val phantomPercent = 0.0
         val underVotePct = .087
 
-        val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPercent)
+        val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPercent)
 
         val contest = cu.contest
         println("contest = $contest")
@@ -73,7 +73,7 @@ class TestAvgAssortValues {
         val phantomPercent = 0.0221
         val underVotePct = .087
 
-        val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPercent)
+        val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPercent)
         val contest = cu.contest
         println("contest = $contest")
 

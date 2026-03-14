@@ -47,7 +47,7 @@ class VunderPools(pools: List<OneAuditPool>) {
             val vunders = pool.possibleContests().associate { contestId ->
                 Pair( contestId, pool.votesAndUndervotes(contestId))
             }
-            VunderPool(vunders, pool.poolName, pool.poolId)
+            VunderPool(vunders, pool.poolName, pool.poolId, pool.hasSingleCardStyle)
         }.associateBy { it.poolId }
     }
 
@@ -60,7 +60,75 @@ class VunderPools(pools: List<OneAuditPool>) {
 
 // for one pool
 // vunders: Contest id -> Vunder
-class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int ) {
+// set Vunder.missing to 0 for hasSingleCardStyle=true
+class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int, val hasSingleCardStyle: Boolean) {
+    val vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
+
+    fun simulatePooledCard(card: AuditableCard): AuditableCard {
+        require (card.poolId == poolId)
+        val cardb = CardBuilder.fromCard(card)
+        card.contests().forEach { contestId ->
+            val vunderPicker = vunderPickers[contestId]!!
+            if (vunderPicker.isEmpty()) {
+                if (hasSingleCardStyle) cardb.replaceContestVotes(contestId, intArrayOf()) // missing not allowed
+            } else {
+                val cands = vunderPicker.pickRandomCandidatesAndDecrement()
+                if (cands != null) {
+                    cardb.replaceContestVotes(contestId, cands) // ok if no contests on it ??
+                }
+            }
+        }
+        return cardb.build()
+    }
+
+    fun simulatePooledCvr(cvb2: CvrBuilder2) {
+        vunderPickers.forEach { (contestId, vunderPicker) ->
+            if (vunderPicker.isEmpty()) {
+                if (hasSingleCardStyle) cvb2.replaceContestVotes(contestId, intArrayOf()) // cant be missing so add an undervote
+            } else {
+                val cands = vunderPicker.pickRandomCandidatesAndDecrement()
+                if (cands != null) {
+                    cvb2.replaceContestVotes(contestId, cands) // ok if no contests on it ??
+                }
+            }
+        }
+    }
+
+    fun done() = vunderPickers.values.all { it.isEmpty() }
+}
+
+
+/*
+// interface PopulationIF {
+//    fun name(): String
+//    fun id(): Int
+//    fun possibleContests(): IntArray // the set of contests that might be on any card in the population
+//    fun hasSingleCardStyle(): Boolean // aka hasStyle: if all cards have exactly the contests in possibleContests()
+//    fun ncards(): Int
+//    fun hasContest(contestId: Int): Boolean
+//}
+class VunderPopulations(populations: List<PopulationIF>) {
+    val vunderPopulations: Map<Int, VunderPopulation>  // poolId -> VunderPool
+
+    init {
+        vunderPopulations = populations.map { population ->
+            val vunders = population.possibleContests().associate { contestId ->
+                Pair( contestId, population.votesAndUndervotes(contestId))
+            }
+            VunderPopulation(vunders, population.name(), population.id(), population.hasSingleCardStyle())
+        }.associateBy { it.poolId }
+    }
+
+    // for the given card with no votes, simulate one with votes, staying within the contest vote totals.
+    fun simulateCard(card: AuditableCard): AuditableCard {
+        val vunderContest = vunderPopulations[card.poolId]
+        return vunderContest!!.simulatePooledCard(card)
+    }
+}
+
+// for one population
+// vunders: Contest id -> Vunder
+class VunderPopulation(vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int, val hasSingleCardStyle: Boolean ) {
     val vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
 
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
@@ -95,4 +163,4 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
     }
 
     fun done() = vunderPickers.values.all { it.isEmpty() }
-}
+} */

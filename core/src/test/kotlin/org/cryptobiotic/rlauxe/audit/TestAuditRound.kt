@@ -29,7 +29,7 @@ class TestAuditRound {
         testCvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
-        consistentSampling(auditRound, mvrManager.cardManifest())
+        consistentSampling(auditRound, mvrManager.sortedManifest())
 
         contestRounds.forEach { contestRound ->
             assertEquals(contestRound.estMvrs, contestRound.wantSampleSize(0))

@@ -42,14 +42,15 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         val stopwatch = Stopwatch()
 
         val mvrManager = mvrManager()
-        val cardManifest = mvrManager.cardManifest()
+        val sortedManifest = mvrManager.sortedManifest()
 
         // for each contest, estimate how many samples are needed to satisfy the risk function,
         estimateSampleSizes(
             auditConfig,
             auditRound,
-            cardManifest = cardManifest,
+            sortedManifest = sortedManifest,
             cardPools = mvrManager().oapools(),
+            populations = mvrManager().populations(),
             previousSamples,
             // nthreads=1,
             onlyTask = onlyTask,
@@ -63,7 +64,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         //    contestRound.maxSampleAllowed = sampledCards.size
         sampleAndRemoveContests(
             auditConfig,
-            cardManifest,
+            sortedManifest,
             auditRound,
             previousSamples = previousSamples,
             quiet)

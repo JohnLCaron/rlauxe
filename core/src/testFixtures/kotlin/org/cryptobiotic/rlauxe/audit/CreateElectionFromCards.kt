@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.util.Closer
 
 class CreateElectionFromCards (
     val contestsUA: List<ContestWithAssertions>,
@@ -16,7 +17,8 @@ class CreateElectionFromCards (
     override fun electionInfo() = ElectionInfo(
         auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
     )
-    override fun createUnsortedMvrs() = emptyList<Cvr>() // TODO only needed for ONEAUDIT with private mvrs
+    override fun createUnsortedMvrsInternal() = null // for in-memory case
+    override fun createUnsortedMvrsExternal() = Closer(cards.iterator()) // for out-of-memory case
     override fun populations() = cardPools
     override fun makeCardPools() = cardPools
     override fun contestsUA() = contestsUA

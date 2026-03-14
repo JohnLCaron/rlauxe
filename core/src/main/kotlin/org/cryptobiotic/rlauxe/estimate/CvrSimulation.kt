@@ -17,10 +17,10 @@ import kotlin.math.round
 // val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
 //var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
 
-// only used by test
-fun simulateCvrsWithDilutedMargin(Nc: Int, margin: Double, undervotePct: Double, phantomPct: Double,
-                                  Npop: Int = Nc,
-                                  limit: Int? = null): Pair<ContestWithAssertions, List<Cvr>> {
+//// used by estimateSampleSizes
+//// only used by test
+fun simulateCvrsFromMargin(Nc: Int, margin: Double, undervotePct: Double, phantomPct: Double, Npop: Int = Nc,
+                           limit: Int? = null): Pair<ContestWithAssertions, List<Cvr>> {
     val nvotes = round(Nc * (1.0 - undervotePct - phantomPct))
     val winner = roundToClosest((margin * Nc + nvotes) / 2)
     val loser = roundToClosest(nvotes - winner)
@@ -34,18 +34,18 @@ fun simulateCvrsWithDilutedMargin(Nc: Int, margin: Double, undervotePct: Double,
     )
     val cu = ContestWithAssertions(contest, true, NpopIn = Npop)
     val config = AuditConfig(AuditType.CLCA, contestSampleCutoff = limit)
-    return Pair( cu, simulateCvrsWithDilutedMargin(cu, config))
+    return Pair( cu, simulateCvrsForContest(cu, config))
 }
 
-
-// simulate the polling mvrs once for all the assertions for this contest
-fun simulateCvrsWithDilutedMargin(contestUA: ContestWithAssertions, config: AuditConfig): List<Cvr> {
+// simulate the polling mvrs once, for all the assertions for this contest
+// scale number of cvrs to config.contestSampleCutoff if that exists
+fun simulateCvrsForContest(contestUA: ContestWithAssertions, config: AuditConfig): List<Cvr> {
     val contest = contestUA.contest as Contest
     val ncvrs = min( contest.Nc, config.contestSampleCutoff ?: Int.MAX_VALUE)
     val pct = ncvrs/contestUA.Npop.toDouble()
     val missing = contestUA.Npop - (contest.Nphantoms() + contest.Nundervotes() + contest.votes.values.sum()) / contest.info.voteForN
     val voteCounts = contest.votes.map { Pair(intArrayOf(it.key), it.value) }
-    val vunder = Vunder(contest.id, -1, voteCounts, contest.Nundervotes(), missing,  contest.info.voteForN)
+    val vunder = Vunder(contest.id, null, voteCounts, contest.Nundervotes(), missing,  contest.info.voteForN)
     // println("vunder = $vunder")
 
     // val vunder = Vunder.fromNpop(contest.id, contest.Nundervotes(), contestUA.Npop, contest.votes, contest.info.voteForN)
@@ -54,27 +54,30 @@ fun simulateCvrsWithDilutedMargin(contestUA: ContestWithAssertions, config: Audi
     return makeVunderCvrs(vunder, nphantoms, "simCvr", limit, null)
 }
 
-/* If youre going to simulate IRV, you need the VoteConsolidator (or the Cvrs).
-// We have the VoteConsolidator in the pools for OneAudit, but not otherwise
-fun simulateCvrsForIrv(contestUA: ContestWithAssertions, config: AuditConfig, irvVotes: VoteConsolidator): List<Cvr> {
-    val contest = contestUA.contest as RaireContest
-    val undervotes = contest.Nundervotes()
-    val npop = contestUA.Npop
-    val candidateIds = contest.info.candidateIds
+// i think you need to do this by population, which is where you get hasSingleCardStyle
+fun ContestWithAssertions.votesAndUndervotes(hasSingleCardStyle: Boolean): Vunder {
+    val contest = this.contest as Contest
 
-    // see ContestTabulation.votesAndUndervotes()
-    val missing = npop - undervotes - irvVotes.nvotes()
-    val voteCounts = irvVotes.votes.map { (hIntArray, count) ->
-        // convert indices back to ids
-        val idArray: List<Int> = hIntArray.array.map { candidateIds[it] }
-        Pair(idArray.toIntArray(), count)
+    val voteCounts = contest.votes.map { Pair(intArrayOf(it.key), it.value) }
+    val voteSum = contest.votes.values.sum()
+    val voteForN = contest.info.voteForN
+
+    val result = if (hasSingleCardStyle) {
+        // if hasSingleCardStyle, then missing has to be zero
+        // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
+        // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
+        val undervotes = this.Npop * voteForN - voteSum
+        Vunder(contest.id, null, voteCounts, undervotes, 0, voteForN)
+    } else {
+        val missing = this.Npop - (contest.Nundervotes() + voteSum) / voteForN
+        Vunder(contest.id, null, voteCounts, contest.Nundervotes(), missing, voteForN)
     }
-    val vunder = Vunder(contest.id, null, voteCounts, undervotes, missing, 1)
-    val ncvrs = min( contest.Nc, config.contestSampleCutoff ?: Int.MAX_VALUE)
-    return makeVunderCvrs(vunder, contest.Nphantoms(), "simIrv", ncvrs, null)
-} */
 
-private fun makeVunderCvrs(vunder: Vunder, phantomCount: Int, prefix: String, limit: Int, poolId: Int?): List<Cvr> {
+    return result
+}
+
+
+fun makeVunderCvrs(vunder: Vunder, nphantoms: Int, prefix: String, limit: Int, poolId: Int?): List<Cvr> {
     val vunderPicker = VunderPicker(vunder)
     val contestId = vunder.contestId
 
@@ -99,7 +102,7 @@ private fun makeVunderCvrs(vunder: Vunder, phantomCount: Int, prefix: String, li
         done = vunderPicker.isEmpty()
     }
 
-    repeat(phantomCount) {
+    repeat(nphantoms) {
         val cvrb = CvrBuilder2("$prefix-${count++}", phantom=true)
         cvrb.replaceContestVotes(contestId, intArrayOf())
         rcvrs.add(cvrb.build())

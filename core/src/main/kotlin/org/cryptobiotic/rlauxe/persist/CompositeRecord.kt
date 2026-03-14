@@ -28,8 +28,8 @@ data class CompositeRecord(
     val componentRecords: List<AuditRecord>,
 ): AuditRecordIF  {
 
-    override fun readCardManifest(): CardManifest {
-        return componentRecords.first().readCardManifest() // TODO
+    override fun readSortedManifest(): CardManifest {
+        return componentRecords.first().readSortedManifest() // TODO
     }
     override fun readOneShotMvrs() = emptyMap<Int, Int>()
 

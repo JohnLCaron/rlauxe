@@ -30,7 +30,7 @@ class TestSfElectionVunderFuzz {
 
     init {
         val auditRecord = AuditRecord.readFrom(auditdir) as AuditRecord
-        cardManifest = auditRecord.readCardManifest()
+        cardManifest = auditRecord.readSortedManifest()
         config = auditRecord.config
         contests = auditRecord.contests
         infos = contests.map { it.contest.info() }.associateBy { it.id }
@@ -127,7 +127,7 @@ class TestSfElectionVunderFuzz {
         val countCardsInPool = countCardsInPool(cardManifest.cards.iterator(), contestId, useCardPoolId)
         println("countCardsInPool=${countCardsInPool}")
 
-        val privateMvrs = readCardsCsvIterator(publisher.privateMvrsFile())
+        val privateMvrs = readCardsCsvIterator(publisher.sortedMvrsFile())
         val mvrPoolAvg = findPoolAverage(privateMvrs, contestId, useCardPoolId, passorter)
         println("mvr poolAvg = ${mvrPoolAvg}")
 
@@ -135,7 +135,7 @@ class TestSfElectionVunderFuzz {
         println("cvrPoolAvg = ${cvrPoolAvg}")
 
         // over all mvr, cvr pairs
-        val privateMvrs2 = readCardsCsvIterator(publisher.privateMvrsFile())
+        val privateMvrs2 = readCardsCsvIterator(publisher.sortedMvrsFile())
         val clcaPoolAvg =
             findPoolAverageB(privateMvrs2, cardManifest.cards.iterator(), contestId, useCardPoolId, cassorter)
         println("clcaPoolAvg = ${clcaPoolAvg}")

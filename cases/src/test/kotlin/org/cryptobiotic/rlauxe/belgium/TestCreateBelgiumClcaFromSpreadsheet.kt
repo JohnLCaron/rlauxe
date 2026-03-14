@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.belgium
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.audit.writeSortedCardsExternalSort
+import org.cryptobiotic.rlauxe.audit.sortManifestExternal
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.dhondt.ProtoContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
@@ -55,7 +55,7 @@ class TestCreateBelgiumClcaFromSpreadsheet {
 
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsExternalSort(topdir, publisher, config.seed)
+        sortManifestExternal(topdir, publisher, config.seed)
 
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
         println()

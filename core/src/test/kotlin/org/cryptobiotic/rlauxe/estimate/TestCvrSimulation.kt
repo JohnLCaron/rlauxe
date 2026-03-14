@@ -18,7 +18,7 @@ class TestCvrSimulation {
         val margin = 0.04
         val underVotePct = 0.20
         val phantomPercent = .05
-        val (cu, vcrs) = simulateCvrsWithDilutedMargin(Nc, margin, underVotePct, phantomPercent, limit = null)
+        val (cu, vcrs) = simulateCvrsFromMargin(Nc, margin, underVotePct, phantomPercent, limit = null)
         val contest = cu.contest as Contest
 
         val nvcrs = vcrs.count { it.hasContest(contest.id) }
@@ -49,7 +49,7 @@ class TestCvrSimulation {
         val underVotePct = 0.20
         val phantomPercent = .05
 
-        val (cu, vcrs) = simulateCvrsWithDilutedMargin(Nc, margin, underVotePct, phantomPercent, limit = 30000)
+        val (cu, vcrs) = simulateCvrsFromMargin(Nc, margin, underVotePct, phantomPercent, limit = 30000)
         val nvcrs = vcrs.count { it.hasContest(cu.id) }
         val contest = cu.contest as Contest
 

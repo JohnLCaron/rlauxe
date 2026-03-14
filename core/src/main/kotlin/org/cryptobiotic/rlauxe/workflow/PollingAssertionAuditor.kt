@@ -37,8 +37,11 @@ fun runPollingAuditRound(
             if (!assertionRound.status.complete) {
                 val assertion = assertionRound.assertion
                 val assorter = assertion.assorter
-
-                val sampler =  PollingSamplerTracker(contest.id, assorter, pairs)
+                val sampler =  PollingSamplerTracker.withMaxSample(
+                    contest.id,
+                    assorter,
+                    pairs,
+                    contest.maxSampleAllowed!!)
 
                 val testH0Result = auditPollingAssertion(config, contest.contestUA, assertionRound, sampler, roundIdx, quiet)
                 assertionRound.status = testH0Result.status
@@ -51,15 +54,19 @@ fun runPollingAuditRound(
         allDone = allDone && contest.done
     }
 
-    // given the cvrPairs, and each ContestRound's maxSampleIndexUsed, count the cvrs that were not used
-    val maxIndex = contestsNotDone.associate { it.id to it.countCvrsUsedInAudit() }
+    // given the cvrPairs, and each ContestRound's maxSamplesUsed, count the cvrs that were not used
+    val contestCounts = mutableMapOf<Int, Int>()
     var countUsed = 0
     var countUnused = 0
     pairs.forEachIndexed { idx, mvrCardPair ->
         val card = mvrCardPair.second
         var wasUsed = false
         contestsNotDone.forEach { contest ->
-            if (card.hasContest(contest.id) && idx < maxIndex[contest.id]!!) wasUsed = true
+            val count = contestCounts.getOrPut(contest.id) { 0 }
+            if (card.hasContest(contest.id)) {
+                if (count < contest.maxSamplesUsed()) wasUsed = true
+                contestCounts[contest.id] = count + 1
+            }
         }
         if (wasUsed) countUsed++ else countUnused++
     }
@@ -98,6 +105,7 @@ fun auditPollingAssertion(
         riskLimit = config.riskLimit,
         upperBound = assorter.upperBound(),
     )
+    testFn.setDebuggingSequences()
 
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=true) { sampler.sample() }
 

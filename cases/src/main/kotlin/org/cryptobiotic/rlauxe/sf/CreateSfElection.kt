@@ -186,7 +186,8 @@ class CreateSfElection(
 
     // TODO add optional fuzz or some other error method
     // convert the cvrExports to the private mvrs; must be in same order as createCards
-    override fun createUnsortedMvrs(): List<Cvr> {
+    override fun createUnsortedMvrsExternal() = null
+    override fun createUnsortedMvrsInternal(): List<Cvr> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
         val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPoolBuilders.associate { it.name() to it.id() })
 

@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.BettingMart
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
-import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
@@ -40,17 +39,17 @@ fun runClcaAuditRound(
     // println("---runClcaAuditRound running ${auditContestTasks.size} tasks")
     val complete: List<Boolean> = ConcurrentTaskRunnerG<Boolean>().run(auditContestTasks)
 
-    // given the cvrPairs, and each ContestRound's maxSampleIndexUsed, count the cvrs that were not used
+    // given the cvrPairs, and each ContestRound's maxSamplesUsed, count the cvrs that were not used
     val contestCounts = mutableMapOf<Int, Int>()
     var countUsed = 0
     var countUnused = 0
-    cvrPairs.forEachIndexed { idx, mvrCardPair ->
+    cvrPairs.forEach { mvrCardPair ->
         val card = mvrCardPair.second
         var wasUsed = false
         contestsNotDone.forEach { contest ->
             val count = contestCounts.getOrPut(contest.id) { 0 }
             if (card.hasContest(contest.id)) {
-                if (count < contest.countCvrsUsedInAudit()) wasUsed = true
+                if (count < contest.maxSamplesUsed()) wasUsed = true
                 contestCounts[contest.id] = count + 1
             }
         }

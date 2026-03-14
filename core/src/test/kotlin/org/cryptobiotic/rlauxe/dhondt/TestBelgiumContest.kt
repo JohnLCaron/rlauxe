@@ -21,7 +21,7 @@ class TestBelgiumContest {
     init {
         val auditdir = "$testdataDir/cases/belgium/2024/Anvers/audit"
         val auditRecord = AuditRecord.readFrom(auditdir) as AuditRecord
-        cardManifest = auditRecord.readCardManifest()
+        cardManifest = auditRecord.readSortedManifest()
         config = auditRecord.config
         contests = auditRecord.contests
         infos = contests.map{ it.contest.info() }.associateBy { it.id }

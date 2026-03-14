@@ -57,7 +57,7 @@ data class AuditConfig(
  */
 @Serializable
 data class AuditConfigJson(
-    val auditType: String,
+    val auditType: AuditType,
     val riskLimit: Double,
     val seed: Long,   // convenient for testing
 
@@ -66,6 +66,7 @@ data class AuditConfigJson(
     val simFuzzPct: Double?,
 
     val contestSampleCutoff: Int?,
+    val auditSampleCutoff: Int?,
     val removeCutoffContests: Boolean,
     val minRecountMargin: Double,
     val minMargin: Double,
@@ -84,23 +85,24 @@ data class AuditConfigJson(
 )
 
 fun AuditConfig.publishJson() = AuditConfigJson(
-    this.auditType.name,
+    this.auditType,
     this.riskLimit,
     this.seed,
 
-    this.nsimEst,
-    this.quantile,
-    this.simFuzzPct,
+    nsimEst = this.nsimEst,
+    quantile = this.quantile,
+    simFuzzPct = this.simFuzzPct,
 
-    this.contestSampleCutoff,
-    this.removeCutoffContests,
-    this.minRecountMargin,
-    this.minMargin,
-    this.maxSamplePct,
-    this.removeMaxContests,
-    this.removeTooManyPhantoms,
+    contestSampleCutoff = this.contestSampleCutoff,
+    auditSampleCutoff = this.auditSampleCutoff,
+    removeCutoffContests = this.removeCutoffContests,
+    minRecountMargin = this.minRecountMargin,
+    minMargin = this.minMargin,
+    maxSamplePct = this.maxSamplePct,
+    removeMaxContests = this.removeMaxContests,
+    removeTooManyPhantoms = this.removeTooManyPhantoms,
 
-    this.auditSampleLimit,
+    auditSampleLimit = this.auditSampleLimit,
 
     clcaConfig = if (!this.auditType.isPolling()) this.clcaConfig.publishJson() else null,
     pollingConfig = if (this.auditType.isPolling()) this.pollingConfig.publishJson() else null,
@@ -112,17 +114,17 @@ fun AuditConfig.publishJson() = AuditConfigJson(
 )
 
 fun AuditConfigJson.import(): AuditConfig {
-    val auditType = enumValueOf(this.auditType, AuditType.entries) ?: AuditType.CLCA
     return AuditConfig(
-        auditType,
+        this.auditType,
         this.riskLimit,
         this.seed,
 
-        this.nsimEst,
-        this.quantile,
-        this.simFuzzPct,
+        nsimEst = this.nsimEst,
+        quantile = this.quantile,
+        simFuzzPct = this.simFuzzPct,
 
         contestSampleCutoff = this.contestSampleCutoff,
+        auditSampleCutoff = this.auditSampleCutoff,
         removeCutoffContests = this.removeCutoffContests,
         minRecountMargin = this.minRecountMargin,
         minMargin = this.minMargin,

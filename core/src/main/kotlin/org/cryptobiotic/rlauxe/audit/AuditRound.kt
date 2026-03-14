@@ -74,7 +74,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     val name = contestUA.name
     val Npop = contestUA.Npop
 
-    var maxSampleAllowed: Int? = null // maximum index in the sample allowed to use
+    var maxSampleAllowed: Int? = null // maximum index in this round's sample that you are allowed to use; only estMvrs are guarenteed to be there.
     var estMvrs = 0 // Estimate of the mvrs required to confirm the contest
     var estNewMvrs = 0 // Estimate of the new mvrs required to confirm the contest
 
@@ -127,7 +127,7 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         }
     }
 
-    fun countCvrsUsedInAudit(): Int {
+    fun maxSamplesUsed(): Int {
         return assertionRounds.maxOfOrNull { it.auditResult?.samplesUsed ?: 0 } ?: 0
     }
 

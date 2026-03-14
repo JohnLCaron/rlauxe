@@ -17,7 +17,8 @@ class CreateElectionFromCvrs (
     override fun electionInfo() = ElectionInfo(
         auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
     )
-    override fun createUnsortedMvrs() = cvrs
+    override fun createUnsortedMvrsInternal() = cvrs // for in-memory case
+    override fun createUnsortedMvrsExternal() = null
     override fun populations() = cardPools
     override fun makeCardPools() = cardPools
     override fun contestsUA() = contestsUA

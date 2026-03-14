@@ -37,7 +37,8 @@ data class MultiContestTestData(
     val addPoolId: Boolean = false, // add cardStyle info to cvrs and cards
     val ncands: Int? = null,
     val poolPct: Double? = null,  // if not null, make a pool with this pct with two ballotStyles
-    val seqCands: Boolean = false // if true, use ncands = 2 .. ncontests + 1
+    val seqCands: Boolean = false, // if true, use ncands = 2 .. ncontests + 1
+    val hasSingleCardStyle: Boolean = false // if true, use ncands = 2 .. ncontests + 1
 ) {
     val poolId = if (poolPct == null) null else 1
     val ballotStylePartition: Map<Int,Int>
@@ -90,7 +91,7 @@ data class MultiContestTestData(
             val ncards = ballotStylePartition[idx]!!
             countBallots += ncards
 
-            Population("style$idx", idx, contestIds.toIntArray(), false).setNcards(ncards)
+            Population("style$idx", idx, contestIds.toIntArray(), hasSingleCardStyle).setNcards(ncards)
         }
         require(countBallots == totalBallots)
         countCards()

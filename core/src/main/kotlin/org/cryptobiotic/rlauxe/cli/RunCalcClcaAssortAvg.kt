@@ -93,12 +93,12 @@ object RunCalcAssortAvg {
                 auditRecord.contests.map { contest -> contest.clcaAssertions.map { Expectation(contest, it.cassorter) } }.flatten()
             }
 
-            val cardManifest = auditRecord.readCardManifest()
+            val cardManifest = auditRecord.readSortedManifest()
             val publisher = Publisher(auditDir)
             println("cardManifest has ${cardManifest.ncards} cards")
 
             val usePrivate = (config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs)
-            val mvrIter = if (usePrivate) readCardsCsvIterator(publisher.privateMvrsFile()).iterator() else null
+            val mvrIter = if (usePrivate) readCardsCsvIterator(publisher.sortedMvrsFile()) else null
 
             runCards(expectations, cardManifest, mvrIter, usePrivate)
 

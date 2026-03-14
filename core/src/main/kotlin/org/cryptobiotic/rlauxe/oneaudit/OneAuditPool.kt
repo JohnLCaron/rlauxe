@@ -40,7 +40,7 @@ data class OneAuditPool(
 
     override fun votesAndUndervotes(contestId: Int): Vunder {
         val contestTab = contestTabs[contestId]!!
-        return contestTab.votesAndUndervotes(poolId, ncards(), hasSingleCardStyle) // good reason for cardPool to always have contestTabs
+        return contestTab.votesAndUndervotes(poolId, ncards(), hasSingleCardStyle)
     }
 
     fun addTo(sumTab: MutableMap<Int, ContestTabulation>) {

@@ -102,7 +102,7 @@ class MakeSfElection {
 
             val publisher = Publisher(auditdir)
             val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-            writeSortedCardsInternalSort(publisher, config.seed)
+            sortManifestInternal(publisher, config.seed)
 
             return runAllRoundsAndVerify(auditdir)
         }

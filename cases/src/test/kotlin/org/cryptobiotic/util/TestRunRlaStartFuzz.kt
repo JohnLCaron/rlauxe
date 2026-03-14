@@ -2,7 +2,7 @@ package org.cryptobiotic.util
 
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.audit.writeSortedCardsInternalSort
+import org.cryptobiotic.rlauxe.audit.sortManifestInternal
 import org.cryptobiotic.rlauxe.cli.RunRlaStartFuzz
 import org.cryptobiotic.rlauxe.cli.RunVerifyAuditRecord
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
@@ -32,7 +32,7 @@ class TestRunRlaStartFuzz {
         )
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
+        sortManifestInternal(publisher, config.seed)
 
         println("============================================================")
         RunVerifyContests.main(arrayOf("-in", auditdir))
@@ -68,7 +68,7 @@ class TestRunRlaStartFuzz {
 
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
+        sortManifestInternal(publisher, config.seed)
 
         var done = false
         while (!done) {
@@ -109,7 +109,7 @@ class TestRunRlaStartFuzz {
         )
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
+        sortManifestInternal(publisher, config.seed)
 
         println("============================================================")
         RunVerifyContests.main(arrayOf("-in", auditdir))
@@ -153,7 +153,7 @@ class TestRunRlaStartFuzz {
         )
         val publisher = Publisher(auditdir)
         val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        writeSortedCardsInternalSort(publisher, config.seed)
+        sortManifestInternal(publisher, config.seed)
 
         println("============================================================")
         val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)

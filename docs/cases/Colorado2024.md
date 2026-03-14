@@ -1,5 +1,5 @@
 # Colorado Statewide Election 2024
-03/06/2026
+03/13/2026
 
 * 3,241,120 ballot cast (Colorado 2024 General Election) in 3199 precincts.
 * 146 contests, no IRV.
@@ -68,7 +68,8 @@ We use it to make the contests.
 
 ## Generating the election
 
-Run createColoradoClca() to create a CLCA elction in  _$testdataDir/cases/corla/clca/audit_
+Run createColoradoElection() to create a CLCA or Polling election in  _$testdataDir/cases/corla/clca/audit_
+or _$testdataDir/cases/corla/polling/audit_. OneAudit elections are not supported.
 
 1. detailxml and contest.csv are used to define a CorlaContestBuilder for each contest.
    Set Nc from contest.csv field name contestBallotCardCount.

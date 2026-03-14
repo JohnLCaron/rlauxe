@@ -17,7 +17,8 @@ data class AuditConfig(
     val simulationStrategy: SimulationStrategy =  SimulationStrategy.optimistic,
 
     // consistentSampling: contestRound.status
-    val contestSampleCutoff: Int? = 30000, // use this number of cvrs in the estimation, set to null to use all
+    val contestSampleCutoff: Int? = 20000, // max number of cvrs for any one contest, set to null to use all
+    val auditSampleCutoff: Int? = 100000, // max number of cvrs for any one contest, set to null to use all
     val removeCutoffContests: Boolean = (contestSampleCutoff != null), // remove contests that need more samples than contestSampleCutoff
     val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / contestNc) greater than this
     val removeMaxContests: Int? = null, // remove top n estimated nmvrs contests

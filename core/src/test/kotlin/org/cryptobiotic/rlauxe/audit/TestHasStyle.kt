@@ -428,7 +428,7 @@ private fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestWithAss
     val auditdir = "$topdir/audit"
     val publisher = Publisher(auditdir)
     val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-    writeSortedCardsExternalSort(topdir, publisher, config.seed)
+    sortManifestExternal(topdir, publisher, config.seed)
 
     // TODO
     val verifyResults = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
@@ -443,15 +443,16 @@ private fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestWithAss
     estimateSampleSizes(
         config,
         auditRound,
-        cardManifest = mvrManager.cardManifest(),
+        sortedManifest = mvrManager.sortedManifest(),
         cardPools = mvrManager.oapools(),
         previousSamples = emptySet(),
+        populations = mvrManager.populations(),
         // nthreads=1,
     )
 
     sampleAndRemoveContests(
         config,
-        mvrManager.cardManifest(),
+        mvrManager.sortedManifest(),
         auditRound,
         emptySet(),
         quiet = false

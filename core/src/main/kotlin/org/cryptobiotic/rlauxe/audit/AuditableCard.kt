@@ -18,14 +18,14 @@ data class AuditableCard (
     val phantom: Boolean,
 
     val votes: Map<Int, IntArray>?,
-    val poolId: Int?,               // must be set if its from a OneAudit pool
-    val populationName: String? = null,  // population name or "all"; aka "cardStyle" ?
-    val population: PopulationIF? = null, // must have population or population name, otherwise hasSingleCardStyle is assumed to be true
+    val poolId: Int?,                      // must be set if its from a OneAudit pool
+    val populationName: String? = null,    // population name or "all"; aka "cardStyle" TODO eliminate "all"
+    val population: PopulationIF? = null,  // must have population or population name, otherwise hasSingleCardStyle is assumed to be true
 ): CvrIF {
 
     init {
         if (population == null && populationName == null && votes == null && poolId == null) {
-            throw RuntimeException("AuditableCard must have poolId, votes, cardStyle, or population")
+            throw RuntimeException("AuditableCard must have poolId, votes, populationName, or population")
         }
     }
 
@@ -210,14 +210,17 @@ class CvrsToCardsAddStyles(
         val org = allCvrs.next()
         val pop = if (popMap == null) null else popMap[org.poolId] // hijack poolId
         val hasCvr = type.isClca() || (type.isOA() && org.poolId == null)
-        val votes = if (hasCvr) org.votes else null  // removes votes for pooled data
+        val votes = if (hasCvr || org.isPhantom()) org.votes else null  // removes votes for pooled data
 
         // if you havent specified a population or votes, then the population = all contests
-        val cardStyle = if (votes == null && pop == null) "all" else pop?.name()
+        val cardStyle = if (votes == null && pop == null)
+            "all" // barf
+        else
+            pop?.name()
 
         return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
-            votes,
-            if (type.isOA()) org.poolId else null,
+            votes = votes,
+            poolId = if (type.isClca()) null else org.poolId, // TODO why remove poolId?
             populationName = cardStyle,
             population = pop,
         )
@@ -261,9 +264,47 @@ class CvrsWithPopulationsToCards(
         val cardStyle = if (votes == null && pop == null) "all" else pop?.name()
 
         return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
-            votes,
-            if (type.isOA()) org.poolId else null,
+            votes = votes,
+            poolId = if (type.isClca()) null else org.poolId,
             populationName = cardStyle,
+            population = pop,
+        )
+    }
+
+    override fun close() = cvrs.close()
+}
+
+// we have the mvrs as cvrs and transform them to AuditableCards
+class MvrsToCardsAddStyles(
+    val cvrs: CloseableIterator<Cvr>,
+    phantomCvrs : List<Cvr>?,
+    populations: List<PopulationIF>,
+): CloseableIterator<AuditableCard> {
+
+    val popMap = populations.associateBy{ it.id() }
+    val allCvrs: Iterator<Cvr>
+    var cardIndex = 0 // 0 based index
+
+    init {
+        allCvrs = if (phantomCvrs == null) {
+            cvrs
+        } else {
+            val cardSeq = cvrs.iterator().asSequence()
+            val phantomSeq = phantomCvrs.asSequence()
+            (cardSeq + phantomSeq).iterator()
+        }
+    }
+
+    override fun hasNext() = allCvrs.hasNext()
+
+    override fun next(): AuditableCard {
+        val org = allCvrs.next()
+        val pop = popMap[org.poolId]
+
+        return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
+            votes = org.votes,
+            poolId = org.poolId,
+            populationName = pop?.name(),
             population = pop,
         )
     }

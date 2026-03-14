@@ -271,7 +271,8 @@ class CreateElectionForAttack(
 ): CreateElectionIF {
 
     override fun electionInfo() = ElectionInfo(AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
-    override fun createUnsortedMvrs() = mvrs
+    override fun createUnsortedMvrsInternal() = mvrs // for in-memory case
+    override fun createUnsortedMvrsExternal() = null
     override fun contestsUA() = contestsUA
     override fun populations() = populations
     override fun cards() = Closer( cards.iterator() )
@@ -280,7 +281,7 @@ class CreateElectionForAttack(
 }
 
 fun ContestWithAssertions.showSimple() = buildString {
-    val contestWithVotes = contest as Contest
+    val contestWithVotes = this@showSimple.contest as Contest
     val votesByName = contestWithVotes.votes.map{ (key, value) ->  Pair(contestWithVotes.info.candidateIdToName[key], value) }
     append("Contest ($id) votes=$votesByName Npop=${Npop} Nc=${contestWithVotes.Nc()} undervotes=${contestWithVotes.Nundervotes()}")
 }

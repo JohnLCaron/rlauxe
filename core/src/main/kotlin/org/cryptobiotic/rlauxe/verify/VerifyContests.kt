@@ -40,7 +40,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
         config = auditRecord.config
         allContests = auditRecord.contests.sortedBy { it.id }
         allInfos = allContests.map{ it.contest.info() }.associateBy { it.id }
-        cardManifest = auditRecord.readCardManifest()
+        cardManifest = auditRecord.readSortedManifest()
     }
 
     fun verify() = verify( allContests!!, show = show)
@@ -149,10 +149,10 @@ fun verifyManifest(
             // the same as tabulateAuditableCards(), replicate so we can do allCvrVotes, nonpooled, pooled
             infos.forEach { (contestId, info) ->
                 val allTab = allCvrVotes.getOrPut(contestId) { ContestTabulation(info) }
-                if (card.hasContest(contestId)) { // TODO heres the problem, believing possibleContests()
+                if (card.hasContest(contestId)) { // TODO heres a possible problem, believing possibleContests()
                     if (card.votes != null && card.votes[contestId] != null) { // happens when cardStyle == all
                         val cands = card.votes[contestId]!!
-                            allTab.addVotes(cands, card.phantom)
+                        allTab.addVotes(cands, card.phantom)
                     } else {
                         if (card.phantom) allTab.nphantoms++
                         allTab.ncardsTabulated++
@@ -176,7 +176,7 @@ fun verifyManifest(
         }
     }
     if (!results.hasErrors) {
-        results.addMessage("  verify $count cards in the Manifest are ordered with no duplicate locations or indices")
+        results.addMessage("  verified that $count cards in the Manifest are ordered with no duplicate locations or indices")
     }
 
     // 2. Given the seed and the PRNG, check that the PRNs are correct and are assigned sequentially by index.
@@ -188,9 +188,9 @@ fun verifyManifest(
         if(it.second != prn) countErrs++
     }
     if (countErrs > 0)
-        results.addError("  verify $count cards in the Manifest have correct prn: there are $countErrs errors")
+        results.addError("  $count cards in the Manifest do not have correct prn: there are $countErrs errors")
     else
-      results.addMessage("  verify $count cards in the Manifest have correct prn")
+      results.addMessage("  verified that $count cards in the Manifest have correct prn")
 
     // check if tabulation agrees with diluted count
     contestsUA.forEach {
@@ -219,7 +219,7 @@ fun verifyManifest(
                 }
             }
         }
-        if (allOk) results.addMessage("  verify contest.Nc and Np agree with manifest")
+        if (allOk) results.addMessage("  verified that contest.Nc and Np agree with manifest")
     }
     return ContestSummary(allCvrVotes, nonpooled, pooled)
 }

@@ -21,10 +21,11 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     val contestsUA = auditRecord.contests.filter { it.preAuditStatus == TestH0Status.InProgress }
     val publisher = Publisher(auditRecord.location)
 
-    val cardManifest = auditRecord.readCardManifest()
+    val sortedManifest = auditRecord.readSortedManifest()
 
-    override fun cardManifest() = cardManifest
+    override fun sortedManifest() = sortedManifest
     override fun oapools() = auditRecord.readCardPools()
+    override fun populations() = auditRecord.readPopulations()
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
         val mvrsForRound = readMvrsForRound(round)
@@ -59,7 +60,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
         return readAuditableCardCsvFile(publisher.sampleMvrsFile(round))
     }
 
-    fun auditableCards(): CloseableIterator<AuditableCard> = cardManifest.cards.iterator()
+    fun auditableCards(): CloseableIterator<AuditableCard> = sortedManifest.cards.iterator()
 }
 
 // for viewer

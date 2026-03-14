@@ -25,7 +25,7 @@ class TruncShrinkage(
     val c: Double = (eta0 - 0.5) / 2,
     val d: Int,
 ) : EstimFn {
-    val capAbove = upperBound * (1 - eps)
+    val capAbove = upperBound * (1 - eps)  // TODO should this be related to maxLoss ??
 
     init {
         require(upperBound > 0.0)
@@ -183,15 +183,11 @@ class EstimAdapter(
     val upperBound: Double,
     val estimFn : EstimFn,  // estimator of the population mean
 ): BettingFn {
-    val etas = mutableListOf<Double>()
-    val bets = mutableListOf<Double>()
 
     override fun bet(prevSamples: Tracker): Double {
         // let bettingmart handle edge cases
         val mu = populationMeanIfH0(N, withoutReplacement, prevSamples)
         val eta = estimFn.eta(prevSamples)
-        etas.add(eta)
-        bets.add(etaToLam(eta, mu, upperBound))
         return etaToLam(eta, mu, upperBound)
     }
 }

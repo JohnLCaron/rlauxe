@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 
 private val logger = KotlinLogging.logger("BelgiumClca")
 
@@ -31,7 +32,8 @@ class BelgiumClca (
     override fun contestsUA() = contestsUA
     override fun cards() = createCardManifest()
     override fun ncards() = allCvrs.size
-    override fun createUnsortedMvrs() = allCvrs
+    override fun createUnsortedMvrsInternal() = allCvrs
+    override fun createUnsortedMvrsExternal() = null
 
     fun createCardManifest(): CloseableIterator<AuditableCard> {
         return CvrsToCardsAddStyles(
@@ -62,6 +64,7 @@ fun createBelgiumClca(
         else -> AuditConfig(
             AuditType.CLCA, removeCutoffContests = false, riskLimit = .05, nsimEst=10, minRecountMargin=0.0,
             simFuzzPct = 0.0, quantile=0.5,
+            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
             clcaConfig = ClcaConfig(fuzzMvrs=0.0)
         )
     }

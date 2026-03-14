@@ -44,36 +44,32 @@ interface SamplerTracker: Tracker, Iterator<Double> {
     override fun variance() = welford().variance()
 }
 
-//// For polling audits.
+//// For polling audits, assumes card.hasContest(contestId) for all samples
 class PollingSamplerTracker(
     val contestId: Int,
     val assorter: AssorterIF,
     val cvrPairs: List<Pair<CvrIF, CvrIF>>, // Pair(mvr, card)
-    maxSampleIndex: Int? = null,
+    val allowReset: Boolean = true,  // needed ?
 ): SamplerTracker {
-    val useMaxSampleIndex = maxSampleIndex ?: cvrPairs.size
     val permutedIndex = MutableList(cvrPairs.size) { it }
-    val allowReset: Boolean = maxSampleIndex == null
 
-    var maxSamples: Int = 0
     private var idx = 0
     private var welford = Welford()
 
     init {
         cvrPairs.forEach { (mvr, card) ->
-            require(mvr.location() == card.location())  { "mvr location ${mvr.location()} != card.location ${card.location()}"}  }
-        maxSamples = cvrPairs.take(useMaxSampleIndex).count { it.second.hasContest(contestId) }
+            require(mvr.location() == card.location())  { "mvr location ${mvr.location()} != card.location ${card.location()}"}
+            require(card.hasContest(contestId))  { " card.location ${card.location()} does not have contest $contestId" }
+        }
     }
 
     override fun sample(): Double {
-        while (idx < cvrPairs.size && hasNext()) {
-            val (mvr, card) = cvrPairs[permutedIndex[idx]]
+        while (hasNext()) {
+            val (mvr, _) = cvrPairs[permutedIndex[idx]]
             idx++
-            if (card.hasContest(contestId)) {
-                if (lastVal != null) welford.update(lastVal!!)
-                lastVal =  assorter.assort(mvr, usePhantoms = true)
-                return lastVal!!
-            }
+            val assortVal =  assorter.assort(mvr, usePhantoms = true)
+            welford.update(assortVal)
+            return assortVal
         }
         logger.error{"PollingSamplerTracker no samples left for contest ${contestId} and Assorter ${assorter.shortName()}"}
         throw RuntimeException("PollingSamplerTracker no samples left for contest ${contestId} and assorter ${assorter.shortName()}")
@@ -86,30 +82,46 @@ class PollingSamplerTracker(
         }
         permutedIndex.shuffle(Random)
         idx = 0
-        maxSamples = cvrPairs.take(useMaxSampleIndex).count { it.second.hasContest(contestId) }
         welford = Welford()
     }
 
-    override fun maxSamples() = maxSamples
+    override fun maxSamples() = cvrPairs.size
     override fun countCvrsUsedInAudit() = idx
     override fun nmvrs() = cvrPairs.size
 
-    override fun hasNext() = (welford.count + 1 < maxSamples)
+    override fun hasNext() = (idx < cvrPairs.size)
     override fun next() = sample()
 
     // tracker reflects "previous sequence"
-    var lastVal: Double? = null
     override fun numberOfSamples() = welford.count
     override fun measuredClcaErrorCounts() = ClcaErrorCounts.empty(0.0, 0.0)
 
     override fun welford() = welford
+
+    companion object {
+
+        fun withMaxSample(
+            contestId: Int,
+            assorter: AssorterIF,
+            completeSamples: List<Pair<CvrIF, CvrIF>>, // Pair(mvr, card)
+            maxSampleIndex: Int,  // index into complete sample list
+        ): PollingSamplerTracker {
+            val extract = mutableListOf<Pair<CvrIF, CvrIF>>()
+            completeSamples.forEachIndexed { idx, pair ->
+                if (pair.second.hasContest(contestId) && idx < maxSampleIndex) {
+                    extract.add(pair)
+                }
+            }
+            return PollingSamplerTracker(contestId, assorter, extract)
+        }
+    }
 }
 
 //// For clca/oa audits, assumes card.hasContest(contestId) for all samples
 class ClcaSamplerErrorTracker(
     val contestId: Int,
     val cassorter: ClcaAssorter,
-    val samples: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
+    val samples: List<Pair<CvrIF, AuditableCard>>,
     val clcaErrorTracker: ClcaErrorTracker,
     val allowReset: Boolean = true,  // needed ?
     val name: String? = null, // debugging
@@ -198,6 +210,7 @@ class ClcaSamplerErrorTracker(
                 clcaErrorTracker ?: ClcaErrorTracker(cassorter.noerror, cassorter.assorter.upperBound()))
         }
 
+        // I think we do the extraction in order to use reset() ?
         fun withMaxSample(
             contestId: Int,
             cassorter: ClcaAssorter,
@@ -233,6 +246,7 @@ class ClcaSamplerErrorTracker(
 }
 
 // tracks errors from passed-in assort values; use ClcaSamplerErrorTracker if you want a SamplerTracker
+// noerror = 0.0 turns off the error tracking part, just does welford tracking
 class ClcaErrorTracker(val noerror: Double, val upper: Double, val welford:Welford, val errorCounts: MutableMap<Double, Int>): ErrorTracker {
     val taus = Taus(upper)
 

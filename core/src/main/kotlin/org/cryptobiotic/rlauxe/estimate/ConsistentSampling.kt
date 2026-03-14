@@ -6,22 +6,24 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.CardManifest
+import kotlin.collections.set
 
 private val debugConsistent = false
+private val verifyMaxIndex = false
 private val logger = KotlinLogging.logger("ConsistentSampling")
 
 // called from auditWorkflow.startNewRound
 // also called by rlauxe-viewer
 fun sampleAndRemoveContests(
     config: AuditConfig,
-    cardManifest: CardManifest,
+    sortedManifest: CardManifest,
     auditRound: AuditRoundIF,
     previousSamples: Set<Long>,
     quiet: Boolean
 ) {
     val stopwatch = Stopwatch()
 
-    // remove removeMaxContests - to generate plot comparisions
+    // remove first "removeMaxContests" - to generate plot comparisions
     if (auditRound.roundIdx == 1 && config.removeMaxContests != null && config.removeMaxContests > 0) {
         val sortedByMargin : List<ContestRound> = auditRound.contestRounds.sortedByDescending { it.estMvrs }
         repeat(config.removeMaxContests) { idx ->
@@ -33,17 +35,34 @@ fun sampleAndRemoveContests(
         }
     }
 
+    var lastCardsUsed : List<AuditableCard> = emptyList()
     val contestsNotDone = auditRound.contestRounds.filter { !it.done }.toMutableList()
-    // limit total samples to less than contestSampleCutoff
     while (contestsNotDone.isNotEmpty()) {
         // create a strawman sample
-        consistentSampling( auditRound, cardManifest, previousSamples)
+        lastCardsUsed = consistentSampling( auditRound, sortedManifest, previousSamples)
 
         // enforce sample limits
         val removeContests = checkSampleLimits(config, auditRound, contestsNotDone)
         if (removeContests.isEmpty()) break
         removeContests.forEach { contestsNotDone.remove(it) }
         // do it again
+    }
+
+    if (verifyMaxIndex) {
+        val countSamples = mutableMapOf<Int, Int>()
+        contestsNotDone.forEach { countSamples[it.id] = 0}
+        lastCardsUsed.forEach { cardUsed ->
+            contestsNotDone.forEach { contest ->
+                val count = countSamples[contest.id]!!
+                if (cardUsed.hasContest(contest.id) && count < contest.maxSampleAllowed!!) {
+                    countSamples[contest.id] = count + 1
+                }
+            }
+        }
+        contestsNotDone.forEach {
+            println("contest ${it.id} countInSample=${countSamples[it.id]} maxSampleAllowed=${it.maxSampleAllowed} est=${it.estMvrs} estNew=${it.estNewMvrs}")
+            require (countSamples[it.id]!! >= it.estMvrs )
+        }
     }
 
     logger.debug{"sampleWithContestCutoff success on ${auditRound.contestRounds.count { !it.done }} contests: round ${auditRound.roundIdx} took ${stopwatch}"}
@@ -72,14 +91,14 @@ private fun checkSampleLimits(
     }
 
     // limit each contest sample to be less than contestSampleCutoff TODO this is new Mvrs ??
-    if (config.removeCutoffContests && config.contestSampleCutoff != null) {
+    if (config.removeCutoffContests && config.contestSampleCutoff != null && config.contestSampleCutoff > 0) {
         contestsNotDone.forEach { contestRound ->
             val simMvrsNeeded = contestRound.assertionRounds.maxOfOrNull { it.estimationResult?.simMvrsNeeded ?: 0 }
             if (simMvrsNeeded != null && simMvrsNeeded > config.contestSampleCutoff) {
                 contestRound.status = TestH0Status.FailMaxSamplesAllowed
                 contestRound.included = false
                 contestRound.done = true
-                logger.warn{" *** remove contest ${contestRound.id} with status FailMaxSamplesAllowed: simMvrsNeeded ${simMvrsNeeded} too large, "}
+                logger.warn{" *** too many samples for contest ${contestRound.id}: ${simMvrsNeeded} > ${config.contestSampleCutoff}, "}
                 removeContests.add(contestRound)
             }
         }
@@ -88,7 +107,7 @@ private fun checkSampleLimits(
     // if above checks remove contests, rerun consistentSampling before checking for this total contestSampleCutoff
     if (removeContests.isEmpty()) {
         // check if overall contestSampleCutoff is exceeded TODO set seperately
-        if (config.removeCutoffContests && config.contestSampleCutoff != null && auditRound.samplePrns.size > config.contestSampleCutoff) {
+        if (config.removeCutoffContests && config.auditSampleCutoff != null && auditRound.samplePrns.size > config.auditSampleCutoff) {
             // find the contest with the largest estimation size eligible for removal, remove it
             val maxEstimation = contestsNotDone.maxOf { it.estSampleSizeEligibleForRemoval() }
             val maxContest = contestsNotDone.first { it.estSampleSizeEligibleForRemoval() == maxEstimation }
@@ -98,7 +117,7 @@ private fun checkSampleLimits(
             maxContest.included = false
             maxContest.done = true
             logger.warn {
-                "*** too many samples ${auditRound.samplePrns.size} > ${config.contestSampleCutoff}, " +
+                "*** too many samples in audit: ${auditRound.samplePrns.size} > ${config.auditSampleCutoff}, " +
                         "remove contest ${maxContest.id} with largest sample size = ${maxContest.estMvrs}"
             }
             removeContests.add(maxContest)
@@ -116,11 +135,12 @@ private fun checkSampleLimits(
 //    contestRound.maxSampleAllowed = sampledCards.size
 fun consistentSampling(
     auditRound: AuditRoundIF,
-    cardManifest: CardManifest,
+    sortedManifest: CardManifest,
     previousSamples: Set<Long> = emptySet(),
-) {
+): List<AuditableCard>  // debugging
+{
     val contestsIncluded = auditRound.contestRounds.filter { !it.done && it.included}
-    if (contestsIncluded.isEmpty()) return
+    if (contestsIncluded.isEmpty()) return emptyList()
 
     // calculate how many samples are wanted for each contest.
     // TODO was val wantSampleSizeMap = wantSampleSize(contestsNotDone, previousSamples, mvrManager.sortedCards().iterator())
@@ -135,7 +155,7 @@ fun consistentSampling(
     val sampledCards = mutableListOf<AuditableCard>()
     var cardIndex = 0  // track maximum index (not done yet)
 
-    val sortedCardIter = cardManifest.cards.iterator()
+    val sortedCardIter = sortedManifest.cards.iterator()
     while (
         sortedCardIter.hasNext() &&
         // ((auditRound.auditorWantNewMvrs < 0) || (newMvrs < auditRound.auditorWantNewMvrs)) && // TODO REDO or delete?
@@ -158,7 +178,7 @@ fun consistentSampling(
         if (include) {
             sampledCards.add(card)
             // TODO this doesnt work, doesnt take into account maxSampleIndex, true ??
-            //   Well, if you assume that asll contests were audited, then this reflects ballots already done.
+            //   Well, if you assume that all contests were audited, then this reflects ballots already done.
             if (!previousSamples.contains(card.prn))
                 newMvrs++
         }
@@ -198,9 +218,10 @@ fun consistentSampling(
     auditRound.nmvrs = sampledCards.size
     auditRound.newmvrs = newMvrs
     auditRound.samplePrns = sampledCards.map { it.prn }
+    return sampledCards
 }
 
-// try running without complexity
+// try running without complexity of auditorWantNewMvrs
 private fun wantSampleSizeSimple(contestsNotDone: List<ContestRound>): Map<Int, Int> {
      return contestsNotDone.associate { it.id to it.estMvrs }
 }

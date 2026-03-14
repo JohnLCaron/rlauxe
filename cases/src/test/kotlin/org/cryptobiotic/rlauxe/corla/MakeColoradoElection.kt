@@ -2,12 +2,16 @@ package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.cli.RunVerifyAuditRecord.runVerifyAuditRecord
+import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.*
 import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.fail
 
 class MakeColoradoElection {
 
@@ -26,7 +30,7 @@ class MakeColoradoElection {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoElection(topdir, "$topdir/audit2",
+        createColoradoElection(topdir, "$topdir/audit",
             detailXmlFile, contestRoundFile, precinctFile, auditType = AuditType.CLCA)
     }
 
@@ -38,9 +42,24 @@ class MakeColoradoElection {
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         createColoradoElection(topdir, "$topdir/audit",
-            detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.POLLING)
+            detailXmlFile, contestRoundFile, precinctFile, auditType=AuditType.POLLING, hasSingleCardStyle=true)
     }
 
+    @Test
+    fun testRunVerifyPolling() {
+        val auditdir = "$testdataDir/cases/corla/polling/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
+        println()
+        print(results)
+
+        val results2 = runVerifyAuditRecord(auditdir)
+        println()
+        print(results2)
+        if (results.hasErrors) fail()
+        if (results2.hasErrors) fail()
+    }
+
+    //// files were lost
     // @Test
     fun testPrecinctTree() {
         val cvrsDir = "$testdataDir/cases/corla/old/cvrexport" // lost?

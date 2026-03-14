@@ -13,33 +13,16 @@ class CreateColoradoPolling (
     electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
-): CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, AuditType.POLLING) {
+    auditdir: String,
+    hasSingleCardStyle: Boolean,
+): CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, AuditType.POLLING, auditdir, hasSingleCardStyle=hasSingleCardStyle) {
 
     val contestsPolling: List<ContestWithAssertions>
 
     init {
-        val contestTabs: Map<Int, ContestTabulation> = tabulateCvrs(CvrIteratorfromPools(), infoMap)
-        contestsPolling = makePollingContests(contestTabs)
-    }
-
-    fun makePollingContests(tabs: Map<Int, ContestTabulation>): List<ContestWithAssertions> {
-        val infoList= corlaContestBuilders.map { it.info }.sortedBy { it.id }
-        val contestMap= corlaContestBuilders.associateBy { it.info.id }
-
-        println("ncontests with info = ${infoList.size}")
-
-        val regContests = infoList.filter { it.choiceFunction != SocialChoiceFunction.IRV }.map { info ->
-            val oaContest = contestMap[info.id]!!
-            val candVotes = oaContest.candidateVotes.filter { info.candidateIds.contains(it.key) } // remove Write-Ins
-            val ncards = oaContest.poolTotalCards()
-            val useNc = max( ncards, oaContest.Nc)
-            val contest = Contest(info, candVotes, useNc, ncards)
-            info.metadata["PoolPct"] = (100.0 * oaContest.poolTotalCards() / useNc).toInt()
-            val Nb = tabs[contest.id]?.ncardsTabulated // tabs.ncards + contest.Np TODO
-            ContestWithAssertions(contest, isClca=false, NpopIn=Nb).addStandardAssertions()
+        contestsPolling = contestsUA.map { contestClca ->
+            ContestWithAssertions(contestClca.contest, isClca=false, NpopIn=contestClca.Npop).addStandardAssertions()
         }
-
-        return regContests
     }
 
     override fun contestsUA() = contestsPolling

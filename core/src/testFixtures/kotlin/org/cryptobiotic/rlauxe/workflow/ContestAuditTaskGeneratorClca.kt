@@ -26,7 +26,7 @@ class ClcaContestAuditTaskGenerator(
         val useConfig = config ?:
         AuditConfig(AuditType.CLCA, nsimEst = nsimEst, clcaConfig = clcaConfigIn ?: ClcaConfig())
 
-        var (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
+        var (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         var testMvrs = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
         // was if (!useConfig.hasStyle && Npop > Nc) {
@@ -72,7 +72,7 @@ class ClcaSingleRoundAuditTaskGenerator(
         val useConfig = config ?:
         AuditConfig(AuditType.CLCA, clcaConfig = clcaConfigIn ?: ClcaConfig())
 
-        val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
+        val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         val testMvrs =  if (p2flips != null || p1flips != null) {
             makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips)
         } else {

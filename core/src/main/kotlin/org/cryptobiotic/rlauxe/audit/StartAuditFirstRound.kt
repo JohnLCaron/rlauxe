@@ -8,11 +8,9 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.OnlyTask
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
-import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
@@ -34,6 +32,7 @@ import kotlin.use
 private val logger = KotlinLogging.logger("StartAudit")
 
 // one could rerun this to overwrite config and sorted cards, using the same election record
+// one could reverse
 fun createAuditRecord(config: AuditConfig, election: CreateElectionIF, auditDir: String, externalSortDir: String? = null) {
     val publisher = Publisher(auditDir)
 
@@ -41,17 +40,26 @@ fun createAuditRecord(config: AuditConfig, election: CreateElectionIF, auditDir:
     publisher.writeAuditConfig(config)
 
     if (externalSortDir == null) {
-        writeSortedCardsInternalSort(publisher, config.seed)
+        sortManifestInternal(publisher, config.seed)
     } else {
-        writeSortedCardsExternalSort(externalSortDir, publisher, config.seed)
+        sortManifestExternal(externalSortDir, publisher, config.seed)
     }
 
-    // save testPrivateMvrs if needed
+    // save Mvrs for testing and diagnostics
     // cant write the sorted mvrs until after sortedCards is written
     if (config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs) {
-        val unsortedMvrs = election.createUnsortedMvrs()
-        writeUnsortedPrivateMvrs(publisher, unsortedMvrs, seed = config.seed)
-        logger.info{"createAuditRecord writeUnsortedPrivateMvrs to ${publisher.privateMvrsFile()}"}
+        val unsortedMvrs = election.createUnsortedMvrsInternal()
+        if (unsortedMvrs != null) {
+            writePrivateMvrsInternal(publisher, unsortedMvrs, seed = config.seed)
+        } else {
+            val unsortedCards = election.createUnsortedMvrsExternal()
+            if (unsortedCards != null) {
+                writeSortedCardsExternal(externalSortDir!!, publisher.sortedMvrsFile(), unsortedCards, seed = config.seed)
+                logger.info { "createAuditRecord wrotePrivateMvrs to ${publisher.sortedMvrsFile()}" }
+            } else {
+                logger.warn { "createAuditRecord did not create private mvrs not available for ${election.javaClass} auditType ${config.auditType}" }
+            }
+        }
     }
 }
 
@@ -114,16 +122,16 @@ fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditR
     }
 }
 
-
-fun writeSortedCardsInternalSort(publisher: Publisher, seed: Long) {
+// assumes that the CardManifest has already been written
+fun sortManifestInternal(publisher: Publisher, seed: Long) {
     val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile())
-    val sortedCards = createSortedCards(unsortedCards, seed)
+    val sortedCards = createSortedCardsInternal(unsortedCards, seed)
     val countCards = writeAuditableCardCsvFile(Closer(sortedCards.iterator()), publisher.sortedCardsFile())
     createZipFile(publisher.sortedCardsFile(), delete = true)
     logger.info{"writeSortedCardsInternalSort ${countCards} cards to ${publisher.sortedCardsFile()}"}
 }
 
-fun createSortedCards(unsortedCards: CloseableIterator<AuditableCard>, seed: Long) : List<AuditableCard> {
+fun createSortedCardsInternal(unsortedCards: CloseableIterator<AuditableCard>, seed: Long) : List<AuditableCard> {
     val prng = Prng(seed)
     val cards = mutableListOf<AuditableCard>()
     unsortedCards.use { cardIter ->
@@ -134,31 +142,31 @@ fun createSortedCards(unsortedCards: CloseableIterator<AuditableCard>, seed: Lon
     return cards.sortedBy { it.prn }
 }
 
-fun writeSortedCardsExternalSort(topdir: String, publisher: Publisher, seed: Long) {
+// assumes that the CardManifest has already been written
+fun sortManifestExternal(topdir: String, publisher: Publisher, seed: Long) {
     val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile())
-    writeExternalSortedCards(topdir, publisher.sortedCardsFile(), unsortedCards, seed)
+    writeSortedCardsExternal(topdir, publisher.sortedCardsFile(), unsortedCards, seed)
 }
 
-fun writeExternalSortedCards(topdir: String, outputFile: String, unsortedCards: CloseableIterator<AuditableCard>, seed: Long) {
+fun writeSortedCardsExternal(topdir: String, outputFile: String, unsortedCards: CloseableIterator<AuditableCard>, seed: Long, zip: Boolean = true) {
     val sorter = SortMerge<AuditableCard>("$topdir/sortChunks", outputFile = outputFile, seed = seed)
     sorter.run(
         cardIter = unsortedCards,
         toAuditableCard = { from: AuditableCard, index: Int, prn: Long -> from.copy(index = index, prn = prn) }
     )
-    createZipFile(outputFile, delete = true)
+    if (zip) createZipFile(outputFile, delete = true)  // TODO delete
 }
 
-// uses private/sortedMvrs.cvs
+// uses private/sortedMvrsFile.cvs
 fun writeMvrsForRound(publisher: Publisher, round: Int): Int {
     val resultSamples = readSamplePrnsJsonFile(publisher.samplePrnsFile(round))
     if (resultSamples.isErr) logger.error{"$resultSamples"}
     require(resultSamples.isOk)
     val sampleNumbers = resultSamples.unwrap()
 
-    // TODO this reads entire list into memory: use readCardsCsvIterator I think
-    val sortedMvrs = readAuditableCardCsvFile(publisher.privateMvrsFile())
+    val sortedMvrs = readCardsCsvIterator(publisher.sortedMvrsFile())
 
-    val sampledMvrs = findSamples(sampleNumbers, Closer(sortedMvrs.iterator()))
+    val sampledMvrs = findSamples(sampleNumbers, sortedMvrs)
     require(sampledMvrs.size == sampleNumbers.size)
 
     sampledMvrs.forEachIndexed { index, mvr ->
@@ -168,13 +176,7 @@ fun writeMvrsForRound(publisher: Publisher, round: Int): Int {
     return writeAuditableCardCsvFile(Closer(sampledMvrs.iterator()), publisher.sampleMvrsFile(round))
 }
 
-fun writePrivateMvrs(publisher: Publisher, sortedMvrs: List<AuditableCard>) {
-    validateOutputDirOfFile(publisher.privateMvrsFile())
-    val countMvrs = writeAuditableCardCsvFile(Closer(sortedMvrs.iterator()), publisher.privateMvrsFile())
-    logger.info{"writeSortedMvrs ${countMvrs} mvrs to ${publisher.privateMvrsFile()}"}
-}
-
-fun writeUnsortedPrivateMvrs(publisher: Publisher, unsortedMvrs: List<Cvr>, seed: Long) {
+fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<Cvr>, seed: Long) {
     val prng = Prng(seed)
     // 0 based index
     val mvrCards = unsortedMvrs.mapIndexed { index, mvr ->
@@ -183,3 +185,17 @@ fun writeUnsortedPrivateMvrs(publisher: Publisher, unsortedMvrs: List<Cvr>, seed
     val sortedMvrs = mvrCards.sortedBy { it.prn }
     writePrivateMvrs(publisher, sortedMvrs)
 }
+
+fun writePrivateMvrs(publisher: Publisher, sortedMvrs: List<AuditableCard>) {
+    validateOutputDirOfFile(publisher.sortedMvrsFile())
+    val countMvrs = writeAuditableCardCsvFile(Closer(sortedMvrs.iterator()), publisher.sortedMvrsFile())
+    logger.info{"writeSortedMvrs ${countMvrs} mvrs to ${publisher.sortedMvrsFile()}"}
+}
+
+
+
+/* could test if cards are in memory
+fun writeExternalSortedCards(topdir: String, publisher: Publisher, unsortedCards: CloseableIterator<AuditableCard>, seed: Long, zip: Boolean = true) {
+    validateOutputDirOfFile(publisher.privateMvrsFile())
+    writeExternalSortedCards(topdir, publisher.privateMvrsFile(), unsortedCards, seed)
+} */

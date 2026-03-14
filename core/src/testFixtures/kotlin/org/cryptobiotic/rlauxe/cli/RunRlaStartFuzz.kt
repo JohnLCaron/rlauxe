@@ -192,7 +192,8 @@ class TestClcaElection(
     override fun electionInfo() = ElectionInfo(
         AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
     )
-    override fun createUnsortedMvrs() = allCvrs
+    override fun createUnsortedMvrsInternal() = allCvrs // for in-memory case
+    override fun createUnsortedMvrsExternal() = null
     override fun populations() = null
     override fun makeCardPools() = null
     override fun contestsUA() = contestsUA
@@ -285,7 +286,8 @@ class TestPollingElection(
     override fun electionInfo() = ElectionInfo(
         AuditType.POLLING, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
     )
-    override fun createUnsortedMvrs() = testMvrs
+    override fun createUnsortedMvrsInternal() = testMvrs // for in-memory case
+    override fun createUnsortedMvrsExternal() = null
     override fun populations() = pops
     override fun makeCardPools() = null
     override fun contestsUA() = contestsUA
@@ -378,7 +380,8 @@ class TestOneAuditElection(
     override fun electionInfo() = ElectionInfo(
         AuditType.ONEAUDIT, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = true,
     )
-    override fun createUnsortedMvrs() = fuzzedMvrs
+    override fun createUnsortedMvrsInternal() = fuzzedMvrs // for in-memory case
+    override fun createUnsortedMvrsExternal() = null
     override fun populations() = cardPools
     override fun makeCardPools() = cardPools
     override fun contestsUA() = contestsUA

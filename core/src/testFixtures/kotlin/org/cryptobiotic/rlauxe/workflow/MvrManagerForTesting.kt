@@ -36,13 +36,12 @@ class MvrManagerForTesting(
         mvrsUA = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
     }
 
-    override fun cardManifest() :CardManifest {
+    override fun sortedManifest() :CardManifest {
         return CardManifest.createFromList(sortedCards, pools)
     }
 
-    override fun oapools(): List<OneAuditPool>? {
-        return pools
-    }
+    override fun oapools() = pools
+    override fun populations() = pools
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
         if (mvrsRound.isEmpty()) {

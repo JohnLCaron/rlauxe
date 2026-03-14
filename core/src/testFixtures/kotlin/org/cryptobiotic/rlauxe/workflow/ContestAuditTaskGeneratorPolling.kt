@@ -25,7 +25,7 @@ class PollingContestAuditTaskGenerator(
             AuditType.POLLING, nsimEst = nsimEst, simFuzzPct = mvrsFuzzPct,
         )
 
-        val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
+        val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         val testMvrs = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
         val ballotCards = MvrManagerForTesting(testMvrs, testMvrs, useConfig.seed)
@@ -58,7 +58,7 @@ class PollingSingleRoundAuditTaskGenerator(
             AuditType.POLLING, simFuzzPct = mvrsFuzzPct
         )
 
-        val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
+        val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         val testMvrs = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
         val ballotCards = MvrManagerForTesting(testCvrs, testMvrs, useConfig.seed)

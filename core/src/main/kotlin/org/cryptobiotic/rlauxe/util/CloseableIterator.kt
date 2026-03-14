@@ -37,3 +37,18 @@ class SubsetIterator<T>(skip:Int, val limit: Int?, proxy: CloseableIterator<T>) 
         // NOOP
     }
 }
+
+class TransformingIterator<R, T> (val org: CloseableIterator<R>, val transform: (R) -> T) : CloseableIterator<T> {
+    private val iterator: Iterator<R> = org.iterator()
+    override fun next(): T {
+        return transform(iterator.next())
+    }
+
+    override fun hasNext(): Boolean {
+        return iterator.hasNext()
+    }
+
+    override fun close() {
+        org.close()
+    }
+}

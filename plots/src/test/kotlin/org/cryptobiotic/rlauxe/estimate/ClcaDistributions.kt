@@ -86,8 +86,9 @@ class ClcaDistributions {
         return estimateSampleSizes(
             config,
             auditRound,
-            cardManifest = mvrManager.cardManifest(),
-            cardPools = emptyList(),
+            sortedManifest = mvrManager.sortedManifest(),
+            cardPools = null,
+            populations = null,
             previousSamples = emptySet(),
         )
     }
@@ -99,7 +100,7 @@ class ClcaDistributions {
 
         val results = mutableListOf<Int>()
         repeat(100) {
-            val (cu, testCvrs) = simulateCvrsWithDilutedMargin(Nc = Nc, margin, undervotePct = undervotePct, phantomPct = phantomPct)
+            val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = undervotePct, phantomPct = phantomPct)
             val testMvrs = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
             val ballotCards = MvrManagerForTesting(testCvrs, testMvrs, auditConfig.seed)

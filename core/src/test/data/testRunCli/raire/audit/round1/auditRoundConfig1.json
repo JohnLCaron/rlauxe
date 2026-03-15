@@ -7,13 +7,14 @@
         "minRecountMargin": 0.005,
         "minMargin": 0.0,
         "maxSamplePct": 0.0,
-        "contestSampleCutoff": 30000,
+        "contestSampleCutoff": 20000,
         "removeCutoffContests": true
     },
     "alphaMart": {
         "d": 100
     },
     "bettingMart": {
+        "maxLoss": 0.9624175929935999,
         "aprioriRates": {}
     }
 }

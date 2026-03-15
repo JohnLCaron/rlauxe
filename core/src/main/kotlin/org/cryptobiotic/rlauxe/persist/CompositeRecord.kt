@@ -6,6 +6,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
+import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.core.*
@@ -28,9 +29,13 @@ data class CompositeRecord(
     val componentRecords: List<AuditRecord>,
 ): AuditRecordIF  {
 
-    override fun readSortedManifest(): CardManifest {
-        return componentRecords.first().readSortedManifest() // TODO
+    override fun readSortedManifest(batches: List<BatchIF>?): CardManifest {
+        return componentRecords.first().readSortedManifest(batches) // TODO
     }
+    override fun readSortedManifest(): CardManifest {
+        return componentRecords.first().readSortedManifest() // barf
+    }
+
     override fun readOneShotMvrs() = emptyMap<Int, Int>()
 
    fun findComponentWithContest(wantContestName: String): AuditRecord? {

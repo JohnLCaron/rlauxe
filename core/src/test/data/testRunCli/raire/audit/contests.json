@@ -18,13 +18,13 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "2": 4155,
-                    "0": 3270,
-                    "1": 697,
-                    "3": 108
+                    "0": 1809,
+                    "2": 1362,
+                    "3": 543,
+                    "1": 193
                 },
-                "Nc": 10000,
-                "Ncast": 10000
+                "Nc": 4743,
+                "Ncast": 4743
             },
             "isComparison": true,
             "pollingAssertions": [
@@ -32,17 +32,8 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.54425,
-                        "winner": 2,
-                        "loser": 0
-                    }
-                },
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.6729,
-                        "winner": 2,
+                        "reportedMean": 0.6703563145688383,
+                        "winner": 0,
                         "loser": 1
                     }
                 },
@@ -50,8 +41,17 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.70235,
-                        "winner": 2,
+                        "reportedMean": 0.5471220746363061,
+                        "winner": 0,
+                        "loser": 2
+                    }
+                },
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.633459835547122,
+                        "winner": 0,
                         "loser": 3
                     }
                 }
@@ -62,23 +62,10 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.54425,
-                            "winner": 2,
-                            "loser": 0
-                        },
-                        "dilutedMargin": 0.08850000000000002
-                    }
-                },
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.6729,
-                            "winner": 2,
+                            "reportedMean": 0.6703563145688383,
+                            "winner": 0,
                             "loser": 1
-                        },
-                        "dilutedMargin": 0.3458000000000001
+                        }
                     }
                 },
                 {
@@ -86,21 +73,131 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.70235,
-                            "winner": 2,
+                            "reportedMean": 0.5471220746363061,
+                            "winner": 0,
+                            "loser": 2
+                        }
+                    }
+                },
+                {
+                    "cassorter": {
+                        "className": "ClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMean": 0.633459835547122,
+                            "winner": 0,
                             "loser": 3
-                        },
-                        "dilutedMargin": 0.40470000000000006
+                        }
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 10000
+            "Npop": 4743
         },
         {
             "info": {
                 "name": "contest1",
                 "id": 1,
+                "candidateNames": {
+                    "cand0": 0,
+                    "cand1": 1
+                },
+                "choiceFunction": "PLURALITY",
+                "nwinners": 1,
+                "voteForN": 1,
+                "metadata": {}
+            },
+            "contest": {
+                "className": "Contest",
+                "votes": {
+                    "1": 2080,
+                    "0": 1723
+                },
+                "Nc": 5257,
+                "Ncast": 5257
+            },
+            "isComparison": true,
+            "pollingAssertions": [
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.5339547270306259,
+                        "winner": 1,
+                        "loser": 0
+                    }
+                }
+            ],
+            "clcaAssertions": [
+                {
+                    "cassorter": {
+                        "className": "ClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMean": 0.5339547270306259,
+                            "winner": 1,
+                            "loser": 0
+                        }
+                    }
+                }
+            ],
+            "status": "InProgress",
+            "Npop": 5257
+        },
+        {
+            "info": {
+                "name": "contest2",
+                "id": 2,
+                "candidateNames": {
+                    "cand0": 0,
+                    "cand1": 1
+                },
+                "choiceFunction": "PLURALITY",
+                "nwinners": 1,
+                "voteForN": 1,
+                "metadata": {}
+            },
+            "contest": {
+                "className": "Contest",
+                "votes": {
+                    "1": 2610,
+                    "0": 2177
+                },
+                "Nc": 5257,
+                "Ncast": 5257
+            },
+            "isComparison": true,
+            "pollingAssertions": [
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.541183184325661,
+                        "winner": 1,
+                        "loser": 0
+                    }
+                }
+            ],
+            "clcaAssertions": [
+                {
+                    "cassorter": {
+                        "className": "ClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMean": 0.541183184325661,
+                            "winner": 1,
+                            "loser": 0
+                        }
+                    }
+                }
+            ],
+            "status": "InProgress",
+            "Npop": 5257
+        },
+        {
+            "info": {
+                "name": "contest3",
+                "id": 3,
                 "candidateNames": {
                     "cand0": 0,
                     "cand1": 1,
@@ -114,9 +211,9 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "2": 3603,
-                    "0": 3388,
-                    "1": 92
+                    "0": 4786,
+                    "1": 4068,
+                    "2": 790
                 },
                 "Nc": 10000,
                 "Ncast": 10000
@@ -127,179 +224,19 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.51075,
-                        "winner": 2,
-                        "loser": 0
-                    }
-                },
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.67555,
-                        "winner": 2,
-                        "loser": 1
-                    }
-                }
-            ],
-            "clcaAssertions": [
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.51075,
-                            "winner": 2,
-                            "loser": 0
-                        },
-                        "dilutedMargin": 0.021500000000000075
-                    }
-                },
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.67555,
-                            "winner": 2,
-                            "loser": 1
-                        },
-                        "dilutedMargin": 0.35109999999999997
-                    }
-                }
-            ],
-            "status": "InProgress",
-            "Npop": 10000
-        },
-        {
-            "info": {
-                "name": "contest2",
-                "id": 2,
-                "candidateNames": {
-                    "cand0": 0,
-                    "cand1": 1,
-                    "cand2": 2,
-                    "cand3": 3
-                },
-                "choiceFunction": "PLURALITY",
-                "nwinners": 1,
-                "voteForN": 1,
-                "metadata": {}
-            },
-            "contest": {
-                "className": "Contest",
-                "votes": {
-                    "2": 3143,
-                    "1": 2935,
-                    "3": 2077,
-                    "0": 374
-                },
-                "Nc": 10000,
-                "Ncast": 10000
-            },
-            "isComparison": true,
-            "pollingAssertions": [
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.63845,
-                        "winner": 2,
-                        "loser": 0
-                    }
-                },
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.5104,
-                        "winner": 2,
-                        "loser": 1
-                    }
-                },
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.5533,
-                        "winner": 2,
-                        "loser": 3
-                    }
-                }
-            ],
-            "clcaAssertions": [
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.63845,
-                            "winner": 2,
-                            "loser": 0
-                        },
-                        "dilutedMargin": 0.2768999999999999
-                    }
-                },
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.5104,
-                            "winner": 2,
-                            "loser": 1
-                        },
-                        "dilutedMargin": 0.02079999999999993
-                    }
-                },
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.5533,
-                            "winner": 2,
-                            "loser": 3
-                        },
-                        "dilutedMargin": 0.10660000000000003
-                    }
-                }
-            ],
-            "status": "InProgress",
-            "Npop": 10000
-        },
-        {
-            "info": {
-                "name": "contest3",
-                "id": 3,
-                "candidateNames": {
-                    "cand0": 0,
-                    "cand1": 1
-                },
-                "choiceFunction": "PLURALITY",
-                "nwinners": 1,
-                "voteForN": 1,
-                "metadata": {}
-            },
-            "contest": {
-                "className": "Contest",
-                "votes": {
-                    "0": 4455,
-                    "1": 3860
-                },
-                "Nc": 8690,
-                "Ncast": 8690
-            },
-            "isComparison": true,
-            "pollingAssertions": [
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.534234752589183,
+                        "reportedMean": 0.5359,
                         "winner": 0,
                         "loser": 1
                     }
+                },
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.6998,
+                        "winner": 0,
+                        "loser": 2
+                    }
                 }
             ],
             "clcaAssertions": [
@@ -308,16 +245,26 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.534234752589183,
+                            "reportedMean": 0.5359,
                             "winner": 0,
                             "loser": 1
-                        },
-                        "dilutedMargin": 0.06846950517836592
+                        }
+                    }
+                },
+                {
+                    "cassorter": {
+                        "className": "ClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMean": 0.6998,
+                            "winner": 0,
+                            "loser": 2
+                        }
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 8690
+            "Npop": 10000
         },
         {
             "info": {
@@ -335,11 +282,11 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "1": 3689,
-                    "0": 3221
+                    "1": 4133,
+                    "0": 3196
                 },
-                "Nc": 8105,
-                "Ncast": 8105
+                "Nc": 9582,
+                "Ncast": 9582
             },
             "isComparison": true,
             "pollingAssertions": [
@@ -347,7 +294,7 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5288710672424429,
+                        "reportedMean": 0.5488937591317052,
                         "winner": 1,
                         "loser": 0
                     }
@@ -359,16 +306,15 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.5288710672424429,
+                            "reportedMean": 0.5488937591317052,
                             "winner": 1,
                             "loser": 0
-                        },
-                        "dilutedMargin": 0.057742134484885854
+                        }
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 8105
+            "Npop": 9582
         },
         {
             "info": {
@@ -386,11 +332,11 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "1": 4161,
-                    "0": 3394
+                    "1": 191,
+                    "0": 156
                 },
-                "Nc": 10000,
-                "Ncast": 10000
+                "Nc": 418,
+                "Ncast": 418
             },
             "isComparison": true,
             "pollingAssertions": [
@@ -398,7 +344,7 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.53835,
+                        "reportedMean": 0.5418660287081339,
                         "winner": 1,
                         "loser": 0
                     }
@@ -410,16 +356,15 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.53835,
+                            "reportedMean": 0.5418660287081339,
                             "winner": 1,
                             "loser": 0
-                        },
-                        "dilutedMargin": 0.07669999999999999
+                        }
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 10000
+            "Npop": 418
         },
         {
             "info": {
@@ -427,7 +372,9 @@
                 "id": 6,
                 "candidateNames": {
                     "cand0": 0,
-                    "cand1": 1
+                    "cand1": 1,
+                    "cand2": 2,
+                    "cand3": 3
                 },
                 "choiceFunction": "PLURALITY",
                 "nwinners": 1,
@@ -437,11 +384,13 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "0": 2509,
-                    "1": 2216
+                    "0": 147,
+                    "1": 139,
+                    "3": 79,
+                    "2": 10
                 },
-                "Nc": 6606,
-                "Ncast": 6606
+                "Nc": 418,
+                "Ncast": 418
             },
             "isComparison": true,
             "pollingAssertions": [
@@ -449,9 +398,27 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.52217680896155,
+                        "reportedMean": 0.5095693779904307,
                         "winner": 0,
                         "loser": 1
+                    }
+                },
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.6638755980861244,
+                        "winner": 0,
+                        "loser": 2
+                    }
+                },
+                {
+                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                    "assorter": {
+                        "className": "PluralityAssorter",
+                        "reportedMean": 0.5813397129186603,
+                        "winner": 0,
+                        "loser": 3
                     }
                 }
             ],
@@ -461,16 +428,37 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.52217680896155,
+                            "reportedMean": 0.5095693779904307,
                             "winner": 0,
                             "loser": 1
-                        },
-                        "dilutedMargin": 0.04435361792310011
+                        }
+                    }
+                },
+                {
+                    "cassorter": {
+                        "className": "ClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMean": 0.6638755980861244,
+                            "winner": 0,
+                            "loser": 2
+                        }
+                    }
+                },
+                {
+                    "cassorter": {
+                        "className": "ClcaAssorter",
+                        "assorter": {
+                            "className": "PluralityAssorter",
+                            "reportedMean": 0.5813397129186603,
+                            "winner": 0,
+                            "loser": 3
+                        }
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 6606
+            "Npop": 418
         },
         {
             "info": {
@@ -488,11 +476,11 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "0": 876,
-                    "1": 685
+                    "1": 298,
+                    "0": 290
                 },
-                "Nc": 2084,
-                "Ncast": 2084
+                "Nc": 753,
+                "Ncast": 753
             },
             "isComparison": true,
             "pollingAssertions": [
@@ -500,9 +488,9 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5458253358925144,
-                        "winner": 0,
-                        "loser": 1
+                        "reportedMean": 0.5053120849933599,
+                        "winner": 1,
+                        "loser": 0
                     }
                 }
             ],
@@ -512,16 +500,15 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.5458253358925144,
-                            "winner": 0,
-                            "loser": 1
-                        },
-                        "dilutedMargin": 0.09165067178502873
+                            "reportedMean": 0.5053120849933599,
+                            "winner": 1,
+                            "loser": 0
+                        }
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 2084
+            "Npop": 753
         },
         {
             "info": {
@@ -539,11 +526,11 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "1": 880,
-                    "0": 800
+                    "0": 4262,
+                    "1": 3388
                 },
-                "Nc": 1895,
-                "Ncast": 1895
+                "Nc": 9582,
+                "Ncast": 9582
             },
             "isComparison": true,
             "pollingAssertions": [
@@ -551,9 +538,9 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.521108179419525,
-                        "winner": 1,
-                        "loser": 0
+                        "reportedMean": 0.5456063452306408,
+                        "winner": 0,
+                        "loser": 1
                     }
                 }
             ],
@@ -563,16 +550,15 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.521108179419525,
-                            "winner": 1,
-                            "loser": 0
-                        },
-                        "dilutedMargin": 0.04221635883905006
+                            "reportedMean": 0.5456063452306408,
+                            "winner": 0,
+                            "loser": 1
+                        }
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 1895
+            "Npop": 9582
         },
         {
             "info": {
@@ -580,9 +566,7 @@
                 "id": 9,
                 "candidateNames": {
                     "cand0": 0,
-                    "cand1": 1,
-                    "cand2": 2,
-                    "cand3": 3
+                    "cand1": 1
                 },
                 "choiceFunction": "PLURALITY",
                 "nwinners": 1,
@@ -592,13 +576,11 @@
             "contest": {
                 "className": "Contest",
                 "votes": {
-                    "2": 649,
-                    "3": 449,
-                    "0": 411,
-                    "1": 60
+                    "0": 4061,
+                    "1": 3813
                 },
-                "Nc": 2084,
-                "Ncast": 2084
+                "Nc": 10000,
+                "Ncast": 10000
             },
             "isComparison": true,
             "pollingAssertions": [
@@ -606,27 +588,9 @@
                     "className": "org.cryptobiotic.rlauxe.core.Assertion",
                     "assorter": {
                         "className": "PluralityAssorter",
-                        "reportedMean": 0.5571017274472169,
-                        "winner": 2,
-                        "loser": 0
-                    }
-                },
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.6413147792706334,
-                        "winner": 2,
+                        "reportedMean": 0.5124,
+                        "winner": 0,
                         "loser": 1
-                    }
-                },
-                {
-                    "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                    "assorter": {
-                        "className": "PluralityAssorter",
-                        "reportedMean": 0.5479846449136276,
-                        "winner": 2,
-                        "loser": 3
                     }
                 }
             ],
@@ -636,40 +600,15 @@
                         "className": "ClcaAssorter",
                         "assorter": {
                             "className": "PluralityAssorter",
-                            "reportedMean": 0.5571017274472169,
-                            "winner": 2,
-                            "loser": 0
-                        },
-                        "dilutedMargin": 0.11420345489443373
-                    }
-                },
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.6413147792706334,
-                            "winner": 2,
+                            "reportedMean": 0.5124,
+                            "winner": 0,
                             "loser": 1
-                        },
-                        "dilutedMargin": 0.2826295585412668
-                    }
-                },
-                {
-                    "cassorter": {
-                        "className": "ClcaAssorter",
-                        "assorter": {
-                            "className": "PluralityAssorter",
-                            "reportedMean": 0.5479846449136276,
-                            "winner": 2,
-                            "loser": 3
-                        },
-                        "dilutedMargin": 0.09596928982725528
+                        }
                     }
                 }
             ],
             "status": "InProgress",
-            "Npop": 2084
+            "Npop": 10000
         }
     ],
     "rcontestsUnderAudit": [
@@ -688,8 +627,8 @@
                 {
                     "winner": 0,
                     "loser": 1,
-                    "difficulty": 24.875621890547265,
-                    "marginInVotes": 201,
+                    "difficulty": 18.51851851851852,
+                    "marginInVotes": 270,
                     "assertion_type": "irv_elimination",
                     "winnerIdx": 0,
                     "loserIdx": 1,
@@ -702,8 +641,8 @@
                 {
                     "winner": 0,
                     "loser": 2,
-                    "difficulty": 23.474178403755868,
-                    "marginInVotes": 213,
+                    "difficulty": 23.04147465437788,
+                    "marginInVotes": 217,
                     "assertion_type": "irv_elimination",
                     "winnerIdx": 0,
                     "loserIdx": 2,
@@ -716,8 +655,8 @@
                 {
                     "winner": 0,
                     "loser": 3,
-                    "difficulty": 23.58490566037736,
-                    "marginInVotes": 212,
+                    "difficulty": 21.645021645021647,
+                    "marginInVotes": 231,
                     "assertion_type": "irv_elimination",
                     "winnerIdx": 0,
                     "loserIdx": 3,
@@ -730,8 +669,8 @@
                 {
                     "winner": 0,
                     "loser": 4,
-                    "difficulty": 24.390243902439025,
-                    "marginInVotes": 205,
+                    "difficulty": 22.123893805309734,
+                    "marginInVotes": 226,
                     "assertion_type": "irv_elimination",
                     "winnerIdx": 0,
                     "loserIdx": 4,
@@ -744,8 +683,8 @@
                 {
                     "winner": 0,
                     "loser": 1,
-                    "difficulty": 22.624434389140273,
-                    "marginInVotes": 221,
+                    "difficulty": 17.064846416382252,
+                    "marginInVotes": 293,
                     "assertion_type": "irv_elimination",
                     "winnerIdx": 0,
                     "loserIdx": 1,
@@ -757,8 +696,21 @@
                 {
                     "winner": 0,
                     "loser": 1,
-                    "difficulty": 22.727272727272727,
-                    "marginInVotes": 220,
+                    "difficulty": 20.080321285140563,
+                    "marginInVotes": 249,
+                    "assertion_type": "irv_elimination",
+                    "winnerIdx": 0,
+                    "loserIdx": 1,
+                    "eliminated": [
+                        2,
+                        4
+                    ]
+                },
+                {
+                    "winner": 0,
+                    "loser": 1,
+                    "difficulty": 18.38235294117647,
+                    "marginInVotes": 272,
                     "assertion_type": "irv_elimination",
                     "winnerIdx": 0,
                     "loserIdx": 1,
@@ -769,12 +721,25 @@
                 },
                 {
                     "winner": 0,
-                    "loser": 2,
-                    "difficulty": 21.73913043478261,
-                    "marginInVotes": 230,
+                    "loser": 3,
+                    "difficulty": 20.491803278688526,
+                    "marginInVotes": 244,
                     "assertion_type": "irv_elimination",
                     "winnerIdx": 0,
-                    "loserIdx": 2,
+                    "loserIdx": 3,
+                    "eliminated": [
+                        1,
+                        4
+                    ]
+                },
+                {
+                    "winner": 0,
+                    "loser": 4,
+                    "difficulty": 18.45018450184502,
+                    "marginInVotes": 271,
+                    "assertion_type": "irv_elimination",
+                    "winnerIdx": 0,
+                    "loserIdx": 4,
                     "eliminated": [
                         1,
                         3
@@ -782,38 +747,12 @@
                 },
                 {
                     "winner": 0,
-                    "loser": 3,
-                    "difficulty": 20.74688796680498,
-                    "marginInVotes": 241,
+                    "loser": 4,
+                    "difficulty": 20.0,
+                    "marginInVotes": 250,
                     "assertion_type": "irv_elimination",
                     "winnerIdx": 0,
-                    "loserIdx": 3,
-                    "eliminated": [
-                        2,
-                        4
-                    ]
-                },
-                {
-                    "winner": 0,
-                    "loser": 3,
-                    "difficulty": 23.25581395348837,
-                    "marginInVotes": 215,
-                    "assertion_type": "irv_elimination",
-                    "winnerIdx": 0,
-                    "loserIdx": 3,
-                    "eliminated": [
-                        1,
-                        4
-                    ]
-                },
-                {
-                    "winner": 0,
-                    "loser": 3,
-                    "difficulty": 19.68503937007874,
-                    "marginInVotes": 254,
-                    "assertion_type": "irv_elimination",
-                    "winnerIdx": 0,
-                    "loserIdx": 3,
+                    "loserIdx": 4,
                     "eliminated": [
                         1,
                         2
@@ -822,8 +761,20 @@
                 {
                     "winner": 0,
                     "loser": 1,
-                    "difficulty": 22.727272727272727,
-                    "marginInVotes": 220,
+                    "difficulty": 19.455252918287936,
+                    "marginInVotes": 257,
+                    "assertion_type": "irv_elimination",
+                    "winnerIdx": 0,
+                    "loserIdx": 1,
+                    "eliminated": [
+                        4
+                    ]
+                },
+                {
+                    "winner": 0,
+                    "loser": 1,
+                    "difficulty": 16.89189189189189,
+                    "marginInVotes": 296,
                     "assertion_type": "irv_elimination",
                     "winnerIdx": 0,
                     "loserIdx": 1,
@@ -833,48 +784,36 @@
                 },
                 {
                     "winner": 0,
-                    "loser": 3,
-                    "difficulty": 22.93577981651376,
-                    "marginInVotes": 218,
+                    "loser": 4,
+                    "difficulty": 21.1864406779661,
+                    "marginInVotes": 236,
                     "assertion_type": "irv_elimination",
                     "winnerIdx": 0,
-                    "loserIdx": 3,
-                    "eliminated": [
-                        4
-                    ]
-                },
-                {
-                    "winner": 0,
-                    "loser": 3,
-                    "difficulty": 19.37984496124031,
-                    "marginInVotes": 258,
-                    "assertion_type": "irv_elimination",
-                    "winnerIdx": 0,
-                    "loserIdx": 3,
+                    "loserIdx": 4,
                     "eliminated": [
                         2
                     ]
                 },
                 {
                     "winner": 0,
-                    "loser": 3,
-                    "difficulty": 20.92050209205021,
-                    "marginInVotes": 239,
+                    "loser": 4,
+                    "difficulty": 18.181818181818183,
+                    "marginInVotes": 275,
                     "assertion_type": "irv_elimination",
                     "winnerIdx": 0,
-                    "loserIdx": 3,
+                    "loserIdx": 4,
                     "eliminated": [
                         1
                     ]
                 },
                 {
                     "winner": 0,
-                    "loser": 3,
-                    "difficulty": 20.92050209205021,
-                    "marginInVotes": 239,
+                    "loser": 4,
+                    "difficulty": 19.37984496124031,
+                    "marginInVotes": 258,
                     "assertion_type": "irv_elimination",
                     "winnerIdx": 0,
-                    "loserIdx": 3,
+                    "loserIdx": 4,
                     "eliminated": []
                 }
             ],
@@ -910,14 +849,14 @@
                         "className": "org.cryptobiotic.rlauxe.core.Assertion",
                         "assorter": {
                             "className": "RaireAssorter",
-                            "reportedMean": 0.5201,
+                            "reportedMean": 0.527,
                             "winner": 0,
                             "loser": 1,
                             "rassertion": {
                                 "winner": 0,
                                 "loser": 1,
-                                "difficulty": 24.875621890547265,
-                                "marginInVotes": 201,
+                                "difficulty": 18.51851851851852,
+                                "marginInVotes": 270,
                                 "assertion_type": "irv_elimination",
                                 "winnerIdx": 0,
                                 "loserIdx": 1,
@@ -933,14 +872,14 @@
                         "className": "org.cryptobiotic.rlauxe.core.Assertion",
                         "assorter": {
                             "className": "RaireAssorter",
-                            "reportedMean": 0.5213,
+                            "reportedMean": 0.5217,
                             "winner": 0,
                             "loser": 2,
                             "rassertion": {
                                 "winner": 0,
                                 "loser": 2,
-                                "difficulty": 23.474178403755868,
-                                "marginInVotes": 213,
+                                "difficulty": 23.04147465437788,
+                                "marginInVotes": 217,
                                 "assertion_type": "irv_elimination",
                                 "winnerIdx": 0,
                                 "loserIdx": 2,
@@ -956,14 +895,14 @@
                         "className": "org.cryptobiotic.rlauxe.core.Assertion",
                         "assorter": {
                             "className": "RaireAssorter",
-                            "reportedMean": 0.5212,
+                            "reportedMean": 0.5231,
                             "winner": 0,
                             "loser": 3,
                             "rassertion": {
                                 "winner": 0,
                                 "loser": 3,
-                                "difficulty": 23.58490566037736,
-                                "marginInVotes": 212,
+                                "difficulty": 21.645021645021647,
+                                "marginInVotes": 231,
                                 "assertion_type": "irv_elimination",
                                 "winnerIdx": 0,
                                 "loserIdx": 3,
@@ -979,14 +918,14 @@
                         "className": "org.cryptobiotic.rlauxe.core.Assertion",
                         "assorter": {
                             "className": "RaireAssorter",
-                            "reportedMean": 0.5205,
+                            "reportedMean": 0.5226,
                             "winner": 0,
                             "loser": 4,
                             "rassertion": {
                                 "winner": 0,
                                 "loser": 4,
-                                "difficulty": 24.390243902439025,
-                                "marginInVotes": 205,
+                                "difficulty": 22.123893805309734,
+                                "marginInVotes": 226,
                                 "assertion_type": "irv_elimination",
                                 "winnerIdx": 0,
                                 "loserIdx": 4,
@@ -1002,14 +941,14 @@
                         "className": "org.cryptobiotic.rlauxe.core.Assertion",
                         "assorter": {
                             "className": "RaireAssorter",
-                            "reportedMean": 0.5221,
+                            "reportedMean": 0.5293,
                             "winner": 0,
                             "loser": 1,
                             "rassertion": {
                                 "winner": 0,
                                 "loser": 1,
-                                "difficulty": 22.624434389140273,
-                                "marginInVotes": 221,
+                                "difficulty": 17.064846416382252,
+                                "marginInVotes": 293,
                                 "assertion_type": "irv_elimination",
                                 "winnerIdx": 0,
                                 "loserIdx": 1,
@@ -1024,14 +963,36 @@
                         "className": "org.cryptobiotic.rlauxe.core.Assertion",
                         "assorter": {
                             "className": "RaireAssorter",
-                            "reportedMean": 0.522,
+                            "reportedMean": 0.5249,
                             "winner": 0,
                             "loser": 1,
                             "rassertion": {
                                 "winner": 0,
                                 "loser": 1,
-                                "difficulty": 22.727272727272727,
-                                "marginInVotes": 220,
+                                "difficulty": 20.080321285140563,
+                                "marginInVotes": 249,
+                                "assertion_type": "irv_elimination",
+                                "winnerIdx": 0,
+                                "loserIdx": 1,
+                                "eliminated": [
+                                    2,
+                                    4
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                        "assorter": {
+                            "className": "RaireAssorter",
+                            "reportedMean": 0.5272,
+                            "winner": 0,
+                            "loser": 1,
+                            "rassertion": {
+                                "winner": 0,
+                                "loser": 1,
+                                "difficulty": 18.38235294117647,
+                                "marginInVotes": 272,
                                 "assertion_type": "irv_elimination",
                                 "winnerIdx": 0,
                                 "loserIdx": 1,
@@ -1046,17 +1007,39 @@
                         "className": "org.cryptobiotic.rlauxe.core.Assertion",
                         "assorter": {
                             "className": "RaireAssorter",
-                            "reportedMean": 0.523,
+                            "reportedMean": 0.5244,
                             "winner": 0,
-                            "loser": 2,
+                            "loser": 3,
                             "rassertion": {
                                 "winner": 0,
-                                "loser": 2,
-                                "difficulty": 21.73913043478261,
-                                "marginInVotes": 230,
+                                "loser": 3,
+                                "difficulty": 20.491803278688526,
+                                "marginInVotes": 244,
                                 "assertion_type": "irv_elimination",
                                 "winnerIdx": 0,
-                                "loserIdx": 2,
+                                "loserIdx": 3,
+                                "eliminated": [
+                                    1,
+                                    4
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                        "assorter": {
+                            "className": "RaireAssorter",
+                            "reportedMean": 0.5271,
+                            "winner": 0,
+                            "loser": 4,
+                            "rassertion": {
+                                "winner": 0,
+                                "loser": 4,
+                                "difficulty": 18.45018450184502,
+                                "marginInVotes": 271,
+                                "assertion_type": "irv_elimination",
+                                "winnerIdx": 0,
+                                "loserIdx": 4,
                                 "eliminated": [
                                     1,
                                     3
@@ -1068,61 +1051,17 @@
                         "className": "org.cryptobiotic.rlauxe.core.Assertion",
                         "assorter": {
                             "className": "RaireAssorter",
-                            "reportedMean": 0.5241,
+                            "reportedMean": 0.525,
                             "winner": 0,
-                            "loser": 3,
+                            "loser": 4,
                             "rassertion": {
                                 "winner": 0,
-                                "loser": 3,
-                                "difficulty": 20.74688796680498,
-                                "marginInVotes": 241,
+                                "loser": 4,
+                                "difficulty": 20.0,
+                                "marginInVotes": 250,
                                 "assertion_type": "irv_elimination",
                                 "winnerIdx": 0,
-                                "loserIdx": 3,
-                                "eliminated": [
-                                    2,
-                                    4
-                                ]
-                            }
-                        }
-                    },
-                    {
-                        "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                        "assorter": {
-                            "className": "RaireAssorter",
-                            "reportedMean": 0.5215,
-                            "winner": 0,
-                            "loser": 3,
-                            "rassertion": {
-                                "winner": 0,
-                                "loser": 3,
-                                "difficulty": 23.25581395348837,
-                                "marginInVotes": 215,
-                                "assertion_type": "irv_elimination",
-                                "winnerIdx": 0,
-                                "loserIdx": 3,
-                                "eliminated": [
-                                    1,
-                                    4
-                                ]
-                            }
-                        }
-                    },
-                    {
-                        "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                        "assorter": {
-                            "className": "RaireAssorter",
-                            "reportedMean": 0.5254,
-                            "winner": 0,
-                            "loser": 3,
-                            "rassertion": {
-                                "winner": 0,
-                                "loser": 3,
-                                "difficulty": 19.68503937007874,
-                                "marginInVotes": 254,
-                                "assertion_type": "irv_elimination",
-                                "winnerIdx": 0,
-                                "loserIdx": 3,
+                                "loserIdx": 4,
                                 "eliminated": [
                                     1,
                                     2
@@ -1134,14 +1073,35 @@
                         "className": "org.cryptobiotic.rlauxe.core.Assertion",
                         "assorter": {
                             "className": "RaireAssorter",
-                            "reportedMean": 0.522,
+                            "reportedMean": 0.5257000000000001,
                             "winner": 0,
                             "loser": 1,
                             "rassertion": {
                                 "winner": 0,
                                 "loser": 1,
-                                "difficulty": 22.727272727272727,
-                                "marginInVotes": 220,
+                                "difficulty": 19.455252918287936,
+                                "marginInVotes": 257,
+                                "assertion_type": "irv_elimination",
+                                "winnerIdx": 0,
+                                "loserIdx": 1,
+                                "eliminated": [
+                                    4
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "className": "org.cryptobiotic.rlauxe.core.Assertion",
+                        "assorter": {
+                            "className": "RaireAssorter",
+                            "reportedMean": 0.5296,
+                            "winner": 0,
+                            "loser": 1,
+                            "rassertion": {
+                                "winner": 0,
+                                "loser": 1,
+                                "difficulty": 16.89189189189189,
+                                "marginInVotes": 296,
                                 "assertion_type": "irv_elimination",
                                 "winnerIdx": 0,
                                 "loserIdx": 1,
@@ -1155,38 +1115,17 @@
                         "className": "org.cryptobiotic.rlauxe.core.Assertion",
                         "assorter": {
                             "className": "RaireAssorter",
-                            "reportedMean": 0.5218,
+                            "reportedMean": 0.5236,
                             "winner": 0,
-                            "loser": 3,
+                            "loser": 4,
                             "rassertion": {
                                 "winner": 0,
-                                "loser": 3,
-                                "difficulty": 22.93577981651376,
-                                "marginInVotes": 218,
+                                "loser": 4,
+                                "difficulty": 21.1864406779661,
+                                "marginInVotes": 236,
                                 "assertion_type": "irv_elimination",
                                 "winnerIdx": 0,
-                                "loserIdx": 3,
-                                "eliminated": [
-                                    4
-                                ]
-                            }
-                        }
-                    },
-                    {
-                        "className": "org.cryptobiotic.rlauxe.core.Assertion",
-                        "assorter": {
-                            "className": "RaireAssorter",
-                            "reportedMean": 0.5258,
-                            "winner": 0,
-                            "loser": 3,
-                            "rassertion": {
-                                "winner": 0,
-                                "loser": 3,
-                                "difficulty": 19.37984496124031,
-                                "marginInVotes": 258,
-                                "assertion_type": "irv_elimination",
-                                "winnerIdx": 0,
-                                "loserIdx": 3,
+                                "loserIdx": 4,
                                 "eliminated": [
                                     2
                                 ]
@@ -1197,17 +1136,17 @@
                         "className": "org.cryptobiotic.rlauxe.core.Assertion",
                         "assorter": {
                             "className": "RaireAssorter",
-                            "reportedMean": 0.5239,
+                            "reportedMean": 0.5275,
                             "winner": 0,
-                            "loser": 3,
+                            "loser": 4,
                             "rassertion": {
                                 "winner": 0,
-                                "loser": 3,
-                                "difficulty": 20.92050209205021,
-                                "marginInVotes": 239,
+                                "loser": 4,
+                                "difficulty": 18.181818181818183,
+                                "marginInVotes": 275,
                                 "assertion_type": "irv_elimination",
                                 "winnerIdx": 0,
-                                "loserIdx": 3,
+                                "loserIdx": 4,
                                 "eliminated": [
                                     1
                                 ]
@@ -1218,17 +1157,17 @@
                         "className": "org.cryptobiotic.rlauxe.core.Assertion",
                         "assorter": {
                             "className": "RaireAssorter",
-                            "reportedMean": 0.5239,
+                            "reportedMean": 0.5258,
                             "winner": 0,
-                            "loser": 3,
+                            "loser": 4,
                             "rassertion": {
                                 "winner": 0,
-                                "loser": 3,
-                                "difficulty": 20.92050209205021,
-                                "marginInVotes": 239,
+                                "loser": 4,
+                                "difficulty": 19.37984496124031,
+                                "marginInVotes": 258,
                                 "assertion_type": "irv_elimination",
                                 "winnerIdx": 0,
-                                "loserIdx": 3,
+                                "loserIdx": 4,
                                 "eliminated": []
                             }
                         }
@@ -1240,14 +1179,14 @@
                             "className": "ClcaAssorter",
                             "assorter": {
                                 "className": "RaireAssorter",
-                                "reportedMean": 0.5201,
+                                "reportedMean": 0.527,
                                 "winner": 0,
                                 "loser": 1,
                                 "rassertion": {
                                     "winner": 0,
                                     "loser": 1,
-                                    "difficulty": 24.875621890547265,
-                                    "marginInVotes": 201,
+                                    "difficulty": 18.51851851851852,
+                                    "marginInVotes": 270,
                                     "assertion_type": "irv_elimination",
                                     "winnerIdx": 0,
                                     "loserIdx": 1,
@@ -1257,8 +1196,7 @@
                                         4
                                     ]
                                 }
-                            },
-                            "dilutedMargin": 0.040200000000000014
+                            }
                         }
                     },
                     {
@@ -1266,14 +1204,14 @@
                             "className": "ClcaAssorter",
                             "assorter": {
                                 "className": "RaireAssorter",
-                                "reportedMean": 0.5213,
+                                "reportedMean": 0.5217,
                                 "winner": 0,
                                 "loser": 2,
                                 "rassertion": {
                                     "winner": 0,
                                     "loser": 2,
-                                    "difficulty": 23.474178403755868,
-                                    "marginInVotes": 213,
+                                    "difficulty": 23.04147465437788,
+                                    "marginInVotes": 217,
                                     "assertion_type": "irv_elimination",
                                     "winnerIdx": 0,
                                     "loserIdx": 2,
@@ -1283,8 +1221,7 @@
                                         4
                                     ]
                                 }
-                            },
-                            "dilutedMargin": 0.04259999999999997
+                            }
                         }
                     },
                     {
@@ -1292,14 +1229,14 @@
                             "className": "ClcaAssorter",
                             "assorter": {
                                 "className": "RaireAssorter",
-                                "reportedMean": 0.5212,
+                                "reportedMean": 0.5231,
                                 "winner": 0,
                                 "loser": 3,
                                 "rassertion": {
                                     "winner": 0,
                                     "loser": 3,
-                                    "difficulty": 23.58490566037736,
-                                    "marginInVotes": 212,
+                                    "difficulty": 21.645021645021647,
+                                    "marginInVotes": 231,
                                     "assertion_type": "irv_elimination",
                                     "winnerIdx": 0,
                                     "loserIdx": 3,
@@ -1309,8 +1246,7 @@
                                         4
                                     ]
                                 }
-                            },
-                            "dilutedMargin": 0.04239999999999999
+                            }
                         }
                     },
                     {
@@ -1318,14 +1254,14 @@
                             "className": "ClcaAssorter",
                             "assorter": {
                                 "className": "RaireAssorter",
-                                "reportedMean": 0.5205,
+                                "reportedMean": 0.5226,
                                 "winner": 0,
                                 "loser": 4,
                                 "rassertion": {
                                     "winner": 0,
                                     "loser": 4,
-                                    "difficulty": 24.390243902439025,
-                                    "marginInVotes": 205,
+                                    "difficulty": 22.123893805309734,
+                                    "marginInVotes": 226,
                                     "assertion_type": "irv_elimination",
                                     "winnerIdx": 0,
                                     "loserIdx": 4,
@@ -1335,8 +1271,7 @@
                                         3
                                     ]
                                 }
-                            },
-                            "dilutedMargin": 0.040999999999999925
+                            }
                         }
                     },
                     {
@@ -1344,14 +1279,14 @@
                             "className": "ClcaAssorter",
                             "assorter": {
                                 "className": "RaireAssorter",
-                                "reportedMean": 0.5221,
+                                "reportedMean": 0.5293,
                                 "winner": 0,
                                 "loser": 1,
                                 "rassertion": {
                                     "winner": 0,
                                     "loser": 1,
-                                    "difficulty": 22.624434389140273,
-                                    "marginInVotes": 221,
+                                    "difficulty": 17.064846416382252,
+                                    "marginInVotes": 293,
                                     "assertion_type": "irv_elimination",
                                     "winnerIdx": 0,
                                     "loserIdx": 1,
@@ -1360,8 +1295,7 @@
                                         4
                                     ]
                                 }
-                            },
-                            "dilutedMargin": 0.04420000000000002
+                            }
                         }
                     },
                     {
@@ -1369,14 +1303,38 @@
                             "className": "ClcaAssorter",
                             "assorter": {
                                 "className": "RaireAssorter",
-                                "reportedMean": 0.522,
+                                "reportedMean": 0.5249,
                                 "winner": 0,
                                 "loser": 1,
                                 "rassertion": {
                                     "winner": 0,
                                     "loser": 1,
-                                    "difficulty": 22.727272727272727,
-                                    "marginInVotes": 220,
+                                    "difficulty": 20.080321285140563,
+                                    "marginInVotes": 249,
+                                    "assertion_type": "irv_elimination",
+                                    "winnerIdx": 0,
+                                    "loserIdx": 1,
+                                    "eliminated": [
+                                        2,
+                                        4
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "cassorter": {
+                            "className": "ClcaAssorter",
+                            "assorter": {
+                                "className": "RaireAssorter",
+                                "reportedMean": 0.5272,
+                                "winner": 0,
+                                "loser": 1,
+                                "rassertion": {
+                                    "winner": 0,
+                                    "loser": 1,
+                                    "difficulty": 18.38235294117647,
+                                    "marginInVotes": 272,
                                     "assertion_type": "irv_elimination",
                                     "winnerIdx": 0,
                                     "loserIdx": 1,
@@ -1385,8 +1343,7 @@
                                         3
                                     ]
                                 }
-                            },
-                            "dilutedMargin": 0.04400000000000004
+                            }
                         }
                     },
                     {
@@ -1394,24 +1351,47 @@
                             "className": "ClcaAssorter",
                             "assorter": {
                                 "className": "RaireAssorter",
-                                "reportedMean": 0.523,
+                                "reportedMean": 0.5244,
                                 "winner": 0,
-                                "loser": 2,
+                                "loser": 3,
                                 "rassertion": {
                                     "winner": 0,
-                                    "loser": 2,
-                                    "difficulty": 21.73913043478261,
-                                    "marginInVotes": 230,
+                                    "loser": 3,
+                                    "difficulty": 20.491803278688526,
+                                    "marginInVotes": 244,
                                     "assertion_type": "irv_elimination",
                                     "winnerIdx": 0,
-                                    "loserIdx": 2,
+                                    "loserIdx": 3,
+                                    "eliminated": [
+                                        1,
+                                        4
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "cassorter": {
+                            "className": "ClcaAssorter",
+                            "assorter": {
+                                "className": "RaireAssorter",
+                                "reportedMean": 0.5271,
+                                "winner": 0,
+                                "loser": 4,
+                                "rassertion": {
+                                    "winner": 0,
+                                    "loser": 4,
+                                    "difficulty": 18.45018450184502,
+                                    "marginInVotes": 271,
+                                    "assertion_type": "irv_elimination",
+                                    "winnerIdx": 0,
+                                    "loserIdx": 4,
                                     "eliminated": [
                                         1,
                                         3
                                     ]
                                 }
-                            },
-                            "dilutedMargin": 0.04600000000000004
+                            }
                         }
                     },
                     {
@@ -1419,74 +1399,23 @@
                             "className": "ClcaAssorter",
                             "assorter": {
                                 "className": "RaireAssorter",
-                                "reportedMean": 0.5241,
+                                "reportedMean": 0.525,
                                 "winner": 0,
-                                "loser": 3,
+                                "loser": 4,
                                 "rassertion": {
                                     "winner": 0,
-                                    "loser": 3,
-                                    "difficulty": 20.74688796680498,
-                                    "marginInVotes": 241,
+                                    "loser": 4,
+                                    "difficulty": 20.0,
+                                    "marginInVotes": 250,
                                     "assertion_type": "irv_elimination",
                                     "winnerIdx": 0,
-                                    "loserIdx": 3,
-                                    "eliminated": [
-                                        2,
-                                        4
-                                    ]
-                                }
-                            },
-                            "dilutedMargin": 0.04820000000000002
-                        }
-                    },
-                    {
-                        "cassorter": {
-                            "className": "ClcaAssorter",
-                            "assorter": {
-                                "className": "RaireAssorter",
-                                "reportedMean": 0.5215,
-                                "winner": 0,
-                                "loser": 3,
-                                "rassertion": {
-                                    "winner": 0,
-                                    "loser": 3,
-                                    "difficulty": 23.25581395348837,
-                                    "marginInVotes": 215,
-                                    "assertion_type": "irv_elimination",
-                                    "winnerIdx": 0,
-                                    "loserIdx": 3,
-                                    "eliminated": [
-                                        1,
-                                        4
-                                    ]
-                                }
-                            },
-                            "dilutedMargin": 0.04299999999999993
-                        }
-                    },
-                    {
-                        "cassorter": {
-                            "className": "ClcaAssorter",
-                            "assorter": {
-                                "className": "RaireAssorter",
-                                "reportedMean": 0.5254,
-                                "winner": 0,
-                                "loser": 3,
-                                "rassertion": {
-                                    "winner": 0,
-                                    "loser": 3,
-                                    "difficulty": 19.68503937007874,
-                                    "marginInVotes": 254,
-                                    "assertion_type": "irv_elimination",
-                                    "winnerIdx": 0,
-                                    "loserIdx": 3,
+                                    "loserIdx": 4,
                                     "eliminated": [
                                         1,
                                         2
                                     ]
                                 }
-                            },
-                            "dilutedMargin": 0.050799999999999956
+                            }
                         }
                     },
                     {
@@ -1494,14 +1423,37 @@
                             "className": "ClcaAssorter",
                             "assorter": {
                                 "className": "RaireAssorter",
-                                "reportedMean": 0.522,
+                                "reportedMean": 0.5257000000000001,
                                 "winner": 0,
                                 "loser": 1,
                                 "rassertion": {
                                     "winner": 0,
                                     "loser": 1,
-                                    "difficulty": 22.727272727272727,
-                                    "marginInVotes": 220,
+                                    "difficulty": 19.455252918287936,
+                                    "marginInVotes": 257,
+                                    "assertion_type": "irv_elimination",
+                                    "winnerIdx": 0,
+                                    "loserIdx": 1,
+                                    "eliminated": [
+                                        4
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "cassorter": {
+                            "className": "ClcaAssorter",
+                            "assorter": {
+                                "className": "RaireAssorter",
+                                "reportedMean": 0.5296,
+                                "winner": 0,
+                                "loser": 1,
+                                "rassertion": {
+                                    "winner": 0,
+                                    "loser": 1,
+                                    "difficulty": 16.89189189189189,
+                                    "marginInVotes": 296,
                                     "assertion_type": "irv_elimination",
                                     "winnerIdx": 0,
                                     "loserIdx": 1,
@@ -1509,8 +1461,7 @@
                                         3
                                     ]
                                 }
-                            },
-                            "dilutedMargin": 0.04400000000000004
+                            }
                         }
                     },
                     {
@@ -1518,23 +1469,45 @@
                             "className": "ClcaAssorter",
                             "assorter": {
                                 "className": "RaireAssorter",
-                                "reportedMean": 0.5218,
+                                "reportedMean": 0.5236,
                                 "winner": 0,
-                                "loser": 3,
+                                "loser": 4,
                                 "rassertion": {
                                     "winner": 0,
-                                    "loser": 3,
-                                    "difficulty": 22.93577981651376,
-                                    "marginInVotes": 218,
+                                    "loser": 4,
+                                    "difficulty": 21.1864406779661,
+                                    "marginInVotes": 236,
                                     "assertion_type": "irv_elimination",
                                     "winnerIdx": 0,
-                                    "loserIdx": 3,
+                                    "loserIdx": 4,
                                     "eliminated": [
-                                        4
+                                        2
                                     ]
                                 }
-                            },
-                            "dilutedMargin": 0.04360000000000008
+                            }
+                        }
+                    },
+                    {
+                        "cassorter": {
+                            "className": "ClcaAssorter",
+                            "assorter": {
+                                "className": "RaireAssorter",
+                                "reportedMean": 0.5275,
+                                "winner": 0,
+                                "loser": 4,
+                                "rassertion": {
+                                    "winner": 0,
+                                    "loser": 4,
+                                    "difficulty": 18.181818181818183,
+                                    "marginInVotes": 275,
+                                    "assertion_type": "irv_elimination",
+                                    "winnerIdx": 0,
+                                    "loserIdx": 4,
+                                    "eliminated": [
+                                        1
+                                    ]
+                                }
+                            }
                         }
                     },
                     {
@@ -1544,67 +1517,18 @@
                                 "className": "RaireAssorter",
                                 "reportedMean": 0.5258,
                                 "winner": 0,
-                                "loser": 3,
+                                "loser": 4,
                                 "rassertion": {
                                     "winner": 0,
-                                    "loser": 3,
+                                    "loser": 4,
                                     "difficulty": 19.37984496124031,
                                     "marginInVotes": 258,
                                     "assertion_type": "irv_elimination",
                                     "winnerIdx": 0,
-                                    "loserIdx": 3,
-                                    "eliminated": [
-                                        2
-                                    ]
-                                }
-                            },
-                            "dilutedMargin": 0.05160000000000009
-                        }
-                    },
-                    {
-                        "cassorter": {
-                            "className": "ClcaAssorter",
-                            "assorter": {
-                                "className": "RaireAssorter",
-                                "reportedMean": 0.5239,
-                                "winner": 0,
-                                "loser": 3,
-                                "rassertion": {
-                                    "winner": 0,
-                                    "loser": 3,
-                                    "difficulty": 20.92050209205021,
-                                    "marginInVotes": 239,
-                                    "assertion_type": "irv_elimination",
-                                    "winnerIdx": 0,
-                                    "loserIdx": 3,
-                                    "eliminated": [
-                                        1
-                                    ]
-                                }
-                            },
-                            "dilutedMargin": 0.047800000000000065
-                        }
-                    },
-                    {
-                        "cassorter": {
-                            "className": "ClcaAssorter",
-                            "assorter": {
-                                "className": "RaireAssorter",
-                                "reportedMean": 0.5239,
-                                "winner": 0,
-                                "loser": 3,
-                                "rassertion": {
-                                    "winner": 0,
-                                    "loser": 3,
-                                    "difficulty": 20.92050209205021,
-                                    "marginInVotes": 239,
-                                    "assertion_type": "irv_elimination",
-                                    "winnerIdx": 0,
-                                    "loserIdx": 3,
+                                    "loserIdx": 4,
                                     "eliminated": []
                                 }
-                            },
-                            "dilutedMargin": 0.047800000000000065
+                            }
                         }
                     }
                 ],

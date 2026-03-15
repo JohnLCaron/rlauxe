@@ -1,11 +1,12 @@
 {
     "auditType": "ONEAUDIT",
     "riskLimit": 0.05,
-    "seed": 7083842436108803150,
+    "seed": -8921983990898036308,
     "nsimEst": 10,
     "quantile": 0.5,
     "simFuzzPct": 0.001,
-    "contestSampleCutoff": 30000,
+    "contestSampleCutoff": 20000,
+    "auditSampleCutoff": 100000,
     "removeCutoffContests": true,
     "minRecountMargin": 0.005,
     "minMargin": 0.0,
@@ -15,7 +16,7 @@
         "strategy": "generalAdaptive2",
         "fuzzPct": 0.001,
         "d": 100,
-        "maxLoss": 0.9,
+        "maxLoss": 0.9624175929935999,
         "apriori": {}
     },
     "persistedWorkflowMode": "testPrivateMvrs",

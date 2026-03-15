@@ -12,6 +12,7 @@ enum class AuditType { POLLING, CLCA, ONEAUDIT;
 
 // commit at Election Creation
 data class ElectionInfo(
+    // val electionName: String, // TODO add
     val auditType: AuditType,
     val ncards: Int,
     val ncontests: Int,
@@ -39,7 +40,6 @@ data class AuditCreationConfig(
     }
 }
 
-// could vary by round; do we really need to retain this ?
 data class AuditRoundConfig(
     val simulation: SimulationControl,
     val sampling: ContestSampleControl,

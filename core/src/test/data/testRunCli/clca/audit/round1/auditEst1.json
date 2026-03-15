@@ -7,37 +7,54 @@
                 {
                     "assorterDesc": "0/1 contest0",
                     "roundIdx": 1,
-                    "estSampleSize": 81,
-                    "estNewSampleSize": 81,
+                    "estSampleSize": 66,
+                    "estNewSampleSize": 66,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 81,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 66,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            80,
-                            80,
-                            80,
-                            80,
-                            80,
-                            80,
-                            80,
-                            80,
-                            80,
-                            159
+                            66
                         ],
-                        "ntrials": 100,
-                        "simNewMvrs": 80
+                        "lastIndex": 66,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 66,
+                        "simMvrs": 66
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                },
+                {
+                    "assorterDesc": "0/2 contest0",
+                    "roundIdx": 1,
+                    "estSampleSize": 0,
+                    "estNewSampleSize": 0,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 66,
+                        "startingTestStatistic": 1.0,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [
+                            66
+                        ],
+                        "lastIndex": 66,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 66,
+                        "simMvrs": 66
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 670,
-            "estMvrs": 80,
-            "estNewMvrs": 80,
+            "maxSampleAllowed": 214,
+            "estMvrs": 66,
+            "estNewMvrs": 66,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -49,37 +66,77 @@
                 {
                     "assorterDesc": "1/0 contest1",
                     "roundIdx": 1,
-                    "estSampleSize": 104,
-                    "estNewSampleSize": 104,
+                    "estSampleSize": 0,
+                    "estNewSampleSize": 0,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 104,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 180,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            103,
-                            103,
-                            103,
-                            103,
-                            103,
-                            103,
-                            103,
-                            103,
-                            103,
-                            297
+                            171
                         ],
-                        "ntrials": 100,
-                        "simNewMvrs": 103
+                        "lastIndex": 982,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 171,
+                        "simMvrs": 171
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                },
+                {
+                    "assorterDesc": "1/2 contest1",
+                    "roundIdx": 1,
+                    "estSampleSize": 0,
+                    "estNewSampleSize": 0,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 180,
+                        "startingTestStatistic": 1.0,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [
+                            171
+                        ],
+                        "lastIndex": 982,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 171,
+                        "simMvrs": 171
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                },
+                {
+                    "assorterDesc": "1/3 contest1",
+                    "roundIdx": 1,
+                    "estSampleSize": 171,
+                    "estNewSampleSize": 171,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 180,
+                        "startingTestStatistic": 1.0,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [
+                            171
+                        ],
+                        "lastIndex": 982,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 171,
+                        "simMvrs": 171
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 386,
-            "estMvrs": 103,
-            "estNewMvrs": 103,
+            "maxSampleAllowed": 402,
+            "estMvrs": 171,
+            "estNewMvrs": 171,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -89,39 +146,56 @@
             "id": 2,
             "assertionRounds": [
                 {
-                    "assorterDesc": "0/1 contest2",
+                    "assorterDesc": "2/0 contest2",
                     "roundIdx": 1,
-                    "estSampleSize": 322,
-                    "estNewSampleSize": 322,
+                    "estSampleSize": 219,
+                    "estNewSampleSize": 219,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 322,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 233,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            297,
-                            297,
-                            297,
-                            297,
-                            297,
-                            297,
-                            297,
-                            297,
-                            356,
-                            588
+                            219
                         ],
-                        "ntrials": 100,
-                        "simNewMvrs": 297
+                        "lastIndex": 1246,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 219,
+                        "simMvrs": 219
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                },
+                {
+                    "assorterDesc": "2/1 contest2",
+                    "roundIdx": 1,
+                    "estSampleSize": 0,
+                    "estNewSampleSize": 0,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 233,
+                        "startingTestStatistic": 1.0,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [
+                            219
+                        ],
+                        "lastIndex": 1246,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 219,
+                        "simMvrs": 219
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 670,
-            "estMvrs": 297,
-            "estNewMvrs": 297,
+            "maxSampleAllowed": 402,
+            "estMvrs": 219,
+            "estNewMvrs": 219,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -131,39 +205,79 @@
             "id": 3,
             "assertionRounds": [
                 {
-                    "assorterDesc": "0/1 contest3",
+                    "assorterDesc": "3/0 contest3",
                     "roundIdx": 1,
-                    "estSampleSize": 132,
-                    "estNewSampleSize": 132,
+                    "estSampleSize": 0,
+                    "estNewSampleSize": 0,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 132,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 85,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            131,
-                            131,
-                            131,
-                            131,
-                            131,
-                            131,
-                            131,
-                            131,
-                            131,
-                            250
+                            84
                         ],
-                        "ntrials": 100,
-                        "simNewMvrs": 131
+                        "lastIndex": 158,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 84,
+                        "simMvrs": 84
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                },
+                {
+                    "assorterDesc": "3/1 contest3",
+                    "roundIdx": 1,
+                    "estSampleSize": 0,
+                    "estNewSampleSize": 0,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 85,
+                        "startingTestStatistic": 1.0,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [
+                            84
+                        ],
+                        "lastIndex": 158,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 84,
+                        "simMvrs": 84
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                },
+                {
+                    "assorterDesc": "3/2 contest3",
+                    "roundIdx": 1,
+                    "estSampleSize": 84,
+                    "estNewSampleSize": 84,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 85,
+                        "startingTestStatistic": 1.0,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [
+                            84
+                        ],
+                        "lastIndex": 158,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 84,
+                        "simMvrs": 84
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 388,
-            "estMvrs": 131,
-            "estNewMvrs": 131,
+            "maxSampleAllowed": 214,
+            "estMvrs": 84,
+            "estNewMvrs": 84,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -173,68 +287,56 @@
             "id": 4,
             "assertionRounds": [
                 {
-                    "assorterDesc": "0/1 contest4",
+                    "assorterDesc": "1/0 contest4",
                     "roundIdx": 1,
-                    "estSampleSize": 85,
-                    "estNewSampleSize": 85,
+                    "estSampleSize": 0,
+                    "estNewSampleSize": 0,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 85,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 82,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            85,
-                            85,
-                            85,
-                            85,
-                            85,
-                            85,
-                            85,
-                            85,
-                            85,
-                            103
+                            81
                         ],
-                        "ntrials": 100,
-                        "simNewMvrs": 85
+                        "lastIndex": 172,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 81,
+                        "simMvrs": 81
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 },
                 {
-                    "assorterDesc": "0/2 contest4",
+                    "assorterDesc": "1/2 contest4",
                     "roundIdx": 1,
-                    "estSampleSize": 37,
-                    "estNewSampleSize": 37,
+                    "estSampleSize": 81,
+                    "estNewSampleSize": 81,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 37,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 82,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            37,
-                            37,
-                            37,
-                            37,
-                            37,
-                            37,
-                            37,
-                            37,
-                            37,
-                            45
+                            81
                         ],
-                        "ntrials": 100,
-                        "simNewMvrs": 37
+                        "lastIndex": 172,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 81,
+                        "simMvrs": 81
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 385,
-            "estMvrs": 85,
-            "estNewMvrs": 85,
+            "maxSampleAllowed": 216,
+            "estMvrs": 81,
+            "estNewMvrs": 81,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -246,37 +348,54 @@
                 {
                     "assorterDesc": "0/1 contest5",
                     "roundIdx": 1,
-                    "estSampleSize": 395,
-                    "estNewSampleSize": 395,
+                    "estSampleSize": 0,
+                    "estNewSampleSize": 0,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 395,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 86,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            340,
-                            387,
-                            387,
-                            387,
-                            387,
-                            387,
-                            387,
-                            387,
-                            463,
-                            1020
+                            85
                         ],
-                        "ntrials": 100,
-                        "simNewMvrs": 387
+                        "lastIndex": 85,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 85,
+                        "simMvrs": 85
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                },
+                {
+                    "assorterDesc": "0/2 contest5",
+                    "roundIdx": 1,
+                    "estSampleSize": 85,
+                    "estNewSampleSize": 85,
+                    "estimationResult": {
+                        "roundIdx": 1,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 86,
+                        "startingTestStatistic": 1.0,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [
+                            85
+                        ],
+                        "lastIndex": 85,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 85,
+                        "simMvrs": 85
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 388,
-            "estMvrs": 387,
-            "estNewMvrs": 387,
+            "maxSampleAllowed": 214,
+            "estMvrs": 85,
+            "estNewMvrs": 85,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -286,97 +405,33 @@
             "id": 6,
             "assertionRounds": [
                 {
-                    "assorterDesc": "3/0 contest6",
+                    "assorterDesc": "1/0 contest6",
                     "roundIdx": 1,
-                    "estSampleSize": 179,
-                    "estNewSampleSize": 179,
+                    "estSampleSize": 84,
+                    "estNewSampleSize": 84,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 179,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 84,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            154,
-                            154,
-                            154,
-                            154,
-                            154,
-                            154,
-                            154,
-                            154,
-                            154,
-                            264
+                            84
                         ],
-                        "ntrials": 100,
-                        "simNewMvrs": 154
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "3/1 contest6",
-                    "roundIdx": 1,
-                    "estSampleSize": 38,
-                    "estNewSampleSize": 38,
-                    "estimationResult": {
-                        "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 38,
-                        "startingTestStatistic": 1.0,
-                        "startingErrorRates": {},
-                        "estimatedDistribution": [
-                            37,
-                            37,
-                            37,
-                            37,
-                            37,
-                            37,
-                            37,
-                            37,
-                            37,
-                            45
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 37
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "3/2 contest6",
-                    "roundIdx": 1,
-                    "estSampleSize": 28,
-                    "estNewSampleSize": 28,
-                    "estimationResult": {
-                        "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 28,
-                        "startingTestStatistic": 1.0,
-                        "startingErrorRates": {},
-                        "estimatedDistribution": [
-                            27,
-                            27,
-                            27,
-                            27,
-                            27,
-                            27,
-                            27,
-                            27,
-                            27,
-                            33
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 27
+                        "lastIndex": 131,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 84,
+                        "simMvrs": 84
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 736,
-            "estMvrs": 154,
-            "estNewMvrs": 154,
+            "maxSampleAllowed": 214,
+            "estMvrs": 84,
+            "estNewMvrs": 84,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -386,39 +441,33 @@
             "id": 7,
             "assertionRounds": [
                 {
-                    "assorterDesc": "1/0 contest7",
+                    "assorterDesc": "0/1 contest7",
                     "roundIdx": 1,
-                    "estSampleSize": 67,
-                    "estNewSampleSize": 67,
+                    "estSampleSize": 65,
+                    "estNewSampleSize": 65,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 67,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 66,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            67,
-                            67,
-                            67,
-                            67,
-                            67,
-                            67,
-                            67,
-                            67,
-                            67,
-                            122
+                            65
                         ],
-                        "ntrials": 100,
-                        "simNewMvrs": 67
+                        "lastIndex": 217,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 65,
+                        "simMvrs": 65
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 388,
-            "estMvrs": 67,
-            "estNewMvrs": 67,
+            "maxSampleAllowed": 216,
+            "estMvrs": 65,
+            "estNewMvrs": 65,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -428,68 +477,33 @@
             "id": 8,
             "assertionRounds": [
                 {
-                    "assorterDesc": "0/1 contest8",
+                    "assorterDesc": "1/0 contest8",
                     "roundIdx": 1,
-                    "estSampleSize": 12,
-                    "estNewSampleSize": 12,
+                    "estSampleSize": 21,
+                    "estNewSampleSize": 21,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 12,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 49,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            12,
-                            12,
-                            12,
-                            12,
-                            12,
-                            12,
-                            12,
-                            12,
-                            12,
-                            16
+                            21
                         ],
-                        "ntrials": 100,
-                        "simNewMvrs": 12
-                    },
-                    "status": "InProgress",
-                    "roundProved": 0
-                },
-                {
-                    "assorterDesc": "0/2 contest8",
-                    "roundIdx": 1,
-                    "estSampleSize": 134,
-                    "estNewSampleSize": 134,
-                    "estimationResult": {
-                        "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 134,
-                        "startingTestStatistic": 1.0,
-                        "startingErrorRates": {},
-                        "estimatedDistribution": [
-                            120,
-                            120,
-                            120,
-                            120,
-                            120,
-                            120,
-                            120,
-                            120,
-                            120,
-                            224
-                        ],
-                        "ntrials": 100,
-                        "simNewMvrs": 120
+                        "lastIndex": 7774,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 21,
+                        "simMvrs": 21
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 736,
-            "estMvrs": 120,
-            "estNewMvrs": 120,
+            "maxSampleAllowed": 420,
+            "estMvrs": 21,
+            "estNewMvrs": 21,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -499,68 +513,56 @@
             "id": 9,
             "assertionRounds": [
                 {
-                    "assorterDesc": "1/0 contest9",
+                    "assorterDesc": "2/0 contest9",
                     "roundIdx": 1,
-                    "estSampleSize": 62,
-                    "estNewSampleSize": 62,
+                    "estSampleSize": 106,
+                    "estNewSampleSize": 106,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 62,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 107,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            62,
-                            62,
-                            62,
-                            62,
-                            62,
-                            62,
-                            62,
-                            62,
-                            62,
-                            63
+                            106
                         ],
-                        "ntrials": 100,
-                        "simNewMvrs": 62
+                        "lastIndex": 106,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 106,
+                        "simMvrs": 106
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 },
                 {
-                    "assorterDesc": "1/2 contest9",
+                    "assorterDesc": "2/1 contest9",
                     "roundIdx": 1,
-                    "estSampleSize": 97,
-                    "estNewSampleSize": 97,
+                    "estSampleSize": 0,
+                    "estNewSampleSize": 0,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 97,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 107,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            97,
-                            97,
-                            97,
-                            97,
-                            97,
-                            97,
-                            97,
-                            97,
-                            97,
-                            180
+                            106
                         ],
-                        "ntrials": 100,
-                        "simNewMvrs": 97
+                        "lastIndex": 106,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 106,
+                        "simMvrs": 106
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 388,
-            "estMvrs": 97,
-            "estNewMvrs": 97,
+            "maxSampleAllowed": 214,
+            "estMvrs": 106,
+            "estNewMvrs": 106,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -570,39 +572,33 @@
             "id": 10,
             "assertionRounds": [
                 {
-                    "assorterDesc": "1/0 contest10",
+                    "assorterDesc": "0/1 contest10",
                     "roundIdx": 1,
-                    "estSampleSize": 67,
-                    "estNewSampleSize": 67,
+                    "estSampleSize": 115,
+                    "estNewSampleSize": 115,
                     "estimationResult": {
                         "roundIdx": 1,
-                        "strategy": "0.001 ClcaFuzzSamplerTracker ",
-                        "calcMvrsNeeded": 67,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 116,
                         "startingTestStatistic": 1.0,
                         "startingErrorRates": {},
                         "estimatedDistribution": [
-                            67,
-                            67,
-                            67,
-                            67,
-                            67,
-                            67,
-                            67,
-                            67,
-                            67,
-                            81
+                            115
                         ],
-                        "ntrials": 100,
-                        "simNewMvrs": 67
+                        "lastIndex": 214,
+                        "quantile": 50,
+                        "ntrials": 1,
+                        "simNewMvrs": 115,
+                        "simMvrs": 115
                     },
                     "status": "InProgress",
                     "roundProved": 0
                 }
             ],
             "roundIdx": 1,
-            "maxSampleAllowed": 388,
-            "estMvrs": 67,
-            "estNewMvrs": 67,
+            "maxSampleAllowed": 214,
+            "estMvrs": 115,
+            "estNewMvrs": 115,
             "auditorWantNewMvrs": -1,
             "done": false,
             "included": true,
@@ -611,8 +607,8 @@
     ],
     "auditWasDone": false,
     "auditIsComplete": false,
-    "nmvrs": 736,
-    "newmvrs": 736,
+    "nmvrs": 420,
+    "newmvrs": 420,
     "mvrsUnused": 0,
     "mvrsUsed": 0,
     "auditorWantNewMvrs": -1

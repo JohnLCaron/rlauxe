@@ -1,8 +1,8 @@
 {
-    "populations": [
+    "batches": [
         {
-            "name": "all",
-            "id": 1,
+            "name": "batch42",
+            "id": 42,
             "ncards": 0,
             "possibleContests": [
                 0,
@@ -11,7 +11,7 @@
                 3,
                 4
             ],
-            "hasSingleCardStyle": false
+            "hasSingleCardStyle": true
         }
     ]
 }

@@ -12,10 +12,11 @@ private val logger = KotlinLogging.logger("AuditableCard")
 
 // The information we have on each physical card in the audit; the complete set is the CardManifest.
 
-// TODO could you write the cards independent of what kind of audit?
-//  OneAudit uses poolId to indicate cvr vs pool card
+// TODO could you write cards independent of what kind of audit?
+//  OneAudit uses poolId to indicate cvr vs pool card; uses cardPool to modify the possibleContests() of each card.
 //  Polling cards never have CVRs, always want poolId or batch to minimize dilution
-//  I think CLCA doesnt care about poolId
+//  I think CLCA doesnt care about poolId, dont use possibleContests(), just the cvrs. See CreateSfElection on jow to do this.
+//  problem is that merging batches is done when reading; and must be uniform, as theres no special CreateElection.
 //  We should be able to write a single MVR, but Cards have to be different.
 
 data class AuditableCard (
@@ -29,12 +30,6 @@ data class AuditableCard (
     val batchName: String,            // batch name TODO must have ??
     val batch: BatchIF? = null,
 ): CvrIF {
-
-   /* init {
-       if (batch == null && batchName == null && votes == null) {
-           logger.warn { "AuditableCard must have batch or votes: $this"}
-       }
-    } */
 
     fun cvr() : Cvr {
         return Cvr(location, votes ?: emptyMap(), phantom, poolId)
@@ -67,13 +62,16 @@ data class AuditableCard (
     fun contests(): IntArray {
         return if (batch != null) batch.possibleContests().toList().sorted().toIntArray()
             else if (votes != null) votes.keys.toList().sorted().toIntArray()
-            else intArrayOf() // TODO
-    }
+            else {
+                logger.warn { "AuditableCard has no batch nor votes: $this"}
+                intArrayOf() // TODO makes no sense, a card with no contests, special batch name ?
+            }
+        }
 
     fun exactContests(): Boolean {
         return if (batch != null) batch.hasSingleCardStyle()
         else if (votes != null) true // TODO
-        else true
+        else false
     }
 
     //// CvrIF
@@ -183,9 +181,9 @@ class MergeBatchesIntoCards(
 
 ////////////////////////////////////////////
 // used in CreateElectionIF
-// this is adding both cardStyle and population to AuditableCard.
-// but when you serialize, it only saves the cardStyle or population name.
-// then we rehydrate (MergePopulationsFromIterable) and put the population reference back in.
+// if you pass in batches, this adds batchName and batch to AuditableCard, keyed on poolId.
+// when you serialize, it only saves the batchName.
+// then we rehydrate (MergePopulationsFromIterable) and put the batch reference back in.
 
 class CvrsToCardManifest(
     val type: AuditType,
@@ -218,9 +216,9 @@ class CvrsToCardManifest(
 
         return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
             votes = votes,
-            poolId = if (type.isClca()) null else org.poolId, // TODO why remove poolId?
+            poolId = if (type.isClca()) null else org.poolId,
             batchName = batch?.name() ?: "cvr",
-            batch, // not really needed ?
+            batch, // not needed if you are just going to serialize; but does no harm
         )
     }
 

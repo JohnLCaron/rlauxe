@@ -54,7 +54,7 @@ class EstimateAudit(
         repeat(ntrials) { run ->
             tasks.add(AuditTrialTask(roundIdx, run+1, config, contestsToAudit, pools, batches, cardManifest))
         }
-        val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunnerG<List<AssertionTrialIF>>().run(tasks, nthreads=1)
+        val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunnerG<List<AssertionTrialIF>>().run(tasks) // , nthreads=1)
 
         val trackerResults = mutableMapOf<Int, MutableList<AssertionTrialIF>>()
         contestsToAudit.forEach { trackerResults[it.id] = mutableListOf() }

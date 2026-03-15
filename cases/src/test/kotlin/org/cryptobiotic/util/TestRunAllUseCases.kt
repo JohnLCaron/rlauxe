@@ -23,7 +23,7 @@ class TestRunAllUseCases {
     @Test
     fun runColoradoClca() {
         val topdir = "$testdataDir/cases/corla/clca"
-        runAllRoundsAndVerify("$topdir/audit3")
+        runAllRoundsAndVerify("$topdir/audit")
     }
 
     @Test

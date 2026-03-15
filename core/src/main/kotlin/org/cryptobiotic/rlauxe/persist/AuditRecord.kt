@@ -11,6 +11,7 @@ import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.Batch
+import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCards
 import org.cryptobiotic.rlauxe.core.*
@@ -39,6 +40,7 @@ interface AuditRecordIF {
     val rounds: List<AuditRoundIF>
 
     fun readSortedManifest(): CardManifest
+    fun readSortedManifest(batches: List<BatchIF>?): CardManifest
     fun readOneShotMvrs(): Map<Int, Int>
 }
 
@@ -82,8 +84,25 @@ class AuditRecord(
         return true
     }
 
+    // for efficiency
+    override fun readSortedManifest(batches: List<BatchIF>?): CardManifest {
+        if (batches != null && batches.isNotEmpty()) {
+            // merge batch references into the Card
+            val mergedCards =
+                MergeBatchesIntoCards(
+                    CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
+                    batches,
+                )
+
+            return CardManifest(mergedCards, electionInfo.ncards, batches)
+        }
+        // no batches so you dont need to merge
+        val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
+        return CardManifest(sortedCards, electionInfo.ncards, emptyList())
+    }
+
     override fun readSortedManifest(): CardManifest {
-        val batches = readBatches()
+        val batches = readBatches() ?: readCardPools()
         if (batches != null && batches.isNotEmpty()) {
             // merge batch references into the Card
             val mergedCards =

@@ -1,5 +1,5 @@
 {
-    "populations": [
+    "batches": [
         {
             "name": "pool42",
             "id": 42,

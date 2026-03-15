@@ -9,8 +9,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
-import org.cryptobiotic.rlauxe.audit.Population
-import org.cryptobiotic.rlauxe.audit.PopulationIF
+import org.cryptobiotic.rlauxe.audit.Batch
+import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.FileOutputStream
 import java.nio.file.Files
@@ -18,22 +18,21 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import kotlin.Int
 
-
 @Serializable
-data class PopulationsJson(
-    val populations: List<PopulationJson>,
+data class BatchesJson(
+    val batches: List<BatchJson>,
 )
 
-fun List<PopulationIF>.publishJson() = PopulationsJson(
+fun List<BatchIF>.publishJson() = BatchesJson(
     this.map { it.publishJson() },
 )
 
-fun PopulationsJson.import(): List<Population> {
-    return this.populations.map { it.import() }
+fun BatchesJson.import(): List<Batch> {
+    return this.batches.map { it.import() }
 }
 
 @Serializable
-class PopulationJson(
+class BatchJson(
     val name: String,
     val id: Int,
     val ncards: Int,
@@ -41,7 +40,7 @@ class PopulationJson(
     val hasSingleCardStyle: Boolean
 )
 
-fun PopulationIF.publishJson() = PopulationJson(
+fun BatchIF.publishJson() = BatchJson(
     this.name(),
     this.id(),
     this.ncards(),
@@ -49,7 +48,7 @@ fun PopulationIF.publishJson() = PopulationJson(
     this.hasSingleCardStyle()
 )
 
-fun PopulationJson.import() = Population(
+fun BatchJson.import() = Batch(
         this.name,
         this.id,
         this.possibleContests,
@@ -59,8 +58,8 @@ fun PopulationJson.import() = Population(
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 @OptIn(ExperimentalSerializationApi::class)
-fun writePopulationsJsonFile(populations: List<PopulationIF>, filename: String) {
-    val json = populations.publishJson()
+fun writeBatchesJsonFile(batches: List<BatchIF>, filename: String) {
+    val json = batches.publishJson()
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
     FileOutputStream(filename).use { out ->
         jsonReader.encodeToStream(json, out)
@@ -69,8 +68,8 @@ fun writePopulationsJsonFile(populations: List<PopulationIF>, filename: String) 
 }
 
 @OptIn(ExperimentalSerializationApi::class)
-fun readPopulationsJsonFile(filename: String): Result<List<PopulationIF>, ErrorMessages> {
-    val errs = ErrorMessages("readPopulationsJsonFile '${filename}'")
+fun readBatchesJsonFile(filename: String): Result<List<Batch>, ErrorMessages> {
+    val errs = ErrorMessages("readBatchesJsonFile '${filename}'")
     val filepath = Path.of(filename)
     if (!Files.exists(filepath)) {
         return errs.add("file does not exist")
@@ -79,7 +78,7 @@ fun readPopulationsJsonFile(filename: String): Result<List<PopulationIF>, ErrorM
 
     return try {
         Files.newInputStream(filepath, StandardOpenOption.READ).use { inp ->
-            val json = jsonReader.decodeFromStream<PopulationsJson>(inp)
+            val json = jsonReader.decodeFromStream<BatchesJson>(inp)
             val contests = json.import()
             if (errs.hasErrors()) Err(errs) else Ok(contests)
         }
@@ -88,7 +87,8 @@ fun readPopulationsJsonFile(filename: String): Result<List<PopulationIF>, ErrorM
     }
 }
 
-fun readPopulationsJsonFileUnwrapped(filename: String): List<PopulationIF> {
-    return readPopulationsJsonFile(filename).unwrap()
+// this requires the file to exist or you get an Exception
+fun readBatchesJsonFileUnwrapped(filename: String): List<Batch> {
+    return readBatchesJsonFile(filename).unwrap()
 }
 

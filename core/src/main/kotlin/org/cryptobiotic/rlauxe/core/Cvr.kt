@@ -1,21 +1,17 @@
 package org.cryptobiotic.rlauxe.core
 
 interface CvrIF {
-    fun hasContest(contestId: Int): Boolean // "is in P_c".
+    fun hasContest(contestId: Int): Boolean // TODO "has contest" or "may have contest" ?
     fun location(): String
     fun isPhantom(): Boolean
     fun poolId(): Int?
 
     fun votes(contestId: Int): IntArray?
     fun hasMarkFor(contestId: Int, candidateId: Int): Int
-
-    // fun hasOneVoteFor(contestId: Int, candidates: List<Int>): Boolean
-    //     // val cands = cvr.votes(contest.id)
-    //    //   val usew2 =  (cands != null && cands.size == 1)
 }
 
 // core abstraction for both CVR and MVR
-// assumes that a vote is 0 or 1.
+// assumes that a vote is 0 or 1, so we just need the list of candidates that were votes for.
 data class Cvr(
     val id: String, // ballot identifier
     val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
@@ -45,20 +41,13 @@ data class Cvr(
                else if (contestVotes.contains(candidateId)) 1 else 0
     }
 
-    /* Is there exactly one vote in the contest among the given candidates?
-    override fun hasOneVoteFor(contestId: Int, candidates: List<Int>): Boolean {
-        val contestVotes = this.votes[contestId] ?: return false
-        val totalVotes = contestVotes.count { candidates.contains(it) }
-        return (totalVotes == 1)
-    } */
-
     override fun toString() = buildString {
         append("$id ($phantom) ")
         if (poolId != null) append(" poolId=$poolId: ")
         votes.forEach { (key, value) -> append(" $key: ${value.contentToString()}")}
     }
 
-    //// overriding because of IntArray ??
+    //// overriding because of IntArray
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

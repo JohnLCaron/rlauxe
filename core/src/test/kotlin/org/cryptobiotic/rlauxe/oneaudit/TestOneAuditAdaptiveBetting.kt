@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.betting.BettingFn
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
@@ -41,7 +42,7 @@ class TestOneAuditAdaptiveBetting {
         println("contestUA=${contestUA}")
         println("cardPool=${cardPools.first()}")
         val oaCassorter = contestUA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
-        val oaErrorsFromPools = OneAuditRatesFromPools(cardPools as List<OneAuditPoolIF>)
+        val oaErrorsFromPools = OneAuditRatesFromPools(cardPools as List<CardPoolIF>)
         val oaErrorRates = oaErrorsFromPools.oaErrorRates(contestUA, oaCassorter)
         println("oaErrorRates=$oaErrorRates pct=${oaErrorRates.rates.values.sum()} ")
         println()

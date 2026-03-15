@@ -1,11 +1,13 @@
 package org.cryptobiotic.rlauxe.verify
 
+import com.github.michaelbull.result.unwrap
+import com.github.michaelbull.result.unwrapError
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.raire.RaireAssorter
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -36,7 +38,11 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
     val cardManifest: CardManifest
 
     init {
-        auditRecord = AuditRecord.readFrom(auditRecordLocation) as AuditRecord
+        val result = AuditRecord.readFromResult(auditRecordLocation)
+        auditRecord = if (result.isOk) result.unwrap() as AuditRecord else {
+            println(result.unwrapError())
+            throw RuntimeException(result.unwrapError().toString())
+        }
         config = auditRecord.config
         allContests = auditRecord.contests.sortedBy { it.id }
         allInfos = allContests.map{ it.contest.info() }.associateBy { it.id }
@@ -227,7 +233,7 @@ fun verifyManifest(
 fun verifyOAagainstCards(
     contests: List<ContestWithAssertions>,
     contestSummary: ContestSummary,
-    cardPools: List<OneAuditPool>,
+    cardPools: List<CardPool>,
     infos: Map<Int, ContestInfo>,
     result: VerifyResults,
     show: Boolean = false
@@ -430,7 +436,7 @@ fun verifyOAassortAvg(
 fun verifyOApools(
     contestsUA: List<ContestWithAssertions>,
     contestSummary: ContestSummary,
-    cardPools: List<OneAuditPool>,
+    cardPools: List<CardPool>,
     result: VerifyResults,
     show: Boolean = false
 ): VerifyResults {

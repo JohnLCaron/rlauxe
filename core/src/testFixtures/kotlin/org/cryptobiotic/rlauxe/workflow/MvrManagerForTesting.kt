@@ -3,11 +3,10 @@ package org.cryptobiotic.rlauxe.workflow
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.json.readPopulationsJsonFileUnwrapped
+import org.cryptobiotic.rlauxe.persist.json.readBatchesJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
@@ -22,7 +21,7 @@ class MvrManagerForTesting(
     cvrs: List<Cvr>,
     mvrs: List<Cvr>,
     seed: Long,
-    val pools: List<OneAuditPool>? = null,
+    val pools: List<CardPool>? = null,
 ) : MvrManager, MvrManagerTestIF {
 
     val sortedCards: List<AuditableCard>
@@ -40,8 +39,8 @@ class MvrManagerForTesting(
         return CardManifest.createFromList(sortedCards, pools)
     }
 
-    override fun oapools() = pools
-    override fun populations() = pools
+    override fun pools() = pools
+    override fun batches() = pools
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
         if (mvrsRound.isEmpty()) {
@@ -122,12 +121,12 @@ fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boole
 // moved from PersistedMvrManager
 
 fun readCardManifest(publisher: Publisher, ncards: Int): CardManifest {
-    if (Files.exists(Path(publisher.populationsFile()))) {
-        val populations = readPopulationsJsonFileUnwrapped(publisher.populationsFile())
+    if (Files.exists(Path(publisher.batchesFile()))) {
+        val populations = readBatchesJsonFileUnwrapped(publisher.batchesFile())
         if (populations.isNotEmpty()) {
             // merge population references into the Card
             val mergedCards =
-                MergePopulationsFromIterable(
+                MergeBatchesIntoCards(
                     CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
                     populations,
                 )
@@ -140,12 +139,12 @@ fun readCardManifest(publisher: Publisher, ncards: Int): CardManifest {
     return CardManifest(sortedCards, ncards, emptyList())
 }
 
-fun readPopulations(publisher: Publisher): List<PopulationIF>? {
-    return if (!Files.exists(Path(publisher.populationsFile()))) null else
-        readPopulationsJsonFileUnwrapped(publisher.populationsFile())
+fun readPopulations(publisher: Publisher): List<BatchIF>? {
+    return if (!Files.exists(Path(publisher.batchesFile()))) null else
+        readBatchesJsonFileUnwrapped(publisher.batchesFile())
 }
 
-fun readCardPools(publisher: Publisher, infos: Map<Int, ContestInfo>): List<OneAuditPool>? {
+fun readCardPools(publisher: Publisher, infos: Map<Int, ContestInfo>): List<CardPool>? {
     return null /// TODO
     //return if (!Files.exists(Path(publisher.cardPoolsFile()))) null else
     //    readCardPoolCsvFile(publisher.cardPoolsFile(), infos)

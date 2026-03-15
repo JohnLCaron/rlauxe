@@ -12,7 +12,6 @@ import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.estimate.OnlyTask
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.CompositeRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -158,7 +157,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         val testH0Result =  when (config.auditType) {
             AuditType.CLCA -> runClcaAudit(config, cvrPairs, contestRound, assertionRound)
             AuditType.POLLING -> runPollingAudit(config, cvrPairs, contestRound, assertionRound)
-            AuditType.ONEAUDIT -> runOneAudit(config, cvrPairs, workflow.mvrManager().oapools()!!, contestRound, assertionRound)
+            AuditType.ONEAUDIT -> runOneAudit(config, cvrPairs, workflow.mvrManager().pools()!!, contestRound, assertionRound)
         }
 
         return if (testH0Result == null) "failed" else buildString {
@@ -229,7 +228,7 @@ fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>
     }
 }
 
-fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>, pools: List<OneAuditPoolIF>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
+fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>, pools: List<CardPoolIF>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
     try {
         val auditor = OneAuditAssertionAuditor(pools)
         val cassertion = assertionRound.assertion as ClcaAssertion

@@ -1,12 +1,17 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.Population
+import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.estimate.Vunder
+import org.cryptobiotic.rlauxe.estimate.VunderPoolsFuzzer
+import org.cryptobiotic.rlauxe.estimate.makeCvrsForPool
+import org.cryptobiotic.rlauxe.estimate.tabulateCvrsWithVoteForNs
+import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
@@ -28,7 +33,7 @@ class TestVunder {
         val candVotes1 = mapOf(0 to 71, 1 to 123, 2 to 3)
         contestVotes[1] = Vunder.fromNpop(1, undervotes, candVotes1.values.sum() + undervotes, candVotes1, 1)
 
-        val cvrs = makeCvrsForPool(contestVotes, "poolName", poolId=42, hasSingleCardStyle = false)
+        val cvrs = makeCvrsForPool(contestVotes, "poolName", poolId = 42, hasSingleCardStyle = false)
 
         // check
         val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
@@ -56,7 +61,7 @@ class TestVunder {
         val candVotes1 = mapOf(0 to 71, 1 to 123, 2 to 3)
         vunders[1] = Vunder.fromNpop(1, undervotes, candVotes1.values.sum() + undervotes, candVotes1,1)
 
-        val cvrs = makeCvrsForPool(vunders, "poolName", poolId=42, hasSingleCardStyle = false)
+        val cvrs = makeCvrsForPool(vunders, "poolName", poolId = 42, hasSingleCardStyle = false)
 
         // check
         val voteForNs = vunders.mapValues { it.value.voteForN }
@@ -138,7 +143,7 @@ class TestVunder {
 
         val info2 = ContestInfo("contest2", 2,  mapOf("Wes" to 1), SocialChoiceFunction.PLURALITY)
         val infos = mapOf(contestOA.id to contestOA.contest.info(), 2 to info2)
-        val vunderFuzz = OneAuditVunderFuzzer( cardPools, infos, 0.0, cards)
+        val vunderFuzz = VunderPoolsFuzzer(cardPools, infos, 0.0, cards)
 
         val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
         val fuzzedMvrs = oaFuzzedPairs.map { it.first }
@@ -148,7 +153,7 @@ class TestVunder {
 
         val fuzzedPool = calcOneAuditPoolsFromMvrs(
             infos,
-            listOf(Population("pool42", 42, intArrayOf(1, 2), false)),
+            listOf(Batch("pool42", 42, intArrayOf(1, 2), false)),
             fuzzedMvrs.map { it.cvr() },
         )
         println("fuzzedPool= ${fuzzedPool.first()}")
@@ -156,7 +161,7 @@ class TestVunder {
         // what if we choose the first 1000 ballots ??
         val limit = 1000
         val limitedCards = cards.subList(0, limit)
-        val limitedFuzz = OneAuditVunderFuzzer( cardPools, infos, 0.0, limitedCards)
+        val limitedFuzz = VunderPoolsFuzzer(cardPools, infos, 0.0, limitedCards)
         val limitedPairs: List<Pair<AuditableCard, AuditableCard>> = limitedFuzz.mvrCvrPairs
         val limitedMvrs = limitedPairs.map { it.first }
 
@@ -167,7 +172,7 @@ class TestVunder {
 
         val limitedPool = calcOneAuditPoolsFromMvrs(
             infos,
-            listOf(Population(cardPool.name(), cardPool.poolId, intArrayOf(1,2), false )),
+            listOf(Batch(cardPool.name(), cardPool.poolId, intArrayOf(1,2), false )),
             limitedMvrs.map { it.cvr() },
         )
         println("limitedPool= ${limitedPool.first()}")
@@ -192,7 +197,7 @@ fun makeContestsWithVunder(
 
    //TODO val cvrs2 = makeCvrsFromPopulations(test.populations)
 
-    val cvrs = makeCvrsForPool(contestVotes, "ballot", poolId=42, hasSingleCardStyle = false)
+    val cvrs = makeCvrsForPool(contestVotes, "ballot", poolId = 42, hasSingleCardStyle = false)
 
     // make the infos
     val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())

@@ -5,8 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditVunderFuzzer
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.workflow.CardManifest
@@ -23,8 +22,8 @@ fun estimateSampleSizes(
     config: AuditConfig,
     auditRound: AuditRoundIF,
     sortedManifest: CardManifest,
-    cardPools: List<OneAuditPool>?,               // only OneAudit
-    populations: List<PopulationIF>?,               // only OneAudit
+    cardPools: List<CardPool>?,
+    populations: List<BatchIF>?,
     previousSamples: Set<Long>,
     showTasks: Boolean = false,
     nthreads: Int = 32,
@@ -50,7 +49,7 @@ fun estimateSampleSizes(
     val vunderFuzz = if (!config.isOA) null else {
         val infos = auditRound.contestRounds.map { it.contestUA.contest.info() }.associateBy { it.id }
         // TODO need cardPools always?
-        OneAuditVunderFuzzer(cardPools!!, infos, config.simFuzzPct ?: 0.0, cardSamples!!.cards)
+        VunderPoolsFuzzer(cardPools!!, infos, config.simFuzzPct ?: 0.0, cardSamples!!.cards)
     }
 
     // create the estimation tasks for each contest and assertion
@@ -95,7 +94,7 @@ fun makeEstimationTasks(
     contestRound: ContestRound,
     roundIdx: Int,
     cardSamples: CardSamples?,
-    vunderFuzz: OneAuditVunderFuzzer?,
+    vunderFuzz: VunderPoolsFuzzer?,
     moreParameters: Map<String, Double> = emptyMap(),
     onlyTask: OnlyTask?,
 ): List<EstimateSampleSizeTask> {
@@ -157,7 +156,7 @@ class EstimateSampleSizeTask(
     val config: AuditConfig,
     val cardSamples: CardSamples?,
     val mvrsForPolling: List<Cvr>?,
-    val vunderFuzz: OneAuditVunderFuzzer?,
+    val vunderFuzz: VunderPoolsFuzzer?,
     val contestRound: ContestRound,
     val assertionRound: AssertionRound,
     val startingTestStatistic: Double, // T, must grow to 1/riskLimit
@@ -346,7 +345,7 @@ private val debug = true
 fun estimateOneAuditAssertionRound(
     roundIdx: Int,
     config: AuditConfig,
-    vunderFuzz: OneAuditVunderFuzzer,
+    vunderFuzz: VunderPoolsFuzzer,
     cardSamples: CardSamples,
     contestRound: ContestRound,
     assertionRound: AssertionRound,

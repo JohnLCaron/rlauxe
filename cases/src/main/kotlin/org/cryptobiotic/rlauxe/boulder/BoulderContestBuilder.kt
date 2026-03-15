@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestBuilderIF
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromBallotStyle
 import org.cryptobiotic.rlauxe.util.mergeReduce
 import org.cryptobiotic.rlauxe.util.roundToClosest
@@ -113,7 +113,7 @@ class BoulderContestBuilder(val info: ContestInfo,
     // total number of cards for this contest in the pools. this is dynamic because the pools get adjusted
     override fun poolTotalCards() = poolTotalCards
 
-    override fun adjustPoolInfo(cardPools: List<OneAuditPoolIF>) {
+    override fun adjustPoolInfo(cardPools: List<CardPoolIF>) {
         if (info.id == 18)
             print("")
         poolTotalCards = cardPools.filter{ it.hasContest(info.id)}.sumOf { it.ncards() }

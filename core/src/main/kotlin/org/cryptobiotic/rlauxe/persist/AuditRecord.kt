@@ -10,11 +10,11 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
-import org.cryptobiotic.rlauxe.audit.MergePopulationsFromIterable
-import org.cryptobiotic.rlauxe.audit.PopulationIF
+import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCards
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -83,33 +83,36 @@ class AuditRecord(
     }
 
     override fun readSortedManifest(): CardManifest {
-        if (Files.exists(Path(publisher.populationsFile()))) {
-            val populations = readPopulationsJsonFileUnwrapped(publisher.populationsFile())
-            if (populations.isNotEmpty()) {
-                // merge population references into the Card
-                val mergedCards =
-                    MergePopulationsFromIterable(
-                        CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
-                        populations,
-                    )
+        val batches = readBatches()
+        if (batches != null && batches.isNotEmpty()) {
+            // merge batch references into the Card
+            val mergedCards =
+                MergeBatchesIntoCards(
+                    CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
+                    batches,
+                )
 
-                return CardManifest(mergedCards, electionInfo.ncards, populations)
-            }
+            return CardManifest(mergedCards, electionInfo.ncards, batches)
         }
-        // no population so you dont need to merge
+        // no batches so you dont need to merge
         val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
         return CardManifest(sortedCards, electionInfo.ncards, emptyList())
     }
 
-    fun readPopulations(): List<PopulationIF>? {
-        return if (!Files.exists(Path(publisher.populationsFile()))) null else
-            readPopulationsJsonFileUnwrapped(publisher.populationsFile())
+    fun readBatches(): List<Batch>? {
+        return if (!Files.exists(Path(publisher.batchesFile()))) null else {
+            val batchesResult = readBatchesJsonFile(publisher.batchesFile())
+           if (batchesResult.isOk) batchesResult.unwrap() else {
+                logger.error{ "$batchesResult" }
+                null
+            }
+        }
     }
 
-    fun readCardPools(): List<OneAuditPool>? {
+    fun readCardPools(): List<CardPool>? {
         val infos = contests.map { it.contest.info() }.associateBy { it.id }
-        return if (!Files.exists(Path(publisher.oneauditPoolsFile()))) null
-               else readCardPoolCsvFile(publisher.oneauditPoolsFile(), infos)
+        return if (!Files.exists(Path(publisher.cardPoolsFile()))) null
+               else readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
     }
 
     // contestId -> nmvrs

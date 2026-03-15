@@ -4,14 +4,15 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.CvrIF
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.persist.CompositeRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.json.readPopulationsJsonFileUnwrapped
+import org.cryptobiotic.rlauxe.persist.json.readBatchesJsonFileUnwrapped
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import java.nio.file.Files
@@ -20,7 +21,7 @@ import kotlin.io.path.Path
 private val logger = KotlinLogging.logger("PersistedMvrManager")
 private val checkValidity = true
 
-// TODO generalize using just first component
+// TODO generalize using more than just first component
 open class CompositeMvrManager(
     val auditRecord: CompositeRecord,
     val config: AuditConfig,
@@ -31,12 +32,12 @@ open class CompositeMvrManager(
 
     override fun sortedManifest() = readCardManifestComposite(publisher)
 
-    override fun populations(): List<PopulationIF>? {
-        return readPopulationsComposite(publisher)
+    override fun batches(): List<BatchIF>? {
+        return readBatchesComposite(publisher)
     }
 
-    override fun oapools(): List<OneAuditPool>? {
-        return null   // TODO ??
+    override fun pools(): List<CardPool>? {
+        return readPoolsComposite(publisher)
     }
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>> {
@@ -79,12 +80,12 @@ open class CompositeMvrManager(
     private fun readCardManifestComposite(publisher: Publisher): CardManifest {
         val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
 
-        if (Files.exists(Path(publisher.populationsFile()))) {
-            val populations = readPopulationsJsonFileUnwrapped(publisher.populationsFile())
+        if (Files.exists(Path(publisher.batchesFile()))) {
+            val populations = readBatchesJsonFileUnwrapped(publisher.batchesFile())
             if (populations.isNotEmpty()) {
                 // merge population references into the Card
                 val mergedCards =
-                    MergePopulationsFromIterable(
+                    MergeBatchesIntoCards(
                         sortedCards,
                         populations,
                     )
@@ -98,9 +99,16 @@ open class CompositeMvrManager(
         return CardManifest(CloseableIterable { sortedCards.iterator() }, 0, emptyList())
     }
 
-    private fun readPopulationsComposite(publisher: Publisher): List<PopulationIF>? {
-        return if (!Files.exists(Path(publisher.populationsFile()))) null else
-            readPopulationsJsonFileUnwrapped(publisher.populationsFile())
+    private fun readBatchesComposite(publisher: Publisher): List<BatchIF>? {
+        return if (!Files.exists(Path(publisher.batchesFile()))) null else
+            readBatchesJsonFileUnwrapped(publisher.batchesFile())
+    }
+
+    private fun readPoolsComposite(publisher: Publisher): List<CardPool>? {
+        return if (!Files.exists(Path(publisher.cardPoolsFile()))) null else {
+            val infos = contestsUA.associate { it.id to it.contest.info() }
+            readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
+        }
     }
 
 }

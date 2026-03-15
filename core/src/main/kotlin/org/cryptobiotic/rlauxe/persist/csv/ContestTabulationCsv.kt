@@ -8,16 +8,24 @@ import kotlin.text.split
 
 private val logger = KotlinLogging.logger("ContestTabulationCsv")
 
-// class ContestTabulation(val contestId: Int, val voteForN: Int, val isIrv: Boolean, val candidateIdToIndex: Map<Int, Int>): RegVotesIF {
-//    override val votes = mutableMapOf<Int, Int>() // cand -> votes
+// class ContestTabulation(
+//    val contestId: Int,
+//    voteForNin: Int, //
+//    val isIrv: Boolean,
+//    val candidateIds: List<Int>
+//) {
+//    val voteForN = if (isIrv) 1 else voteForNin
+//    val candidateIdToIdx by lazy { candidateIds.mapIndexed { idx, id -> Pair(id, idx) }.toMap() }
+//
+//    val votes = mutableMapOf<Int, Int>() // cand -> votes
 //    val irvVotes = VoteConsolidator() // candidate indexes
 //    val notfound = mutableMapOf<Int, Int>() // candidate -> nvotes; track candidates on the cvr but not in the contestInfo, for debugging
 //
-//    var ncards = 0 //
+//    var ncardsTabulated = 0 // total cards added to the tabulation
 //    var novote = 0  // how many cards had no vote for this contest?
 //    var undervotes = 0  // how many undervotes = voteForN - nvotes
 //    var overvotes = 0  // how many overvotes = (voteForN < cands.size)
-//    var nphantoms = 0  // how many overvotes = (voteForN < cands.size)
+//    var nphantoms = 0  // how many phantoms
 
 val ContestTabulationHeader = "contestId, voteForN, cands, ncards, novote, undervotes, overvotes, nphantoms, isIrv, cand:count ... \n"
 

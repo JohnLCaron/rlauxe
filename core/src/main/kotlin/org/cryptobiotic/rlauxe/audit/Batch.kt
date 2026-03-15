@@ -1,37 +1,35 @@
 package org.cryptobiotic.rlauxe.audit
 
-import org.cryptobiotic.rlauxe.oneaudit.Vunder
 import kotlin.collections.contains
 
-/* from SamplePopulations.md
-* CardStyle = the full and exact list of contests on a card.
-* card.exactContests = list of contests that are on this card = CardStyle = "we know exactly what contests are on this card".
-* card.possibleContests = list of contests that might be on this card.
-* "population batch" = batch = a distinct container of cards, from which we can retreive named cards (even if its just by an index into a sorted list).
-* batch.possibleContests = list of contests that are in this batch.
-* batch.hasCardStyle = true if all cards in the batch have a single known CardStyle = "we know exactly what contests are on each card".
-*/
-
-interface PopulationIF {
+/* From SamplePopulations.md
+ * CardStyle = the full and exact list of contests on a card.
+ * card.exactContests = list of contests that are on this card = CardStyle = "we know exactly what contests are on this card".
+ * card.possibleContests = list of contests that might be on this card.
+ * Batch = "population batch" = a distinct container of cards, from which we can retreive named cards (even if its just by an index into a sorted list).
+ * batch.possibleContests = list of contests that are in this batch.
+ * batch.hasSingleCardStyle = true if all cards in the batch have a single known CardStyle = "we know exactly what contests are on each card".
+ */
+// Generalization of a BallotStyle or CardStyle
+interface BatchIF {
     fun name(): String
     fun id(): Int
     fun possibleContests(): IntArray // the set of contests that might be on any card in the population
     fun hasSingleCardStyle(): Boolean // aka hasStyle: if all cards have exactly the contests in possibleContests()
     fun ncards(): Int
     fun hasContest(contestId: Int): Boolean
-    // if you have this, then youre a Pool
+    // if you have this, then you're a Pool
     // fun votesAndUndervotes(contestId: Int): Vunder // , voteForN: Int): Vunder
 }
 
-// serialization turns into this
-data class Population(
+data class Batch(
     val name: String,
     val id: Int,
     val possibleContests: IntArray,      // the list of possible contests.
     val hasSingleCardStyle: Boolean,     // aka hasStyle: if all cards have exactly the contests in hasSingleCardStyle
-) : PopulationIF {
+) : BatchIF {
     var ncards = 0
-    fun setNcards(ncards: Int): Population {
+    fun setNcards(ncards: Int): Batch {
         this.ncards = ncards
         return this
     }
@@ -45,7 +43,7 @@ data class Population(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is Population) return false
+        if (other !is Batch) return false
 
         if (id != other.id) return false
         if (hasSingleCardStyle != other.hasSingleCardStyle) return false
@@ -64,6 +62,8 @@ data class Population(
         result = 31 * result + possibleContests.contentHashCode()
         return result
     }
+
+
 }
 
 

@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.sf
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
+import org.cryptobiotic.rlauxe.estimate.VunderPoolsFuzzer
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.persist.csv.*
 import org.cryptobiotic.rlauxe.util.*
@@ -26,7 +27,7 @@ class TestSfElectionVunderFuzz {
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
 
-    val cardPools: List<OneAuditPool>?
+    val cardPools: List<CardPool>?
 
     init {
         val auditRecord = AuditRecord.readFrom(auditdir) as AuditRecord
@@ -54,7 +55,7 @@ class TestSfElectionVunderFuzz {
         }
 
         // simulate the card pools for all OneAudit contests; do it here one time for all contests
-        val vunderFuzz = OneAuditVunderFuzzer(cardPools!!, infos, config.simFuzzPct ?: 0.0, contestCards)
+        val vunderFuzz = VunderPoolsFuzzer(cardPools!!, infos, config.simFuzzPct ?: 0.0, contestCards)
 
         val pairs = vunderFuzz.mvrCvrPairs
         println(" pairs = ${pairs.size}")
@@ -155,7 +156,7 @@ class TestSfElectionVunderFuzz {
         }
 
         // simulate the card pools for all OneAudit contests; do it here one time for all contests
-        val vunderFuzz = OneAuditVunderFuzzer(cardPools, infos, config.simFuzzPct ?: 0.0, contestCards)
+        val vunderFuzz = VunderPoolsFuzzer(cardPools, infos, config.simFuzzPct ?: 0.0, contestCards)
         val vunderPool = vunderFuzz.vunderPools.vunderPools[useCardPoolId]!!
         val vunderPicker = vunderPool.vunderPickers[contestId]!!
         println("vunder= ${vunderPicker.vunder}")

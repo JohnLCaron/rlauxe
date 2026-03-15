@@ -2,21 +2,21 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.PopulationIF
+import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.core.CvrIF
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 
 private val logger = KotlinLogging.logger("MvrManager")
 
-class CardManifest(val cards: CloseableIterable<AuditableCard>, val ncards: Int, val populations: List<PopulationIF>) {
-    val popMap = populations.associateBy{ it.id() }
-    fun population(populationId: Int) = popMap[populationId]
+class CardManifest(val cards: CloseableIterable<AuditableCard>, val ncards: Int, val batches: List<BatchIF>) {
+    val popMap = batches.associateBy{ it.id() }  // TODO by name ??
+    fun batch(batchId: Int) = popMap[batchId]
 
     companion object {
-        fun createFromList(cards: List<AuditableCard>, populations: List<PopulationIF>?) : CardManifest {
-            return CardManifest(CloseableIterable { cards.iterator() }, cards.size, populations ?: emptyList())
+        fun createFromList(cards: List<AuditableCard>, batches: List<BatchIF>?) : CardManifest {
+            return CardManifest(CloseableIterable { cards.iterator() }, cards.size, batches ?: emptyList())
         }
     }
 }
@@ -25,8 +25,8 @@ class CardManifest(val cards: CloseableIterable<AuditableCard>, val ncards: Int,
 interface MvrManager {
     fun sortedManifest(): CardManifest
     // fun sortedCards(): CloseableIterable<AuditableCard>  // most uses will just need the first n samples
-    fun oapools(): List<OneAuditPool>?
-    fun populations(): List<PopulationIF>?
+    fun pools(): List<CardPool>?
+    fun batches(): List<BatchIF>?
     fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  // Pair(mvr, cvr)
 }
 

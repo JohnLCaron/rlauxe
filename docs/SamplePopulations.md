@@ -8,7 +8,7 @@ If we only have Populations, can anything be done for estimation or is that like
 
 Populations are Pools without vote totals. Still useful for managing dilution. Example is we know what are possible contests for
 precinct/city/county, and we know what precinct a card is from, but we dont have subtotals for the precinct. Only a problem for
-Polling.
+Polling. Or: Each ballot has a known Ballot Style, but no subtotals by ballot styyle.
 
 No need to save both Populations and Pools.
 

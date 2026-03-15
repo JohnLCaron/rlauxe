@@ -22,6 +22,7 @@ private val logger = KotlinLogging.logger("OneShotAudit")
 // AuditRecord must have privateMvrs
 class OneShotAudit(
     val auditdir: String,
+    val show: Boolean = false,
 ) {
     val record = AuditRecord.readFrom(auditdir) as AuditRecord
     val config = record.config
@@ -49,7 +50,7 @@ class OneShotAudit(
         val assertionAuditsOld = mutableListOf<AssertionAudit>()
         contestsUAs.forEach { contestUA ->
             contestUA.clcaAssertions.forEach {
-                assertionAuditsOld.add( AssertionAudit(contestUA, it))
+                assertionAuditsOld.add( AssertionAudit(contestUA, it, show))
             }
         }
 
@@ -82,15 +83,17 @@ class OneShotAudit(
                     if (card.poolId != null) countPoolCards++
                 }
                 countCards++
-/*
-                if (countCards % 100 == 0 && countCards < 1000) {
-                    val more = assertionAudits.filter { it.wantsMore() }.map { it.id() }
-                    println(" $countCards ${more.size}/$naudits = $more")
 
-                } else if (countCards % 1000 == 0) {
-                    val more = assertionAudits.filter { it.wantsMore() }.map { it.id() }
-                    println(" $co untCards ${more.size}/$naudits = $more")
-                } */
+                if (show) {
+                    if (countCards % 100 == 0 && countCards < 1000) {
+                        val more = assertionAudits.filter { it.wantsMore() }.map { it.id() }
+                        println(" $countCards ${more.size}/$naudits = $more")
+
+                    } else if (countCards % 1000 == 0) {
+                        val more = assertionAudits.filter { it.wantsMore() }.map { it.id() }
+                        println(" $countCards ${more.size}/$naudits = $more")
+                    }
+                }
             }
         }
         println("\ncountCards=$countCards countIncludedCards=$countCardsIncluded took $stopwatch\n")
@@ -111,7 +114,7 @@ class OneShotAudit(
         }
     }
 
-    inner class AssertionAudit(val contest: ContestWithAssertions, val cassertion: ClcaAssertion) {
+    inner class AssertionAudit(val contest: ContestWithAssertions, val cassertion: ClcaAssertion, val show: Boolean = false) {
         val id = contest.id
         val endingTestStatistic = 1 / config.riskLimit
         val cassorter = cassertion.cassorter

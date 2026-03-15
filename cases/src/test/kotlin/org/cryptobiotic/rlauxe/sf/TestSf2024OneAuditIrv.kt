@@ -5,8 +5,8 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.raire.RaireAssorter
@@ -34,7 +34,7 @@ class TestSf2024OneAuditIrv() {
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
     val cardManifest: CardManifest
-    val cardPools: List<OneAuditPool>
+    val cardPools: List<CardPool>
     val mvrs: CloseableIterable<AuditableCard>
 
     init {
@@ -179,7 +179,7 @@ class TestSf2024OneAuditIrv() {
 
         var sumMarginInVotes = 0.0
         cardPools.forEach { pop ->
-            val pool = pop as OneAuditPoolIF
+            val pool = pop as CardPoolIF
             val poolAvg = cassorter.poolAverages.assortAverage[pool.poolId]
             if (poolAvg != null) {
                 val marginInVotes = mean2margin(poolAvg) * pool.ncards()

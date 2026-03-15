@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.raire
 
-import org.cryptobiotic.rlauxe.audit.Population
+import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import kotlin.random.Random
@@ -10,7 +10,7 @@ import kotlin.random.Random
 // Try using in San Francisco, since we could generate the VoteConsolidators from the cvrs in the pool
 fun simulateOneAuditRaire(N: Int, contestId: Int, ncands:Int, minMargin: Double, poolPct: Int,
                              undervotePct: Double = .05, phantomPct: Double = .005, quiet: Boolean = true)
-        : Triple<RaireContestWithAssertions, List<Cvr>, List<OneAuditPool>> {
+        : Triple<RaireContestWithAssertions, List<Cvr>, List<CardPool>> {
 
     val (raireCUA, cvrs) = simulateRaireTestContest(N, contestId, ncands, minMargin, undervotePct, phantomPct, quiet)
 
@@ -32,7 +32,7 @@ fun simulateOneAuditRaire(N: Int, contestId: Int, ncands:Int, minMargin: Double,
     //    val possibleContests: IntArray, // the list of possible contests.
     //    val hasSingleCardStyle: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
     //)
-    val pop = Population("simulateOneAuditRaire", 42, intArrayOf(contestId), true)
+    val pop = Batch("simulateOneAuditRaire", 42, intArrayOf(contestId), true)
     val pools = calcOneAuditPoolsFromMvrs(
         infos,
         listOf(pop),

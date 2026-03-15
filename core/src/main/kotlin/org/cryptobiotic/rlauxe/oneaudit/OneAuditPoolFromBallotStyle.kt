@@ -1,7 +1,10 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
-import org.cryptobiotic.rlauxe.audit.PopulationIF
+import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
+import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.roundUp
 import kotlin.collections.component1
@@ -9,13 +12,15 @@ import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.math.max
 
+// used when you dont have CVRs, just pool totals.
+// simulate the pool Cvrs, for estimating sample sizes
 data class OneAuditPoolFromBallotStyle(
     override val poolName: String,
     override val poolId: Int,
     val hasSingleCardStyle: Boolean,
-    val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes; must include contests with no votes
-    val infos: Map<Int, ContestInfo>, // all infos
-): OneAuditPoolIF, PopulationIF {
+    val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes; must include contests and candidates with no votes
+    val infos: Map<Int, ContestInfo>, // all contests
+): CardPoolIF, BatchIF {
 
     val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
     val maxMinCardsNeeded: Int
@@ -130,7 +135,7 @@ data class OneAuditPoolFromBallotStyle(
         return result
     }
 
-    fun toOneAuditPool(): OneAuditPool {
-        return OneAuditPool(this.poolName, this.poolId, this.hasSingleCardStyle, this.infos, this.voteTotals, this.ncards())
+    fun toOneAuditPool(): CardPool {
+        return CardPool(this.poolName, this.poolId, this.hasSingleCardStyle, this.infos, this.voteTotals, this.ncards())
     }
 }

@@ -10,12 +10,12 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
-import org.cryptobiotic.rlauxe.oneaudit.unpooled
+import org.cryptobiotic.rlauxe.audit.unpooled
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.raire.makeRaireOneAuditContest
 import org.cryptobiotic.rlauxe.raire.makeRaireContest
@@ -43,7 +43,7 @@ class CreateSfElection(
 ): CreateElectionIF {
     val cardPoolMapByName: Map<String, OneAuditPoolFromCvrs>
     val cardPoolBuilders: List<OneAuditPoolFromCvrs>
-    val cardPools: List<OneAuditPool>
+    val cardPools: List<CardPool>
     val phantomCount: Map<Int, Int>  // id -> nphantoms
     val contestsUA: List<ContestWithAssertions>
     val ncards: Int
@@ -151,8 +151,8 @@ class CreateSfElection(
         auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = poolsHaveOneCardStyle,
     )
 
-    override fun populations() = if (auditType.isClca()) emptyList() else cardPoolBuilders
-    override fun makeCardPools() = cardPools
+    override fun batches() = if (auditType.isClca()) emptyList() else cardPoolBuilders
+    override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
     override fun cards() = createCards(auditType)
     override fun ncards() = ncards
@@ -162,17 +162,12 @@ class CreateSfElection(
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
         val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPoolBuilders.associate { it.name() to it.id() })
 
-        return if (auditType == AuditType.ONEAUDIT) CvrsToCardsAddStyles(
-            auditType,
-            cvrIter,
-            null, // there are no phantoms
-            cardPoolBuilders)
-        else
-            CvrsToCardsAddStyles(
+        return CvrsToCardManifest(
                 auditType,
                 cvrIter,
                 null, // there are no phantoms
-                null)
+                cardPoolBuilders
+        )
     }
 
     // TODO add optional fuzz or some other error method
@@ -209,7 +204,7 @@ fun makeClcaContestsSF(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, Contes
 }
 
 fun makeOneAuditContestsSF(infos: Map<Int, ContestInfo>, allCvrTabs: Map<Int, ContestTabulation>, contestNcs : Map<Int, Int>, contestNbs: Map<Int, Int>,
-                           unpooledPool: OneAuditPoolFromCvrs, oneAuditPools: List<OneAuditPool>): List<ContestWithAssertions> {
+                           unpooledPool: OneAuditPoolFromCvrs, oneAuditPools: List<CardPool>): List<ContestWithAssertions> {
     val contestsUAs = mutableListOf<ContestWithAssertions>()
 
     // make non IRV contests
@@ -336,7 +331,8 @@ fun createSfElection(
     mvrFuzz: Double? = null,
     minRecountMargin: Double = 0.005,
     minMargin: Double = 0.0,
-    removeCutoffContests: Boolean = true,
+    contestSampleCutoff: Int?,
+    auditSampleCutoff: Int?,
     removeMaxContests: Int? = null,
  ): Result<AuditRoundIF, ErrorMessages> {
     val stopwatch = Stopwatch()
@@ -361,7 +357,7 @@ fun createSfElection(
             minRecountMargin=minRecountMargin,
             minMargin=minMargin,
             removeMaxContests = removeMaxContests,
-            removeCutoffContests = removeCutoffContests,
+            contestSampleCutoff = contestSampleCutoff, auditSampleCutoff = auditSampleCutoff,
             simFuzzPct=mvrFuzz, persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs,
             simulationStrategy = SimulationStrategy.optimistic,
             clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
@@ -372,14 +368,16 @@ fun createSfElection(
             minRecountMargin=minRecountMargin,
             minMargin=minMargin,
             removeMaxContests = removeMaxContests,
-            contestSampleCutoff = 20_000, removeCutoffContests = removeCutoffContests,
+            contestSampleCutoff = contestSampleCutoff, auditSampleCutoff = auditSampleCutoff,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
             simulationStrategy = SimulationStrategy.optimistic,
             clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
         )
 
         else -> AuditConfig(
-            AuditType.POLLING, riskLimit = .05, contestSampleCutoff = 10000, nsimEst = 20) // TODO
+            AuditType.POLLING, riskLimit = .05, nsimEst = 20,
+            contestSampleCutoff = contestSampleCutoff, auditSampleCutoff = auditSampleCutoff,
+            ) // TODO
     }
 
     createAuditRecord(config, election, auditDir = auditdir)

@@ -8,8 +8,6 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
-import org.cryptobiotic.rlauxe.oneaudit.Vunder
-import org.cryptobiotic.rlauxe.oneaudit.VunderPicker
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.math.min
 import kotlin.math.round

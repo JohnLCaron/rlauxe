@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
 
@@ -16,7 +16,7 @@ class MvrManagerFromManifest(
     val infoList: List<ContestInfo>,
     seed:Long,
     val simFuzzPct: Double?,
-    val pools: List<OneAuditPool>? = null,
+    val pools: List<CardPool>? = null,
 ) : MvrManager {
 
     private var mvrsRound: List<AuditableCard> = emptyList()
@@ -39,8 +39,8 @@ class MvrManagerFromManifest(
         return CardManifest.createFromList(sortedCards, pools)
     }
 
-    override fun oapools() = pools
-    override fun populations() = pools
+    override fun pools() = pools
+    override fun batches() = pools
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
         if (mvrsRound.isEmpty()) {  // for SingleRoundAudit.

@@ -26,7 +26,8 @@ class TestGenerateAllUseCases {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
             auditType = AuditType.ONEAUDIT,
-            // minMargin = .011
+            contestSampleCutoff = 2500,
+            auditSampleCutoff = 5000,
         )
     }
 
@@ -38,7 +39,8 @@ class TestGenerateAllUseCases {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
             auditType = AuditType.CLCA,
-            // minMargin = .011
+            contestSampleCutoff = 1000,
+            auditSampleCutoff = 2000,
         )
     }
 
@@ -75,6 +77,8 @@ class TestGenerateAllUseCases {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
+            contestSampleCutoff = 2500,
+            auditSampleCutoff = 5000,
         )
     }
 
@@ -89,14 +93,16 @@ class TestGenerateAllUseCases {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
+            contestSampleCutoff = 1000,
+            auditSampleCutoff = 2000,
         )
     }
 
     @Test
     fun createAllBelgiumElections() {
         val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
-        belgianElectionMap.keys.forEach {
-            allmvrs[it] =  createBelgiumElection(it)
+        belgianElectionMap.keys.forEachIndexed { idx, name ->
+            allmvrs[name] =  createBelgiumElection(name, idx+1)
         }
         allmvrs.forEach {
             val pct = (100.0 * it.value.second) / it.value.first.toDouble()

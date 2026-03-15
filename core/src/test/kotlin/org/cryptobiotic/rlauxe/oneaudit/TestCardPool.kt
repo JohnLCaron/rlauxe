@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.oneaudit
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.Vunder
+import org.cryptobiotic.rlauxe.estimate.makeCvrsForPool
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -10,7 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-class TestOneAuditPool {
+class TestCardPool {
 
     @Test
     fun testCardPoolFromCvrs() {

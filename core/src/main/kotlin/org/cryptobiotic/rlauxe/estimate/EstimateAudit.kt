@@ -11,12 +11,9 @@ import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
-import org.cryptobiotic.rlauxe.oneaudit.VunderPool
-import org.cryptobiotic.rlauxe.oneaudit.VunderPools
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.workflow.CardManifest
@@ -36,8 +33,8 @@ class EstimateAudit(
     val config: AuditConfig,
     val roundIdx: Int,
     val contests: List<ContestRound>,
-    val pools: List<OneAuditPool>?,
-    val populations: List<PopulationIF>?,
+    val pools: List<CardPool>?,
+    val batches: List<BatchIF>?,
     val cardManifest: CardManifest,
 ) {
 
@@ -55,9 +52,9 @@ class EstimateAudit(
         // TODO use 1 when CLCA with no errors
         val ntrials = if (config.isClca) 1 else config.nsimEst
         repeat(ntrials) { run ->
-            tasks.add(AuditTrialTask(roundIdx, run+1, config, contestsToAudit, pools, populations, cardManifest))
+            tasks.add(AuditTrialTask(roundIdx, run+1, config, contestsToAudit, pools, batches, cardManifest))
         }
-        val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunnerG<List<AssertionTrialIF>>().run(tasks)
+        val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunnerG<List<AssertionTrialIF>>().run(tasks, nthreads=1)
 
         val trackerResults = mutableMapOf<Int, MutableList<AssertionTrialIF>>()
         contestsToAudit.forEach { trackerResults[it.id] = mutableListOf() }
@@ -139,22 +136,21 @@ class AuditTrialTask(
     val run: Int,
     val config: AuditConfig,
     val contestsToAudit: List<ContestRound>,
-    val pools: List<OneAuditPool>?,
-    val populations: List<PopulationIF>?,
+    val pools: List<CardPool>?,
+    val batches: List<BatchIF>?,
     val cardManifest: CardManifest) : ConcurrentTaskG<List<AssertionTrialIF>> {
 
     override fun name() = "roundIdx $roundIdx Run $run"
 
     override fun run(): List<AssertionTrialIF> {
         val stopwatch = Stopwatch()
-        // used for OA and Polling; different simulated pool data each run
+
+        // used for OA and Polling; different simulated pool data each run; TODO could use Fuzzer
         val vunderPools = if (pools != null && !config.isClca) VunderPools(pools) else null
+
+        // Polling without pools, auto generate OnePool based on contest totals
+        // Can we do better with Batches ?? Seems like if card has a batch, we can use possible contests to be closer to mvr....
         val vunderPool = if (vunderPools == null && config.isPolling) VunderPool.fromContests(contestsToAudit.map { it.contestUA }, 42) else null
-
-        // TODO Polling without pools, only populations; auto generate OnePool based on contest totals
-        //     can just use contest totals. a contest can generate a Vunder
-
-        // val vunderPopulations = if (config.isPolling && populations != null) VunderPopulations(populations) else null
 
         val contestTrials: List<AssertionTrialIF> = contestsToAudit.map {
             if (config.isPolling) ContestPollingTrial(run, config, it.contestUA, it.minAssertion()!!)

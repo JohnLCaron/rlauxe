@@ -6,8 +6,8 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CreateElectionIF
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
-import org.cryptobiotic.rlauxe.audit.Population
-import org.cryptobiotic.rlauxe.audit.PopulationIF
+import org.cryptobiotic.rlauxe.audit.Batch
+import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
@@ -17,13 +17,13 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.oneaudit.Vunder
+import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
@@ -87,7 +87,8 @@ class CardManifestAttack {
                     false,
                     // intArrayOf(2),
                     votes = mapOf(2 to intArrayOf(1)),
-                    poolId = null
+                    poolId = null,
+                    "cvr"
                 )
             )
             mvrCount++
@@ -105,7 +106,8 @@ class CardManifestAttack {
                     false,
                     //groupBcontests,
                     votes = null, // no votes when pooled
-                    poolId = 1
+                    poolId = 1,
+                    "pool1"
                 )
             )
             poolCount++
@@ -126,7 +128,7 @@ class CardManifestAttack {
                 false,
                 //intArrayOf(2),
                 votes = mapOf(2 to intArrayOf(1)),  // move the 50-100 votes to here
-                poolId=null))
+                poolId=null,"cvr"))
             mvrCount++
             index++
         }
@@ -134,14 +136,14 @@ class CardManifestAttack {
         // these are Bobs pooled votes that match the mvrs
         repeat(25) {
             // mvr has Bob's votes
-            mcards.add(AuditableCard("Pool1-$poolCount", index, 0L, false, votes = null, poolId = 1))
+            mcards.add(AuditableCard("Pool1-$poolCount", index, 0L, false, votes = null, poolId = 1, "pool1"))
             poolCount++
             index++
         }
         // these are contestB pooled votes that match the mvrs
         repeat(25) {
             // mvr doesnt contain contest 1
-            mcards.add(AuditableCard("Pool1-$poolCount", index, 0L, false, votes = null, poolId = 1))
+            mcards.add(AuditableCard("Pool1-$poolCount", index, 0L, false, votes = null, poolId = 1, "pool1"))
             poolCount++
             index++
         }
@@ -181,7 +183,7 @@ class CardManifestAttack {
         println("true Contest totals")
         realcontestUA.forEach { contestUA -> println(contestUA.showSimple())}
 
-        val cardStyle = Population("groupB", 1, groupBcontests, false)
+        val cardStyle = Batch("groupB", 1, groupBcontests, false)
         val realPools = calcOneAuditPoolsFromMvrs(infos, listOf(cardStyle), mvrs)
         realPools.forEach{ println(it) }
         println("--------------------- end truth")
@@ -266,17 +268,17 @@ class CreateElectionForAttack(
     val contestsUA: List<ContestWithAssertions>,
     val cards: List<AuditableCard>,
     val mvrs: List<Cvr>,
-    val populations: List<PopulationIF>?,
-    val cardPools: List<OneAuditPool>?,
+    val populations: List<BatchIF>?,
+    val cardPools: List<CardPool>?,
 ): CreateElectionIF {
 
     override fun electionInfo() = ElectionInfo(AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
     override fun createUnsortedMvrsInternal() = mvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null
     override fun contestsUA() = contestsUA
-    override fun populations() = populations
+    override fun batches() = populations
     override fun cards() = Closer( cards.iterator() )
-    override fun makeCardPools() = cardPools
+    override fun cardPools() = cardPools
     override fun ncards() = cards.size
 }
 
@@ -289,7 +291,7 @@ fun ContestWithAssertions.showSimple() = buildString {
 ////////////////////////////////////////////
 // TODO get rid of
 data class OneAuditPoolForAttack(override val poolName: String, override val poolId: Int, val hasSingleCardStyle: Boolean,
-                        val ncards: Int, val regVotes: Map<Int, ContestVotes>) : OneAuditPoolIF {
+                        val ncards: Int, val regVotes: Map<Int, ContestVotes>) : CardPoolIF {
     override fun name() = poolName
     override fun id() = poolId
     override fun hasSingleCardStyle() = hasSingleCardStyle

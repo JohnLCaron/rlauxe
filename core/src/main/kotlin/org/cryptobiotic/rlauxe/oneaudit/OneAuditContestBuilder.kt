@@ -1,23 +1,26 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.util.margin2mean
+
+//// common code for building OneAudit contests
 
 interface OneAuditContestBuilderIF {
     val contestId: Int
     fun poolTotalCards(): Int // total cards in all pools for this contest
     fun expectedPoolNCards(): Int // expected total pool cards for this contest, making assumptions about missing undervotes
-    fun adjustPoolInfo(cardPools: List<OneAuditPoolIF>)
+    fun adjustPoolInfo(cardPools: List<CardPoolIF>)
 }
 
 private const val debug = false
 
-// the contests share the audit pools, so its convenient to process them all at once?
+// the contests share the card pools, so its convenient to process them all at once
 fun makeOneAuditContests(
     wantContests: List<ContestIF>, // the contests you want to audit
     npopMap: Map<Int,Int>,  // contestId -> Npop
-    cardPools: List<OneAuditPoolIF>,
+    cardPools: List<CardPoolIF>,
 ): List<ContestWithAssertions> {
 
     val contestsUA = wantContests.filter{ !it.isIrv() }.map { contest ->
@@ -39,7 +42,7 @@ fun makeOneAuditContests(
 // this also repalces the clcaAssertions with ones that use ClcaAssorterOneAudit which contain the pool assorter averages
 fun setPoolAssorterAverages(
     oaContests: List<ContestWithAssertions>,
-    pools: List<OneAuditPoolIF>, // poolId -> pool
+    pools: List<CardPoolIF>, // poolId -> pool
 ) {
     val oneAuditErrorsFromPools = OneAuditRatesFromPools(pools)
 

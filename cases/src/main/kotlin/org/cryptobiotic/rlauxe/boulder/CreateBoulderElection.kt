@@ -8,6 +8,8 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.ContestVotes
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
+import org.cryptobiotic.rlauxe.estimate.Vunder
+import org.cryptobiotic.rlauxe.estimate.makeCvrsForPool
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.*
@@ -178,7 +180,8 @@ class CreateBoulderElection(
     // make simulated CVRs for one pool, all contests
     private fun makeCvrsForOnePool(cardPool: OneAuditPoolFromBallotStyle) : List<Cvr> { // contestId -> candidateId -> nvotes
         val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
-        val cvrs = makeCvrsForPool(poolVunders, cardPool.poolName, poolId = cardPool.poolId, cardPool.hasSingleCardStyle)
+        val cvrs =
+            makeCvrsForPool(poolVunders, cardPool.poolName, poolId = cardPool.poolId, cardPool.hasSingleCardStyle)
         // TODO is it true that the number of cvrs can vary when there are multiple contests ?
         //if (cardPool.ncards() != cvrs.size)
         //    logger.warn{"cardPool.ncards ${cardPool.ncards()} != cvrs.size = ${cvrs.size}"}
@@ -289,8 +292,8 @@ class CreateBoulderElection(
 
     override fun electionInfo() = ElectionInfo(auditType, ncards(), contestsUA.size, true, poolsHaveOneCardStyle=true)
     override fun contestsUA() = contestsUA
-    override fun populations() = if (auditType.isClca()) emptyList() else cardPoolBuilders
-    override fun makeCardPools() = if (auditType.isClca()) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
+    override fun batches() = if (auditType.isClca()) emptyList() else cardPoolBuilders
+    override fun cardPools() = if (auditType.isClca()) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
     override fun createUnsortedMvrsInternal() = allCvrs
     override fun createUnsortedMvrsExternal() = null
 
@@ -299,22 +302,12 @@ class CreateBoulderElection(
 
     fun createCards(): CloseableIterator<AuditableCard> {
         // same cvrs for CLCA and OneAudit
-        return if (auditType.isClca()) {
-            CvrsToCardsAddStyles(
-                AuditType.CLCA,
-                Closer(allCvrs.iterator()), // use the mvrs as the cvrs
-                null,
-                null
-            )
-        } else {
-            // turn cvrs into cards with pools
-            CvrsToCardsAddStyles(
-                AuditType.ONEAUDIT,
-                Closer(allCvrs.iterator()),
-                null,
-                populations = cardPoolBuilders
-            )
-        }
+        return CvrsToCardManifest(
+            auditType,
+            Closer(allCvrs.iterator()), // use the mvrs as the cvrs
+            null,
+            batches = cardPoolBuilders
+        )
     }
 }
 
@@ -332,7 +325,8 @@ fun createBoulderElection(
     maxSamplePct: Double = 0.0,
     auditConfigIn: AuditConfig? = null,
     mvrFuzz: Double? = null,
-    removeCutoffContests: Boolean = true,
+    contestSampleCutoff: Int?,
+    auditSampleCutoff: Int?,
     removeMaxContests: Int? = null,
 ): Result<AuditRoundIF, ErrorMessages> {
 
@@ -356,7 +350,8 @@ fun createBoulderElection(
                 maxSamplePct=maxSamplePct,
                 nsimEst = 20,
                 removeMaxContests=removeMaxContests,
-                removeCutoffContests = removeCutoffContests,
+                contestSampleCutoff = contestSampleCutoff,
+                auditSampleCutoff = auditSampleCutoff,
                 persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
                 clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
             )
@@ -369,7 +364,8 @@ fun createBoulderElection(
                 maxSamplePct=maxSamplePct,
                 nsimEst=20,
                 removeMaxContests=removeMaxContests,
-                contestSampleCutoff = 100_000, removeCutoffContests = removeCutoffContests,
+                contestSampleCutoff = contestSampleCutoff,
+                auditSampleCutoff = auditSampleCutoff,
                 persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
                 clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
             )

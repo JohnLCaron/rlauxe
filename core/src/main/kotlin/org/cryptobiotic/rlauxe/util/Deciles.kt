@@ -3,6 +3,8 @@ package org.cryptobiotic.rlauxe.util
 import kotlin.math.min
 import kotlin.math.round
 
+//// TODO perhaps combine or replace with Quantiles ??
+
 // TODO if < 10, just show list with trailing 0s
 // 10*(idx+1) percent of distribution is less than decile[idx]
 fun makeDeciles(data: List<Int>): List<Int> {

@@ -310,16 +310,16 @@ class DHondtContest(
         this.votes.forEach { (candid, nvotes) ->
             repeat(nvotes) {
                 count++
-                cvrs.add( Cvr("cvr$count", mapOf(id to intArrayOf(candid))))
+                cvrs.add( Cvr("cvr$count", mapOf(id to intArrayOf(candid)), poolId=info.id))
             }
         }
         repeat(undervotes) {
             count++
-            cvrs.add( Cvr("undervote$count", mapOf(id to IntArray(0))))
+            cvrs.add( Cvr("undervote$count", mapOf(id to IntArray(0)), poolId=info.id))
         }
         repeat(Nphantoms()) {
             count++
-            cvrs.add( Cvr("phantom$count", mapOf(id to IntArray(0)), phantom=true))
+            cvrs.add( Cvr("phantom$count", mapOf(id to IntArray(0)), poolId=info.id, phantom=true))
         }
         cvrs.shuffle()
         return cvrs

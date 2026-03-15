@@ -56,7 +56,7 @@ class SfSingleRoundAuditTask(
                 val contestRound = ContestRound(contestUA, listOf(assertionRound), 1)
 
                 val skipper = AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run)
-                val manifestWithSkipper = CardManifest(skipper, 0, rlauxAudit.mvrManager().sortedManifest().populations)
+                val manifestWithSkipper = CardManifest(skipper, 0, rlauxAudit.mvrManager().sortedManifest().batches)
 
                 val sampler =
                     ClcaSamplerErrorTracker.withNoErrors(

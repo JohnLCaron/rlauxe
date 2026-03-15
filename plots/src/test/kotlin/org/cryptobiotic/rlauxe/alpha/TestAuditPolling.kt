@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.plots.plotDDsample
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.estimate.*
-import org.cryptobiotic.rlauxe.oneaudit.tabulateVotesFromCvrs
+import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.Sampler

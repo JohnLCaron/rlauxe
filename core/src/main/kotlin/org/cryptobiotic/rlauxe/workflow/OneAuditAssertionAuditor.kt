@@ -7,13 +7,13 @@ import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.TestH0Result
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 
 private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
 
 // allows running OneAudit with RunClcaContestTask
-class OneAuditAssertionAuditor(val pools: List<OneAuditPoolIF>, val quiet: Boolean = true) : ClcaAssertionAuditorIF {
+class OneAuditAssertionAuditor(val pools: List<CardPoolIF>, val quiet: Boolean = true) : ClcaAssertionAuditorIF {
 
     override fun run(
         config: AuditConfig,

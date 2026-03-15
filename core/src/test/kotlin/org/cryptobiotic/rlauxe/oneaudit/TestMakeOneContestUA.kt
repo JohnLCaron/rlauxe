@@ -1,9 +1,11 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.betting.TestH0Status
+import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.roundToClosest
@@ -113,7 +115,7 @@ class TestMakeOneContestUA {
         checkAgainstVerify(contestOA, cardPools, mvrs)
     }
 
-    fun checkBasics(contestOA: ContestWithAssertions, cardPools: List<OneAuditPoolIF>, margin: Double, cvrPercent: Double, expectedNc: Int = Nc) {
+    fun checkBasics(contestOA: ContestWithAssertions, cardPools: List<CardPoolIF>, margin: Double, cvrPercent: Double, expectedNc: Int = Nc) {
         println(contestOA)
 
         //val nvotes = contestOA.cvrNcards + ballotPools.map{ it.ncards }.sum()
@@ -137,7 +139,7 @@ class TestMakeOneContestUA {
         println()
     }
 
-    fun checkAgainstCvrs(contestOA: ContestWithAssertions, cardPools: List<OneAuditPoolIF>, testCvrs: List<Cvr>, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double) {
+    fun checkAgainstCvrs(contestOA: ContestWithAssertions, cardPools: List<CardPoolIF>, testCvrs: List<Cvr>, cvrPercent: Double, undervotePercent: Double, phantomPercent: Double) {
         val bassorter = contestOA.minClcaAssertion()!!.cassorter as OneAuditClcaAssorter
         println(bassorter)
 
@@ -168,7 +170,7 @@ class TestMakeOneContestUA {
         if (nunder > 2) assertEquals(undervotePercent, underPct, .001)
     }
 
-    fun checkAgainstVerify(contestOA: ContestWithAssertions, cardPools: List<OneAuditPoolIF>, testCvrs: List<Cvr>) {
+    fun checkAgainstVerify(contestOA: ContestWithAssertions, cardPools: List<CardPoolIF>, testCvrs: List<Cvr>) {
 
         val allCvrVotes = mutableMapOf<Int, ContestTabulation>()
         val nonpoolCvrVotes = mutableMapOf<Int, ContestTabulation>()

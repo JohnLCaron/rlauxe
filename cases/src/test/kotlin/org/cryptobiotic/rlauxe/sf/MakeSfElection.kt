@@ -38,7 +38,8 @@ class MakeSfElection {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
-            poolsHaveOneCardStyle=false,
+            contestSampleCutoff = 2500,
+            auditSampleCutoff = 5000,
         )
     }
 
@@ -62,6 +63,8 @@ class MakeSfElection {
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
+            contestSampleCutoff = 1000,
+            auditSampleCutoff = 2000,
         )
     }
 
@@ -97,7 +100,8 @@ class MakeSfElection {
                 "ContestManifest.json",
                 "CandidateManifest.json",
                 cvrExportCsv = cvrExportCsv,
-                poolsHaveOneCardStyle=false,
+                contestSampleCutoff = 2000,
+                auditSampleCutoff = 5000,
             )
 
             val publisher = Publisher(auditdir)
@@ -174,10 +178,12 @@ class MakeSfElection {
                 "CandidateManifest.json",
                 cvrExportCsv = cvrExportCsv,
                 poolsHaveOneCardStyle=false,
-                removeCutoffContests = false,
+                contestSampleCutoff = null,
+                auditSampleCutoff = null,
                 minRecountMargin = 0.0,
                 minMargin = 0.0,
-                )
+                removeMaxContests = removeN,
+            )
 
             val publisher = Publisher(auditDir)
             val results = mutableListOf<AuditResult>()

@@ -16,7 +16,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.oneaudit.AssortAvgsInPools
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditRatesFromPools
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -135,7 +135,7 @@ fun makeRaireContest(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, 
 }
 
 // contestTab.irvVotes must be complete, including pooled data, since we generate the RaireAssertions from them.
-fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, Nbin: Int, oneAuditPools: List<OneAuditPool>): RaireContestWithAssertions {
+fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, Nbin: Int, oneAuditPools: List<CardPool>): RaireContestWithAssertions {
     val vc = contestTab.irvVotes
     val startingVotes = vc.makeVoteList()
     val votes = vc.makeVotes(info.candidateIds.size)
@@ -230,7 +230,7 @@ fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, N
 // use raireAssorter.calcMargin to set the pool assorter averages.
 fun setPoolAssorterAveragesForRaire(
     oaContests: List<ContestWithAssertions>,
-    pools: List<OneAuditPool>, // poolId -> pool
+    pools: List<CardPool>, // poolId -> pool
 ) {
     val oneAuditErrorsFromPools = OneAuditRatesFromPools(pools)
 

@@ -1,33 +1,30 @@
-package org.cryptobiotic.rlauxe.oneaudit
+package org.cryptobiotic.rlauxe.audit
 
-import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.PopulationIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.estimate.Vunder
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 
-private val logger = KotlinLogging.logger("OneAuditPool")
-
 const val unpooled = "unpooled"
 
-interface OneAuditPoolIF: PopulationIF {
+interface CardPoolIF: BatchIF {
     val poolName: String
     val poolId: Int
     fun contestTab(contestId: Int): ContestTabulation?
-    fun votesAndUndervotes(contestId: Int): Vunder // , voteForN: Int): Vunder
+    fun votesAndUndervotes(contestId: Int): Vunder // throws exception if bad contest id
 }
 
-// the common class
-data class OneAuditPool(
+// This is what comes out of the serialization import
+data class CardPool(
     override val poolName: String,
     override val poolId: Int,
     val hasSingleCardStyle: Boolean,
     val infos: Map<Int, ContestInfo>,
     val contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
     val totalCards: Int,
-): OneAuditPoolIF {
+): CardPoolIF {
     override fun name() = poolName
     override fun id() = poolId
     override fun hasSingleCardStyle() = hasSingleCardStyle
@@ -54,17 +51,12 @@ data class OneAuditPool(
     }
 
     override fun toString() = buildString {
-        appendLine("OneAuditPool(poolName='$poolName', poolId=$poolId, totalCards=$totalCards")
-    }
-
-    fun showTabs() = buildString {
-        appendLine("OneAuditPool(poolName='$poolName', poolId=$poolId, totalCards=$totalCards")
-        contestTabs.values.forEach { appendLine("  $it")}
+        appendLine("CardPool(poolName='$poolName', poolId=$poolId, totalCards=$totalCards")
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is OneAuditPool) return false
+        if (other !is CardPool) return false
 
         if (poolId != other.poolId) return false
         if (hasSingleCardStyle != other.hasSingleCardStyle) return false

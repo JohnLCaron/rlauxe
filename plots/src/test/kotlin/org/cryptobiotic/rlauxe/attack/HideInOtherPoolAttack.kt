@@ -4,8 +4,8 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCards
-import org.cryptobiotic.rlauxe.audit.Population
+import org.cryptobiotic.rlauxe.audit.MergeBatchIntoCards
+import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -101,7 +101,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
         return ClcaSingleRoundWorkflowTask(
             name(),
             workflow,
-            auditor = OneAuditAssertionAuditor(workflow.mvrManager().oapools()!!),
+            auditor = OneAuditAssertionAuditor(workflow.mvrManager().pools()!!),
             manager.sortedMvrs,
             otherParameters,
         )
@@ -152,8 +152,8 @@ class OASingleRoundWorkflowTaskGeneratorG(
 
         // now divide the cards into pools and cvrs
         val cardStyles = listOf(
-            Population("group1", 1, intArrayOf(1, 2), false),
-            Population("group2", 2, intArrayOf(2), false),
+            Batch("group1", 1, intArrayOf(1, 2), false),
+            Batch("group2", 2, intArrayOf(2), false),
         )
 
         // cards with pools
@@ -161,7 +161,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
         val cardsp = cardsu.map { mcard ->
             if (countPool < Npool) { // put first Npool into the pool
                 countPool++
-                mcard.copy(poolId=1, populationName = "group1")
+                mcard.copy(poolId=1, batchName = "group1")
             } else
                 mcard
         }
@@ -180,7 +180,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
         val mvrs = cardsp.map { mcard ->
             val org = mcard.cvr()
 
-            if (countFlips < wantFlips && mcard.populationName == "group1" && mcard.votes!!.contains(1)) {
+            if (countFlips < wantFlips && mcard.batchName == "group1" && mcard.votes!!.contains(1)) {
                 val votesForContest1 = mcard.votes!!.get(1)!!
                 if (votesForContest1.contains(2)) { // if they voted for candB
                     countFlips++
@@ -217,7 +217,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
             assertEquals(contest.votes, mtabs[contest.id]!!.votes)
         }
 
-        val converter = MergePopulationsIntoCards(
+        val converter = MergeBatchIntoCards(
             cards = modifiedCards,
             cardStyles,
         )

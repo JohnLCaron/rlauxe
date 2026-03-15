@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.persist.json
 
-import org.cryptobiotic.rlauxe.audit.Population
+import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.workflow.readPopulations
@@ -21,14 +21,14 @@ class TestReadPopulations {
         val pops = readPopulations(publisher)!!
         println("read ${pops} pool (original)")
         val pool = pops.first()
-        assertTrue(pool is Population)
+        assertTrue(pool is Batch)
         assertEquals(42, pool.id) // bogus
         assertEquals("pool42", pool.name)
 
         val scratchFile = createTempFile().toFile()
-        writePopulationsJsonFile(pops, scratchFile.toString())
+        writeBatchesJsonFile(pops, scratchFile.toString())
 
-        val roundtrip = readPopulationsJsonFileUnwrapped(scratchFile.toString())
+        val roundtrip = readBatchesJsonFileUnwrapped(scratchFile.toString())
         println("read ${roundtrip} pool (roundtrip)")
         assertEquals(pops.toSet(), roundtrip.toSet())
         val rpool = roundtrip.first()

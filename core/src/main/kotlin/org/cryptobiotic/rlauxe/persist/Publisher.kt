@@ -42,8 +42,8 @@ private val logger = KotlinLogging.logger("Publisher")
         cardManifest.csv      // AuditableCardCsv, may be zipped
         contests.json         // ContestsUnderAuditJson
         electionInfo.json     // ElectionInfoJson
-        oneauditPools.csv     // OneAuditPoolCsv (OneAudit only)
-        populations.json      // PopulationJson: PopulationIF -> Population
+        cardPools.csv         // CardPoolCsv:    CardPoolIF -> CardPool
+        batches.json          // BatchesJson: PopulationIF -> Population
 
         // auditRecord - output of CreateAuditRecord
         auditConfig.json      // AuditConfigJson
@@ -72,8 +72,8 @@ class Publisher(val auditDir: String) {
     fun cardManifestFile() = "$auditDir/cardManifest.csv" // cardManifest
     fun contestsFile() = "$auditDir/contests.json"
     fun electionInfoFile() = "$auditDir/electionInfo.json"
-    fun oneauditPoolsFile() = "$auditDir/oneauditPools.csv"
-    fun populationsFile() = "$auditDir/populations.json"
+    fun cardPoolsFile() = "$auditDir/cardPools.csv"
+    fun batchesFile() = "$auditDir/batches.json"
     fun sortedMvrsFile() = "$auditDir/private/sortedMvrs.csv"
     fun unsortedMvrsFile() = "$auditDir/private/unsortedMvrs.csv"
     fun privateOneshotFile() = "$auditDir/private/oneshot.txt"

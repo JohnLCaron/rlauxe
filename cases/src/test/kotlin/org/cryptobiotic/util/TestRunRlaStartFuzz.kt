@@ -30,9 +30,6 @@ class TestRunRlaStartFuzz {
                 "-ncontests", "11",
             )
         )
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        sortManifestInternal(publisher, config.seed)
 
         println("============================================================")
         RunVerifyContests.main(arrayOf("-in", auditdir))
@@ -65,10 +62,6 @@ class TestRunRlaStartFuzz {
                 "-ncontests", "5",
             )
         )
-
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        sortManifestInternal(publisher, config.seed)
 
         var done = false
         while (!done) {
@@ -107,9 +100,6 @@ class TestRunRlaStartFuzz {
                 "--addRaireCandidates", "5",
             )
         )
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        sortManifestInternal(publisher, config.seed)
 
         println("============================================================")
         RunVerifyContests.main(arrayOf("-in", auditdir))
@@ -151,9 +141,6 @@ class TestRunRlaStartFuzz {
                 "-extraPct", "0.01"
             )
         )
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        sortManifestInternal(publisher, config.seed)
 
         println("============================================================")
         val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)

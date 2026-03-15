@@ -24,8 +24,8 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     val sortedManifest = auditRecord.readSortedManifest()
 
     override fun sortedManifest() = sortedManifest
-    override fun oapools() = auditRecord.readCardPools()
-    override fun populations() = auditRecord.readPopulations()
+    override fun pools() = auditRecord.readCardPools()
+    override fun batches() = auditRecord.readBatches() ?: auditRecord.readCardPools()
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
         val mvrsForRound = readMvrsForRound(round)

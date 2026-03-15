@@ -1,8 +1,9 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.Population
+import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.estimate.VunderPoolsFuzzer
 import org.cryptobiotic.rlauxe.util.tabulateCards
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -46,7 +47,7 @@ class TestOneAuditFuzzers {
         val countPoolCards = cards.count { it.poolId == cardPool.poolId }
         assertEquals(countPoolCards, cardPool.ncards())
 
-        val vunderFuzz = OneAuditVunderFuzzer(pools, infos, fuzzPct, cards)
+        val vunderFuzz = VunderPoolsFuzzer(pools, infos, fuzzPct, cards)
         val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
         assertEquals(cards.size, oaFuzzedPairs.size)
 
@@ -62,7 +63,7 @@ class TestOneAuditFuzzers {
 
         val fuzzedPool = calcOneAuditPoolsFromMvrs(
             infos,
-            populations = listOf(Population("fuzzedPool", 42, intArrayOf(1, 2), false)),
+            populations = listOf(Batch("fuzzedPool", 42, intArrayOf(1, 2), false)),
             fuzzedMvrs.map { it.cvr() },
         )
         println("fuzzedPool= ${fuzzedPool.first()}")

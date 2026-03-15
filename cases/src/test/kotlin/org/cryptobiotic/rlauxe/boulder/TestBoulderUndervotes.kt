@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.boulder
 
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.Population
+import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.dominion.CastVoteRecord
 import org.cryptobiotic.rlauxe.dominion.DominionCvrExportCsv
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
@@ -44,7 +44,7 @@ class TestBoulderUndervotes {
         println("processed $count CastVoteRecords")
 
         var styleId = 1
-        val cardStyles = mutableMapOf<String, Population>()
+        val cardStyles = mutableMapOf<String, Batch>()
         ballotTypes.toSortedMap().forEach { (key, value) ->
             if (value.size == 2) {
                 val (styleA, styleB) = if (value[0].size > value[1].size) {
@@ -52,12 +52,12 @@ class TestBoulderUndervotes {
                 } else {
                     Pair(value[1], value[0])
                 }
-                cardStyles[key + "-A"] = Population(key + "-A", styleId, styleA.toIntArray(), true)
-                cardStyles[key + "-B"] = Population(key + "-B", styleId+1, styleB.toIntArray(), true)
+                cardStyles[key + "-A"] = Batch(key + "-A", styleId, styleA.toIntArray(), true)
+                cardStyles[key + "-B"] = Batch(key + "-B", styleId+1, styleB.toIntArray(), true)
                 styleId += 2
             } else {
                 value.forEach { contestIds ->
-                    cardStyles[key] = Population(key, styleId, contestIds.toIntArray(), true)
+                    cardStyles[key] = Batch(key, styleId, contestIds.toIntArray(), true)
                     styleId++
                 }
             }

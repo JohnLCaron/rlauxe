@@ -37,7 +37,7 @@ class TestSfElection {
 
         val auditRecord = AuditRecord.readFrom(auditdir) as AuditRecord
         val cardManifest = auditRecord.readSortedManifest()
-        val populationNcards = cardManifest.populations.sumOf { it.ncards() }
+        val populationNcards = cardManifest.batches.sumOf { it.ncards() }
         println("manifestSumPools = $populationNcards")
 
         var countCards = 0
@@ -95,7 +95,7 @@ class TestSfElection {
 
         val pw = PersistedWorkflow(auditRecord, false)
         val man: CardManifest = pw.mvrManager().sortedManifest()
-        val populations = man.populations
+        val populations = man.batches
 
         val sumPools = populations.sumOf { it.ncards() }
         println("sumPools = $sumPools")

@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.estimate.calcAssortAvgFromCvrs
+import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -45,7 +46,7 @@ class TestOABasics {
         val contestId = contestUA.id
         val poolId = cardPools.first().poolId
 
-        val cvrVotes =  tabulateVotesFromCvrs(mvrs.iterator())
+        val cvrVotes = tabulateVotesFromCvrs(mvrs.iterator())
         showPct("  cvrVotes", cvrVotes[contestId]!!, contestUA.Nc)
 
         val contest = contestUA.contest as Contest

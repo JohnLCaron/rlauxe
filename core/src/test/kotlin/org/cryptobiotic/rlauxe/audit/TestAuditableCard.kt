@@ -42,15 +42,15 @@ class TestAuditableCard {
     fun testEqualsAndString() {
         val id = Random.nextInt()
         val card1 = AuditableCard ("cvr$id", 42, 4422L, false, // intArrayOf(1,2,3),
-            mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), 1)
+            mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), 1, "pool1")
         val card2 = AuditableCard ("cvr$id", 42, 4422L, false, // intArrayOf(1,2,3),
-            mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), 1)
+            mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), 1, "pool1")
         assertEquals(card1.cvr(), card2.cvr())
         assertEquals(card1.hashCode(), card2.hashCode())
         assertEquals(card1, card2)
         assertEquals(card1.toString(), card2.toString())
 
-        val expected = """AuditableCard(desc='cvr$id', index=42, sampleNum=4422, phantom=false, poolId=1)
+        val expected = """AuditableCard(desc='cvr$id', index=42, sampleNum=4422, phantom=false, poolId=1, batchName='pool1')
   votes: 1:[1, 2, 3], 2:[4, 5, 6], 3:[0, 1], """
         assertEquals(expected, card1.toString())
     }

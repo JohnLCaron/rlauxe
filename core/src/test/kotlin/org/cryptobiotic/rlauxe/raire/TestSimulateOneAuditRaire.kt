@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.verify.AssortAvg
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.oneaudit.TausOA
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.mean2margin
@@ -25,7 +25,7 @@ class TestSimulateOneAuditRaire {
     val rcontest: RaireContest
     val cvrs: List<Cvr>
     val infos: Map<Int, ContestInfo>
-    val pools: List<OneAuditPool>
+    val pools: List<CardPool>
 
     init {
         val minMargin = marginRange.start + Random.nextDouble(marginRange.endInclusive - marginRange.start)

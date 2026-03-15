@@ -67,10 +67,10 @@ class TestHasStyle {
             assertEquals(contest.votes, tabs[contest.id]!!.votes)
         }
 
-        val cardStyles = if (hasStyle) null
-            else listOf(Population("all",  1, contests.map{ it.id }.toIntArray(), false))
+        val cardStyles = if (hasStyle) emptyList()
+            else listOf(Batch("all",  1, contests.map{ it.id }.toIntArray(), false))
 
-        val topdir = "$testdataDir/persist/testHasStyleClcaSingleCard"
+        val topdir = "$testdataDir/persist/hasStyle/testHasStyleClcaSingleCard"
         val auditRound = createAndRunTestAuditCards(topdir, AuditType.CLCA, contests, emptyList(), hasStyle, testCards, cardStyles)
 
         println("==========================")
@@ -162,10 +162,10 @@ class TestHasStyle {
             assertEquals(contest.votes, tabs[contest.id]!!.votes)
         }
 
-        val cardStyles = if (hasStyle) null
-            else listOf(Population("all",  1, contests.map{ it.id }.toIntArray(), false))
+        val cardStyles = if (hasStyle) emptyList()
+            else listOf(Batch("all",  1, contests.map{ it.id }.toIntArray(), false))
 
-        val topdir = "$testdataDir/persist/testHasStyleClcaMultiCard"
+        val topdir = "$testdataDir/persist/hasStyle/testHasStyleClcaMultiCard"
         val auditRound = createAndRunTestAuditCards(topdir, AuditType.CLCA, contests, listOf(3), hasStyle, allCards, cardStyles)
 
         println("==========================")
@@ -229,9 +229,9 @@ class TestHasStyle {
         val contests = listOf(contestB, contestS)
 
         // polling audits always must put in the possible contests
-        val cardStyles = listOf(Population("all", 1, contests.map{ it.id}.toIntArray(), false))
+        val cardStyles = listOf(Batch("single", 1, contests.map{ it.id}.toIntArray(), false))
 
-        val topdir = "$testdataDir/persist/testHasStylePollingSingleCard"
+        val topdir = "$testdataDir/persist/hasStyle/testHasStylePollingSingleCard"
         val auditRound = createAndRunTestAuditCvrs(topdir, AuditType.POLLING, contests, hasStyle, testCvrs, cardStyles)
 
         println("==========================")
@@ -313,10 +313,10 @@ class TestHasStyle {
         }
 
         // polling audits always must put in the possible contests
-        val cardStyles = listOf(Population("all",  1, contests.map{ it.id }.toIntArray(), false))
+        val cardStyles = listOf(Batch("all",  1, contests.map{ it.id }.toIntArray(), false))
 
         // make the audit
-        val topdir = "$testdataDir/persist/testHasStylePollingMultiCard"
+        val topdir = "$testdataDir/persist/hasStyle/testHasStylePollingMultiCard"
         val auditRound = createAndRunTestAuditCards(topdir, AuditType.POLLING, contests, listOf(3), hasStyle, allCvrs, cardStyles)
 
         // run the audit rounds
@@ -345,16 +345,16 @@ class TestHasStyle {
     }
 
     fun createAndRunTestAuditCvrs(topdir: String, auditType: AuditType, contests: List<Contest>, hasStyle: Boolean,
-                                  testCvrs: List<Cvr>, cardStyles:List<PopulationIF>?): AuditRoundIF {
+                                  testCvrs: List<Cvr>, cardStyles:List<BatchIF>?): AuditRoundIF {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         // val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
 
         val infos = contests.map{ it.info }.associateBy { it.id }
-        val cardIter = CvrsWithPopulationsToCards(auditType,
+        val cardIter = CvrsAndBatchesToCards(auditType,
             Closer(testCvrs.iterator()),
             null,
-            populations = cardStyles,
+            batches = cardStyles,
         )
         val tabs = tabulateAuditableCards(cardIter, infos).toSortedMap()
         if (showDetails) tabs.forEach { println(it) }
@@ -365,7 +365,7 @@ class TestHasStyle {
         }
 
         val election =
-            CreateElectionFromCvrs(contestsUA, testCvrs, auditType=auditType, cardPools = null, cardStyles = cardStyles)
+            CreateElectionFromCvrs(contestsUA, testCvrs, auditType=auditType, cardPools = null, batches = cardStyles)
 
         val auditdir = "$topdir/audit"
         createElectionRecord("startTestElectionClca", election, auditDir = auditdir)
@@ -385,7 +385,7 @@ class TestHasStyle {
     }
 
     fun createAndRunTestAuditCards(topdir: String, auditType: AuditType, contests: List<Contest>, skipContests: List<Int>, hasStyle: Boolean,
-                                   testCards: List<AuditableCard>, cardStyles:List<PopulationIF>?): AuditRoundIF {
+                                   testCards: List<AuditableCard>, cardStyles:List<BatchIF>): AuditRoundIF {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         // val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
@@ -399,9 +399,9 @@ class TestHasStyle {
         }
 
         val infos = contests.map{ it.info }.associateBy { it.id }
-        val cardIter = MergePopulationsIntoCards(
+        val cardIter = MergeBatchIntoCards(
             testCards,
-            populations = cardStyles,
+            batches = cardStyles,
         )
         val tabs = tabulateAuditableCards(cardIter, infos)
         if (showDetails) tabs.forEach { println(it) }
@@ -444,9 +444,9 @@ private fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestWithAss
         config,
         auditRound,
         sortedManifest = mvrManager.sortedManifest(),
-        cardPools = mvrManager.oapools(),
+        cardPools = mvrManager.pools(),
         previousSamples = emptySet(),
-        populations = mvrManager.populations(),
+        populations = mvrManager.batches(),
         // nthreads=1,
     )
 

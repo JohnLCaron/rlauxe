@@ -11,7 +11,6 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
-import org.cryptobiotic.rlauxe.oneaudit.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import org.cryptobiotic.rlauxe.workflow.ClcaSampler
 import kotlin.math.abs

@@ -4,7 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.raire.RaireContestTestData
 import org.cryptobiotic.rlauxe.testdataDir
@@ -44,7 +44,7 @@ class TestCardPoolCsv {
         assertEquals(target, roundtrip)
     }
 
-    fun makeRegPool(infos: MutableMap<Int, ContestInfo>): OneAuditPool {
+    fun makeRegPool(infos: MutableMap<Int, ContestInfo>): CardPool {
         val candVotes = mutableListOf<Map<Int, Int>>()
         candVotes.add(mapOf(0 to 200, 1 to 123, 2 to 17))
         candVotes.add(mapOf(0 to 71, 1 to 123, 2 to 0, 3 to 77, 4 to 99))
@@ -75,7 +75,7 @@ class TestCardPoolCsv {
         return pool.toOneAuditPool()
     }
 
-    fun makeIrvPool(infos: MutableMap<Int, ContestInfo>): OneAuditPool {
+    fun makeIrvPool(infos: MutableMap<Int, ContestInfo>): CardPool {
         val N = 20000
         val minMargin = .05
         val undervotePct = 0.0

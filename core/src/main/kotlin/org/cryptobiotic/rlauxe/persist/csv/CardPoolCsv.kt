@@ -2,24 +2,24 @@ package org.cryptobiotic.rlauxe.persist.csv
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import java.io.*
 
 private val logger = KotlinLogging.logger("CardPoolCsv")
 
-// data class OneAuditPool(
+// data class CardPool(
 //    override val poolName: String,
 //    override val poolId: Int,
 //    val hasSingleCardStyle: Boolean,
 //    val infos: Map<Int, ContestInfo>,
 //    val contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
 //    val totalCards: Int,
-//): OneAuditPoolIF {
+//): CardPoolIF {
 
 val CardPoolHeader = "poolId, poolName, hasSingleCardStyle, totalCards, contestId, voteForN, cands, ncards, novote, undervotes, overvotes, nphantoms, isIrv, votes:count ... \n"
 
-fun writeCardPoolCsv(pool: OneAuditPool) = buildString {
+fun writeCardPoolCsv(pool: CardPool) = buildString {
     append("${pool.poolId}, ${pool.poolName}, ${pool.hasSingleCardStyle}, ${pool.totalCards}, ")
     pool.contestTabs.values.forEachIndexed { index, contestTab ->
         if (index > 0) { append("${pool.poolId},,,, ") }
@@ -27,7 +27,7 @@ fun writeCardPoolCsv(pool: OneAuditPool) = buildString {
     }
 }
 
-fun writeCardPoolCsvFile(pool: List<OneAuditPool>, outputFilename: String) {
+fun writeCardPoolCsvFile(pool: List<CardPool>, outputFilename: String) {
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
     writer.write(CardPoolHeader)
     pool.forEach {
@@ -72,11 +72,11 @@ fun readCardPoolContinuation(line: String, current: OneAuditPoolBuilder): Boolea
     return true
 }
 
-fun readCardPoolCsvFile(filename: String, infos: Map<Int, ContestInfo>): List<OneAuditPool> {
+fun readCardPoolCsvFile(filename: String, infos: Map<Int, ContestInfo>): List<CardPool> {
     val reader: BufferedReader = File(filename).bufferedReader()
     reader.readLine() // get rid of header line
 
-    val pools = mutableListOf<OneAuditPool>()
+    val pools = mutableListOf<CardPool>()
     var line = reader.readLine()
     var currentPool: OneAuditPoolBuilder? = null
 
@@ -104,6 +104,6 @@ class OneAuditPoolBuilder(
 ) {
     val contestTabs = mutableMapOf<Int, ContestTabulation>()
 
-    fun build() = OneAuditPool(poolName, poolId, hasSingleCardStyle, infos, contestTabs, totalCards)
+    fun build() = CardPool(poolName, poolId, hasSingleCardStyle, infos, contestTabs, totalCards)
 }
 

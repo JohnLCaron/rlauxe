@@ -38,7 +38,7 @@ val toptopdir = "$testdataDir/cases/belgium/2024"
 class CreateBelgiumElection {
     @Test
     fun createBelgiumElection() {
-        createBelgiumElection("Hainaut", showVerify=true)
+        createBelgiumElection("Hainaut", 5, showVerify=true)
     }
 
     @Test
@@ -49,8 +49,8 @@ class CreateBelgiumElection {
     @Test
     fun createAllBelgiumElections() {
         val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
-        belgianElectionMap.keys.forEach {
-            allmvrs[it] =  createBelgiumElection(it)
+        belgianElectionMap.keys.forEachIndexed { idx, name ->
+            allmvrs[name] =  createBelgiumElection(name, idx+1)
         }
         allmvrs.forEach {
             val pct = (100.0 * it.value.second) / it.value.first.toDouble()
@@ -102,7 +102,7 @@ class CreateBelgiumElection {
     }
 }
 
-fun createBelgiumElection(electionName: String, stopRound:Int=0, showVerify:Boolean = false): Pair<Int, Int> {
+fun createBelgiumElection(electionName: String, contestId: Int, stopRound:Int=0, showVerify:Boolean = false): Pair<Int, Int> {
     println("======================================================")
     println("electionName $electionName")
     val filename = belgianElectionMap[electionName]!!
@@ -113,7 +113,7 @@ fun createBelgiumElection(electionName: String, stopRound:Int=0, showVerify:Bool
     val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, idx+1, it.NrOfVotes) }
     val nwinners = belgiumElection.ElectionLists.sumOf { it.NrOfSeats }
     // val dcontest = makeProtoContest(electionName, 1, dhondtParties, nwinners, belgiumElection.NrOfBlankVotes,.05)
-    val dcontest = makeProtoContest(electionName, 1, dhondtParties, nwinners, 0,.05)
+    val dcontest = makeProtoContest(electionName, contestId, dhondtParties, nwinners, 0,.05)
 
     val totalVotes = belgiumElection.NrOfValidVotes // + belgiumElection.NrOfBlankVotes
     val contestd = dcontest.createContest(Nc = totalVotes, Ncast = totalVotes)

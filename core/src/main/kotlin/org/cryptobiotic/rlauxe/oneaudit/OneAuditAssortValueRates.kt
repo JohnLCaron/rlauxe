@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import au.org.democracydevelopers.raire.irv.Votes
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.raire.RaireAssorter
 import org.cryptobiotic.rlauxe.util.doubleIsClose
@@ -31,7 +32,7 @@ data class OneAuditAssortValueRates(val rates: Map<Double, Double>, val totalInP
 }
 
 // we know exactly the assort values and their frequency; non-IRV
-class OneAuditRatesFromPools(val pools: List<OneAuditPoolIF>) {
+class OneAuditRatesFromPools(val pools: List<CardPoolIF>) {
 
     // non-IRV
     fun oaErrorRates(contestUA: ContestWithAssertions, oaCassorter: OneAuditClcaAssorter): OneAuditAssortValueRates { // sampleValue -> rate

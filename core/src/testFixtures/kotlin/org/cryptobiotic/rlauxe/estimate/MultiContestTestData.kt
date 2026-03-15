@@ -3,12 +3,12 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.audit.MergePopulationsIntoCards
-import org.cryptobiotic.rlauxe.audit.Population
+import org.cryptobiotic.rlauxe.audit.MergeBatchIntoCards
+import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.util.makePhantomCards
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.Int
 import kotlin.String
@@ -19,7 +19,7 @@ import kotlin.random.Random
 
 private const val debugAdjust = false
 
-data class MvrCardAndPops(val mvrs: List<Cvr>, val cardManifest: List<AuditableCard>, val pools: List<OneAuditPoolIF>, val styles: List<Population>)
+data class MvrCardAndPops(val mvrs: List<Cvr>, val cardManifest: List<AuditableCard>, val pools: List<CardPoolIF>, val styles: List<Batch>)
 
 /**
  * Creates a set of contests and populations, with randomly chosen candidates and margins.
@@ -45,7 +45,7 @@ data class MultiContestTestData(
 
     val contestTestBuilders: List<ContestTestDataBuilder>
     val contests: List<Contest>
-    val populations: List<Population>
+    val populations: List<Batch>
     var countBallots = 0
 
     init {
@@ -91,7 +91,7 @@ data class MultiContestTestData(
             val ncards = ballotStylePartition[idx]!!
             countBallots += ncards
 
-            Population("style$idx", idx, contestIds.toIntArray(), hasSingleCardStyle).setNcards(ncards)
+            Batch("style$idx", idx, contestIds.toIntArray(), hasSingleCardStyle).setNcards(ncards)
         }
         require(countBallots == totalBallots)
         countCards()
@@ -126,7 +126,7 @@ data class MultiContestTestData(
 
         // here we put the pool data into a single pool, and combine their contestIds, to get a diluted margin for testing
         val cardManifest = mutableListOf<AuditableCard>()
-        val converter = MergePopulationsIntoCards(
+        val converter = MergeBatchIntoCards(
             cards = mvrs,
             expandedCardStyles,
         )

@@ -6,10 +6,10 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.boulder.distributeExpectedOvervotes
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestBuilderIF
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolIF
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromBallotStyle
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
-import org.cryptobiotic.rlauxe.oneaudit.makeCvrsForPool
+import org.cryptobiotic.rlauxe.estimate.makeCvrsForPool
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -46,7 +46,7 @@ open class CreateColoradoElection (
     val cardPools: List<OneAuditPoolFromBallotStyle> = convertPrecinctsToCardPools(precinctFile, infoMap)
     val ncards: Int
 
-    val populations: List<PopulationIF>
+    val batches: List<BatchIF>
     val contests: List<ContestIF>
     val contestsUA: List<ContestWithAssertions>
     val publisher = Publisher(auditdir)
@@ -72,7 +72,7 @@ open class CreateColoradoElection (
             }
         }
 
-        populations = cardPools
+        batches = cardPools
         contests = makeContests()
 
         // have to save the mvrs while we know them
@@ -188,8 +188,8 @@ open class CreateColoradoElection (
     override fun electionInfo() =
         ElectionInfo(auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
 
-    override fun populations() = if (auditType.isClca()) emptyList() else populations
-    override fun makeCardPools() = if (auditType.isClca()) emptyList() else cardPools.map { it.toOneAuditPool() }
+    override fun batches() = if (auditType.isClca()) null else batches
+    override fun cardPools() = if (auditType.isClca()) null else cardPools.map { it.toOneAuditPool() } // POLLING uses cardPools
     override fun contestsUA() = contestsUA
     override fun ncards() = ncards
 
@@ -310,7 +310,7 @@ class CorlaContestBuilder(val info: ContestInfo, detailContest: ElectionDetailCo
     // total cards in all pools for this contest
     override fun poolTotalCards(): Int  = poolTotalCards
 
-    override fun adjustPoolInfo(cardPools: List<OneAuditPoolIF>){
+    override fun adjustPoolInfo(cardPools: List<CardPoolIF>){
         poolTotalCards = cardPools.filter{ it.hasContest(info.id) }.sumOf { it.ncards() }
     }
 

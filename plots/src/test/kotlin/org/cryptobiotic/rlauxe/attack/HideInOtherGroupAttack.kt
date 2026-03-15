@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.Population
+import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -141,8 +141,8 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
         }
         // now change the groups in the cardManifest
         val cardStyles = listOf(
-            Population("group1",  1,intArrayOf(1,2), false),
-            Population("group2", 2, intArrayOf(2), false),
+            Batch("group1",  1,intArrayOf(1,2), false),
+            Batch("group2", 2, intArrayOf(2), false),
         )
         val modifiedCards = mutableListOf<AuditableCard>()
         val cardAttacker = CardsWithStylesAttack(AuditType.CLCA, cards=Closer(cardsu.iterator()), styles=cardStyles, wantFlips=diff+1)
@@ -166,7 +166,7 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
         // now form the mvrs with the flips
         var countFlips = 0
         val mvrs = modifiedCards.map { mcard ->
-            if (mcard.populationName == "group2" && mcard.votes!!.contains(1)) { // find the flips
+            if (mcard.batchName == "group2" && mcard.votes!!.contains(1)) { // find the flips
                 countFlips++
                 val org = mcard.cvr()
                 val mvotes = org.votes.toMutableMap()
@@ -202,7 +202,7 @@ class CardsWithStylesAttack(
     val cvrsAreComplete: Boolean = true,
     val cards: CloseableIterator<AuditableCard>,
     phantomCards : List<AuditableCard>? = null,
-    styles: List<Population>,
+    styles: List<Batch>,
     val wantFlips: Int
 ): CloseableIterator<AuditableCard> {
 

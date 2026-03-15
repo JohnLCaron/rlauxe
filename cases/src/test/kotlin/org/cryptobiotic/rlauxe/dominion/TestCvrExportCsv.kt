@@ -66,9 +66,9 @@ class TestCvrExportCsv {
             42,
             43L,
             true,
-            //intArrayOf(19, 23, 99, 123456),
             mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
             99,
+            "test1-2"
         )
 
         assertEquals(target, card)
@@ -81,7 +81,7 @@ class TestCvrExportCsv {
             1,
             mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
         )
-        val card = cvr.toAuditableCard(42, 43L, true, mapOf("test1-2" to 99), showPoolVotes=false)
+        val card = cvr.toAuditableCard(42, 43L, true, mapOf("test1-2-3" to 99), showPoolVotes=false)
 
         val target = AuditableCard (
             "test1-2-3",
@@ -91,6 +91,7 @@ class TestCvrExportCsv {
             //intArrayOf(19, 23, 99, 123456),
             null,
             99,
+            "test1-2-3"
         )
 
         assertEquals(target, card)

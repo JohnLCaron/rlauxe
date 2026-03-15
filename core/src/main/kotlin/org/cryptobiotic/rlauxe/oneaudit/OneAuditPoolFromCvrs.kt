@@ -1,8 +1,11 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -14,7 +17,7 @@ data class OneAuditPoolFromCvrs(
     override val poolId: Int,
     val hasSingleCardStyle: Boolean,
     val infos: Map<Int, ContestInfo>,
-): OneAuditPoolIF {
+): CardPoolIF {
 
     val contestTabs = mutableMapOf<Int, ContestTabulation>()  // contestId -> ContestTabulation
     var totalCards = 0
@@ -108,8 +111,15 @@ data class OneAuditPoolFromCvrs(
         contestTabs.values.forEach { appendLine("  $it")}
     }
 
-    fun toOneAuditPool(): OneAuditPool {
-        return OneAuditPool(this.poolName, this.poolId, this.hasSingleCardStyle, this.infos, this.contestTabs, this.totalCards)
+    fun toOneAuditPool(): CardPool {
+        return CardPool(
+            this.poolName,
+            this.poolId,
+            this.hasSingleCardStyle,
+            this.infos,
+            this.contestTabs,
+            this.totalCards
+        )
     }
 
 }

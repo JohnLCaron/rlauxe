@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.oneaudit.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.workflow.PollingSampler
 import org.cryptobiotic.rlauxe.workflow.Sampler
 import kotlin.test.Test

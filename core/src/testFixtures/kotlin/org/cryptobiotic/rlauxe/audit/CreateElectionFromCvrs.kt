@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 
@@ -10,8 +9,8 @@ class CreateElectionFromCvrs (
     val contestsUA: List<ContestWithAssertions>,
     val cvrs: List<Cvr>, // includes phantoms
     val auditType: AuditType,
-    val cardPools: List<OneAuditPool>? = null,
-    val cardStyles: List<PopulationIF>? = null,
+    val cardPools: List<CardPool>? = null,
+    val batches: List<BatchIF>? = null,
 ): CreateElectionIF {
 
     override fun electionInfo() = ElectionInfo(
@@ -19,18 +18,18 @@ class CreateElectionFromCvrs (
     )
     override fun createUnsortedMvrsInternal() = cvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null
-    override fun populations() = cardPools
-    override fun makeCardPools() = cardPools
+    override fun batches() = batches
+    override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
     override fun cards() = createCards()
     override fun ncards() = cvrs.size
 
     fun createCards(): CloseableIterator<AuditableCard> {
-        return CvrsWithPopulationsToCards(
+        return CvrsAndBatchesToCards(
             auditType,
             Closer(cvrs.iterator()),
             phantomCvrs = null,
-            populations = cardPools ?: cardStyles,
+            batches = cardPools ?: batches,
         )
     }
 }

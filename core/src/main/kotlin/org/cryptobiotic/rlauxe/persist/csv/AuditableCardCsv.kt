@@ -12,26 +12,26 @@ import kotlin.io.path.Path
 private val logger = KotlinLogging.logger("AuditableCardCsv")
 
 // data class AuditableCard (
-//    val location: String, // info to find the card for a manual audit. Aka ballot identifier.
+//    val location: String, // enough info to find the card for a manual audit.
 //    val index: Int,  // index into the original, canonical list of cards
 //    val prn: Long,   // psuedo random number
 //    val phantom: Boolean,
-//    val possibleContests: IntArray, // remove
-//    val votes: Map<Int, IntArray>?, // must have this and/or population
-//    val poolId: Int?,
-//    val cardStyle: String? = null, // remove
-//    val population: PopulationIF? = null, // not needed if hasStyle ?
-//): CvrIF {
+//
+//    val votes: Map<Int, IntArray>?,   // CVRs and phantoms
+//    val poolId: Int?,                 // must be set if its from a CardPool
+//    val batchName: String? = null,    // batch name TODO must have ??
+//    val batch: BatchIF? = null,       // must have population or population name, otherwise hasSingleCardStyle is assumed to be true
+//)
 
-val AuditableCardHeader = "location, index, prn, phantom, poolId, style, cvr contests, candidates0, candidates1, ...\n"
+val AuditableCardHeader = "location, index, prn, phantom, poolId, batch, cvr contests, candidates0, candidates1, ...\n"
 
 fun writeAuditableCardCsv(card: AuditableCard) = buildString {
     append("${card.location}, ${card.index}, ${card.prn}, ${if(card.phantom) "yes," else ","} ")
     if (card.poolId == null) append(", ") else append("${card.poolId}, ")
-    if (card.populationName != null) {
-        append("${card.populationName}, ")
-    } else if (card.population != null)
-        append("${card.population.name()}, ")
+    if (card.batchName != null) {
+        append("${card.batchName}, ")
+    } else if (card.batch != null)
+        append("${card.batch.name()}, ")
     else
         append(", ")
 
@@ -102,7 +102,7 @@ fun readAuditableCardCsv(line: String): AuditableCard {
 
     // style = possible contests or population id
     val cardStyleToken = ttokens[idx++].trim()
-    val cardStyle = if (cardStyleToken.isEmpty()) null else cardStyleToken
+    val cardStyle = if (cardStyleToken.isEmpty()) "null" else cardStyleToken
 
     // if clca, list of actual contests and their votes
     if (idx < ttokens.size-1) {
@@ -129,9 +129,9 @@ fun readAuditableCardCsv(line: String): AuditableCard {
             require(contests.size == work.size) { "contests.size (${contests.size}) != votes.size (${work.size})" }
             contests.zip(work).toMap()
         }
-        return AuditableCard(desc, index, sampleNum, phantom, votes, poolId, populationName = cardStyle)
+        return AuditableCard(desc, index, sampleNum, phantom, votes, poolId, batchName=cardStyle)
     }
-    return AuditableCard(desc, index, sampleNum, phantom, null, poolId, populationName=cardStyle)
+    return AuditableCard(desc, index, sampleNum, phantom, null, poolId, batchName=cardStyle)
 }
 
 class AuditableCardCsvReader(filename: String): CloseableIterable<AuditableCard> {

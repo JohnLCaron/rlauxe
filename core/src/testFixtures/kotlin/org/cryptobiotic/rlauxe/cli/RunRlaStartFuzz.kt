@@ -13,7 +13,7 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPool
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -196,16 +196,16 @@ class TestClcaElection(
     )
     override fun createUnsortedMvrsInternal() = allCvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null
-    override fun populations() = null
-    override fun makeCardPools() = null
+    override fun batches() = null
+    override fun cardPools() = null
     override fun contestsUA() = contestsUA
     override fun ncards() = allCvrs.size
 
     override fun cards() : CloseableIterator<AuditableCard> {
-        return CvrsToCardsAddStyles(
+        return CvrsToCardManifest(
             AuditType.CLCA,
             Closer(allCvrs.iterator()),
-            null, null
+            null, null,
         )
     }
 
@@ -255,7 +255,7 @@ class TestPollingElection(
     val contestsUA: List<ContestWithAssertions>
     val cvrs: List<Cvr>
     val testMvrs: List<Cvr>
-    val pool: OneAuditPool
+    val contests: List<Contest>
 
     init {
         val maxMargin = .08
@@ -265,25 +265,15 @@ class TestPollingElection(
         val testData = MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin,
             phantomPctRange = phantomPctRange) // always poolid = 1
 
-        val contests: List<Contest> = testData.contests
+        contests = testData.contests
         println("Start testPersistentWorkflowPolling $testData")
         contests.forEach { println("  $it") }
 
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
         cvrs = testData.makeCvrsFromContests(42)
-        testMvrs =  makeFuzzedCvrsForClca(contests.map{ it.info() } , cvrs, fuzzMvrs)
+        testMvrs = makeFuzzedCvrsForClca(contests.map{ it.info() } , cvrs, fuzzMvrs)
 
         contestsUA = ContestWithAssertions.make(testData.contests, cards(), isClca=false)
-        val infos = contests.associate { it.id to it.info() }
-        val contestTabs = tabulateAuditableCards(cards(), infos)
-
-        //     override val poolName: String,
-        //    override val poolId: Int,
-        //    val hasSingleCardStyle: Boolean,
-        //    val infos: Map<Int, ContestInfo>,
-        //    val contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
-        //    val totalCards: Int,
-        pool = makeOnePool(42, contests, cvrs)
         contestsUA.forEach { println("  $it") }
         println()
     }
@@ -293,27 +283,27 @@ class TestPollingElection(
     )
     override fun createUnsortedMvrsInternal() = testMvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null
-    override fun populations() = null
-    override fun makeCardPools() = null // listOf(pool)
+    override fun batches() = listOf( Batch("batch42", 42, contests.map{it.id}.toIntArray(), true))  // no batches !!
+    override fun cardPools() = null
     override fun contestsUA() = contestsUA
     override fun ncards() = cvrs.size
 
     override fun cards() : CloseableIterator<AuditableCard> {
-        return CvrsToCardsAddStyles(
+        return CvrsToCardManifest(
             AuditType.POLLING,
             Closer(cvrs.iterator()),
             null,
-            populations(),
+            batches(),
         )
     }
 }
 
-fun makeOnePool(poolId: Int, contests: List<Contest>, cvrs: List<Cvr>): OneAuditPool {
+fun makeOnePool(poolId: Int, contests: List<Contest>, cvrs: List<Cvr>): CardPool {
     val infos = contests.associate { it.id to it.info() }
 
     // can just use contest totals. a contest can generate a Vunder
     val contestTabs = tabulateCvrs(cvrs.iterator(), infos)
-    return OneAuditPool("all", poolId, hasSingleCardStyle=true, infos, contestTabs, cvrs.size)
+    return CardPool("all", poolId, hasSingleCardStyle=true, infos, contestTabs, cvrs.size)
 }
 
 ////////////////////////////////
@@ -366,7 +356,7 @@ class TestOneAuditElection(
     fuzzMvrs: Double,
 ): CreateElectionIF {
     val contestsUA = mutableListOf<ContestWithAssertions>()
-    val cardPools: List<OneAuditPool>
+    val cardPools: List<CardPool>
     val cards: List<AuditableCard>
     val fuzzedMvrs: List<Cvr>
 
@@ -395,8 +385,8 @@ class TestOneAuditElection(
     )
     override fun createUnsortedMvrsInternal() = fuzzedMvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null
-    override fun populations() = cardPools
-    override fun makeCardPools() = cardPools
+    override fun batches() = cardPools
+    override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
     override fun ncards() = cards.size
 

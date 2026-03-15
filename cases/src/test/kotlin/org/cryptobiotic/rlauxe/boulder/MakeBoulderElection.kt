@@ -31,7 +31,9 @@ class MakeBoulderElection {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
             auditType = AuditType.ONEAUDIT,
-            minMargin = 0.0
+            minMargin = 0.0,
+            contestSampleCutoff = 2500,
+            auditSampleCutoff = 5000,
         )
     }
 
@@ -52,6 +54,8 @@ class MakeBoulderElection {
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
             auditType = AuditType.CLCA,
+            contestSampleCutoff = 1000,
+            auditSampleCutoff = 2000,
         )
     }
 
@@ -73,6 +77,8 @@ class MakeBoulderElection {
             "$datadir/2025C-Boulder-County-Official-Statement-of-Votes.utf8.csv",
             auditdir = auditdir,
             auditType = AuditType.CLCA,
+            contestSampleCutoff = 1000,
+            auditSampleCutoff = 2000,
         )
     }
 
@@ -164,7 +170,8 @@ class MakeBoulderElection {
                 "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
                 auditdir = auditdir,
                 auditType = AuditType.ONEAUDIT,
-                // minMargin = .011
+                contestSampleCutoff = 2500,
+                auditSampleCutoff = 5000,
             )
             return runAllRoundsAndVerify(auditdir, verify = false)
         }
@@ -231,7 +238,8 @@ class RunRemoveBoulderTask(
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditDir,
             auditType = auditType,
-            removeCutoffContests = false,
+            contestSampleCutoff = 2500,
+            auditSampleCutoff = 5000,
             minRecountMargin = 0.0,
             minMargin = 0.0,
             maxSamplePct = 0.0,

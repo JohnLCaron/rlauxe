@@ -1,21 +1,19 @@
-package org.cryptobiotic.rlauxe.oneaudit
+package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardFromCard
 import org.cryptobiotic.rlauxe.util.CardBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
+import kotlin.collections.get
 
-////////////////////////////////////////////////////////////////////////////////
-// OneAudit Estimation Sampling
-
-// OneAuditVunderFuzzer takes as input the actual cards of the contest.
+// VunderPoolsFuzzer takes as input the actual cards of the contest.
 // it simulates the pooled cards based on the pool totals
 // it optionally fuzzes the Cvrs.
 // the mvrCvrPairs are the (mvr, cvr) pairs suitable for CLCA audit
-class OneAuditVunderFuzzer(
-    pools: List<OneAuditPool>,
+class VunderPoolsFuzzer(
+    pools: List<CardPool>,
     val infos: Map<Int, ContestInfo>,
     val fuzzPct: Double,
     cards: List<AuditableCard>
@@ -40,7 +38,7 @@ class OneAuditVunderFuzzer(
 }
 
 // for all pools
-class VunderPools(pools: List<OneAuditPool>) {
+class VunderPools(pools: List<CardPool>) {
     val vunderPools: Map<Int, VunderPool>  // poolId -> VunderPool
 
     init {
@@ -66,7 +64,7 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
     val vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
 
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
-        require (poolName == "all" || card.poolId == poolId)
+        require (poolName == "all" || card.poolId == poolId) // TODO
         val cardb = CardBuilder.fromCard(card)
         card.contests().forEach { contestId ->
             val vunderPicker = vunderPickers[contestId]
@@ -106,72 +104,3 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
         }
     }
 }
-
-
-
-/*
-// interface PopulationIF {
-//    fun name(): String
-//    fun id(): Int
-//    fun possibleContests(): IntArray // the set of contests that might be on any card in the population
-//    fun hasSingleCardStyle(): Boolean // aka hasStyle: if all cards have exactly the contests in possibleContests()
-//    fun ncards(): Int
-//    fun hasContest(contestId: Int): Boolean
-//}
-class VunderPopulations(populations: List<PopulationIF>) {
-    val vunderPopulations: Map<Int, VunderPopulation>  // poolId -> VunderPool
-
-    init {
-        vunderPopulations = populations.map { population ->
-            val vunders = population.possibleContests().associate { contestId ->
-                Pair( contestId, population.votesAndUndervotes(contestId))
-            }
-            VunderPopulation(vunders, population.name(), population.id(), population.hasSingleCardStyle())
-        }.associateBy { it.poolId }
-    }
-
-    // for the given card with no votes, simulate one with votes, staying within the contest vote totals.
-    fun simulateCard(card: AuditableCard): AuditableCard {
-        val vunderContest = vunderPopulations[card.poolId]
-        return vunderContest!!.simulatePooledCard(card)
-    }
-}
-
-// for one population
-// vunders: Contest id -> Vunder
-class VunderPopulation(vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int, val hasSingleCardStyle: Boolean ) {
-    val vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
-
-    fun simulatePooledCard(card: AuditableCard): AuditableCard {
-        require (card.poolId == poolId)
-        val cardb = CardBuilder.fromCard(card)
-        card.contests().forEach { contestId ->
-            val vunderPicker = vunderPickers[contestId]
-            if (vunderPicker == null || vunderPicker.isEmpty())
-                cardb.replaceContestVotes(contestId, intArrayOf())
-            else {
-                val cands = vunderPicker.pickRandomCandidatesAndDecrement()
-                if (cands != null) {
-                    cardb.replaceContestVotes(contestId, cands) // ok if no contests on it ??
-                }
-            }
-        }
-        return cardb.build()
-    }
-
-    // used for implementing pools with hasSingleCardStyle
-    fun simulatePooledCvr(cvb2: CvrBuilder2) {
-        vunderPickers.forEach { (contestId, vunderPicker) ->
-            if (vunderPicker.isEmpty())
-                cvb2.replaceContestVotes(contestId, intArrayOf())
-            else {
-                val cands = vunderPicker.pickRandomCandidatesAndDecrement()
-                if (cands != null) {
-                    cvb2.replaceContestVotes(contestId, cands) // ok if no contests on it ??
-                }
-            }
-        }
-    }
-
-    fun done() = vunderPickers.values.all { it.isEmpty() }
-} */

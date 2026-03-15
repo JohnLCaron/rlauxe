@@ -27,8 +27,8 @@ class BelgiumClca (
     }
 
     override fun electionInfo() = ElectionInfo(AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
-    override fun populations() = null
-    override fun makeCardPools() = null
+    override fun batches() = infoMap.values.map { Batch(it.name, it.id, intArrayOf(it.id), true)}
+    override fun cardPools() = null
     override fun contestsUA() = contestsUA
     override fun cards() = createCardManifest()
     override fun ncards() = allCvrs.size
@@ -36,11 +36,11 @@ class BelgiumClca (
     override fun createUnsortedMvrsExternal() = null
 
     fun createCardManifest(): CloseableIterator<AuditableCard> {
-        return CvrsToCardsAddStyles(
+        return CvrsToCardManifest(
             AuditType.CLCA,
             Closer(allCvrs.iterator()),
             makePhantomCvrs(contestsUA().map { it.contest }),
-            null,
+            batches(),
         )
     }
 }

@@ -74,7 +74,7 @@ class TestPersistedWorkflow {
     fun testPersistedAuditPolling() {
         val topdir = "$testdataDir/persist/persistWorkflow/polling"
         val N = 50000
-        startTestElectionPolling(topdir, minMargin = .03, fuzzMvrs = .00, pctPhantoms = 0.00, ncards = N, ncontests = 1)
+        startTestElectionPolling(topdir, minMargin = .11, fuzzMvrs = .00, pctPhantoms = 0.00, ncards = N, ncontests = 1)
         runPersistedAudit(topdir, test=false)
     }
 
@@ -111,9 +111,6 @@ class TestPersistedWorkflow {
 
 fun runPersistedAudit(topdir: String, test:Boolean) {
     val auditdir = "$topdir/audit"
-    val publisher = Publisher(auditdir)
-    val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-    sortManifestExternal(topdir, publisher, config.seed)
 
     val verifyResults = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
     println()

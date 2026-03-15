@@ -45,7 +45,8 @@ class CardBuilder(
         return AuditableCard(location, index, prn, phantom,
             votes= if (votes.isEmpty()) null else votes,
             poolId=poolId ?: this.poolId,
-            populationName=cardStyle)
+            batchName= if (!votes.isEmpty()) "cvr" else cardStyle ?: "unknown",
+            batch=null)
     }
 
     companion object {
@@ -57,7 +58,7 @@ class CardBuilder(
             card.contests(), // TODO doesnt deal with "all"
             card.votes,
             card.poolId,
-            card.populationName
+            card.batchName
         )
 
     }

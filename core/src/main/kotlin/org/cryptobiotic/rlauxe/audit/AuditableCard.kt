@@ -68,10 +68,9 @@ data class AuditableCard (
             }
         }
 
-    fun exactContests(): Boolean {
+    fun hasStyle(): Boolean {
         return if (batch != null) batch.hasSingleCardStyle()
-        else if (votes != null) true // TODO
-        else false
+        else (batchName != "cvrsIncomplete") // or set a damn batch already
     }
 
     //// CvrIF

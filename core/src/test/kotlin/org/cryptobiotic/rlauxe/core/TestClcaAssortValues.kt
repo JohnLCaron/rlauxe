@@ -41,7 +41,7 @@ class TestClcaAssortValues {
         val taus = Taus(cassorter.assorter().upperBound())
         println("${taus.values()} * noerror=${cassorter.noerror}")
         println("${taus.names()}")
-        testAll(cassorter, taus, listOf(winner,other,loser, phantom), hasStyle=false)
+        testAll(cassorter, taus, listOf(winner,other,loser, phantom), hasStyle=hasStyle)
     }
 // output:
 // ClcaAssorter for contest AvB (0)
@@ -98,7 +98,7 @@ class TestClcaAssortValues {
     //[win-los, oth-los, noerror, oth-win, los-win] * noerror
     //     winner-loser tau= 0.0000 '      0' (win-los)
     //   winner-phantom tau= 0.0000 '      0' (win-los)
-    //     winner-other tau= 0.5000 ' 1-1/2u' (oth-los)
+    //     winner-other tau= 0.5000 ' 1-1/2u' (oth-los)hasStyle
     //      other-loser tau= 0.5000 ' 1-1/2u' (oth-los)
     //    other-phantom tau= 0.5000 ' 1-1/2u' (oth-los)
     //    phantom-loser tau= 0.5000 ' 1-1/2u' (oth-los)

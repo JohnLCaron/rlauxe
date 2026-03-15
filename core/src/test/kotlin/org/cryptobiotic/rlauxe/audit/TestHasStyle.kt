@@ -68,7 +68,7 @@ class TestHasStyle {
         }
 
         val cardStyles = if (hasStyle) emptyList()
-            else listOf(Batch("all",  1, contests.map{ it.id }.toIntArray(), false))
+            else listOf(Batch("all",  1, contests.map{ it.id }.toIntArray(), hasStyle))
 
         val topdir = "$testdataDir/persist/hasStyle/testHasStyleClcaSingleCard"
         val auditRound = createAndRunTestAuditCards(topdir, AuditType.CLCA, contests, emptyList(), hasStyle, testCards, cardStyles)
@@ -163,7 +163,7 @@ class TestHasStyle {
         }
 
         val cardStyles = if (hasStyle) emptyList()
-            else listOf(Batch("all",  1, contests.map{ it.id }.toIntArray(), false))
+            else listOf(Batch("all",  1, contests.map{ it.id }.toIntArray(), hasStyle))
 
         val topdir = "$testdataDir/persist/hasStyle/testHasStyleClcaMultiCard"
         val auditRound = createAndRunTestAuditCards(topdir, AuditType.CLCA, contests, listOf(3), hasStyle, allCards, cardStyles)
@@ -229,7 +229,7 @@ class TestHasStyle {
         val contests = listOf(contestB, contestS)
 
         // polling audits always must put in the possible contests
-        val cardStyles = listOf(Batch("single", 1, contests.map{ it.id}.toIntArray(), false))
+        val cardStyles = listOf(Batch("single", 1, contests.map{ it.id}.toIntArray(), hasStyle))
 
         val topdir = "$testdataDir/persist/hasStyle/testHasStylePollingSingleCard"
         val auditRound = createAndRunTestAuditCvrs(topdir, AuditType.POLLING, contests, hasStyle, testCvrs, cardStyles)
@@ -313,7 +313,7 @@ class TestHasStyle {
         }
 
         // polling audits always must put in the possible contests
-        val cardStyles = listOf(Batch("all",  1, contests.map{ it.id }.toIntArray(), false))
+        val cardStyles = listOf(Batch("all",  1, contests.map{ it.id }.toIntArray(), hasStyle))
 
         // make the audit
         val topdir = "$testdataDir/persist/hasStyle/testHasStylePollingMultiCard"

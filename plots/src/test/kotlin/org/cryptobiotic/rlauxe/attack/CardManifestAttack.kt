@@ -275,7 +275,7 @@ class CreateElectionForAttack(
     val cardPools: List<CardPool>?,
 ): CreateElectionIF {
 
-    override fun electionInfo() = ElectionInfo(AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
+    override fun electionInfo() = ElectionInfo("CardManifestAttack", AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
     override fun createUnsortedMvrsInternal() = mvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null
     override fun contestsUA() = contestsUA

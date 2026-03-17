@@ -10,9 +10,10 @@ import org.cryptobiotic.rlauxe.util.CloseableIterable
 
 private val logger = KotlinLogging.logger("MvrManager")
 
+// TODO why include the batches ??
 class CardManifest(val cards: CloseableIterable<AuditableCard>, val ncards: Int, val batches: List<BatchIF>) {
-    val popMap = batches.associateBy{ it.id() }  // TODO by name ??
-    fun batch(batchId: Int) = popMap[batchId]
+    val popMap = batches.associateBy{ it.name() }
+    fun batch(batchName: String) = popMap[batchName]
 
     companion object {
         fun createFromList(cards: List<AuditableCard>, batches: List<BatchIF>?) : CardManifest {

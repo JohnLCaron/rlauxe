@@ -53,11 +53,11 @@ fun createAuditRecord(config: AuditConfig, election: CreateElectionIF, auditDir:
             writePrivateMvrsInternal(publisher, unsortedMvrs, seed = config.seed)
         } else {
             val unsortedCards = election.createUnsortedMvrsExternal()
-            if (unsortedCards != null) {
-                writeSortedCardsExternal(externalSortDir!!, publisher.sortedMvrsFile(), unsortedCards, seed = config.seed)
+            if (unsortedCards != null && externalSortDir != null) {
+                writeSortedCardsExternal(externalSortDir, publisher.sortedMvrsFile(), unsortedCards, seed = config.seed)
                 logger.info { "createAuditRecord wrotePrivateMvrs to ${publisher.sortedMvrsFile()}" }
             } else {
-                logger.warn { "createAuditRecord did not create private mvrs not available for ${election.javaClass} auditType ${config.auditType}" }
+                logger.warn { "createAuditRecord did not create private mvrs; not available for ${election.javaClass} auditType ${config.auditType}" }
             }
         }
     }

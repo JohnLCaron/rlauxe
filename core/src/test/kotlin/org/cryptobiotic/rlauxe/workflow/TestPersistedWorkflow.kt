@@ -7,6 +7,8 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.verify.verifyMvrCardPairs
 import kotlin.test.Test
 import kotlin.test.fail
 
@@ -32,8 +34,8 @@ class TestPersistedWorkflow {
         val testMvrs = testData.makeCvrsFromContests()
         val contestsUA = contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
 
-        val election = CreateElectionFromCvrs(contestsUA, testMvrs, AuditType.CLCA)
-        createElectionRecord("persistWorkflowOA", election, auditDir = auditdir)
+        val election = CreateElectionFromCvrs("testPersistedSingleClca", contestsUA, testMvrs, AuditType.CLCA)
+        createElectionRecord(election, auditDir = auditdir)
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
         startFirstRound(auditdir)
 
@@ -59,8 +61,8 @@ class TestPersistedWorkflow {
         val testMvrs = testData.makeCvrsFromContests()
         val contestsUA = contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
 
-        val election = CreateElectionFromCvrs(contestsUA, testMvrs, AuditType.CLCA)
-        createElectionRecord("persistWorkflowOA", election, auditDir = auditdir)
+        val election = CreateElectionFromCvrs("testPersistedAuditClca", contestsUA, testMvrs, AuditType.CLCA)
+        createElectionRecord(election, auditDir = auditdir)
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
         startFirstRound(auditdir)
 
@@ -83,6 +85,7 @@ class TestPersistedWorkflow {
 
         val config = AuditConfig(
             AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = .01,
+            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs
         )
 
         val N = 5000
@@ -97,8 +100,8 @@ class TestPersistedWorkflow {
 
         val contestsUA = listOf(contestOA)
 
-        val election = CreateElectionFromCvrs(contestsUA, mvrs, AuditType.ONEAUDIT, cardPools = cardPools)
-        createElectionRecord("persistWorkflowOA", election, auditDir = auditdir)
+        val election = CreateElectionFromCvrs("testPersistedOneAudit", contestsUA, mvrs, AuditType.ONEAUDIT, cardPools = cardPools)
+        createElectionRecord(election, auditDir = auditdir)
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
         startFirstRound(auditdir)
 

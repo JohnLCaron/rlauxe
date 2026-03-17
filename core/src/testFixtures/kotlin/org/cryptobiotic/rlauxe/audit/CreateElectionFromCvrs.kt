@@ -6,6 +6,7 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 
 class CreateElectionFromCvrs (
+    val electionName: String,
     val contestsUA: List<ContestWithAssertions>,
     val cvrs: List<Cvr>, // includes phantoms
     val auditType: AuditType,
@@ -14,7 +15,7 @@ class CreateElectionFromCvrs (
 ): CreateElectionIF {
 
     override fun electionInfo() = ElectionInfo(
-        auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
+        electionName, auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
     )
     override fun createUnsortedMvrsInternal() = cvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null

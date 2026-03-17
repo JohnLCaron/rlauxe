@@ -31,6 +31,8 @@ fun checkContestsCorrectlyFormed(config: AuditConfig, contestsUA: List<ContestWi
                 val minAssertion = contestUA.minAssertion()
                 if (minAssertion != null) {
                     val marginInVotes = contestUA.contest.marginInVotes(minAssertion.assorter)
+                    if (marginInVotes < 0)
+                        contestUA.contest.marginInVotes(minAssertion.assorter)
                     if (contestUA.contest.Nphantoms() >= marginInVotes) {
                         logger.warn { "***TooManyPhantoms contest ${contestUA.id} nphantoms ${contestUA.contest.Nphantoms()} >= $marginInVotes margin in votes" }
                         contestUA.preAuditStatus = TestH0Status.TooManyPhantoms

@@ -18,7 +18,6 @@ import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.isDirectory
 
 private val logger = KotlinLogging.logger("CompositeRecord")
-private val showMissing = true
 
 data class CompositeRecord(
     override val location: String,
@@ -30,13 +29,23 @@ data class CompositeRecord(
 ): AuditRecordIF  {
 
     override fun readSortedManifest(batches: List<BatchIF>?): CardManifest {
-        return componentRecords.first().readSortedManifest(batches) // TODO
+        return componentRecords.first().readSortedManifest(batches)
     }
     override fun readSortedManifest(): CardManifest {
-        return componentRecords.first().readSortedManifest() // barf
+        val firstManifest =  componentRecords.first().readSortedManifest() // barf
+        return CardManifest(firstManifest.cards, firstManifest.ncards, readBatches())
     }
 
     override fun readOneShotMvrs() = emptyMap<Int, Int>()
+
+    override fun readBatches(): List<BatchIF> {
+        val allBatches = mutableListOf<BatchIF>()
+        for (component in componentRecords) {
+            val cbatches = component.readBatches()
+            if (cbatches != null) allBatches.addAll(cbatches)
+        }
+        return allBatches
+    }
 
    fun findComponentWithContest(wantContestName: String): AuditRecord? {
         var want: AuditRecord? = null

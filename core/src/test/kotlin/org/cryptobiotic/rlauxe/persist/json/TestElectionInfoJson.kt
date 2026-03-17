@@ -20,10 +20,10 @@ class TestElectionInfoJson {
 
     @Test
     fun testRoundtrip() {
-        testRoundtrips(ElectionInfo(AuditType.CLCA, 42, 99, true, true))
-        testRoundtrips(ElectionInfo(AuditType.POLLING, ncards=412, ncontests=63, cvrsContainUndervotes=false, poolsHaveOneCardStyle=true))
-        testRoundtrips(ElectionInfo(AuditType.ONEAUDIT, cvrsContainUndervotes = true, poolsHaveOneCardStyle=null, ncards=42, ncontests=9339))
-        testRoundtrips(ElectionInfo(AuditType.CLCA, ncards=42, ncontests=9, false, false))
+        testRoundtrips(ElectionInfo("CLCA-InfoJson", AuditType.CLCA, 42, 99, true, true))
+        testRoundtrips(ElectionInfo("POLLING-InfoJson", AuditType.POLLING, ncards=412, ncontests=63, cvrsContainUndervotes=false, poolsHaveOneCardStyle=true))
+        testRoundtrips(ElectionInfo("ONEAUDIT-InfoJson", AuditType.ONEAUDIT, cvrsContainUndervotes = true, poolsHaveOneCardStyle=null, ncards=42, ncontests=9339))
+        testRoundtrips(ElectionInfo("CLCA-InfoJsonNostyle", AuditType.CLCA, ncards=42, ncontests=9, false, false))
     }
 
     fun testRoundtrips(target: ElectionInfo) {

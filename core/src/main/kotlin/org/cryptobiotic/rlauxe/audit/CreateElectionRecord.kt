@@ -31,7 +31,7 @@ interface CreateElectionIF {
 
 private val logger = KotlinLogging.logger("CreateElectionRecord")
 
-fun createElectionRecord(name: String, election: CreateElectionIF, auditDir: String, clear: Boolean = true) {
+fun createElectionRecord(election: CreateElectionIF, auditDir: String, clear: Boolean = true) {
     if (clear) clearDirectory(Path(auditDir))
 
     val publisher = Publisher(auditDir)

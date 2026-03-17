@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.persist.json.readSamplePrns
 
 private val logger = KotlinLogging.logger("PersistedMvrManagerTest")
 
+// TODO Can only be used for CLCA; possibly switch to using Vunder??
 class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, PersistedMvrManager(auditRecord) {
 
     // extract the cards with sampleNumbers from the cardManifest, optionally fuzz them, and write them to sampleMvrsFile

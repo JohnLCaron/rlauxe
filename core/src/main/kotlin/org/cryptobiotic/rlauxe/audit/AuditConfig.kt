@@ -38,7 +38,8 @@ data class AuditConfig(
     val pollingConfig: PollingConfig = PollingConfig(),
     val clcaConfig: ClcaConfig = ClcaConfig(),
 
-    val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated,
+    val persistedWorkflowMode: PersistedWorkflowMode =
+        if (auditType.isClca()) PersistedWorkflowMode.testClcaSimulated else PersistedWorkflowMode.testPrivateMvrs,
 
     val quantile1: Double = 0.50, // use this percentile success for estimated sample size
     val version: Double = 2.0,
@@ -46,6 +47,13 @@ data class AuditConfig(
     val isClca = auditType == AuditType.CLCA
     val isOA = auditType == AuditType.ONEAUDIT
     val isPolling = auditType == AuditType.POLLING
+    var electionName: String? = null
+
+    init {
+        if (persistedWorkflowMode == PersistedWorkflowMode.testClcaSimulated && !isClca) {
+            throw RuntimeException("PersistedWorkflowMode.testClcaSimulated must be CLCA")
+        }
+    }
 
     // only used in PersistedMvrManagerTest
     fun mvrFuzzPct(): Double {

@@ -156,7 +156,7 @@ open class ClcaAssorter(
     // [2, (fol+2)/(fol+1), (2*fol+1)/(fol+1),  1, fol/(fol+1), 1/(fol+1), 0] * noerror
 
     // open fun bassort(mvr: CardIF, cvr:CardIF, hasCompleteCvrs: Boolean = this.hasCompleteCvrs): Double {
-    open fun bassort(mvr: CvrIF, cvr:CvrIF, hasStyle:Boolean=true): Double {
+    open fun bassort(mvr: CvrIF, cvr:CvrIF, hasStyle:Boolean=true): Double { // TODO remove default value
         val overstatement = overstatementError(mvr, cvr, hasStyle) // ωi eq (1)
         val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
         return tau * noerror   // Bi eq (7)

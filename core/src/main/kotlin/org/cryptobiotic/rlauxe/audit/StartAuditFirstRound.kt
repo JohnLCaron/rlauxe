@@ -127,8 +127,8 @@ fun sortManifestInternal(publisher: Publisher, seed: Long) {
     val unsortedCards = readCardsCsvIterator(publisher.cardManifestFile())
     val sortedCards = createSortedCardsInternal(unsortedCards, seed)
     val countCards = writeAuditableCardCsvFile(Closer(sortedCards.iterator()), publisher.sortedCardsFile())
-    createZipFile(publisher.sortedCardsFile(), delete = true)
-    logger.info{"writeSortedCardsInternalSort ${countCards} cards to ${publisher.sortedCardsFile()}"}
+    // createZipFile(publisher.sortedCardsFile(), delete = true)
+    logger.info{"sortManifestInternal ${countCards} cards to ${publisher.sortedCardsFile()}"}
 }
 
 fun createSortedCardsInternal(unsortedCards: CloseableIterator<AuditableCard>, seed: Long) : List<AuditableCard> {
@@ -154,7 +154,7 @@ fun writeSortedCardsExternal(topdir: String, outputFile: String, unsortedCards: 
         cardIter = unsortedCards,
         toAuditableCard = { from: AuditableCard, index: Int, prn: Long -> from.copy(index = index, prn = prn) }
     )
-    if (zip) createZipFile(outputFile, delete = true)  // TODO delete
+    // if (zip) createZipFile(outputFile, delete = true)  // TODO delete
 }
 
 // uses private/sortedMvrsFile.cvs
@@ -191,8 +191,6 @@ fun writePrivateMvrs(publisher: Publisher, sortedMvrs: List<AuditableCard>) {
     val countMvrs = writeAuditableCardCsvFile(Closer(sortedMvrs.iterator()), publisher.sortedMvrsFile())
     logger.info{"writeSortedMvrs ${countMvrs} mvrs to ${publisher.sortedMvrsFile()}"}
 }
-
-
 
 /* could test if cards are in memory
 fun writeExternalSortedCards(topdir: String, publisher: Publisher, unsortedCards: CloseableIterator<AuditableCard>, seed: Long, zip: Boolean = true) {

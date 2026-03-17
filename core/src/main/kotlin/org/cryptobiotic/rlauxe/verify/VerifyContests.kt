@@ -82,6 +82,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
     }
 }
 
+// TODO use ErrorMessages? here we have both messages and errors
 class VerifyResults() {
     private val messes = mutableListOf<String>()
     var hasErrors = false

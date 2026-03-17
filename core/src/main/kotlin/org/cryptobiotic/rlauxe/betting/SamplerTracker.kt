@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.Welford
-import org.cryptobiotic.rlauxe.util.doubleIsClose
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import kotlin.random.Random
@@ -65,7 +64,7 @@ class PollingSamplerTracker(
 
     override fun sample(): Double {
         while (hasNext()) {
-            val (mvr, _) = cvrPairs[permutedIndex[idx]]
+            val (mvr, _) = cvrPairs[permutedIndex[idx]] // ignoring the card, which knows the batch
             idx++
             val assortVal =  assorter.assort(mvr, usePhantoms = true)
             welford.update(assortVal)
@@ -147,7 +146,7 @@ class ClcaSamplerErrorTracker(
         while (idx < samples.size) {
             val (mvr, card) = samples[permutedIndex[idx]]
             idx++
-            val nextVal = cassorter.bassort(mvr, card, hasStyle=card.exactContests())
+            val nextVal = cassorter.bassort(mvr, card, hasStyle=card.hasStyle())
             clcaErrorTracker.addSample(nextVal, card.poolId == null) // dont track errors from oa pools
             return nextVal
         }

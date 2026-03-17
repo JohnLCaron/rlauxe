@@ -10,6 +10,8 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.verify.verifyMvrCardPairs
 
 private val logger = KotlinLogging.logger("PersistedMvrManager")
 private val checkValidity = true
@@ -34,14 +36,13 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
 
         val sampledCards = findSamples(sampleNumbers, auditableCards())
         require(sampledCards.size == mvrsForRound.size)
+        val mvrCardPairs = mvrsForRound.zip(sampledCards)
 
         if (checkValidity) {
-            // prove that sampledCvrs correspond to mvrsForRound
-            mvrsForRound.forEachIndexed { index, mvr ->
-                val card = sampledCards[index]
-                require(mvr.location == card.location) { "mvr location ${mvr.location} != card.location ${card.location}"}
-                require(mvr.prn == card.prn)  { "mvr prn ${mvr.prn} != card.prn ${card.prn}"}
-                require(mvr.index == card.index)  { "mvr index ${mvr.index} != card.index ${card.index}"}
+            val errs = ErrorMessages("PersistedMvrManager")
+            verifyMvrCardPairs(mvrCardPairs, errs)
+            if (errs.hasErrors()) {
+                logger.error{ errs.toString() }
             }
         }
 
@@ -50,7 +51,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
             logger.info { "write ${countCards} cards to ${publisher.sampleCardsFile(round)}" }
         }
 
-        return mvrsForRound.zip(sampledCards)
+        return mvrCardPairs
     }
 
     // the sampleMvrsFile is added externally for real audits, and by MvrManagerTestFromRecord for test audits

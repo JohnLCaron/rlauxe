@@ -88,7 +88,7 @@ class CardManifestAttack {
                     // intArrayOf(2),
                     votes = mapOf(2 to intArrayOf(1)),
                     poolId = null,
-                    "cvr"
+                    if (hasStyle) "cvr" else "incomplete",
                 )
             )
             mvrCount++
@@ -107,7 +107,7 @@ class CardManifestAttack {
                     //groupBcontests,
                     votes = null, // no votes when pooled
                     poolId = 1,
-                    "pool1"
+                    if (hasStyle) "pool1" else "incomplete",
                 )
             )
             poolCount++
@@ -122,13 +122,16 @@ class CardManifestAttack {
             // mcards.add(AuditableCard("mvr$mvrCount", mvrCount, 0L, false, intArrayOf(2), votes = mapOf(1 to intArrayOf(1)), poolId=null))
 
             // substitute cards with contest 2 undervotes
-            mcards.add(AuditableCard("mvr$mvrCount",
+            mcards.add( AuditableCard("mvr$mvrCount",
                 index,
                 0L,
                 false,
                 //intArrayOf(2),
                 votes = mapOf(2 to intArrayOf(1)),  // move the 50-100 votes to here
-                poolId=null,"cvr"))
+                poolId=null,
+                if (hasStyle) "cvr" else "incomplete",
+                )
+            )
             mvrCount++
             index++
         }

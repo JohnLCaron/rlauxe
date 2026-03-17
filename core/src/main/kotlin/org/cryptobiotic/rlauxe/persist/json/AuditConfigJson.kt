@@ -72,7 +72,7 @@ data class AuditConfigJson(
     val minMargin: Double,
     val maxSamplePct: Double,
     val removeMaxContests: Int? = null, // remove top n min-margin contests
-    val removeTooManyPhantoms: Boolean,
+    // val removeTooManyPhantoms: Boolean,
 
     val auditSampleLimit: Int?,
 
@@ -100,7 +100,7 @@ fun AuditConfig.publishJson() = AuditConfigJson(
     minMargin = this.minMargin,
     maxSamplePct = this.maxSamplePct,
     removeMaxContests = this.removeMaxContests,
-    removeTooManyPhantoms = this.removeTooManyPhantoms,
+    // removeTooManyPhantoms = this.removeTooManyPhantoms,
 
     auditSampleLimit = this.auditSampleLimit,
 
@@ -130,7 +130,7 @@ fun AuditConfigJson.import(): AuditConfig {
         minMargin = this.minMargin,
         maxSamplePct = this.maxSamplePct,
         removeMaxContests = this.removeMaxContests,
-        removeTooManyPhantoms = this.removeTooManyPhantoms,
+        // removeTooManyPhantoms = this.removeTooManyPhantoms,
 
         auditSampleLimit = this.auditSampleLimit,
 
@@ -147,10 +147,11 @@ fun AuditConfigJson.import(): AuditConfig {
 @Serializable
 data class PollingConfigJson(
     val d: Int,
+    val mode: PollingMode?,
 )
 
-fun PollingConfig.publishJson() = PollingConfigJson(this.d)
-fun PollingConfigJson.import() = PollingConfig(this.d)
+fun PollingConfig.publishJson() = PollingConfigJson(this.d, this.mode)
+fun PollingConfigJson.import() = PollingConfig(this.d, this.mode ?: PollingMode.withPools)
 
 // enum class ClcaStrategyType { generalAdaptive, generalAdaptive2}
 //data class ClcaConfig(

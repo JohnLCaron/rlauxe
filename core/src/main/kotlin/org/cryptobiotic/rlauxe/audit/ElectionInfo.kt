@@ -16,7 +16,7 @@ data class ElectionInfo(
     val auditType: AuditType,
     val ncards: Int,
     val ncontests: Int,
-    val cvrsContainUndervotes: Boolean,
+    val cvrsContainUndervotes: Boolean = true, // TODO where would we use this ??
     val poolsHaveOneCardStyle: Boolean?,
 )
 

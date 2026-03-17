@@ -23,7 +23,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.verify.AssortAvg
-import org.cryptobiotic.rlauxe.workflow.readCardManifest
+import org.cryptobiotic.rlauxe.workflow.readSortedManifest
 import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.math.roundToInt
 import kotlin.test.Test
@@ -50,7 +50,7 @@ class TestSf2024OneAuditIrv() {
         // use the cvrs from the clca as the mvrs
         val cvrdir = "$testdataDir/cases/sf2024/clca/audit"
         val cvrPublisher = Publisher(cvrdir)
-        mvrs = readCardManifest(cvrPublisher, auditRecord.electionInfo.ncards).cards
+        mvrs = readSortedManifest(cvrPublisher, infos, auditRecord.electionInfo.ncards).cards
     }
 
     @Test

@@ -121,7 +121,7 @@ fun runCards(expectations: List<Expectation>, cardManifest: CardManifest, mvrIte
             }
             expectations.forEach { expect ->
                 if (card.hasContest(expect.id)) {
-                    val bassort = expect.cassorter.bassort(mvr, card, hasStyle = card.exactContests())
+                    val bassort = expect.cassorter.bassort(mvr, card, hasStyle = card.hasStyle())
                     expect.bwelford.update(bassort)
 
                     val mvrAssort = expect.assorter.assort(mvr, usePhantoms = false)

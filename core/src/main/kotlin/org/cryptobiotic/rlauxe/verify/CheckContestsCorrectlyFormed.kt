@@ -21,19 +21,20 @@ fun checkContestsCorrectlyFormed(config: AuditConfig, contestsUA: List<ContestWi
         if (contestUA.preAuditStatus == TestH0Status.InProgress && !contestUA.isIrv) {
             checkWinnerVotes(contestUA, results)
 
-            // see if margin is too small
             if ((contestUA.minRecountMargin()?: 0.0) <= config.minRecountMargin) {
                 logger.info{"*** MinMargin contest ${contestUA.id} recountMargin ${contestUA.minRecountMargin()} <= ${config.minRecountMargin}"}
                 contestUA.preAuditStatus = TestH0Status.MinMargin
             } else if ((contestUA.minDilutedMargin()?: 0.0) <= config.minMargin) {
                 logger.info{"*** MinMargin contest ${contestUA.id} minMargin ${contestUA.minDilutedMargin()} <= ${config.minMargin}"}
                 contestUA.preAuditStatus = TestH0Status.MinMargin
-            } else { // see if too many phantoms
-                val minMargin = contestUA.minDilutedMargin() ?: 0.0
-                val adjustedMargin = minMargin - contestUA.phantomRate()
-                if (config.removeTooManyPhantoms && adjustedMargin <= 0.0) {
-                    logger.warn{"***TooManyPhantoms contest ${contestUA.id} adjustedMargin ${adjustedMargin} == $minMargin - ${contestUA.phantomRate()} < 0.0"}
-                    contestUA.preAuditStatus = TestH0Status.TooManyPhantoms
+            } else {
+                val minAssertion = contestUA.minAssertion()
+                if (minAssertion != null) {
+                    val marginInVotes = contestUA.contest.marginInVotes(minAssertion.assorter)
+                    if (contestUA.contest.Nphantoms() >= marginInVotes) {
+                        logger.warn { "***TooManyPhantoms contest ${contestUA.id} nphantoms ${contestUA.contest.Nphantoms()} >= $marginInVotes margin in votes" }
+                        contestUA.preAuditStatus = TestH0Status.TooManyPhantoms
+                    }
                 }
             }
         }

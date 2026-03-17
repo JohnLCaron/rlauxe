@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.util.makeDeciles
-import org.cryptobiotic.rlauxe.workflow.readPopulations
+import org.cryptobiotic.rlauxe.workflow.readCardPools
 import kotlin.test.Test
 
 class ShowPoolSizes {
@@ -23,13 +23,13 @@ class ShowPoolSizes {
         val publisher = Publisher(where)
 
         val contestsResults = readContestsJsonFile(publisher.contestsFile())
-        val allContests = if (contestsResults .isOk) contestsResults.unwrap().sortedBy { it.id } else null
-        val infos = allContests?.map{ it.contest.info() }?.associateBy { it.id }
+        val allContests = if (contestsResults .isOk) contestsResults.unwrap().sortedBy { it.id } else return
+        val infos = allContests.map{ it.contest.info() }.associateBy { it.id }
 
-        val populations = readPopulations(publisher)!!
-        val ncards = populations.map { it.ncards() }
+        val pools = readCardPools(publisher, infos)!!
+        val ncards = pools.map { it.ncards() }
         val deciles = makeDeciles(ncards)
-        println(" $what ncards deciles = $deciles npools= ${populations.size}")
+        println(" $what ncards deciles = $deciles npools= ${pools.size}")
     }
 
 }

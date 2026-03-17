@@ -43,7 +43,7 @@ class ClcaFuzzSamplerTracker(
             val (mvr, card) = cvrPairs[permutedIndex[idx]]
             idx++
             if (card.hasContest(contest.id)) { // should always be true
-                val nextVal = cassorter.bassort(mvr, card, hasStyle=card.exactContests())
+                val nextVal = cassorter.bassort(mvr, card, hasStyle=card.hasStyle())
                 clcaErrorTracker.addSample(nextVal, card.poolId == null) // dont track errors from oa pools
                 welford.update(nextVal)
                 return nextVal

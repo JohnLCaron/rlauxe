@@ -67,8 +67,8 @@ class ErrorMessages(val id: String, private val level: Int = 1) {
     }
 }
 
-fun mergeErrorMessages(top: String, errss: List<ErrorMessages>) : ErrorMessages {
+fun mergeErrorMessages(top: String, errs: List<ErrorMessages>) : ErrorMessages {
     val result = ErrorMessages(top)
-    errss.forEach { result.addNested(it.incr()) }
+    errs.forEach { result.addNested(it.incr()) }
     return result
 }

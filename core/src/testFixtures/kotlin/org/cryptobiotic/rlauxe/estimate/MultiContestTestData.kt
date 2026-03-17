@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.MergeBatchIntoCards
-import org.cryptobiotic.rlauxe.audit.Batch
+import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.util.makePhantomCards
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
@@ -19,13 +19,14 @@ import kotlin.random.Random
 
 private const val debugAdjust = false
 
-data class MvrCardAndPops(val mvrs: List<Cvr>, val cardManifest: List<AuditableCard>, val pools: List<CardPoolIF>, val styles: List<Batch>)
+data class MvrCardAndPops(val mvrs: List<Cvr>, val cardManifest: List<AuditableCard>, val pools: List<CardPoolIF>, val styles: List<BatchIF>)
 
 /**
  * Creates a set of contests and populations, with randomly chosen candidates and margins.
  * It can create cvrs that reflect the contests' exact votes.
  * Not for OneAudit, use makeOneAuditTest()
  * TODO use Vunder, which also models contests missing on a card
+ * TODO rewrite
  */
 data class MultiContestTestData(
     val ncontest: Int,
@@ -45,7 +46,7 @@ data class MultiContestTestData(
 
     val contestTestBuilders: List<ContestTestDataBuilder>
     val contests: List<Contest>
-    val populations: List<Batch>
+    val cardStyles: List<CardStyle>
     var countBallots = 0
 
     init {
@@ -81,7 +82,7 @@ data class MultiContestTestData(
         }
 
         // partition totalBallots amongst the ballotStyles
-        populations = List(nballotStyles) { it }.map { idx ->
+        cardStyles = List(nballotStyles) { it }.map { idx ->
             var contestsForThisBs = contestBstyles.filter{ (fc, bset) -> bset.contains( idx ) }
                 .map { (fc, _) -> fc }
 
@@ -90,8 +91,7 @@ data class MultiContestTestData(
             val contestIds = contestsForThisBs.map { it.info.id }
             val ncards = ballotStylePartition[idx]!!
             countBallots += ncards
-
-            Batch("style$idx", idx, contestIds.toIntArray(), hasSingleCardStyle).setNcards(ncards)
+            CardStyle("style$idx", idx, contestIds.toIntArray(), hasSingleCardStyle, ncards)
         }
         require(countBallots == totalBallots)
         countCards()
@@ -100,8 +100,8 @@ data class MultiContestTestData(
 
     // set contest.ncards
     fun countCards() {
-        populations.forEach { bs ->
-            bs.possibleContests().forEach { contestId ->
+        cardStyles.forEach { bs ->
+            bs.contests.forEach { contestId ->
                 val contest = contestTestBuilders.find { it.info.id == contestId }!!
                 contest.ncards += bs.ncards
             }
@@ -114,14 +114,14 @@ data class MultiContestTestData(
         val mvrs = makeCardsFromContests()
 
         // the union of the first two styles
-        val expandedContestIds = (populations[0].possibleContests() + populations[1].possibleContests()).toSet().sorted().toIntArray()
+        val expandedContestIds = (cardStyles[0].contests + cardStyles[1].contests).toSet().sorted().toIntArray()
 
         val infos = contests.associate { it.id to it.info() }
 
         // expand the two cardStyles
         val expandedCardStyles = listOf(
-            populations[0].copy(possibleContests = expandedContestIds),
-            populations[1].copy(possibleContests = expandedContestIds),
+            cardStyles[0].copy(contests = expandedContestIds),
+            cardStyles[1].copy(contests = expandedContestIds),
         )
 
         // here we put the pool data into a single pool, and combine their contestIds, to get a diluted margin for testing
@@ -142,12 +142,12 @@ data class MultiContestTestData(
         // TODO kludge
         val mvrsAsCvr = mvrs.map { it.cvr() }
 
-        return MvrCardAndPops(mvrsAsCvr, cardManifest, listOf(pool), populations)
+        return MvrCardAndPops(mvrsAsCvr, cardManifest, listOf(pool), cardStyles)
     }
 
     fun makeCardLocationManifest(): CardManifest {
         val cards = makeCardsFromContests()
-        return CardManifest(CloseableIterable { cards.iterator() }, cards.size, populations)
+        return CardManifest(CloseableIterable { cards.iterator() }, cards.size, cardStyles)
     }
 
     override fun toString() = buildString {
@@ -155,11 +155,11 @@ data class MultiContestTestData(
         appendLine(" marginRange=$marginRange underVotePct=$underVotePctRange phantomPct=$phantomPctRange")
         contestTestBuilders.forEach { fcontest ->
             append("  $fcontest")
-            val bs4id = populations.filter{ it.hasContest(fcontest.contestId) }.map{ it.name }
+            val bs4id = cardStyles.filter{ it.hasContest(fcontest.contestId) }.map{ it.name }
             appendLine(" ballotStyles=$bs4id")
         }
         appendLine("")
-        populations.forEach { appendLine("  $it") }
+        cardStyles.forEach { appendLine("  $it") }
     }
 
     // TODO not positive I have the poolId correct
@@ -167,7 +167,7 @@ data class MultiContestTestData(
         contestTestBuilders.forEach { it.resetTracker() } // startFresh
         val cvrbs = CvrBuilders().addContests(contestTestBuilders.map { it.info })
         val result = mutableListOf<Cvr>()
-        populations.forEach { cardStyle ->
+        cardStyles.forEach { cardStyle ->
             val fcontests = contestTestBuilders.filter { cardStyle.hasContest(it.info.id) }
             repeat(cardStyle.ncards) {
                 // add regular Cvrs including undervotes
@@ -191,7 +191,7 @@ data class MultiContestTestData(
 
         var nextCardId = startCvrId
         val result = mutableListOf<AuditableCard>()
-        populations.forEach { cardStyle ->
+        cardStyles.forEach { cardStyle ->
             val fcontests = contestTestBuilders.filter { cardStyle.hasContest(it.info.id) }
             repeat(cardStyle.ncards) {
                 val poolId = if ((poolPct != null) && cardStyle.id  < 2) 1 else null
@@ -324,6 +324,20 @@ data class ContestTestDataBuilder(
     override fun toString() = buildString {
         append("ContestTestData($contestId, ncands=$ncands, margin=${df(margin)}, $choiceFunction ncards=$ncards ballotStyles=$ballotStyles")
     }
+}
+
+data class CardStyle(
+    val name: String,
+    val id: Int,
+    val contests: IntArray,
+    val hasSingleCardStyle: Boolean,
+    val ncards: Int
+): BatchIF {
+    override fun name() = name
+    override fun id() = id
+    override fun possibleContests() = contests
+    override fun hasSingleCardStyle() = hasSingleCardStyle
+    override fun hasContest(contestId: Int) = contests.contains(contestId)
 }
 
 // partition nthings into npartitions randomly

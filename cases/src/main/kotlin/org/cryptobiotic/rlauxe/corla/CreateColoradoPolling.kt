@@ -3,19 +3,21 @@ package org.cryptobiotic.rlauxe.corla
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.*
-import kotlin.math.max
 
 private val logger = KotlinLogging.logger("ColoradoPolling")
 
-// // Create poliing audits where precincts are used to calculate Nb
+// // Create polling audits where precincts are used to calculate Nb and simulated mvrs
 class CreateColoradoPolling (
     electionDetailXmlFile: String,
     contestRoundFile: String,
     precinctFile: String,
     auditdir: String,
     hasSingleCardStyle: Boolean,
-): CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, AuditType.POLLING, auditdir, hasSingleCardStyle=hasSingleCardStyle) {
+    pollingMode: PollingMode,
+): CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile,
+    AuditType.POLLING, auditdir,
+    hasSingleCardStyle=hasSingleCardStyle,
+    pollingMode=pollingMode) {
 
     val contestsPolling: List<ContestWithAssertions>
 
@@ -26,5 +28,14 @@ class CreateColoradoPolling (
     }
 
     override fun contestsUA() = contestsPolling
+
+    override fun batches(): List<BatchIF>? {
+        val allContests = contestsUA().map { it.id }.sorted().toIntArray()
+        return when {
+            (auditType.isPolling() && pollingMode!!.withoutBatches()) -> listOf(Batch("OneBatch", 0, allContests, false))
+            else -> batches
+        }
+    }
+
 }
 

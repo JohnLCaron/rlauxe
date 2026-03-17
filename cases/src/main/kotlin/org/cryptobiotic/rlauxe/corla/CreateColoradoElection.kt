@@ -28,7 +28,6 @@ private val logger = KotlinLogging.logger("ColoradoOneAudit")
 private val debugUndervotes = false
 
 // make pools from the precinct results, then generate CVRs from pools
-// TODO experiment with OneAudit with small counties that do hand counts
 open class CreateColoradoElection (
     electionDetailXmlFile: String,
     contestRoundFile: String,
@@ -36,6 +35,7 @@ open class CreateColoradoElection (
     val auditType: AuditType,
     val auditdir: String,
     val hasSingleCardStyle: Boolean,
+    val pollingMode: PollingMode?,
 ): CreateElectionIF {
     val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
@@ -78,12 +78,15 @@ open class CreateColoradoElection (
         // have to save the mvrs while we know them
         ncards = createAndSaveMvrs()
 
-        val infos = contests.map { it.info() }.associateBy { it.id }
-        val mvrs = readCardsCsvIterator(publisher.unsortedMvrsFile())
-        val (manifestTabs, count) = tabulateCardsAndCount(mvrs, infos)
-        require(ncards == count)
-
-        val npopMap = manifestTabs.mapValues { it.value.ncardsTabulated }
+        val npopMap: Map<Int, Int> = if ((auditType.isPolling() && pollingMode!!.withoutBatches())) {
+            contests.associate { it.id to ncards }
+        } else {
+            val infos = contests.map { it.info() }.associateBy { it.id }
+            val mvrs = readCardsCsvIterator(publisher.unsortedMvrsFile())
+            val (manifestTabs, count) = tabulateCardsAndCount(mvrs, infos)
+            require(ncards == count)
+            manifestTabs.mapValues { it.value.ncardsTabulated }
+        }
 
         contestsUA = if (auditType.isOA()) makeOneAuditContests(contests, npopMap, cardPools) // in case we decide to support OA
                      else ContestWithAssertions.make(contests, npopMap, isClca = auditType.isClca(),)
@@ -164,7 +167,7 @@ open class CreateColoradoElection (
                 }
             }
             OneAuditPoolFromBallotStyle(
-                "${precinct.county}-${precinct.precinct}", idx,
+                "${precinct.county}-${precinct.precinct}", idx+1,
                 hasSingleCardStyle = hasSingleCardStyle, contestTabs, infoMap
             )
         }
@@ -188,8 +191,8 @@ open class CreateColoradoElection (
     override fun electionInfo() =
         ElectionInfo(auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
 
-    override fun batches() = if (auditType.isClca()) null else batches
-    override fun cardPools() = if (auditType.isClca()) null else cardPools.map { it.toOneAuditPool() } // POLLING uses cardPools
+    override fun batches() = if (auditType.isPolling() && pollingMode!!.withBatches()) batches else null
+    override fun cardPools() = if (auditType.isPolling() && pollingMode!!.withPools()) cardPools.map { it.toOneAuditPool() } else null
     override fun contestsUA() = contestsUA
     override fun ncards() = ncards
 
@@ -199,7 +202,8 @@ open class CreateColoradoElection (
             when {
                 mvr.isPhantom() -> mvr
                 auditType.isClca() -> mvr.copy(poolId = null)
-                auditType.isPolling() -> mvr.copy(votes = null)
+                (auditType.isPolling() && pollingMode!!.withoutBatches()) -> mvr.copy(votes = null, batchName="OneBatch", poolId=0)
+                (auditType.isPolling()) -> mvr.copy(votes = null)
                 else -> throw IllegalStateException("Unknown what to do with mvr: $mvr")
             }
         }
@@ -334,13 +338,18 @@ fun createColoradoElection(
     precinctFile: String,
     auditConfigIn: AuditConfig? = null,
     auditType : AuditType,
-    hasSingleCardStyle: Boolean = true,
-    ): Result<AuditRoundIF, ErrorMessages>
+    hasSingleCardStyle: Boolean,
+    pollingMode: PollingMode?,
+    startFirstRound: Boolean = true
+    )
 {
     val stopwatch = Stopwatch()
 
-    val election = if (auditType.isClca()) CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, auditType, auditdir, hasSingleCardStyle=hasSingleCardStyle)
-                    else CreateColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile, auditdir, hasSingleCardStyle=hasSingleCardStyle)
+    val election = if (auditType.isClca())
+        CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, auditType, auditdir,
+                    hasSingleCardStyle, pollingMode=null) else
+        CreateColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile, auditdir, hasSingleCardStyle, pollingMode!!)
+
     createElectionRecord("corla", election, auditDir = auditdir, clear = false)
 
     val config = when {
@@ -358,17 +367,18 @@ fun createColoradoElection(
             contestSampleCutoff = 20000,
             auditSampleCutoff = 100000,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
+            pollingConfig = PollingConfig(mode = pollingMode!!)
         )
         else -> throw RuntimeException("Unsupported audit type ${auditType.name}")
     }
 
     createAuditRecord(config, election, auditDir = auditdir, externalSortDir = topdir)
 
-    val result = startFirstRound(auditdir)
-    if (result.isErr) logger.error{ result.toString() }
-    logger.info {"createCorla took $stopwatch" }
-
-    return result
+    if (startFirstRound) {
+        val result = startFirstRound(auditdir)
+        if (result.isErr) logger.error { result.toString() }
+        logger.info { "createCorla took $stopwatch" }
+    }
 }
 
 

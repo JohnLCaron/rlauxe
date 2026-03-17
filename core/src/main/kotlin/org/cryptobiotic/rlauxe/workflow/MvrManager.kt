@@ -24,7 +24,6 @@ class CardManifest(val cards: CloseableIterable<AuditableCard>, val ncards: Int,
 // use MvrManager for auditing, not creating an audit
 interface MvrManager {
     fun sortedManifest(): CardManifest
-    // fun sortedCards(): CloseableIterable<AuditableCard>  // most uses will just need the first n samples
     fun pools(): List<CardPool>?
     fun batches(): List<BatchIF>?
     fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  // Pair(mvr, cvr)

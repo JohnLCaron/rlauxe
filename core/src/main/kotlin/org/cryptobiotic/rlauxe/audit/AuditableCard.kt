@@ -13,10 +13,10 @@ private val logger = KotlinLogging.logger("AuditableCard")
 // The information we have on each physical card in the audit; the complete set is the CardManifest.
 
 // TODO could you write cards independent of what kind of audit?
-//  OneAudit uses poolId to indicate cvr vs pool card; uses cardPool to modify the possibleContests() of each card.
+//  OneAudit uses poolId to indicate cvr vs pool card; uses cardPool to specify the possibleContests() of pooled card.
 //  Polling cards never have CVRs, always want poolId or batch to minimize dilution
-//  I think CLCA doesnt care about poolId, dont use possibleContests(), just the cvrs. See CreateSfElection on jow to do this.
-//  problem is that merging batches is done when reading; and must be uniform, as theres no special CreateElection.
+//  I think CLCA doesnt care about poolId, dont use batches unless cvrsContainUndervotes = false. See CreateSfElection.
+//  problem is that merging batches is done when reading; and must be uniform, as theres no CreateElection to process specially.
 //  We should be able to write a single MVR, but Cards have to be different.
 
 data class AuditableCard (
@@ -27,8 +27,8 @@ data class AuditableCard (
 
     val votes: Map<Int, IntArray>?,   // CVRs and phantoms
     val poolId: Int?,                 // must be set if its from a CardPool
-    val batchName: String,            // batch name TODO must have ??
-    val batch: BatchIF? = null,
+    val batchName: String,            // batch name.
+    val batch: BatchIF? = null,       // batch reference. CLCA dont need unless cvrsContainUndervotes = false
 ): CvrIF {
 
     fun cvr() : Cvr {
@@ -36,7 +36,7 @@ data class AuditableCard (
     }
 
     override fun toString() = buildString {
-        append("AuditableCard(desc='$location', index=$index, sampleNum=$prn, phantom=$phantom")
+        append("AuditableCard(location='$location', index=$index, prn=$prn, phantom=$phantom")
         if (poolId != null) append(", poolId=$poolId")
         append(", batchName='$batchName'")
         if (batch != null) append(", has batch contests=${batch.possibleContests().contentToString()}")
@@ -55,8 +55,8 @@ data class AuditableCard (
 
     override fun hasContest(contestId: Int): Boolean {
         return if (batch != null) batch.hasContest(contestId)
-            else if (votes != null) votes[contestId] != null
-            else false
+            else if (votes != null) votes[contestId] != null // assumes cvrsContainUndervotes, use batch if not.
+            else false // wtf ??
     }
 
     fun contests(): IntArray {
@@ -64,14 +64,13 @@ data class AuditableCard (
             else if (votes != null) votes.keys.toList().sorted().toIntArray()
             else {
                 logger.warn { "AuditableCard has no batch nor votes: $this"}
-                intArrayOf() // TODO makes no sense, a card with no contests, special batch name ?
+                intArrayOf() // TODO makes no sense, a card with no batch or votes, wtf ?
             }
         }
 
-    fun exactContests(): Boolean {
+    fun hasStyle(): Boolean {
         return if (batch != null) batch.hasSingleCardStyle()
-        else if (votes != null) true // TODO
-        else false
+        else (batchName != "cvrsIncomplete") // or set a damn batch already
     }
 
     //// CvrIF

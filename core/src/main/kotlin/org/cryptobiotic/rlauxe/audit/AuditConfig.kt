@@ -5,6 +5,10 @@ import org.cryptobiotic.rlauxe.util.secureRandom
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.Int
 
+
+// optimistic: round 1 assume no errors, subsequent rounds use measured error rates
+enum class SimulationStrategy { regular, optimistic  }
+
 data class AuditConfig(
     val auditType: AuditType,
     val riskLimit: Double = 0.05,
@@ -26,7 +30,7 @@ data class AuditConfig(
     // checkContestsCorrectlyFormed: preAuditStatus
     val minRecountMargin: Double = 0.005, // do not audit contests less than this recount margin
     val minMargin: Double = 0.0, // do not audit contests less than this margin TODO really it should be noerror?
-    val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin TODO deprecated
+    // val removeTooManyPhantoms: Boolean = false, // do not audit contests if phantoms > margin TODO deprecated
 
     // this turns the audit into a "risk measuring" audit; terminateOnNullReject = false;
     val auditSampleLimit: Int? = null, // limit audit sample size; audit all samples, ignore risk limit
@@ -111,13 +115,16 @@ data class AuditConfig(
     }
 }
 
-
-// optimistic: round 1 assume no errors, subsequent rounds use measured error rates
-enum class SimulationStrategy { regular, optimistic  }
+enum class PollingMode { withPools, withBatches, withoutBatches;
+    fun withPools() = (this == withPools)
+    fun withBatches() = (this == withBatches)
+    fun withoutBatches() = (this == withoutBatches)
+}
 
 // could be called AlphaMartConfig
 data class PollingConfig(
     val d: Int = 100,  // shrinkTrunc weight
+    val mode: PollingMode = PollingMode.withPools
 )
 
 enum class ClcaStrategyType { generalAdaptive2 }

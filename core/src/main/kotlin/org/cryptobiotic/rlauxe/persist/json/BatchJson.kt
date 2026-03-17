@@ -35,7 +35,7 @@ fun BatchesJson.import(): List<Batch> {
 class BatchJson(
     val name: String,
     val id: Int,
-    val ncards: Int,
+    // val ncards: Int,
     val possibleContests: IntArray,
     val hasSingleCardStyle: Boolean
 )
@@ -43,7 +43,7 @@ class BatchJson(
 fun BatchIF.publishJson() = BatchJson(
     this.name(),
     this.id(),
-    this.ncards(),
+    // this.ncards(),
     this.possibleContests(),
     this.hasSingleCardStyle()
 )
@@ -53,7 +53,7 @@ fun BatchJson.import() = Batch(
         this.id,
         this.possibleContests,
         this.hasSingleCardStyle,
-    ).setNcards(this.ncards)
+    ) // .setNcards(this.ncards)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 

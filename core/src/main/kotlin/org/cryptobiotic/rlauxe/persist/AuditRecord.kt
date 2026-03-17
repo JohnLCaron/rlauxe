@@ -42,6 +42,7 @@ interface AuditRecordIF {
     fun readSortedManifest(): CardManifest
     fun readSortedManifest(batches: List<BatchIF>?): CardManifest
     fun readOneShotMvrs(): Map<Int, Int>
+    fun readBatches(): List<BatchIF>?
 }
 
 class AuditRecord(
@@ -118,7 +119,7 @@ class AuditRecord(
         return CardManifest(sortedCards, electionInfo.ncards, emptyList())
     }
 
-    fun readBatches(): List<Batch>? {
+    override fun readBatches(): List<Batch>? {
         return if (!Files.exists(Path(publisher.batchesFile()))) null else {
             val batchesResult = readBatchesJsonFile(publisher.batchesFile())
            if (batchesResult.isOk) batchesResult.unwrap() else {

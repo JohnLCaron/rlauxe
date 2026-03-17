@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 private val logger = KotlinLogging.logger("BelgiumClca")
 
 class BelgiumClca (
-    contestd: DHondtContest,
+    val contestd: DHondtContest,
 ): CreateElectionIF {
 
     val infoMap: Map<Int, ContestInfo>
@@ -26,7 +26,7 @@ class BelgiumClca (
         allCvrs = contestd.createSimulatedCvrs()
     }
 
-    override fun electionInfo() = ElectionInfo(AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
+    override fun electionInfo() = ElectionInfo(contestd.name, AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
     override fun batches() = infoMap.values.map { Batch(it.name, it.id, intArrayOf(it.id), true)}
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
@@ -56,7 +56,7 @@ fun createBelgiumClca(
     val stopwatch = Stopwatch()
     val election = BelgiumClca(contestd)
 
-    createElectionRecord("belgiumClca", election, auditDir = auditdir, clear = clear)
+    createElectionRecord(election, auditDir = auditdir, clear = clear)
     println("createBelgiumClca took $stopwatch")
 
     val config = when {

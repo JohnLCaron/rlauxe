@@ -8,7 +8,7 @@ class TestOneShot {
 
     @Test
     fun testOneShot() {
-        val auditdir = "/home/stormy/rla/cases/corla/polling/audit"
+        val auditdir = "/home/stormy/rla/cases/corla/polling2/audit"
         val record = AuditRecord.readFrom(auditdir)
         if (record == null) throw RuntimeException("record is null")
         require (record is AuditRecord)

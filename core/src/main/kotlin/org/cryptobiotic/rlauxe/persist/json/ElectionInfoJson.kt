@@ -29,7 +29,8 @@ data class ElectionInfo(
 ) */
 @Serializable
 data class ElectionInfoJson(
-    val auditType: String,
+    val electionName: String?,
+    val auditType: AuditType,
     val ncards: Int,
     val ncontests: Int,
     val cvrsContainUndervotes: Boolean,
@@ -37,7 +38,8 @@ data class ElectionInfoJson(
 )
 
 fun ElectionInfo.publishJson() = ElectionInfoJson(
-    this.auditType.name,
+    this.electionName,
+    this.auditType,
     ncards = this.ncards,
     ncontests = this.ncontests,
     cvrsContainUndervotes = this.cvrsContainUndervotes,
@@ -45,7 +47,8 @@ fun ElectionInfo.publishJson() = ElectionInfoJson(
 )
 
 fun ElectionInfoJson.import() = ElectionInfo(
-    enumValueOf(this.auditType, AuditType.entries) ?: throw RuntimeException("unknown AuditType ${this.auditType}"),
+    this.electionName ?: "unknown",
+    auditType = this.auditType,
     ncards = this.ncards,
     ncontests = this.ncontests,
     cvrsContainUndervotes = this.cvrsContainUndervotes,

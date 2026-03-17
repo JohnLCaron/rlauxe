@@ -106,7 +106,7 @@ private fun checkSampleLimits(
 
     // if above checks remove contests, rerun consistentSampling before checking for this total contestSampleCutoff
     if (removeContests.isEmpty()) {
-        // check if overall contestSampleCutoff is exceeded TODO set seperately
+        // check if overall auditSampleCutoff is exceeded
         if (config.removeCutoffContests && config.auditSampleCutoff != null && auditRound.samplePrns.size > config.auditSampleCutoff) {
             // find the contest with the largest estimation size eligible for removal, remove it
             val maxEstimation = contestsNotDone.maxOf { it.estSampleSizeEligibleForRemoval() }

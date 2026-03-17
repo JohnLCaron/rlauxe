@@ -1,7 +1,9 @@
 package org.cryptobiotic.util
 
+import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.PollingConfig
 import org.cryptobiotic.rlauxe.audit.PollingMode
 import org.cryptobiotic.rlauxe.belgium.belgianElectionMap
 import org.cryptobiotic.rlauxe.belgium.createBelgiumElection
@@ -12,7 +14,8 @@ import org.cryptobiotic.rlauxe.sf.createSfElection
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
-import org.junit.jupiter.api.Test
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
+import kotlin.test.Test
 
 class TestGenerateAllUseCases {
     val sfDir = "$testdataDir/cases/sf2024"
@@ -57,16 +60,66 @@ class TestGenerateAllUseCases {
             hasSingleCardStyle=true, pollingMode=null)
     }
 
+
     @Test
-    fun testCreateColoradoPolling() {
+    fun testCreateColoradoPollingPools() {
         val topdir = "$testdataDir/cases/corla/polling"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
+        val auditConfigIn = AuditConfig(
+            AuditType.POLLING, riskLimit = .03, nsimEst = 10, quantile = 0.5,
+            minRecountMargin= 0.005,
+            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
+            pollingConfig = PollingConfig(mode = PollingMode.withPools)
+        )
+
         createColoradoElection(topdir, "$topdir/audit",
-            detailXmlFile, contestRoundFile, precinctFile, auditType = AuditType.POLLING,
-            hasSingleCardStyle = false, pollingMode=PollingMode.withPools)
+            detailXmlFile, contestRoundFile, precinctFile,
+            auditConfigIn=auditConfigIn,
+            auditType=AuditType.POLLING, hasSingleCardStyle=false, pollingMode=PollingMode.withPools)
+    }
+
+    @Test
+    fun testCreateColoradoPollingBatches() {
+        val topdir = "$testdataDir/cases/corla/polling2"
+        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
+        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
+        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
+
+        val auditConfigIn = AuditConfig(
+            AuditType.POLLING, riskLimit = .03, nsimEst = 10, quantile = 0.5,
+            minRecountMargin= 0.005,
+            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
+            pollingConfig = PollingConfig(mode = PollingMode.withBatches)
+        )
+
+        createColoradoElection(topdir, "$topdir/audit",
+            detailXmlFile, contestRoundFile, precinctFile,
+            auditConfigIn=auditConfigIn,
+            auditType=AuditType.POLLING, hasSingleCardStyle=false, pollingMode=PollingMode.withBatches)
+    }
+
+    @Test
+    fun testCreateColoradoPollingWithoutBatches() {
+        val topdir = "$testdataDir/cases/corla/polling3"
+        val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
+        val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
+        val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
+
+        val auditConfigIn = AuditConfig(
+            AuditType.POLLING, riskLimit = .03, nsimEst = 10, quantile = 0.5,
+            minRecountMargin= 0.005,
+            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
+            pollingConfig = PollingConfig(mode = PollingMode.withoutBatches)
+        )
+
+        createColoradoElection(topdir, "$topdir/audit",
+            detailXmlFile, contestRoundFile, precinctFile,
+            auditConfigIn=auditConfigIn,
+            auditType=AuditType.POLLING, hasSingleCardStyle=false, pollingMode=PollingMode.withoutBatches,
+        )
     }
 
     @Test

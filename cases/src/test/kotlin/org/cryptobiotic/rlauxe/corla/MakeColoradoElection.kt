@@ -46,10 +46,8 @@ class MakeColoradoElection {
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         val auditConfigIn = AuditConfig(
-            AuditType.POLLING, riskLimit = .03, nsimEst = 20, quantile = 0.5,
-            contestSampleCutoff = null,
-            auditSampleCutoff = null,
-            minRecountMargin= 0.0,
+            AuditType.POLLING, riskLimit = .03, nsimEst = 10, quantile = 0.5,
+            minRecountMargin= 0.005,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
             pollingConfig = PollingConfig(mode = PollingMode.withPools)
         )
@@ -68,10 +66,8 @@ class MakeColoradoElection {
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         val auditConfigIn = AuditConfig(
-            AuditType.POLLING, riskLimit = .03, nsimEst = 20, quantile = 0.5,
-            contestSampleCutoff = null,
-            auditSampleCutoff = null,
-            minRecountMargin= 0.0,
+            AuditType.POLLING, riskLimit = .03, nsimEst = 10, quantile = 0.5,
+            minRecountMargin= 0.005,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
             pollingConfig = PollingConfig(mode = PollingMode.withBatches)
         )
@@ -90,10 +86,8 @@ class MakeColoradoElection {
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         val auditConfigIn = AuditConfig(
-            AuditType.POLLING, riskLimit = .03, nsimEst = 20, quantile = 0.5,
-            contestSampleCutoff = null,
-            auditSampleCutoff = null,
-            minRecountMargin= 0.0,
+            AuditType.POLLING, riskLimit = .03, nsimEst = 10, quantile = 0.5,
+            minRecountMargin= 0.005,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
             pollingConfig = PollingConfig(mode = PollingMode.withoutBatches)
         )

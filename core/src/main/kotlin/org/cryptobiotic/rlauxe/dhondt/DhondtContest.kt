@@ -12,6 +12,7 @@ import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.nfn
+import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
@@ -262,9 +263,18 @@ class DHondtContest(
     }
 
     override fun marginInVotes(assorter: AssorterIF): Int {
-        val winner = votes[assorter.winner()]!!
-        val loser = votes[assorter.loser()]!!
-        return winner - loser
+        return when (assorter) {
+            is DHondtAssorter -> {
+                roundToClosest(assorter.difficulty(votes[assorter.winner()]!!, votes[assorter.loser()]!!))
+            }
+            is BelowThreshold -> {
+                roundToClosest(assorter.t * nvotes- votes[assorter.winner()]!!)
+            }
+            is AboveThreshold -> {
+                roundToClosest(votes[assorter.winner()]!! - assorter.t * nvotes)
+            }
+            else -> throw RuntimeException("unknown assorter type= ${assorter.javaClass.simpleName}")
+        }
     }
 
     override fun show() = buildString {

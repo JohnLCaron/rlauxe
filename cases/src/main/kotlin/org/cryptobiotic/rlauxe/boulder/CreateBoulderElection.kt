@@ -290,7 +290,7 @@ class CreateBoulderElection(
         }
     }
 
-    override fun electionInfo() = ElectionInfo(auditType, ncards(), contestsUA.size, true, poolsHaveOneCardStyle=true)
+    override fun electionInfo() = ElectionInfo("Boulder24$auditType", auditType, ncards(), contestsUA.size, true, poolsHaveOneCardStyle=true)
     override fun contestsUA() = contestsUA
     override fun batches() = if (auditType.isClca()) emptyList() else cardPoolBuilders
     override fun cardPools() = if (auditType.isClca()) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
@@ -337,7 +337,7 @@ fun createBoulderElection(
     val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
 
     val election = CreateBoulderElection(auditType, export, sovo)
-    createElectionRecord("boulder2024", election, auditDir = auditdir)
+    createElectionRecord(election, auditDir = auditdir)
     println("CreateBoulderElection took $stopwatch")
 
     val config = if (auditConfigIn != null) auditConfigIn

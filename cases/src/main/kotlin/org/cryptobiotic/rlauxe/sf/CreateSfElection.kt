@@ -148,7 +148,7 @@ class CreateSfElection(
     }
 
     override fun electionInfo() = ElectionInfo(
-        auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = poolsHaveOneCardStyle,
+        "SF24$auditType", auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = poolsHaveOneCardStyle,
     )
 
     override fun batches() = if (auditType.isClca()) emptyList() else cardPoolBuilders
@@ -346,7 +346,7 @@ fun createSfElection(
         auditType = auditType,
         poolsHaveOneCardStyle=poolsHaveOneCardStyle,
     )
-    createElectionRecord("sf2024", election, auditDir = auditdir)
+    createElectionRecord(election, auditDir = auditdir)
     logger.info{"createSfElection took $stopwatch"}
     stopwatch.start()
 

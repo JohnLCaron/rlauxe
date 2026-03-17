@@ -19,7 +19,6 @@ import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
-import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.math.min
@@ -140,7 +139,7 @@ fun startTestElectionClca(
         ncontests,
         addRaire,
         addRaireCandidates)
-    createElectionRecord("startTestElectionClca", election, auditDir = auditdir)
+    createElectionRecord(election, auditDir = auditdir)
 
     val config = AuditConfig(
         AuditType.CLCA, nsimEst = 100, simFuzzPct = simFuzz, quantile = quantile,
@@ -192,7 +191,7 @@ class TestClcaElection(
     }
 
     override fun electionInfo() = ElectionInfo(
-        AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
+        "TestClcaElection", AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
     )
     override fun createUnsortedMvrsInternal() = allCvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null
@@ -233,7 +232,7 @@ fun startTestElectionPolling(
         ncards,
         ncontests,
     )
-    createElectionRecord("startTestElectionPolling", election, auditDir = auditdir)
+    createElectionRecord(election, auditDir = auditdir)
 
     val config = AuditConfig(AuditType.POLLING, nsimEst = 100, simFuzzPct = simFuzz,
         persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs, quantile=quantile)
@@ -279,7 +278,7 @@ class TestPollingElection(
     }
 
     override fun electionInfo() = ElectionInfo(
-        AuditType.POLLING, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
+        "TestPollingElection", AuditType.POLLING, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
     )
     override fun createUnsortedMvrsInternal() = testMvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null
@@ -331,7 +330,7 @@ fun startTestElectionOneAudit(
         extraPct=extraPct,
         fuzzMvrs=fuzzMvrs,
     )
-    createElectionRecord("RunRlaStartOneAudit", election, auditDir = auditDir, clear = true)
+    createElectionRecord(election, auditDir = auditDir, clear = true)
 
     val config = AuditConfig(
         AuditType.ONEAUDIT, nsimEst = 10, simFuzzPct = simFuzz, quantile = quantile,
@@ -381,7 +380,7 @@ class TestOneAuditElection(
     }
 
     override fun electionInfo() = ElectionInfo(
-        AuditType.ONEAUDIT, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = true,
+        "TestOneAuditElection", AuditType.ONEAUDIT, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = true,
     )
     override fun createUnsortedMvrsInternal() = fuzzedMvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null

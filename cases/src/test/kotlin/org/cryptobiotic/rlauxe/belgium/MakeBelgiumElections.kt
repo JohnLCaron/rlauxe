@@ -38,7 +38,7 @@ val toptopdir = "$testdataDir/cases/belgium/2024"
 class CreateBelgiumElection {
     @Test
     fun createBelgiumElection() {
-        createBelgiumElection("Hainaut", 5, showVerify=true)
+        createBelgiumElection("Bruxelles", 5, showVerify=true)
     }
 
     @Test

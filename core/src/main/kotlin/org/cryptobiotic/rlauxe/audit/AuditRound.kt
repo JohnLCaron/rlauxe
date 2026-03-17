@@ -18,8 +18,8 @@ interface AuditRoundIF {
     var auditWasDone: Boolean
     var auditIsComplete: Boolean
     var samplePrns: List<Long> // card prns to sample for this round (complete, not just new)
-    var nmvrs: Int
-    var newmvrs: Int
+    var nmvrs: Int      // number of mvrs in round
+    var newmvrs: Int    // number of new mvrs in round
     var auditorWantNewMvrs: Int
     var mvrsUsed: Int
     var mvrsUnused: Int

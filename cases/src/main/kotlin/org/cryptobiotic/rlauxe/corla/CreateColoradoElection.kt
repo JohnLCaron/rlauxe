@@ -189,7 +189,7 @@ open class CreateColoradoElection (
     }
 
     override fun electionInfo() =
-        ElectionInfo(auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
+        ElectionInfo("Corla24$auditType$pollingMode", auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
 
     override fun batches() = if (auditType.isPolling() && pollingMode!!.withBatches()) batches else null
     override fun cardPools() = if (auditType.isPolling() && pollingMode!!.withPools()) cardPools.map { it.toOneAuditPool() } else null
@@ -350,7 +350,7 @@ fun createColoradoElection(
                     hasSingleCardStyle, pollingMode=null) else
         CreateColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile, auditdir, hasSingleCardStyle, pollingMode!!)
 
-    createElectionRecord("corla", election, auditDir = auditdir, clear = false)
+    createElectionRecord(election, auditDir = auditdir, clear = false)
 
     val config = when {
         (auditConfigIn != null) -> auditConfigIn

@@ -12,7 +12,7 @@ enum class AuditType { POLLING, CLCA, ONEAUDIT;
 
 // commit at Election Creation
 data class ElectionInfo(
-    // val electionName: String, // TODO add
+    val electionName: String,
     val auditType: AuditType,
     val ncards: Int,
     val ncontests: Int,

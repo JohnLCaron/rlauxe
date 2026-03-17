@@ -2,11 +2,6 @@ package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
-import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
-import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -47,12 +42,12 @@ class OneShotAudit(
             }
         }
 
-        val assertionAuditsOld = mutableListOf<AssertionAudit>()
+        /* val assertionAuditsOld = mutableListOf<AssertionAudit>()
         contestsUAs.forEach { contestUA ->
             contestUA.clcaAssertions.forEach {
                 assertionAuditsOld.add( AssertionAudit(contestUA, it, show))
             }
-        }
+        } */
 
         val naudits = assertionAudits.size
 
@@ -114,6 +109,7 @@ class OneShotAudit(
         }
     }
 
+    /*
     inner class AssertionAudit(val contest: ContestWithAssertions, val cassertion: ClcaAssertion, val show: Boolean = false) {
         val id = contest.id
         val endingTestStatistic = 1 / config.riskLimit
@@ -157,13 +153,13 @@ class OneShotAudit(
             testStatistic *= payoff
             if (testStatistic > endingTestStatistic) maxIndex = cardSortedIndex // once we set maxUsed then wantsMore == false
 
-            /* val wantId = 28
-            if (id == wantId && passorter.shortName() == "NEN 107/102") {
+            val wantId = 253
+            if (id == wantId) { // && passorter.shortName() == "NEN 107/102") {
                 val mvrVotes = mvr.votes(wantId)?.contentToString() ?: "missing"
                 val cardVotes = card.votes(wantId)?.contentToString() ?: "N/A"
                 println("$countUsed, ${dfn(assortValue, 8)}, ${dfn(maxBet, 8)}, ${dfn(payoff, 8)}, ${dfn(testStatistic, 8)}, " +
                         "${mvr.location}, ${mvrVotes}, ${cardVotes}")
-            } */
+            }
 
             // welford.update(assortValue) // error tracker has a welford...
             errorTracker.addSample(assortValue, card.poolId == null)
@@ -172,5 +168,5 @@ class OneShotAudit(
         override fun toString(): String {
             return "AssertionAudit(contest=${contest.id} assertion=${passorter.shortName()} countUsed=${countUsed} maxIndex=${maxIndex} testStatistic=${testStatistic} )"
         }
-    }
+    } */
 }

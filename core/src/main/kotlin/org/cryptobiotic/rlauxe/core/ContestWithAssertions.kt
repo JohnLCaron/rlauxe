@@ -208,7 +208,7 @@ open class ContestWithAssertions(
         // this does not make OneAudit: use makeOneAuditContests
         fun make(contests: List<ContestIF>, npopMap: Map<Int,Int>, isClca: Boolean): List<ContestWithAssertions> {
             return contests.map {
-                val cua = ContestWithAssertions(it, isClca, NpopIn=npopMap[it.id]).addStandardAssertions()
+                val cua = ContestWithAssertions(it, isClca, NpopIn=npopMap[it.id]) // .addStandardAssertions()
                 if (it is DHondtContest) {
                     cua.addAssertionsFromAssorters(it.assorters)
                 } else {

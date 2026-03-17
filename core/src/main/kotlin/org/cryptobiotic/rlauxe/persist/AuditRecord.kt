@@ -102,7 +102,7 @@ class AuditRecord(
     }
 
     override fun readSortedManifest(): CardManifest {
-        val batches = readBatches() ?: readCardPools()
+        val batches = readBatches() ?: readCardPools() // TODO which  is preferred ??
         if (batches != null && batches.isNotEmpty()) {
             // merge batch references into the Card
             val mergedCards =

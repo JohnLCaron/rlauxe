@@ -37,27 +37,27 @@ fun createElectionRecord(name: String, election: CreateElectionIF, auditDir: Str
     val publisher = Publisher(auditDir)
     val electionInfo = election.electionInfo()
     writeElectionInfoJsonFile(electionInfo, publisher.electionInfoFile())
-    logger.info{"CreateAuditRecord writeElectionInfoJsonFile to ${publisher.electionInfoFile()}\n  $electionInfo"}
+    logger.info{"createElectionRecord writeElectionInfoJsonFile to ${publisher.electionInfoFile()}\n  $electionInfo"}
 
     val batches = election.batches()
     if (!batches.isNullOrEmpty()) {
         writeBatchesJsonFile(batches, publisher.batchesFile())
-        logger.info { "CreateAuditRecord write ${batches.size} batches to ${publisher.batchesFile()}" }
+        logger.info { "createElectionRecord write ${batches.size} batches to ${publisher.batchesFile()}" }
     }
 
     val cardPools = election.cardPools()
     if (!cardPools.isNullOrEmpty()) {
         writeCardPoolCsvFile(cardPools, publisher.cardPoolsFile())
-        logger.info { "writeCardPoolCsvFile ${cardPools.size} pools to ${publisher.cardPoolsFile()}" }
+        logger.info { "createElectionRecord ${cardPools.size} pools to ${publisher.cardPoolsFile()}" }
     }
 
     val cards = election.cards()
     val countCvrs = writeAuditableCardCsvFile(cards, publisher.cardManifestFile())
-    createZipFile(publisher.cardManifestFile(), delete = true)
-    logger.info { "CreateAuditRecord write ${countCvrs} cards to ${publisher.cardManifestFile()}" }
+    // createZipFile(publisher.cardManifestFile(), delete = true)
+    logger.info { "createElectionRecord write ${countCvrs} cards to ${publisher.cardManifestFile()}" }
 
     // write contests
     val contestsUA = election.contestsUA()
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
-    logger.info{"CreateAuditRecord write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
+    logger.info{"createElectionRecord write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
 }

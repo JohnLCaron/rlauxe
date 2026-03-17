@@ -92,6 +92,7 @@ interface ContestIF {
 
     fun recountMargin(assorter: AssorterIF): Double // (w-l)/w
     fun showAssertionDifficulty(assorter: AssorterIF): String
+    fun marginInVotes(assorter: AssorterIF): Int
 
     fun votes() : Map<Int, Int>? {
         return if (this is Contest) this.votes else null
@@ -201,6 +202,12 @@ open class Contest(
         val winner = votes[assorter.winner()]!!
         val loser = votes[assorter.loser()]!!
         return "${assorter.shortName()} votes=$winner/$loser diff=${winner-loser} (w-l)/w =${df(recountMargin(assorter))}"
+    }
+
+    override fun marginInVotes(assorter: AssorterIF): Int {
+        val winner = votes[assorter.winner()]!!
+        val loser = votes[assorter.loser()]!!
+        return winner - loser
     }
 
     override fun show() = buildString {

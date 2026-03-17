@@ -70,6 +70,12 @@ data class RaireContest(
         }
     }
 
+    override fun marginInVotes(assorter: AssorterIF): Int {
+        val rassorter = assorter as RaireAssorter
+        val rassertion = rassorter.rassertion
+        return rassertion.marginInVotes
+    }
+
     override fun showAssertionDifficulty(assorter: AssorterIF): String {
         val rassorter = assorter as RaireAssorter
         val rassertion = rassorter.rassertion

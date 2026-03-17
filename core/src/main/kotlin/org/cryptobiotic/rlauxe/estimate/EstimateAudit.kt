@@ -14,6 +14,7 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.workflow.CardManifest
@@ -148,9 +149,12 @@ class AuditTrialTask(
         // used for OA and Polling; different simulated pool data each run; TODO could use Fuzzer
         val vunderPools = if (pools != null && !config.isClca) VunderPools(pools) else null
 
-        // Polling without pools, auto generate OnePool based on contest totals
+        // Polling without pools, generate one VunderPool based on contest totals
+        val onePool = if (vunderPools == null && config.isPolling) VunderPool.fromContests(contestsToAudit.map { it.contestUA }, 42) else null
+
         // Can we do better with Batches ?? Seems like if card has a batch, we can use possible contests to be closer to mvr....
-        val vunderPool = if (vunderPools == null && config.isPolling) VunderPool.fromContests(contestsToAudit.map { it.contestUA }, 42) else null
+        val vunderBatches = if (onePool != null && batches != null && config.pollingConfig.mode.withBatches())
+            VunderBatches(batches, onePool) else null
 
         val contestTrials: List<AssertionTrialIF> = contestsToAudit.map {
             if (config.isPolling) ContestPollingTrial(run, config, it.contestUA, it.minAssertion()!!)
@@ -170,7 +174,8 @@ class AuditTrialTask(
                 val card = sortedCardIter.next()
                 val mvr = when  {
                     (card.poolId != null && vunderPools != null) -> vunderPools.simulatePooledCard(card)
-                    (vunderPool != null) -> vunderPool.simulatePooledCard(card)
+                    (vunderBatches != null) -> vunderBatches.simulatePooledCard(card)
+                    (onePool != null) -> onePool.simulatePooledCard(card)
                     else -> null
                 }
 
@@ -365,7 +370,7 @@ class ContestPollingTrial(val run: Int,
 
         errorTracker.addSample(assortValue)
 
-        /* val wantId = 120
+        val wantId = -1
         if (run == 1 && contest.id == wantId && countUsed < 1000) {
             val mvrVotes = cvr?.votes(wantId)?.contentToString() ?: "missing"
             val cardVotes = card.votes(wantId)?.contentToString() ?: "N/A"
@@ -373,7 +378,7 @@ class ContestPollingTrial(val run: Int,
                     "${card.location}, ${cardSortedIndex}, mvr=${mvrVotes}, cvr=${cardVotes}")
             if (countUsed == 999)
                 print("")
-        } */
+        }
     }
 
     override fun toString(): String {

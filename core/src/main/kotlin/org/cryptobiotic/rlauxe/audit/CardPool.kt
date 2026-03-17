@@ -14,6 +14,7 @@ interface CardPoolIF: BatchIF {
     val poolId: Int
     fun contestTab(contestId: Int): ContestTabulation?
     fun votesAndUndervotes(contestId: Int): Vunder // throws exception if bad contest id
+    fun ncards(): Int
 }
 
 // This is what comes out of the serialization import

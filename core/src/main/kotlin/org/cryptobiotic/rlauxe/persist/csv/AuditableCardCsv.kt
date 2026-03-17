@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ZipReader
+import org.cryptobiotic.rlauxe.util.emptyCloseableIterator
 import java.io.*
 import java.nio.file.Files
 import kotlin.io.path.Path
@@ -135,8 +136,8 @@ fun readAuditableCardCsv(line: String): AuditableCard {
 }
 
 class AuditableCardCsvReader(filename: String): CloseableIterable<AuditableCard> {
-    val useFilename: String = if (Files.exists(Path("$filename.zip"))) "$filename.zip"
-        else if (Files.exists(Path(filename))) filename
+    var useFilename = if (Files.exists(Path(filename))) filename
+        else if (Files.exists(Path("$filename.zip"))) "$filename.zip" // TODO unzip and leave it unzipped
         else throw RuntimeException("CardsCsvFile $filename or $filename.zip does not exist")
 
     override fun iterator(): CloseableIterator<AuditableCard> {
@@ -158,9 +159,12 @@ fun readAuditableCardCsvFile(filename: String): List<AuditableCard> {
 }
 
 fun readCardsCsvIterator(filename: String): CloseableIterator<AuditableCard> {
-    val useFilename: String = if (Files.exists(Path("$filename.zip"))) "$filename.zip"
-    else if (Files.exists(Path(filename))) filename
-    else throw RuntimeException("CardsCsvFile $filename or $filename.zip does not exist")
+    val useFilename: String = if (Files.exists(Path(filename))) filename
+    else if (Files.exists(Path("$filename.zip"))) "$filename.zip" // TODO unzip
+    else {
+        logger.warn { "readCardsCsvIterator $filename or $filename.zip does not exist"}
+        return emptyCloseableIterator()
+    } // throw RuntimeException("readCardsCsvIterator $filename or $filename.zip does not exist")
 
     return if (useFilename.endsWith(".zip")) {
         val reader = ZipReader(useFilename)

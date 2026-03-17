@@ -1,49 +1,34 @@
 # Sample Populations
-_01/18/26_
-
-## 3/14/2026
-
-We cant simulate mvrs for PollingAudits if we dont have Pools. All our use cases so far have pools.
-If we only have Populations, can anything be done for estimation or is that like not having populations??
-
-Populations are Pools without vote totals. Still useful for managing dilution. Example is we know what are possible contests for
-precinct/city/county, and we know what precinct a card is from, but we dont have subtotals for the precinct. Only a problem for
-Polling. Or: Each ballot has a known Ballot Style, but no subtotals by ballot styyle.
-
-No need to save both Populations and Pools.
-
-Using AuditableCard.poolId to hold population id. Redundant with name, perhaps we dont need name, but we can rehydrate when we add Population reference.
-Polling audits are using pools, so need to set the poolId. OA audits use poolId to know if its pooled or cvr data. 
-Clca audits want cards to not have pools (why?), but that seems wrong.
-
+_03/17/26_
 
 ## TL;DR
 
 The most efficient audit has CVRs (that include undervotes) for all ballots.
 
-Otherwise, we need to create "Population" card containers that know which contests are in it, and use these to set Npop and when choosing audit samples.
+Otherwise, we need to create "Batch" card containers that know which contests are in it, and use these to set Npop and when choosing audit samples. A Batch is a generalization of a "Card Style".
 
-Each population sets "hasSingleCardStyle" = true if all cards in the population have one CardType (i.e all cards in the population have the same contests).  This is set independently on each population, and replaces the global hasStyle (aka use_style) flag.
+Each batch sets "hasSingleCardStyle" = true if all cards in the population have one CardStyle (i.e all cards in the population have the same contests).  This is set independently on each batch, and replaces the global hasStyle (aka use_style) flag.
 
-The population.hasSingleCardStyle field is used when deciding the assort value when an MVR is missing a contest, for all audits (including Polling?).
+The batch.hasSingleCardStyle field is used when deciding the assort value when an MVR is missing a contest, for all audits (including Polling?).
 
-The use of populations is implicit in the "More styles, less work" paper. Setting hasStyle by population and using hasStyle in Polling audits is new, I think. These complexities arise in multi-contest audits and multi-card ballots.
+The use of batches is implicit in the "More styles, less work" paper. Setting hasStyle by batch and using hasStyle in Polling audits is new. These complexities arise in multi-contest audits and multi-card ballots.
 
 **Table of Contents**
 <!-- TOC -->
 * [Sample Populations](#sample-populations)
   * [TL;DR](#tldr)
   * [Definitions](#definitions)
-  * [Populations](#populations)
+  * [Populations and Batches and Pools](#populations-and-batches-and-pools)
   * [Examples](#examples)
     * [multi-card ballots, Polling audit (MoreStyle section 5)](#multi-card-ballots-polling-audit-morestyle-section-5)
     * [CLCA without undervotes](#clca-without-undervotes)
     * [OneAudit](#oneaudit)
-  * [Contest is missing in the MVR](#contest-is-missing-in-the-mvr)
+  * [Polling Modes](#polling-modes)
+  * [The role of singleCardStyle aka hasStyle.](#the-role-of-singlecardstyle-aka-hasstyle)
+    * [Contest is missing in the MVR](#contest-is-missing-in-the-mvr)
     * [Contest is missing in the MVR for Polling](#contest-is-missing-in-the-mvr-for-polling)
-  * [What about Ncast and Nphantom?](#what-about-ncast-and-nphantom)
-* [Claims](#claims)
-  * [Should noerror use reported or diluted margin?](#should-noerror-use-reported-or-diluted-margin)
+  * [Ncast and Nphantom?](#ncast-and-nphantom)
+  * [Claims](#claims)
 <!-- TOC -->
 
 ## Definitions
@@ -51,53 +36,57 @@ The use of populations is implicit in the "More styles, less work" paper. Settin
 * **physical card** = pcard: the physical ballot or physical card if the ballot has multiple cards and the cards are scanned and stored separately.
 * **CVR**: scanned electronic record of a physical card
 * **MVR**: human audited physical card
-* **auditable card** = card:  internal computer representation of a physical card; contains the CVR if there is one. A card usually has a _location_ 
-  which allows a human auditor to locate the physical card, and either a CVR or a _population_ that it belongs to.
+* **auditable card** = card:  internal computer representation of a physical card; contains the CVR if there is one. 
+  A card must have a _location_ which allows a human auditor to locate the physical card, and either a CVR or a _batch_ that it belongs to.
 
+* **Contest population** = P_c: For each contest, the set of cards that may contain the contest. This is the sample population for the contest.
+* **Contest population size** = \|P_c\| = Npop: The size of the contest's population. Npop >= Nc.
+
+* **Batches**: a complete partition of the cards.
+* **Batch**: a non-overlapping subset of the cards with a list of contests that are in the batch.
+* **Batch.possibleContests**: list of contests that are on any of the cards in the batch.
+* **Batch.hasSingleCardStyle**: is true if all cards in the batch have the same CardStyle, so that "we know exactly what contests are on each card".
 * **CardStyle**: the full and exact list of contests on a card.
-* **population**: a distinct container of pcards, from which we can retreive named cards (even if its just by an index into an ordered list).
-* **population.possibleContests**: list of contests that are in this population.
-* **population.hasSingleCardStyle**: is true if all cards in the population have a single known CardStyle, so that "we think we know exactly what contests are on each card".
+* **CardPool**: a batch that has a subtotal of the votes and a count of the number of cards in the batch. 
+  It is also a distinct container of pcards, from which we can retreive named cards (eg by an index into an ordered list of pcards).
 
 * **contest upper limit**: For each contest, we have a trusted upper limit Nc = Nupper, of the number of cards containing the contest.
-* **phantom card** = auditable card added to ensure number of cards = Nc. Phantom cards arent in a population; they have a list of contests they contain.
+* **phantom card** = auditable card added to ensure number of cards = Nc. Phantom cards arent in a population; they have their own list of contests.
 * **card manifest** = complete list of auditable cards, one for each physical card and phantom card.
 
-* **Contest population** = P_c: For each contest, the set of cards that may contain the contest. This is the sample population for the contest. 
-* **Contest population size** = \|P_c\| = Npop: The size of the contest's population. Npop >= Nc. If hasStyle = true for all populations containing the contest, then Nc = Npop.
-
 * **Reported margin**: Each assorter has a reported margin with Nc as denominator; For Plurality it is (nwinners - nlosers) / Nc.
-  Other assorters have numerators somewhat different.
+  Other assorters have numerators possibly different.
 * **Diluted margin**:  Each assorter has a diluted margin with Npop as denominator; for Plurality it is (nwinners - nlosers) / Npop.
-  Other assorters have numerators somewhat different.
+  Other assorters have numerators possibly different.
 
 
-## Populations
+## Populations and Batches and Pools
 
-Each contest has a known population P_c of cards that might contain it. |P_c| = Npopulation = Npop is used for the diluted margin. 
+Each contest has a known population P_c of cards that might contain it. |P_c| = Npop is used for the diluted margin. 
 When auditing, we sample consistently over P_c.
 
 In the best case, we are running a CLCA audit where the CVRs record the undervotes. Then, the CVRs record the exact contests on the card, and Npop = Nc.
 
-There are other scenarios besides CLCA with undervotes where we know exactly which contests are on each card (even for polling):
+In the next best case, we have some cards with CVRs and some without. The non-CVR cards are in CardPools with known vote subtotals. Then we can run
+a OneAudit. Otherwise, we can run a Polling audit. In these case we create Batches to describe what we know about which cards have
+which contests. We might still know the exact list of contests on all the cards (Npop = Nc), or only the approximate list of contests (Npop > Nc).
+For example, we know exactly which contests are on each card:
 
 1. When theres only one contest.
-2. When the cards are divided into populations that have only one CardStyle.
-   
-In the case that "we know exactly what contests are on all cards", SHANGRLA sets hasStyle = true. So we will take that as the meaning
-of hasStyle.
+2. When the cards are divided into batches that have only one CardStyle.
+3. Each ballot has a known Ballot Style.
 
-When we dont know the exact list of contests on all the cards, it is still worth narrowing the population size down as much as possible,
-to minimize sample sizes.
+The batch.hasSingleCardStyle = true when all cards in the batch contain exactly batch.possibleContests, and false when different cards
+may have different subsets of batch.possibleContests.
 
-Populations describe the containers that the physical cards are kept in. 
-Using populations minimizes the diluted count (and so maximizes the margins) as much as possible. 
+A CardPool is a batch that also has a vote subtotal, which allows to run a OneAudit. One can also run a Polling audit
+with pools, which makes the estimation more accurate.
 
-For the same audit and contest, you could have different populations with different values of hasSingleCardStyle. For example, one precinct has a
+For the same audit and contest, you could have different batches with different values of hasSingleCardStyle. For example, one precinct has a
 single CardStyle containing contest c, and another has multiple card styles, not all of which contain contest c.
 
-The calculation of Npop must be transparent so verifiers (or just humans?) can verify it.
-The Population list should be published / committed to.
+The calculation of Npop must be transparent so verifiers (and humans) can verify it.
+The Batches must be published / committed to.
 
 Its worth noting that the EA (election authority) knows the card style for every voter and ballot. 
 So we are dealing with the limitations of associating CardStyles with the anonymous physical ballots and scanned cvrs.
@@ -113,12 +102,12 @@ the cards in the container will have contest S; otherwise, none of the cards in 
 Suppose a ballot has c cards to it. Suppose all ballots of the same style are kept in the same container, but the cards are
 scanned and separately addressable. If there are c cards, we know that only 1/c have the contest.
 
-population.possibleContests = all contests on the ballot (aka ballot style). population.hasSingleCardStyle = false, because there are c distinct CardStyles.
+The batch.possibleContests = all contests on the ballot (aka ballot style), and batch.hasSingleCardStyle = false, because there are c distinct CardStyles.
 
 ### CLCA without undervotes
 
-We have CVRs but dont record the undervotes. 
-Then we need to use populations to specify where the undervotes might be.
+We have CVRs but dont record the undervotes. cvrsContainUndervotes = false. 
+Then we need to use populations to specify where the contests are.
 
 ### OneAudit
 
@@ -131,35 +120,105 @@ and the pool's vote count. This is the SanFrancisco 2024 test case.
 Undervotes need to be included in the vote count. This is the Boulder 2024 test case. (Boulder 2024 does not
 record the undervotes for the redacted pools, so we guess what they are for the simulation.)
 
-The OneAudit pools are the populations.
-
-In San Francisco, the pools do not appear to have one CardStyle, so population.hasSingleCardStyle = false.
+In San Francisco, the pools do not have one CardStyle, so population.hasSingleCardStyle = false.
 In Boulder, each pool appears to have one CardStyle, so population.hasSingleCardStyle = true.
 
-For OneAudit, we know the vote totals for the population. In the general case we dont necessarily know the vote counts
-for each population. Also see Ncast section below.
+## Polling Modes
 
-## Contest is missing in the MVR
+With pools, we have a tabulation of the ballots in the pool. This is necessary to run OneAudit. With those tabulations we
+can run estimations by generating cvrs for the pooled cards that match the pool subtotals.
+
+We also run Polling audits with pools (mode = withPools). TODO: characterize OneAudit vs Polling using pools.
+
+Suppose you dont have cvrs or pools, so you're going to run a Polling audit. If you just have one undifferentiated stack
+of N ballots, then you just use N = Npop for all contests. (mode = withoutBatches)
+
+You may have distinct batches, where you know which contests are in each batch, that allows Npop to be smaller, perhaps much smaller. 
+To run simulations one can use the card's batch to restrict the simulated Mvr to the possible contests. (mode = withBatches)
+
+TODO: characterize using Batch vs Pools for Polling audits.
+
+Note that a Batch is a CardStyle when hasSingleCardStyle = true. So this covers the case where you know the CardStyle for each card.
+This allows Npop to be as small as possible.
+
+For Corla 2024, all ballots are in precints with subtotals.
+
+In all cases, we simulate cvrs that match the precinct subtotals; make both cards and Mvrs from these simulated cvrs.
+
+1. CLCA: add cvrs to all cards and run a CLCA audit.
+2. OneAudit: add cvrs to some percentage of cards, the remaining cards use OneAudit pooled averages.
+3. Polling with pools: none of the cards have cvrs, all reference CardPools with subtotals. Estimation matches with the
+   pool subtotals.
+4. Polling with batches: none of the cards have cvrs, all reference Batches without subtotals.
+   Estimation restricts to batch.possibleContests and uses common Vunder across all batches.
+5. Polling without batches. Npop = N for all contests.
+
+3 and 4 differ only in estimation, where one would expect 3 to be somewhat more accurate, ie have a smaller variance.
+
+## The role of singleCardStyle aka hasStyle.
+
+1. Vunder is how we simulate the votes for one contest; VunderPool is how we simulate cvrs in a Pool:
+````
+   data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pair<IntArray, Int>>, val undervotes: Int, val missing: Int, val voteForN: Int)
+      val nvotes = voteCounts.sumOf { it.second }
+      val ncards = missing + (undervotes + nvotes) / voteForN
+      
+   class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int, val hasSingleCardStyle: Boolean)
+````
+
+if !singleCardStyle, then Vunder chooses both missing (contest not on the cvr) and undervotes (contest on the cvr but not voted).
+if singleCardStyle, then missing = 0, and undervotes = ncards * voteForN - voteSum. Note that ncards = Npop for the contest.
+
+In the actual mvrs, we expect to see no missing contests when hasSingleCardStyle=true.
+
+2. In the CLCA assorter, missing contests are penalized if card.hasStyle() = batch.hasSingleCardStyle:
+
+            val nextVal = cassorter.bassort(mvr, card, hasStyle=card.hasStyle())
+            val mvr_assort = if (!mvr.hasContest(info.id)) { if (hasStyle) 0.0 else 0.5 } ...
+
+These zeroes can tank the audit. But it seems theres no obvious incentive to declare card.hasStyle() = true (if you want the audit to succeed).
+The Batches of the audit are something that could be accidentally or deliberately wrong. They are part of the pre-audit
+committment. TODO: with and without hasStyle, where is there a difference?
+
+3. So you have this pile of physical ballots in a batch. You think that they are all the ballots in a precinct. You think you
+   know what contests are in the precinct. Suppose you get the batches mixed up?
+
+    1. Suppose singleCardStyle=false. You start seeing missing contests, but these are expected and "harmless" since hasStyles = false.
+       You start seeing contests that are not expected to be in that batch. Right now, the software ignores them. A
+       warning message should be given so that the humans can fix the problem and restart the audit?
+    2. Suppose singleCardStyle=true. These are unexpected and tank the audit. A warning message should be given so that the
+       humans can fix the problem and restart the audit.
+
+This argues for keeping track of statistics associated with a batch, to tell if a batch is bad.
+(Note that each card has a reference to the batch that its from). Perhaps this should all be done before the audit is run,
+raher than during the audit ?? Added this functionality into VerifyMvrs.
+
+SHANGRLA seems to only have hasStyles for entire audit. In that case, you get the benefit of reduced dilution vs the cost of mvr_assort = 0.
+Using Batches gets you the reduced dilution. This happens when calculating Npop, and also in ConsistentSampling, both relying
+on card.hasContest(contest.id).
+
+Setting hasSingleCardStyle=true is to pay the cost. It wouldnt be hard to set this to false, the Npop calculation does not depend on it.
+hasSingleCardStyle only effects the simulation, allowing missing (false) or not (true). But missing and undervote have the same effect
+when hasStyle = false.
+
+### Contest is missing in the MVR
 
 When the contest is missing on the MVR, we assign 0 to mvr_assort when hasStyle=true, and 0.5 when hasStyle=false.
 
 The first case tanks the audit, and the second may allow attacks(?)
 
-Using population.hasSingleCardStyle instead of global hasStyles should be better. TODO investigate the effect of that change.
-
-But still, note that population.hasSingleCardStyle requires all cards to have the same CardStyle in a population. 
+Note that batch.hasSingleCardStyle requires all cards to have the same CardStyle in a batch.
 So it is false even if theres only one card thats different.
 That could have a big effect on the assort values, but it only increases the diluted count by 1. Seems fishy.
 
 An attacker could falsely claim hasSingleCardStyle=false; could we detect that?
-
 
 ### Contest is missing in the MVR for Polling
 
 Suppose each precinct has one CardStyle, and each precinct stores its own ballots, and we are doing a Polling audit.
 You hand count the ballots, and keep all cards for a ballot in the same ballot envelope.
 Then it doesnt matter how many cards are in the ballot. Since we know the exact contests on all cards, we
-have hasSingleCardStyle = true. The contest audit can sample only from the populations that contain the contest, and Npop = Nc.
+have hasSingleCardStyle = true. The contest audit can sample only from the batches that contain the contest, and Npop = Nc.
 
 Suppose you audit a ballot that turns out not to have that contest? Seems like mvr_assort should be 0, not a 0.5, when hasSingleCardStyle = true.
 `if (!cvr.hasContest(info.id)) return if (hasStyle) 0.0 else 0.5`
@@ -173,14 +232,14 @@ mvr_assort = 0 when mvr doesnt have the contest, since that will happen a lot. W
 
 So we need to set mvr_assort based on hasSingleCardStyle, just as with CLCA and OneAudit.
 
-## What about Ncast and Nphantom?
+## Ncast and Nphantom?
 
 When hasStyles = true, we can count the cards and see how many each contest has. Use that as Ncast, then add phantoms as needed.
 
-When hasStyles = false, where do we get Ncast? If the populations all have vote totals that include undervotes, we can get Ncast from them.
+When hasStyles = false, where do we get Ncast? If the batches all have vote totals that include undervotes, we can get Ncast from them.
 Otherwise we have to assume that both Nc and Ncast are given by the EA.
 
-# Claims
+## Claims
 
 **failNc claim** The card manifest must have Nc cards; add phantoms until you do.
 Sample over those Npop > Nc cards, and if you find an MVR that doesnt contain the contest, give it an assort value of 0.
@@ -222,23 +281,6 @@ The assorter upperBound (= u) are fixed in code.
 Plurality u always = 1. (Could limit the other assorters by bounding min t or max nseats).
 Make t and nseats part of the public config, that can be checked by the verifier.
 Claim this is sufficent to prevent noerror manipulation = "failNoerror claim".
-
-
-## Should noerror use reported or diluted margin?
-
-Noerror is the credit you get when the mvr matchs the cvr. Using diluted margin will decrease the credit when Npop > Nc.
-Noerror uses v/u, where v is the margin. Is it the reported margin or the diluted margin?
-
-The reported margin is (nwinners - nlosers) / Nupper, where Nupper is trusted.
-The diluted margin is (nwinners - nlosers) / Npopulation, where Npopulation > Nupper. 
-
-Philip's "More style, less work" paper uses diluted margins. (Paper shows how Npop is smaller when hasStyle = true.
-Could also say that Npop is smaller when you know which cards have the contest, and can sample from just those.)
-
-Rlauxe's TestAvgAssortValues.testAvgAssortWithDilutedMargin() shows that dilutedMargin, not reportedMargin, agrees with the
-average cvrs assortMargin.
-
-Conclusion: use diluted margin for noerror calculation
 
 
 

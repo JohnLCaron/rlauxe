@@ -43,7 +43,8 @@ class CardBuilder(
         //    val poolId: Int?, // for OneAudit
         //    val cardStyle: String? = null,
         return AuditableCard(location, index, prn, phantom,
-            votes= if (votes.isEmpty()) null else votes,
+            // votes= if (votes.isEmpty()) null else votes, // TODO why was this null ??
+            votes= votes,
             poolId=poolId ?: this.poolId,
             batchName= if (!votes.isEmpty()) "cvr" else cardStyle ?: "unknown",
             batch=null)

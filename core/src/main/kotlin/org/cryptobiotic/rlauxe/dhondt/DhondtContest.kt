@@ -261,6 +261,12 @@ class DHondtContest(
         }
     }
 
+    override fun marginInVotes(assorter: AssorterIF): Int {
+        val winner = votes[assorter.winner()]!!
+        val loser = votes[assorter.loser()]!!
+        return winner - loser
+    }
+
     override fun show() = buildString {
         appendLine(super.show())
         append("   nseats=${winnerSeats.values.sum()} winners=${winnerSeats} belowMin=${belowMinPct} threshold=${info.minFraction} minVotes=${roundUp(info.minFraction!! * nvotes)}")

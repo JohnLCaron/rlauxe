@@ -99,7 +99,7 @@ fun corlaCalc(config: AuditConfig, contestRound: ContestRound): SampleEst? {
 
     val est2 = estimateSampleSizePayloads(
         config.riskLimit,
-        errors = errorCounts!!
+        errors = errorCounts
     )
 
     if (contestRound.contestUA.id == 116)

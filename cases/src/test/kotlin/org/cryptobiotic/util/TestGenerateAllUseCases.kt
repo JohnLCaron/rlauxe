@@ -2,6 +2,7 @@ package org.cryptobiotic.util
 
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.PollingMode
 import org.cryptobiotic.rlauxe.belgium.belgianElectionMap
 import org.cryptobiotic.rlauxe.belgium.createBelgiumElection
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
@@ -52,7 +53,8 @@ class TestGenerateAllUseCases {
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         createColoradoElection(topdir, "$topdir/audit",
-            detailXmlFile, contestRoundFile, precinctFile, auditType = AuditType.CLCA)
+            detailXmlFile, contestRoundFile, precinctFile, auditType = AuditType.CLCA,
+            hasSingleCardStyle=true, pollingMode=null)
     }
 
     @Test
@@ -63,7 +65,8 @@ class TestGenerateAllUseCases {
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
         createColoradoElection(topdir, "$topdir/audit",
-            detailXmlFile, contestRoundFile, precinctFile, auditType = AuditType.POLLING)
+            detailXmlFile, contestRoundFile, precinctFile, auditType = AuditType.POLLING,
+            hasSingleCardStyle = false, pollingMode=PollingMode.withPools)
     }
 
     @Test

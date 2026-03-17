@@ -8,9 +8,9 @@ import kotlin.test.Test
 // dont run in coverage Tests
 class TestRunRoundCli {
 
-    //@Test
+    // @Test
     fun testStartAuditFirstRound() {
-        val auditdir = "$testdataDir/cases/corla/polling/audit"
+        val auditdir = "$testdataDir/cases/corla/polling3/audit"
 
         StartAuditFirstRound.main(
             arrayOf(
@@ -20,9 +20,9 @@ class TestRunRoundCli {
         )
     }
 
-    //@Test
+    // @Test
     fun testRunRoundCli() {
-        val auditdir = "$testdataDir/cases/corla/polling/audit"
+        val auditdir = "$testdataDir/cases/corla/polling2/audit"
 
         RunRlaRoundCli.main(
             arrayOf(

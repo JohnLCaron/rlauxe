@@ -64,7 +64,7 @@ class PollingSamplerTracker(
 
     override fun sample(): Double {
         while (hasNext()) {
-            val (mvr, _) = cvrPairs[permutedIndex[idx]]
+            val (mvr, _) = cvrPairs[permutedIndex[idx]] // ignoring the card, which knows the batch
             idx++
             val assortVal =  assorter.assort(mvr, usePhantoms = true)
             welford.update(assortVal)

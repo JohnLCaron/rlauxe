@@ -160,7 +160,7 @@ class TestAvgAssortValues {
             addPoolId = true)
 
         println()
-        test.populations.forEach { println(it) }
+        test.cardStyles.forEach { println(it) }
 
         val testCards = test.makeCardsFromContests()
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeAuditableCardCsv(it)}") }
@@ -168,7 +168,7 @@ class TestAvgAssortValues {
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
             MergeBatchIntoCards(
                 testCards,
-                batches = test.populations,
+                batches = test.cardStyles,
             )
         }
 
@@ -207,9 +207,9 @@ class TestAvgAssortValues {
             addPoolId = true)
 
         println()
-        test.populations.forEach { println(it) }
+        test.cardStyles.forEach { println(it) }
 
-        val modStyles = test.populations.map { it.copy(possibleContests=intArrayOf(0,1,2,3,4)) }
+        val modStyles = test.cardStyles.map { it.copy(contests=intArrayOf(0,1,2,3,4)) }
 
         val testCards = test.makeCardsFromContests()
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeAuditableCardCsv(it)}") }

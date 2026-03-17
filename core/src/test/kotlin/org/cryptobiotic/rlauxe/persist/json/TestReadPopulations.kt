@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.persist.json
 import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.workflow.readPopulations
+import org.cryptobiotic.rlauxe.workflow.readBatches
 import kotlin.io.path.createTempFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -14,22 +14,22 @@ class TestReadPopulations {
 
     @Test
     fun testReadOneAuditPopulations() {
-        val auditdir = "$testdataDir/persist/testRunCli/oneaudit/audit"
+        val auditdir = "$testdataDir/persist/testRunCli/polling/audit"
         // val auditdir = "../core/src/test/data/testRunCli/oneaudit/audit"
 
         val publisher = Publisher(auditdir)
-        val pops = readPopulations(publisher)!!
-        println("read ${pops} pool (original)")
+        val pops = readBatches(publisher)!!
+        println("read ${pops} batch (original)")
         val pool = pops.first()
         assertTrue(pool is Batch)
         assertEquals(42, pool.id) // bogus
-        assertEquals("pool42", pool.name)
+        assertEquals("batch42", pool.name)
 
         val scratchFile = createTempFile().toFile()
         writeBatchesJsonFile(pops, scratchFile.toString())
 
         val roundtrip = readBatchesJsonFileUnwrapped(scratchFile.toString())
-        println("read ${roundtrip} pool (roundtrip)")
+        println("read ${roundtrip} batch (roundtrip)")
         assertEquals(pops.toSet(), roundtrip.toSet())
         val rpool = roundtrip.first()
         assertEquals(pool, rpool)

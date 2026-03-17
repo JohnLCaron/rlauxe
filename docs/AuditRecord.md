@@ -1,25 +1,33 @@
 # The AuditRecord
-_last changed 03/02/2026_
+_last changed 03/16/2026_
 
-A complete _Audit Record_ has the following files in it:
+An _Audit Record_ may have the following files in it:
 
     $auditdir/
-        auditConfig.json    // auditConfigJson (old way)
-        auditCreationConfig.json // auditCreationConfigJson (new way)
+        // election record - output of createElectionRecord
+        batches.json          // BatchesJson: BatchIF -> Batch (optional) 
         cardManifest.csv      // AuditableCardCsv, may be zipped
+        cardPools.csv         // CardPoolCsv:    CardPoolIF -> CardPool (optional)
         contests.json         // ContestsUnderAuditJson
-        electionInfo.json     // ElectionInfoJson 
-        oneauditPools.json    // OneAuditPoolCsv, OneAudit only 
-        populations.json      // PopulationJson, optional 
+        electionInfo.json     // ElectionInfoJson (new way)
+
+        // auditRecord - output of createAuditRecord
+        auditConfig.json      // AuditConfigJson (old way)
+        auditCreationConfig.json  // AuditCreationConfigJson (new way)
+        auditSeed.json        // TODO
         sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
-        
+
         roundX/
-            auditRoundConfigX.json  // configuration parameters for round X (new way)
-            auditEstX.json       // AuditRoundJson,  the state of the estimation for this round
-            auditStateX.json     // AuditRoundJson,  the state of the audit for this round
-            sampleCardsX.csv     // AuditableCardCsv, complete cards used for this round; matches samplePrnsX.csv
-            sampleMvrsX.csv      // AuditableCardCsv, complete mvrs used for this round; matches samplePrnsX.csv
-            samplePrnsX.json     // SamplePrnsJson, complete sample prns for this round, in order
+            auditEstX.json       // AuditRoundJson,  an audit state with estimation, ready for auditing
+            auditRoundConfigX.json  // auditRoundConfigJson, configuration for this round (new way)
+            auditStateX.json     // AuditRoundJson,  the results of the audit for this round
+            sampleCardsX.csv     // AuditableCardCsv, complete sorted cards used for this round; matches samplePrnsX.csv
+            sampleMvrsX.csv      // AuditableCardCsv, complete sorted mvrs used for this round; matches samplePrnsX.csv
+            samplePrnsX.json     // SamplePrnsJson, complete sorted sample prns for this round
+
+        private/                  (test only)
+            sortedMvrs.csv       // AuditableCardCsv, sorted by prn, matches sortedCards.csv, may be zipped
+            unsortedMvrs.csv     // AuditableCardCsv (optional)
 
 ## Commitment Sequence
 
@@ -29,20 +37,22 @@ The election information is contained in the following files. The EA can modify 
 are correct. Before the seed is chosen in step 2, they are digitally signed and published publically (aka _committed to the Audit Record_), 
 and may not be changed.
 
-        electionInfo.json      
-        populations.json       
-        oneauditPools.csv       
-        contests.json
-        cardManifest.csv      
+        batches.json          // BatchesJson: BatchIF -> Batch (optional) 
+        cardManifest.csv      // AuditableCardCsv, may be zipped
+        cardPools.csv         // CardPoolCsv:    CardPoolIF -> CardPool (optional)
+        contests.json         // ContestsUnderAuditJson
+        electionInfo.json     // ElectionInfoJson (new way)
 
 2. createAuditRecord : PRNG seed chosen, cards assigned PRNs
 
 The PRNG seed is chosen, and all the cards in the card manifest are assigned a PRN in order.
 The cards are then sorted by PRN and written to sortedCards.csv. These are commited to the Audit Record.
 The PRNG seed can only be chosen once and the cards immediately committed.
-        
-        auditCreationConfig.json  // the overall configuration parameters, including the seed
-        sortedCards.csv   // all cards sorted by PRN
+
+        auditConfig.json      // AuditConfigJson (old way)
+        auditCreationConfig.json  // AuditCreationConfigJson (new way)
+        auditSeed.json        // TODO
+        sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
 
 3. Audit Round X Sample Estimation
 
@@ -102,7 +112,7 @@ and keeping everything in memory (no persistence).
 
 _AuditWorkflow_ and its subclasses (esp _PersistedWorkflow_) implement auditing with rounds. 
 
-For real-world workflows, see createSfElection(), createBoulderElection(), createBelgiumClca(), and createColoradoElection()
+For real-world workflow examples, see createSfElection(), createBoulderElection(), createBelgiumClca(), and createColoradoElection()
 in the cases module.
 
 ### Auditing with rounds workflow

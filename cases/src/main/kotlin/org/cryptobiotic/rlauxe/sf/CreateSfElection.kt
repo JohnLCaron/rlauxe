@@ -166,7 +166,7 @@ class CreateSfElection(
                 auditType,
                 cvrIter,
                 null, // there are no phantoms
-                // OA: use batch.possibleContests() to dilute the margin; CLCA: dont use batch.possibleContests()
+                // OA: use batch.possibleContests() to dilute the margin; CLCA: dont use batch.possibleContests() if clcaHasUndervotes
                 if (auditType.isClca()) null else cardPoolBuilders
         )
     }

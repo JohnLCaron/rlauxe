@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -102,5 +103,41 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
             val vunders = contests.associate { it.id to Vunder.fromContest(it, poolId) }
             return VunderPool(vunders, "all", poolId, true)
         }
+    }
+}
+
+class VunderBatches(batches: List<BatchIF>, val onePool: VunderPool) {
+    val batchMap = batches.associateBy { it.name() }
+
+    // for the given pooled card with no votes, simulate one with votes, staying within the onePool vote totals.
+    fun simulatePooledCard(card: AuditableCard): AuditableCard {
+        if (card.isPhantom()) return card
+
+        val batch = batchMap[card.batchName]
+        val cardb = CardBuilder.fromCard(card)
+
+        if (batch == null) {
+            println("batch ${card.batchName} not found")
+            return cardb.build()
+        }
+
+        batch.possibleContests().forEach { contestId ->
+            val vunderPicker = onePool.vunderPickers[contestId]
+            // only contests still needed to audit are in OnePool
+            if (vunderPicker != null) {
+                if (vunderPicker.isEmpty()) {
+                    if (batch.hasSingleCardStyle()) cardb.replaceContestVotes(
+                        contestId,
+                        intArrayOf()
+                    ) // missing not allowed
+                } else {
+                    val cands = vunderPicker.pickRandomCandidatesAndDecrement()
+                    if (cands != null) {
+                        cardb.replaceContestVotes(contestId, cands) // ok if no contests on it ??
+                    }
+                }
+            }
+        }
+        return cardb.build()
     }
 }

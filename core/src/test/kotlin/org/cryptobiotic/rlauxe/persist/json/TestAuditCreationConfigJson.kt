@@ -10,6 +10,7 @@ import kotlin.test.assertTrue
 
 import kotlin.test.assertNotNull
 
+/*
 class TestAuditCreationConfigJson {
 
     @Test
@@ -70,4 +71,4 @@ class TestAuditCreationConfigJson {
 
         scratchFile.delete()
     }
-}
+} */

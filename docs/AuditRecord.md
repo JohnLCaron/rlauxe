@@ -11,10 +11,10 @@ An _Audit Record_ may have the following files in it:
         contests.json         // ContestsUnderAuditJson
         electionInfo.json     // ElectionInfoJson (new way)
 
-        // auditRecord - output of createAuditRecord
+        // auditRecord - output of createAuditRecord, after the seed has been chosen
         auditConfig.json      // AuditConfigJson (old way)
         auditCreationConfig.json  // AuditCreationConfigJson (new way)
-        auditSeed.json        // TODO
+        auditSeed.json        // TODO ?
         sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
 
         roundX/

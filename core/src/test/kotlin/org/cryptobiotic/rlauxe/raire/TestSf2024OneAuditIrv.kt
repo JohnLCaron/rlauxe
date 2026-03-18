@@ -39,7 +39,7 @@ class TestSf2024OneAuditIrv() {
         // use the cvrs from the clca as the mvrs
         val cvrdir = "$testdataDir/cases/sf2024/clca/audit"
         val cvrPublisher = Publisher(cvrdir)
-        mvrsIterable = readSortedManifest(cvrPublisher, infos, auditRecord.electionInfo.ncards).cards
+        mvrsIterable = readSortedManifest(cvrPublisher, infos, auditRecord.electionInfo.totalCardCount).cards
 
         mvrsIterable.iterator().use { iter ->
             while (iter.hasNext() && mvrs.size < 1000 ) {

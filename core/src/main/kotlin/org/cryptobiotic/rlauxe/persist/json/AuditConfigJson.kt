@@ -180,7 +180,7 @@ fun ClcaConfig.publishJson() = ClcaConfigJson(
 )
 
 fun ClcaConfigJson.import() = ClcaConfig(
-        enumValueOf(this.strategy, ClcaStrategyType.entries) ?: ClcaStrategyType.generalAdaptive2,
+        enumValueOf(this.strategy, ClcaStrategyType.entries) ?: ClcaStrategyType.generalAdaptive,
         this.fuzzPct,
         this.d,
         this.maxLoss ?: 0.90,

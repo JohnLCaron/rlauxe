@@ -360,7 +360,6 @@ fun createSfElection(
             removeMaxContests = removeMaxContests,
             contestSampleCutoff = contestSampleCutoff, auditSampleCutoff = auditSampleCutoff,
             simFuzzPct=mvrFuzz, persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs,
-            simulationStrategy = SimulationStrategy.optimistic,
             clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
         )
 
@@ -371,7 +370,6 @@ fun createSfElection(
             removeMaxContests = removeMaxContests,
             contestSampleCutoff = contestSampleCutoff, auditSampleCutoff = auditSampleCutoff,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
-            simulationStrategy = SimulationStrategy.optimistic,
             clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
         )
 

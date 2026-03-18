@@ -53,7 +53,6 @@ class OaMarginAttack {
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "calcMvrsNeeded", "fuzzPct" to fuzzPct),
                 auditConfigIn = AuditConfig(
                     AuditType.ONEAUDIT, nsimEst = nsimEst,
-                    simulationStrategy = SimulationStrategy.optimistic,
                 ),
                 p1flips=margin*extra,
             )

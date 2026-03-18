@@ -12,7 +12,6 @@ import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
-import org.cryptobiotic.rlauxe.util.enumValueOf
 
 import java.io.FileOutputStream
 import java.nio.file.Files
@@ -26,6 +25,8 @@ data class ElectionInfo(
     val ncontests: Int,
     val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
     val poolsHaveOneCardStyle: Boolean,
+    val pollingMode: PollingMode? = null,
+    val other: Map<String, Any> = emptyMap(), // TODO
 ) */
 @Serializable
 data class ElectionInfoJson(
@@ -35,25 +36,39 @@ data class ElectionInfoJson(
     val ncontests: Int,
     val cvrsContainUndervotes: Boolean,
     val poolsHaveOneCardStyle: Boolean?,
+    val pollingMode: PollingMode? = null,
+    val other: Map<String, String>?
 )
 
 fun ElectionInfo.publishJson() = ElectionInfoJson(
     this.electionName,
     this.auditType,
-    ncards = this.ncards,
-    ncontests = this.ncontests,
+    ncards = this.totalCardCount,
+    ncontests = this.contestCount,
     cvrsContainUndervotes = this.cvrsContainUndervotes,
     poolsHaveOneCardStyle = this.poolsHaveOneCardStyle,
+    pollingMode = this.pollingMode,
+    other = if (this.other.isEmpty()) null else this.other.publishJson(),
 )
 
 fun ElectionInfoJson.import() = ElectionInfo(
     this.electionName ?: "unknown",
     auditType = this.auditType,
-    ncards = this.ncards,
-    ncontests = this.ncontests,
+    totalCardCount = this.ncards,
+    contestCount = this.ncontests,
     cvrsContainUndervotes = this.cvrsContainUndervotes,
     poolsHaveOneCardStyle = this.poolsHaveOneCardStyle,
+    pollingMode = this.pollingMode,
+    other = if (this.other == null) emptyMap() else this.other.import(),
 )
+
+fun Map<String, Any>.publishJson(): Map<String, String> {
+    return this.mapValues { it.value.toString() }
+}
+
+fun Map<String, String>.import(): Map<String, Double> {
+    return this.mapValues { it.value.toDouble() } // TODO type info ??
+}
 
 /////////////////////////////////////////////////////////////////////////////////
 

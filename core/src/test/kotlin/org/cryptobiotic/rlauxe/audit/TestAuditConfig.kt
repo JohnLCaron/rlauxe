@@ -11,13 +11,13 @@ class TestAuditConfig {
             AuditType.CLCA, nsimEst = 10, seed=-2417429242344992892,
         )
         val expected =
-"""AuditConfig(auditType=CLCA, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testClcaSimulated
-  minRecountMargin=0.005 minMargin=0.0 contestSampleCutoff=20000 auditSampleCutoff=100000 removeCutoffContests=true
-  nsimEst=10, quantile=0.8, simFuzzPct=null, simulationStrategy=optimistic, mvrFuzzPct=0.0,
-  ClcaConfig(strategy=generalAdaptive2, fuzzMvrs=null, d=100, maxLoss=0.9624175929935999, apriori=TausRates(rates={}))
+"""AuditConfig(auditType=CLCA, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testClcaSimulated,
+ minRecountMargin=0.005, minMargin=0.0, contestSampleCutoff=20000, auditSampleCutoff=100000, removeCutoffContests=true,
+  nsimEst=10, quantile1=0.5, quantile=0.8, simFuzzPct=null, simulationStrategy=optimistic, mvrFuzzPct=0.0,
+  ClcaConfig(strategy=generalAdaptive, fuzzMvrs=null, d=100, maxLoss=0.9624175929935999, apriori=TausRates(rates={}))
 """
         assertEquals(expected, config.toString())
-        assertEquals("generalAdaptive2", config.strategy())
+        assertEquals("generalAdaptive", config.strategy())
     }
 
     @Test
@@ -26,10 +26,10 @@ class TestAuditConfig {
             AuditType.POLLING, nsimEst = 10, seed=-2417429242344992892,
         )
         val expected =
-            """AuditConfig(auditType=POLLING, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testClcaSimulated
-  minRecountMargin=0.005 minMargin=0.0 contestSampleCutoff=20000 auditSampleCutoff=100000 removeCutoffContests=true
-  nsimEst=10, quantile=0.8, simFuzzPct=null, simulationStrategy=optimistic, mvrFuzzPct=0.0,
-  PollingConfig(d=100)
+            """AuditConfig(auditType=POLLING, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testPrivateMvrs,
+ minRecountMargin=0.005, minMargin=0.0, contestSampleCutoff=20000, auditSampleCutoff=100000, removeCutoffContests=true,
+  nsimEst=10, quantile1=0.5, quantile=0.8, simFuzzPct=null, simulationStrategy=optimistic, mvrFuzzPct=0.0,
+  PollingConfig(d=100, mode=withPools)
 """
         assertEquals(expected, config.toString())
         assertEquals("polling", config.strategy())
@@ -41,13 +41,13 @@ class TestAuditConfig {
             AuditType.ONEAUDIT, nsimEst = 10, seed=-2417429242344992892,
         )
         val expected =
-            """AuditConfig(auditType=ONEAUDIT, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testClcaSimulated
-  minRecountMargin=0.005 minMargin=0.0 contestSampleCutoff=20000 auditSampleCutoff=100000 removeCutoffContests=true
-  nsimEst=10, quantile=0.8, simFuzzPct=null, simulationStrategy=optimistic, mvrFuzzPct=0.0,
-  ClcaConfig(strategy=generalAdaptive2, fuzzMvrs=null, d=100, maxLoss=0.9624175929935999, apriori=TausRates(rates={}))
+            """AuditConfig(auditType=ONEAUDIT, riskLimit=0.05, seed=-2417429242344992892 persistedWorkflowMode=testPrivateMvrs,
+ minRecountMargin=0.005, minMargin=0.0, contestSampleCutoff=20000, auditSampleCutoff=100000, removeCutoffContests=true,
+  nsimEst=10, quantile1=0.5, quantile=0.8, simFuzzPct=null, simulationStrategy=optimistic, mvrFuzzPct=0.0,
+  ClcaConfig(strategy=generalAdaptive, fuzzMvrs=null, d=100, maxLoss=0.9624175929935999, apriori=TausRates(rates={}))
 """
         assertEquals(expected, config.toString())
-        assertEquals("generalAdaptive2", config.strategy())
+        assertEquals("generalAdaptive", config.strategy())
     }
 
 }

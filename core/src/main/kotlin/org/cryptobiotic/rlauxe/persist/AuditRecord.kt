@@ -95,11 +95,11 @@ class AuditRecord(
                     batches,
                 )
 
-            return CardManifest(mergedCards, electionInfo.ncards, batches)
+            return CardManifest(mergedCards, electionInfo.totalCardCount, batches)
         }
         // no batches so you dont need to merge
         val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
-        return CardManifest(sortedCards, electionInfo.ncards, emptyList())
+        return CardManifest(sortedCards, electionInfo.totalCardCount, emptyList())
     }
 
     override fun readSortedManifest(): CardManifest {
@@ -112,11 +112,11 @@ class AuditRecord(
                     batches,
                 )
 
-            return CardManifest(mergedCards, electionInfo.ncards, batches)
+            return CardManifest(mergedCards, electionInfo.totalCardCount, batches)
         }
         // no batches so you dont need to merge
         val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
-        return CardManifest(sortedCards, electionInfo.ncards, emptyList())
+        return CardManifest(sortedCards, electionInfo.totalCardCount, emptyList())
     }
 
     override fun readBatches(): List<Batch>? {
@@ -187,12 +187,12 @@ class AuditRecord(
                 null
             }
 
-            // new way of storing config
+            /* new way of storing config
             val auditCreationConfigResult = readAuditCreationConfigJsonFile(publisher.auditCreationConfigFile())
             val auditCreationConfig = if (auditCreationConfigResult.isOk) auditCreationConfigResult.unwrap() else {
                 errs.addNested(auditCreationConfigResult.unwrapError())
                 null
-            }
+            } */
 
             val contestsResults = readContestsJsonFile(publisher.contestsFile())
             val contests = if (contestsResults.isOk) contestsResults.unwrap()  else {
@@ -256,14 +256,15 @@ class AuditRecord(
                     }
                 }
 
-                // new way of storing config
+                /*new way of storing config
                 // readAuditRoundConfigJsonFile(filename: String): Result<AuditRoundConfig, ErrorMessages>
                 val auditRoundConfigResult = readAuditRoundConfigJsonFile(publisher.auditRoundConfigFile(roundIdx))
                 val auditRoundConfig = if (auditRoundConfigResult.isOk) auditRoundConfigResult.unwrap() else {
                     errs.addNested(auditRoundConfigResult.unwrapError())
                     null
-                }
+                }  */
 
+                /*
                 if (auditCreationConfig != null && auditRoundConfig != null) {
                     val auditConfigNew = AuditConfig.fromRoundConfig(auditCreationConfig, auditRoundConfig)
                     if (auditConfigNew != config) {
@@ -271,7 +272,7 @@ class AuditRecord(
                        // println("fromRoundConfig= ${auditConfigNew}")
                         println("auditConfigNew != config")
                     }
-                }
+                } */
 
             }
             // TODO AuditRecord or CompositeRecord ??

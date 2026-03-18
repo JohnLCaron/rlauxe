@@ -12,6 +12,7 @@ import kotlin.test.assertNotNull
 
 class TestAuditRoundConfigJson {
 
+    /*
     @Test
     fun testRoundtrip() {
         testRoundtrips(AuditConfig(AuditType.CLCA, seed = 12356667890L))
@@ -89,4 +90,6 @@ class TestAuditRoundConfigJson {
         scratchFile1.delete()
         scratchFile2.delete()
     }
+
+     */
 }

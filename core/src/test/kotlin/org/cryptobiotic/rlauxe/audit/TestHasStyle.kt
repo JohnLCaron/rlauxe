@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.audit
 
-import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
@@ -9,8 +8,6 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.estimate.MultiContestCombineData
 import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
@@ -380,8 +377,9 @@ class TestHasStyle {
         }
 
         createAuditRecord(config, election, auditDir = auditdir)
+        startFirstRound(auditdir)
 
-        return runTestPersistedAudit(topdir, contestsUA)
+        return runTestPersistedAudit(config, topdir, contestsUA)
     }
 
     fun createAndRunTestAuditCards(name:String, topdir: String, auditType: AuditType, contests: List<Contest>, skipContests: List<Int>, hasStyle: Boolean,
@@ -419,21 +417,22 @@ class TestHasStyle {
         createElectionRecord(election, auditDir = auditdir)
 
         createAuditRecord(config, election, auditDir = auditdir)
+        startFirstRound(auditdir)
 
-        return runTestPersistedAudit(topdir, contestsUA)
+        return runTestPersistedAudit(config, topdir, contestsUA)
     }
 }
 
-private fun runTestPersistedAudit(topdir: String, wantAudit: List<ContestWithAssertions>): AuditRoundIF {
+private fun runTestPersistedAudit(config: AuditConfig, topdir: String, wantAudit: List<ContestWithAssertions>): AuditRoundIF {
     val auditdir = "$topdir/audit"
-    val publisher = Publisher(auditdir)
-    val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-    sortManifestExternal(topdir, publisher, config.seed)
 
     // TODO
     val verifyResults = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
     if (showDetails) print(verifyResults)
-    if (verifyResults.hasErrors) fail()
+    if (verifyResults.hasErrors) {
+        print(verifyResults)
+        fail()
+    }
 
     val rlauxAudit = PersistedWorkflow.readFrom(auditdir)!!
     val mvrManager = rlauxAudit.mvrManager()

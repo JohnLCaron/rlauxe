@@ -50,6 +50,8 @@ data class AuditConfig(
         }
     }
 
+    fun isRiskMeasuringAudit() = auditSampleLimit != null
+
     // only used in PersistedMvrManagerTest
     fun mvrFuzzPct(): Double {
         return when (auditType) {
@@ -80,43 +82,4 @@ data class AuditConfig(
             AuditType.CLCA, AuditType.ONEAUDIT -> clcaConfig.strategy.toString()
         }
     }
-
-    /*
-    companion object {
-        fun fromCreationConfig(cc: AuditCreationConfig): AuditConfig {
-            return AuditConfig(
-                auditType = cc.auditType,
-                riskLimit = cc.riskLimit,
-                seed = cc.seed,
-                auditSampleLimit = cc.riskMeasuringSampleLimit,
-                persistedWorkflowMode = cc.persistedWorkflowMode,
-                clcaConfig = ClcaConfig(fuzzMvrs = cc.fuzzMvrs)
-            )
-        }
-        fun fromRoundConfig(cc: AuditCreationConfig, arc: AuditRoundConfig): AuditConfig {
-            return AuditConfig(
-                auditType = cc.auditType,
-                riskLimit = cc.riskLimit,
-                seed = cc.seed,
-                auditSampleLimit = cc.riskMeasuringSampleLimit,
-                persistedWorkflowMode = cc.persistedWorkflowMode,
-
-                nsimEst = arc.simulation.nsimEst,
-                quantile = arc.simulation.quantile,
-                simFuzzPct = arc.simulation.simFuzzPct,
-
-                minRecountMargin = arc.sampling.minRecountMargin,
-                minMargin = arc.sampling.minMargin,
-                contestSampleCutoff = arc.sampling.contestSampleCutoff,
-                removeCutoffContests = arc.sampling.removeCutoffContests,
-                maxSamplePct = arc.sampling.maxSamplePct,
-                removeMaxContests = arc.sampling.removeMaxContests,
-
-                clcaConfig = arc.makeClcaConfig(cc.fuzzMvrs),
-                pollingConfig = PollingConfig(arc.alphaMart.d)
-            )
-        }
-    }
-
-     */
 }

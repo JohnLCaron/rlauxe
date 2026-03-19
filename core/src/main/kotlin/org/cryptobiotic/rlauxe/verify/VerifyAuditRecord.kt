@@ -33,15 +33,15 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         }
 
         publisher = Publisher(auditRecordLocation)
-        val auditConfigResult = readAuditConfigJsonFile(publisher.auditConfigFile())
-        config = auditConfigResult.unwrap()
+        config = auditRecord.config
+        contests = auditRecord.contests
 
-        val contestsResults = readContestsJsonFile(publisher.contestsFile())
+        /* val contestsResults = readContestsJsonFile(publisher.contestsFile())
         contests = if (contestsResults .isOk) contestsResults.unwrap().sortedBy { it.id } else {
             println(contestsResults)
             logger.error{ contestsResults.toString() }
             throw RuntimeException( contestsResults.toString() )
-        }
+        } */
 
         allInfos = contests.map{ it.contest.info() }.associateBy { it.id }
     }

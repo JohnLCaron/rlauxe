@@ -14,7 +14,7 @@ class TestConfigBuilders {
             "corla", AuditType.CLCA, 42, 11,
             true, true, pollingMode = null
         )
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, persistedWorkflowMode = PersistedWorkflowMode.testClcaSimulated)
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, PersistedWorkflowMode.testClcaSimulated)
         val round = AuditRoundConfig(
             SimulationControl(nsimEst = 10, estPercentSuccess = listOf(0.42, 0.55, .67)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000),
@@ -30,7 +30,7 @@ class TestConfigBuilders {
             "corla", AuditType.POLLING, 4262, 11,
             true, true, pollingMode = PollingMode.withBatches
         )
-        val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
             SimulationControl(nsimEst = 20, estPercentSuccess = listOf(0.50, 0.80)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
@@ -65,7 +65,7 @@ class TestConfigBuilders {
             "sf", AuditType.CLCA, 42222, 111,
             true, false, pollingMode = null
         )
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
             SimulationControl(nsimEst = 22),
             ContestSampleControl(contestSampleCutoff = 1000, auditSampleCutoff = 2000),
@@ -81,7 +81,7 @@ class TestConfigBuilders {
             "sf", AuditType.ONEAUDIT, 42222, 111,
             true, false, pollingMode = null
         )
-        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
             SimulationControl(nsimEst = 22),
             ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
@@ -97,7 +97,7 @@ class TestConfigBuilders {
             "boulder", AuditType.ONEAUDIT, 42222, 111,
             true, true, pollingMode = null
         )
-        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
             SimulationControl(nsimEst = 22),
             ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
@@ -113,7 +113,7 @@ class TestConfigBuilders {
             "boulder", AuditType.CLCA, 42222, 111,
             true, true, pollingMode = null
         )
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
             SimulationControl(nsimEst = 20, estPercentSuccess = listOf(0.42, 0.55, .67)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 1000, auditSampleCutoff = 2000),
@@ -143,7 +143,7 @@ fun testConfigBuilderRoundtrip(electionInfo: ElectionInfo, target: Config) {
     } else null
     assertEquals(target.round, roundTrip)
 
-    val configRound = Config(target.electionInfo, creationTrip, roundTrip)
+    val configRound = Config(target.electionInfo, creationTrip!!, roundTrip!!)
     assertEquals(target, configRound)
 }
 
@@ -165,7 +165,7 @@ fun createBoulderConfigBuilder(
     return AuditConfigBuilder(electionInfo)
         .setCreation(
             riskLimit = riskLimit,
-            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
+            PersistedWorkflowMode.testPrivateMvrs,
         )
         .setRoundConfig()
         .setSimulation(nsimEst = 20, mvrFuzz = mvrFuzz,)
@@ -197,7 +197,7 @@ fun createSfConfigBuilder(
     return AuditConfigBuilder(electionInfo)
         .setCreation(
             riskLimit = .05,
-            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
+            PersistedWorkflowMode.testPrivateMvrs,
         )
         .setRoundConfig()
         .setSimulation(nsimEst = 10, estPercentSuccess = estPercentSuccess, mvrFuzz = mvrFuzz,)

@@ -107,7 +107,8 @@ fun auditPollingAssertion(
     )
     testFn.setDebuggingSequences()
 
-    val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=true) { sampler.sample() }
+    val terminateOnNullReject = !config.isRiskMeasuringAudit()
+    val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=terminateOnNullReject) { sampler.sample() }
 
     assertionRound.auditResult = AuditRoundResult(
         roundIdx,

@@ -39,26 +39,26 @@ data class AuditCreationConfig(
 data class AuditCreationConfigJson(
     val auditType: AuditType,
     val riskLimit: Double,
+    val persistedWorkflowMode: PersistedWorkflowMode,
     val seed: Long,
     val riskMeasuringSampleLimit: Int?,
-    val persistedWorkflowMode: PersistedWorkflowMode,
 )
 
 fun AuditCreationConfig.publishJson() = AuditCreationConfigJson(
     this.auditType,
     this.riskLimit,
+    this.persistedWorkflowMode,
     this.seed,
     this.riskMeasuringSampleLimit,
-    this.persistedWorkflowMode,
 )
 
 fun AuditCreationConfigJson.import() = AuditCreationConfig(
-        this.auditType,
-        this.riskLimit,
-        this.seed,
-        this.riskMeasuringSampleLimit,
-        this.persistedWorkflowMode,
-    )
+    this.auditType,
+    this.riskLimit,
+    this.persistedWorkflowMode,
+    this.seed,
+    this.riskMeasuringSampleLimit,
+)
 
 /////////////////////////////////////////////////////////////////////////////////
 

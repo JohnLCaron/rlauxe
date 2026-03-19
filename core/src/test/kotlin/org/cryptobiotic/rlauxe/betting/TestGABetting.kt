@@ -34,8 +34,6 @@ class TestGABetting {
             oaAssortRates=null,
             d = 0,
         )
-        gaBetting.debug = true
-
         val tracker = ClcaErrorTracker(noerror, upper)
         repeat(1000) { tracker.addSample(noerror) }
 

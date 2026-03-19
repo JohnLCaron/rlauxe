@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.AuditRecordIF
 import org.cryptobiotic.rlauxe.persist.CompositeRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
-// import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundConfigJsonFile
+import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
 
@@ -63,16 +63,16 @@ class PersistedWorkflow(
             nextRound.auditIsComplete = true
         } else {
             // heres where we limit the number of samples we are willing to audit
-            if (config.auditSampleLimit != null ) {
+            if (config.auditSampleLimit != null && nextRound.samplePrns.size > config.auditSampleLimit) {
                 nextRound.samplePrns = nextRound.samplePrns.subList(0, config.auditSampleLimit)
             }
 
-/*            val auditRoundConfig = AuditRoundConfig.fromAuditConfig(config)
+            val auditRoundConfig = AuditRoundConfig.fromAuditConfig(config)
             writeAuditRoundConfigJsonFile(auditRoundConfig, publisher.auditRoundConfigFile(nextRound.roundIdx))
             logger.info {"startNewRound writeAuditRoundConfig to ${publisher.auditRoundConfigFile(nextRound.roundIdx)}"}
 
             writeAuditRoundJsonFile(nextRound, publisher.auditEstFile(nextRound.roundIdx))
-            logger.info {"startNewRound writeAuditEstimation to ${publisher.auditEstFile(nextRound.roundIdx)}"} */
+            logger.info {"startNewRound writeAuditEstimation to ${publisher.auditEstFile(nextRound.roundIdx)}"}
 
             writeSamplePrnsJsonFile(nextRound.samplePrns, publisher.samplePrnsFile(nextRound.roundIdx))
             logger.info {"startNewRound writeSamplePrns ${publisher.samplePrnsFile(nextRound.roundIdx)}"}

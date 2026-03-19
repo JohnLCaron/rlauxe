@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class TestConfig {
+class TestConfigConversions {
     val auditRecords = listOf(
         "$testdataDir/cases/boulder24/oa/audit",
         "$testdataDir/cases/boulder24/clca/audit",
@@ -28,12 +28,11 @@ class TestConfig {
     }
 
     @Test
-    fun testProblem() {
-        val auditdir = "$testdataDir/cases/belgium/2024"
+    fun testRound() {
+        val auditdir = "$testdataDir/cases/belgium/2024/Namur/audit"
         val auditRecord = AuditRecord.readFrom(auditdir)!!
         testAuditConfigRoundtrip(auditdir, auditRecord.config)
     }
-
 
     @Test
     fun testAuditConfigRoundtrip() {

@@ -2,8 +2,14 @@ package org.cryptobiotic.rlauxe.belgium
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
+import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
+import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.ClcaConfig
+import org.cryptobiotic.rlauxe.audit.ContestSampleControl
+import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.core.AssorterIF
@@ -15,6 +21,7 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.fail
@@ -112,14 +119,20 @@ fun createBelgiumElection(electionName: String, contestId: Int, stopRound:Int=0,
 
     val dhondtParties = belgiumElection.ElectionLists.mapIndexed { idx, it ->  DhondtCandidate(it.PartyLabel, idx+1, it.NrOfVotes) }
     val nwinners = belgiumElection.ElectionLists.sumOf { it.NrOfSeats }
-    // val dcontest = makeProtoContest(electionName, 1, dhondtParties, nwinners, belgiumElection.NrOfBlankVotes,.05)
     val dcontest = makeProtoContest(electionName, contestId, dhondtParties, nwinners, 0,.05)
 
     val totalVotes = belgiumElection.NrOfValidVotes // + belgiumElection.NrOfBlankVotes
     val contestd = dcontest.createContest(Nc = totalVotes, Ncast = totalVotes)
 
     val topdir = "$toptopdir/$electionName"
-    createBelgiumClca(topdir=topdir, contestd)
+
+    val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
+    val round = AuditRoundConfig(
+        SimulationControl(nsimEst = 1),
+        ContestSampleControl.NONE,
+        ClcaConfig(fuzzMvrs=0.0), null)
+
+    createBelgiumClca(topdir=topdir, contestd, creation, round)
 
     val auditdir = "$topdir/audit"
     val results = RunVerifyContests.runVerifyContests(auditdir, null, show = showVerify)

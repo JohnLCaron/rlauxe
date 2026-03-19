@@ -8,8 +8,8 @@ import kotlin.Int
 // practice run
 data class Config(
     val electionInfo: ElectionInfo,
-    val creation: AuditCreationConfig?,
-    val round: AuditRoundConfig?,
+    val creation: AuditCreationConfig,
+    val round: AuditRoundConfig,
     val version: String = "0.8.4",  // how do we get library version ??
 ) {
     val auditType = electionInfo.auditType
@@ -18,7 +18,7 @@ data class Config(
     val isPolling = auditType == AuditType.POLLING
 
     init {
-        if (creation != null) require(creation.auditType == electionInfo.auditType) {"creation.auditType must equal electionInfo.auditType"}
+        require(creation.auditType == electionInfo.auditType) {"creation.auditType must equal electionInfo.auditType"}
     }
 
     val simulation = round!!.simulation
@@ -63,8 +63,8 @@ data class Config(
 }
 
 class AuditConfigBuilder(val electionInfo: ElectionInfo,) {
-    var roundConfigBuilder: RoundConfigBuilder? = null
-    var creationConfig: AuditCreationConfig? = null
+    var roundConfigBuilder = RoundConfigBuilder(this)
+    var creationConfig = AuditCreationConfig(electionInfo.auditType)
 
     fun setCreation(
             riskLimit: Double,
@@ -83,12 +83,11 @@ class AuditConfigBuilder(val electionInfo: ElectionInfo,) {
     }
 
     fun setRoundConfig(): RoundConfigBuilder  {
-        roundConfigBuilder = RoundConfigBuilder(this)
-        return roundConfigBuilder!!
+        return roundConfigBuilder
     }
 
     fun build(): Config {
-        val auditRoundConfig = roundConfigBuilder?.buildit()
+        val auditRoundConfig = roundConfigBuilder.buildit()
         return Config(electionInfo, creationConfig, auditRoundConfig)
     }
 }

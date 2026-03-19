@@ -13,6 +13,7 @@ import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.math.ln
 
 private val logger = KotlinLogging.logger("GeneralAdaptiveBetting")
+private val debug = false
 
 // new design
 //  first round: use apriori and nphantoms for initial rate estimate
@@ -33,7 +34,7 @@ data class GeneralAdaptiveBetting(
     val upper = aprioriErrorRates.upper
     val taus = Taus(upper)
     val aprioriRates: Map<Double, Double>  // bassort -> rate
-    var debug = false
+    // var debug = false
 
     init {
         aprioriRates = makeAprioriErrorRates(aprioriErrorRates, nphantoms/Npop.toDouble())

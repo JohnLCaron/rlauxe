@@ -40,12 +40,11 @@ data class ElectionInfo(
 data class AuditCreationConfig(
     val auditType: AuditType, // must agree with ElectionInfo
     val riskLimit: Double = 0.05,
-    val seed: Long = secureRandom.nextLong(),
-    val riskMeasuringSampleLimit: Int? = null, // the number of samples we are willing to audit; this turns the audit into a "risk measuring" audit
-
     val persistedWorkflowMode: PersistedWorkflowMode =
         if (auditType.isClca()) PersistedWorkflowMode.testClcaSimulated else PersistedWorkflowMode.testPrivateMvrs,
 
+    val seed: Long = secureRandom.nextLong(),
+    val riskMeasuringSampleLimit: Int? = null, // the number of samples we are willing to audit; this turns the audit into a "risk measuring" audit
     val other: Map<String, Any> = emptyMap(),    // soft parameters
 ) {
 
@@ -59,8 +58,7 @@ data class AuditCreationConfig(
 
     companion object {
         fun fromAuditConfig(config: AuditConfig): AuditCreationConfig {
-            return AuditCreationConfig(config.auditType, config.riskLimit, config.seed, config.auditSampleLimit,
-                config.persistedWorkflowMode)
+            return AuditCreationConfig(config.auditType, config.riskLimit, config.persistedWorkflowMode, config.seed, config.auditSampleLimit)
         }
     }
 }
@@ -80,6 +78,8 @@ data class AuditRoundConfig(
         val CLCA = AuditRoundConfig(SimulationControl(), ContestSampleControl(), ClcaConfig(), null)
         val POLLING = AuditRoundConfig(SimulationControl(),
             ContestSampleControl(contestSampleCutoff=20000, auditSampleCutoff=100_000), null, PollingConfig())
+
+        fun standard(auditType: AuditType) = if (auditType.isPolling()) POLLING else CLCA
 
         fun fromAuditConfig(config: AuditConfig): AuditRoundConfig {
             val simulation =

@@ -331,28 +331,28 @@ class CorlaContestBuilder(val info: ContestInfo, detailContest: ElectionDetailCo
 ////////////////////////////////////////////////////////////////////
 // Create audit where pools are from the precinct total. May be CLCA or OneAudit
 fun createColoradoElection(
-    topdir: String,
-    auditdir: String,
-    electionDetailXmlFile: String,
-    contestRoundFile: String,
-    precinctFile: String,
-    auditConfigIn: AuditConfig? = null,
-    auditType : AuditType,
-    hasSingleCardStyle: Boolean,
-    pollingMode: PollingMode?,
-    startFirstRound: Boolean = true
-    )
-{
+        topdir: String,
+        auditdir: String,
+        electionDetailXmlFile: String,
+        contestRoundFile: String,
+        precinctFile: String,
+        pollingMode: PollingMode? = null,
+        creation: AuditCreationConfig,
+        round: AuditRoundConfig,
+        startFirstRound: Boolean = true
+    ) {
     val stopwatch = Stopwatch()
 
-    val election = if (auditType.isClca())
-        CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, auditType, auditdir,
-                    hasSingleCardStyle, pollingMode=null) else
-        CreateColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile, auditdir, hasSingleCardStyle, pollingMode!!)
+    val election = if (creation.auditType.isClca())
+        CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, creation.auditType, auditdir,
+                    hasSingleCardStyle=false, pollingMode=null) else
+        CreateColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile, auditdir, hasSingleCardStyle=false, pollingMode!!)
 
     createElectionRecord(election, auditDir = auditdir, clear = false)
+    val config = Config(election.electionInfo(), creation, round)
+    val auditConfig = config.toAuditConfig()
 
-    val config = when {
+    /* val config = when {
         (auditConfigIn != null) -> auditConfigIn
         auditType.isClca() -> AuditConfig(
             AuditType.CLCA,
@@ -370,9 +370,9 @@ fun createColoradoElection(
             pollingConfig = PollingConfig(mode = pollingMode!!)
         )
         else -> throw RuntimeException("Unsupported audit type ${auditType.name}")
-    }
+    } */
 
-    createAuditRecord(config, election, auditDir = auditdir, externalSortDir = topdir)
+    createAuditRecord(auditConfig, election, auditDir = auditdir, externalSortDir = topdir)
 
     if (startFirstRound) {
         val result = startFirstRound(auditdir)

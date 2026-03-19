@@ -49,7 +49,8 @@ class BelgiumClca (
 fun createBelgiumClca(
     topdir: String,
     contestd: DHondtContest,
-    auditConfigIn: AuditConfig? = null,
+    creation: AuditCreationConfig,
+    round: AuditRoundConfig,
     clear: Boolean = true): Result<AuditRoundIF, ErrorMessages>
 {
     val auditdir = "$topdir/audit"
@@ -59,7 +60,10 @@ fun createBelgiumClca(
     createElectionRecord(election, auditDir = auditdir, clear = clear)
     println("createBelgiumClca took $stopwatch")
 
-    val config = when {
+    val config = Config(election.electionInfo(), creation, round)
+    val auditConfig = config.toAuditConfig()
+
+    /* val config = when {
         (auditConfigIn != null) -> auditConfigIn
         else -> AuditConfig(
             AuditType.CLCA, removeCutoffContests = false, riskLimit = .05, nsimEst=10, minRecountMargin=0.0,
@@ -67,9 +71,9 @@ fun createBelgiumClca(
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
             clcaConfig = ClcaConfig(fuzzMvrs=0.0)
         )
-    }
+    } */
 
-    createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+    createAuditRecord(auditConfig, election, auditDir = auditdir, externalSortDir=topdir)
 
     val result = startFirstRound(auditdir)
     if (result.isErr) logger.error{ result.toString() }

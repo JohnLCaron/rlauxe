@@ -99,8 +99,6 @@ class TestOneAuditAdaptiveBetting {
                 oaAssortRates = oaErrorRates,
                 d = 100,
             )
-            betFun.debug = true
-
             val tracker = ClcaErrorTracker(oaCassorter.noerror(), oaCassorter.assorter.upperBound())
             val nsamples = runSamplesNeeded(contestUA.Npop, betFun, sampler, tracker, show = false)
             sampleSizes.add(nsamples)

@@ -26,40 +26,39 @@ data class AuditCreationConfig(
     val auditType: AuditType, // must agree with ElectionInfo
     val riskLimit: Double = 0.05,
     val seed: Long = secureRandom.nextLong(),
-    val auditSampleLimit: Int? = null, // the number of samples we are willing to audit; this turns the audit into a "risk measuring" audit
+    val riskMeasuringSampleLimit: Int? = null, // the number of samples we are willing to audit; this turns the audit into a "risk measuring" audit
 
-    val persistedWorkflowMode: PersistedWorkflowMode, // real, testSimulated, testPrivateMvrs
-    val fuzzMvrs: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs when persistedWorkflowMode=testSimulate
+    val persistedWorkflowMode: PersistedWorkflowMode =
+        if (auditType.isClca()) PersistedWorkflowMode.testClcaSimulated else PersistedWorkflowMode.testPrivateMvrs,
+
+    val other: Map<String, Any> = emptyMap(),    // soft parameters
 )
-)
- */
+*/
+
 @Serializable
 data class AuditCreationConfigJson(
     val auditType: AuditType,
     val riskLimit: Double,
+    val persistedWorkflowMode: PersistedWorkflowMode,
     val seed: Long,
-    val auditSampleLimit: Int?,
-    val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated,
-    val fuzzMvrs: Double? = null,
+    val riskMeasuringSampleLimit: Int?,
 )
 
 fun AuditCreationConfig.publishJson() = AuditCreationConfigJson(
     this.auditType,
     this.riskLimit,
-    this.seed,
-    this.auditSampleLimit,
     this.persistedWorkflowMode,
-    this.fuzzMvrs,
+    this.seed,
+    this.riskMeasuringSampleLimit,
 )
 
 fun AuditCreationConfigJson.import() = AuditCreationConfig(
-        this.auditType,
-        this.riskLimit,
-        this.seed,
-        this.auditSampleLimit,
-        this.persistedWorkflowMode,
-        this.fuzzMvrs,
-    )
+    this.auditType,
+    this.riskLimit,
+    this.persistedWorkflowMode,
+    this.seed,
+    this.riskMeasuringSampleLimit,
+)
 
 /////////////////////////////////////////////////////////////////////////////////
 

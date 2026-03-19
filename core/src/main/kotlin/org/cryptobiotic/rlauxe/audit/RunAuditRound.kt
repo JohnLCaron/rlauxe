@@ -61,7 +61,9 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRo
         val workflow = PersistedWorkflow(auditRecord)
         var roundIdx = 0
         var complete = false
+        var auditWasRun = false
 
+        // run the audit on the last round, if there is one
         if (!workflow.auditRounds().isEmpty()) {
             val lastRound = workflow.auditRounds().last()
             roundIdx = lastRound.roundIdx
@@ -71,6 +73,7 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRo
                 val roundStopwatch = Stopwatch()
                 // run the audit for this round
                 complete = workflow.runAuditRound(lastRound as AuditRound, onlyTask)
+                auditWasRun = true
                 logger.info { "End runAuditRound ${lastRound.roundIdx} complete=$complete took ${roundStopwatch}" }
 
             } else {
@@ -78,7 +81,11 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRo
             }
         }
 
-        if (!complete) {
+        // on a risk measureing audit, we dont want to do the next estimation round automatically, wait for explicit call.
+        val waitOnRisk = auditRecord.config.isRiskMeasuringAudit() && auditWasRun
+
+        // start a new round by estimating the mvrs needed
+        if (!complete && !waitOnRisk ) {
             roundIdx++
             // start next round and estimate sample sizes
             logger.info { "Start startNewRound $roundIdx using ${workflow}" }

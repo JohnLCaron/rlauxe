@@ -65,7 +65,7 @@ fun sampleAndRemoveContests(
         }
     }
 
-    logger.debug{"sampleWithContestCutoff success on ${auditRound.contestRounds.count { !it.done }} contests: round ${auditRound.roundIdx} took ${stopwatch}"}
+    logger.debug{"sampleAndRemoveContests success on ${auditRound.contestRounds.count { !it.done }} contests: round ${auditRound.roundIdx} took ${stopwatch}"}
 }
 
 // TODO find balance with allowing EA to control what gets removed

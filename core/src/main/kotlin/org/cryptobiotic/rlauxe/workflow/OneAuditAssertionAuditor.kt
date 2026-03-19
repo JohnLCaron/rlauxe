@@ -50,7 +50,7 @@ class OneAuditAssertionAuditor(val pools: List<CardPoolIF>, val quiet: Boolean =
         )
         testFn.setDebuggingSequences()
 
-        val terminateOnNullReject = config.auditSampleLimit == null
+        val terminateOnNullReject = !config.isRiskMeasuringAudit()
         val testH0Result = testFn.testH0(samplerTracker.maxSamples(), terminateOnNullReject = terminateOnNullReject) { samplerTracker.sample() }
 
         assertionRound.auditResult = AuditRoundResult(

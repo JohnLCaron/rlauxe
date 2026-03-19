@@ -1,10 +1,6 @@
 package org.cryptobiotic.rlauxe.persist
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.AuditConfig
-import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
-import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
-import org.cryptobiotic.rlauxe.persist.json.writeAuditCreationConfigJsonFile
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.File
 import java.nio.file.Files
@@ -16,8 +12,8 @@ private val logger = KotlinLogging.logger("Publisher")
 
     $auditdir/
         // election record - output of CreateElectionRecord
-        auditConfig.json      // AuditConfigJson
         auditCreationConfig.json  // AuditCreationConfigJson
+        auditRoundConfig.json // AuditRoundConfigJson
         batches.json          // BatchesJson: PopulationIF -> Population
         cardManifest.csv      // AuditableCardCsv, may be zipped
         cardPools.csv         // CardPoolCsv:    CardPoolIF -> CardPool
@@ -32,7 +28,7 @@ private val logger = KotlinLogging.logger("Publisher")
 
         roundX/
             auditEstX.json       // AuditRoundJson,  an audit state with estimation, ready for auditing
-            auditRoundConfigX.json  // auditRoundConfigJson, configuration for round
+            auditRoundConfigX.json  // AuditRoundConfigJson, configuration for round
             auditStateX.json     // AuditRoundJson,  the results of the audit for this round
             sampleCardsX.csv     // AuditableCardCsv, complete sorted cards used for this round
             sampleMvrsX.csv      // AuditableCardCsv, complete sorted mvrs used for this round
@@ -48,8 +44,9 @@ class Publisher(val auditDir: String) {
         validateOutputDir(Path.of(auditDir), ErrorMessages("Publisher"))
     }
 
-    fun auditConfigFile() = "$auditDir/auditConfig.json"
+    // fun auditConfigFile() = "$auditDir/auditConfig.json"
     fun auditCreationConfigFile() = "$auditDir/auditCreationConfig.json"
+    fun auditRoundProtoFile() = "$auditDir/auditRoundConfig.json"
     // fun auditSeedFile() = "$auditDir/auditSeed.json"
     fun cardManifestFile() = "$auditDir/cardManifest.csv" // cardManifest
     fun contestsFile() = "$auditDir/contests.json"
@@ -106,14 +103,14 @@ class Publisher(val auditDir: String) {
         return roundIdx - 1
     }
 
-    fun writeAuditConfig(config: AuditConfig) {
+    /* fun writeAuditConfig(config: AuditConfig) {
         writeAuditConfigJsonFile(config, this.auditConfigFile())
         logger.info{"writeAuditConfig to ${this.auditConfigFile()}\n  $config"}
 
         val auditCreationConfig = AuditCreationConfig.fromAuditConfig(config)
         writeAuditCreationConfigJsonFile(auditCreationConfig, this.auditCreationConfigFile())
         logger.info{"writeAuditCreationConfig to ${this.auditCreationConfigFile()}\n  $auditCreationConfig"}
-    }
+    } */
 }
 
 /** Make sure output directories exists; delete existing files in them.  */

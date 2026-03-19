@@ -1,10 +1,6 @@
 package org.cryptobiotic.rlauxe.cli
 
-import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.audit.sortManifestInternal
 import org.cryptobiotic.rlauxe.audit.runRound
-import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
@@ -30,9 +26,9 @@ class TestRunCliInTemp {
                 "-ncontests", "25",
             )
         )
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        sortManifestInternal(publisher, config.seed)
+        // val publisher = Publisher(auditdir)
+        // val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        // sortManifestInternal(publisher, config.seed)
 
         println("============================================================")
         RunVerifyContests.main(arrayOf("-in", auditdir))
@@ -76,9 +72,9 @@ class TestRunCliInTemp {
             )
         )
 
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        sortManifestInternal(publisher, config.seed)
+        // val publisher = Publisher(auditdir)
+        // val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        // sortManifestInternal(publisher, config.seed)
 
         var done = false
         while (!done) {
@@ -117,9 +113,9 @@ class TestRunCliInTemp {
                 "--addRaireCandidates", "5",
             )
         )
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        sortManifestInternal(publisher, config.seed)
+        // val publisher = Publisher(auditdir)
+        // val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        // sortManifestInternal(publisher, config.seed)
 
         println("============================================================")
         val results = RunVerifyContests.runVerifyContests(auditdir, null, false)
@@ -153,9 +149,9 @@ class TestRunCliInTemp {
                 "-ncards", "10000",
             )
         )
-        val publisher = Publisher(auditdir)
-        val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
-        sortManifestInternal(publisher, config.seed)
+        // val publisher = Publisher(auditdir)
+        // val config = readAuditConfigJsonFile(publisher.auditConfigFile()).unwrap()
+        // sortManifestInternal(publisher, config.seed)
 
         println("============================================================")
         val resultsvc = RunVerifyContests.runVerifyContests(auditdir, null, false)

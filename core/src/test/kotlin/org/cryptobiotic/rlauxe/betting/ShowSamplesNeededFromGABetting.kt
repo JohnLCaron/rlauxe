@@ -47,7 +47,6 @@ class ShowSamplesNeededFromGABetting {
             oaAssortRates=null,
             d = 0,
         )
-        betFn.debug = true
 
         val tracker = ClcaErrorTracker(noerror, upper)
         repeat(1000) { tracker.addSample(noerror) }

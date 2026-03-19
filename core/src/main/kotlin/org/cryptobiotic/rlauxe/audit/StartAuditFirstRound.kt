@@ -11,6 +11,8 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
+import org.cryptobiotic.rlauxe.persist.json.writeAuditCreationConfigJsonFile
+import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
@@ -18,7 +20,6 @@ import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.SortMerge
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.createZipFile
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
@@ -31,13 +32,19 @@ import kotlin.use
 
 private val logger = KotlinLogging.logger("StartAudit")
 
-// one could rerun this to overwrite config and sorted cards, using the same election record
-// one could reverse
+// TO pass in creation, round config
 fun createAuditRecord(config: AuditConfig, election: CreateElectionIF, auditDir: String, externalSortDir: String? = null) {
     val publisher = Publisher(auditDir)
 
-    // write AuditConfig and AuditCreationConfig
-    publisher.writeAuditConfig(config)
+    val auditCreationConfig = AuditCreationConfig.fromAuditConfig(config)
+    writeAuditCreationConfigJsonFile(auditCreationConfig, publisher.auditCreationConfigFile())
+    logger.info{"writeAuditCreationConfig to ${publisher.auditCreationConfigFile()}\n  $auditCreationConfig"}
+
+    val auditRoundConfig = AuditRoundConfig.fromAuditConfig(config)
+    writeAuditRoundConfigJsonFile(auditRoundConfig, publisher.auditRoundProtoFile())
+    logger.info{"writeAuditCreationConfig to ${publisher.auditRoundProtoFile()}\n  $auditCreationConfig"}
+
+    // publisher.writeAuditConfig(config)
 
     if (externalSortDir == null) {
         sortManifestInternal(publisher, config.seed)

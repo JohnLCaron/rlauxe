@@ -95,10 +95,8 @@ class ShowGAOneAuditBetting {
         assorts.subList(0, N/2).forEach{ tracker.addSample(it) }
         println(tracker.measuredClcaErrorCounts().show())
 
-        betFn.debug = true
         val bet = betFn.bet(tracker)
         println("bet = $bet maxLoss = $maxLoss")
-        betFn.debug = false
 
         assorts.shuffle(Random)
         findSamplesNeededUsingAssorts(N, margin, upper, bet, assorts, taus)

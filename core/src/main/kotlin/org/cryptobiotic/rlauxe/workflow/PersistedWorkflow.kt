@@ -63,7 +63,7 @@ class PersistedWorkflow(
             nextRound.auditIsComplete = true
         } else {
             // heres where we limit the number of samples we are willing to audit
-            if (config.auditSampleLimit != null ) {
+            if (config.auditSampleLimit != null && nextRound.samplePrns.size > config.auditSampleLimit) {
                 nextRound.samplePrns = nextRound.samplePrns.subList(0, config.auditSampleLimit)
             }
 

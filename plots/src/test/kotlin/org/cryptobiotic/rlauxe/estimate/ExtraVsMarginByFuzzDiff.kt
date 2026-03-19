@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
-import org.cryptobiotic.rlauxe.audit.SimulationStrategy
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -35,8 +34,7 @@ class ExtraVsMarginByFuzzDiff {
             val auditConfig = AuditConfig(
                 AuditType.CLCA, nsimEst = nsimEst, simFuzzPct = simFuzzPct,
                 persistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated,
-                simulationStrategy = SimulationStrategy.optimistic,
-                clcaConfig = ClcaConfig(fuzzMvrs=fuzzMvrs, strategy=ClcaStrategyType.generalAdaptive2)
+                clcaConfig = ClcaConfig(fuzzMvrs=fuzzMvrs, strategy=ClcaStrategyType.generalAdaptive)
             )
 
             margins.forEach { margin ->

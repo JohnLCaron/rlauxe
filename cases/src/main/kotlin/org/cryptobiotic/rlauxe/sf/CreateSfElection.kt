@@ -322,19 +322,12 @@ fun makeContestNcs(contestManifest: ContestManifest, contestInfos: List<ContestI
 
 fun createSfElection(
     auditdir: String,
-    auditType : AuditType,
     castVoteRecordZip: String,
     contestManifestFilename: String,
     candidateManifestFile: String,
     cvrExportCsv: String,
-    auditConfigIn: AuditConfig? = null,
-    poolsHaveOneCardStyle: Boolean = false,
-    mvrFuzz: Double? = null,
-    minRecountMargin: Double = 0.005,
-    minMargin: Double = 0.0,
-    contestSampleCutoff: Int?,
-    auditSampleCutoff: Int?,
-    removeMaxContests: Int? = null,
+    creation: AuditCreationConfig,
+    round: AuditRoundConfig,
  ): Result<AuditRoundIF, ErrorMessages> {
     val stopwatch = Stopwatch()
 
@@ -343,14 +336,17 @@ fun createSfElection(
         contestManifestFilename,
         candidateManifestFile,
         cvrExportCsv,
-        auditType = auditType,
-        poolsHaveOneCardStyle=poolsHaveOneCardStyle,
+        auditType = creation.auditType,
+        poolsHaveOneCardStyle=false,
     )
     createElectionRecord(election, auditDir = auditdir)
     logger.info{"createSfElection took $stopwatch"}
     stopwatch.start()
 
-    val config = when {
+    val config = Config(election.electionInfo(), creation, round)
+    val auditConfig = config.toAuditConfig()
+
+    /* val config = when {
         (auditConfigIn != null) -> auditConfigIn
 
         (auditType == AuditType.CLCA) -> AuditConfig(
@@ -360,7 +356,6 @@ fun createSfElection(
             removeMaxContests = removeMaxContests,
             contestSampleCutoff = contestSampleCutoff, auditSampleCutoff = auditSampleCutoff,
             simFuzzPct=mvrFuzz, persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs,
-            simulationStrategy = SimulationStrategy.optimistic,
             clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
         )
 
@@ -371,7 +366,6 @@ fun createSfElection(
             removeMaxContests = removeMaxContests,
             contestSampleCutoff = contestSampleCutoff, auditSampleCutoff = auditSampleCutoff,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
-            simulationStrategy = SimulationStrategy.optimistic,
             clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
         )
 
@@ -379,9 +373,9 @@ fun createSfElection(
             AuditType.POLLING, riskLimit = .05, nsimEst = 20,
             contestSampleCutoff = contestSampleCutoff, auditSampleCutoff = auditSampleCutoff,
             ) // TODO
-    }
+    } */
 
-    createAuditRecord(config, election, auditDir = auditdir)
+    createAuditRecord(auditConfig, election, auditDir = auditdir)
 
     val result = startFirstRound(auditdir)
     if (result.isErr) logger.error{ result.toString() }

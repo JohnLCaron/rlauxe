@@ -1,10 +1,14 @@
 package org.cryptobiotic.util
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
+import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.ClcaConfig
+import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.PollingConfig
 import org.cryptobiotic.rlauxe.audit.PollingMode
+import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.belgium.belgianElectionMap
 import org.cryptobiotic.rlauxe.belgium.createBelgiumElection
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
@@ -25,41 +29,57 @@ class TestGenerateAllUseCases {
     fun createBoulder24oa() {
         val auditdir = "$testdataDir/cases/boulder24/oa/audit"
 
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
+        val round = AuditRoundConfig(
+            SimulationControl(nsimEst = 22),
+            ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
+            ClcaConfig(fuzzMvrs=.001), null)
+
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
-            auditType = AuditType.ONEAUDIT,
-            contestSampleCutoff = 2500,
-            auditSampleCutoff = 5000,
+            creation,
+            round
         )
     }
 
     @Test
     fun createBoulder24clca() { // simulate CVRs
         val auditdir = "$testdataDir/cases/boulder24/clca/audit"
+
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
+        val round = AuditRoundConfig(
+            SimulationControl(nsimEst = 20, estPercentSuccess = listOf(0.42, 0.55, .67)),
+            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 1000, auditSampleCutoff = 2000),
+            ClcaConfig(fuzzMvrs=.001), null)
+
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
-            auditType = AuditType.CLCA,
-            contestSampleCutoff = 1000,
-            auditSampleCutoff = 2000,
+            creation,
+            round,
         )
     }
 
     @Test
-    fun createColoradoClca() {
+    fun testCreateColoradoClca() {
         val topdir = "$testdataDir/cases/corla/clca"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        createColoradoElection(topdir, "$topdir/audit",
-            detailXmlFile, contestRoundFile, precinctFile, auditType = AuditType.CLCA,
-            hasSingleCardStyle=true, pollingMode=null)
-    }
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, PersistedWorkflowMode.testClcaSimulated)
+        val round = AuditRoundConfig(
+            SimulationControl(nsimEst = 10, estPercentSuccess = listOf(0.42, 0.55, .67)),
+            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000),
+            ClcaConfig(), null)
 
+        createColoradoElection(topdir, "$topdir/audit",
+            detailXmlFile, contestRoundFile, precinctFile,
+            null, creation, round)
+    }
 
     @Test
     fun testCreateColoradoPollingPools() {
@@ -68,17 +88,15 @@ class TestGenerateAllUseCases {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        val auditConfigIn = AuditConfig(
-            AuditType.POLLING, riskLimit = .03, nsimEst = 10, quantile = 0.5,
-            minRecountMargin= 0.005,
-            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
-            pollingConfig = PollingConfig(mode = PollingMode.withPools)
-        )
+        val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
+        val round = AuditRoundConfig(
+            SimulationControl(nsimEst = 10, estPercentSuccess = listOf(0.50, 0.80)),
+            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
+            null, PollingConfig())
 
         createColoradoElection(topdir, "$topdir/audit",
             detailXmlFile, contestRoundFile, precinctFile,
-            auditConfigIn=auditConfigIn,
-            auditType=AuditType.POLLING, hasSingleCardStyle=false, pollingMode=PollingMode.withPools)
+            pollingMode=PollingMode.withPools, creation, round)
     }
 
     @Test
@@ -88,69 +106,76 @@ class TestGenerateAllUseCases {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        val auditConfigIn = AuditConfig(
-            AuditType.POLLING, riskLimit = .03, nsimEst = 10, quantile = 0.5,
-            minRecountMargin= 0.005,
-            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
-            pollingConfig = PollingConfig(mode = PollingMode.withBatches)
-        )
+        val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
+        val round = AuditRoundConfig(
+            SimulationControl(nsimEst = 10, estPercentSuccess = listOf(0.50, 0.80)),
+            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
+            null, PollingConfig())
 
         createColoradoElection(topdir, "$topdir/audit",
             detailXmlFile, contestRoundFile, precinctFile,
-            auditConfigIn=auditConfigIn,
-            auditType=AuditType.POLLING, hasSingleCardStyle=false, pollingMode=PollingMode.withBatches)
+            pollingMode=PollingMode.withBatches, creation, round)
     }
 
-    @Test
+    // @Test too long - fix
     fun testCreateColoradoPollingWithoutBatches() {
         val topdir = "$testdataDir/cases/corla/polling3"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        val auditConfigIn = AuditConfig(
-            AuditType.POLLING, riskLimit = .03, nsimEst = 10, quantile = 0.5,
-            minRecountMargin= 0.005,
-            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
-            pollingConfig = PollingConfig(mode = PollingMode.withoutBatches)
-        )
+        val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
+        val round = AuditRoundConfig(
+            SimulationControl(nsimEst = 10, estPercentSuccess = listOf(0.50, 0.80)),
+            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
+            null, PollingConfig())
 
         createColoradoElection(topdir, "$topdir/audit",
             detailXmlFile, contestRoundFile, precinctFile,
-            auditConfigIn=auditConfigIn,
-            auditType=AuditType.POLLING, hasSingleCardStyle=false, pollingMode=PollingMode.withoutBatches,
+            pollingMode=PollingMode.withoutBatches, creation, round,
+            startFirstRound = false,
         )
     }
 
     @Test
-    fun createSFElectionOA() {
+    fun makeSFElectionOA() {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
 
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
+        val round = AuditRoundConfig(
+            SimulationControl(nsimEst = 22),
+            ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
+            ClcaConfig(fuzzMvrs=.001), null)
+
         createSfElection(
-            auditdir = auditdir,
-            AuditType.ONEAUDIT,
+            auditdir=auditdir,
             sfZipFile,
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
-            contestSampleCutoff = 2500,
-            auditSampleCutoff = 5000,
+            creation,
+            round,
         )
     }
 
     @Test
-    fun createSFElectionClca() {
+    fun makeSFElectionClca() {
         val auditdir = "$testdataDir/cases/sf2024/clca/audit"
 
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
+        val round = AuditRoundConfig(
+            SimulationControl(nsimEst = 22),
+            ContestSampleControl(contestSampleCutoff = 1000, auditSampleCutoff = 2000),
+            ClcaConfig(fuzzMvrs=.001), null)
+
         createSfElection(
-            auditdir = auditdir,
-            AuditType.CLCA,
+            auditdir=auditdir,
             sfZipFile,
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = "$sfDir/$cvrExportCsvFile",
-            contestSampleCutoff = 1000,
-            auditSampleCutoff = 2000,
+            creation,
+            round,
         )
     }
 

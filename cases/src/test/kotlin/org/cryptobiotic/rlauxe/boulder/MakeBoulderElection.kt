@@ -1,18 +1,16 @@
 package org.cryptobiotic.rlauxe.boulder
 
+import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
+import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.startFirstRound
-import org.cryptobiotic.rlauxe.betting.TestH0Status
+import org.cryptobiotic.rlauxe.audit.ClcaConfig
+import org.cryptobiotic.rlauxe.audit.ContestSampleControl
+import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
-import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.json.readAuditConfigUnwrapped
-import org.cryptobiotic.rlauxe.persist.json.writeAuditConfigJsonFile
-import org.cryptobiotic.rlauxe.util.makeDeciles
-import org.cryptobiotic.rlauxe.util.secureRandom
+import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import org.cryptobiotic.util.runAllRoundsAndVerify
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,14 +24,25 @@ class MakeBoulderElection {
     @Test
     fun createBoulder24oa() {
         val auditdir = "$testdataDir/cases/boulder24/oa/audit"
+
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05, PersistedWorkflowMode.testPrivateMvrs)
+        val round = AuditRoundConfig(
+            SimulationControl(nsimEst = 22),
+            ContestSampleControl(
+                minRecountMargin = .005,
+                minMargin = 0.0,
+                contestSampleCutoff = 2500,
+                auditSampleCutoff = 5000
+            ),
+            ClcaConfig(fuzzMvrs = .001), null
+        )
+
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
-            auditType = AuditType.ONEAUDIT,
-            minMargin = 0.0,
-            contestSampleCutoff = 2500,
-            auditSampleCutoff = 5000,
+            creation,
+            round
         )
     }
 
@@ -49,13 +58,20 @@ class MakeBoulderElection {
     @Test
     fun createBoulder24clca() { // simulate CVRs
         val auditdir = "$testdataDir/cases/boulder24/clca/audit"
+
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .05, PersistedWorkflowMode.testPrivateMvrs)
+        val round = AuditRoundConfig(
+            SimulationControl(nsimEst = 20, estPercentSuccess = listOf(0.42, 0.55, .67)),
+            ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 1000, auditSampleCutoff = 2000),
+            ClcaConfig(fuzzMvrs = .001), null
+        )
+
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
             "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
             auditdir = auditdir,
-            auditType = AuditType.CLCA,
-            contestSampleCutoff = 1000,
-            auditSampleCutoff = 2000,
+            creation,
+            round,
         )
     }
 
@@ -68,6 +84,7 @@ class MakeBoulderElection {
         if (results.hasErrors) fail()
     }
 
+    /*
     @Test
     fun createBoulder25clca() { // simulate CVRs
         val datadir = "$testdataDir/cases/boulder2025"
@@ -81,9 +98,6 @@ class MakeBoulderElection {
             auditSampleCutoff = 2000,
         )
     }
-
-    /*
-
  @Test
  fun createBoulder24recount() {
      createBoulderElection(
@@ -136,9 +150,18 @@ class MakeBoulderElection {
     @Test
     fun testParseIrvContestName() {
         assertEquals(Pair("Frankenfurter (Vote For=11)", 1), parseIrvContestName("Frankenfurter (Vote For=11)"))
-        assertEquals(Pair("Frankenfurter", 11), parseIrvContestName("Frankenfurter (Number of positions=11, Number of ranks=4)"))
-        assertEquals(Pair("Frankenfurter", 11), parseIrvContestName("Frankenfurter(Number of positions=11, but wait theres more"))
-        assertEquals(Pair("Heather (Bob) Morrisson", 11), parseIrvContestName("Heather (Bob) Morrisson (Number of positions=11,)"))
+        assertEquals(
+            Pair("Frankenfurter", 11),
+            parseIrvContestName("Frankenfurter (Number of positions=11, Number of ranks=4)")
+        )
+        assertEquals(
+            Pair("Frankenfurter", 11),
+            parseIrvContestName("Frankenfurter(Number of positions=11, but wait theres more")
+        )
+        assertEquals(
+            Pair("Heather (Bob) Morrisson", 11),
+            parseIrvContestName("Heather (Bob) Morrisson (Number of positions=11,)")
+        )
         assertEquals(Pair("Number of positions=", 1), parseIrvContestName("Number of positions=    "))
     }
 
@@ -165,110 +188,27 @@ class MakeBoulderElection {
         override fun name() = "createBoulderElection $runIndex"
 
         override fun run(): Boolean {
+            val creation =
+                AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05, PersistedWorkflowMode.testPrivateMvrs)
+            val round = AuditRoundConfig(
+                SimulationControl(nsimEst = 22),
+                ContestSampleControl(
+                    minRecountMargin = .005,
+                    minMargin = 0.0,
+                    contestSampleCutoff = 2500,
+                    auditSampleCutoff = 5000
+                ),
+                ClcaConfig(fuzzMvrs = .001), null
+            )
+
             createBoulderElection(
                 "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
                 "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
                 auditdir = auditdir,
-                auditType = AuditType.ONEAUDIT,
-                contestSampleCutoff = 2500,
-                auditSampleCutoff = 5000,
+                creation,
+                round
             )
             return runAllRoundsAndVerify(auditdir, verify = false)
         }
     }
-
-    ///////////////////////////////////////////////
-    //// generates the CLCA for CaseStudiesRemoveNmax
-    @Test
-    fun createBoulderRemoveNclca() {
-        val results = mutableListOf<AuditResult>()
-
-        repeat(11) { removeN ->
-            val auditdir = "$testdataDir/cases/boulder24/clcan/audit$removeN"
-            val task = RunRemoveBoulderTask(removeN, 1, auditdir, AuditType.CLCA)
-            val estResults: List<AuditResult> = task.run()
-            results.addAll(estResults)
-        }
-        println("CLCA results")
-        results.forEach { println(it) }
-    }
-
-    @Test
-    fun createBoulderRemoveNoa() {
-
-        val tasks = mutableListOf<ConcurrentTaskG<List<AuditResult>>>()
-        repeat(11) { removeN ->
-            val auditDir = "$testdataDir/cases/boulder24/oan/audit$removeN"
-            tasks.add(RunRemoveBoulderTask(removeN, 1, auditDir, AuditType.ONEAUDIT))
-        }
-
-        val estResults: List<AuditResult> =
-            ConcurrentTaskRunnerG<List<AuditResult>>().run(tasks, nthreads = 5).flatten()
-
-        val results = mutableMapOf<Int, MutableList<AuditResult>>()
-        println("OneAudit results")
-        estResults.forEach { result ->
-            println("$result")
-            val list = results.getOrPut(result.removeN) { mutableListOf() }
-            list.add(result)
-        }
-
-        results.forEach { (removeN, resultList) ->
-            val nmvrs = resultList.map { it.nmvrs }
-            val deciles = makeDeciles(nmvrs)
-            val success = resultList.map { it.nsuccess }
-            println("$removeN, ${nmvrs.average()}, ${success.average()}, $deciles")
-        }
-    }
 }
-
-class RunRemoveBoulderTask(
-    val removeN: Int,
-    val nruns: Int,
-    val auditDir: String,
-    val auditType: AuditType,
-) : ConcurrentTaskG<List<AuditResult>> {
-
-    override fun name() = "removeN=$removeN"
-
-    override fun run(): List<AuditResult> {
-
-        createBoulderElection(
-            "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",
-            "src/test/data/Boulder2024/2024G-Boulder-County-Official-Statement-of-Votes.csv",
-            auditdir = auditDir,
-            auditType = auditType,
-            contestSampleCutoff = 2500,
-            auditSampleCutoff = 5000,
-            minRecountMargin = 0.0,
-            minMargin = 0.0,
-            maxSamplePct = 0.0,
-        )
-
-        val publisher = Publisher(auditDir)
-        val results = mutableListOf<AuditResult>()
-        repeat(nruns) { run ->
-            val config = readAuditConfigUnwrapped(publisher.auditConfigFile())!!
-            val nconfig = config.copy(removeMaxContests = removeN, seed = secureRandom.nextLong())
-            writeAuditConfigJsonFile(nconfig, publisher.auditConfigFile())
-            println("${name()} removeN=$removeN run=$run")
-            startFirstRound(auditDir)
-            runAllRoundsAndVerify(auditDir, verify = false)
-
-            val contestState = mutableMapOf<Int, TestH0Status>()
-            val auditRecord = AuditRecord.readFrom(auditDir)!!
-            auditRecord.rounds.forEach { auditRound ->
-                auditRound.contestRounds.forEach { contestRound ->
-                    contestState[contestRound.id] = contestRound.status
-                }
-            }
-            val successes = contestState.values.count { it == TestH0Status.StatRejectNull }
-            val result = AuditResult(removeN, (auditRecord as AuditRecord).previousMvrs.size, successes)
-            println("${name()} removeN=$removeN resilt=$result")
-            results.add(result)
-        }
-        return results
-    }
-}
-
-data class AuditResult(val removeN: Int, val nmvrs: Int, val nsuccess: Int)

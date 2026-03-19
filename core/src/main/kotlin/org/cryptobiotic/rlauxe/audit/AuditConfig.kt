@@ -1,13 +1,8 @@
 package org.cryptobiotic.rlauxe.audit
 
-import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.util.secureRandom
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.Int
-
-
-// optimistic: round 1 assume no errors, subsequent rounds use measured error rates
-enum class SimulationStrategy { regular, optimistic  }
 
 data class AuditConfig(
     val auditType: AuditType,
@@ -55,6 +50,8 @@ data class AuditConfig(
         }
     }
 
+    fun isRiskMeasuringAudit() = auditSampleLimit != null
+
     // only used in PersistedMvrManagerTest
     fun mvrFuzzPct(): Double {
         return when (auditType) {
@@ -64,10 +61,10 @@ data class AuditConfig(
     }
 
     override fun toString() = buildString {
-        appendLine("AuditConfig(auditType=$auditType, riskLimit=$riskLimit, seed=$seed persistedWorkflowMode=$persistedWorkflowMode" )
-        append("  minRecountMargin=$minRecountMargin minMargin=$minMargin")
-        if (removeMaxContests != null) { append(" removeMaxContests=$removeMaxContests") }
-        if (contestSampleCutoff != null) { append(" contestSampleCutoff=$contestSampleCutoff auditSampleCutoff=$auditSampleCutoff removeCutoffContests=$removeCutoffContests") }
+        appendLine("AuditConfig(auditType=$auditType, riskLimit=$riskLimit, seed=$seed persistedWorkflowMode=$persistedWorkflowMode," )
+        append(" minRecountMargin=$minRecountMargin, minMargin=$minMargin,")
+        if (removeMaxContests != null) { append(" removeMaxContests=$removeMaxContests,") }
+        if (contestSampleCutoff != null) { append(" contestSampleCutoff=$contestSampleCutoff, auditSampleCutoff=$auditSampleCutoff, removeCutoffContests=$removeCutoffContests,") }
         if (auditSampleLimit != null) { append(" auditSampleLimit=$auditSampleLimit (risk measuring audit)") }
         appendLine()
         appendLine("  nsimEst=$nsimEst, quantile1=$quantile1, quantile=$quantile, simFuzzPct=${simFuzzPct}, simulationStrategy=$simulationStrategy, mvrFuzzPct=${mvrFuzzPct()},")
@@ -85,61 +82,4 @@ data class AuditConfig(
             AuditType.CLCA, AuditType.ONEAUDIT -> clcaConfig.strategy.toString()
         }
     }
-
-    companion object {
-        fun fromCreationConfig(cc: AuditCreationConfig): AuditConfig {
-            return AuditConfig(
-                auditType = cc.auditType,
-                riskLimit = cc.riskLimit,
-                seed = cc.seed,
-                auditSampleLimit = cc.auditSampleLimit,
-                persistedWorkflowMode = cc.persistedWorkflowMode,
-                clcaConfig = ClcaConfig(fuzzMvrs = cc.fuzzMvrs)
-            )
-        }
-        fun fromRoundConfig(cc: AuditCreationConfig, arc: AuditRoundConfig): AuditConfig {
-            return AuditConfig(
-                auditType = cc.auditType,
-                riskLimit = cc.riskLimit,
-                seed = cc.seed,
-                auditSampleLimit = cc.auditSampleLimit,
-                persistedWorkflowMode = cc.persistedWorkflowMode,
-
-                nsimEst = arc.simulation.nsimEst,
-                quantile = arc.simulation.quantile,
-                simFuzzPct = arc.simulation.simFuzzPct,
-
-                minRecountMargin = arc.sampling.minRecountMargin,
-                minMargin = arc.sampling.minMargin,
-                contestSampleCutoff = arc.sampling.contestSampleCutoff,
-                removeCutoffContests = arc.sampling.removeCutoffContests,
-                maxSamplePct = arc.sampling.maxSamplePct,
-                removeMaxContests = arc.sampling.removeMaxContests,
-
-                clcaConfig = arc.makeClcaConfig(cc.fuzzMvrs),
-                pollingConfig = PollingConfig(arc.alphaMart.d)
-            )
-        }
-    }
 }
-
-enum class PollingMode { withPools, withBatches, withoutBatches;
-    fun withPools() = (this == withPools)
-    fun withBatches() = (this == withBatches)
-    fun withoutBatches() = (this == withoutBatches)
-}
-
-// could be called AlphaMartConfig
-data class PollingConfig(
-    val d: Int = 100,  // shrinkTrunc weight
-    val mode: PollingMode = PollingMode.withPools
-)
-
-enum class ClcaStrategyType { generalAdaptive2 }
-data class ClcaConfig(
-    val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive2,
-    val fuzzMvrs: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs when persistedWorkflowMode=testSimulate
-    val d: Int = 100,  // shrinkTrunc weight for error rates
-    val maxLoss: Double = 1.0 / 1.03905,  // max loss on any one bet, 0 < maxLoss < 1
-    val apriori: TausRates = TausRates(emptyMap()),
-)

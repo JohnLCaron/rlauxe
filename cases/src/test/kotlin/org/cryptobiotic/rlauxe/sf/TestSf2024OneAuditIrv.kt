@@ -50,7 +50,7 @@ class TestSf2024OneAuditIrv() {
         // use the cvrs from the clca as the mvrs
         val cvrdir = "$testdataDir/cases/sf2024/clca/audit"
         val cvrPublisher = Publisher(cvrdir)
-        mvrs = readSortedManifest(cvrPublisher, infos, auditRecord.electionInfo.ncards).cards
+        mvrs = readSortedManifest(cvrPublisher, infos, auditRecord.electionInfo.totalCardCount).cards
     }
 
     @Test

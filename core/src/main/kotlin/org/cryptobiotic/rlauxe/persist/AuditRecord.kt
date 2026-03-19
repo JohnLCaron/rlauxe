@@ -8,6 +8,7 @@ import com.github.michaelbull.result.unwrapError
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
+import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.Batch
@@ -16,6 +17,7 @@ import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCards
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -95,11 +97,11 @@ class AuditRecord(
                     batches,
                 )
 
-            return CardManifest(mergedCards, electionInfo.ncards, batches)
+            return CardManifest(mergedCards, electionInfo.totalCardCount, batches)
         }
         // no batches so you dont need to merge
         val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
-        return CardManifest(sortedCards, electionInfo.ncards, emptyList())
+        return CardManifest(sortedCards, electionInfo.totalCardCount, emptyList())
     }
 
     override fun readSortedManifest(): CardManifest {
@@ -112,11 +114,11 @@ class AuditRecord(
                     batches,
                 )
 
-            return CardManifest(mergedCards, electionInfo.ncards, batches)
+            return CardManifest(mergedCards, electionInfo.totalCardCount, batches)
         }
         // no batches so you dont need to merge
         val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
-        return CardManifest(sortedCards, electionInfo.ncards, emptyList())
+        return CardManifest(sortedCards, electionInfo.totalCardCount, emptyList())
     }
 
     override fun readBatches(): List<Batch>? {
@@ -181,16 +183,22 @@ class AuditRecord(
                 null
             }
 
-            val auditConfigResult = readAuditConfigJsonFile(publisher.auditConfigFile())
+            /* val auditConfigResult = readAuditConfigJsonFile(publisher.auditConfigFile())
             val config = if (auditConfigResult.isOk) auditConfigResult.unwrap() else {
                 errs.addNested(auditConfigResult.unwrapError())
                 null
-            }
+            } */
 
             // new way of storing config
             val auditCreationConfigResult = readAuditCreationConfigJsonFile(publisher.auditCreationConfigFile())
             val auditCreationConfig = if (auditCreationConfigResult.isOk) auditCreationConfigResult.unwrap() else {
                 errs.addNested(auditCreationConfigResult.unwrapError())
+                null
+            }
+
+            val auditRoundConfigResult = readAuditRoundConfigJsonFile(publisher.auditRoundProtoFile())
+            val auditRoundProtoConfig = if (auditRoundConfigResult.isOk) auditRoundConfigResult.unwrap() else {
+                errs.addNested(auditRoundConfigResult.unwrapError())
                 null
             }
 
@@ -203,6 +211,7 @@ class AuditRecord(
 
             val sampledMvrsAll = mutableListOf<AuditableCard>()
 
+            var lastRoundConfig: AuditRoundConfig? = null
             var prevAuditRound : AuditRound? = null
             val rounds = mutableListOf<AuditRound>()
             for (roundIdx in 1..publisher.currentRound()) {
@@ -263,20 +272,28 @@ class AuditRecord(
                     errs.addNested(auditRoundConfigResult.unwrapError())
                     null
                 }
+                if (auditRoundConfig != null) lastRoundConfig = auditRoundConfig
 
-                if (auditCreationConfig != null && auditRoundConfig != null) {
-                    val auditConfigNew = AuditConfig.fromRoundConfig(auditCreationConfig, auditRoundConfig)
+                /* if (auditCreationConfig != null && auditRoundConfig != null) {
+                    val configNew = Config(electionInfo!!, auditCreationConfig, auditRoundConfig)
+                    val auditConfigNew = configNew.toAuditConfig()
                     if (auditConfigNew != config) {
-                        // println("readAuditConfigJsonFile= $config")
-                       // println("fromRoundConfig= ${auditConfigNew}")
-                        println("auditConfigNew != config")
+                        println("readAuditConfigJsonFile= $config")
+                        println("configNew= ${configNew}")
+                        println("configNew.toAuditConfig()= $auditConfigNew")
+                        logger.error{ "configNew != auditConfig "}
+                        throw RuntimeException("configNew != auditConfig")
                     }
-                }
-
+                } */
             }
+
+            val configNew = Config(electionInfo!!, auditCreationConfig!!, lastRoundConfig?: auditRoundProtoConfig!!)
+
             // TODO AuditRecord or CompositeRecord ??
-            return if (errs.hasErrors()) Err(errs) else
-                Ok(AuditRecord(location, electionInfo!!, config!!, contests!!, rounds, sampledMvrsAll))
+            return if (errs.hasErrors()) Err(errs) else {
+                val auditConfigNew = configNew.toAuditConfig()
+                Ok(AuditRecord(location, electionInfo, auditConfigNew, contests!!, rounds, sampledMvrsAll))
+            }
         }
     }
 }

@@ -1,7 +1,8 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.ClcaConfig
+import org.cryptobiotic.rlauxe.audit.Config
 import kotlin.test.Test
 import kotlin.test.*
 
@@ -128,10 +129,19 @@ class TestTaus {
     }
 
     @Test
-    fun testAuditConfig() {
-        val config = AuditConfig(AuditType.CLCA)
-        val apriori = config.clcaConfig.apriori.makeErrorRates(.542, 1.0)
-        assertTrue(apriori.errorRates.isEmpty())
+    fun testEmptyErrorRates() {
+        val config = Config.from(AuditType.CLCA)
+        val clcaErrorRates = config.round.clcaConfig!!.apriori.makeErrorRates(.542, 1.0)
+        assertTrue(clcaErrorRates.errorRates.isEmpty())
+    }
+
+    @Test
+    fun testNotEmptyErrorRates() {
+        val config = Config.from(AuditType.CLCA)
+            .replaceClcaConfig(ClcaConfig(apriori = TausRates(mapOf("win-oth" to .0099))))
+        val clcaErrorRates = config.round.clcaConfig!!.apriori.makeErrorRates(.542, 1.00)
+        assertTrue(!clcaErrorRates.errorRates.isEmpty())
+        assertEquals("{0.271=0.0099}",clcaErrorRates.errorRates.toString())
     }
 
 }

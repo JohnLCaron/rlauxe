@@ -62,8 +62,8 @@ fun AuditCreationConfigJson.import() = AuditCreationConfig(
 
 /////////////////////////////////////////////////////////////////////////////////
 
-fun writeAuditCreationConfigJsonFile(auditConfig: AuditCreationConfig, filename: String) {
-    val json = auditConfig.publishJson()
+fun writeAuditCreationConfigJsonFile(creation: AuditCreationConfig, filename: String) {
+    val json = creation.publishJson()
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
     FileOutputStream(filename).use { out ->
         jsonReader.encodeToStream(json, out)

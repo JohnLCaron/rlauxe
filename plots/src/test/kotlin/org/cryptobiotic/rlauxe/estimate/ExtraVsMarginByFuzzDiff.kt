@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
@@ -32,11 +31,6 @@ class ExtraVsMarginByFuzzDiff {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         fuzzDiffs.forEach { fuzzDiff ->
             val simFuzzPct = fuzzMvrs+fuzzDiff
-            val auditConfigOld = AuditConfig(
-                AuditType.CLCA, nsimEst = nsimEst, simFuzzPct = simFuzzPct,
-                persistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated,
-                clcaConfig = ClcaConfig(fuzzMvrs=fuzzMvrs, strategy=ClcaStrategyType.generalAdaptive)
-            )
             val config =  Config.from( AuditType.CLCA, nsimEst = nsimEst, fuzzMvrs = simFuzzPct, contestSampleCutoff = 10000,
                 persistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated, )
 

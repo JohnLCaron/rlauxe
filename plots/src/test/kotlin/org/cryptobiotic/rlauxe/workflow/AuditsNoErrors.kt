@@ -113,7 +113,7 @@ class AuditsNoErrors {
 
         maxLoss.forEach { maxLoss ->
             margins.forEach { margin ->
-                val config = Config.from(AuditType.CLCA).replace(ClcaConfig(maxLoss=maxLoss))
+                val config = Config.from(AuditType.CLCA).replaceClcaConfig(ClcaConfig(maxLoss=maxLoss))
 
                 val noerror = ClcaSingleRoundAuditTaskGenerator(
                     N, margin, 0.0, 0.0, 0.0,

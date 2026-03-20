@@ -235,9 +235,6 @@ fun startTestElectionPolling(
     )
     createElectionRecord(election, auditDir = auditdir)
 
-    val configOld = AuditConfig(AuditType.POLLING, nsimEst = 100, simFuzzPct = simFuzz,
-        persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs, quantile=quantile)
-
     val config = Config.from(election.electionInfo(), nsimEst = 20, simFuzzPct = simFuzz,
         fuzzMvrs=fuzzMvrs)
 
@@ -335,13 +332,6 @@ fun startTestElectionOneAudit(
         fuzzMvrs=fuzzMvrs,
     )
     createElectionRecord(election, auditDir = auditDir, clear = true)
-
-    val configOld = AuditConfig(
-        AuditType.ONEAUDIT, nsimEst = 10, simFuzzPct = simFuzz, quantile = quantile,
-        persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
-        clcaConfig = ClcaConfig(fuzzMvrs=fuzzMvrs),
-        simulationStrategy = if (strategy == "calc") SimulationStrategy.optimistic else SimulationStrategy.regular,
-    )
 
     val config = Config.from(election.electionInfo(), nsimEst = 20, simFuzzPct = simFuzz,
         fuzzMvrs=fuzzMvrs)

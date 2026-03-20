@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.raire
 
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
@@ -30,7 +29,6 @@ class GenRaireNoErrorsPlots {
         val margins =
             listOf(.005, .0075, .01, .012, .016, .02, .03, .04, .05)
 
-        val configOld = AuditConfig(AuditType.CLCA, nsimEst = nsimEst)
         val config =  Config.from( AuditType.CLCA, nsimEst = nsimEst)
 
         val stopwatch = Stopwatch()

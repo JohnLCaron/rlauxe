@@ -10,9 +10,7 @@ import kotlin.test.assertNotNull
 class TestClcaAudit {
     val N = 10000
 
-    val config = AuditConfig(
-        AuditType.CLCA, nsimEst=10, simFuzzPct=0.003,
-    )
+    val config = Config.from(AuditType.CLCA, nsimEst=10, simFuzzPct=0.003)
 
     @Test
     fun testClcaOneContest() {
@@ -108,7 +106,7 @@ class TestClcaAudit {
         println(finalRound.show())
     }
 
-    fun testClcaWorkflow(config: AuditConfig, testData: MultiContestTestData, mvrFuzzPct: Double? = null): AuditRoundIF? {
+    fun testClcaWorkflow(config: Config, testData: MultiContestTestData, mvrFuzzPct: Double? = null): AuditRoundIF? {
         val contests: List<Contest> = testData.contests
         val infoList = contests.map { it. info }
         println("Start testClcaWorkflow $testData")
@@ -120,7 +118,7 @@ class TestClcaAudit {
         val testMvrs = makeFuzzedCvrsForClca(infoList, testCvrs, mvrFuzzPct)
 
         val workflow = WorkflowTesterClca(config, contests, emptyList(),
-            MvrManagerForTesting(testCvrs, testMvrs, config.seed))
+            MvrManagerForTesting(testCvrs, testMvrs, config.creation.seed))
 
         return runTestAuditToCompletion("testClcaWorkflow", workflow)
     }

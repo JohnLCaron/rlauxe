@@ -344,38 +344,7 @@ fun createSfElection(
     stopwatch.start()
 
     val config = Config(election.electionInfo(), creation, round)
-    val auditConfig = config.toAuditConfig()
-
-    /* val config = when {
-        (auditConfigIn != null) -> auditConfigIn
-
-        (auditType == AuditType.CLCA) -> AuditConfig(
-            AuditType.CLCA, riskLimit = .05, nsimEst=20,
-            minRecountMargin=minRecountMargin,
-            minMargin=minMargin,
-            removeMaxContests = removeMaxContests,
-            contestSampleCutoff = contestSampleCutoff, auditSampleCutoff = auditSampleCutoff,
-            simFuzzPct=mvrFuzz, persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs,
-            clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
-        )
-
-        (auditType == AuditType.ONEAUDIT) -> AuditConfig(
-            AuditType.ONEAUDIT, riskLimit = .05, nsimEst = 20,
-            minRecountMargin=minRecountMargin,
-            minMargin=minMargin,
-            removeMaxContests = removeMaxContests,
-            contestSampleCutoff = contestSampleCutoff, auditSampleCutoff = auditSampleCutoff,
-            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
-            clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
-        )
-
-        else -> AuditConfig(
-            AuditType.POLLING, riskLimit = .05, nsimEst = 20,
-            contestSampleCutoff = contestSampleCutoff, auditSampleCutoff = auditSampleCutoff,
-            ) // TODO
-    } */
-
-    createAuditRecord(auditConfig, election, auditDir = auditdir)
+    createAuditRecord(config, election, auditDir = auditdir)
 
     val result = startFirstRound(auditdir)
     if (result.isErr) logger.error{ result.toString() }

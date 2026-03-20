@@ -31,7 +31,7 @@ class OaMarginAttack {
             val oneauditGeneratorReportedMean = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "reportedMean", "fuzzPct" to fuzzPct),
-                auditConfigIn = AuditConfig(
+                auditConfigIn = Config.from(
                     AuditType.ONEAUDIT, nsimEst = nsimEst,
                 ),
                 p1flips=margin*extra,
@@ -41,7 +41,7 @@ class OaMarginAttack {
             val oneauditGeneratorBet99 = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "simulate", "fuzzPct" to fuzzPct),
-                auditConfigIn = AuditConfig(
+                auditConfigIn = Config.from(
                     AuditType.ONEAUDIT, nsimEst = nsimEst,
                 ),
                 p1flips=margin*extra,
@@ -51,7 +51,7 @@ class OaMarginAttack {
             val oneauditGeneratorEta0Eps = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "calcMvrsNeeded", "fuzzPct" to fuzzPct),
-                auditConfigIn = AuditConfig(
+                auditConfigIn = Config.from(
                     AuditType.ONEAUDIT, nsimEst = nsimEst,
                 ),
                 p1flips=margin*extra,

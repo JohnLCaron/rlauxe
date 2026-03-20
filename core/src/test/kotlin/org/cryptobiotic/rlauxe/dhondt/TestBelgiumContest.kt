@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.dhondt
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.core.AboveThreshold
 import org.cryptobiotic.rlauxe.core.BelowThreshold
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -13,7 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestBelgiumContest {
-    val config: AuditConfig
+    val config: Config
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
     val cardManifest: CardManifest

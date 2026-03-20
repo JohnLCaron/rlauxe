@@ -6,8 +6,10 @@ import org.cryptobiotic.rlauxe.betting.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.makeDeciles
+import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 
 // TODO obsolete
@@ -19,7 +21,7 @@ private val logger = KotlinLogging.logger("EstimateSampleSizes")
 
 // 1. _Estimation_: for each contest, estimate how many samples are needed for this AuditRound
 fun estimateSampleSizes(
-    config: AuditConfig,
+    config: Config,
     auditRound: AuditRoundIF,
     sortedManifest: CardManifest,
     cardPools: List<CardPool>?,
@@ -29,8 +31,8 @@ fun estimateSampleSizes(
     nthreads: Int = 32,
     onlyTask: OnlyTask? = null,
 ): List<RunRepeatedResult> {
-
-    if (config.simulationStrategy == SimulationStrategy.optimistic) {
+    val simulation = config.round.simulation
+    if (simulation.simulationStrategy == SimulationStrategy.optimistic) {
         val optimistic = EstimateAudit(config,  auditRound.roundIdx, auditRound.contestRounds, cardPools, populations, sortedManifest)
         return optimistic.run()
     }
@@ -49,7 +51,7 @@ fun estimateSampleSizes(
     val vunderFuzz = if (!config.isOA) null else {
         val infos = auditRound.contestRounds.map { it.contestUA.contest.info() }.associateBy { it.id }
         // TODO need cardPools always?
-        VunderPoolsFuzzer(cardPools!!, infos, config.simFuzzPct ?: 0.0, cardSamples!!.cards)
+        VunderPoolsFuzzer(cardPools!!, infos, simulation.simFuzzPct ?: 0.0, cardSamples!!.cards)
     }
 
     // create the estimation tasks for each contest and assertion
@@ -90,7 +92,7 @@ fun estimateSampleSizes(
 // For one contest, generate a task for each non-complete assertion
 // starts from where the last audit left off (prevAuditResult.pvalue)
 fun makeEstimationTasks(
-    config: AuditConfig,
+    config: Config,
     contestRound: ContestRound,
     roundIdx: Int,
     cardSamples: CardSamples?,
@@ -153,7 +155,7 @@ fun makeEstimationTasks(
 // For one contest, for one assertion, a concurrent task
 class EstimateSampleSizeTask(
     val roundIdx: Int,
-    val config: AuditConfig,
+    val config: Config,
     val cardSamples: CardSamples?,
     val mvrsForPolling: List<Cvr>?,
     val vunderFuzz: VunderPoolsFuzzer?,
@@ -219,7 +221,7 @@ private const val quiet = true
 
 fun estimateClcaAssertionRound(
     roundIdx: Int,
-    config: AuditConfig,
+    config: Config,
     cardSamples: CardSamples,
     contestRound: ContestRound,
     assertionRound: AssertionRound,
@@ -229,13 +231,13 @@ fun estimateClcaAssertionRound(
     val contestUA = contestRound.contestUA
     val contest = contestUA.contest
 
-    val clcaConfig = config.clcaConfig
     val cassertion = assertionRound.assertion as ClcaAssertion
     val cassorter = cassertion.cassorter
     val noerror=cassorter.noerror()
     val upper=cassorter.assorter.upperBound()
 
-
+    val simulation = config.round.simulation
+    val clcaConfig = config.round.clcaConfig!!
     val apriori = clcaConfig.apriori.makeErrorRates(noerror, upper)
 
     val bettingFn =
@@ -252,12 +254,12 @@ fun estimateClcaAssertionRound(
     val previousErrorTracker = assertionRound.previousErrorTracker()
     // for one contest, this takes a list of cards and optionally fuzzes them to use as the mvrs.
     val samplerTracker =
-        ClcaFuzzSamplerTracker(config.simFuzzPct ?: 0.0, cardSamples, contestUA, cassorter, previousErrorTracker)
+        ClcaFuzzSamplerTracker(simulation.simFuzzPct ?: 0.0, cardSamples, contestUA, cassorter, previousErrorTracker)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
-    logger.debug{ "estimateClcaAssertionRound for $name with ${config.nsimEst} trials"}
+    logger.debug{ "estimateClcaAssertionRound for $name with ${simulation.nsimEst} trials"}
     val stopwatch = Stopwatch()
-    val ntrials = config.nsimEst
+    val ntrials = simulation.nsimEst
 
     // run the simulation ntrials (=config.nsimEst) times
     val result: RunRepeatedResult = runRepeatedBettingMart(
@@ -274,27 +276,33 @@ fun estimateClcaAssertionRound(
 
     // informational
     val startingErrorRates = if (roundIdx == 1) {
-        val aprioriRates = config.clcaConfig.apriori.makeErrorRates(noerror, upper)
+        val aprioriRates = clcaConfig.apriori.makeErrorRates(noerror, upper)
         makeAprioriErrorRates(aprioriRates, contestUA.Nphantoms/contestUA.Npop.toDouble())
     } else {
         previousErrorTracker.errorRates()
     }
 
+    // create the distribution and find the percentileWanted number of mvrs
+    val percentileWanted = simulation.percentile(roundIdx)
+    val distribution = result.sampleCount.toIntArray()
+    val newMvrsWanted = roundUp(percentiles().index(percentileWanted).compute(*distribution))
+
+    // calculate from "first principles"
     val calcMvrsNeeded = assertionRound.calcNewMvrsNeeded(contestRound.contestUA, config)
+
     assertionRound.estimationResult = EstimationRoundResult(
         roundIdx,
-        "${config.simFuzzPct} ClcaFuzzSamplerTracker ",
+        "${simulation.simFuzzPct} ClcaFuzzSamplerTracker ",
         calcNewMvrsNeeded = calcMvrsNeeded,
         startingTestStatistic = startingTestStatistic,
         startingErrorRates = startingErrorRates,
         estimatedDistribution = makeDeciles(result.sampleCount),
         lastIndex=0,
-        quantile=config.quantile.toInt(),
+        percentile=percentileWanted,
         ntrials = result.sampleCount.size,
         simNewMvrsNeeded = when {
-            (result.sampleCount.size < ntrials/2) -> calcMvrsNeeded // more than half the simulations fail
-            (roundIdx == 1) -> result.findQuantile(.50) // TODO set quantile value in AuditConfig ??
-            else -> result.findQuantile(config.quantile)
+            (result.sampleCount.size < ntrials/2) -> calcMvrsNeeded // more than half the simulations fail TODO set in config
+            else -> newMvrsWanted
         }
     )
 
@@ -306,7 +314,7 @@ fun estimateClcaAssertionRound(
 fun runRepeatedBettingMart(
     name: String,
     ntrials: Int,
-    config: AuditConfig,
+    config: Config,
     samplerTracker: SamplerTracker,
     bettingFn: BettingFn,
     clcaUpper: Double, // clca assorter
@@ -344,7 +352,7 @@ private val debug = true
 
 fun estimateOneAuditAssertionRound(
     roundIdx: Int,
-    config: AuditConfig,
+    config: Config,
     vunderFuzz: VunderPoolsFuzzer,
     cardSamples: CardSamples,
     contestRound: ContestRound,
@@ -355,9 +363,13 @@ fun estimateOneAuditAssertionRound(
     val contestUA = contestRound.contestUA
     val cassertion = assertionRound.assertion as ClcaAssertion
     val oaCassorter = cassertion.cassorter as OneAuditClcaAssorter
-    val clcaConfig = config.clcaConfig
+
     val noerror=oaCassorter.noerror()
     val upper=oaCassorter.assorter.upperBound()
+
+    val simulation = config.round.simulation
+    val clcaConfig = config.round.clcaConfig!!
+
 
     // one set of fuzzed pairs for all contests and assertions.
     val apriori = clcaConfig.apriori.makeErrorRates(noerror, upper)
@@ -385,9 +397,9 @@ fun estimateOneAuditAssertionRound(
         ClcaSamplerErrorTracker.fromIndexList(contestUA.contest.id, oaCassorter, oaFuzzedPairs, wantIndices, previousErrorTracker)
 
     val name = "${contestUA.id}-${assertionRound.assertion.assorter.shortName()}"
-    logger.debug{ "estimateOneAuditAssertionRound for $name with ${config.nsimEst} trials"}
+    logger.debug{ "estimateOneAuditAssertionRound for $name with ${simulation.nsimEst} trials"}
     val stopwatch = Stopwatch()
-    val ntrials = config.nsimEst
+    val ntrials = simulation.nsimEst
 
     val result = runRepeatedBettingMart(
         name,
@@ -403,13 +415,20 @@ fun estimateOneAuditAssertionRound(
 
     // informational
     val startingErrorRates = if (roundIdx == 1) {
-        val aprioriRates = config.clcaConfig.apriori.makeErrorRates(noerror, upper)
+        val aprioriRates = clcaConfig.apriori.makeErrorRates(noerror, upper)
         makeAprioriErrorRates(aprioriRates, contestUA.Nphantoms/contestUA.Npop.toDouble())
     } else {
         previousErrorTracker.errorRates()
     }
 
+    // create the distribution and find the percentileWanted number of mvrs
+    val percentileWanted = simulation.percentile(roundIdx)
+    val distribution = result.sampleCount.toIntArray()
+    val newMvrsWanted = roundUp(percentiles().index(percentileWanted).compute(*distribution))
+
+    // calculate from "first principles"
     val calcMvrsNeeded = assertionRound.calcNewMvrsNeeded(contestRound.contestUA, config)
+
     assertionRound.estimationResult = EstimationRoundResult(
         roundIdx,
         "${vunderFuzz.fuzzPct} OneAuditVunderFuzzer",
@@ -417,13 +436,12 @@ fun estimateOneAuditAssertionRound(
         startingErrorRates = startingErrorRates,
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
-        quantile=config.quantile.toInt(),
+        percentile=percentileWanted,
         lastIndex=0,
         ntrials = result.sampleCount.size,
         simNewMvrsNeeded = when {
             (result.sampleCount.size < ntrials/2) -> calcMvrsNeeded // more than half the simulations fail
-            (roundIdx == 1) -> result.findQuantile(.50) // TODO value put in AuditConfig ??
-            else -> result.findQuantile(config.quantile)
+            else -> newMvrsWanted
         }
     )
 
@@ -437,7 +455,7 @@ fun estimateOneAuditAssertionRound(
 
 fun estimatePollingAssertionRound(
     roundIdx: Int,
-    config: AuditConfig,
+    config: Config,
     contestUA: ContestWithAssertions,
     mvrs: List<Cvr>,
     assertionRound: AssertionRound,
@@ -449,11 +467,12 @@ fun estimatePollingAssertionRound(
     val eta0 = assorter.dilutedMean()
 
     // optional fuzzing of the mvrs
-    val useFuzz = config.simFuzzPct ?: 0.0
+    val simulation = config.round.simulation
+    val useFuzz = simulation.simFuzzPct ?: 0.0
     val samplerTracker = PollingFuzzSamplerTracker(useFuzz, mvrs, contestUA.contest as Contest, assorter)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
-    logger.debug{ "estimatePollingAssertionRound for $name with ${config.nsimEst} trials"}
+    logger.debug{ "estimatePollingAssertionRound for $name with ${simulation.nsimEst} trials"}
     val stopwatch = Stopwatch()
 
     val result = runRepeatedAlphaMart(
@@ -468,20 +487,24 @@ fun estimatePollingAssertionRound(
         moreParameters = moreParameters,
     )
 
+    // create the distribution and find the percentileWanted number of mvrs
+    val percentileWanted = simulation.percentile(roundIdx)
+    val distribution = result.sampleCount.toIntArray()
+    val newMvrsWanted = roundUp(percentiles().index(percentileWanted).compute(*distribution))
+
+    // calculate from "first principles" only for CLCA; TODO ??
+    // val calcMvrsNeeded = assertionRound.calcNewMvrsNeeded(contestRound.contestUA, config)
+
     assertionRound.estimationResult = EstimationRoundResult(
         roundIdx,
         estStrategy,
         calcNewMvrsNeeded = 0, // TODO
         startingTestStatistic = startingTestStatistic,
         estimatedDistribution = makeDeciles(result.sampleCount),
-        quantile=config.quantile.toInt(),
+        percentile=percentileWanted,
         ntrials = result.sampleCount.size,
         lastIndex=0,
-        simNewMvrsNeeded = when {
-            (result.sampleCount.size == 0) -> 0
-            (roundIdx == 1) -> result.findQuantile(.50) // TODO put in AuditConfig ??
-            else -> result.findQuantile(config.quantile)
-        }
+        simNewMvrsNeeded = newMvrsWanted
     )
 
     logger.debug{"estimatePollingAssertionRound $roundIdx ${name} ${makeDeciles(result.sampleCount)} took=$stopwatch"}
@@ -491,7 +514,7 @@ fun estimatePollingAssertionRound(
 
 fun runRepeatedAlphaMart(
     name: String,
-    config: AuditConfig,
+    config: Config,
     samplerTracker: SamplerTracker,
     estimFn: EstimFn?, // if null use default TruncShrinkage
     eta0: Double,  // initial estimate of mean
@@ -504,7 +527,7 @@ fun runRepeatedAlphaMart(
     val useEstimFn = estimFn ?: TruncShrinkage(
         N = N,
         upperBound = upperBound,
-        d = config.pollingConfig.d,
+        d = config.round.pollingConfig!!.d,
         eta0 = eta0,
     )
 
@@ -513,14 +536,14 @@ fun runRepeatedAlphaMart(
         N = N,
         tracker = samplerTracker,
         upperBound = upperBound,
-        riskLimit = config.riskLimit,
+        riskLimit = config.creation.riskLimit,
     )
 
     val result: RunRepeatedResult = runRepeated(
         name,
-        ntrials = config.nsimEst,
+        ntrials = config.simulation.nsimEst,
         testFn = testFn,
-        testParameters = mapOf("ntrials" to config.nsimEst.toDouble(), "polling" to 1.0) + moreParameters,
+        testParameters = mapOf("ntrials" to config.simulation.nsimEst.toDouble(), "polling" to 1.0) + moreParameters,
         startingTestStatistic = startingTestStatistic,
         samplerTracker=samplerTracker,
         N = N,

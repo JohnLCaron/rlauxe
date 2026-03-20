@@ -2,14 +2,11 @@ package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.betting.TausRateTable
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.math.min
@@ -40,7 +37,7 @@ data class CardSamples(val cards: List<AuditableCard>, val usedByContests: Map<I
 
 // cardManifest may not fit into memory, so extract in-memory subset of cardManifest to use for the estimations.
 fun getSubsetForEstimation(
-    config: AuditConfig,
+    config: Config,
     contests: List<ContestRound>,
     cardManifest: CardManifest,
     previousSamples: Set<Long>,
@@ -177,7 +174,7 @@ private val fac = 10 // TODO pass in? check cardManifest, just use all if not to
 // TODO feels wrong
 // CLCA and OneAudit, not needed by Polling
 // we dont use this for the actual estimation....
-fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: Int): Int {
+fun estSamplesNeeded(config: Config, contestRound: ContestRound, ncards: Int): Int {
     val minAssertionRound = contestRound.minAssertion()
     if (minAssertionRound == null) {
         contestRound.minAssertion()
@@ -193,7 +190,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: In
     val contest = contestRound.contestUA
     val assorter = cassorter.assorter
 
-    // i think problem is that we arent adding the fuzzPct to estWithOptimalBet ??
+    /* i think problem is that we arent adding the fuzzPct to estWithOptimalBet ??
     //val errorCounts = mutableMapOf<Double, Int>()
     //val taus = Taus(cassorter.assorter.upperBound())
     // ClcaErrorCounts(errorCounts, contest.Nc, cassorter.noerror(), cassorter.assorter.upperBound())
@@ -206,7 +203,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: In
             cassorter.noerror(),
             cassorter.assorter.upperBound()
         )
-    }
+    } */
 
     val nsamples = minAssertionRound.calcNewMvrsNeeded(contest, config) // TODO NEXT
 
@@ -218,7 +215,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: In
 
     // TODO using contestSampleCutoff as maximum
     var est =  min( contest.Npop, needed)
-    if (config.contestSampleCutoff != null) est = min(config.contestSampleCutoff, est)
+    if (config.round.sampling.contestSampleCutoff != null) est = min(config.round.sampling.contestSampleCutoff, est)
 
     if (est < 0) {
         // TODO what to do when estimate is negetive?? Perhaps fail ??
@@ -228,7 +225,7 @@ fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: In
                 "nsamples=${nsamples}, stddev=$stddev" }
 
         val lastPvalue = minAssertionRound.auditResult?.plast ?: config.riskLimit
-        est =  cassorter.sampleSizeNoErrors(2 * config.clcaConfig.maxLoss, lastPvalue)
+        est =  cassorter.sampleSizeNoErrors(2 * config.round.clcaConfig!!.maxLoss, lastPvalue)
         if (est < 0) { // barf
             est = 0
             contestRound.status = TestH0Status.FailMaxSamplesAllowed

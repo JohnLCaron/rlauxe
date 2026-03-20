@@ -14,6 +14,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -141,10 +142,10 @@ fun startTestElectionClca(
         addRaireCandidates)
     createElectionRecord(election, auditDir = auditdir)
 
-    val config = AuditConfig(
-        AuditType.CLCA, nsimEst = 100, simFuzzPct = simFuzz, quantile = quantile,
-        clcaConfig = ClcaConfig(fuzzMvrs=fuzzMvrs)
-    )
+    val config = Config.from( election.electionInfo(), nsimEst = 100, simFuzzPct = simFuzz, fuzzMvrs=fuzzMvrs)
+
+    val configOld = Config.from(election.electionInfo(), nsimEst = 20, simFuzzPct = simFuzz,
+        fuzzMvrs=fuzzMvrs)
 
     createAuditRecord(config, election, auditDir = auditdir)
 
@@ -234,8 +235,11 @@ fun startTestElectionPolling(
     )
     createElectionRecord(election, auditDir = auditdir)
 
-    val config = AuditConfig(AuditType.POLLING, nsimEst = 100, simFuzzPct = simFuzz,
+    val configOld = AuditConfig(AuditType.POLLING, nsimEst = 100, simFuzzPct = simFuzz,
         persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs, quantile=quantile)
+
+    val config = Config.from(election.electionInfo(), nsimEst = 20, simFuzzPct = simFuzz,
+        fuzzMvrs=fuzzMvrs)
 
     createAuditRecord(config, election, auditDir = auditdir)
 
@@ -332,12 +336,15 @@ fun startTestElectionOneAudit(
     )
     createElectionRecord(election, auditDir = auditDir, clear = true)
 
-    val config = AuditConfig(
+    val configOld = AuditConfig(
         AuditType.ONEAUDIT, nsimEst = 10, simFuzzPct = simFuzz, quantile = quantile,
         persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
         clcaConfig = ClcaConfig(fuzzMvrs=fuzzMvrs),
         simulationStrategy = if (strategy == "calc") SimulationStrategy.optimistic else SimulationStrategy.regular,
     )
+
+    val config = Config.from(election.electionInfo(), nsimEst = 20, simFuzzPct = simFuzz,
+        fuzzMvrs=fuzzMvrs)
 
     createAuditRecord(config, election, auditDir = auditDir)
 

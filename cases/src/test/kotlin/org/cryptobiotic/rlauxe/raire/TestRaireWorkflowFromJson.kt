@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 
 class TestRaireWorkflowFromJson {
 
-    // @Test TODO failing
+    /* @Test TODO failing
     fun testRaireComparisonWithStyle() {
         testRaireWorkflow(AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst=10))
     }
@@ -20,9 +20,9 @@ class TestRaireWorkflowFromJson {
     // @Test TODO failing
     fun testRaireComparisonNoStyle() {
         testRaireWorkflow(AuditConfig(AuditType.CLCA, seed = 123568667890L, nsimEst=10))
-    }
+    } */
 
-    fun testRaireWorkflow(config: AuditConfig) {
+    fun testRaireWorkflow(config: Config) {
         Stopwatch()
 
         // This single contest cvr file is the only real cvr data in SHANGRLA
@@ -50,7 +50,7 @@ class TestRaireWorkflowFromJson {
 
         val nassertions = raireResults.contests.sumOf { it.rassertions.size }
 
-        val manager = MvrManagerForTesting(testCvrs, testCvrs, config.seed)
+        val manager = MvrManagerForTesting(testCvrs, testCvrs, config.creation.seed)
         val workflow = WorkflowTesterClca(config, emptyList(), raireResults.contests, manager)
 
         runComparisonWorkflowR(workflow, Closer(manager.sortedCards.iterator()), nassertions)

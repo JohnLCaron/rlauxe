@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -33,15 +33,15 @@ fun simulateCvrsFromMargin(Nc: Int, margin: Double, undervotePct: Double, phanto
         Ncast = roundToClosest(nvotes + Nu)
     )
     val cu = ContestWithAssertions(contest, true, NpopIn = Npop)
-    val config = AuditConfig(AuditType.CLCA, contestSampleCutoff = limit)
+    val config = Config.from(AuditType.CLCA, contestSampleCutoff = limit)
     return Pair( cu, simulateCvrsForContest(cu, config))
 }
 
 // simulate the polling mvrs once, for all the assertions for this contest
 // scale number of cvrs to config.contestSampleCutoff if that exists
-fun simulateCvrsForContest(contestUA: ContestWithAssertions, config: AuditConfig): List<Cvr> {
+fun simulateCvrsForContest(contestUA: ContestWithAssertions, config: Config): List<Cvr> {
     val contest = contestUA.contest as Contest
-    val ncvrs = min( contest.Nc, config.contestSampleCutoff ?: Int.MAX_VALUE)
+    val ncvrs = min( contest.Nc, config.round.sampling.contestSampleCutoff ?: Int.MAX_VALUE)
     val pct = ncvrs/contestUA.Npop.toDouble()
     val missing = contestUA.Npop - (contest.Nphantoms() + contest.Nundervotes() + contest.votes.values.sum()) / contest.info.voteForN
     val voteCounts = contest.votes.map { Pair(intArrayOf(it.key), it.value) }

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
@@ -11,9 +11,7 @@ import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.abs
-import kotlin.math.ceil
 import kotlin.math.ln
-import kotlin.math.max
 import kotlin.test.Test
 
 class TestCorlaEstimate {
@@ -69,7 +67,7 @@ fun countPhantoms(cardManifest: CardManifest, contestId: Int) {
     println("\nnphantoms = $countPhantoms for contest $contestId")
 }
 
-fun corlaCalc(config: AuditConfig, contestRound: ContestRound): SampleEst? {
+fun corlaCalc(config: Config, contestRound: ContestRound): SampleEst? {
     val minAssertion = contestRound.minAssertion()
     if (minAssertion == null) return null
     val lastResult = minAssertion.auditResult

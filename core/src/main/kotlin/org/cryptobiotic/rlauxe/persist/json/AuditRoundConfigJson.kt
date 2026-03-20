@@ -59,21 +59,21 @@ data class SimulationControl(
 @Serializable
 data class SimulationControlJson(
     val nsimEst: Int, // number of simulation estimation trials
-    val estPercentSuccess: List<Double>, // use this percentile success for estimated sample size
+    val estPercentile: List<Int>?, // use this percentile success for estimated sample size
     val simFuzzPct: Double?, // for simulating the estimation fuzzing
     val simulationStrategy: SimulationStrategy, // for simulating the estimation fuzzing
 )
 
 fun SimulationControl.publishJson() = SimulationControlJson(
     this.nsimEst,
-    this.estPercentSuccess,
+    this.estPercentile,
     this.simFuzzPct,
     this.simulationStrategy,
 )
 
 fun SimulationControlJson.import() = SimulationControl(
     this.nsimEst,
-    this.estPercentSuccess,
+    this.estPercentile ?: emptyList(), // TODO
     this.simFuzzPct,
     this.simulationStrategy,
 )

@@ -29,7 +29,7 @@ class PersistedWorkflow(
     val auditDir = auditRecord.location
     val publisher = Publisher(auditDir)
 
-    private val config: AuditConfig
+    private val config: Config
     private val auditContests: List<ContestWithAssertions>
     private val auditRounds = mutableListOf<AuditRoundIF>()
     private val mvrManager: MvrManager
@@ -37,7 +37,7 @@ class PersistedWorkflow(
 
     init {
         config = auditRecord.config
-        mode = config.persistedWorkflowMode
+        mode = config.creation.persistedWorkflowMode
         // skip contests that have been removed
         auditContests = auditRecord.contests.filter { it.preAuditStatus == TestH0Status.InProgress }
         auditRounds.addAll(auditRecord.rounds)
@@ -49,7 +49,7 @@ class PersistedWorkflow(
         }
     }
 
-    override fun auditConfig() =  this.config
+    override fun config() =  this.config
     override fun mvrManager() = mvrManager
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestWithAssertions> = auditContests
@@ -63,11 +63,12 @@ class PersistedWorkflow(
             nextRound.auditIsComplete = true
         } else {
             // heres where we limit the number of samples we are willing to audit
-            if (config.auditSampleLimit != null && nextRound.samplePrns.size > config.auditSampleLimit) {
-                nextRound.samplePrns = nextRound.samplePrns.subList(0, config.auditSampleLimit)
+            val riskMeasuringSampleLimit = config.creation.riskMeasuringSampleLimit
+            if (riskMeasuringSampleLimit != null && nextRound.samplePrns.size > riskMeasuringSampleLimit) {
+                nextRound.samplePrns = nextRound.samplePrns.subList(0, riskMeasuringSampleLimit)
             }
 
-            val auditRoundConfig = AuditRoundConfig.fromAuditConfig(config)
+            val auditRoundConfig = config.round
             writeAuditRoundConfigJsonFile(auditRoundConfig, publisher.auditRoundConfigFile(nextRound.roundIdx))
             logger.info {"startNewRound writeAuditRoundConfig to ${publisher.auditRoundConfigFile(nextRound.roundIdx)}"}
 

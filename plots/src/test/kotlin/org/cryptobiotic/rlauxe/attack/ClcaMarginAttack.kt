@@ -1,10 +1,10 @@
 package org.cryptobiotic.rlauxe.attack
 
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -25,7 +25,7 @@ class ClcaMarginAttack {
         val allMargins = listOf(.001, .002, .003, .004, .005, .006, .008, .01)
         val margins = allMargins.filter { it > phantomPct }
         val stopwatch = Stopwatch()
-        val config = AuditConfig(AuditType.CLCA)
+        val config = Config.from(AuditType.CLCA)
         val extra = 1.001 // to ensure margin goes below 0
 
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
@@ -38,7 +38,7 @@ class ClcaMarginAttack {
 
             val clcaGenerator3 = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct, fuzzPct,
                 parameters= mapOf("nruns" to nruns, "cat" to "fuzzPct", "fuzzPct" to fuzzPct),
-                config = config.copy(clcaConfig = ClcaConfig(fuzzMvrs=fuzzPct)),
+                config = config,
                 p1flips=margin*extra,
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator3))

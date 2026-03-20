@@ -15,12 +15,12 @@ class OneAuditContestAuditTaskGenerator(
     val cvrPercent: Double,
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
-    val auditConfigIn: AuditConfig? = null,
+    val auditConfigIn: Config? = null,
 ) : ContestAuditTaskGenerator {
     override fun name() = "OneAuditWorkflowTaskGenerator"
 
     override fun generateNewTask(): SingleContestAuditTask {
-        val config = auditConfigIn ?: AuditConfig(AuditType.ONEAUDIT, simFuzzPct = mvrsFuzzPct)
+        val config = auditConfigIn ?: Config.from(AuditType.ONEAUDIT, simFuzzPct = mvrsFuzzPct)
 
         // data class ContestMvrCardAndPools(
         //    val contestUA: ContestUnderAudit,
@@ -41,7 +41,7 @@ class OneAuditContestAuditTaskGenerator(
         val oneaudit = WorkflowTesterOneAudit(
             config=config,
             listOf(contestUA),
-            MvrManagerForTesting(mvrs, oaMvrs, seed=config.seed, pools=pools)
+            MvrManagerForTesting(mvrs, oaMvrs, seed=config.creation.seed, pools=pools)
         )
 
         return SingleContestAuditTask(
@@ -61,7 +61,7 @@ class OneAuditSingleRoundAuditTaskGeneratorWithFlips(
     val cvrPercent: Double,
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
-    val auditConfigIn: AuditConfig? = null,
+    val auditConfigIn: Config? = null,
     val quiet: Boolean = true,
     val p2flips: Double? = null,
     val p1flips: Double? = null,
@@ -70,7 +70,7 @@ class OneAuditSingleRoundAuditTaskGeneratorWithFlips(
     override fun name() = "OneAuditSingleRoundAuditTaskGenerator"
 
     override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
-        val config = auditConfigIn ?: AuditConfig(AuditType.ONEAUDIT, simFuzzPct = mvrsFuzzPct)
+        val config = auditConfigIn ?: Config.from(AuditType.ONEAUDIT, simFuzzPct = mvrsFuzzPct)
 
         val (contestUA, mvrs, cards, pools) = makeOneAuditTest(
                 margin,
@@ -89,7 +89,7 @@ class OneAuditSingleRoundAuditTaskGeneratorWithFlips(
 
 
         val oneaudit = WorkflowTesterOneAudit(config=config, listOf(contestUA),
-            MvrManagerForTesting(mvrs, oaMvrs, seed=config.seed, pools=pools))
+            MvrManagerForTesting(mvrs, oaMvrs, seed=config.creation.seed, pools=pools))
 
         return ClcaSingleRoundWorkflowTask(
             name(),
@@ -111,14 +111,14 @@ class OneAuditSingleRoundWithDilutedMargin(
     val extraInPool: Int,
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
-    val auditConfigIn: AuditConfig? = null,
+    val auditConfigIn: Config? = null,
     val quiet: Boolean = true,
 ): ContestAuditTaskGenerator {
 
     override fun name() = "OneAuditSingleRoundWithDilutedMargin"
 
     override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
-        val config = auditConfigIn ?: AuditConfig(AuditType.ONEAUDIT, simFuzzPct = mvrsFuzzPct)
+        val config = auditConfigIn ?: Config.from(AuditType.ONEAUDIT, simFuzzPct = mvrsFuzzPct)
 
         val (contestUA, mvrs, cards, pools) = makeOneAuditTest(
                 margin,

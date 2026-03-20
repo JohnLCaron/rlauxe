@@ -70,7 +70,7 @@ class AuditsWithPhantoms {
         val phantoms = listOf(.00, .005, .01, .02, .03, .035, .04, .0425)
         val stopwatch = Stopwatch()
 
-        val auditConfig = AuditConfig(AuditType.CLCA, nsimEst = nsimEst)
+        val auditConfig = Config.from(AuditType.CLCA, nsimEst = nsimEst)
 
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         phantoms.forEach { phantom ->

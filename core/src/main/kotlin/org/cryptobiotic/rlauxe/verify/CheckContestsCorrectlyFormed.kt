@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.verify
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import kotlin.collections.component1
@@ -10,7 +10,9 @@ import kotlin.math.min
 
 private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOANS")
 
-fun checkContestsCorrectlyFormed(config: AuditConfig, contestsUA: List<ContestWithAssertions>, results: VerifyResults) {
+fun checkContestsCorrectlyFormed(config: Config, contestsUA: List<ContestWithAssertions>, results: VerifyResults) {
+    val sampleControl = config.round.sampling
+
     results.addMessage("checkContestsCorrectlyFormed")
 
     checkContestInfos(contestsUA, results)
@@ -21,11 +23,11 @@ fun checkContestsCorrectlyFormed(config: AuditConfig, contestsUA: List<ContestWi
         if (contestUA.preAuditStatus == TestH0Status.InProgress && !contestUA.isIrv) {
             checkWinnerVotes(contestUA, results)
 
-            if ((contestUA.minRecountMargin()?: 0.0) <= config.minRecountMargin) {
-                logger.info{"*** MinMargin contest ${contestUA.id} recountMargin ${contestUA.minRecountMargin()} <= ${config.minRecountMargin}"}
+            if ((contestUA.minRecountMargin()?: 0.0) <= sampleControl.minRecountMargin) {
+                logger.info{"*** MinMargin contest ${contestUA.id} recountMargin ${contestUA.minRecountMargin()} <= ${sampleControl.minRecountMargin}"}
                 contestUA.preAuditStatus = TestH0Status.MinMargin
-            } else if ((contestUA.minDilutedMargin()?: 0.0) <= config.minMargin) {
-                logger.info{"*** MinMargin contest ${contestUA.id} minMargin ${contestUA.minDilutedMargin()} <= ${config.minMargin}"}
+            } else if ((contestUA.minDilutedMargin()?: 0.0) <= sampleControl.minMargin) {
+                logger.info{"*** MinMargin contest ${contestUA.id} minMargin ${contestUA.minDilutedMargin()} <= ${sampleControl.minMargin}"}
                 contestUA.preAuditStatus = TestH0Status.MinMargin
             } else {
                 val minAssertion = contestUA.minAssertion()

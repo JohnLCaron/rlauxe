@@ -61,19 +61,7 @@ fun createBelgiumClca(
     println("createBelgiumClca took $stopwatch")
 
     val config = Config(election.electionInfo(), creation, round)
-    val auditConfig = config.toAuditConfig()
-
-    /* val config = when {
-        (auditConfigIn != null) -> auditConfigIn
-        else -> AuditConfig(
-            AuditType.CLCA, removeCutoffContests = false, riskLimit = .05, nsimEst=10, minRecountMargin=0.0,
-            simFuzzPct = 0.0, quantile=0.5,
-            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
-            clcaConfig = ClcaConfig(fuzzMvrs=0.0)
-        )
-    } */
-
-    createAuditRecord(auditConfig, election, auditDir = auditdir, externalSortDir=topdir)
+    createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
 
     val result = startFirstRound(auditdir)
     if (result.isErr) logger.error{ result.toString() }

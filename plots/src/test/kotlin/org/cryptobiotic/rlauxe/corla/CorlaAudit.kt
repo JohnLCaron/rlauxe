@@ -17,8 +17,7 @@ class CorlaSingleRoundAuditTaskGenerator(
     val phantomPct: Double,
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
-    val auditConfig: AuditConfig? = null,
-    val clcaConfigIn: ClcaConfig? = null,
+    val auditConfig: Config? = null,
     val nsimEst: Int = 100,
     val quiet: Boolean = true,
     val p2flips: Double? = null,
@@ -27,10 +26,7 @@ class CorlaSingleRoundAuditTaskGenerator(
     override fun name() = "CorlaSingleRoundAuditTaskGenerator"
 
     override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
-        val useConfig = auditConfig ?: AuditConfig(
-            AuditType.CLCA, nsimEst = nsimEst,
-            clcaConfig = clcaConfigIn ?: ClcaConfig()
-        )
+        val useConfig = auditConfig ?: Config.from(AuditType.CLCA, nsimEst = nsimEst)
 
         val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         val testMvrs = if (p2flips != null || p1flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips) else
@@ -56,18 +52,14 @@ class CorlaContestAuditTaskGenerator(
     val phantomPct: Double,
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
-    val auditConfigIn: AuditConfig? = null,
+    val auditConfigIn: Config? = null,
     val clcaConfigIn: ClcaConfig? = null,
     val p2flips: Double? = null,
 ): ContestAuditTaskGenerator {
     override fun name() = "CorlaWorkflowTaskGenerator"
 
     override fun generateNewTask(): SingleContestAuditTask {
-        val auditConfig = auditConfigIn ?:
-        AuditConfig(
-            AuditType.CLCA, nsimEst = 10,
-            clcaConfig = clcaConfigIn ?: ClcaConfig(fuzzMvrs=mvrsFuzzPct)
-        )
+        val auditConfig = auditConfigIn ?: Config.from(AuditType.CLCA, nsimEst = 10, fuzzMvrs=mvrsFuzzPct)
 
         val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         val testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
@@ -88,7 +80,7 @@ class CorlaContestAuditTaskGenerator(
 }
 
 class CorlaAudit(
-    val auditConfig: AuditConfig,
+    val auditConfig: Config,
     contestsToAudit: List<Contest>, // the contests you want to audit
     val mvrManagerForTesting: MvrManagerForTesting, // mutable
     val quiet: Boolean = false,
@@ -110,7 +102,7 @@ class CorlaAudit(
         return complete
     }
 
-    override fun auditConfig() =  this.auditConfig
+    override fun config() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestWithAssertions> = contestsUA
     override fun mvrManager() = mvrManagerForTesting
@@ -122,7 +114,7 @@ class CorlaAudit(
 class CorlaAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
     override fun run(
-        config: AuditConfig,
+        config: Config,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
         samplerTracker: ClcaSamplerErrorTracker,

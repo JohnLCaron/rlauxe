@@ -23,7 +23,7 @@ class TestConfigConversions {
         auditRecords.forEach {
             println("doing $it")
             val auditRecord = AuditRecord.readFrom(it)!!
-            testAuditConfigRoundtrip(it, auditRecord.config)
+            testAuditConfig2Roundtrip(auditRecord.electionInfo, auditRecord.config)
         }
     }
 
@@ -31,24 +31,13 @@ class TestConfigConversions {
     fun testRound() {
         val auditdir = "$testdataDir/cases/belgium/2024/Namur/audit"
         val auditRecord = AuditRecord.readFrom(auditdir)!!
-        testAuditConfigRoundtrip(auditdir, auditRecord.config)
+        testAuditConfig2Roundtrip(auditRecord.electionInfo, auditRecord.config)
     }
 
     @Test
     fun testAuditConfigRoundtrip() {
-        val config = AuditConfig(
-            AuditType.CLCA, nsimEst = 10, seed = -2417429242344992892,
-        )
-        testAuditConfigRoundtrip("testAuditConfigRoundtrip", config)
-    }
-
-    fun testAuditConfigRoundtrip(name: String, config: AuditConfig) {
-        val electionInfo = ElectionInfo(name, config.auditType, 42, 11, true, true)
-        val config2 = Config.fromAuditConfig(electionInfo, config)
-        val roundtrip = config2.toAuditConfig()
-
-        assertEquals(config, roundtrip)
-        assertEquals(electionInfo, config2.electionInfo)
+        val config = Config.from(AuditType.CLCA, nsimEst = 10)
+        testAuditConfig2Roundtrip(config.election, config)
     }
 
     @Test
@@ -61,7 +50,7 @@ class TestConfigConversions {
                 persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
             )
             .setRoundConfig()
-            .setSimulation(nsimEst = 99, estPercentSuccess = listOf(0.42, 0.17), simFuzzPct = .12, mvrFuzz = .01,)
+            .setSimulation(nsimEst = 99, estPercentile = listOf(42, 67), simFuzzPct = .12, mvrFuzz = .01,)
             .setSampleControl(
                 minRecountMargin = .0042,
                 minMargin = .04,
@@ -94,7 +83,7 @@ class TestConfigConversions {
         val election3 = electionInfo.copy(electionName="sf", poolsHaveOneCardStyle=false)
         val target3 = createSfElection(election3,
             minRecountMargin = .015,
-            estPercentSuccess = listOf(0.42, 0.17),
+            estPercentile = listOf(42, 17),
             minMargin = 0.02,
             mvrFuzz = 0.0,
             contestSampleCutoff = 1000,
@@ -108,8 +97,8 @@ fun testAuditConfig2Roundtrip(electionInfo: ElectionInfo, target: Config) {
     val config = target.toAuditConfig()
     val roundtrip = Config.fromAuditConfig(electionInfo, config)
 
-    assertEquals(electionInfo, roundtrip.electionInfo)
-    assertEquals(target.electionInfo, roundtrip.electionInfo)
+    assertEquals(electionInfo, roundtrip.election)
+    assertEquals(target.election, roundtrip.election)
     assertEquals(target.creation, roundtrip.creation)
     assertEquals(target.round!!.simulation, roundtrip.round!!.simulation)
     assertEquals(target.round.sampling, roundtrip.round.sampling)
@@ -128,7 +117,7 @@ fun createBoulderConfig(
     minRecountMargin: Double = .005,
     minMargin: Double = 0.0,
     maxSamplePct: Double = 0.0,
-    //auditConfigIn: AuditConfig? = null,
+    //auditConfigIn: Config? = null,
     mvrFuzz: Double? = null,
     contestSampleCutoff: Int?,
     auditSampleCutoff: Int?,
@@ -156,9 +145,9 @@ fun createBoulderConfig(
 fun createSfElection(
     //auditdir: String,
     electionInfo: ElectionInfo, // trouble
-    //auditConfigIn: AuditConfig? = null,
+    //auditConfigIn: Config? = null,
     // poolsHaveOneCardStyle: Boolean = false,
-    estPercentSuccess: List<Double>,
+    estPercentile: List<Int>,
     mvrFuzz: Double? = null,
     minRecountMargin: Double = 0.005,
     minMargin: Double = 0.0,
@@ -173,7 +162,7 @@ fun createSfElection(
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
         )
         .setRoundConfig()
-        .setSimulation(nsimEst = 10, estPercentSuccess = estPercentSuccess, mvrFuzz = mvrFuzz,)
+        .setSimulation(nsimEst = 10, estPercentile = estPercentile, mvrFuzz = mvrFuzz,)
         .setSampleControl(
             minRecountMargin = minRecountMargin,
             minMargin = minMargin,
@@ -188,7 +177,7 @@ fun createColoradoElection(
     //topdir: String,
     //auditdir: String,
     electionInfo: ElectionInfo, // trouble
-    //auditConfigIn: AuditConfig? = null,
+    //auditConfigIn: Config? = null,
     //auditType : AuditType,
     //hasSingleCardStyle: Boolean,
     //pollingMode: PollingMode?,
@@ -203,7 +192,7 @@ fun createColoradoElection(
                 persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
             )
             .setRoundConfig()
-            .setSimulation(nsimEst = 10, estPercentSuccess = listOf(0.42, 0.55))
+            .setSimulation(nsimEst = 10, estPercentile = listOf(42, 55))
             .setSampleControl(
                 minRecountMargin = .005,
                 removeMaxContests = removeMaxContests,

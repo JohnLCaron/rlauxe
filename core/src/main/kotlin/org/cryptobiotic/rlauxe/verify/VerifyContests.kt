@@ -32,7 +32,7 @@ import kotlin.use
 // but only if you call cerify with the contests' note only then do you get contestUA.preAuditStatus saved
 class VerifyContests(val auditRecordLocation: String, val show: Boolean = false) {
     val auditRecord: AuditRecord
-    val config: AuditConfig
+    val config: Config
     val allContests: List<ContestWithAssertions>?
     val allInfos: Map<Int, ContestInfo>?
     val cardManifest: CardManifest
@@ -110,7 +110,7 @@ data class ContestSummary(
 
 // all audits, including polling
 fun verifyManifest(
-    config: AuditConfig,
+    config: Config,
     contestsUA: List<ContestWithAssertions>,
     cards: CloseableIterable<AuditableCard>,
     infos: Map<Int, ContestInfo>,
@@ -189,7 +189,7 @@ fun verifyManifest(
     // 2. Given the seed and the PRNG, check that the PRNs are correct and are assigned sequentially by index.
     var countErrs = 0
     val indexSorted = indexList.sortedBy { it.first }
-    val prng = Prng(config.seed)
+    val prng = Prng(config.creation.seed)
     indexSorted.forEach {
         val prn = prng.next()
         if(it.second != prn) countErrs++

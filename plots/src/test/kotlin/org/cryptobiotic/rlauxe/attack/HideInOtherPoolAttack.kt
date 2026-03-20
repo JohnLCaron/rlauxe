@@ -1,11 +1,11 @@
 package org.cryptobiotic.rlauxe.attack
 
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.MergeBatchIntoCards
 import org.cryptobiotic.rlauxe.audit.Batch
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -230,7 +230,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
 
         // TODO need the fake mvrs i think ??
         val fakeMvrs = cardsp.map { it.cvr() }
-        val config = AuditConfig(AuditType.ONEAUDIT, seed = 12356667890L)
+        val config = Config.from(AuditType.ONEAUDIT)
         val (contestsUA, cardPools) =
             makeOneAuditTestContests(
                 infos,

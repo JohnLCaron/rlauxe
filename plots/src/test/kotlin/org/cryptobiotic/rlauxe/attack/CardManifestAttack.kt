@@ -19,6 +19,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import org.cryptobiotic.rlauxe.util.Closer
@@ -245,9 +246,11 @@ class CardManifestAttack {
         val election = CreateElectionForAttack(listOf(contestUA), cards, mvrs, cardPools, null)
 
         val auditdir = "$topdir/audit"
-        val config = AuditConfig(
+        val configOld = AuditConfig(
             AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10,
         )
+
+        val config = Config.from(election.electionInfo(), nsimEst = 10, contestSampleCutoff = 20000)
 
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
         startFirstRound(auditdir)

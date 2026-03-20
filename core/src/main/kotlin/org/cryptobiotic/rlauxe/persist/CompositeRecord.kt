@@ -3,10 +3,10 @@ package org.cryptobiotic.rlauxe.persist
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.BatchIF
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.core.*
@@ -22,7 +22,7 @@ private val logger = KotlinLogging.logger("CompositeRecord")
 data class CompositeRecord(
     override val location: String,
     override val electionInfo: ElectionInfo,
-    override val config: AuditConfig,
+    override val config: Config,
     override val contests: List<ContestWithAssertions>,
     override val rounds: List<AuditRoundIF>,
     val componentRecords: List<AuditRecord>,
@@ -74,7 +74,7 @@ data class CompositeRecord(
         fun readFrom(location: String): CompositeRecord? {
             val components = mutableListOf<AuditRecord>()
             val contests = mutableListOf<ContestWithAssertions>()
-            var config: AuditConfig? = null
+            var config: Config? = null
             var electionInfo: ElectionInfo? = null
 
             // find all subdirectories

@@ -333,40 +333,7 @@ fun createBoulderElection(
     println("CreateBoulderElection took $stopwatch")
 
     val config = Config(election.electionInfo(), creation, round)
-    val auditConfig = config.toAuditConfig()
-/*
-    val config = if (auditConfigIn != null) auditConfigIn
-        else if (auditType.isClca())
-            AuditConfig(
-                AuditType.CLCA,
-                riskLimit = riskLimit,
-                minRecountMargin = minRecountMargin,
-                minMargin = minMargin,
-                maxSamplePct=maxSamplePct,
-                nsimEst = 20,
-                removeMaxContests=removeMaxContests,
-                contestSampleCutoff = contestSampleCutoff,
-                auditSampleCutoff = auditSampleCutoff,
-                persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
-                clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
-            )
-        else if (auditType.isOA())
-            AuditConfig(
-                AuditType.ONEAUDIT,
-                riskLimit=riskLimit,
-                minRecountMargin=minRecountMargin,
-                minMargin=minMargin,
-                maxSamplePct=maxSamplePct,
-                nsimEst=20,
-                removeMaxContests=removeMaxContests,
-                contestSampleCutoff = contestSampleCutoff,
-                auditSampleCutoff = auditSampleCutoff,
-                persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,  // write mvrs to private
-                clcaConfig = ClcaConfig(fuzzMvrs=mvrFuzz)
-            )
-    else throw RuntimeException("unsupported audit type $auditType") */
-
-    createAuditRecord(auditConfig, election, auditDir = auditdir)
+    createAuditRecord(config, election, auditDir = auditdir)
 
     val result = startFirstRound(auditdir)
     if (result.isErr) logger.error{ result.toString() }

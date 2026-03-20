@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import kotlin.test.Test
 
 class TestOneRoundClcaAudit {
-    val config = AuditConfig(AuditType.CLCA, nsimEst=10)
+    val config = Config.from(AuditType.CLCA, nsimEst=10)
 
     @Test
     fun testClcaSingleRoundAudit() {
@@ -27,7 +27,7 @@ class TestOneRoundClcaAudit {
         val testMvrs = testCvrs
 
         val workflow = WorkflowTesterClca(config, contests, emptyList(),
-            MvrManagerForTesting(testCvrs, testMvrs, config.seed))
+            MvrManagerForTesting(testCvrs, testMvrs, config.creation.seed))
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         runClcaSingleRoundAudit(workflow, contestRounds, auditor = ClcaAssertionAuditor(), parameters=emptyMap())
     }

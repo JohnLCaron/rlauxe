@@ -24,7 +24,7 @@ private val checkValidity = true
 // TODO generalize using more than just first component
 open class CompositeMvrManager(
     val auditRecord: CompositeRecord,
-    val config: AuditConfig,
+    val config: Config,
     val contestsUA: List<ContestWithAssertions>,
     val mvrWrite: Boolean = true): MvrManager {
 

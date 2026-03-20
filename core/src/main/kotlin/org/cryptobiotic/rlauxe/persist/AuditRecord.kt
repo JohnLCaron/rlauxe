@@ -6,7 +6,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import com.github.michaelbull.result.unwrapError
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
@@ -37,7 +37,7 @@ private val logger = KotlinLogging.logger("AuditRecord")
 interface AuditRecordIF {
     val location: String
     val electionInfo: ElectionInfo
-    val config: AuditConfig
+    val config: Config
     val contests: List<ContestWithAssertions>
     val rounds: List<AuditRoundIF>
 
@@ -50,11 +50,14 @@ interface AuditRecordIF {
 class AuditRecord(
     override val location: String,
     override val electionInfo: ElectionInfo,
-    override val config: AuditConfig,
+    val auditCreationConfig: AuditCreationConfig,
+    val auditRoundConfig: AuditRoundConfig,
     override val contests: List<ContestWithAssertions>,
     override val rounds: List<AuditRound>,  // TODO do we need to replace AuditEst ??
     mvrs: List<AuditableCard> // mvrs already sampled
 ): AuditRecordIF {
+    override val config = Config(electionInfo, auditCreationConfig, auditRoundConfig)
+
     val previousMvrs = mutableMapOf<Long, AuditableCard>() // cumulative
     val publisher = Publisher(location)
 
@@ -155,6 +158,10 @@ class AuditRecord(
             }
         }
         return result
+    }
+
+    fun showName(): String {
+        return "audit $location election ${electionInfo.electionName}"
     }
 
     companion object {
@@ -286,13 +293,11 @@ class AuditRecord(
                     }
                 } */
             }
-
-            val configNew = Config(electionInfo!!, auditCreationConfig!!, lastRoundConfig?: auditRoundProtoConfig!!)
+            val roundConfig = lastRoundConfig?: auditRoundProtoConfig!!
 
             // TODO AuditRecord or CompositeRecord ??
             return if (errs.hasErrors()) Err(errs) else {
-                val auditConfigNew = configNew.toAuditConfig()
-                Ok(AuditRecord(location, electionInfo, auditConfigNew, contests!!, rounds, sampledMvrsAll))
+                Ok(AuditRecord(location, electionInfo!!, auditCreationConfig!!, roundConfig, contests!!, rounds, sampledMvrsAll))
             }
         }
     }

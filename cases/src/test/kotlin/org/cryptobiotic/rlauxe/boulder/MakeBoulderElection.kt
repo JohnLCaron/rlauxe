@@ -61,7 +61,7 @@ class MakeBoulderElection {
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .05, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 20, estPercentSuccess = listOf(0.42, 0.55, .67)),
+            SimulationControl(nsimEst = 20, estPercentile = listOf(42, 55, 67)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 1000, auditSampleCutoff = 2000),
             ClcaConfig(fuzzMvrs = .001), null
         )

@@ -16,7 +16,7 @@ private val logger = KotlinLogging.logger("PollingAudit")
 
 // TODO parallelize over contests; see runClcaAuditRound
 fun runPollingAuditRound(
-    config: AuditConfig,
+    config: Config,
     auditRound: AuditRound,
     mvrManager: MvrManager,
     roundIdx: Int,
@@ -77,7 +77,7 @@ fun runPollingAuditRound(
 }
 
 fun auditPollingAssertion(
-    config: AuditConfig,
+    config: Config,
     contestUA: ContestWithAssertions,
     assertionRound: AssertionRound,
     sampler: SamplerTracker,
@@ -93,7 +93,7 @@ fun auditPollingAssertion(
         N = contestUA.Npop,
         withoutReplacement = true,
         upperBound = assorter.upperBound(),
-        d = config.pollingConfig.d,
+        d = config.round.pollingConfig!!.d,
         eta0 = eta0,
     )
 
@@ -107,7 +107,7 @@ fun auditPollingAssertion(
     )
     testFn.setDebuggingSequences()
 
-    val terminateOnNullReject = !config.isRiskMeasuringAudit()
+    val terminateOnNullReject = !config.creation.isRiskMeasuringAudit()
     val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=terminateOnNullReject) { sampler.sample() }
 
     assertionRound.auditResult = AuditRoundResult(

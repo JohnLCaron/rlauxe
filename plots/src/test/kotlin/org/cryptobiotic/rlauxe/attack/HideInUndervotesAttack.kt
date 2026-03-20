@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.attack
 
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -164,7 +164,7 @@ class ClcaSingleRoundWorkflowTaskGeneratorU(
         // println("mvrVotes=${mvrVotes}")
         assertTrue(mvrVotes[1]!! > mvrVotes[2]!!)
 
-        val config = AuditConfig(AuditType.CLCA, seed = 12356667890L)
+        val config = Config.from(AuditType.CLCA)
 
         val Nbs = mapOf(1 to Nc)
 

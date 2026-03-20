@@ -82,7 +82,7 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRo
         }
 
         // on a risk measureing audit, we dont want to do the next estimation round automatically, wait for explicit call.
-        val waitOnRisk = auditRecord.config.isRiskMeasuringAudit() && auditWasRun
+        val waitOnRisk = auditRecord.config.creation.isRiskMeasuringAudit() && auditWasRun
 
         // start a new round by estimating the mvrs needed
         if (!complete && !waitOnRisk ) {
@@ -105,7 +105,7 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRo
             val nextRound = workflow.startNewRound(quiet = false, onlyTask)
 
             // get matching mvrs if needed
-            if (!nextRound.auditIsComplete && auditRecord.config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs) {
+            if (!nextRound.auditIsComplete && auditRecord.config.creation.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs) {
                 val publisher = Publisher(auditDir)
                 val ncards = writeMvrsForRound(publisher, roundIdx)
                 logger.info{"writeMvrsForRound ${ncards} cards to ${publisher.sampleMvrsFile(roundIdx)}"}
@@ -158,7 +158,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
         val cvrPairs = workflow.mvrManager().makeMvrCardPairsForRound(roundIdx)
         val sampler = PairSampler(contestId, cvrPairs)
 
-        val config = workflow.auditConfig()
+        val config = workflow.config()
 
         // run the audit, capture the sequences
         val testH0Result =  when (config.auditType) {
@@ -212,7 +212,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
     }
 }
 
-fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
+fun runClcaAudit(config: Config, cvrPairs: List<Pair<CvrIF, AuditableCard>>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
     try {
         val auditor = ClcaAssertionAuditor()
 
@@ -235,7 +235,7 @@ fun runClcaAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>
     }
 }
 
-fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>, pools: List<CardPoolIF>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
+fun runOneAudit(config: Config, cvrPairs: List<Pair<CvrIF, AuditableCard>>, pools: List<CardPoolIF>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
     try {
         val auditor = OneAuditAssertionAuditor(pools)
         val cassertion = assertionRound.assertion as ClcaAssertion
@@ -257,7 +257,7 @@ fun runOneAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, AuditableCard>>,
     }
 }
 
-fun runPollingAudit(config: AuditConfig, cvrPairs: List<Pair<CvrIF, CvrIF>>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
+fun runPollingAudit(config: Config, cvrPairs: List<Pair<CvrIF, CvrIF>>, contestRound: ContestRound, assertionRound: AssertionRound): TestH0Result? {
     try {
         val assertion = assertionRound.assertion
         val assorter = assertion.assorter

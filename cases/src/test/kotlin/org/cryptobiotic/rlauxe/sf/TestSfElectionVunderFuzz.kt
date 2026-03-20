@@ -23,7 +23,7 @@ class TestSfElectionVunderFuzz {
     val publisher = Publisher(auditdir)
 
     val cardManifest: CardManifest
-    val config: AuditConfig
+    val config: Config
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
 
@@ -55,7 +55,7 @@ class TestSfElectionVunderFuzz {
         }
 
         // simulate the card pools for all OneAudit contests; do it here one time for all contests
-        val vunderFuzz = VunderPoolsFuzzer(cardPools!!, infos, config.simFuzzPct ?: 0.0, contestCards)
+        val vunderFuzz = VunderPoolsFuzzer(cardPools!!, infos, config.round.simulation.simFuzzPct ?: 0.0, contestCards)
 
         val pairs = vunderFuzz.mvrCvrPairs
         println(" pairs = ${pairs.size}")
@@ -156,7 +156,7 @@ class TestSfElectionVunderFuzz {
         }
 
         // simulate the card pools for all OneAudit contests; do it here one time for all contests
-        val vunderFuzz = VunderPoolsFuzzer(cardPools, infos, config.simFuzzPct ?: 0.0, contestCards)
+        val vunderFuzz = VunderPoolsFuzzer(cardPools, infos, config.round.simulation.simFuzzPct ?: 0.0, contestCards)
         val vunderPool = vunderFuzz.vunderPools.vunderPools[useCardPoolId]!!
         val vunderPicker = vunderPool.vunderPickers[contestId]!!
         println("vunder= ${vunderPicker.vunder}")

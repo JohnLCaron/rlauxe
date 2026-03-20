@@ -1,14 +1,11 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.cli.makeOnePool
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
-import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.util.TransformingIterator
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.random.Random
 import kotlin.test.Test
@@ -23,7 +20,7 @@ class TestPollingAudit {
 
     @Test
     fun testPollingWithStyle() {
-        val auditConfig = AuditConfig(AuditType.POLLING, nsimEst = 10)
+        val auditConfig = Config.from(AuditType.POLLING, nsimEst = 10)
 
         // each contest has a specific margin between the top two vote getters.
         val N = 50000
@@ -66,7 +63,7 @@ class TestPollingAudit {
     @Test
     fun testPollingWithFuzz() {
         val mvrFuzzPct = .0123
-        val auditConfig = AuditConfig(
+        val auditConfig = Config.from(
             AuditType.POLLING, nsimEst = 10, simFuzzPct = mvrFuzzPct
         )
 
@@ -126,7 +123,7 @@ class TestPollingAudit {
             assertEquals(contest.Nc, fcontest.phantomCount + fcontest.underCount + nvotes)
         }
 
-        val auditConfig = AuditConfig(AuditType.POLLING, nsimEst = 10)
+        val auditConfig = Config.from(AuditType.POLLING, nsimEst = 10)
         val cvrs = multiContestTest.makeCvrsFromContests(42)
         val pool = makeOnePool(42, multiContestTest.contests, cvrs)
         val mvrManager = MvrManagerForTesting(cvrs, cvrs, Random.nextLong()) // , pools = listOf(pool))

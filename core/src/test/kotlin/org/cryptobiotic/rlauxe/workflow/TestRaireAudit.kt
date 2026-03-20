@@ -1,9 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.ClcaConfig
-import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.raire.*
@@ -13,28 +11,25 @@ class TestRaireAudit {
 
     @Test
     fun testRaireClcaWithStyle() {
-        testRaireWorkflow(AuditConfig(AuditType.CLCA, nsimEst=10))
+        testRaireWorkflow(Config.from(AuditType.CLCA, nsimEst=10))
     }
 
-    fun testRaireWorkflow(auditConfig: AuditConfig) {
+    fun testRaireWorkflow(auditConfig: Config) {
         val (rcontest, testCvrs) = simulateRaireTestContest(N=20000, contestId=111, ncands=3, minMargin=.04, quiet = true)
         val workflow = WorkflowTesterClca(auditConfig, emptyList(), listOf(rcontest),
-            MvrManagerForTesting(testCvrs, testCvrs, auditConfig.seed))
+            MvrManagerForTesting(testCvrs, testCvrs, auditConfig.creation.seed))
         runTestAuditToCompletion("testRaireWorkflow", workflow)
     }
 
     @Test
     fun testRaireFuzz() {
         val mvrFuzzPct = .02
-        val config = AuditConfig(
-            AuditType.CLCA, nsimEst=10, simFuzzPct = mvrFuzzPct,
-            clcaConfig = ClcaConfig(fuzzMvrs = mvrFuzzPct)
-        )
+        val config = Config.from(AuditType.CLCA, nsimEst=10, simFuzzPct = mvrFuzzPct, fuzzMvrs = mvrFuzzPct)
 
         val (rcontest: RaireContestWithAssertions, testCvrs: List<Cvr>) = simulateRaireTestContest(N=20000, contestId=111, ncands=4, minMargin=.04, quiet = true)
         val testMvrs =  makeFuzzedCvrsForClca(listOf(rcontest.contest.info()) , testCvrs, mvrFuzzPct)
         val workflow = WorkflowTesterClca(config, emptyList(), listOf(rcontest),
-            MvrManagerForTesting(testCvrs, testMvrs, config.seed))
+            MvrManagerForTesting(testCvrs, testMvrs, config.creation.seed))
         runTestAuditToCompletion("testRaireWorkflow", workflow)
     }
 

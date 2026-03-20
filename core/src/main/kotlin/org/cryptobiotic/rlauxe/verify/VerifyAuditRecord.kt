@@ -10,15 +10,13 @@ import org.cryptobiotic.rlauxe.persist.AuditRecordIF
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.existsOrZip
-import org.cryptobiotic.rlauxe.persist.json.readAuditConfigJsonFile
-import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 
 private val logger = KotlinLogging.logger("VerifyAuditRecord")
 
 class VerifyAuditRecord(val auditRecordLocation: String) {
     val auditRecord: AuditRecordIF
     val publisher: Publisher
-    val config: AuditConfig
+    val config: Config
     val contests: List<ContestWithAssertions>
     val allInfos: Map<Int, ContestInfo>?
 
@@ -73,7 +71,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
 
     fun verifyAssertion(assertion: AssertionRound, result: VerifyResults) {
         if (assertion.prevAuditResult != null) {
-            verifyRoundResult(assertion.prevAuditResult!!, result)
+            verifyRoundResult(assertion.prevAuditResult, result)
         }
         if (assertion.estimationResult != null) {
             verifyEstimationResult(assertion.estimationResult!!, result)

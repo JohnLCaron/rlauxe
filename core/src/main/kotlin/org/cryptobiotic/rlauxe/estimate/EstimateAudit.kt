@@ -21,6 +21,7 @@ import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.Double
 import kotlin.Int
 import kotlin.collections.sortedBy
+import kotlin.math.abs
 import kotlin.math.min
 import kotlin.use
 
@@ -28,10 +29,10 @@ private val logger = KotlinLogging.logger("EstimateAudit")
 private val showWork = false
 
 // TODO  round > 1 we want to incorporate the measured errors from previous rounds
-//   cant we use vunderPool to do so, that only uses fuzz
-//   just change the assortValue randomly p percent of the time. can do the same for clca.
+//   cant use vunderPool to do so, that only uses fuzz
+//   just change the assortValue randomly p percent of the time? can do the same for clca.
 class EstimateAudit(
-    val config: AuditConfig,
+    val config: Config,
     val roundIdx: Int,
     val contests: List<ContestRound>,
     val pools: List<CardPool>?,
@@ -50,14 +51,15 @@ class EstimateAudit(
         val tasks = mutableListOf<AuditTrialTask>()
 
         // TODO use more simulations when the margin is low or calcNewMvrs are high ??
-        // TODO use 1 when CLCA with no errors
-        val ntrials = if (config.isClca) 1 else config.nsimEst
+
+        // each trial is running all the contests in the round (but only the minAssertion)
+        val ntrials = if (config.isClca) 1 else config.round.simulation.nsimEst
         repeat(ntrials) { run ->
             tasks.add(AuditTrialTask(roundIdx, run+1, config, contestsToAudit, pools, batches, cardManifest))
         }
         val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunnerG<List<AssertionTrialIF>>().run(tasks) // , nthreads=1)
 
-        val trackerResults = mutableMapOf<Int, MutableList<AssertionTrialIF>>()
+        val trackerResults = mutableMapOf<Int, MutableList<AssertionTrialIF>>() // contestId -> list(trial)
         contestsToAudit.forEach { trackerResults[it.id] = mutableListOf() }
         trialResults.forEach { result ->
             result.forEach { trackerResults[it.contest().id]!!.add(it) }
@@ -68,12 +70,8 @@ class EstimateAudit(
             val contestResults: List<AssertionTrialIF> = trackerResults[contestRound.id]!!
             // seems like this should take into account the number of new mvrs wanted.
             // high pct when small, conservative when large ??
-            // hard to get a one-size-fits-all. could try letting userr have control....
-            val pct = when (roundIdx) {
-                1 -> 50
-                2 -> 80
-                else -> 96
-            }
+            // hard to get a one-size-fits-all. could try letting user have more control....
+            val pct = config.round.simulation.percentile(roundIdx) // this is an integer
 
             contestResults.forEach {
                 if (it.wantsMore()) {
@@ -82,18 +80,20 @@ class EstimateAudit(
                 // require( !contestResults.any { it.wantsMore() })
             }
 
-            val useTrial = findQuantileTrial(contestResults, .01 * pct)
             val distribution: List<Int> = contestResults.map { it.nmvrs() }.sorted()
+            val newMvrs = roundUp(percentiles().index(pct).compute(*distribution.toIntArray()))
 
-            // TODO only have minAssertion; is that ok ?
+            // TODO only estimating minAssertion; is that ok ?
             //   minAssertion can change when some assertions succeed in previous rounds
+
+            // which trial is closest to nmvrs?
+            val useTrial = findClosestTrial(contestResults, newMvrs)
             val useAssertionRound = useTrial.assertionRound()
 
-            val newMvrs = roundUp(percentiles().index(pct).compute(*distribution.toIntArray()))
             val prevNmrs = useAssertionRound.prevAssertionRound?.auditResult?.samplesUsed ?: 0
             val estMvrs = prevNmrs + newMvrs
 
-            // testOnly means dont modify the AuditRecord
+            // contestOnly means dont modify the AuditRecord
             if (contestOnly == null) {
                 contestRound.estMvrs = estMvrs
                 contestRound.estNewMvrs = newMvrs
@@ -103,7 +103,7 @@ class EstimateAudit(
 
                 val calcNewMvrsNeeded = if (config.isPolling) 0 else useAssertionRound.calcNewMvrsNeeded(contestRound.contestUA, config)
 
-                val estimatiomResult = EstimationRoundResult(
+                val estimationResult = EstimationRoundResult(
                     roundIdx,
                     "EstimateAudit",
                     calcNewMvrsNeeded = calcNewMvrsNeeded,
@@ -111,15 +111,15 @@ class EstimateAudit(
                     startingErrorRates = emptyMap(), // TODO capture nphantoms ?
                     estimatedDistribution = distribution,
                     lastIndex = useTrial.maxIndex(),
-                    quantile = pct,
+                    percentile = pct,
                     ntrials = ntrials,
                     simNewMvrsNeeded = newMvrs,
                     simMvrsNeeded = estMvrs,
                 )
 
-                // attach estimatiomResult to all the assertions still to be done
+                // attach estimationResult to all the assertions still to be done
                 contestRound.assertionRounds.forEach { assertion ->
-                    assertion.estimationResult = estimatiomResult
+                    assertion.estimationResult = estimationResult
                 }
             }
 
@@ -135,7 +135,7 @@ class EstimateAudit(
 class AuditTrialTask(
     val roundIdx: Int,
     val run: Int,
-    val config: AuditConfig,
+    val config: Config,
     val contestsToAudit: List<ContestRound>,
     val pools: List<CardPool>?,
     val batches: List<BatchIF>?,
@@ -152,8 +152,8 @@ class AuditTrialTask(
         // Polling without pools, generate one VunderPool based on contest totals
         val onePool = if (vunderPools == null && config.isPolling) VunderPool.fromContests(contestsToAudit.map { it.contestUA }, 42) else null
 
-        // Can we do better with Batches ?? Seems like if card has a batch, we can use possible contests to be closer to mvr....
-        val vunderBatches = if (onePool != null && batches != null && config.pollingConfig.mode.withBatches())
+        // Use Batches if available
+        val vunderBatches = if (onePool != null && batches != null && config.election.pollingMode?.withBatches() == true)
             VunderBatches(batches, onePool) else null
 
         val contestTrials: List<AssertionTrialIF> = contestsToAudit.map {
@@ -204,11 +204,12 @@ class AuditTrialTask(
 
 // 1 trial, 1 Clca contest
 class ContestClcaTrial(val run: Int,
-                       val config: AuditConfig,
+                       val config: Config,
                        val contest: ContestWithAssertions,
                        val assertionRound: AssertionRound,
 ): AssertionTrialIF {
-    val endingTestStatistic = 1 / config.riskLimit
+    val endingTestStatistic = 1 / config.creation.riskLimit
+    val clcaConfig = config.round.clcaConfig!!
 
     val cassertion = assertionRound.assertion as ClcaAssertion // minimum noerror
     val cassorter = cassertion.cassorter
@@ -221,14 +222,14 @@ class ContestClcaTrial(val run: Int,
     val prevSamplesUsed: Int
 
     init {
-        val aprioriErrorRates = config.clcaConfig.apriori.makeErrorRates(cassorter.noerror, passorter.upperBound())
+        val aprioriErrorRates = clcaConfig.apriori.makeErrorRates(cassorter.noerror, passorter.upperBound())
         val oaAssortRates = if (config.isOA) (cassorter as OneAuditClcaAssorter).oaAssortRates else null
 
         bettingFun = GeneralAdaptiveBetting(
             contest.Npop, // population size for this contest
             aprioriErrorRates = aprioriErrorRates, // apriori rates not counting phantoms, non-null so we always have noerror and upper
             contest.Nphantoms,
-            config.clcaConfig.maxLoss,
+            clcaConfig.maxLoss,
             oaAssortRates=oaAssortRates,
         )
 
@@ -296,10 +297,11 @@ class ContestClcaTrial(val run: Int,
 
 // 1 trial, 1 Polling contest
 class ContestPollingTrial(val run: Int,
-                          val config: AuditConfig,
+                          val config: Config,
                           val contest: ContestWithAssertions,
                           val assertionRound: AssertionRound): AssertionTrialIF {
-    val endingTestStatistic = 1 / config.riskLimit
+    val endingTestStatistic = 1 / config.creation.riskLimit
+    val pollingConfig = config.round.pollingConfig!!
 
     val assertion = assertionRound.assertion
     val assorter = assertion.assorter
@@ -318,7 +320,7 @@ class ContestPollingTrial(val run: Int,
             N = contest.Npop,
             withoutReplacement = true,
             upperBound = assorter.upperBound(),
-            d = config.pollingConfig.d,
+            d = pollingConfig.d,
             eta0 = eta0,
         )
 
@@ -422,4 +424,20 @@ fun findQuantileTrial(data: List<AssertionTrialIF>, quantile: Double): Assertion
     // rounding down. TODO interpolate; see Deciles ??
     val p = min((quantile * data.size).toInt(), data.size-1)
     return sortedData[p]
+}
+
+fun findClosestTrial(data: List<AssertionTrialIF>, nmvrs: Int): AssertionTrialIF {
+    require(data.isNotEmpty())
+
+    var closestValue = Int.MAX_VALUE
+    var closestTrial: AssertionTrialIF? = null
+
+    data.forEach { trial ->
+        val diff = abs(trial.nmvrs() - nmvrs)
+        if (diff < closestValue) {
+            closestTrial = trial
+            closestValue = diff
+        }
+    }
+    return closestTrial!!
 }

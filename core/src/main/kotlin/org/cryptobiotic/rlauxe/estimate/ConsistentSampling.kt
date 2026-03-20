@@ -15,7 +15,7 @@ private val logger = KotlinLogging.logger("ConsistentSampling")
 // called from auditWorkflow.startNewRound
 // also called by rlauxe-viewer
 fun sampleAndRemoveContests(
-    config: AuditConfig,
+    config: Config,
     sortedManifest: CardManifest,
     auditRound: AuditRoundIF,
     previousSamples: Set<Long>,
@@ -24,9 +24,10 @@ fun sampleAndRemoveContests(
     val stopwatch = Stopwatch()
 
     // remove first "removeMaxContests" - to generate plot comparisions
-    if (auditRound.roundIdx == 1 && config.removeMaxContests != null && config.removeMaxContests > 0) {
+    val removeMaxContests: Int? = config.round.sampling.removeMaxContests()
+    if (auditRound.roundIdx == 1 && removeMaxContests != null && removeMaxContests > 0) {
         val sortedByMargin : List<ContestRound> = auditRound.contestRounds.sortedByDescending { it.estMvrs }
-        repeat(config.removeMaxContests) { idx ->
+        repeat(removeMaxContests) { idx ->
             val maxContest = sortedByMargin[idx]
             maxContest.status = TestH0Status.FailMaxSamplesAllowed
             maxContest.included = false
@@ -42,7 +43,7 @@ fun sampleAndRemoveContests(
         lastCardsUsed = consistentSampling( auditRound, sortedManifest, previousSamples)
 
         // enforce sample limits
-        val removeContests = checkSampleLimits(config, auditRound, contestsNotDone)
+        val removeContests = checkSampleLimits(config.round.sampling, auditRound, contestsNotDone)
         if (removeContests.isEmpty()) break
         removeContests.forEach { contestsNotDone.remove(it) }
         // do it again
@@ -70,35 +71,35 @@ fun sampleAndRemoveContests(
 
 // TODO find balance with allowing EA to control what gets removed
 private fun checkSampleLimits(
-    config: AuditConfig,
+    sampleControl: ContestSampleControl,
     auditRound: AuditRoundIF,
     contestsNotDone: MutableList<ContestRound>,
 ): List<ContestRound> {
     val removeContests = mutableListOf<ContestRound>()
 
     // limit contest samples to maxSamplePct
-    if (config.maxSamplePct > 0.0) {
+    if (sampleControl.maxSamplePct > 0.0) {
         contestsNotDone.forEach { contestRound ->
             val pct = contestRound.estMvrs / contestRound.contestUA.Nc.toDouble() // TODO this is all Mvrs ?
-            if (pct > config.maxSamplePct) {
+            if (pct > sampleControl.maxSamplePct) {
                 contestRound.status = TestH0Status.FailMaxSamplesAllowed
                 contestRound.included = false
                 contestRound.done = true
-                logger.warn{"*** remove contest ${contestRound.id} with status FailMaxSamplesAllowed: maxSamplePct ${pct} > ${config.maxSamplePct}"}
+                logger.warn{"*** remove contest ${contestRound.id} with status FailMaxSamplesAllowed: maxSamplePct ${pct} > ${sampleControl.maxSamplePct}"}
                 removeContests.add(contestRound)
             }
         }
     }
 
     // limit each contest sample to be less than contestSampleCutoff TODO this is new Mvrs ??
-    if (config.removeCutoffContests && config.contestSampleCutoff != null && config.contestSampleCutoff > 0) {
+    if (sampleControl.removeCutoffContests && sampleControl.contestSampleCutoff != null && sampleControl.contestSampleCutoff > 0) {
         contestsNotDone.forEach { contestRound ->
             val simMvrsNeeded = contestRound.assertionRounds.maxOfOrNull { it.estimationResult?.simMvrsNeeded ?: 0 }
-            if (simMvrsNeeded != null && simMvrsNeeded > config.contestSampleCutoff) {
+            if (simMvrsNeeded != null && simMvrsNeeded > sampleControl.contestSampleCutoff) {
                 contestRound.status = TestH0Status.FailMaxSamplesAllowed
                 contestRound.included = false
                 contestRound.done = true
-                logger.warn{" *** too many samples for contest ${contestRound.id}: ${simMvrsNeeded} > ${config.contestSampleCutoff}, "}
+                logger.warn{" *** too many samples for contest ${contestRound.id}: ${simMvrsNeeded} > ${sampleControl.contestSampleCutoff}, "}
                 removeContests.add(contestRound)
             }
         }
@@ -107,7 +108,7 @@ private fun checkSampleLimits(
     // if above checks remove contests, rerun consistentSampling before checking for this total contestSampleCutoff
     if (removeContests.isEmpty()) {
         // check if overall auditSampleCutoff is exceeded
-        if (config.removeCutoffContests && config.auditSampleCutoff != null && auditRound.samplePrns.size > config.auditSampleCutoff) {
+        if (sampleControl.removeCutoffContests && sampleControl.auditSampleCutoff != null && auditRound.samplePrns.size > sampleControl.auditSampleCutoff) {
             // find the contest with the largest estimation size eligible for removal, remove it
             val maxEstimation = contestsNotDone.maxOf { it.estSampleSizeEligibleForRemoval() }
             val maxContest = contestsNotDone.first { it.estSampleSizeEligibleForRemoval() == maxEstimation }
@@ -117,7 +118,7 @@ private fun checkSampleLimits(
             maxContest.included = false
             maxContest.done = true
             logger.warn {
-                "*** too many samples in audit: ${auditRound.samplePrns.size} > ${config.auditSampleCutoff}, " +
+                "*** too many samples in audit: ${auditRound.samplePrns.size} > ${sampleControl.auditSampleCutoff}, " +
                         "remove contest ${maxContest.id} with largest sample size = ${maxContest.estMvrs}"
             }
             removeContests.add(maxContest)

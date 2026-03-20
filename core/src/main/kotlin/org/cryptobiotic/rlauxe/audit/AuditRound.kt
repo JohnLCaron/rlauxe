@@ -226,29 +226,30 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     }
 
     // return (calculated new mvrs needed, optimalBet) based on prevAuditResult.measuredCounts or apriori.errorCounts
-    fun calcNewMvrsNeeded(contest: ContestWithAssertions, auditConfig : AuditConfig): Int {
+    fun calcNewMvrsNeeded(contest: ContestWithAssertions, config : Config): Int {
         require(assertion is ClcaAssertion)
         val cassorter = assertion.cassorter
+        val clcaConfig = config.round.clcaConfig!!
 
         // because we start from previous rounds, we are calculating new mvrs
         // payoff^n = Tprev
         // Tprev * Tnow = T = 1/risklimit
         // Tnow = T / Tprev = (1/risklimit) / (1/plast)
         // alpha_now = 1 / Tnow = = (1/plast) / (1/risklimit) = risklimit/plast
-        var alpha = auditConfig.riskLimit
+        var alpha = config.creation.riskLimit
         if (this.prevAuditResult != null) {
             alpha /= this.prevAuditResult.plast
         }
 
-        val aprioriRates = auditConfig.clcaConfig.apriori.makeErrorRates(noerror, upper)
+        val aprioriRates = clcaConfig.apriori.makeErrorRates(noerror, upper)
         val ratesWithPhantoms =  makeAprioriErrorRates(aprioriRates, contest.Nphantoms/contest.Npop.toDouble())
 
         return if (cassorter is OneAuditClcaAssorter) {
             val clcaErrorRates =  ClcaErrorRates(noerror, upper, ratesWithPhantoms)
-            val pair = assertion.cassorter.estWithOptimalBet2(contest, auditConfig.clcaConfig.maxLoss, alpha, clcaErrorRates)
+            val pair = assertion.cassorter.estWithOptimalBet2(contest, clcaConfig.maxLoss, alpha, clcaErrorRates)
             pair.first
         } else {
-            val maxBet = 2 * auditConfig.clcaConfig.maxLoss // TODO ??
+            val maxBet = 2 * clcaConfig.maxLoss // TODO ??
             cassorter.sampleSizeWithErrors(maxBet, alpha, ClcaErrorRates(noerror, upper, ratesWithPhantoms))
         }
     }
@@ -266,7 +267,7 @@ data class EstimationRoundResult(
     val startingErrorRates: Map<Double, Double>? = null, // error rates used for estimation; informational
     val estimatedDistribution: List<Int>,   // distribution of estimated sample sizes
     val lastIndex: Int,
-    val quantile: Int,
+    val percentile: Int,  // percentile of the distribution of estimate sample sample sizes
     val ntrials: Int,
     val simNewMvrsNeeded: Int,
     val simMvrsNeeded: Int = 0,

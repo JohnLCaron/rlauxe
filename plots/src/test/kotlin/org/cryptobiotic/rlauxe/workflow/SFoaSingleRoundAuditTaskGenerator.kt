@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.AssertionRound
-import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
@@ -20,7 +20,7 @@ class SFoaSingleRoundAuditTaskGenerator(
     val auditDir: String,
     val mvrsFuzzPct: Double = 0.0,
     val parameters : Map<String, Any>,
-    val auditConfigIn: AuditConfig? = null,
+    val auditConfigIn: Config? = null,
 ): WorkflowResultListTaskGenerator {
 
     override fun name() = "SFoaSingleRoundAuditTaskGenerator"
@@ -68,7 +68,7 @@ class SfoaSingleRoundAuditTask(
                 val runner = OneAuditAssertionAuditor(rlauxAudit.mvrManager().pools() as List<CardPoolIF>)
 
                 val result: TestH0Result = runner.run(
-                    rlauxAudit.auditConfig(),
+                    rlauxAudit.config(),
                     contestRound,
                     assertionRound,
                     sampler,

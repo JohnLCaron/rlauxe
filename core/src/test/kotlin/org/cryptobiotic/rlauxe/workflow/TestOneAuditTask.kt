@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,7 +13,7 @@ class TestOneAuditTask {
         val Nc = 50000
         val margin = .04
         val mvrFuzzPct = .003
-        val config = AuditConfig(
+        val config = Config.from(
             AuditType.ONEAUDIT, nsimEst = 10, simFuzzPct = mvrFuzzPct,
         )
         val taskGen = OneAuditContestAuditTaskGenerator(
@@ -34,7 +34,7 @@ class TestOneAuditTask {
         val Nc = 50000
         val margin = .04
         val mvrFuzzPct = 0.0
-        val config = AuditConfig(
+        val config = Config.from(
             AuditType.ONEAUDIT, simFuzzPct = mvrFuzzPct,
         )
         val taskGen = OneAuditSingleRoundWithDilutedMargin(
@@ -60,7 +60,7 @@ class TestOneAuditTask {
         val Nc = 50000
         val margin = .04
         val mvrFuzzPct = 0.005
-        val config = AuditConfig(
+        val config = Config.from(
             AuditType.ONEAUDIT, simFuzzPct = mvrFuzzPct,
         )
         val taskGen = OneAuditSingleRoundWithDilutedMargin(
@@ -90,7 +90,7 @@ class TestOneAuditTask {
         val phantomPct = 0.00
         val cvrPercent = 0.80
 
-        val auditConfigIn = AuditConfig(AuditType.ONEAUDIT)
+        val auditConfigIn = Config.from(AuditType.ONEAUDIT)
         val taskGen = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
             Nc,
             margin,

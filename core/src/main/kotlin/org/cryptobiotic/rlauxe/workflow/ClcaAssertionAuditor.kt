@@ -17,7 +17,7 @@ private val logger = KotlinLogging.logger("ClcaAudit")
 // run all contests and assertions for one round with the given auditor.
 // return isComplete
 fun runClcaAuditRound(
-    config: AuditConfig,
+    config: Config,
     auditRound: AuditRound,
     mvrManager: MvrManager,
     roundIdx: Int,
@@ -62,7 +62,7 @@ fun runClcaAuditRound(
 }
 
 class RunClcaContestTask(
-    val config: AuditConfig,
+    val config: Config,
     val contestRound: ContestRound,
     val cvrPairs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
     val auditor: ClcaAssertionAuditorIF,
@@ -110,7 +110,7 @@ class RunClcaContestTask(
 // abstraction so ClcaAudit can be used for OneAudit
 fun interface ClcaAssertionAuditorIF {
     fun run(
-        config: AuditConfig,
+        config: Config,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
         samplerTracker: ClcaSamplerErrorTracker,
@@ -121,7 +121,7 @@ fun interface ClcaAssertionAuditorIF {
 class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
 
     override fun run(
-        config: AuditConfig,
+        config: Config,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
         samplerTracker: ClcaSamplerErrorTracker,
@@ -131,7 +131,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         val contest = contestUA.contest
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
-        val clcaConfig = config.clcaConfig
+        val clcaConfig = config.round.clcaConfig!!
 
         val noerror=cassorter.noerror()
         val upper=cassorter.assorter.upperBound()
@@ -159,7 +159,7 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         )
         testFn.setDebuggingSequences()
 
-        val terminateOnNullReject = !config.isRiskMeasuringAudit()
+        val terminateOnNullReject = !config.creation.isRiskMeasuringAudit()
         val testH0Result = testFn.testH0(samplerTracker.maxSamples(), terminateOnNullReject = terminateOnNullReject) { samplerTracker.sample() }
         if (!testH0Result.status.success && showFail) {
             println("TestH0Result est ${assertionRound.estMvrs} max= ${samplerTracker.maxSamples()} used=${testH0Result.sampleCount} plast = ${testH0Result.pvalueLast}")

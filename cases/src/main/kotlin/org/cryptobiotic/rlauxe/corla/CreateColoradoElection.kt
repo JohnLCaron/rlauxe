@@ -350,29 +350,8 @@ fun createColoradoElection(
 
     createElectionRecord(election, auditDir = auditdir, clear = false)
     val config = Config(election.electionInfo(), creation, round)
-    val auditConfig = config.toAuditConfig()
 
-    /* val config = when {
-        (auditConfigIn != null) -> auditConfigIn
-        auditType.isClca() -> AuditConfig(
-            AuditType.CLCA,
-            contestSampleCutoff = 10000,
-            auditSampleCutoff = 20000,
-            riskLimit = .03,
-            nsimEst=10,
-            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
-        )
-        auditType.isPolling() -> AuditConfig(
-            AuditType.POLLING, riskLimit = .03, nsimEst = 20, quantile = 0.5,
-            contestSampleCutoff = 20000,
-            auditSampleCutoff = 100000,
-            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs,
-            pollingConfig = PollingConfig(mode = pollingMode!!)
-        )
-        else -> throw RuntimeException("Unsupported audit type ${auditType.name}")
-    } */
-
-    createAuditRecord(auditConfig, election, auditDir = auditdir, externalSortDir = topdir)
+    createAuditRecord(config, election, auditDir = auditdir, externalSortDir = topdir)
 
     if (startFirstRound) {
         val result = startFirstRound(auditdir)

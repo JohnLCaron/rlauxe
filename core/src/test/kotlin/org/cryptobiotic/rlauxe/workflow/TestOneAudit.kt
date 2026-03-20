@@ -17,9 +17,9 @@ class TestOneAudit {
         )
         println(contestOA)
 
-        val config = AuditConfig(AuditType.ONEAUDIT, nsimEst=10)
+        val config = Config.from(AuditType.ONEAUDIT, nsimEst=10)
         val workflow = WorkflowTesterOneAudit(config, listOf(contestOA),
-            MvrManagerForTesting(mvrs, mvrs, config.seed, pools=pools))
+            MvrManagerForTesting(mvrs, mvrs, config.creation.seed, pools=pools))
 
         runTestAuditToCompletion("testOneAuditContestSmall", workflow)
     }
@@ -35,8 +35,8 @@ class TestOneAudit {
         )
         println(contestOA)
 
-        val config = AuditConfig(AuditType.ONEAUDIT, nsimEst=10)
-        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(mvrs, mvrs, config.seed, pools=pools))
+        val config = Config.from(AuditType.ONEAUDIT, nsimEst=10)
+        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(mvrs, mvrs, config.creation.seed, pools=pools))
 
         runTestAuditToCompletion("testOneAuditContest", workflow)
     }
@@ -52,8 +52,8 @@ class TestOneAudit {
         )
         println(contestOA)
 
-        val config = AuditConfig(AuditType.ONEAUDIT, nsimEst=10)
-        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.seed, pools=pools))
+        val config = Config.from(AuditType.ONEAUDIT, nsimEst=10)
+        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.creation.seed, pools=pools))
 
         runTestAuditToCompletion("testOneAuditContest", workflow)
     }
@@ -69,9 +69,9 @@ class TestOneAudit {
         )
         println(contestOA)
 
-        val config = AuditConfig(AuditType.ONEAUDIT, nsimEst=10)
+        val config = Config.from(AuditType.ONEAUDIT, nsimEst=10)
 
-        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.seed, pools=pools))
+        val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.creation.seed, pools=pools))
         runTestAuditToCompletion("testOneAuditContestSmall", workflow)
     }
 

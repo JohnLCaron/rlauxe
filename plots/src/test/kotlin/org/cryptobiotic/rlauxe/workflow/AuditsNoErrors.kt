@@ -34,7 +34,6 @@ class AuditsNoErrors {
 
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, 0.0,
-                clcaConfigIn= ClcaConfig(ClcaStrategyType.generalAdaptive, 0.0),
                 parameters=mapOf("nruns" to nruns, "cat" to "clca")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
@@ -42,7 +41,7 @@ class AuditsNoErrors {
             cvrPercents.forEach { cvrPercent ->
                 val oneauditGenerator = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                     N, margin, 0.0, 0.0, cvrPercent, 0.0,
-                    auditConfigIn = AuditConfig(AuditType.ONEAUDIT),
+                    auditConfigIn = Config.from(AuditType.ONEAUDIT),
                     parameters=mapOf("nruns" to nruns, "cat" to "oneaudit-${(100 * cvrPercent).toInt()}%"),
                 )
                 tasks.add(RepeatedWorkflowRunner(nruns, oneauditGenerator))
@@ -114,9 +113,11 @@ class AuditsNoErrors {
 
         maxLoss.forEach { maxLoss ->
             margins.forEach { margin ->
+                val config = Config.from(AuditType.CLCA).replace(ClcaConfig(maxLoss=maxLoss))
+
                 val noerror = ClcaSingleRoundAuditTaskGenerator(
                     N, margin, 0.0, 0.0, 0.0,
-                    clcaConfigIn= ClcaConfig(maxLoss=maxLoss),
+                    config=config,
                     parameters = mapOf("nruns" to nruns, "cat" to maxLoss)
                 )
                 tasks.add(RepeatedWorkflowRunner(nruns, noerror))

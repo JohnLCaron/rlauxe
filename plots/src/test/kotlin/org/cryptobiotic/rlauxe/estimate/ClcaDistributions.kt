@@ -27,11 +27,11 @@ class ClcaDistributions {
 
     @Test
     fun plotClcaDistributions() {
-        val auditConfig = AuditConfig(AuditType.CLCA,
-            nsimEst = nsimEst, simFuzzPct = simFuzzPct, quantile = 0.5,
+        val auditConfig = Config.from(AuditType.CLCA,
+            nsimEst = nsimEst, simFuzzPct = simFuzzPct,
             persistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated,
-            simulationStrategy = SimulationStrategy.regular,
-            clcaConfig = ClcaConfig(fuzzMvrs=mvrsFuzzPct),
+            // TODO needed ?? simulationStrategy = SimulationStrategy.regular,
+            fuzzMvrs=mvrsFuzzPct,
         )
 
         // TODO use deciles
@@ -70,7 +70,7 @@ class ClcaDistributions {
     }
 
     // calculate 100 estimateSampleSizes, return List<EstimationResult>, single contest, no phantoms
-    fun doOneEstSample(Nc: Int, margin: Double, mvrsFuzzPct: Double, config: AuditConfig): List<RunRepeatedResult> {
+    fun doOneEstSample(Nc: Int, margin: Double, mvrsFuzzPct: Double, config: Config): List<RunRepeatedResult> {
         val undervotePct = 0.0
         val phantomPct = 0.0
 
@@ -94,7 +94,7 @@ class ClcaDistributions {
     }
 
     // calculate 100 simulated audits, return "samplesNeeded", single contest, fuzzed, no phantoms
-    fun doOneHundredAudits(Nc: Int, margin: Double, mvrsFuzzPct: Double, auditConfig: AuditConfig): List<Int> {
+    fun doOneHundredAudits(Nc: Int, margin: Double, mvrsFuzzPct: Double, auditConfig: Config): List<Int> {
         val undervotePct = 0.0
         val phantomPct = 0.0
 

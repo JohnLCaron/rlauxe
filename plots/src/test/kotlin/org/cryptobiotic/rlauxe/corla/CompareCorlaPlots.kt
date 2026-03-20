@@ -1,8 +1,8 @@
 package org.cryptobiotic.rlauxe.corla
 
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
@@ -27,7 +27,7 @@ class CompareCorlaPlots {
     fun corlaComparePlots() {
         val margins =
             listOf(.003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .10)
-        val config = AuditConfig(AuditType.CLCA, nsimEst = nsimEst)
+        val config = Config.from(AuditType.CLCA, nsimEst = nsimEst)
 
         val stopwatch = Stopwatch()
 

@@ -16,7 +16,7 @@ private val logger = KotlinLogging.logger("OneAuditAssertionAuditor")
 class OneAuditAssertionAuditor(val pools: List<CardPoolIF>, val quiet: Boolean = true) : ClcaAssertionAuditorIF {
 
     override fun run(
-        config: AuditConfig,
+        config: Config,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
         samplerTracker: ClcaSamplerErrorTracker,
@@ -25,7 +25,7 @@ class OneAuditAssertionAuditor(val pools: List<CardPoolIF>, val quiet: Boolean =
         val contestUA = contestRound.contestUA
         val cassertion = assertionRound.assertion as ClcaAssertion
         val oaCassorter = cassertion.cassorter as OneAuditClcaAssorter
-        val clcaConfig = config.clcaConfig
+        val clcaConfig = config.round.clcaConfig!!
 
         val noerror=oaCassorter.noerror()
         val upper=oaCassorter.assorter.upperBound()
@@ -50,7 +50,7 @@ class OneAuditAssertionAuditor(val pools: List<CardPoolIF>, val quiet: Boolean =
         )
         testFn.setDebuggingSequences()
 
-        val terminateOnNullReject = !config.isRiskMeasuringAudit()
+        val terminateOnNullReject = !config.creation.isRiskMeasuringAudit()
         val testH0Result = testFn.testH0(samplerTracker.maxSamples(), terminateOnNullReject = terminateOnNullReject) { samplerTracker.sample() }
 
         assertionRound.auditResult = AuditRoundResult(

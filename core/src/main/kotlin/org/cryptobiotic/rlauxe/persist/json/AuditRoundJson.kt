@@ -249,7 +249,7 @@ fun EstimationRoundResult.publishJson() = EstimationRoundResultJson(
     this.startingErrorRates,
     this.estimatedDistribution,
     this.lastIndex,
-    this.quantile,
+    this.percentile,
     this.ntrials,
     this.simNewMvrsNeeded,
     this.simMvrsNeeded,

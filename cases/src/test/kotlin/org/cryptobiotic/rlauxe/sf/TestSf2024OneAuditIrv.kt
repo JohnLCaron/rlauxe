@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.sf
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 import org.cryptobiotic.rlauxe.core.*
@@ -30,7 +30,7 @@ import kotlin.test.Test
 import kotlin.use
 
 class TestSf2024OneAuditIrv() {
-    val config: AuditConfig
+    val config: Config
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
     val cardManifest: CardManifest

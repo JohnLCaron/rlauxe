@@ -4,6 +4,8 @@ import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.Config
+import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.runRepeatedAlphaMart
@@ -36,7 +38,8 @@ class TestAlphaMart {
         val assorter = contestUA.minPollingAssertion()!!.assorter
 
         val cvrs = test.makeCvrsFromContests()
-        val config = AuditConfig(AuditType.POLLING, nsimEst=10)
+        val configOld = AuditConfig(AuditType.POLLING, nsimEst=10)
+        val config = Config.from(ElectionInfo("testRunAlphaMart", AuditType.POLLING, totalCardCount = cvrs.size, contestCount=1), nsimEst = 10)
         val samplerTracker = PollingSamplerTracker(contestUA.contest.id, assorter, cvrs.zip(cvrs))
 
         val eta0 = assorter.dilutedMean()

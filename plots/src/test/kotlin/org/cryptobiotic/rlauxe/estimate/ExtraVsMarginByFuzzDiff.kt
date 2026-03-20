@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -31,17 +32,19 @@ class ExtraVsMarginByFuzzDiff {
         val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
         fuzzDiffs.forEach { fuzzDiff ->
             val simFuzzPct = fuzzMvrs+fuzzDiff
-            val auditConfig = AuditConfig(
+            val auditConfigOld = AuditConfig(
                 AuditType.CLCA, nsimEst = nsimEst, simFuzzPct = simFuzzPct,
                 persistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated,
                 clcaConfig = ClcaConfig(fuzzMvrs=fuzzMvrs, strategy=ClcaStrategyType.generalAdaptive)
             )
+            val config =  Config.from( AuditType.CLCA, nsimEst = nsimEst, fuzzMvrs = simFuzzPct, contestSampleCutoff = 10000,
+                persistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated, )
 
             margins.forEach { margin ->
                 val clcaGenerator1 = ClcaContestAuditTaskGenerator("'extraVsMargin simFuzzPct=$simFuzzPct, margin=$margin'",
                     Nc, margin, 0.1, 0.0, fuzzMvrs,
                     parameters=mapOf("nruns" to ntrials.toDouble(), "simFuzzPct" to simFuzzPct, "fuzzMvrs" to fuzzMvrs),
-                    config=auditConfig)
+                    config=config)
                 tasks.add(RepeatedWorkflowRunner(ntrials, clcaGenerator1))
             }
 

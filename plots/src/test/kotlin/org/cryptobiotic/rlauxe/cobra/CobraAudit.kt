@@ -18,7 +18,7 @@ class CobraSingleRoundAuditTaskGenerator(
     val p2oracle: Double,
     val p2prior: Double,
     val parameters: Map<String, Any>,
-    val auditConfig: AuditConfig,
+    val auditConfig: Config,
     val quiet: Boolean = true,
 ) : ContestAuditTaskGenerator {
     override fun name() = "CobraSingleRoundAuditTaskGenerator"
@@ -60,7 +60,7 @@ class CobraSingleRoundAuditTaskGenerator(
 }
 
 class CobraAudit(
-    val auditConfig: AuditConfig,
+    val auditConfig: Config,
     contestsToAudit: List<Contest>, // the contests you want to audit
     val mvrManagerForTesting: MvrManagerForTesting, // mutable
     val p2prior: Double,
@@ -82,7 +82,7 @@ class CobraAudit(
         return complete
     }
 
-    override fun auditConfig() = this.auditConfig
+    override fun config() = this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestWithAssertions> = contestsUA
     override fun mvrManager() = mvrManagerForTesting
@@ -96,7 +96,7 @@ class AuditCobraAssertion(
 ) : ClcaAssertionAuditorIF {
 
     override fun run(
-        config: AuditConfig,
+        config: Config,
         contestRound: ContestRound,
         assertionRound: AssertionRound,
         samplerTracker: ClcaSamplerErrorTracker,
@@ -105,6 +105,7 @@ class AuditCobraAssertion(
         val contestUA = contestRound.contestUA
         val cassertion = assertionRound.assertion as ClcaAssertion
         val cassorter = cassertion.cassorter
+        val clcaConfig = config.round.clcaConfig!!
 
         val totalSamples = contestUA.Npop
         val p2count = roundToClosest(p2prior * totalSamples) // TODO Note losing precision on the rate; make alternate constructor
@@ -114,9 +115,9 @@ class AuditCobraAssertion(
             Npop = contestUA.Npop,
             aprioriErrorRates = aprioriCounts.clcaErrorRates(),
             nphantoms = contestUA.Nphantoms,
-            maxLoss = config.clcaConfig.maxLoss,
+            maxLoss = clcaConfig.maxLoss,
             oaAssortRates = null,
-            d = config.clcaConfig.d,
+            d = clcaConfig.d,
         )
 
         val testFn = BettingMart(

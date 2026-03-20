@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.fuzz
 
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -25,7 +25,7 @@ class PlotClcaFuzz {
         val margins = listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
 
         // do all margins and sample sizes
-        val config = AuditConfig(AuditType.CLCA, nsimEst = 100)
+        val config = Config.from(AuditType.CLCA, nsimEst = 100)
 
         val stopwatch = Stopwatch()
         val tasks = mutableListOf<RepeatedWorkflowRunner>()

@@ -29,7 +29,7 @@ class OaPhantomAttack {
             val oneauditGeneratorReportedMean = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=phantomPct, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "reportedMean", "fuzzPct" to fuzzPct),
-                auditConfigIn = AuditConfig(
+                auditConfigIn = Config.from(
                     AuditType.ONEAUDIT, nsimEst = nsimEst,
                 ),
             )
@@ -38,7 +38,7 @@ class OaPhantomAttack {
             val oneauditGeneratorBet99 = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=phantomPct, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "simulate", "fuzzPct" to fuzzPct),
-                auditConfigIn = AuditConfig(
+                auditConfigIn = Config.from(
                     AuditType.ONEAUDIT, nsimEst = nsimEst,
                 ),
             )
@@ -47,7 +47,7 @@ class OaPhantomAttack {
             val oneauditGeneratorEta0Eps = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=phantomPct, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "calcMvrsNeeded", "fuzzPct" to fuzzPct),
-                auditConfigIn = AuditConfig(
+                auditConfigIn = Config.from(
                     AuditType.ONEAUDIT, nsimEst = nsimEst,
                 ),
             )

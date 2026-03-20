@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditType
@@ -17,7 +17,7 @@ import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
 
 // TODO add the Nbs
 class WorkflowTesterClca(
-    val auditConfig: AuditConfig,
+    val config: Config,
     contestsToAudit: List<ContestIF>, // the contests you want to audit
     raireContests: List<RaireContestWithAssertions>,
     val mvrManager: MvrManager,
@@ -27,7 +27,7 @@ class WorkflowTesterClca(
     private val auditRounds = mutableListOf<AuditRoundIF>()
 
     init {
-        require (auditConfig.auditType == AuditType.CLCA)
+        require (config.auditType == AuditType.CLCA)
 
         val regularContests = contestsToAudit.map {
             val cua = ContestWithAssertions(it, true, NpopIn=Npops[it.id])
@@ -42,7 +42,7 @@ class WorkflowTesterClca(
     }
 
     override fun runAuditRound(auditRound: AuditRound, onlyTask: OnlyTask?, quiet: Boolean): Boolean  {
-        val complete = runClcaAuditRound(auditConfig, auditRound, mvrManager, auditRound.roundIdx,
+        val complete = runClcaAuditRound(config, auditRound, mvrManager, auditRound.roundIdx,
             auditor = ClcaAssertionAuditor(quiet)
         )
         auditRound.auditWasDone = true
@@ -50,7 +50,7 @@ class WorkflowTesterClca(
         return complete
     }
 
-    override fun auditConfig() =  this.auditConfig
+    override fun config() =  this.config
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestWithAssertions> = contestsUA
     override fun mvrManager() = mvrManager

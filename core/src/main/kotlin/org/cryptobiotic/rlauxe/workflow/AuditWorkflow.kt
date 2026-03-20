@@ -12,7 +12,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
 
 // abstract superclass of workflows
  abstract class AuditWorkflow {
-    abstract fun auditConfig() : AuditConfig
+    abstract fun config() : Config
     abstract fun mvrManager() : MvrManager
     abstract fun auditRounds(): MutableList<AuditRoundIF>
     abstract fun contestsUA(): List<ContestWithAssertions>
@@ -23,7 +23,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         val previousRound = if (auditRounds.isEmpty()) null else auditRounds.last() as AuditRound
         val roundIdx = auditRounds.size + 1
 
-        val auditConfig = auditConfig()
+        val config = config()
         val auditRound = if (previousRound == null) {
             // first time, create the round
             val contestRounds = contestsUA()
@@ -46,7 +46,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
 
         // for each contest, estimate how many samples are needed to satisfy the risk function,
         estimateSampleSizes(
-            auditConfig,
+            config,
             auditRound,
             sortedManifest = sortedManifest,
             cardPools = mvrManager().pools(),
@@ -63,7 +63,7 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
         //    auditRound.samplePrns = sampledCards.map { it.prn }
         //    contestRound.maxSampleAllowed = sampledCards.size
         sampleAndRemoveContests(
-            auditConfig,
+            config,
             sortedManifest,
             auditRound,
             previousSamples = previousSamples,

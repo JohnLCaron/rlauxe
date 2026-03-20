@@ -10,7 +10,6 @@ import kotlin.test.assertEquals
 
 class TestCvrSimulation {
 
-    // fun simulateCvrsWithDilutedMargin(contestUA: ContestWithAssertions, config: AuditConfig): List<Cvr> {
     @Test
     fun testSimulateCvrsWithDilutedMargin() {
         val Nc = 50000

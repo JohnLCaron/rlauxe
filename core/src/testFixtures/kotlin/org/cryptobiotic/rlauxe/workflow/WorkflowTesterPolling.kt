@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditType
@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.OnlyTask
 
 class WorkflowTesterPolling(
-    val auditConfig: AuditConfig,
+    val auditConfig: Config,
     contestsToAudit: List<ContestIF>, // the contests you want to audit
     val mvrManager: MvrManager,
 ): AuditWorkflow() {
@@ -27,7 +27,7 @@ class WorkflowTesterPolling(
         return complete
     }
 
-    override fun auditConfig() =  this.auditConfig
+    override fun config() =  this.auditConfig
     override fun auditRounds() = auditRounds
     override fun contestsUA(): List<ContestWithAssertions> = contestsUA
     override fun mvrManager() = mvrManager

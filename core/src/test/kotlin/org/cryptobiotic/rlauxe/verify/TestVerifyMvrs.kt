@@ -24,7 +24,8 @@ class TestVerifyMvrs {
 
         val errs = ErrorMessages("testMatch")
         verifyMvrCardPairs(cards.zip(cards), errs)
-        println("$errs")
+        if (errs.hasErrors())
+         println("testMatch hasErrors")
         assertFalse(errs.hasErrors())
     }
 
@@ -41,7 +42,6 @@ class TestVerifyMvrs {
         val rcards = cards.reversed()
         val errs = ErrorMessages("testDontMatch")
         verifyMvrCardPairs(cards.zip(rcards), errs)
-        println("$errs")
         assertTrue(errs.hasErrors())
     }
 

@@ -15,16 +15,14 @@ class ClcaContestAuditTaskGenerator(
     val phantomPct: Double,
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
-    val config: AuditConfig? = null,
-    val clcaConfigIn: ClcaConfig? = null,
+    val config: Config? = null,
     val Npop: Int = Nc,
     val nsimEst: Int = 100,
 ): ContestAuditTaskGenerator {
     override fun name() = name
 
     override fun generateNewTask(): SingleContestAuditTask {
-        val useConfig = config ?:
-        AuditConfig(AuditType.CLCA, nsimEst = nsimEst, clcaConfig = clcaConfigIn ?: ClcaConfig())
+        val useConfig = config ?: Config.from( AuditType.CLCA, nsimEst = nsimEst, fuzzMvrs=mvrsFuzzPct)
 
         var (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         var testMvrs = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
@@ -38,7 +36,7 @@ class ClcaContestAuditTaskGenerator(
         }
 
         val clcaWorkflow = WorkflowTesterClca(useConfig, listOf(cu.contest), emptyList(),
-            MvrManagerForTesting(testCvrs, testMvrs, seed=useConfig.seed))
+            MvrManagerForTesting(testCvrs, testMvrs, seed=useConfig.creation.seed))
 
         return SingleContestAuditTask(
             name(),
@@ -54,10 +52,9 @@ class ClcaSingleRoundAuditTaskGenerator(
     val margin: Double,
     val underVotePct: Double,
     val phantomPct: Double,
-    val mvrsFuzzPct: Double,
+    val mvrsFuzzPct: Double?,
     val parameters : Map<String, Any>,
-    val config: AuditConfig? = null,
-    val clcaConfigIn: ClcaConfig? = null,
+    val config: Config? = null,
     val quiet: Boolean = true,
     val p2flips: Double? = null,  // used in attack
     val p1flips: Double? = null,
@@ -69,8 +66,7 @@ class ClcaSingleRoundAuditTaskGenerator(
     }
 
     override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
-        val useConfig = config ?:
-        AuditConfig(AuditType.CLCA, clcaConfig = clcaConfigIn ?: ClcaConfig())
+        val useConfig = config ?: Config.from(AuditType.CLCA)
 
         val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
         val testMvrs =  if (p2flips != null || p1flips != null) {
@@ -168,7 +164,7 @@ fun runClcaSingleRoundAudit(
 ): Int {
     val oneRound = AuditRound(1, contestRounds, samplePrns = emptyList())
 
-    runClcaAuditRound(workflow.auditConfig(), oneRound, workflow.mvrManager(), 1,
+    runClcaAuditRound(workflow.config(), oneRound, workflow.mvrManager(), 1,
         auditor = auditor, parameters=parameters)
 
     var maxSamples = 0

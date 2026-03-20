@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.corla
 
-import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.testdataDir
@@ -40,7 +39,7 @@ class MakeColoradoElection {
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, PersistedWorkflowMode.testClcaSimulated)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 10, estPercentSuccess = listOf(0.42, 0.55, .67)),
+            SimulationControl(nsimEst = 10, estPercentile = listOf(42, 55, 67)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000),
             ClcaConfig(), null)
 
@@ -58,7 +57,7 @@ class MakeColoradoElection {
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 10, estPercentSuccess = listOf(0.50, 0.80)),
+            SimulationControl(nsimEst = 10, estPercentile = listOf(50, 80)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
@@ -76,7 +75,7 @@ class MakeColoradoElection {
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 10, estPercentSuccess = listOf(0.50, 0.80)),
+            SimulationControl(nsimEst = 10, estPercentile = listOf(50, 80)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
@@ -94,7 +93,7 @@ class MakeColoradoElection {
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 10, estPercentSuccess = listOf(0.50, 0.80)),
+            SimulationControl(nsimEst = 10, estPercentile = listOf(50, 80)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 

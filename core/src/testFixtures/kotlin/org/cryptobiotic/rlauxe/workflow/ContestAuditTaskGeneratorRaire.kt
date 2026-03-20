@@ -11,15 +11,14 @@ class RaireContestAuditTaskGenerator(
     val phantomPct: Double,
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
-    val auditConfig: AuditConfig? = null,
-    val clcaConfigIn: ClcaConfig? = null,
+    val config: Config? = null,
     val nsimEst: Int = 100,
     ): ContestAuditTaskGenerator {
 
     override fun name() = "RaireWorkflowTaskGenerator"
 
     override fun generateNewTask(): SingleContestAuditTask {
-        val useConfig = auditConfig ?: AuditConfig(AuditType.CLCA, nsimEst = nsimEst, clcaConfig = clcaConfigIn ?: ClcaConfig())
+        val useConfig = config ?: Config.from( AuditType.CLCA, nsimEst = nsimEst, fuzzMvrs = mvrsFuzzPct)
 
         val (rcontest, testCvrs) = simulateRaireTestContest(
             N = Nc,
@@ -34,7 +33,7 @@ class RaireContestAuditTaskGenerator(
 
         val clca = WorkflowTesterClca(
             useConfig, emptyList(), listOf(rcontest),
-            MvrManagerForTesting(cvrs=testCvrs, mvrs=testMvrs, useConfig.seed),
+            MvrManagerForTesting(cvrs=testCvrs, mvrs=testMvrs, useConfig.creation.seed),
         )
         return SingleContestAuditTask(
             name(),
@@ -53,15 +52,14 @@ class RaireSingleRoundAuditTaskGenerator(
     val phantomPct: Double,
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
-    val auditConfig: AuditConfig? = null,
-    val clcaConfigIn: ClcaConfig? = null,
+    val auditConfig: Config? = null,
     val nsimEst: Int = 100,
 ): ContestAuditTaskGenerator {
 
     override fun name() = "ClcaSingleRoundAuditTaskGenerator"
 
     override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
-        val useConfig = auditConfig ?: AuditConfig(AuditType.CLCA, nsimEst = nsimEst, clcaConfig = clcaConfigIn ?: ClcaConfig())
+        val useConfig = auditConfig ?: Config.from(AuditType.CLCA, nsimEst = nsimEst)
 
         val (rcontest, testCvrs) = simulateRaireTestContest(
             N = Nc,

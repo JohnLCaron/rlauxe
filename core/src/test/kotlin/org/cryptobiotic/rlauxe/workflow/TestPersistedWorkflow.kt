@@ -18,7 +18,7 @@ class TestPersistedWorkflow {
         val topdir = "$testdataDir/persist/persistWorkflow/singleClca"
         val auditdir = "$topdir/audit"
 
-        val config = AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01,
+        val configOld = AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01,
             persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs
         )
 
@@ -34,6 +34,10 @@ class TestPersistedWorkflow {
 
         val election = CreateElectionFromCvrs("testPersistedSingleClca", contestsUA, testMvrs, AuditType.CLCA)
         createElectionRecord(election, auditDir = auditdir)
+
+        val config = Config.from(election.electionInfo(), nsimEst = 10, contestSampleCutoff = 1000, simFuzzPct = .01,
+            persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs)
+
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
         startFirstRound(auditdir)
 
@@ -46,7 +50,7 @@ class TestPersistedWorkflow {
         val topdir = "$testdataDir/persist/persistWorkflow/clca"
         val auditdir = "$topdir/audit"
 
-        val config = AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01,
+        val configOld = AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01,
             persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs
         )
         val N = 50000
@@ -61,6 +65,9 @@ class TestPersistedWorkflow {
 
         val election = CreateElectionFromCvrs("testPersistedAuditClca", contestsUA, testMvrs, AuditType.CLCA)
         createElectionRecord(election, auditDir = auditdir)
+
+        val config = Config.from(election.electionInfo(), nsimEst = 10, contestSampleCutoff = 1000, simFuzzPct = .01,
+            persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs)
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
         startFirstRound(auditdir)
 
@@ -81,7 +88,7 @@ class TestPersistedWorkflow {
         val topdir = "$testdataDir/persist/persistWorkflow/oneaudit"
         val auditdir = "$topdir/audit"
 
-        val config = AuditConfig(
+        val configOld = AuditConfig(
             AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = .01,
             persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs
         )
@@ -100,6 +107,10 @@ class TestPersistedWorkflow {
 
         val election = CreateElectionFromCvrs("testPersistedOneAudit", contestsUA, mvrs, AuditType.ONEAUDIT, cardPools = cardPools)
         createElectionRecord(election, auditDir = auditdir)
+
+        val config = Config.from(election.electionInfo(), nsimEst = 10, contestSampleCutoff = 20000, simFuzzPct = .01,
+            persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs)
+
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
         startFirstRound(auditdir)
 

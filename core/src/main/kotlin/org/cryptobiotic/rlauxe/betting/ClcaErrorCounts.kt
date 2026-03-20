@@ -1,8 +1,5 @@
 package org.cryptobiotic.rlauxe.betting
 
-import org.cryptobiotic.rlauxe.util.Welford
-import org.cryptobiotic.rlauxe.util.doubleIsClose
-import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.collections.component1
 import kotlin.collections.component2
 

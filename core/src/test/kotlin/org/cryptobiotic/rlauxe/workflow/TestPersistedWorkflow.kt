@@ -18,10 +18,6 @@ class TestPersistedWorkflow {
         val topdir = "$testdataDir/persist/persistWorkflow/singleClca"
         val auditdir = "$topdir/audit"
 
-        val configOld = AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01,
-            persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs
-        )
-
         val N = 50000
         val testData = MultiContestTestData(1, 1, N, marginRange=0.03..0.03, ncands=2)
 
@@ -50,9 +46,6 @@ class TestPersistedWorkflow {
         val topdir = "$testdataDir/persist/persistWorkflow/clca"
         val auditdir = "$topdir/audit"
 
-        val configOld = AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01,
-            persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs
-        )
         val N = 50000
         val testData = MultiContestTestData(11, 4, N, marginRange=0.03..0.05)
 
@@ -87,11 +80,6 @@ class TestPersistedWorkflow {
         // val topdir = kotlin.io.path.createTempDirectory().toString()
         val topdir = "$testdataDir/persist/persistWorkflow/oneaudit"
         val auditdir = "$topdir/audit"
-
-        val configOld = AuditConfig(
-            AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10, simFuzzPct = .01,
-            persistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs
-        )
 
         val N = 5000
         // Synthetic cvrs for testing reflecting the exact contest votes, already has undervotes and phantoms.

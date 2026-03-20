@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.attack
 
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.audit.AuditConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CreateElectionIF
@@ -246,10 +245,6 @@ class CardManifestAttack {
         val election = CreateElectionForAttack(listOf(contestUA), cards, mvrs, cardPools, null)
 
         val auditdir = "$topdir/audit"
-        val configOld = AuditConfig(
-            AuditType.ONEAUDIT, contestSampleCutoff = 20000, nsimEst = 10,
-        )
-
         val config = Config.from(election.electionInfo(), nsimEst = 10, contestSampleCutoff = 20000)
 
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)

@@ -7,7 +7,6 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 
 private val logger = KotlinLogging.logger("BelgiumClca")
 

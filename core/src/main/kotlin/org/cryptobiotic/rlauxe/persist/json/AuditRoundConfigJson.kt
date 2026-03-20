@@ -11,7 +11,9 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.util.ErrorMessages
+import org.cryptobiotic.rlauxe.util.enumValueOf
 
 import java.io.FileOutputStream
 import java.nio.file.Files
@@ -124,6 +126,51 @@ fun ContestSampleControlJson.import() =  ContestSampleControl(
         this.auditSampleCutoff,
         this.removeCutoffContests,
     )
+
+
+@Serializable
+data class PollingConfigJson(
+    val d: Int,
+    val mode: PollingMode?,
+)
+
+fun PollingConfig.publishJson() = PollingConfigJson(this.d, this.mode)
+fun PollingConfigJson.import() = PollingConfig(this.d, this.mode ?: PollingMode.withPools)
+
+// enum class ClcaStrategyType { generalAdaptive, generalAdaptive2}
+//data class ClcaConfig(
+//    val strategy: ClcaStrategyType = ClcaStrategyType.generalAdaptive2,
+//    val fuzzMvrs: Double? = null, // used by PersistedMvrManagerTest to fuzz mvrs when persistedWorkflowMode=testSimulate
+//    val d: Int = 100,  // shrinkTrunc weight for error rates
+//    val maxLoss: Double = 0.90,  // max loss on any one bet, 0 < maxLoss < 1
+//    val cvrsContainUndervotes: Boolean = true,
+//    val apriori: TausRates = TausRates(emptyMap()),
+//)
+@Serializable
+data class ClcaConfigJson(
+    val strategy: String,
+    val fuzzPct: Double?,
+    val d: Int,
+    val maxLoss: Double?,
+    val apriori:  Map<String, Double>?,
+)
+
+fun ClcaConfig.publishJson() = ClcaConfigJson(
+    this.strategy.name,
+    this.fuzzMvrs,
+    this.d,
+    this.maxLoss,
+    this.apriori.rates,
+)
+
+fun ClcaConfigJson.import() = ClcaConfig(
+    enumValueOf(this.strategy, ClcaStrategyType.entries) ?: ClcaStrategyType.generalAdaptive,
+    this.fuzzPct,
+    this.d,
+    this.maxLoss ?: 0.90,
+    apriori=TausRates(this.apriori ?: emptyMap()),
+)
+
 
 /////////////////////////////////////////////////////////////////////////////////
 

@@ -36,30 +36,14 @@ data class Config(
         }
     }
 
-    fun toAuditConfig() = AuditConfig(
-        auditType = election.auditType,
-        riskLimit = creation.riskLimit,
-        seed = creation.seed,
-        nsimEst = simulation.nsimEst,
-        quantile = if (simulation.estPercentile.size > 1) .01 * simulation.estPercentile[1] else .50,
-        simFuzzPct = simulation.simFuzzPct,
-        contestSampleCutoff = sampling.contestSampleCutoff,
-        auditSampleCutoff = sampling.auditSampleCutoff,
-        removeCutoffContests = sampling.removeCutoffContests,
-        maxSamplePct = sampling.maxSamplePct,
-        removeMaxContests = sampling.removeMaxContests(),
-        minRecountMargin = sampling.minRecountMargin,
-        minMargin = sampling.minMargin,
-        auditSampleLimit = creation.riskMeasuringSampleLimit,
-        pollingConfig = round.pollingConfig ?: PollingConfig(),
-        clcaConfig = round.clcaConfig ?: ClcaConfig(),
-        persistedWorkflowMode = creation.persistedWorkflowMode,
-        quantile1 = if (simulation.estPercentile.size > 0) .01 * simulation.estPercentile[0] else .50,
-    )
-
-    fun replace(clcaConfig: ClcaConfig): Config {
+    fun replaceClcaConfig(clcaConfig: ClcaConfig): Config {
         return Config(this.election, this.creation, this.round.copy(clcaConfig = clcaConfig), this.version)
     }
+
+    fun replaceSeed(seed: Long): Config {
+        return Config(this.election, this.creation.copy(seed = seed), this.round, this.version)
+    }
+
 
     override fun toString() = buildString {
         appendLine("Config(")
@@ -67,14 +51,11 @@ data class Config(
         appendLine("  creation=$creation, ")
         appendLine("  simulation=$simulation, ")
         appendLine("  sampling=$sampling)")
+        if (round.clcaConfig != null) appendLine("  clcaConfig=${round.clcaConfig} )")
+        if (round.pollingConfig != null) appendLine("  pollingConfig=${round.pollingConfig} )")
     }
 
     companion object {
-        fun fromAuditConfig( electionInfo: ElectionInfo, config: AuditConfig): Config {
-            val creation = AuditCreationConfig.fromAuditConfig(  config)
-            val round = AuditRoundConfig.fromAuditConfig(  config)
-            return Config(electionInfo, creation, round)
-        }
 
         fun from( auditType: AuditType,
                   riskLimit:Double= .05,
@@ -106,15 +87,6 @@ data class Config(
                 riskLimit, nsimEst, simFuzzPct, fuzzMvrs, contestSampleCutoff, apriori, persistedWorkflowMode)
         }
 
-        // AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01,
-        //            persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs
-        //        )
-        // AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst=10, contestSampleCutoff = 1000, simFuzzPct = .01,
-        //            persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs
-        //        )
-        //             AuditConfig(AuditType.CLCA, seed = 12356667890L, nsimEst = 100,
-        //                clcaConfig = ClcaConfig(apriori = TausRates(mapOf("win-oth" to .001))),
-        //            )
         fun forClca( electionInfo: ElectionInfo,
                      riskLimit:Double= .05,
                      nsimEst:Int= 10,
@@ -132,8 +104,7 @@ data class Config(
             )
             return Config(electionInfo, creation, round)
         }
-        //             AuditConfig(AuditType.POLLING, seed = 12356667890L, nsimEst = 100, // skipContests=skipContests,
-        //                pollingConfig = PollingConfig())
+
         fun forPolling( electionInfo: ElectionInfo,
                         riskLimit:Double= .05,
                         nsimEst:Int=10,
@@ -205,12 +176,6 @@ data class AuditCreationConfig(
     }
 
     fun isRiskMeasuringAudit() = riskMeasuringSampleLimit != null
-
-    companion object {
-        fun fromAuditConfig(config: AuditConfig): AuditCreationConfig {
-            return AuditCreationConfig(config.auditType, config.riskLimit, config.persistedWorkflowMode, config.seed, config.auditSampleLimit)
-        }
-    }
 }
 
 //// can configure each round seperately; commit when each round has been audited
@@ -230,21 +195,6 @@ data class AuditRoundConfig(
             ContestSampleControl(contestSampleCutoff=20000, auditSampleCutoff=100_000), null, PollingConfig())
 
         fun standard(auditType: AuditType) = if (auditType.isPolling()) POLLING else CLCA
-
-        fun fromAuditConfig(config: AuditConfig): AuditRoundConfig {
-            val simulation =
-                SimulationControl(config.nsimEst, listOf((100 * config.quantile1).toInt(), (100*config.quantile).toInt()), config.simFuzzPct)
-
-            val other = mutableMapOf<String, String>()
-            if (config.removeMaxContests != null) other["removeMaxContests"] = config.removeMaxContests.toString()
-            val sampling = ContestSampleControl(
-                config.minRecountMargin, config.minMargin, config.maxSamplePct, config.contestSampleCutoff, config.auditSampleCutoff,
-                removeCutoffContests=config.removeCutoffContests,
-                other=other,
-            )
-
-            return AuditRoundConfig(simulation, sampling, config.clcaConfig, config.pollingConfig)
-        }
     }
 }
 

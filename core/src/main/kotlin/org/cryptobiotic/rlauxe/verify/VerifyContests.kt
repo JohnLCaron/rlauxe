@@ -55,12 +55,12 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
 
     fun verify(contests: List<ContestWithAssertions>, show: Boolean): VerifyResults {
         val results = VerifyResults()
-        results.addMessage("---RunVerifyContests on $auditRecordLocation ")
+        results.addMessage("---RunVerifyContests on $auditRecordLocation")
         if (contests.size == 1) results.addMessage("  ${contests.first()} ")
 
         // all
         val infos = allInfos ?: contests.associate { it.id to it.contest.info() }
-        checkContestsCorrectlyFormed(config, contests, results)
+        checkContestsCorrectlyFormed(config.round.sampling, contests, results)
         val contestSummary = verifyManifest(config, contests, cardManifest.cards, infos, results)
 
         // OA

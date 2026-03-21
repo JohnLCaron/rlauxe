@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.utils
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -116,3 +117,44 @@ fun checkHasContest(cvrs: List<Cvr>, cards: CloseableIterator<AuditableCard>, in
         }
     }
 }
+
+
+// we have the mvrs as cvrs and transform them to AuditableCards for private storage
+// needed for out-of-memory handling (eg Corla)
+class MvrsToCardsAddStyles(
+    val cvrs: CloseableIterator<Cvr>,
+    phantomCvrs : List<Cvr>?,
+    batches: List<BatchIF>,
+): CloseableIterator<AuditableCard> {
+
+    val batchMap = batches.associateBy{ it.id() }
+    val allCvrs: Iterator<Cvr>
+    var cardIndex = 0 // 0 based index
+
+    init {
+        allCvrs = if (phantomCvrs == null) {
+            cvrs
+        } else {
+            val cardSeq = cvrs.iterator().asSequence()
+            val phantomSeq = phantomCvrs.asSequence()
+            (cardSeq + phantomSeq).iterator()
+        }
+    }
+
+    override fun hasNext() = allCvrs.hasNext()
+
+    override fun next(): AuditableCard {
+        val org = allCvrs.next()
+        val batch = batchMap[org.poolId]  // hijack poolId
+
+        return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
+            votes = org.votes,
+            poolId = org.poolId,
+            batchName = batch?.name() ?: "unknown",
+            batch = batch
+        )
+    }
+
+    override fun close() = cvrs.close()
+}
+

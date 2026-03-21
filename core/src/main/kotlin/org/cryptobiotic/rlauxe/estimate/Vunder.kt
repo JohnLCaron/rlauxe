@@ -202,7 +202,7 @@ class VunderPicker(val vunder: Vunder) {
     }
 }
 
-// used for creating Cvrs for pools with hasSingleCardStyle=false
+/* used for creating Cvrs for pools with hasSingleCardStyle=false
 fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): List<Cvr> {
     val vunderPickers = vunders.mapValues { VunderPicker(it.value) }
 
@@ -231,7 +231,7 @@ fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): L
 
     rcvrs.shuffle()
     return rcvrs
-}
+} */
 
 // set Vunder.missing to 0 for hasSingleCardStyle=true
 fun makeCvrsForPool(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, hasSingleCardStyle: Boolean): List<Cvr> {

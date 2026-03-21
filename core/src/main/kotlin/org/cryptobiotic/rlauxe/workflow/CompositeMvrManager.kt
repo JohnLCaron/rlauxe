@@ -30,7 +30,8 @@ open class CompositeMvrManager(
 
     val publisher = Publisher(auditRecord.componentRecords.first().location)
 
-    override fun sortedManifest() = readCardManifestComposite(publisher)
+    // override fun sortedManifest() = readCardManifestComposite(publisher)
+    override fun sortedManifest() = auditRecord.readSortedManifest()
 
     override fun batches(): List<BatchIF>? {
         return readBatchesComposite(publisher)
@@ -40,6 +41,7 @@ open class CompositeMvrManager(
         return readPoolsComposite(publisher)
     }
 
+    // wtf ??
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>> {
         val mvrsForRound = readMvrsForRound(round)
         val sampleNumbers = mvrsForRound.map { it.prn }

@@ -8,27 +8,27 @@ class TestOneShot {
 
     @Test
     fun testOneShot() {
-        val auditdir = "/home/stormy/rla/cases/corla/clca/audit"
+        val auditdir = "/home/stormy/rla/cases/boulder24/clca/audit"
         val record = AuditRecord.readFrom(auditdir)
         if (record == null) throw RuntimeException("record is null")
         require (record is AuditRecord)
 
         val writeOneshot = Publisher(auditdir).privateOneshotFile()
         val oneshot = OneShotAudit(auditdir)
-        oneshot.run(listOf(), writeOneshot)
+        oneshot.run(listOf(), writeOneshot, show=true)
 
         val oneshotNmvrs = record.readOneShotMvrs()
         println(oneshotNmvrs)
     }
 
-    @Test
-    fun testEstimateAudit() {
+    // @Test dont use for unit tests
+    fun testEstimatePollingAudit() {
         val auditdir = "/home/stormy/rla/cases/corla/polling/audit"
         val record = AuditRecord.readFrom(auditdir)
         if (record == null) throw RuntimeException("record is null")
         require (record is AuditRecord)
 
-        val roundIdx = 1
+        val roundIdx = 4
         val auditRound = record.rounds[roundIdx-1]
         val estaudit = EstimateAudit(
             record.config,

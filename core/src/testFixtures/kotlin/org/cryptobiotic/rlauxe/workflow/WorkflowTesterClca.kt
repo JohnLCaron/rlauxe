@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
-import org.cryptobiotic.rlauxe.estimate.OnlyTask
+import org.cryptobiotic.rlauxe.estimateOld.OnlyTask
 import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
 
 // TODO add the Nbs

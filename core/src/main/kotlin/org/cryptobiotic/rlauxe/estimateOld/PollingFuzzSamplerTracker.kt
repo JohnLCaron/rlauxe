@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.estimate
+package org.cryptobiotic.rlauxe.estimateOld
 
 import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.core.AssorterIF
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.ContestVoteBuilder
+import org.cryptobiotic.rlauxe.estimate.chooseNewCandidate
 import org.cryptobiotic.rlauxe.util.CvrBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilders
 import org.cryptobiotic.rlauxe.util.CvrContest

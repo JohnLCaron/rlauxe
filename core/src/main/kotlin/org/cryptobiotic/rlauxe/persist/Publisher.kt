@@ -13,7 +13,7 @@ private val logger = KotlinLogging.logger("Publisher")
     $auditdir/
         // election record - output of CreateElectionRecord
         auditCreationConfig.json  // AuditCreationConfigJson
-        auditRoundConfig.json // AuditRoundConfigJson
+        auditRoundPrototype.json // AuditRoundConfigJson
         batches.json          // BatchesJson: PopulationIF -> Population
         cardManifest.csv      // AuditableCardCsv, may be zipped
         cardPools.csv         // CardPoolCsv:    CardPoolIF -> CardPool

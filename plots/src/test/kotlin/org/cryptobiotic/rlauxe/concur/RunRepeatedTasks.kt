@@ -18,8 +18,8 @@ import kotlinx.coroutines.yield
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.RiskMeasuringFn
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
-import org.cryptobiotic.rlauxe.estimate.RunRepeatedResult
-import org.cryptobiotic.rlauxe.estimate.runRepeated
+import org.cryptobiotic.rlauxe.estimateOld.RunRepeatedResult
+import org.cryptobiotic.rlauxe.estimateOld.runRepeated
 import org.cryptobiotic.rlauxe.rlaplots.SRT
 import org.cryptobiotic.rlauxe.rlaplots.makeSRT
 import org.cryptobiotic.rlauxe.util.Stopwatch

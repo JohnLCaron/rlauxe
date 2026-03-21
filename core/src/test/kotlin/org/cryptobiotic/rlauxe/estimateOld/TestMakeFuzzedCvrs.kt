@@ -1,8 +1,11 @@
-package org.cryptobiotic.rlauxe.estimate
+package org.cryptobiotic.rlauxe.estimateOld
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.ClcaSampler
 import org.junit.jupiter.api.Test

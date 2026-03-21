@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.estimate
+package org.cryptobiotic.rlauxe.estimateOld
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
@@ -9,6 +9,8 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PluralityAssorter
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.estimate.makeCvr
+import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactCount
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.makeContestFromCvrs
 import org.junit.jupiter.api.Assertions.assertTrue

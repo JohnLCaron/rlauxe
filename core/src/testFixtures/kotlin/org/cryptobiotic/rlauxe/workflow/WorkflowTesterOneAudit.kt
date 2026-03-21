@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.estimate.OnlyTask
+import org.cryptobiotic.rlauxe.estimateOld.OnlyTask
 
 class WorkflowTesterOneAudit(
     val config: Config,

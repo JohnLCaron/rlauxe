@@ -2,13 +2,9 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.df
-import org.cryptobiotic.rlauxe.util.frac
-import org.cryptobiotic.rlauxe.util.makeDeciles
-import org.cryptobiotic.rlauxe.util.probability
-import org.cryptobiotic.rlauxe.util.quantile
+import org.cryptobiotic.rlauxe.estimateOld.probability
+import org.cryptobiotic.rlauxe.estimateOld.quantile
 import kotlin.math.min
-import kotlin.math.round
-import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

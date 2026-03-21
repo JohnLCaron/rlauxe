@@ -8,9 +8,9 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.estimate.EstimateAudit
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.estimate.MultiContestCombineData
-import org.cryptobiotic.rlauxe.estimate.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sampleAndRemoveContests
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
@@ -428,15 +428,8 @@ private fun runTestPersistedAudit(config: Config, topdir: String, wantAudit: Lis
     val contestRounds = wantAudit.map { ContestRound(it, 1) }
     val auditRound = AuditRound(1, contestRounds = contestRounds, samplePrns = emptyList())
 
-    estimateSampleSizes(
-        config,
-        auditRound,
-        sortedManifest = mvrManager.sortedManifest(),
-        cardPools = mvrManager.pools(),
-        previousSamples = emptySet(),
-        populations = mvrManager.batches(),
-        // nthreads=1,
-    )
+    val optimistic = EstimateAudit(config,  auditRound.roundIdx, auditRound.contestRounds, mvrManager.pools(), mvrManager.batches(), mvrManager.sortedManifest())
+    optimistic.run()
 
     sampleAndRemoveContests(
         config,

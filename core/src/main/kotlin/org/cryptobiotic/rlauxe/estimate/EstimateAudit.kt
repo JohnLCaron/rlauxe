@@ -40,12 +40,12 @@ class EstimateAudit(
     val cardManifest: CardManifest,
 ) {
 
-    fun run(contestOnly: Int? = null): List<RunRepeatedResult> {
+    fun run(nthreads: Int? = null, contestOnly: Int? = null): Map<Int, List<Int>> {
         val contestsToAudit = if (contestOnly == null) contests.filter { !it.done && it.included } else
             listOf( contests.find { it.id == contestOnly}!! )
 
         if (contestsToAudit.isEmpty())
-            return emptyList()
+            return emptyMap()
 
         val stopwatch = Stopwatch()
         val tasks = mutableListOf<AuditTrialTask>()
@@ -57,7 +57,7 @@ class EstimateAudit(
         repeat(ntrials) { run ->
             tasks.add(AuditTrialTask(roundIdx, run+1, config, contestsToAudit, pools, batches, cardManifest))
         }
-        val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunnerG<List<AssertionTrialIF>>().run(tasks) // , nthreads=1)
+        val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunnerG<List<AssertionTrialIF>>().run(tasks, nthreads)
 
         val trackerResults = mutableMapOf<Int, MutableList<AssertionTrialIF>>() // contestId -> list(trial)
         contestsToAudit.forEach { trackerResults[it.id] = mutableListOf() }
@@ -127,7 +127,8 @@ class EstimateAudit(
         }
         logger.info { "EstimateAudit ntrials=${ntrials} ncontests=${contestsToAudit.size} took $stopwatch" }
 
-        return emptyList() // bogus
+        // return contestId -> List<nmvrs>
+        return trackerResults.mapValues { it.value.map{ it.nmvrs() } }
     }
 }
 
@@ -402,6 +403,7 @@ interface AssertionTrialIF {
     fun addCard(mvr: AuditableCard?, card: AuditableCard, cardSortedIndex: Int)
 }
 
+/*
 fun findQuantileTrial(data: List<AssertionTrialIF>, quantile: Double): AssertionTrialIF {
     require(data.isNotEmpty())
 
@@ -424,7 +426,7 @@ fun findQuantileTrial(data: List<AssertionTrialIF>, quantile: Double): Assertion
     // rounding down. TODO interpolate; see Deciles ??
     val p = min((quantile * data.size).toInt(), data.size-1)
     return sortedData[p]
-}
+} */
 
 fun findClosestTrial(data: List<AssertionTrialIF>, nmvrs: Int): AssertionTrialIF {
     require(data.isNotEmpty())

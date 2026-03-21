@@ -1,5 +1,8 @@
 package org.cryptobiotic.rlauxe.util
 
+import org.cryptobiotic.rlauxe.estimateOld.makeDeciles
+import org.cryptobiotic.rlauxe.estimateOld.probability
+import org.cryptobiotic.rlauxe.estimateOld.quantile
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals

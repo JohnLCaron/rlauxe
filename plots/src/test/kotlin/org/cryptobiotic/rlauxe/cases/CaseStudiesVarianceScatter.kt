@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
 import org.cryptobiotic.rlauxe.rlaplots.genericScatter
-import org.cryptobiotic.rlauxe.util.makeDeciles
+import org.cryptobiotic.rlauxe.estimateOld.makeDeciles
 import org.cryptobiotic.rlauxe.util.nfn
 import org.jetbrains.kotlinx.kandy.letsplot.settings.Symbol
 import org.jetbrains.kotlinx.kandy.util.color.Color

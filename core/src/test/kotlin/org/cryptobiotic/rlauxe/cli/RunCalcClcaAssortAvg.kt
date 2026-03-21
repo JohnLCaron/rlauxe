@@ -55,7 +55,7 @@ object RunCalcAssortAvg {
                 println(auditRecordResult.unwrapError())
                 return
             }
-            require (auditRecord is AuditRecord)
+            require(auditRecord is AuditRecord)
             val config = auditRecord.config
             println("auditRecord in $auditDir isOA=${config.isOA}")
 
@@ -90,7 +90,14 @@ object RunCalcAssortAvg {
                     onlyContest.clcaAssertions.map { Expectation(onlyContest, it.cassorter) }
                 }
             } else {
-                auditRecord.contests.map { contest -> contest.clcaAssertions.map { Expectation(contest, it.cassorter) } }.flatten()
+                auditRecord.contests.map { contest ->
+                    contest.clcaAssertions.map {
+                        Expectation(
+                            contest,
+                            it.cassorter
+                        )
+                    }
+                }.flatten()
             }
 
             val cardManifest = auditRecord.readSortedManifest()
@@ -106,76 +113,96 @@ object RunCalcAssortAvg {
             println(t.message)
         }
     }
-}
 
-val tol = doublePrecision
 
-fun runCards(expectations: List<Expectation>, cardManifest: CardManifest, mvrIter: Iterator<AuditableCard>?, usePrivate: Boolean) {
-    var count = 0
-    cardManifest.cards.iterator().use { cardIter ->
-        while (cardIter.hasNext()) {
-            val card = cardIter.next()
-            val mvr = if (usePrivate) mvrIter!!.next() else card
-            if (usePrivate) {
-                require(mvr.prn == card.prn)
-            }
-            expectations.forEach { expect ->
-                if (card.hasContest(expect.id)) {
-                    val bassort = expect.cassorter.bassort(mvr, card, hasStyle = card.hasStyle())
-                    expect.bwelford.update(bassort)
+    val tol = doublePrecision
 
-                    val mvrAssort = expect.assorter.assort(mvr, usePhantoms = false)
-                    expect.mvrWelford.update(mvrAssort)
+    fun runCards(
+        expectations: List<Expectation>,
+        cardManifest: CardManifest,
+        mvrIter: Iterator<AuditableCard>?,
+        usePrivate: Boolean
+    ) {
+        var count = 0
+        cardManifest.cards.iterator().use { cardIter ->
+            while (cardIter.hasNext()) {
+                val card = cardIter.next()
+                val mvr = if (usePrivate) mvrIter!!.next() else card
+                if (usePrivate) {
+                    require(mvr.prn == card.prn)
+                }
+                expectations.forEach { expect ->
+                    if (card.hasContest(expect.id)) {
+                        val bassort = expect.cassorter.bassort(mvr, card, hasStyle = card.hasStyle())
+                        expect.bwelford.update(bassort)
+
+                        val mvrAssort = expect.assorter.assort(mvr, usePhantoms = false)
+                        expect.mvrWelford.update(mvrAssort)
+                    }
+                }
+                count++
+                if (count % 10_000 == 0) {
+                    print(" $count,")
+                }
+                if (count % 100_000 == 0) {
+                    println()
                 }
             }
-            count++
-            if (count % 10_000 == 0) {
-                print(" $count,")
-            }
-            if (count % 100_000 == 0) {
-                println()
-            }
+        }
+        println()
+        expectations.forEach { expect ->
+            print("contest=${expect.id}, cassorter=${expect.cassorter.shortName()}, Npop ${expect.contest.Npop} count ${expect.bwelford.count}")
+
+            if (expect.bwelford.count != expect.contest.Npop) println(" *** FAIL ${(expect.bwelford.count - expect.contest.Npop)}")
+            else println()
+        }
+
+        var lastContest = -1
+        expectations.forEach { expect ->
+            if (expect.id != lastContest) println()
+            lastContest = expect.id
+            println(expect)
+
+            if (!doubleIsClose(expect.expectBassortMean(), expect.bwelford.mean, tol))
+                println("*** FAIL expectBassortMean ${expect.expectBassortMean()} != ${expect.bwelford.mean}")
+            if (!doubleIsClose(expect.mean, expect.mvrWelford.mean, tol))
+                println("*** FAIL expectMean ${expect.mean} != ${expect.mvrWelford.mean}")
+            //if (expect.bwelford.count != expect.contest.Npop)
+            //     println( "*** FAIL contest Npop ${expect.contest.Npop} != ${expect.bwelford.count} count" )
         }
     }
-    println()
-    expectations.forEach { expect ->
-        print( "contest=${expect.id}, cassorter=${expect.cassorter.shortName()}, Npop ${expect.contest.Npop} count ${expect.bwelford.count}" )
 
-        if (expect.bwelford.count != expect.contest.Npop) println( " *** FAIL ${(expect.bwelford.count - expect.contest.Npop)}" )
-        else println()
-    }
+    data class Expectation(val contest: ContestWithAssertions, val cassorter: ClcaAssorter) {
+        val assorter = cassorter.assorter
+        val mean = margin2mean(cassorter.assorterMargin)
+        val noerror = cassorter.noerror  // TODO can we predict bassortMean based on nphantoms and pool avgs ??
 
-    var lastContest = -1
-    expectations.forEach { expect ->
-        if (expect.id != lastContest) println()
-        lastContest = expect.id
-        println(expect)
+        val id = contest.id
+        val bwelford = Welford()
+        val mvrWelford = Welford()
 
-        if(!doubleIsClose(expect.expectBassortMean(), expect.bwelford.mean, tol))
-            println( "*** FAIL expectBassortMean ${expect.expectBassortMean()} != ${expect.bwelford.mean}" )
-        if (!doubleIsClose(expect.mean, expect.mvrWelford.mean, tol))
-            println( "*** FAIL expectMean ${expect.mean} != ${expect.mvrWelford.mean}" )
-       //if (expect.bwelford.count != expect.contest.Npop)
-       //     println( "*** FAIL contest Npop ${expect.contest.Npop} != ${expect.bwelford.count} count" )
-    }
-}
+        fun expectBassortMean(): Double =
+            // phantoms are tau = 1/2 * noerror
+            cassorter.noerror * (1.0 - contest.Nphantoms / (2.0 * contest.Npop))
 
-data class Expectation(val contest: ContestWithAssertions, val cassorter: ClcaAssorter) {
-    val assorter = cassorter.assorter
-    val mean = margin2mean(cassorter.assorterMargin)
-    val noerror = cassorter.noerror  // TODO can we predict bassortMean based on nphantoms and pool avgs ??
-
-    val id = contest.id
-    val bwelford = Welford()
-    val mvrWelford = Welford()
-
-    fun expectBassortMean(): Double =
-        // phantoms are tau = 1/2 * noerror
-        cassorter.noerror * (1.0 - contest.Nphantoms / (2.0 * contest.Npop))
-
-    override fun toString() = buildString {
-        append("contest=$id, cassorter=${cassorter.shortName()}, mean=${dfn(mean, 8)} == mvr assortMean=${dfn(mvrWelford.mean, 8)}; ")
-        append("expectBassortMean=${dfn(expectBassortMean(), 8)} == bassortMean=${dfn(bwelford.mean, 8)}; Npop=${contest.Npop}")
+        override fun toString() = buildString {
+            append(
+                "contest=$id, cassorter=${cassorter.shortName()}, mean=${dfn(mean, 8)} == mvr assortMean=${
+                    dfn(
+                        mvrWelford.mean,
+                        8
+                    )
+                }; "
+            )
+            append(
+                "expectBassortMean=${dfn(expectBassortMean(), 8)} == bassortMean=${
+                    dfn(
+                        bwelford.mean,
+                        8
+                    )
+                }; Npop=${contest.Npop}"
+            )
+        }
     }
 }
 

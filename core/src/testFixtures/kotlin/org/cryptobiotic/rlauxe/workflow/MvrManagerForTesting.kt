@@ -28,14 +28,14 @@ class MvrManagerForTesting(
 ) : MvrManager, MvrManagerTestIF {
 
     val sortedCards: List<AuditableCard>
-    val mvrsUA: List<AuditableCard> // the mvrs in the same order as the sorted cards
+    val sortedMvrs: List<AuditableCard> // the mvrs in the same order as the sorted cards
     private var mvrsRound: List<AuditableCard> = emptyList()
 
     init {
         // the order of the sortedCards cannot be changed once set.
         val prng = Prng(seed)
         sortedCards = cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }
-        mvrsUA = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
+        sortedMvrs = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
     }
 
     override fun sortedManifest() :CardManifest {
@@ -47,7 +47,7 @@ class MvrManagerForTesting(
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
         if (mvrsRound.isEmpty()) {
-            return mvrsUA.zip(sortedCards) // all of em, for SingleRoundAudit
+            return sortedMvrs.zip(sortedCards) // all of em, for SingleRoundAudit
         }
 
         val sampleNumbers = mvrsRound.map { it.prn }
@@ -66,7 +66,7 @@ class MvrManagerForTesting(
 
     // MvrManagerTestIF
     override fun setMvrsBySampleNumber(sampleNumbers: List<Long>, round: Int): List<AuditableCard> {
-        val sampledMvrs = findSamples(sampleNumbers, Closer(mvrsUA.iterator()))
+        val sampledMvrs = findSamples(sampleNumbers, Closer(sortedMvrs.iterator()))
         require(sampledMvrs.size == sampleNumbers.size)
 
         // debugging sanity check

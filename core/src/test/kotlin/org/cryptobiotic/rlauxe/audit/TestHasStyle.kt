@@ -432,11 +432,10 @@ private fun runTestPersistedAudit(config: Config, topdir: String, wantAudit: Lis
     optimistic.run()
 
     sampleAndRemoveContests(
-        config,
+        config.round.sampling,
         mvrManager.sortedManifest(),
         auditRound,
         emptySet(),
-        quiet = false
     )
 
     val nextRound = rlauxAudit.startNewRound(quiet = false)

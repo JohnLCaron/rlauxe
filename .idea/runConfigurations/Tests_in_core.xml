@@ -57,6 +57,16 @@
           <option name="ENABLED" value="true" />
           <option name="INCLUDE" value="false" />
         </pattern>
+        <pattern>
+          <option name="PATTERN" value="org.cryptobiotic.rlauxe.utils.*" />
+          <option name="ENABLED" value="true" />
+          <option name="INCLUDE" value="false" />
+        </pattern>
+        <pattern>
+          <option name="PATTERN" value="org.cryptobiotic.rlauxe.estimateOld.*" />
+          <option name="ENABLED" value="true" />
+          <option name="INCLUDE" value="false" />
+        </pattern>
       </extension>
     </EXTENSION>
     <DebugAllEnabled>false</DebugAllEnabled>

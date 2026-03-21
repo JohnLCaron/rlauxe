@@ -70,7 +70,7 @@ class TestGenerateAllUseCases {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, PersistedWorkflowMode.testClcaSimulated)
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
             SimulationControl(nsimEst = 10, estPercentile = listOf(42, 55, 67)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000),

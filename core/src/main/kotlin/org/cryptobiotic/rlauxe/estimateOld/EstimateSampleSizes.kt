@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
 import org.cryptobiotic.rlauxe.estimate.VunderPoolsFuzzer
+import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.roundUp
@@ -547,12 +548,3 @@ fun runRepeatedAlphaMart(
     return result
 }
 
-data class OnlyTask(val contestId: Int, val taskName: String) {
-    companion object {
-        fun parse(taskName: String?): OnlyTask? {
-            if (taskName == null) return null
-            val tokens = taskName.split("-")
-            return OnlyTask(tokens[0].toInt(), taskName)
-        }
-    }
-}

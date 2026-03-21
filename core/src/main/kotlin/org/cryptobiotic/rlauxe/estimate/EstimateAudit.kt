@@ -20,9 +20,7 @@ import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.Double
 import kotlin.Int
-import kotlin.collections.sortedBy
 import kotlin.math.abs
-import kotlin.math.min
 import kotlin.use
 
 private val logger = KotlinLogging.logger("EstimateAudit")
@@ -31,6 +29,15 @@ private val showWork = false
 // TODO  round > 1 we want to incorporate the measured errors from previous rounds
 //   cant use vunderPool to do so, that only uses fuzz
 //   just change the assortValue randomly p percent of the time? can do the same for clca.
+
+// side effects:
+//   contestRound.estMvrs = estMvrs
+//   contestRound.estNewMvrs = newMvrs
+//
+//   useAssertionRound.estMvrs = estMvrs
+//   useAssertionRound.estNewMvrs = newMvrs
+//   assertionRound.estimationResult = estimationResult
+
 class EstimateAudit(
     val config: Config,
     val roundIdx: Int,
@@ -39,6 +46,7 @@ class EstimateAudit(
     val batches: List<BatchIF>?,
     val cardManifest: CardManifest,
 ) {
+    val auditType = config.auditType
 
     fun run(nthreads: Int? = null, contestOnly: Int? = null): Map<Int, List<Int>> {
         val contestsToAudit = if (contestOnly == null) contests.filter { !it.done && it.included } else
@@ -53,7 +61,7 @@ class EstimateAudit(
         // TODO use more simulations when the margin is low or calcNewMvrs are high ??
 
         // each trial is running all the contests in the round (but only the minAssertion)
-        val ntrials = if (config.isClca) 1 else config.round.simulation.nsimEst
+        val ntrials = if (auditType.isClca()) 1 else config.round.simulation.nsimEst
         repeat(ntrials) { run ->
             tasks.add(AuditTrialTask(roundIdx, run+1, config, contestsToAudit, pools, batches, cardManifest))
         }
@@ -101,7 +109,7 @@ class EstimateAudit(
                 useAssertionRound.estMvrs = estMvrs
                 useAssertionRound.estNewMvrs = newMvrs
 
-                val calcNewMvrsNeeded = if (config.isPolling) 0 else useAssertionRound.calcNewMvrsNeeded(contestRound.contestUA, config)
+                val calcNewMvrsNeeded = if (auditType.isPolling()) 0 else useAssertionRound.calcNewMvrsNeeded(contestRound.contestUA, config)
 
                 val estimationResult = EstimationRoundResult(
                     roundIdx,
@@ -158,8 +166,8 @@ class AuditTrialTask(
             VunderBatches(batches, onePool) else null
 
         val contestTrials: List<AssertionTrialIF> = contestsToAudit.map {
-            if (config.isPolling) ContestPollingTrial(run, config, it.contestUA, it.minAssertion()!!)
-            else ContestClcaTrial(run, config, it.contestUA, it.minAssertion()!!)
+            if (config.isPolling) ContestPollingTrial(run, config.creation.riskLimit, config.round.pollingConfig!!, it.contestUA, it.minAssertion()!!)
+            else ContestClcaTrial(run, config.creation.riskLimit, config.round.clcaConfig!!, config.isOA, it.contestUA, it.minAssertion()!!)
         }
 
         var cardSortedIndex = 1 // 1 based
@@ -205,12 +213,13 @@ class AuditTrialTask(
 
 // 1 trial, 1 Clca contest
 class ContestClcaTrial(val run: Int,
-                       val config: Config,
+                       val riskLimit: Double,
+                       val clcaConfig: ClcaConfig,
+                       val isOA: Boolean,
                        val contest: ContestWithAssertions,
                        val assertionRound: AssertionRound,
 ): AssertionTrialIF {
-    val endingTestStatistic = 1 / config.creation.riskLimit
-    val clcaConfig = config.round.clcaConfig!!
+    val endingTestStatistic = 1 / riskLimit
 
     val cassertion = assertionRound.assertion as ClcaAssertion // minimum noerror
     val cassorter = cassertion.cassorter
@@ -224,7 +233,7 @@ class ContestClcaTrial(val run: Int,
 
     init {
         val aprioriErrorRates = clcaConfig.apriori.makeErrorRates(cassorter.noerror, passorter.upperBound())
-        val oaAssortRates = if (config.isOA) (cassorter as OneAuditClcaAssorter).oaAssortRates else null
+        val oaAssortRates = if (isOA) (cassorter as OneAuditClcaAssorter).oaAssortRates else null
 
         bettingFun = GeneralAdaptiveBetting(
             contest.Npop, // population size for this contest
@@ -298,11 +307,11 @@ class ContestClcaTrial(val run: Int,
 
 // 1 trial, 1 Polling contest
 class ContestPollingTrial(val run: Int,
-                          val config: Config,
+                          val riskLimit: Double,
+                          val pollingConfig: PollingConfig,
                           val contest: ContestWithAssertions,
                           val assertionRound: AssertionRound): AssertionTrialIF {
-    val endingTestStatistic = 1 / config.creation.riskLimit
-    val pollingConfig = config.round.pollingConfig!!
+    val endingTestStatistic = 1 / riskLimit
 
     val assertion = assertionRound.assertion
     val assorter = assertion.assorter

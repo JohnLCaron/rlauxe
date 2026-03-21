@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.estimate
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
-import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.collections.set
@@ -15,16 +14,15 @@ private val logger = KotlinLogging.logger("ConsistentSampling")
 // called from auditWorkflow.startNewRound
 // also called by rlauxe-viewer
 fun sampleAndRemoveContests(
-    config: Config,
+    sampling: ContestSampleControl,
     sortedManifest: CardManifest,
     auditRound: AuditRoundIF,
     previousSamples: Set<Long>,
-    quiet: Boolean
 ) {
     val stopwatch = Stopwatch()
 
     // remove first "removeMaxContests" - to generate plot comparisions
-    val removeMaxContests: Int? = config.round.sampling.removeMaxContests()
+    val removeMaxContests: Int? = sampling.removeMaxContests()
     if (auditRound.roundIdx == 1 && removeMaxContests != null && removeMaxContests > 0) {
         val sortedByMargin : List<ContestRound> = auditRound.contestRounds.sortedByDescending { it.estMvrs }
         repeat(removeMaxContests) { idx ->
@@ -43,7 +41,7 @@ fun sampleAndRemoveContests(
         lastCardsUsed = consistentSampling( auditRound, sortedManifest, previousSamples)
 
         // enforce sample limits
-        val removeContests = checkSampleLimits(config.round.sampling, auditRound, contestsNotDone)
+        val removeContests = checkSampleLimits(sampling, auditRound, contestsNotDone)
         if (removeContests.isEmpty()) break
         removeContests.forEach { contestsNotDone.remove(it) }
         // do it again
@@ -80,7 +78,7 @@ private fun checkSampleLimits(
     // limit contest samples to maxSamplePct
     if (sampleControl.maxSamplePct > 0.0) {
         contestsNotDone.forEach { contestRound ->
-            val pct = contestRound.estMvrs / contestRound.contestUA.Nc.toDouble() // TODO this is all Mvrs ? Use Npop ??
+            val pct = contestRound.estMvrs / contestRound.contestUA.Npop.toDouble() // TODO this is all Mvrs ? Use Npop ??
             if (pct > sampleControl.maxSamplePct) {
                 contestRound.status = TestH0Status.FailMaxSamplesAllowed
                 contestRound.included = false

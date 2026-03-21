@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.*
-import org.cryptobiotic.rlauxe.estimateOld.OnlyTask
+import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.estimateOld.simulateCvrsFromMargin
 import org.cryptobiotic.rlauxe.workflow.*
 

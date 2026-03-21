@@ -5,7 +5,7 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.estimateOld.OnlyTask
+import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -99,7 +99,7 @@ fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditR
         //// heres where we can remove contests as needed
         // this may change the auditStatus to misformed.
         val results = VerifyResults()
-        checkContestsCorrectlyFormed(auditRecord.config, auditRecord.contests, results)
+        checkContestsCorrectlyFormed(auditRecord.config.round.sampling, auditRecord.contests, results)
         if (results.hasErrors) {
             logger.warn{ results.toString() }
         } else {

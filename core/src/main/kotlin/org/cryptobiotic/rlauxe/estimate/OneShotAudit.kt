@@ -17,7 +17,6 @@ private val logger = KotlinLogging.logger("OneShotAudit")
 // AuditRecord must have privateMvrs
 class OneShotAudit(
     val auditdir: String,
-    val show: Boolean = false,
 ) {
     val record = AuditRecord.readFrom(auditdir) as AuditRecord
     val config = record.config
@@ -25,7 +24,7 @@ class OneShotAudit(
     val cardPools = record.readCardPools()
     val mvrs = readCardsCsvIterator(Publisher(auditdir).sortedMvrsFile())
 
-    fun run(skipContests: List<Int>, writeFile: String? = null) {
+    fun run(skipContests: List<Int>, writeFile: String? = null, show:Boolean = false) {
         println("OneShotAudit exclude $skipContests on $auditdir")
 
         val stopwatch = Stopwatch()
@@ -36,8 +35,8 @@ class OneShotAudit(
         contestsUAs.forEach { contestUA ->
             contestUA.assertions().forEach { assertion ->
                 val assertionRound = AssertionRound(assertion, 1, null)
-                val aa = if (config.isPolling) ContestPollingTrial(1, config, contestUA, assertionRound)
-                         else ContestClcaTrial(1, config, contestUA, assertionRound)
+                val aa = if (config.isPolling) ContestPollingTrial(1, config.creation.riskLimit, config.round.pollingConfig!!, contestUA, assertionRound)
+                    else ContestClcaTrial(1, config.creation.riskLimit, config.round.clcaConfig!!, config.isOA, contestUA, assertionRound)
                 assertionAudits.add( aa)
             }
         }

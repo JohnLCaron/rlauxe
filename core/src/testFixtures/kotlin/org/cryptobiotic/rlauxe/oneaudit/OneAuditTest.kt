@@ -246,5 +246,6 @@ fun calcOneAuditPoolsFromMvrs(
         val pool = poolsFromCvrs[it.poolId]
         if (pool != null) pool.accumulateVotes(it)
     }
+
     return poolsFromCvrs.values.toList()
 }

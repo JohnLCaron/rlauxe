@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
 import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
-import org.cryptobiotic.rlauxe.estimate.OnlyTask
+import org.cryptobiotic.rlauxe.estimateOld.OnlyTask
 
 private val logger = KotlinLogging.logger("ClcaAudit")
 

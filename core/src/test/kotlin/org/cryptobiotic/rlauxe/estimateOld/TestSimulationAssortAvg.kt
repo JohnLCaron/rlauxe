@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.estimate
+package org.cryptobiotic.rlauxe.estimateOld
 
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.double
@@ -10,6 +10,8 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.showVotes
+import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.calcAssorterMargin
 import org.cryptobiotic.rlauxe.propTestFastConfig
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doublePrecision
@@ -71,7 +73,13 @@ class TestSimulationAssortAvg {
                 Arb.Companion.int(min = 10000, max = 30000),
                 Arb.Companion.int(min = 0, max = 100)
             ) { reportedMargin, underVotePct, phantomPct, Nc, Np ->
-                val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, reportedMargin, undervotePct = underVotePct, phantomPct = phantomPct, Npop=Np)
+                val (cu, testCvrs) = simulateCvrsFromMargin(
+                    Nc = Nc,
+                    reportedMargin,
+                    undervotePct = underVotePct,
+                    phantomPct = phantomPct,
+                    Npop = Np
+                )
                 println(
                     "margin=${df(reportedMargin)} under=${df(underVotePct)} phantom=${df(phantomPct)} votes: [${
                         showVotes((cu.contest as Contest).votes)

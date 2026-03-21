@@ -9,7 +9,7 @@ class TestRunRoundAgainCli {
 
     @Test
     fun testRunRoundAgainOneAudit() {
-        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
+        val auditdir = "$testdataDir/persist/testRunCli/oneaudit/audit"
 
         RunRoundAgainCli.main(
             arrayOf(
@@ -35,14 +35,14 @@ class TestRunRoundAgainCli {
         )
     }
 
-    @Test // only for OA, CLCA
+    @Test
     fun testRunRoundAgainPolling() {
-        val auditDir = "$testdataDir/cases/corla/polling/audit"
+        val auditDir = "$testdataDir/persist/testRunCli/polling/audit"
 
         RunRoundAgainCli.main(
             arrayOf(
                 "-auditDir", auditDir,
-                "-contest", "120",
+                "-contest", "1",
                 "-round", "1",
                 "-assertion", "first",
             )

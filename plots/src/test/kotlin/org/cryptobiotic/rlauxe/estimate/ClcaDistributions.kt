@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.estimateOld.simulateCvrsFromMargin
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.margin2mean
@@ -34,18 +35,18 @@ class ClcaDistributions {
             fuzzMvrs=mvrsFuzzPct,
         )
 
-        // TODO use deciles
+        // TODO use Quantiles
 
         println("doOneHundred")
         val actuals = doOneHundredAudits(Nc, margin, mvrsFuzzPct, auditConfig).sorted()
         val tripleActuals =
-            actuals.mapIndexed { idx, y -> Triple((idx + 1).toDouble(), 100.0 * y.toDouble() / Nc, "actual") }
+            actuals.mapIndexed { idx, nmvr -> Triple((idx + 1).toDouble(), 100.0 * nmvr.toDouble() / Nc, "actual") }
 
         println("doOneEstSample")
-        val estResults: RunRepeatedResult = doOneEstSample(Nc, margin, mvrsFuzzPct, auditConfig).first() // first and only contest
-        val estSampleCounts = estResults.sampleCount.sorted()
+        val estResults: List<Int>  = doOneEstSample(Nc, margin, mvrsFuzzPct, auditConfig).toList().first().second // first and only contest
+        val estSampleCounts = estResults.sorted()
         val tripleEst =
-            estSampleCounts.mapIndexed { idx, y -> Triple((idx + 1).toDouble(), 100.0 * y.toDouble() / Nc, "estimate") }
+            estSampleCounts.mapIndexed { idx, nmvr -> Triple((idx + 1).toDouble(), 100.0 * nmvr.toDouble() / Nc, "estimate") }
 
         plotCumul(
             name,
@@ -70,7 +71,7 @@ class ClcaDistributions {
     }
 
     // calculate 100 estimateSampleSizes, return List<EstimationResult>, single contest, no phantoms
-    fun doOneEstSample(Nc: Int, margin: Double, mvrsFuzzPct: Double, config: Config): List<RunRepeatedResult> {
+    fun doOneEstSample(Nc: Int, margin: Double, mvrsFuzzPct: Double, config: Config): Map<Int, List<Int>> {
         val undervotePct = 0.0
         val phantomPct = 0.0
 
@@ -83,6 +84,10 @@ class ClcaDistributions {
         val auditRound = AuditRound(1, contestRounds = contestRounds, samplePrns = emptyList())
 
         // just want the sample estimation stuff
+        val optimistic = EstimateAudit(config,  auditRound.roundIdx, auditRound.contestRounds, mvrManager.pools(), mvrManager.batches(), mvrManager.sortedManifest())
+        return optimistic.run()
+
+        /* was
         return estimateSampleSizes(
             config,
             auditRound,
@@ -90,7 +95,7 @@ class ClcaDistributions {
             cardPools = null,
             populations = null,
             previousSamples = emptySet(),
-        )
+        ) */
     }
 
     // calculate 100 simulated audits, return "samplesNeeded", single contest, fuzzed, no phantoms
@@ -100,7 +105,12 @@ class ClcaDistributions {
 
         val results = mutableListOf<Int>()
         repeat(100) {
-            val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = undervotePct, phantomPct = phantomPct)
+            val (cu, testCvrs) = simulateCvrsFromMargin(
+                Nc = Nc,
+                margin,
+                undervotePct = undervotePct,
+                phantomPct = phantomPct
+            )
             val testMvrs = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
             val ballotCards = MvrManagerForTesting(testCvrs, testMvrs, auditConfig.seed)

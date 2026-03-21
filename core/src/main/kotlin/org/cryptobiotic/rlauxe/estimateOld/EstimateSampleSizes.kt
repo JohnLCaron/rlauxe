@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.estimate
+package org.cryptobiotic.rlauxe.estimateOld
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
@@ -6,36 +6,32 @@ import org.cryptobiotic.rlauxe.betting.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
+import org.cryptobiotic.rlauxe.estimate.VunderPoolsFuzzer
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.makeDeciles
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.workflow.CardManifest
 
-// TODO obsolete
 
 private val logger = KotlinLogging.logger("EstimateSampleSizes")
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //// Comparison, Polling, OneAudit.
 
-// 1. _Estimation_: for each contest, estimate how many samples are needed for this AuditRound
+// TODO obsolete. keeping around for reference for now.
 fun estimateSampleSizes(
     config: Config,
     auditRound: AuditRoundIF,
     sortedManifest: CardManifest,
     cardPools: List<CardPool>?,
-    populations: List<BatchIF>?,
+    batches: List<BatchIF>?, // why dont you need batches ?
     previousSamples: Set<Long>,
     showTasks: Boolean = false,
     nthreads: Int = 32,
     onlyTask: OnlyTask? = null,
 ): List<RunRepeatedResult> {
-    val simulation = config.round.simulation
-    if (simulation.simulationStrategy == SimulationStrategy.optimistic) {
-        val optimistic = EstimateAudit(config,  auditRound.roundIdx, auditRound.contestRounds, cardPools, populations, sortedManifest)
-        return optimistic.run()
-    }
 
     // choose a subset of the cards for the estimation for speed
     val cardSamples: CardSamples? = if (config.isPolling) null else
@@ -51,7 +47,7 @@ fun estimateSampleSizes(
     val vunderFuzz = if (!config.isOA) null else {
         val infos = auditRound.contestRounds.map { it.contestUA.contest.info() }.associateBy { it.id }
         // TODO need cardPools always?
-        VunderPoolsFuzzer(cardPools!!, infos, simulation.simFuzzPct ?: 0.0, cardSamples!!.cards)
+        VunderPoolsFuzzer(cardPools!!, infos, config.round.simulation.simFuzzPct ?: 0.0, cardSamples!!.cards)
     }
 
     // create the estimation tasks for each contest and assertion
@@ -107,7 +103,7 @@ fun makeEstimationTasks(
     // simulate the polling mvrs once for all the assertions for this contest
     val mvrsForPolling = if (config.isPolling) {
             estStrategy = "simulateCvrsWithDilutedMargin"
-            simulateCvrsForContest(contestRound.contestUA, config)
+        simulateCvrsForContest(contestRound.contestUA, config)
         } else null
 
     contestRound.assertionRounds.filter { !it.status.complete }.map { assertionRound ->
@@ -545,7 +541,7 @@ fun runRepeatedAlphaMart(
         testFn = testFn,
         testParameters = mapOf("ntrials" to config.simulation.nsimEst.toDouble(), "polling" to 1.0) + moreParameters,
         startingTestStatistic = startingTestStatistic,
-        samplerTracker=samplerTracker,
+        samplerTracker = samplerTracker,
         N = N,
     )
     return result

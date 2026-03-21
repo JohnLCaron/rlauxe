@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.*
+import org.cryptobiotic.rlauxe.estimateOld.simulateCvrsFromMargin
 import kotlin.math.max
 
 // Simulate single Contest, do regular audit
@@ -24,7 +25,12 @@ class ClcaContestAuditTaskGenerator(
     override fun generateNewTask(): SingleContestAuditTask {
         val useConfig = config ?: Config.from( AuditType.CLCA, nsimEst = nsimEst, fuzzMvrs=mvrsFuzzPct)
 
-        var (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
+        var (cu, testCvrs) = simulateCvrsFromMargin(
+            Nc = Nc,
+            margin,
+            undervotePct = underVotePct,
+            phantomPct = phantomPct
+        )
         var testMvrs = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
         // was if (!useConfig.hasStyle && Npop > Nc) {
@@ -68,7 +74,12 @@ class ClcaSingleRoundAuditTaskGenerator(
     override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
         val useConfig = config ?: Config.from(AuditType.CLCA)
 
-        val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
+        val (cu, testCvrs) = simulateCvrsFromMargin(
+            Nc = Nc,
+            margin,
+            undervotePct = underVotePct,
+            phantomPct = phantomPct
+        )
         val testMvrs =  if (p2flips != null || p1flips != null) {
             makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips)
         } else {

@@ -49,7 +49,7 @@ fun sampleAndRemoveContests(
         // do it again
     }
 
-    if (verifyMaxIndex) {
+    if (verifyMaxIndex) { // debugging, probably dont need this anymore
         val countSamples = mutableMapOf<Int, Int>()
         contestsNotDone.forEach { countSamples[it.id] = 0}
         lastCardsUsed.forEach { cardUsed ->
@@ -80,7 +80,7 @@ private fun checkSampleLimits(
     // limit contest samples to maxSamplePct
     if (sampleControl.maxSamplePct > 0.0) {
         contestsNotDone.forEach { contestRound ->
-            val pct = contestRound.estMvrs / contestRound.contestUA.Nc.toDouble() // TODO this is all Mvrs ?
+            val pct = contestRound.estMvrs / contestRound.contestUA.Nc.toDouble() // TODO this is all Mvrs ? Use Npop ??
             if (pct > sampleControl.maxSamplePct) {
                 contestRound.status = TestH0Status.FailMaxSamplesAllowed
                 contestRound.included = false
@@ -178,8 +178,8 @@ fun consistentSampling(
 
         if (include) {
             sampledCards.add(card)
-            // TODO this doesnt work, doesnt take into account maxSampleIndex, true ??
-            //   Well, if you assume that all contests were audited, then this reflects ballots already done.
+            //   If you assume that previousSamples had all contests audited, then previousSamples reflects ballots already audited,
+            //   (even if not used for this contest), so you dont need to sample them again, so theyre not new.
             if (!previousSamples.contains(card.prn))
                 newMvrs++
         }
@@ -227,7 +227,7 @@ private fun wantSampleSizeSimple(contestsNotDone: List<ContestRound>): Map<Int, 
      return contestsNotDone.associate { it.id to it.estMvrs }
 }
 
-
+/*
 //// TODO  this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set
 // for each contest, return map contestId -> wantSampleSize. used in ConsistentSampling
 private fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedCards : CloseableIterator<AuditableCard>, debug: Boolean = false): Map<Int, Int> {
@@ -260,7 +260,7 @@ private fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples:
     if (debug) logger.debug{"wantSampleSize = $wantSampleSizeMap"}
 
     return wantSampleSizeMap
-}
+} */
 
 
 

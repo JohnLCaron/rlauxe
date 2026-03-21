@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger("ConcurrentTaskRunnerG")
 
+// generic task running; maybe should be in util ?
+
 interface ConcurrentTaskG<T> {
     fun name() : String
     fun run() : T
@@ -32,13 +34,14 @@ class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Bo
     private val results = mutableListOf<T>()
 
     // run all the tasks concurrently
-    fun run(tasks: List<ConcurrentTaskG<T>>, nthreads: Int = 30): List<T> {
+    fun run(tasks: List<ConcurrentTaskG<T>>, nthreads: Int? = null): List<T> {
         val stopwatch = Stopwatch()
+        val useThreads = nthreads ?: 30
         logger.debug{"ConcurrentTaskRunnerG run ${tasks.size} concurrent tasks with $nthreads threads"}
         runBlocking {
             val taskProducer = produceTasks(tasks)
             val calcJobs = mutableListOf<Job>()
-            repeat(nthreads) {
+            repeat(useThreads) {
                 calcJobs.add(launchCalculations(taskProducer) { task -> runTask(task) })
             }
             // wait for all tasks to be done

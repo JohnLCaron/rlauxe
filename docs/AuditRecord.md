@@ -1,5 +1,5 @@
 # The AuditRecord
-_last changed 03/16/2026_
+_last changed 03/20/2026_
 
 An _Audit Record_ may have the following files in it:
 
@@ -9,11 +9,11 @@ An _Audit Record_ may have the following files in it:
         cardManifest.csv      // AuditableCardCsv, may be zipped
         cardPools.csv         // CardPoolCsv:    CardPoolIF -> CardPool (optional)
         contests.json         // ContestsUnderAuditJson
-        electionInfo.json     // ElectionInfoJson (new way)
+        electionInfo.json     // ElectionInfoJson 
 
         // auditRecord - output of createAuditRecord, after the seed has been chosen
-        auditConfig.json      // AuditConfigJson (old way)
-        auditCreationConfig.json  // AuditCreationConfigJson (new way)
+        auditCreationConfig.json  // AuditCreationConfigJson 
+        auditRoundPrototype.json  // auditRoundConfigJson ; prototype for auditRoundConfigX
         auditSeed.json        // TODO ?
         sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
 
@@ -35,7 +35,7 @@ An _Audit Record_ may have the following files in it:
 
 The election information is contained in the following files. The EA can modify these until satisfied that they
 are correct. Before the seed is chosen in step 2, they are digitally signed and published publically (aka _committed to the Audit Record_), 
-and may not be changed.
+and then may not be changed.
 
         batches.json          // BatchesJson: BatchIF -> Batch (optional) 
         cardManifest.csv      // AuditableCardCsv, may be zipped
@@ -49,19 +49,16 @@ The PRNG seed is chosen, and all the cards in the card manifest are assigned a P
 The cards are then sorted by PRN and written to sortedCards.csv. These are commited to the Audit Record.
 The PRNG seed can only be chosen once and the cards immediately committed.
 
-        auditConfig.json      // AuditConfigJson (old way)
-        auditCreationConfig.json  // AuditCreationConfigJson (new way)
-        auditSeed.json        // TODO
-        sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
+        auditCreationConfig.json  // AuditCreationConfigJson
+        auditRoundPrototype.json  // auditRoundConfigJson ; prototype for auditRoundConfigX
+        sortedCards.csv           // AuditableCardCsv, sorted by prn, may be zipped
 
 3. Audit Round X Sample Estimation
 
 The EA decides which contests are in (or will continue to be in) the audit, and what the configuration parameters are for the round.
-The EA can calculate estimated sample sizes, and modify contest sample sizes and configuration parameters as often as they want.
+The EA can calculate estimated sample sizes, and modify contest sample sizes and AuditRoundConfig parameters as often as they want.
 The EA cannot hand pick which ballots to sample, only modify how many samples for each contest are used in the round.
-This preserves the _canonical ordering_ of each contest, 
-see [Deterministic sampling order for each Contest](https://github.com/JohnLCaron/rlauxe#deterministic-sampling-order-for-each-contest)
-for more explanation.
+This preserves the _canonical ordering_ of each contest, see [Deterministic sampling order for each Contest](https://github.com/JohnLCaron/rlauxe#deterministic-sampling-order-for-each-contest) for more explanation.
 
 Once the EA is satisfied with sample sizes and auditing parameters, the following files are committed to the Audit Record:
 

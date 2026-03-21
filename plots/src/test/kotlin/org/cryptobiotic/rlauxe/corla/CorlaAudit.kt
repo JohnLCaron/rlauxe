@@ -6,6 +6,8 @@ import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.*
+import org.cryptobiotic.rlauxe.estimateOld.OnlyTask
+import org.cryptobiotic.rlauxe.estimateOld.simulateCvrsFromMargin
 import org.cryptobiotic.rlauxe.workflow.*
 
 // TODO Corla uses all the mechanism of rlauxe execpt the RiskMeasuringFn
@@ -28,7 +30,12 @@ class CorlaSingleRoundAuditTaskGenerator(
     override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
         val useConfig = auditConfig ?: Config.from(AuditType.CLCA, nsimEst = nsimEst)
 
-        val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
+        val (cu, testCvrs) = simulateCvrsFromMargin(
+            Nc = Nc,
+            margin,
+            undervotePct = underVotePct,
+            phantomPct = phantomPct
+        )
         val testMvrs = if (p2flips != null || p1flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, p1flips) else
             makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
@@ -61,7 +68,12 @@ class CorlaContestAuditTaskGenerator(
     override fun generateNewTask(): SingleContestAuditTask {
         val auditConfig = auditConfigIn ?: Config.from(AuditType.CLCA, nsimEst = 10, fuzzMvrs=mvrsFuzzPct)
 
-        val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
+        val (cu, testCvrs) = simulateCvrsFromMargin(
+            Nc = Nc,
+            margin,
+            undervotePct = underVotePct,
+            phantomPct = phantomPct
+        )
         val testMvrs =  if (p2flips != null) makeFlippedMvrs(testCvrs, Nc, p2flips, 0.0) else
             makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 

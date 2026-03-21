@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.audit.MergeBatchIntoCards
 import org.cryptobiotic.rlauxe.audit.CvrsAndBatchesToCards
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.simulateCvrsFromMargin
+import org.cryptobiotic.rlauxe.estimateOld.simulateCvrsFromMargin
 import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
 import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterable

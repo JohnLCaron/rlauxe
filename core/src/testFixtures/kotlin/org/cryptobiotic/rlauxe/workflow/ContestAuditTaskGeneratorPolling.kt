@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.estimate.*
+import org.cryptobiotic.rlauxe.estimateOld.simulateCvrsFromMargin
 import kotlin.math.max
 
 class PollingContestAuditTaskGenerator(
@@ -25,7 +26,12 @@ class PollingContestAuditTaskGenerator(
             AuditType.POLLING, nsimEst = nsimEst, simFuzzPct = mvrsFuzzPct,
         )
 
-        val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
+        val (cu, testCvrs) = simulateCvrsFromMargin(
+            Nc = Nc,
+            margin,
+            undervotePct = underVotePct,
+            phantomPct = phantomPct
+        )
         val testMvrs = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
         val ballotCards = MvrManagerForTesting(testMvrs, testMvrs, useConfig.creation.seed)
@@ -58,7 +64,12 @@ class PollingSingleRoundAuditTaskGenerator(
             AuditType.POLLING, simFuzzPct = mvrsFuzzPct
         )
 
-        val (cu, testCvrs) = simulateCvrsFromMargin(Nc = Nc, margin, undervotePct = underVotePct, phantomPct = phantomPct)
+        val (cu, testCvrs) = simulateCvrsFromMargin(
+            Nc = Nc,
+            margin,
+            undervotePct = underVotePct,
+            phantomPct = phantomPct
+        )
         val testMvrs = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, mvrsFuzzPct)
 
         val ballotCards = MvrManagerForTesting(testCvrs, testMvrs, useConfig.creation.seed)

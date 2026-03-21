@@ -27,6 +27,12 @@ class TestRunAllUseCases {
     }
 
     @Test
+    fun runColoradoPolling() {
+        val topdir = "$testdataDir/cases/corla/polling"
+        runAllRoundsAndVerify("$topdir/audit")
+    }
+
+    @Test
     fun runSFElectionOA() {
         val topdir = "$testdataDir/cases/sf2024/oa"
         runAllRoundsAndVerify("$topdir/audit")

@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.estimate
+package org.cryptobiotic.rlauxe.estimateOld
 
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.AuditType
@@ -7,12 +7,14 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.estimate.Vunder
+import org.cryptobiotic.rlauxe.estimate.VunderPicker
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.math.min
 import kotlin.math.round
 
-// TODO obsolete ??
+// TODO obsolete if estimateSampleSizes() is ?? Move to textFixtures ??
 
 // val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
 //var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
@@ -45,7 +47,7 @@ fun simulateCvrsForContest(contestUA: ContestWithAssertions, config: Config): Li
     val pct = ncvrs/contestUA.Npop.toDouble()
     val missing = contestUA.Npop - (contest.Nphantoms() + contest.Nundervotes() + contest.votes.values.sum()) / contest.info.voteForN
     val voteCounts = contest.votes.map { Pair(intArrayOf(it.key), it.value) }
-    val vunder = Vunder(contest.id, null, voteCounts, contest.Nundervotes(), missing,  contest.info.voteForN)
+    val vunder = Vunder(contest.id, null, voteCounts, contest.Nundervotes(), missing, contest.info.voteForN)
     // println("vunder = $vunder")
 
     // val vunder = Vunder.fromNpop(contest.id, contest.Nundervotes(), contestUA.Npop, contest.votes, contest.info.voteForN)
@@ -54,7 +56,7 @@ fun simulateCvrsForContest(contestUA: ContestWithAssertions, config: Config): Li
     return makeVunderCvrs(vunder, nphantoms, "simCvr", limit, null)
 }
 
-// i think you need to do this by population, which is where you get hasSingleCardStyle
+/* i think you need to do this by population, which is where you get hasSingleCardStyle
 fun ContestWithAssertions.votesAndUndervotes(hasSingleCardStyle: Boolean): Vunder {
     val contest = this.contest as Contest
 
@@ -74,8 +76,7 @@ fun ContestWithAssertions.votesAndUndervotes(hasSingleCardStyle: Boolean): Vunde
     }
 
     return result
-}
-
+} */
 
 fun makeVunderCvrs(vunder: Vunder, nphantoms: Int, prefix: String, limit: Int, poolId: Int?): List<Cvr> {
     val vunderPicker = VunderPicker(vunder)

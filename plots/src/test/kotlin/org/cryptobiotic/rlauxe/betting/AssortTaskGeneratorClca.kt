@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.betting
 
 import org.cryptobiotic.rlauxe.SampleFromArray
-import org.cryptobiotic.rlauxe.estimate.*
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.workflow.ContestAuditTaskGenerator
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
 import kotlin.Int
@@ -32,7 +32,7 @@ class ClcaSingleRoundAssortTask(
     val maxLoss: Double,
     val errorRates: Double,
     val parameters : Map<String, Any>,
-) : ConcurrentTaskG<WorkflowResult> {
+) : ConcurrentTask<WorkflowResult> {
     val sampling: SamplerTracker
     val noerror: Double
 

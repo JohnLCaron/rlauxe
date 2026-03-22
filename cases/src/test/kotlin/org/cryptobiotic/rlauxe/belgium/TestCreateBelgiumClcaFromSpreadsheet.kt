@@ -55,7 +55,7 @@ class TestCreateBelgiumClcaFromSpreadsheet {
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 1),
+            SimulationControl(nsimTrials = 1),
             ContestSampleControl(contestSampleCutoff = 1000, auditSampleCutoff = 2000),
             ClcaConfig(fuzzMvrs=0.0), null)
 

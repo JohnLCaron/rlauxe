@@ -19,7 +19,7 @@ class MakeSfElection {
 
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 22),
+            SimulationControl(nsimTrials = 22),
             ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
             ClcaConfig(fuzzMvrs=.001), null)
 
@@ -49,7 +49,7 @@ class MakeSfElection {
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 22),
+            SimulationControl(nsimTrials = 22),
             ContestSampleControl(contestSampleCutoff = 1000, auditSampleCutoff = 2000),
             ClcaConfig(fuzzMvrs=.001), null)
 

@@ -5,14 +5,14 @@ import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 
 val skipPerRun = 8_000
 
 interface WorkflowResultListTaskGenerator {
     fun name(): String
-    fun generateNewTask(): ConcurrentTaskG<List<WorkflowResult>>
+    fun generateNewTask(): ConcurrentTask<List<WorkflowResult>>
 }
 
 class SFoaSingleRoundAuditTaskGenerator(
@@ -25,7 +25,7 @@ class SFoaSingleRoundAuditTaskGenerator(
 
     override fun name() = "SFoaSingleRoundAuditTaskGenerator"
 
-    override fun generateNewTask(): ConcurrentTaskG<List<WorkflowResult>> {
+    override fun generateNewTask(): ConcurrentTask<List<WorkflowResult>> {
 
         return SfoaSingleRoundAuditTask(
             run,
@@ -41,7 +41,7 @@ class SfoaSingleRoundAuditTask(
     val auditDir: String,
     val otherParameters: Map<String, Any>,
     val quiet: Boolean,
-) : ConcurrentTaskG<List<WorkflowResult>> {
+) : ConcurrentTask<List<WorkflowResult>> {
 
     override fun name() = "run$run"
 

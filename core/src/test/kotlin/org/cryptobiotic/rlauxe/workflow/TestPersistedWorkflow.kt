@@ -31,7 +31,7 @@ class TestPersistedWorkflow {
         val election = CreateElectionFromCvrs("testPersistedSingleClca", contestsUA, testMvrs, AuditType.CLCA)
         createElectionRecord(election, auditDir = auditdir)
 
-        val config = Config.from(election.electionInfo(), nsimEst = 10, contestSampleCutoff = 1000, simFuzzPct = .01,
+        val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 1000, simFuzzPct = .01,
             persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs)
 
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
@@ -59,7 +59,7 @@ class TestPersistedWorkflow {
         val election = CreateElectionFromCvrs("testPersistedAuditClca", contestsUA, testMvrs, AuditType.CLCA)
         createElectionRecord(election, auditDir = auditdir)
 
-        val config = Config.from(election.electionInfo(), nsimEst = 10, contestSampleCutoff = 1000, simFuzzPct = .01,
+        val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 1000, simFuzzPct = .01,
             persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs)
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
         startFirstRound(auditdir)
@@ -96,7 +96,7 @@ class TestPersistedWorkflow {
         val election = CreateElectionFromCvrs("testPersistedOneAudit", contestsUA, mvrs, AuditType.ONEAUDIT, cardPools = cardPools)
         createElectionRecord(election, auditDir = auditdir)
 
-        val config = Config.from(election.electionInfo(), nsimEst = 10, contestSampleCutoff = 20000, simFuzzPct = .01,
+        val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 20000, simFuzzPct = .01,
             persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs)
 
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)

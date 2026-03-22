@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -22,7 +22,7 @@ class SfSingleRoundAuditTaskGenerator(
 
     override fun name() = "SfSingleRoundAuditTaskGenerator"
 
-    override fun generateNewTask(): ConcurrentTaskG<List<WorkflowResult>> {
+    override fun generateNewTask(): ConcurrentTask<List<WorkflowResult>> {
 
         return SfSingleRoundAuditTask(
             run,
@@ -41,7 +41,7 @@ class SfSingleRoundAuditTask(
     val auditDir: String,
     val otherParameters: Map<String, Any>,
     val quiet: Boolean,
-) : ConcurrentTaskG<List<WorkflowResult>> {
+) : ConcurrentTask<List<WorkflowResult>> {
 
     override fun name() = "run$run"
 

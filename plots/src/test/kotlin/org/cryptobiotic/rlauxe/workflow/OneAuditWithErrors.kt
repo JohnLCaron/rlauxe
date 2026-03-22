@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -25,7 +25,7 @@ class OneAuditWithErrors {
 
         val stopwatch = Stopwatch()
 
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
 
         for (margin in margins) {
             fuzzPcts.forEach { fuzzPct ->

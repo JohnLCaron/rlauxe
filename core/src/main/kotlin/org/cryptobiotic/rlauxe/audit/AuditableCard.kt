@@ -8,8 +8,6 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import kotlin.collections.get
 import kotlin.sequences.plus
 
-private val logger = KotlinLogging.logger("AuditableCard")
-
 // The information we have on each physical card in the audit; the complete set is the CardManifest.
 
 // TODO could you write cards independent of what kind of audit?
@@ -126,6 +124,8 @@ data class AuditableCard (
         fun fromCvrs(cvrs: List<Cvr>): List<AuditableCard> {
             return cvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0) }
         }
+
+        private val logger = KotlinLogging.logger("AuditableCard")
     }
 }
 

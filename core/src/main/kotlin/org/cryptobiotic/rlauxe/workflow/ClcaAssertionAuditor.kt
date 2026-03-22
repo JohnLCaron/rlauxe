@@ -8,8 +8,8 @@ import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
+import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.util.OnlyTask
 
 private val logger = KotlinLogging.logger("ClcaAudit")
@@ -37,7 +37,7 @@ fun runClcaAuditRound(
     // run all tasks
     // logger.debug { "runClcaAuditRound ($roundIdx) ${auditContestTasks.size} tasks for auditor ${auditor.javaClass.simpleName} " }
     // println("---runClcaAuditRound running ${auditContestTasks.size} tasks")
-    val complete: List<Boolean> = ConcurrentTaskRunnerG<Boolean>().run(auditContestTasks)
+    val complete: List<Boolean> = ConcurrentTaskRunner<Boolean>().run(auditContestTasks)
 
     // given the cvrPairs, and each ContestRound's maxSamplesUsed, count the cvrs that were not used
     val contestCounts = mutableMapOf<Int, Int>()
@@ -69,7 +69,7 @@ class RunClcaContestTask(
     val roundIdx: Int,
     val parameters: Map<String, Any>,
     val onlyTask: OnlyTask? = null,
-): ConcurrentTaskG<Boolean> {
+): ConcurrentTask<Boolean> {
 
     override fun name() = "RunContestTask for ${contestRound.contestUA.name} round $roundIdx nassertions ${contestRound.assertionRounds.size}"
 

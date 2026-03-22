@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -21,7 +21,7 @@ class CompareAuditVariance {
 
         val pollConfig = Config.from(AuditType.POLLING)
         val stopwatch = Stopwatch()
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
         margins.forEach { margin ->
             val pollingGenerator = PollingSingleRoundAuditTaskGenerator(
                  N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct,
@@ -61,7 +61,7 @@ class CompareAuditVariance {
         val clcaConfig = Config.from(AuditType.CLCA, fuzzMvrs=fuzzPct)
 
         val stopwatch = Stopwatch()
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
         margins.forEach { margin ->
              val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(
                 N, margin, 0.0, 0.0, mvrsFuzzPct=fuzzPct,

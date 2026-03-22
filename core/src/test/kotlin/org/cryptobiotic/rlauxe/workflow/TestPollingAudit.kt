@@ -20,7 +20,7 @@ class TestPollingAudit {
 
     @Test
     fun testPollingWithStyle() {
-        val auditConfig = Config.from(AuditType.POLLING, nsimEst = 10)
+        val auditConfig = Config.from(AuditType.POLLING, nsimTrials = 10)
 
         // each contest has a specific margin between the top two vote getters.
         val N = 50000
@@ -64,7 +64,7 @@ class TestPollingAudit {
     fun testPollingWithFuzz() {
         val mvrFuzzPct = .0123
         val auditConfig = Config.from(
-            AuditType.POLLING, nsimEst = 10, simFuzzPct = mvrFuzzPct
+            AuditType.POLLING, nsimTrials = 10, simFuzzPct = mvrFuzzPct
         )
 
         // each contest has a specific margin between the top two vote getters.
@@ -123,7 +123,7 @@ class TestPollingAudit {
             assertEquals(contest.Nc, fcontest.phantomCount + fcontest.underCount + nvotes)
         }
 
-        val auditConfig = Config.from(AuditType.POLLING, nsimEst = 10)
+        val auditConfig = Config.from(AuditType.POLLING, nsimTrials = 10)
         val cvrs = multiContestTest.makeCvrsFromContests(42)
         val pool = makeOnePool(42, multiContestTest.contests, cvrs)
         val mvrManager = MvrManagerForTesting(cvrs, cvrs, Random.nextLong()) // , pools = listOf(pool))

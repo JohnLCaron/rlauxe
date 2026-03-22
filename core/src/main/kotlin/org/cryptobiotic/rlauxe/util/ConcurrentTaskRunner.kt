@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalCoroutinesApi::class)
 
-package org.cryptobiotic.rlauxe.estimate
+package org.cryptobiotic.rlauxe.util
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
@@ -16,28 +16,24 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 import kotlinx.coroutines.yield
-import org.cryptobiotic.rlauxe.util.Stopwatch
 import java.util.concurrent.TimeUnit
 
-private val logger = KotlinLogging.logger("ConcurrentTaskRunnerG")
 
-// generic task running; maybe should be in util ?
-
-interface ConcurrentTaskG<T> {
+interface ConcurrentTask<T> {
     fun name() : String
     fun run() : T
 }
 
-// runs set of ConcurrentTaskG<T> concurrently, whose run() returns T. Used in estimateSampleSizes and plotting.
-class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Boolean = false) {
+// runs a set of ConcurrentTask<T> concurrently, each task.run() returns T.
+class ConcurrentTaskRunner<T>(val show: Boolean = false, val showTaskResult: Boolean = false) {
     private val mutex = Mutex()
     private val results = mutableListOf<T>()
 
     // run all the tasks concurrently
-    fun run(tasks: List<ConcurrentTaskG<T>>, nthreads: Int? = null): List<T> {
+    fun run(tasks: List<ConcurrentTask<T>>, nthreads: Int? = null): List<T> {
         val stopwatch = Stopwatch()
         val useThreads = nthreads ?: 30
-        logger.debug{"ConcurrentTaskRunnerG run ${tasks.size} concurrent tasks with $nthreads threads"}
+        logger.debug{"ConcurrentTaskRunner run ${tasks.size} concurrent tasks with $nthreads threads"}
         runBlocking {
             val taskProducer = produceTasks(tasks)
             val calcJobs = mutableListOf<Job>()
@@ -54,7 +50,7 @@ class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Bo
     }
 
     fun runTask(
-        task: ConcurrentTaskG<T>,
+        task: ConcurrentTask<T>,
     ): T {
         val stopwatch = Stopwatch()
         val result = task.run()
@@ -62,7 +58,7 @@ class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Bo
         return result
     }
 
-    private fun CoroutineScope.produceTasks(producer: Iterable<ConcurrentTaskG<T>>): ReceiveChannel<ConcurrentTaskG<T>> =
+    private fun CoroutineScope.produceTasks(producer: Iterable<ConcurrentTask<T>>): ReceiveChannel<ConcurrentTask<T>> =
         produce {
             for (task in producer) {
                 send(task)
@@ -72,8 +68,8 @@ class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Bo
         }
 
     private fun CoroutineScope.launchCalculations(
-        input: ReceiveChannel<ConcurrentTaskG<T>>,
-        taskRunner: (ConcurrentTaskG<T>) -> T?,
+        input: ReceiveChannel<ConcurrentTask<T>>,
+        taskRunner: (ConcurrentTask<T>) -> T?,
     ) = launch(Dispatchers.Default) {
         for (task in input) {
             val result = taskRunner(task) // not inside the mutex!!
@@ -85,5 +81,9 @@ class ConcurrentTaskRunnerG<T>(val show: Boolean = false, val showTaskResult: Bo
             }
             yield()
         }
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger("ConcurrentTaskRunner")
     }
 }

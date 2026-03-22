@@ -67,7 +67,7 @@ data class SimulationControlJson(
 )
 
 fun SimulationControl.publishJson() = SimulationControlJson(
-    this.nsimEst,
+    this.nsimTrials,
     this.estPercentile,
     this.simFuzzPct,
     this.simulationStrategy,

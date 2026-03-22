@@ -9,8 +9,8 @@ import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.betting.TestH0Status
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
+import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.estimateOld.makeDeciles
@@ -37,14 +37,14 @@ class MakeBoulderRemoveN {
     //@Test
     fun createBoulderRemoveNoa() {
 
-        val tasks = mutableListOf<ConcurrentTaskG<List<AuditResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<AuditResult>>>()
         repeat(11) { removeN ->
             val auditDir = "$testdataDir/cases/boulder24/oan/audit$removeN"
             tasks.add(RunRemoveBoulderTask(removeN, 1, auditDir, AuditType.ONEAUDIT))
         }
 
         val estResults: List<AuditResult> =
-            ConcurrentTaskRunnerG<List<AuditResult>>().run(tasks, nthreads = 5).flatten()
+            ConcurrentTaskRunner<List<AuditResult>>().run(tasks, nthreads = 5).flatten()
 
         val results = mutableMapOf<Int, MutableList<AuditResult>>()
         println("OneAudit results")
@@ -68,13 +68,13 @@ class RunRemoveBoulderTask(
     val nruns: Int,
     val auditDir: String,
     val auditType: AuditType,
-) : ConcurrentTaskG<List<AuditResult>> {
+) : ConcurrentTask<List<AuditResult>> {
 
     override fun name() = "removeN=$removeN"
 
     override fun run(): List<AuditResult> {
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
-        val round = AuditRoundConfig(SimulationControl(nsimEst = 22), ContestSampleControl.NONE, ClcaConfig(), null)
+        val round = AuditRoundConfig(SimulationControl(nsimTrials = 22), ContestSampleControl.NONE, ClcaConfig(), null)
 
         createBoulderElection(
             "src/test/data/Boulder2024/2024-Boulder-County-General-Redacted-Cast-Vote-Record.zip",

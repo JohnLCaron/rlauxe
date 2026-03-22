@@ -16,7 +16,7 @@ import kotlin.test.Test
 // show distribution of Clca samplesNeeded estimation vs actual audits
 class ClcaDistributions {
     val Nc = 50000
-    val nsimEst = 100
+    val nSimTrials = 100
     val margin = .02
     val mvrsFuzzPct = .02
     val simFuzzPct = .04
@@ -29,7 +29,7 @@ class ClcaDistributions {
     @Test
     fun plotClcaDistributions() {
         val auditConfig = Config.from(AuditType.CLCA,
-            nsimEst = nsimEst, simFuzzPct = simFuzzPct,
+            nsimTrials = nSimTrials, simFuzzPct = simFuzzPct,
             persistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated,
             // TODO needed ?? simulationStrategy = SimulationStrategy.regular,
             fuzzMvrs=mvrsFuzzPct,

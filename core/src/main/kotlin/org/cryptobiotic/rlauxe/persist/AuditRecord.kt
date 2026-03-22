@@ -32,8 +32,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.Path
 
-private val logger = KotlinLogging.logger("AuditRecord")
-
 interface AuditRecordIF {
     val location: String
     val electionInfo: ElectionInfo
@@ -165,6 +163,7 @@ class AuditRecord(
     }
 
     companion object {
+        private val logger = KotlinLogging.logger("AuditRecord")
 
         // used by viewer
         fun readFrom(location: String): AuditRecordIF? {

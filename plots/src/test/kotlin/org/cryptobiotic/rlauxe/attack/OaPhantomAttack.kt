@@ -15,7 +15,7 @@ class OaPhantomAttack {
 
     val N = 100000
     val nruns = 100
-    val nsimEst = 10
+    val nSimTrials = 10
     val fuzzPct = .01
     val cvrPercent = 0.5
 
@@ -30,7 +30,7 @@ class OaPhantomAttack {
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=phantomPct, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "reportedMean", "fuzzPct" to fuzzPct),
                 auditConfigIn = Config.from(
-                    AuditType.ONEAUDIT, nsimEst = nsimEst,
+                    AuditType.ONEAUDIT, nsimTrials = nSimTrials,
                 ),
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorReportedMean))
@@ -39,7 +39,7 @@ class OaPhantomAttack {
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=phantomPct, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "simulate", "fuzzPct" to fuzzPct),
                 auditConfigIn = Config.from(
-                    AuditType.ONEAUDIT, nsimEst = nsimEst,
+                    AuditType.ONEAUDIT, nsimTrials = nSimTrials,
                 ),
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorBet99))
@@ -48,7 +48,7 @@ class OaPhantomAttack {
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=phantomPct, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "calcMvrsNeeded", "fuzzPct" to fuzzPct),
                 auditConfigIn = Config.from(
-                    AuditType.ONEAUDIT, nsimEst = nsimEst,
+                    AuditType.ONEAUDIT, nsimTrials = nSimTrials,
                 ),
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorEta0Eps))

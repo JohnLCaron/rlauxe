@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -22,7 +22,7 @@ class AuditsWithUndervotes {
         val undervotes = listOf(.00, .10, .20, .30, .40, .50)
         val stopwatch = Stopwatch()
 
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
 
         undervotes.forEach { undervote ->
             val pollingGenerator = PollingSingleRoundAuditTaskGenerator(N, margin, undervote, phantomPct=0.0, mvrsFuzzPct=mvrFuzzPct,

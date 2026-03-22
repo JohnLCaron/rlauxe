@@ -2,12 +2,11 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.ClcaConfig
-import org.cryptobiotic.rlauxe.audit.ClcaStrategyType
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.io.path.Path
@@ -16,7 +15,7 @@ import kotlin.test.Test
 class ExtraVsMarginByFuzzDiff {
     val Nc = 50000
     val ntrials = 1000
-    val nsimEst = 100
+    val nSimTrials = 100
     val name = "extraVsMarginCalc003ga3"
     val dirName = "$testdataDir/plots/extra/$name"
     val fuzzMvrs = 0.003
@@ -28,10 +27,10 @@ class ExtraVsMarginByFuzzDiff {
         val fuzzDiffs = listOf(-.003, -.0015, 0.0, .0015, .003)
         val stopwatch = Stopwatch()
 
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
         fuzzDiffs.forEach { fuzzDiff ->
             val simFuzzPct = fuzzMvrs+fuzzDiff
-            val config =  Config.from( AuditType.CLCA, nsimEst = nsimEst, fuzzMvrs = simFuzzPct, contestSampleCutoff = 10000,
+            val config =  Config.from( AuditType.CLCA, nsimTrials = nSimTrials, fuzzMvrs = simFuzzPct, contestSampleCutoff = 10000,
                 persistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated, )
 
             margins.forEach { margin ->
@@ -43,7 +42,7 @@ class ExtraVsMarginByFuzzDiff {
             }
 
         }
-        println("run ${tasks.size} tasks $ntrials trials each with ${nsimEst} simulations each trial")
+        println("run ${tasks.size} tasks $ntrials trials each with ${nSimTrials} simulations each trial")
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 

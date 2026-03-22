@@ -12,9 +12,7 @@ import kotlin.Int
 import kotlin.math.max
 import kotlin.use
 
-private val logger = KotlinLogging.logger("OneShotAudit")
-
-// AuditRecord must have privateMvrs
+// AuditRecord must have privateMvrs; run actual audit to compare to estimation
 class OneShotAudit(
     val auditdir: String,
 ) {
@@ -106,6 +104,10 @@ class OneShotAudit(
             maxAssertions.toSortedMap().forEach { (id, count) -> writer.write("$id: $count\n") }
             writer.close()
         }
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger("OneShotAudit")
     }
 
     /*

@@ -147,14 +147,14 @@ class SimulationControlBuilder(prev: SimulationControl?) {
     val def = SimulationControl()
 
     // make everything mutable
-    var nsimEst = prev?.nsimEst
+    var nsimEst = prev?.nsimTrials
     var estPercentSuccess = prev?.estPercentile
     var simFuzzPct = prev?.simFuzzPct
     var simulationStrategy = prev?.simulationStrategy
 
     // build using defaults if not set
     fun build() = SimulationControl(
-        nsimEst = nsimEst ?: def.nsimEst,
+        nsimTrials = nsimEst ?: def.nsimTrials,
         estPercentile = estPercentSuccess ?: def.estPercentile,
         simFuzzPct = simFuzzPct ?: def.simFuzzPct,
         simulationStrategy = simulationStrategy ?: def.simulationStrategy,

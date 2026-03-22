@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -11,14 +11,13 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.test.Test
 
-import org.jetbrains.kotlinx.kandy.util.color.Color
 import kotlin.io.path.Path
 
 // not that interesting, maybe delete
 
 class CompareCorlaPlots {
     val nruns = 10
-    val nsimEst = 10
+    val nSimTrials = 10
     val name = "corlaWithPhantoms2"
     val dirName = "$testdataDir/plots/corla/$name"
     val N = 100000
@@ -27,11 +26,11 @@ class CompareCorlaPlots {
     fun corlaComparePlots() {
         val margins =
             listOf(.003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .10)
-        val config = Config.from(AuditType.CLCA, nsimEst = nsimEst)
+        val config = Config.from(AuditType.CLCA, nsimTrials = nSimTrials)
 
         val stopwatch = Stopwatch()
 
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
         margins.forEach { margin ->
             var fuzzPct = .0
             var phantomPct = 0.0

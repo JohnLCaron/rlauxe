@@ -8,8 +8,6 @@ import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import kotlin.random.Random
 
-private val logger = KotlinLogging.logger("SamplerTracker")
-
 // main purpose is for BettingFn.bet(prevSamples: Tracker)
 interface Tracker {
     fun numberOfSamples(): Int    // total number of samples so far
@@ -98,6 +96,7 @@ class PollingSamplerTracker(
     override fun welford() = welford
 
     companion object {
+        private val logger = KotlinLogging.logger("PollingSamplerTracker")
 
         fun withMaxSample(
             contestId: Int,
@@ -189,6 +188,8 @@ class ClcaSamplerErrorTracker(
     }
 
     companion object {
+        private val logger = KotlinLogging.logger("ClcaSamplerErrorTracker")
+
         // pull the desired samples out
         fun fromIndexList(
             contestId: Int,

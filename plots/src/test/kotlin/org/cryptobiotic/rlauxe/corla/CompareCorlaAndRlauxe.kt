@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.corla
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -32,7 +32,7 @@ class CompareCorlaAndRlauxe {
         val config = Config.from(AuditType.CLCA, riskLimit = risk)
 
         val stopwatch = Stopwatch()
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
 
         for (margin in margins) {
             fuzzPcts.forEach { fuzzPct ->
@@ -80,7 +80,7 @@ class CompareCorlaAndRlauxe {
         val phantoms = listOf(.00, .001, .002, .005, .01, .02)
         val stopwatch = Stopwatch()
 
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
 
         phantoms.forEach { phantomPct ->
             val corlaTask = CorlaSingleRoundAuditTaskGenerator(

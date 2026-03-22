@@ -1,8 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.testdataDir
@@ -23,7 +22,7 @@ class AuditsWithErrors {
         val fuzzPcts = listOf(.00, .001, .0025, .005, .0075, .01)
 
         val stopwatch = Stopwatch()
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
 
         for (margin in margins) {
             fuzzPcts.forEach { fuzzPct ->
@@ -100,7 +99,7 @@ class AuditsWithErrors {
 
         val stopwatch = Stopwatch()
 
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
 
         fuzzPcts.forEach { fuzzPct ->
 
@@ -174,7 +173,7 @@ class AuditsWithErrors {
 
         val stopwatch = Stopwatch()
 
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
 
         for (margin in margins) {
             fuzzPcts.forEach { fuzzPct ->

@@ -6,7 +6,6 @@ import kotlinx.cli.ArgType
 import kotlinx.cli.default
 import kotlinx.cli.required
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.audit.ClcaConfig
 
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
@@ -14,14 +13,12 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.math.min
 
 private val logger = KotlinLogging.logger("RunRlaStartFuzz")
@@ -142,10 +139,7 @@ fun startTestElectionClca(
         addRaireCandidates)
     createElectionRecord(election, auditDir = auditdir)
 
-    val config = Config.from( election.electionInfo(), nsimEst = 100, simFuzzPct = simFuzz, fuzzMvrs=fuzzMvrs)
-
-    val configOld = Config.from(election.electionInfo(), nsimEst = 20, simFuzzPct = simFuzz,
-        fuzzMvrs=fuzzMvrs)
+    val config = Config.from( election.electionInfo(), nsimTrials = 100, simFuzzPct = simFuzz, fuzzMvrs=fuzzMvrs)
 
     createAuditRecord(config, election, auditDir = auditdir)
 
@@ -235,7 +229,7 @@ fun startTestElectionPolling(
     )
     createElectionRecord(election, auditDir = auditdir)
 
-    val config = Config.from(election.electionInfo(), nsimEst = 20, simFuzzPct = simFuzz,
+    val config = Config.from(election.electionInfo(), nsimTrials = 20, simFuzzPct = simFuzz,
         fuzzMvrs=fuzzMvrs)
 
     createAuditRecord(config, election, auditDir = auditdir)
@@ -333,7 +327,7 @@ fun startTestElectionOneAudit(
     )
     createElectionRecord(election, auditDir = auditDir, clear = true)
 
-    val config = Config.from(election.electionInfo(), nsimEst = 20, simFuzzPct = simFuzz,
+    val config = Config.from(election.electionInfo(), nsimTrials = 20, simFuzzPct = simFuzz,
         fuzzMvrs=fuzzMvrs)
 
     createAuditRecord(config, election, auditDir = auditDir)

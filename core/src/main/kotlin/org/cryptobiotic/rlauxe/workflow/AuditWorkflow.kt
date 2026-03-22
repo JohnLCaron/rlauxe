@@ -9,8 +9,6 @@ import org.cryptobiotic.rlauxe.estimateOld.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.sampleAndRemoveContests
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
-private val logger = KotlinLogging.logger("RlauxAuditIF")
-
 // abstract superclass of workflows
  abstract class AuditWorkflow {
     abstract fun config() : Config
@@ -93,4 +91,8 @@ private val logger = KotlinLogging.logger("RlauxAuditIF")
 
     // 6. _Run the audit_
     abstract fun runAuditRound(auditRound: AuditRound, onlyTask: OnlyTask? = null, quiet: Boolean = true): Boolean  // return true if audit is complete
-}
+
+    companion object {
+        private val logger = KotlinLogging.logger("AuditWorkflow")
+    }
+ }

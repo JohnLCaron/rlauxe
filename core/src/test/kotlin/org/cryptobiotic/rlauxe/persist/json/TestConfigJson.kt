@@ -16,17 +16,17 @@ class TestConfigJson {
         testRoundtrips(Config.from(AuditType.ONEAUDIT))
 
         testRoundtrips(
-            Config.from(AuditType.CLCA, riskLimit=.03, nsimEst=42, simFuzzPct=.111, contestSampleCutoff=10000)
+            Config.from(AuditType.CLCA, riskLimit=.03, nsimTrials=42, simFuzzPct=.111, contestSampleCutoff=10000)
         )
 
         testRoundtrips(
             Config.from(
-                AuditType.POLLING, riskLimit=.03, nsimEst=42, simFuzzPct=.111, contestSampleCutoff=10000
+                AuditType.POLLING, riskLimit=.03, nsimTrials=42, simFuzzPct=.111, contestSampleCutoff=10000
             )
         )
         testRoundtrips(
             Config.from(
-                AuditType.ONEAUDIT, riskLimit=.03, nsimEst=42, simFuzzPct=.111,
+                AuditType.ONEAUDIT, riskLimit=.03, nsimTrials=42, simFuzzPct=.111,
                 contestSampleCutoff=10000,
             )
         )

@@ -20,7 +20,7 @@ class CorlaSingleRoundAuditTaskGenerator(
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
     val auditConfig: Config? = null,
-    val nsimEst: Int = 100,
+    val nSimTrials: Int = 100,
     val quiet: Boolean = true,
     val p2flips: Double? = null,
     val p1flips: Double? = null,
@@ -28,7 +28,7 @@ class CorlaSingleRoundAuditTaskGenerator(
     override fun name() = "CorlaSingleRoundAuditTaskGenerator"
 
     override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
-        val useConfig = auditConfig ?: Config.from(AuditType.CLCA, nsimEst = nsimEst)
+        val useConfig = auditConfig ?: Config.from(AuditType.CLCA, nsimTrials = nSimTrials)
 
         val (cu, testCvrs) = simulateCvrsFromMargin(
             Nc = Nc,
@@ -66,7 +66,7 @@ class CorlaContestAuditTaskGenerator(
     override fun name() = "CorlaWorkflowTaskGenerator"
 
     override fun generateNewTask(): SingleContestAuditTask {
-        val auditConfig = auditConfigIn ?: Config.from(AuditType.CLCA, nsimEst = 10, fuzzMvrs=mvrsFuzzPct)
+        val auditConfig = auditConfigIn ?: Config.from(AuditType.CLCA, nsimTrials = 10, fuzzMvrs=mvrsFuzzPct)
 
         val (cu, testCvrs) = simulateCvrsFromMargin(
             Nc = Nc,

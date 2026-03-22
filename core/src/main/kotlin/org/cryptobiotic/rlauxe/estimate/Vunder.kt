@@ -12,8 +12,6 @@ import kotlin.collections.component2
 import kotlin.collections.iterator
 import kotlin.random.Random
 
-private val logger = KotlinLogging.logger("VunderBar")
-
 // This is a way to create test Cvrs that match known vote totals and undervotes and novotes for one population or pool
 // ok for voteForN > 1, ok for IRV
 
@@ -81,7 +79,7 @@ class VunderPicker(val vunder: Vunder) {
 
     fun pickRandomCandidatesAndDecrement(): IntArray? {
         if (isEmpty()) {
-            logger.error { "Vunder2 called when isEmpty" }
+            logger.error { "VunderPicker called when isEmpty" }
             return null
         }
 
@@ -200,7 +198,10 @@ class VunderPicker(val vunder: Vunder) {
         val choose = vunderRemaining[vunderIdx]
         choose.remaining++
     }
-}
+
+    companion object {
+        private val logger = KotlinLogging.logger("VunderPicker")
+    }}
 
 /* used for creating Cvrs for pools with hasSingleCardStyle=false
 fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): List<Cvr> {

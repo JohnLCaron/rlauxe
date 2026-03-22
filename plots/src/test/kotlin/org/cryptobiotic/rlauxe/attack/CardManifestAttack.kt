@@ -245,7 +245,7 @@ class CardManifestAttack {
         val election = CreateElectionForAttack(listOf(contestUA), cards, mvrs, cardPools, null)
 
         val auditdir = "$topdir/audit"
-        val config = Config.from(election.electionInfo(), nsimEst = 10, contestSampleCutoff = 20000)
+        val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 20000)
 
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
         startFirstRound(auditdir)

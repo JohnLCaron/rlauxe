@@ -18,9 +18,6 @@ import org.cryptobiotic.rlauxe.util.Closer
 import java.nio.file.Files
 import kotlin.io.path.Path
 
-private val logger = KotlinLogging.logger("PersistedMvrManager")
-private val checkValidity = true
-
 // TODO generalize using more than just first component
 open class CompositeMvrManager(
     val auditRecord: CompositeRecord,
@@ -113,4 +110,8 @@ open class CompositeMvrManager(
         }
     }
 
+    companion object {
+        private val logger = KotlinLogging.logger("CompositeMvrManager")
+        private val checkValidity = true
+    }
 }

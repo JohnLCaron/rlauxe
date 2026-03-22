@@ -14,7 +14,7 @@ class OaMarginAttack {
 
     val N = 100000
     val nruns = 10
-    val nsimEst = 10
+    val nSimTrials = 10
     val fuzzPct = .00
     val cvrPercent = 0.5
     var phantomPct = .00
@@ -32,7 +32,7 @@ class OaMarginAttack {
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "reportedMean", "fuzzPct" to fuzzPct),
                 auditConfigIn = Config.from(
-                    AuditType.ONEAUDIT, nsimEst = nsimEst,
+                    AuditType.ONEAUDIT, nsimTrials = nSimTrials,
                 ),
                 p1flips=margin*extra,
             )
@@ -42,7 +42,7 @@ class OaMarginAttack {
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "simulate", "fuzzPct" to fuzzPct),
                 auditConfigIn = Config.from(
-                    AuditType.ONEAUDIT, nsimEst = nsimEst,
+                    AuditType.ONEAUDIT, nsimTrials = nSimTrials,
                 ),
                 p1flips=margin*extra,
             )
@@ -52,7 +52,7 @@ class OaMarginAttack {
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=0.0, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "calcMvrsNeeded", "fuzzPct" to fuzzPct),
                 auditConfigIn = Config.from(
-                    AuditType.ONEAUDIT, nsimEst = nsimEst,
+                    AuditType.ONEAUDIT, nsimTrials = nSimTrials,
                 ),
                 p1flips=margin*extra,
             )

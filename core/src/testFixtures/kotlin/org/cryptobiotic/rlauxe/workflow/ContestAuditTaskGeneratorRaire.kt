@@ -12,13 +12,13 @@ class RaireContestAuditTaskGenerator(
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
     val config: Config? = null,
-    val nsimEst: Int = 100,
+    val nSimTrials: Int = 100,
     ): ContestAuditTaskGenerator {
 
     override fun name() = "RaireWorkflowTaskGenerator"
 
     override fun generateNewTask(): SingleContestAuditTask {
-        val useConfig = config ?: Config.from( AuditType.CLCA, nsimEst = nsimEst, fuzzMvrs = mvrsFuzzPct)
+        val useConfig = config ?: Config.from( AuditType.CLCA, nsimTrials = nSimTrials, fuzzMvrs = mvrsFuzzPct)
 
         val (rcontest, testCvrs) = simulateRaireTestContest(
             N = Nc,
@@ -53,13 +53,13 @@ class RaireSingleRoundAuditTaskGenerator(
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
     val auditConfig: Config? = null,
-    val nsimEst: Int = 100,
+    val nSimTrials: Int = 100,
 ): ContestAuditTaskGenerator {
 
     override fun name() = "ClcaSingleRoundAuditTaskGenerator"
 
     override fun generateNewTask(): ClcaSingleRoundWorkflowTask {
-        val useConfig = auditConfig ?: Config.from(AuditType.CLCA, nsimEst = nsimEst)
+        val useConfig = auditConfig ?: Config.from(AuditType.CLCA, nsimTrials = nSimTrials)
 
         val (rcontest, testCvrs) = simulateRaireTestContest(
             N = Nc,

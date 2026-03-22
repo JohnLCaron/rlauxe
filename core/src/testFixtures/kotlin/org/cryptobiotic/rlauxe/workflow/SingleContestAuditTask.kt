@@ -1,12 +1,9 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
+import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.betting.TestH0Status
-import org.cryptobiotic.rlauxe.util.Welford
-import kotlin.math.sqrt
 
 private val quiet = true
 
@@ -14,7 +11,7 @@ private val logger = KotlinLogging.logger("ContestAuditTask")
 
 interface ContestAuditTaskGenerator {
     fun name(): String
-    fun generateNewTask(): ConcurrentTaskG<WorkflowResult>
+    fun generateNewTask(): ConcurrentTask<WorkflowResult>
 }
 
 // A ContestAuditTask is always for a single contest (unlike a Workflow which may be multi-contest)
@@ -22,7 +19,7 @@ class SingleContestAuditTask(
     val name: String,
     val workflow: AuditWorkflow,
     val otherParameters: Map<String, Any>,
-) : ConcurrentTaskG<WorkflowResult> {
+) : ConcurrentTask<WorkflowResult> {
 
     override fun name() = name
     override fun run(): WorkflowResult {
@@ -88,14 +85,14 @@ class SingleContestAuditTask(
     }
 }
 
-fun runRepeatedWorkflowsAndAverage(tasks: List<ConcurrentTaskG<List<WorkflowResult>>>, nthreads:Int = 40): List<WorkflowResult> {
-    val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunnerG<List<WorkflowResult>>().run(tasks, nthreads=nthreads)
+fun runRepeatedWorkflowsAndAverage(tasks: List<ConcurrentTask<List<WorkflowResult>>>, nthreads:Int = 40): List<WorkflowResult> {
+    val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunner<List<WorkflowResult>>().run(tasks, nthreads=nthreads)
     val results: List<WorkflowResult> = rresults.map { avgWorkflowResult(it) }
     return results
 }
 
-fun runWorkflows(tasks: List<ConcurrentTaskG<List<WorkflowResult>>>, nthreads:Int = 40): List<WorkflowResult> {
-    val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunnerG<List<WorkflowResult>>().run(tasks, nthreads=nthreads)
+fun runWorkflows(tasks: List<ConcurrentTask<List<WorkflowResult>>>, nthreads:Int = 40): List<WorkflowResult> {
+    val rresults: List<List<WorkflowResult>> = ConcurrentTaskRunner<List<WorkflowResult>>().run(tasks, nthreads=nthreads)
     val results: List<WorkflowResult> = rresults.flatten()
     return results
 }

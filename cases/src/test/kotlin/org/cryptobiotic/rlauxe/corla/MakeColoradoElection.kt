@@ -39,7 +39,7 @@ class MakeColoradoElection {
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 10, estPercentile = listOf(42, 55, 67)),
+            SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000),
             ClcaConfig(), null)
 
@@ -57,7 +57,7 @@ class MakeColoradoElection {
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 10, estPercentile = listOf(50, 80)),
+            SimulationControl(nsimTrials = 10, estPercentile = listOf(50, 80)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
@@ -75,7 +75,7 @@ class MakeColoradoElection {
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 10, estPercentile = listOf(50, 80)),
+            SimulationControl(nsimTrials = 10, estPercentile = listOf(50, 80)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
@@ -93,7 +93,7 @@ class MakeColoradoElection {
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 10, estPercentile = listOf(50, 80)),
+            SimulationControl(nsimTrials = 10, estPercentile = listOf(50, 80)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 

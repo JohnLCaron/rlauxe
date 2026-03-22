@@ -31,7 +31,7 @@ class TestGenerateAllUseCases {
 
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 22),
+            SimulationControl(nsimTrials = 22),
             ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
             ClcaConfig(fuzzMvrs=.001), null)
 
@@ -50,7 +50,7 @@ class TestGenerateAllUseCases {
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 20, estPercentile = listOf(42, 55, 67)),
+            SimulationControl(nsimTrials = 20, estPercentile = listOf(42, 55, 67)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 1000, auditSampleCutoff = 2000),
             ClcaConfig(fuzzMvrs=.001), null)
 
@@ -72,7 +72,7 @@ class TestGenerateAllUseCases {
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 10, estPercentile = listOf(42, 55, 67)),
+            SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000),
             ClcaConfig(), null)
 
@@ -90,7 +90,7 @@ class TestGenerateAllUseCases {
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 10, estPercentile = listOf(50, 80)),
+            SimulationControl(nsimTrials = 10, estPercentile = listOf(50, 80)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
@@ -108,7 +108,7 @@ class TestGenerateAllUseCases {
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 10, estPercentile = listOf(50, 80)),
+            SimulationControl(nsimTrials = 10, estPercentile = listOf(50, 80)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
@@ -126,7 +126,7 @@ class TestGenerateAllUseCases {
 
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 10, estPercentile = listOf(50, 80)),
+            SimulationControl(nsimTrials = 10, estPercentile = listOf(50, 80)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
             null, PollingConfig())
 
@@ -143,7 +143,7 @@ class TestGenerateAllUseCases {
 
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 22),
+            SimulationControl(nsimTrials = 22),
             ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
             ClcaConfig(fuzzMvrs=.001), null)
 
@@ -164,7 +164,7 @@ class TestGenerateAllUseCases {
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 22),
+            SimulationControl(nsimTrials = 22),
             ContestSampleControl(contestSampleCutoff = 1000, auditSampleCutoff = 2000),
             ClcaConfig(fuzzMvrs=.001), null)
 

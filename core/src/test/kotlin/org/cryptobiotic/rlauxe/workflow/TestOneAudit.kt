@@ -17,7 +17,7 @@ class TestOneAudit {
         )
         println(contestOA)
 
-        val config = Config.from(AuditType.ONEAUDIT, nsimEst=10)
+        val config = Config.from(AuditType.ONEAUDIT, nsimTrials=10)
         val workflow = WorkflowTesterOneAudit(config, listOf(contestOA),
             MvrManagerForTesting(mvrs, mvrs, config.creation.seed, pools=pools))
 
@@ -35,7 +35,7 @@ class TestOneAudit {
         )
         println(contestOA)
 
-        val config = Config.from(AuditType.ONEAUDIT, nsimEst=10)
+        val config = Config.from(AuditType.ONEAUDIT, nsimTrials=10)
         val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(mvrs, mvrs, config.creation.seed, pools=pools))
 
         runTestAuditToCompletion("testOneAuditContest", workflow)
@@ -52,7 +52,7 @@ class TestOneAudit {
         )
         println(contestOA)
 
-        val config = Config.from(AuditType.ONEAUDIT, nsimEst=10)
+        val config = Config.from(AuditType.ONEAUDIT, nsimTrials=10)
         val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.creation.seed, pools=pools))
 
         runTestAuditToCompletion("testOneAuditContest", workflow)
@@ -69,7 +69,7 @@ class TestOneAudit {
         )
         println(contestOA)
 
-        val config = Config.from(AuditType.ONEAUDIT, nsimEst=10)
+        val config = Config.from(AuditType.ONEAUDIT, nsimTrials=10)
 
         val workflow = WorkflowTesterOneAudit(config, listOf(contestOA), MvrManagerForTesting(testCvrs, testCvrs, config.creation.seed, pools=pools))
         runTestAuditToCompletion("testOneAuditContestSmall", workflow)
@@ -80,7 +80,7 @@ class TestOneAudit {
     fun testOneAuditContestFuzzed() {
         val mvrFuzzPct = .0123
         val config = AuditConfig(
-            AuditType.ONEAUDIT, hasStyles=true, nsimEst=10,
+            AuditType.ONEAUDIT, hasStyles=true, nSimTrials=10,
             oaConfig = OneAuditConfig(strategy= OneAuditStrategyType.reportedMean , simFuzzPct=mvrFuzzPct)
         )
         val (contestOA, testCvrs) = makeOneContestUA(25000, 20000, cvrPercent = .70, undervotePercent=.01, phantomPercent = .0)
@@ -95,7 +95,7 @@ class TestOneAudit {
 
     @Test
     fun testOneAuditSingleRoundAudit() {
-        val config = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nsimEst=10)
+        val config = AuditConfig(AuditType.ONEAUDIT, hasStyles=true, nSimTrials=10)
 
         val (contestOA, testCvrs) = makeOneContestUA(10000, 5000, cvrPercent = .80, undervotePercent=.0, phantomPercent = .0)
         val contests = listOf(contestOA)

@@ -11,8 +11,6 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.existsOrZip
 
-private val logger = KotlinLogging.logger("VerifyAuditRecord")
-
 class VerifyAuditRecord(val auditRecordLocation: String) {
     val auditRecord: AuditRecordIF
     val publisher: Publisher
@@ -149,5 +147,9 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
             count++
         }
         return true
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger("VerifyAuditRecord")
     }
 }

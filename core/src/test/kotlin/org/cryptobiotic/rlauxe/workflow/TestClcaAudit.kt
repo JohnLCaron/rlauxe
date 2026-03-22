@@ -10,7 +10,7 @@ import kotlin.test.assertNotNull
 class TestClcaAudit {
     val N = 10000
 
-    val config = Config.from(AuditType.CLCA, nsimEst=10, simFuzzPct=0.003)
+    val config = Config.from(AuditType.CLCA, nsimTrials=10, simFuzzPct=0.003)
 
     @Test
     fun testClcaOneContest() {

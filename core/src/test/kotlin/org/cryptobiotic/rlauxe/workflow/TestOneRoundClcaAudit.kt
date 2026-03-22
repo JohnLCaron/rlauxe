@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import kotlin.test.Test
 
 class TestOneRoundClcaAudit {
-    val config = Config.from(AuditType.CLCA, nsimEst=10)
+    val config = Config.from(AuditType.CLCA, nsimTrials=10)
 
     @Test
     fun testClcaSingleRoundAudit() {

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.cobra
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.workflow.*
@@ -15,7 +15,7 @@ class GenCobraPlots {
 
     val N = 10000
     val nruns = 1000
-    val nsimEst = 10
+    val nSimTrials = 10
     val p2prior = .001
 
     @Test
@@ -23,9 +23,9 @@ class GenCobraPlots {
         val p2s = listOf(.001, .002, .005, .0075, .01, .02, .03, .04, .05)
         val reportedMeans = listOf(0.501, 0.502, 0.503, 0.504, 0.505, 0.506, 0.5075, 0.508, 0.51, 0.52, 0.53, 0.54, 0.55, 0.56, 0.58, 0.6,)
 
-        val config = Config.from(AuditType.CLCA, nsimEst = nsimEst)
+        val config = Config.from(AuditType.CLCA, nsimTrials = nSimTrials)
 
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
         reportedMeans.forEach { reportedMean ->
             p2s.forEach { p2 ->
                      val cobra = CobraSingleRoundAuditTaskGenerator(

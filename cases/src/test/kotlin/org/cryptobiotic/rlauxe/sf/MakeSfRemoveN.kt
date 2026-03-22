@@ -6,8 +6,8 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.boulder.AuditResult
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
+import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.estimateOld.makeDeciles
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
@@ -25,12 +25,12 @@ class MakeSfRemoveN {
     fun createSFOAvariance() {
         val topdir = "$testdataDir/cases/sf2024oa"
 
-        val tasks = mutableListOf<ConcurrentTaskG<Boolean>>()
+        val tasks = mutableListOf<ConcurrentTask<Boolean>>()
         repeat(20) { run ->
             tasks.add( RunOneAuditVarianceTask(run+1, topdir, AuditType.ONEAUDIT) )
         }
 
-        val estResults = ConcurrentTaskRunnerG<Boolean>().run(tasks, nthreads=10) // OOM, reduce threads
+        val estResults = ConcurrentTaskRunner<Boolean>().run(tasks, nthreads=10) // OOM, reduce threads
         println(estResults)
     }
 
@@ -38,7 +38,7 @@ class MakeSfRemoveN {
         val runIndex: Int,
         val topdir: String,
         val auditType: AuditType,
-    ) : ConcurrentTaskG<Boolean> {
+    ) : ConcurrentTask<Boolean> {
         val auditdir = "$topdir/audit$runIndex"
 
         override fun name() = "createSFElection $runIndex"
@@ -46,7 +46,7 @@ class MakeSfRemoveN {
         override fun run(): Boolean {
             val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
             val round = AuditRoundConfig(
-                SimulationControl(nsimEst = 22),
+                SimulationControl(nsimTrials = 22),
                 ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
                 ClcaConfig(fuzzMvrs=.001), null)
 
@@ -74,14 +74,14 @@ class MakeSfRemoveN {
     // @Test
     fun createSfRemoveNclca() {
 
-        val tasks = mutableListOf<ConcurrentTaskG<List<AuditResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<AuditResult>>>()
         repeat(11) { removeN ->
             val auditdir = "$testdataDir/cases/sf2024/clcan/audit$removeN"
             tasks.add(RunRemoveSFtask( removeN,1, auditdir, AuditType.CLCA))
         }
 
         val results: List<AuditResult> =
-            ConcurrentTaskRunnerG<List<AuditResult>>().run(tasks, nthreads = 5).flatten()
+            ConcurrentTaskRunner<List<AuditResult>>().run(tasks, nthreads = 5).flatten()
 
         println("CLCA results")
         results.forEach { println(it) }
@@ -91,14 +91,14 @@ class MakeSfRemoveN {
     // @Test
     fun createSfRemoveNoa() {
 
-        val tasks = mutableListOf<ConcurrentTaskG<List<AuditResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<AuditResult>>>()
         repeat(11) { removeN ->
             val auditDir = "$testdataDir/cases/sf2024/oan/audit$removeN"
             tasks.add(RunRemoveSFtask(removeN, 20, auditDir, AuditType.ONEAUDIT))
         }
 
         val estResults: List<AuditResult> =
-            ConcurrentTaskRunnerG<List<AuditResult>>().run(tasks, nthreads = 7).flatten()
+            ConcurrentTaskRunner<List<AuditResult>>().run(tasks, nthreads = 7).flatten()
 
         val results = mutableMapOf<Int, MutableList<AuditResult>>()
         println("OneAudit results")
@@ -121,13 +121,13 @@ class MakeSfRemoveN {
         val nruns: Int,
         val auditDir: String,
         val auditType: AuditType,
-    ) : ConcurrentTaskG<List<AuditResult>> {
+    ) : ConcurrentTask<List<AuditResult>> {
 
         override fun name() = "removeN= $removeN"
 
         override fun run(): List<AuditResult> {
             val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
-            val round = AuditRoundConfig(SimulationControl(nsimEst = 22), ContestSampleControl.NONE, ClcaConfig(), null)
+            val round = AuditRoundConfig(SimulationControl(nsimTrials = 22), ContestSampleControl.NONE, ClcaConfig(), null)
 
             createSfElection(
                 auditdir=auditDir,

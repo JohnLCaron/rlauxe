@@ -8,8 +8,8 @@ import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
+import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import org.cryptobiotic.util.runAllRoundsAndVerify
 import kotlin.test.Test
@@ -27,7 +27,7 @@ class MakeBoulderElection {
 
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 22),
+            SimulationControl(nsimTrials = 22),
             ContestSampleControl(
                 minRecountMargin = .005,
                 minMargin = 0.0,
@@ -61,7 +61,7 @@ class MakeBoulderElection {
 
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .05, PersistedWorkflowMode.testPrivateMvrs)
         val round = AuditRoundConfig(
-            SimulationControl(nsimEst = 20, estPercentile = listOf(42, 55, 67)),
+            SimulationControl(nsimTrials = 20, estPercentile = listOf(42, 55, 67)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 1000, auditSampleCutoff = 2000),
             ClcaConfig(fuzzMvrs = .001), null
         )
@@ -170,19 +170,19 @@ class MakeBoulderElection {
     fun createBoulderOAvariance() {
         val topdir = "$testdataDir/cases/boulder24oa2"
 
-        val tasks = mutableListOf<ConcurrentTaskG<Boolean>>()
+        val tasks = mutableListOf<ConcurrentTask<Boolean>>()
         repeat(20) { run ->
             tasks.add(RunOneAuditVarianceTask(run + 1, topdir))
         }
 
-        val estResults = ConcurrentTaskRunnerG<Boolean>().run(tasks, nthreads = 10) // OOM, reduce threads
+        val estResults = ConcurrentTaskRunner<Boolean>().run(tasks, nthreads = 10) // OOM, reduce threads
         println(estResults)
     }
 
     class RunOneAuditVarianceTask(
         val runIndex: Int,
         val topdir: String,
-    ) : ConcurrentTaskG<Boolean> {
+    ) : ConcurrentTask<Boolean> {
         val auditdir = "$topdir/audit$runIndex"
 
         override fun name() = "createBoulderElection $runIndex"
@@ -191,7 +191,7 @@ class MakeBoulderElection {
             val creation =
                 AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05, PersistedWorkflowMode.testPrivateMvrs)
             val round = AuditRoundConfig(
-                SimulationControl(nsimEst = 22),
+                SimulationControl(nsimTrials = 22),
                 ContestSampleControl(
                     minRecountMargin = .005,
                     minMargin = 0.0,

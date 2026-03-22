@@ -6,8 +6,8 @@ import org.cryptobiotic.rlauxe.betting.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskRunnerG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
+import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.estimate.VunderPoolsFuzzer
 import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
@@ -58,7 +58,7 @@ fun estimateSampleSizes(
     }
 
     // run estimation tasks concurrently
-    val estResults: List<EstimationResult> = ConcurrentTaskRunnerG<EstimationResult>(showTasks).run(tasks, nthreads=nthreads)
+    val estResults: List<EstimationResult> = ConcurrentTaskRunner<EstimationResult>(showTasks).run(tasks, nthreads=nthreads)
 
     // put results into assertionRounds
     estResults.forEach { estResult ->
@@ -162,7 +162,7 @@ class EstimateSampleSizeTask(
     val estStrategy: String,
     val prevSampleSize: Int,
     val moreParameters: Map<String, Double> = emptyMap(),
-) : ConcurrentTaskG<EstimationResult> {
+) : ConcurrentTask<EstimationResult> {
 
     override fun name() = "${contestRound.contestUA.id}-${assertionRound.assertion.assorter.shortName()}"
 
@@ -254,9 +254,9 @@ fun estimateClcaAssertionRound(
         ClcaFuzzSamplerTracker(simulation.simFuzzPct ?: 0.0, cardSamples, contestUA, cassorter, previousErrorTracker)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
-    logger.debug{ "estimateClcaAssertionRound for $name with ${simulation.nsimEst} trials"}
+    logger.debug{ "estimateClcaAssertionRound for $name with ${simulation.nsimTrials} trials"}
     val stopwatch = Stopwatch()
-    val ntrials = simulation.nsimEst
+    val ntrials = simulation.nsimTrials
 
     // run the simulation ntrials (=config.nsimEst) times
     val result: RunRepeatedResult = runRepeatedBettingMart(
@@ -394,9 +394,9 @@ fun estimateOneAuditAssertionRound(
         ClcaSamplerErrorTracker.fromIndexList(contestUA.contest.id, oaCassorter, oaFuzzedPairs, wantIndices, previousErrorTracker)
 
     val name = "${contestUA.id}-${assertionRound.assertion.assorter.shortName()}"
-    logger.debug{ "estimateOneAuditAssertionRound for $name with ${simulation.nsimEst} trials"}
+    logger.debug{ "estimateOneAuditAssertionRound for $name with ${simulation.nsimTrials} trials"}
     val stopwatch = Stopwatch()
-    val ntrials = simulation.nsimEst
+    val ntrials = simulation.nsimTrials
 
     val result = runRepeatedBettingMart(
         name,
@@ -469,7 +469,7 @@ fun estimatePollingAssertionRound(
     val samplerTracker = PollingFuzzSamplerTracker(useFuzz, mvrs, contestUA.contest as Contest, assorter)
 
     val name = "${contestUA.id}/${assertionRound.assertion.assorter.shortName()}"
-    logger.debug{ "estimatePollingAssertionRound for $name with ${simulation.nsimEst} trials"}
+    logger.debug{ "estimatePollingAssertionRound for $name with ${simulation.nsimTrials} trials"}
     val stopwatch = Stopwatch()
 
     val result = runRepeatedAlphaMart(
@@ -538,9 +538,9 @@ fun runRepeatedAlphaMart(
 
     val result: RunRepeatedResult = runRepeated(
         name,
-        ntrials = config.simulation.nsimEst,
+        ntrials = config.simulation.nsimTrials,
         testFn = testFn,
-        testParameters = mapOf("ntrials" to config.simulation.nsimEst.toDouble(), "polling" to 1.0) + moreParameters,
+        testParameters = mapOf("ntrials" to config.simulation.nsimTrials.toDouble(), "polling" to 1.0) + moreParameters,
         startingTestStatistic = startingTestStatistic,
         samplerTracker = samplerTracker,
         N = N,

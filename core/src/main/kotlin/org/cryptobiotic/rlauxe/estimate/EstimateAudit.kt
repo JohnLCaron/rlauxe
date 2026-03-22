@@ -12,6 +12,8 @@ import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
+import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.dfn
@@ -61,11 +63,11 @@ class EstimateAudit(
         // TODO use more simulations when the margin is low or calcNewMvrs are high ??
 
         // each trial is running all the contests in the round (but only the minAssertion)
-        val ntrials = if (auditType.isClca()) 1 else config.round.simulation.nsimEst
+        val ntrials = if (auditType.isClca()) 1 else config.round.simulation.nsimTrials
         repeat(ntrials) { run ->
             tasks.add(AuditTrialTask(roundIdx, run+1, config, contestsToAudit, pools, batches, cardManifest))
         }
-        val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunnerG<List<AssertionTrialIF>>().run(tasks, nthreads)
+        val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunner<List<AssertionTrialIF>>().run(tasks, nthreads)
 
         val trackerResults = mutableMapOf<Int, MutableList<AssertionTrialIF>>() // contestId -> list(trial)
         contestsToAudit.forEach { trackerResults[it.id] = mutableListOf() }
@@ -148,7 +150,7 @@ class AuditTrialTask(
     val contestsToAudit: List<ContestRound>,
     val pools: List<CardPool>?,
     val batches: List<BatchIF>?,
-    val cardManifest: CardManifest) : ConcurrentTaskG<List<AssertionTrialIF>> {
+    val cardManifest: CardManifest) : ConcurrentTask<List<AssertionTrialIF>> {
 
     override fun name() = "roundIdx $roundIdx Run $run"
 

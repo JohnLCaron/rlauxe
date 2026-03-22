@@ -1,157 +1,83 @@
-# Estimation notes
-_3/8/2026_
+# Estimation
 
-1. SubsetForEstimation (CLCA, OneAudit)
+## Under/Over estimating error rates
 
-        // cardManifest may not fit into memory, so extract in-memory subset of cardManifest to use for the estimations.
-        getSubsetForEstimation(
-            config,
-            auditRound.contestRounds,
-            cardManifest,
-            previousSamples,
-        ): CardSamples
+Overestimating sample sizes uses more hand-counted MVRs than needed. Underestimating sample sizes forces more rounds than needed.
+Over/under estimation is strongly influenced by over/under estimating error rates.
 
-For each Contest, decide on nsamples using estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: Int). 
-Then use (simplified variant of) ConsistentSampling to choose the actual Cards to put into CardSamples.
+The following plots show approximate distributions of estimated and actual sample sizes, for margin=2% and errors in the MVRs generated with 2% fuzz.
 
-This is the crux of the problem:
+When the estimated error rates are equal to the actual error rates:
 
-    fun estSamplesNeeded(config: AuditConfig, contestRound: ContestRound, ncards: Int) {
-        val nsamples = minAssertionRound.calcNewMvrsNeeded(contest, config) // TODO NEXT
-    
-        // TODO underestimates when nsamples is low ?
-        val stddev = .586 * nsamples - 23.85 // see https://github.com/JohnLCaron/rlauxe?tab=readme-ov-file#clca-with-errors
-    
-        val fac = 10
-        // Approximately 95.45% / 99.73% of the data in a normal distribution falls within two / three standard deviations of the mean.
-        val needed = if (stddev > 0) roundUp(nsamples + fac * stddev) else fac * nsamples
-    
-        // TODO using contestSampleCutoff as maximum
-        var est =  min( contest.Npop, needed)
-        if (config.contestSampleCutoff != null) est = min(config.contestSampleCutoff, est)
-    }
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/dist/estErrorRatesEqual.html" rel="estErrorRatesEqual">![estErrorRatesEqual](plots2/dist/estErrorRatesEqual.png)</a>
 
-* fac = 10 is ridiculous, should be fac = 3
-* problem is that 
-    1. stddev estimate is not good for small values of nsamples
-    2. calcNewMvrsNeeded can be negetive sometime. perhaps only OneAudit using optimalBet ??
+When the estimated error rates are double the actual error rates:
 
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/dist//estErrorRatesDouble.html" rel="estErrorRatesDouble">![estErrorRatesDouble](plots2/dist/estErrorRatesDouble.png)</a>
 
-2. Estimation (CLCA and OneAudit):
+When the estimated error rates are half the actual error rates:
 
-Get the CardSamples one time. For OneAudit, use VunderFuzz one time to create mvr pairs, and optionally fuzz CVRs.
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/dist/estErrorRatesHalf.html" rel="estErrorRatesHalf">![estErrorRatesHalf](plots2/dist/estErrorRatesHalf.png)</a>
 
-Run simulation for each contest and assertion.
+These are generated without using rounds. When using rounds, surprisingly its better to start with an initial guess of
+no simulated fuzzing, as these plots show:
 
-Always use GeneralAdaptiveBetting(apriori, nphantoms)
+Here are the average extra samples vs the average number of rounds for mvrs with 1/1000 fuzz:
+<p>
+  <img alt="Equal" src="plots2/extra/extraVsMarginCalc001Linear.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp; 
+  <img alt="Half" src="plots2/extra/extraVsMarginCalc001NroundsLinear.png" width="45%">
+</p>
 
-CLCA: Optionally fuzz the CardSamples with config.simFuzzPct 
-    sampler = ClcaFuzzSamplerTracker(config.simFuzzPct ?: 0.0, cardSamples, contestUA, cassorter, assertionRound.previousErrorCounts())
-        (extracts cards for this contest from CardSamples).
+Here are the average extra samples vs the average number of rounds for mvrs with 2/1000 fuzz:
+<p>
+  <img alt="Equal" src="plots2/extra/extraVsMarginCalc002Linear.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp; 
+  <img alt="Half" src="plots2/extra/extraVsMarginCalc002NroundsLinear.png" width="45%">
+</p>
 
-    Set results into estimationResult.estimatedDistribution
-    Set calcMvrsNeeded = assertionRound.calcNewMvrsNeeded(contestRound.contestUA, config) into estimationResult.calcNewMvrsNeeded
+Here are the average extra samples vs the average number of rounds for mvrs with 3/1000 fuzz:
+<p>
+  <img alt="Equal" src="plots2/extra/extraVsMarginCalc003Linear.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp; 
+  <img alt="Half" src="plots2/extra/extraVsMarginCalc003NroundsLinear.png" width="45%">
+</p>
 
-    Set estimationResult.simNewMvrsNeeded = when {
-            (result.sampleCount.size < ntrials/2) -> calcMvrsNeeded // more than half the simulations fail
-            (roundIdx == 1) -> result.findQuantile(.50) // TODO set quantile value in AuditConfig ??
-            else -> result.findQuantile(config.quantile)
-        }
+In all three cases, using 0% simulation has the lowest extra samples, better than using simFuzzPct that matches the true
+fuzz (fuzzMvrs). Note that these are averages over 1000 trials. The reason 0% simulation has the lowest extra samples
+is probably that with a large variance, one is better off underestimating the sample size on the first round,
+and then on the second round using the measured error rates to estimate how many are left to do.
 
-OneAudit: Optionally fuzz the CardSamples with vunderFuzz(config.simFuzzPct), then use vunderFuzz.mvrCvrPairs is in ClcaSamplerErrorTracker
-    val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
-    val sampler = ClcaSamplerErrorTracker.fromIndexList(contestUA.contest.id, oaCassorter, oaFuzzedPairs, wantIndices, assertionRound.previousErrorCounts())
-        (extracts cards for this contest from CardSamples).
-    
-    Set results into estimationResult.estimatedDistribution
-    Set calcMvrsNeeded = assertionRound.calcNewMvrsNeeded(contestRound.contestUA, config) into estimationResult.calcNewMvrsNeeded
+The trade off in using 0% simulation is that the average number of rounds goes up. (In the future, we could allow the
+auitors to assign a cost to sampling n ballots and a cost to an audit round, and attempt to minimize the overall costs.)
 
-    Set estimationResult.simNewMvrsNeeded = when {
-            (result.sampleCount.size < ntrials/2) -> calcMvrsNeeded // more than half the simulations fail
-            (roundIdx == 1) -> result.findQuantile(.50) // TODO value put in AuditConfig ??
-            else -> result.findQuantile(config.quantile)
-        }
+Based on these findings, we have chosen to use the _optimistic strategy_: for round 1, we simualte the sample distribution assuming no errors.
+For subsequent rounds, we use the measured error rates from the previous round. The user can control what percentile of
+the distribution is used for the estimate foreach round. The default is to take the 50th percentile on round 1, and the 80th percentile on subsequent rounds.
 
-* how can "more than half the simulations fail" ?  
+The results of this strategy are shown here:
 
-  3. After Estimation (CLCA and OneAudit):
+<p>
+  <img alt="Equal" src="plots2/extra2/extraVsMarginCalc001ga3Linear.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp; 
+  <img alt="Half" src="plots2/extra2/extraVsMarginCalc001ga3NroundsLinear.png" width="45%">
+</p>
 
-          if ((config.isClca || config.isOA ) && auditRound.roundIdx == 1 && config.simulationStrategy == SimulationStrategy.optimistic) {
-              calculateSampleSizes(config, auditRound, overwrite = false)
-          }
+Here are the average extra samples vs the average number of rounds for mvrs with 2/1000 fuzz:
+<p>
+  <img alt="Equal" src="plots2/extra2/extraVsMarginCalc002ga3Linear.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp; 
+  <img alt="Half" src="plots2/extra2/extraVsMarginCalc002ga3NroundsLinear.png" width="45%">
+</p>
 
-          // assertionRound.calcNewMvrsNeeded is written to     
-          // assertionRound.estNewMvrs, assertionRound.estMvrs, // what is this doing, why are we doing it ??
-          // estimationResult.calcNewMvrsNeeded                 // already done. not needed
-          // and if (overwrite) contestRound.estNewMvrs, contestRound.maxNewEstMvrs
+Here are the average extra samples vs the average number of rounds for mvrs with 3/1000 fuzz:
+<p>
+  <img alt="Equal" src="plots2/extra2/extraVsMarginCalc003ga3Linear.png" width="45%">
+&nbsp; &nbsp; &nbsp; &nbsp; 
+  <img alt="Half" src="plots2/extra2/extraVsMarginCalc003ga3NroundsLinear.png" width="45%">
+</p>
 
+Here are interactive plots to zoom in on more detail:
 
-
-|               | round | apriori | nphantoms | measured | OAassortRates | use  |
-|---------------|-------|---------|-----------|----------|---------------|------|
-| clca subset   | 1     | x       | x         |          |               | calc |
-| clca estimate | 1     | x       | x         |          |               | sim  |
-| clca subset   | > 1   | ?       | ?         | x        |               | calc |
-| clca estimate | > 1   | ?       | ?         | x        |               | sim  |
-
-
-* calc : AssertionRound.calcNewMvrsNeeded
-* sim  : simulate the audit n trials, create distribution, use kth quantile
-
-## clca subset round 1
-
-
-
-=================
-
-When sampling elements without replacement from a finite population of size N
-where an element occurs with probability p
-(meaning N*p elements have the characteristic), "Bernoulli distribution"
-
-the sample variance of the number of successes is 
-
-Var(X) = n * p * (1 - p) (N - n) / (N - 1)
-
-where (N - n) / (N - 1) is the finite population correction
-
-N = 351540
-n = 203
-p = 21083 / 351540 = .059973
-
-fpc = (N - n) / (N - 1) = .999092562
-n * p * (1 - p) * fpc = 0.999092562 × (.059973) × (1 − .059973) × 203 = 11.43
-stddev = 3.38
-
-in a sample of 203, expect 12.2 +/- 3.4.
-if you find more phantoms, sample size go up 
-
-    // you could just count the damn number of phantoms you are going to see....
-    // you could run a mini audit to track the phantoms and just keep adding cards until you pass the risk limit.
-    // is that kosher? It might solve the "variance due to phantoms" problem.
-    // maybe you should not do incremental, just start over each time ???
-    // maybe its bogus to have so many phantoms - they should be undervotes....
-
-    // corla contest 116 - margin .133, noerror is .536 (payoff 1.0685) and phantom pct is 6% (payoff .5531)
-    //  (1.0684)^n * (.5531) = 1
-    // n = -ln(.5531) / ln(1.0684) = 9
-    // n_payoffRisk = ln (.03) ÷ ln(1.0685) = 52
-    // n_payoffPhantoms = nphantoms * n
-    // nphantoms = phantomPct * sampleSize
-    // sampleSize = n_payoffRisk + phantomPct * sampleSize * 9
-    // sampleSize = n_payoffRisk / (1 - phantomPct * 9)
-    // phantomPct = .06, sampleSize = 113,
-    // phantomPct = .08, sampleSize = 185,
-    // phantomPct = .09, sampleSize = 274,
-    // phantomPct = .10, sampleSize = 520 (!) close to the margin
-
-Note 
-
-    variance = n * p * (1 - p) is linear with n;  (N - n) / (N - 1) ~ 1 when n << N
-
-    n = sampleSize = n_payoffRisk / (1 - phantomPct * 9) = 52 / (1 - p * 9) = 113 when p = .06
-
-    phantomCount = 12.2 +/- 3.4 = 8.8 .. 15.6
-    if phantomCount =  15.6, pct = 15.6/203 = 
-
-    
-
+* [interactive extra samples plots](https://johnlcaron.github.io/rlauxe/docs/plots2/extra2/extraSamples.html)
+* [interactive number of rounds plots](https://johnlcaron.github.io/rlauxe/docs/plots2/extra2/numberOfRounds.html)

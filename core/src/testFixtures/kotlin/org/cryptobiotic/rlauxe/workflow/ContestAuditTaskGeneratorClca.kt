@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.estimateOld.simulateCvrsFromMargin
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import kotlin.math.max
 
 // Simulate single Contest, do regular audit
@@ -18,12 +19,12 @@ class ClcaContestAuditTaskGenerator(
     val parameters : Map<String, Any>,
     val config: Config? = null,
     val Npop: Int = Nc,
-    val nsimEst: Int = 100,
+    val nSimTrials: Int = 100,
 ): ContestAuditTaskGenerator {
     override fun name() = name
 
     override fun generateNewTask(): SingleContestAuditTask {
-        val useConfig = config ?: Config.from( AuditType.CLCA, nsimEst = nsimEst, fuzzMvrs=mvrsFuzzPct)
+        val useConfig = config ?: Config.from( AuditType.CLCA, nsimTrials = nSimTrials, fuzzMvrs=mvrsFuzzPct)
 
         var (cu, testCvrs) = simulateCvrsFromMargin(
             Nc = Nc,
@@ -122,7 +123,7 @@ class ClcaSingleRoundWorkflowTask(
     val auditor: ClcaAssertionAuditorIF, // can be used for both Clca and OneAudit
     val testMvrs: List<Cvr>, // needed for tracking the true margin of the mvrs, for plotting
     val parameters: Map<String, Any> = emptyMap(),
-) : ConcurrentTaskG<WorkflowResult> {
+) : ConcurrentTask<WorkflowResult> {
 
     override fun name() = name
 

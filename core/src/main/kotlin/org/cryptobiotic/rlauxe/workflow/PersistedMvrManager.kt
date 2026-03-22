@@ -13,9 +13,6 @@ import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.verify.verifyMvrCardPairs
 
-private val logger = KotlinLogging.logger("PersistedMvrManager")
-private val checkValidity = true
-
 // assumes that the mvrs have been set externally into the election record, eg by EnterMvrsCli.
 // skip writing when doing runRoundAgain
 open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boolean = true): MvrManager {
@@ -63,6 +60,11 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     }
 
     fun auditableCards(): CloseableIterator<AuditableCard> = sortedManifest.cards.iterator()
+
+    companion object {
+        private val logger = KotlinLogging.logger("PersistedMvrManager")
+        private val checkValidity = true
+    }
 }
 
 // for viewer

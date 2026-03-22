@@ -11,7 +11,7 @@ class TestRaireAudit {
 
     @Test
     fun testRaireClcaWithStyle() {
-        testRaireWorkflow(Config.from(AuditType.CLCA, nsimEst=10))
+        testRaireWorkflow(Config.from(AuditType.CLCA, nsimTrials=10))
     }
 
     fun testRaireWorkflow(auditConfig: Config) {
@@ -24,7 +24,7 @@ class TestRaireAudit {
     @Test
     fun testRaireFuzz() {
         val mvrFuzzPct = .02
-        val config = Config.from(AuditType.CLCA, nsimEst=10, simFuzzPct = mvrFuzzPct, fuzzMvrs = mvrFuzzPct)
+        val config = Config.from(AuditType.CLCA, nsimTrials=10, simFuzzPct = mvrFuzzPct, fuzzMvrs = mvrFuzzPct)
 
         val (rcontest: RaireContestWithAssertions, testCvrs: List<Cvr>) = simulateRaireTestContest(N=20000, contestId=111, ncands=4, minMargin=.04, quiet = true)
         val testMvrs =  makeFuzzedCvrsForClca(listOf(rcontest.contest.info()) , testCvrs, mvrFuzzPct)

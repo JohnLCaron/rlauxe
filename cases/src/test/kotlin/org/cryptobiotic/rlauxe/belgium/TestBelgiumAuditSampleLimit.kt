@@ -55,7 +55,7 @@ fun createBelgiumElectionLimited(electionName: String, topdir: String, contestId
 
     val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, riskMeasuringSampleLimit=1000)
     val round = AuditRoundConfig(
-        SimulationControl(nsimEst = 1),
+        SimulationControl(nsimTrials = 1),
         ContestSampleControl.NONE,
         ClcaConfig(fuzzMvrs=0.0), null)
 

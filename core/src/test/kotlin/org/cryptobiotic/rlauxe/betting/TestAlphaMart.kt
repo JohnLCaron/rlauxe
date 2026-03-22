@@ -37,7 +37,7 @@ class TestAlphaMart {
         val assorter = contestUA.minPollingAssertion()!!.assorter
 
         val cvrs = test.makeCvrsFromContests()
-        val config = Config.from(ElectionInfo("testRunAlphaMart", AuditType.POLLING, totalCardCount = cvrs.size, contestCount=1), nsimEst = 10)
+        val config = Config.from(ElectionInfo("testRunAlphaMart", AuditType.POLLING, totalCardCount = cvrs.size, contestCount=1), nsimTrials = 10)
         val samplerTracker = PollingSamplerTracker(contestUA.contest.id, assorter, cvrs.zip(cvrs))
 
         val eta0 = assorter.dilutedMean()

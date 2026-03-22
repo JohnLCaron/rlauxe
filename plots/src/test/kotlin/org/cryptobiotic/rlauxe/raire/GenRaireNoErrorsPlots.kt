@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.raire
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.ScaleType
@@ -19,7 +19,7 @@ import kotlin.test.Test
 
 class GenRaireNoErrorsPlots {
     val nruns = 100
-    val nsimEst = 100
+    val nSimTrials = 100
     val N = 20000
     val name = "raireNoErrors"
     val dirName = "$testdataDir/plots/$name"
@@ -29,20 +29,20 @@ class GenRaireNoErrorsPlots {
         val margins =
             listOf(.005, .0075, .01, .012, .016, .02, .03, .04, .05)
 
-        val config =  Config.from( AuditType.CLCA, nsimEst = nsimEst)
+        val config =  Config.from( AuditType.CLCA, nsimTrials = nSimTrials)
 
         val stopwatch = Stopwatch()
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
         margins.forEach { margin ->
             val raireGenerator = RaireContestAuditTaskGenerator(
-                N, margin, 0.0, 0.0, 0.0, nsimEst=nsimEst,
+                N, margin, 0.0, 0.0, 0.0, nSimTrials=nSimTrials,
                 config=config,
                 parameters=mapOf("nruns" to nruns, "cat" to "raire")
             )
             tasks.add(RepeatedWorkflowRunner(nruns, raireGenerator))
 
             val noerrorGenerator = ClcaContestAuditTaskGenerator("raireNoErrorsPlots margin=$margin",
-                N, margin, 0.0, 0.0, 0.0, nsimEst=nsimEst,
+                N, margin, 0.0, 0.0, 0.0, nSimTrials=nSimTrials,
                 config=config,
                 parameters=mapOf("nruns" to nruns, "cat" to "clcaNoerror")
             )

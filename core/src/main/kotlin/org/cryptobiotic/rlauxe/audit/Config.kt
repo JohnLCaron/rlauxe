@@ -5,8 +5,6 @@ import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.util.secureRandom
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 
-private val logger = KotlinLogging.logger("Config")
-
 data class Config(
     val election: ElectionInfo,
     val creation: AuditCreationConfig,
@@ -57,47 +55,47 @@ data class Config(
 
     companion object {
 
-        fun from( auditType: AuditType,
-                  riskLimit:Double= .05,
-                  nsimEst:Int=10,
-                  simFuzzPct: Double? = null,
-                  fuzzMvrs:Double? = null,
-                  contestSampleCutoff:Int? = if (auditType.isPolling()) 10000 else 2000,
-                  apriori: TausRates = TausRates(emptyMap()),
-                  persistedWorkflowMode: PersistedWorkflowMode = if (auditType.isClca())
+        fun from(auditType: AuditType,
+                 riskLimit:Double= .05,
+                 nsimTrials:Int=10,
+                 simFuzzPct: Double? = null,
+                 fuzzMvrs:Double? = null,
+                 contestSampleCutoff:Int? = if (auditType.isPolling()) 10000 else 2000,
+                 apriori: TausRates = TausRates(emptyMap()),
+                 persistedWorkflowMode: PersistedWorkflowMode = if (auditType.isClca())
                       PersistedWorkflowMode.testClcaSimulated else PersistedWorkflowMode.testPrivateMvrs,): Config {
 
             return from(ElectionInfo.forTest(auditType),
-                riskLimit, nsimEst, simFuzzPct, fuzzMvrs, contestSampleCutoff, apriori, persistedWorkflowMode)
+                riskLimit, nsimTrials, simFuzzPct, fuzzMvrs, contestSampleCutoff, apriori, persistedWorkflowMode)
         }
 
-        fun from( electionInfo: ElectionInfo,
-                  riskLimit:Double= .05,
-                  nsimEst:Int=10,
-                  simFuzzPct: Double? = null,
-                  fuzzMvrs:Double? = null,
-                  contestSampleCutoff:Int? = if (electionInfo.auditType.isPolling()) 10000 else 2000,
-                  apriori: TausRates = TausRates(emptyMap()),
-                  persistedWorkflowMode: PersistedWorkflowMode = if (electionInfo.auditType.isClca())
+        fun from(electionInfo: ElectionInfo,
+                 riskLimit:Double= .05,
+                 nsimTrials:Int=10,
+                 simFuzzPct: Double? = null,
+                 fuzzMvrs:Double? = null,
+                 contestSampleCutoff:Int? = if (electionInfo.auditType.isPolling()) 10000 else 2000,
+                 apriori: TausRates = TausRates(emptyMap()),
+                 persistedWorkflowMode: PersistedWorkflowMode = if (electionInfo.auditType.isClca())
                       PersistedWorkflowMode.testClcaSimulated else PersistedWorkflowMode.testPrivateMvrs,): Config {
 
             return if (electionInfo.auditType.isPolling()) forPolling(electionInfo,
-                riskLimit, nsimEst, simFuzzPct, contestSampleCutoff, persistedWorkflowMode)
+                riskLimit, nsimTrials, simFuzzPct, contestSampleCutoff, persistedWorkflowMode)
             else forClca(electionInfo,
-                riskLimit, nsimEst, simFuzzPct, fuzzMvrs, contestSampleCutoff, apriori, persistedWorkflowMode)
+                riskLimit, nsimTrials, simFuzzPct, fuzzMvrs, contestSampleCutoff, apriori, persistedWorkflowMode)
         }
 
-        fun forClca( electionInfo: ElectionInfo,
-                     riskLimit:Double= .05,
-                     nsimEst:Int= 10,
-                     simFuzzPct: Double? = null,
-                     fuzzMvrs:Double? = null,
-                     contestSampleCutoff:Int?= 2000,
-                     apriori: TausRates = TausRates(emptyMap()),
-                     persistedWorkflowMode: PersistedWorkflowMode = PersistedWorkflowMode.testClcaSimulated): Config {
+        fun forClca(electionInfo: ElectionInfo,
+                    riskLimit:Double= .05,
+                    nsimTrials:Int= 10,
+                    simFuzzPct: Double? = null,
+                    fuzzMvrs:Double? = null,
+                    contestSampleCutoff:Int?= 2000,
+                    apriori: TausRates = TausRates(emptyMap()),
+                    persistedWorkflowMode: PersistedWorkflowMode = PersistedWorkflowMode.testClcaSimulated): Config {
             val creation = AuditCreationConfig(electionInfo.auditType, riskLimit=riskLimit, persistedWorkflowMode=persistedWorkflowMode)
             val round = AuditRoundConfig(
-                SimulationControl(nsimEst=nsimEst, simFuzzPct=simFuzzPct),
+                SimulationControl(nsimTrials=nsimTrials, simFuzzPct=simFuzzPct),
                 ContestSampleControl(contestSampleCutoff=contestSampleCutoff),
                 ClcaConfig(fuzzMvrs=fuzzMvrs, apriori=apriori),
                 null
@@ -105,15 +103,15 @@ data class Config(
             return Config(electionInfo, creation, round)
         }
 
-        fun forPolling( electionInfo: ElectionInfo,
-                        riskLimit:Double= .05,
-                        nsimEst:Int=10,
-                        simFuzzPct: Double? = null,
-                        contestSampleCutoff:Int? = 10000,
-                        persistedWorkflowMode:PersistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs): Config {
+        fun forPolling(electionInfo: ElectionInfo,
+                       riskLimit:Double= .05,
+                       nsimTrials:Int=10,
+                       simFuzzPct: Double? = null,
+                       contestSampleCutoff:Int? = 10000,
+                       persistedWorkflowMode:PersistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs): Config {
             val creation = AuditCreationConfig(electionInfo.auditType, riskLimit=riskLimit, persistedWorkflowMode=persistedWorkflowMode)
             val round = AuditRoundConfig(
-                SimulationControl(nsimEst=nsimEst, simFuzzPct=simFuzzPct),
+                SimulationControl(nsimTrials=nsimTrials, simFuzzPct=simFuzzPct),
                 ContestSampleControl(contestSampleCutoff=contestSampleCutoff),
                 null,
                 PollingConfig()
@@ -203,7 +201,7 @@ data class AuditRoundConfig(
 enum class SimulationStrategy { regular, optimistic  }
 
 data class SimulationControl(
-    val nsimEst: Int = 20, // number of simulation estimation trials
+    val nsimTrials: Int = 20, // number of simulation estimation trials
     val estPercentile: List<Int> = listOf(50, 80), // use this percentile of the distribution of estimated sample sizes
     val simFuzzPct: Double? = null, // for estimation fuzzing
     val simulationStrategy: SimulationStrategy = SimulationStrategy.optimistic
@@ -249,6 +247,7 @@ data class ContestSampleControl(
     companion object {
         val removeMaxContests = "removeMaxContests"
         val NONE = ContestSampleControl(0.0, 0.0, 0.0, null, null, false,emptyMap())
+        private val logger = KotlinLogging.logger("ContestSampleControl")
     }
 }
 

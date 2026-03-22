@@ -21,6 +21,8 @@ dependencies {
 
     testImplementation(platform("org.junit:junit-bom:5.13.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("com.google.guava:guava:33.5.0-jre")
+    testImplementation("com.google.truth:truth:1.4.5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     testFixturesImplementation(files("../libs/raire-java-1.0.2.jar"))

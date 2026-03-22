@@ -1,13 +1,13 @@
 
 package org.cryptobiotic.rlauxe.concur
 
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.workflow.WorkflowResult
 import org.cryptobiotic.rlauxe.workflow.ContestAuditTaskGenerator
 
 // TODO specific to ContestAuditTaskGenerator ??
 class RepeatedWorkflowRunner (val nruns: Int, val taskGenerator: ContestAuditTaskGenerator):
-    ConcurrentTaskG<List<WorkflowResult>> {
+    ConcurrentTask<List<WorkflowResult>> {
 
     override fun name(): String = "Repeated-${taskGenerator.name()}"
 

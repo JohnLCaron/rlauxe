@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.estimate.ConcurrentTaskG
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -25,7 +25,7 @@ class AuditsWithPhantoms {
         val phantoms = listOf(.00, .001, .002, .005, .01, .02, .03, .04, .05)
         val stopwatch = Stopwatch()
 
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
 
         phantoms.forEach { phantom ->
             val pollingGenerator = PollingSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
@@ -65,14 +65,14 @@ class AuditsWithPhantoms {
     @Test
     fun genAuditsWithPhantomsPlotsMarginShift() {
         val nruns = 10  // number of times to run workflow
-        val nsimEst = 100
+        val nSimTrials = 100
         val margin = .045
         val phantoms = listOf(.00, .005, .01, .02, .03, .035, .04, .0425)
         val stopwatch = Stopwatch()
 
-        val auditConfig = Config.from(AuditType.CLCA, nsimEst = nsimEst)
+        val auditConfig = Config.from(AuditType.CLCA, nsimTrials = nSimTrials)
 
-        val tasks = mutableListOf<ConcurrentTaskG<List<WorkflowResult>>>()
+        val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
         phantoms.forEach { phantom ->
             val clcaGenerator = ClcaSingleRoundAuditTaskGenerator(N, margin, 0.0, phantomPct=phantom, mvrFuzzPct,
                 config=auditConfig,

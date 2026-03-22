@@ -367,7 +367,7 @@ class TestHasStyle {
         val auditdir = "$topdir/audit"
         createElectionRecord(election, auditDir = auditdir)
 
-        val config = Config.from(election.electionInfo(), nsimEst = 100,
+        val config = Config.from(election.electionInfo(), nsimTrials = 100,
             apriori = TausRates(mapOf("win-oth" to .001)))
 
         createAuditRecord(config, election, auditDir = auditdir)
@@ -402,7 +402,7 @@ class TestHasStyle {
         val auditdir = "$topdir/audit"
         createElectionRecord(election, auditDir = auditdir)
 
-        val config = Config.from(election.electionInfo(), nsimEst = 100,
+        val config = Config.from(election.electionInfo(), nsimTrials = 100,
             apriori = TausRates(mapOf("win-oth" to .001)))
 
         createAuditRecord(config, election, auditDir = auditdir)

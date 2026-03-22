@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.estimateOld.simulateCvrsFromMargin
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import kotlin.math.max
 
 class PollingContestAuditTaskGenerator(
@@ -16,14 +17,14 @@ class PollingContestAuditTaskGenerator(
     val parameters : Map<String, Any>,
     val auditConfig: Config? = null,
     val Npop: Int,
-    val nsimEst: Int = 100,
+    val nSimTrials: Int = 100,
     ) : ContestAuditTaskGenerator {
 
     override fun name() = "PollingWorkflowTaskGenerator"
 
-    override fun generateNewTask(): ConcurrentTaskG<WorkflowResult> {
+    override fun generateNewTask(): ConcurrentTask<WorkflowResult> {
         val useConfig = auditConfig ?: Config.from(
-            AuditType.POLLING, nsimEst = nsimEst, simFuzzPct = mvrsFuzzPct,
+            AuditType.POLLING, nsimTrials = nSimTrials, simFuzzPct = mvrsFuzzPct,
         )
 
         val (cu, testCvrs) = simulateCvrsFromMargin(
@@ -91,7 +92,7 @@ class PollingSingleRoundAuditTask(
     val testMvrs: List<Cvr>,
     val otherParameters: Map<String, Any>,
     val quiet: Boolean,
-) : ConcurrentTaskG<WorkflowResult> {
+) : ConcurrentTask<WorkflowResult> {
 
     override fun name() = name
 

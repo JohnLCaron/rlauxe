@@ -12,7 +12,6 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import java.nio.file.Files.notExists
 import java.nio.file.Path
 
@@ -89,7 +88,7 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRo
             val nextRound = workflow.startNewRound(quiet = false, onlyTask)
 
             // get matching mvrs if needed
-            if (!nextRound.auditIsComplete && auditRecord.config.creation.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs) {
+            if (!nextRound.auditIsComplete && auditRecord.config.election.mvrSource == MvrSource.testPrivateMvrs) {
                 val publisher = Publisher(auditDir)
                 val ncards = writeMvrsForRound(publisher, roundIdx)
                 logger.info{"writeMvrsForRound ${ncards} cards to ${publisher.sampleMvrsFile(roundIdx)}"}

@@ -1,7 +1,9 @@
 {
+    "electionName": "TestOneAuditElection",
     "auditType": "ONEAUDIT",
     "ncards": 50500,
     "ncontests": 1,
     "cvrsContainUndervotes": true,
-    "poolsHaveOneCardStyle": true
+    "poolsHaveOneCardStyle": true,
+    "mvrSource": "testPrivateMvrs"
 }

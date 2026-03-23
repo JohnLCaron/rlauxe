@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.workflow.*
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
+import org.cryptobiotic.rlauxe.audit.MvrSource
 import kotlin.test.Test
 
 // show distribution of Clca samplesNeeded estimation vs actual audits
@@ -30,7 +30,7 @@ class ClcaDistributions {
     fun plotClcaDistributions() {
         val auditConfig = Config.from(AuditType.CLCA,
             nsimTrials = nSimTrials, simFuzzPct = simFuzzPct,
-            persistedWorkflowMode =  PersistedWorkflowMode.testClcaSimulated,
+            mvrSource =  MvrSource.testClcaSimulated,
             // TODO needed ?? simulationStrategy = SimulationStrategy.regular,
             fuzzMvrs=mvrsFuzzPct,
         )

@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.estimateOld.makeDeciles
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
+import org.cryptobiotic.rlauxe.audit.MvrSource
 import org.cryptobiotic.util.runAllRoundsAndVerify
 import kotlin.collections.List
 import kotlin.collections.forEach
@@ -44,7 +44,7 @@ class MakeSfRemoveN {
         override fun name() = "createSFElection $runIndex"
 
         override fun run(): Boolean {
-            val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
+            val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, )
             val round = AuditRoundConfig(
                 SimulationControl(nsimTrials = 22),
                 ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
@@ -126,7 +126,7 @@ class MakeSfRemoveN {
         override fun name() = "removeN= $removeN"
 
         override fun run(): List<AuditResult> {
-            val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
+            val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, )
             val round = AuditRoundConfig(SimulationControl(nsimTrials = 22), ContestSampleControl.NONE, ClcaConfig(), null)
 
             createSfElection(

@@ -18,7 +18,6 @@ import org.cryptobiotic.rlauxe.sf.createSfElection
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.test.Test
 
 class TestGenerateAllUseCases {
@@ -29,7 +28,7 @@ class TestGenerateAllUseCases {
     fun createBoulder24oa() {
         val auditdir = "$testdataDir/cases/boulder24/oa/audit"
 
-        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 22),
             ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
@@ -48,7 +47,7 @@ class TestGenerateAllUseCases {
     fun createBoulder24clca() { // simulate CVRs
         val auditdir = "$testdataDir/cases/boulder24/clca/audit"
 
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 20, estPercentile = listOf(42, 55, 67)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 1000, auditSampleCutoff = 2000),
@@ -70,7 +69,7 @@ class TestGenerateAllUseCases {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 10, estPercentile = listOf(42, 55, 67)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 10000, auditSampleCutoff = 20000),
@@ -88,7 +87,7 @@ class TestGenerateAllUseCases {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 10, estPercentile = listOf(50, 80)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
@@ -106,7 +105,7 @@ class TestGenerateAllUseCases {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 10, estPercentile = listOf(50, 80)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
@@ -124,7 +123,7 @@ class TestGenerateAllUseCases {
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
         val precinctFile = "src/test/data/corla/2024election/2024GeneralPrecinctLevelResults.zip"
 
-        val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 10, estPercentile = listOf(50, 80)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 200000, auditSampleCutoff = 100000),
@@ -141,7 +140,7 @@ class TestGenerateAllUseCases {
     fun makeSFElectionOA() {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
 
-        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 22),
             ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
@@ -162,7 +161,7 @@ class TestGenerateAllUseCases {
     fun makeSFElectionClca() {
         val auditdir = "$testdataDir/cases/sf2024/clca/audit"
 
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 22),
             ContestSampleControl(contestSampleCutoff = 1000, auditSampleCutoff = 2000),

@@ -12,7 +12,7 @@ import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.dhondt.ProtoContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
+import org.cryptobiotic.rlauxe.audit.MvrSource
 import kotlin.test.Test
 import kotlin.test.fail
 
@@ -53,7 +53,7 @@ class TestCreateBelgiumClcaFromSpreadsheet {
         }
         println()
 
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05)
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 1),
             ContestSampleControl(contestSampleCutoff = 1000, auditSampleCutoff = 2000),

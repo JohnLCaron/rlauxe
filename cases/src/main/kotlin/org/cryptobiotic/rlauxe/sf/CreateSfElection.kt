@@ -24,7 +24,6 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.utils.countPhantoms
 import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.Boolean
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -40,7 +39,8 @@ class CreateSfElection(
     val cvrExportCsv: String,
     val auditType: AuditType,
     val poolsHaveOneCardStyle: Boolean,
-): CreateElectionIF {
+    val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
+    ): CreateElectionIF {
     val cardPoolMapByName: Map<String, OneAuditPoolFromCvrs>
     val cardPoolBuilders: List<OneAuditPoolFromCvrs>
     val cardPools: List<CardPool>
@@ -148,7 +148,8 @@ class CreateSfElection(
     }
 
     override fun electionInfo() = ElectionInfo(
-        "SF24$auditType", auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = poolsHaveOneCardStyle,
+        "SF24$auditType", auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true,
+        poolsHaveOneCardStyle = poolsHaveOneCardStyle, mvrSource = mvrSource
     )
 
     override fun batches() = if (auditType.isClca()) emptyList() else cardPoolBuilders
@@ -328,6 +329,7 @@ fun createSfElection(
     cvrExportCsv: String,
     creation: AuditCreationConfig,
     round: AuditRoundConfig,
+    mvrSource: MvrSource = MvrSource.testPrivateMvrs,
  ): Result<AuditRoundIF, ErrorMessages> {
     val stopwatch = Stopwatch()
 
@@ -338,6 +340,7 @@ fun createSfElection(
         cvrExportCsv,
         auditType = creation.auditType,
         poolsHaveOneCardStyle=false,
+        mvrSource = mvrSource
     )
     createElectionRecord(election, auditDir = auditdir)
     logger.info{"createSfElection took $stopwatch"}

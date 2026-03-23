@@ -23,7 +23,6 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import org.cryptobiotic.rlauxe.workflow.findSamples
 import java.io.File
 import java.nio.file.Files.notExists
@@ -52,7 +51,7 @@ fun createAuditRecord(config: Config, election: CreateElectionIF, auditDir: Stri
 
     // save Mvrs for testing and diagnostics
     // cant write the sorted mvrs until after sortedCards is written
-    if (config.creation.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs) {
+    if (config.election.mvrSource == MvrSource.testPrivateMvrs) {
         val unsortedMvrs = election.createUnsortedMvrsInternal()
         if (unsortedMvrs != null) {
             writePrivateMvrsInternal(publisher, unsortedMvrs, seed = config.creation.seed)
@@ -112,7 +111,7 @@ fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditR
         val nextRound = workflow.startNewRound(quiet = false, onlyTask)
 
         // get matching mvrs if needed
-        if (auditRecord.config.persistedWorkflowMode == PersistedWorkflowMode.testPrivateMvrs) {
+        if (auditRecord.config.mvrSource == MvrSource.testPrivateMvrs) {
             val publisher = Publisher(auditDir)
             val ncards = writeMvrsForRound(publisher, roundIdx)
             logger.info{"writeMvrsForRound ${ncards} cards to ${publisher.sampleMvrsFile(roundIdx)}"}

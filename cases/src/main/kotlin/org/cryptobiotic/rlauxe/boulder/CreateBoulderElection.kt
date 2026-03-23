@@ -16,7 +16,6 @@ import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.utils.checkNpops
 import org.cryptobiotic.rlauxe.utils.tabulateNpops
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -35,6 +34,7 @@ class CreateBoulderElection(
     val export: DominionCvrExportCsv,
     val sovo: BoulderStatementOfVotes,
     val distributeOvervotes: List<Int> = listOf(0, 63),
+    val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
 ): CreateElectionIF {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convertToCvr() }
     val infoList = makeContestInfo().sortedBy{ it.id }
@@ -290,7 +290,8 @@ class CreateBoulderElection(
         }
     }
 
-    override fun electionInfo() = ElectionInfo("Boulder24$auditType", auditType, ncards(), contestsUA.size, true, poolsHaveOneCardStyle=true)
+    override fun electionInfo() = ElectionInfo("Boulder24$auditType", auditType, ncards(), contestsUA.size,
+        true, poolsHaveOneCardStyle=true, mvrSource=mvrSource)
     override fun contestsUA() = contestsUA
     override fun batches() = if (auditType.isClca()) emptyList() else cardPoolBuilders
     override fun cardPools() = if (auditType.isClca()) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
@@ -320,6 +321,7 @@ fun createBoulderElection(
     auditdir: String,
     creation: AuditCreationConfig,
     round: AuditRoundConfig,
+    mvrSource: MvrSource = MvrSource.testPrivateMvrs,
 ): Result<AuditRoundIF, ErrorMessages> {
 
     val stopwatch = Stopwatch()
@@ -328,7 +330,7 @@ fun createBoulderElection(
     val sovo = readBoulderStatementOfVotes(sovoFile, variation)
     val export: DominionCvrExportCsv = readDominionCvrExportCsv(cvrExportFile, "Boulder")
 
-    val election = CreateBoulderElection(creation.auditType, export, sovo)
+    val election = CreateBoulderElection(creation.auditType, export, sovo, mvrSource = mvrSource)
     createElectionRecord(election, auditDir = auditdir)
     println("CreateBoulderElection took $stopwatch")
 

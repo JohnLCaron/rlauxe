@@ -1,6 +1,8 @@
 {
+    "electionName": "TestClcaElection",
     "auditType": "CLCA",
     "ncards": 15000,
     "ncontests": 11,
-    "cvrsContainUndervotes": true
+    "cvrsContainUndervotes": true,
+    "mvrSource": "testClcaSimulated"
 }

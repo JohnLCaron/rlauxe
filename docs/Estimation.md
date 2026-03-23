@@ -51,7 +51,7 @@ and then on the second round using the measured error rates to estimate how many
 The trade off in using 0% simulation is that the average number of rounds goes up. (In the future, we could allow the
 auitors to assign a cost to sampling n ballots and a cost to an audit round, and attempt to minimize the overall costs.)
 
-Based on these findings, we have chosen to use the _optimistic strategy_: for round 1, we simualte the sample distribution assuming no errors.
+Based on these findings, we have chosen to use the _optimistic strategy_: for round 1, we simulate the sample distribution assuming no errors.
 For subsequent rounds, we use the measured error rates from the previous round. The user can control what percentile of
 the distribution is used for the estimate foreach round. The default is to take the 50th percentile on round 1, and the 80th percentile on subsequent rounds.
 

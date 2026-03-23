@@ -1,6 +1,8 @@
 {
+    "electionName": "TestPollingElection",
     "auditType": "POLLING",
     "ncards": 20000,
     "ncontests": 5,
-    "cvrsContainUndervotes": true
+    "cvrsContainUndervotes": true,
+    "mvrSource": "testPrivateMvrs"
 }

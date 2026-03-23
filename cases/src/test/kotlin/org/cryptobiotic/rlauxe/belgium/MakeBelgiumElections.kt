@@ -21,7 +21,6 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import kotlin.math.ln
 import kotlin.test.Test
 import kotlin.test.fail
@@ -126,7 +125,7 @@ fun createBelgiumElection(electionName: String, contestId: Int, stopRound:Int=0,
 
     val topdir = "$toptopdir/$electionName"
 
-    val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
+    val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05)
     val round = AuditRoundConfig(
         SimulationControl(nsimTrials = 1),
         ContestSampleControl.NONE,

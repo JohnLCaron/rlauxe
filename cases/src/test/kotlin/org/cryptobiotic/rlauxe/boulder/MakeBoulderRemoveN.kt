@@ -14,7 +14,6 @@ import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.estimateOld.makeDeciles
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import org.cryptobiotic.util.runAllRoundsAndVerify
 
 class MakeBoulderRemoveN {
@@ -73,7 +72,7 @@ class RunRemoveBoulderTask(
     override fun name() = "removeN=$removeN"
 
     override fun run(): List<AuditResult> {
-        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, )
         val round = AuditRoundConfig(SimulationControl(nsimTrials = 22), ContestSampleControl.NONE, ClcaConfig(), null)
 
         createBoulderElection(

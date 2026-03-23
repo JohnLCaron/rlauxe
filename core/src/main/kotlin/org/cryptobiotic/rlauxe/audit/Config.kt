@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.audit
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.util.secureRandom
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 
 data class Config(
     val election: ElectionInfo,
@@ -24,7 +23,7 @@ data class Config(
     val sampling = round.sampling
     val riskLimit = creation.riskLimit
     val seed = creation.seed
-    val persistedWorkflowMode = creation.persistedWorkflowMode
+    val mvrSource = election.mvrSource
 
     // only used in PersistedMvrManagerTest
     fun mvrFuzzPct(): Double {
@@ -62,11 +61,11 @@ data class Config(
                  fuzzMvrs:Double? = null,
                  contestSampleCutoff:Int? = if (auditType.isPolling()) 10000 else 2000,
                  apriori: TausRates = TausRates(emptyMap()),
-                 persistedWorkflowMode: PersistedWorkflowMode = if (auditType.isClca())
-                      PersistedWorkflowMode.testClcaSimulated else PersistedWorkflowMode.testPrivateMvrs,): Config {
+                 mvrSource: MvrSource = if (auditType.isClca())
+                      MvrSource.testClcaSimulated else MvrSource.testPrivateMvrs,): Config {
 
-            return from(ElectionInfo.forTest(auditType),
-                riskLimit, nsimTrials, simFuzzPct, fuzzMvrs, contestSampleCutoff, apriori, persistedWorkflowMode)
+            return from(ElectionInfo.forTest(auditType, mvrSource),
+                riskLimit, nsimTrials, simFuzzPct, fuzzMvrs, contestSampleCutoff, apriori)
         }
 
         fun from(electionInfo: ElectionInfo,
@@ -76,13 +75,12 @@ data class Config(
                  fuzzMvrs:Double? = null,
                  contestSampleCutoff:Int? = if (electionInfo.auditType.isPolling()) 10000 else 2000,
                  apriori: TausRates = TausRates(emptyMap()),
-                 persistedWorkflowMode: PersistedWorkflowMode = if (electionInfo.auditType.isClca())
-                      PersistedWorkflowMode.testClcaSimulated else PersistedWorkflowMode.testPrivateMvrs,): Config {
+           ): Config {
 
             return if (electionInfo.auditType.isPolling()) forPolling(electionInfo,
-                riskLimit, nsimTrials, simFuzzPct, contestSampleCutoff, persistedWorkflowMode)
+                riskLimit, nsimTrials, simFuzzPct, contestSampleCutoff)
             else forClca(electionInfo,
-                riskLimit, nsimTrials, simFuzzPct, fuzzMvrs, contestSampleCutoff, apriori, persistedWorkflowMode)
+                riskLimit, nsimTrials, simFuzzPct, fuzzMvrs, contestSampleCutoff, apriori)
         }
 
         fun forClca(electionInfo: ElectionInfo,
@@ -92,8 +90,8 @@ data class Config(
                     fuzzMvrs:Double? = null,
                     contestSampleCutoff:Int?= 2000,
                     apriori: TausRates = TausRates(emptyMap()),
-                    persistedWorkflowMode: PersistedWorkflowMode = PersistedWorkflowMode.testClcaSimulated): Config {
-            val creation = AuditCreationConfig(electionInfo.auditType, riskLimit=riskLimit, persistedWorkflowMode=persistedWorkflowMode)
+            ): Config {
+            val creation = AuditCreationConfig(electionInfo.auditType, riskLimit=riskLimit)
             val round = AuditRoundConfig(
                 SimulationControl(nsimTrials=nsimTrials, simFuzzPct=simFuzzPct),
                 ContestSampleControl(contestSampleCutoff=contestSampleCutoff),
@@ -108,8 +106,8 @@ data class Config(
                        nsimTrials:Int=10,
                        simFuzzPct: Double? = null,
                        contestSampleCutoff:Int? = 10000,
-                       persistedWorkflowMode:PersistedWorkflowMode = PersistedWorkflowMode.testPrivateMvrs): Config {
-            val creation = AuditCreationConfig(electionInfo.auditType, riskLimit=riskLimit, persistedWorkflowMode=persistedWorkflowMode)
+        ): Config {
+            val creation = AuditCreationConfig(electionInfo.auditType, riskLimit=riskLimit)
             val round = AuditRoundConfig(
                 SimulationControl(nsimTrials=nsimTrials, simFuzzPct=simFuzzPct),
                 ContestSampleControl(contestSampleCutoff=contestSampleCutoff),
@@ -136,6 +134,12 @@ enum class PollingMode { withPools, withBatches, withoutBatches;
     fun withoutBatches() = (this == withoutBatches)
 }
 
+enum class MvrSource {
+    real,               // sampleMvrs$round.csv must be written from external program.
+    testPrivateMvrs,    // sampleMvrs$round.csv are taken from private/sortedMvrs.csv
+    testClcaSimulated,  // use PersistedMvrManagerTest to fuzz the mvrs on the fly (clca only)
+}
+
 // what information cannot be changed by the auditors?
 data class ElectionInfo(
     val electionName: String,
@@ -143,14 +147,22 @@ data class ElectionInfo(
     val totalCardCount: Int,    // total cards in the election
     val contestCount: Int,
 
-    val cvrsContainUndervotes: Boolean = true, // TODO where do we use this ??
-    val poolsHaveOneCardStyle: Boolean? = null,
-    val pollingMode: PollingMode? = null,
+    val cvrsContainUndervotes: Boolean = true, // TODO implement cvrsContainUndervotes = false
+    val poolsHaveOneCardStyle: Boolean? = null, // TODO dont seem to be using this
+    val pollingMode: PollingMode? = null, // TODO also needed for cvrsContainUndervotes = false ?
+
+    val mvrSource: MvrSource =
+        if (auditType.isClca()) MvrSource.testClcaSimulated else MvrSource.testPrivateMvrs,
 
     val other: Map<String, Any> = emptyMap(),    // soft parameters to ease migration
 ) {
+    init {
+        if (mvrSource == MvrSource.testClcaSimulated && !auditType.isClca()) {
+            throw RuntimeException("PersistedWorkflowMode.testClcaSimulated must be CLCA")
+        }
+    }
     companion object {
-        fun forTest(auditType: AuditType) = ElectionInfo("testing", auditType, 42, 1)
+        fun forTest(auditType: AuditType, mvrSource: MvrSource) = ElectionInfo("testing", auditType, 42, 1, mvrSource=mvrSource)
     }
 }
 
@@ -159,20 +171,11 @@ data class ElectionInfo(
 data class AuditCreationConfig(
     val auditType: AuditType, // must agree with ElectionInfo
     val riskLimit: Double = 0.05,
-    val persistedWorkflowMode: PersistedWorkflowMode =
-        if (auditType.isClca()) PersistedWorkflowMode.testClcaSimulated else PersistedWorkflowMode.testPrivateMvrs,
 
     val seed: Long = secureRandom.nextLong(),
     val riskMeasuringSampleLimit: Int? = null, // the number of samples we are willing to audit; this turns the audit into a "risk measuring" audit
     val other: Map<String, Any> = emptyMap(),    // soft parameters
 ) {
-
-    init {
-        if (persistedWorkflowMode == PersistedWorkflowMode.testClcaSimulated && !auditType.isClca()) {
-            throw RuntimeException("PersistedWorkflowMode.testClcaSimulated must be CLCA")
-        }
-    }
-
     fun isRiskMeasuringAudit() = riskMeasuringSampleLimit != null
 }
 
@@ -186,7 +189,6 @@ data class AuditRoundConfig(
 
     val other: Map<String, String> = emptyMap(),    // soft parameters
 ) {
-
     companion object {
         val CLCA = AuditRoundConfig(SimulationControl(), ContestSampleControl(), ClcaConfig(), null)
         val POLLING = AuditRoundConfig(SimulationControl(),

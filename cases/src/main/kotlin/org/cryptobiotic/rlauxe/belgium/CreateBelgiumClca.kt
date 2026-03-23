@@ -12,6 +12,7 @@ private val logger = KotlinLogging.logger("BelgiumClca")
 
 class BelgiumClca (
     val contestd: DHondtContest,
+    val mvrSource: MvrSource,
 ): CreateElectionIF {
 
     val infoMap: Map<Int, ContestInfo>
@@ -25,7 +26,8 @@ class BelgiumClca (
         allCvrs = contestd.createSimulatedCvrs()
     }
 
-    override fun electionInfo() = ElectionInfo(contestd.name, AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
+    override fun electionInfo() = ElectionInfo(contestd.name, AuditType.CLCA, ncards(), contestsUA.size,
+        cvrsContainUndervotes = true, poolsHaveOneCardStyle = null, mvrSource = mvrSource)
     override fun batches() = infoMap.values.map { Batch(it.name, it.id, intArrayOf(it.id), true)}
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
@@ -54,7 +56,7 @@ fun createBelgiumClca(
 {
     val auditdir = "$topdir/audit"
     val stopwatch = Stopwatch()
-    val election = BelgiumClca(contestd)
+    val election = BelgiumClca(contestd, MvrSource.testPrivateMvrs)
 
     createElectionRecord(election, auditDir = auditdir, clear = clear)
     println("createBelgiumClca took $stopwatch")

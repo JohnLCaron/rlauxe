@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.util.secureRandom
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
+import org.cryptobiotic.rlauxe.audit.MvrSource
 import kotlin.Double
 import kotlin.Int
 
@@ -10,17 +10,16 @@ class AuditConfigBuilder(val electionInfo: ElectionInfo,) {
     var creationConfig = AuditCreationConfig(electionInfo.auditType)
 
     fun setCreation(
-            riskLimit: Double,
-            persistedWorkflowMode: PersistedWorkflowMode,
-            seed: Long = secureRandom.nextLong(),
-            riskMeasuringSampleLimit: Int? = null
+        riskLimit: Double,
+        mvrSource: MvrSource,
+        seed: Long = secureRandom.nextLong(),
+        riskMeasuringSampleLimit: Int? = null
         ):AuditConfigBuilder  {
         creationConfig = AuditCreationConfig(
             auditType=electionInfo.auditType,
             riskLimit=riskLimit,
             seed=seed,
             riskMeasuringSampleLimit=riskMeasuringSampleLimit,
-            persistedWorkflowMode=persistedWorkflowMode,
         )
         return this
     }

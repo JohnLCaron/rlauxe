@@ -3,7 +3,6 @@
         {
             "name": "pool42",
             "id": 42,
-            "ncards": 3000,
             "possibleContests": [
                 1,
                 2

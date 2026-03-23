@@ -1,0 +1,67 @@
+{
+    "roundIdx": 2,
+    "contestRounds": [
+        {
+            "id": 1,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "0/1 OneAuditTest",
+                    "roundIdx": 2,
+                    "estSampleSize": 506,
+                    "estNewSampleSize": 324,
+                    "estimationResult": {
+                        "roundIdx": 2,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 254,
+                        "startingTestStatistic": 0.6032401048232039,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [
+                            84,
+                            100,
+                            153,
+                            162,
+                            185,
+                            192,
+                            193,
+                            193,
+                            193,
+                            206,
+                            221,
+                            264,
+                            281,
+                            286,
+                            293,
+                            318,
+                            344,
+                            391,
+                            508,
+                            584
+                        ],
+                        "lastIndex": 500,
+                        "quantile": 80,
+                        "ntrials": 20,
+                        "simNewMvrs": 324,
+                        "simMvrs": 506
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                }
+            ],
+            "roundIdx": 2,
+            "maxSampleAllowed": 506,
+            "estMvrs": 506,
+            "estNewMvrs": 324,
+            "auditorWantNewMvrs": -1,
+            "done": false,
+            "included": true,
+            "status": "InProgress"
+        }
+    ],
+    "auditWasDone": false,
+    "auditIsComplete": false,
+    "nmvrs": 506,
+    "newmvrs": 324,
+    "mvrsUnused": 0,
+    "mvrsUsed": 0,
+    "auditorWantNewMvrs": -1
+}

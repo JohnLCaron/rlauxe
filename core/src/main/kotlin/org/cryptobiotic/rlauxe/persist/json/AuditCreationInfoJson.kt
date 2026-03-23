@@ -11,10 +11,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.util.ErrorMessages
-import org.cryptobiotic.rlauxe.util.enumValueOf
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
+import org.cryptobiotic.rlauxe.audit.MvrSource
 
 import java.io.FileOutputStream
 import java.nio.file.Files
@@ -39,7 +37,7 @@ data class AuditCreationConfig(
 data class AuditCreationConfigJson(
     val auditType: AuditType,
     val riskLimit: Double,
-    val persistedWorkflowMode: PersistedWorkflowMode,
+    val mvrSource: MvrSource?,
     val seed: Long,
     val riskMeasuringSampleLimit: Int?,
 )
@@ -47,7 +45,7 @@ data class AuditCreationConfigJson(
 fun AuditCreationConfig.publishJson() = AuditCreationConfigJson(
     this.auditType,
     this.riskLimit,
-    this.persistedWorkflowMode,
+    null,
     this.seed,
     this.riskMeasuringSampleLimit,
 )
@@ -55,7 +53,6 @@ fun AuditCreationConfig.publishJson() = AuditCreationConfigJson(
 fun AuditCreationConfigJson.import() = AuditCreationConfig(
     this.auditType,
     this.riskLimit,
-    this.persistedWorkflowMode,
     this.seed,
     this.riskMeasuringSampleLimit,
 )

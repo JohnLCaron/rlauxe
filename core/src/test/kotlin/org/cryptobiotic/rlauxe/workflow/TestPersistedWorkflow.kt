@@ -28,11 +28,10 @@ class TestPersistedWorkflow {
         val testMvrs = testData.makeCvrsFromContests()
         val contestsUA = contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
 
-        val election = CreateElectionFromCvrs("testPersistedSingleClca", contestsUA, testMvrs, AuditType.CLCA)
+        val election = CreateElectionFromCvrs("testPersistedSingleClca", contestsUA, testMvrs, AuditType.CLCA, mvrSource=MvrSource.testPrivateMvrs)
         createElectionRecord(election, auditDir = auditdir)
 
-        val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 1000, simFuzzPct = .01,
-            persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs)
+        val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 1000, simFuzzPct = .01)
 
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
         startFirstRound(auditdir)
@@ -56,11 +55,10 @@ class TestPersistedWorkflow {
         val testMvrs = testData.makeCvrsFromContests()
         val contestsUA = contests.map { ContestWithAssertions(it, isClca = true).addStandardAssertions() }
 
-        val election = CreateElectionFromCvrs("testPersistedAuditClca", contestsUA, testMvrs, AuditType.CLCA)
+        val election = CreateElectionFromCvrs("testPersistedAuditClca", contestsUA, testMvrs, AuditType.CLCA, mvrSource=MvrSource.testPrivateMvrs)
         createElectionRecord(election, auditDir = auditdir)
 
-        val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 1000, simFuzzPct = .01,
-            persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs)
+        val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 1000, simFuzzPct = .01)
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
         startFirstRound(auditdir)
 
@@ -93,11 +91,11 @@ class TestPersistedWorkflow {
 
         val contestsUA = listOf(contestOA)
 
-        val election = CreateElectionFromCvrs("testPersistedOneAudit", contestsUA, mvrs, AuditType.ONEAUDIT, cardPools = cardPools)
+        val election = CreateElectionFromCvrs("testPersistedOneAudit", contestsUA, mvrs, AuditType.ONEAUDIT,
+            cardPools = cardPools, mvrSource=MvrSource.testPrivateMvrs)
         createElectionRecord(election, auditDir = auditdir)
 
-        val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 20000, simFuzzPct = .01,
-            persistedWorkflowMode=PersistedWorkflowMode.testPrivateMvrs)
+        val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 20000, simFuzzPct = .01)
 
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
         startFirstRound(auditdir)

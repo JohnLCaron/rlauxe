@@ -362,7 +362,8 @@ class TestHasStyle {
         }
 
         val election =
-            CreateElectionFromCvrs(name, contestsUA, testCvrs, auditType=auditType, cardPools = null, batches = cardStyles)
+            CreateElectionFromCvrs(name, contestsUA, testCvrs, auditType=auditType, cardPools = null,
+                batches = cardStyles, mvrSource=MvrSource.testPrivateMvrs)
 
         val auditdir = "$topdir/audit"
         createElectionRecord(election, auditDir = auditdir)
@@ -397,7 +398,8 @@ class TestHasStyle {
         }
 
         val election =
-            CreateElectionFromCards(name, contestsUA, testCards, cardPools = null, cardStyles = cardStyles, auditType)
+            CreateElectionFromCards(name, contestsUA, testCards, cardPools = null, cardStyles = cardStyles, auditType,
+                mvrSource = MvrSource.real)
 
         val auditdir = "$topdir/audit"
         createElectionRecord(election, auditDir = auditdir)

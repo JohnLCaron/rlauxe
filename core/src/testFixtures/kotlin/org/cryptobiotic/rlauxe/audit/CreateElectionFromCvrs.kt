@@ -12,10 +12,12 @@ class CreateElectionFromCvrs (
     val auditType: AuditType,
     val cardPools: List<CardPool>? = null,
     val batches: List<BatchIF>? = null,
+    val mvrSource: MvrSource,
 ): CreateElectionIF {
 
     override fun electionInfo() = ElectionInfo(
-        electionName, auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
+        electionName, auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true,
+        poolsHaveOneCardStyle = null, mvrSource = mvrSource
     )
     override fun createUnsortedMvrsInternal() = cvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null

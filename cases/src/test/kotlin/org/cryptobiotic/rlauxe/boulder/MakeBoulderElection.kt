@@ -10,7 +10,6 @@ import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflowMode
 import org.cryptobiotic.util.runAllRoundsAndVerify
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,7 +24,7 @@ class MakeBoulderElection {
     fun createBoulder24oa() {
         val auditdir = "$testdataDir/cases/boulder24/oa/audit"
 
-        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05, PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 22),
             ContestSampleControl(
@@ -59,7 +58,7 @@ class MakeBoulderElection {
     fun createBoulder24clca() { // simulate CVRs
         val auditdir = "$testdataDir/cases/boulder24/clca/audit"
 
-        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .05, PersistedWorkflowMode.testPrivateMvrs)
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit = .05, )
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 20, estPercentile = listOf(42, 55, 67)),
             ContestSampleControl(minRecountMargin = .005, contestSampleCutoff = 1000, auditSampleCutoff = 2000),
@@ -189,7 +188,7 @@ class MakeBoulderElection {
 
         override fun run(): Boolean {
             val creation =
-                AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05, PersistedWorkflowMode.testPrivateMvrs)
+                AuditCreationConfig(AuditType.ONEAUDIT, riskLimit = .05, )
             val round = AuditRoundConfig(
                 SimulationControl(nsimTrials = 22),
                 ContestSampleControl(

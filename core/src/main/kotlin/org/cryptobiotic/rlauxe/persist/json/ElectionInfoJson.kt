@@ -37,6 +37,7 @@ data class ElectionInfoJson(
     val cvrsContainUndervotes: Boolean,
     val poolsHaveOneCardStyle: Boolean?,
     val pollingMode: PollingMode? = null,
+    val mvrSource: MvrSource? = null,
     val other: Map<String, String>?
 )
 
@@ -48,6 +49,7 @@ fun ElectionInfo.publishJson() = ElectionInfoJson(
     cvrsContainUndervotes = this.cvrsContainUndervotes,
     poolsHaveOneCardStyle = this.poolsHaveOneCardStyle,
     pollingMode = this.pollingMode,
+    mvrSource = this.mvrSource,
     other = if (this.other.isEmpty()) null else this.other.publishJson(),
 )
 
@@ -59,6 +61,7 @@ fun ElectionInfoJson.import() = ElectionInfo(
     cvrsContainUndervotes = this.cvrsContainUndervotes,
     poolsHaveOneCardStyle = this.poolsHaveOneCardStyle,
     pollingMode = this.pollingMode,
+    mvrSource = this.mvrSource ?: if (auditType.isClca()) MvrSource.testClcaSimulated else MvrSource.testPrivateMvrs,
     other = if (this.other == null) emptyMap() else this.other.import(),
 )
 

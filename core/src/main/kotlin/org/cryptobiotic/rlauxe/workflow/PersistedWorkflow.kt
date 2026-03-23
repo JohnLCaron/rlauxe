@@ -13,14 +13,6 @@ import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeAuditRoundJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeSamplePrnsJsonFile
 
-private val logger = KotlinLogging.logger("PersistedWorkflow")
-
-enum class PersistedWorkflowMode {
-    real,           // use PersistedMvrManager;  sampleMvrs$round.csv must be written from external program.
-    testClcaSimulated,  // use PersistedMvrManagerTest which fuzzes the mvrs on the fly (not for polling)
-    testPrivateMvrs  // use PersistedMvrManager; use private/sortedMvrs.csv to write sampleMvrs$round.csv
-}
-
 /** AuditWorkflow with persistent state. */
 class PersistedWorkflow(
     val auditRecord: AuditRecordIF,
@@ -33,18 +25,18 @@ class PersistedWorkflow(
     private val auditContests: List<ContestWithAssertions>
     private val auditRounds = mutableListOf<AuditRoundIF>()
     private val mvrManager: MvrManager
-    private val mode: PersistedWorkflowMode
+    private val mvrSource: MvrSource
 
     init {
         config = auditRecord.config
-        mode = config.creation.persistedWorkflowMode
+        mvrSource = config.election.mvrSource
         // skip contests that have been removed
         auditContests = auditRecord.contests.filter { it.preAuditStatus == TestH0Status.InProgress }
         auditRounds.addAll(auditRecord.rounds)
 
         mvrManager = when {
             (auditRecord is CompositeRecord) -> CompositeMvrManager(auditRecord, config, auditContests)
-            (mode == PersistedWorkflowMode.testClcaSimulated) -> PersistedMvrManagerTest(auditRecord as AuditRecord)
+            (mvrSource == MvrSource.testClcaSimulated) -> PersistedMvrManagerTest(auditRecord as AuditRecord)
             else -> PersistedMvrManager(auditRecord as AuditRecord, mvrWrite=mvrWrite)
         }
     }
@@ -110,10 +102,12 @@ class PersistedWorkflow(
     }
 
     override fun toString(): String {
-        return "PersistentWorkflow(auditDir='$auditDir', mode=$mode, mvrManager=${mvrManager.javaClass.simpleName})"
+        return "PersistentWorkflow(auditDir='$auditDir', mode=$mvrSource, mvrManager=${mvrManager.javaClass.simpleName})"
     }
 
     companion object {
+        private val logger = KotlinLogging.logger("PersistedWorkflow")
+
         fun readFrom(location: String): PersistedWorkflow? {
             val auditRecord = AuditRecord.readFrom(location)
             return if (auditRecord == null) null

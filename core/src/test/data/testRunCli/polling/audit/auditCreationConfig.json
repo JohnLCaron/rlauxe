@@ -1,6 +1,5 @@
 {
     "auditType": "POLLING",
     "riskLimit": 0.05,
-    "seed": 1466891979529927108,
-    "persistedWorkflowMode": "testPrivateMvrs"
+    "seed": 4617422754482595905
 }

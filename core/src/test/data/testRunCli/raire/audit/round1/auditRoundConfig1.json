@@ -1,20 +1,26 @@
 {
     "simulation": {
-        "quantile": 0.5,
-        "simFuzzPct": 0.001
+        "nsimEst": 100,
+        "estPercentile": [
+            50,
+            80
+        ],
+        "simFuzzPct": 0.001,
+        "simulationStrategy": "optimistic"
     },
     "sampling": {
         "minRecountMargin": 0.005,
         "minMargin": 0.0,
         "maxSamplePct": 0.0,
-        "contestSampleCutoff": 20000,
+        "contestSampleCutoff": 2000,
+        "auditSampleCutoff": 10000,
         "removeCutoffContests": true
     },
-    "alphaMart": {
-        "d": 100
-    },
-    "bettingMart": {
+    "clcaConfig": {
+        "strategy": "generalAdaptive",
+        "fuzzPct": 0.001,
+        "d": 100,
         "maxLoss": 0.9624175929935999,
-        "aprioriRates": {}
+        "apriori": {}
     }
 }

@@ -1,7 +1,5 @@
 {
     "auditType": "ONEAUDIT",
     "riskLimit": 0.05,
-    "seed": -8921983990898036308,
-    "persistedWorkflowMode": "testPrivateMvrs",
-    "fuzzMvrs": 0.001
+    "seed": 2339742895763567007
 }

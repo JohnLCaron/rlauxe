@@ -1,0 +1,181 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;Co1tKq&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;Co1tKq&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;extraVsMarginOA number of audit rounds&quot;,
+&quot;subtitle&quot;:&quot;OneAudit Nc=50000 ntrials=1000 nsimTrials=100 fuzzMvrs=0.0&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null]
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;auditRounds&quot;,
+&quot;color&quot;:&quot;legend&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;auditRounds&quot;:[1.574,1.6,1.624,1.602,1.589,1.654,1.635,1.615,1.613,1.585,1.639,1.562,1.587,1.625,1.604,1.641,1.614,1.597,1.602,1.579,1.624,1.571,1.566,1.6,1.644,1.628,1.617,1.6176176176176176,1.632,1.601,1.617,1.58,1.578,1.615,1.581,1.58,1.612,1.606,1.553,1.558,1.556,1.544,1.496,1.504,1.61,1.601,1.589,1.551,1.495,1.481,1.415,1.404,1.378,1.369,1.379],
+&quot;margin&quot;:[0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009],
+&quot;&amp;merged_groups&quot;:[&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;],
+&quot;legend&quot;:[&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;legend&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;auditRounds&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;auditRounds&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;],
+&quot;margin&quot;:[0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009],
+&quot;auditRounds&quot;:[1.574,1.6,1.624,1.602,1.589,1.654,1.635,1.615,1.613,1.585,1.639,1.562,1.587,1.625,1.604,1.641,1.614,1.597,1.602,1.579,1.624,1.571,1.566,1.6,1.644,1.628,1.617,1.6176176176176176,1.632,1.601,1.617,1.58,1.578,1.615,1.581,1.58,1.612,1.606,1.553,1.558,1.556,1.544,1.496,1.504,1.61,1.601,1.589,1.551,1.495,1.481,1.415,1.404,1.378,1.369,1.379],
+&quot;legend&quot;:[&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;legend&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;auditRounds&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;auditRounds&quot;,&quot;legend&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;15&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

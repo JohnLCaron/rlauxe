@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 03/22/2026_
+_last changed: 03/24/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -32,6 +32,7 @@ See [Getting Started](docs/Developer.md#getting-started) if you are a developer 
 * [Estimating Sample Batch sizes](#estimating-sample-batch-sizes)
   * [Simulating MVRs](#simulating-mvrs)
   * [Choosing ballots](#choosing-ballots)
+  * [Extra mvrs vs number of rounds](#extra-mvrs-vs-number-of-rounds)
 * [Multiple Contest Auditing](#multiple-contest-auditing)
   * [Efficiency](#efficiency)
   * [Deterministic sampling order for each Contest](#deterministic-sampling-order-for-each-contest)
@@ -388,7 +389,7 @@ The _consistent sampling_ algorithm reads through the sorted Card Manifest and c
 
 Each round does its own consistent sampling without regard to the previous round's results. Previously audited MVRS are always used again in subsequent rounds, for contests that continue to the next round. The auditors only have to find and hand audit the _new mvrs_ that havent been audited before.
 
-## Extra Nmvrs vs number of rounds
+## Extra mvrs vs number of rounds
 
 Using the above algorithm for estimating samples sizes, here are the extra samples and average number of rounds for CLCA
 at different values of fuzzed errors:
@@ -397,11 +398,31 @@ at different values of fuzzed errors:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginNroundsLinear.html" rel="extraVsMarginNrounds">![extraVsMarginNrounds](docs/plots2/estimate/extraVsMarginNroundsLinear.png)</a>
 
-Here are the extra samples and average number of rounds for OneAudit at different percentages of pooled data:
+* Extra Mvrs stay reasonable at these fuzz levels. 
+* With no errors, the estimation is spot on so there are no extra mvrs and the audit always finishes in 1 round. This is true
+  even when there are phantoms.
+* Nrounds generally is 2 or less, which was the goal of the algorithm.
+
+The effect of 1% phantoms:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginLogLinear.html" rel="extraVsMargin">![extraVsMargin](docs/plots2/estimate/extraVsMarginLogLinear.png)</a>
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginNroundsLinear.html" rel="extraVsMarginNrounds">![extraVsMarginNrounds](docs/plots2/estimate/extraVsMarginNroundsLinear.png)</a>
+
+Here are the extra samples and average number of rounds for OneAudit at different percentages of pooled data:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginOALogLinear.html" rel="extraVsMarginOA">![extraVsMarginOA](docs/plots2/estimate/extraVsMarginOALogLinear.png)</a>
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginNroundsOALinear.html" rel="extraVsMarginOANrounds">![extraVsMarginOANrounds](docs/plots2/estimate/extraVsMarginOANroundsLinear.png)</a>
+
+* Extra Mvrs can be quite high at low margins.
+* Nrounds averages are 2 or less when cvrPercent is 80% or higher.
+
+Here are the extra samples and average number of rounds for OneAudit at different percentages of pooled data:
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginPollingLinear.html" rel="extraVsMarginPolling">![extraVsMarginPolling](docs/plots2/estimate/extraVsMarginPollingLinear.png)</a>
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginNroundsPollingLinear.html" rel="extraVsMarginPollingNrounds">![extraVsMarginPollingNrounds](docs/plots2/estimate/extraVsMarginPollingNroundsLinear.png)</a>
 
 # Multiple Contest Auditing
 

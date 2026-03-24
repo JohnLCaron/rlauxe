@@ -19,7 +19,7 @@ class TestPollingAuditTask {
         val taskGen = PollingContestAuditTaskGenerator(
             Nc, margin, 0.0, 0.0, 0.0,
             mapOf("cat" to "pollingWithStyles"),
-            auditConfig = auditConfig,
+            config = auditConfig,
             Npop = Nc
         )
 

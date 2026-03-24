@@ -1,0 +1,183 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;NXNjhw&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;NXNjhw&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;extraVsMarginOA extra samples&quot;,
+&quot;subtitle&quot;:&quot;OneAudit Nc=50000 ntrials=1000 nsimTrials=100 fuzzMvrs=0.0&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;extraSamples&quot;,
+&quot;color&quot;:&quot;legend&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009],
+&quot;&amp;merged_groups&quot;:[&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;],
+&quot;extraSamples&quot;:[5892.156999999999,3896.3800000000156,2508.1710000000003,1289.9650000000015,753.5949999999996,527.503999999999,364.76500000000055,263.01199999999835,201.08600000000013,161.28199999999987,131.8949999999997,4068.784000000005,2290.2610000000086,1492.8229999999994,731.2020000000009,398.56700000000103,263.4850000000006,184.72499999999968,133.15300000000053,107.61900000000011,85.27000000000007,67.78400000000025,3292.114000000004,1702.2140000000027,1061.2669999999994,490.41599999999835,281.3109999999996,188.39139139139138,132.17199999999968,94.18700000000001,71.81299999999982,58.629000000000076,49.179999999999936,2105.540000000001,1039.7429999999954,640.2400000000009,288.0450000000004,172.68699999999995,114.50299999999993,72.96800000000025,51.029000000000195,39.14200000000008,29.197999999999922,21.82799999999999,964.1899999999996,442.38800000000015,264.1849999999996,109.53000000000003,54.874000000000166,35.10600000000014,24.58200000000005,16.446999999999917,13.400999999999911,10.402999999999977,8.304000000000073],
+&quot;legend&quot;:[&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;legend&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;extraSamples&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;extraSamples&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009],
+&quot;&amp;merged_groups&quot;:[&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;],
+&quot;extraSamples&quot;:[5892.156999999999,3896.3800000000156,2508.1710000000003,1289.9650000000015,753.5949999999996,527.503999999999,364.76500000000055,263.01199999999835,201.08600000000013,161.28199999999987,131.8949999999997,4068.784000000005,2290.2610000000086,1492.8229999999994,731.2020000000009,398.56700000000103,263.4850000000006,184.72499999999968,133.15300000000053,107.61900000000011,85.27000000000007,67.78400000000025,3292.114000000004,1702.2140000000027,1061.2669999999994,490.41599999999835,281.3109999999996,188.39139139139138,132.17199999999968,94.18700000000001,71.81299999999982,58.629000000000076,49.179999999999936,2105.540000000001,1039.7429999999954,640.2400000000009,288.0450000000004,172.68699999999995,114.50299999999993,72.96800000000025,51.029000000000195,39.14200000000008,29.197999999999922,21.82799999999999,964.1899999999996,442.38800000000015,264.1849999999996,109.53000000000003,54.874000000000166,35.10600000000014,24.58200000000005,16.446999999999917,13.400999999999911,10.402999999999977,8.304000000000073],
+&quot;legend&quot;:[&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-50%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-75%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-83%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-90%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;,&quot;oneaudit-96%&quot;]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;legend&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;extraSamples&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;extraSamples&quot;,&quot;legend&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

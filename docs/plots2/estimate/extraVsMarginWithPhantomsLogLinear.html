@@ -1,0 +1,183 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;lOH3Ch&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;lOH3Ch&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;extraVsMarginWithPhantoms extra samples&quot;,
+&quot;subtitle&quot;:&quot;CLCA Nc=50000 phantomPct=0.01 ntrials=100 nsimTrials=100&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;extraSamples&quot;,
+&quot;color&quot;:&quot;fuzzMvrs&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;],
+&quot;margin&quot;:[0.020000000000000018,0.02499999999999991,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.020000000000000018,0.02499999999999991,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.020000000000000018,0.02499999999999991,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.020000000000000018,0.02499999999999991,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.020000000000000018,0.02499999999999991,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009],
+&quot;fuzzMvrs&quot;:[&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;],
+&quot;extraSamples&quot;:[67.36000000000013,17.720000000000027,11.649999999999977,4.0600000000000875,3.020000000000067,2.749999999999858,0.5499999999999403,0.4000000000000199,0.7499999999999858,0.3499999999999943,58.77999999999929,51.87000000000023,19.99000000000001,7.900000000000091,2.3000000000000114,2.0,1.909999999999954,0.38000000000000966,1.509999999999991,0.960000000000008,95.13000000000034,65.75000000000011,34.560000000000116,13.840000000000089,4.190000000000055,2.8000000000000114,3.379999999999953,1.0900000000000034,1.710000000000008,0.6399999999999864,108.38000000000056,73.63999999999976,38.039999999999964,16.94000000000011,7.8700000000000045,3.9799999999999898,2.490000000000009,2.9199999999999733,1.8600000000000136,0.7500000000000142,169.01999999999953,67.30999999999995,25.190000000000055,16.919999999999845,8.460000000000008,5.069999999999993,5.159999999999968,4.119999999999976,1.5000000000000142,1.7699999999999818]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;fuzzMvrs&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;extraSamples&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;extraSamples&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;margin&quot;:[0.020000000000000018,0.02499999999999991,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.020000000000000018,0.02499999999999991,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.020000000000000018,0.02499999999999991,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.020000000000000018,0.02499999999999991,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.020000000000000018,0.02499999999999991,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009],
+&quot;&amp;merged_groups&quot;:[&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;],
+&quot;fuzzMvrs&quot;:[&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;],
+&quot;extraSamples&quot;:[67.36000000000013,17.720000000000027,11.649999999999977,4.0600000000000875,3.020000000000067,2.749999999999858,0.5499999999999403,0.4000000000000199,0.7499999999999858,0.3499999999999943,58.77999999999929,51.87000000000023,19.99000000000001,7.900000000000091,2.3000000000000114,2.0,1.909999999999954,0.38000000000000966,1.509999999999991,0.960000000000008,95.13000000000034,65.75000000000011,34.560000000000116,13.840000000000089,4.190000000000055,2.8000000000000114,3.379999999999953,1.0900000000000034,1.710000000000008,0.6399999999999864,108.38000000000056,73.63999999999976,38.039999999999964,16.94000000000011,7.8700000000000045,3.9799999999999898,2.490000000000009,2.9199999999999733,1.8600000000000136,0.7500000000000142,169.01999999999953,67.30999999999995,25.190000000000055,16.919999999999845,8.460000000000008,5.069999999999993,5.159999999999968,4.119999999999976,1.5000000000000142,1.7699999999999818]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;fuzzMvrs&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;extraSamples&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;extraSamples&quot;,&quot;fuzzMvrs&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

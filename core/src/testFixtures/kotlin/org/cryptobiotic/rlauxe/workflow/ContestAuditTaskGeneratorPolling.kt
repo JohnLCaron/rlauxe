@@ -15,7 +15,7 @@ class PollingContestAuditTaskGenerator(
     val phantomPct: Double,
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
-    val auditConfig: Config? = null,
+    val config: Config? = null,
     val Npop: Int,
     val nSimTrials: Int = 100,
     ) : ContestAuditTaskGenerator {
@@ -23,7 +23,7 @@ class PollingContestAuditTaskGenerator(
     override fun name() = "PollingWorkflowTaskGenerator"
 
     override fun generateNewTask(): ConcurrentTask<WorkflowResult> {
-        val useConfig = auditConfig ?: Config.from(
+        val useConfig = config ?: Config.from(
             AuditType.POLLING, nsimTrials = nSimTrials, simFuzzPct = mvrsFuzzPct,
         )
 

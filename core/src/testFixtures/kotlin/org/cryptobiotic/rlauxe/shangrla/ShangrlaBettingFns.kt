@@ -13,7 +13,7 @@ import kotlin.math.sqrt
 // betting functions from SHANGRLA code
 
 class FixedBet(val lam: Double): BettingFn {
-    override fun bet(prevSamples: Tracker) = lam
+    override fun bet(prevSamples: Tracker, show: Boolean) = lam
 }
 
 // SmithRamdas 2022, section B.3
@@ -50,7 +50,7 @@ class AgrapaBet(
     val c_grapa_grow: Double
 ): BettingFn {
 
-    override fun bet(prevSamples: Tracker): Double {
+    override fun bet(prevSamples: Tracker, show: Boolean): Double {
         val lastSampleNumber = prevSamples.numberOfSamples()
         if (lastSampleNumber == 0) return lam0 // initial guess
 
@@ -146,7 +146,7 @@ class OptimalComparisonNoP1(
         eta =  numer/denom + eta3
     }
 
-    override fun bet(prevSamples: Tracker): Double {
+    override fun bet(prevSamples: Tracker, show: Boolean): Double {
         // (N * 0.5 - sampleTracker.sum()) / (N - sampleNum) =~ 0.5
         val mu = populationMeanIfH0(N, withoutReplacement, prevSamples)
         // return (eta / mu - 1) / (upper - mu)

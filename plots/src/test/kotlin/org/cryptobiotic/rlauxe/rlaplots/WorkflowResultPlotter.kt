@@ -388,3 +388,7 @@ fun categoryFuzzPct(wr: WorkflowResult): String {
 fun categoryFuzzDiff(wr: WorkflowResult): String {
     return dfn(wr.Dparam("simFuzzPct"), 4)
 }
+
+fun categoryFuzzMvrs(wr: WorkflowResult): String {
+    return dfn(wr.Dparam("fuzzMvrs"), 4)
+}

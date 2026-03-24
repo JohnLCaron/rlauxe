@@ -53,7 +53,7 @@ class ClcaContestAuditTaskGenerator(
     }
 }
 
-// Simulate single Contest, do one-round audit
+// Simulate single Contest, do one-round CLCA audit
 class ClcaSingleRoundAuditTaskGenerator(
     val Nc: Int,
     val margin: Double,
@@ -129,9 +129,9 @@ class ClcaSingleRoundWorkflowTask(
 
     override fun run(): WorkflowResult {
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
-        val nmvrs = runClcaSingleRoundAudit(workflow, contestRounds, auditor, parameters)
+        val maxEstMvrs = runClcaSingleRoundAudit(workflow, contestRounds, auditor, parameters)
 
-        val contest = contestRounds.first()
+        val contest = contestRounds.first() // theres only one
         val minAssertion = contest.minAssertion()!!
         val assorter = minAssertion.assertion.assorter
         val mvrMargin = assorter.calcAssorterMargin(contest.id, testMvrs, usePhantoms = true)
@@ -154,10 +154,10 @@ class ClcaSingleRoundWorkflowTask(
                 status = lastRound.status,
                 nrounds = minAssertion.roundProved.toDouble(),
                 samplesUsed = lastRound.samplesUsed.toDouble(),
-                nmvrs = nmvrs.toDouble(),
+                nmvrs = maxEstMvrs.toDouble(),
                 parameters + lastRound.params,
                 failPct = if (lastRound.status != TestH0Status.StatRejectNull) 100.0 else 0.0,
-                wtf = (nmvrs - lastRound.samplesUsed) / minAssertion.roundProved.toDouble(),
+                wtf = (maxEstMvrs - lastRound.samplesUsed) / minAssertion.roundProved.toDouble(),
 
                 mvrMargin=mvrMargin,
                 startingRates=null,
@@ -167,7 +167,7 @@ class ClcaSingleRoundWorkflowTask(
     }
 }
 
-// keep this seperate function for testing
+// keep this function seperate for testing
 fun runClcaSingleRoundAudit(
     workflow: AuditWorkflow,
     contestRounds: List<ContestRound>,
@@ -179,13 +179,13 @@ fun runClcaSingleRoundAudit(
     runClcaAuditRound(workflow.config(), oneRound, workflow.mvrManager(), 1,
         auditor = auditor, parameters=parameters)
 
-    var maxSamples = 0
+    var maxEstMvrs = 0
     contestRounds.forEach { contest->
         contest.assertionRounds.forEach { assertion ->
-            maxSamples = max( maxSamples, assertion.estMvrs)
+            maxEstMvrs = max( maxEstMvrs, assertion.estMvrs)
         }
     }
-    return maxSamples
+    return maxEstMvrs
 }
 
 

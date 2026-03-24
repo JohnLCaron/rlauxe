@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import kotlin.random.Random
 
-// Generate OA contest, do full audit
+// Generate OA contest with given margin, do full audit with rounds
 class OneAuditContestAuditTaskGenerator(
     val Nc: Int,
     val margin: Double,
@@ -15,12 +15,12 @@ class OneAuditContestAuditTaskGenerator(
     val cvrPercent: Double,
     val mvrsFuzzPct: Double,
     val parameters : Map<String, Any>,
-    val auditConfigIn: Config? = null,
+    val configIn: Config? = null,
 ) : ContestAuditTaskGenerator {
-    override fun name() = "OneAuditWorkflowTaskGenerator"
+    override fun name() = "OneAuditWorkflowTaskGenerator margin=$margin mvrsFuzzPct=$mvrsFuzzPct cvrPercent=$cvrPercent"
 
     override fun generateNewTask(): SingleContestAuditTask {
-        val config = auditConfigIn ?: Config.from(AuditType.ONEAUDIT, simFuzzPct = mvrsFuzzPct)
+        val config = configIn ?: Config.from(AuditType.ONEAUDIT, simFuzzPct = mvrsFuzzPct)
 
         // data class ContestMvrCardAndPools(
         //    val contestUA: ContestUnderAudit,
@@ -35,6 +35,7 @@ class OneAuditContestAuditTaskGenerator(
             undervoteFraction = underVotePct,
             phantomFraction = phantomPct
         )
+
         // TODO should be OneAuditPairFuzzer ??
         val oaMvrs = makeFuzzedCvrsForClca(listOf(contestUA.contest.info()), mvrs, mvrsFuzzPct)
 
@@ -52,8 +53,8 @@ class OneAuditContestAuditTaskGenerator(
     }
 }
 
-// Generate OA contest, do audit in a single round
-class OneAuditSingleRoundAuditTaskGeneratorWithFlips(
+// Generate OA contest, do one-round OA audit
+class OneAuditSingleRoundAuditTaskGenerator(
     val Nc: Int,
     val margin: Double,
     val underVotePct: Double,
@@ -86,7 +87,6 @@ class OneAuditSingleRoundAuditTaskGeneratorWithFlips(
         } else {
             makeFuzzedCvrsForClca(listOf(contestUA.contest.info()), mvrs, mvrsFuzzPct)
         }
-
 
         val oneaudit = WorkflowTesterOneAudit(config=config, listOf(contestUA),
             MvrManagerForTesting(mvrs, oaMvrs, seed=config.creation.seed, pools=pools))
@@ -139,6 +139,15 @@ class OneAuditSingleRoundWithDilutedMargin(
             pools=pools)
 
         val oneaudit = WorkflowTesterOneAudit(config=config, listOf(contestUA), manager)
+
+        // // AuditWorkflow is given, audit one contest in a single round
+        //class ClcaSingleRoundWorkflowTask(
+        //    val name: String,
+        //    val workflow: AuditWorkflow,
+        //    val auditor: ClcaAssertionAuditorIF, // can be used for both Clca and OneAudit
+        //    val testMvrs: List<Cvr>, // needed for tracking the true margin of the mvrs, for plotting
+        //    val parameters: Map<String, Any> = emptyMap(),
+        //) : ConcurrentTask<WorkflowResult> {
         return ClcaSingleRoundWorkflowTask(
             name(),
             oneaudit,

@@ -80,7 +80,7 @@ fun auditPollingAssertion(
     config: Config,
     contestUA: ContestWithAssertions,
     assertionRound: AssertionRound,
-    sampler: SamplerTracker,
+    samplerTracker: SamplerTracker,
     roundIdx: Int,
     quiet: Boolean = false
 ): TestH0Result {
@@ -100,7 +100,7 @@ fun auditPollingAssertion(
     val testFn = AlphaMart(
         estimFn = estimFn,
         N = contestUA.Npop,
-        tracker = sampler,
+        tracker = samplerTracker,
         withoutReplacement = true,
         riskLimit = config.riskLimit,
         upperBound = assorter.upperBound(),
@@ -108,12 +108,11 @@ fun auditPollingAssertion(
     testFn.setDebuggingSequences()
 
     val terminateOnNullReject = !config.creation.isRiskMeasuringAudit()
-    val testH0Result = testFn.testH0(sampler.maxSamples(), terminateOnNullReject=terminateOnNullReject) { sampler.sample() }
+    val testH0Result = testFn.testH0(samplerTracker.nmvrs(), terminateOnNullReject=terminateOnNullReject) { samplerTracker.sample() }
 
     assertionRound.auditResult = AuditRoundResult(
         roundIdx,
-        nmvrs = sampler.nmvrs(),
-        // countCvrsUsedInAudit = sampler.countCvrsUsedInAudit(),
+        nmvrs = samplerTracker.nmvrs(),
         plast = testH0Result.pvalueLast,
         pmin = testH0Result.pvalueMin,
         samplesUsed = testH0Result.sampleCount,

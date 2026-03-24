@@ -5,8 +5,11 @@ import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.cli.startTestElectionPolling
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.testdataDir
+import org.cryptobiotic.rlauxe.util.ConcurrentTask
+import kotlin.Int
 import kotlin.test.Test
 import kotlin.test.fail
 
@@ -36,7 +39,7 @@ class TestPersistedWorkflow {
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
         startFirstRound(auditdir)
 
-        runPersistedAudit(topdir, test=false)
+        runPersistedAudit(topdir)
     }
 
     @Test
@@ -62,7 +65,7 @@ class TestPersistedWorkflow {
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
         startFirstRound(auditdir)
 
-        runPersistedAudit(topdir, test=false)
+        runPersistedAudit(topdir)
     }
 
     @Test
@@ -70,7 +73,7 @@ class TestPersistedWorkflow {
         val topdir = "$testdataDir/persist/persistWorkflow/polling"
         val N = 50000
         startTestElectionPolling(topdir, minMargin = .11, fuzzMvrs = .00, pctPhantoms = 0.00, ncards = N, ncontests = 1)
-        runPersistedAudit(topdir, test=false)
+        runPersistedAudit(topdir, maxRounds=10)
     }
 
     @Test
@@ -100,11 +103,54 @@ class TestPersistedWorkflow {
         createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
         startFirstRound(auditdir)
 
-        runPersistedAudit(topdir, test=false)
+        runPersistedAudit(topdir, maxRounds=10)
+    }
+
+    @Test
+    fun problem() {
+        // from ExtraVsMarginOneAudit
+        // 2026-03-23 16:11:19.947 WARN   runAudit OneAuditWorkflowTaskGenerator margin=0.01 mvrsFuzzPct=0.0 cvrPercent=0.9 11 exceeded maxRounds = 10
+        val Nc = 50000
+        val margin = .01
+        val mvrFuzzPct = .00
+        val ntrials = 1
+        val nsimTrials = 100
+        val cvrPercent = .50
+
+        val topdir = "$testdataDir/persist/persistWorkflow/oneauditProblem2"
+        val auditdir = "$topdir/audit"
+
+        val electionInfo = ElectionInfo.forTest(AuditType.ONEAUDIT, MvrSource.testPrivateMvrs) // TODO where do you get the mvrs ??
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05,)
+        val config = Config(electionInfo, creation, round =
+            AuditRoundConfig(
+                SimulationControl(nsimTrials=nsimTrials),
+                sampling = ContestSampleControl.NONE,
+                ClcaConfig(), null)
+        )
+
+        val (contestOA, mvrs, cards, pools) = makeOneAuditTest(
+            margin,
+            Nc,
+            cvrFraction = cvrPercent,
+            undervoteFraction = 0.0,
+            phantomFraction = 0.0
+        )
+
+        val contestsUA = listOf(contestOA)
+
+        val election = CreateElectionFromCvrs("testPersistedOneAudit", contestsUA, mvrs, AuditType.ONEAUDIT,
+            cardPools = pools, mvrSource=MvrSource.testPrivateMvrs)
+        createElectionRecord(election, auditDir = auditdir)
+
+        createAuditRecord(config, election, auditDir = auditdir, externalSortDir=topdir)
+        startFirstRound(auditdir)
+
+        runPersistedAudit(topdir, maxRounds=10)
     }
 }
 
-fun runPersistedAudit(topdir: String, test:Boolean) {
+fun runPersistedAudit(topdir: String, maxRounds:Int = 6) {
     val auditdir = "$topdir/audit"
 
     val verifyResults = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
@@ -127,7 +173,7 @@ fun runPersistedAudit(topdir: String, test:Boolean) {
             fail()
         } */
 
-        done = lastRound.auditIsComplete || lastRound.roundIdx > 5
+        done = lastRound.auditIsComplete || lastRound.roundIdx > maxRounds
     }
 
     if (lastRound != null) {

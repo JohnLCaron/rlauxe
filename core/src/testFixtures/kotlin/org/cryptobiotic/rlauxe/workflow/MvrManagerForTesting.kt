@@ -19,7 +19,8 @@ import kotlin.io.path.Path
 private val logger = KotlinLogging.logger("MvrManagerForTesting")
 
 // simulated cvrs, mvrs for testing are sorted and kept here in memory
-// not peristent
+// not persistent
+// TODO can we redo this as a MvrSource?
 class MvrManagerForTesting(
     cvrs: List<Cvr>,
     mvrs: List<Cvr>,
@@ -29,7 +30,7 @@ class MvrManagerForTesting(
 
     val sortedCards: List<AuditableCard>
     val sortedMvrs: List<AuditableCard> // the mvrs in the same order as the sorted cards
-    private var mvrsRound: List<AuditableCard> = emptyList()
+    private var mvrsForRound: List<AuditableCard> = emptyList()
 
     init {
         // the order of the sortedCards cannot be changed once set.
@@ -38,30 +39,30 @@ class MvrManagerForTesting(
         sortedMvrs = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
     }
 
-    override fun sortedManifest() :CardManifest {
+    override fun sortedManifest(): CardManifest {
         return CardManifest.createFromList(sortedCards, pools)
     }
 
     override fun pools() = pools
     override fun batches() = pools
 
-    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
-        if (mvrsRound.isEmpty()) {
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>> {
+        if (mvrsForRound.isEmpty()) {
             return sortedMvrs.zip(sortedCards) // all of em, for SingleRoundAudit
         }
 
-        val sampleNumbers = mvrsRound.map { it.prn }
+        val sampleNumbers = mvrsForRound.map { it.prn }
         val sampledCvrs = findSamples(sampleNumbers, Closer(sortedCards.iterator()))
 
         // prove that sampledCvrs correspond to mvrs
-        require(sampledCvrs.size == mvrsRound.size)
-        val cvruaPairs: List<Pair<AuditableCard, AuditableCard>> = mvrsRound.zip(sampledCvrs)
+        require(sampledCvrs.size == mvrsForRound.size)
+        val cvruaPairs: List<Pair<AuditableCard, AuditableCard>> = mvrsForRound.zip(sampledCvrs)
         cvruaPairs.forEach { (mvr, cvr) ->
             require(mvr.location == cvr.location)
             require(mvr.index == cvr.index)
-            require(mvr.prn== cvr.prn)
+            require(mvr.prn == cvr.prn)
         }
-        return mvrsRound.zip(sampledCvrs)
+        return mvrsForRound.zip(sampledCvrs)
     }
 
     // MvrManagerTestIF
@@ -76,13 +77,16 @@ class MvrManagerForTesting(
             lastRN = mvr.prn
         }
 
-        mvrsRound = sampledMvrs
+        mvrsForRound = sampledMvrs
         return sampledMvrs
+    }
+
+    override fun toString(): String {
+        return "MvrManagerForTesting(pools=${pools?.size}, sortedCards=${sortedCards.size}, sortedMvrs=${sortedMvrs.size}, mvrsRound=${mvrsForRound.size})"
     }
 }
 
 // runs audit rounds until finished. return last audit round
-// Can only use this if the MvrManager implements MvrManagerTest
 // otherwise run one round at a time with PersistentAudit
 fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boolean=true, maxRounds:Int=10): AuditRoundIF? {
     val stopwatch = Stopwatch()
@@ -108,16 +112,14 @@ fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boole
             // println(" runAudit $name ${nextRound.roundIdx} done=$complete samples=${nextRound.samplePrns.size}")
             if (nextRound.roundIdx > maxRounds) {
                 logger.warn {" runAudit $name ${roundidx} exceeded maxRounds = $maxRounds"}
+                // TODO set contest status ??
                 nextRound = null
                 break
             }  // safety net
         }
     }
 
-    if (nextRound == null)
-        print("")
-
-    return nextRound
+    return nextRound // workflow.auditRounds().last() // hmm how do we indicate the riskLimit wasnt satisfied?
 }
 
 /////////////////////////////////////////////////////////////////

@@ -27,19 +27,19 @@ class SingleContestAuditTask(
         // run all needed rounds. lastRound shows how many rounds were needed
         val lastRound = runTestAuditToCompletion(name, workflow, quiet = quiet)
 
-        if (lastRound == null) {  // TODO why would this be null?
-            logger.error { "lastRound is null, setting contest to ContestMisformed"}
+        if (lastRound == null) {  // nextRound.roundIdx > maxRounds)
+            logger.error { "lastRound is null, setting contest to FailMaxRoundsAllowed"}
             return WorkflowResult(
                 name,
                 0,
                 0.0,
-                TestH0Status.ContestMisformed,
+                TestH0Status.FailMaxRoundsAllowed,
                 0.0, 0.0, 0.0,
                 otherParameters,
             )
         }
 
-        // TODO since its single contest, does the lastRound always have the entire set of mvr sampleNumbers?
+        // single contest
         val nmvrs = lastRound.samplePrns.size
         val contest = lastRound.contestRounds.first() // theres only one contest
 

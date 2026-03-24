@@ -1,0 +1,183 @@
+            <iframe src='about:blank' style='border:none !important;' width='600' height='400' srcdoc="&lt;html lang=&quot;en&quot;>
+   &lt;head>
+       &lt;meta charset=&quot;UTF-8&quot;>
+       &lt;style> html, body { margin: 0; padding: 0; overflow: hidden; } &lt;/style>
+       &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;library&quot; src=&quot;https://cdn.jsdelivr.net/gh/JetBrains/lets-plot@v4.7.3/js-package/distr/lets-plot.min.js&quot;>&lt;/script>
+   &lt;/head>
+   &lt;body>
+          &lt;div id=&quot;Bzj5pq&quot;>&lt;/div>
+   &lt;script type=&quot;text/javascript&quot; data-lets-plot-script=&quot;plot&quot;>
+   
+   (function() {
+   // ----------
+   
+   const forceImmediateRender = false;
+   const responsive = false;
+   
+   let sizing = {
+       width_mode: &quot;FIXED&quot;,
+       height_mode: &quot;FIXED&quot;,
+       width: 600.0, 
+       height: 400.0 
+   };
+   
+   const preferredWidth = document.body.dataset.letsPlotPreferredWidth;
+   if (preferredWidth !== undefined) {
+       sizing = {
+           width_mode: 'FIXED',
+           height_mode: 'SCALED',
+           width: parseFloat(preferredWidth)
+       };
+   }
+   
+   const containerDiv = document.getElementById(&quot;Bzj5pq&quot;);
+   let fig = null;
+   
+   function renderPlot() {
+       if (fig === null) {
+           const plotSpec = {
+&quot;ggtitle&quot;:{
+&quot;text&quot;:&quot;extraVsMargin extra samples&quot;,
+&quot;subtitle&quot;:&quot;CLCA Nc=50000 ntrials=1000 nsimTrials=100&quot;
+},
+&quot;mapping&quot;:{
+},
+&quot;data&quot;:{
+},
+&quot;kind&quot;:&quot;plot&quot;,
+&quot;scales&quot;:[{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+},{
+&quot;aesthetic&quot;:&quot;color&quot;,
+&quot;discrete&quot;:true
+},{
+&quot;aesthetic&quot;:&quot;x&quot;,
+&quot;limits&quot;:[null,null]
+},{
+&quot;aesthetic&quot;:&quot;y&quot;,
+&quot;limits&quot;:[null,null],
+&quot;trans&quot;:&quot;LOG10&quot;
+}],
+&quot;layers&quot;:[{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;extraSamples&quot;,
+&quot;color&quot;:&quot;fuzzMvrs&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;],
+&quot;margin&quot;:[0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009],
+&quot;extraSamples&quot;:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,25.00699999999972,13.581000000000245,6.768999999999551,2.635000000000332,1.4230000000000018,0.9650000000002876,0.8490000000000322,0.39400000000001967,0.3769999999999669,0.3060000000001395,0.2599999999999838,52.17299999999932,22.49299999999971,13.157000000000437,5.824999999999989,3.035999999999774,2.0329999999997312,1.6269999999999385,1.2139999999999844,0.6719999999999686,0.7400000000000801,0.3669999999999547,69.9940000000006,35.361999999999625,16.7969999999994,8.464000000000254,4.852000000000288,3.060000000000059,1.9710000000000178,1.917999999999921,1.0969999999998947,0.8179999999999978,0.7400000000002223,83.52599999999984,38.57300000000146,24.399999999999807,11.61899999999963,6.423999999999978,4.417999999999779,2.6859999999999786,1.8700000000000614,1.7909999999999258,0.9899999999998528,0.9800000000000892,106.22699999999986,49.98599999999976,28.81099999999998,13.65600000000029,7.316000000000031,4.707999999999913,3.2819999999999823,2.866000000000085,1.7539999999999765,1.6330000000000524,1.1200000000000045],
+&quot;fuzzMvrs&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;]
+},
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;line&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;fuzzMvrs&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;extraSamples&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+}
+},{
+&quot;mapping&quot;:{
+&quot;x&quot;:&quot;margin&quot;,
+&quot;y&quot;:&quot;extraSamples&quot;,
+&quot;group&quot;:&quot;&amp;merged_groups&quot;
+},
+&quot;stat&quot;:&quot;identity&quot;,
+&quot;data&quot;:{
+&quot;&amp;merged_groups&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;],
+&quot;margin&quot;:[0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009,0.010000000000000009,0.014999999999999902,0.020000000000000018,0.030000000000000027,0.040000000000000036,0.050000000000000044,0.06000000000000005,0.07000000000000006,0.08000000000000007,0.09000000000000008,0.10000000000000009],
+&quot;fuzzMvrs&quot;:[&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0000&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0010&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0020&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0030&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0040&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;,&quot;0.0050&quot;],
+&quot;extraSamples&quot;:[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,25.00699999999972,13.581000000000245,6.768999999999551,2.635000000000332,1.4230000000000018,0.9650000000002876,0.8490000000000322,0.39400000000001967,0.3769999999999669,0.3060000000001395,0.2599999999999838,52.17299999999932,22.49299999999971,13.157000000000437,5.824999999999989,3.035999999999774,2.0329999999997312,1.6269999999999385,1.2139999999999844,0.6719999999999686,0.7400000000000801,0.3669999999999547,69.9940000000006,35.361999999999625,16.7969999999994,8.464000000000254,4.852000000000288,3.060000000000059,1.9710000000000178,1.917999999999921,1.0969999999998947,0.8179999999999978,0.7400000000002223,83.52599999999984,38.57300000000146,24.399999999999807,11.61899999999963,6.423999999999978,4.417999999999779,2.6859999999999786,1.8700000000000614,1.7909999999999258,0.9899999999998528,0.9800000000000892,106.22699999999986,49.98599999999976,28.81099999999998,13.65600000000029,7.316000000000031,4.707999999999913,3.2819999999999823,2.866000000000085,1.7539999999999765,1.6330000000000524,1.1200000000000045]
+},
+&quot;size&quot;:1.0,
+&quot;shape&quot;:1.0,
+&quot;color&quot;:&quot;#5470c6&quot;,
+&quot;sampling&quot;:&quot;none&quot;,
+&quot;inherit_aes&quot;:false,
+&quot;position&quot;:&quot;identity&quot;,
+&quot;geom&quot;:&quot;point&quot;,
+&quot;data_meta&quot;:{
+&quot;series_annotations&quot;:[{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;fuzzMvrs&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;margin&quot;
+},{
+&quot;type&quot;:&quot;float&quot;,
+&quot;column&quot;:&quot;extraSamples&quot;
+},{
+&quot;type&quot;:&quot;str&quot;,
+&quot;column&quot;:&quot;&amp;merged_groups&quot;
+}]
+},
+&quot;tooltips&quot;:{
+&quot;variables&quot;:[&quot;margin&quot;,&quot;extraSamples&quot;,&quot;fuzzMvrs&quot;],
+&quot;disable_splitting&quot;:true
+}
+}],
+&quot;spec_id&quot;:&quot;3&quot;
+};
+           fig = LetsPlot.buildPlotFromProcessedSpecs(plotSpec, containerDiv, sizing);
+       } else {
+           fig.updateView({});
+       }
+   }
+   
+   const renderImmediately = 
+       forceImmediateRender || (
+           sizing.width_mode === 'FIXED' &amp;&amp; 
+           (sizing.height_mode === 'FIXED' || sizing.height_mode === 'SCALED')
+       );
+   
+   if (renderImmediately) {
+       renderPlot();
+   }
+   
+   if (!renderImmediately || responsive) {
+       // Set up observer for initial sizing or continuous monitoring
+       var observer = new ResizeObserver(function(entries) {
+           for (let entry of entries) {
+               if (entry.contentBoxSize &amp;&amp; 
+                   entry.contentBoxSize[0].inlineSize > 0) {
+                   if (!responsive &amp;&amp; observer) {
+                       observer.disconnect();
+                       observer = null;
+                   }
+                   renderPlot();
+                   if (!responsive) {
+                       break;
+                   }
+               }
+           }
+       });
+       
+       observer.observe(containerDiv);
+   }
+   
+   // ----------
+   })();
+   
+   &lt;/script>
+   &lt;/body>
+&lt;/html>"></iframe>    

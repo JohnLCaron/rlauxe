@@ -12,6 +12,7 @@ import org.cryptobiotic.rlauxe.betting.populationMeanIfH0
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
@@ -207,7 +208,7 @@ class AuditTrialTask(
                 cardSortedIndex++
             }
         }
-        logger.info { "roundIdx $roundIdx $run countEstimatedCards=$countEstimatedCards took $stopwatch" }
+        logger.debug { "roundIdx $roundIdx $run countEstimatedCards=$countEstimatedCards took $stopwatch" }
 
         return contestTrials
     }
@@ -232,14 +233,16 @@ class ContestClcaTrial(val run: Int,
     val bettingFun : GeneralAdaptiveBetting
     val startingTestStatistic: Double
     val prevSamplesUsed: Int
+    // val seq = DebuggingSequences()
 
     init {
         val aprioriErrorRates = clcaConfig.apriori.makeErrorRates(cassorter.noerror, passorter.upperBound())
         val oaAssortRates = if (isOA) (cassorter as OneAuditClcaAssorter).oaAssortRates else null
 
+        // use the same betting function as the real audit
         bettingFun = GeneralAdaptiveBetting(
             contest.Npop, // population size for this contest
-            aprioriErrorRates = aprioriErrorRates, // apriori rates not counting phantoms, non-null so we always have noerror and upper
+            aprioriErrorRates = aprioriErrorRates, // apriori rates not counting phantoms; non-null so we always have noerror and upper
             contest.Nphantoms,
             clcaConfig.maxLoss,
             oaAssortRates=oaAssortRates,
@@ -247,16 +250,17 @@ class ContestClcaTrial(val run: Int,
 
         val prevAuditResult = assertionRound.prevAssertionRound?.auditResult
         prevSamplesUsed = prevAuditResult?.samplesUsed ?: 0
-        errorTracker = prevAuditResult?.clcaErrorTracker ?: ClcaErrorTracker(cassorter.noerror, passorter.upperBound())
+        errorTracker = prevAuditResult?.clcaErrorTracker?.copyAll() ?: ClcaErrorTracker(cassorter.noerror, passorter.upperBound())
 
         val plast = prevAuditResult?.plast
         startingTestStatistic = if (plast == null) 1.0 else 1.0 / plast
     }
-
+    var status = TestH0Status.InProgress
     var testStatistic = startingTestStatistic // aka T
     var maxIndex = 0
     var countSkip = 0
     var countUsed = 0
+    var firstDebug = true
 
     override fun skip(): Boolean {
         countSkip++
@@ -271,6 +275,7 @@ class ContestClcaTrial(val run: Int,
     override fun nmvrs() = countUsed
     override fun startingTestStatistic() = startingTestStatistic
 
+    // why not just use BettingMart ??
     override fun addCard(mvr: AuditableCard?, card: AuditableCard, cardSortedIndex: Int) {
         countUsed++
 
@@ -281,25 +286,43 @@ class ContestClcaTrial(val run: Int,
         }
 
         val mui = populationMeanIfH0(contest.Npop, true, errorTracker)
-        val maxBet = bettingFun.bet(errorTracker)
+        if (mui > cassorter.upperBound) { // 1  # true mean is certainly less than 1/2
+            status = TestH0Status.AcceptNull
+            maxIndex = cardSortedIndex
+            return
+        }
+        if (mui < 0.0) { // 5 # true mean certainly greater than 1/2
+            status = TestH0Status.SampleSumRejectNull
+            maxIndex = cardSortedIndex
+            return
+        }
 
-        val payoff = (1 + maxBet * (assortValue - mui))
+        val bet = bettingFun.bet(errorTracker)
+
+        val payoff = (1 + bet * (assortValue - mui))
         testStatistic *= payoff
         if (testStatistic > endingTestStatistic) {
+            status = TestH0Status.StatRejectNull
             maxIndex = cardSortedIndex
         } // once we set maxUsed then wantsMore == false
 
-        // welford.update(assortValue) // error tracker has a welford...
-        errorTracker.addSample(assortValue, card.poolId == null)
+        val wantId = -1
+        if (run == 1 && contest.id == wantId) {
+            if (firstDebug) {
+                println("idx, xs,            bet,           payoff,       Tj,             location, mvr votes, card votes")
+                firstDebug = false
+            }
+            bettingFun.bet(errorTracker, show = true) // debugging
 
-        /*
-        val wantId = 0
-        if (run == 1 && contest.id == wantId && countUsed < 1000) {
             val mvrVotes = mvr?.votes(wantId)?.contentToString() ?: "missing"
             val cardVotes = card.votes(wantId)?.contentToString() ?: "N/A"
-            println("$countUsed, ${dfn(assortValue, 8)}, ${dfn(maxBet, 8)}, ${dfn(payoff, 8)}, ${dfn(testStatistic, 8)}, " +
+            println("$countUsed, ${dfn(assortValue, 8)}, ${dfn(bet, 8)}, ${dfn(payoff, 8)}, ${dfn(testStatistic, 8)}, " +
                     "${card.location}, ${mvrVotes}, ${cardVotes}")
-        } */
+        }
+        errorTracker.addSample(assortValue, card.poolId == null)
+
+        //     fun add(x: Double, bet: Double, mj: Double, tj: Double, testStatistic: Double) {
+        // seq.add(assortValue, bet, mui, payoff, testStatistic)
     }
 
     override fun toString(): String {
@@ -340,12 +363,13 @@ class ContestPollingTrial(val run: Int,
 
         val prevAuditResult = assertionRound.prevAssertionRound?.auditResult
         prevSamplesUsed = prevAuditResult?.samplesUsed ?: 0
-        errorTracker = prevAuditResult?.clcaErrorTracker ?: ClcaErrorTracker(0.0, assorter.upperBound())
+        errorTracker = prevAuditResult?.clcaErrorTracker?.copyAll() ?: ClcaErrorTracker(0.0, assorter.upperBound())
 
         val plast = prevAuditResult?.plast
         startingTestStatistic = if (plast == null) 1.0 else 1.0 / plast
     }
 
+    var status = TestH0Status.InProgress
     var testStatistic = startingTestStatistic // aka T
     var maxIndex = 0
     var countSkip = 0
@@ -364,6 +388,7 @@ class ContestPollingTrial(val run: Int,
     override fun nmvrs() = countUsed
     override fun startingTestStatistic() = startingTestStatistic
 
+    // why not just use BettingMart ??
     override fun addCard(cvr: AuditableCard?, card: AuditableCard, cardSortedIndex: Int) {
         countUsed++
 
@@ -374,6 +399,17 @@ class ContestPollingTrial(val run: Int,
         }
 
         val mui = populationMeanIfH0(contest.Npop, true, errorTracker)
+        if (mui > assorter.upperBound()) { // 1  # true mean is certainly less than 1/2
+            status = TestH0Status.AcceptNull
+            maxIndex = cardSortedIndex
+            return
+        }
+        if (mui < 0.0) { // 5 # true mean certainly greater than 1/2
+            status = TestH0Status.SampleSumRejectNull
+            maxIndex = cardSortedIndex
+            return
+        }
+
         val maxBet = bettingFn.bet(errorTracker)
 
         val payoff = (1 + maxBet * (assortValue - mui))
@@ -381,8 +417,6 @@ class ContestPollingTrial(val run: Int,
         if (testStatistic > endingTestStatistic) {
             maxIndex = cardSortedIndex
         }
-
-        errorTracker.addSample(assortValue)
 
         val wantId = -1
         if (run == 1 && contest.id == wantId && countUsed < 1000) {
@@ -393,6 +427,8 @@ class ContestPollingTrial(val run: Int,
             if (countUsed == 999)
                 print("")
         }
+
+        errorTracker.addSample(assortValue)
     }
 
     override fun toString(): String {
@@ -413,31 +449,6 @@ interface AssertionTrialIF {
     fun wantsMore(): Boolean
     fun addCard(mvr: AuditableCard?, card: AuditableCard, cardSortedIndex: Int)
 }
-
-/*
-fun findQuantileTrial(data: List<AssertionTrialIF>, quantile: Double): AssertionTrialIF {
-    require(data.isNotEmpty())
-
-    val sortedData: List<AssertionTrialIF> = data.sortedBy { it.nmvrs() }
-    val deciles = mutableListOf<Int>()
-    val n = sortedData.size
-    repeat(9) {
-        val quantile = .10 * (it + 1)
-        val p = min((quantile * n).toInt(), n - 1)
-        deciles.add(sortedData[p].nmvrs())
-    }
-    deciles.add(sortedData.last().nmvrs() + 1)
-
-    require(quantile in 0.0..1.0)
-
-    // edge cases
-    if (quantile == 0.0) return sortedData.first()
-    if (quantile == 100.0) return sortedData.last()
-
-    // rounding down. TODO interpolate; see Deciles ??
-    val p = min((quantile * data.size).toInt(), data.size-1)
-    return sortedData[p]
-} */
 
 fun findClosestTrial(data: List<AssertionTrialIF>, nmvrs: Int): AssertionTrialIF {
     require(data.isNotEmpty())

@@ -78,18 +78,26 @@ data class GeneralAdaptiveBetting(
         return est
     }
 
-    override fun bet(prevSamples: Tracker): Double {
+    override fun bet(prevSamples: Tracker, show: Boolean): Double {
         val errorTracker = prevSamples as ErrorTracker
         val trackerErrors = errorTracker.measuredClcaErrorCounts()
 
         val estRates = estimatedErrorRates(trackerErrors)
         val mui = populationMeanIfH0(Npop, withoutReplacement=true, prevSamples)
+        if (mui < 0.0) {
+            populationMeanIfH0(Npop, withoutReplacement=true, prevSamples)
+        }
         val maxBet = maxLoss / mui
-
+        if (maxBet > 2.0) {
+            populationMeanIfH0(Npop, withoutReplacement=true, prevSamples)
+        }
         if (estRates.isEmpty()) return maxBet // TODO better
 
         val kelly = GeneralOptimalLambda(errorTracker.noerror(), estRates, oaAssortRates?.rates, mui=mui, maxBet=maxBet, debug = debug)
         val bet = kelly.solve()
+        if (show && bet > 2.0) {
+            println("bet $bet > 2; maxBet = $maxBet mui=$mui, nsamplesLeft=${Npop - prevSamples.numberOfSamples()}")
+        }
         return bet
     }
 }

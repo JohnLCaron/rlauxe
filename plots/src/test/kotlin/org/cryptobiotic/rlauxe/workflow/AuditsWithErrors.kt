@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
@@ -12,7 +11,7 @@ import kotlin.test.Test
 import kotlin.math.pow
 
 class AuditsWithErrors {
-    val nruns = 1000
+    val nruns = 100
     val N = 100000
 
     @Test

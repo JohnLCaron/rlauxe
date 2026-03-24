@@ -129,7 +129,7 @@ class AuditCobraAssertion(
             tracker = samplerTracker,
         )
 
-        val testH0Result = testFn.testH0(samplerTracker.maxSamples(), terminateOnNullReject = true) { samplerTracker.sample() }
+        val testH0Result = testFn.testH0(samplerTracker.nmvrs(), terminateOnNullReject = true) { samplerTracker.sample() }
         val samplesNeeded = testH0Result.sampleCount
 
         assertionRound.auditResult = AuditRoundResult(

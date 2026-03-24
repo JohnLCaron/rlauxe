@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.attack
 
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.*
@@ -26,7 +25,7 @@ class OaPhantomAttack {
 
         val tasks = mutableListOf<RepeatedWorkflowRunner>()
         allMargins.forEach { margin ->
-            val oneauditGeneratorReportedMean = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
+            val oneauditGeneratorReportedMean = OneAuditSingleRoundAuditTaskGenerator(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=phantomPct, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "reportedMean", "fuzzPct" to fuzzPct),
                 auditConfigIn = Config.from(
@@ -35,7 +34,7 @@ class OaPhantomAttack {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorReportedMean))
 
-            val oneauditGeneratorBet99 = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
+            val oneauditGeneratorBet99 = OneAuditSingleRoundAuditTaskGenerator(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=phantomPct, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "simulate", "fuzzPct" to fuzzPct),
                 auditConfigIn = Config.from(
@@ -44,7 +43,7 @@ class OaPhantomAttack {
             )
             tasks.add(RepeatedWorkflowRunner(nruns, oneauditGeneratorBet99))
 
-            val oneauditGeneratorEta0Eps = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
+            val oneauditGeneratorEta0Eps = OneAuditSingleRoundAuditTaskGenerator(
                 Nc=N, margin=margin, underVotePct=0.0, phantomPct=phantomPct, cvrPercent=cvrPercent, mvrsFuzzPct=fuzzPct,
                 parameters=mapOf("nruns" to nruns.toDouble(), "cat" to "calcMvrsNeeded", "fuzzPct" to fuzzPct),
                 auditConfigIn = Config.from(

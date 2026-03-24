@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
-import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -39,7 +38,7 @@ class AuditsNoErrors {
             tasks.add(RepeatedWorkflowRunner(nruns, clcaGenerator))
 
             cvrPercents.forEach { cvrPercent ->
-                val oneauditGenerator = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
+                val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
                     N, margin, 0.0, 0.0, cvrPercent, 0.0,
                     auditConfigIn = Config.from(AuditType.ONEAUDIT),
                     parameters=mapOf("nruns" to nruns, "cat" to "oneaudit-${(100 * cvrPercent).toInt()}%"),

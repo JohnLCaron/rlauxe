@@ -90,7 +90,7 @@ class AdaptiveBetting(
     val p2u: Double = errorRates.p2u // apriori rate of 2-vote understatements; set < 0 to remove consideration
     var lastBet = 0.0
 
-    override fun bet(prevSamples: Tracker): Double {
+    override fun bet(prevSamples: Tracker, show: Boolean): Double {
         val rateSampler = prevSamples as PluralityErrorTracker
         val lastj = prevSamples.numberOfSamples()
         val p2oest = if (p2o < 0.0 || lastj == 0) minRate else estimateRate(d, p2o, rateSampler.countP2o().toDouble() / lastj, lastj)
@@ -140,7 +140,7 @@ class OracleComparison(
         lam = kelly.solve()
     }
     // note lam is a constant
-    override fun bet(prevSamples: Tracker): Double {
+    override fun bet(prevSamples: Tracker, show: Boolean): Double {
         return lam
     }
 }

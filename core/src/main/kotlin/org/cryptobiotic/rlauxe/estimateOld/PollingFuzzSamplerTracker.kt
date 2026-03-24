@@ -58,9 +58,8 @@ class PollingFuzzSamplerTracker(
         return makeFuzzedCvrsForPolling(listOf(contest.info()), cvrs, fuzzPct) // single contest
     }
 
-    override fun maxSamples() = maxSamples
+    override fun nmvrs() = maxSamples
     override fun countCvrsUsedInAudit() = idx
-    override fun nmvrs() = mvrs.size
 
     override fun hasNext() = (welford.count + 1 < maxSamples)
     override fun next() = sample()

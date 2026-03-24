@@ -145,13 +145,12 @@ class CorlaAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
             noerror = cassorter.noerror(),
             p1 = 0.0, p2 = 0.0, p3 = 0.0, p4 = 0.0, // TODO
         )
-        val testH0Result = testFn.testH0(samplerTracker.maxSamples(), terminateOnNullReject = true) { samplerTracker.sample() }
+        val testH0Result = testFn.testH0(samplerTracker.nmvrs(), terminateOnNullReject = true) { samplerTracker.sample() }
         val samplesNeeded = testH0Result.sampleCount
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
             nmvrs = samplerTracker.nmvrs(),
-            // countCvrsUsedInAudit = sampling.countCvrsUsedInAudit(),
             plast = testH0Result.pvalueLast,
             pmin = testH0Result.pvalueMin,
             samplesUsed = samplesNeeded,

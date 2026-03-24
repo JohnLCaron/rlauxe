@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import kotlin.test.Test
 
-class TestOneRoundClcaAudit {
+class TestSingleRoundClcaAudit {
     val config = Config.from(AuditType.CLCA, nsimTrials=10)
 
     @Test
@@ -24,12 +24,15 @@ class TestOneRoundClcaAudit {
 
         // Synthetic cvrs for testing reflecting the exact contest votes, plus undervotes and phantoms.
         val testCvrs = testData.makeCvrsFromContests()
-        val testMvrs = testCvrs
+        val testMvrs = testCvrs // TODO no fuzzing
 
         val workflow = WorkflowTesterClca(config, contests, emptyList(),
             MvrManagerForTesting(testCvrs, testMvrs, config.creation.seed))
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
-        runClcaSingleRoundAudit(workflow, contestRounds, auditor = ClcaAssertionAuditor(), parameters=emptyMap())
+
+        val maxEstMvrs = runClcaSingleRoundAudit(workflow, contestRounds, auditor = ClcaAssertionAuditor(), parameters=emptyMap())
+
+
     }
 
 }

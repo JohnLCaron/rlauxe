@@ -20,7 +20,7 @@ fun runAlphaMartRepeated(
 ): RunRepeatedResult {
 
     val useEstimFn = estimFn ?: TruncShrinkage(
-        samplerTracker.maxSamples(),
+        samplerTracker.nmvrs(),
         true,
         upperBound = sampleUpperBound,
         d = d,
@@ -29,7 +29,7 @@ fun runAlphaMartRepeated(
 
     val alpha = AlphaMart(
         estimFn = useEstimFn,
-        N = samplerTracker.maxSamples(),
+        N = samplerTracker.nmvrs(),
         tracker = samplerTracker,
         upperBound = sampleUpperBound,
         withoutReplacement = withoutReplacement,

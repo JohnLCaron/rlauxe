@@ -160,15 +160,15 @@ class ClcaAssertionAuditor(val quiet: Boolean = true): ClcaAssertionAuditorIF {
         testFn.setDebuggingSequences()
 
         val terminateOnNullReject = !config.creation.isRiskMeasuringAudit()
-        val testH0Result = testFn.testH0(samplerTracker.maxSamples(), terminateOnNullReject = terminateOnNullReject) { samplerTracker.sample() }
+        val testH0Result = testFn.testH0(samplerTracker.nmvrs(), terminateOnNullReject = terminateOnNullReject) { samplerTracker.sample() }
         if (!testH0Result.status.success && showFail) {
-            println("TestH0Result est ${assertionRound.estMvrs} max= ${samplerTracker.maxSamples()} used=${testH0Result.sampleCount} plast = ${testH0Result.pvalueLast}")
+            println("TestH0Result est ${assertionRound.estMvrs} max= ${samplerTracker.nmvrs()} used=${testH0Result.sampleCount} plast = ${testH0Result.pvalueLast}")
             println("   errors = ${samplerTracker.measuredClcaErrorCounts()}")
         }
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
-            nmvrs = samplerTracker.maxSamples(),
+            nmvrs = samplerTracker.nmvrs(),
             plast = testH0Result.pvalueLast,
             pmin = testH0Result.pvalueMin,
             samplesUsed = testH0Result.sampleCount,

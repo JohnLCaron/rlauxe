@@ -36,7 +36,7 @@ fun runRepeated(
         }
 
         val testH0Result = testFn.testH0(
-            maxSamples=samplerTracker.maxSamples(),
+            maxSamples=samplerTracker.nmvrs(),
             terminateOnNullReject=terminateOnNullReject,
             startingTestStatistic = startingTestStatistic,
        ) { samplerTracker.sample() }
@@ -60,7 +60,7 @@ fun runRepeated(
     }
 
     if (fail > 0) {
-        logger.warn { "$name:  $fail/$ntrials failures in sampling max= ${samplerTracker.maxSamples()} samples" }
+        logger.warn { "$name:  $fail/$ntrials failures in sampling max= ${samplerTracker.nmvrs()} samples" }
     } // else {
     //    logger.info { "$name:  $fail/$ntrials failures in sampling max= ${samplerTracker.maxSamples()} samples took $stopwatch" }
     // }

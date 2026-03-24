@@ -162,8 +162,16 @@ where
 
 And use this to find the optimal value of lambda.
 
-Compare [current OneAudit plots](https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrorsLogLinear.html) with
-[previous OneAudit plots](https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/AuditsNoErrors4/AuditsNoErrors4LogLinear.html) to see the improvement when using eq 2 to set optimal bets.
+Compare current OneAudit results to previous OneAudit to see the improvement when using eq 2 to set optimal bets:
+
+** current OneAudit No Error using eq 2 **
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrorsLogLinear.html" rel="OneAuditNoErrors">![OneAuditNoErrors](plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrorsLogLinear.png)</a>
+
+** previous OneAudit No Errors **
+
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/AuditsNoErrors4/AuditsNoErrors4LogLinear.html" rel="AuditsNoErrors4">![AuditsNoErrors4](plots/oneaudit4/AuditsNoErrors4/AuditsNoErrors4LogLinear.png)</a>
+
 
 ### Estimating samples needed for OneAudit when there are no errors
 

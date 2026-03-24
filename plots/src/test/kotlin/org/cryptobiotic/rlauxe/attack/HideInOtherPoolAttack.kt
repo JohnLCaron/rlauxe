@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.MergeBatchIntoCards
 import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction

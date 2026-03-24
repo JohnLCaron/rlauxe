@@ -184,7 +184,7 @@ class EstimAdapter(
     val estimFn : EstimFn,  // estimator of the population mean
 ): BettingFn {
 
-    override fun bet(prevSamples: Tracker): Double {
+    override fun bet(prevSamples: Tracker, show: Boolean): Double {
         // let bettingmart handle edge cases
         val mu = populationMeanIfH0(N, withoutReplacement, prevSamples)
         val eta = estimFn.eta(prevSamples)

@@ -43,11 +43,8 @@ class BettingMart(
         while (sampleNumber < maxSamples) {
             // population mean under the null hypothesis
             mj = populationMeanIfH0(N, withoutReplacement, tracker)  // approx .5
-            // println("$sampleNumber: mj = $mj numer= ${(N * 0.5 - tracker.sum())} denom = ${(N - tracker.numberOfSamples())} ")
-
             // make sure mj is in bounds
             if (mj > sampleUpperBound || mj < 0.0) { // 1, 5
-                populationMeanIfH0(N, withoutReplacement, tracker) // debug
                 break
             }
 
@@ -76,8 +73,6 @@ class BettingMart(
                 sequences.add(xj, lamj, mj, tj, testStatistic)
             }
             if (showEachSample) println("** $sampleNumber: ${df(xj)} bet=${df(lamj)} tj=${df(tj)} Tj=${df(testStatistic)} pj=${df(1/testStatistic)}")
-            // if (sampleNumber % 1000 == 0)
-            //    println(sampleNumber)
 
             // S ← S + Xj
             // tracker.addSample(xj)

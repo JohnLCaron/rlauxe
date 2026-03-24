@@ -1,10 +1,15 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
+import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
+import org.cryptobiotic.rlauxe.audit.ClcaConfig
 import org.cryptobiotic.rlauxe.audit.Config
+import org.cryptobiotic.rlauxe.audit.ContestSampleControl
+import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MvrSource
-import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
+import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
@@ -13,37 +18,45 @@ import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.io.path.Path
 import kotlin.test.Test
 
-class ExtraVsMarginByFuzzDiff {
+class ExtraVsMarginClca {
     val Nc = 50000
     val ntrials = 1000
-    val nSimTrials = 100
-    val name = "extraVsMarginCalc003ga3"
+    val nsimTrials = 100
+    val name = "extraVsMargin"
     val dirName = "$testdataDir/plots/extra/$name"
-    val fuzzMvrs = 0.003
 
     // Used in docs
     @Test
     fun extraVsMargin() {
         val margins = listOf(.01, .015, .02, .03, .04, .05, .06, .07, .08, .09, .10)
-        val fuzzDiffs = listOf(-.003, -.0015, 0.0, .0015, .003)
+        val mvrFuzzs = listOf(0.0, .001, .002, .003, .004, .005)
+
+        val election = ElectionInfo.forTest(AuditType.CLCA, MvrSource.testClcaSimulated)
+        val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05,)
+        val sampleControl = ContestSampleControl(minRecountMargin = 0.0, minMargin=0.0, contestSampleCutoff = null, auditSampleCutoff = null)
+
         val stopwatch = Stopwatch()
 
         val tasks = mutableListOf<ConcurrentTask<List<WorkflowResult>>>()
-        fuzzDiffs.forEach { fuzzDiff ->
-            val simFuzzPct = fuzzMvrs+fuzzDiff
-            val config =  Config.from( AuditType.CLCA, nsimTrials = nSimTrials, fuzzMvrs = simFuzzPct, contestSampleCutoff = 10000,
-                mvrSource =  MvrSource.testClcaSimulated, )
+        mvrFuzzs.forEach { fuzzMvrs ->
+
+            val config = Config(election, creation, round =
+                AuditRoundConfig(
+                    SimulationControl(nsimTrials = nsimTrials), sampling =
+                    sampleControl,
+                    ClcaConfig(fuzzMvrs=fuzzMvrs), null)
+                )
 
             margins.forEach { margin ->
-                val clcaGenerator1 = ClcaContestAuditTaskGenerator("'extraVsMargin simFuzzPct=$simFuzzPct, margin=$margin'",
+                val clcaGenerator1 = ClcaContestAuditTaskGenerator("'extraVsMargin fuzzMvrs=$fuzzMvrs, margin=$margin'",
                     Nc, margin, 0.1, 0.0, fuzzMvrs,
-                    parameters=mapOf("nruns" to ntrials.toDouble(), "simFuzzPct" to simFuzzPct, "fuzzMvrs" to fuzzMvrs),
+                    parameters=mapOf("nruns" to ntrials.toDouble(), "fuzzMvrs" to fuzzMvrs),
                     config=config)
                 tasks.add(RepeatedWorkflowRunner(ntrials, clcaGenerator1))
             }
 
         }
-        println("run ${tasks.size} tasks $ntrials trials each with ${nSimTrials} simulations each trial")
+        println("run ${tasks.size} tasks $ntrials trials each with ${nsimTrials} simulations each trial")
         val results: List<WorkflowResult> = runRepeatedWorkflowsAndAverage(tasks)
         println(stopwatch.took())
 
@@ -56,12 +69,14 @@ class ExtraVsMarginByFuzzDiff {
 
     @Test
     fun regenPlots() {
-        val subtitle = "Nc=${Nc} ntrials=${ntrials} fuzzMvrs=$fuzzMvrs"
+        val subtitle = "CLCA Nc=${Nc} ntrials=${ntrials} nsimTrials=$nsimTrials"
 
-        showExtraVsMargin(dirName, name, subtitle, ScaleType.Linear, "simFuzzPct") { categoryFuzzDiff(it) }
-        showEstSizesVsMarginPct(dirName, name, subtitle, ScaleType.Linear, "simFuzzPct")  { categoryFuzzDiff(it) }
-        showNroundsVsMargin(dirName, name, subtitle, ScaleType.Linear, "simFuzzPct")  { categoryFuzzDiff(it) }
-        // showRatioVsMargin(dirName, name, subtitle, ScaleType.Linear, "simFuzzPct")  { categoryFuzzDiff(it) }
+        showExtraVsMargin(dirName, name, subtitle, ScaleType.LogLinear, "fuzzMvrs") { categoryFuzzMvrs(it) }
+        showEstSizesVsMarginPct(dirName, name, subtitle, ScaleType.LogLinear, "fuzzMvrs")  { categoryFuzzMvrs(it) }
+
+        showExtraVsMargin(dirName, name, subtitle, ScaleType.Linear, "fuzzMvrs") { categoryFuzzMvrs(it) }
+        showEstSizesVsMarginPct(dirName, name, subtitle, ScaleType.Linear, "fuzzMvrs")  { categoryFuzzMvrs(it) }
+        showNroundsVsMargin(dirName, name, subtitle, ScaleType.Linear, "fuzzMvrs")  { categoryFuzzMvrs(it) }
     }
 
     fun showExtraVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType,
@@ -108,25 +123,10 @@ class ExtraVsMarginByFuzzDiff {
             wrs = data,
             writeFile = "$dirName/${name}Nrounds${scaleType.name}",
             xname = "margin", xfld = { it.margin },
-            yname = "auditRounds", yfld = { it.nrounds},
+            yname = "auditRounds", yfld = { it.nrounds },
             catName = catName, catfld = catfld,
             scaleType = scaleType
         )
     }
 
-    fun showRatioVsMargin(dirName: String, name:String, subtitle: String, scaleType: ScaleType, catName: String, catfld: (WorkflowResult) -> String) {
-        val io = WorkflowResultsIO("$dirName/${name}.csv")
-        val data = io.readResults()
-
-        wrsPlot(
-            titleS = "$name extraSamples/nrounds",
-            subtitleS = subtitle,
-            wrs = data,
-            writeFile = "$dirName/${name}Ratio${scaleType.name}",
-            xname = "margin", xfld = { it.margin },
-            yname = "extraSamples/nrounds", yfld = { it.wtf },
-            catName = catName, catfld = catfld,
-            scaleType = scaleType
-        )
-    }
 }

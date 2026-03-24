@@ -2,13 +2,14 @@ package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.testdataDir
 import kotlin.test.Test
 
 class TestOneShot {
 
     @Test
     fun testOneShot() {
-        val auditdir = "/home/stormy/rla/cases/boulder24/clca/audit"
+        val auditdir = "$testdataDir/persist/persistWorkflow/oneauditProblem2/audit"
         val record = AuditRecord.readFrom(auditdir)
         if (record == null) throw RuntimeException("record is null")
         require (record is AuditRecord)

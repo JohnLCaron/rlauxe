@@ -136,7 +136,7 @@ class ClcaSingleRoundAssortTask(
         )
 
         val testH0Result = testFn.testH0(
-            sampling.maxSamples(),
+            sampling.nmvrs(),
             terminateOnNullReject = true,
         ) { sampling.sample() }
 

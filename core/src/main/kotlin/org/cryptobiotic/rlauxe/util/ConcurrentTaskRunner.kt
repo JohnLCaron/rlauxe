@@ -76,7 +76,6 @@ class ConcurrentTaskRunner<T>(val show: Boolean = false, val showTaskResult: Boo
             if (result != null) {
                 mutex.withLock {
                     results.add(result)
-                    if (results.size % 100 == 0) print(" ${results.size}")
                 }
             }
             yield()

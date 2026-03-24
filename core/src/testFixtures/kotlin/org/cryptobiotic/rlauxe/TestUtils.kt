@@ -34,11 +34,8 @@ class SampleFromArray(val array: DoubleArray): SamplerTracker {
         return nextValue
     }
 
-    override fun maxSamples() = array.size
-
-    override fun countCvrsUsedInAudit() = index
-
     override fun nmvrs() = array.size
+    override fun countCvrsUsedInAudit() = index
 
     override fun reset() {
         TODO("Not yet implemented")

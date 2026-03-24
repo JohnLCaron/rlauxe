@@ -109,7 +109,7 @@ class RunRepeatedTasks {
             if (calculation != null) {
                 mutex.withLock {
                     calculations.add(calculation)
-                    if (calculations.size % 100 == 0) print(" ${calculations.size}")
+                    // if (calculations.size % 100 == 0) print(" ${calculations.size}")
                 }
             }
             yield()

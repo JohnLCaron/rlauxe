@@ -51,11 +51,11 @@ class OneAuditAssertionAuditor(val pools: List<CardPoolIF>, val quiet: Boolean =
         testFn.setDebuggingSequences()
 
         val terminateOnNullReject = !config.creation.isRiskMeasuringAudit()
-        val testH0Result = testFn.testH0(samplerTracker.maxSamples(), terminateOnNullReject = terminateOnNullReject) { samplerTracker.sample() }
+        val testH0Result = testFn.testH0(samplerTracker.nmvrs(), terminateOnNullReject = terminateOnNullReject) { samplerTracker.sample() }
 
         assertionRound.auditResult = AuditRoundResult(
             roundIdx,
-            nmvrs = samplerTracker.maxSamples(),
+            nmvrs = samplerTracker.nmvrs(),
             plast = testH0Result.pvalueLast,
             pmin = testH0Result.pvalueMin,
             samplesUsed = testH0Result.sampleCount,

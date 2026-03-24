@@ -8,7 +8,7 @@ package org.cryptobiotic.rlauxe.betting
  *  The bet must only use the previous samples.
  */
 interface BettingFn {
-    fun bet(prevSamples: Tracker): Double
+    fun bet(prevSamples: Tracker, show: Boolean = false): Double
 }
 
 /** All risk measuring functions implement this */
@@ -37,9 +37,10 @@ enum class TestH0Status(val rank: Int, val complete: Boolean, val success: Boole
 
     // set by sampleWithContestCutoff
     FailMaxSamplesAllowed(6,true, false),  // estimated samples greater than maximum samples allowed
+    FailMaxRoundsAllowed(7,true, false),  // estimated samples greater than maximum samples allowed
 
     // set manually by auditor
-    AuditorRemoved(7,true, false),  // auditor decided to remove it
+    AuditorRemoved(8,true, false),  // auditor decided to remove it
 
     //// possible returns from RiskTestingFn
     LimitReached(10,false, false),  // cant tell from the number of samples available

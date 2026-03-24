@@ -45,14 +45,14 @@ fun doOneAlphaMartRun(
     val upperBound = u
 
     val estimFn = TruncShrinkage(
-        N = sampler.maxSamples(), withoutReplacement = withoutReplacement, upperBound = upperBound,
+        N = sampler.nmvrs(), withoutReplacement = withoutReplacement, upperBound = upperBound,
         eta0 = eta0,
         d = d
     )
 
     val alpha = AlphaMart(
         estimFn = estimFn,
-        N = sampler.maxSamples(),
+        N = sampler.nmvrs(),
         tracker = sampler,
         upperBound = upperBound,
         withoutReplacement = withoutReplacement,

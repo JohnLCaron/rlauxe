@@ -157,8 +157,8 @@ data class ElectionInfo(
     val other: Map<String, Any> = emptyMap(),    // soft parameters to ease migration
 ) {
     init {
-        if (mvrSource == MvrSource.testClcaSimulated && !auditType.isClca()) {
-            throw RuntimeException("PersistedWorkflowMode.testClcaSimulated must be CLCA")
+        if (mvrSource == MvrSource.testClcaSimulated && auditType.isPolling()) {
+            throw RuntimeException("MvrSource must be CLCA or OneAudit")
         }
     }
     companion object {

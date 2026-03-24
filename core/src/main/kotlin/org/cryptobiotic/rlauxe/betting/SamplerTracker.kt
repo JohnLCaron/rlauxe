@@ -25,9 +25,8 @@ interface ErrorTracker: Tracker {
 interface SamplerTracker: Tracker, Iterator<Double> {
     // Sampler : abstraction for creating a sequence of assort values
     fun sample(): Double // get next in sample
-    fun maxSamples(): Int  // max samples available, needed by testFn
+    fun nmvrs(): Int  // total number of mvrs available for this contest for this round
     fun countCvrsUsedInAudit(): Int // number of cvrs used in the audit
-    fun nmvrs(): Int // total number mvrs
 
     fun reset()   // start over again with different permutation (may be prohibited)
     fun measuredClcaErrorCounts(): ClcaErrorCounts // empty when polling
@@ -82,9 +81,8 @@ class PollingSamplerTracker(
         welford = Welford()
     }
 
-    override fun maxSamples() = cvrPairs.size
-    override fun countCvrsUsedInAudit() = idx
     override fun nmvrs() = cvrPairs.size
+    override fun countCvrsUsedInAudit() = idx
 
     override fun hasNext() = (idx < cvrPairs.size)
     override fun next() = sample()
@@ -163,9 +161,8 @@ class ClcaSamplerErrorTracker(
         idx = 0
     }
 
-    override fun maxSamples() = samples.size
-    override fun countCvrsUsedInAudit() = idx  // count of cvrs used in the audit
     override fun nmvrs() = samples.size
+    override fun countCvrsUsedInAudit() = idx  // count of cvrs used in the audit
 
     override fun hasNext() = (idx < samples.size)
     override fun next() = sample()
@@ -286,4 +283,9 @@ data class ClcaErrorTracker(val noerror: Double, val upper: Double, val welford:
     override fun mean() = welford.mean
     override fun variance() = welford.variance()
     override fun noerror() = noerror
+
+    // ClcaErrorTracker(val noerror: Double, val upper: Double, val welford:Welford, val errorCounts: MutableMap<Double, Int>)
+    fun copyAll(): ClcaErrorTracker {
+        return ClcaErrorTracker(this.noerror, this.upper, this.welford.copy(), this.errorCounts.toMutableMap())
+    }
 }

@@ -19,7 +19,7 @@ private val logger = KotlinLogging.logger("ClcaFuzzSamplerTracker")
 // used by estimateClcaAssertionRound
 class ClcaFuzzSamplerTracker(
     val simFuzzPct: Double,
-    val cardSamples: CardSamples, // these are new each round and need to be fuzzed
+    cardSamples: CardSamples, // these are new each round and need to be fuzzed
     val contestUA: ContestWithAssertions,
     val cassorter: ClcaAssorter,
     val clcaErrorTracker: ClcaErrorTracker,
@@ -71,9 +71,8 @@ class ClcaFuzzSamplerTracker(
         return makeFuzzedCardsForClca(listOf(contest.info()), samples, simFuzzPct)
     }
 
-    override fun maxSamples() = maxSamples
+    override fun nmvrs() = maxSamples
     override fun countCvrsUsedInAudit() = idx
-    override fun nmvrs() = cvrPairs.size
 
     override fun hasNext() = (welford.count + 1 < maxSamples)
     override fun next() = sample()

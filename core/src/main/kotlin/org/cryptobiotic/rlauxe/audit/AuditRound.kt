@@ -291,7 +291,7 @@ data class EstimationRoundResult(
 
 data class AuditRoundResult(
     val roundIdx: Int,
-    val nmvrs: Int,                 // number of mvrs available for this contest for this round
+    val nmvrs: Int,                 // total number of mvrs available for this contest for this round
     val plast: Double,              // last pvalue when testH0 terminates
     val pmin: Double,               // minimum pvalue reached
     val samplesUsed: Int,           // sample count when testH0 terminates

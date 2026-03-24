@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
-import org.cryptobiotic.rlauxe.concur.RepeatedWorkflowRunner
 import org.cryptobiotic.rlauxe.persist.validateOutputDir
 import org.cryptobiotic.rlauxe.rlaplots.*
 import org.cryptobiotic.rlauxe.util.Stopwatch
@@ -29,7 +28,7 @@ class OneAuditWithErrors {
 
         for (margin in margins) {
             fuzzPcts.forEach { fuzzPct ->
-                val oneauditGenerator = OneAuditSingleRoundAuditTaskGeneratorWithFlips(
+                val oneauditGenerator = OneAuditSingleRoundAuditTaskGenerator(
                     N, margin, 0.0, 0.0, cvrPercent, mvrsFuzzPct = fuzzPct,
                     auditConfigIn = Config.from(AuditType.ONEAUDIT),
                     parameters = mapOf("nruns" to nruns.toDouble(), "fuzzPct" to fuzzPct, "cat" to margin)

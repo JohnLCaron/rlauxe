@@ -20,7 +20,7 @@ import kotlin.test.Test
 
 class ExtraVsMarginClca {
     val Nc = 50000
-    val ntrials = 100
+    val ntrials = 1000
     val nsimTrials = 100
     val name = "extraVsMarginWithPhantoms"
     val dirName = "$testdataDir/plots/extra/$name"

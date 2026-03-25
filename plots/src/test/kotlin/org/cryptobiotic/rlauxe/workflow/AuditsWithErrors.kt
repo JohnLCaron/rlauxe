@@ -58,8 +58,8 @@ class AuditsWithErrors {
         val dirName = "$testdataDir/plots/samplesNeeded/clcaFuzzByMargin"
         val dataFilename = "$dirName/clcaFuzzByMargin.csv"
         val subtitle3 = "Nc=${N} nruns=${nruns}"
-        showStddevVsMargin(dataFilename, name3, dirName, subtitle3, ScaleType.Linear, catName="fuzzPct")
-        showStddevVsMargin(dataFilename, name3, dirName, subtitle3, ScaleType.LogLinear, catName="fuzzPct")
+        //showStddevVsMargin(dataFilename, name3, dirName, subtitle3, ScaleType.Linear, catName="fuzzPct")
+        // showStddevVsMargin(dataFilename, name3, dirName, subtitle3, ScaleType.LogLinear, catName="fuzzPct")
         showStddevVsMargin(dataFilename, name3, dirName, subtitle3, ScaleType.LogLog, catName="fuzzPct")
     }
 

@@ -162,13 +162,13 @@ where
 
 And use this to find the optimal value of lambda.
 
-Compare current OneAudit results to previous OneAudit to see the improvement when using eq 2 to set optimal bets:
+The next two plots compare the current OneAudit results to previous OneAudit when there are no errors to see the improvement when using eq 2 to set optimal bets:
 
-** current OneAudit No Error using eq 2 **
+**Current OneAudit using eq 2**
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrorsLogLinear.html" rel="OneAuditNoErrors">![OneAuditNoErrors](plots2/oneaudit/OneAuditNoErrors/OneAuditNoErrorsLogLinear.png)</a>
 
-** previous OneAudit No Errors **
+**Previous OneAudit**
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/AuditsNoErrors4/AuditsNoErrors4LogLinear.html" rel="AuditsNoErrors4">![AuditsNoErrors4](plots/oneaudit4/AuditsNoErrors4/AuditsNoErrors4LogLinear.png)</a>
 
@@ -181,13 +181,14 @@ number of samples needed for OneAudit when there are no errors in the CVR data, 
     T_i = Prod (payoff_i, i= 1..i)
 
 over N trials, there will be N * p terms, where p is the probability of that term:   
-
+````
     T_n = (1 + λc (noerror − .5)) ^ (N*p0) * Prod { (1 + λc * (a_pk - 0.5)) ^ (N*p_pk) } = (1/alpha)
 
     N * ln(1 + λc (noerror − .5))*p0 + N * Sum( ln(1 + λc (a_pk − .5)*p_pk) = ln(1/alpha)
     N = ln(1/alpha) / (ln(1 + λc (noerror − .5))*p0 + Sum( ln(1 + λc (a_pk − .5)*p_pk))     (eq 3)
 
-where p0 = 1 - Sum (p_pk), and λc is taken as the optimal value using eq 2 when all error probabilities are 0.
+    where p0 = 1 - Sum (p_pk), and λc is taken as the optimal value using eq 2 when all error probabilities are 0.
+````
 
 This value of N estimates the mean of a distribution that has a fairly large variance.
 
@@ -196,11 +197,12 @@ and there are no errors at all in the CVRs. The terms in equation 2 are:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/oapayoff/oapayoff.html" rel="OABettingPayoff">![OABettingPayoff](plots2/betting/oapayoff/oapayoff.png)</a>
 
-In this example, the optimal lamda is around 1.4. As the percent of cards in OneAudit pools increase, the negetive terms get large enough to curve the sum downward,
-then we get an optimal bet less than maxBet, and we need many more samples than CLCA without pools. Errors in the CVRs magnify the downward curve. A combination
-of small margin, large pool percentage and CVR errors will force the audit to a full hand count.
+The _sum_ curve here is the payoff as a function of the bet lamda, and the optimal lamda gives the largest payoff. In this example, the optimal lamda is around 1.4. 
 
-TODO: can we detect when a OneAudit will always go to a full hand count even without CVR errors, based only on the margin and the pool averages? We can see when
+As the percent of cards in OneAudit pools increase, the _loser_ teerm get large enough to curve the sum downward,
+and we get an optimal bet less than maxBet, so we need many more samples than CLCA without pools. Errors in the CVRs magnify the downward curve. A combination of small margin, large pool percentage and CVR errors will force the audit to a full hand count.
+
+**TODO**: can we detect when a OneAudit will always go to a full hand count even without CVR errors, based only on the margin and the pool averages? We can see when
 eq 3 goes negetive, which I think means on average the OneAudit will go to a hand count, but the large variance allows the possibility that it will stop
 short of a full count. OTOH we can probably use the calculated variance to estimate the probability of a full count.
 
@@ -225,8 +227,7 @@ Which is smallest when λ_j = maxBet = 2 * maxLoss
     t_min = 1 - maxBet /2
     t_min = 1 - maxLoss
 
-which is how we choose maxLoss: whats the largest loss we are willing to suffer on a single sample? If maxLoss = .9, then t_p2o = .1, and we
-lose 90% of our "winnings" (aka the testStatistic T).
+which is how we choose maxLoss: whats the largest loss we are willing to suffer on a single sample? If maxLoss = .9, then t_p2o = .1, and we lose 90% of our "winnings" (aka the testStatistic T).
 
 To compensate for one p2o sample at the maximum bet, we need n_p2o noerror samples, such that
 
@@ -256,7 +257,7 @@ Ignoring other types of errors, the number of samples needed when there are k p2
 
     nsamples = n + k * n_p2o
 
-Here is a plot of nsamples for values of k (0 .. 5) and two different margins v = .01 and .05:
+Here is a log-log plot of nsamples for values of k (0 .. 5) and two different margins v = .01 and .05:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/maxloss/maxLoss2.p2oErrors.LogLog.html" rel="maxLossLog">![maxLossLog](plots2/betting/maxloss/maxLoss2.p2oErrors.LogLog.png)</a>
   

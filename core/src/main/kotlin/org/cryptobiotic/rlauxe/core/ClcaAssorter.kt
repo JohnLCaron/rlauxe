@@ -76,8 +76,7 @@ open class ClcaAssorter(
     }
 
     // expected sample size if there are clca errors
-    // TODO same as estimateSampleSizePayloads I think
-    // TODO clcaErrorCounts with phantoms added; use AssertionRound.calcNewMvrsNeeded()
+    // for clcaErrorCounts with phantoms added, use AssertionRound.calcNewMvrsNeeded()
     open fun sampleSizeWithErrors(bet: Double, alpha: Double, clcaErrorRates: ClcaErrorRates): Int {
         val p0 = 1.0 - clcaErrorRates.sumRates()
         val noerrorTerm = ln(1.0 + bet * (noerror - 0.5)) * p0
@@ -92,25 +91,6 @@ open class ClcaAssorter(
         val N =  roundUp((-ln(alpha) / lnPayoff))
         return N
     }
-
-    /* TODO deprecated
-    // Pair(estSampleSize, optimalBet)
-    open fun estWithOptimalBet2(contest: ContestWithAssertions, maxLoss: Double, alpha: Double, clcaErrorRates: ClcaErrorRates? = null): Pair<Int, Double> {
-        val upper = assorter.upperBound()
-        val betFn = GeneralAdaptiveBetting(
-            contest.Npop,
-            clcaErrorRates ?: ClcaErrorRates.empty(noerror(), upper), // else no errors
-            contest.Nphantoms,
-            maxLoss = maxLoss,
-            debug = false,
-        )
-        val optimalBet = betFn.bet(ClcaErrorTracker(noerror(), upper))
-
-        val estSampleSize = if (clcaErrorRates == null) sampleSizeNoErrors(optimalBet, alpha) else
-            sampleSizeWithErrors(optimalBet, alpha, clcaErrorRates)
-
-        return Pair(estSampleSize, optimalBet)
-    } */
 
     // B(bi, ci) = (1-o/u)/(2-v/u), where
     //                o is the overstatement
@@ -227,9 +207,8 @@ open class ClcaAssorter(
         if (hasStyle and !cvr.hasContest(info.id)) {
             //val trace = Throwable().stackTraceToString()
             //logger.error { "hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})\n$trace" }
-            // TODO core dump not a good option.
-            //    if we were using hasStyle in assorter.assort(), it would return 0.0 for cvr_assort
-            //throw RuntimeException("hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
+            // TODO if we were using hasStyle in assorter.assort(), it would return 0.0 for cvr_assort, see Issues#4
+            // throw RuntimeException("hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
             return Double.NaN
         }
 

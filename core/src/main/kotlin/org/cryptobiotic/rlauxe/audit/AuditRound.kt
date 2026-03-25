@@ -225,7 +225,7 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
         return prevAuditResult?.clcaErrorTracker ?: ClcaErrorTracker(assertion.noerror, assertion.assorter.upperBound())
     }
 
-    // return (calculated new mvrs needed, optimalBet) based on prevAuditResult.measuredCounts or apriori.errorCounts
+    // return (calculated new mvrs needed, same algorithm as GeneralAdaptiveBetting
     fun calcNewMvrsNeeded(contest: ContestWithAssertions, config : Config): Int {
         require(assertion is ClcaAssertion)
         val cassorter = assertion.cassorter

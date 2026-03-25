@@ -144,7 +144,7 @@ class OneAuditClcaAssorter(
             }
             else this.assorter.assort(mvr, usePhantoms = false)
 
-        // val cvr_assort = if (cvr.phantom) .5 else poolAvgAssortValue TODO
+        // val cvr_assort = if (cvr.phantom) .5 else poolAvgAssortValue TODO see Issue#4
         val cvr_assort = poolAvgAssortValue
         return cvr_assort - mvr_assort
     }
@@ -166,8 +166,7 @@ class OneAuditClcaAssorter(
     }
 
     // expected sample size if there are clca errors
-    // TODO same as estimateSampleSizePayloads I think
-    // TODO clcaErrorCounts with phantoms added
+    // for clcaErrorCounts with phantoms added, use AssertionRound.calcNewMvrsNeeded()
     override fun sampleSizeWithErrors(bet: Double, alpha: Double, clcaErrorRates: ClcaErrorRates): Int {
         val p0 = 1.0 - clcaErrorRates.sumRates()
         val noerrorTerm = ln(1.0 + bet * (noerror - 0.5)) * p0

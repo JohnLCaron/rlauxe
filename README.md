@@ -63,17 +63,16 @@ Otherwise, the audit expands, potentially to a full hand count. If every asserti
 in a risk-limiting audit with risk limit α:
 **_if the election outcome is not correct, the chance the audit will stop shy of a full hand count is at most α_**.
 
-| term      | definition                                                                                   |
-|-----------|----------------------------------------------------------------------------------------------|
-| audit     | iterative process of choosing ballots and checking if all the assertions are true.           |
-| risk	     | we want to confirm or reject with risk level α.                                              |
-| assorter  | assigns a number between 0 and upper to each card, chosen to make assertions "half average". |
-| assertion | the mean of assorter values is > 1/2: "half-average assertion"                               |
-| bettingFn | decides how much to bet for each sample. (BettingMart)                                       |
-| riskFn    | the statistical method to test if the assertion is true.                                     |
-| Nc        | a trusted, independent bound on the number of valid cards cast in the contest c.             |
-| Ncast     | the number of cards validly cast in the contest                                              |
-| Npop      | the number of cards that might contain the contest                                           |
+| term      | definition                                                                                  |
+|-----------|---------------------------------------------------------------------------------------------|
+| audit     | iterative process of randomly sampling ballots and checking if all the assertions are true  |
+| risk	     | confirm or reject with this "risk limit", for example risk = .05 (5%)                       |
+| assorter  | assigns a number between 0 and upper to each card, chosen to make assertions "half average" |
+| assertion | asserts that the average of the assorter values is > 1/2: "half-average assertion"          |
+| riskFn    | the statistical method used to test if the assertion is true.                               |
+| Nc        | a trusted, independent bound on the number of valid cards cast in the contest c.            |
+| Ncast     | the number of cards validly cast in the contest                                             |
+| Npop      | the number of cards that might contain the contest                                          |
 
 
 # Rlauxe Workflow Overview
@@ -90,11 +89,11 @@ For each contest:
 - Describe each contest name, candidates, contest type (eg Plurality, IRV, Dhondt, ...), etc. in the _ContestInfo_.
 - Count the votes in the usual way. The reported winner(s) and the reported margins are based on this vote count.
   Use the votes, the number of valid cards (Nc), the number of votes cast (Ncast), and the ContestInfo to create the _Contest_.
-- If this is a multicontest election, you may need to create _Batch_ objects that describe each contest's _sample population_ , 
+- If this is a multicontest election, you may need to create _Batch_ objects that describe each contest's _sample population_, 
   the set of cards that might contain the contest. Count the number of cards in the population to get _Npop_ which is used to calculate
   the contest's _diluted margin_. See [SamplePopulations](docs/SamplePopulations.md) for details.
 - The rlauxe software generates the assertions needed to prove if the winners are correct. Add the assertions and Npop
-  to the Contest to get the  _ContestWithAssertion_.
+  to the Contest to get the  _ContestWithAssertions_.
 
 Commitment:
 - Configuration information is set in ElectionInfo.
@@ -164,7 +163,7 @@ If the error estimates are correct, one gets optimal "sample sizes", the number 
 
 See [Betting risk function](docs/BettingRiskFunctions.md) for an overview of the risk and betting functions.
 
-## OneAudit CLCA
+## Overstatement Net Equivalent Audit (OneAudit)
 
 OneAudit is a type of CLCA audit. It deals with the cases where:
 
@@ -177,7 +176,7 @@ OneAudit is a type of CLCA audit. It deals with the cases where:
 In both cases we use the average assorter value in a pool as the assort value of the (missing) CVR.
 When a ballot has been chosen for hand audit:
 
-1. If it has a CVR, use the standard CLCA over-statement assorter.
+1. If it has a CVR, use the standard CLCA overstatement assorter.
 2. If it has no CVR, use the overstatement-net-equivalent (ONE) CVR from the pool that it belongs to.
 
 Thus, all cards must either have a CVR or be contained in a pool.
@@ -204,9 +203,9 @@ on ballots.
 
 In general, samplesNeeded is independent of the population size Npop. Rather, samplesNeeded depends on the _diluted margin_ 
 as well as the random sequence of ballots chosen to be hand audited. (Actually there is a slight dependence on N for 
-_without replacement_ audits when the sample size approaches N, but that case approaches a full hand audit, so isnt very interesting.)
+_without replacement_ audits that increases as the sample size approaches N.)
 
-The following plots are simulations, averaging the results from the stated number of runs.
+The following plots are simulations, averaging the results over the stated number of runs.
 
 ## Samples needed with no errors
 
@@ -226,7 +225,7 @@ At any setting of maximum bet, the CLCA assort value is always the same when the
 and the plot above shows the exact number of samples needed as a function of margin and maximum risk.
 
 For polling, the assort values vary, and the number of samples needed depends on the order the samples are drawn.
-Here are the average and standard deviation over 100 independent trials at each reported margin, when no errors are found:
+Here are the average and standard deviation over 100 independent trials at each reported margin:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/pollingWithStdDev/pollingWithStdDevLinear.html" rel="pollingWithStdDev">![pollingWithStdDev](docs/plots2/samplesNeeded/pollingWithStdDev/pollingWithStdDevLinear.png)</a>
 
@@ -257,7 +256,8 @@ Here are the results of 1000 simulations of CLCA average samplesNeeded by margin
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.html" rel="clcaFuzzByMarginLogLog">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginLogLog.png)</a>
 
-The average samplesNeeded tell only half the story. Here is the standard deviation of the distributions of the previous plot:
+The average samplesNeeded tell only half the story. Here is the standard deviation of the distributions of the previous plot
+(there is no variation when fuzzPct = 0):
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginStddevLogLog.html" rel="clcaFuzzByMarginStddevLogLog">![margin2WithStdDevLinear](docs/plots2/samplesNeeded/clcaFuzzByMargin/clcaFuzzByMarginStddevLogLog.png)</a>
 
@@ -391,10 +391,11 @@ Each round does its own consistent sampling without regard to the previous round
 
 ## Estmation extra mvrs and number of rounds
 
+Using the above algorithm for estimating samples sizes, here are the extra samples and average number of rounds for the three audit types:
+
 **CLCA**
 
-Using the above algorithm for estimating samples sizes, here are the extra samples and average number of rounds for CLCA
-at different values of fuzzed errors:
+CLCA at different values of fuzzed errors:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginLogLinear.html" rel="extraVsMargin">![extraVsMargin](docs/plots2/estimate/extraVsMarginLogLinear.png)</a>
 
@@ -407,19 +408,19 @@ at different values of fuzzed errors:
 
 The effect of 1% phantoms:
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginLogLinear.html" rel="extraVsMargin">![extraVsMargin](docs/plots2/estimate/extraVsMarginLogLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginWithPhantomsLogLinear.html" rel="extraVsMarginWithPhantoms">![extraVsMarginWithPhantoms](docs/plots2/estimate/extraVsMarginWithPhantomsLogLinear.png)</a>
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginNroundsLinear.html" rel="extraVsMarginNrounds">![extraVsMarginNrounds](docs/plots2/estimate/extraVsMarginNroundsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginWithPhantomsNroundsLinear.html" rel="extraVsMarginWithPhantomsNrounds">![extraVsMarginWithPhantomsNrounds](docs/plots2/estimate/extraVsMarginWithPhantomsNroundsLinear.png)</a>
 
 **OneAudit**
 
-Here are the extra samples and average number of rounds for OneAudit at different percentages of pooled data:
+OneAudit at different percentages of CVR data:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginOALogLinear.html" rel="extraVsMarginOA">![extraVsMarginOA](docs/plots2/estimate/extraVsMarginOALogLinear.png)</a>
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginNroundsOALinear.html" rel="extraVsMarginOANrounds">![extraVsMarginOANrounds](docs/plots2/estimate/extraVsMarginOANroundsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginOANroundsLinear.html" rel="extraVsMarginOANrounds">![extraVsMarginOANrounds](docs/plots2/estimate/extraVsMarginOANroundsLinear.png)</a>
 
-* Extra Mvrs can be quite high at low margins, probably mostly due to the sample distribution variance.
+* Extra Mvrs are quite high at lower margins and as the percentage CVRs decreases.
 * Nrounds averages are < 2. 
 * Possibly we could tweak the parameters to reduce extra samples and still keep average rounds < 2.
 
@@ -429,9 +430,9 @@ Here are the extra samples and average number of rounds for Polling:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginPollingLinear.html" rel="extraVsMarginPolling">![extraVsMarginPolling](docs/plots2/estimate/extraVsMarginPollingLinear.png)</a>
 
-<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginNroundsPollingLinear.html" rel="extraVsMarginPollingNrounds">![extraVsMarginPollingNrounds](docs/plots2/estimate/extraVsMarginPollingNroundsLinear.png)</a>
+<a href="https://johnlcaron.github.io/rlauxe/docs/plots2/estimate/extraVsMarginPollingNroundsLinear.html" rel="extraVsMarginPollingNrounds">![extraVsMarginPollingNrounds](docs/plots2/estimate/extraVsMarginPollingNroundsLinear.png)</a>
 
-* Extra Mvrs are very high, probably mostly due to the sample distribution variance.
+* Extra Mvrs are very high.
 * Nrounds averages are < 2.
 * Possibly we could tweak the parameters to reduce extra samples and still keep average rounds < 2.
 

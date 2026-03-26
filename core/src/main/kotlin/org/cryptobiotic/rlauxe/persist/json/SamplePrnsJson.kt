@@ -17,20 +17,21 @@ import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+import kotlin.text.toLong
 
 private val logger = KotlinLogging.logger("SamplePrnsJson")
 
 @Serializable
 data class SamplePrnsJson(
-    val sampleNumbers: List<Long>,
+    val samplePrns: List<String>, // dont trust JSON long parsing, see Issue#253
 )
 
 fun List<Long>.publishJson() = SamplePrnsJson(
-    this.map { it },
+    this.map { it.toString(radix=16) },
 )
 
 fun SamplePrnsJson.import(): List<Long> {
-    return this.sampleNumbers
+    return this.samplePrns.map{ it.toLong(radix=16) }
 }
 
 fun writeSamplePrnsJsonFile(samplePrns: List<Long>, filename: String) {

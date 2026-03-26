@@ -15,7 +15,7 @@ private val logger = KotlinLogging.logger("AuditableCardCsv")
 // data class AuditableCard (
 //    val location: String, // enough info to find the card for a manual audit.
 //    val index: Int,  // index into the original, canonical list of cards
-//    val prn: Long,   // psuedo random number
+//    val prn: Long,   // psuedo random number (serialize to hex string)
 //    val phantom: Boolean,
 //
 //    val votes: Map<Int, IntArray>?,   // CVRs and phantoms
@@ -27,7 +27,7 @@ private val logger = KotlinLogging.logger("AuditableCardCsv")
 val AuditableCardHeader = "location, index, prn, phantom, poolId, batch, cvr contests, candidates0, candidates1, ...\n"
 
 fun writeAuditableCardCsv(card: AuditableCard) = buildString {
-    append("${card.location}, ${card.index}, ${card.prn}, ${if(card.phantom) "yes," else ","} ")
+    append("${card.location}, ${card.index}, ${card.prn.toString(radix=16)}, ${if(card.phantom) "yes," else ","} ")
     if (card.poolId == null) append(", ") else append("${card.poolId}, ")
     if (card.batchName != null) {
         append("${card.batchName}, ")
@@ -96,7 +96,7 @@ fun readAuditableCardCsv(line: String): AuditableCard {
     var idx = 0
     val desc = ttokens[idx++]
     val index = ttokens[idx++].toInt()
-    val sampleNum = ttokens[idx++].toLong()
+    val sampleNum = ttokens[idx++].toLong(radix=16)
     val phantom = ttokens[idx++] == "yes"
     val poolIdToken = ttokens[idx++]
     val poolId = if (poolIdToken.isEmpty()) null else poolIdToken.toInt()

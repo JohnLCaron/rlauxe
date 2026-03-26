@@ -38,7 +38,7 @@ data class AuditCreationConfigJson(
     val auditType: AuditType,
     val riskLimit: Double,
     val mvrSource: MvrSource?,
-    val seed: Long,
+    val seed: String,  // dont trust JSON long parsing, see Issue#253
     val riskMeasuringSampleLimit: Int?,
 )
 
@@ -46,14 +46,14 @@ fun AuditCreationConfig.publishJson() = AuditCreationConfigJson(
     this.auditType,
     this.riskLimit,
     null,
-    this.seed,
+    this.seed.toString(radix=16),
     this.riskMeasuringSampleLimit,
 )
 
 fun AuditCreationConfigJson.import() = AuditCreationConfig(
     this.auditType,
     this.riskLimit,
-    this.seed,
+    this.seed.toLong(radix=16),
     this.riskMeasuringSampleLimit,
 )
 

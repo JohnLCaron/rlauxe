@@ -48,15 +48,17 @@ class Publisher(val auditDir: String) {
     fun auditCreationConfigFile() = "$auditDir/auditCreationConfig.json"
     fun auditRoundProtoFile() = "$auditDir/auditRoundConfig.json"
     // fun auditSeedFile() = "$auditDir/auditSeed.json"
+    fun batchesFile() = "$auditDir/batches.json"
     fun cardManifestFile() = "$auditDir/cardManifest.csv" // cardManifest
+    fun cardPoolsFile() = "$auditDir/cardPools.csv"
     fun contestsFile() = "$auditDir/contests.json"
     fun electionInfoFile() = "$auditDir/electionInfo.json"
-    fun cardPoolsFile() = "$auditDir/cardPools.csv"
-    fun batchesFile() = "$auditDir/batches.json"
-    fun sortedMvrsFile() = "$auditDir/private/sortedMvrs.csv"
-    fun unsortedMvrsFile() = "$auditDir/private/unsortedMvrs.csv"
-    fun privateOneshotFile() = "$auditDir/private/oneshot.txt"
     fun sortedCardsFile() = "$auditDir/sortedCards.csv" // sorted cardManifest
+
+    // private
+    fun sortedMvrsFile() = "$auditDir/private/sortedMvrs.csv"
+    fun privateOneshotFile() = "$auditDir/private/oneshot.txt"
+    fun unsortedMvrsFile() = "$auditDir/private/unsortedMvrs.csv"
 
     fun auditRoundConfigFile(round: Int): String {
         val dir = "$auditDir/round$round"
@@ -102,15 +104,6 @@ class Publisher(val auditDir: String) {
         }
         return roundIdx - 1
     }
-
-    /* fun writeAuditConfig(config: AuditConfig) {
-        writeAuditConfigJsonFile(config, this.auditConfigFile())
-        logger.info{"writeAuditConfig to ${this.auditConfigFile()}\n  $config"}
-
-        val auditCreationConfig = AuditCreationConfig.fromAuditConfig(config)
-        writeAuditCreationConfigJsonFile(auditCreationConfig, this.auditCreationConfigFile())
-        logger.info{"writeAuditCreationConfig to ${this.auditCreationConfigFile()}\n  $auditCreationConfig"}
-    } */
 }
 
 /** Make sure output directories exists; delete existing files in them.  */

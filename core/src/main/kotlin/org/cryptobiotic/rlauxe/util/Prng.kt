@@ -21,7 +21,7 @@ class Prng(seed: Long) {
     }
 }
 
-class HmacSha256(key : ByteArray) {
+private class HmacSha256(key : ByteArray) {
     val md : Mac = Mac.getInstance("HmacSHA256")
     init {
         val secretKey = SecretKeySpec(key, "HmacSHA256")
@@ -37,7 +37,7 @@ class HmacSha256(key : ByteArray) {
     }
 }
 
-fun intToByteArray (data: Int) : ByteArray {
+private fun intToByteArray (data: Int) : ByteArray {
     require (data >= 0)
     val dataLong : Long = data.toLong()
     return if (isBigEndian()) {
@@ -47,7 +47,7 @@ fun intToByteArray (data: Int) : ByteArray {
     }
 }
 
-fun longToByteArray (data: Long) : ByteArray {
+private fun longToByteArray (data: Long) : ByteArray {
     require (data >= 0)
     return if (isBigEndian()) {
         ByteArray(8) { i -> (data shr (i * 8)).toByte() }
@@ -56,11 +56,11 @@ fun longToByteArray (data: Long) : ByteArray {
     }
 }
 
-fun ByteArray.toLong(): Long {
+private fun ByteArray.toLong(): Long {
     val result = this.fold(0L) { acc, byte -> (acc shl 8) or (byte.toLong() and 0xFF) }
     return if (result > 0) result else -result
 }
 
-fun isBigEndian(): Boolean = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN
+private fun isBigEndian(): Boolean = ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN
 
 

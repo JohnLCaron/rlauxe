@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.AlphaMart
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
+import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
@@ -12,53 +13,30 @@ import org.cryptobiotic.rlauxe.betting.TruncShrinkage
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 
-private val logger = KotlinLogging.logger("PollingAudit")
-
-// TODO parallelize over contests; see runClcaAuditRound
-fun runPollingAuditRound(
+// run all contests and assertions for one round with the given auditor.
+// return isComplete
+fun runPollingAuditRound2(
     config: Config,
     auditRound: AuditRound,
     mvrManager: MvrManager,
     roundIdx: Int,
-    quiet: Boolean = true
+    onlyTask: OnlyTask? = null,
 ): Boolean {
-    val pairs = mvrManager.makeMvrCardPairsForRound(roundIdx)
+    val mvrCvrs = mvrManager.makeMvrCardPairsForRound(roundIdx)
 
-    val contestsNotDone = auditRound.contestRounds.filter { !it.done }
-    if (contestsNotDone.isEmpty()) {
-        return true
-    }
-
-    if (!quiet) logger.debug{"runAudit round $roundIdx"}
-    var allDone = true
+    // parallelize over contests
+    val contestsNotDone = auditRound.contestRounds.filter{ !it.done }
+    val auditContestTasks = mutableListOf<RunPollingContestTask>()
     contestsNotDone.forEach { contest ->
-        val contestAssertionStatus = mutableListOf<TestH0Status>()
-        contest.assertionRounds.forEach { assertionRound ->
-            if (!assertionRound.status.complete) {
-                val assertion = assertionRound.assertion
-                val assorter = assertion.assorter
-                val sampler =  PollingSamplerTracker.withMaxSample(
-                    contest.id,
-                    assorter,
-                    pairs,
-                    contest.maxSampleAllowed)
-
-                val testH0Result = auditPollingAssertion(config, contest.contestUA, assertionRound, sampler, roundIdx, quiet)
-                assertionRound.status = testH0Result.status
-                if (testH0Result.status.complete) assertionRound.roundProved = roundIdx
-            }
-            contestAssertionStatus.add(assertionRound.status)
-        }
-        contest.done = contestAssertionStatus.all { it.complete }
-        contest.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
-        allDone = allDone && contest.done
+        auditContestTasks.add( RunPollingContestTask(config, contest, mvrCvrs, roundIdx, onlyTask) )
     }
+    val complete: List<Boolean> = ConcurrentTaskRunner<Boolean>().run(auditContestTasks)
 
     // given the cvrPairs, and each ContestRound's maxSamplesUsed, count the cvrs that were not used
     val contestCounts = mutableMapOf<Int, Int>()
     var countUsed = 0
     var countUnused = 0
-    pairs.forEachIndexed { idx, mvrCardPair ->
+    mvrCvrs.forEach { mvrCardPair ->
         val card = mvrCardPair.second
         var wasUsed = false
         contestsNotDone.forEach { contest ->
@@ -70,19 +48,60 @@ fun runPollingAuditRound(
         }
         if (wasUsed) countUsed++ else countUnused++
     }
-
     auditRound.mvrsUnused =  countUnused
     auditRound.mvrsUsed =  countUsed
-    return allDone
+
+    return if (complete.isEmpty()) true else complete.reduce { acc, b -> acc && b }
 }
 
-private fun auditPollingAssertion(
+class RunPollingContestTask(
+    val config: Config,
+    val contestRound: ContestRound,
+    val mvrCvrs: List<Pair<CvrIF, AuditableCard>>, // Pair(mvr, card)
+    val roundIdx: Int,
+    val onlyTask: OnlyTask? = null,
+): ConcurrentTask<Boolean> {
+
+    override fun name() = "RunPollingContestTask for ${contestRound.contestUA.name} round $roundIdx nassertions ${contestRound.assertionRounds.size}"
+
+    override fun run(): Boolean {
+        val contestAssertionStatus = mutableListOf<TestH0Status>()
+
+        contestRound.assertionRounds.forEach { assertionRound ->
+            val taskName = "${contestRound.contestUA.id}-${assertionRound.assertion.assorter.shortName()}"
+            if (onlyTask == null || onlyTask.taskName == taskName) {
+                if (!assertionRound.status.complete) {
+                    val assertion = assertionRound.assertion
+                    val assorter = assertion.assorter
+                    val sampler = PollingSamplerTracker.withMaxSample(
+                        contestRound.id,
+                        assorter,
+                        mvrCvrs,
+                        contestRound.maxSampleAllowed
+                    )
+
+                    val testH0Result =
+                        auditPollingAssertion2(config, contestRound.contestUA, assertionRound, sampler, roundIdx)
+                    assertionRound.status = testH0Result.status
+                    if (testH0Result.status.complete) assertionRound.roundProved = roundIdx
+                }
+            }
+            contestAssertionStatus.add(assertionRound.status)
+        }
+        if (contestAssertionStatus.isNotEmpty()) {
+            contestRound.done = contestAssertionStatus.all { it.complete }
+            contestRound.status = contestAssertionStatus.minBy { it.rank } // use lowest rank status.
+        }
+        return contestRound.done
+    }
+}
+
+fun auditPollingAssertion2(
     config: Config,
     contestUA: ContestWithAssertions,
     assertionRound: AssertionRound,
     samplerTracker: SamplerTracker,
     roundIdx: Int,
-    quiet: Boolean = false
 ): TestH0Result {
     val assertion = assertionRound.assertion
     val assorter = assertion.assorter
@@ -120,6 +139,5 @@ private fun auditPollingAssertion(
         clcaErrorTracker = null,
     )
 
-    if (!quiet) logger.debug{" ${contestUA.name} ${assertionRound.auditResult}"}
     return testH0Result
 }

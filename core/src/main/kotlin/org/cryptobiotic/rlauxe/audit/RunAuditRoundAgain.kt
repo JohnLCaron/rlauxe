@@ -18,7 +18,7 @@ import org.cryptobiotic.rlauxe.util.trunc
 import org.cryptobiotic.rlauxe.workflow.ClcaAssertionAuditor
 import org.cryptobiotic.rlauxe.workflow.OneAuditAssertionAuditor
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
-import org.cryptobiotic.rlauxe.workflow.auditPollingAssertion
+import org.cryptobiotic.rlauxe.workflow.auditPollingAssertion2
 import java.nio.file.Files.notExists
 import java.nio.file.Path
 
@@ -167,7 +167,7 @@ fun runPollingAudit(config: Config, cvrPairs: List<Pair<CvrIF, CvrIF>>, contestR
             maxSampleIndex = contestRound.maxSampleAllowed!!
         )
 
-        val testH0Result = auditPollingAssertion(config, contestRound.contestUA, assertionRound, sampler, assertionRound.roundIdx)
+        val testH0Result = auditPollingAssertion2(config, contestRound.contestUA, assertionRound, sampler, assertionRound.roundIdx)
 
         return testH0Result
 

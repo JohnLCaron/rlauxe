@@ -31,7 +31,6 @@ import java.nio.file.StandardOpenOption
 //    var sampleNumbers: List<Long>, // ballot indices to sample for this round
 //    var nmvrs: Int = 0,
 //    var newmvrs: Int = 0,
-//    var auditorWantNewMvrs: Int = -1,
 //)
 
 // one in each roundXX subdirectory
@@ -47,7 +46,6 @@ data class AuditRoundJson(
     var newmvrs: Int,
     var mvrsUnused: Int,
     var mvrsUsed: Int,
-    var auditorWantNewMvrs: Int,
 )
 
 fun AuditRoundIF.publishJson() : AuditRoundJson {
@@ -60,7 +58,6 @@ fun AuditRoundIF.publishJson() : AuditRoundJson {
         this.newmvrs,
         this.mvrsUsed,
         this.mvrsUnused,
-        this.auditorWantNewMvrs,
     )
 }
 
@@ -81,7 +78,6 @@ fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: L
         this.newmvrs,
         this.mvrsUsed,
         this.mvrsUnused,
-        this.auditorWantNewMvrs,
     )
 }
 
@@ -97,7 +93,6 @@ fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: L
 //
 //    var estNewSamples = 0 // Estimate of the new sample size required to confirm the contest
 //    var estSampleSize = 0 // number of total samples estimated needed
-//    var auditorWantNewMvrs: Int = -1 // Auditor has set the new sample size for this audit round. rlauxe-viewer
 //    var done = false
 //    var included = true
 //    var status = contestUA.preAuditStatus
@@ -111,9 +106,6 @@ data class ContestRoundJson(
     val maxSampleAllowed: Int?,
     val estMvrs: Int,
     val estNewMvrs: Int,
-    // val actualMvrs: Int,
-    // val actualNewMvrs: Int,
-    val auditorWantNewMvrs: Int,
 
     val done: Boolean,
     val included: Boolean,
@@ -128,9 +120,6 @@ fun ContestRound.publishJson() : ContestRoundJson {
         maxSampleAllowed = this.maxSampleAllowed,
         estMvrs = this.estMvrs,
         estNewMvrs = this.estNewMvrs,
-        // actualMvrs = this.actualMvrs,
-        // actualNewMvrs = this.actualNewMvrs,
-        auditorWantNewMvrs = this.auditorWantNewMvrs,
         this.done,
         this.included,
         this.status,
@@ -153,9 +142,6 @@ fun ContestRoundJson.import(contestUA: ContestWithAssertions, prevContestRound: 
     contestRound.maxSampleAllowed = this.maxSampleAllowed
     contestRound.estMvrs = this.estMvrs
     contestRound.estNewMvrs = this.estNewMvrs
-    // contestRound.actualMvrs = this.actualMvrs
-    // contestRound.actualNewMvrs = this.actualNewMvrs
-    contestRound.auditorWantNewMvrs = this.auditorWantNewMvrs
 
     contestRound.done = this.done
     contestRound.included = this.included
@@ -276,7 +262,7 @@ fun EstimationRoundResultJson.import() = EstimationRoundResult(
 //    val pmin: Double,               // minimum pvalue reached
 //    val samplesUsed: Int,           // sample count when testH0 terminates
 //    val status: TestH0Status,       // testH0 status
-//    val clcaErrorTracker: ClcaErrorTracker, // measured error counts (clca only)
+//    val clcaErrorTracker: ClcaErrorTracker?, // measured error counts (clca only)
 //    val params: Map<String, Double> = emptyMap(),
 //)
 
@@ -289,7 +275,7 @@ data class AuditRoundResultJson(
     val pmin: Double,       // minimum pvalue reached
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
     val status: String, // testH0 status
-    val clcaErrorTracker: ClcaErrorTrackerJson,
+    val clcaErrorTracker: ClcaErrorTrackerJson?,
     val params: Map<String, Double>
 )
 
@@ -301,7 +287,7 @@ fun AuditRoundResult.publishJson() = AuditRoundResultJson(
     pmin = this.pmin,
     samplesUsed = this.samplesUsed,
     status = this.status.name,
-    clcaErrorTracker = this.clcaErrorTracker.publishJson(),
+    clcaErrorTracker = this.clcaErrorTracker?.publishJson(),
     params = params,
 )
 
@@ -314,7 +300,7 @@ fun AuditRoundResultJson.import() : AuditRoundResult {
         pmin=this.pmin,
         samplesUsed=this.samplesUsed,
         status=status,
-        clcaErrorTracker=this.clcaErrorTracker.import(),
+        clcaErrorTracker=this.clcaErrorTracker?.import(),
         params=params,
     )
 }

@@ -108,8 +108,8 @@ private fun checkSampleLimits(
         // check if overall auditSampleCutoff is exceeded
         if (sampleControl.removeCutoffContests && sampleControl.auditSampleCutoff != null && auditRound.samplePrns.size > sampleControl.auditSampleCutoff) {
             // find the contest with the largest estimation size eligible for removal, remove it
-            val maxEstimation = contestsNotDone.maxOf { it.estSampleSizeEligibleForRemoval() }
-            val maxContest = contestsNotDone.first { it.estSampleSizeEligibleForRemoval() == maxEstimation }
+            val maxEstimation = contestsNotDone.maxOf { it.estMvrs }
+            val maxContest = contestsNotDone.first { it.estMvrs == maxEstimation }
 
             /// remove maxContest from the audit
             maxContest.status = TestH0Status.FailMaxSamplesAllowed
@@ -141,9 +141,8 @@ fun consistentSampling(
     val contestsIncluded = auditRound.contestRounds.filter { !it.done && it.included}
     if (contestsIncluded.isEmpty()) return emptyList()
 
-    // calculate how many samples are wanted for each contest.
-    // TODO was val wantSampleSizeMap = wantSampleSize(contestsNotDone, previousSamples, mvrManager.sortedCards().iterator())
-    val wantSampleSize = wantSampleSizeSimple(contestsIncluded)
+    // how many samples are wanted for each contest.
+    val wantSampleSize = contestsIncluded.associate { it.id to it.estMvrs }
     require(wantSampleSize.values.all { it >= 0 }) { "wantSampleSize must be >= 0" }
 
     val skippedContests = mutableSetOf<Int>()
@@ -157,7 +156,6 @@ fun consistentSampling(
     val sortedCardIter = sortedManifest.cards.iterator()
     while (
         sortedCardIter.hasNext() &&
-        // ((auditRound.auditorWantNewMvrs < 0) || (newMvrs < auditRound.auditorWantNewMvrs)) && // TODO REDO or delete?
         contestsIncluded.any { (haveSampleSize[it.id] ?: 0) < (wantSampleSize[it.id] ?: 0) }
     ) {
         // get the next card in sorted order
@@ -171,7 +169,7 @@ fun consistentSampling(
                 if ((haveSampleSize[contest.id] ?: 0) < (wantSampleSize[contest.id] ?: 0)) {
                     include = true
                 }
-            } // has contest
+            }
         }
 
         if (include) {
@@ -219,46 +217,4 @@ fun consistentSampling(
     auditRound.samplePrns = sampledCards.map { it.prn }
     return sampledCards
 }
-
-// try running without complexity of auditorWantNewMvrs
-private fun wantSampleSizeSimple(contestsNotDone: List<ContestRound>): Map<Int, Int> {
-     return contestsNotDone.associate { it.id to it.estMvrs }
-}
-
-/*
-//// TODO  this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set
-// for each contest, return map contestId -> wantSampleSize. used in ConsistentSampling
-private fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedCards : CloseableIterator<AuditableCard>, debug: Boolean = false): Map<Int, Int> {
-    //// count how many samples each contest already has
-    val prevContestCounts = mutableMapOf<ContestRound, Int>()
-    contestsNotDone.forEach { prevContestCounts[it] = 0 }
-
-    // Note this iterates through sortedCards only until all previousSamples have been found and counted
-    sortedCards.use { cardIter ->
-        previousSamples.forEach { prevNumber ->
-            while (cardIter.hasNext()) {
-                val card = cardIter.next() // previousSamples must be in same order as sortedBorc
-                if (card.prn == prevNumber) {
-                    contestsNotDone.forEach { contest ->
-                        if (card.hasContest(contest.id)) {
-                            prevContestCounts[contest] = prevContestCounts[contest]?.plus(1) ?: 1
-                        }
-                    }
-                    break
-                }
-            }
-        }
-    }
-    if (debug) {
-        val prevContestCountsById = prevContestCounts.entries.associate { it.key.id to it.value }
-        logger.debug{"**wantSampleSize prevContestCountsById = $prevContestCountsById"}
-    }
-    // we need prevContestCounts in order to calculate wantSampleSize if contest.auditorWantNewMvrs has been set
-    val wantSampleSizeMap = prevContestCounts.entries.associate { it.key.id to it.key.wantSampleSize(it.value) }
-    if (debug) logger.debug{"wantSampleSize = $wantSampleSizeMap"}
-
-    return wantSampleSizeMap
-} */
-
-
 

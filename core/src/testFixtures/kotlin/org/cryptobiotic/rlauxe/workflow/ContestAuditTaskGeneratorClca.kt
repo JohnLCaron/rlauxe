@@ -146,22 +146,22 @@ class ClcaSingleRoundWorkflowTask(
                 parameters,
             )
         } else {
-            val lastRound = minAssertion.auditResult!!
+            val auditResult = minAssertion.auditResult!!
             WorkflowResult(
                 name,
                 Nc = contest.Npop,
                 margin = assorter.dilutedMargin(),
-                status = lastRound.status,
+                status = auditResult.status,
                 nrounds = minAssertion.roundProved.toDouble(),
-                samplesUsed = lastRound.samplesUsed.toDouble(),
+                samplesUsed = auditResult.samplesUsed.toDouble(),
                 nmvrs = maxEstMvrs.toDouble(),
-                parameters + lastRound.params,
-                failPct = if (lastRound.status != TestH0Status.StatRejectNull) 100.0 else 0.0,
-                wtf = (maxEstMvrs - lastRound.samplesUsed) / minAssertion.roundProved.toDouble(),
+                parameters + auditResult.params,
+                failPct = if (auditResult.status != TestH0Status.StatRejectNull) 100.0 else 0.0,
+                wtf = (maxEstMvrs - auditResult.samplesUsed) / minAssertion.roundProved.toDouble(),
 
                 mvrMargin=mvrMargin,
                 startingRates=null,
-                measuredCounts=lastRound.clcaErrorTracker.measuredClcaErrorCounts(),
+                measuredCounts=auditResult.clcaErrorTracker!!.measuredClcaErrorCounts(),
             )
         }
     }

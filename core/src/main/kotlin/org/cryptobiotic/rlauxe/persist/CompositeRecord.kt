@@ -161,7 +161,6 @@ data class CompositeAuditRound(
     override var newmvrs: Int = 0,
     override var mvrsUsed: Int = 0,
     override var mvrsUnused: Int = 0,
-    override var auditorWantNewMvrs: Int = -1,
 ) : AuditRoundIF {
 
     init {

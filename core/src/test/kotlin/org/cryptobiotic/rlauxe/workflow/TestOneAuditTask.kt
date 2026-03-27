@@ -27,7 +27,7 @@ class TestOneAuditTask {
         val nsimTrials = 100
         val cvrPercent = .50
 
-        val election = ElectionInfo.forTest(AuditType.ONEAUDIT, MvrSource.testClcaSimulated) // TODO where do you get the mvrs ??
+        val election = ElectionInfo.forTest(AuditType.ONEAUDIT, MvrSource.testClcaSimulated) // TODO where do you get the mvrs, need testPrivateMvrs ??
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05,)
         val sampleControl = ContestSampleControl(minRecountMargin = 0.0, minMargin=0.0, contestSampleCutoff = null, auditSampleCutoff = null)
         val config = Config(election, creation, round =

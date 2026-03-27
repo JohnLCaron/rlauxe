@@ -73,7 +73,7 @@ fun corlaCalc(config: Config, contestRound: ContestRound): SampleEst? {
     val lastResult = minAssertion.auditResult
     if (lastResult == null) return null
 
-    val errorCounts = lastResult.clcaErrorTracker.measuredClcaErrorCounts()
+    val errorCounts = lastResult.clcaErrorTracker!!.measuredClcaErrorCounts()
 
     // fun estimateSampleSizeSimple(
     //    riskLimit: Double,

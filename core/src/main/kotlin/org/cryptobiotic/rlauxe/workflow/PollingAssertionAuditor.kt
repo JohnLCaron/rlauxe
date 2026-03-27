@@ -117,7 +117,7 @@ fun auditPollingAssertion(
         pmin = testH0Result.pvalueMin,
         samplesUsed = testH0Result.sampleCount,
         status = testH0Result.status,
-        clcaErrorTracker = ClcaErrorTracker(0.0, 0.0), // TODO
+        clcaErrorTracker = null,
     )
 
     if (!quiet) logger.debug{" ${contestUA.name} ${assertionRound.auditResult}"}

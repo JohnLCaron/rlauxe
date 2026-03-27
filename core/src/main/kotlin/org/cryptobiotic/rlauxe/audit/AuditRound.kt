@@ -16,14 +16,14 @@ interface AuditRoundIF {
 
     var auditWasDone: Boolean
     var auditIsComplete: Boolean
-    var samplePrns: List<Long> // card prns to sample for this round (complete, not just new)
+    var samplePrns: List<Long> // card prns to sample for just this round (complete, not just new)
     var nmvrs: Int      // number of mvrs in round
     var newmvrs: Int    // number of new mvrs in round
     var mvrsUsed: Int
     var mvrsUnused: Int
 
     fun show(): String
-    fun createNextRound(prevAuditRound: AuditRound?): AuditRound
+    fun createNextRound(): AuditRound
 }
 
 
@@ -48,17 +48,18 @@ data class AuditRound(
         "AuditState(round = $roundIdx, nmvrs=$nmvrs, auditWasDone=$auditWasDone, auditIsComplete=$auditIsComplete)" +
                 " ncontests=${contestRounds.size} ncontestsDone=${contestRounds.count { it.done }}"
 
-    override fun createNextRound(prevAuditRound: AuditRound?): AuditRound {
+    override fun createNextRound(): AuditRound {
         val nextContests = contestRounds.filter { !it.status.complete }.map { contestRound ->
-            val prevContestRound = prevAuditRound?.contestRounds?.find { it.id == contestRound.id }
+            val prevContestRound = this.contestRounds.find { it.id == contestRound.id }
             contestRound.createNextRound(prevContestRound)
         }
         return AuditRound(roundIdx + 1, nextContests, samplePrns = emptyList())
     }
 }
 
-// called from rlauxe-viewer
-fun List<AuditRoundIF>.previousSamples(currentRoundIdx: Int): Set<Long> {
+// called from AuditWorkflow.startNewRound() and rlauxe-viewer
+// All the Prns that have been sampled so far
+fun List<AuditRoundIF>.previousSamplePrns(currentRoundIdx: Int): Set<Long> {
     val result = mutableSetOf<Long>()
     this.filter { it.roundIdx < currentRoundIdx }.forEach { auditRound ->
         result.addAll(auditRound.samplePrns)

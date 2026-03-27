@@ -228,7 +228,7 @@ data class ContestSampleControl(
     val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / contestNc) greater than this // TODO should be Npop
     val contestSampleCutoff: Int? = 1000, // max number of cvrs for any one contest, set to null to use all
     val auditSampleCutoff: Int? = 10000, // max number of cvrs in the audit, set to null to use all
-    val removeCutoffContests: Boolean = (contestSampleCutoff != null || auditSampleCutoff != null), // TODO keep this ??
+    // val removeCutoffContests: Boolean = (contestSampleCutoff != null || auditSampleCutoff != null), // TODO keep this ??
 
     // soft parameters
     val other: Map<String, String> = emptyMap(),    // soft parameters to ease migration
@@ -248,7 +248,7 @@ data class ContestSampleControl(
 
     companion object {
         val removeMaxContests = "removeMaxContests"
-        val NONE = ContestSampleControl(0.0, 0.0, 0.0, null, null, false,emptyMap())
+        val NONE = ContestSampleControl(0.0, 0.0, 0.0, null, null, emptyMap())
         private val logger = KotlinLogging.logger("ContestSampleControl")
     }
 }

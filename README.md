@@ -450,7 +450,7 @@ Before the audit begins:
 For each round:
 1. If _maxSamplePct_ is set, a contest whose estimated sample size is greater than _maxSamplePct * Npop_ is removed from the audit with failure code FailMaxSamplesAllowed.
 2. If _contestSampleCutoff_ is set, a contest whose estimated sample size is greater than _contestSampleCutoff_ is removed from the audit with failure code FailMaxSamplesAllowed.
-3. If _auditSampleCutoff_ is set, if the audit round's sample size is greater than _auditSampleCutoff_, then the contest with the largest  is removed from the audit with failure code FailMaxSamplesAllowed. The sampling is then redone without that contest, and the check on the total number of ballots is repeated, until the total sample size is less than auditSampleCutoff.
+3. If _auditSampleCutoff_ is set, if the audit round's sample size is greater than _auditSampleCutoff_, then the contest with the largest estimated sample size is removed from the audit with failure code FailMaxSamplesAllowed. The sampling is then redone without that contest, and the check on the total number of ballots is repeated, until the total sample size is less than auditSampleCutoff.
 
 These rules are somewhat arbitrary but allow us to test audits without human intervention. In a real audit,
 auditors would select which contests to audit, rerunning the estimation as needed,

@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import org.cryptobiotic.rlauxe.audit.previousSamples
+import org.cryptobiotic.rlauxe.audit.previousSamplePrns
 import org.cryptobiotic.rlauxe.estimate.consistentSampling
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import kotlin.test.Test
@@ -23,10 +23,10 @@ class TestPersistentConsistentSampling {
         println("auditRound = ${auditRound.roundIdx}")
 
         repeat(auditRound.roundIdx) {
-            val previousSamples = auditRecord.rounds.previousSamples(it+1)
+            val previousSamples = auditRecord.rounds.previousSamplePrns(it+1)
             println("round = ${it+1} previousSample size = ${previousSamples.size}")
         }
-        val previousSamples = auditRecord.rounds.previousSamples(auditRound.roundIdx)
+        val previousSamples = auditRecord.rounds.previousSamplePrns(auditRound.roundIdx)
 
         val workflow = PersistedWorkflow(auditRecord, true)
         consistentSampling(auditRound, workflow.mvrManager().sortedManifest(), previousSamples)

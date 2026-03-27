@@ -17,8 +17,6 @@ import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.isDirectory
 
-private val logger = KotlinLogging.logger("CompositeRecord")
-
 data class CompositeRecord(
     override val location: String,
     override val electionInfo: ElectionInfo,
@@ -69,6 +67,7 @@ data class CompositeRecord(
     }
 
     companion object {
+        private val logger = KotlinLogging.logger("CompositeRecord")
 
         // used by viewer
         fun readFrom(location: String): CompositeRecord? {
@@ -151,7 +150,7 @@ fun makeAuditRounds(records: List<AuditRecord>) : List<AuditRoundIF> {
 
 data class CompositeAuditRound(
     override val roundIdx: Int,
-    override val contestRounds: List<ContestRound>, // TODO change the contestId to be unique ??
+    override val contestRounds: List<ContestRound>,
     val auditRounds: List<AuditRound>,
 
     override var auditWasDone: Boolean = false,
@@ -172,8 +171,8 @@ data class CompositeAuditRound(
         mvrsUnused = auditRounds.map { it.mvrsUnused }.sum()
     }
 
-    override fun createNextRound(prevAuditRound: AuditRound?): AuditRound {
-        TODO("Not yet implemented")
+    override fun createNextRound(): AuditRound {
+        throw UnsupportedOperationException("CompositeAuditRound.createNextRound()")
     }
 
     //// called from viewer

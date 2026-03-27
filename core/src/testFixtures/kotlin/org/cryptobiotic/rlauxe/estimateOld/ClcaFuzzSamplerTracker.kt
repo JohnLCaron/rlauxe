@@ -8,7 +8,6 @@ import org.cryptobiotic.rlauxe.betting.ErrorTracker
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsForClca
-import org.cryptobiotic.rlauxe.estimateOld.CardSamples
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.random.Random
 

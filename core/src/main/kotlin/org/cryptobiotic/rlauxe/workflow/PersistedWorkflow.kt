@@ -89,7 +89,7 @@ class PersistedWorkflow(
                 auditor = ClcaAssertionAuditor(quiet), onlyTask=onlyTask)
             AuditType.ONEAUDIT -> runClcaAuditRound(config, auditRound, mvrManager, auditRound.roundIdx,
                 auditor = OneAuditAssertionAuditor(mvrManager().pools()!!, quiet), onlyTask=onlyTask, )
-            AuditType.POLLING -> runPollingAuditRound2(config, auditRound, mvrManager, auditRound.roundIdx)
+            AuditType.POLLING -> runPollingAuditRound(config, auditRound, mvrManager, auditRound.roundIdx)
         }
 
         auditRound.auditWasDone = true

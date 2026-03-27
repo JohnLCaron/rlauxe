@@ -35,7 +35,6 @@ import java.nio.file.StandardOpenOption
 
 // one in each roundXX subdirectory
 // note dont store samplePrns: List<Long>, these are kept in seperate file
-// TODO keeping seperate AuditEst from AuditState, cound serialize differently if needed
 @Serializable
 data class AuditRoundJson(
     val roundIdx: Int,
@@ -67,7 +66,6 @@ fun AuditRoundJson.import(contestUAs: List<ContestWithAssertions>, samplePrns: L
     val contestRounds = this.contestRounds.map {
         it.import( contestUAmap[it.id]!!, prevContestMap[it.id])
     }
-    // TODO Composite needed to serialize ??
     return AuditRound(
         this.roundIdx,
         contestRounds,

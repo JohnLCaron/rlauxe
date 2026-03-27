@@ -365,28 +365,28 @@ class TestShangrlaAssertions {
         val cassorterHasStyle = ClcaAssorter(plur_con_test.info, aliceVsBobP)
 
         // mvr == cvr, always get noerror
-        assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(aliceMvr, aliceMvr)) // 1
-        assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(bobMvr, bobMvr))
-        assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(candyMvr, candyMvr))
+        assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(aliceMvr, aliceMvr, true)) // 1
+        assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(bobMvr, bobMvr, true))
+        assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(candyMvr, candyMvr, true))
 
-        assertEquals(0.0 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(bobMvr, aliceMvr)) // 2
-        assertEquals(0.5 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(bobMvr, candyMvr))
-        assertEquals(2.0 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(aliceMvr, bobMvr))
-        assertEquals(1.5 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(aliceMvr, candyMvr))
-        assertEquals(1.5 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(candyMvr, bobMvr))
-        assertEquals(0.5 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(candyMvr, aliceMvr))
-        assertEquals(1.0 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(candyMvr, danMvr))
+        assertEquals(0.0 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(bobMvr, aliceMvr, true)) // 2
+        assertEquals(0.5 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(bobMvr, candyMvr, true))
+        assertEquals(2.0 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(aliceMvr, bobMvr, true))
+        assertEquals(1.5 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(aliceMvr, candyMvr, true))
+        assertEquals(1.5 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(candyMvr, bobMvr, true))
+        assertEquals(0.5 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(candyMvr, aliceMvr, true))
+        assertEquals(1.0 * cassorterHasStyle.noerror, cassorterHasStyle.bassort(candyMvr, danMvr, true))
 
         //// contest does not appear on the MVR
         // we get an assort value of {0, noerror, noerror/2} depending if the CVR showed a vote for the {winner, loser, other},
-        assertEquals(0.0, cassorterHasStyle.bassort(wrongContestMvr, aliceMvr)) // 4
-        assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(wrongContestMvr, bobMvr))
-        assertEquals(cassorterHasStyle.noerror/2, cassorterHasStyle.bassort(wrongContestMvr, candyMvr))
+        assertEquals(0.0, cassorterHasStyle.bassort(wrongContestMvr, aliceMvr, true)) // 4
+        assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(wrongContestMvr, bobMvr, true))
+        assertEquals(cassorterHasStyle.noerror/2, cassorterHasStyle.bassort(wrongContestMvr, candyMvr, true))
 
-        assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(wrongContestMvr, bobMvr))
-        assertEquals(cassorterHasStyle.noerror/2, cassorterHasStyle.bassort(wrongContestMvr, candyMvr))
-        assertEquals(0.0, cassorterHasStyle.bassort(wrongContestMvr, aliceMvr)) // 4
-        assertEquals(Double.NaN, cassorterHasStyle.bassort(wrongContestMvr, wrongContestMvr)) // 4
+        assertEquals(cassorterHasStyle.noerror, cassorterHasStyle.bassort(wrongContestMvr, bobMvr, true))
+        assertEquals(cassorterHasStyle.noerror/2, cassorterHasStyle.bassort(wrongContestMvr, candyMvr, true))
+        assertEquals(0.0, cassorterHasStyle.bassort(wrongContestMvr, aliceMvr, true)) // 4
+        assertEquals(Double.NaN, cassorterHasStyle.bassort(wrongContestMvr, wrongContestMvr, true)) // 4
 
         /* val mess = assertFailsWith<RuntimeException>{
             cassorterHasStyle.bassort(wrongContestMvr, wrongContestMvr)

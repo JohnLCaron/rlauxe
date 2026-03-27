@@ -60,7 +60,7 @@ class TestOneAuditAdaptiveBetting {
         val solver = GeneralOptimalLambda(
             oaCassorter.noerror(),
             clcaErrors.errorRates(),
-            oaErrorRates.rates,
+            oaErrorRates,
             mui,
             2.0,
             debug = true

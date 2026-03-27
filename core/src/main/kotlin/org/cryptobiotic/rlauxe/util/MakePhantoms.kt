@@ -89,7 +89,6 @@ class PhantomBuilder(val id: String, val idx: Int) {
     fun buildCard(): AuditableCard {
         // hijack votes
         val votes = contests.associateWith { IntArray(0) }
-        return AuditableCard(location = id, index = idx, prn = 0L, phantom = true, votes = votes, poolId = null,
-            batchName="cvr")
+        return AuditableCard(location = id, index = idx, prn = 0L, phantom = true, votes = votes, poolId = null, batchName="phantoms")
     }
 }

@@ -65,7 +65,7 @@ class TestCvrBuilders {
                     var count = 0
                     fcvrs.forEachIndexed { idx, fcvr ->
                         if (fcvr.hasContest(contest.id)) {
-                            samples.addSample(minAssort.bassort(fcvr, cvrs[idx]))
+                            samples.addSample(minAssort.bassort(fcvr, cvrs[idx], true))
                             ccount++
                             if (cvrs[idx] != fcvr) count++
                         }
@@ -103,7 +103,7 @@ class TestCvrBuilders {
                     var countChanged = 0
                     cvrsForClca.forEachIndexed { idx, fcvr ->
                         if (fcvr.hasContest(contest.id)) {
-                            samples.addSample(minAssort.bassort(fcvr, cvrs[idx]))
+                            samples.addSample(minAssort.bassort(fcvr, cvrs[idx], true))
                             ccount++
                             if (cvrs[idx] != fcvr) countChanged++
                         }

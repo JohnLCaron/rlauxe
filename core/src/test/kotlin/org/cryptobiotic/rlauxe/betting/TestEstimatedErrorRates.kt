@@ -26,7 +26,7 @@ class TestEstimatedErrorRates {
     // 3. shrinkTruncEstimateRate : ease the first d samples in slowly: est = (d * apriori + errorCount) / (d + sampleNum - 1)
     // 4. phantoms, add or max?
     fun estimatedErrorRates(startingErrors: ClcaErrorCounts, nphantoms: Int, trackerErrors: ClcaErrorCounts? = null): Map<Double, Double> { // bassort -> rate
-        val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.totalInPools) / Npop.toDouble()
+        val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.ncardsInPools) / Npop.toDouble()
         val sampleNumber = startingErrors.totalSamples + (trackerErrors?.totalSamples ?: 0)
 
         val estRates = taus.namesNoErrors().map { name ->
@@ -89,7 +89,7 @@ class TestEstimatedErrorRates {
         if (trackerErrors == null || trackerErrors.errorCounts.isEmpty()) return startingRates
 
         val errorRates = trackerErrors.errorRates()
-        val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.totalInPools) / Npop.toDouble()
+        val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.ncardsInPools) / Npop.toDouble()
 
         val estRates = taus.namesNoErrors().map { name ->
             val tauValue = taus.valueOf(name)!!

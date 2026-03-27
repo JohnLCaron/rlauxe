@@ -63,7 +63,7 @@ class TruncShrinkage(
     }
 }
 
-// TODO test against TruncShrinkage
+// TODO test TruncShrinkageNew against TruncShrinkage
 /* class TruncShrinkageNew(
     val N: Int,
     val withoutReplacement: Boolean = true,

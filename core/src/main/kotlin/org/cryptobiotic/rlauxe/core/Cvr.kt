@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.core
 
 interface CvrIF {
-    fun hasContest(contestId: Int): Boolean // TODO "has contest" or "may have contest" ?
+    fun hasContest(contestId: Int): Boolean // Cvr: "has contest"; AuditableCard: "may have contest"
     fun location(): String
     fun isPhantom(): Boolean
     fun poolId(): Int?
@@ -11,7 +11,7 @@ interface CvrIF {
 }
 
 // core abstraction for both CVR and MVR
-// assumes that a vote is 0 or 1, so we just need the list of candidates that were votes for.
+// assumes that a vote is 0 or 1, so we just need the list of candidates that were voted for.
 data class Cvr(
     val id: String, // ballot identifier
     val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last

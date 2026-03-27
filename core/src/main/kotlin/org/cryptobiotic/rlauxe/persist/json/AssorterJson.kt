@@ -78,7 +78,7 @@ data class OneAuditAssortValueRatesJson(
 
 fun OneAuditAssortValueRates.publishJson() = OneAuditAssortValueRatesJson(
     this.rates,
-    this.totalInPools,
+    this.ncardsInPools,
 )
 
 fun OneAuditAssortValueRatesJson.import() = OneAuditAssortValueRates(

@@ -10,7 +10,7 @@ import kotlin.sequences.plus
 
 // The information we have on each physical card in the audit; the complete set is the CardManifest.
 
-// TODO could you write cards independent of what kind of audit?
+// could you write cards independent of what kind of audit?
 //  OneAudit uses poolId to indicate cvr vs pool card; uses cardPool to specify the possibleContests() of pooled card.
 //  Polling cards never have CVRs, always want poolId or batch to minimize dilution
 //  I think CLCA doesnt care about poolId, dont use batches unless cvrsContainUndervotes = false. See CreateSfElection.
@@ -25,7 +25,7 @@ data class AuditableCard (
 
     val votes: Map<Int, IntArray>?,   // CVRs and phantoms
     val poolId: Int?,                 // must be set if its from a CardPool
-    val batchName: String,            // batch name.
+    val batchName: String,            // batch name: "fromCvr" if no batch and its from a CVR
     val batch: BatchIF? = null,       // batch reference. CLCA dont need unless cvrsContainUndervotes = false
 ): CvrIF {
 
@@ -51,6 +51,7 @@ data class AuditableCard (
     override fun poolId() = poolId
     override fun votes(contestId: Int): IntArray? = votes?.get(contestId)
 
+    // "may have contest"
     override fun hasContest(contestId: Int): Boolean {
         return if (batch != null) batch.hasContest(contestId)
             else if (votes != null) votes[contestId] != null // assumes cvrsContainUndervotes, use batch if not.
@@ -118,8 +119,9 @@ data class AuditableCard (
     }
 
     companion object {
+        val fromCvr = "fromCvr"
         fun fromCvr(cvr: Cvr, index: Int, prn: Long): AuditableCard {
-            return AuditableCard(cvr.id, index, prn=prn, cvr.phantom, cvr.votes, cvr.poolId, batchName="cvr") // TODO
+            return AuditableCard(cvr.id, index, prn=prn, cvr.phantom, cvr.votes, cvr.poolId, batchName=fromCvr)
         }
         fun fromCvrs(cvrs: List<Cvr>): List<AuditableCard> {
             return cvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0) }
@@ -153,7 +155,7 @@ class MergeBatchIntoCards(
 // Add batch reference when reading in
 class MergeBatchesIntoCards(
     val cards: CloseableIterable<AuditableCard>,
-    val batches: List<BatchIF>,  // TODO try not optional
+    val batches: List<BatchIF>,
 ): CloseableIterable<AuditableCard> {
 
     override fun iterator(): CloseableIterator<AuditableCard> = MergeBatchesIterator(cards.iterator(), batches)
@@ -216,7 +218,7 @@ class CvrsToCardManifest(
         return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
             votes = votes,
             poolId = if (type.isClca()) null else org.poolId,
-            batchName = batch?.name() ?: "cvr",
+            batchName = batch?.name() ?: AuditableCard.fromCvr,
             batch, // not needed if you are just going to serialize; but does no harm
         )
     }
@@ -258,7 +260,7 @@ class CvrsAndBatchesToCards(
         return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
             votes = votes,
             poolId = if (type.isClca()) null else org.poolId,
-            batchName = pop?.name() ?: "cvr", // TODO ??
+            batchName = pop?.name() ?: AuditableCard.fromCvr,
             batch = pop,
         )
     }

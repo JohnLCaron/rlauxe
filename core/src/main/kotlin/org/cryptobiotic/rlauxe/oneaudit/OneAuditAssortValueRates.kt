@@ -11,20 +11,14 @@ import kotlin.collections.set
 import kotlin.math.ln
 
 // rate :  assort value -> rate over the entire population
-data class OneAuditAssortValueRates(val rates: Map<Double, Double>, val totalInPools: Int) {
-    fun sumRates() = rates.map{ it.value }.sum()
-    fun avgAssort() = rates.map{ (value, rate) -> value * rate }.sum() / sumRates()
+data class OneAuditAssortValueRates(val rates: Map<Double, Double>, val ncardsInPools: Int) {
+    val sumRates: Double by lazy { rates.map{ it.value }.sum() }
+    val avgAssort: Double by lazy { rates.map{ (value, rate) -> value * rate }.sum() / sumRates }
 
     override fun toString() = buildString {
-        append("OneAuditAssortValueRates(totalInPools=$totalInPools n=${rates.size} sumOfRates= ${sumRates()} avgAssort= ${avgAssort()})")
+        append("OneAuditAssortValueRates(ncardsInPools=$ncardsInPools n=${rates.size} sumOfRates= ${sumRates} avgAssort= ${avgAssort})")
     }
-    fun sumOneAuditTerm(maxBet:Double): Double {
-        var sumOneAuditTerm = 0.0
-        rates.forEach { (assortValue: Double, rate: Double) ->
-            sumOneAuditTerm += ln(1.0 + maxBet * (assortValue - 0.5)) * rate
-        }
-        return sumOneAuditTerm
-    }
+
     fun show() = buildString {
         appendLine(this@OneAuditAssortValueRates)
         rates.forEach { appendLine("  $it") }

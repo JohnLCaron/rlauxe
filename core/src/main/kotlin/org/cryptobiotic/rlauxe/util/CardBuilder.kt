@@ -46,7 +46,7 @@ class CardBuilder(
             // votes= if (votes.isEmpty()) null else votes, // TODO why was this null ??
             votes= votes,
             poolId=poolId ?: this.poolId,
-            batchName= if (!votes.isEmpty()) "cvr" else cardStyle ?: "unknown",
+            batchName= if (!votes.isEmpty()) AuditableCard.fromCvr else cardStyle ?: "unknown",
             batch=null)
     }
 

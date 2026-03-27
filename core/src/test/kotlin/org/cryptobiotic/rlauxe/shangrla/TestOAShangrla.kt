@@ -116,13 +116,13 @@ class TestOAShangrla {
         println("poolAvgAssort=$poolAvgAssort loserVoteNoCvr=$loserVoteNoCvr winnerVoteNoCvr=$winnerVoteNoCvr otherVoteNoCvr=$otherVoteNoCvr")
 
         // mvr assort always return poolAvg because it has a poolId
-        println(" mvr winner bassort=${cassorter.bassort(winnerNoCvr, winnerNoCvr)} ")
-        println(" mvr loser bassort=${cassorter.bassort(loserNoCvr, winnerNoCvr)} ")
-        println(" mvr other bassort=${cassorter.bassort(otherNoCvr, winnerNoCvr)} ")
+        println(" mvr winner bassort=${cassorter.bassort(winnerNoCvr, winnerNoCvr, true)} ")
+        println(" mvr loser bassort=${cassorter.bassort(loserNoCvr, winnerNoCvr, true)} ")
+        println(" mvr other bassort=${cassorter.bassort(otherNoCvr, winnerNoCvr, true)} ")
 
-        assertEquals(winnerVoteNoCvr, cassorter.bassort(winnerNoCvr, winnerNoCvr), .0001)
-        assertEquals(loserVoteNoCvr, cassorter.bassort(loserNoCvr, winnerNoCvr), .0001)
-        assertEquals(otherVoteNoCvr, cassorter.bassort(otherNoCvr, winnerNoCvr), .0001)
+        assertEquals(winnerVoteNoCvr, cassorter.bassort(winnerNoCvr, winnerNoCvr, true), .0001)
+        assertEquals(loserVoteNoCvr, cassorter.bassort(loserNoCvr, winnerNoCvr, true), .0001)
+        assertEquals(otherVoteNoCvr, cassorter.bassort(otherNoCvr, winnerNoCvr, true), .0001)
 
         val expect = """OneAuditClcaAssorter for contest OneAuditTest (1)
   assorter= Plurality winner=0 loser=1 dilutedMargin=65.7200% dilutedMean=82.8600%

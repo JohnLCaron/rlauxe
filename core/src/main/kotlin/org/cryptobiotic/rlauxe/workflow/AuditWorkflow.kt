@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.EstimateAudit
 import org.cryptobiotic.rlauxe.util.OnlyTask
-import org.cryptobiotic.rlauxe.estimateOld.estimateSampleSizes
 import org.cryptobiotic.rlauxe.estimate.removeContestsAndSample
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
@@ -43,29 +42,16 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
         val sortedManifest = mvrManager.sortedManifest()
 
         // estimate how many samples are needed for each contest, to satisfy the risk function,
-        val simulation = config.round.simulation
-        if (simulation.simulationStrategy == SimulationStrategy.optimistic) {
-            val estimate = EstimateAudit(
-                config,
-                auditRound.roundIdx,
-                auditRound.contestRounds,
-                mvrManager().pools(),
-                mvrManager().batches(),
-                sortedManifest
-            )
-            estimate.run(nthreads=null, contestOnly=null)
-        } else {
-            estimateSampleSizes(
-                config,
-                auditRound,
-                sortedManifest = sortedManifest,
-                cardPools = mvrManager().pools(),
-                batches = mvrManager().batches(),
-                previousSamples,
-                // nthreads=1,
-                onlyTask = onlyTask,
-            )
-        }
+        val estimate = EstimateAudit(
+            config,
+            auditRound.roundIdx,
+            auditRound.contestRounds,
+            mvrManager().pools(),
+            mvrManager().batches(),
+            sortedManifest
+        )
+        estimate.run(nthreads=null, contestOnly=null)
+
         logger.debug{"Estimate round ${roundIdx} took ${stopwatch}"}
 
         // this sets the following fields:

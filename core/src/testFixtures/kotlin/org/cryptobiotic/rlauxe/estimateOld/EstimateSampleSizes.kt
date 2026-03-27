@@ -88,7 +88,7 @@ fun estimateSampleSizes(
 
 // For one contest, generate a task for each non-complete assertion
 // starts from where the last audit left off (prevAuditResult.pvalue)
-fun makeEstimationTasks(
+private fun makeEstimationTasks(
     config: Config,
     contestRound: ContestRound,
     roundIdx: Int,

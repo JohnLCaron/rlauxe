@@ -21,7 +21,7 @@ class WorkflowTesterPolling(
     }
 
     override fun runAuditRound(auditRound: AuditRound, onlyTask: OnlyTask?, quiet: Boolean): Boolean  {
-        val complete = runPollingAuditRound2(auditConfig, auditRound, mvrManager, auditRound.roundIdx)
+        val complete = runPollingAuditRound(auditConfig, auditRound, mvrManager, auditRound.roundIdx)
         auditRound.auditWasDone = true
         auditRound.auditIsComplete = complete
         return complete

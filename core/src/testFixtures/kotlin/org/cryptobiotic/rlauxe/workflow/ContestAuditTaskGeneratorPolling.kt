@@ -100,7 +100,7 @@ class PollingSingleRoundAuditTask(
         val contestRounds = workflow.contestsUA().map { ContestRound(it, 1) }
         val oneRound = AuditRound(1, contestRounds, samplePrns = emptyList())
 
-        runPollingAuditRound2(workflow.config(), oneRound, workflow.mvrManager(), 1)
+        runPollingAuditRound(workflow.config(), oneRound, workflow.mvrManager(), 1)
 
         var maxSamples = 0
         contestRounds.forEach { contest->

@@ -1,10 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.AlphaMart
-import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
-import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
@@ -15,7 +12,7 @@ import org.cryptobiotic.rlauxe.util.*
 
 // run all contests and assertions for one round with the given auditor.
 // return isComplete
-fun runPollingAuditRound2(
+fun runPollingAuditRound(
     config: Config,
     auditRound: AuditRound,
     mvrManager: MvrManager,
@@ -81,7 +78,7 @@ class RunPollingContestTask(
                     )
 
                     val testH0Result =
-                        auditPollingAssertion2(config, contestRound.contestUA, assertionRound, sampler, roundIdx)
+                        auditPollingAssertion(config, contestRound.contestUA, assertionRound, sampler, roundIdx)
                     assertionRound.status = testH0Result.status
                     if (testH0Result.status.complete) assertionRound.roundProved = roundIdx
                 }
@@ -96,7 +93,7 @@ class RunPollingContestTask(
     }
 }
 
-fun auditPollingAssertion2(
+fun auditPollingAssertion(
     config: Config,
     contestUA: ContestWithAssertions,
     assertionRound: AssertionRound,

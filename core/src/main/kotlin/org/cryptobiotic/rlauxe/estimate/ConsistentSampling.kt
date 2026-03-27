@@ -116,7 +116,7 @@ private fun checkSampleLimits(
             maxContest.done = true
             logger.warn {
                 "*** too many samples in audit: ${auditRound.samplePrns.size} > ${sampleControl.auditSampleCutoff}, " +
-                        "remove contest ${maxContest.id} with largest sample size = ${maxContest.estMvrs}"
+                        "remove contest ${maxContest.id} with largest sample size = ${maxContest.estMvrs}; set to FailMaxSamplesAllowed"
             }
             removeContests.add(maxContest)
         }

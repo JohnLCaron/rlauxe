@@ -126,25 +126,19 @@ class TestConfigBuilders {
 }
 
 fun testConfigBuilderRoundtrip(electionInfo: ElectionInfo, target: Config) {
-    val electionTrip = if (electionInfo != null) {
-        val json = target.election.publishJson()
-        json.import()
-    } else null
+    val json = target.election.publishJson()
+    val electionTrip = json.import()
     assertEquals(electionInfo, electionTrip)
 
-    val creationTrip = if (target.creation != null) {
-        val creationJson = target.creation.publishJson()
-        creationJson.import()
-    } else null
+    val creationJson = target.creation.publishJson()
+    val creationTrip = creationJson.import()
     assertEquals(target.creation, creationTrip)
 
-    val roundTrip = if (target.round != null) {
-        val json = target.round.publishJson()
-        json.import()
-    } else null
+    val roundJson = target.round.publishJson()
+    val roundTrip = roundJson.import()
     assertEquals(target.round, roundTrip)
 
-    val configRound = Config(target.election, creationTrip!!, roundTrip!!)
+    val configRound = Config(target.election, creationTrip, roundTrip)
     assertEquals(target, configRound)
 }
 

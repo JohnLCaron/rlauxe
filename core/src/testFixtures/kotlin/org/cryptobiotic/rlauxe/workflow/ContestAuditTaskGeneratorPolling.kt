@@ -113,7 +113,7 @@ class PollingSingleRoundAuditTask(
         val contest = contestRounds.first() // theres only one
         val minAssertion = contest.minAssertion()!!
         val assorter = minAssertion.assertion.assorter
-        val mvrMargin = assorter.calcAssorterMargin(contest.id, testMvrs, usePhantoms = true) // TODO needed or debugging?
+        val mvrMargin = assorter.calcAssorterMargin(contest.id, testMvrs, usePhantoms = true)
 
         return if (minAssertion.auditResult == null) { // TODO why might this this empty?
             WorkflowResult(

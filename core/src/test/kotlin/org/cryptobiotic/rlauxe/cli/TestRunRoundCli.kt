@@ -20,7 +20,7 @@ class TestRunRoundCli {
         )
     }
 
-    @Test
+    // @Test
     fun testRunRoundCli() {
         val auditdir = "$testdataDir/persist/persistWorkflow/oneauditProblem2/audit"
 

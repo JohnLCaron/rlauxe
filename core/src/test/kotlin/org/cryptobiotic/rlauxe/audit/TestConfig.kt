@@ -14,7 +14,7 @@ class TestConfig {
   electionInfo=ElectionInfo(electionName=testing, auditType=CLCA, totalCardCount=42, contestCount=1, cvrsContainUndervotes=true, poolsHaveOneCardStyle=null, pollingMode=null, mvrSource=testClcaSimulated, other={}), 
   creation=AuditCreationConfig(auditType=CLCA, riskLimit=0.05, seed=-1, riskMeasuringSampleLimit=null, other={}), 
   simulation=SimulationControl(nsimTrials=10, estPercentile=[50, 80], simFuzzPct=null, simulationStrategy=optimistic), 
-  sampling=ContestSampleControl(minRecountMargin=0.005, minMargin=0.0, maxSamplePct=0.0, contestSampleCutoff=2000, auditSampleCutoff=10000, removeCutoffContests=true, other={}))
+  sampling=ContestSampleControl(minRecountMargin=0.005, minMargin=0.0, maxSamplePct=0.0, contestSampleCutoff=2000, auditSampleCutoff=10000, other={}))
   clcaConfig=ClcaConfig(strategy=generalAdaptive, fuzzMvrs=null, d=100, maxLoss=0.9624175929935999, apriori=TausRates(rates={})) )
 """
         assertEquals(expected, config.toString())
@@ -28,7 +28,7 @@ class TestConfig {
   electionInfo=ElectionInfo(electionName=testing, auditType=CLCA, totalCardCount=42, contestCount=1, cvrsContainUndervotes=true, poolsHaveOneCardStyle=null, pollingMode=null, mvrSource=testClcaSimulated, other={}), 
   creation=AuditCreationConfig(auditType=CLCA, riskLimit=0.1, seed=-1, riskMeasuringSampleLimit=null, other={}), 
   simulation=SimulationControl(nsimTrials=11, estPercentile=[50, 80], simFuzzPct=0.002, simulationStrategy=optimistic), 
-  sampling=ContestSampleControl(minRecountMargin=0.005, minMargin=0.0, maxSamplePct=0.0, contestSampleCutoff=2000, auditSampleCutoff=10000, removeCutoffContests=true, other={}))
+  sampling=ContestSampleControl(minRecountMargin=0.005, minMargin=0.0, maxSamplePct=0.0, contestSampleCutoff=2000, auditSampleCutoff=10000, other={}))
   clcaConfig=ClcaConfig(strategy=generalAdaptive, fuzzMvrs=0.001, d=100, maxLoss=0.9624175929935999, apriori=TausRates(rates={})) )
 """
         assertEquals(expected, config.toString())
@@ -43,7 +43,7 @@ class TestConfig {
   electionInfo=ElectionInfo(electionName=testPollingAudit, auditType=POLLING, totalCardCount=4200, contestCount=11, cvrsContainUndervotes=true, poolsHaveOneCardStyle=false, pollingMode=withBatches, mvrSource=testPrivateMvrs, other={}), 
   creation=AuditCreationConfig(auditType=POLLING, riskLimit=0.05, seed=-1, riskMeasuringSampleLimit=null, other={}), 
   simulation=SimulationControl(nsimTrials=100, estPercentile=[50, 80], simFuzzPct=0.002, simulationStrategy=optimistic), 
-  sampling=ContestSampleControl(minRecountMargin=0.005, minMargin=0.0, maxSamplePct=0.0, contestSampleCutoff=10000, auditSampleCutoff=10000, removeCutoffContests=true, other={}))
+  sampling=ContestSampleControl(minRecountMargin=0.005, minMargin=0.0, maxSamplePct=0.0, contestSampleCutoff=10000, auditSampleCutoff=10000, other={}))
   pollingConfig=PollingConfig(d=100, mode=withPools) )
 """
         assertEquals(expected, config.toString())
@@ -72,7 +72,7 @@ class TestConfig {
   electionInfo=ElectionInfo(electionName=testSoftParams, auditType=CLCA, totalCardCount=4200, contestCount=11, cvrsContainUndervotes=true, poolsHaveOneCardStyle=null, pollingMode=null, mvrSource=testClcaSimulated, other={}), 
   creation=AuditCreationConfig(auditType=CLCA, riskLimit=0.045, seed=-1, riskMeasuringSampleLimit=1000, other={}), 
   simulation=SimulationControl(nsimTrials=1, estPercentile=[50, 80], simFuzzPct=null, simulationStrategy=optimistic), 
-  sampling=ContestSampleControl(minRecountMargin=0.0, minMargin=0.0, maxSamplePct=0.0, contestSampleCutoff=null, auditSampleCutoff=null, removeCutoffContests=false, other={}))
+  sampling=ContestSampleControl(minRecountMargin=0.0, minMargin=0.0, maxSamplePct=0.0, contestSampleCutoff=null, auditSampleCutoff=null, other={}))
   clcaConfig=ClcaConfig(strategy=generalAdaptive, fuzzMvrs=0.0, d=100, maxLoss=0.9624175929935999, apriori=TausRates(rates={win-oth=0.0099})) )
 """
         assertEquals(expected, config.toString())
@@ -87,7 +87,7 @@ class TestConfig {
   electionInfo=ElectionInfo(electionName=testOneAudit, auditType=ONEAUDIT, totalCardCount=4200, contestCount=11, cvrsContainUndervotes=true, poolsHaveOneCardStyle=false, pollingMode=withBatches, mvrSource=testPrivateMvrs, other={}), 
   creation=AuditCreationConfig(auditType=ONEAUDIT, riskLimit=0.05, seed=-1, riskMeasuringSampleLimit=null, other={}), 
   simulation=SimulationControl(nsimTrials=101, estPercentile=[50, 80], simFuzzPct=0.0021, simulationStrategy=optimistic), 
-  sampling=ContestSampleControl(minRecountMargin=0.005, minMargin=0.0, maxSamplePct=0.0, contestSampleCutoff=2000, auditSampleCutoff=10000, removeCutoffContests=true, other={}))
+  sampling=ContestSampleControl(minRecountMargin=0.005, minMargin=0.0, maxSamplePct=0.0, contestSampleCutoff=2000, auditSampleCutoff=10000, other={}))
   clcaConfig=ClcaConfig(strategy=generalAdaptive, fuzzMvrs=0.0011, d=100, maxLoss=0.9624175929935999, apriori=TausRates(rates={})) )
 """
         assertEquals(expected, config.toString())

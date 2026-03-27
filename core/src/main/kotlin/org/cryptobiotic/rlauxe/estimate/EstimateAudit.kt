@@ -17,6 +17,7 @@ import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
@@ -31,7 +32,7 @@ private val showWork = false
 
 // TODO  round > 1 we want to incorporate the measured errors from previous rounds
 //   cant use vunderPool to do so, that only uses fuzz
-//   just change the assortValue randomly p percent of the time? can do the same for clca.
+//   just change the assortValue randomly p percent of the time? can do the same for clca. (??)
 
 // side effects:
 //   contestRound.estMvrs = estMvrs
@@ -250,7 +251,7 @@ class ContestClcaTrial(val run: Int,
 
         val prevAuditResult = assertionRound.prevAssertionRound?.auditResult
         prevSamplesUsed = prevAuditResult?.samplesUsed ?: 0
-        errorTracker = prevAuditResult?.clcaErrorTracker?.copyAll() ?: ClcaErrorTracker(cassorter.noerror, passorter.upperBound())
+        errorTracker = assertionRound.previousErrorTracker()
 
         val plast = prevAuditResult?.plast
         startingTestStatistic = if (plast == null) 1.0 else 1.0 / plast
@@ -346,7 +347,7 @@ class ContestPollingTrial(val run: Int,
     val prevSamplesUsed: Int
 
     val bettingFn: EstimAdapter
-    val errorTracker: ClcaErrorTracker
+    val welford = Welford() // use this as the Tracker
 
     init {
         val eta0 = margin2mean(assorter.dilutedMargin())
@@ -363,7 +364,6 @@ class ContestPollingTrial(val run: Int,
 
         val prevAuditResult = assertionRound.prevAssertionRound?.auditResult
         prevSamplesUsed = prevAuditResult?.samplesUsed ?: 0
-        errorTracker = prevAuditResult?.clcaErrorTracker?.copyAll() ?: ClcaErrorTracker(0.0, assorter.upperBound())
 
         val plast = prevAuditResult?.plast
         startingTestStatistic = if (plast == null) 1.0 else 1.0 / plast
@@ -388,7 +388,6 @@ class ContestPollingTrial(val run: Int,
     override fun nmvrs() = countUsed
     override fun startingTestStatistic() = startingTestStatistic
 
-    // why not just use BettingMart ??
     override fun addCard(cvr: AuditableCard?, card: AuditableCard, cardSortedIndex: Int) {
         countUsed++
 
@@ -398,7 +397,7 @@ class ContestPollingTrial(val run: Int,
             assorter.assort(cvr!!, usePhantoms = true)
         }
 
-        val mui = populationMeanIfH0(contest.Npop, true, errorTracker)
+        val mui = populationMeanIfH0(contest.Npop, true, welford)
         if (mui > assorter.upperBound()) { // 1  # true mean is certainly less than 1/2
             status = TestH0Status.AcceptNull
             maxIndex = cardSortedIndex
@@ -410,7 +409,7 @@ class ContestPollingTrial(val run: Int,
             return
         }
 
-        val maxBet = bettingFn.bet(errorTracker)
+        val maxBet = bettingFn.bet(welford)
 
         val payoff = (1 + maxBet * (assortValue - mui))
         testStatistic *= payoff
@@ -428,7 +427,7 @@ class ContestPollingTrial(val run: Int,
                 print("")
         }
 
-        errorTracker.addSample(assortValue)
+        welford.update(assortValue)
     }
 
     override fun toString(): String {

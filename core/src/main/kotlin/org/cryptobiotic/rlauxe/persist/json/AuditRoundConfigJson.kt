@@ -53,7 +53,7 @@ fun AuditRoundConfigJson.import() = AuditRoundConfig(
 /*
 data class SimulationControl(
     val nsimEst: Int = 20, // number of simulation estimation trials
-    val estPercentSuccess: List<Double> = listOf(0.50, 0.80), // use this percentile success for estimated sample size in round idx+1
+    val estPercentSuccess: List<Double> = listOf(50, 80), // use this percentile success for estimated sample size in round idx+1
     val simFuzzPct: Double? = null, // for estimation fuzzing
     val simulationStrategy: SimulationStrategy = SimulationStrategy.optimistic
 )*/
@@ -61,7 +61,7 @@ data class SimulationControl(
 @Serializable
 data class SimulationControlJson(
     val nsimEst: Int, // number of simulation estimation trials
-    val estPercentile: List<Int>?, // use this percentile success for estimated sample size
+    val estPercentile: List<Int>, // use this percentile success for estimated sample size
     val simFuzzPct: Double?, // for simulating the estimation fuzzing
     val simulationStrategy: SimulationStrategy, // for simulating the estimation fuzzing
 )
@@ -75,7 +75,7 @@ fun SimulationControl.publishJson() = SimulationControlJson(
 
 fun SimulationControlJson.import() = SimulationControl(
     this.nsimEst,
-    this.estPercentile ?: emptyList(), // TODO
+    this.estPercentile,
     this.simFuzzPct,
     this.simulationStrategy,
 )
@@ -87,10 +87,9 @@ data class ContestSampleControl(
     val minMargin: Double = 0.0, // do not audit contests less than this margin TODO really it should be noerror for clca?
 
     //// consistentSampling: contestRound.status, depends on having estimation
-    val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / contestNc) greater than this // TODO should be Npop
+    val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / Npop) greater than this
     val contestSampleCutoff: Int? = 1000, // max number of cvrs for any one contest, set to null to use all
     val auditSampleCutoff: Int? = 10000, // max number of cvrs in the audit, set to null to use all
-    val removeCutoffContests: Boolean = (contestSampleCutoff != null || auditSampleCutoff != null), // TODO keep this ??
 
     // soft parameters
     val other: Map<String, String> = emptyMap(),    // soft parameters to ease migration
@@ -106,7 +105,7 @@ data class ContestSampleControlJson(
     val maxSamplePct: Double,
     val contestSampleCutoff: Int?,
     val auditSampleCutoff: Int?,
-    val removeCutoffContests: Boolean,
+    // val removeCutoffContests: Boolean,
 )
 
 fun ContestSampleControl.publishJson() = ContestSampleControlJson(
@@ -115,7 +114,7 @@ fun ContestSampleControl.publishJson() = ContestSampleControlJson(
     this.maxSamplePct,
     this.contestSampleCutoff,
     this.auditSampleCutoff,
-    this.removeCutoffContests,
+    // this.removeCutoffContests,
 )
 
 fun ContestSampleControlJson.import() =  ContestSampleControl(
@@ -124,7 +123,7 @@ fun ContestSampleControlJson.import() =  ContestSampleControl(
         this.maxSamplePct,
         this.contestSampleCutoff,
         this.auditSampleCutoff,
-        this.removeCutoffContests,
+        // this.removeCutoffContests,
     )
 
 

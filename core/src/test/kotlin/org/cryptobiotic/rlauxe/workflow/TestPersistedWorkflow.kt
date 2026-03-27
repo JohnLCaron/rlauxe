@@ -120,7 +120,7 @@ class TestPersistedWorkflow {
         val topdir = "$testdataDir/persist/persistWorkflow/oneauditProblem2"
         val auditdir = "$topdir/audit"
 
-        val electionInfo = ElectionInfo.forTest(AuditType.ONEAUDIT, MvrSource.testPrivateMvrs) // TODO where do you get the mvrs ??
+        val electionInfo = ElectionInfo.forTest(AuditType.ONEAUDIT, MvrSource.testPrivateMvrs)
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05,)
         val config = Config(electionInfo, creation, round =
             AuditRoundConfig(

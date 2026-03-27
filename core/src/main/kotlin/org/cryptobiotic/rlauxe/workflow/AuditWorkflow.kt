@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.EstimateAudit
 import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.estimateOld.estimateSampleSizes
-import org.cryptobiotic.rlauxe.estimate.sampleAndRemoveContests
+import org.cryptobiotic.rlauxe.estimate.removeContestsAndSample
 import org.cryptobiotic.rlauxe.util.Stopwatch
 
 // abstract superclass of workflows
@@ -26,18 +26,17 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
         val auditRound = if (previousRound == null) {
             // first time, create the round
             val contestRounds = contestsUA()
-                // .filter { !auditConfig.skipContests.contains(it.id) }
                 .filter{ onlyTask == null || it.id == onlyTask.contestId }
                 .map { ContestRound(it, roundIdx) }
             AuditRound(roundIdx, contestRounds = contestRounds, samplePrns = emptyList())
         } else {
             // next time, create from previous round
-            previousRound.createNextRound(previousRound)
+            previousRound.createNextRound()
         }
         auditRounds.add(auditRound)
 
         logger.debug{"Estimate round ${roundIdx}"}
-        val previousSamples = auditRounds.previousSamples(roundIdx)
+        val previousSamples = auditRounds.previousSamplePrns(roundIdx)
         val stopwatch = Stopwatch()
 
         val mvrManager = mvrManager()
@@ -74,7 +73,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
         //    auditRound.newmvrs = newMvrs
         //    auditRound.samplePrns = sampledCards.map { it.prn }
         //    contestRound.maxSampleAllowed = sampledCards.size
-        sampleAndRemoveContests(
+        removeContestsAndSample(
             config.round.sampling,
             sortedManifest,
             auditRound,

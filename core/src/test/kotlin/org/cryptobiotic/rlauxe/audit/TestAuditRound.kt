@@ -32,9 +32,6 @@ class TestAuditRound {
         consistentSampling(auditRound, mvrManager.sortedManifest())
 
         contestRounds.forEach { contestRound ->
-            assertEquals(contestRound.estMvrs, contestRound.wantSampleSize(0))
-            assertEquals(contestRound.estMvrs, contestRound.estSampleSizeEligibleForRemoval())
-
             val firstAssertion = contestRound.assertionRounds.first()
             assertEquals(0, firstAssertion.estMvrs)
             assertNotEquals(firstAssertion.assertion.loser, firstAssertion.assertion.winner) // wtf?

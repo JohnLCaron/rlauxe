@@ -63,7 +63,6 @@ class TestAuditRoundJson {
             //    var status = TestH0Status.InProgress
             cr.estNewMvrs = 66
             cr.estMvrs = 77
-            cr.auditorWantNewMvrs = 88
             cr.done = true
             cr.included = false
             cr.status = TestH0Status.FailMaxSamplesAllowed
@@ -95,8 +94,6 @@ class TestAuditRoundJson {
             val cr = ContestRound(contest, 1)
             cr.estNewMvrs = 66
             cr.estMvrs = 77
-            // cr.estSampleSizeNoStyles = 88
-            cr.auditorWantNewMvrs = 88
             cr.done = true
             cr.included = false
             cr.status = TestH0Status.FailMaxSamplesAllowed
@@ -110,7 +107,6 @@ class TestAuditRoundJson {
             false,
             samplePrns = listOf(1,2,3, 21),
             nmvrs = 129182,
-            auditorWantNewMvrs = 2223,
             )
 
         val scratchFile = createTempFile().toFile()
@@ -157,7 +153,6 @@ class TestAuditRoundJson {
             false,
             samplePrns = lastRound.samplePrns,
             nmvrs = 33333,
-            auditorWantNewMvrs = 33334533,
         )
         val json = target.publishJson()
         val roundtrip = json.import(clcaWorkflow.contestsUA(), target.samplePrns, prevRound)
@@ -235,7 +230,6 @@ class TestAuditRoundJson {
             false,
             samplePrns = nextRound.samplePrns,
             nmvrs = 33333,
-            auditorWantNewMvrs = 33733,
         )
         val json = target.publishJson()
         val roundtrip: AuditRound = json.import(clcaWorkflow.contestsUA(), target.samplePrns, null)
@@ -284,7 +278,6 @@ class TestAuditRoundJson {
             false,
             samplePrns = nextRound.samplePrns,
             nmvrs = testCvrs.size,
-            auditorWantNewMvrs = 333,
         )
         val json = target.publishJson()
         val roundtrip: AuditRound = json.import(clcaWorkflow.contestsUA(), target.samplePrns, null)
@@ -321,7 +314,6 @@ fun check(s1: AuditRoundIF, s2: AuditRoundIF) {
     assertEquals(s1.samplePrns, s2.samplePrns)
     assertEquals(s1.nmvrs, s2.nmvrs)
     assertEquals(s1.newmvrs, s2.newmvrs)
-    assertEquals(s1.auditorWantNewMvrs, s2.auditorWantNewMvrs)
     assertEquals(s1.mvrsUsed, s2.mvrsUsed)
     assertEquals(s1.mvrsUnused, s2.mvrsUnused)
 
@@ -355,7 +347,6 @@ fun check(c1: ContestRound, c2: ContestRound): Boolean {
     assertEquals(c1.roundIdx, c2.roundIdx)
     assertEquals(c1.estNewMvrs, c2.estNewMvrs)
     assertEquals(c1.estMvrs, c2.estMvrs)
-    assertEquals(c1.auditorWantNewMvrs, c2.auditorWantNewMvrs)
     assertEquals(c1.done, c2.done)
     assertEquals(c1.included, c2.included)
     assertEquals(c1.status, c2.status)

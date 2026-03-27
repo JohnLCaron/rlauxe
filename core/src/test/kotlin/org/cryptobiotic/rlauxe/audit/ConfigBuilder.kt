@@ -70,7 +70,6 @@ class RoundConfigBuilder(val configBuilder: AuditConfigBuilder) {
                 minMargin=minMargin,
                 maxSamplePct=maxSamplePct,
                 contestSampleCutoff=contestSampleCutoff,
-                removeCutoffContests= removeCutoffContests?: (contestSampleCutoff != null || auditSampleCutoff != null),
                 auditSampleCutoff=auditSampleCutoff,
                 other=other
         )
@@ -116,7 +115,7 @@ class ContestSampleControlBuilder(prev: ContestSampleControl?) {
     var maxSamplePct = prev?.maxSamplePct
     var contestSampleCutoff = prev?.contestSampleCutoff
     var auditSampleCutoff = prev?.auditSampleCutoff
-    var removeCutoffContests = prev?.removeCutoffContests
+    // var removeCutoffContests = prev?.removeCutoffContests
     var other = mutableMapOf<String, String>()
 
     init {
@@ -130,7 +129,7 @@ class ContestSampleControlBuilder(prev: ContestSampleControl?) {
         maxSamplePct = maxSamplePct ?: def.maxSamplePct,
         contestSampleCutoff = contestSampleCutoff ?: def.contestSampleCutoff,
         auditSampleCutoff = auditSampleCutoff ?: def.auditSampleCutoff,
-        removeCutoffContests = removeCutoffContests ?: def.removeCutoffContests,
+        // removeCutoffContests = removeCutoffContests ?: def.removeCutoffContests,
         other = other
     )
 }

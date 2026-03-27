@@ -1,13 +1,12 @@
 package org.cryptobiotic.rlauxe.audit
 
-import org.cryptobiotic.rlauxe.betting.ClcaErrorCounts
 import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.betting.makeAprioriErrorRates
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
-import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
+import org.cryptobiotic.rlauxe.util.Quantiles
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundUp
 
@@ -17,17 +16,18 @@ interface AuditRoundIF {
 
     var auditWasDone: Boolean
     var auditIsComplete: Boolean
-    var samplePrns: List<Long> // card prns to sample for this round (complete, not just new)
+    var samplePrns: List<Long> // card prns to sample for just this round (complete, not just new)
     var nmvrs: Int      // number of mvrs in round
     var newmvrs: Int    // number of new mvrs in round
-    var auditorWantNewMvrs: Int
     var mvrsUsed: Int
     var mvrsUnused: Int
 
     fun show(): String
-    fun createNextRound(prevAuditRound: AuditRound?): AuditRound
+    fun createNextRound(): AuditRound
 }
 
+
+ // Note: mutable
 data class AuditRound(
     override val roundIdx: Int,
     override val contestRounds: List<ContestRound>,
@@ -40,7 +40,6 @@ data class AuditRound(
     override var newmvrs: Int = 0,  // new mvrs in the round
     override var mvrsUnused: Int = 0,
     override var mvrsUsed: Int = 0,
-    override var auditorWantNewMvrs: Int = -1,
 ) : AuditRoundIF {
 
     override fun toString() = show()
@@ -49,17 +48,18 @@ data class AuditRound(
         "AuditState(round = $roundIdx, nmvrs=$nmvrs, auditWasDone=$auditWasDone, auditIsComplete=$auditIsComplete)" +
                 " ncontests=${contestRounds.size} ncontestsDone=${contestRounds.count { it.done }}"
 
-    override fun createNextRound(prevAuditRound: AuditRound?): AuditRound {
+    override fun createNextRound(): AuditRound {
         val nextContests = contestRounds.filter { !it.status.complete }.map { contestRound ->
-            val prevContestRound = prevAuditRound?.contestRounds?.find { it.id == contestRound.id }
+            val prevContestRound = this.contestRounds.find { it.id == contestRound.id }
             contestRound.createNextRound(prevContestRound)
         }
         return AuditRound(roundIdx + 1, nextContests, samplePrns = emptyList())
     }
 }
 
-// called from rlauxe-viewer
-fun List<AuditRoundIF>.previousSamples(currentRoundIdx: Int): Set<Long> {
+// called from AuditWorkflow.startNewRound() and rlauxe-viewer
+// All the Prns that have been sampled so far
+fun List<AuditRoundIF>.previousSamplePrns(currentRoundIdx: Int): Set<Long> {
     val result = mutableSetOf<Long>()
     this.filter { it.roundIdx < currentRoundIdx }.forEach { auditRound ->
         result.addAll(auditRound.samplePrns)
@@ -67,6 +67,7 @@ fun List<AuditRoundIF>.previousSamples(currentRoundIdx: Int): Set<Long> {
     return result.toSet()
 }
 
+// Note: mutable
 data class ContestRound(val contestUA: ContestWithAssertions, val assertionRounds: List<AssertionRound>, val roundIdx: Int) {
     val id = contestUA.id
 
@@ -76,8 +77,6 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     var maxSampleAllowed: Int? = null // maximum index in this round's sample that you are allowed to use; only estMvrs are guarenteed to be there.
     var estMvrs = 0 // Estimate of the mvrs required to confirm the contest
     var estNewMvrs = 0 // Estimate of the new mvrs required to confirm the contest
-
-    var auditorWantNewMvrs: Int = -1 // Auditor has set the new sample size for this audit round. rlauxe-viewer
 
     var done = false
     var included = true
@@ -92,16 +91,6 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
 
     constructor(contestUA: ContestWithAssertions, roundIdx: Int) :
             this(contestUA, contestUA.assertions().map{ AssertionRound(it, roundIdx, null) }, roundIdx)
-
-    fun wantSampleSize(prevCount: Int): Int {
-        return if (auditorWantNewMvrs > 0) (auditorWantNewMvrs + prevCount)
-                else estMvrs
-    }
-
-    fun estSampleSizeEligibleForRemoval(): Int {
-        return if (!included || auditorWantNewMvrs >= 0 ) 0 // auditor excluded or set explicitly, not eligible
-               else estMvrs
-    }
 
     fun createNextRound(prevContestRound: ContestRound?) : ContestRound {
         val nextAssertions =  assertionRounds.filter { !it.status.complete }.map{ assertionRound ->
@@ -168,7 +157,6 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         if (roundIdx != other.roundIdx) return false
         if (estNewMvrs != other.estNewMvrs) return false
         if (estMvrs != other.estMvrs) return false
-        if (auditorWantNewMvrs != other.auditorWantNewMvrs) return false
         if (done != other.done) return false
         if (included != other.included) return false
         if (contestUA != other.contestUA) return false
@@ -182,7 +170,6 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
         var result = roundIdx
         result = 31 * result + estNewMvrs
         result = 31 * result + estMvrs
-        result = 31 * result + auditorWantNewMvrs
         result = 31 * result + done.hashCode()
         result = 31 * result + included.hashCode()
         result = 31 * result + contestUA.hashCode()
@@ -196,12 +183,13 @@ data class ContestRound(val contestUA: ContestWithAssertions, val assertionRound
     }
 }
 
+// Note: mutable
 data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevAssertionRound: AssertionRound?) {
     val noerror = if (assertion is ClcaAssertion) assertion.cassorter.noerror() else 0.0
     val upper = assertion.upper
     val prevAuditResult = prevAssertionRound?.auditResult
 
-    // these values are set during estimateSampleSizes()
+    // these values are set by EstimateAudit
     var estMvrs = 0   // estimated sample size for current round
     var estNewMvrs = 0   // estimated new sample size for current round
     var estimationResult: EstimationRoundResult? = null
@@ -209,23 +197,23 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     // these values are set during runAudit()
     var auditResult: AuditRoundResult? = null
     var status = TestH0Status.InProgress
-    var roundProved = 0           // round when set to proved or disproved
+    var roundProved = 0           // round when proved or disproved
 
-    // we get the results from the audit, not the estimation
+    /* we get the results from the audit, not the estimation
     fun previousErrorCounts(): ClcaErrorCounts? {
         require(assertion is ClcaAssertion)
         if (roundIdx == 1 || prevAuditResult == null)
             return null
 
         return ClcaErrorCounts(prevAuditResult.clcaErrorTracker.errorCounts, prevAuditResult.samplesUsed, noerror, upper)
-    }
+    } */
 
     fun previousErrorTracker(): ClcaErrorTracker {
         require(assertion is ClcaAssertion)
-        return prevAuditResult?.clcaErrorTracker ?: ClcaErrorTracker(assertion.noerror, assertion.assorter.upperBound())
+        return prevAuditResult?.clcaErrorTracker?.copyAll() ?: ClcaErrorTracker(assertion.noerror, assertion.assorter.upperBound())
     }
 
-    // return (calculated new mvrs needed, same algorithm as GeneralAdaptiveBetting
+    // same algorithm as GeneralAdaptiveBetting
     fun calcNewMvrsNeeded(contest: ContestWithAssertions, config : Config): Int {
         require(assertion is ClcaAssertion)
         val cassorter = assertion.cassorter
@@ -259,6 +247,7 @@ data class AssertionRound(val assertion: Assertion, val roundIdx: Int, var prevA
     }
 }
 
+// Note: immutable
 data class EstimationRoundResult(
     val roundIdx: Int,
     val strategy: String,
@@ -281,14 +270,15 @@ data class EstimationRoundResult(
         }
     }
 
+    // used by viewer
     fun deciles(): List<Int> {
         val decilePcts = IntArray(10) { 10 * (it+1) }
-        val wtf: MutableMap<Int?, Double?> = percentiles().indexes(*decilePcts).compute(*estimatedDistribution.toIntArray())
+        val wtf: MutableMap<Int?, Double?> = Quantiles.percentiles().indexes(*decilePcts).compute(*estimatedDistribution.toIntArray())
         return wtf.values.map { roundUp(it!!) }
     }
-
 }
 
+// Note: immutable
 data class AuditRoundResult(
     val roundIdx: Int,
     val nmvrs: Int,                 // total number of mvrs available for this contest for this round
@@ -296,7 +286,7 @@ data class AuditRoundResult(
     val pmin: Double,               // minimum pvalue reached
     val samplesUsed: Int,           // sample count when testH0 terminates
     val status: TestH0Status,       // testH0 status
-    val clcaErrorTracker: ClcaErrorTracker, // allows to start estimation from where we left off
+    val clcaErrorTracker: ClcaErrorTracker?, // CLCA only; allows to start estimation from where we left off
     val params: Map<String, Double> = emptyMap(),
 ) {
 
@@ -306,8 +296,10 @@ data class AuditRoundResult(
     }
 
     fun measuredCounts() = buildString {
-        if (clcaErrorTracker.errorCounts.isEmpty()) append("empty") else {
-            append(clcaErrorTracker.errorCounts.toString())
+        when {
+            clcaErrorTracker == null -> append("N/A")
+            clcaErrorTracker.errorCounts.isEmpty() -> append("empty")
+            else -> append(clcaErrorTracker.errorCounts.toString())
         }
     }
 

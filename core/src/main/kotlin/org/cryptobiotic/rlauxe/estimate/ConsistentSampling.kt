@@ -13,11 +13,11 @@ private val logger = KotlinLogging.logger("ConsistentSampling")
 
 // called from auditWorkflow.startNewRound
 // also called by rlauxe-viewer
-fun sampleAndRemoveContests(
+fun removeContestsAndSample(
     sampling: ContestSampleControl,
     sortedManifest: CardManifest,
     auditRound: AuditRoundIF,
-    previousSamples: Set<Long>,
+    previousSamples: Set<Long>, // all previous prns ever sampled
 ) {
     val stopwatch = Stopwatch()
 
@@ -78,7 +78,7 @@ private fun checkSampleLimits(
     // limit contest samples to maxSamplePct
     if (sampleControl.maxSamplePct > 0.0) {
         contestsNotDone.forEach { contestRound ->
-            val pct = contestRound.estMvrs / contestRound.contestUA.Npop.toDouble() // TODO this is all Mvrs ? Use Npop ??
+            val pct = contestRound.estMvrs / contestRound.contestUA.Npop.toDouble()
             if (pct > sampleControl.maxSamplePct) {
                 contestRound.status = TestH0Status.FailMaxSamplesAllowed
                 contestRound.included = false
@@ -89,29 +89,28 @@ private fun checkSampleLimits(
         }
     }
 
-    // limit each contest sample to be less than contestSampleCutoff TODO this is new Mvrs ??
-    if (sampleControl.removeCutoffContests && sampleControl.contestSampleCutoff != null && sampleControl.contestSampleCutoff > 0) {
+    // limit each contest sample to be less than contestSampleCutoff
+    if (sampleControl.contestSampleCutoff != null && sampleControl.contestSampleCutoff > 0) {
         contestsNotDone.forEach { contestRound ->
-            val simMvrsNeeded = contestRound.assertionRounds.maxOfOrNull { it.estimationResult?.simMvrsNeeded ?: 0 }
-            if (simMvrsNeeded != null && simMvrsNeeded > sampleControl.contestSampleCutoff) {
+            if (contestRound.estMvrs > sampleControl.contestSampleCutoff) {
                 contestRound.status = TestH0Status.FailMaxSamplesAllowed
                 contestRound.included = false
                 contestRound.done = true
-                logger.warn{" *** too many samples for contest ${contestRound.id}: ${simMvrsNeeded} > ${sampleControl.contestSampleCutoff}, "}
+                logger.warn{" *** too many samples for contest ${contestRound.id}: ${contestRound.estMvrs} > ${sampleControl.contestSampleCutoff}, "}
                 removeContests.add(contestRound)
             }
         }
     }
 
-    // if above checks remove contests, rerun consistentSampling before checking for this total contestSampleCutoff
+    // if above checks remove contests, rerun consistentSampling before checking for auditSampleCutoff
     if (removeContests.isEmpty()) {
         // check if overall auditSampleCutoff is exceeded
-        if (sampleControl.removeCutoffContests && sampleControl.auditSampleCutoff != null && auditRound.samplePrns.size > sampleControl.auditSampleCutoff) {
+        if (sampleControl.auditSampleCutoff != null && auditRound.samplePrns.size > sampleControl.auditSampleCutoff) {
             // find the contest with the largest estimation size eligible for removal, remove it
-            val maxEstimation = contestsNotDone.maxOf { it.estSampleSizeEligibleForRemoval() }
-            val maxContest = contestsNotDone.first { it.estSampleSizeEligibleForRemoval() == maxEstimation }
+            val maxEstimation = contestsNotDone.maxOf { it.estMvrs }
+            val maxContest = contestsNotDone.first { it.estMvrs == maxEstimation }
 
-            /// remove maxContest from the audit
+            /// remove contest with largest estimation from the audit
             maxContest.status = TestH0Status.FailMaxSamplesAllowed
             maxContest.included = false
             maxContest.done = true
@@ -135,15 +134,14 @@ private fun checkSampleLimits(
 fun consistentSampling(
     auditRound: AuditRoundIF,
     sortedManifest: CardManifest,
-    previousSamples: Set<Long> = emptySet(),
+    previousSamples: Set<Long> = emptySet(), // all previous prns ever sampled
 ): List<AuditableCard>  // debugging
 {
     val contestsIncluded = auditRound.contestRounds.filter { !it.done && it.included}
     if (contestsIncluded.isEmpty()) return emptyList()
 
-    // calculate how many samples are wanted for each contest.
-    // TODO was val wantSampleSizeMap = wantSampleSize(contestsNotDone, previousSamples, mvrManager.sortedCards().iterator())
-    val wantSampleSize = wantSampleSizeSimple(contestsIncluded)
+    // how many samples are wanted for each contest.
+    val wantSampleSize = contestsIncluded.associate { it.id to it.estMvrs }
     require(wantSampleSize.values.all { it >= 0 }) { "wantSampleSize must be >= 0" }
 
     val skippedContests = mutableSetOf<Int>()
@@ -157,7 +155,6 @@ fun consistentSampling(
     val sortedCardIter = sortedManifest.cards.iterator()
     while (
         sortedCardIter.hasNext() &&
-        // ((auditRound.auditorWantNewMvrs < 0) || (newMvrs < auditRound.auditorWantNewMvrs)) && // TODO REDO or delete?
         contestsIncluded.any { (haveSampleSize[it.id] ?: 0) < (wantSampleSize[it.id] ?: 0) }
     ) {
         // get the next card in sorted order
@@ -171,7 +168,7 @@ fun consistentSampling(
                 if ((haveSampleSize[contest.id] ?: 0) < (wantSampleSize[contest.id] ?: 0)) {
                     include = true
                 }
-            } // has contest
+            }
         }
 
         if (include) {
@@ -219,46 +216,4 @@ fun consistentSampling(
     auditRound.samplePrns = sampledCards.map { it.prn }
     return sampledCards
 }
-
-// try running without complexity of auditorWantNewMvrs
-private fun wantSampleSizeSimple(contestsNotDone: List<ContestRound>): Map<Int, Int> {
-     return contestsNotDone.associate { it.id to it.estMvrs }
-}
-
-/*
-//// TODO  this is a lot of trouble to calculate prevContestCounts; we only need it if contest.auditorWantNewMvrs has been set
-// for each contest, return map contestId -> wantSampleSize. used in ConsistentSampling
-private fun wantSampleSize(contestsNotDone: List<ContestRound>, previousSamples: Set<Long>, sortedCards : CloseableIterator<AuditableCard>, debug: Boolean = false): Map<Int, Int> {
-    //// count how many samples each contest already has
-    val prevContestCounts = mutableMapOf<ContestRound, Int>()
-    contestsNotDone.forEach { prevContestCounts[it] = 0 }
-
-    // Note this iterates through sortedCards only until all previousSamples have been found and counted
-    sortedCards.use { cardIter ->
-        previousSamples.forEach { prevNumber ->
-            while (cardIter.hasNext()) {
-                val card = cardIter.next() // previousSamples must be in same order as sortedBorc
-                if (card.prn == prevNumber) {
-                    contestsNotDone.forEach { contest ->
-                        if (card.hasContest(contest.id)) {
-                            prevContestCounts[contest] = prevContestCounts[contest]?.plus(1) ?: 1
-                        }
-                    }
-                    break
-                }
-            }
-        }
-    }
-    if (debug) {
-        val prevContestCountsById = prevContestCounts.entries.associate { it.key.id to it.value }
-        logger.debug{"**wantSampleSize prevContestCountsById = $prevContestCountsById"}
-    }
-    // we need prevContestCounts in order to calculate wantSampleSize if contest.auditorWantNewMvrs has been set
-    val wantSampleSizeMap = prevContestCounts.entries.associate { it.key.id to it.key.wantSampleSize(it.value) }
-    if (debug) logger.debug{"wantSampleSize = $wantSampleSizeMap"}
-
-    return wantSampleSizeMap
-} */
-
-
 

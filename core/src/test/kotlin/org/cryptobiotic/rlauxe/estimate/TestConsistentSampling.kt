@@ -1,15 +1,12 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.AuditRound
-import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
 import org.cryptobiotic.rlauxe.workflow.*
@@ -156,7 +153,7 @@ class TestConsistentSampling {
             //    contestRound.status = TestH0Status.FailMaxSamplesAllowed
             //    contestRound.included = false
             //    contestRound.done = true
-            sampleAndRemoveContests(
+            removeContestsAndSample(
                 sampleControl,
                 mvrManager.sortedManifest(),
                 auditRound,

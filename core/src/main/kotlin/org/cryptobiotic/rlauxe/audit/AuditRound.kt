@@ -287,7 +287,7 @@ data class AuditRoundResult(
     val samplesUsed: Int,           // sample count when testH0 terminates
     val status: TestH0Status,       // testH0 status
     val clcaErrorTracker: ClcaErrorTracker?, // CLCA only; allows to start estimation from where we left off
-    val params: Map<String, Double> = emptyMap(),
+    val params: Map<String, Double> = emptyMap(),  // TODO is this used ?
 ) {
 
     override fun toString() = buildString {

@@ -158,7 +158,6 @@ fun writeSortedCardsExternal(topdir: String, outputFile: String, unsortedCards: 
         cardIter = unsortedCards,
         toAuditableCard = { from: AuditableCard, index: Int, prn: Long -> from.copy(index = index, prn = prn) }
     )
-    // if (zip) createZipFile(outputFile, delete = true)  // TODO delete
 }
 
 // uses private/sortedMvrsFile.cvs

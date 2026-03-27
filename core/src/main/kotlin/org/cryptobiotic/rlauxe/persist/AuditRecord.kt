@@ -253,7 +253,7 @@ class AuditRecord(
                         errs.addNested(auditRound.unwrapError())
                     }
                 } else {
-                    // TODO if read in AuditEst, replace with AuditState when audit is done....
+                    // TODO if read in AuditEst, replace with AuditState when audit is done ??
                     val auditEstFile = publisher.auditEstFile(roundIdx)
                     if (Files.exists(Path.of(auditEstFile))) {
                         val auditEstRound = readAuditRoundJsonFile(

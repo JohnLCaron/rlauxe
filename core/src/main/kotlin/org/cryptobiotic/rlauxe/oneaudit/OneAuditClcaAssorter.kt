@@ -151,7 +151,7 @@ class OneAuditClcaAssorter(
 
     // expected sample size if there are no clca errors
     override fun sampleSizeNoErrors(bet: Double, alpha: Double): Int {
-        val p0 = 1.0 - oaAssortRates.sumRates()
+        val p0 = 1.0 - oaAssortRates.sumRates
         val noerrorTerm = ln(1.0 + bet * (noerror - 0.5)) * p0
 
         var sumOneAuditTerm = 0.0

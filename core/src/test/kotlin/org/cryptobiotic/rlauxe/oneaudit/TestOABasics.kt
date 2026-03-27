@@ -96,25 +96,25 @@ class TestOABasics {
         // it doesnt matter what the cvr is, it just matters that its in the pool, so cvr_assort always = poolAverage
         // bassort(mvr: Cvr, cvr: Cvr)
         println("Pool")
-        println(" bassort(winnerVote, anyVote)=${oaAssorter.bassort(winnerPool, winnerPool)} ")
-        println(" bassort(otherVote, anyVote)=${oaAssorter.bassort(otherPool, winnerPool)} ")
-        println(" bassort(loserVote, anyVote)=${oaAssorter.bassort(loserPool, winnerPool)} ")
-        println(" bassort(underVote, anyVote)=${oaAssorter.bassort(underPool, winnerPool)} ")
-        println(" bassort(missingContest, anyVote)=${oaAssorter.bassort(missingContest, winnerPool)} ")
+        println(" bassort(winnerVote, anyVote)=${oaAssorter.bassort(winnerPool, winnerPool, true)} ")
+        println(" bassort(otherVote, anyVote)=${oaAssorter.bassort(otherPool, winnerPool, true)} ")
+        println(" bassort(loserVote, anyVote)=${oaAssorter.bassort(loserPool, winnerPool, true)} ")
+        println(" bassort(underVote, anyVote)=${oaAssorter.bassort(underPool, winnerPool, true)} ")
+        println(" bassort(missingContest, anyVote)=${oaAssorter.bassort(missingContest, winnerPool, true)} ")
         println("bassort = ([2, 1.5, 1] - poolAvg) / (2 - assorterMargin)} ")
 
         println()
-        assertEquals(otherVote, oaAssorter.bassort(otherPool, winnerPool), doublePrecision)
-        assertEquals(loserVote, oaAssorter.bassort(loserPool, winnerPool), doublePrecision)
-        assertEquals(winnerVote, oaAssorter.bassort(winnerPool, winnerPool), doublePrecision)
+        assertEquals(otherVote, oaAssorter.bassort(otherPool, winnerPool, true), doublePrecision)
+        assertEquals(loserVote, oaAssorter.bassort(loserPool, winnerPool, true), doublePrecision)
+        assertEquals(winnerVote, oaAssorter.bassort(winnerPool, winnerPool, true), doublePrecision)
 
-        assertEquals(otherVote, oaAssorter.bassort(otherPool, loserPool), doublePrecision)
-        assertEquals(loserVote, oaAssorter.bassort(loserPool, loserPool), doublePrecision)
-        assertEquals(winnerVote, oaAssorter.bassort(winnerPool, loserPool), doublePrecision)
+        assertEquals(otherVote, oaAssorter.bassort(otherPool, loserPool, true), doublePrecision)
+        assertEquals(loserVote, oaAssorter.bassort(loserPool, loserPool, true), doublePrecision)
+        assertEquals(winnerVote, oaAssorter.bassort(winnerPool, loserPool, true), doublePrecision)
 
-        assertEquals(otherVote, oaAssorter.bassort(otherPool, otherPool), doublePrecision)
-        assertEquals(loserVote, oaAssorter.bassort(loserPool, otherPool), doublePrecision)
-        assertEquals(winnerVote, oaAssorter.bassort(winnerPool, otherPool), doublePrecision)
+        assertEquals(otherVote, oaAssorter.bassort(otherPool, otherPool, true), doublePrecision)
+        assertEquals(loserVote, oaAssorter.bassort(loserPool, otherPool, true), doublePrecision)
+        assertEquals(winnerVote, oaAssorter.bassort(winnerPool, otherPool, true), doublePrecision)
 
         //////////
 
@@ -123,19 +123,19 @@ class TestOABasics {
         val otherCvr = Cvr("other", mapOf(contestId to intArrayOf(2)))
 
         println("CVR pool")
-        println(" bassort(winnerCvr, winnerCvr)=${oaAssorter.bassort(winnerCvr, winnerCvr)} ")  // noerror
-        println(" bassort(otherCvr, winnerCvr)=${oaAssorter.bassort(otherCvr, winnerCvr)} ") // noerror/2
-        println(" bassort(loserCvr, winnerCvr)=${oaAssorter.bassort(loserCvr, winnerCvr)} ") // 0
+        println(" bassort(winnerCvr, winnerCvr)=${oaAssorter.bassort(winnerCvr, winnerCvr, true)} ")  // noerror
+        println(" bassort(otherCvr, winnerCvr)=${oaAssorter.bassort(otherCvr, winnerCvr, true)} ") // noerror/2
+        println(" bassort(loserCvr, winnerCvr)=${oaAssorter.bassort(loserCvr, winnerCvr, true)} ") // 0
         println()
-        println(" bassort(winnerCvr, otherCvr)=${oaAssorter.bassort(winnerCvr, otherCvr)} ") // 1.5 * noerror
-        println(" bassort(otherCvr, otherCvr)=${oaAssorter.bassort(otherCvr, otherCvr)} ") // noerror
-        println(" bassort(loserCvr, otherCvr)=${oaAssorter.bassort(loserCvr, otherCvr)} ") // noerror/2
+        println(" bassort(winnerCvr, otherCvr)=${oaAssorter.bassort(winnerCvr, otherCvr, true)} ") // 1.5 * noerror
+        println(" bassort(otherCvr, otherCvr)=${oaAssorter.bassort(otherCvr, otherCvr, true)} ") // noerror
+        println(" bassort(loserCvr, otherCvr)=${oaAssorter.bassort(loserCvr, otherCvr, true)} ") // noerror/2
         println()
-        println(" bassort(winnerCvr, loserCvr)=${oaAssorter.bassort(winnerCvr, loserCvr)} ") // 2 * noerror
-        println(" bassort(otherCvr, loserCvr)=${oaAssorter.bassort(otherCvr, loserCvr)} ") // 1.5 * noerror
-        println(" bassort(loserCvr, loserCvr)=${oaAssorter.bassort(loserCvr, loserCvr)} ") // noerror
+        println(" bassort(winnerCvr, loserCvr)=${oaAssorter.bassort(winnerCvr, loserCvr, true)} ") // 2 * noerror
+        println(" bassort(otherCvr, loserCvr)=${oaAssorter.bassort(otherCvr, loserCvr, true)} ") // 1.5 * noerror
+        println(" bassort(loserCvr, loserCvr)=${oaAssorter.bassort(loserCvr, loserCvr, true)} ") // noerror
         println()
-        println("bassort = [0, .5, 1, 1.5, 2] * noerror=${oaAssorter.bassort(loserCvr, loserCvr)} ")
+        println("bassort = [0, .5, 1, 1.5, 2] * noerror=${oaAssorter.bassort(loserCvr, loserCvr, true)} ")
     }
 
     @Test

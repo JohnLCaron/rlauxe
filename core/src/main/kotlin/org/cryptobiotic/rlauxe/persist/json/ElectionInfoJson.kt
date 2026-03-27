@@ -20,13 +20,19 @@ import java.nio.file.StandardOpenOption
 
 /*
 data class ElectionInfo(
+    val electionName: String,
     val auditType: AuditType,
-    val ncards: Int,
-    val ncontests: Int,
-    val persistedWorkflowMode: PersistedWorkflowMode =  PersistedWorkflowMode.testSimulated,
-    val poolsHaveOneCardStyle: Boolean,
+    val totalCardCount: Int,    // total cards in the election
+    val contestCount: Int,
+
+    val cvrsContainUndervotes: Boolean = true,
+    val poolsHaveOneCardStyle: Boolean? = null,
     val pollingMode: PollingMode? = null,
-    val other: Map<String, Any> = emptyMap(), // TODO
+
+    val mvrSource: MvrSource =
+        if (auditType.isClca()) MvrSource.testClcaSimulated else MvrSource.testPrivateMvrs,
+
+    val other: Map<String, Any> = emptyMap(),    // soft parameters to ease migration
 ) */
 @Serializable
 data class ElectionInfoJson(

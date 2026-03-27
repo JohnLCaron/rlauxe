@@ -281,7 +281,7 @@ class ContestClcaTrial(val run: Int,
         countUsed++
 
         val assortValue = if (mvr != null) {
-            cassorter.bassort(mvr, card, hasStyle = false) // hasStyle??
+            cassorter.bassort(mvr, card, hasStyle=card.hasStyle())
         } else {
             if (card.isPhantom()) phantomAssortValue * cassorter.noerror else cassorter.noerror
         }

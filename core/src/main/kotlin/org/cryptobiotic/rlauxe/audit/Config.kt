@@ -225,10 +225,9 @@ data class ContestSampleControl(
     val minMargin: Double = 0.0, // do not audit contests less than this margin TODO really it should be noerror for clca?
 
     //// consistentSampling: contestRound.status, depends on having estimation
-    val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / contestNc) greater than this // TODO should be Npop
+    val maxSamplePct: Double = 0.0, // do not audit contests with (estimated nmvrs / Npop) greater than this
     val contestSampleCutoff: Int? = 1000, // max number of cvrs for any one contest, set to null to use all
     val auditSampleCutoff: Int? = 10000, // max number of cvrs in the audit, set to null to use all
-    // val removeCutoffContests: Boolean = (contestSampleCutoff != null || auditSampleCutoff != null), // TODO keep this ??
 
     // soft parameters
     val other: Map<String, String> = emptyMap(),    // soft parameters to ease migration

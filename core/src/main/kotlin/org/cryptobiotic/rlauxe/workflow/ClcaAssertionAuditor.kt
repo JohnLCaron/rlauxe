@@ -71,7 +71,7 @@ class RunClcaContestTask(
     val onlyTask: OnlyTask? = null,
 ): ConcurrentTask<Boolean> {
 
-    override fun name() = "RunContestTask for ${contestRound.contestUA.name} round $roundIdx nassertions ${contestRound.assertionRounds.size}"
+    override fun name() = "RunClcaContestTask for ${contestRound.contestUA.name} round $roundIdx nassertions ${contestRound.assertionRounds.size}"
 
     override fun run(): Boolean {
         val contestAssertionStatus = mutableListOf<TestH0Status>()

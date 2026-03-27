@@ -42,11 +42,16 @@ class CardBuilder(
         //                                    // for IRV, ranked first to last; missing for pooled data or polling audits
         //    val poolId: Int?, // for OneAudit
         //    val cardStyle: String? = null,
+        val batchName = when {
+            cardStyle != null -> cardStyle
+            !votes.isEmpty() -> AuditableCard.fromCvr
+            else -> "unknown"
+        }
         return AuditableCard(location, index, prn, phantom,
             // votes= if (votes.isEmpty()) null else votes, // TODO why was this null ??
             votes= votes,
             poolId=poolId ?: this.poolId,
-            batchName= if (!votes.isEmpty()) "cvr" else cardStyle ?: "unknown",
+            batchName= batchName,
             batch=null)
     }
 
@@ -56,7 +61,7 @@ class CardBuilder(
             card.index,
             card.prn,
             card.phantom,
-            card.contests(), // TODO doesnt deal with "all"
+            card.contests(),
             card.votes,
             card.poolId,
             card.batchName

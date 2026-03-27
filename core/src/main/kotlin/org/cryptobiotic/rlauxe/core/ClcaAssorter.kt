@@ -136,7 +136,7 @@ open class ClcaAssorter(
     // [2, (fol+2)/(fol+1), (2*fol+1)/(fol+1),  1, fol/(fol+1), 1/(fol+1), 0] * noerror
 
     // open fun bassort(mvr: CardIF, cvr:CardIF, hasCompleteCvrs: Boolean = this.hasCompleteCvrs): Double {
-    open fun bassort(mvr: CvrIF, cvr:CvrIF, hasStyle:Boolean=true): Double { // TODO remove default value
+    open fun bassort(mvr: CvrIF, cvr:CvrIF, hasStyle:Boolean): Double {
         val overstatement = overstatementError(mvr, cvr, hasStyle) // ωi eq (1)
         val tau = (1.0 - overstatement / this.assorter.upperBound()) // τi eq (6)
         return tau * noerror   // Bi eq (7)
@@ -207,7 +207,7 @@ open class ClcaAssorter(
         if (hasStyle and !cvr.hasContest(info.id)) {
             //val trace = Throwable().stackTraceToString()
             //logger.error { "hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})\n$trace" }
-            // TODO if we were using hasStyle in assorter.assort(), it would return 0.0 for cvr_assort, see Issues#4
+            // TODO if we were using hasStyle in assorter.assort(), it would return 0.0 for cvr_assort, see Issue#552
             // throw RuntimeException("hasCompleteCvrs==True but cvr=${cvr} does not contain contest ${info.name} (${info.id})")
             return Double.NaN
         }

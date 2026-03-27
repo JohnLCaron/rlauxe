@@ -11,9 +11,7 @@ import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditAssortValueRates
 import org.cryptobiotic.rlauxe.util.dfn
 import kotlin.math.ln
-
-private val logger = KotlinLogging.logger("GeneralAdaptiveBetting")
-private val debug = false
+import kotlin.math.max
 
 // new design
 //  first round: use apriori and nphantoms for initial rate estimate
@@ -44,19 +42,20 @@ data class GeneralAdaptiveBetting(
         if (trackerErrors == null || trackerErrors.errorCounts.isEmpty()) return aprioriRates
 
         val errorRates = trackerErrors.errorRates()
-        val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.totalInPools) / Npop.toDouble()
+        val scaled = if (oaAssortRates == null) 1.0 else (Npop - oaAssortRates.ncardsInPools) / Npop.toDouble()
 
         val estRates = taus.namesNoErrors().map { name ->
             val tauValue = taus.valueOf(name)!!
             val bassort = tauValue * noerror
             val aprioriRate = aprioriRates[bassort] ?: 0.0
-            val rate = scaled * shrinkTruncEstimateRate2(
+            val rate = scaled * shrinkTruncEstimateRate(
                 aprioriRate = aprioriRate,
                 measuredRate = errorRates[bassort] ?: 0.0,
                 sampleNum = trackerErrors.totalSamples,
             )
             Pair(bassort, rate)
         }.toMap()
+
         return estRates
     }
 
@@ -67,13 +66,13 @@ data class GeneralAdaptiveBetting(
     // Then the shrink-trunc estimate is:
     //   p_̃ki := (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ epsk  ; COBRA eq (4)
 
-    fun shrinkTruncEstimateRate2(
+    private fun shrinkTruncEstimateRate(
         aprioriRate: Double,
         measuredRate: Double,
         sampleNum: Int,
     ): Double {
         if (sampleNum == 0) return aprioriRate
-        val d1 = if (d<1) 1 else d
+        val d1 = max(1, d)
         val est = (d1 * aprioriRate + sampleNum * measuredRate) / (d1 + sampleNum - 1)
         return est
     }
@@ -82,23 +81,27 @@ data class GeneralAdaptiveBetting(
         val errorTracker = prevSamples as ErrorTracker
         val trackerErrors = errorTracker.measuredClcaErrorCounts()
 
-        val estRates = estimatedErrorRates(trackerErrors)
+        // calling routine should check if mui < 0 or > assorter.upperBound() before calling bet()
         val mui = populationMeanIfH0(Npop, withoutReplacement=true, prevSamples)
-        if (mui < 0.0) {
-            populationMeanIfH0(Npop, withoutReplacement=true, prevSamples)
-        }
         val maxBet = maxLoss / mui
-        if (maxBet > 2.0) {
-            populationMeanIfH0(Npop, withoutReplacement=true, prevSamples)
-        }
-        if (estRates.isEmpty()) return maxBet // TODO better
 
-        val kelly = GeneralOptimalLambda(errorTracker.noerror(), estRates, oaAssortRates?.rates, mui=mui, maxBet=maxBet, debug = debug)
+        val estRates = estimatedErrorRates(trackerErrors)
+
+        // TODO this is supposed to detect when optimization will always return maxBet; probably can do better
+        val nonzeroRates = estRates.filter { it.value > 0 }
+        if (nonzeroRates.isEmpty() && oaAssortRates == null) return maxBet
+
+        val kelly = GeneralOptimalLambda(errorTracker.noerror(), nonzeroRates, oaAssortRates, mui=mui, maxBet=maxBet, debug = debug)
         val bet = kelly.solve()
         if (show && bet > 2.0) {
             println("bet $bet > 2; maxBet = $maxBet mui=$mui, nsamplesLeft=${Npop - prevSamples.numberOfSamples()}")
         }
         return bet
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger("GeneralAdaptiveBetting")
+        private val debug = false
     }
 }
 
@@ -122,24 +125,20 @@ fun makeAprioriErrorRates(apriori: ClcaErrorRates, phantomRate: Double): Map<Dou
     return errorsWithPhantoms
 }
 
-class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, Double>, val oaErrorRates: Map<Double, Double>?,
+class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, Double>, val oaAssortRates: OneAuditAssortValueRates?,
                            val mui: Double, val maxBet: Double, val debug: Boolean=false) {
     var p0: Double
 
     init {
         require (mui > 0.0) {
-            "mui=$mui"
+            "mui=$mui must be > 0"
         }
         require (maxBet > 0.0)
 
-        val oasum = if (oaErrorRates == null) 0.0 else oaErrorRates.map{ it.value }.sum() // TODO these could be calculated once
         val clcasum = clcaErrorRates.map{ it.value }.sum()
+        val oasum = oaAssortRates?.sumRates ?: 0.0
         p0 = 1.0 - clcasum - oasum    // calculate against other values to get it exact
-        if (p0 < 0.0) {
-            // logger.warn{"p0 less than 0 = $p0"}
-            p0 = 0.0
-        }
-        require (p0 >= 0.0)
+        require (p0 >= 0.0) { "p0=$p0 less than 0" }
         if (debug) {
             println("GeneralOptimalLambda init: mui=$mui ")
             expectedValueLogt(maxBet, true)
@@ -182,10 +181,8 @@ class GeneralOptimalLambda(val noerror: Double, val clcaErrorRates: Map<Double, 
         }
 
         var sumOneAuditTerm = 0.0
-        if (oaErrorRates != null) {
-            oaErrorRates.forEach { (assortValue: Double, rate: Double) ->
-                sumOneAuditTerm += ln(1.0 + lam * (assortValue - mui)) * rate
-            }
+        oaAssortRates?.rates?.forEach { (assortValue: Double, rate: Double) ->
+            sumOneAuditTerm += ln(1.0 + lam * (assortValue - mui)) * rate
         }
         val total = noerrorTerm + sumClcaTerm + sumOneAuditTerm
 

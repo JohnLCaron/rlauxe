@@ -16,10 +16,10 @@ interface BatchIF {
     fun id(): Int
     fun possibleContests(): IntArray // the set of contests that might be on any card in the population
     fun hasSingleCardStyle(): Boolean // aka hasStyle: if all cards have exactly the contests in possibleContests()
-    fun hasContest(contestId: Int): Boolean
+    fun hasContest(contestId: Int): Boolean // "is in possibleContests()"
     // if you have these, then you're a Pool
-    // fun ncards(): Int
-    // fun votesAndUndervotes(contestId: Int): Vunder // , voteForN: Int): Vunder
+    //   fun ncards(): Int
+    //   fun votesAndUndervotes(contestId: Int): Vunder
 }
 
 data class Batch(

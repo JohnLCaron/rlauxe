@@ -40,7 +40,8 @@ class CreateSfElection(
     val auditType: AuditType,
     val poolsHaveOneCardStyle: Boolean,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
-    ): CreateElectionIF {
+): CreateElectionIF {
+
     val cardPoolMapByName: Map<String, OneAuditPoolFromCvrs>
     val cardPoolBuilders: List<OneAuditPoolFromCvrs>
     val cardPools: List<CardPool>

@@ -169,7 +169,7 @@ class TestSimulateOneAuditRaire {
 
             assertEquals(1, pools.size)
             val pool = pools.first()
-            assertEquals(pool.ncards(), target.totalInPools)
+            assertEquals(pool.ncards(), target.ncardsInPools)
 
             val poolAvg = oaCassorter.poolAverages.assortAverage[pool.poolId]
             assertNotNull(poolAvg)

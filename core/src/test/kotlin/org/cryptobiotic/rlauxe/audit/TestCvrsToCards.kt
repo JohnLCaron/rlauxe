@@ -35,12 +35,12 @@ class TestCvrsToCards {
         // with no population, only the cvrs are present.
         var target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=null)
         var card = target.next()
-        testOneTarget("** clca complete cvrs", cvr, card, auditType, hasCardStyles, "cvr")
+        testOneTarget("** clca complete cvrs", cvr, card, auditType, hasCardStyles, AuditableCard.fromCvr)
 
         cvr = cvrr.copy(poolId=1)
         target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=null)
         card = target.next()
-        testOneTarget("clca hasStyle and poolIds", cvr, card, auditType, hasCardStyles, expectStyle = "cvr")
+        testOneTarget("clca hasStyle and poolIds", cvr, card, auditType, hasCardStyles, expectStyle = AuditableCard.fromCvr)
 
         val cardStyle = Batch("you", 1, intArrayOf(0,1,2,3,4), false)
         // doesnt make sense to use; hasStyle means use cvr
@@ -61,13 +61,13 @@ class TestCvrsToCards {
         cvr = cvrr.copy(poolId=null)
         target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=listOf(cardStyle))
         card = target.next()
-        assertEquals("cvr", card.batchName, "no poolId")
+        assertEquals(AuditableCard.fromCvr, card.batchName, "no poolId")
 
         // what if you dont supply the cardStyles? FAIL
         cvr = cvrr.copy(poolId=1)
         target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=null)
         card = target.next()
-        assertEquals("cvr", card.batchName, "no pools")
+        assertEquals(AuditableCard.fromCvr, card.batchName, "no pools")
     }
 
     @Test
@@ -80,17 +80,17 @@ class TestCvrsToCards {
         val expectedMessage = "AuditableCard must have votes, possibleContests, cardStyle, or population"
         var cvr = cvrr.copy(poolId=null)  // no poolId
         var target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=null, )
-        testOneTarget("** poll with no pools", cvr, target.next(), auditType, hasCardStyles, "cvr")
+        testOneTarget("** poll with no pools", cvr, target.next(), auditType, hasCardStyles, AuditableCard.fromCvr)
 
         cvr = cvrr.copy(poolId=1) // poolId but no pools
         target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=null)
-        testOneTarget("** poll with poolid but no pool", cvr, target.next(), auditType, hasCardStyles, expectStyle = "cvr")
+        testOneTarget("** poll with poolid but no pool", cvr, target.next(), auditType, hasCardStyles, expectStyle = AuditableCard.fromCvr)
 
         // what happens if the poolId doesnt match ??
         val cardStyle = Batch("cardstyle1", 1,intArrayOf(0,1,2,3,4), false)
         cvr = cvrr.copy(poolId=2) // poolId doesnt match
         target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=null)
-        testOneTarget("** poll with pools but wrong poolid", cvr, target.next(), auditType, hasCardStyles, expectStyle = "cvr")
+        testOneTarget("** poll with pools but wrong poolid", cvr, target.next(), auditType, hasCardStyles, expectStyle = AuditableCard.fromCvr)
 
         // successfully use pool 1
         hasCardStyles = true
@@ -111,13 +111,13 @@ class TestCvrsToCards {
 
         val cardStyle = Batch("oapool2", 2,intArrayOf(0,1,2), false)
         var target = CvrsAndBatchesToCards(auditType, Closer(cvrs.iterator()), phantomCvrs=null, batches=listOf(cardStyle), )
-        testOneTarget("oa hasStyle", cvrc, target.next(), auditType, hasCardStyles, "cvr")
+        testOneTarget("oa hasStyle", cvrc, target.next(), auditType, hasCardStyles, AuditableCard.fromCvr)
         testOneTarget("oa hasStyle pooled", cvrp, target.next(), auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
 
         // noStyle means must supply the list of possibleContests for pooled data and cvrs
         hasCardStyles = true
         target = CvrsAndBatchesToCards(auditType, Closer(cvrs.iterator()), phantomCvrs=null, batches=listOf(cardStyle), )
-        testOneTarget("oa noStyle", cvrc, target.next(), auditType, hasCardStyles, "cvr")
+        testOneTarget("oa noStyle", cvrc, target.next(), auditType, hasCardStyles, AuditableCard.fromCvr)
         testOneTarget("oa noStyle pooled", cvrp, target.next(), auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
     }
 

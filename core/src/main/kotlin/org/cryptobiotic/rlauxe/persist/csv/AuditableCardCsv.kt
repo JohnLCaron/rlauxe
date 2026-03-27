@@ -15,14 +15,14 @@ private val logger = KotlinLogging.logger("AuditableCardCsv")
 // data class AuditableCard (
 //    val location: String, // enough info to find the card for a manual audit.
 //    val index: Int,  // index into the original, canonical list of cards
-//    val prn: Long,   // psuedo random number (serialize to hex string)
+//    val prn: Long,   // psuedo random number
 //    val phantom: Boolean,
 //
 //    val votes: Map<Int, IntArray>?,   // CVRs and phantoms
 //    val poolId: Int?,                 // must be set if its from a CardPool
-//    val batchName: String? = null,    // batch name TODO must have ??
-//    val batch: BatchIF? = null,       // must have population or population name, otherwise hasSingleCardStyle is assumed to be true
-//)
+//    val batchName: String,            // batch name: "fromCvr" if no batch and its from a CVR
+//    val batch: BatchIF? = null,       // batch reference. CLCA dont need unless cvrsContainUndervotes = false
+//))
 
 val AuditableCardHeader = "location, index, prn, phantom, poolId, batch, cvr contests, candidates0, candidates1, ...\n"
 

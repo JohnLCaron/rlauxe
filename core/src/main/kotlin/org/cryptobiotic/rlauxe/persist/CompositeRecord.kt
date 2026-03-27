@@ -89,11 +89,10 @@ data class CompositeRecord(
                                 println("  Error: ${result.component2()}")
                             } else {
                                 val orgRecord: AuditRecord = result.unwrap() as AuditRecord
-                                val modRecord = modifyRecord(orgRecord, componentId)
-                                components.add(modRecord)
-                                contests.addAll(modRecord.contests)
-                                if (config == null) config = modRecord.config // TODO all configs are the same ??
-                                if (electionInfo == null) electionInfo = modRecord.electionInfo // TODO all electionInfo are the same ??
+                                components.add(orgRecord)
+                                contests.addAll(orgRecord.contests)
+                                if (config == null) config = orgRecord.config // TODO all configs are the same ??
+                                if (electionInfo == null) electionInfo = orgRecord.electionInfo // TODO all electionInfo are the same ??
                                 componentId++
                             }
                         }
@@ -109,11 +108,6 @@ data class CompositeRecord(
             }
         }
     }
-}
-
-// TODO. problem is that contest id is replicated everywhere in assertions, contestRound etc
-fun modifyRecord(orgRecord: AuditRecord, componentId: Int): AuditRecord {
-    return orgRecord
 }
 
 fun makeAuditRounds(records: List<AuditRecord>) : List<AuditRoundIF> {

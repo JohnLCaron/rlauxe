@@ -67,7 +67,7 @@ class TestSfElection {
             println(" ${it.cassorter}")
             val oaass = it.cassorter as OneAuditClcaAssorter
             println("     ${oaass.oaAssortRates} npools=${oaass.poolAverages.assortAverage.size}")
-            assertEquals(count49pools, oaass.oaAssortRates.totalInPools)
+            assertEquals(count49pools, oaass.oaAssortRates.ncardsInPools)
             val nzavg = oaass.poolAverages.assortAverage.filter { it.value != 0.0 }.count()
             println(" non zero pools = ${nzavg}")
         }

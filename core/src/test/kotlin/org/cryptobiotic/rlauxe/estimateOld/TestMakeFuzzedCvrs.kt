@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
+import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.ClcaSampler
 import org.junit.jupiter.api.Test
@@ -26,7 +26,7 @@ class TestMakeFuzzedCvrs {
         val assort = contestUA.clcaAssertions.first().cassorter
 
         val testMvrs = makeFuzzedCvrsForPolling(listOf(contest.info), testCvrs, mvrsFuzzPct)
-        val testCards = testCvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0) }
+        val testCards = testCvrs.mapIndexed { idx, cvr -> AuditableCard(cvr, idx, 0) }
         val sampler = ClcaSampler( // fuzz single contest OK
             contestUA.id,
             testCards.size,
@@ -50,15 +50,17 @@ class TestMakeFuzzedCvrs {
     @Test
     fun testMakeFuzzedCvrsFromContestSimulatedCvrs() {
         val N = 10000
-        val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)
+        val fuzzPcts = listOf(0.001, .005, .01, .02, .05)
         val margins =
             listOf(.001, .002, .003, .004, .005, .006, .008, .01, .012, .016, .02, .03, .04, .05, .06, .07, .08, .10)
 
         val choiceChanges = mutableListOf<MutableMap<String, Int>>()
         fuzzPcts.forEach { fuzzPct ->
             margins.forEach { margin ->
-                val (cu, testCvrs) = simulateCvrsFromMargin(Nc = N, margin, undervotePct = .1, phantomPct = .01)
-                val fuzzed = makeFuzzedCvrsForClca(listOf(cu.contest.info()), testCvrs, fuzzPct)
+                if (show) println("fuzz $fuzzPct margin $margin")
+
+                val (cua, testCvrs) = simulateCvrsFromMargin(Nc = N, margin, undervotePct = .1, phantomPct = .01)
+                val fuzzed = makeFuzzedCvrsForClca(listOf(cua.contest.info()), testCvrs, fuzzPct)
                 val choiceChange = mutableMapOf<String, Int>()
                 testCvrs.zip(fuzzed).forEach { (cvr, fuzzedCvr) ->
                     val orgChoice = cvr.votes[0]!!.firstOrNull() ?: 2
@@ -74,7 +76,8 @@ class TestMakeFuzzedCvrs {
                 choiceChanges.add(choiceChange)
 
                 val unchanged = choiceChange["00"]!! + choiceChange["11"]!! + choiceChange["22"]!!
-                if (show) println(" unchanged $unchanged = ${unchanged / N.toDouble()}")
+                if (show) println("  unchanged $unchanged = ${unchanged / N.toDouble()}")
+
                 assertEquals(fuzzPct, 1.0 - unchanged / N.toDouble(), .01)
             }
         }

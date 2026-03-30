@@ -40,7 +40,7 @@ class CreateSfElection(
     val auditType: AuditType,
     val poolsHaveOneCardStyle: Boolean,
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
-): CreateElectionIF {
+): ElectionBuilder {
 
     val cardPoolMapByName: Map<String, OneAuditPoolFromCvrs>
     val cardPoolBuilders: List<OneAuditPoolFromCvrs>
@@ -73,7 +73,10 @@ class CreateSfElection(
         phantomCount = countPhantoms(allCvrTabs, contestNcs)
 
         // we need to know the diluted Nb before we can create the assertions: another pass through the cvrExports
-        val (manifestTabs, count) = tabulateCardsAndCount( createCards(auditType), infos)
+        val cards = createCards(auditType)
+        val auditableCardIter: CloseableIterator<AuditableCard> = MergeBatchesIntoCardManifestIterator(cards, batches())
+
+        val (manifestTabs, count) = tabulateCardsAndCount( auditableCardIter, infos)
         val contestNbs = manifestTabs.mapValues { it.value.ncardsTabulated }
         // println("contestNbs= ${contestNbs}")
         this.ncards = count
@@ -160,11 +163,11 @@ class CreateSfElection(
     override fun ncards() = ncards
 
     // same cvrs for CLCA and OneAudit
-    fun createCards(auditType: AuditType): CloseableIterator<AuditableCard> {
+    fun createCards(auditType: AuditType): CloseableIterator<CardWithBatchName> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
         val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPoolBuilders.associate { it.name() to it.id() })
 
-        return CvrsToCardManifest(
+        return CvrsToCardsWithBatchNameIterator(
                 auditType,
                 cvrIter,
                 null, // there are no phantoms

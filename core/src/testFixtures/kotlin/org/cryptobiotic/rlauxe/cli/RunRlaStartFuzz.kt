@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
+import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
@@ -54,11 +54,6 @@ object RunRlaStartFuzz {
             shortName = "simFuzz",
             description = "simulation fuzzing"
         ).default(0.0)
-        val quantile by parser.option(
-            ArgType.Double,
-            shortName = "quantile",
-            description = "Estimation quantile (0.1-1.0)"
-        ).default(0.8)
         val pctPhantoms by parser.option(
             ArgType.Double,
             shortName = "pctPhantoms",
@@ -84,11 +79,11 @@ object RunRlaStartFuzz {
             shortName = "rcands",
             description = "Number of candidates for raire contest"
         ).default(5)
-        val oaStrategy by parser.option(
-            ArgType.String,
-            shortName = "oaStrategy",
-            description = "OneAudit Strategy: simulate or calc"
-        ).default("simulate")
+        val pollingMode by parser.option(
+            ArgType.Choice<PollingMode>(),
+            shortName = "f",
+            description = "Format"
+        ).default(PollingMode.withBatches)
         val cvrFraction by parser.option(
             ArgType.Double,
             shortName = "cvrFraction",
@@ -103,14 +98,15 @@ object RunRlaStartFuzz {
         try {
             parser.parse(args)
             println("RunRlaStartFuzz on $topdir auditType=$auditType minMargin=$minMargin fuzzMvrs=$fuzzMvrs, simFuzz=$simFuzz, pctPhantoms=$pctPhantoms, ncards=$ncards ncontests=$ncontests" +
-                    " addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates quantile=$quantile")
+                    " addRaire=$addRaireContest addRaireCandidates=$addRaireCandidates")
             when (auditType) {
-                "POLLING" -> startTestElectionPolling(topdir, minMargin, ncards, fuzzMvrs, simFuzz, quantile, pctPhantoms, ncontests)
-                "ONEAUDIT" ->  startTestElectionOneAudit(topdir, minMargin, fuzzMvrs, simFuzz, quantile, pctPhantoms, ncards, oaStrategy, cvrFraction, extraPct=extra)
-                else ->  startTestElectionClca(topdir, minMargin, fuzzMvrs, simFuzz, quantile, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates)
+                "POLLING" -> startTestElectionPolling(topdir, minMargin, ncards, simFuzz, pctPhantoms, ncontests, pollingMode)
+                "ONEAUDIT" ->  startTestElectionOneAudit(topdir, minMargin, fuzzMvrs, simFuzz, pctPhantoms, ncards, cvrFraction, extraPct=extra)
+                else ->  startTestElectionClca(topdir, minMargin, fuzzMvrs, simFuzz, pctPhantoms, ncards, ncontests, addRaireContest, addRaireCandidates)
             }
         } catch (t: Throwable) {
             println(t.message)
+            throw t
         }
     }
 }
@@ -121,7 +117,6 @@ fun startTestElectionClca(
     minMargin: Double,
     fuzzMvrs: Double,
     simFuzz: Double,
-    quantile: Double,
     pctPhantoms: Double?,
     ncards: Int,
     ncontests: Int,
@@ -154,7 +149,7 @@ class TestClcaElection(
     ncontests: Int,
     addRaire: Boolean,
     addRaireCandidates: Int,
-): CreateElectionIF {
+): ElectionBuilder {
     val contestsUA = mutableListOf<ContestWithAssertions>()
     val allCvrs = mutableListOf<Cvr>()
 
@@ -195,15 +190,29 @@ class TestClcaElection(
     override fun contestsUA() = contestsUA
     override fun ncards() = allCvrs.size
 
-    override fun cards() : CloseableIterator<AuditableCard> {
-        return CvrsToCardManifest(
+    override fun cards() : CloseableIterator<CardWithBatchName> {
+        return CvrsToCardsWithBatchNameIterator(
             AuditType.CLCA,
             Closer(allCvrs.iterator()),
             null, null,
         )
     }
-
 }
+
+// interface ElectionBuilder {
+//    fun electionInfo(): ElectionInfo
+//    fun contestsUA(): List<ContestWithAssertions>
+//
+//    // if you immediately write to disk, you only need one pass through the cards iterator
+//    fun cards() : CloseableIterator<CardNoBatch>
+//    fun ncards(): Int
+//
+//    // probably implementations should put out both ? Let the auditor decide how to use ??
+//    fun batches(): List<BatchIF>?
+//    fun cardPools(): List<CardPool>?
+//    fun createUnsortedMvrsInternal(): List<Cvr>? // for in-memory case, poolId used also as batch name?
+//    fun createUnsortedMvrsExternal(): CloseableIterator<CardNoBatch>? // for out-of-memory case
+//}
 
 /////////////////////////////////////////////////////
 
@@ -211,26 +220,24 @@ fun startTestElectionPolling(
     topdir: String,
     minMargin: Double,
     ncards: Int,
-    fuzzMvrs: Double = .001,
-    simFuzz: Double = .001,
-    quantile: Double = .80,
+    simFuzz: Double = .001, // TODO does this make sense, to fuzz polling ??
     pctPhantoms: Double = 0.0,
     ncontests: Int = 11,
+    pollingMode: PollingMode,
 ) {
     val auditdir = "$topdir/audit"
 
     val election = TestPollingElection(
         auditdir,
         minMargin,
-        fuzzMvrs,
         pctPhantoms,
         ncards,
         ncontests,
+        pollingMode
     )
-    createElectionRecord(election, auditDir = auditdir)
+    createElectionRecord(election, auditDir = auditdir, )
 
-    val config = Config.from(election.electionInfo(), nsimTrials = 20, simFuzzPct = simFuzz,
-        fuzzMvrs=fuzzMvrs)
+    val config = Config.from(election.electionInfo(), nsimTrials = 20, simFuzzPct = simFuzz)
 
     createAuditRecord(config, election, auditDir = auditdir)
 
@@ -241,15 +248,17 @@ fun startTestElectionPolling(
 class TestPollingElection(
     val auditdir: String,
     minMargin: Double,
-    fuzzMvrs: Double,
     pctPhantoms: Double?,
     ncards: Int,
     ncontests: Int,
-): CreateElectionIF {
-    val contestsUA: List<ContestWithAssertions>
-    val cvrs: List<Cvr>
-    val testMvrs: List<Cvr>
+    val pollingMode: PollingMode,
+): ElectionBuilder {
     val contests: List<Contest>
+    val testMvrs: List<Cvr>
+    val batches: List<BatchIF>
+    // val pools: List<CardPoolIF>
+    val cards: List<CardWithBatchName>
+    val contestsUA: List<ContestWithAssertions>
 
     init {
         val maxMargin = .08
@@ -257,39 +266,38 @@ class TestPollingElection(
         val phantomPctRange: ClosedFloatingPointRange<Double> =
             if (pctPhantoms == null) 0.00..0.005 else pctPhantoms..pctPhantoms
         val testData = MultiContestTestData(ncontests, 4, ncards, marginRange = useMin..maxMargin,
-            phantomPctRange = phantomPctRange) // always poolid = 1
+            phantomPctRange = phantomPctRange, auditType = AuditType.POLLING) // always poolid = 1
 
         contests = testData.contests
         println("Start testPersistentWorkflowPolling $testData")
         contests.forEach { println("  $it") }
 
         // Synthetic cvrs for testing, reflecting the exact contest votes, plus undervotes and phantoms.
-        cvrs = testData.makeCvrsFromContests(42)
-        testMvrs = makeFuzzedCvrsForClca(contests.map{ it.info() } , cvrs, fuzzMvrs)
+        val mvrCardAndPops = testData.makeMvrCardAndPops()
+        this.testMvrs  = mvrCardAndPops.mvrs
+        this.cards = mvrCardAndPops.cards.map { CardWithBatchName(it) }
+        // this.pools = mvrCardAndPops.pools
+        this.batches = mvrCardAndPops.batches
 
-        contestsUA = ContestWithAssertions.make(testData.contests, cards(), isClca=false)
+        // testMvrs = makeFuzzedCvrsForClca(contests.map{ it.info() } , cvrs, fuzzMvrs)
+
+        contestsUA = testData.contests.map { ContestWithAssertions(it, isClca=false).addStandardAssertions() }
         contestsUA.forEach { println("  $it") }
+
         println()
     }
 
     override fun electionInfo() = ElectionInfo(
-        "TestPollingElection", AuditType.POLLING, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null,
+        "TestPollingElection", AuditType.POLLING, ncards(), contestsUA.size,
+        cvrsContainUndervotes = true, poolsHaveOneCardStyle = null, pollingMode = pollingMode,
     )
     override fun createUnsortedMvrsInternal() = testMvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null
-    override fun batches() = listOf( Batch("batch42", 42, contests.map{it.id}.toIntArray(), true))  // no batches !!
+    override fun batches() = batches
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
-    override fun ncards() = cvrs.size
-
-    override fun cards() : CloseableIterator<AuditableCard> {
-        return CvrsToCardManifest(
-            AuditType.POLLING,
-            Closer(cvrs.iterator()),
-            null,
-            batches(),
-        )
-    }
+    override fun ncards() = cards.size
+    override fun cards() = Closer(cards.iterator())
 }
 
 fun makeOnePool(poolId: Int, contests: List<Contest>, cvrs: List<Cvr>): CardPool {
@@ -307,10 +315,8 @@ fun startTestElectionOneAudit(
     minMargin: Double,
     fuzzMvrs: Double,
     simFuzz: Double,
-    quantile: Double,
     phantomPct: Double,
     ncards: Int,
-    strategy: String,
     cvrFraction: Double,
     extraPct: Double,
 ) {
@@ -344,7 +350,7 @@ class TestOneAuditElection(
     phantomPct: Double,
     extraPct: Double,
     fuzzMvrs: Double,
-): CreateElectionIF {
+): ElectionBuilder {
     val contestsUA = mutableListOf<ContestWithAssertions>()
     val cardPools: List<CardPool>
     val cards: List<AuditableCard>
@@ -375,10 +381,15 @@ class TestOneAuditElection(
     )
     override fun createUnsortedMvrsInternal() = fuzzedMvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null
-    override fun batches() = cardPools
+    override fun batches() = null
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
     override fun ncards() = cards.size
 
-    override fun cards() = Closer ( cards.iterator())
+    // override fun cards() = Closer ( cards.iterator())
+
+    override fun cards() : CloseableIterator<CardWithBatchName> {
+        return Closer( this.cards.map { CardWithBatchName(it) }.iterator())
+    }
+
 }

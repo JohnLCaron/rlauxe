@@ -17,8 +17,9 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.margin2mean
-import org.cryptobiotic.rlauxe.workflow.CardManifest
+import org.cryptobiotic.rlauxe.persist.CardManifest
 import org.cryptobiotic.rlauxe.audit.MvrSource
+import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import kotlin.String
 import kotlin.use
 
@@ -100,12 +101,13 @@ object RunCalcAssortAvg {
                 }.flatten()
             }
 
-            val cardManifest = auditRecord.readSortedManifest()
+            val mvrManager = PersistedMvrManager(auditRecord)
+            val cardManifest = mvrManager.sortedManifest()
             val publisher = Publisher(auditDir)
             println("cardManifest has ${cardManifest.ncards} cards")
 
             val usePrivate = (config.mvrSource == MvrSource.testPrivateMvrs)
-            val mvrIter = if (usePrivate) readCardsCsvIterator(publisher.sortedMvrsFile()) else null
+            val mvrIter = if (usePrivate) mvrManager.readCardsAndMerge(publisher.sortedMvrsFile()) else null
 
             runCards(expectations, cardManifest, mvrIter, usePrivate)
 

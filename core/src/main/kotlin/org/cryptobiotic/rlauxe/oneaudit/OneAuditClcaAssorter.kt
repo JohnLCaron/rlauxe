@@ -112,7 +112,7 @@ class OneAuditClcaAssorter(
     fun poolAverage(poolId: Int?) = poolAverages.assortAverage[poolId]
 
     // B(bi, ci)
-    override fun bassort(mvr: CvrIF, cvr: CvrIF, hasStyle: Boolean): Double {
+    override fun bassort(mvr: CvrIF, cvr: CvrIF, hasStyle: Boolean): Double { // TODO why not cvr: AuditableCard ??
         if (cvr.poolId() == null) {
             return super.bassort(mvr, cvr, hasStyle) // here we use the standard assorter
         }

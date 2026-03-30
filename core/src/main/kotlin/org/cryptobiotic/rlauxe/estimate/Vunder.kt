@@ -15,8 +15,8 @@ import kotlin.random.Random
 // This is a way to create test Cvrs that match known vote totals and undervotes and novotes for one population or pool
 // ok for voteForN > 1, ok for IRV
 
-// vunder = "votes and undervotes and novotes"
-// novotes = the cards in the population that dont contain the contest
+// vunder = "votes and undervotes and missing votes"
+// missing votes = the cards in the population that dont contain the contest
 // voteCounts: Pair(candsVoteFor, count); candsVoteFor is immutable
 data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pair<IntArray, Int>>, val undervotes: Int, val missing: Int, val voteForN: Int) {
     val nvotes = voteCounts.sumOf { it.second } // candVotes.values.sum()
@@ -25,7 +25,7 @@ data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pai
     val undervoteIdx = voteCounts.size
     val missingIdx = voteCounts.size + 1
 
-    // candId -> count
+    // {candId, undervote, missing} -> count
     val vunder: List<Pair<IntArray, Int>> = voteCounts + Pair(intArrayOf(), undervotes) + Pair(intArrayOf(), missing)
     val nvunder = vunder.size  // ncandidates + 2
 
@@ -202,37 +202,6 @@ class VunderPicker(val vunder: Vunder) {
     companion object {
         private val logger = KotlinLogging.logger("VunderPicker")
     }}
-
-/* used for creating Cvrs for pools with hasSingleCardStyle=false
-fun makeVunderCvrs(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?): List<Cvr> {
-    val vunderPickers = vunders.mapValues { VunderPicker(it.value) }
-
-    val rcvrs = mutableListOf<Cvr>()
-    var count = 1
-    var done = false
-    while (!done) {
-        val cvrId = "${poolName}-${count}"
-        val cvb2 = CvrBuilder2(cvrId, phantom = false, poolId = poolId)
-        vunderPickers.entries.forEach { (contestId, vunderPicker) ->
-            if (vunderPicker.isNotEmpty()) {
-                // pick random candidates for the contest
-                val useCandidates = vunderPicker.pickRandomCandidatesAndDecrement()
-                // add the contest to cvr unless its a novote
-                if (useCandidates != null) {
-                    cvb2.replaceContestVotes(contestId, useCandidates)
-                }
-            }
-        }
-        rcvrs.add(cvb2.build())
-        // check(vunders, rcvrs)
-
-        count++
-        done = vunderPickers.values.all { it.isEmpty() }
-    }
-
-    rcvrs.shuffle()
-    return rcvrs
-} */
 
 // set Vunder.missing to 0 for hasSingleCardStyle=true
 fun makeCvrsForPool(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, hasSingleCardStyle: Boolean): List<Cvr> {

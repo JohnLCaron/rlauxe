@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.util
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
+import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsForClca
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -12,12 +12,12 @@ class TestCardBuilders {
     @Test
     fun testConvertCardsRoundtrip() {
         val test = MultiContestTestData(20, 11, 20000)
-        val cards = test.makeCardsFromContests()
+        val (mvrs, cards, pools, styles) = test.makeMvrCardAndPops()
         val cardMap = cards.associateBy { it.location }
 
-        val cardbs = mutableListOf<CardBuilder>()
+        val cardbs = mutableListOf<AuditableCardBuilder>()
         cards.forEach {
-            val cb = CardBuilder.fromCard(it)
+            val cb = AuditableCardBuilder.fromCard(it)
             if (it.votes != null) {
                 it.votes.forEach{ (contestId, votes) -> cb.replaceContestVotes(contestId, votes) }
             }
@@ -39,7 +39,7 @@ class TestCardBuilders {
         val test = MultiContestTestData(ncontests, 11, 50000)
         val contests: List<Contest> = test.contests
         val cards = test.makeCardsFromContests()
-        val cvrs = cards.map { it.cvr() }
+        val cvrs = cards.map { it.toCvr() }
         val detail = false
         val ntrials = 1
         val fuzzPcts = listOf(0.0, 0.001, .005, .01, .02, .05)

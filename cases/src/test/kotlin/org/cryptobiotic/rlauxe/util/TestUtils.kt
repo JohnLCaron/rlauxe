@@ -9,7 +9,7 @@ class TestUtils {
     @Test
     fun testTabulateCardsAndCount() {
         val test = MultiContestTestData(20, 11, 20000)
-        val cards = test.makeCardsFromContests()
+        val ( mvrs, cards, pools, styles) = test.makeMvrCardAndPops()
         val infos = test.contests.map { it.info }.associateBy { it.id }
 
         val (tabs, count) = tabulateCardsAndCount(Closer(cards.iterator()), infos)

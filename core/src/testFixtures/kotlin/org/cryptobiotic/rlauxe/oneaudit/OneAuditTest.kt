@@ -2,9 +2,10 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
-import org.cryptobiotic.rlauxe.audit.CvrsAndBatchesToCards
+import org.cryptobiotic.rlauxe.audit.CvrsToCardsWithBatchNameIterator
 import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
@@ -119,7 +120,7 @@ fun makeOneAuditTest(
     info1.metadata["PoolPct"] = (100.0 * poolNcards / Nc).toInt()
 
     val mvrs = makeMvrs(contest, cvrNc, cvrVotes, cvrUndervotes, pool, extraInPool)
-    val cardManifest=  makeCardManifest(mvrs, pool)
+    val cardManifest = makeCardManifest(mvrs, pool)
 
     val (oaUA, cardPools) = makeOneAuditTestContests(infos, listOf(contest), listOf(pool), cardManifest, mvrs)
 
@@ -182,14 +183,18 @@ fun makeCardManifest(mvrs: List<Cvr>, pool: OneAuditPoolFromBallotStyle): List<A
     val expandedContestIds = pool.infos.keys.toList().toIntArray()
 
     // make the cards with the expanded card style
-    val converter = CvrsAndBatchesToCards(
+    val cardsNoBatch = CvrsToCardsWithBatchNameIterator(
         type = AuditType.ONEAUDIT,
         cvrs = Closer(mvrs.iterator()),
         phantomCvrs = null,
         listOf(pool),
     )
+    // could also run it through MergeBatchesIntoCardManifestIterable
     val cards = mutableListOf<AuditableCard>()
-    converter.forEach { cards.add(it) }
+    cardsNoBatch.forEach { card ->
+        val batch = if (card.poolId == 42) pool else Batch.fromCvrBatch
+        cards.add( AuditableCard(card, batch))
+    }
 
     // we need to populate the pool tab with the votes
     val poolTabs = OneAuditPoolFromCvrs("pool", 1, false, pool.infos)

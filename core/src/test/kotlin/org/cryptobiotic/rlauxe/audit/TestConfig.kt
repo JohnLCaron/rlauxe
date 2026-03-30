@@ -80,11 +80,11 @@ class TestConfig {
 
     @Test
     fun testOneAudit() {
-        val electionInfo= ElectionInfo("testOneAudit", AuditType.ONEAUDIT, 4200, 11, poolsHaveOneCardStyle=false, pollingMode= PollingMode.withBatches)
+        val electionInfo= ElectionInfo("testOneAudit", AuditType.ONEAUDIT, 4200, 11, poolsHaveOneCardStyle=false,)
         val config = Config.from(electionInfo, nsimTrials = 101, simFuzzPct=.0021, fuzzMvrs=.0011).replaceSeed(-1)
         val expected =
             """Config(
-  electionInfo=ElectionInfo(electionName=testOneAudit, auditType=ONEAUDIT, totalCardCount=4200, contestCount=11, cvrsContainUndervotes=true, poolsHaveOneCardStyle=false, pollingMode=withBatches, mvrSource=testPrivateMvrs, other={}), 
+  electionInfo=ElectionInfo(electionName=testOneAudit, auditType=ONEAUDIT, totalCardCount=4200, contestCount=11, cvrsContainUndervotes=true, poolsHaveOneCardStyle=false, pollingMode=null, mvrSource=testPrivateMvrs, other={}), 
   creation=AuditCreationConfig(auditType=ONEAUDIT, riskLimit=0.05, seed=-1, riskMeasuringSampleLimit=null, other={}), 
   simulation=SimulationControl(nsimTrials=101, estPercentile=[50, 80], simFuzzPct=0.0021, simulationStrategy=optimistic), 
   sampling=ContestSampleControl(minRecountMargin=0.005, minMargin=0.0, maxSamplePct=0.0, contestSampleCutoff=2000, auditSampleCutoff=10000, other={}))

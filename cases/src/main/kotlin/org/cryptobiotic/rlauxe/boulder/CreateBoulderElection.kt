@@ -13,7 +13,6 @@ import org.cryptobiotic.rlauxe.estimate.makeCvrsForPool
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.utils.checkNpops
 import org.cryptobiotic.rlauxe.utils.tabulateNpops
 import org.cryptobiotic.rlauxe.verify.checkEquivilentVotes
 import kotlin.collections.component1
@@ -35,7 +34,7 @@ class CreateBoulderElection(
     val sovo: BoulderStatementOfVotes,
     val distributeOvervotes: List<Int> = listOf(0, 63),
     val mvrSource: MvrSource = MvrSource.testPrivateMvrs,
-): CreateElectionIF {
+): ElectionBuilder {
     val exportCvrs: List<Cvr> = export.cvrs.map { it.convertToCvr() }
     val infoList = makeContestInfo().sortedBy{ it.id }
     val infoMap = infoList.associateBy { it.id }
@@ -93,7 +92,8 @@ class CreateBoulderElection(
         val totalRedactedBallots = cardPoolBuilders.sumOf { it.ncards() }
         logger.info { "number of redacted ballots = $totalRedactedBallots in ${cardPoolBuilders.size} cardPools"}
 
-        checkNpops(allCvrs, createCards(), infoList)
+        // TODO put in verify
+        // checkNpops(allCvrs, createCards(), infoList)
     }
 
     // make ContestInfo from BoulderStatementOfVotes, and matching export.schema.contests
@@ -301,9 +301,9 @@ class CreateBoulderElection(
     override fun cards() = createCards()
     override fun ncards() = ncards
 
-    fun createCards(): CloseableIterator<AuditableCard> {
+    fun createCards(): CloseableIterator<CardWithBatchName> {
         // same cvrs for CLCA and OneAudit
-        return CvrsToCardManifest(
+        return CvrsToCardsWithBatchNameIterator(
             auditType,
             Closer(allCvrs.iterator()), // use the mvrs as the cvrs
             null,

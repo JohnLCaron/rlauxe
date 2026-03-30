@@ -13,7 +13,7 @@ private val logger = KotlinLogging.logger("BelgiumClca")
 class BelgiumClca (
     val contestd: DHondtContest,
     val mvrSource: MvrSource,
-): CreateElectionIF {
+): ElectionBuilder {
 
     val infoMap: Map<Int, ContestInfo>
     val contestsUA: List<ContestWithAssertions>
@@ -31,13 +31,13 @@ class BelgiumClca (
     override fun batches() = infoMap.values.map { Batch(it.name, it.id, intArrayOf(it.id), true)}
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
-    override fun cards() = createCardManifest()
+    override fun cards() = createCards()
     override fun ncards() = allCvrs.size
     override fun createUnsortedMvrsInternal() = allCvrs
     override fun createUnsortedMvrsExternal() = null
 
-    fun createCardManifest(): CloseableIterator<AuditableCard> {
-        return CvrsToCardManifest(
+    fun createCards(): CloseableIterator<CardWithBatchName> {
+        return CvrsToCardsWithBatchNameIterator(
             AuditType.CLCA,
             Closer(allCvrs.iterator()),
             makePhantomCvrs(contestsUA().map { it.contest }),

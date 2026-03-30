@@ -1,7 +1,8 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.util.makePhantomCards
+import org.cryptobiotic.rlauxe.audit.Batch
+import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
@@ -15,6 +16,8 @@ data class MultiContestCombineData(
     val poolId: Int? = null,
 ) {
     val contestVoteTrackers: List<ContestVoteTracker>
+    val batch = if (poolId == null) Batch.fromCvrBatch
+        else Batch("MultiContestCombineData", poolId, contests.map { it.id }.toIntArray(), false)
 
     init {
         require(contests.size > 0)
@@ -31,7 +34,7 @@ data class MultiContestCombineData(
         val result = mutableListOf<AuditableCard>()
         repeat(totalBallots) {
             // add regular Cvrs including undervotes and phantoms
-            result.add(makeCard(nextCardId++, contestVoteTrackers, cardStyle))
+            result.add( makeCard(nextCardId++, contestVoteTrackers, cardStyle))
         }
 
         val phantoms = makePhantomCards(contests, startIdx = result.size)
@@ -41,10 +44,10 @@ data class MultiContestCombineData(
     }
 
     private fun makeCard(nextCardId: Int, fcontests: List<ContestVoteTracker>, cardStyle:String?): AuditableCard {
-        //     constructor(location: String, index: Int, poolId: Int?, cardStyle: String?):
-        val cardBuilder = CardBuilder("card${nextCardId}", nextCardId, poolId=poolId, cardStyle=cardStyle)
+        //         constructor(location: String, index: Int, poolId: Int?, cardStyle: String?):
+        val cardBuilder = AuditableCardBuilder("card${nextCardId}", nextCardId, 0, false, null, batch = batch)
         fcontests.forEach { fcontest -> fcontest.addContestToCard(cardBuilder) }
-        return cardBuilder.build(poolId)
+        return cardBuilder.build()
     }
 
     // multicontest cvrs
@@ -100,7 +103,7 @@ data class ContestVoteTracker(
     }
 
     // choose Candidate, add contest, including undervote
-    fun addContestToCard(cvrb: CardBuilder) {
+    fun addContestToCard(cvrb: AuditableCardBuilder) {
         if (votesLeft == 0)
             return
         val candidateIdx = chooseCandidate(Random.nextInt(votesLeft))
@@ -110,6 +113,17 @@ data class ContestVoteTracker(
             cvrb.replaceContestVote(info.id, info.candidateIds[candidateIdx])
         }
     }
+    fun addContestToCardNoBatch(cvrb: CardWithBatchNameBuilder) {
+        if (votesLeft == 0)
+            return
+        val candidateIdx = chooseCandidate(Random.nextInt(votesLeft))
+        if (candidateIdx == ncands) {
+            cvrb.replaceContestVote(info.id, null) // undervote
+        } else {
+            cvrb.replaceContestVote(info.id, info.candidateIds[candidateIdx])
+        }
+    }
+
 
     // choice is a number from 0..votesLeft
     // shrink the partition as votes are taken from it

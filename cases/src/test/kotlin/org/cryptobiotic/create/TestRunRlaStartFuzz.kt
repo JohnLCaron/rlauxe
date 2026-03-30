@@ -1,4 +1,4 @@
-package org.cryptobiotic.util
+package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.cli.RunRlaStartFuzz
@@ -21,7 +21,6 @@ class TestRunRlaStartFuzz {
                 "-minMargin", "0.01",
                 "-simFuzz", "0.001",
                 "-fuzzMvrs", "0.001",
-                "-quantile", "0.5",
                 "-ncards", "10000",
                 "-ncontests", "11",
             )
@@ -53,7 +52,6 @@ class TestRunRlaStartFuzz {
                 "--auditType", "POLLING",
                 "-simFuzz", "0.001",
                 "-fuzzMvrs", "0.001",
-                "-quantile", "0.5",
                 "-ncards", "20000",
                 "-ncontests", "5",
             )
@@ -89,7 +87,6 @@ class TestRunRlaStartFuzz {
                 "-minMargin", "0.01",
                 "-simFuzz", "0.001",
                 "-fuzzMvrs", "0.001",
-                "-quantile", "0.5",
                 "-ncards", "10000",
                 "-ncontests", "10",
                 "--addRaireContest",
@@ -131,7 +128,6 @@ class TestRunRlaStartFuzz {
                 "-minMargin", "0.04",
                 "-simFuzz", "0.001",
                 "-fuzzMvrs", "0.001",
-                "-quantile", "0.5",
                 "-cvrFraction", "0.95",
                 "-ncards", "50000",
                 "-extraPct", "0.01"

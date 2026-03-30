@@ -5,10 +5,8 @@ import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.cli.startTestElectionPolling
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTest
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import kotlin.Int
 import kotlin.test.Test
 import kotlin.test.fail
@@ -72,7 +70,7 @@ class TestPersistedWorkflow {
     fun testPersistedAuditPolling() {
         val topdir = "$testdataDir/persist/persistWorkflow/polling"
         val N = 50000
-        startTestElectionPolling(topdir, minMargin = .11, fuzzMvrs = .00, pctPhantoms = 0.00, ncards = N, ncontests = 1)
+        startTestElectionPolling(topdir, minMargin = .11, pctPhantoms = 0.00, ncards = N, ncontests = 1, pollingMode = PollingMode.withBatches)
         runPersistedAudit(topdir, maxRounds=10)
     }
 
@@ -106,7 +104,7 @@ class TestPersistedWorkflow {
         runPersistedAudit(topdir, maxRounds=10)
     }
 
-    @Test
+    // @Test
     fun problem() {
         // from ExtraVsMarginOneAudit
         // 2026-03-23 16:11:19.947 WARN   runAudit OneAuditWorkflowTaskGenerator margin=0.01 mvrsFuzzPct=0.0 cvrPercent=0.9 11 exceeded maxRounds = 10

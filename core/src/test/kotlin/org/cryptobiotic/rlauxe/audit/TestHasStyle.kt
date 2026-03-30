@@ -9,10 +9,12 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.EstimateAudit
-import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.estimate.MultiContestCombineData
 import org.cryptobiotic.rlauxe.estimate.removeContestsAndSample
+import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
+import org.cryptobiotic.rlauxe.workflow.CreateElectionFromCards
+import org.cryptobiotic.rlauxe.workflow.CreateElectionFromCvrs
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import kotlin.random.Random
 import kotlin.test.Test
@@ -348,11 +350,7 @@ class TestHasStyle {
         // val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
 
         val infos = contests.map{ it.info }.associateBy { it.id }
-        val cardIter = CvrsAndBatchesToCards(auditType,
-            Closer(testCvrs.iterator()),
-            null,
-            batches = cardStyles,
-        )
+        val cardIter = Closer( mvrsToAuditableCardsList(auditType, testCvrs, cardStyles, null).iterator())
         val tabs = tabulateAuditableCards(cardIter, infos).toSortedMap()
         if (showDetails) tabs.forEach { println(it) }
 
@@ -362,8 +360,10 @@ class TestHasStyle {
         }
 
         val election =
-            CreateElectionFromCvrs(name, contestsUA, testCvrs, auditType=auditType, cardPools = null,
-                batches = cardStyles, mvrSource=MvrSource.testPrivateMvrs)
+            CreateElectionFromCvrs(
+                name, contestsUA, testCvrs, auditType = auditType, cardPools = null,
+                batches = cardStyles, mvrSource = MvrSource.testPrivateMvrs
+            )
 
         val auditdir = "$topdir/audit"
         createElectionRecord(election, auditDir = auditdir)
@@ -384,10 +384,7 @@ class TestHasStyle {
         // val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )
 
         val infos = contests.map{ it.info }.associateBy { it.id }
-        val cardIter = MergeBatchIntoCards(
-            testCards,
-            batches = cardStyles,
-        )
+        val cardIter = Closer(testCards.iterator())
         val tabs = tabulateAuditableCards(cardIter, infos)
         if (showDetails) tabs.forEach { println(it) }
 
@@ -398,8 +395,10 @@ class TestHasStyle {
         }
 
         val election =
-            CreateElectionFromCards(name, contestsUA, testCards, cardPools = null, cardStyles = cardStyles, auditType,
-                mvrSource = MvrSource.real)
+            CreateElectionFromCards(
+                name, contestsUA, testCards, cardPools = null, cardStyles = cardStyles, auditType,
+                mvrSource = MvrSource.real
+            )
 
         val auditdir = "$topdir/audit"
         createElectionRecord(election, auditDir = auditdir)

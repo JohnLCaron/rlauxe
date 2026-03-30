@@ -52,7 +52,7 @@ data class CardPool(
     }
 
     override fun toString() = buildString {
-        appendLine("CardPool(poolName='$poolName', poolId=$poolId, totalCards=$totalCards")
+        append("CardPool(poolName='$poolName', poolId=$poolId, totalCards=$totalCards")
     }
 
     override fun equals(other: Any?): Boolean {

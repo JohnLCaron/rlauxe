@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.cli.makeOnePool
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.util.df
 import kotlin.random.Random
 import kotlin.test.Test
@@ -52,8 +51,7 @@ class TestPollingAudit {
         }
         println()
 
-        val testCvrs = test.makeCvrsFromContests(42)
-        val pool = makeOnePool(42, contests, testCvrs)
+        val testCvrs = test.makeCvrsFromContests()
         val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong()) // , pools = listOf(pool))
 
         val workflow = WorkflowTesterPolling(auditConfig, contests, mvrManager)
@@ -85,8 +83,7 @@ class TestPollingAudit {
 
         val contests: List<Contest> = test.contests
         // Synthetic cvrs for testing reflecting the exact contest votes. In production, we dont actually have the cvrs.
-        val testCvrs = test.makeCvrsFromContests(42)
-        val pool = makeOnePool(42, contests, testCvrs)
+        val testCvrs = test.makeCvrsFromContests()
 
         val testMvrs =  makeFuzzedCvrsForClca(test.contests.map { it.info} , testCvrs, mvrFuzzPct)
         val mvrManager = MvrManagerForTesting(testCvrs, testMvrs, Random.nextLong()) // , pools = listOf(pool))
@@ -124,8 +121,7 @@ class TestPollingAudit {
         }
 
         val auditConfig = Config.from(AuditType.POLLING, nsimTrials = 10)
-        val cvrs = multiContestTest.makeCvrsFromContests(42)
-        val pool = makeOnePool(42, multiContestTest.contests, cvrs)
+        val cvrs = multiContestTest.makeCvrsFromContests()
         val mvrManager = MvrManagerForTesting(cvrs, cvrs, Random.nextLong()) // , pools = listOf(pool))
         val workflow = WorkflowTesterPolling(auditConfig, multiContestTest.contests, mvrManager)
 

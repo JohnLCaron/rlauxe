@@ -13,8 +13,7 @@
         "minMargin": 0.0,
         "maxSamplePct": 0.0,
         "contestSampleCutoff": 2000,
-        "auditSampleCutoff": 10000,
-        "removeCutoffContests": true
+        "auditSampleCutoff": 10000
     },
     "clcaConfig": {
         "strategy": "generalAdaptive",

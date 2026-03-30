@@ -11,7 +11,6 @@ import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
-import org.cryptobiotic.rlauxe.workflow.CardManifest
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
@@ -30,8 +29,7 @@ data class CompositeRecord(
         return componentRecords.first().readSortedManifest(batches)
     }
     override fun readSortedManifest(): CardManifest {
-        val firstManifest =  componentRecords.first().readSortedManifest() // barf
-        return CardManifest(firstManifest.cards, firstManifest.ncards, readBatches())
+        return componentRecords.first().readSortedManifest() // barf
     }
 
     override fun readOneShotMvrs() = emptyMap<Int, Int>()

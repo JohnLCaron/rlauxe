@@ -154,7 +154,7 @@ class TestVunder {
         val fuzzedPool = calcOneAuditPoolsFromMvrs(
             infos,
             listOf(Batch("pool42", 42, intArrayOf(1, 2), false)),
-            fuzzedMvrs.map { it.cvr() },
+            fuzzedMvrs.map { it.toCvr() },
         )
         println("fuzzedPool= ${fuzzedPool.first()}")
 
@@ -173,7 +173,7 @@ class TestVunder {
         val limitedPool = calcOneAuditPoolsFromMvrs(
             infos,
             listOf(Batch(cardPool.name(), cardPool.poolId, intArrayOf(1,2), false )),
-            limitedMvrs.map { it.cvr() },
+            limitedMvrs.map { it.toCvr() },
         )
         println("limitedPool= ${limitedPool.first()}")
     }

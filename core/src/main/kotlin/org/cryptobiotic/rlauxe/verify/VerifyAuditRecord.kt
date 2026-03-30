@@ -8,11 +8,12 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.AuditRecordIF
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.existsOrZip
+import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 
 class VerifyAuditRecord(val auditRecordLocation: String) {
     val auditRecord: AuditRecordIF
+    val mvrManager: PersistedMvrManager
     val publisher: Publisher
     val config: Config
     val contests: List<ContestWithAssertions>
@@ -27,6 +28,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
             logger.error{ auditRecordResult.toString() }
             throw RuntimeException( auditRecordResult.toString() )
         }
+        mvrManager = PersistedMvrManager(auditRecord as AuditRecord, false)
 
         publisher = Publisher(auditRecordLocation)
         config = auditRecord.config
@@ -104,7 +106,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
         val estCards = contestRound.estMvrs
 
         result.addMessage(" verify sampling for contest ${contest.id}")
-        val cards = readAuditableCardCsvFile(publisher.sampleCardsFile(firstRound.roundIdx))
+        val cards = mvrManager.readCardsAndMergeList(publisher.sampleCardsFile(firstRound.roundIdx))
         var nextRoundIdx = 1
         while (nextRoundIdx < auditRecord.rounds.size) {
             val nextRound = auditRecord.rounds[nextRoundIdx]
@@ -113,7 +115,7 @@ class VerifyAuditRecord(val auditRecordLocation: String) {
             val estCardsNext = nextContestRound.estMvrs
 
             if (!existsOrZip(publisher.sampleCardsFile(nextRound.roundIdx))) return
-            val nextCards = readAuditableCardCsvFile(publisher.sampleCardsFile(nextRound.roundIdx))
+            val nextCards = mvrManager.readCardsAndMergeList(publisher.sampleCardsFile(nextRound.roundIdx))
 
             result.addMessage("   verify sampling for contest ${contest.id} round ${firstRound.roundIdx} estCards=${estCards} " +
                     "vs round ${nextRound.roundIdx} estCards=${estCardsNext} ")

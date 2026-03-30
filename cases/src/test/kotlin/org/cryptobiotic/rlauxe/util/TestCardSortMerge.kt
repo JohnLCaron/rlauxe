@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.util
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
@@ -35,7 +35,7 @@ class TestCardSortMerge {
         )
         sorter.run(
             cardIter = cvrExportCsvIterator(filename = cvrExportFile),
-            toAuditableCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
+            toCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
         )
 
         val cardIter = readCardsCsvIterator(outputFile)
@@ -61,7 +61,7 @@ class TestCardSortMerge {
 
         sorter.run(
             cardIter = cvrExportCsvIterator(filename = "$cvrExportFile.zip"),
-            toAuditableCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
+            toCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
         )
 
         val cardIter = readCardsCsvIterator(outputFile)
@@ -87,7 +87,7 @@ class TestCardSortMerge {
 
         sorter.run(
             cardIter = cvrExportCsvIterator(filename = "$cvrExportFile.zip"),
-            toAuditableCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
+            toCard = { from: CvrExport, index: Int, prn: Long -> toAuditableCard(from, index, prn, pools) }
         )
 
         val cardIter = readCardsCsvIterator(outputFile)
@@ -101,8 +101,8 @@ class TestCardSortMerge {
         assertEquals(0, countPools) // the zip file has no pooled data
     }
 
-    fun toAuditableCard(from: CvrExport, index: Int, prn: Long, pools: Map<String, Int>? = null, showPoolVotes: Boolean = true): AuditableCard {
-        return from.toAuditableCard(index=index, prn=prn, false, pools = pools, showPoolVotes)
+    fun toAuditableCard(from: CvrExport, index: Int, prn: Long, pools: Map<String, Int>? = null, showPoolVotes: Boolean = true): CardWithBatchName {
+        return from.toCardNoBatch(index=index, prn=prn, false, pools = pools, showPoolVotes)
     }
 
 }

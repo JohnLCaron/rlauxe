@@ -1,6 +1,8 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.Batch
+import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.core.ContestIF
 import org.cryptobiotic.rlauxe.core.Cvr
 
@@ -36,8 +38,10 @@ fun makePhantomCvrs(
             phantombs[it].contests.add(contest.id)
         }
     }
-    // println("nphantoms = ${phantombs.size}")
-    return phantombs.map { it.buildCvr() }
+
+    val result =  phantombs.map { it.buildCvr() }
+    result.forEach { require(it.votes.isNotEmpty() )}
+    return result
 }
 
 fun makePhantomCvrs(
@@ -78,6 +82,27 @@ fun makePhantomCards(
     return phantombs.map { it.buildCard() }
 }
 
+fun makePhantomNoBatch(
+    contests: List<ContestIF>,
+    startIdx: Int,
+    prefix: String = "phantom-",
+): List<CardWithBatchName> {
+    var idx = startIdx
+
+    val phantombs = mutableListOf<PhantomBuilder>()
+    for (contest in contests) {
+        val phantoms_needed = contest.Nphantoms()
+        while (phantombs.size < phantoms_needed) { // make sure you have enough phantom CVRs
+            phantombs.add(PhantomBuilder(id = "${prefix}${phantombs.size + 1}", idx++))
+        }
+        // include this contest on the first n phantom CVRs
+        repeat(phantoms_needed) {
+            phantombs[it].contests.add(contest.id)
+        }
+    }
+    return phantombs.map { it.buildCardNoBatch() }
+}
+
 class PhantomBuilder(val id: String, val idx: Int) {
     val contests = mutableListOf<Int>()
 
@@ -87,8 +112,12 @@ class PhantomBuilder(val id: String, val idx: Int) {
     }
 
     fun buildCard(): AuditableCard {
-        // hijack votes
         val votes = contests.associateWith { IntArray(0) }
-        return AuditableCard(location = id, index = idx, prn = 0L, phantom = true, votes = votes, poolId = null, batchName="phantoms")
+        return AuditableCard(location = id, index = idx, prn = 0L, phantom = true, votes = votes, batch=Batch.phantomBatch)
     }
+    fun buildCardNoBatch(): CardWithBatchName {
+        val votes = contests.associateWith { IntArray(0) }
+        return CardWithBatchName(location = id, index = idx, prn = 0L, phantom = true, votes = votes, poolId = null, batchName=Batch.phantoms)
+    }
+
 }

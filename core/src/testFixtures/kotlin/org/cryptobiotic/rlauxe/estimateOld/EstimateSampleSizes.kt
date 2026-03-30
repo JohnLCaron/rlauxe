@@ -13,7 +13,7 @@ import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.roundUp
-import org.cryptobiotic.rlauxe.workflow.CardManifest
+import org.cryptobiotic.rlauxe.persist.CardManifest
 
 
 private val logger = KotlinLogging.logger("EstimateSampleSizes")

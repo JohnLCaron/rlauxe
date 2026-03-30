@@ -144,7 +144,7 @@ class ClcaSamplerErrorTracker(
             val (mvr, card) = samples[permutedIndex[idx]]
             idx++
             val nextVal = cassorter.bassort(mvr, card, hasStyle=card.hasStyle())
-            clcaErrorTracker.addSample(nextVal, card.poolId == null) // dont track errors from oa pools
+            clcaErrorTracker.addSample(nextVal, card.poolId() == null) // dont track errors from oa pools
             return nextVal
         }
         logger.error{"ClcaSamplerErrorTracker no samples left for contest ${contestId} and ComparisonAssorter ${cassorter.shortName()}"}

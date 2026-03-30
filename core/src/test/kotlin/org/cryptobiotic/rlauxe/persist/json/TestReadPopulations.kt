@@ -2,8 +2,11 @@ package org.cryptobiotic.rlauxe.persist.json
 
 import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsvFile
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.workflow.readBatches
+import org.cryptobiotic.rlauxe.workflow.readCardPools
 import kotlin.io.path.createTempFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,17 +16,15 @@ import kotlin.test.assertTrue
 class TestReadPopulations {
 
     @Test
-    fun testReadOneAuditPopulations() {
+    fun testReadPollingBatches() {
         val auditdir = "$testdataDir/persist/testRunCli/polling/audit"
-        // val auditdir = "../core/src/test/data/testRunCli/oneaudit/audit"
 
         val publisher = Publisher(auditdir)
         val pops = readBatches(publisher)!!
         println("read ${pops} batch (original)")
         val pool = pops.first()
-        assertTrue(pool is Batch)
-        assertEquals(42, pool.id) // bogus
-        assertEquals("batch42", pool.name)
+        assertEquals(0, pool.id) // bogus
+        assertEquals("style0", pool.name)
 
         val scratchFile = createTempFile().toFile()
         writeBatchesJsonFile(pops, scratchFile.toString())
@@ -38,9 +39,8 @@ class TestReadPopulations {
         scratchFile.delete()
     }
 
-    /* TODO
     @Test
-    fun testReadCardPools() {
+    fun testReadOneAuditPools() {
         val auditdir = "$testdataDir/persist/testRunCli/oneaudit/audit"
         // val auditdir = "../core/src/test/data/testRunCli/oneaudit/audit"
 
@@ -65,6 +65,6 @@ class TestReadPopulations {
         assertEquals(pool.hashCode(), rpool.hashCode())
 
         scratchFile.delete()
-    } */
+    }
 
 }

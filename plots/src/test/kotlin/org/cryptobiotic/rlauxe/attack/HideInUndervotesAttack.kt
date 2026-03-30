@@ -153,7 +153,7 @@ class ClcaSingleRoundWorkflowTaskGeneratorU(
                 flippedVotes[1] = intArrayOf(1)
                 Cvr(card.location, flippedVotes, false, poolId)
             } else {
-                card.cvr()
+                card.toCvr()
             }
         }
         assertEquals(undervotes, countFlips)

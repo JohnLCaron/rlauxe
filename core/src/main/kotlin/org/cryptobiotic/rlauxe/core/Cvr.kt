@@ -6,7 +6,7 @@ interface CvrIF {
     fun isPhantom(): Boolean
     fun poolId(): Int?
 
-    fun votes(contestId: Int): IntArray?
+    fun votes(contestId: Int): IntArray? // contestId -> candidate ids voted for
     fun hasMarkFor(contestId: Int, candidateId: Int): Int
 }
 
@@ -16,23 +16,24 @@ data class Cvr(
     val id: String, // ballot identifier
     val votes: Map<Int, IntArray>, // contest -> list of candidates voted for; for IRV, ranked first to last
     val phantom: Boolean = false,
-    val poolId: Int? = null,  // or cardStyle.id
+    val poolId: Int? = null,
 ): CvrIF {
+
     init {
         require(id.indexOf(',') < 0) { "cvr.id='$id' must not have commas"} // must not have nasty commas
     }
 
-    override fun isPhantom() = phantom
-    override fun poolId() = poolId
+    constructor(oldCvr: Cvr, votes: Map<Int, IntArray>) : this(oldCvr.id, votes, oldCvr.phantom)
+    constructor(contest: Int, ranks: List<Int>): this( "testing", mapOf(contest to ranks.toIntArray())) // for quick testing
+
     override fun location() = id
+    override fun isPhantom() = phantom
 
     override fun hasContest(contestId: Int): Boolean = votes[contestId] != null
     override fun votes(contestId: Int): IntArray? = votes[contestId]
 
-    fun contests() = votes.keys.toList().sorted().toIntArray()
-
-    constructor(oldCvr: Cvr, votes: Map<Int, IntArray>) : this(oldCvr.id, votes, oldCvr.phantom)
-    constructor(contest: Int, ranks: List<Int>): this( "testing", mapOf(contest to ranks.toIntArray())) // for quick testing
+    // OA bassort() uses poolId to branch between pooled and Cvr cards
+    override fun poolId() = poolId
 
     // Let 1candidate(bi) = 1 if ballot i has a mark for candidate, and 0 if not; SHANGRLA section 2, page 4
     override fun hasMarkFor(contestId: Int, candidateId: Int): Int {

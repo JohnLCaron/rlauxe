@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.roundUp
-import org.cryptobiotic.rlauxe.workflow.CardManifest
+import org.cryptobiotic.rlauxe.persist.CardManifest
 import kotlin.math.min
 
 private val debug = false
@@ -159,7 +159,7 @@ fun tabulateDebugInfo(cards: CloseableIterator<AuditableCard>, contests: List<Co
                 if (useCard && card.hasContest(contest.id)) {
                     val tab = tabs.getOrPut(contest.id) { ContestDebugInfo(contest.id, 0, 0) }
                     tab.count++
-                    if (card.poolId == null)
+                    if (card.poolId() == null)
                         tab.countNotPooled++
                 }
             }

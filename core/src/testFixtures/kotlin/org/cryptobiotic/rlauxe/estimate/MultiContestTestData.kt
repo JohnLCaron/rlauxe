@@ -1,15 +1,15 @@
 package org.cryptobiotic.rlauxe.estimate
 
+import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.audit.MergeBatchIntoCards
+import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterator
 import org.cryptobiotic.rlauxe.audit.BatchIF
-import org.cryptobiotic.rlauxe.util.makePhantomCards
+import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
-import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
-import org.cryptobiotic.rlauxe.workflow.CardManifest
+import org.cryptobiotic.rlauxe.audit.CvrsToCardsWithBatchNameIterator
 import kotlin.Int
 import kotlin.String
 import kotlin.math.abs
@@ -19,12 +19,13 @@ import kotlin.random.Random
 
 private const val debugAdjust = false
 
-data class MvrCardAndPops(val mvrs: List<Cvr>, val cardManifest: List<AuditableCard>, val pools: List<CardPoolIF>, val styles: List<BatchIF>)
+// (mvrs, cards, pools, styles)
+data class MvrCardAndPops(val mvrs: List<Cvr>, val cards: List<AuditableCard>, val pools: List<CardPoolIF>, val batches: List<BatchIF>)
 
 /**
  * Creates a set of contests and populations, with randomly chosen candidates and margins.
  * It can create cvrs that reflect the contests' exact votes.
- * Not for OneAudit, use makeOneAuditTest()
+ * TODO Not for OneAudit, use makeOneAuditTest()
  * TODO use Vunder, which also models contests missing on a card
  * TODO rewrite
  */
@@ -35,14 +36,14 @@ data class MultiContestTestData(
     val marginRange: ClosedFloatingPointRange<Double> = 0.01.. 0.03,
     val underVotePctRange: ClosedFloatingPointRange<Double> = 0.01.. 0.30, // needed to set Nc
     val phantomPctRange: ClosedFloatingPointRange<Double> = 0.00..  0.005, // needed to set Nc
-    val addPoolId: Boolean = false, // add cardStyle info to cvrs and cards
     val ncands: Int? = null,
-    val poolPct: Double? = null,  // if not null, make a pool with this pct with two ballotStyles
+    // val poolPctForTestData: Double? = null,  // if not null, make a pool with this pct with two ballotStyles
     val seqCands: Boolean = false, // if true, use ncands = 2 .. ncontests + 1
-    val hasSingleCardStyle: Boolean = false // if true, use ncands = 2 .. ncontests + 1
+    val hasSingleCardStyle: Boolean = false, // if true, use ncands = 2 .. ncontests + 1
+    val auditType: AuditType = AuditType.CLCA,
 ) {
-    val poolId = if (poolPct == null) null else 1
-    val ballotStylePartition: Map<Int,Int>
+    // val poolId = if (poolPctForTestData == null) null else 1
+    val ballotStylePartition: Map<Int, Int>
 
     val contestTestBuilders: List<ContestTestDataBuilder>
     val contests: List<Contest>
@@ -54,8 +55,9 @@ data class MultiContestTestData(
         require(nballotStyles > 0)
         require(totalBallots > nballotStyles * ncontest) // TODO
 
-        ballotStylePartition = if (poolPct == null) partition(totalBallots, nballotStyles).toMap() // Map bsidx -> ncards in each ballot style (bs)
-            else partitionWithPool(totalBallots, nballotStyles, poolPct).toMap()
+        ballotStylePartition = partition(totalBallots, nballotStyles).toMap() // Map bsidx -> ncards in each ballot style (bs)
+        // ballotStylePartition = if (poolPctForTestData == null) partition(totalBallots, nballotStyles).toMap() // Map bsidx -> ncards in each ballot style (bs)
+        //    else partitionWithPool(totalBallots, nballotStyles, poolPctForTestData).toMap()
 
         // between 2 and 4 candidates, margin is a random number in marginRange
         contestTestBuilders = List(ncontest) { it }.map {// id same as index
@@ -108,46 +110,47 @@ data class MultiContestTestData(
         }
     }
 
-    // mvrs, cardPool, cardStyle
-    fun makeCardPoolManifest(): MvrCardAndPops {
+    // (mvrs, cards, pools, styles)
+    fun makeMvrCardAndPops(): MvrCardAndPops {
         // these are the mvr truth
-        val mvrs = makeCardsFromContests()
+        val mvrs: List<Cvr> = makeCvrsFromContests()
 
-        // the union of the first two styles
+        // the union of the first two styles TODO wtf
+
+        /* expand the two cardStyles
         val expandedContestIds = (cardStyles[0].contests + cardStyles[1].contests).toSet().sorted().toIntArray()
-
-        val infos = contests.associate { it.id to it.info() }
-
-        // expand the two cardStyles
         val expandedCardStyles = listOf(
             cardStyles[0].copy(contests = expandedContestIds),
             cardStyles[1].copy(contests = expandedContestIds),
+        ) */
+
+        // convert MVRS to cardWithBatchName
+        val batchNameIter: CloseableIterator<CardWithBatchName> = CvrsToCardsWithBatchNameIterator(
+            auditType,
+            cvrs = Closer( mvrs.iterator()),  // hmmm fishy
+            phantomCvrs = null, // mvrs already have the phantoms
+            batches = cardStyles,
         )
 
-        // here we put the pool data into a single pool, and combine their contestIds, to get a diluted margin for testing
-        val cardManifest = mutableListOf<AuditableCard>()
-        val converter = MergeBatchIntoCards(
-            cards = mvrs,
-            expandedCardStyles,
+        // cardWithBatchName to AuditableCard
+        val cards = mutableListOf<AuditableCard>()
+        val converter: CloseableIterator<AuditableCard> = MergeBatchesIntoCardManifestIterator(
+            batchNameIter,
+            batches = cardStyles,
         )
-        converter.forEach { cardManifest.add(it) }
-
-        // we need to populate the pool tab with the votes
-        val pool = OneAuditPoolFromCvrs("pool", 1, false, infos)
-        expandedContestIds.forEach { id -> pool.contestTabs[id] = ContestTabulation(infos[id]!!) }
-        mvrs.forEach { card ->
-            if (card.poolId == 1) pool.accumulateVotes(card.cvr())
+        converter.forEach { it ->
+            cards.add(it)
         }
 
-        // TODO kludge
-        val mvrsAsCvr = mvrs.map { it.cvr() }
+        /* we need to populate the pool tab with the votes
+        val infos = contests.associate { it.id to it.info() }
+        val pool = OneAuditPoolFromCvrs("pool", 1, false, infos)
+        expandedContestIds.forEach { id -> pool.contestTabs[id] = ContestTabulation(infos[id]!!) }
+        mvrs.forEach { mvr ->
+            if (mvr.poolId == 1) pool.accumulateVotes(mvr)
+        } */
 
-        return MvrCardAndPops(mvrsAsCvr, cardManifest, listOf(pool), cardStyles)
-    }
-
-    fun makeCardLocationManifest(): CardManifest {
-        val cards = makeCardsFromContests()
-        return CardManifest(CloseableIterable { cards.iterator() }, cards.size, cardStyles)
+        return MvrCardAndPops(mvrs, cards, emptyList(), cardStyles)
     }
 
     override fun toString() = buildString {
@@ -162,8 +165,7 @@ data class MultiContestTestData(
         cardStyles.forEach { appendLine("  $it") }
     }
 
-    // TODO not positive I have the poolId correct
-    fun makeCvrsFromContests(poolId: Int? = null): List<Cvr> {
+    fun makeCvrsFromContests(): List<Cvr> {
         contestTestBuilders.forEach { it.resetTracker() } // startFresh
         val cvrbs = CvrBuilders().addContests(contestTestBuilders.map { it.info })
         val result = mutableListOf<Cvr>()
@@ -171,13 +173,13 @@ data class MultiContestTestData(
             val fcontests = contestTestBuilders.filter { cardStyle.hasContest(it.info.id) }
             repeat(cardStyle.ncards) {
                 // add regular Cvrs including undervotes
-                val poolId = poolId // if ((poolPct != null) && cardStyle.id  < 2) 1 else null
-                result.add(makeCvr(cvrbs, fcontests, poolId = poolId)) // TODO always just add ??
+                result.add( makeCvr(cvrbs, fcontests, poolId = cardStyle.id)) // hijack poolId
             }
         }
 
-        val phantoms = makePhantomCvrs(contests)
-        return result + phantoms
+        result.addAll(makePhantomCvrs(contests))
+        result.shuffle(Random)
+        return result
     }
 
     private fun makeCvr(cvrbs: CvrBuilders, fcontests: List<ContestTestDataBuilder>, poolId: Int?): Cvr {
@@ -186,26 +188,26 @@ data class MultiContestTestData(
         return cvrb.build(poolId)
     }
 
-    fun makeCardsFromContests(startCvrId : Int = 0): List<AuditableCard> {
+    fun makeCardsFromContests(startCvrId : Int = 0): List<CardWithBatchName> {
         contestTestBuilders.forEach { it.resetTracker() } // startFresh
 
         var nextCardId = startCvrId
-        val result = mutableListOf<AuditableCard>()
+        val result = mutableListOf<CardWithBatchName>()
         cardStyles.forEach { cardStyle ->
             val fcontests = contestTestBuilders.filter { cardStyle.hasContest(it.info.id) }
             repeat(cardStyle.ncards) {
-                val poolId = if ((poolPct != null) && cardStyle.id  < 2) 1 else null
-                result.add(makeCard(nextCardId++, fcontests, poolId = poolId, cardStyle=cardStyle.name))
+                // val poolId = if ((poolPctForTestData != null) && cardStyle.id  < 2) 1 else null
+                result.add(makeCard(nextCardId++, fcontests, poolId = cardStyle.id, cardStyle=cardStyle.name))
             }
         }
 
-        result.addAll(makePhantomCards(contests, startIdx = result.size))
+        result.addAll(makePhantomNoBatch(contests, startIdx = result.size))
         result.shuffle(Random)
         return result
     }
 
-    private fun makeCard(nextCardId: Int, fcontests: List<ContestTestDataBuilder>, poolId: Int?, cardStyle: String?): AuditableCard {
-        val cardBuilder = CardBuilder("card${nextCardId}", nextCardId, poolId, cardStyle)
+    private fun makeCard(nextCardId: Int, fcontests: List<ContestTestDataBuilder>, poolId: Int?, cardStyle: String?): CardWithBatchName {
+        val cardBuilder = CardWithBatchNameBuilder("card${nextCardId}", nextCardId, poolId, cardStyle)
         fcontests.forEach { fcontest -> fcontest.addContestToCard(cardBuilder) }
         return cardBuilder.build(poolId)
     }
@@ -280,7 +282,7 @@ data class ContestTestDataBuilder(
     }
 
     // choose Candidate, add contest, including undervote
-    fun addContestToCard(cvrb: CardBuilder) {
+    fun addContestToCard(cvrb: CardWithBatchNameBuilder) {
         val candidateIdx = chooseCandidate(Random.nextInt(votesLeft))
         if (candidateIdx == ncands) {
             cvrb.replaceContestVote(info.id, null) // undervote

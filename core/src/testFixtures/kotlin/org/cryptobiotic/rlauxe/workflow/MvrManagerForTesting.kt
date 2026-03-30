@@ -5,6 +5,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.persist.CardManifest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -35,12 +36,12 @@ class MvrManagerForTesting(
     init {
         // the order of the sortedCards cannot be changed once set.
         val prng = Prng(seed)
-        sortedCards = cvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }.sortedBy { it.prn }
-        sortedMvrs = sortedCards.map { AuditableCard.fromCvr(mvrs[it.index], it.index, it.prn) }
+        sortedCards = cvrs.mapIndexed { idx, it -> AuditableCard(it, idx, prng.next()) }.sortedBy { it.prn }
+        sortedMvrs = sortedCards.map { AuditableCard(mvrs[it.index], it.index, it.prn) }
     }
 
     override fun sortedManifest(): CardManifest {
-        return CardManifest.createFromList(sortedCards, pools)
+        return CardManifest.createFromAList(sortedCards)
     }
 
     override fun pools() = pools
@@ -63,6 +64,10 @@ class MvrManagerForTesting(
             require(mvr.prn == cvr.prn)
         }
         return mvrsForRound.zip(sampledCvrs)
+    }
+
+    override fun writeMvrsForRound(round: Int): Int {
+        TODO("Not yet implemented")
     }
 
     // MvrManagerTestIF
@@ -126,20 +131,15 @@ fun runTestAuditToCompletion(name: String, workflow: AuditWorkflow, quiet: Boole
 // no AuditRecord, pass in publisher...
 
 fun readSortedManifest(publisher: Publisher, infos: Map<Int, ContestInfo>, ncards: Int): CardManifest {
-    val batches = readBatches(publisher) ?: readCardPools(publisher, infos) // which is preferrred ?
-    if (batches != null && batches.isNotEmpty()) {
-        // merge batch references into the Card
-        val mergedCards =
-            MergeBatchesIntoCards(
-                CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
-                batches,
-            )
+    val batches = readBatches(publisher) ?: readCardPools(publisher, infos) ?: emptyList() // which is preferrred ?
+    // merge batch references into the Card
+    val mergedCards =
+        MergeBatchesIntoCardManifestIterable(
+            CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
+            batches,
+        )
 
-        return CardManifest(mergedCards, ncards, batches)
-    }
-    // no batches so you dont need to merge
-    val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
-    return CardManifest(sortedCards, ncards, emptyList())
+    return CardManifest(mergedCards, ncards)
 }
 
 fun readBatches(publisher: Publisher): List<Batch>? {

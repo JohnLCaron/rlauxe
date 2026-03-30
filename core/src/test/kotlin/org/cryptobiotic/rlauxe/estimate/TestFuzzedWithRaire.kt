@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
 import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
+import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsForClca
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

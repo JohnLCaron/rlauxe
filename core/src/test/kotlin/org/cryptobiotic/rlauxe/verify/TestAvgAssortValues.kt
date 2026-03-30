@@ -2,13 +2,13 @@ package org.cryptobiotic.rlauxe.verify
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.MergeBatchIntoCards
-import org.cryptobiotic.rlauxe.audit.CvrsAndBatchesToCards
+import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterator
+import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsList
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimateOld.simulateCvrsFromMargin
-import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
+import org.cryptobiotic.rlauxe.persist.csv.CardHeader
+import org.cryptobiotic.rlauxe.persist.csv.writeCardCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import kotlin.test.Test
@@ -33,17 +33,14 @@ class TestAvgAssortValues {
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsAndBatchesToCards(
-                AuditType.CLCA, Closer(testCvrs.iterator()),
-                phantomCvrs=null, batches = null,
-            )
+            mvrsToAuditableCardsList( AuditType.CLCA, testCvrs, null).iterator()
         }
 
         if (showCvrs) {
-            println("\n$AuditableCardHeader")
+            println("\n$CardHeader")
             var count = 0
             for (card in cardIterable.iterator()) {
-                print(writeAuditableCardCsv(card))
+                print(writeCardCsv(card))
                 if (count++ > 10) break
             }
             println()
@@ -80,17 +77,14 @@ class TestAvgAssortValues {
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsAndBatchesToCards(
-                AuditType.CLCA, Closer(testCvrs.iterator()),
-                phantomCvrs=null, batches = null,
-            )
+            mvrsToAuditableCardsList( AuditType.CLCA, testCvrs, null).iterator()
         }
 
         if (showCvrs) {
-            println("\n$AuditableCardHeader")
+            println("\n$CardHeader")
             var count = 0
             for (card in cardIterable.iterator()) {
-                print(writeAuditableCardCsv(card))
+                print(writeCardCsv(card))
                 if (count++ > 10) break
             }
             println()
@@ -123,17 +117,14 @@ class TestAvgAssortValues {
         val testCvrs = test.makeCvrsFromContests()
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsAndBatchesToCards(
-                AuditType.CLCA,Closer(testCvrs.iterator()),
-                phantomCvrs=null, batches = null,
-            )
+            mvrsToAuditableCardsList( AuditType.CLCA, testCvrs, null).iterator()
         }
 
         if (showCvrs) {
-            println("\n$AuditableCardHeader")
+            println("\n$CardHeader")
             var count = 0
             for (card in cardIterable.iterator()) {
-                print(writeAuditableCardCsv(card))
+                print(writeCardCsv(card))
                 if (count++ > 10) break
             }
             println()
@@ -156,28 +147,27 @@ class TestAvgAssortValues {
         val underVotePct = 0.034..0.0345
         val phantomRange = 0.001..0.005
 
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange,
-            addPoolId = true)
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
 
         println()
         test.cardStyles.forEach { println(it) }
 
         val testCards = test.makeCardsFromContests()
-        if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeAuditableCardCsv(it)}") }
+        if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeCardCsv(it)}") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            MergeBatchIntoCards(
-                testCards,
+            MergeBatchesIntoCardManifestIterator(
+                Closer(testCards.iterator()),
                 batches = test.cardStyles,
             )
         }
 
         if (showCvrs) {
-            println("\n$AuditableCardHeader")
+            println("\n$CardHeader")
             var count = 0
             for (card in cardIterable.iterator()) {
-                if (card.contests().toSet() != card.votes?.keys) print("*** ")
-                print(writeAuditableCardCsv(card))
+                if (card.possibleContests().toSet() != card.votes?.keys) print("*** ")
+                print(writeCardCsv(card))
                 if (count++ > 100) break
             }
             println()
@@ -203,8 +193,7 @@ class TestAvgAssortValues {
         val underVotePct = 0.034..0.0345
         val phantomRange = 0.001..0.005
 
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange,
-            addPoolId = true)
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
 
         println()
         test.cardStyles.forEach { println(it) }
@@ -212,21 +201,21 @@ class TestAvgAssortValues {
         val modStyles = test.cardStyles.map { it.copy(contests=intArrayOf(0,1,2,3,4)) }
 
         val testCards = test.makeCardsFromContests()
-        if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeAuditableCardCsv(it)}") }
+        if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeCardCsv(it)}") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            MergeBatchIntoCards(
-                testCards,
+            MergeBatchesIntoCardManifestIterator(
+                Closer(testCards.iterator()),
                 batches = modStyles,
             )
         }
 
         if (showCvrs) {
-            println("\n$AuditableCardHeader")
+            println("\n$CardHeader")
             var count = 0
             for (card in cardIterable.iterator()) {
-                if (card.contests().toSet() != card.votes?.keys) print("*** ")
-                print(writeAuditableCardCsv(card))
+                if (card.possibleContests().toSet() != card.votes?.keys) print("*** ")
+                print(writeCardCsv(card))
                 if (count++ > 100) break
             }
             println()

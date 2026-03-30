@@ -44,27 +44,27 @@ class TestOneAuditFuzzers {
         assertFalse(cardPool.hasContest(42))
         assertEquals(2, cardPool.possibleContests().size) // when extraPct > 0
 
-        val countPoolCards = cards.count { it.poolId == cardPool.poolId }
+        val countPoolCards = cards.count { it.poolId() == cardPool.poolId }
         assertEquals(countPoolCards, cardPool.ncards())
 
         val vunderFuzz = VunderPoolsFuzzer(pools, infos, fuzzPct, cards)
         val oaFuzzedPairs: List<Pair<AuditableCard, AuditableCard>> = vunderFuzz.mvrCvrPairs
         assertEquals(cards.size, oaFuzzedPairs.size)
 
-        val countPoolCards2 = oaFuzzedPairs.count { it.second.poolId == cardPool.poolId }
+        val countPoolCards2 = oaFuzzedPairs.count { it.second.poolId() == cardPool.poolId }
         assertEquals(countPoolCards, countPoolCards2)
 
         val fuzzedMvrs = oaFuzzedPairs.map { it.first }
         val fuzzedMvrTab = tabulateCards(fuzzedMvrs.iterator(), infos)
         println("fuzzedMvrTab= ${fuzzedMvrTab[info.id]}")
 
-        val countPoolCards3 = fuzzedMvrs.count { it.poolId == cardPool.poolId }
+        val countPoolCards3 = fuzzedMvrs.count { it.poolId() == cardPool.poolId }
         assertEquals(countPoolCards, countPoolCards3)
 
         val fuzzedPool = calcOneAuditPoolsFromMvrs(
             infos,
             populations = listOf(Batch("fuzzedPool", 42, intArrayOf(1, 2), false)),
-            fuzzedMvrs.map { it.cvr() },
+            fuzzedMvrs.map { it.toCvr() },
         )
         println("fuzzedPool= ${fuzzedPool.first()}")
         println()

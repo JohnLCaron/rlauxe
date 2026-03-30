@@ -26,7 +26,6 @@ interface AuditRoundIF {
     fun createNextRound(): AuditRound
 }
 
-
  // Note: mutable
 data class AuditRound(
     override val roundIdx: Int,

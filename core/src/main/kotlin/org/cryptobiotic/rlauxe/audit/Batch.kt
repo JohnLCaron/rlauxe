@@ -14,7 +14,7 @@ import kotlin.collections.contains
 interface BatchIF {
     fun name(): String
     fun id(): Int
-    fun possibleContests(): IntArray // the set of contests that might be on any card in the population
+    fun possibleContests(): IntArray // the set of contests that might be on any card in the batch
     fun hasSingleCardStyle(): Boolean // aka hasStyle: if all cards have exactly the contests in possibleContests()
     fun hasContest(contestId: Int): Boolean // "is in possibleContests()"
     // if you have these, then you're a Pool
@@ -54,7 +54,17 @@ data class Batch(
         return result
     }
 
+    companion object {
+        // dont use these names for other batches
+        val fromCvr = "_fromCvr"
+        val phantoms = "_phantoms"
 
+        //  assumes cvrsContainUndervotes, use regular batch if not.
+        val fromCvrBatch = Batch(fromCvr, -1, intArrayOf(), true)
+        val phantomBatch = Batch(phantoms, -1, intArrayOf(), true)
+
+        fun useVotes(batchName: String): Boolean = batchName == fromCvr || batchName == phantoms
+    }
 }
 
 

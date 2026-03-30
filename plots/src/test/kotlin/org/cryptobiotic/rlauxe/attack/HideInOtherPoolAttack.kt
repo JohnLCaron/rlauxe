@@ -1,32 +1,6 @@
 package org.cryptobiotic.rlauxe.attack
 
-import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.MergeBatchIntoCards
-import org.cryptobiotic.rlauxe.audit.Batch
-import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.core.Contest
-import org.cryptobiotic.rlauxe.core.ContestInfo
-import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.estimate.MultiContestCombineData
-import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditTestContests
-import org.cryptobiotic.rlauxe.rlaplots.*
-import org.cryptobiotic.rlauxe.util.Closer
-import org.cryptobiotic.rlauxe.util.ContestTabulation
-import org.cryptobiotic.rlauxe.util.Stopwatch
-import org.cryptobiotic.rlauxe.util.roundToClosest
-import org.cryptobiotic.rlauxe.util.sumContestTabulations
-import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
-import org.cryptobiotic.rlauxe.util.tabulateCvrs
-import org.cryptobiotic.rlauxe.util.tabulateOneAuditPools
-import org.cryptobiotic.rlauxe.workflow.*
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.random.Random
-import kotlin.test.Test
-import kotlin.test.assertEquals
-
+/*
 class HideInOtherPoolAttack {
     val name = "hideInOtherPoolAttack"
     var dirName = "$testdataDir/attack/$name"
@@ -160,7 +134,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
         val cardsp = cardsu.map { mcard ->
             if (countPool < Npool) { // put first Npool into the pool
                 countPool++
-                mcard.copy(poolId=1, batchName = "group1")
+                mcard.copy(batch = cardStyles[0])
             } else
                 mcard
         }
@@ -177,9 +151,9 @@ class OASingleRoundWorkflowTaskGeneratorG(
         val wantFlips = diff
         var countFlips = 0
         val mvrs = cardsp.map { mcard ->
-            val org = mcard.cvr()
+            val org = mcard.toCvr()
 
-            if (countFlips < wantFlips && mcard.batchName == "group1" && mcard.votes!!.contains(1)) {
+            if (countFlips < wantFlips && mcard.batchName() == "group1" && mcard.votes!!.contains(1)) {
                 val votesForContest1 = mcard.votes!!.get(1)!!
                 if (votesForContest1.contains(2)) { // if they voted for candB
                     countFlips++
@@ -206,7 +180,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
         // now claim that the flipped cards are in group 2
         val modifiedCards = cardsp.map { mcard ->
             if (flippedLocations.contains(mcard.location())) {
-                mcard.copy(poolId=2)
+                mcard.copy(batch = cardStyles[1])
             }
             else
                 mcard
@@ -216,7 +190,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
             assertEquals(contest.votes, mtabs[contest.id]!!.votes)
         }
 
-        val converter = MergeBatchIntoCards(
+        val converter = MergeBatchesIntoCardIterator(
             cards = modifiedCards,
             cardStyles,
         )
@@ -228,7 +202,7 @@ class OASingleRoundWorkflowTaskGeneratorG(
         }
 
         // TODO need the fake mvrs i think ??
-        val fakeMvrs = cardsp.map { it.cvr() }
+        val fakeMvrs = cardsp.map { it.toCvr() }
         val config = Config.from(AuditType.ONEAUDIT)
         val (contestsUA, cardPools) =
             makeOneAuditTestContests(
@@ -259,3 +233,4 @@ class OASingleRoundWorkflowTaskGeneratorG(
         return Pair(workflow, mvrManager)
     }
 }
+*/

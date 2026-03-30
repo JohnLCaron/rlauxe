@@ -2,9 +2,9 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CvrsAndBatchesToCards
-import org.cryptobiotic.rlauxe.persist.csv.AuditableCardHeader
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsv
+import org.cryptobiotic.rlauxe.audit.CvrsToCardsWithBatchNameIterator
+import org.cryptobiotic.rlauxe.persist.csv.CardHeader
+import org.cryptobiotic.rlauxe.persist.csv.writeCardCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.doublePrecision
@@ -29,18 +29,13 @@ class TestOneAuditAssortAvg {
         if (showCards) mvrs.forEach { println("  $it") }
 
         // note: using the mvrs
-        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsAndBatchesToCards(
-                AuditType.ONEAUDIT, Closer(mvrs.iterator()),
-                phantomCvrs = null, cardPools,
-            )
-        }
+        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable { cards.iterator() }
 
         if (showCards) {
-            println("\n$AuditableCardHeader")
+            println("\n$CardHeader")
             var count = 0
             for (card in cardIterable.iterator()) {
-                print(writeAuditableCardCsv(card))
+                print(writeCardCsv(card))
                 if (count++ > 100) break
             }
             println()
@@ -71,18 +66,13 @@ class TestOneAuditAssortAvg {
         assertEquals(margin, oaContest.minDilutedMargin()!!, doublePrecision)
 
         // note: using the mvrs
-        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsAndBatchesToCards(
-                AuditType.ONEAUDIT,  Closer(mvrs.iterator()),
-                phantomCvrs = null, cardPools,
-            )
-        }
+        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable { cards.iterator() }
 
         if (showCvrs) {
-            println("\n$AuditableCardHeader")
+            println("\n$CardHeader")
             var count = 0
             for (card in cardIterable.iterator()) {
-                print(writeAuditableCardCsv(card))
+                print(writeCardCsv(card))
                 if (count++ > 10) break
             }
             println()
@@ -106,18 +96,13 @@ class TestOneAuditAssortAvg {
         if (showCvrs) mvrs.subList(0, 10).forEach { println("  $it") }
 
         // note: using the mvrs
-        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            CvrsAndBatchesToCards(
-                AuditType.ONEAUDIT, Closer(mvrs.iterator()),
-                phantomCvrs = null, cardPools,
-            )
-        }
+        val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable { cards.iterator() }
 
         if (showCvrs) {
-            println("\n$AuditableCardHeader")
+            println("\n$CardHeader")
             var count = 0
             for (card in cardIterable.iterator()) {
-                print(writeAuditableCardCsv(card))
+                print(writeCardCsv(card))
                 if (count++ > 10) break
             }
             println()

@@ -20,7 +20,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.util.pfn
 import org.cryptobiotic.rlauxe.util.sumContestTabulations
 import org.cryptobiotic.rlauxe.util.tabulateOneAuditPools
-import org.cryptobiotic.rlauxe.workflow.CardManifest
+import org.cryptobiotic.rlauxe.persist.CardManifest
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
@@ -165,7 +165,7 @@ fun verifyManifest(
                         allTab.ncardsTabulated++
                     }
 
-                    if (card.poolId == null) {
+                    if (card.poolId() == null) {
                         val nonpoolTab = nonpooled.getOrPut(contestId) { ContestTabulation(infos[contestId]!!) }
                         if (card.votes != null && card.votes[contestId] != null) { // happens when cardStyle == all
                             val cands = card.votes[contestId]!!
@@ -340,7 +340,7 @@ fun verifyClcaAssortAvg(
                         val passorter = cassertion.assorter
                         val assortAvg = assorters.getOrPut(passorter.hashcodeDesc()) { AssortAvg() }
                         assortAvg.ncards++
-                        assortAvg.totalAssort += passorter.assort(card.cvr(), usePhantoms = false)
+                        assortAvg.totalAssort += passorter.assort(card, usePhantoms = false)
                     }
                 }
             }
@@ -393,10 +393,10 @@ fun verifyOAassortAvg(
                         val passorter = oaCassorter.assorter
                         val assortAvg = avg.getOrPut(passorter.hashcodeDesc()) { AssortAvg() }
                         if (card.hasContest(contestUA.id)) {
-                            val assortVal = if (card.poolId != null)
-                                oaCassorter.poolAverages.assortAverage[card.poolId]!!
+                            val assortVal = if (card.poolId() != null)
+                                oaCassorter.poolAverages.assortAverage[card.poolId()]!!
                             else
-                                passorter.assort(card.cvr(), usePhantoms = false)
+                                passorter.assort(card, usePhantoms = false)
                             assortAvg.totalAssort += assortVal
                             assortAvg.ncards++
                         }

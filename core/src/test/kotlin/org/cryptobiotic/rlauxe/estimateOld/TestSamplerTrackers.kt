@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.estimateOld
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.PollingSamplerTracker
 import org.cryptobiotic.rlauxe.core.Assertion
@@ -49,7 +50,8 @@ class TestSamplerTrackers {
     fun testClcaSampling() {
         // was hasUndervotes=false
         val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, true)
-        val cvrPairs = cvrs.zip( AuditableCard.fromCvrs(cvrs))
+        val cards = cvrs.mapIndexed { idx, cvr -> AuditableCard(cvr, idx, 0 ) }
+        val cvrPairs = cvrs.zip( cards)
 
         val target = ClcaSamplerErrorTracker.withMaxSample(0, cassorter, cvrPairs)
 
@@ -71,7 +73,7 @@ class TestSamplerTrackers {
     fun testClcaSamplerErrorTrackerWithNoErrors() {
         // was hasUndervotes=false
         val cassorter =  ClcaAssorter(assertion.info, assertion.assorter, true)
-        val cards = AuditableCard.fromCvrs(cvrs)
+        val cards = cvrs.mapIndexed { idx, cvr -> AuditableCard(cvr, idx, 0 ) }
 
         val target = ClcaSamplerErrorTracker.withNoErrors(0, cassorter, cards.iterator())
 
@@ -94,7 +96,7 @@ class TestSamplerTrackers {
     fun testClcaSamplerErrorTrackerFromIndexList() {
         // was hasUndervotes=false
         val cassorter =  ClcaAssorter(assertion.info, assertion.assorter,true)
-        val cards = AuditableCard.fromCvrs(cvrs)
+        val cards = cvrs.mapIndexed { idx, cvr -> AuditableCard(cvr, idx, 0 ) }
         val cvrPairs = cards.zip( cards)
         val wantIndices = List(cards.size) { it }
 

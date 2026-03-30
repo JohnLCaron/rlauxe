@@ -160,9 +160,14 @@ data class ElectionInfo(
         if (mvrSource == MvrSource.testClcaSimulated && auditType.isPolling()) {
             throw RuntimeException("MvrSource must be CLCA or OneAudit")
         }
+        if (pollingMode == null && auditType.isPolling()) {
+            throw RuntimeException("Polling Audits must set pollingMode")
+        }
     }
     companion object {
-        fun forTest(auditType: AuditType, mvrSource: MvrSource) = ElectionInfo("testing", auditType, 42, 1, mvrSource=mvrSource)
+        fun forTest(auditType: AuditType, mvrSource: MvrSource) =
+            ElectionInfo("testing", auditType, 42, 1, mvrSource=mvrSource,
+                pollingMode = if (auditType.isPolling()) PollingMode.withBatches else null)
     }
 }
 

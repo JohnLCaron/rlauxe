@@ -162,7 +162,7 @@ class ClcaSingleRoundWorkflowTaskGenerator(
                 flippedVotes[1] = intArrayOf(1)
                 Cvr(card.location, flippedVotes, false, poolId)
             } else {
-                card.cvr()
+                card.toCvr()
             }
         }
         val mvrTabs = tabulateCloseableCvrs(Closer(mvrs.iterator()), infos).toSortedMap()

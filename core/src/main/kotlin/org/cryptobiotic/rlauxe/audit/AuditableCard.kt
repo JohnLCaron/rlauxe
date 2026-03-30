@@ -5,6 +5,8 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.util.Prng
 import kotlin.collections.get
 import kotlin.sequences.plus
 
@@ -17,70 +19,76 @@ import kotlin.sequences.plus
 //  problem is that merging batches is done when reading; and must be uniform, as theres no CreateElection to process specially.
 //  We should be able to write a single MVR, but Cards have to be different.
 
+// maybe AuditableCard must have a batch, but intermediate states could use CardBuilder ??
+// If batch exists, dont need poolId
+// maybe you write CardBuilder and read AuditableCard?
+
+//// change AuditableCardCsv to CardNoBatchCsv
+// cardManifest.csv     // AuditableCardCsv, may be zipped
+// sortedCards.csv      // AuditableCardCsv, sorted by prn, may be zipped  TODO change to sortedCardManifest
+
+// private/sortedMvrs.csv       // AuditableCardCsv, sorted by prn, matches sortedCards.csv, may be zipped
+// private/unsortedMvrs.csv     // AuditableCardCsv (optional)
+
+// roundX/sampleCardsX.csv     // AuditableCardCsv, complete sorted cards used for this round; matches samplePrnsX.csv
+// roundX/sampleMvrsX.csv      // AuditableCardCsv, complete sorted mvrs used for this round; matches samplePrnsX.csv
+
+// does it help if Mvrs dont have to have batch set ?? or even batchName?
+
 data class AuditableCard (
     val location: String, // enough info to find the card for a manual audit.
     val index: Int,  // index into the original, canonical list of cards
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
-
     val votes: Map<Int, IntArray>?,   // CVRs and phantoms
-    val poolId: Int?,                 // must be set if its from a CardPool
-    val batchName: String,            // batch name: "fromCvr" if no batch and its from a CVR
-    val batch: BatchIF? = null,       // batch reference. CLCA dont need unless cvrsContainUndervotes = false
-): CvrIF {
+    val batch: BatchIF,       // batch reference. CLCA dont need unless cvrsContainUndervotes = false
+): CvrIF, CardIF {
 
-    fun cvr() : Cvr {
-        return Cvr(location, votes ?: emptyMap(), phantom, poolId)
-    }
-
-    override fun toString() = buildString {
-        append("AuditableCard(location='$location', index=$index, prn=$prn, phantom=$phantom")
-        if (poolId != null) append(", poolId=$poolId")
-        append(", batchName='$batchName'")
-        if (batch != null) append(", has batch contests=${batch.possibleContests().contentToString()}")
-        append(")")
-        if (votes != null) {
-            appendLine()
-            append("  votes: ")
-            votes.forEach { id, vote -> append("$id:${vote.contentToString()}, ") }
+    init {
+        if (Batch.useVotes(batch.name()) && votes == null) {
+            throw RuntimeException("batch '${batch.name()}' must have non-null votes")
         }
     }
 
-    override fun isPhantom() = phantom
-    override fun location() = location
-    override fun poolId() = poolId
-    override fun votes(contestId: Int): IntArray? = votes?.get(contestId)
+    constructor(card: CardWithBatchName, batch: BatchIF): this(card.location, card.index, card.prn, card.phantom, card.votes, batch)
+    constructor(cvr: Cvr, index: Int, prn: Long): this(cvr.id, index, prn, cvr.phantom, cvr.votes, batch = Batch.fromCvrBatch)
 
-    // "may have contest"
+    fun toCvr() = Cvr(location, votes!!, phantom, poolId()) // TODO can we get rid of?
+
+    // "may have contest". Cvr hasContest does not allow missing, ie is not the same as "may have contest"
     override fun hasContest(contestId: Int): Boolean {
-        return if (batch != null) batch.hasContest(contestId)
-            else if (votes != null) votes[contestId] != null // assumes cvrsContainUndervotes, use batch if not.
-            else false // wtf ??
-    }
-
-    fun contests(): IntArray {
-        return if (batch != null) batch.possibleContests().toList().sorted().toIntArray()
-            else if (votes != null) votes.keys.toList().sorted().toIntArray()
-            else {
-                logger.warn { "AuditableCard has no batch nor votes: $this"}
-                intArrayOf() // TODO makes no sense, a card with no batch or votes, wtf ?
-            }
+        return when {
+            Batch.useVotes(batch.name()) -> votes!![contestId] != null // assumes cvrsContainUndervotes, use batch if not.
+            else -> batch.hasContest(contestId)
         }
-
-    fun hasStyle(): Boolean {
-        return if (batch != null) batch.hasSingleCardStyle()
-        else (batchName != "cvrsIncomplete") // or set a damn batch already
     }
 
-    //// CvrIF
-    // Let 1candidate(bi) = 1 if ballot i has a mark for candidate, and 0 if not; SHANGRLA section 2, page 4
+    override fun location() = location
+    override fun index() = index
+    override fun prn() = prn
+    override fun isPhantom() = phantom
+    override fun votes() = votes
+    override fun votes(contestId: Int): IntArray? = votes?.get(contestId)
+    override fun poolId(): Int? = if (batch is CardPoolIF) batch.id() else null // TODO check
+    override fun batchName() = batch.name()
+
     override fun hasMarkFor(contestId: Int, candidateId: Int): Int {
         val contestVotes = votes?.get(contestId)
         return if (contestVotes == null) 0
         else if (contestVotes.contains(candidateId)) 1 else 0
     }
 
-    //// Kotlin data class doesnt handle IntArray and List<IntArray> correctly
+    // return sorted
+    fun possibleContests() : IntArray {
+        return when {
+            Batch.useVotes(batch.name()) -> votes!!.keys.toList().sorted().toIntArray() // assumes cvrsContainUndervotes, use batch if not.
+            else -> batch.possibleContests().toList().sorted().toIntArray()
+        }
+    }
+
+    fun hasStyle() = batch.hasSingleCardStyle()
+
+    //// Kotlin data class doesnt handle IntArray correctly
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is AuditableCard) return false
@@ -88,21 +96,96 @@ data class AuditableCard (
         if (index != other.index) return false
         if (prn != other.prn) return false
         if (phantom != other.phantom) return false
-        if (poolId != other.poolId) return false
         if (location != other.location) return false
-        // if (!possibleContests.contentEquals(other.possibleContests)) return false
-        if (batchName != other.batchName) return false
         if (batch != other.batch) return false
 
         if ((votes == null) != (other.votes == null)) return false
-
         if (votes != null) {
             for ((contestId, candidates) in votes) {
                 val otherCands = other.votes!![contestId]
                 if (!candidates.contentEquals(otherCands)) return false
             }
         }
+        return true
+    }
 
+    override fun hashCode(): Int {
+        var result = index
+        result = 31 * result + prn.hashCode()
+        result = 31 * result + phantom.hashCode()
+        result = 31 * result + location.hashCode()
+        result = 31 * result + batch.hashCode()
+        votes?.forEach { (contestId, candidates) -> result = 31 * result + contestId.hashCode() + candidates.contentHashCode() }
+        return result
+    }
+
+    override fun toString() = buildString {
+        append("AuditableCard(location='$location', index=$index, prn=$prn, phantom=$phantom")
+        append(", has batch ${batch.name()} ${batch.id()} possibleContests=${batch.possibleContests().contentToString()} singleStyle=${batch.hasSingleCardStyle()}")
+        append(")")
+        if (votes != null) {
+            appendLine()
+            append("  votes: ")
+            votes.forEach { id, vote -> append("$id:${vote.contentToString()}, ") }
+        }
+    }
+}
+
+// lets us serialize either CardNoStyle or AuditableCard
+interface CardIF {
+    fun location(): String // enough info to find the card for a manual audit.
+    fun index(): Int  // index into the original, canonical list of cards
+    fun prn(): Long   // psuedo random number
+    fun isPhantom(): Boolean
+
+    fun votes(): Map<Int, IntArray>?   // CVRs and phantoms
+    fun poolId(): Int?                 // must be set if its from a CardPool  TODO verify batch name, poolId
+    fun batchName(): String            // batch name: "fromCvr" if no batch and its from a CVR (then votes is non null)
+}
+
+// for serialization and ElectionBuilder
+data class CardWithBatchName (
+    val location: String, // enough info to find the card for a manual audit.
+    val index: Int,  // index into the original, canonical list of cards
+    val prn: Long,   // psuedo random number
+    val phantom: Boolean,
+
+    val votes: Map<Int, IntArray>?,   // CVRs and phantoms
+    val poolId: Int?,                 // must be set if its from a CardPool  TODO verify batch name, poolId
+    val batchName: String,            // batch name: "fromCvr" if no batch and its from a CVR (then votes is non null)
+): CardIF {
+
+    constructor(card: AuditableCard): this(card.location, card.index, card.prn, card.phantom, card.votes, card.poolId(), card.batchName())
+
+    override fun location() = location
+    override fun index() = index
+    override fun prn() = prn
+    override fun isPhantom() = phantom
+    override fun votes() = votes
+    override fun poolId() = poolId
+    override fun batchName() = batchName
+
+    fun toCvr() = Cvr(location, votes!!, phantom, poolId) // TODO get rid of
+
+    //// Kotlin data class doesnt handle IntArray and List<IntArray> correctly
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is CardWithBatchName) return false
+
+        if (index != other.index) return false
+        if (prn != other.prn) return false
+        if (phantom != other.phantom) return false
+        if (poolId != other.poolId) return false
+        if (location != other.location) return false
+        if (batchName != other.batchName) return false
+
+        if ((votes == null) != (other.votes == null)) return false
+        if (votes != null) {
+            for ((contestId, candidates) in votes) {
+                val otherCands = other.votes!![contestId]
+                if (!candidates.contentEquals(otherCands)) return false
+            }
+        }
         return true
     }
 
@@ -113,88 +196,114 @@ data class AuditableCard (
         result = 31 * result + (poolId ?: 0)
         result = 31 * result + location.hashCode()
         result = 31 * result + batchName.hashCode()
-        result = 31 * result + (batch?.hashCode() ?: 0)
         votes?.forEach { (contestId, candidates) -> result = 31 * result + contestId.hashCode() + candidates.contentHashCode() }
         return result
     }
 
-    companion object {
-        val fromCvr = "fromCvr"
-        fun fromCvr(cvr: Cvr, index: Int, prn: Long): AuditableCard {
-            return AuditableCard(cvr.id, index, prn=prn, cvr.phantom, cvr.votes, cvr.poolId, batchName=fromCvr)
+    override fun toString() = buildString {
+        append("CardWithBatchName(location='$location', index=$index, prn=$prn, phantom=$phantom")
+        if (poolId != null) append(", poolId=$poolId")
+        append(", batchName='$batchName'")
+        append(")")
+        if (votes != null) {
+            appendLine()
+            append("  votes: ")
+            votes.forEach { id, vote -> append("$id:${vote.contentToString()}, ") }
         }
-        fun fromCvrs(cvrs: List<Cvr>): List<AuditableCard> {
-            return cvrs.mapIndexed { idx, cvr -> AuditableCard.fromCvr(cvr, idx, 0) }
-        }
+    }
 
-        private val logger = KotlinLogging.logger("AuditableCard")
+    companion object {
+        private val logger = KotlinLogging.logger("CardWithBatchName")
     }
 }
 
-class MergeBatchIntoCards(
-    val cards: List<AuditableCard>,
+//// Add batch reference when reading in CardNoBatch
+
+fun merge(cards: CloseableIterator<CardWithBatchName>, batches: List<BatchIF>?) : CloseableIterator<AuditableCard> {
+    return MergeBatchesIntoCardManifestIterator(cards, batches ?: emptyList())
+}
+
+fun merge(cards: List<CardWithBatchName>, batches: List<BatchIF>?) : List<AuditableCard> {
+    val iter = MergeBatchesIntoCardManifestIterator(Closer(cards.iterator()), batches ?: emptyList())
+    val result = mutableListOf<AuditableCard>()
+    while (iter.hasNext()) result.add(iter.next())
+    return result
+}
+
+// read CardWithBatchName, add batch, output AuditableCard as Iterator
+class MergeBatchesIntoCardManifestIterator(
+    val cardsIter: CloseableIterator<CardWithBatchName>,
     batches: List<BatchIF>,
 ): CloseableIterator<AuditableCard> {
-    val cardsIter = cards.iterator()
     val batchMap = batches.associateBy{ it.name() }
 
     override fun hasNext() = cardsIter.hasNext()
 
-    // merges the populations into the cards
+    // batchName must be in batchMap
     override fun next(): AuditableCard {
         val org = cardsIter.next()
-        val pop = batchMap[org.batchName]
-        return org.copy(batch = pop)
+        val batchy = batchMap[org.batchName]
+        val batch = when {
+            org.batchName == Batch.phantoms -> Batch.phantomBatch
+            org.batchName == Batch.fromCvr -> Batch.fromCvrBatch
+            batchy != null -> batchy
+            else ->
+                throw RuntimeException()
+        }
+        return AuditableCard(org, batch)
     }
 
-    override fun close() {}
+    override fun close() { cardsIter.close() }
 }
 
-////////////////////////////////////////////
-
-// Add batch reference when reading in
-class MergeBatchesIntoCards(
-    val cards: CloseableIterable<AuditableCard>,
+// read CardWithBatchName, add batch, output AuditableCard as Iterable
+class MergeBatchesIntoCardManifestIterable(
+    val cards: CloseableIterable<CardWithBatchName>,
     val batches: List<BatchIF>,
 ): CloseableIterable<AuditableCard> {
 
     override fun iterator(): CloseableIterator<AuditableCard> = MergeBatchesIterator(cards.iterator(), batches)
 
     private class MergeBatchesIterator(
-        val cardsIter: CloseableIterator<AuditableCard>,
+        val cardsIter: CloseableIterator<CardWithBatchName>,
         batches: List<BatchIF>,
     ): CloseableIterator<AuditableCard> {
         val batchMap = batches.associateBy { it.name() }
 
         override fun hasNext() = cardsIter.hasNext()
 
-        // merges the batch reference into the cards; could be null
+        // batchName must be in batchMap
         override fun next(): AuditableCard {
-            val org: AuditableCard = cardsIter.next()
-            val pop = batchMap[org.batchName]
-            return org.copy(batch = pop)
-        }
+            val org: CardWithBatchName = cardsIter.next()
+            val batchy = batchMap[org.batchName]
 
+            val batch = when {
+                org.batchName == Batch.phantoms -> Batch.phantomBatch
+                org.batchName == Batch.fromCvr -> Batch.fromCvrBatch
+                batchy != null -> batchy
+                else ->
+                    throw RuntimeException()
+            }
+            return AuditableCard(org, batch)
+        }
         override fun close() = cardsIter.close()
     }
-
 }
 
 ////////////////////////////////////////////
 // used in CreateElectionIF
-// if you pass in batches, this adds batchName and batch to AuditableCard, keyed on poolId.
-// when you serialize, it only saves the batchName.
-// then we rehydrate (MergePopulationsFromIterable) and put the batch reference back in.
-
-class CvrsToCardManifest(
+// relies on cvrs having poolIds that match the batch.id()
+// when it has a pool, use the pool name for the batchName
+class CvrsToCardsWithBatchNameIterator(
     val type: AuditType,
-    val cvrs: CloseableIterator<Cvr>,
+    val cvrs: CloseableIterator<Cvr>,  // hmmm fishy
     val phantomCvrs : List<Cvr>?,
-    batches: List<BatchIF>?, // if you allow empty, might as well allow null
-): CloseableIterator<AuditableCard> {
+    batches: List<BatchIF>?,
+): CloseableIterator<CardWithBatchName> {
 
     val batchMap = batches?.associateBy{ it.id() } ?: emptyMap()
     val allCvrs: Iterator<Cvr>
+
     var cardIndex = 0 // 0 based index
 
     init {
@@ -209,61 +318,117 @@ class CvrsToCardManifest(
 
     override fun hasNext() = allCvrs.hasNext()
 
-    override fun next(): AuditableCard {
+    override fun next(): CardWithBatchName {
         val org = allCvrs.next()
         val batch = batchMap[org.poolId] // hijack poolId
         val hasCvr = type.isClca() || (type.isOA() && org.poolId == null)
-        val votes = if (hasCvr || org.isPhantom()) org.votes else null  // removes votes for pooled data
+        val votes = if (hasCvr) org.votes else null  // removes votes for pooled data
 
-        return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
+        val batchName = when {
+            org.isPhantom() -> Batch.phantoms
+            (batch != null) -> batch.name()
+            else -> Batch.fromCvr
+        }
+
+        return CardWithBatchName(
+            location = org.id,
+            index = cardIndex++,
+            prn = 0,
+            phantom=org.phantom,
             votes = votes,
             poolId = if (type.isClca()) null else org.poolId,
-            batchName = batch?.name() ?: AuditableCard.fromCvr,
-            batch, // not needed if you are just going to serialize; but does no harm
+            batchName = batchName,
         )
     }
 
     override fun close() = cvrs.close()
 }
 
-// used only in testing - could move to testFixtures
-// was CvrsWithPopulationsToCardManifest
-class CvrsAndBatchesToCards(
-    val type: AuditType,
-    val cvrs: CloseableIterator<Cvr>,  // hmmm fishy
-    val phantomCvrs : List<Cvr>?,
-    batches: List<BatchIF>?,
-): CloseableIterator<AuditableCard> {
+// we have the mvrs as cvrs and transform them to CardWithBatchName for private storage
+// needed for out-of-memory handling (eg Corla)
+// relies on cvrs having poolIds that match the batch.id()
+// when it has a pool, use the pool name for the batchName
+class MvrsToCardsWithBatchNameIterator(
+    val mvrs: CloseableIterator<Cvr>,
+    batches: List<BatchIF>,
+    phantomCvrs : List<Cvr>? = null,
+    seed: Long? = null,
+): CloseableIterator<CardWithBatchName> {
 
-    val popMap = batches?.associateBy{ it.id() }
-    val allCvrs: Iterator<Cvr>
-    var cardIndex = 0 // 0 based index
+    val allMvrs: Iterator<Cvr>
 
     init {
-        allCvrs = if (phantomCvrs == null) {
-            cvrs
+        allMvrs = if (phantomCvrs == null) {
+            mvrs
         } else {
-            val cardSeq = cvrs.iterator().asSequence()
+            val mvrSeq = mvrs.iterator().asSequence()
             val phantomSeq = phantomCvrs.asSequence()
-            (cardSeq + phantomSeq).iterator()
+            (mvrSeq + phantomSeq).iterator()
         }
     }
 
-    override fun hasNext() = allCvrs.hasNext()
+    val batchMap = batches.associateBy{ it.id() }
+    val prng = if (seed != null) Prng(seed) else null
 
-    override fun next(): AuditableCard {
-        val org = allCvrs.next()
-        val pop = if (popMap == null) null else popMap[org.poolId] // hijack poolId
-        val hasCvr = type.isClca() || (type.isOA() && org.poolId == null)
-        val votes = if (hasCvr) org.votes else null  // removes votes for pooled data
+    var cardIndex = 0 // 0 based index
 
-        return AuditableCard(org.id, cardIndex++, 0, phantom=org.phantom,
-            votes = votes,
-            poolId = if (type.isClca()) null else org.poolId,
-            batchName = pop?.name() ?: AuditableCard.fromCvr,
-            batch = pop,
+    override fun hasNext() = allMvrs.hasNext()
+
+    override fun next(): CardWithBatchName {
+        val org = allMvrs.next()
+        val batch = batchMap[org.poolId]  // hijack poolId
+
+        val batchName = when {
+            org.isPhantom() -> Batch.phantoms
+            (batch != null) -> batch.name()
+            else -> Batch.fromCvr
+        }
+
+        return CardWithBatchName(
+            org.id,
+            cardIndex++,
+            prng?.next() ?: 0,
+            phantom = org.phantom,
+            votes = org.votes,
+            poolId = org.poolId,
+            batchName = batchName,
         )
     }
 
-    override fun close() = cvrs.close()
+    override fun close() = mvrs.close()
+}
+
+// TODO only used in testing
+fun mvrsToAuditableCardsList(
+    type: AuditType,
+    mvrs: List<Cvr>,
+    batches: List<BatchIF>?,
+    seed: Long? = null,
+): List<AuditableCard> {
+
+    val batchMap = batches?.associateBy{ it.id() } ?: emptyMap()
+    val prng = if (seed != null) Prng(seed) else null
+
+    var cardIndex = 0 // 0 based index
+
+    return mvrs.map { org ->
+        val batch = batchMap[org.poolId]  // hijack poolId
+        val hasCvr = type.isClca() || (type.isOA() && org.poolId == null)
+        val votes = if (hasCvr) org.votes else null  // removes votes for pooled data
+
+        val useBatch = when {
+            org.isPhantom() -> Batch.phantomBatch
+            (batch != null) -> batch
+            else -> Batch.fromCvrBatch
+        }
+
+        AuditableCard(
+            org.id,
+            cardIndex++,
+            prng?.next() ?: 0,
+            phantom = org.phantom,
+            votes = votes,
+            batch = useBatch,
+        )
+    }
 }

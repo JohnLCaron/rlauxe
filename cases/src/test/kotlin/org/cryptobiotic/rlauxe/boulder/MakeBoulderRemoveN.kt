@@ -14,7 +14,7 @@ import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.estimateOld.makeDeciles
-import org.cryptobiotic.util.runAllRoundsAndVerify
+import org.cryptobiotic.create.runAllRoundsAndVerify
 
 class MakeBoulderRemoveN {
     ///////////////////////////////////////////////
@@ -102,7 +102,7 @@ class RunRemoveBoulderTask(
                 }
             }
             val successes = contestState.values.count { it == TestH0Status.StatRejectNull }
-            val result = AuditResult(removeN, (auditRecord as AuditRecord).previousMvrs.size, successes)
+            val result = AuditResult(removeN, (auditRecord as AuditRecord).nmvrs, successes)
             println("${name()} removeN=$removeN resilt=$result")
             results.add(result)
         }

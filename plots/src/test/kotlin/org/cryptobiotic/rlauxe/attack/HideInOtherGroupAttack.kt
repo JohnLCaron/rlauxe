@@ -164,18 +164,18 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
 
         // now form the mvrs with the flips
         var countFlips = 0
-        val mvrs = modifiedCards.map { mcard ->
-            if (mcard.batchName == "group2" && mcard.votes!!.contains(1)) { // find the flips
+        val mvrCards = modifiedCards.map { mcard ->
+            if (mcard.batchName() == "group2" && mcard.votes!!.contains(1)) { // find the flips
                 countFlips++
-                val org = mcard.cvr()
-                val mvotes = org.votes.toMutableMap()
+                val org = mcard
+                val mvotes = mcard.votes!!.toMutableMap()
                 mvotes[1] = intArrayOf(1) // switch vote to candidate A
                 org.copy(votes = mvotes)
             } else
-                mcard.cvr()
+                mcard
         }
 
-        val mvrTabs = tabulateCloseableCvrs(Closer(mvrs.iterator()), infos).toSortedMap()
+        val mvrTabs = tabulateAuditableCards(Closer(mvrCards.iterator()), infos).toSortedMap()
         val mvrVotes = mvrTabs[contestB.id]!!.votes
         if (mvrVotes[1]!! <= mvrVotes[2]!!) {
             mvrTabs.forEach { println(it) }
@@ -188,7 +188,8 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
         val Nbs = mapOf(1 to Nc)
 
         val mvrManager =
-            MvrManagerFromManifest(modifiedCards, mvrs, contests.map { it.info() }, seed=Random.nextLong(), simFuzzPct=fuzzPct)
+            MvrManagerFromManifest(modifiedCards, mvrCards.map { it.toCvr() }, contests.map { it.info() }, seed=Random.nextLong(), simFuzzPct=fuzzPct)
+
         return Pair(
             WorkflowTesterClca(config, listOf(contestB), emptyList(), mvrManager, Npops = Nbs),
             mvrManager
@@ -237,10 +238,8 @@ class CardsWithStylesAttack(
         val votes = if (hasCvr) org.votes else null
 
         return AuditableCard(org.location, cardIndex++, 0, phantom=org.phantom,
-            //contests,
             votes,
-            poolId=null,
-            style.name(),
+            batch=org.batch,
         )
     }
 

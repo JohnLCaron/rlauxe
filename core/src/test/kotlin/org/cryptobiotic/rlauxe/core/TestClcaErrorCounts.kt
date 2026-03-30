@@ -153,7 +153,6 @@ class TestClcaErrorCounts {
             //    val marginRange: ClosedFloatingPointRange<Double> = 0.01.. 0.03,
             //    val underVotePctRange: ClosedFloatingPointRange<Double> = 0.01.. 0.30, // needed to set Nc
             //    val phantomPctRange: ClosedFloatingPointRange<Double> = 0.00..  0.005, // needed to set Nc
-            //    val addPoolId: Boolean = false, // add cardStyle info to cvrs and cards
             //    val ncands: Int? = null,
             //    val poolPct: Double? = null,  // if not null, make a pool with this pct with two ballotStyles
             //    val seqCands: Boolean = false // if true, use ncands = 2 .. ncontests + 1

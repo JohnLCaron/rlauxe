@@ -1,7 +1,8 @@
 package org.cryptobiotic.rlauxe.persist.csv
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardIF
+import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ZipReader
@@ -10,57 +11,52 @@ import java.io.*
 import java.nio.file.Files
 import kotlin.io.path.Path
 
-private val logger = KotlinLogging.logger("AuditableCardCsv")
+private val logger = KotlinLogging.logger("CardCsv")
 
-// data class AuditableCard (
-//    val location: String, // enough info to find the card for a manual audit.
-//    val index: Int,  // index into the original, canonical list of cards
-//    val prn: Long,   // psuedo random number
-//    val phantom: Boolean,
+// interface CardIF {
+//    fun location(): String // enough info to find the card for a manual audit.
+//    fun index(): Int  // index into the original, canonical list of cards
+//    fun prn(): Long   // psuedo random number
+//    fun isPhantom(): Boolean
 //
-//    val votes: Map<Int, IntArray>?,   // CVRs and phantoms
-//    val poolId: Int?,                 // must be set if its from a CardPool
-//    val batchName: String,            // batch name: "fromCvr" if no batch and its from a CVR
-//    val batch: BatchIF? = null,       // batch reference. CLCA dont need unless cvrsContainUndervotes = false
-//))
+//    fun votes(): Map<Int, IntArray>?   // CVRs and phantoms
+//    fun poolId(): Int?                 // must be set if its from a CardPool  TODO verify batch name, poolId
+//    fun batchName(): String            // batch name: "fromCvr" if no batch and its from a CVR (then votes is non null)
+//}
 
-val AuditableCardHeader = "location, index, prn, phantom, poolId, batch, cvr contests, candidates0, candidates1, ...\n"
+val CardHeader = "location, index, prn, phantom, poolId, batchName, cvr contests, candidates0, candidates1, ...\n"
 
-fun writeAuditableCardCsv(card: AuditableCard) = buildString {
-    append("${card.location}, ${card.index}, ${card.prn.toString(radix=16)}, ${if(card.phantom) "yes," else ","} ")
-    if (card.poolId == null) append(", ") else append("${card.poolId}, ")
-    if (card.batchName != null) {
-        append("${card.batchName}, ")
-    } else if (card.batch != null)
-        append("${card.batch.name()}, ")
-    else
-        append(", ")
+fun writeCardCsv(card: CardIF) = buildString {
+    append("${card.location()}, ${card.index()}, ${card.prn().toString(radix=16)}, ${if(card.isPhantom()) "yes," else ","} ")
+    if (card.poolId() == null) append(", ") else append("${card.poolId()}, ")
+    append("${card.batchName()}, ")
 
-    if (card.votes != null) {
-        val contests = card.votes.map { it.key }.toIntArray()
-        val candidates = card.votes.map { it.value }
+    if (card.votes() != null) {
+        val votes = card.votes()!!
+        val contests = votes.map { it.key }.toIntArray()
+        val candidates = votes.map { it.value }
         append("${contests.joinToString(" ")}, ")
         candidates.forEach { append("${it.joinToString(" ")}, ") }
     }
     appendLine()
 }
 
-fun writeAuditableCardCsvFile(cards: List<AuditableCard>, outputFilename: String) {
+fun writeCardCsvFile(cards: List<CardIF>, outputFilename: String) {
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
-    writer.write(AuditableCardHeader)
+    writer.write(CardHeader)
     cards.forEach {
-        writer.write(writeAuditableCardCsv(it))
+        writer.write(writeCardCsv(it))
     }
     writer.close()
 }
 
-fun writeAuditableCardCsvFile(cards: CloseableIterator<AuditableCard>, outputFilename: String): Int {
+fun writeCardCsvFile(cards: CloseableIterator<CardIF>, outputFilename: String): Int {
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
-    writer.write(AuditableCardHeader)
+    writer.write(CardHeader)
     var count = 0
     cards.use { cardIter ->
         while (cardIter.hasNext()) {
-            writer.write(writeAuditableCardCsv(cardIter.next()))
+            writer.write(writeCardCsv(cardIter.next()))
             count++
         }
     }
@@ -68,16 +64,16 @@ fun writeAuditableCardCsvFile(cards: CloseableIterator<AuditableCard>, outputFil
     return count
 }
 
-class AuditableCardCsvWriter(outputFilename: String) {
+class CardCsvWriter(outputFilename: String) {
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
     var countCards = 0
     init {
-        writer.write(AuditableCardHeader)
+        writer.write(CardHeader)
     }
 
-    fun write(cards: List<AuditableCard>) {
+    fun write(cards: List<CardIF>) {
         cards.forEach {
-            writer.write(writeAuditableCardCsv(it))
+            writer.write(writeCardCsv(it))
         }
         countCards += cards.size
     }
@@ -89,7 +85,7 @@ class AuditableCardCsvWriter(outputFilename: String) {
 
 /////////////////////////////////////////////////////////
 
-fun readAuditableCardCsv(line: String): AuditableCard {
+fun readCardCsv(line: String): CardWithBatchName {
     val tokens = line.split(",")
     val ttokens = tokens.map { it.trim() }
 
@@ -100,10 +96,7 @@ fun readAuditableCardCsv(line: String): AuditableCard {
     val phantom = ttokens[idx++] == "yes"
     val poolIdToken = ttokens[idx++]
     val poolId = if (poolIdToken.isEmpty()) null else poolIdToken.toInt()
-
-    // style = possible contests or population id
-    val cardStyleToken = ttokens[idx++].trim()
-    val cardStyle = if (cardStyleToken.isEmpty()) "null" else cardStyleToken
+    val batchName = ttokens[idx++].trim()
 
     // if clca, list of actual contests and their votes
     if (idx < ttokens.size-1) {
@@ -130,35 +123,35 @@ fun readAuditableCardCsv(line: String): AuditableCard {
             require(contests.size == work.size) { "contests.size (${contests.size}) != votes.size (${work.size})" }
             contests.zip(work).toMap()
         }
-        return AuditableCard(desc, index, sampleNum, phantom, votes, poolId, batchName=cardStyle)
+        return CardWithBatchName(desc, index, sampleNum, phantom, votes, poolId, batchName=batchName)
     }
-    return AuditableCard(desc, index, sampleNum, phantom, null, poolId, batchName=cardStyle)
+    return CardWithBatchName(desc, index, sampleNum, phantom, null, poolId, batchName=batchName)
 }
 
-class AuditableCardCsvReader(filename: String): CloseableIterable<AuditableCard> {
+class CardCsvReader(filename: String): CloseableIterable<CardWithBatchName> {
     var useFilename = if (Files.exists(Path(filename))) filename
         else if (Files.exists(Path("$filename.zip"))) "$filename.zip" // TODO unzip and leave it unzipped
         else throw RuntimeException("CardsCsvFile $filename or $filename.zip does not exist")
 
-    override fun iterator(): CloseableIterator<AuditableCard> {
+    override fun iterator(): CloseableIterator<CardWithBatchName> {
         return readCardsCsvIterator(useFilename)
     }
 }
 
-fun readAuditableCardCsvFile(filename: String): List<AuditableCard> {
+fun readCardCsvFile(filename: String): List<CardWithBatchName> {
     val reader: BufferedReader = File(filename).bufferedReader()
     reader.readLine() // get rid of header line
 
-    val cards = mutableListOf<AuditableCard>()
+    val cards = mutableListOf<CardWithBatchName>()
     while (true) {
         val line = reader.readLine() ?: break
-        cards.add(readAuditableCardCsv(line))
+        cards.add(readCardCsv(line))
     }
     reader.close()
     return cards
 }
 
-fun readCardsCsvIterator(filename: String): CloseableIterator<AuditableCard> {
+fun readCardsCsvIterator(filename: String): CloseableIterator<CardWithBatchName> {
     val useFilename: String = if (Files.exists(Path(filename))) filename
     else if (Files.exists(Path("$filename.zip"))) "$filename.zip" // TODO unzip
     else {
@@ -175,8 +168,9 @@ fun readCardsCsvIterator(filename: String): CloseableIterator<AuditableCard> {
     }
 }
 
-class IteratorCardsCsvStream(input: InputStream): CloseableIterator<AuditableCard> {
-    val reader = BufferedReader(InputStreamReader(input, "ISO-8859-1"))
+class IteratorCardsCsvStream(input: InputStream): CloseableIterator<CardWithBatchName> {
+    // was val reader = BufferedReader(InputStreamReader(input, "ISO-8859-1")) for some reason
+    val reader = BufferedReader(InputStreamReader(input))
     var nextLine: String? = null
     var countLines  = 0
 
@@ -192,9 +186,9 @@ class IteratorCardsCsvStream(input: InputStream): CloseableIterator<AuditableCar
         return nextLine != null
     }
 
-    override fun next(): AuditableCard {
+    override fun next(): CardWithBatchName {
         if (!hasNext()) throw NoSuchElementException()
-        val result =  readAuditableCardCsv(nextLine!!)
+        val result =  readCardCsv(nextLine!!)
         nextLine = null
         return result
     }

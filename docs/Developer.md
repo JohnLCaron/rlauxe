@@ -91,7 +91,7 @@ To run a subset of tests in cases:
 
 ```
     cd <devhome>/rlauxe
-    ./gradlew :cases:test --tests "org.cryptobiotic.util.*"
+    ./gradlew :cases:test --tests "org.cryptobiotic.create.*"
 ```
 
 

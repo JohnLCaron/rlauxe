@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
+import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.estimateOld.makeFuzzedCvrsForPolling
 import kotlin.test.Test
 import kotlin.test.assertEquals

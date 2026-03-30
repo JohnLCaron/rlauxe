@@ -19,14 +19,14 @@ class TestAuditRound {
         val contestsUAs: List<ContestWithAssertions> = test.contests.map {
             ContestWithAssertions(it, isClca = true).addStandardAssertions()
         }
-        val testCvrs = test.makeCvrsFromContests()
-        val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())
+        val (mvrs, cards, pools, styles) = test.makeMvrCardAndPops()
+        val mvrManager = MvrManagerForTesting(mvrs, mvrs, Random.nextLong())
 
         val contestRounds = contestsUAs.map { contest -> ContestRound(contest, 1) }
         contestRounds.forEach { it.estMvrs = it.Npop / 11 } // random
 
         val prng = Prng(Random.nextLong())
-        testCvrs.mapIndexed { idx, it -> AuditableCard.fromCvr(it, idx, prng.next()) }
+        mvrs.mapIndexed { idx, it -> AuditableCard(it, idx, prng.next()) }
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())
         consistentSampling(auditRound, mvrManager.sortedManifest())

@@ -2,15 +2,25 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterable
+import org.cryptobiotic.rlauxe.util.PhantomBuilder
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
-import org.junit.jupiter.api.Assertions.assertEquals
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.iterator
 import kotlin.test.Test
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.test.assertEquals
 
 class TestMakePhantoms {
+
+    @Test
+    fun testEmpty() {
+        val builder = PhantomBuilder("ph", 42)
+        val cvr = builder.buildCvr()
+        assertNotNull(cvr.votes)
+        assertTrue(cvr.votes.isEmpty())
+    }
 
     @Test
     fun testMakePhantomCvrs() {
@@ -36,7 +46,7 @@ class TestMakePhantoms {
         val phantomCvrs = makePhantomCvrs(phantomCount, prefix)
         val cvrs = CloseableIterable { phantomCvrs.iterator() }
 
-        val target = CvrsAndBatchesToCards(AuditType.CLCA,
+        val target = CvrsToCardsWithBatchNameIterator(AuditType.CLCA,
             cvrs.iterator(), phantomCvrs, null)
         assertEquals(84, target.allCvrs.asSequence().count())
 

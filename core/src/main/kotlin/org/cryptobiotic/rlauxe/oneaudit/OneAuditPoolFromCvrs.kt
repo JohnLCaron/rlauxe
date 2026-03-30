@@ -12,6 +12,7 @@ import kotlin.collections.component2
 
 private val logger = KotlinLogging.logger("OneAuditPoolFromCvrs")
 
+// build pool from CVRs
 data class OneAuditPoolFromCvrs(
     override val poolName: String,
     override val poolId: Int,
@@ -32,7 +33,6 @@ data class OneAuditPoolFromCvrs(
 
     override fun ncards() = totalCards
 
-    // this is when you have CVRs. (sfoa, sfoans)
     fun accumulateVotes(cvr : Cvr) {
         cvr.votes.forEach { (contestId, candIds) ->
             if (infos[contestId] == null) {

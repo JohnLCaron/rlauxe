@@ -3,8 +3,6 @@ package org.cryptobiotic.rlauxe.sf
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.oneaudit.*
-import org.cryptobiotic.rlauxe.persist.csv.*
-
 import org.cryptobiotic.rlauxe.betting.ClcaErrorRates
 import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
@@ -12,8 +10,7 @@ import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFileUnwrapped
-import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.workflow.CardManifest
+import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -36,8 +33,10 @@ class TestSfElection {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
 
         val auditRecord = AuditRecord.readFrom(auditdir) as AuditRecord
-        val cardManifest = auditRecord.readSortedManifest()
-        val populationNcards = cardManifest.batches.sumOf { (it as CardPoolIF).ncards() }
+        val mvrManager = PersistedMvrManager(auditRecord, false)
+        val cardManifest = mvrManager.sortedManifest()
+        val pools = mvrManager.pools()!!
+        val populationNcards = pools.sumOf { (it as CardPoolIF).ncards() }
         println("manifestSumPools = $populationNcards")
 
         var countCards = 0
@@ -48,7 +47,7 @@ class TestSfElection {
                 val card = iter.next()
                 if (card.hasContest(49)) {
                     count49++
-                    if (card.poolId != null) count49pools++
+                    if (card.poolId() != null) count49pools++
                 }
                 countCards++
             }
@@ -74,7 +73,7 @@ class TestSfElection {
         assertEquals(count49, contest49.Npop)
 
         val publisher = Publisher(auditdir)
-        val sortedMvrs: CloseableIterator<AuditableCard> = readCardsCsvIterator(publisher.sortedMvrsFile())
+        val sortedMvrs = mvrManager.readCardsAndMerge(publisher.sortedMvrsFile())
         countCards = 0
         count49 = 0
         count49pools = 0
@@ -83,7 +82,7 @@ class TestSfElection {
                 val card = iter.next()
                 if (card.hasContest(49)) {
                     count49++
-                    if (card.poolId != null) count49pools++
+                    if (card.poolId() != null) count49pools++
                 }
                 countCards++
             }
@@ -94,10 +93,8 @@ class TestSfElection {
         println("contest49 pool/cards = ${count49pools/count49.toDouble()}")
 
         val pw = PersistedWorkflow(auditRecord, false)
-        val man: CardManifest = pw.mvrManager().sortedManifest()
-        val populations = man.batches
 
-        val sumPools = populations.sumOf { (it as CardPool).ncards() }
+        val sumPools = pools.sumOf { (it as CardPool).ncards() }
         println("sumPools = $sumPools")
     }
 

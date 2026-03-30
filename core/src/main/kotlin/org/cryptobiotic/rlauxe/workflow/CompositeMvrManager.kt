@@ -7,14 +7,8 @@ import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.persist.CompositeRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readBatchesJsonFileUnwrapped
-import org.cryptobiotic.rlauxe.util.CloseableIterable
-import org.cryptobiotic.rlauxe.util.Closer
 import java.nio.file.Files
 import kotlin.io.path.Path
 
@@ -34,43 +28,19 @@ open class CompositeMvrManager(
         return readBatchesComposite(publisher)
     }
 
+    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun writeMvrsForRound(round: Int): Int {
+        TODO("Not yet implemented")
+    }
+
     override fun pools(): List<CardPool>? {
         return readPoolsComposite(publisher)
     }
 
-    // wtf ??
-    override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>> {
-        val mvrsForRound = readMvrsForRound(round)
-        val sampleNumbers = mvrsForRound.map { it.prn }
-
-        val sampledCards = findSamples(sampleNumbers, auditableCards())
-        require(sampledCards.size == mvrsForRound.size)
-
-        if (checkValidity) {
-            // prove that sampledCvrs correspond to mvrsForRound
-            mvrsForRound.forEachIndexed { index, mvr ->
-                val card = sampledCards[index]
-                require(mvr.location == card.location) { "mvr location ${mvr.location} != card.location ${card.location}" }
-                require(mvr.prn == card.prn) { "mvr prn ${mvr.prn} != card.prn ${card.prn}" }
-                require(mvr.index == card.index) { "mvr index ${mvr.index} != card.index ${card.index}" }
-            }
-        }
-
-        if (mvrWrite) {
-            val countCards = writeAuditableCardCsvFile(
-                Closer(sampledCards.iterator()),
-                publisher.sampleCardsFile(round)
-            ) // sampleCards
-            logger.info { "write ${countCards} cards to ${publisher.sampleCardsFile(round)}" }
-        }
-
-        return mvrsForRound.zip(sampledCards)
-    }
-
-    private fun readMvrsForRound(round: Int): List<AuditableCard> {
-        return readAuditableCardCsvFile(publisher.sampleMvrsFile(round))
-    }
-
+    /*
     private fun auditableCards(): CloseableIterator<AuditableCard> {
         val cardManifest = readCardManifestComposite(publisher)
         return cardManifest.cards.iterator()
@@ -84,7 +54,7 @@ open class CompositeMvrManager(
             if (populations.isNotEmpty()) {
                 // merge population references into the Card
                 val mergedCards =
-                    MergeBatchesIntoCards(
+                    MergeBatchesIntoCardIterable(
                         sortedCards,
                         populations,
                     )
@@ -96,7 +66,7 @@ open class CompositeMvrManager(
 
         // TODO ncards ??
         return CardManifest(CloseableIterable { sortedCards.iterator() }, 0, emptyList())
-    }
+    } */
 
     private fun readBatchesComposite(publisher: Publisher): List<BatchIF>? {
         return if (!Files.exists(Path(publisher.batchesFile()))) null else

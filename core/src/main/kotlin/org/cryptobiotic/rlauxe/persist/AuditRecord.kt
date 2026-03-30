@@ -14,19 +14,15 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
-import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCards
+import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.Config
-import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.*
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.ErrorMessages
-import org.cryptobiotic.rlauxe.workflow.CardManifest
-import org.cryptobiotic.rlauxe.workflow.findSamples
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -52,80 +48,39 @@ class AuditRecord(
     val auditRoundConfig: AuditRoundConfig,
     override val contests: List<ContestWithAssertions>,
     override val rounds: List<AuditRound>,  // TODO do we need to replace AuditEst ??
-    mvrs: List<AuditableCard> // mvrs already sampled
+    val nmvrs: Int // mvrs already sampled
 ): AuditRecordIF {
-    override val config = Config(electionInfo, auditCreationConfig, auditRoundConfig)
-
-    val previousMvrs = mutableMapOf<Long, AuditableCard>() // cumulative
     val publisher = Publisher(location)
 
-    init {
-        mvrs.forEach { previousMvrs[it.prn] = it }
-    }
+    override val config = Config(electionInfo, auditCreationConfig, auditRoundConfig)
 
-    // TODO maybe better on workflow ??
-    // TODO new mvrs vs mvrs may confuse people. Build interface to manage this process?
-    fun enterMvrs(mvrs: CloseableIterable<AuditableCard>, errs: ErrorMessages): Boolean {
-        val publisher = Publisher(location)
-        val lastRoundIdx = if (rounds.isEmpty()) 1 else rounds.last().roundIdx
-
-        // get complete match with sampleNums in last round
-        val sampledPrnsResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(lastRoundIdx))
-        if (sampledPrnsResult.isErr) {
-            logger.error{ "$sampledPrnsResult" } // needed?
-            errs.addNested(sampledPrnsResult.component2()!!)
-            return false
-        }
-        val sampledPrns = sampledPrnsResult.unwrap()
-
-        val sampledMvrs = findSamples(sampledPrns, mvrs.iterator())
-
-        // TODO NEXTASK is this all prns or just new? humans want just new
-        writeAuditableCardCsvFile(sampledMvrs , publisher.sampleMvrsFile(lastRoundIdx))
-        logger.info{"enterMvrs write sampledMvrs to '${publisher.sampleMvrsFile(lastRoundIdx)}' for round $lastRoundIdx"}
-
-        sampledMvrs.forEach { previousMvrs[it.prn] = it } // cumulative
-        return true
-    }
-
-    // for efficiency
+    // for efficiency, batches are read once
     override fun readSortedManifest(batches: List<BatchIF>?): CardManifest {
-        if (batches != null && batches.isNotEmpty()) {
-            // merge batch references into the Card
-            val mergedCards =
-                MergeBatchesIntoCards(
-                    CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
-                    batches,
-                )
-
-            return CardManifest(mergedCards, electionInfo.totalCardCount, batches)
-        }
-        // no batches so you dont need to merge
-        val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
-        return CardManifest(sortedCards, electionInfo.totalCardCount, emptyList())
+        // merge batch references into the Card
+        val mergedCards: CloseableIterable<AuditableCard> =
+            MergeBatchesIntoCardManifestIterable(
+                CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
+                batches ?: emptyList(),
+            )
+        return CardManifest(mergedCards, electionInfo.totalCardCount)
     }
 
     override fun readSortedManifest(): CardManifest {
-        val batches = readBatches() ?: readCardPools() // TODO which  is preferred ??
-        if (batches != null && batches.isNotEmpty()) {
-            // merge batch references into the Card
-            val mergedCards =
-                MergeBatchesIntoCards(
-                    CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
-                    batches,
-                )
+        val batches = readBatches() ?: readCardPools() ?: emptyList() // TODO which  is preferred ??
+        // merge batch references into the Card
+        val mergedCards =
+            MergeBatchesIntoCardManifestIterable(
+                CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
+                batches,
+            )
 
-            return CardManifest(mergedCards, electionInfo.totalCardCount, batches)
-        }
-        // no batches so you dont need to merge
-        val sortedCards = CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) }
-        return CardManifest(sortedCards, electionInfo.totalCardCount, emptyList())
+        return CardManifest(mergedCards, electionInfo.totalCardCount)
     }
 
     override fun readBatches(): List<Batch>? {
         return if (!Files.exists(Path(publisher.batchesFile()))) null else {
             val batchesResult = readBatchesJsonFile(publisher.batchesFile())
-           if (batchesResult.isOk) batchesResult.unwrap() else {
+            if (batchesResult.isOk) batchesResult.unwrap() else {
                 logger.error{ "$batchesResult" }
                 null
             }
@@ -189,12 +144,6 @@ class AuditRecord(
                 null
             }
 
-            /* val auditConfigResult = readAuditConfigJsonFile(publisher.auditConfigFile())
-            val config = if (auditConfigResult.isOk) auditConfigResult.unwrap() else {
-                errs.addNested(auditConfigResult.unwrapError())
-                null
-            } */
-
             // new way of storing config
             val auditCreationConfigResult = readAuditCreationConfigJsonFile(publisher.auditCreationConfigFile())
             val auditCreationConfig = if (auditCreationConfigResult.isOk) auditCreationConfigResult.unwrap() else {
@@ -215,7 +164,7 @@ class AuditRecord(
             }
             if (errs.hasErrors()) return Err(errs)
 
-            val sampledMvrsAll = mutableListOf<AuditableCard>()
+            var countMvrsUsed = 0
 
             var lastRoundConfig: AuditRoundConfig? = null
             var prevAuditRound : AuditRound? = null
@@ -227,15 +176,6 @@ class AuditRecord(
                     null
                 }
                 if (errs.hasErrors()) return Err(errs)
-
-                // may not exist yet
-                val mvrsForRoundFile = publisher.sampleMvrsFile(roundIdx)
-                val sampledMvrs = if (Files.exists(Path.of(mvrsForRoundFile))) {
-                    readAuditableCardCsvFile(mvrsForRoundFile)
-                } else {
-                    emptyList()
-                }
-                sampledMvrsAll.addAll(sampledMvrs) // cumulative
 
                 // AuditStateFile doesnt exist until audit is run
                 val auditStateFile = publisher.auditFile(roundIdx)
@@ -249,11 +189,11 @@ class AuditRecord(
                     if (auditRound.isOk) {
                         prevAuditRound = auditRound.unwrap() as AuditRound
                         rounds.add(prevAuditRound)
+                        countMvrsUsed += prevAuditRound.newmvrs
                     } else {
                         errs.addNested(auditRound.unwrapError())
                     }
                 } else {
-                    // TODO if read in AuditEst, replace with AuditState when audit is done ??
                     val auditEstFile = publisher.auditEstFile(roundIdx)
                     if (Files.exists(Path.of(auditEstFile))) {
                         val auditEstRound = readAuditRoundJsonFile(
@@ -265,6 +205,8 @@ class AuditRecord(
                         if (auditEstRound.isOk) {
                             prevAuditRound = auditEstRound.unwrap() as AuditRound
                             rounds.add(auditEstRound.unwrap() as AuditRound)
+                            countMvrsUsed += prevAuditRound.newmvrs  // nonzero ?
+
                         } else {
                             errs.addNested(auditEstRound.unwrapError())
                         }
@@ -279,24 +221,12 @@ class AuditRecord(
                     null
                 }
                 if (auditRoundConfig != null) lastRoundConfig = auditRoundConfig
-
-                /* if (auditCreationConfig != null && auditRoundConfig != null) {
-                    val configNew = Config(electionInfo!!, auditCreationConfig, auditRoundConfig)
-                    val auditConfigNew = configNew.toAuditConfig()
-                    if (auditConfigNew != config) {
-                        println("readAuditConfigJsonFile= $config")
-                        println("configNew= ${configNew}")
-                        println("configNew.toAuditConfig()= $auditConfigNew")
-                        logger.error{ "configNew != auditConfig "}
-                        throw RuntimeException("configNew != auditConfig")
-                    }
-                } */
             }
             val roundConfig = lastRoundConfig?: auditRoundProtoConfig!!
 
             // TODO AuditRecord or CompositeRecord ??
             return if (errs.hasErrors()) Err(errs) else {
-                Ok(AuditRecord(location, electionInfo!!, auditCreationConfig!!, roundConfig, contests!!, rounds, sampledMvrsAll))
+                Ok(AuditRecord(location, electionInfo!!, auditCreationConfig!!, roundConfig, contests!!, rounds, countMvrsUsed))
             }
         }
     }

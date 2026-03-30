@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.util.mean2margin
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
+import org.cryptobiotic.rlauxe.audit.PollingMode
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimateOld.runRepeatedAlphaMart
@@ -12,6 +13,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestAlphaMart {
+
     @Test
     fun testLamToEta() {
         //    noCvr  eta=0.6677852348993288 mean=0.5 upperBound=1.0 lam=0.6711409395973154 round=0.6669463087248322
@@ -30,14 +32,17 @@ class TestAlphaMart {
         val marginRange= 0.01 .. 0.01
         val underVotePct= 0.20 .. 0.20
         val phantomRange= 0.005 .. 0.005
-        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
+        val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange,
+            auditType = AuditType.POLLING)
 
         val contest = test.contests.first()
         val contestUA = ContestWithAssertions(contest, isClca = false).addStandardAssertions()
         val assorter = contestUA.minPollingAssertion()!!.assorter
 
         val cvrs = test.makeCvrsFromContests()
-        val config = Config.from(ElectionInfo("testRunAlphaMart", AuditType.POLLING, totalCardCount = cvrs.size, contestCount=1), nsimTrials = 10)
+        val config = Config.from(
+            ElectionInfo("testRunAlphaMart", AuditType.POLLING, totalCardCount = cvrs.size, contestCount=1, pollingMode = PollingMode.withBatches),
+            nsimTrials = 10)
         val samplerTracker = PollingSamplerTracker(contestUA.contest.id, assorter, cvrs.zip(cvrs))
 
         val eta0 = assorter.dilutedMean()

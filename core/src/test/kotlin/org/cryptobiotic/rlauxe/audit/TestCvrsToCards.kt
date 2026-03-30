@@ -1,25 +1,16 @@
 package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.util.Closer
+import org.cryptobiotic.rlauxe.estimate.Vunder
+import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.junit.jupiter.api.Test
 import kotlin.math.abs
 import kotlin.random.Random
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-// data class AuditableCard (
-//    val location: String, // info to find the card for a manual audit. Aka ballot identifier.
-//    val index: Int,  // index into the original, canonical list of cards
-//    val prn: Long,   // psuedo random number
-//    val phantom: Boolean,
-//    val possibleContests: IntArray, // list of contests that might be on the ballot. TODO replace with cardStyle?
-//    val votes: Map<Int, IntArray>?, // for CLCA or OneAudit, a map of contest -> the candidate ids voted; must include undervotes; missing for pooled data or polling audits
-//                                                                                // when IRV, ranked first to last
-//    val poolId: Int?, // for OneAudit, or for setting style
-//    val cardStyle: String? = null, // set style in a way that doesnt interfere with onaudit....
-//)
 class TestCvrsToCards {
 
     @Test
@@ -33,70 +24,71 @@ class TestCvrsToCards {
 
         var cvr = cvrr.copy(poolId=null)
         // with no population, only the cvrs are present.
-        var target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=null)
-        var card = target.next()
-        testOneTarget("** clca complete cvrs", cvr, card, auditType, hasCardStyles, AuditableCard.fromCvr)
+        var target = mvrsToAuditableCardsList(auditType, listOf(cvr), batches=null)
+        var card = target.first()
+        testOneTarget("** clca complete cvrs", cvr, card, auditType, hasCardStyles, Batch.fromCvr)
 
         cvr = cvrr.copy(poolId=1)
-        target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=null)
-        card = target.next()
-        testOneTarget("clca hasStyle and poolIds", cvr, card, auditType, hasCardStyles, expectStyle = AuditableCard.fromCvr)
+        target = mvrsToAuditableCardsList(auditType, listOf(cvr), batches=null)
+        card = target.first()
+        testOneTarget("clca hasStyle and poolIds", cvr, card, auditType, hasCardStyles, expectStyle = Batch.fromCvr)
 
         val cardStyle = Batch("you", 1, intArrayOf(0,1,2,3,4), false)
         // doesnt make sense to use; hasStyle means use cvr
         hasCardStyles = true
         cvr = cvrr.copy(poolId=1)
-        target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=listOf(cardStyle))
-        card = target.next()
-        testOneTarget("clca hasStyle and poolIds and styles", cvr, card, auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
+        target = mvrsToAuditableCardsList(auditType, listOf(cvr), batches=listOf(cardStyle))
+        card = target.first()
+        testOneTarget("clca hasStyle and poolIds and styles", cvr, card, auditType, hasCardStyles, cardStyle.name(), expectBatch = cardStyle)
 
         // noStyle means votes isnt complete, so you need cardStyles and poolIds. should test if votes cubset of cardpool contests
         hasCardStyles = true
         cvr = cvrr.copy(poolId=1)
-        target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=listOf(cardStyle))
-        card = target.next()
-        testOneTarget("** clca incomplete cvrs", cvr, card, auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
+        target = mvrsToAuditableCardsList(auditType, listOf(cvr), batches=listOf(cardStyle))
+        card = target.first()
+        testOneTarget("** clca incomplete cvrs", cvr, card, auditType, hasCardStyles, cardStyle.name(), expectBatch = cardStyle)
 
         // what if you dont supply the poolId?
         cvr = cvrr.copy(poolId=null)
-        target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=listOf(cardStyle))
-        card = target.next()
-        assertEquals(AuditableCard.fromCvr, card.batchName, "no poolId")
+        target = mvrsToAuditableCardsList(auditType, listOf(cvr), batches=listOf(cardStyle))
+        card = target.first()
+        assertEquals(Batch.fromCvr, card.batchName(), "no poolId")
 
         // what if you dont supply the cardStyles? FAIL
         cvr = cvrr.copy(poolId=1)
-        target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=null)
-        card = target.next()
-        assertEquals(AuditableCard.fromCvr, card.batchName, "no pools")
+        target = mvrsToAuditableCardsList(auditType, listOf(cvr), batches=null)
+        card = target.first()
+        assertEquals(Batch.fromCvr, card.batchName(), "no pools")
     }
 
     @Test
     fun testCvrsWithStylesToCardsForPolling() {
         val cvrr = makeCvr(abs(Random.nextInt()), 2 + Random.nextInt(3), 2 + Random.nextInt(2), poolId=1)
 
-        var auditType = AuditType.POLLING
+        val auditType = AuditType.POLLING
         var hasCardStyles = false
 
-        val expectedMessage = "AuditableCard must have votes, possibleContests, cardStyle, or population"
+        // polling but no batches
         var cvr = cvrr.copy(poolId=null)  // no poolId
-        var target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=null, )
-        testOneTarget("** poll with no pools", cvr, target.next(), auditType, hasCardStyles, AuditableCard.fromCvr)
+        var message = assertFailsWith<RuntimeException> {
+            mvrsToAuditableCardsList(auditType, listOf(cvr), batches = null)
+        }.message!!
+        assertEquals("batch '_fromCvr' must have non-null votes", message)
 
-        cvr = cvrr.copy(poolId=1) // poolId but no pools
-        target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=null)
-        testOneTarget("** poll with poolid but no pool", cvr, target.next(), auditType, hasCardStyles, expectStyle = AuditableCard.fromCvr)
+        val batch = Batch("cardstyle1", 1,intArrayOf(0,1,2,3,4), false)
 
         // what happens if the poolId doesnt match ??
-        val cardStyle = Batch("cardstyle1", 1,intArrayOf(0,1,2,3,4), false)
         cvr = cvrr.copy(poolId=2) // poolId doesnt match
-        target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=null)
-        testOneTarget("** poll with pools but wrong poolid", cvr, target.next(), auditType, hasCardStyles, expectStyle = AuditableCard.fromCvr)
+        message = assertFailsWith<RuntimeException> {
+            mvrsToAuditableCardsList(auditType, listOf(cvr), batches = listOf(batch))
+        }.message!!
+        assertEquals("batch '_fromCvr' must have non-null votes", message)
 
         // successfully use pool 1
         hasCardStyles = true
         cvr = cvrr.copy(poolId=1)
-        target = CvrsAndBatchesToCards(auditType, Closer(listOf(cvr).iterator()), phantomCvrs=null, batches=listOf(cardStyle))
-        testOneTarget("** poll with pool", cvr, target.next(), auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
+        var target = mvrsToAuditableCardsList(auditType, listOf(cvr), batches = listOf(batch))
+        testOneTarget("** poll with pool", cvr, target.first(), auditType, hasCardStyles, batch.name(), expectBatch = batch)
     }
 
     @Test
@@ -109,42 +101,42 @@ class TestCvrsToCards {
         var auditType = AuditType.ONEAUDIT
         var hasCardStyles = true
 
-        val cardStyle = Batch("oapool2", 2,intArrayOf(0,1,2), false)
-        var target = CvrsAndBatchesToCards(auditType, Closer(cvrs.iterator()), phantomCvrs=null, batches=listOf(cardStyle), )
-        testOneTarget("oa hasStyle", cvrc, target.next(), auditType, hasCardStyles, AuditableCard.fromCvr)
-        testOneTarget("oa hasStyle pooled", cvrp, target.next(), auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
+        val cardPool = CardPoolTest("oapool2", 2,  intArrayOf(0,1,2), hasCardStyles, totalCards=42)
+        var target = mvrsToAuditableCardsList(auditType, cvrs, batches=listOf(cardPool), )
+        testOneTarget("oa hasStyle", cvrc, target[0], auditType, hasCardStyles, Batch.fromCvr)
+        testOneTarget("oa hasStyle pooled", cvrp, target[1], auditType, hasCardStyles, cardPool.name(), expectBatch = cardPool)
 
         // noStyle means must supply the list of possibleContests for pooled data and cvrs
         hasCardStyles = true
-        target = CvrsAndBatchesToCards(auditType, Closer(cvrs.iterator()), phantomCvrs=null, batches=listOf(cardStyle), )
-        testOneTarget("oa noStyle", cvrc, target.next(), auditType, hasCardStyles, AuditableCard.fromCvr)
-        testOneTarget("oa noStyle pooled", cvrp, target.next(), auditType, hasCardStyles, cardStyle.name(), expectPop = cardStyle)
+        target = mvrsToAuditableCardsList(auditType, cvrs, batches=listOf(cardPool), )
+        testOneTarget("oa noStyle", cvrc, target[0], auditType, hasCardStyles, Batch.fromCvr)
+        testOneTarget("oa noStyle pooled", cvrp, target[1], auditType, hasCardStyles, cardPool.name(), expectBatch = cardPool)
     }
 
-    fun testOneTarget(what: String, cvr: Cvr, card: AuditableCard, auditType: AuditType, hasCardStyles: Boolean, expectStyle:String?, expectPop:Batch?=null) {
+    fun testOneTarget(what: String, cvr: Cvr, card: AuditableCard, auditType: AuditType, hasCardStyles: Boolean, expectStyle:String?, expectBatch:BatchIF?=null) {
         println("$what [$auditType hasCardStyles:$hasCardStyles]:")
         println("  ${cvr.show()}")
         println("  ${card.show()}")
         println()
 
         if (auditType.isClca()) {
-            assertEquals(cvr, card.cvr())
+            assertEquals(cvr, card.toCvr())
             assertNotNull(card.votes)
             assertEquals(cvr.votes, card.votes)
-            assertEquals(null, card.poolId, "poolId")
+            assertEquals(null, card.poolId(), "poolId")
 
         } else if (auditType.isPolling()) {
             assertNull(card.votes)
 
         }  else if (auditType.isOA()) {
-            assertEquals(cvr.poolId, card.poolId, "poolId")
+            assertEquals(cvr.poolId, card.poolId(), "poolId")
         }
 
         assertEquals(cvr.id, card.location)
         assertEquals(cvr.phantom, card.phantom)
-        assertEquals(expectStyle, card.batchName, "cardStyle")
+        assertEquals(expectStyle, card.batchName(), "cardStyle")
 
-        val styleContests = expectPop?.possibleContests?.toList()?.toSet() ?: emptySet()
+        val styleContests = expectBatch?.possibleContests()?.toList()?.toSet() ?: emptySet()
         val expectContests = when (auditType) {
             AuditType.ONEAUDIT -> {
                 if (card.votes != null)
@@ -155,14 +147,13 @@ class TestCvrsToCards {
                     styleContests
             }
             AuditType.CLCA -> if (hasCardStyles) styleContests else card.votes!!.keys.toSet()
-            AuditType.POLLING -> expectPop?.possibleContests()?.toSet() ?: emptySet()
+            AuditType.POLLING -> expectBatch?.possibleContests()?.toSet() ?: emptySet()
         }
-        if (expectContests != card.contests().toSet())
-            print("${card.contests()}")
-        assertEquals(expectContests, card.contests().toSet(), "card.contests()")
+        if (expectContests != card.possibleContests().toSet())
+            print("${card.possibleContests()}")
+        assertEquals(expectContests, card.possibleContests().toSet(), "card.contests()")
     }
 }
-
 
 fun Cvr.show() = buildString {
     append("$id phantom=$phantom votes={")
@@ -177,8 +168,32 @@ fun AuditableCard.show() = buildString {
         votes.toSortedMap().forEach { (id, cands) -> append("$id: ${cands.contentToString()}, ") }
         append("}")
     }
-    append(" poolId=$poolId")
-    append(" contests=${contests().contentToString()}")
-    append(" cardStyle=$batchName")
+    append(" poolId=${poolId()}")
+    append(" contests=${possibleContests().contentToString()}")
+    append(" cardStyle=${batchName()}")
+
+}
+
+class CardPoolTest(
+    override val poolName: String,
+    override val poolId: Int,
+    val possibleContests: IntArray,      // the list of possible contests.
+    val hasSingleCardStyle: Boolean,
+    val totalCards: Int,
+): CardPoolIF, BatchIF {
+    override fun name() = poolName
+    override fun id() = poolId
+    override fun hasSingleCardStyle() = hasSingleCardStyle
+    override fun ncards() = totalCards
+    override fun hasContest(contestId: Int) = possibleContests.contains(contestId)
+    override fun possibleContests() = possibleContests
+
+    override fun contestTab(contestId: Int): ContestTabulation? {
+        TODO("Not yet implemented")
+    }
+
+    override fun votesAndUndervotes(contestId: Int): Vunder {
+        TODO("Not yet implemented")
+    }
 
 }

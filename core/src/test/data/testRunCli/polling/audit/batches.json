@@ -1,16 +1,45 @@
 {
     "batches": [
         {
-            "name": "batch42",
-            "id": 42,
+            "name": "style0",
+            "id": 0,
             "possibleContests": [
                 0,
                 1,
-                2,
                 3,
                 4
             ],
-            "hasSingleCardStyle": true
+            "hasSingleCardStyle": false
+        },
+        {
+            "name": "style1",
+            "id": 1,
+            "possibleContests": [
+                0,
+                2,
+                4
+            ],
+            "hasSingleCardStyle": false
+        },
+        {
+            "name": "style2",
+            "id": 2,
+            "possibleContests": [
+                0,
+                3,
+                4
+            ],
+            "hasSingleCardStyle": false
+        },
+        {
+            "name": "style3",
+            "id": 3,
+            "possibleContests": [
+                0,
+                1,
+                4
+            ],
+            "hasSingleCardStyle": false
         }
     ]
 }

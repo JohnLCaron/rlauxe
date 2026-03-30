@@ -21,7 +21,7 @@ import org.cryptobiotic.rlauxe.util.Welford
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
-import org.cryptobiotic.rlauxe.workflow.CardManifest
+import org.cryptobiotic.rlauxe.persist.CardManifest
 import kotlin.Double
 import kotlin.Int
 import kotlin.math.abs
@@ -159,7 +159,8 @@ class AuditTrialTask(
     override fun run(): List<AssertionTrialIF> {
         val stopwatch = Stopwatch()
 
-        // used for OA and Polling; different simulated pool data each run; TODO could use Fuzzer
+        // TODO use VunderPoolsFuzzer when cvrsContainUndervotes = false
+        // used for OA and Polling; different simulated pool data each run; TODO could use VunderPoolsFuzzer
         val vunderPools = if (pools != null && !config.isClca) VunderPools(pools) else null
 
         // Polling without pools, generate one VunderPool based on contest totals
@@ -186,7 +187,7 @@ class AuditTrialTask(
                 // get the next card in sorted order
                 val card = sortedCardIter.next()
                 val mvr = when  {
-                    (card.poolId != null && vunderPools != null) -> vunderPools.simulatePooledCard(card)
+                    (card.poolId() != null && vunderPools != null) -> vunderPools.simulatePooledCard(card)
                     (vunderBatches != null) -> vunderBatches.simulatePooledCard(card)
                     (onePool != null) -> onePool.simulatePooledCard(card)
                     else -> null
@@ -204,7 +205,7 @@ class AuditTrialTask(
                 if (include) {
                     // sampledCards.add(card)
                     countEstimatedCards++
-                    if (card.poolId != null) countPoolCards++
+                    if (card.poolId() != null) countPoolCards++
                 }
                 cardSortedIndex++
             }
@@ -320,7 +321,7 @@ class ContestClcaTrial(val run: Int,
             println("$countUsed, ${dfn(assortValue, 8)}, ${dfn(bet, 8)}, ${dfn(payoff, 8)}, ${dfn(testStatistic, 8)}, " +
                     "${card.location}, ${mvrVotes}, ${cardVotes}")
         }
-        errorTracker.addSample(assortValue, card.poolId == null)
+        errorTracker.addSample(assortValue, card.poolId() == null)
 
         //     fun add(x: Double, bet: Double, mj: Double, tj: Double, testStatistic: Double) {
         // seq.add(assortValue, bet, mui, payoff, testStatistic)

@@ -2,10 +2,10 @@ package org.cryptobiotic.rlauxe.workflow
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsForClca
+import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardFromCard
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.json.readSamplePrns
 
 private val logger = KotlinLogging.logger("PersistedMvrManagerTest")
@@ -27,7 +27,7 @@ class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, Persi
         }
 
         // get maybe-fuzzed mvrs from previous round, use them again
-        val previousMvrs = if (round == 1) emptyList() else readAuditableCardCsvFile( publisher.sampleMvrsFile(round-1))
+        val previousMvrs = if (round == 1) emptyList() else readCardsAndMergeList( publisher.sampleMvrsFile(round-1))
         val previousPrns = if (round == 1) emptyList() else readSamplePrns(publisher.samplePrnsFile(round-1))
         val previousPrnsSet = previousPrns.toSet()
         require(previousPrns.size == previousMvrs.size)
@@ -84,7 +84,7 @@ class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, Persi
             mvrs2
         }
 
-        writeAuditableCardCsvFile(sampledMvrs, publisher.sampleMvrsFile(round)) // test sampleMvrs
+        writeCardCsvFile(sampledMvrs, publisher.sampleMvrsFile(round)) // test sampleMvrs
         logger.info{"setMvrsBySampleNumber write sampledMvrs to '${publisher.sampleMvrsFile(round)}"}
         return sampledMvrs
     }
@@ -100,4 +100,20 @@ class PersistedMvrManagerTest(auditRecord: AuditRecord): MvrManagerTestIF, Persi
             setMvrsBySampleNumber(sampleNumbers, roundIdx)
         }
     }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Ok for CLCA IRV; TODO can this be used with DHondt?
+// ClcaFuzzSamplerTracker uses this for only one contest; so the other fuzzings are ignored
+// PersistedMvrManagerTest uses this to fuzz all contests
+fun makeFuzzedCardsForClca(infoList: List<ContestInfo>,
+                           cards: List<AuditableCard>,
+                           fuzzPct: Double,
+) : List<AuditableCard> {
+    if (fuzzPct == 0.0) return cards
+    val infos = infoList.associate{ it.id to it }
+    val isIRV = infoList.associate { it.id to it.isIrv}
+
+    return cards.map { card -> makeFuzzedCardFromCard(infos, isIRV, card, fuzzPct ) }
 }

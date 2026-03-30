@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
-import org.cryptobiotic.util.runAllRoundsAndVerify
+import org.cryptobiotic.create.runAllRoundsAndVerify
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail

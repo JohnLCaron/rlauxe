@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.sf
 
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.workflow.CardManifest
+import org.cryptobiotic.rlauxe.persist.CardManifest
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
@@ -100,10 +100,10 @@ class TestSf2024OneAuditIrv() {
                 val card = cardIter.next()
 
                 if (card.hasContest(rcontestUA.id)) {
-                    val assortVal = if (card.poolId != null)
-                        cassorter.poolAverages.assortAverage[card.poolId]!!
+                    val assortVal = if (card.poolId() != null)
+                        cassorter.poolAverages.assortAverage[card.poolId()]!!
                     else
-                        rassorter.assort(card.cvr(), usePhantoms = false)
+                        rassorter.assort(card, usePhantoms = false)
                     avgWithPool.totalAssort += assortVal
                     avgWithPool.ncards++
                 }
@@ -201,8 +201,8 @@ class TestSf2024OneAuditIrv() {
         cards.use { cardIter ->
             while (cardIter.hasNext()) {
                 val card = cardIter.next()
-                if (card.hasContest(rcontestUA.id) && (card.poolId == null)) {
-                    val assortVal = rassorter.assort(card.cvr(), usePhantoms = false)
+                if (card.hasContest(rcontestUA.id) && (card.poolId() == null)) {
+                    val assortVal = rassorter.assort(card, usePhantoms = false)
                     avgNoPool.totalAssort += assortVal
                     avgNoPool.ncards++
                 }
@@ -240,7 +240,7 @@ class TestSf2024OneAuditIrv() {
         val iter = cardManifest.cards.iterator()
         while (iter.hasNext()) {
             val card = iter.next()
-            if (card.hasContest(contestId) && (card.poolId == null)) {
+            if (card.hasContest(contestId) && (card.poolId() == null)) {
                 if (card.phantom) nonpoolTab.nphantoms++
                 if (card.votes != null) { // I  think this is always true
                     val votes = card.votes!!

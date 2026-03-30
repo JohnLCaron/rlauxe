@@ -7,7 +7,8 @@ import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.roundUp
-import org.cryptobiotic.rlauxe.workflow.CardManifest
+import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.abs
@@ -43,7 +44,8 @@ class TestCorlaEstimate {
     fun testCountPhantoms() {
         val auditdir = "$testdataDir/cases/corla/clca/audit"
         val auditRecord = AuditRecord.readFrom(auditdir)!!
-        countPhantoms(auditRecord.readSortedManifest(), 116)
+        val mvrManager = PersistedMvrManager(auditRecord as AuditRecord)
+        countPhantoms(mvrManager.sortedManifest(), 116)
     }
 }
 
@@ -54,7 +56,7 @@ fun countPhantoms(cardManifest: CardManifest, contestId: Int) {
     cardManifest.cards.iterator().use { cardIter ->
         while (cardIter.hasNext()) {
             val card = cardIter.next()
-            if (card.isPhantom() && card.contests().contains(contestId)) {
+            if (card.isPhantom() && card.possibleContests().contains(contestId)) {
                 countPhantoms++
             }
             count++

@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
+import org.cryptobiotic.rlauxe.persist.CardManifest
 
 val skipPerRun = 8_000
 
@@ -50,13 +51,16 @@ class SfoaSingleRoundAuditTask(
         val wresults = mutableListOf<WorkflowResult>()
 
         val rlauxAudit = PersistedWorkflow.readFrom(auditDir)!!
+        val mvrManager = rlauxAudit.mvrManager()
+        val batches = mvrManager.batches()
+
         rlauxAudit.contestsUA().forEach { contestUA ->
             contestUA.clcaAssertions.forEach { cassertion ->
                 val assertionRound = AssertionRound(cassertion, 1, null)
                 val contestRound = ContestRound(contestUA, listOf(assertionRound), 1)
 
-                val skipper = AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run)
-                val manifestWithSkipper = CardManifest(skipper, 0, rlauxAudit.mvrManager().sortedManifest().batches)
+                val skipper = AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run, batches)
+                val manifestWithSkipper = CardManifest(skipper, 0)
 
                 val sampler =
                     ClcaSamplerErrorTracker.withNoErrors(

@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.dominion
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.util.createZipFile
 import kotlin.io.path.createTempFile
 
@@ -59,9 +59,9 @@ class TestCvrExportCsv {
             1,
             mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
         )
-        val card = cvr.toAuditableCard(42, 43L, true, mapOf("test1-2" to 99))
+        val card = cvr.toCardNoBatch(42, 43L, true, mapOf("test1-2" to 99))
 
-        val target = AuditableCard (
+        val target = CardWithBatchName (
             "test1-2-3",
             42,
             43L,
@@ -81,9 +81,9 @@ class TestCvrExportCsv {
             1,
             mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
         )
-        val card = cvr.toAuditableCard(42, 43L, true, mapOf("test1-2-3" to 99), showPoolVotes=false)
+        val card = cvr.toCardNoBatch(42, 43L, true, mapOf("test1-2-3" to 99), showPoolVotes=false)
 
-        val target = AuditableCard (
+        val target = CardWithBatchName (
             "test1-2-3",
             42,
             43L,

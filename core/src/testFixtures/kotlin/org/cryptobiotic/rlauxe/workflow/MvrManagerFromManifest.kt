@@ -4,8 +4,8 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.persist.CardManifest
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
 
@@ -35,8 +35,8 @@ class MvrManagerFromManifest(
         sortedMvrs = sortedPairs.map { it.second }
     }
 
-    override fun sortedManifest() :CardManifest {
-        return CardManifest.createFromList(sortedCards, pools)
+    override fun sortedManifest() : CardManifest {
+        return CardManifest.createFromAList(sortedCards)
     }
 
     override fun pools() = pools
@@ -65,6 +65,10 @@ class MvrManagerFromManifest(
         }
 
         return mvrsRound.zip(sampledCvrs)
+    }
+
+    override fun writeMvrsForRound(round: Int): Int {
+        TODO("Not yet implemented")
     }
 
 }

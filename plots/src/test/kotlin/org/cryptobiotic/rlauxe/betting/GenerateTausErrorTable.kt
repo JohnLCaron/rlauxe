@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.betting
 
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsForClca
+import org.cryptobiotic.rlauxe.workflow.makeFuzzedCardsForClca
 import kotlin.test.Test
 
 
@@ -40,9 +40,8 @@ class GenerateTausErrorTable {
                 println(" contest ${it.id} ncands ${it.ncandidates}")
                 ContestWithAssertions(it).addStandardAssertions()
             }
-            val cards = test.makeCardsFromContests()
+            val (mvrs, cards, pools, styles) = test.makeMvrCardAndPops()
             val fuzzPcts = listOf(0.0001, 0.0005, 0.001, .005, .01)
-
 
             fuzzPcts.forEach { fuzzPct ->
                 val fcards = makeFuzzedCardsForClca(contestsUA.map { it.contest.info() }, cards, fuzzPct)

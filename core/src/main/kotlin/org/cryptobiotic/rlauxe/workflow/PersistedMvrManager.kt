@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.workflow
 
+import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TestH0Status
@@ -7,8 +8,10 @@ import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
+import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
+import org.cryptobiotic.rlauxe.persist.json.readSamplePrnsJsonFile
+import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.verify.verifyMvrCardPairs
@@ -22,6 +25,8 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
 
     val batches = auditRecord.readBatches() ?: auditRecord.readCardPools()
     val sortedManifest = auditRecord.readSortedManifest(batches)
+
+    fun auditableCards(): CloseableIterator<AuditableCard> = sortedManifest.cards.iterator()
 
     override fun sortedManifest() = sortedManifest
     override fun batches() = batches
@@ -44,11 +49,32 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
         }
 
         if (mvrWrite) {
-            val countCards = writeAuditableCardCsvFile(Closer(sampledCards.iterator()), publisher.sampleCardsFile(round)) // sampleCards
+            val countCards = writeCardCsvFile(Closer(sampledCards.iterator()), publisher.sampleCardsFile(round)) // sampleCards
             logger.info { "write ${countCards} cards to ${publisher.sampleCardsFile(round)}" }
         }
 
         return mvrCardPairs
+    }
+
+    // uses private/sortedMvrsFile.cvs
+    override fun writeMvrsForRound(round: Int): Int {
+        val resultSamples = readSamplePrnsJsonFile(publisher.samplePrnsFile(round))
+        if (resultSamples.isErr) logger.error{"$resultSamples"}
+        require(resultSamples.isOk)
+        val sampleNumbers = resultSamples.unwrap()
+
+        val mvrCardIter = readCardsCsvIterator(publisher.sortedMvrsFile())
+        val mergedMvrIter = MergeBatchesIntoCardManifestIterator(mvrCardIter, batches ?: emptyList())
+
+        val sampledMvrs = findSamples(sampleNumbers, mergedMvrIter)
+        require(sampledMvrs.size == sampleNumbers.size)
+
+        // validate
+        sampledMvrs.forEachIndexed { index, mvr ->
+            require(mvr.prn == sampleNumbers[index])
+        }
+
+        return writeCardCsvFile(Closer(sampledMvrs.iterator()), publisher.sampleMvrsFile(round))
     }
 
     // the sampleMvrsFile is added externally for real audits, and by MvrManagerTestFromRecord for test audits
@@ -56,10 +82,55 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     // it is placed into publisher.sampleMvrsFile(round), and this method just reads from that file.
     // return complete list of mvrs used for this round
     private fun readMvrsForRound(round: Int): List<AuditableCard> {
-        return readAuditableCardCsvFile(publisher.sampleMvrsFile(round))
+        val mvrCardIter = readCardsCsvIterator(publisher.sampleMvrsFile(round))
+        val mergedMvrIter = MergeBatchesIntoCardManifestIterator(mvrCardIter, batches ?: emptyList())
+        val mvrCards = mutableListOf<AuditableCard>()
+        while (mergedMvrIter.hasNext()) { mvrCards.add(mergedMvrIter.next())}
+        return mvrCards
     }
 
-    fun auditableCards(): CloseableIterator<AuditableCard> = sortedManifest.cards.iterator()
+    fun enterMvrsForRound(round: Int, mvrs: CloseableIterable<CardWithBatchName>, errs: ErrorMessages): Boolean {
+        val sampledPrnsResult = readSamplePrnsJsonFile(publisher.samplePrnsFile(round))
+        if (sampledPrnsResult.isErr) {
+            logger.error{ "$sampledPrnsResult" } // needed?
+            errs.addNested(sampledPrnsResult.component2()!!)
+            return false
+        }
+
+        require(sampledPrnsResult.isOk)
+        val sampledPrns = sampledPrnsResult.unwrap()
+
+        val mergedMvrIter = MergeBatchesIntoCardManifestIterator(mvrs.iterator(), batches ?: emptyList())
+
+        val sampledMvrs = findSamples(sampledPrns, mergedMvrIter) // what does this do
+        require(sampledMvrs.size == sampledPrns.size)
+
+        // validate
+        sampledMvrs.forEachIndexed { index, mvr ->
+            require(mvr.prn == sampledPrns[index])
+        }
+
+        // TODO NEXTASK is this all prns or just new? humans want just new
+        writeCardCsvFile(sampledMvrs , publisher.sampleMvrsFile(round))
+        logger.info{"enterMvrs write sampledMvrs to '${publisher.sampleMvrsFile(round)}' for round $round"}
+
+        // TODO AuditRecord.previousMvrs do we really need to do this ??
+        // sampledMvrs.forEach { auditRecord.previousMvrs[it.prn] = it } // cumulative
+        return true
+    }
+
+    fun readCardsAndMerge(filename: String): CloseableIterator<AuditableCard> {
+        val mvrCardIter = readCardsCsvIterator(filename)
+        return MergeBatchesIntoCardManifestIterator(mvrCardIter, batches ?: emptyList())
+    }
+
+    fun readCardsAndMergeList(filename: String): List<AuditableCard> {
+        val mvrCardIter = readCardsCsvIterator(filename)
+        val mergedMvrIter = MergeBatchesIntoCardManifestIterator(mvrCardIter, batches ?: emptyList())
+        val mvrCards = mutableListOf<AuditableCard>()
+        while (mergedMvrIter.hasNext()) { mvrCards.add(mergedMvrIter.next())}
+        return mvrCards
+    }
 
     companion object {
         private val logger = KotlinLogging.logger("PersistedMvrManager")
@@ -67,9 +138,9 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     }
 }
 
-// for viewer
+/* for viewer
 fun readMvrsForRound(publisher: Publisher, roundIdx: Int): List<AuditableCard> {
-    return readAuditableCardCsvFile(publisher.sampleMvrsFile(roundIdx))
-}
+    return readCardCsvFile(publisher.sampleMvrsFile(roundIdx))
+} */
 
 

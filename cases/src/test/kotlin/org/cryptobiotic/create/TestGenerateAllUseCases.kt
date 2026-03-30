@@ -1,4 +1,4 @@
-package org.cryptobiotic.util
+package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
@@ -63,7 +63,7 @@ class TestGenerateAllUseCases {
     }
 
     @Test
-    fun testCreateColoradoClca() {
+    fun createColoradoClca() {
         val topdir = "$testdataDir/cases/corla/clca"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
@@ -81,7 +81,7 @@ class TestGenerateAllUseCases {
     }
 
     @Test
-    fun testCreateColoradoPollingPools() {
+    fun createColoradoPollingPools() {
         val topdir = "$testdataDir/cases/corla/polling"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
@@ -99,7 +99,7 @@ class TestGenerateAllUseCases {
     }
 
     @Test
-    fun testCreateColoradoPollingBatches() {
+    fun createColoradoPollingBatches() {
         val topdir = "$testdataDir/cases/corla/polling2"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"
@@ -116,8 +116,8 @@ class TestGenerateAllUseCases {
             pollingMode=PollingMode.withBatches, creation, round)
     }
 
-    // @Test too long - fix
-    fun testCreateColoradoPollingWithoutBatches() {
+    @Test // too long - fix
+    fun createColoradoPollingWithoutBatches() {
         val topdir = "$testdataDir/cases/corla/polling3"
         val detailXmlFile = "src/test/data/corla/2024election/detail.xml"
         val contestRoundFile = "src/test/data/corla/2024audit/round1/contest.csv"

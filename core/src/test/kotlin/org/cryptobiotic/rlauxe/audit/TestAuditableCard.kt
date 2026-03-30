@@ -26,31 +26,31 @@ class TestAuditableCard {
         repeat(1000) {
             val id = Random.nextInt()
             val cvr = makeCvr(id, 11, 15)
-            val card = AuditableCard.fromCvr(cvr, it, it.toLong())
-            assertEquals(cvr, card.cvr())
+            val card = AuditableCard(cvr, it, it.toLong())
+            assertEquals(cvr, card.toCvr())
             assertEquals(id.toString(), card.location)
             assertEquals(it, card.index)
             assertEquals(it.toLong(), card.prn)
             assertEquals(false, card.phantom)
             // assertEquals(cvr.votes.keys, card.possibleContests.toSet())
             assertNotNull(card.votes)
-            assertNull(card.poolId)
+            assertNull(card.poolId())
         }
     }
 
     @Test
     fun testEqualsAndString() {
         val id = Random.nextInt()
-        val card1 = AuditableCard ("cvr$id", 42, 4422L, false, // intArrayOf(1,2,3),
+        val card1 = CardWithBatchName ("cvr$id", 42, 4422L, false, // intArrayOf(1,2,3),
             mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), 1, "pool1")
-        val card2 = AuditableCard ("cvr$id", 42, 4422L, false, // intArrayOf(1,2,3),
+        val card2 = CardWithBatchName ("cvr$id", 42, 4422L, false, // intArrayOf(1,2,3),
             mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), 1, "pool1")
-        assertEquals(card1.cvr(), card2.cvr())
+        assertEquals(card1.toCvr(), card2.toCvr())
         assertEquals(card1.hashCode(), card2.hashCode())
         assertEquals(card1, card2)
         assertEquals(card1.toString(), card2.toString())
 
-        val expected = """AuditableCard(location='cvr$id', index=42, prn=4422, phantom=false, poolId=1, batchName='pool1')
+        val expected = """CardWithBatchName(location='cvr$id', index=42, prn=4422, phantom=false, poolId=1, batchName='pool1')
   votes: 1:[1, 2, 3], 2:[4, 5, 6], 3:[0, 1], """
         assertEquals(expected, card1.toString())
     }

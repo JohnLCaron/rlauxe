@@ -14,24 +14,21 @@ fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCard, AuditableCard>>, e
             nested.add("*** Mvr location, prn, or index does not match card")
         }
 
-        val batch = card.batch
-        if (batch != null) {
-            // TODO do we know votes != null ??
-            mvr.votes!!.keys.forEach { mvrContestId ->
-                if (!batch.possibleContests().contains(mvrContestId)) {
-                    hasError = true
-                    nested.add("*** Mvr contains contest ${mvrContestId} not contained in batch $batch")
-                }
+        mvr.votes!!.keys.forEach { mvrContestId ->
+            if (!card.possibleContests().contains(mvrContestId)) {
+                hasError = true
+                nested.add("*** Mvr contains contest ${mvrContestId} not contained in card $card")
             }
-            if (batch.hasSingleCardStyle()) {
-                batch.possibleContests().forEach { batchContestId ->
-                    if (!mvr.votes.contains(batchContestId)) {
-                        hasError = true
-                        nested.add("*** batch contains contest ${batchContestId} not contained in Mvr")
-                    }
+        }
+        if (card.batch.hasSingleCardStyle()) {
+            card.batch.possibleContests().forEach { batchContestId ->
+                if (!mvr.votes.contains(batchContestId)) {
+                    hasError = true
+                    nested.add("*** batch contains contest ${batchContestId} not contained in Mvr")
                 }
             }
         }
+
         if (hasError) {
             nested.add("    mvr=${mvr.show()}")
             nested.add("    card=${card.show()}")
@@ -41,8 +38,8 @@ fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCard, AuditableCard>>, e
 
 fun AuditableCard.show() = buildString {
     append("AuditableCard(location='$location', index=$index, sampleNum=$prn, phantom=$phantom")
-    if (poolId != null) append(", poolId=$poolId")
-    append(", batchName='$batchName'")
-    if (batch != null) append(", has batch contests=${batch.possibleContests().contentToString()}")
+    if (poolId() != null) append(", poolId=${poolId()}")
+    append(", batchName='${batchName()}'")
+    append(", has batch contests=${batch.possibleContests().contentToString()}")
     if (votes != null) append(" has vote contests=${votes.keys.toList().sorted()})")
 }

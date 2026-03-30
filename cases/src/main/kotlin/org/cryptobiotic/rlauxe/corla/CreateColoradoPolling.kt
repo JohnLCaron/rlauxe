@@ -14,10 +14,14 @@ class CreateColoradoPolling (
     auditdir: String,
     hasSingleCardStyle: Boolean,
     pollingMode: PollingMode,
-): CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile,
-    AuditType.POLLING, auditdir,
-    hasSingleCardStyle=hasSingleCardStyle,
-    pollingMode=pollingMode) {
+): CreateColoradoElection(
+            electionDetailXmlFile,
+            contestRoundFile,
+            precinctFile,
+            AuditType.POLLING,
+            auditdir,
+            hasSingleCardStyle=hasSingleCardStyle,
+            pollingMode=pollingMode) {
 
     val contestsPolling: List<ContestWithAssertions>
 

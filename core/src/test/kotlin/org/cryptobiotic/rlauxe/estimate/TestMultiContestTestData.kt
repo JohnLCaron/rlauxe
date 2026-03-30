@@ -1,9 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
-import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.util.doublePrecision
 import org.cryptobiotic.rlauxe.util.Closer
@@ -70,9 +68,7 @@ class TestMultiContestTestData {
 
     @Test
     fun testMakeCardLocationManifest() {
-        val cardManifest = test.makeCardLocationManifest()
-        val testCards = mutableListOf<AuditableCard>()
-        cardManifest.cards.iterator().forEach { testCards.add(it) }
+        val ( mvrs, testCards, pools, styles) = test.makeMvrCardAndPops()
 
         val tabs = tabulateAuditableCards(Closer(testCards.iterator()), infos).toSortedMap() // contestId -> candidateId -> nvotes
         tabs.forEach { id, tab ->
@@ -191,16 +187,14 @@ class TestMultiContestTestData {
 
     @Test
     fun testPhantomCvrs() {
-        val cardManifest = test.makeCardLocationManifest()
-        val testCvrs = mutableListOf<Cvr>()
-        cardManifest.cards.iterator().forEach { testCvrs.add(it.cvr()) }
+        val cardManifest = test.makeMvrCardAndPops().cards
 
         test.contests.forEachIndexed { idx, contest ->
             val fcontest = test.contestTestBuilders[idx]
             val Nc = fcontest.ncards + fcontest.phantomCount
             assertEquals(contest.Nc, Nc)
 
-            val nphantom = testCvrs.count { it.hasContest(contest.id) && it.phantom }
+            val nphantom = cardManifest.count { it.hasContest(contest.id) && it.phantom }
             assertEquals(fcontest.phantomCount, nphantom)
             val phantomPct = nphantom/ Nc.toDouble()
             println("Nc=${contest.Nc} nphantom=$nphantom pct= $phantomPct =~ ${fcontest.phantomPct} abs=${abs(phantomPct - fcontest.phantomPct)} tol=${1.0/Nc}")
@@ -209,7 +203,8 @@ class TestMultiContestTestData {
             val contestUA = ContestWithAssertions(contest, isClca = true).addStandardAssertions()
             val cassorter = contestUA.minClcaAssertion()!!.cassorter
 
-            val sampler = ClcaSampler(contest.id, testCvrs.size, testCvrs.zip(AuditableCard.fromCvrs(testCvrs)), cassorter, true) // TODO
+            val cvrPairs = cardManifest.zip(cardManifest)
+            val sampler = ClcaSampler(contest.id, cardManifest.size, cvrPairs, cassorter, true) // TODO
             val tracker = PluralityErrorTracker(cassorter.noerror())
             while (sampler.hasNext()) { tracker.addSample(sampler.next()) }
             // println("   tracker.errorRates = ${tracker.errorRates()}")

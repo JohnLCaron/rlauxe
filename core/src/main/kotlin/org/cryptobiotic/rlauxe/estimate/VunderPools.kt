@@ -3,40 +3,10 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.audit.CardPool
-import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.util.CardBuilder
+import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import kotlin.collections.get
-
-// VunderPoolsFuzzer takes as input the actual cards of the contest.
-// it simulates the pooled cards based on the pool totals
-// it optionally fuzzes the Cvrs.
-// the mvrCvrPairs are the (mvr, cvr) pairs suitable for CLCA audit
-class VunderPoolsFuzzer(
-    pools: List<CardPool>,
-    val infos: Map<Int, ContestInfo>,
-    val fuzzPct: Double,
-    cards: List<AuditableCard>
-) {
-    val isIRV = infos.mapValues { it.value.isIrv }
-    var mvrCvrPairs: List<Pair<AuditableCard, AuditableCard>>  // mvr, cvr pairs
-    val vunderPools =  VunderPools(pools)
-
-    init {
-        val mvrs = cards.map { card ->
-            val onecard = if (card.poolId != null) {
-                vunderPools.simulatePooledCard(card)
-            } else if (card.votes != null) {
-                makeFuzzedCardFromCard(infos, isIRV, card, fuzzPct)  // in ClcaFuzzSamplerTracker
-            } else {
-                throw RuntimeException("card must be pooled or have votes")
-            }
-            onecard
-        }
-        mvrCvrPairs = mvrs.zip(cards)
-    }
-}
 
 // for all pools
 class VunderPools(pools: List<CardPool>) {
@@ -53,7 +23,7 @@ class VunderPools(pools: List<CardPool>) {
 
     // for the given pooled card with no votes, simulate one with votes, staying within the pool vote totals.
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
-        val vunderPool = vunderPools[card.poolId]
+        val vunderPool = vunderPools[card.poolId()]
         return vunderPool!!.simulatePooledCard(card)
     }
 }
@@ -65,9 +35,10 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
     val vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
 
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
-        require (poolName == "all" || card.poolId == poolId) // TODO
-        val cardb = CardBuilder.fromCard(card)
-        card.contests().forEach { contestId ->
+        require (poolName == "all" || card.poolId() == poolId) // TODO
+        val cardb = AuditableCardBuilder.fromCard(card)
+
+        card.possibleContests().forEach { contestId ->
             val vunderPicker = vunderPickers[contestId]
             if (vunderPicker == null) {
                 print("") // ignore
@@ -106,6 +77,7 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
     }
 }
 
+// for all batches and one "pool" of subtotaled votes
 class VunderBatches(batches: List<BatchIF>, val onePool: VunderPool) {
     val batchMap = batches.associateBy { it.name() }
 
@@ -113,11 +85,11 @@ class VunderBatches(batches: List<BatchIF>, val onePool: VunderPool) {
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
         if (card.isPhantom()) return card
 
-        val batch = batchMap[card.batchName]
-        val cardb = CardBuilder.fromCard(card)
+        val batch = batchMap[card.batchName()]
+        val cardb = AuditableCardBuilder.fromCard(card)
 
         if (batch == null) {
-            println("batch ${card.batchName} not found")
+            println("batch ${card.batchName()} not found")
             return cardb.build()
         }
 

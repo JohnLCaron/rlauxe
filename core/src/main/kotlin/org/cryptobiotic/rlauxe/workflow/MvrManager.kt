@@ -1,26 +1,11 @@
 package org.cryptobiotic.rlauxe.workflow
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.persist.CardManifest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
-import org.cryptobiotic.rlauxe.util.CloseableIterable
-
-private val logger = KotlinLogging.logger("MvrManager")
-
-// TODO why include the batches ??
-class CardManifest(val cards: CloseableIterable<AuditableCard>, val ncards: Int, val batches: List<BatchIF>) {
-    val popMap = batches.associateBy{ it.name() }
-    fun batch(batchName: String) = popMap[batchName]
-
-    companion object {
-        fun createFromList(cards: List<AuditableCard>, batches: List<BatchIF>?) : CardManifest {
-            return CardManifest(CloseableIterable { cards.iterator() }, cards.size, batches ?: emptyList())
-        }
-    }
-}
 
 // use MvrManager for auditing, not creating an audit
 interface MvrManager {
@@ -28,6 +13,7 @@ interface MvrManager {
     fun pools(): List<CardPool>?
     fun batches(): List<BatchIF>?
     fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  // Pair(mvr, cvr)
+    fun writeMvrsForRound(round: Int): Int
 }
 
 // when the MvrManager supplies the audited mvrs, its a test

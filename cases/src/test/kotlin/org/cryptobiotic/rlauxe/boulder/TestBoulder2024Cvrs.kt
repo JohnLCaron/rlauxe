@@ -136,7 +136,7 @@ class TestBoulder2024Cvrs {
             while (mvrIter.hasNext()) {
                 val mvr = mvrIter.next()
                 if (mvr.poolId() == 18) {
-                    val cands = mvr.votes(17)
+                    val cands = mvr.votes?.get(17)
                     if (cands != null) {
                         tab.addVotes(cands, mvr.isPhantom())
                         println("mvr ${mvr.location()} ${cands.contentToString()}")

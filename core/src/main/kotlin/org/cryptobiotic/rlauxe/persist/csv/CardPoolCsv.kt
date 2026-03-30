@@ -3,6 +3,7 @@ package org.cryptobiotic.rlauxe.persist.csv
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import java.io.*
 
@@ -19,15 +20,15 @@ private val logger = KotlinLogging.logger("CardPoolCsv")
 
 val CardPoolHeader = "poolId, poolName, hasSingleCardStyle, totalCards, contestId, voteForN, cands, ncards, novote, undervotes, overvotes, nphantoms, isIrv, votes:count ... \n"
 
-fun writeCardPoolCsv(pool: CardPool) = buildString {
-    append("${pool.poolId}, ${pool.poolName}, ${pool.hasSingleCardStyle}, ${pool.totalCards}, ")
-    pool.contestTabs.values.forEachIndexed { index, contestTab ->
+fun writeCardPoolCsv(pool: CardPoolIF) = buildString {
+    append("${pool.poolId}, ${pool.poolName}, ${pool.hasSingleCardStyle()}, ${pool.ncards()}, ")
+    pool.possibleContests().forEachIndexed { index, contestId ->
         if (index > 0) { append("${pool.poolId},,,, ") }
-        append(writeContestTabulationCsv(contestTab))
+        append(writeContestTabulationCsv(pool.contestTab(contestId)!!))
     }
 }
 
-fun writeCardPoolCsvFile(pool: List<CardPool>, outputFilename: String) {
+fun writeCardPoolCsvFile(pool: List<CardPoolIF>, outputFilename: String) {
     val writer: OutputStreamWriter = FileOutputStream(outputFilename).writer()
     writer.write(CardPoolHeader)
     pool.forEach {
@@ -78,7 +79,7 @@ fun readCardPoolCsvFile(filename: String, infos: Map<Int, ContestInfo>): List<Ca
 
     val pools = mutableListOf<CardPool>()
     var line = reader.readLine()
-    var currentPool: OneAuditPoolBuilder? = null
+    var currentPool: OneAuditPoolBuilder?
 
     outerLoop@
     while (true) {

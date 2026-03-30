@@ -39,7 +39,7 @@ class TestConsistentSamplerFromShangrla {
 
         val prng = Prng(12345678901L)
         var cards = cvrs.mapIndexed { idx, it ->
-            AuditableCard.fromCvr( it, idx, prng.next()) // here we assign sample number deterministically
+            AuditableCard( it, idx, prng.next()) // here we assign sample number deterministically
         }
         cards = cards.sortedBy { it.prn }
 
@@ -97,7 +97,7 @@ class TestConsistentSamplerFromShangrla {
         val phantomCVRs = makePhantomCvrs(contests)
 
         val prng = Prng(123456789012L)
-        val cards = (cvrs + phantomCVRs).mapIndexed { idx, it -> AuditableCard.fromCvr( it, idx, prng.next()) }
+        val cards = (cvrs + phantomCVRs).mapIndexed { idx, it -> AuditableCard( it, idx, prng.next()) }
         assertEquals(10, cards.size)
 
         val auditRound = AuditRound(1, contestRounds, samplePrns = emptyList())

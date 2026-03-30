@@ -12,10 +12,9 @@ import org.cryptobiotic.rlauxe.estimate.makeCvrsForPool
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.csv.writeAuditableCardCsvFile
+import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.validateOutputDirOfFile
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.utils.MvrsToCardsAddStyles
 import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -35,7 +34,7 @@ open class CreateColoradoElection (
     val auditdir: String,
     val hasSingleCardStyle: Boolean,
     val pollingMode: PollingMode?,
-): CreateElectionIF {
+): ElectionBuilder {
     val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
     val electionDetailXml: ElectionDetailXml = readColoradoElectionDetail(electionDetailXmlFile)
 
@@ -74,15 +73,18 @@ open class CreateColoradoElection (
         batches = cardPools
         contests = makeContests()
 
-        // have to save the mvrs while we know them
+        // have to save the mvrs and generate the cardManifest from them
         ncards = createAndSaveMvrs()
 
         val npopMap: Map<Int, Int> = if ((auditType.isPolling() && pollingMode!!.withoutBatches())) {
-            contests.associate { it.id to ncards }
+            contests.associate { it.id to ncards } // then the population is the entire set of cards. (wont go well)
         } else {
+            // read them back in as an Iterator, so we dont have to read all into memory
             val infos = contests.map { it.info() }.associateBy { it.id }
-            val mvrs = readCardsCsvIterator(publisher.unsortedMvrsFile())
-            val (manifestTabs, count) = tabulateCardsAndCount(mvrs, infos)
+            val mvrs: CloseableIterator<CardWithBatchName> = readCardsCsvIterator(publisher.unsortedMvrsFile())
+            val auditableCardIter: CloseableIterator<AuditableCard> = MergeBatchesIntoCardManifestIterator(mvrs, batches)
+            // are we handling the batches correctly using mvrs?
+            val (manifestTabs, count) = tabulateCardsAndCount(auditableCardIter, infos)
             require(ncards == count)
             manifestTabs.mapValues { it.value.ncardsTabulated }
         }
@@ -195,12 +197,13 @@ open class CreateColoradoElection (
     override fun contestsUA() = contestsUA
     override fun ncards() = ncards
 
-    override fun cards(): CloseableIterator<AuditableCard> {
+    // TODO verify election creation, verify audit creation
+    override fun cards(): CloseableIterator<CardWithBatchName> {
         val unsortedMvrs = readCardsCsvIterator(publisher.unsortedMvrsFile())
         return TransformingIterator(unsortedMvrs) { mvr ->
             when {
-                mvr.isPhantom() -> mvr
-                auditType.isClca() -> mvr.copy(poolId = null)
+                mvr.phantom -> mvr
+                auditType.isClca() -> mvr.copy(poolId = null, batchName = Batch.fromCvr)
                 (auditType.isPolling() && pollingMode!!.withoutBatches()) -> mvr.copy(votes = null, batchName="OneBatch", poolId=0)
                 (auditType.isPolling()) -> mvr.copy(votes = null)
                 else -> throw IllegalStateException("Unknown what to do with mvr: $mvr")
@@ -208,27 +211,28 @@ open class CreateColoradoElection (
         }
     }
 
-    override fun createUnsortedMvrsInternal() = null
+    // StartAuditFirstRound will create the sorted MVRs
     override fun createUnsortedMvrsExternal() = readCardsCsvIterator(publisher.unsortedMvrsFile())
+    override fun createUnsortedMvrsInternal() = null
 
     // CvrsToCardsAddStyles is random, so in order to match the mvrs and cvrs, we must generate the mvrs first,
-    // the create manifest from them. This is nonstandard, so we will do it here.
+    // then create manifest from them. This is nonstandard, so we will do it here.
     // Could put this into createAuditRecord(reverse = true) ??
     // return number of cards
     fun createAndSaveMvrs(): Int {
-        val unsortedMvrIterator = MvrsToCardsAddStyles(
+        val unsortedMvrIterator = MvrsToCardsWithBatchNameIterator(
             Closer(CvrIteratorfromPools()),
-            makePhantomCvrs(contests), // yes there are phantoms, heres where we need the contests
             cardPools,
+            makePhantomCvrs(contests), // yes there are phantoms, heres where we need the contests' Nphantoms
         )
 
         clearDirectory(Path(auditdir))
         validateOutputDirOfFile(publisher.unsortedMvrsFile())
 
-        writeAuditableCardCsvFile(unsortedMvrIterator, publisher.unsortedMvrsFile())
+        writeCardCsvFile(unsortedMvrIterator, publisher.unsortedMvrsFile())
         logger.info{"CreateColoradoElection unsortedMvrsFile to ${publisher.unsortedMvrsFile()}"}
 
-        return unsortedMvrIterator.cardIndex
+        return unsortedMvrIterator.cardIndex // card count
     }
 
     /*

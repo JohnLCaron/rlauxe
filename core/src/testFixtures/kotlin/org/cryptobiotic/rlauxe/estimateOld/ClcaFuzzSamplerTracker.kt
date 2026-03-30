@@ -7,11 +7,9 @@ import org.cryptobiotic.rlauxe.betting.ClcaErrorTracker
 import org.cryptobiotic.rlauxe.betting.ErrorTracker
 import org.cryptobiotic.rlauxe.betting.SamplerTracker
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardsForClca
 import org.cryptobiotic.rlauxe.util.*
+import org.cryptobiotic.rlauxe.workflow.makeFuzzedCardsForClca
 import kotlin.random.Random
-
-private const val debug = false
 
 private val logger = KotlinLogging.logger("ClcaFuzzSamplerTracker")
 
@@ -45,7 +43,7 @@ class ClcaFuzzSamplerTracker(
             idx++
             if (card.hasContest(contest.id)) { // should always be true
                 val nextVal = cassorter.bassort(mvr, card, hasStyle=card.hasStyle())
-                clcaErrorTracker.addSample(nextVal, card.poolId == null) // dont track errors from oa pools
+                clcaErrorTracker.addSample(nextVal, card.poolId() == null) // dont track errors from oa pools
                 welford.update(nextVal)
                 return nextVal
             } else {

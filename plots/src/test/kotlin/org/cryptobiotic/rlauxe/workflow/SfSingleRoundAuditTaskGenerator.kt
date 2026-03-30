@@ -3,9 +3,12 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.audit.ContestRound
+import org.cryptobiotic.rlauxe.audit.merge
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.betting.TestH0Result
+import org.cryptobiotic.rlauxe.persist.CardManifest
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -50,13 +53,16 @@ class SfSingleRoundAuditTask(
         val wresults = mutableListOf<WorkflowResult>()
 
         val rlauxAudit = PersistedWorkflow.readFrom(auditDir)!!
+        val mvrManager = rlauxAudit.mvrManager()
+        val batches = mvrManager.batches()
+
         rlauxAudit.contestsUA().forEach { contestUA ->
             contestUA.clcaAssertions.forEach { cassertion ->
                 val assertionRound = AssertionRound(cassertion, 1, null)
                 val contestRound = ContestRound(contestUA, listOf(assertionRound), 1)
 
-                val skipper = AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run)
-                val manifestWithSkipper = CardManifest(skipper, 0, rlauxAudit.mvrManager().sortedManifest().batches)
+                val skipper = AuditableCardCsvReaderSkip("$auditDir/sortedCards.csv", skipPerRun * run, batches)
+                val manifestWithSkipper = CardManifest(skipper, 0, )
 
                 val sampler =
                     ClcaSamplerErrorTracker.withNoErrors(
@@ -95,10 +101,10 @@ class SfSingleRoundAuditTask(
     }
 }
 
-class AuditableCardCsvReaderSkip(val filename: String, val skip: Int): CloseableIterable<AuditableCard> {
+class AuditableCardCsvReaderSkip(val filename: String, val skip: Int, val batches: List<BatchIF>?): CloseableIterable<AuditableCard> {
     override fun iterator(): CloseableIterator<AuditableCard> {
-        val iter = readCardsCsvIterator(filename)
-        repeat(skip) { if (iter.hasNext()) (iter.next()) }
-        return iter
+        val cardsNoBatchSkipped = readCardsCsvIterator(filename)
+        repeat(skip) { if (cardsNoBatchSkipped.hasNext()) (cardsNoBatchSkipped.next()) }
+        return merge(cardsNoBatchSkipped, batches)
     }
 }

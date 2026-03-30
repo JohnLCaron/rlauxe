@@ -1,4 +1,4 @@
-package org.cryptobiotic.util
+package org.cryptobiotic.create
 
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests

@@ -11,10 +11,9 @@ import org.cryptobiotic.rlauxe.audit.PollingMode
 import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.cli.RunVerifyAuditRecord.runVerifyAuditRecord
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
-import org.cryptobiotic.rlauxe.persist.csv.readAuditableCardCsvFile
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.csv.readCardCsvFile
 import org.cryptobiotic.rlauxe.util.*
-import org.cryptobiotic.rlauxe.audit.MvrSource
 import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -148,7 +147,7 @@ class MakeColoradoElection {
 
         // fake: reading the mvrs instead of the cvrs
         val publisher = Publisher("$topDir/audit")
-        val sampledMvrs = readAuditableCardCsvFile(publisher.sampleMvrsFile(1))
+        val sampledMvrs = readCardCsvFile(publisher.sampleMvrsFile(1))
         println("number of samples = ${sampledMvrs.size}")
 
         sampledMvrs.forEach{ mvr ->

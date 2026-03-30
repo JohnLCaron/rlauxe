@@ -77,7 +77,7 @@ in a risk-limiting audit with risk limit α:
 
 # Rlauxe Workflow Overview
 
-**1. Before the Audit**
+**1. Election Creation**
 
 Create the Card Manifest:
 - Create a _Card Manifest_, in which every physical card (and any phantom cards) have a unique entry (called the _AuditableCard_ or _card_).
@@ -100,14 +100,21 @@ Commitment:
 - Write the electionInfo, cardManifest, contest, and if needed, the pools and batches to a publically accessible "bulletin board".
 - Digitally sign these files; they constitute the "election commitment" and may not be altered once the seed is chosen.
 
-**2. Creating a random seed**
+Verify:
+- Verify the election commitment
 
+**2. Audit Creation**
+
+Create the seed and the sorted CardManifest:
 - Create a random 32-bit integer "seed" in a way that allows public observers to be confident that it is truly random.
 - Publish the random seed to the bulletin board. It becomes part of the "audit commitment" and may not be altered once chosen.
 - Use the PRNG (Psuedo Random Number Generator) with the random seed, and assign the generated PRNs (Psuedo Random Number), 
   in order, to the auditable cards. Sort the cards by PRN.
 - Configuration information, including the seed, are set in AuditCreationConfig.
 - The AuditCreationConfig and the sorted cards constitute the "audit commitment", and may not be altered once the seed is chosen.
+
+Verify:
+- Verify the audit commitment
 
 **3. Starting the Audit**
 
@@ -134,6 +141,8 @@ The audit proceeds in rounds:
 5. **Create MVRs**: the auditors enter the results of the manual audits (as Manual Vote Records, MVRs) into the system.
 6. **Run the audit**: For each contest, using the MVRs, the software calculates if the risk limit is satisfied.
 7. **Decide on Next Round**: for each contest not satisfied, the auditors decide whether to continue to another round, or call for a hand recount.
+
+(Is there an "audit round committment" ? )
 
 **5. Verification**
 

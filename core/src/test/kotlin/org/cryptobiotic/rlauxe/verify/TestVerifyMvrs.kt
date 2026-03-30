@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.audit.makeCvr
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import kotlin.random.Random
 import kotlin.test.Test
-import kotlin.test.assertContains
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -19,13 +18,13 @@ class TestVerifyMvrs {
         repeat(N) {
             val id = Random.nextInt()
             val cvr = makeCvr(id, 11, 15)
-            cards.add(AuditableCard(cvr.id, it, prn=it.toLong(), cvr.phantom, cvr.votes, cvr.poolId, batchName="cvr"))
+            cards.add(AuditableCard(cvr, it, prn=it.toLong()))
         }
 
         val errs = ErrorMessages("testMatch")
         verifyMvrCardPairs(cards.zip(cards), errs)
         if (errs.hasErrors())
-         println("testMatch hasErrors")
+          println("testMatch $errs")
         assertFalse(errs.hasErrors())
     }
 
@@ -36,7 +35,7 @@ class TestVerifyMvrs {
         repeat(N) {
             val id = Random.nextInt()
             val cvr = makeCvr(id, 11, 15)
-            cards.add(AuditableCard(cvr.id, it, prn=it.toLong(), cvr.phantom, cvr.votes, cvr.poolId, batchName="cvr"))
+            cards.add(AuditableCard(cvr, it, prn=it.toLong()))
         }
 
         val rcards = cards.reversed()
@@ -52,15 +51,15 @@ class TestVerifyMvrs {
         repeat(N) {
             val id = Random.nextInt()
             val cvr = makeCvr(id, 11, 15)
-            cards.add(AuditableCard(cvr.id, it, prn=it.toLong(), cvr.phantom, cvr.votes, cvr.poolId, batchName="cvr"))
+            cards.add(AuditableCard(cvr, it, prn=it.toLong()))
         }
 
         val rcards = listOf(
-            cards[0].copy(batchName="hasStyle",batch=Batch("hasStyle", 1, cards[0].contests(), true)),
-            cards[1].copy(batchName="hasStyle",batch=Batch("hasStyle", 1, removeOne(cards[1].contests()), true)),
-            cards[2].copy(batchName="noStyle",batch=Batch("hasStyle", 1, removeOne(cards[2].contests()), false)),
-            cards[3].copy(batchName="hasStyle",batch=Batch("hasStyle", 1, addOne(cards[3].contests()), true)),
-            cards[4].copy(batchName="noStyle",batch=Batch("hasStyle", 1, addOne(cards[4].contests()), false)),
+            cards[0].copy(batch=Batch("hasStyle", 1, cards[0].possibleContests(), true)),
+            cards[1].copy(batch=Batch("hasStyle", 1, removeOne(cards[1].possibleContests()), true)),
+            cards[2].copy(batch=Batch("noStyle", 1, removeOne(cards[2].possibleContests()), false)),
+            cards[3].copy(batch=Batch("hasStyle", 1, addOne(cards[3].possibleContests()), true)),
+            cards[4].copy(batch=Batch("noStyle", 1, addOne(cards[4].possibleContests()), false)),
         )
         val errs = ErrorMessages("testHasStyle")
         verifyMvrCardPairs(cards.zip(rcards), errs)

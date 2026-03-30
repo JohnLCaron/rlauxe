@@ -2,11 +2,11 @@ package org.cryptobiotic.rlauxe.attack
 
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CreateElectionIF
+import org.cryptobiotic.rlauxe.audit.ElectionBuilder
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.audit.BatchIF
+import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
@@ -19,6 +19,7 @@ import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.Config
+import org.cryptobiotic.rlauxe.audit.merge
 import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import org.cryptobiotic.rlauxe.util.Closer
@@ -75,12 +76,12 @@ class CardManifestAttack {
         var index=0
         mvrCount = 0
         poolCount = 0
-        val mcards = mutableListOf<AuditableCard>()
+        val mcards = mutableListOf<CardWithBatchName>()
 
         //// group A, mvr index 0-50 match real mvrs.
         repeat(50) {
             mcards.add(
-                AuditableCard(
+                CardWithBatchName(
                     "mvr$mvrCount",
                     index,
                     0L,
@@ -99,7 +100,7 @@ class CardManifestAttack {
         // we move these 50 into the pool, when they sample the mvr, contestA is missing
         repeat(50) {
             mcards.add(
-                AuditableCard(
+                CardWithBatchName(
                     "Pool1-$poolCount",
                     index,
                     0L,
@@ -122,7 +123,7 @@ class CardManifestAttack {
             // mcards.add(AuditableCard("mvr$mvrCount", mvrCount, 0L, false, intArrayOf(2), votes = mapOf(1 to intArrayOf(1)), poolId=null))
 
             // substitute cards with contest 2 undervotes
-            mcards.add( AuditableCard("mvr$mvrCount",
+            mcards.add( CardWithBatchName("mvr$mvrCount",
                 index,
                 0L,
                 false,
@@ -139,19 +140,18 @@ class CardManifestAttack {
         // these are Bobs pooled votes that match the mvrs
         repeat(25) {
             // mvr has Bob's votes
-            mcards.add(AuditableCard("Pool1-$poolCount", index, 0L, false, votes = null, poolId = 1, "pool1"))
+            mcards.add(CardWithBatchName("Pool1-$poolCount", index, 0L, false, votes = null, poolId = 1, "pool1"))
             poolCount++
             index++
         }
         // these are contestB pooled votes that match the mvrs
         repeat(25) {
             // mvr doesnt contain contest 1
-            mcards.add(AuditableCard("Pool1-$poolCount", index, 0L, false, votes = null, poolId = 1, "pool1"))
+            mcards.add(CardWithBatchName("Pool1-$poolCount", index, 0L, false, votes = null, poolId = 1, "pool1"))
             poolCount++
             index++
         }
-        val cards = mcards.toList()
-
+        val cards = merge(mcards, null)
         require(mvrs.size == cards.size)
         ////////////////////////////////////////////////////////////////////////////////
 
@@ -194,7 +194,6 @@ class CardManifestAttack {
 
         val manifestTabs = tabulateAuditableCards(Closer(cards.iterator()), infos)
         print(showTabs("manifestTabs", manifestTabs))
-
 
         // TODO
         //// make the CardPool with reported votes (lies)
@@ -242,7 +241,7 @@ class CardManifestAttack {
         println()
 
         //// create a peristent audit
-        val election = CreateElectionForAttack(listOf(contestUA), cards, mvrs, cardPools, null)
+        val election = CreateElectionForAttack(listOf(contestUA), mcards, mvrs, cardPools, null)
 
         val auditdir = "$topdir/audit"
         val config = Config.from(election.electionInfo(), nsimTrials = 10, contestSampleCutoff = 20000)
@@ -267,11 +266,11 @@ class CardManifestAttack {
 
 class CreateElectionForAttack(
     val contestsUA: List<ContestWithAssertions>,
-    val cards: List<AuditableCard>,
+    val cards: List<CardWithBatchName>,
     val mvrs: List<Cvr>,
     val populations: List<BatchIF>?,
     val cardPools: List<CardPool>?,
-): CreateElectionIF {
+): ElectionBuilder {
 
     override fun electionInfo() = ElectionInfo("CardManifestAttack", AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
     override fun createUnsortedMvrsInternal() = mvrs // for in-memory case

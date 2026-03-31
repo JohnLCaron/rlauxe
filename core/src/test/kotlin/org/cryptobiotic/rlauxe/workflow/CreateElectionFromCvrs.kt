@@ -60,8 +60,8 @@ class CreateElectionFromCards (
         electionName, auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true,
         poolsHaveOneCardStyle = null, pollingMode = PollingMode.withBatches
     )
-    override fun createUnsortedMvrsInternal() = null // for in-memory case
-    override fun createUnsortedMvrsExternal() = Closer(createCards().iterator()) // for out-of-memory case
+    override fun createUnsortedMvrsInternal() = cards.map { it.toCvr() }
+    override fun createUnsortedMvrsExternal() = null // Closer(createCards().iterator()) // for out-of-memory case
     override fun batches() = cardStyles
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA

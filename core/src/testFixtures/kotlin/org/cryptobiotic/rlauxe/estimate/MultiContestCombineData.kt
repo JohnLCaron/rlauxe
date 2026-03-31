@@ -17,7 +17,7 @@ data class MultiContestCombineData(
 ) {
     val contestVoteTrackers: List<ContestVoteTracker>
     val batch = if (poolId == null) Batch.fromCvrBatch
-        else Batch("MultiContestCombineData", poolId, contests.map { it.id }.toIntArray(), false)
+        else Batch("batch$poolId", poolId, contests.map { it.id }.toIntArray(), false)
 
     init {
         require(contests.size > 0)
@@ -39,7 +39,7 @@ data class MultiContestCombineData(
 
         val phantoms = makePhantomCards(contests, startIdx = result.size)
         result.addAll(phantoms)
-        result.shuffle(Random)
+        // result.shuffle(Random)
         return Pair(result, listOf(batch))
     }
 

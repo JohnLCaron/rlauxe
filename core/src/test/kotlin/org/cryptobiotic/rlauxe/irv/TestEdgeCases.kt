@@ -9,7 +9,7 @@
   You should have received a copy of the GNU Affero General Public License along with ConcreteSTV.  If not, see <https://www.gnu.org/licenses/>.
 
  */
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.irv
 
 import au.org.democracydevelopers.raire.RaireError.InvalidNumberOfCandidates
 import au.org.democracydevelopers.raire.RaireProblem

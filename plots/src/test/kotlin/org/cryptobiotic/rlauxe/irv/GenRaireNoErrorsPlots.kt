@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.irv
 
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType

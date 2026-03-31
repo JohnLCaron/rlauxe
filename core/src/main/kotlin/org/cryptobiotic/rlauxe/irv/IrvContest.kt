@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.irv
 
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore
@@ -12,8 +12,8 @@ import kotlin.collections.toIntArray
 private val logger = KotlinLogging.logger("RaireContest")
 
 // an IRV Contest that does not have votes (candidateId -> nvotes Map<Int, Int>)
-// this is the motivation for ContestIF
-data class RaireContest(
+// (this is the motivation for ContestIF)
+data class IrvContest(
     val info: ContestInfo,
     val winners: List<Int>, // actually only one winner is allowed
     val Nc: Int,
@@ -106,7 +106,7 @@ data class RaireContest(
 }
 
 class RaireContestWithAssertions(
-    contest: RaireContest,
+    contest: IrvContest,
     val rassertions: List<RaireAssertion>,
     NpopIn: Int,
 ): ContestWithAssertions(contest, isClca=true, NpopIn) {
@@ -164,7 +164,7 @@ class RaireContestWithAssertions(
          ): RaireContestWithAssertions {
 
             val winnerId = info.candidateIds[winnerIndex]
-            val contest = RaireContest(
+            val contest = IrvContest(
                 info,
                 listOf(winnerId),
                 Nc = Nc,
@@ -227,7 +227,6 @@ enum class RaireAssertionType(val shortName: String) {
 }
 
 // wraps the info from au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty
-// converts a raire.java AssertionAndDifficulty
 data class RaireAssertion(
     val winnerId: Int, // this must be the candidate ID, in order to match with Cvr.votes
     val loserId: Int,  // ditto

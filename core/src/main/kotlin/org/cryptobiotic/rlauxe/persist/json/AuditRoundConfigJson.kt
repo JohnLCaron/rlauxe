@@ -13,7 +13,6 @@ import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.util.ErrorMessages
-import org.cryptobiotic.rlauxe.util.enumValueOf
 
 import java.io.FileOutputStream
 import java.nio.file.Files
@@ -130,11 +129,10 @@ fun ContestSampleControlJson.import() =  ContestSampleControl(
 @Serializable
 data class PollingConfigJson(
     val d: Int,
-    val mode: PollingMode?,
 )
 
-fun PollingConfig.publishJson() = PollingConfigJson(this.d, this.mode)
-fun PollingConfigJson.import() = PollingConfig(this.d, this.mode ?: PollingMode.withPools)
+fun PollingConfig.publishJson() = PollingConfigJson(this.d)
+fun PollingConfigJson.import() = PollingConfig(this.d)
 
 // enum class ClcaStrategyType { generalAdaptive, generalAdaptive2}
 //data class ClcaConfig(
@@ -147,7 +145,7 @@ fun PollingConfigJson.import() = PollingConfig(this.d, this.mode ?: PollingMode.
 //)
 @Serializable
 data class ClcaConfigJson(
-    val strategy: String,
+    val strategy: ClcaStrategyType,
     val fuzzPct: Double?,
     val d: Int,
     val maxLoss: Double?,
@@ -155,7 +153,7 @@ data class ClcaConfigJson(
 )
 
 fun ClcaConfig.publishJson() = ClcaConfigJson(
-    this.strategy.name,
+    this.strategy,
     this.fuzzMvrs,
     this.d,
     this.maxLoss,
@@ -163,7 +161,7 @@ fun ClcaConfig.publishJson() = ClcaConfigJson(
 )
 
 fun ClcaConfigJson.import() = ClcaConfig(
-    enumValueOf(this.strategy, ClcaStrategyType.entries) ?: ClcaStrategyType.generalAdaptive,
+    this.strategy,
     this.fuzzPct,
     this.d,
     this.maxLoss ?: 0.90,

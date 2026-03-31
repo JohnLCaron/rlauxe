@@ -3,12 +3,11 @@ package org.cryptobiotic.rlauxe.oneaudit
 import au.org.democracydevelopers.raire.irv.Votes
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.raire.RaireAssorter
+import org.cryptobiotic.rlauxe.irv.RaireAssorter
 import org.cryptobiotic.rlauxe.util.doubleIsClose
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
-import kotlin.math.ln
 
 // rate :  assort value -> rate over the entire population
 data class OneAuditAssortValueRates(val rates: Map<Double, Double>, val ncardsInPools: Int) {
@@ -25,7 +24,7 @@ data class OneAuditAssortValueRates(val rates: Map<Double, Double>, val ncardsIn
     }
 }
 
-// we know exactly the assort values and their frequency; non-IRV
+// we know exactly the assort values and their frequency
 class OneAuditRatesFromPools(val pools: List<CardPoolIF>) {
 
     // non-IRV
@@ -52,12 +51,6 @@ class OneAuditRatesFromPools(val pools: List<CardPoolIF>) {
             }
         }
 
-        //         var sumOneAuditTerm = 0.0
-        //        if (oaErrorRates != null) { // probably dont need the filter
-        //            oaErrorRates.filter { it.value != 0.0 }.forEach { (sampleValue: Double, rate: Double) ->
-        //                sumOneAuditTerm += ln(1.0 + lam * (sampleValue - mui)) * rate
-        //            }
-        //        }
         val rates = mutableMapOf<Double, Double>()
         pairs.filter { it.second > 0.0 }.forEach {
             val rate = rates.getOrPut(it.first) { 0.0 }
@@ -75,34 +68,22 @@ class OneAuditRatesFromPools(val pools: List<CardPoolIF>) {
                 val taus = TausOA(oaCassorter.assorter.upperBound(), poolAvg)
 
                 val tab = pool.contestTab(contestUA.id)!!
-                // if (tab.irvVotes.votes.isNotEmpty()) {
-                    val irvVotes: Votes = tab.irvVotes.makeVotes(contestUA.ncandidates)
-                    val winnerLoser = raire.winnerLoserVotes(irvVotes)
-                    val winnerCounts: Int = winnerLoser.first
-                    val loserCounts: Int = winnerLoser.second
+                val irvVotes: Votes = tab.irvVotes.makeVotes(contestUA.ncandidates)
+                val winnerLoser = raire.winnerLoserVotes(irvVotes)
+                val winnerCounts: Int = winnerLoser.first
+                val loserCounts: Int = winnerLoser.second
 
-                    val otherCounts = pool.ncards() - winnerCounts - loserCounts
-                    totalInPools += pool.ncards()
-                    val dencards = contestUA.Npop.toDouble() // rate is over entire population
+                val otherCounts = pool.ncards() - winnerCounts - loserCounts
+                totalInPools += pool.ncards()
+                val dencards = contestUA.Npop.toDouble() // rate is over entire population
 
-                    // sampleValue -> rate
-                    pairs.add(Pair(taus.tausOA[0].first * oaCassorter.noerror(), loserCounts / dencards))  // loser
-                    pairs.add(Pair(taus.tausOA[1].first * oaCassorter.noerror(), otherCounts / dencards))  // other
-                    pairs.add(Pair(taus.tausOA[2].first * oaCassorter.noerror(), winnerCounts / dencards))  // winner
-                // }
-                // I guess you could have no votes ??
-                //else {
-                  //  throw RuntimeException("oaErrorRatesIrv needs tab.irvVotes.votes.isNotEmpty()")
-                //}
+                // sampleValue -> rate
+                pairs.add(Pair(taus.tausOA[0].first * oaCassorter.noerror(), loserCounts / dencards))  // loser
+                pairs.add(Pair(taus.tausOA[1].first * oaCassorter.noerror(), otherCounts / dencards))  // other
+                pairs.add(Pair(taus.tausOA[2].first * oaCassorter.noerror(), winnerCounts / dencards))  // winner
             }
         }
 
-        //         var sumOneAuditTerm = 0.0
-        //        if (oaErrorRates != null) { // probably dont need the filter
-        //            oaErrorRates.filter { it.value != 0.0 }.forEach { (sampleValue: Double, rate: Double) ->
-        //                sumOneAuditTerm += ln(1.0 + lam * (sampleValue - mui)) * rate
-        //            }
-        //        }
         val rates = mutableMapOf<Double, Double>()
         pairs.filter { it.second > 0.0 }.forEach {
             val rate = rates.getOrPut(it.first) { 0.0 }

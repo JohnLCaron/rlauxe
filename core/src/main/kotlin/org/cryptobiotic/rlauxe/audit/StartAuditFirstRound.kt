@@ -28,7 +28,7 @@ import kotlin.use
 
 private val logger = KotlinLogging.logger("StartAudit")
 
-// TO pass in creation, round config
+// TODO pass in creation, round config
 fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: String, externalSortDir: String? = null) {
     val publisher = Publisher(auditDir)
 

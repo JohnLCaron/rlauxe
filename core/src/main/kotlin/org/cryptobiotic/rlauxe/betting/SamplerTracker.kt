@@ -87,9 +87,8 @@ class PollingSamplerTracker(
     override fun hasNext() = (idx < cvrPairs.size)
     override fun next() = sample()
 
-    // tracker reflects "previous sequence"
     override fun numberOfSamples() = welford.count
-    override fun measuredClcaErrorCounts() = ClcaErrorCounts.empty(0.0, 0.0)
+    override fun measuredClcaErrorCounts() = ClcaErrorCounts.empty(0.0, 0.0) // doesnt apply for polling
 
     override fun welford() = welford
 

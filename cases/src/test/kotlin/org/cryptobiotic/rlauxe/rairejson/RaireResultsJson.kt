@@ -7,10 +7,10 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.raire.RaireAssertion
-import org.cryptobiotic.rlauxe.raire.RaireAssertionType
-import org.cryptobiotic.rlauxe.raire.RaireContest
-import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
+import org.cryptobiotic.rlauxe.irv.RaireAssertion
+import org.cryptobiotic.rlauxe.irv.RaireAssertionType
+import org.cryptobiotic.rlauxe.irv.IrvContest
+import org.cryptobiotic.rlauxe.irv.RaireContestWithAssertions
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
@@ -64,7 +64,7 @@ fun RaireResultsContestAuditJson.import(Nc: Int, Np: Int): RaireContestWithAsser
     val eliminated = this.eliminated.map { it.toInt() } // eliminated
     val assertions = this.assertions.map { it.import() }
     val candidates = listOf(winner) + eliminated // the sum of winner and eliminated must be all the candiates
-    val contest = RaireContest(
+    val contest = IrvContest(
         ContestInfo(
             this.contest,
             name.toInt(), // ??

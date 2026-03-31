@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.irv
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import kotlin.math.min
@@ -7,7 +7,7 @@ import kotlin.random.Random
 // simulate cvrs for a RaireContest, doesnt call raire-java for the assertions
 // used in EstimateSampleSize
 data class SimulateIrvTestData(
-    val contest: RaireContest,
+    val contest: IrvContest,
     val minMargin: Double,
     val sampleLimits: Int?,
     val excessVotes: Int? = null,

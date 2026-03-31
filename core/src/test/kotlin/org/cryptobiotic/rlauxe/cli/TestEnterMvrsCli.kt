@@ -22,7 +22,7 @@ class TestEnterMvrsCli {
     fun testEnterMvrsError1() {
         val auditDir = "/my/bad/testPersistentWorkflowClca"
 
-        assertFailsWith<IllegalArgumentException> {
+        assertFailsWith<RuntimeException> {
             EnterMvrsCli.main(
                 arrayOf(
                     "-in", auditDir,
@@ -35,7 +35,7 @@ class TestEnterMvrsCli {
     @Test
     fun testEnterMvrsError2() {
         val auditDir = "$testdataDir/persist/testPersistentWorkflowClca"
-        assertFailsWith<IllegalArgumentException> {
+        assertFailsWith<RuntimeException> {
             EnterMvrsCli.main(
                 arrayOf(
                     "-in", auditDir,

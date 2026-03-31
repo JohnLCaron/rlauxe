@@ -2,10 +2,10 @@ package org.cryptobiotic.rlauxe.persist.json
 
 import kotlinx.serialization.Serializable
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.raire.RaireAssertion
-import org.cryptobiotic.rlauxe.raire.RaireAssertionType
-import org.cryptobiotic.rlauxe.raire.RaireContest
-import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
+import org.cryptobiotic.rlauxe.irv.RaireAssertion
+import org.cryptobiotic.rlauxe.irv.RaireAssertionType
+import org.cryptobiotic.rlauxe.irv.IrvContest
+import org.cryptobiotic.rlauxe.irv.RaireContestWithAssertions
 
 // class RaireContestUnderAudit(
 //    contest: RaireContest,
@@ -31,7 +31,7 @@ fun RaireContestUnderAuditJson.import(): RaireContestWithAssertions {
     val raireContest = this.raireContest.import(contestUA.contest.info())
 
     val result = RaireContestWithAssertions(
-        raireContest as RaireContest,
+        raireContest as IrvContest,
         this.rassertions.map { it.import() },
         contestUA.Npop,
     )
@@ -55,10 +55,9 @@ data class RaireAssertionJson(
     val loser: Int,
     val difficulty: Double,
     val marginInVotes: Int,
-    val assertion_type: String,
+    val assertionType: RaireAssertionType,
     val winnerIdx: Int,
     val loserIdx: Int, val eliminated: List<Int>,
-    // val votes: Map<Int, Int>,
 )
 
 fun RaireAssertion.publishJson() = RaireAssertionJson(
@@ -66,11 +65,10 @@ fun RaireAssertion.publishJson() = RaireAssertionJson(
     this.loserId,
     this.difficulty,
     this.marginInVotes,
-    this.assertionType.name,
+    this.assertionType,
     this.winnerIdx,
     this.loserIdx,
     this.eliminated,
-    // this.votes,
 )
 
 fun RaireAssertionJson.import(): RaireAssertion {
@@ -79,10 +77,9 @@ fun RaireAssertionJson.import(): RaireAssertion {
         this.loser,
         this.difficulty,
         this.marginInVotes,
-        RaireAssertionType.fromString(this.assertion_type),
+        this.assertionType,
         this.winnerIdx,
         this.loserIdx,
         this.eliminated,
-        // this.votes,
     )
 }

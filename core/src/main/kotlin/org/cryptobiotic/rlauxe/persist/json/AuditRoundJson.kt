@@ -15,7 +15,6 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Welford
-import org.cryptobiotic.rlauxe.util.enumValueOf
 
 import java.io.FileOutputStream
 import java.nio.file.Files
@@ -272,7 +271,7 @@ data class AuditRoundResultJson(
     val plast: Double,       // last pvalue when testH0 terminates
     val pmin: Double,       // minimum pvalue reached
     val samplesUsed: Int,     // sample count when testH0 terminates, usually maxSamples
-    val status: String, // testH0 status
+    val status: TestH0Status, // testH0 status
     val clcaErrorTracker: ClcaErrorTrackerJson?,
     val params: Map<String, Double>
 )
@@ -284,20 +283,19 @@ fun AuditRoundResult.publishJson() = AuditRoundResultJson(
     plast = this.plast,
     pmin = this.pmin,
     samplesUsed = this.samplesUsed,
-    status = this.status.name,
+    status = this.status,
     clcaErrorTracker = this.clcaErrorTracker?.publishJson(),
     params = params,
 )
 
 fun AuditRoundResultJson.import() : AuditRoundResult {
-    val status = enumValueOf(this.status, TestH0Status.entries) ?: TestH0Status.InProgress
     return AuditRoundResult(
         this.roundIdx,
         nmvrs=this.nmvrs,
         plast=this.plast,
         pmin=this.pmin,
         samplesUsed=this.samplesUsed,
-        status=status,
+        status=this.status,
         clcaErrorTracker=this.clcaErrorTracker?.import(),
         params=params,
     )

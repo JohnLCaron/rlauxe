@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
-import org.cryptobiotic.rlauxe.raire.RaireContestTestData
+import org.cryptobiotic.rlauxe.irv.RaireContestTestData
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.makeContestsWithUndervotesAndPhantoms

@@ -149,7 +149,7 @@ data class ElectionInfo(
 
     val cvrsContainUndervotes: Boolean = true, // TODO implement cvrsContainUndervotes = false
     val poolsHaveOneCardStyle: Boolean? = null, // TODO dont seem to be using this
-    val pollingMode: PollingMode? = null, // TODO also needed for cvrsContainUndervotes = false ?
+    val pollingMode: PollingMode? = null, // TODO also needed for cvrsContainUndervotes = false ? Maybe "BatchesMode ??
 
     val mvrSource: MvrSource =
         if (auditType.isClca()) MvrSource.testClcaSimulated else MvrSource.testPrivateMvrs,
@@ -259,7 +259,6 @@ data class ContestSampleControl(
 
 data class PollingConfig(
     val d: Int = 100,  // shrinkTrunc weight
-    val mode: PollingMode = PollingMode.withPools, // move to ElectionInfo, cant be changed
 )
 
 enum class ClcaStrategyType { generalAdaptive }

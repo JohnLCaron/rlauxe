@@ -46,8 +46,6 @@ import org.cryptobiotic.rlauxe.util.roundToClosest
     #           = (.05 * T_L - T_A) / T_L * 2*.95 + .5
  */
 
-const val compareBelgium = false
-
 data class BelowThreshold(val info: ContestInfo, val candId: Int, val t: Double): AssorterIF  {
     val id = info.id
     val lowerg = (t-1) // aka 'a'

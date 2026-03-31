@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.irv
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import kotlin.test.Test

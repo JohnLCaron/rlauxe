@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditClcaAssorter
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.raire.RaireAssorter
+import org.cryptobiotic.rlauxe.irv.RaireAssorter
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -190,9 +190,10 @@ fun verifyManifest(
     var countErrs = 0
     val indexSorted = indexList.sortedBy { it.first }
     val prng = Prng(config.creation.seed)
-    indexSorted.forEach {
+    indexSorted.forEachIndexed { idx, it ->
         val prn = prng.next()
-        if(it.second != prn) countErrs++
+        if (it.second != prn)
+            countErrs++
     }
     if (countErrs > 0)
         results.addError("  $count cards in the Manifest do not have correct prn: there are $countErrs errors")

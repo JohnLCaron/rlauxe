@@ -143,7 +143,7 @@ class ClcaSingleRoundWorkflowTaskGenerator(
         val testData = MultiContestCombineData(listOf(contestB, contestS), contestB.Nc, poolId = poolId)
 
         // so this has to be the cards
-        val cards = testData.makeCardsFromContests()
+        val (cards, _) = testData.makeCardsFromContests()
         assertEquals(Nc, cards.size)
         val cardTabs = tabulateAuditableCards(Closer(cards.iterator()), infos).toSortedMap()
         // cardTabs.forEach { println(it) }

@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.audit.CvrsToCardsWithBatchNameIterator
 import org.cryptobiotic.rlauxe.audit.ElectionBuilder
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MvrSource
+import org.cryptobiotic.rlauxe.audit.PollingMode
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -26,7 +27,7 @@ class CreateElectionFromCvrs (
 
     override fun electionInfo() = ElectionInfo(
         electionName, auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true,
-        poolsHaveOneCardStyle = null, mvrSource = mvrSource
+        poolsHaveOneCardStyle = null, mvrSource = mvrSource, pollingMode = PollingMode.withBatches
     )
     override fun createUnsortedMvrsInternal() = cvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null
@@ -53,16 +54,15 @@ class CreateElectionFromCards (
     val cardPools: List<CardPool>? = null,
     val cardStyles: List<BatchIF>? = null,
     val auditType: AuditType,
-    val mvrSource: MvrSource,
 ): ElectionBuilder {
 
     override fun electionInfo() = ElectionInfo(
         electionName, auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true,
-        poolsHaveOneCardStyle = null, mvrSource = mvrSource
+        poolsHaveOneCardStyle = null, pollingMode = PollingMode.withBatches
     )
     override fun createUnsortedMvrsInternal() = null // for in-memory case
     override fun createUnsortedMvrsExternal() = Closer(createCards().iterator()) // for out-of-memory case
-    override fun batches() = cardPools
+    override fun batches() = cardStyles
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
     override fun cards() = Closer(createCards().iterator())

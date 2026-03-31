@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.irv
 
 import au.org.democracydevelopers.raire.irv.Vote
 import io.github.oshai.kotlinlogging.KotlinLogging

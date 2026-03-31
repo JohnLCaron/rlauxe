@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.irv
 
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -17,7 +17,7 @@ class TestSimulateIrvTestData {
     val Np = 10
 
     val target: RaireContestWithAssertions
-    val targetContest: RaireContest
+    val targetContest: IrvContest
     val cvrs: List<Cvr>
     val infos: Map<Int, ContestInfo>
 
@@ -38,7 +38,7 @@ class TestSimulateIrvTestData {
         //    val undervotes: Int,
         //)
         //)
-        val raireContest = RaireContest(info, winners=listOf(42), N, N-Np, (undervotePct * N).toInt())
+        val irvContest = IrvContest(info, winners=listOf(42), N, N-Np, (undervotePct * N).toInt())
 
         // data class SimulateIrvTestData(
         //    val contest: RaireContest,
@@ -47,20 +47,20 @@ class TestSimulateIrvTestData {
         //    val excessVotes: Int? = null,
         //    val quiet: Boolean = true
         //)
-        val sim = SimulateIrvTestData(raireContest, minMargin, sampleLimits=null, quiet=false )
+        val sim = SimulateIrvTestData(irvContest, minMargin, sampleLimits=null, quiet=false )
         assertEquals("SimulateIrvTestData(0} phantoms=$Np ncards=$N", sim.toString())
 
         cvrs = sim.makeCvrs()
-        infos = mapOf(raireContest.id to raireContest.info())
+        infos = mapOf(irvContest.id to irvContest.info())
         val tabs = tabulateCvrs(cvrs.iterator(), infos)
-        val contestTab = tabs[raireContest.id]
+        val contestTab = tabs[irvContest.id]
         assertNotNull(contestTab)
 
         //println(contestTab.irvVotes)
         println("nvotes = ${contestTab.irvVotes.nvotes()}")
         val nvotes = contestTab.irvVotes.nvotes()
         target = makeRaireContest(info, contestTab, N, N)
-        targetContest = target.contest as RaireContest
+        targetContest = target.contest as IrvContest
     }
 
     @Test

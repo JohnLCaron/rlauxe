@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.persist.json
 
 import org.cryptobiotic.rlauxe.core.*
-import org.cryptobiotic.rlauxe.raire.*
+import org.cryptobiotic.rlauxe.irv.*
 import org.cryptobiotic.rlauxe.util.listToMap
 import org.cryptobiotic.rlauxe.util.margin2mean
 import kotlin.test.Test
@@ -26,11 +26,11 @@ class TestRaireJson {
             choiceFunction = SocialChoiceFunction.IRV,
             candidateNames = listToMap("A", "B", "C", "D"),
         )
-        val target = RaireContest(info, listOf(3), 42, 33, undervotes=11)
+        val target = IrvContest(info, listOf(3), 42, 33, undervotes=11)
         // TODO target.roundsPaths.addAll(roundPathsById)
 
         val json = target.publishJson()
-        val roundtrip = json.import(info) as RaireContest
+        val roundtrip = json.import(info) as IrvContest
         assertNotNull(roundtrip)
         assertEquals(target, roundtrip)
         assertTrue(roundtrip.equals(target))
@@ -51,8 +51,8 @@ class TestRaireJson {
         assertNotNull(roundtrip)
         assertEquals(target, roundtrip)
         assertTrue(roundtrip.equals(target))
-        val tcontest = target.contest as RaireContest
-        val rcontest = roundtrip.contest as RaireContest
+        val tcontest = target.contest as IrvContest
+        val rcontest = roundtrip.contest as IrvContest
         assertTrue(tcontest.roundsPaths.equals(rcontest.roundsPaths))
     }
 
@@ -102,7 +102,7 @@ fun makeRaireUA(): RaireContestWithAssertions {
         choiceFunction = SocialChoiceFunction.IRV,
         candidateNames = listToMap("A", "B", "C", "D"),
     )
-    val contest = RaireContest(info, listOf(2), 120, 111, undervotes=1)
+    val contest = IrvContest(info, listOf(2), 120, 111, undervotes=1)
 
     val round1 =  IrvRound(mapOf(0 to 42, 1 to 99, 2 to 1032)) // data class IrvRound(val count: Map<Int, Int>) { // count is candidate -> nvotes for one round
     val round2 =  IrvRound(mapOf(1 to 99, 2 to 1032))

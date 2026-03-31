@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.irv
 
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -22,7 +22,7 @@ class TestSimulateOneAuditRaire {
     val phantomPct = 0.0
 
     val rcontestUA: RaireContestWithAssertions
-    val rcontest: RaireContest
+    val rcontest: IrvContest
     val cvrs: List<Cvr>
     val infos: Map<Int, ContestInfo>
     val pools: List<CardPool>
@@ -37,7 +37,7 @@ class TestSimulateOneAuditRaire {
         rcontestUA = makeRaireContestResult.first
         cvrs = makeRaireContestResult.second
         pools = makeRaireContestResult.third
-        rcontest = rcontestUA.contest as RaireContest
+        rcontest = rcontestUA.contest as IrvContest
         infos = mapOf(rcontest.id to rcontest.info())
     }
 

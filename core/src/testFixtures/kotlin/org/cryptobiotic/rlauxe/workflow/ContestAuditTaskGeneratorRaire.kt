@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.*
-import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
+import org.cryptobiotic.rlauxe.irv.simulateRaireTestContest
 
 class RaireContestAuditTaskGenerator(
     val Nc: Int,

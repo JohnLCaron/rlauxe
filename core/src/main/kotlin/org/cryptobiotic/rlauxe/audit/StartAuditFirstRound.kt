@@ -127,7 +127,7 @@ fun sortManifestInternal(publisher: Publisher, seed: Long) {
     val sortedCards = createSortedCardsInternal(unsortedCards, seed)
     val countCards = writeCardCsvFile(Closer(sortedCards.iterator()), publisher.sortedCardsFile())
     // createZipFile(publisher.sortedCardsFile(), delete = true)
-    logger.info{"sortManifestInternal ${countCards} cards to ${publisher.sortedCardsFile()}"}
+    logger.info{"sortManifestInternal ${countCards} cards to ${publisher.sortedCardsFile()} seed= $seed"}
 }
 
 fun createSortedCardsInternal(unsortedCards: CloseableIterator<CardWithBatchName>, seed: Long) : List<CardWithBatchName> {
@@ -135,7 +135,9 @@ fun createSortedCardsInternal(unsortedCards: CloseableIterator<CardWithBatchName
     val cards = mutableListOf<CardWithBatchName>()
     unsortedCards.use { cardIter ->
         while (cardIter.hasNext()) {
-            cards.add( cardIter.next().copy(prn = prng.next()))
+            val unsorted = cardIter.next()
+            val nextPrn = prng.next()
+            cards.add( unsorted.copy(prn = nextPrn))
         }
     }
     return cards.sortedBy { it.prn }

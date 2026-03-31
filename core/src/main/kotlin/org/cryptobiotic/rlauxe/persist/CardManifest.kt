@@ -7,8 +7,6 @@ import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 
 class CardManifest(val cards: CloseableIterable<AuditableCard>, val ncards: Int) {
-    // val popMap = batches.associateBy{ it.name() }
-    // fun batch(batchName: String) = popMap[batchName]
 
     companion object {
         fun createFromAList(cards: List<AuditableCard>) : CardManifest {

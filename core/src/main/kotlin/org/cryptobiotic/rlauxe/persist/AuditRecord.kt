@@ -144,7 +144,6 @@ class AuditRecord(
                 null
             }
 
-            // new way of storing config
             val auditCreationConfigResult = readAuditCreationConfigJsonFile(publisher.auditCreationConfigFile())
             val auditCreationConfig = if (auditCreationConfigResult.isOk) auditCreationConfigResult.unwrap() else {
                 errs.addNested(auditCreationConfigResult.unwrapError())

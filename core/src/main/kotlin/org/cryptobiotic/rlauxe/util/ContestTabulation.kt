@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.estimate.Vunder
-import org.cryptobiotic.rlauxe.raire.VoteConsolidator
+import org.cryptobiotic.rlauxe.irv.VoteConsolidator
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.iterator

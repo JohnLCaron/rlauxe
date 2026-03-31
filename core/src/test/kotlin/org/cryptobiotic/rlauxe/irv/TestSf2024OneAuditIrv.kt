@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.irv
 
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.AuditableCard
@@ -52,7 +52,7 @@ class TestSf2024OneAuditIrv() {
     fun testAssorterMethods() {
         val contest24 = contests.find { it.id == 24 }!!
         val rcontestUA = contest24 as RaireContestWithAssertions
-        val rcontest = contest24.contest as RaireContest
+        val rcontest = contest24.contest as IrvContest
         println("  ${rcontest.showCandidates()}")
 
         val poolId = 3464

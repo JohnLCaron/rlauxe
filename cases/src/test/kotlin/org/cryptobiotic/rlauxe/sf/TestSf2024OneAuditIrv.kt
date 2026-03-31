@@ -9,9 +9,9 @@ import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
-import org.cryptobiotic.rlauxe.raire.RaireAssorter
-import org.cryptobiotic.rlauxe.raire.RaireContest
-import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
+import org.cryptobiotic.rlauxe.irv.RaireAssorter
+import org.cryptobiotic.rlauxe.irv.IrvContest
+import org.cryptobiotic.rlauxe.irv.RaireContestWithAssertions
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -57,7 +57,7 @@ class TestSf2024OneAuditIrv() {
     fun testSf2024oa() {
         val contest24 = contests.find { it.id == 24 }!!
         val rcontestUA = contest24 as RaireContestWithAssertions
-        val rcontest = contest24.contest as RaireContest
+        val rcontest = contest24.contest as IrvContest
         val Npop = rcontestUA.Npop
         val info24 = rcontestUA.contest.info()
         val infos24 = mapOf(24 to info24)

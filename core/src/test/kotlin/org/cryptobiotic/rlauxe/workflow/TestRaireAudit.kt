@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.raire.*
+import org.cryptobiotic.rlauxe.irv.*
 import kotlin.test.Test
 
 class TestRaireAudit {

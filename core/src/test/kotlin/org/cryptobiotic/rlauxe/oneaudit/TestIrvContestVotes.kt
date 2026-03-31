@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.raire.VoteList
+import org.cryptobiotic.rlauxe.irv.VoteList
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

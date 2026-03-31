@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.irv
 
 import au.org.democracydevelopers.raire.RaireProblem
 import au.org.democracydevelopers.raire.RaireSolution
@@ -129,7 +129,7 @@ fun makeRaireContest(info: ContestInfo, contestTab: ContestTabulation, Nc: Int, 
         val roundsById = roundPath.rounds.map { round -> round.convert(info.candidateIds) }
         IrvRoundsPath(roundsById, roundPath.irvWinner.convert(info.candidateIds))
     }
-    (rcontestUA.contest as RaireContest).roundsPaths.addAll(roundPathsById)
+    (rcontestUA.contest as IrvContest).roundsPaths.addAll(roundPathsById)
 
     return rcontestUA
 }
@@ -221,7 +221,7 @@ fun makeRaireOneAuditContest(info: ContestInfo, contestTab: ContestTabulation, N
         val roundsById = roundPath.rounds.map { round -> round.convert(info.candidateIds) }
         IrvRoundsPath(roundsById, roundPath.irvWinner.convert(info.candidateIds))
     }
-    (rcontestUA.contest as RaireContest).roundsPaths.addAll(roundPathsById)
+    (rcontestUA.contest as IrvContest).roundsPaths.addAll(roundPathsById)
 
 
     return rcontestUA

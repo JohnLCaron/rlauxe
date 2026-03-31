@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.irv
 
 import org.cryptobiotic.rlauxe.core.Cvr
 import kotlin.random.Random
@@ -14,7 +14,7 @@ class TestSimulateRaireTestContest {
     val phantomRange = 0.001..0.01
 
     val rcontestUA: RaireContestWithAssertions
-    val rcontest: RaireContest
+    val rcontest: IrvContest
     val cvrs: List<Cvr>
 
     init {
@@ -25,7 +25,7 @@ class TestSimulateRaireTestContest {
         val makeRaireContestResult = simulateRaireTestContest(N=N, contestId=111, ncands=4, minMargin=minMargin, phantomPct=phantomPct, quiet=false)
         rcontestUA = makeRaireContestResult.first
         cvrs = makeRaireContestResult.second
-        rcontest = rcontestUA.contest as RaireContest
+        rcontest = rcontestUA.contest as IrvContest
     }
 
     @Test

@@ -7,7 +7,7 @@ import kotlin.math.min
 
 private val logger = KotlinLogging.logger("Contest")
 
-// For a Contest; Assertions may be mixed.
+// For a Contest; but a contest may have mixed Assertions, eg DHondt.
 enum class SocialChoiceFunction(val hasMinPct: Boolean) {
     PLURALITY(false),
     APPROVAL(false),

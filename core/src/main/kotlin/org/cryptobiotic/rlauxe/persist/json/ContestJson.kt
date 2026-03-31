@@ -14,9 +14,8 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.dhondt.DhondtScore
-import org.cryptobiotic.rlauxe.raire.*
+import org.cryptobiotic.rlauxe.irv.*
 import org.cryptobiotic.rlauxe.util.ErrorMessages
-import org.cryptobiotic.rlauxe.util.enumValueOf
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
@@ -35,7 +34,7 @@ data class ContestInfoJson(
     val name: String,
     val id: Int,
     val candidateNames: Map<String, Int>, // candidate name -> candidate id
-    val choiceFunction: String,
+    val choiceFunction: SocialChoiceFunction,
     val nwinners: Int,
     val voteForN: Int? = null,
     val minFraction: Double?,
@@ -47,7 +46,7 @@ fun ContestInfo.publishJson() : ContestInfoJson {
         this.name,
         this.id,
         this.candidateNames,
-        this.choiceFunction.name,
+        this.choiceFunction,
         this.nwinners,
         this.voteForN,
         this.minFraction,
@@ -56,12 +55,11 @@ fun ContestInfo.publishJson() : ContestInfoJson {
 }
 
 fun ContestInfoJson.import(): ContestInfo {
-    val choiceFunction = enumValueOf(this.choiceFunction, SocialChoiceFunction.entries) ?: SocialChoiceFunction.PLURALITY
     val info = ContestInfo(
         this.name,
         this.id,
         this.candidateNames,
-        choiceFunction,
+        this.choiceFunction,
         this.nwinners,
         this.voteForN ?: this.nwinners,
         this.minFraction,
@@ -79,13 +77,14 @@ fun ContestInfoJson.import(): ContestInfo {
 //        val Ncast: Int,            // number of cast ballots containing this Contest, including undervotes
 //    ): ContestIF
 //
-// data class RaireContest(
+// data class IrvContest(
 //    val info: ContestInfo,
-//    val winners: List<Int>,
+//    val winners: List<Int>, // actually only one winner is allowed
 //    val Nc: Int,
 //    val Ncast: Int,
+//    val undervotes: Int,
 //) : ContestIF {
-//     val roundsPaths = mutableListOf<IrvRoundsPath>()
+//    val roundsPaths = mutableListOf<IrvRoundsPath>()
 
 @Serializable
 data class ContestIFJson(
@@ -94,8 +93,8 @@ data class ContestIFJson(
     val winners: List<Int>?,
     val Nc: Int,
     val Ncast: Int,
-    val irvRoundsPaths: List<IrvRoundsPathJson>? = null,
     val undervotes: Int? = null,
+    val irvRoundsPaths: List<IrvRoundsPathJson>? = null,
     val sortedScores: List<DhondtScoreJson>? = null
 )
 
@@ -118,15 +117,15 @@ fun ContestIF.publishJson() : ContestIFJson {
                 this.Nc,
                 this.Ncast,
             )
-        is RaireContest ->
+        is IrvContest ->
             ContestIFJson(
-                "RaireContest",
+                "IrvContest",
                 votes = null,
                 this.winners,
                 this.Nc,
                 this.Ncast,
+                undervotes = this.undervotes,
                 irvRoundsPaths = this.roundsPaths.map { it.publishJson() },
-                undervotes = this.undervotes
             )
         else -> throw RuntimeException("unknown contest type ${this.javaClass.simpleName} = $this")
     }
@@ -141,8 +140,9 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
                 this.Nc,
                 this.Ncast,
             )
+        "IrvContest",
         "RaireContest" -> {
-            val rcontest = RaireContest(
+            val rcontest = IrvContest(
                 info,
                 this.winners!!,
                 this.Nc,
@@ -226,7 +226,7 @@ data class ContestUnderAuditJson(
 
 fun ContestWithAssertions.publishJson() : ContestUnderAuditJson {
     return ContestUnderAuditJson(
-        this.contest.info().publishJson(),
+        this.contest.info().publishJson(), // heres where ContestInfo gets stored
         this.contest.publishJson(),
         this.isClca,
         this.assertions.map { it.publishIFJson() },

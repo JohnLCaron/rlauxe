@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.irv
 
 import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.core.*
@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
-class TestRaireContest {
+class TestIrvContest {
 
     @Test
     fun testContestBasics() {
@@ -21,7 +21,7 @@ class TestRaireContest {
         //    override val winners: List<Int>,
         //    override val Nc: Int,
         //    override val Np: Int,
-        val contest = RaireContest(info, winners=listOf(1), Nc=211, Ncast=210, undervotes = 1)
+        val contest = IrvContest(info, winners=listOf(1), Nc=211, Ncast=210, undervotes = 1)
         assertEquals(info.id, contest.id)
         assertEquals(info.choiceFunction, contest.choiceFunction)
         assertEquals(211, contest.Nc)
@@ -29,7 +29,7 @@ class TestRaireContest {
         assertEquals(listOf(1), contest.winners())
         assertEquals(listOf(0, 2, 3, 4, 42), contest.losers())
         assertEquals(listOf("cand1"), contest.winnerNames())
-        assertEquals( "RaireContest(info='testContestInfo' (0) candidates=[0, 1, 2, 3, 4, 42] choiceFunction=IRV nwinners=1 voteForN=1, winners=[1], Nc=211, Ncast=210, undervotes=1)",
+        assertEquals( "IrvContest(info='testContestInfo' (0) candidates=[0, 1, 2, 3, 4, 42] choiceFunction=IRV nwinners=1 voteForN=1, winners=[1], Nc=211, Ncast=210, undervotes=1)",
             contest.toString()
         )
     }

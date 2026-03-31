@@ -1,6 +1,5 @@
 package org.cryptobiotic.cli
 
-import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -9,14 +8,14 @@ import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
-import org.cryptobiotic.rlauxe.raire.IrvCount
-import org.cryptobiotic.rlauxe.raire.RaireContest
-import org.cryptobiotic.rlauxe.raire.VoteConsolidator
-import org.cryptobiotic.rlauxe.raire.showIrvCountResult
+import org.cryptobiotic.rlauxe.irv.IrvCount
+import org.cryptobiotic.rlauxe.irv.IrvContest
+import org.cryptobiotic.rlauxe.irv.VoteConsolidator
+import org.cryptobiotic.rlauxe.irv.showIrvCountResult
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import kotlin.test.Test
 
-class ShowRaireContests {
+class ShowIrvContests {
 
     @Test
     fun showRaireContests() {
@@ -30,7 +29,7 @@ class ShowRaireContests {
 
         val irvCounters = mutableListOf<IrvCounter>()
         contestsUA.filter { it.isIrv }.forEach { contestUA ->
-            irvCounters.add(IrvCounter(contestUA.contest as RaireContest))
+            irvCounters.add(IrvCounter(contestUA.contest as IrvContest))
         }
 
         val cvrCsv = "$topDir/$cvrExportCsvFile"
@@ -53,7 +52,7 @@ class ShowRaireContests {
     }
 }
 
-data class IrvCounter(val rcontest: RaireContest) {
+data class IrvCounter(val rcontest: IrvContest) {
     val vc = VoteConsolidator()
     val contestId = rcontest.id
 
@@ -65,7 +64,7 @@ data class IrvCounter(val rcontest: RaireContest) {
     }
 }
 
-fun showIrvCount(rcontest: RaireContest, irvCount: IrvCount) {
+fun showIrvCount(rcontest: IrvContest, irvCount: IrvCount) {
     val roundResult = irvCount.runRounds()
     println(showIrvCountResult(roundResult, rcontest.info))
     println("================================================================================================\n")

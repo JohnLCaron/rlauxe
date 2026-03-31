@@ -52,4 +52,5 @@ object RunVerifyContests {
         }
         return verifier.verify()
     }
+
 }

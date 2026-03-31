@@ -44,7 +44,7 @@ class TestConfig {
   creation=AuditCreationConfig(auditType=POLLING, riskLimit=0.05, seed=-1, riskMeasuringSampleLimit=null, other={}), 
   simulation=SimulationControl(nsimTrials=100, estPercentile=[50, 80], simFuzzPct=0.002, simulationStrategy=optimistic), 
   sampling=ContestSampleControl(minRecountMargin=0.005, minMargin=0.0, maxSamplePct=0.0, contestSampleCutoff=10000, auditSampleCutoff=10000, other={}))
-  pollingConfig=PollingConfig(d=100, mode=withPools) )
+  pollingConfig=PollingConfig(d=100) )
 """
         assertEquals(expected, config.toString())
     }

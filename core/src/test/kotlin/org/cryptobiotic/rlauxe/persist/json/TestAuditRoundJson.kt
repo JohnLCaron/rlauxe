@@ -9,8 +9,8 @@ import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
-import org.cryptobiotic.rlauxe.raire.simulateRaireTestContest
+import org.cryptobiotic.rlauxe.irv.RaireContestWithAssertions
+import org.cryptobiotic.rlauxe.irv.simulateRaireTestContest
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.io.path.createTempFile
 import kotlin.test.Test

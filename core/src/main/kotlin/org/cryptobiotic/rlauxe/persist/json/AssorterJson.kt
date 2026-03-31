@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dhondt.DHondtAssorter
 import org.cryptobiotic.rlauxe.oneaudit.*
-import org.cryptobiotic.rlauxe.raire.RaireAssorter
+import org.cryptobiotic.rlauxe.irv.RaireAssorter
 
 // open class ClcaAssorter(
 //    val info: ContestInfo,

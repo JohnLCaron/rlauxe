@@ -10,7 +10,7 @@
 
  */
 
-package org.cryptobiotic.rlauxe.raire
+package org.cryptobiotic.rlauxe.irv
 
 import au.org.democracydevelopers.raire.RaireException
 import au.org.democracydevelopers.raire.algorithm.RaireResult

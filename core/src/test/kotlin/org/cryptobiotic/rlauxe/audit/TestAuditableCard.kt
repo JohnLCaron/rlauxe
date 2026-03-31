@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.junit.jupiter.api.Test
 import kotlin.random.Random
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
@@ -51,6 +52,23 @@ class TestAuditableCard {
         assertEquals(card1.toString(), card2.toString())
 
         val expected = """CardWithBatchName(location='cvr$id', index=42, prn=4422, phantom=false, poolId=1, batchName='pool1')
+  votes: 1:[1, 2, 3], 2:[4, 5, 6], 3:[0, 1], """
+        assertEquals(expected, card1.toString())
+    }
+
+    @Test
+    fun testCardEqualsAndString() {
+        val id = 42
+        val card1 = AuditableCard ("cvr$id", 42, 4422L, false, // intArrayOf(1,2,3),
+            mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), Batch.fromCvrBatch)
+        val card2 = AuditableCard ("cvr$id", 42, 4422L, false, // intArrayOf(1,2,3),
+            mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), Batch.phantomBatch)
+        assertEquals(card1.toCvr(), card2.toCvr())
+        assertNotEquals(card1.hashCode(), card2.hashCode())
+        assertNotEquals(card1, card2)
+        assertNotEquals(card1.toString(), card2.toString())
+
+        val expected = """AuditableCard(location='cvr42', index=42, prn=4422, phantom=false, has batch _fromCvr -1 possibleContests=[] singleStyle=true)
   votes: 1:[1, 2, 3], 2:[4, 5, 6], 3:[0, 1], """
         assertEquals(expected, card1.toString())
     }

@@ -13,7 +13,7 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.dhondt.DHondtContest
 import org.cryptobiotic.rlauxe.util.OnlyTask
-import org.cryptobiotic.rlauxe.raire.RaireContestWithAssertions
+import org.cryptobiotic.rlauxe.irv.RaireContestWithAssertions
 
 // TODO add the Nbs
 class WorkflowTesterClca(

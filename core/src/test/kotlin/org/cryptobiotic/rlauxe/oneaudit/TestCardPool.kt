@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.util.tabulateCvrs
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.Vunder
-import org.cryptobiotic.rlauxe.estimate.makeCvrsForPool
+import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -76,10 +76,10 @@ class TestCardPool {
         }
 
         //  TODO val cvrs2 = makeCvrsFromPopulations(test.populations)
-        val cvrs = makeCvrsForPool(contestVotes, "poolName", poolId = 42, test.hasSingleCardStyle)
+        val cvrs = makeCvrsForOnePool(contestVotes, "poolName", poolId = 42, test.hasSingleCardStyle)
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
 
-        val cardPools = calcOneAuditPoolsFromMvrs(infos, test.cardStyles, cvrs)
+        val cardPools = calcOneAuditPoolsFromMvrs(infos, test.cardStyleWithNcards, cvrs)
         // was val cardPools = CardPoolFromCvrs.makeCardPools(cvrs.iterator(), infos)
         val cardPool = cardPools.first()
 
@@ -109,7 +109,7 @@ class TestCardPool {
         }
 
         // TODO val cvrs2 = makeCvrsFromPopulations(test.populations)
-        val cvrs = makeCvrsForPool(contestVotes, "poolName", poolId = 42, hasSingleCardStyle = false)
+        val cvrs = makeCvrsForOnePool(contestVotes, "poolName", poolId = 42, hasSingleCardStyle = false)
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
         val cvrTabs = tabulateCvrs(cvrs.iterator(), infos)
 

@@ -23,6 +23,7 @@ fun checkContestsCorrectlyFormed(sampleControl: ContestSampleControl, contestsUA
         if (contestUA.preAuditStatus == TestH0Status.InProgress && !contestUA.isIrv) {
             checkWinnerVotes(contestUA, results)
 
+            // this is sampleControl, not validation
             if ((contestUA.minRecountMargin()?: 0.0) <= sampleControl.minRecountMargin) {
                 logger.warn{"*** MinMargin contest ${contestUA.id} recountMargin ${contestUA.minRecountMargin()} <= ${sampleControl.minRecountMargin}"}
                 contestUA.preAuditStatus = TestH0Status.MinMargin
@@ -49,7 +50,7 @@ fun checkContestInfos(contestsUA: List<ContestWithAssertions>, results: VerifyRe
     val contestNames = mutableSetOf<String>()
     val contestIds = mutableSetOf<Int>()
     contestsUA.forEach { contestUA ->
-        // 2. over all contests, verify that the names and ids are unique.
+        // 1. over all contests, verify that the names and ids are unique.
         if (!contestNames.add(contestUA.name)) {
             results.addError("Contest ${contestUA.name} duplicate name")
             contestUA.preAuditStatus = TestH0Status.ContestMisformed
@@ -59,7 +60,8 @@ fun checkContestInfos(contestsUA: List<ContestWithAssertions>, results: VerifyRe
             contestUA.preAuditStatus = TestH0Status.ContestMisformed
         }
 
-        // 1. for each contest, verify that candidate names and candidate ids are unique.
+        // checked in ContestInfo constructor
+        /* 2. for each contest, verify that candidate names and candidate ids are unique.
         val candNames = mutableSetOf<String>()
         val candIds = mutableSetOf<Int>()
         contestUA.contest.info().candidateNames.forEach { name, id ->
@@ -71,10 +73,11 @@ fun checkContestInfos(contestsUA: List<ContestWithAssertions>, results: VerifyRe
                 results.addError("Contest ${contestUA.name} (${contestUA.id}) candidate $id duplicate id")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
             }
-        }
+        } */
     }
 }
 
+// TODO not needed, checked in Contest constructor? or duplicate for safety ??
 fun checkWinners(contestUA: ContestWithAssertions, results: VerifyResults) {
     val contest = contestUA.contest
     val info = contest.info()
@@ -123,7 +126,7 @@ fun checkWinnerVotes(contestUA: ContestWithAssertions, results: VerifyResults) {
     val sortedVotes: List<Map.Entry<Int, Int>> = contest.votes.entries.sortedByDescending { it.value } // highest vote count first
     val nwinners = contest.winners.size
 
-    // 3. verify that the winners have more votes than the losers (margins > 0 for all assertions)
+    // 4. verify that the winners have more votes than the losers (margins > 0 for all assertions)
     sortedVotes.take(nwinners).forEach { (candId, _) ->
         if (!contest.winners.contains(candId)) {
             results.addError("Contest ${info.name} (${info.id}) winners ${contest.winners} should contain candidateId $candId")

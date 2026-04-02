@@ -34,17 +34,17 @@ data class ContestInfo(
     val candidateIdToIdx: Map<Int, Int>
 
     init {
-        if (choiceFunction.hasMinPct) require(minFraction != null) { "$choiceFunction requires minFraction"}
+        if (choiceFunction.hasMinPct) require(minFraction != null) { "$choiceFunction requires minFraction" }
         if (!choiceFunction.hasMinPct)  require(minFraction == null) { "$choiceFunction may not have minFraction"}
         if (minFraction != null) require(minFraction in (0.0..1.0)) { "minFraction must be between 0 and 1"}
         if (choiceFunction != SocialChoiceFunction.DHONDT) require(nwinners in (1..candidateNames.size)) { "nwinners between 1 and candidateNames.size"}
         require(voteForN in (1..candidateNames.size)) { "voteForN between 1 and candidateNames.size"}
 
-        val candidateSet = candidateNames.toList().map { it.first }.toSet()
+        val candidateSet: Set<String> = candidateNames.toList().map { it.first }.toSet()
         require(candidateSet.size == candidateNames.size) { "duplicate candidate name $candidateNames"} // may not be possible
-        candidateSet.forEach { candidate ->
+        candidateSet.forEach { candidate: String ->
             candidateSet.filter{ it != candidate }.forEach {
-                require(candidate.isNotEmpty() ) { "empty candidate name: $candidateNames"}
+                require(candidate.isNotEmpty() ) { "blank candidate name in $candidateNames"}
                 require(!candidate.equals(it, ignoreCase = true) ) { "candidate names differ only by case: $candidateNames"}
             }
         }
@@ -130,14 +130,16 @@ open class Contest(
     var losers: List<Int>
 
     init {
+        require(info.choiceFunction != SocialChoiceFunction.IRV) { "contest $id: use IrvContest for SocialChoiceFunction.IRV" }
         require(Ncast <= Nc) { "contest $id Ncast= $Ncast must be <= Nc= $Nc" }
 
-        // construct votes, adding 0 votes if needed
+        // verify that the candidateIds match whats in the ContestInfo
         voteInput.forEach {
             require(info().candidateIds.contains(it.key)) {
                 "'${it.key}' not found in contestInfo candidateIds ${info.candidateIds}"
             }
         }
+        // construct votes, adding 0 votes as needed
         val voteBuilder = mutableMapOf<Int, Int>()
         voteBuilder.putAll(voteInput)
         info.candidateIds.forEach {
@@ -145,23 +147,25 @@ open class Contest(
                 voteBuilder[it] = 0
             }
         }
-        votes = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap() // sort by votes recieved
+        votes = voteBuilder.toList().sortedBy{ it.second }.reversed().toMap() // sort by number of votes recieved
         votes.forEach { (candId, candVotes) ->
             require(candVotes <= Ncast) { // LOOK
                 "contest $id candidate= $candId votes = $candVotes must be <= (Nc - Nphantoms) = ${Nc - Nphantoms()}"
             }
         }
         val nvotes = votes.values.sum()
-       if (info.choiceFunction != SocialChoiceFunction.IRV) {
-            require(nvotes <= info.voteForN * Ncast) {
-                "contest $id nvotes= $nvotes must be <= nwinners=${info.voteForN} * (Nc=$Nc - Nphantoms=${Nphantoms()}) = ${info.voteForN * (Nc - Nphantoms())}"
-            }
+        require(nvotes <= info.voteForN * Ncast) {
+            "contest $id nvotes= $nvotes must be <= voteForN=${info.voteForN} * Ncast=$Ncast = ${info.voteForN * Ncast}"
         }
         undervotes = info.voteForN * Ncast - nvotes   // C1
 
         //// find winners, check that the minimum value is satisfied
-        // This works for PLURALITY, APPROVAL, THRESHOLD.  IRV handled by RaireContest, DHONDT by DHondtContest
         // "A winning candidate must have a minimum fraction f ∈ (0, 1) of the valid votes to win". assume that means nvotes, not Nc.
+        // TODO test; does this work for DHondt ??
+        //     // overridden by DHondt
+        //    var winnerNames: List<String>
+        //    var winners: List<Int>
+        //    var losers: List<Int>
         val useMin = info.minFraction ?: 0.0
         val overTheMin = votes.toList().filter{ it.second.toDouble()/nvotes >= useMin }
         val useNwinners = min(overTheMin.size, info.nwinners)

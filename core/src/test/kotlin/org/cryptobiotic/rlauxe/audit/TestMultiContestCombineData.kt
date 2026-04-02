@@ -2,22 +2,16 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.betting.TausRates
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.estimate.EstimateAudit
 import org.cryptobiotic.rlauxe.estimate.MultiContestCombineData
-import org.cryptobiotic.rlauxe.estimate.removeContestsAndSample
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
 import org.cryptobiotic.rlauxe.verify.VerifyAuditCommitment
 import org.cryptobiotic.rlauxe.verify.VerifyElectionCommitment
 import org.cryptobiotic.rlauxe.workflow.CreateElectionFromCards
-import org.cryptobiotic.rlauxe.workflow.CreateElectionFromCvrs
-import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -27,30 +21,33 @@ private val showDetails = false
 
 // replicate examples in MoreStyles paper
 // was using hasStyle, now removed
-class TestVerifyStages {
+class TestMultiContestCombineData {
 
-    // @Test
+    @Test
     fun doone() {
-        testHasStylePollingMultiCard(false)
+        makeClcaMultiCard(false)
     }
 
     @Test
     fun testNoStyle() {
-        testHasStyleClcaSingleCard(false)
-        testHasStyleClcaMultiCard(false)
-        testHasStylePollingSingleCard(false)
-        testHasStylePollingMultiCard(false)
+        makeClcaSingleCard(false)
+        makeClcaMultiCard(false)
+        makePollingSingleCard(false)
+        makePollingMultiCard(false)
     }
 
     @Test
     fun testHasStyle() {
-        testHasStyleClcaSingleCard(true)
-        testHasStyleClcaMultiCard(true)
-        testHasStylePollingSingleCard(true)
-        testHasStylePollingMultiCard(true)
+        makeClcaSingleCard(true)
+        makeClcaMultiCard(true)
+        makePollingSingleCard(true)
+        makePollingMultiCard(true)
     }
 
-    fun testHasStyleClcaSingleCard(hasStyle: Boolean) {
+    // testClcaSingleCard-false == isClca with batches, one batch both contests, makes Npop = batch size.
+    // this is equivilent to !cvrsContainUndervotes, but you never see undervotes in cvr
+    // limitation to MultiContestCombineData, switch to Vunder
+    fun makeClcaSingleCard(hasStyle: Boolean) {
         // p 6.
         // Suppose N = 10,000, p = 0.1, and mB = 0.1 = mS . For contest
         // B, there are 5,500 reported votes for the winner and 4,500 reported votes for the loser; for
@@ -88,11 +85,11 @@ class TestVerifyStages {
 
         val topdir = "$testdataDir/persist/hasStyle/testClcaSingleCard-$hasStyle"
         val ok = createAndRunTestAuditCards("testHasStyleClcaSingleCard", topdir, AuditType.CLCA, contests,
-            emptyList(), hasStyle, testCards, batches)
+            testCards, batches)
         assertTrue(ok)
     }
 
-    fun testHasStyleClcaMultiCard(hasStyle: Boolean) {
+    fun makeClcaMultiCard(hasStyle: Boolean) {
         // p 9.
         // Now suppose that each ballot consists of c > 1 cards. For simplicity, suppose that every
         // voter casts all c cards of their ballot. Contest B is on all N ballots and on N of the N c cards.
@@ -157,11 +154,11 @@ class TestVerifyStages {
         val cardStyles = batches1 + batches2
 
         val topdir = "$testdataDir/persist/hasStyle/testClcaMultiCard-$hasStyle"
-        val ok = createAndRunTestAuditCards("testHasStyleClcaMultiCard", topdir, AuditType.CLCA, contests, listOf(3), hasStyle, allCards, cardStyles)
+        val ok = createAndRunTestAuditCards("testHasStyleClcaMultiCard", topdir, AuditType.CLCA, contests, allCards, cardStyles)
         assertTrue(ok)
     }
 
-    fun testHasStylePollingSingleCard(hasStyle: Boolean) {
+    fun makePollingSingleCard(hasStyle: Boolean) {
         // p 11.
         // Consider again auditing contests B and S with margins MB and MS (in votes), N ballots
         // cast each consisting of c cards, contest B on N of the N c cards and S is on pN of the cards
@@ -197,18 +194,16 @@ class TestVerifyStages {
         assertEquals(0.1, contestS.reportedMargin(1, 2))
 
         val testData = MultiContestCombineData(listOf(contestB, contestS), contestB.Nc, poolId=1)
-        val testCvrs = testData.makeCvrsFromContests()
+        val (testCards, batches) = testData.makeCardsFromContests()
+
         val contests = listOf(contestB, contestS)
 
-        // polling audits always must have batches
-        val cardStyles = listOf(Batch("single", 1, contests.map{ it.id}.toIntArray(), hasStyle))
-
         val topdir = "$testdataDir/persist/hasStyle/testPollingSingleCard-$hasStyle"
-        val ok = createAndRunTestAuditCvrs("testHasStylePollingSingleCard", topdir, AuditType.POLLING, contests, hasStyle, testCvrs, cardStyles)
+        val ok = createAndRunTestAuditCards("testHasStylePollingSingleCard", topdir, AuditType.POLLING, contests, testCards, batches)
         assertTrue(ok)
     }
 
-    fun testHasStylePollingMultiCard(hasStyle: Boolean) {
+    fun makePollingMultiCard(hasStyle: Boolean) {
 
         val contestB = Contest(
             ContestInfo("B", 1, mapOf("Wes" to 1, "Les" to 2), SocialChoiceFunction.PLURALITY),
@@ -264,10 +259,11 @@ class TestVerifyStages {
         // make the audit
         val topdir = "$testdataDir/persist/hasStyle/testPollingMultiCard-$hasStyle"
         val ok = createAndRunTestAuditCards("testHasStylePollingMultiCard", topdir, AuditType.POLLING, contests,
-            listOf(3), hasStyle, allCvrs, cardStyles)
+            allCvrs, cardStyles)
         assertTrue(ok)
     }
 
+    /*
     fun createAndRunTestAuditCvrs(name:String, topdir: String, auditType: AuditType, contests: List<Contest>, hasStyle: Boolean,
                                   testCvrs: List<Cvr>, cardStyles:List<BatchIF>?): Boolean {
 
@@ -300,9 +296,9 @@ class TestVerifyStages {
         startFirstRound(auditdir)
 
         return runAllRoundsAndVerify(auditdir)
-    }
+    } */
 
-    fun createAndRunTestAuditCards(name:String, topdir: String, auditType: AuditType, contests: List<Contest>, skipContests: List<Int>, hasStyle: Boolean,
+    fun createAndRunTestAuditCards(name:String, topdir: String, auditType: AuditType, contests: List<Contest>,
                                    testCards: List<AuditableCard>, cardStyles:List<BatchIF>): Boolean {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
@@ -314,13 +310,14 @@ class TestVerifyStages {
         if (showDetails) tabs.forEach { println(it) }
 
         val contestsUA = contests.map {
-            val Nb = tabs[it.id]?.ncardsTabulated ?:
-                throw RuntimeException("Contest ${it.id} not found")
+            val Nb = tabs[it.id]?.ncardsTabulated ?: throw RuntimeException("Contest ${it.id} not found")
             ContestWithAssertions(it, isClca=true, NpopIn=Nb).addStandardAssertions()
         }
 
         val election =
-            CreateElectionFromCards(name, contestsUA, testCards, cardPools = null, cardStyles = cardStyles, auditType)
+            CreateElectionFromCards(
+                name, auditType, contestsUA, testCards, cardPools = null,
+                batches = cardStyles, )
 
         val auditdir = "$topdir/audit"
         createElectionRecord(election, auditDir = auditdir)
@@ -353,31 +350,3 @@ class TestVerifyStages {
     }
 }
 
-private fun runTestPersistedAudit(config: Config, topdir: String, wantAudit: List<ContestWithAssertions>): AuditRoundIF {
-    val auditdir = "$topdir/audit"
-
-    val verifyResults = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
-    if (showDetails) print(verifyResults)
-    if (verifyResults.hasErrors) {
-        print(verifyResults)
-        fail()
-    }
-
-    val rlauxAudit = PersistedWorkflow.readFrom(auditdir)!!
-    val mvrManager = rlauxAudit.mvrManager()
-    val contestRounds = wantAudit.map { ContestRound(it, 1) }
-    val auditRound = AuditRound(1, contestRounds = contestRounds, samplePrns = emptyList())
-
-    val estimate = EstimateAudit(config,  auditRound.roundIdx, auditRound.contestRounds, mvrManager.pools(), mvrManager.batches(), mvrManager.sortedManifest())
-    estimate.run()
-
-    removeContestsAndSample(
-        config.round.sampling,
-        mvrManager.sortedManifest(),
-        auditRound,
-        emptySet(),
-    )
-
-    val nextRound = rlauxAudit.startNewRound(quiet = false)
-    return nextRound
-}

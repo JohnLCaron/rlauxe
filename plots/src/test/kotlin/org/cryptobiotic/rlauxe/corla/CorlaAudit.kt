@@ -7,7 +7,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.*
 import org.cryptobiotic.rlauxe.util.OnlyTask
-import org.cryptobiotic.rlauxe.estimateOld.simulateCvrsFromMargin
+import org.cryptobiotic.rlauxe.estimate.simulateCvrsFromMargin
 import org.cryptobiotic.rlauxe.workflow.*
 
 // TODO Corla uses all the mechanism of rlauxe execpt the RiskMeasuringFn

@@ -9,6 +9,7 @@ import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.estimate.VunderPoolsFuzzer
+import org.cryptobiotic.rlauxe.estimate.simulateCvrsForContest
 import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.util.Quantiles.percentiles
 import org.cryptobiotic.rlauxe.util.Stopwatch

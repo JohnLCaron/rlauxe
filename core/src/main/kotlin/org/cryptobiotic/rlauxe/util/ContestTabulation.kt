@@ -11,7 +11,7 @@ import kotlin.collections.component2
 import kotlin.collections.iterator
 import kotlin.collections.toMap
 
-// tabulate contest votes from cards or cvrs; can handle both regular and irv voting
+// tabulate contest votes from cards or cvrs; can handle both regular and irv voting. mutable.
 class ContestTabulation(
     val contestId: Int,
     voteForNin: Int, //

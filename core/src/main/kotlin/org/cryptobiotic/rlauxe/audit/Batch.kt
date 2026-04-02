@@ -17,16 +17,17 @@ interface BatchIF {
     fun possibleContests(): IntArray // the set of contests that might be on any card in the batch
     fun hasSingleCardStyle(): Boolean // aka hasStyle: if all cards have exactly the contests in possibleContests()
     fun hasContest(contestId: Int): Boolean // "is in possibleContests()"
-    // if you have these, then you're a Pool
+    // if you have these, then you're a CardPool
     //   fun ncards(): Int
     //   fun votesAndUndervotes(contestId: Int): Vunder
 }
 
+// TODO maybe this should be CardStyle? (!)
 data class Batch(
     val name: String,
     val id: Int,
     val possibleContests: IntArray,      // the list of possible contests.
-    val hasSingleCardStyle: Boolean,     // aka hasStyle: if all cards have exactly the contests in hasSingleCardStyle
+    val hasSingleCardStyle: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
 ) : BatchIF {
     override fun name() = name
     override fun id() = id

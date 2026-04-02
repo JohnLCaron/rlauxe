@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.estimateOld
 
 import org.cryptobiotic.rlauxe.core.Contest
+import org.cryptobiotic.rlauxe.estimate.simulateCvrsFromMargin
 import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.tabulateCvrs

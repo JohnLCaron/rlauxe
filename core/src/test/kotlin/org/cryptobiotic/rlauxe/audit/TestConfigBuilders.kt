@@ -2,7 +2,6 @@ package org.cryptobiotic.rlauxe.audit
 
 import org.cryptobiotic.rlauxe.persist.json.import
 import org.cryptobiotic.rlauxe.persist.json.publishJson
-import org.cryptobiotic.rlauxe.audit.MvrSource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -12,7 +11,7 @@ class TestConfigBuilders {
     fun testCorlaBuilderClca() {
         val electionInfo = ElectionInfo(
             "corla", AuditType.CLCA, 42, 11,
-            true, true, pollingMode = null,
+            true,  pollingMode = null,
             mvrSource = MvrSource.testClcaSimulated
         )
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.03, )
@@ -29,7 +28,7 @@ class TestConfigBuilders {
     fun testCorlaBuilderPolling() {
         val electionInfo = ElectionInfo(
             "corla", AuditType.POLLING, 4262, 11,
-            true, true, pollingMode = PollingMode.withBatches
+            true,  pollingMode = PollingMode.withBatches
         )
         val creation = AuditCreationConfig(AuditType.POLLING, riskLimit=.03, )
         val round = AuditRoundConfig(
@@ -64,7 +63,7 @@ class TestConfigBuilders {
     fun testSfBuilderClca() {
         val electionInfo = ElectionInfo(
             "sf", AuditType.CLCA, 42222, 111,
-            true, false, pollingMode = null
+            true, pollingMode = null
         )
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, )
         val round = AuditRoundConfig(
@@ -80,7 +79,7 @@ class TestConfigBuilders {
     fun testSfBuilderOA() {
         val electionInfo = ElectionInfo(
             "sf", AuditType.ONEAUDIT, 42222, 111,
-            true, false, pollingMode = null
+            true,  pollingMode = null
         )
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05,)
         val round = AuditRoundConfig(
@@ -96,7 +95,7 @@ class TestConfigBuilders {
     fun testBoulderBuilderOA() {
         val electionInfo = ElectionInfo(
             "boulder", AuditType.ONEAUDIT, 42222, 111,
-            true, true, pollingMode = null
+            true,  pollingMode = null
         )
         val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, )
         val round = AuditRoundConfig(
@@ -112,7 +111,7 @@ class TestConfigBuilders {
     fun testBoulderBuilderClca() {
         val electionInfo = ElectionInfo(
             "boulder", AuditType.CLCA, 42222, 111,
-            true, true, pollingMode = null
+            true,  pollingMode = null
         )
         val creation = AuditCreationConfig(AuditType.CLCA, riskLimit=.05, )
         val round = AuditRoundConfig(

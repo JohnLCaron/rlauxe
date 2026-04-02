@@ -148,7 +148,7 @@ data class ElectionInfo(
     val contestCount: Int,
 
     val cvrsContainUndervotes: Boolean = true, // TODO implement cvrsContainUndervotes = false
-    val poolsHaveOneCardStyle: Boolean? = null, // TODO dont seem to be using this
+    // val poolsHaveOneCardStyle: Boolean? = null, // TODO dont seem to be using this; instead its set indididually on pool/batch
     val pollingMode: PollingMode? = null, // TODO also needed for cvrsContainUndervotes = false ? Maybe "BatchesMode ??
 
     val mvrSource: MvrSource =

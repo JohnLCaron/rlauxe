@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.estimate.*
-import org.cryptobiotic.rlauxe.estimateOld.simulateCvrsFromMargin
+import org.cryptobiotic.rlauxe.estimate.simulateCvrsFromMargin
 import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import kotlin.math.max
 

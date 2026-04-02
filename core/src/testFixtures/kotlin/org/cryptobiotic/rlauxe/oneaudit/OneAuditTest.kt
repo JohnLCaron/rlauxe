@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.Vunder
-import org.cryptobiotic.rlauxe.estimate.makeCvrsForPool
+import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
 import org.cryptobiotic.rlauxe.util.*
 import kotlin.Int
 import kotlin.test.assertEquals
@@ -144,14 +144,14 @@ fun makeMvrs(
     if (cvrNcards > 0) {
         val vunderCvrs = Vunder.fromNpop(contest.id, cvrUndervotes, cvrNcards, cvrVotes, info.voteForN)
         val cvrCvrs =
-            makeCvrsForPool(mapOf(info.id to vunderCvrs), "regularCvr", poolId = null, pool.hasSingleCardStyle())
+            makeCvrsForOnePool(mapOf(info.id to vunderCvrs), "regularCvr", poolId = null, pool.hasSingleCardStyle())
         mvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     }
 
     // add the pooled cvrs
     pool.possibleContests().forEach { contestId ->
         val vunderPool = pool.votesAndUndervotes(contestId)
-        val poolCvrs = makeCvrsForPool(
+        val poolCvrs = makeCvrsForOnePool(
             mapOf(info.id to vunderPool),
             pool.poolName,
             poolId = pool.poolId,

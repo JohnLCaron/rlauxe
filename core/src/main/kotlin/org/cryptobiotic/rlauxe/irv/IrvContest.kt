@@ -29,7 +29,7 @@ data class IrvContest(
     val roundsPaths = mutableListOf<IrvRoundsPath>()
 
     init {
-        require(info.choiceFunction == SocialChoiceFunction.IRV) { "RaireContest must be an IRV contest" }
+        require(info.choiceFunction == SocialChoiceFunction.IRV) { "IrvContest must use SocialChoiceFunction.IRV)" }
         val mapIdToName: Map<Int, String> = info.candidateNames.toList().associate { Pair(it.second, it.first) }
         winnerNames = winners.map { mapIdToName[it]!! }
         val mlosers = mutableListOf<Int>()

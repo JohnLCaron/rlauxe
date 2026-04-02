@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterator
 import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsList
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
-import org.cryptobiotic.rlauxe.estimateOld.simulateCvrsFromMargin
+import org.cryptobiotic.rlauxe.estimate.simulateCvrsFromMargin
 import org.cryptobiotic.rlauxe.persist.csv.CardHeader
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsv
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -150,7 +150,7 @@ class TestAvgAssortValues {
         val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
 
         println()
-        test.cardStyles.forEach { println(it) }
+        test.cardStyleWithNcards.forEach { println(it) }
 
         val testCards = test.makeCardsFromContests()
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeCardCsv(it)}") }
@@ -158,7 +158,7 @@ class TestAvgAssortValues {
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
             MergeBatchesIntoCardManifestIterator(
                 Closer(testCards.iterator()),
-                batches = test.cardStyles,
+                batches = test.cardStyleWithNcards,
             )
         }
 
@@ -196,9 +196,9 @@ class TestAvgAssortValues {
         val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
 
         println()
-        test.cardStyles.forEach { println(it) }
+        test.cardStyleWithNcards.forEach { println(it) }
 
-        val modStyles = test.cardStyles.map { it.copy(contests=intArrayOf(0,1,2,3,4)) }
+        val modStyles = test.cardStyleWithNcards.map { it.copy(contests=intArrayOf(0,1,2,3,4)) }
 
         val testCards = test.makeCardsFromContests()
         if (showCvrs) testCards.subList(0, 10).forEach { print("  ${writeCardCsv(it)}") }

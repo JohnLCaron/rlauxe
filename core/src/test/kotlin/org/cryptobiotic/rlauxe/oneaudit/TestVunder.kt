@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
 import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.estimate.VunderPoolsFuzzer
-import org.cryptobiotic.rlauxe.estimate.makeCvrsForPool
+import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
 import org.cryptobiotic.rlauxe.estimate.tabulateCvrsWithVoteForNs
 import org.cryptobiotic.rlauxe.estimate.tabulateVotesFromCvrs
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -33,7 +33,7 @@ class TestVunder {
         val candVotes1 = mapOf(0 to 71, 1 to 123, 2 to 3)
         contestVotes[1] = Vunder.fromNpop(1, undervotes, candVotes1.values.sum() + undervotes, candVotes1, 1)
 
-        val cvrs = makeCvrsForPool(contestVotes, "poolName", poolId = 42, hasSingleCardStyle = false)
+        val cvrs = makeCvrsForOnePool(contestVotes, "poolName", poolId = 42, hasSingleCardStyle = false)
 
         // check
         val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
@@ -61,7 +61,7 @@ class TestVunder {
         val candVotes1 = mapOf(0 to 71, 1 to 123, 2 to 3)
         vunders[1] = Vunder.fromNpop(1, undervotes, candVotes1.values.sum() + undervotes, candVotes1,1)
 
-        val cvrs = makeCvrsForPool(vunders, "poolName", poolId = 42, hasSingleCardStyle = false)
+        val cvrs = makeCvrsForOnePool(vunders, "poolName", poolId = 42, hasSingleCardStyle = false)
 
         // check
         val voteForNs = vunders.mapValues { it.value.voteForN }
@@ -197,7 +197,7 @@ fun makeContestsWithVunder(
 
    //TODO val cvrs2 = makeCvrsFromPopulations(test.populations)
 
-    val cvrs = makeCvrsForPool(contestVotes, "ballot", poolId = 42, hasSingleCardStyle = false)
+    val cvrs = makeCvrsForOnePool(contestVotes, "ballot", poolId = 42, hasSingleCardStyle = false)
 
     // make the infos
     val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())

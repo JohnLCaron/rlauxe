@@ -19,9 +19,51 @@ import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.collections.mutableListOf
 
 private val showDetails = false
-private val useBt = false // always use Bt
+private val useBt = true // always use Bt
 
-// Belgium does each contest separately, so Npop = Nc. TODO generalize that
+
+// ### Section 5.1 highest averages from Proportional paper
+//
+//A highest averages method is parameterized by a set of divisors d(1), d(2), . . . d(S) where S is the number of seats.
+//The divisors for D’Hondt are d(i) = i. Sainte-Laguë has divisors d(i) = 2i − 1.
+//
+//Define
+//
+//    fe,s = Te/d(s) for entity e and seat s.
+//
+// ### Section 5.2 Simple D’Hondt: Party-only voting
+//
+//In the simplest form of highest averages methods, seats are allocated to each
+//entity (party) based on individual entity tallies. Let We be the number of seats
+//won and Le the number of the first seat lost by entity e. That is:
+//
+//    We = max{s : (e, s) ∈ W}; ⊥ if e has no winners. this is e's lowest winner.
+//    Le = min{s : (e, s) !∈ W}; ⊥ if e won all the seats. this is e's highest loser.
+//
+//The inequalities that define the winners are, for all parties A with at least
+//one winner, for all parties B (different from A) with at least one loser, as follows:
+//
+//    fA,WA > fB,LB    A’s lowest winner beat party B’s highest loser
+//    TA/d(WA) > TB/d(LB)
+//    TA/d(WA) - TB/d(LB) > 0
+//
+//From this, we define the proto-assorter for any ballot b as
+//
+//    g_AB(b) = 1/d(WA) if b is a vote for A
+//            = -1/d(WB) if b is a vote for B
+//            = 0 otherwisa
+//
+//    or equivilantly, g_AB(b) = bA/d(WA) - bB/d(WB)
+//
+//g lower bound is -1/d(WB) = -1/first (lowest winner)
+//g upper bound is 1/d(WA)  = 1/last   (highest loser)
+//c = -1.0 / (2 * lower) = first/2
+//h upper bound is h(g upper) = h(1/last) * c + 1/2 = (1/last) * first/2 + 1/2 = (first/last+1)/2
+//
+//first and last both range from 1 to nseats, so
+//    min upper is (1/nseats + 1)/2 which is between 1/2 and 1
+//    max upper is (nseats + 1)/2 which is >= 1
+
 
 data class DhondtCandidate(val name: String, val id: Int, val votes: Int) {
     var lastSeatWon: Int? = null // We
@@ -387,48 +429,6 @@ private data class AssorterBuilder(val contest: ProtoContest, val winner: Dhondt
         firstSeatLost = loser.firstSeatLost!!)
      .setDilutedMean(hmean)
 }
-
-// ### Section 5.1 highest averages
-//
-//A highest averages method is parameterized by a set of divisors d(1), d(2), . . . d(S) where S is the number of seats.
-//The divisors for D’Hondt are d(i) = i. Sainte-Laguë has divisors d(i) = 2i − 1.
-//
-//Define
-//
-//    fe,s = Te/d(s) for entity e and seat s.
-//
-// ### Section 5.2 Simple D’Hondt: Party-only voting
-//
-//In the simplest form of highest averages methods, seats are allocated to each
-//entity (party) based on individual entity tallies. Let We be the number of seats
-//won and Le the number of the first seat lost by entity e. That is:
-//
-//    We = max{s : (e, s) ∈ W}; ⊥ if e has no winners. this is e's lowest winner.
-//    Le = min{s : (e, s) !∈ W}; ⊥ if e won all the seats. this is e's highest loser.
-//
-//The inequalities that define the winners are, for all parties A with at least
-//one winner, for all parties B (different from A) with at least one loser, as follows:
-//
-//    fA,WA > fB,LB    A’s lowest winner beat party B’s highest loser
-//    TA/d(WA) > TB/d(LB)
-//    TA/d(WA) - TB/d(LB) > 0
-//
-//From this, we define the proto-assorter for any ballot b as
-//
-//    g_AB(b) = 1/d(WA) if b is a vote for A
-//            = -1/d(WB) if b is a vote for B
-//            = 0 otherwisa
-//
-//    or equivilantly, g_AB(b) = bA/d(WA) - bB/d(WB)
-//
-//g lower bound is -1/d(WB) = -1/first (lowest winner)
-//g upper bound is 1/d(WA)  = 1/last   (highest loser)
-//c = -1.0 / (2 * lower) = first/2
-//h upper bound is h(g upper) = h(1/last) * c + 1/2 = (1/last) * first/2 + 1/2 = (first/last+1)/2
-//
-//first and last both range from 1 to nseats, so
-//    min upper is (1/nseats + 1)/2 which is between 1/2 and 1
-//    max upper is (nseats + 1)/2 which is >= 1
 
 // winner,loser: candidate ids
 // lastSeatWon: last seat won by winner

@@ -53,7 +53,6 @@ class VerifyAuditCommitment(val auditDir: String, contestId: Int?, show: Boolean
         results.addMessage("---VerifyElection on $auditDir")
         if (contests.size == 1) results.addMessage("  ${contests.first()} ")
 
-        // checkContestsCorrectlyFormed(ContestSampleControl.NONE, contests, results)
         verifySortedCardManifest(auditType, contests, audit.sortedManifest, infos, batchSet,
             audit.auditCreationConfig.seed, results)
 

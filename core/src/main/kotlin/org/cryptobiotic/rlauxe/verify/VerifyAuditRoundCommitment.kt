@@ -1,0 +1,156 @@
+package org.cryptobiotic.rlauxe.verify
+
+import com.github.michaelbull.result.unwrap
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.core.ContestInfo
+import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.persist.AuditRecord
+import org.cryptobiotic.rlauxe.persist.AuditRecordIF
+import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.existsOrZip
+import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
+
+class VerifyAuditRoundCommitment(val auditRecordLocation: String) {
+    val auditRecord: AuditRecordIF
+    val mvrManager: PersistedMvrManager
+    val publisher: Publisher
+    val config: Config
+    val contests: List<ContestWithAssertions>
+    val allInfos: Map<Int, ContestInfo>?
+
+    init {
+        val auditRecordResult = AuditRecord.readFromResult(auditRecordLocation)
+        if (auditRecordResult .isOk) {
+            auditRecord = auditRecordResult.unwrap()
+        } else {
+            println( auditRecordResult.toString() )
+            logger.error{ auditRecordResult.toString() }
+            throw RuntimeException( auditRecordResult.toString() )
+        }
+        mvrManager = PersistedMvrManager(auditRecord as AuditRecord, false)
+
+        publisher = Publisher(auditRecordLocation)
+        config = auditRecord.config
+        contests = auditRecord.contests
+
+        /* val contestsResults = readContestsJsonFile(publisher.contestsFile())
+        contests = if (contestsResults .isOk) contestsResults.unwrap().sortedBy { it.id } else {
+            println(contestsResults)
+            logger.error{ contestsResults.toString() }
+            throw RuntimeException( contestsResults.toString() )
+        } */
+
+        allInfos = contests.map{ it.contest.info() }.associateBy { it.id }
+    }
+
+    fun verify(show: Boolean = false): VerifyResults {
+        val result = VerifyResults()
+        result.addMessage("VerifyAuditRecord on $auditRecordLocation ")
+        auditRecord.rounds.forEach { verifyRound(it, result) }
+
+        verifyMultipleRoundSampling(result)
+
+        return result
+    }
+
+    fun verifyRound(round: AuditRoundIF, result: VerifyResults) {
+        result.addMessage(" verify round = ${round.roundIdx}")
+        round.contestRounds.forEach { verifyContest(it, result) }
+    }
+
+    fun verifyContest(contest: ContestRound, result: VerifyResults) {
+        result.addMessage("  verify contest = ${contest.id}")
+        contest.assertionRounds.forEach { verifyAssertion(it, result) }
+
+        val contestUA = contest.contestUA
+        contest.assertionRounds.forEach { assertionRound ->
+            require(contestUA.assertions().contains(assertionRound.assertion))
+        }
+    }
+
+    fun verifyAssertion(assertion: AssertionRound, result: VerifyResults) {
+        if (assertion.prevAuditResult != null) {
+            verifyRoundResult(assertion.prevAuditResult, result)
+        }
+        if (assertion.estimationResult != null) {
+            verifyEstimationResult(assertion.estimationResult!!, result)
+        }
+        if (assertion.auditResult != null) {
+            verifyRoundResult(assertion.auditResult!!, result)
+        }
+    }
+
+    fun verifyRoundResult(auditResult: AuditRoundResult, result: VerifyResults) {
+    }
+
+    fun verifyEstimationResult(estResult: EstimationRoundResult, result: VerifyResults) {
+    }
+
+    fun verifyMultipleRoundSampling(result: VerifyResults) {
+        val nrounds = auditRecord.rounds.size
+        if (nrounds < 2) result.addMessage("no need to verify sampling across $nrounds rounds")
+        else {
+            result.addMessage("--- verify multiple round sampling across $nrounds rounds")
+            contests.forEach { contest ->
+                verifySamplingForContest(contest, result)
+            }
+        }
+    }
+
+    fun verifySamplingForContest(contest: ContestWithAssertions, result: VerifyResults) {
+        val firstRound = auditRecord.rounds.first()
+        val contestRound = firstRound.contestRounds.find { it.id == contest.contest.id }
+        if (contestRound == null) return
+        val estCards = contestRound.estMvrs
+
+        result.addMessage(" verify sampling for contest ${contest.id}")
+        val cards = mvrManager.readCardsAndMergeList(publisher.sampleCardsFile(firstRound.roundIdx))
+        var nextRoundIdx = 1
+        while (nextRoundIdx < auditRecord.rounds.size) {
+            val nextRound = auditRecord.rounds[nextRoundIdx]
+            val nextContestRound = nextRound.contestRounds.find { it.id == contest.contest.id }
+            if (nextContestRound == null) break
+            val estCardsNext = nextContestRound.estMvrs
+
+            if (!existsOrZip(publisher.sampleCardsFile(nextRound.roundIdx))) return
+            val nextCards = mvrManager.readCardsAndMergeList(publisher.sampleCardsFile(nextRound.roundIdx))
+
+            result.addMessage("   verify sampling for contest ${contest.id} round ${firstRound.roundIdx} estCards=${estCards} " +
+                    "vs round ${nextRound.roundIdx} estCards=${estCardsNext} ")
+
+            verifySamplingForContest(contest, cards,  nextCards, nextRound.roundIdx, estCards, result)
+            nextRoundIdx++
+        }
+    }
+
+    // TODO check mvrs
+    fun verifySamplingForContest(contest: ContestWithAssertions, cards: List<AuditableCard>, nextCards: List<AuditableCard>,
+                                 round:Int, estCards: Int, result: VerifyResults): Boolean {
+        val mycards = cards.filter { it.hasContest(contest.id) }.iterator()
+        val nextcards = nextCards.filter { it.hasContest(contest.id) }.iterator()
+
+        // TODO need to know how many cards were chosen for this contest and round, and stop there...
+        var count = 0
+        while (mycards.hasNext() && count < estCards) {
+            val mycard = mycards.next()
+            if (nextcards.hasNext()) {
+                val nextcard = nextcards.next()
+                if (mycard.location == "card9835" && round == 3 && contest.id == 9) {
+                    val wwtf = mycard.equals(nextcard)
+                }
+
+                if (mycard != nextcard) {
+                    result.addError("  failed ${mycard.location()} != ${nextcard.location}")
+                    return false
+                }
+            }
+            count++
+        }
+        return true
+    }
+
+    companion object {
+        private val logger = KotlinLogging.logger("VerifyAuditRecord")
+    }
+}

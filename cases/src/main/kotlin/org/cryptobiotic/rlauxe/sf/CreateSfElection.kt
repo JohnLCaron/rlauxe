@@ -153,7 +153,7 @@ class CreateSfElection(
 
     override fun electionInfo() = ElectionInfo(
         "SF24$auditType", auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true,
-        poolsHaveOneCardStyle = poolsHaveOneCardStyle, mvrSource = mvrSource
+        mvrSource = mvrSource
     )
 
     override fun batches() = if (auditType.isClca()) emptyList() else cardPoolBuilders

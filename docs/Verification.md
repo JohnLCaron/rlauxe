@@ -3,6 +3,8 @@ _last changed 10/19/2025_
 
 TODO review/bring up to date
 
+# checkContestsCorrectlyFormed
+
 ## ContestInfo correctly formed
 
 ````
@@ -18,27 +20,34 @@ class ContestInfo(
 )
 ````
 
-1. for each contest, verify that candidate names and candidate ids are unique.
-2. over all contests, verify that the names and ids are unique.
+1. over all contests, verify that the contest names and ids are unique.
 
 ## Contest correctly formed
 
 ````
 class Contest(
-        val info: ContestInfo,
-        val votes: Map<Int, Int>,   // candidateId -> nvotes
-        val Nc: Int,                // trusted maximum ballots/cards that contain this contest
-        val Ncast: Int,             // number of cast ballots containing this Contest, including undervotes
-        val winners: List<Int>,
-    )
-    
-class RaireContest(
     val info: ContestInfo,
+    val votes: Map<Int, Int>,   // candidateId -> nvotes
+    val Nc: Int,                // trusted maximum ballots/cards that contain this contest
+    val Ncast: Int,             // number of cast ballots containing this Contest, including undervotes
     val winners: List<Int>,
+)
+    
+class IrvContest(
+    val info: ContestInfo,
+    val winners: List<Int>, // actually only one winner is allowed
     val Nc: Int,
     val Ncast: Int,
     val undervotes: Int,
 )
+
+class DHondtContest(
+    info: ContestInfo,
+    voteInput: Map<Int, Int>,  
+    Nc: Int,                // trusted maximum ballots/cards that contain this contest
+    Ncast: Int,             // number of cast ballots containing this Contest, including undervotes
+    val sortedScores: List<DhondtScore>,
+): Contest(info, voteInput, Nc, Ncast) 
 
 ````
 

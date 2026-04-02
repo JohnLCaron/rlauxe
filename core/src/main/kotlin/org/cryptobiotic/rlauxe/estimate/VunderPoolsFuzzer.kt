@@ -7,6 +7,7 @@ import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import kotlin.collections.toList
 import kotlin.random.Random
 
+// simulate the (mvr, cvr) pairs for OneAudit contests
 // VunderPoolsFuzzer takes as input the actual cards of the contest.
 // it simulates the pooled cards based on the pool totals
 // it optionally fuzzes the Cvrs.
@@ -18,7 +19,7 @@ class VunderPoolsFuzzer(
     cards: List<AuditableCard>
 ) {
     val isIRV = infos.mapValues { it.value.isIrv }
-    var mvrCvrPairs: List<Pair<AuditableCard, AuditableCard>>  // mvr, cvr pairs
+    var mvrCvrPairs: List<Pair<AuditableCard, AuditableCard>>  // the (mvr, cvr) pairs suitable for CLCA audit
     val vunderPools =  VunderPools(pools)
 
     init {
@@ -37,6 +38,7 @@ class VunderPoolsFuzzer(
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+// move fuzzing to here
 // TODO this is pretty crude, just randomly changing shit.
 // TODO cvrsContainUndervotes
 // vunderPools.simulatePooledCard(card) carefully counts votes, undervotes, and missing votes

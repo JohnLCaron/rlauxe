@@ -5,7 +5,6 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
 import org.cryptobiotic.rlauxe.core.ClcaAssertion
 import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.estimateOld.simulateCvrsFromMargin
 import org.cryptobiotic.rlauxe.rlaplots.genericPlotter
 import org.cryptobiotic.rlauxe.util.makeContestsFromCvrs
 import org.cryptobiotic.rlauxe.util.margin2mean

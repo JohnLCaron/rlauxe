@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import kotlin.collections.get
 
-// for all pools
+// for all pools, multiple contests
 class VunderPools(pools: List<CardPool>) {
     val vunderPools: Map<Int, VunderPool>  // poolId -> VunderPool
 
@@ -28,7 +28,7 @@ class VunderPools(pools: List<CardPool>) {
     }
 }
 
-// for one pool
+// for one pool, multiple contests
 // vunders: Contest id -> Vunder
 // set Vunder.missing to 0 for hasSingleCardStyle=true
 class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int, val hasSingleCardStyle: Boolean) {
@@ -77,7 +77,7 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
     }
 }
 
-// for all batches and one "pool" of subtotaled votes
+// for multiple batches, multiple contests and one "pool" of subtotaled votes
 class VunderBatches(batches: List<BatchIF>, val onePool: VunderPool) {
     val batchMap = batches.associateBy { it.name() }
 

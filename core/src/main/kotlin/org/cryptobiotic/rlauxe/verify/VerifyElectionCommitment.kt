@@ -15,6 +15,7 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readBatchesJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
@@ -26,6 +27,7 @@ import java.nio.file.Files
 import kotlin.io.path.Path
 
 class VerifyElectionCommitment(val auditDir: String, contestId: Int?, show: Boolean) {
+    val publisher = Publisher(auditDir)
     val election: ElectionCommitment
     val auditType: AuditType
     val contests: List<ContestWithAssertions>
@@ -34,7 +36,6 @@ class VerifyElectionCommitment(val auditDir: String, contestId: Int?, show: Bool
     val cardManifest: CloseableIterable<AuditableCard>
 
     init {
-        val publisher = Publisher(auditDir)
         val result = readElectionCommitment(publisher)
         election = if (result.isOk) result.unwrap() else {
             println(result.unwrapError())
@@ -54,8 +55,25 @@ class VerifyElectionCommitment(val auditDir: String, contestId: Int?, show: Bool
         if (contests.size == 1) results.addMessage("  ${contests.first()} ")
 
         checkContestsCorrectlyFormed(ContestSampleControl.NONE, contests, results)
-        verifyCardManifest(auditType, contests, cardManifest, infos, batchSet, results)
+        val contestSummary = verifyCardManifest(auditType, contests, cardManifest, infos, batchSet, results)
 
+        // OA
+        if (auditType.isOA()) {
+            val cardPools = if (!Files.exists(Path(publisher.cardPoolsFile()))) null
+                            else readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
+
+            if (cardPools != null) {
+                verifyOAagainstCards(contests, contestSummary, cardPools, infos, results)
+                verifyOAassortAvg(contests, cardManifest.iterator(), results)
+                verifyOApools(contests, contestSummary, cardPools, results)
+            }
+        }
+
+        // CLCA
+        if (auditType.isClca()) {
+            verifyClcaAgainstCards(contests, contestSummary, results)
+            verifyClcaAssortAvg(contests, cardManifest.iterator(), results)
+        }
         return results
     }
 
@@ -104,7 +122,7 @@ fun verifyCardManifest(
     infos: Map<Int, ContestInfo>,
     batchSet: Set<BatchIF>,
     results: VerifyResults,
-) {
+): ContestSummary {
     results.addMessage("verifyCardManifest")
 
     val allCvrVotes = mutableMapOf<Int, ContestTabulation>()
@@ -121,7 +139,6 @@ fun verifyCardManifest(
 
             if (card.index != count) {
                 results.addError("card.index ${card.index} at $count must be sequential starting at 0")
-                return
             }
 
             // 1. Check that all card locations and indices are unique
@@ -200,5 +217,7 @@ fun verifyCardManifest(
         }
         if (allOk) results.addMessage("  verified that contest.Nc and Np agree with manifest")
     }
+
+    return ContestSummary(allCvrVotes, nonpooled, pooled)
 
 }

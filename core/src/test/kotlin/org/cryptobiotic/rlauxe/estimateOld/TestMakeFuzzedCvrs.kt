@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.PluralityErrorTracker
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.makeCvrsByExactMean
+import org.cryptobiotic.rlauxe.estimate.simulateCvrsFromMargin
 import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsForClca
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.workflow.ClcaSampler

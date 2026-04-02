@@ -4,12 +4,12 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.verify.VerifyAuditRoundCommitment
 import org.cryptobiotic.rlauxe.verify.VerifyResults
 import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
@@ -131,7 +131,7 @@ fun runAllRoundsAndVerify(auditdir: String, maxRounds:Int=7, verify:Boolean = tr
     println("============================================================")
 
     if (verify) {
-        val verifyResults = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
+        val verifyResults = VerifyAuditRoundCommitment(auditdir).verify(show = true)
         println()
         print(verifyResults)
         return (!verifyResults.hasErrors)

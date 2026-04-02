@@ -15,6 +15,7 @@ import kotlin.random.Random
 // This is a way to create test Cvrs that match known vote totals and undervotes and novotes for one population or pool
 // ok for voteForN > 1, ok for IRV
 
+// One contest, one pool
 // vunder = "votes and undervotes and missing votes"
 // missing votes = the cards in the population that dont contain the contest
 // voteCounts: Pair(candsVoteFor, count); candsVoteFor is immutable
@@ -201,10 +202,12 @@ class VunderPicker(val vunder: Vunder) {
 
     companion object {
         private val logger = KotlinLogging.logger("VunderPicker")
-    }}
+    }
+}
 
+// multiple contests, one pool
 // set Vunder.missing to 0 for hasSingleCardStyle=true
-fun makeCvrsForPool(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, hasSingleCardStyle: Boolean): List<Cvr> {
+fun makeCvrsForOnePool(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, hasSingleCardStyle: Boolean): List<Cvr> {
     val vunderpool = VunderPool(vunders, poolName, poolId ?: -1, hasSingleCardStyle)
 
     val rcvrs = mutableListOf<Cvr>()

@@ -47,7 +47,7 @@ data class MultiContestTestData(
 
     val contestTestBuilders: List<ContestTestDataBuilder>
     val contests: List<Contest>
-    val cardStyles: List<CardStyle>
+    val cardStyleWithNcards: List<CardStyleWithNcards>
     var countBallots = 0
 
     init {
@@ -84,7 +84,7 @@ data class MultiContestTestData(
         }
 
         // partition totalBallots amongst the ballotStyles
-        cardStyles = List(nballotStyles) { it }.map { idx ->
+        cardStyleWithNcards = List(nballotStyles) { it }.map { idx ->
             var contestsForThisBs = contestBstyles.filter{ (fc, bset) -> bset.contains( idx ) }
                 .map { (fc, _) -> fc }
 
@@ -93,7 +93,7 @@ data class MultiContestTestData(
             val contestIds = contestsForThisBs.map { it.info.id }
             val ncards = ballotStylePartition[idx]!!
             countBallots += ncards
-            CardStyle("style$idx", idx, contestIds.toIntArray(), hasSingleCardStyle, ncards)
+            CardStyleWithNcards("style$idx", idx, contestIds.toIntArray(), hasSingleCardStyle, ncards)
         }
         require(countBallots == totalBallots)
         countCards()
@@ -102,7 +102,7 @@ data class MultiContestTestData(
 
     // set contest.ncards
     fun countCards() {
-        cardStyles.forEach { bs ->
+        cardStyleWithNcards.forEach { bs ->
             bs.contests.forEach { contestId ->
                 val contest = contestTestBuilders.find { it.info.id == contestId }!!
                 contest.ncards += bs.ncards
@@ -129,14 +129,14 @@ data class MultiContestTestData(
             auditType,
             cvrs = Closer( mvrs.iterator()),  // hmmm fishy
             phantomCvrs = null, // mvrs already have the phantoms
-            batches = cardStyles,
+            batches = cardStyleWithNcards,
         )
 
         // cardWithBatchName to AuditableCard
         val cards = mutableListOf<AuditableCard>()
         val converter: CloseableIterator<AuditableCard> = MergeBatchesIntoCardManifestIterator(
             batchNameIter,
-            batches = cardStyles,
+            batches = cardStyleWithNcards,
         )
         converter.forEach { it ->
             cards.add(it)
@@ -150,7 +150,7 @@ data class MultiContestTestData(
             if (mvr.poolId == 1) pool.accumulateVotes(mvr)
         } */
 
-        return MvrCardAndPops(mvrs, cards, emptyList(), cardStyles)
+        return MvrCardAndPops(mvrs, cards, emptyList(), cardStyleWithNcards)
     }
 
     override fun toString() = buildString {
@@ -158,18 +158,18 @@ data class MultiContestTestData(
         appendLine(" marginRange=$marginRange underVotePct=$underVotePctRange phantomPct=$phantomPctRange")
         contestTestBuilders.forEach { fcontest ->
             append("  $fcontest")
-            val bs4id = cardStyles.filter{ it.hasContest(fcontest.contestId) }.map{ it.name }
+            val bs4id = cardStyleWithNcards.filter{ it.hasContest(fcontest.contestId) }.map{ it.name }
             appendLine(" ballotStyles=$bs4id")
         }
         appendLine("")
-        cardStyles.forEach { appendLine("  $it") }
+        cardStyleWithNcards.forEach { appendLine("  $it") }
     }
 
     fun makeCvrsFromContests(): List<Cvr> {
         contestTestBuilders.forEach { it.resetTracker() } // startFresh
         val cvrbs = CvrBuilders().addContests(contestTestBuilders.map { it.info })
         val result = mutableListOf<Cvr>()
-        cardStyles.forEach { cardStyle ->
+        cardStyleWithNcards.forEach { cardStyle ->
             val fcontests = contestTestBuilders.filter { cardStyle.hasContest(it.info.id) }
             repeat(cardStyle.ncards) {
                 // add regular Cvrs including undervotes
@@ -193,7 +193,7 @@ data class MultiContestTestData(
 
         var nextCardId = startCvrId
         val result = mutableListOf<CardWithBatchName>()
-        cardStyles.forEach { cardStyle ->
+        cardStyleWithNcards.forEach { cardStyle ->
             val fcontests = contestTestBuilders.filter { cardStyle.hasContest(it.info.id) }
             repeat(cardStyle.ncards) {
                 // val poolId = if ((poolPctForTestData != null) && cardStyle.id  < 2) 1 else null
@@ -328,7 +328,8 @@ data class ContestTestDataBuilder(
     }
 }
 
-data class CardStyle(
+// its convenient to track ncards. perhaps a batch is a CardStyle with ncards ??
+data class CardStyleWithNcards(
     val name: String,
     val id: Int,
     val contests: IntArray,

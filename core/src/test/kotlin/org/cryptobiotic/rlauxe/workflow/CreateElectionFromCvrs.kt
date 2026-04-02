@@ -27,7 +27,7 @@ class CreateElectionFromCvrs (
 
     override fun electionInfo() = ElectionInfo(
         electionName, auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true,
-        poolsHaveOneCardStyle = null, mvrSource = mvrSource, pollingMode = PollingMode.withBatches
+        mvrSource = mvrSource, pollingMode = PollingMode.withBatches
     )
     override fun createUnsortedMvrsInternal() = cvrs // for in-memory case
     override fun createUnsortedMvrsExternal() = null
@@ -49,20 +49,27 @@ class CreateElectionFromCvrs (
 
 class CreateElectionFromCards (
     val electionName: String,
+    val auditType: AuditType,
     val contestsUA: List<ContestWithAssertions>,
     val cards: List<AuditableCard>, // includes phantoms
     val cardPools: List<CardPool>? = null,
-    val cardStyles: List<BatchIF>? = null,
-    val auditType: AuditType,
+    val batches: List<BatchIF>? = null,
+    val mvrSource: MvrSource? = null
 ): ElectionBuilder {
 
-    override fun electionInfo() = ElectionInfo(
-        electionName, auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true,
-        poolsHaveOneCardStyle = null, pollingMode = PollingMode.withBatches
-    )
+    override fun electionInfo(): ElectionInfo {
+        return if (mvrSource == null) ElectionInfo(
+            electionName, auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true,
+            pollingMode = PollingMode.withBatches
+        ) else ElectionInfo(
+                electionName, auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true,
+                mvrSource = mvrSource,
+                pollingMode = PollingMode.withBatches
+            )
+    }
     override fun createUnsortedMvrsInternal() = cards.map { it.toCvr() }
     override fun createUnsortedMvrsExternal() = null // Closer(createCards().iterator()) // for out-of-memory case
-    override fun batches() = cardStyles
+    override fun batches() = batches
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
     override fun cards() = Closer(createCards().iterator())

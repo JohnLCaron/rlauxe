@@ -74,7 +74,7 @@ class TestContest {
         val mess7 = assertFailsWith<IllegalArgumentException> {
             ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "" to 2), SocialChoiceFunction.APPROVAL)
         }.message
-        assertEquals("empty candidate name: {cand0=0, cand1=1, =2}", mess7)
+        assertEquals("blank candidate name in {cand0=0, cand1=1, =2}", mess7)
 
         val mess8 = assertFailsWith<IllegalArgumentException> {
             ContestInfo(
@@ -124,7 +124,7 @@ class TestContest {
             Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Ncast=209)
         }.message
         assertNotNull(mess2)
-        assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Nphantoms=2) = 209", mess2)
+        assertEquals("contest 0 nvotes= 216 must be <= voteForN=1 * Ncast=209 = 209", mess2)
 
         val contest2 = Contest(info, mapOf(0 to 100, 1 to 108), Nc=211,Ncast=210)
         assertEquals(contest, contest2)
@@ -211,7 +211,7 @@ class TestContest {
             Contest(info, mapOf(0 to 100, 1 to 116), Nc = 211, Ncast=209)
         }.message
         assertNotNull(mess)
-        assertEquals("contest 0 nvotes= 216 must be <= nwinners=1 * (Nc=211 - Nphantoms=2) = 209", mess)
+        assertEquals("contest 0 nvotes= 216 must be <= voteForN=1 * Ncast=209 = 209", mess)
     }
 
     // @Test not allowed
@@ -295,12 +295,10 @@ class TestContest {
     @Test
     fun testContestUnderAuditIrvException() {
         val info = ContestInfo("testContestInfo", 0, mapOf("cand0" to 0, "cand1" to 1, "cand2" to 2), SocialChoiceFunction.IRV)
-        val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc = 211, Ncast=211)
-
         val mess1 = assertFailsWith<RuntimeException> {
-            ContestWithAssertions(contest, isClca = false).addStandardAssertions()
+            val contest = Contest(info, mapOf(0 to 100, 1 to 108), Nc = 211, Ncast=211)
         }.message
-        assertEquals("choice function IRV is not supported", mess1)
+        assertEquals("contest 0: use IrvContest for SocialChoiceFunction.IRV", mess1)
     }
 
     @Test

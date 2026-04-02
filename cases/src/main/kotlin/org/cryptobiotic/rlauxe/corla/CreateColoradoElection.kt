@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.oneaudit.OneAuditContestBuilderIF
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromBallotStyle
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
-import org.cryptobiotic.rlauxe.estimate.makeCvrsForPool
+import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
@@ -190,7 +190,7 @@ open class CreateColoradoElection (
     }
 
     override fun electionInfo() =
-        ElectionInfo("Corla24$auditType$pollingMode", auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true, poolsHaveOneCardStyle = null)
+        ElectionInfo("Corla24$auditType$pollingMode", auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true)
 
     override fun batches() = if (auditType.isPolling() && pollingMode!!.withBatches()) batches else null
     override fun cardPools() = if (auditType.isPolling() && pollingMode!!.withPools()) cardPools.map { it.toOneAuditPool() } else null
@@ -281,7 +281,7 @@ open class CreateColoradoElection (
         init {
             val poolVunders = cardPool.possibleContests().map { Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
 
-            cvrs = makeCvrsForPool(
+            cvrs = makeCvrsForOnePool(
                 poolVunders,
                 cardPool.poolName,
                 poolId = cardPool.poolId,

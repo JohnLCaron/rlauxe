@@ -1,4 +1,4 @@
-package org.cryptobiotic.rlauxe.estimateOld
+package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.AuditType
@@ -7,8 +7,6 @@ import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.estimate.Vunder
-import org.cryptobiotic.rlauxe.estimate.VunderPicker
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import kotlin.math.min
@@ -19,8 +17,7 @@ import kotlin.math.round
 // val sim = ContestSimulation.make2wayTestContest(Nc=Nc, margin, undervotePct=underVotePct, phantomPct=phantomPct)
 //var testCvrs = sim.makeCvrs() // includes undervotes and phantoms
 
-//// used by estimateSampleSizes
-//// only used by test
+//// used by estimateSampleSizes; for a single contest
 fun simulateCvrsFromMargin(Nc: Int, margin: Double, undervotePct: Double, phantomPct: Double, Npop: Int = Nc,
                            limit: Int? = null): Pair<ContestWithAssertions, List<Cvr>> {
     val nvotes = round(Nc * (1.0 - undervotePct - phantomPct))

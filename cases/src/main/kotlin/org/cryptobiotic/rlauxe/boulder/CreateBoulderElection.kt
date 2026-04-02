@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.dominion.ContestVotes
 import org.cryptobiotic.rlauxe.dominion.readDominionCvrExportCsv
 import org.cryptobiotic.rlauxe.estimate.Vunder
-import org.cryptobiotic.rlauxe.estimate.makeCvrsForPool
+import org.cryptobiotic.rlauxe.estimate.makeCvrsForOnePool
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.oneaudit.*
 import org.cryptobiotic.rlauxe.util.*
@@ -181,7 +181,7 @@ class CreateBoulderElection(
     private fun makeCvrsForOnePool(cardPool: OneAuditPoolFromBallotStyle) : List<Cvr> { // contestId -> candidateId -> nvotes
         val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
         val cvrs =
-            makeCvrsForPool(poolVunders, cardPool.poolName, poolId = cardPool.poolId, cardPool.hasSingleCardStyle)
+            makeCvrsForOnePool(poolVunders, cardPool.poolName, poolId = cardPool.poolId, cardPool.hasSingleCardStyle)
         // TODO is it true that the number of cvrs can vary when there are multiple contests ?
         //if (cardPool.ncards() != cvrs.size)
         //    logger.warn{"cardPool.ncards ${cardPool.ncards()} != cvrs.size = ${cvrs.size}"}
@@ -291,7 +291,7 @@ class CreateBoulderElection(
     }
 
     override fun electionInfo() = ElectionInfo("Boulder24$auditType", auditType, ncards(), contestsUA.size,
-        true, poolsHaveOneCardStyle=true, mvrSource=mvrSource)
+        true, mvrSource=mvrSource)
     override fun contestsUA() = contestsUA
     override fun batches() = if (auditType.isClca()) emptyList() else cardPoolBuilders
     override fun cardPools() = if (auditType.isClca()) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }

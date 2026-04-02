@@ -1,9 +1,14 @@
-# Sample Populations
+# Sample Populations (2)
 _04/02/26_
 
-CardStyle has possibleContests per card. 
+AuditableCard has a CardStyle, which tells the possibleContests that might be on that card. Read through the manifest and count the cards that
+might contain a contest: that is the contest.Npop.
 
-Batch emphasises partitions of cards. To find out what cards are in a batch, read through the manifest. Generally not needed. So a Batch is virtual. 
+Batch emphasizes partitioning of cards into physical containers. To find out what cards are in a batch, read through the manifest. Generally not needed. So a Batch is virtual. 
+
+A Batch has a CardStyle. Perhaps also ncards?
+
+Read through the manifest and tabulate the votes into a set of ContestTabulation, one for each contest. For IRV, one gets a VoteConsolidator, otherwise a count of the votes for each candidate. Also Npop, undervotes and missing.
 
 ## TL;DR
 

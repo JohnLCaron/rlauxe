@@ -17,12 +17,11 @@ interface CardPoolIF: BatchIF {
     fun ncards(): Int
 }
 
-// This is what comes out of the serialization import
 data class CardPool(
     override val poolName: String,
     override val poolId: Int,
     val hasSingleCardStyle: Boolean,
-    val infos: Map<Int, ContestInfo>,
+    val infos: Map<Int, ContestInfo>, // do we really need this ??
     val contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
     val totalCards: Int,
 ): CardPoolIF {

@@ -9,7 +9,7 @@ class TestOneShot {
 
     @Test
     fun testOneShot() {
-        val auditdir = "$testdataDir/persist/persistWorkflow/clca/audit"
+        val auditdir = "$testdataDir/persist/hasStyle/makeMultiCardNoStylePolling/audit"
         val record = AuditRecord.readFrom(auditdir)
         if (record == null) throw RuntimeException("record is null")
         require (record is AuditRecord)

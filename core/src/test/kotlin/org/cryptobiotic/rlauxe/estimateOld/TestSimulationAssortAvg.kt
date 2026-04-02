@@ -12,6 +12,7 @@ import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.core.showVotes
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.calcAssorterMargin
+import org.cryptobiotic.rlauxe.estimate.simulateCvrsFromMargin
 import org.cryptobiotic.rlauxe.propTestFastConfig
 import org.cryptobiotic.rlauxe.util.df
 import org.cryptobiotic.rlauxe.util.doublePrecision

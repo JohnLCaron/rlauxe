@@ -2,13 +2,18 @@
 _04/02/26_
 
 AuditableCard has a CardStyle, which tells the possibleContests that might be on that card. Read through the manifest and count the cards that
-might contain a contest: that is the contest.Npop.
+might contain a contest: that is the contest.Npop. 
 
-Batch emphasizes partitioning of cards into physical containers. To find out what cards are in a batch, read through the manifest. Generally not needed. So a Batch is virtual. 
+Batch emphasizes the partitioning of cards into physical containers. To find out what cards are in a batch, read through the manifest. 
+A Batch hasa/isa CardStyle. Perhaps also ncards? A CardPool is a Batch. Perhaps a Batch is a CardPool, so we dont need Batch ??
 
-A Batch has a CardStyle. Perhaps also ncards?
+A Batch is disjoint, a CardStyle can be used by many batches. Does an AuditableCard have a Batch or CardStyle ?? 
 
-Read through the manifest and tabulate the votes into a set of ContestTabulation, one for each contest. For IRV, one gets a VoteConsolidator, otherwise a count of the votes for each candidate. Also Npop, undervotes and missing.
+Read through the manifest and tabulate the votes into a set of ContestTabulation, one for each contest. For IRV, one gets a VoteConsolidator, otherwise a count of the votes for each candidate. Also you get Npop, undervotes and missing.
+
+In EstimateAudit, we want to use pools to estimate with if they exist. So the merging needs to merge the Pools in, not the batches.
+So maybe dont write the batch if there are pools. Probably clearer if we use CardStyle instead of Batch.
+
 
 ## TL;DR
 

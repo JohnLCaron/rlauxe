@@ -293,8 +293,8 @@ class CreateBoulderElection(
     override fun electionInfo() = ElectionInfo("Boulder24$auditType", auditType, ncards(), contestsUA.size,
         true, mvrSource=mvrSource)
     override fun contestsUA() = contestsUA
-    override fun batches() = if (auditType.isClca()) emptyList() else cardPoolBuilders
-    override fun cardPools() = if (auditType.isClca()) emptyList() else cardPoolBuilders.map { it.toOneAuditPool() }
+    override fun batches() = null // TODO !cvrsHaveUndervotes need batches
+    override fun cardPools() = if (auditType.isOA()) cardPoolBuilders else null // TODO why convert ??
     override fun createUnsortedMvrsInternal() = allCvrs
     override fun createUnsortedMvrsExternal() = null
 
@@ -307,7 +307,7 @@ class CreateBoulderElection(
             auditType,
             Closer(allCvrs.iterator()), // use the mvrs as the cvrs
             null,
-            batches = cardPoolBuilders
+            batches = if (auditType.isClca()) null else cardPoolBuilders
         )
     }
 }

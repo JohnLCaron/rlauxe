@@ -14,7 +14,7 @@ import kotlin.collections.contains
  * batch.possibleContests = list of contests that are in this batch.
  * batch.hasSingleCardStyle = true if all cards in the batch have a single known CardStyle = "we know exactly what contests are on each card".
  */
-// Generalization of a BallotStyle or CardStyle
+/* Maybe this is the minimum
 interface CardStyleIF {
     fun name(): String
     fun id(): Int
@@ -24,7 +24,7 @@ interface CardStyleIF {
     // if you have these, then you're a CardPool
     //   fun ncards(): Int
     //   fun votesAndUndervotes(contestId: Int): Vunder
-}
+} */
 
 data class CardStyle(
     val name: String,
@@ -78,7 +78,7 @@ data class BallotStyle(
     val hasSingleCardStyle: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
     val cardStyles: List<CardStyle>,      // one for each card; contests are disjoint
     val nballots: Int,                    // does this belong ?? or just for BallotPool
-)  : CardStyleIF {
+)  : BatchIF {
     val contests = mutableSetOf<Int>()
     init {
         cardStyles.forEach { cs -> cs.possibleContests.forEach { contests.add(it) } }

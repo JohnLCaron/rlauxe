@@ -8,6 +8,7 @@ import com.github.michaelbull.result.unwrapError
 import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.Batch.Companion.useVotes
 import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
@@ -15,6 +16,7 @@ import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readAuditCreationConfigJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readBatchesJsonFile
@@ -27,7 +29,7 @@ import org.cryptobiotic.rlauxe.util.Prng
 import java.nio.file.Files
 import kotlin.io.path.Path
 
-class VerifyAuditCommitment(val auditDir: String, contestId: Int?, show: Boolean) {
+class VerifyAuditCommitment(val auditDir: String, contestId: Int? = null, show: Boolean = false) {
     val audit: AuditCommitment
     val auditType: AuditType
     val contests: List<ContestWithAssertions>
@@ -65,6 +67,7 @@ data class AuditCommitment(val electionInfo: ElectionInfo, val auditCreationConf
                            val contests: List<ContestWithAssertions>, val batches: List<BatchIF>,
                            val sortedManifest: CloseableIterable<AuditableCard> )
 
+// TODO: use AuditRecord
 fun readAuditCommitment(publisher: Publisher): Result<AuditCommitment, ErrorMessages> {
     val errs = ErrorMessages("readElectionRecord from '${publisher.auditDir}'")
 
@@ -86,7 +89,11 @@ fun readAuditCommitment(publisher: Publisher): Result<AuditCommitment, ErrorMess
         null
     }
 
-    val batches = if (!Files.exists(Path(publisher.batchesFile()))) emptyList() else {
+    val infos = contests!!.map { it.contest.info() }.associateBy { it.id }
+    val pools = if (!Files.exists(Path(publisher.cardPoolsFile()))) null
+    else readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
+
+    val batches = pools ?: if (!Files.exists(Path(publisher.batchesFile()))) emptyList() else {
         val batchesResult = readBatchesJsonFile(publisher.batchesFile())
         if (batchesResult.isOk) batchesResult.unwrap() else {
             errs.addNested(batchesResult.unwrapError())
@@ -126,14 +133,11 @@ fun verifySortedCardManifest(
     var count = 0
     var lastCard: AuditableCard? = null
 
-
-    println("verifySortedCardManifest seed= $seed")
-
     cards.iterator().use { cardIter ->
         while (cardIter.hasNext()) {
             val card = cardIter.next()
 
-            // ll card locations and indices are unique
+            // all card locations and indices are unique
             if (!locationSet.add(card.location)) {
                 results.addError("$count duplicate card.location ${card.location}")
             }
@@ -150,6 +154,11 @@ fun verifySortedCardManifest(
             lastCard = card
 
             indexList.add(Pair(card.index, card.prn))
+
+            // check that batch exists
+            if (!useVotes(card.batch.name()) && !batchSet.contains(card.batch)) {
+                results.addError("card $count ${card.location} batch ${card.batch} not in batches")
+            }
 
             infos.forEach { (contestId, info) ->
                 val allTab = allCvrVotes.getOrPut(contestId) { ContestTabulation(info) }

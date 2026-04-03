@@ -48,13 +48,13 @@ class AuditRecord(
     val auditRoundConfig: AuditRoundConfig,
     override val contests: List<ContestWithAssertions>,
     override val rounds: List<AuditRound>,  // TODO do we need to replace AuditEst ??
-    val nmvrs: Int // mvrs already sampled
+    val nmvrs: Int // number of mvrs already sampled
 ): AuditRecordIF {
     val publisher = Publisher(location)
 
     override val config = Config(electionInfo, auditCreationConfig, auditRoundConfig)
 
-    // for efficiency, batches are read once
+    // for efficiency, batches can be read once and stored by the caller
     override fun readSortedManifest(batches: List<BatchIF>?): CardManifest {
         // merge batch references into the Card
         val mergedCards: CloseableIterable<AuditableCard> =
@@ -66,7 +66,7 @@ class AuditRecord(
     }
 
     override fun readSortedManifest(): CardManifest {
-        val batches = readBatches() ?: readCardPools() ?: emptyList() // TODO which  is preferred ??
+        val batches = readCardPools() ?: readBatches() ?: emptyList() // pools are preferred
         // merge batch references into the Card
         val mergedCards =
             MergeBatchesIntoCardManifestIterable(
@@ -93,7 +93,7 @@ class AuditRecord(
                else readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
     }
 
-    // contestId -> nmvrs
+    // return contestId -> nmvrs
     override fun readOneShotMvrs(): Map<Int, Int> {
         if (!Files.exists(Path(publisher.privateOneshotFile()))) {
             return emptyMap()

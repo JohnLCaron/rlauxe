@@ -7,6 +7,7 @@ import com.github.michaelbull.result.unwrap
 import com.github.michaelbull.result.unwrapError
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.Batch.Companion.useVotes
 import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
@@ -26,7 +27,7 @@ import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.nio.file.Files
 import kotlin.io.path.Path
 
-class VerifyElectionCommitment(val auditDir: String, contestId: Int?, show: Boolean) {
+class VerifyElectionCommitment(val auditDir: String) {
     val publisher = Publisher(auditDir)
     val election: ElectionCommitment
     val auditType: AuditType
@@ -54,7 +55,6 @@ class VerifyElectionCommitment(val auditDir: String, contestId: Int?, show: Bool
         results.addMessage("---VerifyElection on $auditDir")
         if (contests.size == 1) results.addMessage("  ${contests.first()} ")
 
-        checkContestsCorrectlyFormed(ContestSampleControl.NONE, contests, results)
         val contestSummary = verifyCardManifest(auditType, contests, cardManifest, infos, batchSet, results)
 
         // OA
@@ -82,6 +82,7 @@ class VerifyElectionCommitment(val auditDir: String, contestId: Int?, show: Bool
 data class ElectionCommitment(val electionInfo: ElectionInfo, val contests: List<ContestWithAssertions>, val batches: List<BatchIF>,
     val cardManifest: CloseableIterable<AuditableCard> )
 
+// TODO: use AuditRecord
 fun readElectionCommitment(publisher: Publisher): Result<ElectionCommitment, ErrorMessages> {
     val errs = ErrorMessages("readElectionRecord from '${publisher.auditDir}'")
 
@@ -97,13 +98,17 @@ fun readElectionCommitment(publisher: Publisher): Result<ElectionCommitment, Err
         null
     }
 
-    val batches = if (!Files.exists(Path(publisher.batchesFile()))) emptyList() else {
-        val batchesResult = readBatchesJsonFile(publisher.batchesFile())
-        if (batchesResult.isOk) batchesResult.unwrap() else {
-            errs.addNested(batchesResult.unwrapError())
-            emptyList()
+    val infos = contests!!.map { it.contest.info() }.associateBy { it.id }
+    val pools = if (!Files.exists(Path(publisher.cardPoolsFile()))) null
+        else readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
+
+    val batches = pools ?: if (!Files.exists(Path(publisher.batchesFile()))) emptyList() else {
+            val batchesResult = readBatchesJsonFile(publisher.batchesFile())
+            if (batchesResult.isOk) batchesResult.unwrap() else {
+                errs.addNested(batchesResult.unwrapError())
+                emptyList()
+            }
         }
-    }
 
     val cardManifest: CloseableIterable<AuditableCard> =
         MergeBatchesIntoCardManifestIterable(
@@ -150,7 +155,7 @@ fun verifyCardManifest(
             }
 
             // check that batch exists
-            if (!batchSet.contains(card.batch)) {
+            if (!useVotes(card.batch.name()) && !batchSet.contains(card.batch)) {
                 results.addError("card $count ${card.location} batch ${card.batch} not in batches")
             }
 

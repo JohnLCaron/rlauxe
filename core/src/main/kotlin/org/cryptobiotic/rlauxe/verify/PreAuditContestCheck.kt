@@ -1,7 +1,6 @@
 package org.cryptobiotic.rlauxe.verify
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
@@ -9,9 +8,9 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.math.min
 
-private val logger = KotlinLogging.logger("createSfElectionFromCsvExportOANS")
 
-fun checkContestsCorrectlyFormed(sampleControl: ContestSampleControl, contestsUA: List<ContestWithAssertions>, results: VerifyResults) {
+fun preAuditContestCheck(contestsUA: List<ContestWithAssertions>, results: VerifyResults) {
+    val logger = KotlinLogging.logger("preAuditContestCheck")
 
     results.addMessage("checkContestsCorrectlyFormed")
 
@@ -23,23 +22,15 @@ fun checkContestsCorrectlyFormed(sampleControl: ContestSampleControl, contestsUA
         if (contestUA.preAuditStatus == TestH0Status.InProgress && !contestUA.isIrv) {
             checkWinnerVotes(contestUA, results)
 
-            // this is sampleControl, not validation
-            if ((contestUA.minRecountMargin()?: 0.0) <= sampleControl.minRecountMargin) {
-                logger.warn{"*** MinMargin contest ${contestUA.id} recountMargin ${contestUA.minRecountMargin()} <= ${sampleControl.minRecountMargin}"}
-                contestUA.preAuditStatus = TestH0Status.MinMargin
-            } else if ((contestUA.minDilutedMargin()?: 0.0) <= sampleControl.minMargin) {
-                logger.warn{"*** MinMargin contest ${contestUA.id} minMargin ${contestUA.minDilutedMargin()} <= ${sampleControl.minMargin}"}
-                contestUA.preAuditStatus = TestH0Status.MinMargin
-            } else {
-                val minAssertion = contestUA.minAssertion()
-                if (minAssertion != null) {
-                    val marginInVotes = contestUA.contest.marginInVotes(minAssertion.assorter)
-                    if (marginInVotes < 0)
-                        contestUA.contest.marginInVotes(minAssertion.assorter)
-                    if (contestUA.contest.Nphantoms() >= marginInVotes) {
-                        logger.warn { "***TooManyPhantoms contest ${contestUA.id} nphantoms ${contestUA.contest.Nphantoms()} >= $marginInVotes margin in votes" }
-                        contestUA.preAuditStatus = TestH0Status.TooManyPhantoms
-                    }
+            // remove TooManyPhantoms
+            val minAssertion = contestUA.minAssertion()
+            if (minAssertion != null) {
+                val marginInVotes = contestUA.contest.marginInVotes(minAssertion.assorter)
+                if (marginInVotes < 0)
+                    contestUA.contest.marginInVotes(minAssertion.assorter)
+                if (contestUA.contest.Nphantoms() >= marginInVotes) {
+                    logger.warn { "***TooManyPhantoms contest ${contestUA.id} nphantoms ${contestUA.contest.Nphantoms()} >= $marginInVotes margin in votes" }
+                    contestUA.preAuditStatus = TestH0Status.TooManyPhantoms
                 }
             }
         }
@@ -60,8 +51,8 @@ fun checkContestInfos(contestsUA: List<ContestWithAssertions>, results: VerifyRe
             contestUA.preAuditStatus = TestH0Status.ContestMisformed
         }
 
-        // checked in ContestInfo constructor
-        /* 2. for each contest, verify that candidate names and candidate ids are unique.
+        // DUP checked in ContestInfo constructor
+        // 2. for each contest, verify that candidate names and candidate ids are unique.
         val candNames = mutableSetOf<String>()
         val candIds = mutableSetOf<Int>()
         contestUA.contest.info().candidateNames.forEach { name, id ->
@@ -73,11 +64,11 @@ fun checkContestInfos(contestsUA: List<ContestWithAssertions>, results: VerifyRe
                 results.addError("Contest ${contestUA.name} (${contestUA.id}) candidate $id duplicate id")
                 contestUA.preAuditStatus = TestH0Status.ContestMisformed
             }
-        } */
+        }
     }
 }
 
-// TODO not needed, checked in Contest constructor? or duplicate for safety ??
+// DUP not needed, checked in Contest constructor? or duplicate for safety ??
 fun checkWinners(contestUA: ContestWithAssertions, results: VerifyResults) {
     val contest = contestUA.contest
     val info = contest.info()
@@ -117,6 +108,7 @@ fun checkWinners(contestUA: ContestWithAssertions, results: VerifyResults) {
     }
 }
 
+// DUP?
 // 3. verify that the winners have more votes than the losers (margins > 0 for all assertions)
 // 4. check that the top nwinners are in the list of winners
 fun checkWinnerVotes(contestUA: ContestWithAssertions, results: VerifyResults) {

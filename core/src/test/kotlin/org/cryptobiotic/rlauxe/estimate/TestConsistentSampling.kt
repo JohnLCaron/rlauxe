@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.verify.VerifyResults
-import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
+import org.cryptobiotic.rlauxe.verify.preAuditContestCheck
 import org.cryptobiotic.rlauxe.workflow.*
 
 import kotlin.random.Random
@@ -111,7 +111,7 @@ class TestConsistentSampling {
             val mvrManager = MvrManagerForTesting(testCvrs, testCvrs, Random.nextLong())
 
             val results = VerifyResults()
-            checkContestsCorrectlyFormed(sampleControl, contestsUAs, results) // contestUA.preAuditStatus is set
+            preAuditContestCheck(contestsUAs, results) // contestUA.preAuditStatus is set
             if (results.hasErrors) println( results.toString() )
             val countCheckRemoved = contestsUAs.count { it.preAuditStatus != TestH0Status.InProgress }
             println(" checkContestsCorrectlyFormed removed ${countCheckRemoved} / ${contestsUAs.size}")

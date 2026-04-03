@@ -27,6 +27,7 @@ import kotlin.collections.forEach
 import kotlin.text.appendLine
 import kotlin.use
 
+// TODO convert to use  VerifyXXXCommittment
 // pre audit verifaction; no access to mvrs.
 // for all audit types. Cards and CardPools must already be published, contests might not,
 // but only if you call cerify with the contests' note only then do you get contestUA.preAuditStatus saved
@@ -60,7 +61,7 @@ class VerifyContests(val auditRecordLocation: String, val show: Boolean = false)
 
         // all
         val infos = allInfos ?: contests.associate { it.id to it.contest.info() }
-        checkContestsCorrectlyFormed(config.round.sampling, contests, results)
+        preAuditContestCheck(contests, results)
         val contestSummary = verifyManifest(config, contests, cardManifest.cards, infos, results)
 
         // OA

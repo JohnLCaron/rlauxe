@@ -12,7 +12,7 @@ data class AuditableCard (
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
     val votes: Map<Int, IntArray>?,   // CVRs and phantoms
-    val batch: BatchIF,       // batch reference. CLCA dont need unless cvrsContainUndervotes = false
+    val batch: BatchIF,       // TODO perhaps this should be CardStyle ?
 ): CvrIF, CardIF {
 
     init {
@@ -123,7 +123,7 @@ data class CardWithBatchName (
 
     val votes: Map<Int, IntArray>?,   // CVRs and phantoms
     val poolId: Int?,                 // must be set if its from a CardPool  TODO verify batch name, poolId
-    val batchName: String,            // batch name: "fromCvr" if no batch and its from a CVR (then votes is non null)
+    val batchName: String,            // batch name: "fromCvr" its from a CVR (then votes must be non null)
 ): CardIF {
 
     constructor(card: AuditableCard): this(card.location, card.index, card.prn, card.phantom, card.votes, card.poolId(), card.batchName())

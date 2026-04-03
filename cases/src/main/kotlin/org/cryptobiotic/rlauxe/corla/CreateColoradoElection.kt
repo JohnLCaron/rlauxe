@@ -41,7 +41,7 @@ open class CreateColoradoElection (
     val corlaContestBuilders = makeOneAuditBuilders(electionDetailXml, roundContests)
     val infoMap = corlaContestBuilders.associate { it.info.id to it.info }
 
-    val cardPools: List<OneAuditPoolFromBallotStyle> = convertPrecinctsToCardPools(precinctFile, infoMap)
+    val cardPools: List<OneAuditPoolFromBallotStyle>
     val ncards: Int
 
     val batches: List<BatchIF>
@@ -50,6 +50,8 @@ open class CreateColoradoElection (
     val publisher = Publisher(auditdir)
 
     init {
+        cardPools = convertPrecinctsToCardPools(precinctFile, infoMap)
+
         // set contest total cards as sum over pools
         corlaContestBuilders.forEach { it.adjustPoolInfo(cardPools) }
 
@@ -190,9 +192,9 @@ open class CreateColoradoElection (
     }
 
     override fun electionInfo() =
-        ElectionInfo("Corla24$auditType$pollingMode", auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true)
+        ElectionInfo("Corla24$auditType$pollingMode", auditType, ncards(), contestsUA.size, pollingMode = pollingMode)
 
-    override fun batches() = if (auditType.isPolling() && pollingMode!!.withBatches()) batches else null
+    override fun batches() = if (auditType.isPolling() && pollingMode!!.withBatches()) batches else null // TODO !cvrsHaveUndervotes need batches
     override fun cardPools() = if (auditType.isPolling() && pollingMode!!.withPools()) cardPools.map { it.toOneAuditPool() } else null
     override fun contestsUA() = contestsUA
     override fun ncards() = ncards

@@ -75,6 +75,21 @@ private fun checkSampleLimits(
 ): List<ContestRound> {
     val removeContests = mutableListOf<ContestRound>()
 
+    // limit contest samples to minRecountMargin, minMargin
+    if (sampleControl.minRecountMargin > 0.0 || sampleControl.minMargin > 0.0) {
+        contestsNotDone.forEach { contestRound ->
+            val contestUA = contestRound.contestUA
+            if ((contestUA.minRecountMargin() ?: 0.0) <= sampleControl.minRecountMargin) {
+                logger.warn { "*** MinMargin contest ${contestUA.id} recountMargin ${contestUA.minRecountMargin()} <= ${sampleControl.minRecountMargin}" }
+                contestUA.preAuditStatus = TestH0Status.MinMargin
+            }
+            if ((contestUA.minDilutedMargin() ?: 0.0) <= sampleControl.minMargin) {
+                logger.warn { "*** MinMargin contest ${contestUA.id} minMargin ${contestUA.minDilutedMargin()} <= ${sampleControl.minMargin}" }
+                contestUA.preAuditStatus = TestH0Status.MinMargin
+            }
+        }
+    }
+
     // limit contest samples to maxSamplePct
     if (sampleControl.maxSamplePct > 0.0) {
         contestsNotDone.forEach { contestRound ->

@@ -18,8 +18,9 @@ import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Prng
 import org.cryptobiotic.rlauxe.util.SortMerge
 import org.cryptobiotic.rlauxe.util.Stopwatch
+import org.cryptobiotic.rlauxe.verify.VerifyAuditCommitment
 import org.cryptobiotic.rlauxe.verify.VerifyResults
-import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
+import org.cryptobiotic.rlauxe.verify.preAuditContestCheck
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import java.io.File
 import java.nio.file.Files.notExists
@@ -60,6 +61,11 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: Strin
             }
         }
     }
+
+    val verifyACResults = VerifyAuditCommitment(auditDir).verify()
+    if (verifyACResults.hasErrors) {
+        logger.error { "createAuditRecord VerifyAuditCommitment failed: ${verifyACResults}" }
+    }
 }
 
 fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRoundIF, ErrorMessages> {
@@ -93,7 +99,7 @@ fun startFirstRound(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditR
         //// heres where we can remove contests as needed
         // this may change the auditStatus to misformed.
         val results = VerifyResults()
-        checkContestsCorrectlyFormed(auditRecord.config.round.sampling, auditRecord.contests, results)
+        preAuditContestCheck(auditRecord.contests, results)
         if (results.hasErrors) {
             logger.warn{ results.toString() }
         } else {

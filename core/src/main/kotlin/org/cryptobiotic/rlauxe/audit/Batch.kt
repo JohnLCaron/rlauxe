@@ -10,7 +10,7 @@ import kotlin.collections.contains
  * batch.possibleContests = list of contests that are in this batch.
  * batch.hasSingleCardStyle = true if all cards in the batch have a single known CardStyle = "we know exactly what contests are on each card".
  */
-// Generalization of a BallotStyle or CardStyle
+// TODO maybe rename as CardStyleIF ??
 interface BatchIF {
     fun name(): String
     fun id(): Int
@@ -22,7 +22,7 @@ interface BatchIF {
     //   fun votesAndUndervotes(contestId: Int): Vunder
 }
 
-// TODO maybe this should be CardStyle? (!)
+// TODO maybe rename as CardStyle ??
 data class Batch(
     val name: String,
     val id: Int,

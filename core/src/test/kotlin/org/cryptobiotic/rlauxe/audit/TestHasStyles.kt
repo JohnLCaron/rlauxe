@@ -5,6 +5,7 @@ import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
+import org.cryptobiotic.rlauxe.estimate.CSDtype
 import org.cryptobiotic.rlauxe.estimate.MultiContestCombineData
 import org.cryptobiotic.rlauxe.estimate.MultiContestCombinePools
 import org.cryptobiotic.rlauxe.estimate.MultiContestFromBallotStyles
@@ -13,8 +14,6 @@ import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.TransformingIterator
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
-import org.cryptobiotic.rlauxe.verify.VerifyAuditCommitment
-import org.cryptobiotic.rlauxe.verify.VerifyElectionCommitment
 import org.cryptobiotic.rlauxe.workflow.CreateElectionFromCards
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -93,10 +92,11 @@ class TestHasStyles {
         contest3s = listOf(contestB, contestS, contestT)
     }
 
-    @Test
+    // @Test
     fun doone() {
-        // makeMultiCardHasBallotStylePolling() //
-        makeMultiCardNoStylePolling() //
+        makeMultiCard(AuditType.POLLING, CSDtype.cardStyles) // mvrs = 2394
+        makeMultiCard(AuditType.POLLING, CSDtype.ballotStyles) // mvrs = 2765
+        makeMultiCard(AuditType.POLLING, CSDtype.noStyles) // mvrs = 7441
     }
 
     @Test
@@ -117,11 +117,14 @@ class TestHasStyles {
 
         makeMultiCardHasCardStyleClca() // 114; paper has 128
         makeMultiCardHasCardStyle(AuditType.CLCA) // mvrUsed = 665; paper has 128
-        makeMultiCardNoStyle(AuditType.CLCA) // mvrUsed = 1206; paper has 1,712
+        makeMultiCardNoStyle(AuditType.CLCA) // mvrUsed = 1206; paper has 1712
 
-        // change to p = .3 TODO
-        makeMultiCardHasBallotStylePolling() // mvrUsed = 2037 (will vary); paper has 2067-2432
-        makeMultiCardNoStylePolling() // mvrUsed = 14000 (will vary) ; paper has 4053 TODO
+        // change to p = .3
+        makeMultiCard(AuditType.POLLING, CSDtype.cardStyles) // mvrs = 2394 ; paper doesnt have?
+        makeMultiCard(AuditType.POLLING, CSDtype.ballotStyles) // mvrs = 2765 ; paper has 2067-2432 (B and S on the same/different card)
+        makeMultiCard(AuditType.POLLING, CSDtype.noStyles) // mvrs = 7441 ; paper has 4053
+
+        // TODO could run makeMultiCard with CLCA, then I think thats the case where !cvrsContainUndervotes so we use batches instead of _fromCvr.
     }
 
     fun makeSingleCardNoStyle(auditType: AuditType) {
@@ -271,9 +274,10 @@ class TestHasStyles {
     // I think this means that we have a multicard ballot, and we know what the possible contests, say by precinct, but the
     //   ballot's cards were not kept together, its just one pile of cards per precinct.
     // So there are two pools, one that doesnt contain S and one that might (?)
-    fun makeMultiCardHasBallotStylePolling() {
-        //   multicard: Npop(B) = N*c, Npop(S) = N   ??
-        // actual: N, N/2
+    fun makeMultiCard(auditType: AuditType, csd: CSDtype) {
+        // cardStyles: N, N/2. why not p:N because each ballot generates 2 cards, batch12 has N/2 ballots; extra are undervotes
+        // ballotStyles: 2*N, N. "know which ballots contain S but not which particular cards contain S". so Npop(S) = all of batch12
+        // noStyles: 2*N, 2*N. dont know what ballots contain S. so Npop(S) = all
         val contestS3 = Contest(
             ContestInfo("S", 2, mapOf("Del" to 1, "Mel" to 2), SocialChoiceFunction.PLURALITY),
             mapOf(1 to 1650, 2 to 1350),
@@ -297,10 +301,10 @@ class TestHasStyles {
         val card1 = CardStyle("card1", 1, intArrayOf(1), true)
         val card2 = CardStyle("card2", 2, intArrayOf(2), true)
         val card3 = CardStyle("card3", 3, intArrayOf(3), true)
-        val ballot12 = BallotStyle("style12", 4, false, listOf(card1, card2), N/2)
-        val ballot13 = BallotStyle("style13", 5, false, listOf(card1, card3), N/2)
+        val ballot12 = BallotStyle("batch1", 4, false, listOf(card1, card2), N/2)
+        val ballot13 = BallotStyle("batch2", 5, false, listOf(card1, card3), N/2)
 
-        val testData = MultiContestFromBallotStyles(contests, listOf(ballot12, ballot13))
+        val testData = MultiContestFromBallotStyles(contests, listOf(ballot12, ballot13), csd)
         val (testCards, batches) = testData.makeCardsFromContests()
 
         val infos = contests.map{ it.info }.associateBy { it.id }
@@ -309,8 +313,8 @@ class TestHasStyles {
             assertEquals(contest.votes, tabs[contest.id]!!.votes)
         }
 
-        val topdir = "$testdataDir/persist/hasStyle/makeMultiCardHasBallotStylePolling"
-        val ok = createAndRunTestAuditCards(AuditType.POLLING, "makeMultiCardHasBallotStylePolling", topdir, acontests, testCards, batches)
+        val topdir = "$testdataDir/persist/hasStyle/makeMultiCard.$auditType.$csd"
+        val ok = createAndRunTestAuditCards(AuditType.POLLING, "makeMultiCard.$auditType.$csd", topdir, acontests, testCards, batches)
         assertTrue(ok)
     }
 
@@ -342,7 +346,7 @@ class TestHasStyles {
         val ballot123 = BallotStyle("style12", 4, false, listOf(card1, card2), N)
         // val ballot13 = BallotStyle("style13", 5, false, listOf(card1, card3), N)
 
-        val testData = MultiContestFromBallotStyles(contests, listOf(ballot123))
+        val testData = MultiContestFromBallotStyles(contests, listOf(ballot123), CSDtype.noStyles)
         val (testCards, batches) = testData.makeCardsFromContests()
 
         val card12 = CardStyle("card12", 3, intArrayOf(1,2), false)
@@ -436,12 +440,6 @@ class TestHasStyles {
         val auditdir = "$topdir/audit"
         createElectionRecord(election, auditDir = auditdir)
 
-        val verifyECResults = VerifyElectionCommitment(auditdir, null, show = true).verify()
-        if (verifyECResults.hasErrors) {
-            print(verifyECResults)
-            fail()
-        }
-
         val creation = AuditCreationConfig(auditType, riskLimit=.05, seed = 123456789L)
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 10),
@@ -451,12 +449,6 @@ class TestHasStyles {
         val config = Config(election.electionInfo(), creation, round)
 
         createAuditRecord(config, election, auditDir = auditdir)
-
-        val verifyACResults = VerifyAuditCommitment(auditdir, null, show = true).verify()
-        if (verifyACResults.hasErrors) {
-            print(verifyACResults)
-            fail()
-        }
 
         startFirstRound(auditdir)
 

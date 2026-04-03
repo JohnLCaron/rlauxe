@@ -28,7 +28,7 @@ class BelgiumClca (
 
     override fun electionInfo() = ElectionInfo(contestd.name, AuditType.CLCA, ncards(), contestsUA.size,
         cvrsContainUndervotes = true, mvrSource = mvrSource)
-    override fun batches() = infoMap.values.map { Batch(it.name, it.id, intArrayOf(it.id), true)}
+    override fun batches() = infoMap.values.map { Batch(it.name, it.id, intArrayOf(it.id), true)} // dont really need I think
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
     override fun cards() = createCards()

@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.verify.VerifyAuditRoundCommitment
 import org.cryptobiotic.rlauxe.verify.VerifyResults
-import org.cryptobiotic.rlauxe.verify.checkContestsCorrectlyFormed
+import org.cryptobiotic.rlauxe.verify.preAuditContestCheck
 import org.cryptobiotic.rlauxe.workflow.PersistedWorkflow
 import java.nio.file.Files.notExists
 import java.nio.file.Path
@@ -79,7 +79,7 @@ fun runRoundResult(auditDir: String, onlyTask: OnlyTask? = null): Result<AuditRo
                 //// heres where we can remove contests as needed
                 // this may change the auditStatus to misformed.
                 val results = VerifyResults()
-                checkContestsCorrectlyFormed(auditRecord.config.round.sampling, auditRecord.contests, results)
+                preAuditContestCheck(auditRecord.contests, results)
                 if (results.hasErrors) {
                     logger.warn{ results.toString() }
                 } else {
@@ -131,10 +131,13 @@ fun runAllRoundsAndVerify(auditdir: String, maxRounds:Int=7, verify:Boolean = tr
     println("============================================================")
 
     if (verify) {
-        val verifyResults = VerifyAuditRoundCommitment(auditdir).verify(show = true)
-        println()
-        print(verifyResults)
-        return (!verifyResults.hasErrors)
+        val verifyRound = VerifyAuditRoundCommitment(auditdir).verify()
+        if (verifyRound.hasErrors) {
+            println()
+            print(verifyRound)
+            logger.error { "runAllRoundsAndVerify VerifyAuditRoundCommitment failed: ${verifyRound}" }
+        }
+        return (!verifyRound.hasErrors)
     }
     return true
 }

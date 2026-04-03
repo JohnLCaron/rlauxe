@@ -13,7 +13,7 @@ import kotlin.collections.forEach
 import kotlin.math.max
 
 // used when you dont have CVRs, just pool totals.
-// simulate the pool Cvrs, for estimating sample sizes
+// the ContestTabulations are given
 data class OneAuditPoolFromBallotStyle(
     override val poolName: String,
     override val poolId: Int,

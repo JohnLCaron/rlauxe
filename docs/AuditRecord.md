@@ -41,7 +41,7 @@ and then may not be changed.
         cardManifest.csv      // AuditableCardCsv, may be zipped
         cardPools.csv         // CardPoolCsv:    CardPoolIF -> CardPool (optional)
         contests.json         // ContestsUnderAuditJson
-        electionInfo.json     // ElectionInfoJson (new way)
+        electionInfo.json     // ElectionInfoJson
 
 2. createAuditRecord : PRNG seed chosen, cards assigned PRNs
 

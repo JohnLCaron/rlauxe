@@ -11,6 +11,9 @@ import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeElectionInfoJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeBatchesJsonFile
 import org.cryptobiotic.rlauxe.util.CloseableIterator
+import org.cryptobiotic.rlauxe.verify.VerifyElectionCommitment
+import org.cryptobiotic.rlauxe.verify.VerifyResults
+import org.cryptobiotic.rlauxe.verify.preAuditContestCheck
 import kotlin.io.path.Path
 
 interface ElectionBuilder {
@@ -21,7 +24,8 @@ interface ElectionBuilder {
     fun cards() : CloseableIterator<CardWithBatchName>
     fun ncards(): Int
 
-    // maybe implementations should put out both ? Let the auditor decide how to use ??
+    // In EstimateAudit, we want to use pools to estimate with, if they exist. So the merging needs to merge pools, not the batches.
+    // So dont write batches if there are pools. Also its up to the reader to prefer pools.
     fun batches(): List<BatchIF>?
     fun cardPools(): List<CardPoolIF>?
 
@@ -57,8 +61,20 @@ fun createElectionRecord(election: ElectionBuilder, auditDir: String, clear: Boo
     // createZipFile(publisher.cardManifestFile(), delete = true)
     logger.info { "createElectionRecord write ${countCvrs} cards to ${publisher.cardManifestFile()}" }
 
-    // write contests
+    // by calling preAuditContestCheck here, we change the contest.preAuditStatus before the contests are written
+    // but we dont have the ContestSampleControl yet. TODO ??
     val contestsUA = election.contestsUA()
+
+    val results = VerifyResults()
+    results.addMessage("---VerifyElection on $auditDir")
+    preAuditContestCheck(contestsUA, results)
+
+    // write contests
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
     logger.info{"createElectionRecord write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
+
+    val verifyECResults = VerifyElectionCommitment(auditDir).verify()
+    if (verifyECResults.hasErrors) {
+        logger.error { "createElectionRecord VerifyElectionCommitment failed: ${verifyECResults}" }
+    }
 }

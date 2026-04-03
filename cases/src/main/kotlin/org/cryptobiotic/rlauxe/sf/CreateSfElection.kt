@@ -45,7 +45,7 @@ class CreateSfElection(
     val cardPoolMapByName: Map<String, OneAuditPoolFromCvrs>
     val cardPoolBuilders: List<OneAuditPoolFromCvrs>
     val cardPools: List<CardPool>
-    val phantomCount: Map<Int, Int>  // id -> nphantoms
+    // val phantomCount: Map<Int, Int>  // id -> nphantoms
     val contestsUA: List<ContestWithAssertions>
     val ncards: Int
 
@@ -70,11 +70,11 @@ class CreateSfElection(
         val unpooledPool = allCardPools[unpooled]!! // this does not have the diluted count
 
         // we need Nc to make the phantom cvrs in createCardManifest()
-        phantomCount = countPhantoms(allCvrTabs, contestNcs)
+        // phantomCount = countPhantoms(allCvrTabs, contestNcs)
 
         // we need to know the diluted Nb before we can create the assertions: another pass through the cvrExports
         val cards = createCards(auditType)
-        val auditableCardIter: CloseableIterator<AuditableCard> = MergeBatchesIntoCardManifestIterator(cards, batches())
+        val auditableCardIter: CloseableIterator<AuditableCard> = MergeBatchesIntoCardManifestIterator(cards, cardPoolBuilders)
 
         val (manifestTabs, count) = tabulateCardsAndCount( auditableCardIter, infos)
         val contestNbs = manifestTabs.mapValues { it.value.ncardsTabulated }
@@ -82,7 +82,7 @@ class CreateSfElection(
         this.ncards = count
 
         // make contests based on cvr tabulations
-        cardPools = cardPoolBuilders.map { it.toOneAuditPool() }
+        cardPools = cardPoolBuilders.map { it.toOneAuditPool() } // TODO not sure why need to convert
         contestsUA = if (auditType.isClca()) {
             makeClcaContestsSF(infos, allCvrTabs, contestNcs, contestNbs).sortedBy { it.id }
         } else if (auditType.isOA()) {
@@ -156,8 +156,8 @@ class CreateSfElection(
         mvrSource = mvrSource
     )
 
-    override fun batches() = if (auditType.isClca()) emptyList() else cardPoolBuilders
-    override fun cardPools() = cardPools
+    override fun batches() = null // TODO !cvrsHaveUndervotes need batches
+    override fun cardPools() = if (auditType.isOA()) cardPoolBuilders else null
     override fun contestsUA() = contestsUA
     override fun cards() = createCards(auditType)
     override fun ncards() = ncards

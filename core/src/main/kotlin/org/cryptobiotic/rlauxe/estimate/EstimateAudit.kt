@@ -161,6 +161,7 @@ class AuditTrialTask(
 
         // TODO use VunderPoolsFuzzer when cvrsContainUndervotes = false
         // used for OA and Polling; different simulated pool data each run; TODO could use VunderPoolsFuzzer
+        // TODO here is where we need the card.batch to point to the pool, not the batch. maybe dont write the batch is there are pools
         val vunderPools = if (pools != null && !config.isClca) VunderPools(pools) else null
 
         // Polling without pools, generate one VunderPool based on contest totals

@@ -23,13 +23,12 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     val contestsUA = auditRecord.contests.filter { it.preAuditStatus == TestH0Status.InProgress }
     val publisher = Publisher(auditRecord.location)
 
-    val batches = auditRecord.readBatches() ?: auditRecord.readCardPools()
+    private val batches = auditRecord.readCardPools() ?: auditRecord.readBatches() // pools are preferred
     val sortedManifest = auditRecord.readSortedManifest(batches)
-
     fun auditableCards(): CloseableIterator<AuditableCard> = sortedManifest.cards.iterator()
 
     override fun sortedManifest() = sortedManifest
-    override fun batches() = batches
+    override fun batches() = auditRecord.readBatches()
     override fun pools() = auditRecord.readCardPools() // could test if batches are cardPools
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {

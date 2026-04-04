@@ -381,7 +381,7 @@ fun verifyOAassortAvg(
 
     var allOk = true
 
-    // sum all the assorter values in one pass across all the cards, usinmg PoolAverage when card is in a pool
+    // sum all the assorter values in one pass across all the cards, using PoolAverage when card is in a pool
     val cardAssortAvgs = mutableMapOf<Int, MutableMap<String, AssortAvg>>()  // contest -> assorter -> average
     cards.use { cardIter ->
         while (cardIter.hasNext()) {

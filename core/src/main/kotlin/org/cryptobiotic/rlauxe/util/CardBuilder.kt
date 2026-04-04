@@ -35,7 +35,7 @@ class AuditableCardBuilder(
         return AuditableCard(
             location, index, prn, phantom,
             votes = votes,
-            batch = batch
+            cardStyle = batch
         )
     }
 
@@ -46,7 +46,7 @@ class AuditableCardBuilder(
             card.prn,
             card.phantom,
             card.votes,
-            card.batch
+            card.cardStyle
         )
 
     }
@@ -100,7 +100,7 @@ class CardWithBatchNameBuilder(
             location, index, prn, phantom,
             votes = votes,
             poolId = poolId,
-            batchName = useBatchName
+            styleName = useBatchName
         )
     }
 
@@ -112,7 +112,7 @@ class CardWithBatchNameBuilder(
             card.phantom,
             card.votes,
             card.poolId(),
-            card.batchName(),
+            card.styleName(),
         )
 
     }

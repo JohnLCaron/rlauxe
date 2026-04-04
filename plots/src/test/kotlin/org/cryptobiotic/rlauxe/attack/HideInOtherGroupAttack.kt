@@ -15,7 +15,6 @@ import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
-import org.cryptobiotic.rlauxe.util.tabulateCloseableCvrs
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.random.Random
 import kotlin.sequences.plus
@@ -165,7 +164,7 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
         // now form the mvrs with the flips
         var countFlips = 0
         val mvrCards = modifiedCards.map { mcard ->
-            if (mcard.batchName() == "group2" && mcard.votes!!.contains(1)) { // find the flips
+            if (mcard.styleName() == "group2" && mcard.votes!!.contains(1)) { // find the flips
                 countFlips++
                 val org = mcard
                 val mvotes = mcard.votes!!.toMutableMap()
@@ -239,7 +238,7 @@ class CardsWithStylesAttack(
 
         return AuditableCard(org.location, cardIndex++, 0, phantom=org.phantom,
             votes,
-            batch=org.batch,
+            cardStyle=org.cardStyle,
         )
     }
 

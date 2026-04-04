@@ -4,10 +4,9 @@ import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.audit.unpooled
 
-
 // intermediate CVR representation for DominionCvrSummary
 data class CvrExport(val id: String, val group: Int, val votes: Map<Int, IntArray>) {
-    // constructor(cvr: Cvr) : this(cvr.id, 0, cvr.votes) // TODO the group id is lost when converting to Cvr and back
+    val poolCounts = mutableMapOf<String, Int>()
 
     // Calculate the pool name from the cvr id. Could pass in a function (CvrExport) -> pool name
     fun poolKey(): String {
@@ -16,17 +15,18 @@ data class CvrExport(val id: String, val group: Int, val votes: Map<Int, IntArra
         return id.substring(0, lastIdx)
     }
 
+    // only used in test
     fun toCardNoBatch(index: Int, prn: Long, phantom: Boolean = false, pools: Map<String, Int>? = null, showPoolVotes: Boolean = true): CardWithBatchName {
         val contests = votes.map { it.key }.toIntArray()
         val poolId = if (pools == null || group != 1) null else pools[ poolKey() ]  // TODO not general
         // TODO if you want to delete the votes, add an adapter
         val useVotes = if (poolId == null || showPoolVotes) votes else null
-        return CardWithBatchName(id, index, prn, phantom, useVotes, poolId, batchName=poolKey())
+        return CardWithBatchName(id, index, prn, phantom, useVotes, poolId, styleName=poolKey())
     }
 
-    fun toCvr(phantom: Boolean = false, pools: Map<String, Int>? = null) : Cvr {
+    fun toCvr(pools: Map<String, Int>? = null , convertId: String) : Cvr {
         val poolId = if (pools == null || group != 1) null else pools[ poolKey() ] // TODO not general
-        return Cvr(id, votes, phantom, poolId)
+        return Cvr(convertId, votes, phantom=false, poolId)
     }
 
     override fun equals(other: Any?): Boolean {

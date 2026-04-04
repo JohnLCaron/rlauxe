@@ -22,7 +22,6 @@ import org.cryptobiotic.rlauxe.irv.makeRaireContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.ErrorMessages
-import org.cryptobiotic.rlauxe.utils.countPhantoms
 import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
 import kotlin.Boolean
 import kotlin.collections.component1
@@ -60,10 +59,10 @@ class CreateSfElection(
 
         // pass 1 through cvrs, make card pools, including unpooled
         val (allCardPools: Map<String, OneAuditPoolFromCvrs>, allCvrTabs: Map<Int, ContestTabulation>, ncards) = createCardPools(
-            infos,
-            cvrExportCsv,
-            poolsHaveOneCardStyle,
-        )
+                infos,
+                cvrExportCsv,
+                poolsHaveOneCardStyle,
+            )
 
         cardPoolMapByName = allCardPools.filter { it.value.poolName != unpooled } // exclude the unpooled
         cardPoolBuilders = cardPoolMapByName.values.toList() // exclude the unpooled
@@ -108,7 +107,7 @@ class CreateSfElection(
                 val pool = allCardPools.getOrPut(cvrExport.poolKey()) {
                     OneAuditPoolFromCvrs(cvrExport.poolKey(), allCardPools.size + 1, poolsHaveOneCardStyle, contestInfos)
                 }
-                pool.accumulateVotes(cvrExport.toCvr())
+                pool.accumulateVotes(cvrExport.toCvr(null, cvrExport.id))
 
                 cvrExport.votes.forEach { (id, cands) ->
                     val contestTab = allCvrTabs.getOrPut(id) { ContestTabulation(contestInfos[id]!!) }
@@ -165,7 +164,7 @@ class CreateSfElection(
     // same cvrs for CLCA and OneAudit
     fun createCards(auditType: AuditType): CloseableIterator<CardWithBatchName> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
-        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPoolBuilders.associate { it.name() to it.id() })
+        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPoolBuilders.associate { it.name() to it.id() }, true)
 
         return CvrsToCardsWithBatchNameIterator(
                 auditType,
@@ -181,7 +180,7 @@ class CreateSfElection(
     override fun createUnsortedMvrsExternal() = null
     override fun createUnsortedMvrsInternal(): List<Cvr> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
-        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPoolBuilders.associate { it.name() to it.id() })
+        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPoolBuilders.associate { it.name() to it.id() }, false)
 
         val unsortedMvrs = mutableListOf<Cvr>()
         cvrIter.use { iter ->

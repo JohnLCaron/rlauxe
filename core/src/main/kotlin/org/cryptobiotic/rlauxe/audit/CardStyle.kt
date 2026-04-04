@@ -67,7 +67,7 @@ data class CardStyle(
         val fromCvrBatch = CardStyle(fromCvr, -1, intArrayOf(), true)
         val phantomBatch = CardStyle(phantoms, -1, intArrayOf(), true)
 
-        fun useVotes(batchName: String): Boolean = batchName == fromCvr || batchName == phantoms
+        fun useVotes(styleName: String): Boolean = styleName == fromCvr || styleName == phantoms
     }
 }
 

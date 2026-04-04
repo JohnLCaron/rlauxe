@@ -18,7 +18,6 @@ import org.cryptobiotic.rlauxe.workflow.CreateElectionFromCards
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlin.test.fail
 
 private val showDetails = false
 
@@ -162,7 +161,7 @@ class TestHasStyles {
         val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
             Closer( testCards.iterator())) { card:AuditableCard ->
             val contests = card.votes!!.keys.toList().sorted()
-            card.copy(batch = fixBatches[contests]!!)
+            card.copy(cardStyle = fixBatches[contests]!!)
         }
         val newBatched = mutableListOf<AuditableCard>()
         while (newBatchedIter.hasNext()) { newBatched.add(newBatchedIter.next()) }
@@ -355,7 +354,7 @@ class TestHasStyles {
         val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
             Closer( testCards.iterator())) { card:AuditableCard ->
             val contests = card.votes!!.keys.toList().sorted()
-            card.copy(batch = card12)
+            card.copy(cardStyle = card12)
         }
         val newBatched = mutableListOf<AuditableCard>()
         while (newBatchedIter.hasNext()) { newBatched.add(newBatchedIter.next()) }
@@ -401,7 +400,7 @@ class TestHasStyles {
 
         val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
             Closer( testCards.iterator())) { card:AuditableCard ->
-            card.copy(batch = all)
+            card.copy(cardStyle = all)
         }
         val newBatched = mutableListOf<AuditableCard>()
         while (newBatchedIter.hasNext()) { newBatched.add(newBatchedIter.next()) }

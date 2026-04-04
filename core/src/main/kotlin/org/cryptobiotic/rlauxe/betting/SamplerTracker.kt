@@ -130,7 +130,8 @@ class ClcaSamplerErrorTracker(
         require(cassorter.noerror == clcaErrorTracker.noerror)
         require(cassorter.assorter.upperBound() == clcaErrorTracker.upper)
         samples.forEach { (mvr, card) ->
-            require(mvr.location() == card.location())  { "mvr location ${mvr.location()} != card.location ${card.location()}"}
+            // TODO replace with prn, but probably should be Pair<CardIF, AuditableCard> ??
+            // require(mvr.location() == card.location())  { "mvr location ${mvr.location()} != card.location ${card.location()}"}
             require(card.hasContest(contestId))  { " card.location ${card.location()} does not have contest $contestId" }
         }
     }

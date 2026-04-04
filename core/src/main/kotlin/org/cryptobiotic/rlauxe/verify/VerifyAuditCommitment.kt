@@ -156,8 +156,8 @@ fun verifySortedCardManifest(
             indexList.add(Pair(card.index, card.prn))
 
             // check that batch exists
-            if (!useVotes(card.batch.name()) && !batchSet.contains(card.batch)) {
-                results.addError("card $count ${card.location} batch ${card.batch} not in batches")
+            if (!useVotes(card.cardStyle.name()) && !batchSet.contains(card.cardStyle)) {
+                results.addError("card $count ${card.location} batch ${card.cardStyle} not in batches")
             }
 
             infos.forEach { (contestId, info) ->

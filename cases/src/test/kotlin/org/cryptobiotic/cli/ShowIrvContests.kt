@@ -33,7 +33,7 @@ class ShowIrvContests {
         }
 
         val cvrCsv = "$topDir/$cvrExportCsvFile"
-        val cvrIter = CvrExportToCvrAdapter(cvrExportCsvIterator(cvrCsv))
+        val cvrIter = CvrExportToCvrAdapter(cvrExportCsvIterator(cvrCsv), null, false)
         var count = 0
         while (cvrIter.hasNext()) {
             val cvr = cvrIter.next()

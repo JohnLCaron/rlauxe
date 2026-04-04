@@ -39,7 +39,7 @@ class TestAuditableCardsCsv {
             // intArrayOf(19, 23, 99, 123456),
             null,
             null,
-            batchName = "all",
+            styleName = "all",
         )
 
         val csv = writeCardCsv(target)
@@ -54,7 +54,7 @@ class TestAuditableCardsCsv {
     fun testRoundtripIO() {
         val target = listOf(
             CardWithBatchName ("deets", 42, 43L, false, null, 111, "pool111"),
-            CardWithBatchName ("deets", 42, 43L, false, null, null, batchName="all"),
+            CardWithBatchName ("deets", 42, 43L, false, null, null, styleName="all"),
             CardWithBatchName ("info to find card", 42, 43L, true,
                 mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), 11, "pool11"),
             CardWithBatchName ("info to find card", 42, 43L, true,

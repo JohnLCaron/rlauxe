@@ -51,7 +51,7 @@ class TestAuditableCard {
         assertEquals(card1, card2)
         assertEquals(card1.toString(), card2.toString())
 
-        val expected = """CardWithBatchName(location='cvr$id', index=42, prn=4422, phantom=false, poolId=1, batchName='pool1')
+        val expected = """CardWithBatchName(location='cvr$id', index=42, prn=4422, phantom=false, poolId=1, styleName='pool1')
   votes: 1:[1, 2, 3], 2:[4, 5, 6], 3:[0, 1], """
         assertEquals(expected, card1.toString())
     }
@@ -68,7 +68,7 @@ class TestAuditableCard {
         assertNotEquals(card1, card2)
         assertNotEquals(card1.toString(), card2.toString())
 
-        val expected = """AuditableCard(location='cvr42', index=42, prn=4422, phantom=false, has batch _fromCvr -1 possibleContests=[] singleStyle=true)
+        val expected = """AuditableCard(location='cvr42', index=42, prn=4422, phantom=false, has cardStyle _fromCvr -1 possibleContests=[] singleStyle=true)
   votes: 1:[1, 2, 3], 2:[4, 5, 6], 3:[0, 1], """
         assertEquals(expected, card1.toString())
     }

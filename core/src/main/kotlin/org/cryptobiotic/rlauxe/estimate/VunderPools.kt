@@ -85,11 +85,11 @@ class VunderBatches(batches: List<BatchIF>, val onePool: VunderPool) {
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
         if (card.isPhantom()) return card
 
-        val batch = batchMap[card.batchName()]
+        val batch = batchMap[card.styleName()]
         val cardb = AuditableCardBuilder.fromCard(card)
 
         if (batch == null) {
-            println("batch ${card.batchName()} not found")
+            println("batch ${card.styleName()} not found")
             return cardb.build()
         }
 

@@ -43,7 +43,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
             val errs = ErrorMessages("PersistedMvrManager")
             verifyMvrCardPairs(mvrCardPairs, errs)
             if (errs.hasErrors()) {
-                logger.error{ " ${auditRecord.showName()} verifyMvrCardPairs " }
+                logger.error{ " ${auditRecord.showName()} verifyMvrCardPairs $errs" }
             }
         }
 

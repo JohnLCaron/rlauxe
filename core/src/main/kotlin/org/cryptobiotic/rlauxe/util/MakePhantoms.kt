@@ -113,11 +113,11 @@ class PhantomBuilder(val id: String, val idx: Int) {
 
     fun buildCard(): AuditableCard {
         val votes = contests.associateWith { IntArray(0) }
-        return AuditableCard(location = id, index = idx, prn = 0L, phantom = true, votes = votes, batch=Batch.phantomBatch)
+        return AuditableCard(location = id, index = idx, prn = 0L, phantom = true, votes = votes, cardStyle=Batch.phantomBatch)
     }
     fun buildCardNoBatch(): CardWithBatchName {
         val votes = contests.associateWith { IntArray(0) }
-        return CardWithBatchName(location = id, index = idx, prn = 0L, phantom = true, votes = votes, poolId = null, batchName=Batch.phantoms)
+        return CardWithBatchName(location = id, index = idx, prn = 0L, phantom = true, votes = votes, poolId = null, styleName=Batch.phantoms)
     }
 
 }

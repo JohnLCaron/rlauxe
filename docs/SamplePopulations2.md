@@ -1,19 +1,33 @@
 # Sample Populations (2)
-_04/02/26_
+_04/04/26_
 
-AuditableCard has a CardStyle, which tells the possibleContests that might be on that card. Read through the manifest and count the cards that
-might contain a contest: that is the contest.Npop. 
+AuditableCard has a CardStyle, which tells the possibleContests that might be on that card. Read through the manifest and count the cards that might contain a contest: that is the contest.Npop. We only need CardStylke for that.
 
-Batch emphasizes the partitioning of cards into physical containers. To find out what cards are in a batch, read through the manifest. 
-A Batch hasa/isa CardStyle. Perhaps also ncards? A CardPool is a Batch. Perhaps a Batch is a CardPool, so we dont need Batch ??
+Batch emphasizes the partitioning of cards into physical containers. To find out what cards are in a batch, read through the manifest. If AuditableCard hasa CardStyle instead of a Batch, then you dont record the partition. Unless you use a Batch?
+A Batch hasa/isa CardStyle. Perhaps also ncards? 
 
-A Batch is disjoint, a CardStyle can be used by many batches. Does an AuditableCard have a Batch or CardStyle ?? 
+A Batch is disjoint, a CardStyle can be used by many batches. Does an AuditableCard have a Batch or CardStyle ?? At the moment were not using Batch to mean disjoint.
 
 Read through the manifest and tabulate the votes into a set of ContestTabulation, one for each contest. For IRV, one gets a VoteConsolidator, otherwise a count of the votes for each candidate. Also you get Npop, undervotes and missing.
 
-In EstimateAudit, we want to use pools to estimate with if they exist. So the merging needs to merge the Pools in, not the batches.
-So maybe dont write the batch if there are pools. Probably clearer if we use CardStyle instead of Batch.
+A CardPool is a Batch. Perhaps a Batch is a CardPool, so we dont need Batch ?? CardPool -> Batch?
+A CardPool has ContestTabulation for each contest. One could have a batch partition without a tabulation. If we need batch partition, maybe that is recorded seperately? CardPool -> Batch -> CardStyle.
 
+In EstimateAudit, we want to use pools for estimattion if they exist. So the merging needs to use Pools for the CardStyle, not the batches. So maybe dont write the batch if there are pools. Probably clearer if we use CardStyle instead of Batch. (Problem 1) All our cases use pools, not batches.
+
+In the real world, we have partitions. Precincts, counties, possible other districts. These have distinct Card Styles. Consider the case where the physical ballots can be matched to their card style by knowing their partition. Perhaps given the ballot id, we know their partition and card style.
+
+In SF2024 we have complete CVRs. Consider the scenario where we know the CardStyle based on the ballot ID, and at the precinct the cards are seperated into piles by CardStyle. But we only have precinct subtotals, not card style subtotals. Note: "the cards are seperated into piles" = batch.
+
+SF ballot has an id: "27-541-00027_00541_000009" and a group = 1/2. Group 1 are the precinct votes, and 27-541 is the precinct number = pool.name. Group the precinct ballots by card style, give them a number. ncontests = 1..40. Record the cards styles as precinct-cardstyle. Record the id as precinct-cardstyle-idx. 
+
+TODO: The regular sf card pool data ids should be changed to precinct-idx. For OA, we imagine that the cards are kept in some canonical order, from 1..ncards. This order must be preserved for consistent sampling. To use the "card style cariant", the cards are kept in k piles, one for each card style, and again these piles must be preserved.
+
+Since we dont have subtotals by card style, we do a regular one-audit based on the precinct tabulation. But we can sample from the population defined by the card styles, which greatly reduces Npop.
+
+So this is an example to test the use of both pools and card styles. Because we encode the card style into the ballot id, we dont have to change the conversion CvrExport -> Cvr -> Card. But consider adding a CardStyle id to the Cvr.
+
+Going back to Problem 1: We want the CardStyle inside the Card for convenience of sampling. The poolId no longer has to agree with it.
 
 ## TL;DR
 

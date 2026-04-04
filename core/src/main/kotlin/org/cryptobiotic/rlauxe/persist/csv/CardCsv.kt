@@ -21,15 +21,15 @@ private val logger = KotlinLogging.logger("CardCsv")
 //
 //    fun votes(): Map<Int, IntArray>?   // CVRs and phantoms
 //    fun poolId(): Int?                 // must be set if its from a CardPool  TODO verify batch name, poolId
-//    fun batchName(): String            // batch name: "fromCvr" if no batch and its from a CVR (then votes is non null)
+//    fun styleName(): String            // "fromCvr" if no batch and its from a CVR (then votes is non null)
 //}
 
-val CardHeader = "location, index, prn, phantom, poolId, batchName, cvr contests, candidates0, candidates1, ...\n"
+val CardHeader = "location, index, prn, phantom, poolId, cardStyle, cvr contests, candidates0, candidates1, ...\n"
 
 fun writeCardCsv(card: CardIF) = buildString {
     append("${card.location()}, ${card.index()}, ${card.prn().toString(radix=16)}, ${if(card.isPhantom()) "yes," else ","} ")
     if (card.poolId() == null) append(", ") else append("${card.poolId()}, ")
-    append("${card.batchName()}, ")
+    append("${card.styleName()}, ")
 
     if (card.votes() != null) {
         val votes = card.votes()!!
@@ -96,7 +96,7 @@ fun readCardCsv(line: String): CardWithBatchName {
     val phantom = ttokens[idx++] == "yes"
     val poolIdToken = ttokens[idx++]
     val poolId = if (poolIdToken.isEmpty()) null else poolIdToken.toInt()
-    val batchName = ttokens[idx++].trim()
+    val styleName = ttokens[idx++].trim()
 
     // if clca, list of actual contests and their votes
     if (idx < ttokens.size-1) {
@@ -123,9 +123,9 @@ fun readCardCsv(line: String): CardWithBatchName {
             require(contests.size == work.size) { "contests.size (${contests.size}) != votes.size (${work.size})" }
             contests.zip(work).toMap()
         }
-        return CardWithBatchName(desc, index, sampleNum, phantom, votes, poolId, batchName=batchName)
+        return CardWithBatchName(desc, index, sampleNum, phantom, votes, poolId, styleName=styleName)
     }
-    return CardWithBatchName(desc, index, sampleNum, phantom, null, poolId, batchName=batchName)
+    return CardWithBatchName(desc, index, sampleNum, phantom, null, poolId, styleName=styleName)
 }
 
 class CardCsvReader(filename: String): CloseableIterable<CardWithBatchName> {

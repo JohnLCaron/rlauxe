@@ -9,7 +9,6 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.Batch.Companion.useVotes
 import org.cryptobiotic.rlauxe.audit.BatchIF
-import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
 import org.cryptobiotic.rlauxe.betting.TestH0Status
@@ -155,8 +154,8 @@ fun verifyCardManifest(
             }
 
             // check that batch exists
-            if (!useVotes(card.batch.name()) && !batchSet.contains(card.batch)) {
-                results.addError("card $count ${card.location} batch ${card.batch} not in batches")
+            if (!useVotes(card.cardStyle.name()) && !batchSet.contains(card.cardStyle)) {
+                results.addError("card $count ${card.location} batch ${card.cardStyle} not in batches")
             }
 
             // the same as tabulateAuditableCards(), replicate so we can do allCvrVotes, nonpooled, pooled

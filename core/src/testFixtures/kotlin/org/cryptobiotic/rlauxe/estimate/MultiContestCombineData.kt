@@ -164,7 +164,7 @@ data class MultiContestCombinePools(
         val cvrb2 = CvrBuilder2("card${nextCardId}", false, poolId = pool.id())
         vunderPool.simulatePooledCvr(cvrb2)
         val cvr = cvrb2.build()
-        return AuditableCard("card${nextCardId}", nextCardId, 0L, false, cvr.votes, batch = pool)
+        return AuditableCard("card${nextCardId}", nextCardId, 0L, false, cvr.votes, cardStyle = pool)
 
     }
 }
@@ -268,6 +268,6 @@ data class MultiContestFromBallotStyles(
         val cvrb2 = CvrBuilder2(cardName, false, poolId = cardStyle.id())
         vunderPool.simulatePooledCvr(cvrb2)
         val cvr = cvrb2.build()
-        return AuditableCard(cardName, cardId, 0L, false, cvr.votes, batch = cardStyle)
+        return AuditableCard(cardName, cardId, 0L, false, cvr.votes, cardStyle = cardStyle)
     }
 }

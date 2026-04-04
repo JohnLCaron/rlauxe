@@ -11,7 +11,6 @@ import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.audit.BatchIF
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
@@ -77,7 +76,7 @@ class AuditRecord(
         return CardManifest(mergedCards, electionInfo.totalCardCount)
     }
 
-    override fun readBatches(): List<Batch>? {
+    override fun readBatches(): List<BatchIF>? {
         return if (!Files.exists(Path(publisher.batchesFile()))) null else {
             val batchesResult = readBatchesJsonFile(publisher.batchesFile())
             if (batchesResult.isOk) batchesResult.unwrap() else {

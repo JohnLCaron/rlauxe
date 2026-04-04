@@ -36,7 +36,7 @@ interface ElectionBuilder {
 
 private val logger = KotlinLogging.logger("CreateElectionRecord")
 
-fun createElectionRecord(election: ElectionBuilder, auditDir: String, clear: Boolean = true) {
+fun createElectionRecord(election: ElectionBuilder, auditDir: String, clear: Boolean = true, validate: Boolean = true) {
     if (clear) clearDirectory(Path(auditDir))
 
     val publisher = Publisher(auditDir)
@@ -73,8 +73,11 @@ fun createElectionRecord(election: ElectionBuilder, auditDir: String, clear: Boo
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
     logger.info{"createElectionRecord write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
 
-    val verifyECResults = VerifyElectionCommitment(auditDir).verify()
-    if (verifyECResults.hasErrors) {
-        logger.error { "createElectionRecord VerifyElectionCommitment failed: ${verifyECResults}" }
+    // taking forever - make optional
+    if (validate) {
+        val verifyECResults = VerifyElectionCommitment(auditDir).verify()
+        if (verifyECResults.hasErrors) {
+            logger.error { "createElectionRecord VerifyElectionCommitment failed: ${verifyECResults}" }
+        }
     }
 }

@@ -96,9 +96,22 @@ fun CvrExport.toCsv() = buildString {
     appendLine()
 }
 
-class CvrExportToCvrAdapter(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: Map<String, Int>? = null) : CloseableIterator<Cvr> {
+class CvrExportToCvrAdapter(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: Map<String, Int>?, val convertPoolIds: Boolean) : CloseableIterator<Cvr> {
+    val poolCounts = mutableMapOf<String, Int>()
+
     override fun hasNext() = cvrExportIterator.hasNext()
-    override fun next() = cvrExportIterator.next().toCvr(pools=pools)
+    override fun next(): Cvr {
+        val cvrExport = cvrExportIterator.next()
+        val poolId = if (pools == null || cvrExport.group != 1) null else pools[ cvrExport.poolKey() ] // TODO not general
+
+        val convertId = if (!convertPoolIds || poolId == null) cvrExport.id else {
+            val poolName = cvrExport.poolKey()
+            val poolCount =  poolCounts.getOrPut(poolName) { 0 }
+            poolCounts[poolName] = poolCount + 1
+            "pool ${cvrExport.poolKey()} position${poolCount+1}"
+        }
+        return cvrExport.toCvr(pools=pools, convertId)
+    }
     override fun close() = cvrExportIterator.close()
 }
 

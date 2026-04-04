@@ -205,8 +205,8 @@ open class CreateColoradoElection (
         return TransformingIterator(unsortedMvrs) { mvr ->
             when {
                 mvr.phantom -> mvr
-                auditType.isClca() -> mvr.copy(poolId = null, batchName = Batch.fromCvr)
-                (auditType.isPolling() && pollingMode!!.withoutBatches()) -> mvr.copy(votes = null, batchName="OneBatch", poolId=0)
+                auditType.isClca() -> mvr.copy(poolId = null, styleName = Batch.fromCvr)
+                (auditType.isPolling() && pollingMode!!.withoutBatches()) -> mvr.copy(votes = null, styleName="OneBatch", poolId=0)
                 (auditType.isPolling()) -> mvr.copy(votes = null)
                 else -> throw IllegalStateException("Unknown what to do with mvr: $mvr")
             }

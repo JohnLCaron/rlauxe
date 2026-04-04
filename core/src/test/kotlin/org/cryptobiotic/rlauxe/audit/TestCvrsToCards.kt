@@ -52,13 +52,13 @@ class TestCvrsToCards {
         cvr = cvrr.copy(poolId=null)
         target = mvrsToAuditableCardsList(auditType, listOf(cvr), batches=listOf(cardStyle))
         card = target.first()
-        assertEquals(Batch.fromCvr, card.batchName(), "no poolId")
+        assertEquals(Batch.fromCvr, card.styleName(), "no poolId")
 
         // what if you dont supply the cardStyles? FAIL
         cvr = cvrr.copy(poolId=1)
         target = mvrsToAuditableCardsList(auditType, listOf(cvr), batches=null)
         card = target.first()
-        assertEquals(Batch.fromCvr, card.batchName(), "no pools")
+        assertEquals(Batch.fromCvr, card.styleName(), "no pools")
     }
 
     @Test
@@ -73,7 +73,7 @@ class TestCvrsToCards {
         var message = assertFailsWith<RuntimeException> {
             mvrsToAuditableCardsList(auditType, listOf(cvr), batches = null)
         }.message!!
-        assertEquals("batch '_fromCvr' must have non-null votes", message)
+        assertEquals("cardStyle '_fromCvr' must have non-null votes", message)
 
         val batch = Batch("cardstyle1", 1,intArrayOf(0,1,2,3,4), false)
 
@@ -82,7 +82,7 @@ class TestCvrsToCards {
         message = assertFailsWith<RuntimeException> {
             mvrsToAuditableCardsList(auditType, listOf(cvr), batches = listOf(batch))
         }.message!!
-        assertEquals("batch '_fromCvr' must have non-null votes", message)
+        assertEquals("cardStyle '_fromCvr' must have non-null votes", message)
 
         // successfully use pool 1
         hasCardStyles = true
@@ -134,7 +134,7 @@ class TestCvrsToCards {
 
         assertEquals(cvr.id, card.location)
         assertEquals(cvr.phantom, card.phantom)
-        assertEquals(expectStyle, card.batchName(), "cardStyle")
+        assertEquals(expectStyle, card.styleName(), "cardStyle")
 
         val styleContests = expectBatch?.possibleContests()?.toList()?.toSet() ?: emptySet()
         val expectContests = when (auditType) {
@@ -170,7 +170,7 @@ fun AuditableCard.show() = buildString {
     }
     append(" poolId=${poolId()}")
     append(" contests=${possibleContests().contentToString()}")
-    append(" cardStyle=${batchName()}")
+    append(" cardStyle=${styleName()}")
 
 }
 

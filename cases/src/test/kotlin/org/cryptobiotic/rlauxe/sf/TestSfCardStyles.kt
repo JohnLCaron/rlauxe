@@ -160,11 +160,6 @@ class TestSfCardStyles {
                     precinctVote.poolIds.add(cvrExport.poolKey())
                     precinctVote.styles.add(cvrExport.ballotStyleId)
                     precinctVote.addContests(cvrExport.votes.keys)
-
-                    if (cvrExport.id == "26-143-00026_00143_000127") {
-                        println(cvrExport)
-                        println()
-                    }
                 }
             }
         }

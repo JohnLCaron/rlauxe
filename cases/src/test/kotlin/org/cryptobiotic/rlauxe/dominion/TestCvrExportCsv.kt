@@ -16,6 +16,7 @@ class TestCvrExportCsv {
         val target = CvrExport(
             "info to find card",
             42,
+            123, 11,
             mapOf(
                 19 to intArrayOf(1, 2, 3),
                 23 to intArrayOf(),
@@ -57,12 +58,13 @@ class TestCvrExportCsv {
         val cvr = CvrExport (
             "test1-2-3",
             1,
+            123, 11,
             mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
         )
         val card = cvr.toCardNoBatch(42, 43L, true, mapOf("test1-2" to 99))
 
         val target = CardWithBatchName (
-            "test1-2-3",
+            "test1-2-3", null,
             42,
             43L,
             true,
@@ -76,22 +78,23 @@ class TestCvrExportCsv {
 
     @Test
     fun testToAuditableCardNoshowPoolVotes() {
+        val votes = mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724))
         val cvr = CvrExport (
             "test1-2-3",
             1,
-            mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)),
+            123, 11,
+            votes,
         )
-        val card = cvr.toCardNoBatch(42, 43L, true, mapOf("test1-2-3" to 99), showPoolVotes=false)
+        val card = cvr.toCardNoBatch(42, 43L, true, mapOf("test1-2" to 99), showPoolVotes=true)
 
         val target = CardWithBatchName (
-            "test1-2-3",
+            "test1-2-3", null,
             42,
             43L,
             true,
-            //intArrayOf(19, 23, 99, 123456),
-            null,
+            votes,
             99,
-            "test1-2-3"
+            "test1-2"
         )
 
         assertEquals(target, card)

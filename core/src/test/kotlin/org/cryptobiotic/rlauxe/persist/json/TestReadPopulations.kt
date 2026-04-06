@@ -1,6 +1,5 @@
 package org.cryptobiotic.rlauxe.persist.json
 
-import org.cryptobiotic.rlauxe.audit.Batch
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsvFile
@@ -10,7 +9,6 @@ import org.cryptobiotic.rlauxe.workflow.readCardPools
 import kotlin.io.path.createTempFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 // TODO mo betta
 class TestReadPopulations {
@@ -27,9 +25,9 @@ class TestReadPopulations {
         assertEquals("style0", pool.name)
 
         val scratchFile = createTempFile().toFile()
-        writeBatchesJsonFile(pops, scratchFile.toString())
+        writeCardStylesJsonFile(pops, scratchFile.toString())
 
-        val roundtrip = readBatchesJsonFileUnwrapped(scratchFile.toString())
+        val roundtrip = readCardStylesJsonFileUnwrapped(scratchFile.toString())
         println("read ${roundtrip} batch (roundtrip)")
         assertEquals(pops.toSet(), roundtrip.toSet())
         val rpool = roundtrip.first()

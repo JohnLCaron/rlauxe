@@ -9,7 +9,7 @@ import org.cryptobiotic.rlauxe.persist.CardManifest
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
-import org.cryptobiotic.rlauxe.persist.json.readBatchesJsonFile
+import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFile
 import org.cryptobiotic.rlauxe.util.CloseableIterable
 import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Prng
@@ -142,9 +142,9 @@ fun readSortedManifest(publisher: Publisher, infos: Map<Int, ContestInfo>, ncard
     return CardManifest(mergedCards, ncards)
 }
 
-fun readBatches(publisher: Publisher): List<Batch>? {
-    return if (!Files.exists(Path(publisher.batchesFile()))) null else {
-        val batchesResult = readBatchesJsonFile(publisher.batchesFile())
+fun readBatches(publisher: Publisher): List<CardStyle>? {
+    return if (!Files.exists(Path(publisher.cardStylesFile()))) null else {
+        val batchesResult = readCardStylesJsonFile(publisher.cardStylesFile())
         if (batchesResult.isOk) batchesResult.unwrap() else {
             logger.error{ "$batchesResult" }
             null

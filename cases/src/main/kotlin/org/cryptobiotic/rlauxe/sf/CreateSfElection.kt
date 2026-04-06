@@ -7,22 +7,21 @@ import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.dominion.CvrExport
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditPoolFromCvrs
 import org.cryptobiotic.rlauxe.audit.unpooled
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.core.SocialChoiceFunction
-import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.audit.CardPool
+import org.cryptobiotic.rlauxe.dominion.CvrExportToCardAdapter
 import org.cryptobiotic.rlauxe.oneaudit.makeOneAuditContests
 import org.cryptobiotic.rlauxe.irv.makeRaireOneAuditContest
 import org.cryptobiotic.rlauxe.irv.makeRaireContest
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.util.ErrorMessages
-import org.cryptobiotic.rlauxe.utils.countPhantoms
+import org.cryptobiotic.rlauxe.util.TransformingIterator
 import org.cryptobiotic.rlauxe.utils.tabulateCardsAndCount
 import kotlin.Boolean
 import kotlin.collections.component1
@@ -60,10 +59,10 @@ class CreateSfElection(
 
         // pass 1 through cvrs, make card pools, including unpooled
         val (allCardPools: Map<String, OneAuditPoolFromCvrs>, allCvrTabs: Map<Int, ContestTabulation>, ncards) = createCardPools(
-            infos,
-            cvrExportCsv,
-            poolsHaveOneCardStyle,
-        )
+                infos,
+                cvrExportCsv,
+                poolsHaveOneCardStyle,
+            )
 
         cardPoolMapByName = allCardPools.filter { it.value.poolName != unpooled } // exclude the unpooled
         cardPoolBuilders = cardPoolMapByName.values.toList() // exclude the unpooled
@@ -108,7 +107,7 @@ class CreateSfElection(
                 val pool = allCardPools.getOrPut(cvrExport.poolKey()) {
                     OneAuditPoolFromCvrs(cvrExport.poolKey(), allCardPools.size + 1, poolsHaveOneCardStyle, contestInfos)
                 }
-                pool.accumulateVotes(cvrExport.toCvr())
+                pool.accumulateVotes(cvrExport.toCvr(null, cvrExport.id))
 
                 cvrExport.votes.forEach { (id, cands) ->
                     val contestTab = allCvrTabs.getOrPut(id) { ContestTabulation(contestInfos[id]!!) }
@@ -156,35 +155,34 @@ class CreateSfElection(
         mvrSource = mvrSource
     )
 
-    override fun batches() = null // TODO !cvrsHaveUndervotes need batches
+    override fun cardStyles() = null // TODO !cvrsHaveUndervotes need batches
     override fun cardPools() = if (auditType.isOA()) cardPoolBuilders else null
     override fun contestsUA() = contestsUA
     override fun cards() = createCards(auditType)
     override fun ncards() = ncards
 
-    // same cvrs for CLCA and OneAudit
     fun createCards(auditType: AuditType): CloseableIterator<CardWithBatchName> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
-        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPoolBuilders.associate { it.name() to it.id() })
+        val cardIter = CvrExportToCardAdapter(cvrExportIter, cardPools(), auditType.isOA())
 
-        return CvrsToCardsWithBatchNameIterator(
-                auditType,
-                cvrIter,
-                null, // there are no phantoms
-                // OA: use batch.possibleContests() to dilute the margin; CLCA: dont use batch.possibleContests() if clcaHasUndervotes
-                if (auditType.isClca()) null else cardPoolBuilders
-        )
+        // still need to remove cvrs for pooled data
+        val transformer = TransformingIterator<CardWithBatchName, CardWithBatchName>(cardIter) { org ->
+            val hasCvr = auditType.isClca() || (auditType.isOA() && org.poolId == null)
+            val votes = if (hasCvr) org.votes else null  // removes votes for pooled data
+            org.copy(votes = votes)
+        }
+        return transformer
     }
 
-    // TODO add optional fuzz or some other error method
+    // TODO add optional fuzz or some other error method?
     // convert the cvrExports to the private mvrs; must be in same order as createCards
     override fun createUnsortedMvrsExternal() = null
-    override fun createUnsortedMvrsInternal(): List<Cvr> {
+    override fun createUnsortedMvrsInternal(): List<CardWithBatchName> {
         val cvrExportIter = cvrExportCsvIterator(cvrExportCsv)
-        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, cardPoolBuilders.associate { it.name() to it.id() })
+        val cardIter = CvrExportToCardAdapter(cvrExportIter, cardPools(), auditType.isOA())
 
-        val unsortedMvrs = mutableListOf<Cvr>()
-        cvrIter.use { iter ->
+        val unsortedMvrs = mutableListOf<CardWithBatchName>()
+        cardIter.use { iter ->
             while( iter.hasNext()) { unsortedMvrs.add (iter.next()) }
         }
         return unsortedMvrs

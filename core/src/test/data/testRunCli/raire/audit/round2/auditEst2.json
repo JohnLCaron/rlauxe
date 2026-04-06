@@ -1,0 +1,81 @@
+{
+    "roundIdx": 2,
+    "contestRounds": [
+        {
+            "id": 2,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "1/0 contest2",
+                    "roundIdx": 2,
+                    "estSampleSize": 442,
+                    "estNewSampleSize": 21,
+                    "estimationResult": {
+                        "roundIdx": 2,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 22,
+                        "startingTestStatistic": 16.852593183733124,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [
+                            21
+                        ],
+                        "lastIndex": 858,
+                        "quantile": 80,
+                        "ntrials": 1,
+                        "simNewMvrs": 21,
+                        "simMvrs": 442
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                }
+            ],
+            "roundIdx": 2,
+            "maxSampleAllowed": 562,
+            "estMvrs": 442,
+            "estNewMvrs": 21,
+            "done": false,
+            "included": true,
+            "status": "InProgress"
+        },
+        {
+            "id": 9,
+            "assertionRounds": [
+                {
+                    "assorterDesc": "0/1 contest9",
+                    "roundIdx": 2,
+                    "estSampleSize": 780,
+                    "estNewSampleSize": 461,
+                    "estimationResult": {
+                        "roundIdx": 2,
+                        "strategy": "EstimateAudit",
+                        "calcMvrsNeeded": 428,
+                        "startingTestStatistic": 0.3883578710472799,
+                        "startingErrorRates": {},
+                        "estimatedDistribution": [
+                            461
+                        ],
+                        "lastIndex": 1551,
+                        "quantile": 80,
+                        "ntrials": 1,
+                        "simNewMvrs": 461,
+                        "simMvrs": 780
+                    },
+                    "status": "InProgress",
+                    "roundProved": 0
+                }
+            ],
+            "roundIdx": 2,
+            "maxSampleAllowed": 911,
+            "estMvrs": 780,
+            "estNewMvrs": 461,
+            "done": false,
+            "included": true,
+            "status": "InProgress"
+        }
+    ],
+    "auditWasDone": false,
+    "auditIsComplete": false,
+    "nmvrs": 911,
+    "newmvrs": 374,
+    "mvrsUnused": 0,
+    "mvrsUsed": 0
+}

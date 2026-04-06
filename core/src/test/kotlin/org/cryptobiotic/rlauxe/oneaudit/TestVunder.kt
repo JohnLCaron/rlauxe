@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.Batch
+import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -153,7 +153,7 @@ class TestVunder {
 
         val fuzzedPool = calcOneAuditPoolsFromMvrs(
             infos,
-            listOf(Batch("pool42", 42, intArrayOf(1, 2), false)),
+            listOf(CardStyle("pool42", 42, intArrayOf(1, 2), false)),
             fuzzedMvrs.map { it.toCvr() },
         )
         println("fuzzedPool= ${fuzzedPool.first()}")
@@ -172,7 +172,7 @@ class TestVunder {
 
         val limitedPool = calcOneAuditPoolsFromMvrs(
             infos,
-            listOf(Batch(cardPool.name(), cardPool.poolId, intArrayOf(1,2), false )),
+            listOf(CardStyle(cardPool.name(), cardPool.poolId, intArrayOf(1,2), false )),
             limitedMvrs.map { it.toCvr() },
         )
         println("limitedPool= ${limitedPool.first()}")

@@ -32,7 +32,7 @@ class PollingSampler(
     private var count = 0
 
     init {
-        cvrPairs.forEach { (mvr, card) -> require(mvr.location() == card.location())  }
+        cvrPairs.forEach { (mvr, card) -> require(mvr.id() == card.id())  }
     }
 
     override fun sample(): Double {
@@ -81,7 +81,7 @@ class ClcaSampler(
 
     init {
         cvrPairs.forEach { (mvr, card) ->
-            require(mvr.location() == card.location())  { "mvr location ${mvr.location()} != card.location ${card.location()}"}  }
+            require(mvr.id() == card.id())  { "mvr id ${mvr.id()} != card.id ${card.id()}"}  }
         maxSamples = cvrPairs.take(maxSampleIndex).count { it.second.hasContest(contestId) }
     }
 

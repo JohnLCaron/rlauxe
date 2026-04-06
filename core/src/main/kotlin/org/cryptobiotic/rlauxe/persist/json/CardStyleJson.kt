@@ -9,8 +9,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
-import org.cryptobiotic.rlauxe.audit.Batch
-import org.cryptobiotic.rlauxe.audit.BatchIF
+import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.FileOutputStream
 import java.nio.file.Files
@@ -19,20 +19,20 @@ import java.nio.file.StandardOpenOption
 import kotlin.Int
 
 @Serializable
-data class BatchesJson(
-    val batches: List<BatchJson>,
+data class CardStylesJson(
+    val batches: List<CardStyleJson>,
 )
 
-fun List<BatchIF>.publishJson() = BatchesJson(
+fun List<CardStyleIF>.publishJson() = CardStylesJson(
     this.map { it.publishJson() },
 )
 
-fun BatchesJson.import(): List<Batch> {
+fun CardStylesJson.import(): List<CardStyle> {
     return this.batches.map { it.import() }
 }
 
 @Serializable
-class BatchJson(
+class CardStyleJson(
     val name: String,
     val id: Int,
     // val ncards: Int,
@@ -40,7 +40,7 @@ class BatchJson(
     val hasSingleCardStyle: Boolean
 )
 
-fun BatchIF.publishJson() = BatchJson(
+fun CardStyleIF.publishJson() = CardStyleJson(
     this.name(),
     this.id(),
     // this.ncards(),
@@ -48,7 +48,7 @@ fun BatchIF.publishJson() = BatchJson(
     this.hasSingleCardStyle()
 )
 
-fun BatchJson.import() = Batch(
+fun CardStyleJson.import() = CardStyle(
         this.name,
         this.id,
         this.possibleContests,
@@ -58,7 +58,7 @@ fun BatchJson.import() = Batch(
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 @OptIn(ExperimentalSerializationApi::class)
-fun writeBatchesJsonFile(batches: List<BatchIF>, filename: String) {
+fun writeCardStylesJsonFile(batches: List<CardStyleIF>, filename: String) {
     val json = batches.publishJson()
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
     FileOutputStream(filename).use { out ->
@@ -68,7 +68,7 @@ fun writeBatchesJsonFile(batches: List<BatchIF>, filename: String) {
 }
 
 @OptIn(ExperimentalSerializationApi::class)
-fun readBatchesJsonFile(filename: String): Result<List<Batch>, ErrorMessages> {
+fun readCardStylesJsonFile(filename: String): Result<List<CardStyle>, ErrorMessages> {
     val errs = ErrorMessages("readBatchesJsonFile '${filename}'")
     val filepath = Path.of(filename)
     if (!Files.exists(filepath)) {
@@ -78,7 +78,7 @@ fun readBatchesJsonFile(filename: String): Result<List<Batch>, ErrorMessages> {
 
     return try {
         Files.newInputStream(filepath, StandardOpenOption.READ).use { inp ->
-            val json = jsonReader.decodeFromStream<BatchesJson>(inp)
+            val json = jsonReader.decodeFromStream<CardStylesJson>(inp)
             val contests = json.import()
             if (errs.hasErrors()) Err(errs) else Ok(contests)
         }
@@ -88,7 +88,7 @@ fun readBatchesJsonFile(filename: String): Result<List<Batch>, ErrorMessages> {
 }
 
 // this requires the file to exist or you get an Exception
-fun readBatchesJsonFileUnwrapped(filename: String): List<Batch> {
-    return readBatchesJsonFile(filename).unwrap()
+fun readCardStylesJsonFileUnwrapped(filename: String): List<CardStyle> {
+    return readCardStylesJsonFile(filename).unwrap()
 }
 

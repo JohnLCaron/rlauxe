@@ -120,6 +120,17 @@ fun readContestManifestFromZip(zipFilename: String, contestManifestFilename: Str
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // read CandidateManifest.json
+// {
+//  "Version": "5.10.50.85",
+//  "List": [
+//    {
+//      "Description": "DONALD J. TRUMP / JD VANCE",
+//      "Id": 5,
+//      "ExternalId": "",
+//      "ContestId": 1,
+//      "Type": "Regular",
+//      "Disabled": 0
+//    },
 
 enum class CandidateMType { Regular, WriteIn, QualifiedWriteIn }
 
@@ -182,9 +193,21 @@ fun readCandidateManifestJsonFromZip(zipFilename: String, filename: String): Res
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // read BallotTypeContestManifest.json
+// {
+//  "Version": "5.10.50.85",
+//  "List": [
+//    {
+//     {
+//      "BallotTypeId": 24,
+//      "ContestId": 14
+//    },
+//    {
+//      "BallotTypeId": 25,
+//      "ContestId": 1
+//    },
 
 @Serializable
-data class BallotTypeContestManifestJson(
+data class BallotTypesContestManifestJson(
     val List: List<BallotTypeContestJson>,
 )
 
@@ -194,7 +217,7 @@ data class BallotTypeContestJson(
     val ContestId: Int,
 )
 
-data class BallotTypeContestManifest (
+data class BallotTypesContestManifest (
     val ballotStyles: Map<Int, IntArray> // ballot style id -> contest Ids
 ) {
     override fun toString() = buildString {
@@ -202,7 +225,7 @@ data class BallotTypeContestManifest (
     }
 }
 
-fun BallotTypeContestManifestJson.import(): BallotTypeContestManifest {
+fun BallotTypesContestManifestJson.import(): BallotTypesContestManifest {
     val contestMap = mutableMapOf<Int, MutableList<Int>>()
 
     this.List.forEach {
@@ -212,11 +235,10 @@ fun BallotTypeContestManifestJson.import(): BallotTypeContestManifest {
     }
 
     // TODO should we sort them?
-    return BallotTypeContestManifest( contestMap.mapValues { it.value.toIntArray()} )
+    return BallotTypesContestManifest( contestMap.mapValues { it.value.toIntArray()} )
 }
 
-
-fun readBallotTypeContestManifestJson(filename: String): Result<BallotTypeContestManifest, ErrorMessages> {
+fun readBallotTypeContestManifestJson(filename: String): Result<BallotTypesContestManifest, ErrorMessages> {
     val errs = ErrorMessages("readBallotTypeContestManifestJson '${filename}'")
     val filepath = Path.of(filename)
     if (!Files.exists(filepath)) {
@@ -226,7 +248,7 @@ fun readBallotTypeContestManifestJson(filename: String): Result<BallotTypeContes
 
     return try {
         Files.newInputStream(filepath, StandardOpenOption.READ).use { inp ->
-            val json = jsonReader.decodeFromStream<BallotTypeContestManifestJson>(inp)
+            val json = jsonReader.decodeFromStream<BallotTypesContestManifestJson>(inp)
             if (errs.hasErrors()) Err(errs) else Ok(json.import() )
         }
     } catch (t: Throwable) {
@@ -234,21 +256,108 @@ fun readBallotTypeContestManifestJson(filename: String): Result<BallotTypeContes
     }
 }
 
-fun readBallotTypeContestManifestJson(input: InputStream, filename: String): Result<BallotTypeContestManifest, ErrorMessages> {
-    val errs = ErrorMessages("readCandidateManifestJson '${filename}'")
+fun readBallotTypeContestManifestUnwrapped(filename: String): BallotTypesContestManifest? {
+    val result = readBallotTypeContestManifestJson(filename)
+    return if (result.isOk) result.unwrap() else null
+}
+
+fun readBallotTypeContestManifestJson(input: InputStream, filename: String): Result<BallotTypesContestManifest, ErrorMessages> {
+    val errs = ErrorMessages("readBallotTypeContestManifestJson '${filename}'")
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true }
 
     return try {
-        val json = jsonReader.decodeFromStream<BallotTypeContestManifestJson>(input)
+        val json = jsonReader.decodeFromStream<BallotTypesContestManifestJson>(input)
         if (errs.hasErrors()) Err(errs) else Ok(json.import() )
     } catch (t: Throwable) {
         errs.add("Exception= ${t.message} ${t.stackTraceToString()}")
     }
 }
 
-fun readBallotTypeContestManifestJsonFromZip(zipFilename: String, filename: String): Result<BallotTypeContestManifest, ErrorMessages> {
+fun readBallotTypeContestManifestJsonFromZip(zipFilename: String, filename: String): Result<BallotTypesContestManifest, ErrorMessages> {
     val reader = ZipReader(zipFilename)
     val input = reader.inputStream(filename)
     return readBallotTypeContestManifestJson(input, filename)
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// read BallotTypeManifest.json
+// {
+//  "Version": "5.10.50.85",
+//  "List": [
+//     {
+//      "Description": "Ballot Type 1 - VBM",
+//      "Id": 1,
+//      "ExternalId": "VBM"
+//    },
+//    {
+//      "Description": "Ballot Type 1 - POLL",
+//      "Id": 2,
+//      "ExternalId": "POLL"
+//    },
+//    {
+//      "Description": "Ballot Type 1 - VBM BOE",
+//      "Id": 3,
+//      "ExternalId": "VBM"
+//    },
+
+@Serializable
+data class BallotTypesManifest(
+    val List: List<BallotTypeManifest>,
+) {
+    val ballotStyles: Map<Int, BallotTypeManifest> by lazy {
+        List.sortedBy{ it.Id }.associateBy { it.Id }
+    }
+
+    override fun toString() = buildString {
+        ballotStyles.forEach { appendLine("  $it") }
+    }
+}
+
+@Serializable
+data class BallotTypeManifest(
+    val Description: String,
+    val Id: Int,
+    val ExternalId: String,
+) {
+    override fun toString() = buildString {
+        append(" $Id $ExternalId '$Description'")
+    }
+}
+
+fun readBallotTypesManifest(filename: String): Result<BallotTypesManifest, ErrorMessages> {
+    val errs = ErrorMessages("readBallotTypeManifestJson '${filename}'")
+    val filepath = Path.of(filename)
+    if (!Files.exists(filepath)) {
+        return errs.add("file does not exist")
+    }
+    val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true }
+
+    return try {
+        Files.newInputStream(filepath, StandardOpenOption.READ).use { inp ->
+            val json = jsonReader.decodeFromStream<BallotTypesManifest>(inp)
+            if (errs.hasErrors()) Err(errs) else Ok(json )
+        }
+    } catch (t: Throwable) {
+        errs.add("Exception= ${t.message} ${t.stackTraceToString()}")
+    }
+}
+
+fun readBallotTypesManifest(input: InputStream, filename: String): Result<BallotTypesManifest, ErrorMessages> {
+    val errs = ErrorMessages("readBallotTypeManifestJson '${filename}'")
+    val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true }
+
+    return try {
+        val json = jsonReader.decodeFromStream<BallotTypesManifest>(input)
+        if (errs.hasErrors()) Err(errs) else Ok(json )
+    } catch (t: Throwable) {
+        errs.add("Exception= ${t.message} ${t.stackTraceToString()}")
+    }
+}
+
+fun readBallotTypesManifestFromZip(zipFilename: String, filename: String): Result<BallotTypesManifest, ErrorMessages> {
+    val reader = ZipReader(zipFilename)
+    val input = reader.inputStream(filename)
+    return readBallotTypesManifest(input, filename)
 }
 

@@ -3,7 +3,6 @@ package org.cryptobiotic.rlauxe.audit
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -30,7 +29,7 @@ import kotlin.use
 private val logger = KotlinLogging.logger("StartAudit")
 
 // TODO pass in creation, round config
-fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: String, externalSortDir: String? = null) {
+fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: String, externalSortDir: String? = null, validate: Boolean = false) {
     val publisher = Publisher(auditDir)
 
     writeAuditCreationConfigJsonFile(config.creation, publisher.auditCreationConfigFile())
@@ -50,7 +49,7 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: Strin
     if (config.election.mvrSource == MvrSource.testPrivateMvrs) {
         val unsortedMvrs = election.createUnsortedMvrsInternal() // make electionBuilder add the batches ??
         if (unsortedMvrs != null) {
-            writePrivateMvrsInternal(publisher, unsortedMvrs, election.batches(), seed = config.creation.seed)
+            writePrivateMvrsInternal(publisher, unsortedMvrs, election.cardStyles(), seed = config.creation.seed)
         } else {
             val unsortedCards = election.createUnsortedMvrsExternal()
             if (unsortedCards != null && externalSortDir != null) {
@@ -62,9 +61,11 @@ fun createAuditRecord(config: Config, election: ElectionBuilder, auditDir: Strin
         }
     }
 
-    val verifyACResults = VerifyAuditCommitment(auditDir).verify()
-    if (verifyACResults.hasErrors) {
-        logger.error { "createAuditRecord VerifyAuditCommitment failed: ${verifyACResults}" }
+    if (validate) {
+        val verifyACResults = VerifyAuditCommitment(auditDir).verify()
+        if (verifyACResults.hasErrors) {
+            logger.error { "createAuditRecord VerifyAuditCommitment failed: ${verifyACResults}" }
+        }
     }
 }
 
@@ -163,14 +164,17 @@ fun writeSortedCardsExternal(topdir: String, outputFile: String, unsortedCards: 
     )
 }
 
-// internal sort
-fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<Cvr>, batches: List<BatchIF>?, seed: Long) {
+// internal sort of unsortedMvrs, must be in canonical order
+fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<CardWithBatchName>, batches: List<CardStyleIF>?, seed: Long) {
     validateOutputDirOfFile(publisher.sortedMvrsFile())
 
-    val mvrIter = Closer(unsortedMvrs.iterator())
-    val mvrCardIter = MvrsToCardsWithBatchNameIterator( mvrIter, batches ?: emptyList(), phantomCvrs = null, seed = seed)
+    // val mvrCardIter = MvrsToCardsWithBatchNameIterator( mvrIter, batches ?: emptyList(), phantomCvrs = null, seed = seed)
+
+    // add the prn
+    val prng = Prng(seed)
+    val mvrIter = unsortedMvrs.iterator()
     val mvrCards = mutableListOf<CardWithBatchName>()
-    while (mvrCardIter.hasNext()) { mvrCards.add(mvrCardIter.next()) }
+    while (mvrIter.hasNext()) { mvrCards.add( mvrIter.next().copy(prn=prng.next()) ) }
 
     val sortedMvrs = mvrCards.sortedBy { it.prn }
 

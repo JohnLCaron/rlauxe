@@ -1,14 +1,15 @@
 package org.cryptobiotic.rlauxe.sf
 
-import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.junit.jupiter.api.Assertions.assertTrue
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.test.Test
 
-class TestReadSfJson {
+class TestManifestReadersJson {
 
     @Test
     fun testContestManifestJsonFile() {
@@ -48,17 +49,20 @@ class TestReadSfJson {
     }
 
     @Test
-    fun testBallotTypeContestManifestJsonFile() {
+    fun readBallotTypeContestManifestJsonFile() {
         val filename = "src/test/data/SF2024/manifests/BallotTypeContestManifest.json"
-        val result: Result<BallotTypeContestManifest, ErrorMessages> = readBallotTypeContestManifestJson(filename)
+        val result: Result<BallotTypesContestManifest, ErrorMessages> = readBallotTypeContestManifestJson(filename)
         val manifest1 = if (result .isOk) result.unwrap()
             else throw RuntimeException("Cannot read BallotTypeContestManifest from ${filename} err = $result")
+
+        println("ballot style == contests")
         println(manifest1)
 
+        // check its the same as whats in the zip file
         val topDir = "$testdataDir/cases/sf2024"
         val zipFilename = "$topDir/CVR_Export_20241202143051.zip"
         val ifilename = "BallotTypeContestManifest.json"
-        val result2: Result<BallotTypeContestManifest, ErrorMessages> = readBallotTypeContestManifestJsonFromZip(zipFilename, ifilename)
+        val result2: Result<BallotTypesContestManifest, ErrorMessages> = readBallotTypeContestManifestJsonFromZip(zipFilename, ifilename)
         val manifest2 = if (result2 .isOk) result2.unwrap()
             else throw RuntimeException("Cannot read BallotTypeContestManifest from $zipFilename/$ifilename err = $result")
         // println(manifest2)
@@ -67,6 +71,36 @@ class TestReadSfJson {
             val values1 = manifest1.ballotStyles[key]!!
             assertTrue (value2.contentEquals(values1))
         }
+    }
+
+    @Test
+    fun readBallotTypeManifestJsonFile() {
+        val filename = "src/test/data/SF2024/manifests/BallotTypeManifest.json"
+        val result: Result<BallotTypesManifest, ErrorMessages> = readBallotTypesManifest(filename)
+        val manifest1 = if (result .isOk) result.unwrap()
+        else throw RuntimeException("Cannot read BallotTypeContestManifest from ${filename} err = $result")
+
+        println("ballot style == contests")
+        println(manifest1)
+    }
+
+    @Test
+    fun joinBallotTypeContestManifest() {
+        val filename = "src/test/data/SF2024/manifests/BallotTypeContestManifest.json"
+        val result: Result<BallotTypesContestManifest, ErrorMessages> = readBallotTypeContestManifestJson(filename)
+        val contestManifest = if (result .isOk) result.unwrap()
+            else throw RuntimeException("Cannot read BallotTypeContestManifest from ${filename} err = $result")
+
+        val filename2 = "src/test/data/SF2024/manifests/BallotTypeManifest.json"
+        val result2: Result<BallotTypesManifest, ErrorMessages> = readBallotTypesManifest(filename2)
+        val typeManifest = if (result .isOk) result2.unwrap()
+            else throw RuntimeException("Cannot read BallotTypeManifest from ${filename} err = $result")
+
+        contestManifest.ballotStyles.forEach { (key, value) ->
+            val btm = typeManifest.ballotStyles[key]!!
+            println("  ${btm.Id} ${btm.ExternalId} == ${value.contentToString()}")
+        }
+
     }
 
 }

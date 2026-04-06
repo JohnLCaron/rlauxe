@@ -1,9 +1,9 @@
 package org.cryptobiotic.cli
 
 import com.github.michaelbull.result.unwrap
+import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.core.Cvr
-import org.cryptobiotic.rlauxe.dominion.CvrExportToCvrAdapter
+import org.cryptobiotic.rlauxe.dominion.CvrExportToCardAdapter
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvIterator
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -33,11 +33,10 @@ class ShowIrvContests {
         }
 
         val cvrCsv = "$topDir/$cvrExportCsvFile"
-        val cvrIter = CvrExportToCvrAdapter(cvrExportCsvIterator(cvrCsv))
+        val cardIter = CvrExportToCardAdapter(cvrExportCsvIterator(cvrCsv), null, false)
         var count = 0
-        while (cvrIter.hasNext()) {
-            val cvr = cvrIter.next()
-            irvCounters.forEach { it.addCvr(cvr)}
+        while (cardIter.hasNext()) {
+            irvCounters.forEach { it.addCvr(cardIter.next())}
             count++
         }
         println("processed $count cvrs $stopwatch")
@@ -56,8 +55,8 @@ data class IrvCounter(val rcontest: IrvContest) {
     val vc = VoteConsolidator()
     val contestId = rcontest.id
 
-    fun addCvr( cvr: Cvr) {
-        val votes = cvr.votes[contestId]
+    fun addCvr( cvr: CardWithBatchName) {
+        val votes = cvr.votes!![contestId]
         if (votes != null) {
             vc.addVote(votes)
         }

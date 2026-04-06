@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.attack
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.Batch
+import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -15,7 +15,6 @@ import org.cryptobiotic.rlauxe.util.Closer
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.tabulateAuditableCards
-import org.cryptobiotic.rlauxe.util.tabulateCloseableCvrs
 import org.cryptobiotic.rlauxe.workflow.*
 import kotlin.random.Random
 import kotlin.sequences.plus
@@ -140,8 +139,8 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
         }
         // now change the groups in the cardManifest
         val cardStyles = listOf(
-            Batch("group1",  1,intArrayOf(1,2), hasStyle),
-            Batch("group2", 2, intArrayOf(2), hasStyle),
+            CardStyle("group1",  1,intArrayOf(1,2), hasStyle),
+            CardStyle("group2", 2, intArrayOf(2), hasStyle),
         )
         val modifiedCards = mutableListOf<AuditableCard>()
         val cardAttacker = CardsWithStylesAttack(AuditType.CLCA, cards=Closer(cardsu.iterator()), styles=cardStyles, wantFlips=diff+1)
@@ -165,7 +164,7 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
         // now form the mvrs with the flips
         var countFlips = 0
         val mvrCards = modifiedCards.map { mcard ->
-            if (mcard.batchName() == "group2" && mcard.votes!!.contains(1)) { // find the flips
+            if (mcard.styleName() == "group2" && mcard.votes!!.contains(1)) { // find the flips
                 countFlips++
                 val org = mcard
                 val mvotes = mcard.votes!!.toMutableMap()
@@ -202,7 +201,7 @@ class CardsWithStylesAttack(
     val cvrsAreComplete: Boolean = true,
     val cards: CloseableIterator<AuditableCard>,
     phantomCards : List<AuditableCard>? = null,
-    styles: List<Batch>,
+    styles: List<CardStyle>,
     val wantFlips: Int
 ): CloseableIterator<AuditableCard> {
 
@@ -237,9 +236,10 @@ class CardsWithStylesAttack(
         val contests = style.possibleContests()
         val votes = if (hasCvr) org.votes else null
 
-        return AuditableCard(org.location, cardIndex++, 0, phantom=org.phantom,
+        return AuditableCard(org.id, org.location, cardIndex++, 0, phantom=org.phantom,
+            org.poolId,
             votes,
-            batch=org.batch,
+            cardStyle=org.cardStyle,
         )
     }
 

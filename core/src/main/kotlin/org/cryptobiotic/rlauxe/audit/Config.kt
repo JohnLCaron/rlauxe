@@ -64,7 +64,8 @@ data class Config(
                  mvrSource: MvrSource = if (auditType.isClca())
                       MvrSource.testClcaSimulated else MvrSource.testPrivateMvrs,): Config {
 
-            return from(ElectionInfo.forTest(auditType, mvrSource),
+            return from(
+                ElectionInfo.forTest(auditType, mvrSource),
                 riskLimit, nsimTrials, simFuzzPct, fuzzMvrs, contestSampleCutoff, apriori)
         }
 

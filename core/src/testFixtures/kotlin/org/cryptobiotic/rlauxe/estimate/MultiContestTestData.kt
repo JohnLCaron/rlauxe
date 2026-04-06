@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterator
-import org.cryptobiotic.rlauxe.audit.BatchIF
+import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
@@ -20,7 +20,7 @@ import kotlin.random.Random
 private const val debugAdjust = false
 
 // (mvrs, cards, pools, styles)
-data class MvrCardAndPops(val mvrs: List<Cvr>, val cards: List<AuditableCard>, val pools: List<CardPoolIF>, val batches: List<BatchIF>)
+data class MvrCardAndPops(val mvrs: List<Cvr>, val cards: List<AuditableCard>, val pools: List<CardPoolIF>, val batches: List<CardStyleIF>)
 
 /**
  * Creates a set of contests and populations, with randomly chosen candidates and margins.
@@ -207,7 +207,7 @@ data class MultiContestTestData(
     }
 
     private fun makeCard(nextCardId: Int, fcontests: List<ContestTestDataBuilder>, poolId: Int?, cardStyle: String?): CardWithBatchName {
-        val cardBuilder = CardWithBatchNameBuilder("card${nextCardId}", nextCardId, poolId, cardStyle)
+        val cardBuilder = CardWithBatchNameBuilder("card${nextCardId}", null, nextCardId, poolId, cardStyle)
         fcontests.forEach { fcontest -> fcontest.addContestToCard(cardBuilder) }
         return cardBuilder.build(poolId)
     }
@@ -335,7 +335,7 @@ data class CardStyleWithNcards(
     val contests: IntArray,
     val hasSingleCardStyle: Boolean,
     val ncards: Int
-): BatchIF {
+): CardStyleIF {
     override fun name() = name
     override fun id() = id
     override fun possibleContests() = contests

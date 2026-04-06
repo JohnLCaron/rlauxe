@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.verify
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterator
-import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsList
+import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsTest
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.estimate.simulateCvrsFromMargin
@@ -33,7 +33,7 @@ class TestAvgAssortValues {
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            mvrsToAuditableCardsList( AuditType.CLCA, testCvrs, null).iterator()
+            mvrsToAuditableCardsTest( AuditType.CLCA, testCvrs, null).iterator()
         }
 
         if (showCvrs) {
@@ -77,7 +77,7 @@ class TestAvgAssortValues {
         if (showCvrs) testCvrs.subList(0, 10).forEach { println("  $it") }
 
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            mvrsToAuditableCardsList( AuditType.CLCA, testCvrs, null).iterator()
+            mvrsToAuditableCardsTest( AuditType.CLCA, testCvrs, null).iterator()
         }
 
         if (showCvrs) {
@@ -116,8 +116,9 @@ class TestAvgAssortValues {
         val test = MultiContestTestData(ncontests, nbs, N, marginRange, underVotePct, phantomRange)
         val testCvrs = test.makeCvrsFromContests()
 
+        // TODO this looks wrong. use makeCardsFromContests ?
         val cardIterable: CloseableIterable<AuditableCard> = CloseableIterable {
-            mvrsToAuditableCardsList( AuditType.CLCA, testCvrs, null).iterator()
+            mvrsToAuditableCardsTest( AuditType.CLCA, testCvrs, null).iterator()
         }
 
         if (showCvrs) {

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.BatchIF
+import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
@@ -78,18 +78,18 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
 }
 
 // for multiple batches, multiple contests and one "pool" of subtotaled votes
-class VunderBatches(batches: List<BatchIF>, val onePool: VunderPool) {
+class VunderBatches(batches: List<CardStyleIF>, val onePool: VunderPool) {
     val batchMap = batches.associateBy { it.name() }
 
     // for the given pooled card with no votes, simulate one with votes, staying within the onePool vote totals.
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
         if (card.isPhantom()) return card
 
-        val batch = batchMap[card.batchName()]
+        val batch = batchMap[card.styleName()]
         val cardb = AuditableCardBuilder.fromCard(card)
 
         if (batch == null) {
-            println("batch ${card.batchName()} not found")
+            println("batch ${card.styleName()} not found")
             return cardb.build()
         }
 

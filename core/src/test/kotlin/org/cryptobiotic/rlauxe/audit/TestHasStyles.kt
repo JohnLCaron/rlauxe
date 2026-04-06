@@ -18,7 +18,6 @@ import org.cryptobiotic.rlauxe.workflow.CreateElectionFromCards
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlin.test.fail
 
 private val showDetails = false
 
@@ -153,16 +152,16 @@ class TestHasStyles {
         val (testCards, batches) = testData.makeCardsFromContests()
 
         val fixBatches = mapOf(
-            listOf(1) to Batch("batchB", 1, intArrayOf(1), false),
-            listOf(2) to Batch("batchS", 2, intArrayOf(2), false),
-            listOf(1,2) to Batch("batchBS", 3, intArrayOf(1,2), false)
+            listOf(1) to CardStyle("batchB", 1, intArrayOf(1), false),
+            listOf(2) to CardStyle("batchS", 2, intArrayOf(2), false),
+            listOf(1,2) to CardStyle("batchBS", 3, intArrayOf(1,2), false)
         )
 
         // now fix the batches
         val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
             Closer( testCards.iterator())) { card:AuditableCard ->
             val contests = card.votes!!.keys.toList().sorted()
-            card.copy(batch = fixBatches[contests]!!)
+            card.copy(cardStyle = fixBatches[contests]!!)
         }
         val newBatched = mutableListOf<AuditableCard>()
         while (newBatchedIter.hasNext()) { newBatched.add(newBatchedIter.next()) }
@@ -355,7 +354,7 @@ class TestHasStyles {
         val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
             Closer( testCards.iterator())) { card:AuditableCard ->
             val contests = card.votes!!.keys.toList().sorted()
-            card.copy(batch = card12)
+            card.copy(cardStyle = card12)
         }
         val newBatched = mutableListOf<AuditableCard>()
         while (newBatchedIter.hasNext()) { newBatched.add(newBatchedIter.next()) }
@@ -397,11 +396,11 @@ class TestHasStyles {
         val (testCards, batches) = testData.makeCardsFromContests()
 
         // now fix the batches
-        val all = Batch("all", 1, intArrayOf(1,2,3), false)
+        val all = CardStyle("all", 1, intArrayOf(1,2,3), false)
 
         val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
             Closer( testCards.iterator())) { card:AuditableCard ->
-            card.copy(batch = all)
+            card.copy(cardStyle = all)
         }
         val newBatched = mutableListOf<AuditableCard>()
         while (newBatchedIter.hasNext()) { newBatched.add(newBatchedIter.next()) }
@@ -418,7 +417,7 @@ class TestHasStyles {
     }
 
     fun createAndRunTestAuditCards(auditType: AuditType, name:String, topdir: String, contests: List<Contest>,
-                                   testCards: List<AuditableCard>, batches:List<BatchIF>): Boolean {
+                                   testCards: List<AuditableCard>, batches:List<CardStyleIF>): Boolean {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         // val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )

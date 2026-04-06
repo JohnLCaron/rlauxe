@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.Batch
+import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.estimate.VunderPoolsFuzzer
 import org.cryptobiotic.rlauxe.util.tabulateCards
@@ -63,7 +63,7 @@ class TestOneAuditFuzzers {
 
         val fuzzedPool = calcOneAuditPoolsFromMvrs(
             infos,
-            populations = listOf(Batch("fuzzedPool", 42, intArrayOf(1, 2), false)),
+            populations = listOf(CardStyle("fuzzedPool", 42, intArrayOf(1, 2), false)),
             fuzzedMvrs.map { it.toCvr() },
         )
         println("fuzzedPool= ${fuzzedPool.first()}")

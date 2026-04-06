@@ -4,8 +4,8 @@ import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ElectionBuilder
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
-import org.cryptobiotic.rlauxe.audit.Batch
-import org.cryptobiotic.rlauxe.audit.BatchIF
+import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
@@ -20,6 +20,7 @@ import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.merge
+import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsList
 import org.cryptobiotic.rlauxe.oneaudit.setPoolAssorterAverages
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
 import org.cryptobiotic.rlauxe.util.Closer
@@ -83,6 +84,7 @@ class CardManifestAttack {
             mcards.add(
                 CardWithBatchName(
                     "mvr$mvrCount",
+                    null,
                     index,
                     0L,
                     false,
@@ -102,6 +104,7 @@ class CardManifestAttack {
             mcards.add(
                 CardWithBatchName(
                     "Pool1-$poolCount",
+                    null,
                     index,
                     0L,
                     false,
@@ -123,7 +126,7 @@ class CardManifestAttack {
             // mcards.add(AuditableCard("mvr$mvrCount", mvrCount, 0L, false, intArrayOf(2), votes = mapOf(1 to intArrayOf(1)), poolId=null))
 
             // substitute cards with contest 2 undervotes
-            mcards.add( CardWithBatchName("mvr$mvrCount",
+            mcards.add( CardWithBatchName("mvr$mvrCount", null,
                 index,
                 0L,
                 false,
@@ -140,14 +143,14 @@ class CardManifestAttack {
         // these are Bobs pooled votes that match the mvrs
         repeat(25) {
             // mvr has Bob's votes
-            mcards.add(CardWithBatchName("Pool1-$poolCount", index, 0L, false, votes = null, poolId = 1, "pool1"))
+            mcards.add(CardWithBatchName("Pool1-$poolCount", null, index, 0L, false, votes = null, poolId = 1, "pool1"))
             poolCount++
             index++
         }
         // these are contestB pooled votes that match the mvrs
         repeat(25) {
             // mvr doesnt contain contest 1
-            mcards.add(CardWithBatchName("Pool1-$poolCount", index, 0L, false, votes = null, poolId = 1, "pool1"))
+            mcards.add(CardWithBatchName("Pool1-$poolCount", null, index, 0L, false, votes = null, poolId = 1, "pool1"))
             poolCount++
             index++
         }
@@ -186,7 +189,7 @@ class CardManifestAttack {
         println("true Contest totals")
         realcontestUA.forEach { contestUA -> println(contestUA.showSimple())}
 
-        val cardStyle = Batch("groupB", 1, groupBcontests, false)
+        val cardStyle = CardStyle("groupB", 1, groupBcontests, false)
         val realPools = calcOneAuditPoolsFromMvrs(infos, listOf(cardStyle), mvrs)
         realPools.forEach{ println(it) }
         println("--------------------- end truth")
@@ -268,15 +271,15 @@ class CreateElectionForAttack(
     val contestsUA: List<ContestWithAssertions>,
     val cards: List<CardWithBatchName>,
     val mvrs: List<Cvr>,
-    val populations: List<BatchIF>?,
+    val populations: List<CardStyleIF>?,
     val cardPools: List<CardPool>?,
 ): ElectionBuilder {
 
     override fun electionInfo() = ElectionInfo("CardManifestAttack", AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true,)
-    override fun createUnsortedMvrsInternal() = mvrs // for in-memory case
+    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsList(mvrs, populations)
     override fun createUnsortedMvrsExternal() = null
     override fun contestsUA() = contestsUA
-    override fun batches() = populations
+    override fun cardStyles() = populations
     override fun cards() = Closer( cards.iterator() )
     override fun cardPools() = cardPools
     override fun ncards() = cards.size

@@ -1,6 +1,7 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
+import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.MultiContestTestData
 import org.cryptobiotic.rlauxe.workflow.makeFuzzedCvrsForClca
@@ -10,10 +11,29 @@ import kotlin.test.assertEquals
 class TestCardBuilders {
 
     @Test
+    fun testOneBuilder() {
+        val card = AuditableCard ("cvr$42", null, 42, 4422L, false, // intArrayOf(1,2,3),
+            null, mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), CardStyle.fromCvrBatch)
+        val cb = AuditableCardBuilder.fromCard(card)
+        val back = cb.build()
+        assertEquals(card, back)
+    }
+
+    @Test
+    fun testReplaceContestVotes() {
+        val card = AuditableCard ("cvr$42", null, 42, 4422L, false, // intArrayOf(1,2,3),
+            null, mapOf(1 to intArrayOf(1,2,3), 2 to intArrayOf(4,5,6), 3 to intArrayOf(0,1)), CardStyle.fromCvrBatch)
+        val cb = AuditableCardBuilder.fromCard(card)
+        card.votes!!.forEach { (contestId, votes) -> cb.replaceContestVotes(contestId, votes) }
+        val back = cb.build()
+        assertEquals(card, back)
+    }
+
+    @Test
     fun testConvertCardsRoundtrip() {
         val test = MultiContestTestData(20, 11, 20000)
         val (mvrs, cards, pools, styles) = test.makeMvrCardAndPops()
-        val cardMap = cards.associateBy { it.location }
+        val cardMap = cards.associateBy { it.id }
 
         val cardbs = mutableListOf<AuditableCardBuilder>()
         cards.forEach {
@@ -28,7 +48,7 @@ class TestCardBuilders {
         val roundtrip: List<AuditableCard> = cardbs.map { it.build() }
         // same order
         roundtrip.forEach{
-            val orgCard = cardMap[it.location]!!
+            val orgCard = cardMap[it.id]!!
             assertEquals(orgCard, it)
         }
     }

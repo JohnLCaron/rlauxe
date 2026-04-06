@@ -33,10 +33,10 @@ class CreateColoradoPolling (
 
     override fun contestsUA() = contestsPolling
 
-    override fun batches(): List<BatchIF>? {
+    override fun cardStyles(): List<CardStyleIF>? {
         val allContests = contestsUA().map { it.id }.sorted().toIntArray()
         return when {
-            (auditType.isPolling() && pollingMode!!.withoutBatches()) -> listOf(Batch("OneBatch", 0, allContests, false))
+            (auditType.isPolling() && pollingMode!!.withoutBatches()) -> listOf(CardStyle("OneBatch", 0, allContests, false))
             else -> batches
         }
     }

@@ -11,8 +11,7 @@ import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.Batch
-import org.cryptobiotic.rlauxe.audit.BatchIF
+import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
 import org.cryptobiotic.rlauxe.core.*
@@ -36,9 +35,9 @@ interface AuditRecordIF {
     val rounds: List<AuditRoundIF>
 
     fun readSortedManifest(): CardManifest
-    fun readSortedManifest(batches: List<BatchIF>?): CardManifest
+    fun readSortedManifest(batches: List<CardStyleIF>?): CardManifest
     fun readOneShotMvrs(): Map<Int, Int>
-    fun readBatches(): List<BatchIF>?
+    fun readCardStyles(): List<CardStyleIF>?
 }
 
 class AuditRecord(
@@ -55,7 +54,7 @@ class AuditRecord(
     override val config = Config(electionInfo, auditCreationConfig, auditRoundConfig)
 
     // for efficiency, batches can be read once and stored by the caller
-    override fun readSortedManifest(batches: List<BatchIF>?): CardManifest {
+    override fun readSortedManifest(batches: List<CardStyleIF>?): CardManifest {
         // merge batch references into the Card
         val mergedCards: CloseableIterable<AuditableCard> =
             MergeBatchesIntoCardManifestIterable(
@@ -66,7 +65,7 @@ class AuditRecord(
     }
 
     override fun readSortedManifest(): CardManifest {
-        val batches = readCardPools() ?: readBatches() ?: emptyList() // pools are preferred
+        val batches = readCardPools() ?: readCardStyles() ?: emptyList() // pools are preferred
         // merge batch references into the Card
         val mergedCards =
             MergeBatchesIntoCardManifestIterable(
@@ -77,9 +76,9 @@ class AuditRecord(
         return CardManifest(mergedCards, electionInfo.totalCardCount)
     }
 
-    override fun readBatches(): List<Batch>? {
-        return if (!Files.exists(Path(publisher.batchesFile()))) null else {
-            val batchesResult = readBatchesJsonFile(publisher.batchesFile())
+    override fun readCardStyles(): List<CardStyleIF>? {
+        return if (!Files.exists(Path(publisher.cardStylesFile()))) null else {
+            val batchesResult = readCardStylesJsonFile(publisher.cardStylesFile())
             if (batchesResult.isOk) batchesResult.unwrap() else {
                 logger.error{ "$batchesResult" }
                 null

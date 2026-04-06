@@ -182,9 +182,10 @@ class TestClcaElection(
 
     override fun electionInfo() = ElectionInfo(
         "TestClcaElection", AuditType.CLCA, ncards(), contestsUA.size, cvrsContainUndervotes = true,)
-    override fun createUnsortedMvrsInternal() = allCvrs // for in-memory case
+    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsList(allCvrs, cardStyles()) // for in-memory case
     override fun createUnsortedMvrsExternal() = null
-    override fun batches() = null
+
+    override fun cardStyles() = null
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
     override fun ncards() = allCvrs.size
@@ -254,7 +255,7 @@ class TestPollingElection(
 ): ElectionBuilder {
     val contests: List<Contest>
     val testMvrs: List<Cvr>
-    val batches: List<BatchIF>
+    val batches: List<CardStyleIF>
     // val pools: List<CardPoolIF>
     val cards: List<CardWithBatchName>
     val contestsUA: List<ContestWithAssertions>
@@ -290,9 +291,9 @@ class TestPollingElection(
         "TestPollingElection", AuditType.POLLING, ncards(), contestsUA.size,
         cvrsContainUndervotes = true, pollingMode = pollingMode,
     )
-    override fun createUnsortedMvrsInternal() = testMvrs // for in-memory case
+    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsList(testMvrs, cardStyles()) // for in-memory case
     override fun createUnsortedMvrsExternal() = null
-    override fun batches() = batches
+    override fun cardStyles() = batches
     override fun cardPools() = null
     override fun contestsUA() = contestsUA
     override fun ncards() = cards.size
@@ -378,9 +379,9 @@ class TestOneAuditElection(
     override fun electionInfo() = ElectionInfo(
         "TestOneAuditElection", AuditType.ONEAUDIT, ncards(), contestsUA.size, cvrsContainUndervotes = true,
     )
-    override fun createUnsortedMvrsInternal() = fuzzedMvrs // for in-memory case
+    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsList(fuzzedMvrs, cardStyles()) // for in-memory case
     override fun createUnsortedMvrsExternal() = null
-    override fun batches() = null
+    override fun cardStyles() = null
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
     override fun ncards() = cards.size

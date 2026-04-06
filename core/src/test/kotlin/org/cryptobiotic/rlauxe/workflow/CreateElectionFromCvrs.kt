@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.BatchIF
+import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CvrsToCardsWithBatchNameIterator
@@ -10,6 +10,7 @@ import org.cryptobiotic.rlauxe.audit.ElectionBuilder
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MvrSource
 import org.cryptobiotic.rlauxe.audit.PollingMode
+import org.cryptobiotic.rlauxe.audit.mvrsToAuditableCardsList
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.CloseableIterator
@@ -21,7 +22,7 @@ class CreateElectionFromCvrs (
     val cvrs: List<Cvr>, // includes phantoms
     val auditType: AuditType,
     val cardPools: List<CardPool>? = null,
-    val batches: List<BatchIF>? = null,
+    val batches: List<CardStyleIF>? = null,
     val mvrSource: MvrSource,
 ): ElectionBuilder {
 
@@ -29,9 +30,9 @@ class CreateElectionFromCvrs (
         electionName, auditType, ncards(), contestsUA.size, cvrsContainUndervotes = true,
         mvrSource = mvrSource, pollingMode = PollingMode.withBatches
     )
-    override fun createUnsortedMvrsInternal() = cvrs // for in-memory case
+    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsList(cvrs, batches)
     override fun createUnsortedMvrsExternal() = null
-    override fun batches() = batches
+    override fun cardStyles() = batches
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
     override fun cards() = createCards()
@@ -53,7 +54,7 @@ class CreateElectionFromCards (
     val contestsUA: List<ContestWithAssertions>,
     val cards: List<AuditableCard>, // includes phantoms
     val cardPools: List<CardPool>? = null,
-    val batches: List<BatchIF>? = null,
+    val batches: List<CardStyleIF>? = null,
     val mvrSource: MvrSource? = null
 ): ElectionBuilder {
 
@@ -67,9 +68,9 @@ class CreateElectionFromCards (
                 pollingMode = PollingMode.withBatches
             )
     }
-    override fun createUnsortedMvrsInternal() = cards.map { it.toCvr() }
+    override fun createUnsortedMvrsInternal() = cards.map { CardWithBatchName(it) }
     override fun createUnsortedMvrsExternal() = null // Closer(createCards().iterator()) // for out-of-memory case
-    override fun batches() = batches
+    override fun cardStyles() = batches
     override fun cardPools() = cardPools
     override fun contestsUA() = contestsUA
     override fun cards() = Closer(createCards().iterator())

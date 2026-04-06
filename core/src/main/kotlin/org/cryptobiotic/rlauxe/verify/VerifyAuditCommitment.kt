@@ -8,8 +8,9 @@ import com.github.michaelbull.result.unwrapError
 import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.Batch.Companion.useVotes
-import org.cryptobiotic.rlauxe.audit.BatchIF
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
+import org.cryptobiotic.rlauxe.audit.CardStyle.Companion.useVotes
+import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
 import org.cryptobiotic.rlauxe.betting.TestH0Status
@@ -19,7 +20,7 @@ import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.readCardsCsvIterator
 import org.cryptobiotic.rlauxe.persist.json.readAuditCreationConfigJsonFile
-import org.cryptobiotic.rlauxe.persist.json.readBatchesJsonFile
+import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readContestsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.readElectionInfoJsonFile
 import org.cryptobiotic.rlauxe.util.CloseableIterable
@@ -34,7 +35,7 @@ class VerifyAuditCommitment(val auditDir: String, contestId: Int? = null, show: 
     val auditType: AuditType
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
-    val batchSet: Set<BatchIF>
+    val batchSet: Set<CardStyleIF>
 
     init {
         val publisher = Publisher(auditDir)
@@ -47,7 +48,8 @@ class VerifyAuditCommitment(val auditDir: String, contestId: Int? = null, show: 
         auditType = audit.electionInfo.auditType
         contests = audit.contests
         infos = contests.map{ it.contest.info() }.associateBy { it.id }
-        batchSet = audit.batches.toSet()
+        val useBatches = audit.batches ?: audit.pools!!
+        batchSet = useBatches.toSet()
     }
 
     fun verify(): VerifyResults {
@@ -64,7 +66,8 @@ class VerifyAuditCommitment(val auditDir: String, contestId: Int? = null, show: 
 }
 
 data class AuditCommitment(val electionInfo: ElectionInfo, val auditCreationConfig: AuditCreationConfig,
-                           val contests: List<ContestWithAssertions>, val batches: List<BatchIF>,
+                           val contests: List<ContestWithAssertions>, val batches: List<CardStyleIF>?,
+                           val pools: List<CardPoolIF>?,
                            val sortedManifest: CloseableIterable<AuditableCard> )
 
 // TODO: use AuditRecord
@@ -93,22 +96,24 @@ fun readAuditCommitment(publisher: Publisher): Result<AuditCommitment, ErrorMess
     val pools = if (!Files.exists(Path(publisher.cardPoolsFile()))) null
     else readCardPoolCsvFile(publisher.cardPoolsFile(), infos)
 
-    val batches = pools ?: if (!Files.exists(Path(publisher.batchesFile()))) emptyList() else {
-        val batchesResult = readBatchesJsonFile(publisher.batchesFile())
+    val batches = if (!Files.exists(Path(publisher.cardStylesFile()))) null else {
+        val batchesResult = readCardStylesJsonFile(publisher.cardStylesFile())
         if (batchesResult.isOk) batchesResult.unwrap() else {
             errs.addNested(batchesResult.unwrapError())
             emptyList()
         }
     }
 
+    val useBatches = batches ?: pools
+
     val sortedManifest: CloseableIterable<AuditableCard> =
         MergeBatchesIntoCardManifestIterable(
             CloseableIterable { readCardsCsvIterator(publisher.sortedCardsFile()) },
-            batches,
+            useBatches!!,
         )
 
     return if (errs.hasErrors()) Err(errs) else
-        Ok(AuditCommitment(electionInfo!!, auditCreationConfig!!, contests!!, batches, sortedManifest))
+        Ok(AuditCommitment(electionInfo!!, auditCreationConfig!!, contests, batches, pools, sortedManifest))
 }
 
 fun verifySortedCardManifest(
@@ -116,7 +121,7 @@ fun verifySortedCardManifest(
     contestsUA: List<ContestWithAssertions>,
     cards: CloseableIterable<AuditableCard>,
     infos: Map<Int, ContestInfo>,
-    batchSet: Set<BatchIF>,
+    batchSet: Set<CardStyleIF>,
     seed: Long,
     results: VerifyResults,
 ) {
@@ -127,6 +132,7 @@ fun verifySortedCardManifest(
     val pooled = mutableMapOf<Int, ContestTabulation>()
 
     val locationSet = mutableSetOf<String>()
+    val idSet = mutableSetOf<String>()
     val indexSet = mutableSetOf<Int>()
     val indexList = mutableListOf<Pair<Int, Long>>()
 
@@ -137,9 +143,12 @@ fun verifySortedCardManifest(
         while (cardIter.hasNext()) {
             val card = cardIter.next()
 
-            // all card locations and indices are unique
-            if (!locationSet.add(card.location)) {
-                results.addError("$count duplicate card.location ${card.location}")
+            // all card id, locations and indices are unique
+            if (!idSet.add(card.id)) {
+                results.addError("$count duplicate card.id ${card.id}")
+            }
+            if (!locationSet.add(card.location())) {
+                results.addError("$count duplicate card.location ${card.location()}")
             }
             if (!indexSet.add(card.index)) {
                 results.addError("$count duplicate card.index ${card.index}")
@@ -156,8 +165,8 @@ fun verifySortedCardManifest(
             indexList.add(Pair(card.index, card.prn))
 
             // check that batch exists
-            if (!useVotes(card.batch.name()) && !batchSet.contains(card.batch)) {
-                results.addError("card $count ${card.location} batch ${card.batch} not in batches")
+            if (!useVotes(card.cardStyle.name()) && !batchSet.contains(card.cardStyle)) {
+                results.addError("card $count ${card.id} batch ${card.cardStyle} not in batches")
             }
 
             infos.forEach { (contestId, info) ->

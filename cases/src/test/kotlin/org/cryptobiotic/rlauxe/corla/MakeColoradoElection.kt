@@ -151,11 +151,11 @@ class MakeColoradoElection {
         println("number of samples = ${sampledMvrs.size}")
 
         sampledMvrs.forEach{ mvr ->
-            val precinct = mvr.location.split("-").first()
+            val precinct = mvr.id.split("-").first()
             val county = precinctMap[precinct] ?: error("no county for precinct $precinct")
             val countySampleMap = countySamples[county]!!
             val precinctSamples = countySampleMap.getOrPut(precinct) { PrecinctSamples(precinct) }
-            precinctSamples.sampleIds.add(mvr.location)
+            precinctSamples.sampleIds.add(mvr.id)
         }
 
         println("============================================================")

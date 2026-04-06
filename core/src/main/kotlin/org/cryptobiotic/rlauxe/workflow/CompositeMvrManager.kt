@@ -8,7 +8,7 @@ import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.persist.CompositeRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.csv.readCardPoolCsvFile
-import org.cryptobiotic.rlauxe.persist.json.readBatchesJsonFileUnwrapped
+import org.cryptobiotic.rlauxe.persist.json.readCardStylesJsonFileUnwrapped
 import java.nio.file.Files
 import kotlin.io.path.Path
 
@@ -24,7 +24,7 @@ open class CompositeMvrManager(
     // override fun sortedManifest() = readCardManifestComposite(publisher)
     override fun sortedManifest() = auditRecord.readSortedManifest()
 
-    override fun batches(): List<BatchIF>? {
+    override fun batches(): List<CardStyleIF>? {
         return readBatchesComposite(publisher)
     }
 
@@ -68,9 +68,9 @@ open class CompositeMvrManager(
         return CardManifest(CloseableIterable { sortedCards.iterator() }, 0, emptyList())
     } */
 
-    private fun readBatchesComposite(publisher: Publisher): List<BatchIF>? {
-        return if (!Files.exists(Path(publisher.batchesFile()))) null else
-            readBatchesJsonFileUnwrapped(publisher.batchesFile())
+    private fun readBatchesComposite(publisher: Publisher): List<CardStyleIF>? {
+        return if (!Files.exists(Path(publisher.cardStylesFile()))) null else
+            readCardStylesJsonFileUnwrapped(publisher.cardStylesFile())
     }
 
     private fun readPoolsComposite(publisher: Publisher): List<CardPool>? {

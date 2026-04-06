@@ -1,6 +1,6 @@
 package org.cryptobiotic.rlauxe.irv
 
-import org.cryptobiotic.rlauxe.audit.Batch
+import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.oneaudit.calcOneAuditPoolsFromMvrs
@@ -32,7 +32,7 @@ fun simulateOneAuditRaire(N: Int, contestId: Int, ncands:Int, minMargin: Double,
     //    val possibleContests: IntArray, // the list of possible contests.
     //    val hasSingleCardStyle: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
     //)
-    val pop = Batch("simulateOneAuditRaire", 42, intArrayOf(contestId), true)
+    val pop = CardStyle("simulateOneAuditRaire", 42, intArrayOf(contestId), true)
     val pools = calcOneAuditPoolsFromMvrs(
         infos,
         listOf(pop),

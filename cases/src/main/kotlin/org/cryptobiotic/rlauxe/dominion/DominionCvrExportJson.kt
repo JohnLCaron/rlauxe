@@ -82,6 +82,15 @@ data class DominionCvrExportJson(
     }
 }
 
+// Each Session object contains the following attributes:
+// TabulatorId: the tabulator id, same as the one used in the manifest
+// BatchId: the batch id, unique for a given tabulator id.
+// RecordId: the CVR id within the batch.
+// CountingGroupId: the counting group id, same as the one used in the manifest.
+// ImageMask: the file mask for finding the associated images with this session.
+// Original element, contains the original state of the CVR data for this session.
+// Modified element (optional), contains the modified state of the CVR data for this session.
+
 @Serializable
 data class Session(
     val TabulatorId: Int,
@@ -101,9 +110,16 @@ data class Session(
     }
 }
 
+// Original/Modified element:
+// This element contains attributes that can be potentially be modified during adjudication/conditional voting management:
+//  PrecinctPortionId: the precinct portion id, same as the one used in the manifest.
+//  BallotTypeId: the ballot type id, same as the one used in the manifest.
+//  IsCurrent: set to true, if this element represents the current state of the CVR.
+//  Contest elements. Lists all contests for the current ballot type.
+
 @Serializable
 data class Cards (
-    val PrecinctPortionId: Int,
+    val PrecinctPortionId: Int, // presumably from PrecinctPortionManifest
     val BallotTypeId: Int,  // from BallotTypeManifest.json; points to BallotTypeContestManifest.json
     val IsCurrent: Boolean,
     val Cards: List<Card>,
@@ -124,8 +140,15 @@ data class Card(
     override fun toString() = buildString {
         appendLine("Card(Id=$Id, KeyInId=$KeyInId, PaperIndex=$PaperIndex)")
         Contests.forEach { append("      $it") }
-    }}
+    }
+}
 
+// Contest:
+// This element represents a marked contest. Contains the following attributes:
+//  Id: contest identifier, as used in the manifest file.
+//  Marks: list of marked (explicitly/implicitly) in this contest.
+// Note: explicit marks mean when the voter filled in the voting box directly.
+// Implicit means when the voting box was implied by a straight party ticket selection.
 @Serializable
 data class Contest(
     val Id: Int,
@@ -141,6 +164,19 @@ data class Contest(
     }
 }
 
+// Mark element
+// CandidateId: indicates the candidate the mark is for (if a write-in position is resolved to a
+//   qualified write-in the candidate id will point to a qualified write-in).
+// PartyId: indicates party affiliation. If not party affiliation then this will be 0.
+// Rank: indicates rank; will be 1 by default, will only contain values higher than 1 if ranked choice voting is used.
+// WriteinIndex: if mark is for write-in position (or qualified write-in) this attribute indicates which
+//   write-in position in the contest (0 means first, 1 means second position, etc.)
+// MarkDensity: percentage that voting box was filled.
+// WriteinDensity: percentage that write-in area was filled in. Attribute exists only if it is a write-in position.
+// IsAmbiguous: a Boolean value indicating whether mark is ambiguous.
+// IsVote: a Boolean value indicating whether the mark produced a vote. Note: an implicit selection
+//   because of straight party vote would also be set to true. Any mark above the max threshold will
+//   be true in a ranked choice voting contest
 @Serializable
 data class Mark(
     val CandidateId: Int,
@@ -218,7 +254,8 @@ fun DominionCvrExportJson.import(contestManifest: ContestManifest) : DominionCvr
                 val endIdx = session.ImageMask.lastIndexOf("*.*")
                 session.ImageMask.substring(startIdx, endIdx)
             }
-            cvrs.add(CvrExport("${session.TabulatorId}-${session.BatchId}-${recordId}", session.CountingGroupId, votes))
+            cvrs.add(CvrExport("${session.TabulatorId}-${session.BatchId}-${recordId}", session.CountingGroupId,
+                cards.BallotTypeId, cards.PrecinctPortionId, votes))
         }
     }
     return DominionCvrSummary(cvrs.size, ncards, contestSums, cvrs)

@@ -2,14 +2,13 @@ package org.cryptobiotic.rlauxe.audit
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
-import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.persist.clearDirectory
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import org.cryptobiotic.rlauxe.persist.csv.writeCardPoolCsvFile
 import org.cryptobiotic.rlauxe.persist.json.writeContestsJsonFile
 import org.cryptobiotic.rlauxe.persist.json.writeElectionInfoJsonFile
-import org.cryptobiotic.rlauxe.persist.json.writeBatchesJsonFile
+import org.cryptobiotic.rlauxe.persist.json.writeCardStylesJsonFile
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.verify.VerifyElectionCommitment
 import org.cryptobiotic.rlauxe.verify.VerifyResults
@@ -26,17 +25,16 @@ interface ElectionBuilder {
 
     // In EstimateAudit, we want to use pools to estimate with, if they exist. So the merging needs to merge pools, not the batches.
     // So dont write batches if there are pools. Also its up to the reader to prefer pools.
-    fun batches(): List<BatchIF>?
+    fun cardStyles(): List<CardStyleIF>?
     fun cardPools(): List<CardPoolIF>?
 
-    fun createUnsortedMvrsInternal(): List<Cvr>? // for in-memory case, poolId used also as batch name?
-    // TODO CloseableIterator<Cvr> ??
+    fun createUnsortedMvrsInternal(): List<CardWithBatchName>? // for in-memory case, poolId used also as batch name?
     fun createUnsortedMvrsExternal(): CloseableIterator<CardWithBatchName>? // for out-of-memory case
 }
 
 private val logger = KotlinLogging.logger("CreateElectionRecord")
 
-fun createElectionRecord(election: ElectionBuilder, auditDir: String, clear: Boolean = true) {
+fun createElectionRecord(election: ElectionBuilder, auditDir: String, clear: Boolean = true, validate: Boolean = false) {
     if (clear) clearDirectory(Path(auditDir))
 
     val publisher = Publisher(auditDir)
@@ -44,10 +42,10 @@ fun createElectionRecord(election: ElectionBuilder, auditDir: String, clear: Boo
     writeElectionInfoJsonFile(electionInfo, publisher.electionInfoFile())
     logger.info{"createElectionRecord writeElectionInfoJsonFile to ${publisher.electionInfoFile()}\n  $electionInfo"}
 
-    val batches = election.batches()
+    val batches = election.cardStyles()
     if (!batches.isNullOrEmpty()) {
-        writeBatchesJsonFile(batches, publisher.batchesFile())
-        logger.info { "createElectionRecord write ${batches.size} batches to ${publisher.batchesFile()}" }
+        writeCardStylesJsonFile(batches, publisher.cardStylesFile())
+        logger.info { "createElectionRecord write ${batches.size} batches to ${publisher.cardStylesFile()}" }
     }
 
     val cardPools = election.cardPools()
@@ -73,8 +71,11 @@ fun createElectionRecord(election: ElectionBuilder, auditDir: String, clear: Boo
     writeContestsJsonFile(contestsUA, publisher.contestsFile())
     logger.info{"createElectionRecord write ${contestsUA.size} contests to ${publisher.contestsFile()}"}
 
-    val verifyECResults = VerifyElectionCommitment(auditDir).verify()
-    if (verifyECResults.hasErrors) {
-        logger.error { "createElectionRecord VerifyElectionCommitment failed: ${verifyECResults}" }
+    // taking forever - make optional
+    if (validate) {
+        val verifyECResults = VerifyElectionCommitment(auditDir).verify()
+        if (verifyECResults.hasErrors) {
+            logger.error { "createElectionRecord VerifyElectionCommitment failed: ${verifyECResults}" }
+        }
     }
 }

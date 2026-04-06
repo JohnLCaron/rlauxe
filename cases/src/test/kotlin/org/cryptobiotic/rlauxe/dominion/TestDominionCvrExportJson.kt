@@ -3,9 +3,8 @@ package org.cryptobiotic.rlauxe.dominion
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.CvrsToCardsWithBatchNameIterator
-import org.cryptobiotic.rlauxe.audit.Batch
+import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.oneaudit.CardPoolTest
 import org.cryptobiotic.rlauxe.persist.csv.CardHeader
 import org.cryptobiotic.rlauxe.persist.csv.writeCardCsv
 import org.cryptobiotic.rlauxe.sf.ContestManifest
@@ -136,7 +135,7 @@ class TestDominionCvrExportJson {
     }
 
     @Test
-    fun testCvrExportToCvrAdapter() {
+    fun testCvrExportToCardAdapter() {
         val topdir = "$testdataDir/tests/scratch/"
         val cvrExportFilename = "$topdir/$cvrExportCsvFile"
 
@@ -146,8 +145,8 @@ class TestDominionCvrExportJson {
         cardManifestWriter2.write(CardHeader)
 
         val cvrExportIter = cvrExportCsvIterator(cvrExportFilename)
-        val cvrIter = CvrExportToCvrAdapter(cvrExportIter, null )
-        val cardIter = CvrsToCardsWithBatchNameIterator(AuditType.CLCA, cvrIter, null, null)
+        val cardIter = CvrExportToCardAdapter(cvrExportIter, null, false )
+        // val cardIter = CvrsToCardsWithBatchNameIterator(AuditType.CLCA, cvrIter, null, null)
 
         while (cardIter.hasNext()) {
             val card = cardIter.next()
@@ -160,15 +159,12 @@ class TestDominionCvrExportJson {
         val cardManifestWriter3 = FileOutputStream(cardManifestFilename3).writer()
         cardManifestWriter3.write(CardHeader)
 
-        val cardStyle = Batch("31-125", 2, intArrayOf(0, 1, 2), false)
+        val cardStyle = CardStyle("31-125", 2, intArrayOf(0, 1, 2), false)
         val cvrExportIter2 = cvrExportCsvIterator(cvrExportFilename) // CvrExport
-        val cvrIter2 = CvrExportToCvrAdapter(cvrExportIter2, pools= mapOf("31-125" to 2)) // Cvr
-        val cardIter2 = CvrsToCardsWithBatchNameIterator(
-            AuditType.ONEAUDIT,
-            cvrIter2,
-            null,
-            listOf(cardStyle)
-        ) // AuditableCard
+
+        val pool = CardPoolTest("31-125", 2, intArrayOf(0, 1, 2), false, 42)
+        val cardIter2 = CvrExportToCardAdapter(cvrExportIter2, pools= listOf(pool), true) // Cvr
+        // val cardIter2 = CvrsToCardsWithBatchNameIterator(AuditType.ONEAUDIT, cvrIter2, null, listOf(cardStyle)) // AuditableCard
 
         while (cardIter2.hasNext()) {
             val card = cardIter2.next()

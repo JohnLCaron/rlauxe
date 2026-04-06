@@ -160,7 +160,7 @@ class ClcaSingleRoundWorkflowTaskGenerator(
                 countFlips++
                 val flippedVotes = cardVotes.toMutableMap()
                 flippedVotes[1] = intArrayOf(1)
-                Cvr(card.location, flippedVotes, false, poolId)
+                Cvr(card.id, flippedVotes, false, poolId)
             } else {
                 card.toCvr()
             }

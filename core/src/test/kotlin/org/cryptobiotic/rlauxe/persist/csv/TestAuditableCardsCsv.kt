@@ -11,7 +11,8 @@ class TestAuditableCardsCsv {
     @Test
     fun testRoundtrip() {
         val target = CardWithBatchName (
-            "info to find card",
+            "id to find card",
+            "location to find card",
             42,
             43L,
             true,
@@ -33,6 +34,7 @@ class TestAuditableCardsCsv {
     fun testRoundtripNoVotes() {
         val target = CardWithBatchName (
             "deets",
+            "dots",
             42,
             43L,
             false,
@@ -53,11 +55,11 @@ class TestAuditableCardsCsv {
     @Test
     fun testRoundtripIO() {
         val target = listOf(
-            CardWithBatchName ("deets", 42, 43L, false, null, 111, "pool111"),
-            CardWithBatchName ("deets", 42, 43L, false, null, null, styleName="all"),
-            CardWithBatchName ("info to find card", 42, 43L, true,
+            CardWithBatchName ("deets", "dots", 42, 43L, false, null, 111, "pool111"),
+            CardWithBatchName ("deeks","docs",  42, 43L, false, null, null, styleName="all"),
+            CardWithBatchName ("id", "info to find card", 42, 43L, true,
                 mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), 11, "pool11"),
-            CardWithBatchName ("info to find card", 42, 43L, true,
+            CardWithBatchName ("id1", "info2 to find card", 42, 43L, true,
                 mapOf(19 to intArrayOf(1,2,3), 23 to intArrayOf(), 99 to intArrayOf(1,2,3,4,5,6,7,8,9,0), 123456 to intArrayOf(23498724)), null, "cvr"),
         )
 

@@ -7,40 +7,43 @@ import org.cryptobiotic.rlauxe.core.CvrIF
 // The information we have on each physical card in the audit; the complete set is the CardManifest.
 
 data class AuditableCard (
-    val location: String, // enough info to find the card for a manual audit.
+    val id: String, // enough info to find the card for a manual audit.
+    val location: String?, // enough info to find the card for a manual audit.
     val index: Int,  // index into the original, canonical list of cards
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
+    val poolId: Int?, // must be set if its from a CardPool
     val votes: Map<Int, IntArray>?,   // CVRs and phantoms
-    val cardStyle: BatchIF,       // TODO perhaps this should be CardStyle ?
+    val cardStyle: CardStyleIF,
 ): CvrIF, CardIF {
 
     init {
-        if (Batch.useVotes(cardStyle.name()) && votes == null) {
+        if (CardStyle.useVotes(cardStyle.name()) && votes == null) {
             throw RuntimeException("cardStyle '${cardStyle.name()}' must have non-null votes")
         }
     }
 
-    constructor(card: CardWithBatchName, cardStyle: BatchIF): this(card.location, card.index, card.prn, card.phantom, card.votes, cardStyle)
-    constructor(cvr: Cvr, index: Int, prn: Long): this(cvr.id, index, prn, cvr.phantom, cvr.votes, cardStyle = Batch.fromCvrBatch)
+    constructor(card: CardWithBatchName, cardStyle: CardStyleIF): this(card.id, card.location, card.index, card.prn, card.phantom, card.poolId, card.votes, cardStyle)
+    constructor(cvr: Cvr, index: Int, prn: Long): this(cvr.id, null, index, prn, cvr.phantom, cvr.poolId, cvr.votes, cardStyle = CardStyle.fromCvrBatch)
 
-    fun toCvr() = Cvr(location, votes!!, phantom, poolId()) // TODO can we get rid of?
+    fun toCvr() = Cvr(id, votes!!, phantom, poolId()) // TODO can we get rid of?
 
     // "may have contest". Cvr hasContest does not allow missing, ie is not the same as "may have contest"
     override fun hasContest(contestId: Int): Boolean {
         return when {
-            Batch.useVotes(cardStyle.name()) -> votes!![contestId] != null // assumes cvrsContainUndervotes, use batch if not.
+            CardStyle.useVotes(cardStyle.name()) -> votes!![contestId] != null // assumes cvrsContainUndervotes, use cardStyle if not.
             else -> cardStyle.hasContest(contestId)
         }
     }
 
-    override fun location() = location
+    override fun id() = id
+    override fun location() = location ?: id()
     override fun index() = index
     override fun prn() = prn
     override fun isPhantom() = phantom
     override fun votes() = votes
     override fun votes(contestId: Int): IntArray? = votes?.get(contestId)
-    override fun poolId(): Int? = if (cardStyle is CardPoolIF) cardStyle.id() else null // TODO check
+    override fun poolId(): Int? = poolId
     override fun styleName() = cardStyle.name()
 
     override fun hasMarkFor(contestId: Int, candidateId: Int): Int {
@@ -52,7 +55,7 @@ data class AuditableCard (
     // return sorted
     fun possibleContests() : IntArray {
         return when {
-            Batch.useVotes(cardStyle.name()) -> votes!!.keys.toList().sorted().toIntArray() // assumes cvrsContainUndervotes, use batch if not.
+            CardStyle.useVotes(cardStyle.name()) -> votes!!.keys.toList().sorted().toIntArray() // assumes cvrsContainUndervotes, use cardStyle if not.
             else -> cardStyle.possibleContests().toList().sorted().toIntArray()
         }
     }
@@ -91,7 +94,10 @@ data class AuditableCard (
     }
 
     override fun toString() = buildString {
-        append("AuditableCard(location='$location', index=$index, prn=$prn, phantom=$phantom")
+        append("AuditableCard(id='$id', ")
+        if (location != null) append("location='$location', ")
+        append("index=$index, prn=$prn, phantom=$phantom")
+        if (poolId != null) append("poolId=$poolId, ")
         append(", has cardStyle ${cardStyle.name()} ${cardStyle.id()} possibleContests=${cardStyle.possibleContests().contentToString()} singleStyle=${cardStyle.hasSingleCardStyle()}")
         append(")")
         if (votes != null) {
@@ -104,6 +110,7 @@ data class AuditableCard (
 
 // lets us serialize either CardNoStyle or AuditableCard
 interface CardIF {
+    fun id(): String // enough info to find the card for a manual audit.
     fun location(): String // enough info to find the card for a manual audit.
     fun index(): Int  // index into the original, canonical list of cards
     fun prn(): Long   // psuedo random number
@@ -111,24 +118,26 @@ interface CardIF {
 
     fun votes(): Map<Int, IntArray>?   // CVRs and phantoms
     fun poolId(): Int?                 // must be set if its from a CardPool
-    fun styleName(): String            // "fromCvr" if no batch and its from a CVR (then votes is non null)
+    fun styleName(): String            // "fromCvr" if no cardStyle and its from a CVR (then votes is non null)
 }
 
 // for serialization and ElectionBuilder
 data class CardWithBatchName (
-    val location: String, // enough info to find the card for a manual audit.
+    val id: String,
+    val location: String?, // enough info to find the card for a manual audit.
     val index: Int,  // index into the original, canonical list of cards
     val prn: Long,   // psuedo random number
     val phantom: Boolean,
 
     val votes: Map<Int, IntArray>?,   // CVRs and phantoms
-    val poolId: Int?,                 // must be set if its from a CardPool  TODO verify batch name, poolId
+    val poolId: Int?,                 // must be set if its from a CardPool
     val styleName: String,
 ): CardIF {
 
-    constructor(card: AuditableCard): this(card.location, card.index, card.prn, card.phantom, card.votes, card.poolId(), card.styleName())
+    constructor(card: AuditableCard): this(card.id, card.location, card.index, card.prn, card.phantom, card.votes, card.poolId(), card.styleName())
 
-    override fun location() = location
+    override fun id() = id
+    override fun location() = location ?: id()
     override fun index() = index
     override fun prn() = prn
     override fun isPhantom() = phantom
@@ -136,7 +145,7 @@ data class CardWithBatchName (
     override fun poolId() = poolId
     override fun styleName() = styleName
 
-    fun toCvr() = Cvr(location, votes!!, phantom, poolId) // TODO get rid of
+    fun toCvr() = Cvr(id, votes!!, phantom, poolId) // TODO get rid of
 
     //// Kotlin data class doesnt handle IntArray and List<IntArray> correctly
     override fun equals(other: Any?): Boolean {
@@ -172,7 +181,9 @@ data class CardWithBatchName (
     }
 
     override fun toString() = buildString {
-        append("CardWithBatchName(location='$location', index=$index, prn=$prn, phantom=$phantom")
+        append("CardWithBatchName(id='$id', ")
+        if (location != null) append("location='$location', ")
+        append("index=$index, prn=$prn, phantom=$phantom")
         if (poolId != null) append(", poolId=$poolId")
         append(", styleName='$styleName'")
         append(")")

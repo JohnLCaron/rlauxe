@@ -24,10 +24,12 @@ private val logger = KotlinLogging.logger("CardCsv")
 //    fun styleName(): String            // "fromCvr" if no batch and its from a CVR (then votes is non null)
 //}
 
-val CardHeader = "location, index, prn, phantom, poolId, cardStyle, cvr contests, candidates0, candidates1, ...\n"
+val CardHeader = "id, location, index, prn, phantom, poolId, cardStyle, cvr contests, candidates0, candidates1, ...\n"
 
 fun writeCardCsv(card: CardIF) = buildString {
-    append("${card.location()}, ${card.index()}, ${card.prn().toString(radix=16)}, ${if(card.isPhantom()) "yes," else ","} ")
+    append("${card.id()}, ")
+    if (card.id() == card.location()) append(", ") else append("${card.location()}, ")
+    append("${card.index()}, ${card.prn().toString(radix=16)}, ${if(card.isPhantom()) "yes," else ","} ")
     if (card.poolId() == null) append(", ") else append("${card.poolId()}, ")
     append("${card.styleName()}, ")
 
@@ -90,7 +92,9 @@ fun readCardCsv(line: String): CardWithBatchName {
     val ttokens = tokens.map { it.trim() }
 
     var idx = 0
-    val desc = ttokens[idx++]
+    val id = ttokens[idx++]
+    val locationToken = ttokens[idx++]
+    val location = locationToken.ifEmpty { null }
     val index = ttokens[idx++].toInt()
     val sampleNum = ttokens[idx++].toLong(radix=16)
     val phantom = ttokens[idx++] == "yes"
@@ -123,9 +127,9 @@ fun readCardCsv(line: String): CardWithBatchName {
             require(contests.size == work.size) { "contests.size (${contests.size}) != votes.size (${work.size})" }
             contests.zip(work).toMap()
         }
-        return CardWithBatchName(desc, index, sampleNum, phantom, votes, poolId, styleName=styleName)
+        return CardWithBatchName(id, location, index, sampleNum, phantom, votes, poolId, styleName=styleName)
     }
-    return CardWithBatchName(desc, index, sampleNum, phantom, null, poolId, styleName=styleName)
+    return CardWithBatchName(id, location, index, sampleNum, phantom, null, poolId, styleName=styleName)
 }
 
 class CardCsvReader(filename: String): CloseableIterable<CardWithBatchName> {

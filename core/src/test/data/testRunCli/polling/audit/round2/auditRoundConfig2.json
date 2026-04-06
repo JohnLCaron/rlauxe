@@ -16,7 +16,6 @@
         "auditSampleCutoff": 10000
     },
     "pollingConfig": {
-        "d": 100,
-        "mode": "withPools"
+        "d": 100
     }
 }

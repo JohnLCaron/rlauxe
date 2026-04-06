@@ -293,9 +293,9 @@ class CreateBoulderElection(
     override fun electionInfo() = ElectionInfo("Boulder24$auditType", auditType, ncards(), contestsUA.size,
         true, mvrSource=mvrSource)
     override fun contestsUA() = contestsUA
-    override fun batches() = null // TODO !cvrsHaveUndervotes need batches
-    override fun cardPools() = if (auditType.isOA()) cardPoolBuilders else null // TODO why convert ??
-    override fun createUnsortedMvrsInternal() = allCvrs
+    override fun cardStyles() = null // TODO !cvrsHaveUndervotes need batches
+    override fun cardPools() = if (auditType.isOA()) cardPoolBuilders else null
+    override fun createUnsortedMvrsInternal() = mvrsToAuditableCardsList(allCvrs, cardPools())
     override fun createUnsortedMvrsExternal() = null
 
     override fun cards() = createCards()

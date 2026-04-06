@@ -89,7 +89,7 @@ fun runRoundAgain(auditDir: String, contestRound: ContestRound, assertionRound: 
 
                     append("${nfn(it+1, 4)}, ${dfn(x, 8)}$err, ${dfn(seq.bets[it], 8)}, ${dfn(seq.tjs[it], 8)}")
                     append(", ${trunc(seq.testStatistics[it].toString(), 8)}, ${trunc(pvalues[it].toString(), 8)}")
-                    append(", ${sfn(pair.first.location(), 25)}")
+                    append(", ${sfn(pair.first.id(), 25)}")
                     append(", ${sfn(mvrVotes, 10)}")
                     if (card.poolId() != null) append(", pool=${card.poolId()}, poolAvg=${df(oaAssorter?.poolAverage(card.poolId()))}")
                         else append(", votes=${cardVotes}")

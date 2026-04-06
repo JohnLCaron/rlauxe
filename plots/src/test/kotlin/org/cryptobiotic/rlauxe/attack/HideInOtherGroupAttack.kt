@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.attack
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.Batch
+import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.core.Contest
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -139,8 +139,8 @@ class ClcaSingleRoundWorkflowTaskGeneratorG(
         }
         // now change the groups in the cardManifest
         val cardStyles = listOf(
-            Batch("group1",  1,intArrayOf(1,2), hasStyle),
-            Batch("group2", 2, intArrayOf(2), hasStyle),
+            CardStyle("group1",  1,intArrayOf(1,2), hasStyle),
+            CardStyle("group2", 2, intArrayOf(2), hasStyle),
         )
         val modifiedCards = mutableListOf<AuditableCard>()
         val cardAttacker = CardsWithStylesAttack(AuditType.CLCA, cards=Closer(cardsu.iterator()), styles=cardStyles, wantFlips=diff+1)
@@ -201,7 +201,7 @@ class CardsWithStylesAttack(
     val cvrsAreComplete: Boolean = true,
     val cards: CloseableIterator<AuditableCard>,
     phantomCards : List<AuditableCard>? = null,
-    styles: List<Batch>,
+    styles: List<CardStyle>,
     val wantFlips: Int
 ): CloseableIterator<AuditableCard> {
 
@@ -236,7 +236,8 @@ class CardsWithStylesAttack(
         val contests = style.possibleContests()
         val votes = if (hasCvr) org.votes else null
 
-        return AuditableCard(org.location, cardIndex++, 0, phantom=org.phantom,
+        return AuditableCard(org.id, org.location, cardIndex++, 0, phantom=org.phantom,
+            org.poolId,
             votes,
             cardStyle=org.cardStyle,
         )

@@ -3,10 +3,9 @@ package org.cryptobiotic.rlauxe.estimate
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.BallotPool
 import org.cryptobiotic.rlauxe.audit.BallotStyle
-import org.cryptobiotic.rlauxe.audit.Batch
-import org.cryptobiotic.rlauxe.audit.BatchIF
-import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
@@ -19,8 +18,8 @@ data class MultiContestCombineData(
     val poolId: Int? = null,
 ) {
     val contestVoteTrackers: List<ContestVoteTracker>
-    val batch = if (poolId == null) Batch.fromCvrBatch
-        else Batch("batch$poolId", poolId, contests.map { it.id }.toIntArray(), false)
+    val batch = if (poolId == null) CardStyle.fromCvrBatch
+        else CardStyle("batch$poolId", poolId, contests.map { it.id }.toIntArray(), false)
 
     init {
         require(contests.size > 0)
@@ -30,7 +29,7 @@ data class MultiContestCombineData(
     // multicontest cvrs
     // create new partitions each time this is called
     // includes undervotes and phantoms, size = totalBallots + phantom count
-    fun makeCardsFromContests(startCvrId : Int = 0, cardStyle:String?=null): Pair<List<AuditableCard>, List<Batch>> {
+    fun makeCardsFromContests(startCvrId : Int = 0, cardStyle:String?=null): Pair<List<AuditableCard>, List<CardStyle>> {
         contestVoteTrackers.forEach { it.resetTracker() } // startFresh
 
         var nextCardId = startCvrId
@@ -48,7 +47,7 @@ data class MultiContestCombineData(
 
     private fun makeCard(nextCardId: Int, fcontests: List<ContestVoteTracker>, cardStyle:String?): AuditableCard {
         //         constructor(location: String, index: Int, poolId: Int?, cardStyle: String?):
-        val cardBuilder = AuditableCardBuilder("card${nextCardId}", nextCardId, 0, false, null, batch = batch)
+        val cardBuilder = AuditableCardBuilder("card${nextCardId}", null, nextCardId, 0, false, cardStyle = batch)
         fcontests.forEach { fcontest -> fcontest.addContestToCard(cardBuilder) }
         return cardBuilder.build()
     }
@@ -143,7 +142,7 @@ data class MultiContestCombinePools(
     val poolMap = pools.associateBy { it.poolId }
 
     // multicontest cards
-    fun makeCardsFromContests(): Pair<List<AuditableCard>, List<BatchIF>> {
+    fun makeCardsFromContests(): Pair<List<AuditableCard>, List<CardStyleIF>> {
         var nextCardId = 0
         val result = mutableListOf<AuditableCard>()
 
@@ -164,7 +163,7 @@ data class MultiContestCombinePools(
         val cvrb2 = CvrBuilder2("card${nextCardId}", false, poolId = pool.id())
         vunderPool.simulatePooledCvr(cvrb2)
         val cvr = cvrb2.build()
-        return AuditableCard("card${nextCardId}", nextCardId, 0L, false, cvr.votes, cardStyle = pool)
+        return AuditableCard("card${nextCardId}", null, nextCardId, 0L, false, null, cvr.votes, cardStyle = pool)
 
     }
 }
@@ -228,7 +227,7 @@ data class MultiContestFromBallotStyles(
     }
 
     // multicontest cards
-    fun makeCardsFromContests(): Pair<List<AuditableCard>, List<BatchIF>> {
+    fun makeCardsFromContests(): Pair<List<AuditableCard>, List<CardStyleIF>> {
         var nextCardIdx = 0
         var nextBallotIdx = 0
         val result = mutableListOf<AuditableCard>()
@@ -264,10 +263,10 @@ data class MultiContestFromBallotStyles(
         return Pair(result, cardStyles)
     }
 
-    private fun makeCard(cardName: String, cardId: Int, vunderPool: VunderPool, cardStyle:BatchIF): AuditableCard {
+    private fun makeCard(cardName: String, cardId: Int, vunderPool: VunderPool, cardStyle:CardStyleIF): AuditableCard {
         val cvrb2 = CvrBuilder2(cardName, false, poolId = cardStyle.id())
         vunderPool.simulatePooledCvr(cvrb2)
         val cvr = cvrb2.build()
-        return AuditableCard(cardName, cardId, 0L, false, cvr.votes, cardStyle = cardStyle)
+        return AuditableCard(cardName, null, cardId, 0L, false, null, cvr.votes, cardStyle = cardStyle)
     }
 }

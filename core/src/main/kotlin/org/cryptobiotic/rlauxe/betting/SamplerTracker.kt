@@ -54,8 +54,8 @@ class PollingSamplerTracker(
 
     init {
         cvrPairs.forEach { (mvr, card) ->
-            require(mvr.location() == card.location())  { "mvr location ${mvr.location()} != card.location ${card.location()}"}
-            require(card.hasContest(contestId))  { " card.location ${card.location()} does not have contest $contestId" }
+            require(mvr.id() == card.id())  { "mvr.id ${mvr.id()} != card.id ${card.id()}"}
+            require(card.hasContest(contestId))  { " card ${card.id()} does not have contest $contestId" }
         }
     }
 
@@ -130,9 +130,8 @@ class ClcaSamplerErrorTracker(
         require(cassorter.noerror == clcaErrorTracker.noerror)
         require(cassorter.assorter.upperBound() == clcaErrorTracker.upper)
         samples.forEach { (mvr, card) ->
-            // TODO replace with prn, but probably should be Pair<CardIF, AuditableCard> ??
-            // require(mvr.location() == card.location())  { "mvr location ${mvr.location()} != card.location ${card.location()}"}
-            require(card.hasContest(contestId))  { " card.location ${card.location()} does not have contest $contestId" }
+            require(mvr.id() == card.id())  { "mvr.id ${mvr.id()} != card.id ${card.id()}"}
+            require(card.hasContest(contestId))  { " card ${card.id()} does not have contest $contestId" }
         }
     }
 

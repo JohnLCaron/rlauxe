@@ -1,18 +1,20 @@
 package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.Batch
-import org.cryptobiotic.rlauxe.audit.BatchIF
+import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 
 // builds one AuditableCard
 class AuditableCardBuilder(
-    val location: String,
+    val id: String,
+    val location: String? = null,
     val index: Int,
     val prn: Long,
     val phantom: Boolean,
-    votesIn: Map<Int, IntArray>?,
-    val batch: BatchIF
+    val poolId: Int? = null,
+    votesIn: Map<Int, IntArray>? = null,
+    val cardStyle: CardStyleIF
 ) {
     val votes = mutableMapOf<Int, IntArray>()
 
@@ -20,7 +22,7 @@ class AuditableCardBuilder(
         if (votesIn != null) votes.putAll(votesIn)
     }
 
-    fun possibleContests() = batch.possibleContests()
+    fun possibleContests() = cardStyle.possibleContests()
 
     fun replaceContestVotes(contestId: Int, contestVotes: IntArray): AuditableCardBuilder  {
         votes[contestId] = contestVotes
@@ -33,18 +35,21 @@ class AuditableCardBuilder(
 
     fun build() : AuditableCard {
         return AuditableCard(
-            location, index, prn, phantom,
+            id, location, index, prn, phantom,
+            poolId = poolId,
             votes = votes,
-            cardStyle = batch
+            cardStyle = cardStyle
         )
     }
 
     companion object {
         fun fromCard(card: AuditableCard) = AuditableCardBuilder(
+            card.id,
             card.location,
             card.index,
             card.prn,
             card.phantom,
+            card.poolId,
             card.votes,
             card.cardStyle
         )
@@ -54,13 +59,14 @@ class AuditableCardBuilder(
 
 // builds one AuditableCard
 class CardWithBatchNameBuilder(
-    val location: String,
+    val id: String,
+    val location: String?,
     val index: Int,
     val prn: Long,
     val phantom: Boolean,
     votesIn: Map<Int, IntArray>?,
     val poolId: Int?,
-    val batchName: String? = null,
+    val cardStyle: String? = null,
 ) {
     val votes = mutableMapOf<Int, IntArray>()
 
@@ -68,8 +74,8 @@ class CardWithBatchNameBuilder(
         if (votesIn != null) votes.putAll(votesIn)
     }
 
-    constructor(location: String, index: Int, poolId: Int?, cardStyle: String?):
-            this(location, index, 0L, false, null,  poolId, cardStyle)
+    constructor(id: String, location: String?, index: Int, poolId: Int?, cardStyle: String?):
+            this(id, location, index, 0L, false, null,  poolId, cardStyle)
 
     fun replaceContestVotes(contestId: Int, contestVotes: IntArray): CardWithBatchNameBuilder  {
         votes[contestId] = contestVotes
@@ -82,8 +88,8 @@ class CardWithBatchNameBuilder(
 
     fun build(poolId:Int? = null) : CardWithBatchName {
         val useBatchName: String = when {
-            batchName != null -> batchName
-            !votes.isEmpty() -> Batch.fromCvr
+            cardStyle != null -> cardStyle
+            !votes.isEmpty() -> CardStyle.fromCvr
             else -> "unknown"
         }
         // data class CardWithBatchName (
@@ -97,7 +103,7 @@ class CardWithBatchNameBuilder(
         //    val batchName: String,            // batch name: "fromCvr" if no batch and its from a CVR (then votes is non null)
         //)
         return CardWithBatchName(
-            location, index, prn, phantom,
+            id, location, index, prn, phantom,
             votes = votes,
             poolId = poolId,
             styleName = useBatchName
@@ -106,6 +112,7 @@ class CardWithBatchNameBuilder(
 
     companion object {
         fun from(card: AuditableCard) = CardWithBatchNameBuilder(
+            card.id,
             card.location,
             card.index,
             card.prn,

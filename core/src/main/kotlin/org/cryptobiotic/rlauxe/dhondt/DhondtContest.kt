@@ -362,6 +362,7 @@ class DHondtContest(
         appendLine()
     }
 
+    // create a cvr for each vote
     fun createSimulatedCvrs(): List<Cvr> {
         val cvrs = mutableListOf<Cvr>()
         var count=0

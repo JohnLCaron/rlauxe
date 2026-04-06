@@ -2,11 +2,11 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.Batch
+import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CvrsToCardsWithBatchNameIterator
-import org.cryptobiotic.rlauxe.audit.BatchIF
+import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.Vunder
@@ -192,7 +192,7 @@ fun makeCardManifest(mvrs: List<Cvr>, pool: OneAuditPoolFromBallotStyle): List<A
     // could also run it through MergeBatchesIntoCardManifestIterable
     val cards = mutableListOf<AuditableCard>()
     cardsNoBatch.forEach { card ->
-        val batch = if (card.poolId == 42) pool else Batch.fromCvrBatch
+        val batch = if (card.poolId == 42) pool else CardStyle.fromCvrBatch
         cards.add( AuditableCard(card, batch))
     }
 
@@ -215,7 +215,7 @@ fun makeCardManifest(mvrs: List<Cvr>, pool: OneAuditPoolFromBallotStyle): List<A
 fun makeOneAuditTestContests(
     infos: Map<Int, ContestInfo>, // all the contests in the pools
     contestsToAudit: List<Contest>, // the contests you want to audit
-    cardStyles: List<BatchIF>,
+    cardStyles: List<CardStyleIF>,
     cardManifest: List<AuditableCard>,
     mvrs: List<Cvr>, // this must be just for tests
 ): Pair<List<ContestWithAssertions>, List<OneAuditPoolFromCvrs>> {
@@ -235,7 +235,7 @@ fun makeOneAuditTestContests(
 
 fun calcOneAuditPoolsFromMvrs(
     infos: Map<Int, ContestInfo>,
-    populations: List<BatchIF>,
+    populations: List<CardStyleIF>,
     mvrs: List<Cvr>,
 ): List<OneAuditPoolFromCvrs> {  // poolId -> CardPoolFromCvrs
 
@@ -253,4 +253,27 @@ fun calcOneAuditPoolsFromMvrs(
     }
 
     return poolsFromCvrs.values.toList()
+}
+
+class CardPoolTest(
+    override val poolName: String,
+    override val poolId: Int,
+    val possibleContests: IntArray,      // the list of possible contests.
+    val hasSingleCardStyle: Boolean,
+    val totalCards: Int,
+): CardPoolIF, CardStyleIF {
+    override fun name() = poolName
+    override fun id() = poolId
+    override fun hasSingleCardStyle() = hasSingleCardStyle
+    override fun ncards() = totalCards
+    override fun hasContest(contestId: Int) = possibleContests.contains(contestId)
+    override fun possibleContests() = possibleContests
+
+    override fun contestTab(contestId: Int): ContestTabulation? {
+        TODO("Not yet implemented")
+    }
+
+    override fun votesAndUndervotes(contestId: Int): Vunder {
+        TODO("Not yet implemented")
+    }
 }

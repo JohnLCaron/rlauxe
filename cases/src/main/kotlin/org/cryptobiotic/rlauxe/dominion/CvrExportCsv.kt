@@ -1,17 +1,19 @@
 package org.cryptobiotic.rlauxe.dominion
 
-import io.github.oshai.kotlinlogging.KotlinLogging
-import org.cryptobiotic.rlauxe.core.Cvr
+import org.cryptobiotic.rlauxe.audit.CardStyle
+import org.cryptobiotic.rlauxe.audit.CardPoolIF
+import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.util.CloseableIterator
 import org.cryptobiotic.rlauxe.util.ZipReader
 import java.io.*
 import java.nio.file.Files
+import kotlin.collections.associateBy
 import kotlin.collections.joinToString
 import kotlin.io.path.Path
 
-const val CvrExportCsvHeader = "id, group, contests, candidates0, candidates1, ...\n"
+const val CvrExportCsvHeader = "id, group, style, precinct, contests, candidates0, candidates1, ...\n"
 
-private val logger = KotlinLogging.logger("CvrExportCvs")
+// private val logger = KotlinLogging.logger("CvrExportCvs")
 
 fun readCvrExportCsv(line: String): CvrExport {
     val tokens = line.split(",")
@@ -20,6 +22,8 @@ fun readCvrExportCsv(line: String): CvrExport {
     var idx = 0
     val id = ttokens[idx++]
     val group = ttokens[idx++].toInt()
+    val style = ttokens[idx++].toInt()
+    val precinct = ttokens[idx++].toInt()
     val contestsStr = ttokens[idx++]
     val contestsTokens = contestsStr.split(" ")
     val contests : List<Int> = contestsTokens.map { it.trim().toInt() }
@@ -35,7 +39,7 @@ fun readCvrExportCsv(line: String): CvrExport {
     require(contests.size == work.size) { "contests.size (${contests.size}) != votes.size (${work.size})" }
 
     val votes = contests.zip(work).toMap()
-    return CvrExport(id, group, votes)
+    return CvrExport(id, group, style, precinct, votes)
 }
 
 fun cvrExportCsvIterator(filename: String): CloseableIterator<CvrExport> {
@@ -89,31 +93,45 @@ fun writeCvrExportCsvFile(cvrs: Iterator<CvrExport>, filename: String) {
 
 fun CvrExport.toCsv() = buildString {
     val contests = votes.map { it.key }
-    append("$id, $group, ${contests.joinToString(" ")}, ")
+    append("$id, $group, $ballotStyleId, $precinctPortionId, ${contests.joinToString(" ")}, ")
     contests.forEach {
         append("${votes[it]!!.joinToString(" ")}, ")
     }
     appendLine()
 }
 
-class CvrExportToCvrAdapter(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: Map<String, Int>?, val convertPoolIds: Boolean) : CloseableIterator<Cvr> {
-    val poolCounts = mutableMapOf<String, Int>()
+// converts CvrExport to CardWithBatchName, adds poolId, styleName, location
+class CvrExportToCardAdapter(val cvrExportIterator: CloseableIterator<CvrExport>, val pools: List<CardPoolIF>?, val convertPoolIds: Boolean) : CloseableIterator<CardWithBatchName> {
+    val poolMap = pools?.associateBy { it.name() } ?: emptyMap()
+    val poolCounts = mutableMapOf<String, Int>() // to assign index within the poool
+    var countIndex = 0
 
     override fun hasNext() = cvrExportIterator.hasNext()
-    override fun next(): Cvr {
+    override fun next(): CardWithBatchName {
         val cvrExport = cvrExportIterator.next()
-        val poolId = if (pools == null || cvrExport.group != 1) null else pools[ cvrExport.poolKey() ] // TODO not general
+        val pool = if (pools == null || cvrExport.group != 1) null else poolMap[ cvrExport.poolKey() ]
 
-        val convertId = if (!convertPoolIds || poolId == null) cvrExport.id else {
+        // TODO this is location. Perhaps we need to also store original id ?? So maybe output card ?
+        val location = if (!convertPoolIds || pool == null) null else {
             val poolName = cvrExport.poolKey()
             val poolCount =  poolCounts.getOrPut(poolName) { 0 }
             poolCounts[poolName] = poolCount + 1
-            "pool ${cvrExport.poolKey()} position${poolCount+1}"
+            "pool ${pool.name()} position${poolCount+1}"
         }
-        return cvrExport.toCvr(pools=pools, convertId)
+
+        val result = CardWithBatchName(
+            cvrExport.id,
+            location,
+            countIndex,
+            0,
+            phantom = false,
+            votes =  cvrExport.votes,
+            poolId = pool?.poolId,
+            styleName = pool?.name() ?: CardStyle.fromCvr,
+        )
+
+        countIndex++
+        return result
     }
     override fun close() = cvrExportIterator.close()
 }
-
-
-

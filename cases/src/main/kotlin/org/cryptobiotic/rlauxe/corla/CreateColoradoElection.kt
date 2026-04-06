@@ -44,7 +44,7 @@ open class CreateColoradoElection (
     val cardPools: List<OneAuditPoolFromBallotStyle>
     val ncards: Int
 
-    val batches: List<BatchIF>
+    val batches: List<CardStyleIF>
     val contests: List<ContestIF>
     val contestsUA: List<ContestWithAssertions>
     val publisher = Publisher(auditdir)
@@ -76,7 +76,7 @@ open class CreateColoradoElection (
         contests = makeContests()
 
         // have to save the mvrs and generate the cardManifest from them
-        ncards = createAndSaveMvrs()
+        ncards = createAndSaveUnsortedMvrs()
 
         val npopMap: Map<Int, Int> = if ((auditType.isPolling() && pollingMode!!.withoutBatches())) {
             contests.associate { it.id to ncards } // then the population is the entire set of cards. (wont go well)
@@ -194,7 +194,7 @@ open class CreateColoradoElection (
     override fun electionInfo() =
         ElectionInfo("Corla24$auditType$pollingMode", auditType, ncards(), contestsUA.size, pollingMode = pollingMode)
 
-    override fun batches() = if (auditType.isPolling() && pollingMode!!.withBatches()) batches else null // TODO !cvrsHaveUndervotes need batches
+    override fun cardStyles() = if (auditType.isPolling() && pollingMode!!.withBatches()) batches else null // TODO !cvrsHaveUndervotes need batches
     override fun cardPools() = if (auditType.isPolling() && pollingMode!!.withPools()) cardPools.map { it.toOneAuditPool() } else null
     override fun contestsUA() = contestsUA
     override fun ncards() = ncards
@@ -205,7 +205,7 @@ open class CreateColoradoElection (
         return TransformingIterator(unsortedMvrs) { mvr ->
             when {
                 mvr.phantom -> mvr
-                auditType.isClca() -> mvr.copy(poolId = null, styleName = Batch.fromCvr)
+                auditType.isClca() -> mvr.copy(poolId = null, styleName = CardStyle.fromCvr)
                 (auditType.isPolling() && pollingMode!!.withoutBatches()) -> mvr.copy(votes = null, styleName="OneBatch", poolId=0)
                 (auditType.isPolling()) -> mvr.copy(votes = null)
                 else -> throw IllegalStateException("Unknown what to do with mvr: $mvr")
@@ -221,7 +221,7 @@ open class CreateColoradoElection (
     // then create manifest from them. This is nonstandard, so we will do it here.
     // Could put this into createAuditRecord(reverse = true) ??
     // return number of cards
-    fun createAndSaveMvrs(): Int {
+    fun createAndSaveUnsortedMvrs(): Int {
         val unsortedMvrIterator = MvrsToCardsWithBatchNameIterator(
             Closer(CvrIteratorfromPools()),
             cardPools,

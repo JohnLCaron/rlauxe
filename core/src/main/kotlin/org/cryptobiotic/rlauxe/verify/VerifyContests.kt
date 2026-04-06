@@ -136,8 +136,8 @@ fun verifyManifest(
             //    print("")
 
             // 1. Check that all card locations and indices are unique, and the card prns are in ascending order
-            if (!locationSet.add(card.location)) {
-                results.addError("$count duplicate card.location ${card.location}")
+            if (!locationSet.add(card.id)) {
+                results.addError("$count duplicate card.id ${card.id}")
             }
 
             if (!indexSet.add(card.index)) {

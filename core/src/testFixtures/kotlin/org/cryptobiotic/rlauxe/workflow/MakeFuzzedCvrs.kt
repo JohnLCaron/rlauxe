@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.Batch
+import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.makeFuzzedCardFromCard
 
@@ -16,7 +16,7 @@ fun makeFuzzedCvrsForClca(infoList: List<ContestInfo>, cvrs: List<Cvr>, fuzzPct:
     val isIRV = infoList.associate { it.id to it.isIrv }
     var countChanged = 0
     val result =  cvrs.map { cvr ->
-        val card = AuditableCard( cvr.id, 0, prn=0, cvr.phantom, cvr.votes, cardStyle = Batch.fromCvrBatch)
+        val card = AuditableCard( cvr.id, null, 0, prn=0, cvr.phantom, null, cvr.votes, cardStyle = CardStyle.fromCvrBatch)
         val fuzzedCard = makeFuzzedCardFromCard(infos, isIRV, card, fuzzPct)
         val fuzzedCvr = Cvr( cvr.id, fuzzedCard.votes!!, cvr.phantom, cvr.poolId)
         if (fuzzedCvr != cvr)

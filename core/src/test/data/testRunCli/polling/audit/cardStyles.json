@@ -15,9 +15,8 @@
             "name": "style1",
             "id": 1,
             "possibleContests": [
-                0,
-                2,
-                4
+                1,
+                2
             ],
             "hasSingleCardStyle": false
         },
@@ -25,8 +24,7 @@
             "name": "style2",
             "id": 2,
             "possibleContests": [
-                0,
-                3,
+                1,
                 4
             ],
             "hasSingleCardStyle": false
@@ -35,7 +33,6 @@
             "name": "style3",
             "id": 3,
             "possibleContests": [
-                0,
                 1,
                 4
             ],

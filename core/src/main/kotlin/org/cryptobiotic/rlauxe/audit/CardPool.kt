@@ -9,7 +9,7 @@ import kotlin.collections.forEach
 
 const val unpooled = "unpooled"
 
-interface CardPoolIF: BatchIF {
+interface CardPoolIF: CardStyleIF {
     val poolName: String
     val poolId: Int
     fun contestTab(contestId: Int): ContestTabulation?

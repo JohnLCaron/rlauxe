@@ -4,6 +4,5 @@
     "ncards": 50500,
     "ncontests": 1,
     "cvrsContainUndervotes": true,
-    "poolsHaveOneCardStyle": true,
     "mvrSource": "testPrivateMvrs"
 }

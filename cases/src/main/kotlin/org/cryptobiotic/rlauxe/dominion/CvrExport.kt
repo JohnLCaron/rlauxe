@@ -6,7 +6,6 @@ import org.cryptobiotic.rlauxe.audit.unpooled
 
 // intermediate CVR representation for DominionCvrSummary
 data class CvrExport(val id: String, val group: Int, val ballotStyleId: Int, val precinctPortionId: Int, val votes: Map<Int, IntArray>) {
-    val poolCounts = mutableMapOf<String, Int>()
 
     // Calculate the pool name from the cvr id. Could pass in a function (CvrExport) -> pool name
     fun poolKey(): String {

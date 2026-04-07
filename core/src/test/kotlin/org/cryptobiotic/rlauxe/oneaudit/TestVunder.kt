@@ -44,10 +44,10 @@ class TestVunder {
             println("  vunders= ${vunders.cands()}")
         }
 
-        assertEquals("id=0, voteForN=1, votes={0=200, 1=123, 2=17}, nvotes=340 ncards=391, undervotes=51, missing=0", contestVotes[0].toString())
+        assertEquals("Vunder contestId=0, voteForN=1, votes={0=200, 1=123, 2=17}, nvotes=340 ncards=391, undervotes=51, missing=0", contestVotes[0].toString())
         assertTrue(checkEquivilentVotes(mapOf(0 to 200, 1 to 123, 2 to 17), contestVotes[0]!!.cands()))
 
-        assertEquals("id=1, voteForN=1, votes={0=71, 1=123, 2=3}, nvotes=197 ncards=248, undervotes=51, missing=0", contestVotes[1].toString())
+        assertEquals("Vunder contestId=1, voteForN=1, votes={0=71, 1=123, 2=3}, nvotes=197 ncards=248, undervotes=51, missing=0", contestVotes[1].toString())
         assertTrue(checkEquivilentVotes(mapOf(0 to 71, 1 to 123, 2 to 3), contestVotes[1]!!.cands()))
     }
 
@@ -74,7 +74,7 @@ class TestVunder {
         }
 
         assertTrue(checkEquivilentVotes(mapOf(0 to 200, 1 to 123, 2 to 17), vunders[0]!!.cands()))
-        assertEquals("id=0, voteForN=2, votes={0=200, 1=123, 2=17}, nvotes=340 ncards=391, undervotes=51, missing=196", vunders[0]!!.toString())
+        assertEquals("Vunder contestId=0, voteForN=2, votes={0=200, 1=123, 2=17}, nvotes=340 ncards=391, undervotes=51, missing=196", vunders[0]!!.toString())
     }
 
     // checkEquivilentVotes(vunder.candVotes, contestTab.votes)

@@ -30,6 +30,7 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
     override fun sortedManifest() = sortedManifest
     override fun batches() = auditRecord.readCardStyles()
     override fun pools() = auditRecord.readCardPools() // could test if batches are cardPools
+    override fun auditdir() = auditRecord.location
 
     override fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  {
         val mvrsForRound = readMvrsForRound(round)
@@ -113,8 +114,6 @@ open class PersistedMvrManager(val auditRecord: AuditRecord, val mvrWrite: Boole
         writeCardCsvFile(sampledMvrs , publisher.sampleMvrsFile(round))
         logger.info{"enterMvrs write sampledMvrs to '${publisher.sampleMvrsFile(round)}' for round $round"}
 
-        // TODO AuditRecord.previousMvrs do we really need to do this ??
-        // sampledMvrs.forEach { auditRecord.previousMvrs[it.prn] = it } // cumulative
         return true
     }
 

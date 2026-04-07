@@ -4,6 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyleIF
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
+import org.cryptobiotic.rlauxe.core.Cvr
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.util.CvrBuilder2
 import kotlin.collections.get
@@ -75,6 +76,22 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
             return VunderPool(vunders, "all", poolId, true)
         }
     }
+}
+
+// for viewer
+fun makeCvrsForVunderPool(pool: CardPool, vunderpool: VunderPool): List<Cvr> {
+    val rcvrs = mutableListOf<Cvr>()
+    var count = 1
+    while (!vunderpool.done()) {
+        val cvrId = "${pool.name()}-${count}"
+        val cvb2 = CvrBuilder2(cvrId, phantom = false, poolId = pool.poolId)
+        vunderpool.simulatePooledCvr(cvb2)
+        rcvrs.add(cvb2.build())
+        count++
+    }
+
+    rcvrs.shuffle()
+    return rcvrs
 }
 
 // for multiple batches, multiple contests and one "pool" of subtotaled votes

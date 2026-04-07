@@ -22,6 +22,8 @@ import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.margin2mean
 import org.cryptobiotic.rlauxe.util.roundUp
 import org.cryptobiotic.rlauxe.persist.CardManifest
+import org.cryptobiotic.rlauxe.persist.Publisher
+import org.cryptobiotic.rlauxe.persist.csv.writeCardCsvFile
 import kotlin.Double
 import kotlin.Int
 import kotlin.math.abs
@@ -43,6 +45,7 @@ private val showWork = false
 //   assertionRound.estimationResult = estimationResult
 
 class EstimateAudit(
+    val auditdir: String,
     val config: Config,
     val roundIdx: Int,
     val contests: List<ContestRound>,
@@ -67,7 +70,7 @@ class EstimateAudit(
         // each trial is running all the contests in the round (but only the minAssertion)
         val ntrials = if (auditType.isClca()) 1 else config.round.simulation.nsimTrials
         repeat(ntrials) { run ->
-            tasks.add(AuditTrialTask(roundIdx, run+1, config, contestsToAudit, pools, batches, cardManifest))
+            tasks.add(AuditTrialTask(auditdir, roundIdx, run+1, config, contestsToAudit, pools, batches, cardManifest))
         }
         val trialResults: List<List<AssertionTrialIF>> = ConcurrentTaskRunner<List<AssertionTrialIF>>().run(tasks, nthreads)
 
@@ -146,18 +149,21 @@ class EstimateAudit(
 
 // 1 trial, all contests
 class AuditTrialTask(
+    val auditdir: String,
     val roundIdx: Int,
     val run: Int,
     val config: Config,
     val contestsToAudit: List<ContestRound>,
     val pools: List<CardPool>?,
     val batches: List<CardStyleIF>?,
-    val cardManifest: CardManifest) : ConcurrentTask<List<AssertionTrialIF>> {
+    val cardManifest: CardManifest
+) : ConcurrentTask<List<AssertionTrialIF>> {
 
     override fun name() = "roundIdx $roundIdx Run $run"
 
     override fun run(): List<AssertionTrialIF> {
         val stopwatch = Stopwatch()
+        val simMvrs = mutableListOf<AuditableCard>()
 
         // TODO use VunderPoolsFuzzer when cvrsContainUndervotes = false
         // used for OA and Polling; different simulated pool data each run; TODO could use VunderPoolsFuzzer
@@ -177,7 +183,6 @@ class AuditTrialTask(
         }
 
         var cardSortedIndex = 1 // 1 based
-
         var countEstimatedCards = 0
         var countPoolCards = 0
         cardManifest.cards.iterator().use { sortedCardIter ->
@@ -191,7 +196,7 @@ class AuditTrialTask(
                     (card.poolId() != null && vunderPools != null) -> vunderPools.simulatePooledCard(card)
                     (vunderBatches != null) -> vunderBatches.simulatePooledCard(card)
                     (onePool != null) -> onePool.simulatePooledCard(card)
-                    else -> null
+                    else -> card // TODO was null; wtf ??
                 }
 
                 var include = false
@@ -207,15 +212,26 @@ class AuditTrialTask(
                     // sampledCards.add(card)
                     countEstimatedCards++
                     if (card.poolId() != null) countPoolCards++
+                    if (keepSimMvrs) simMvrs.add(mvr)
                 }
                 cardSortedIndex++
             }
         }
         logger.debug { "roundIdx $roundIdx $run countEstimatedCards=$countEstimatedCards took $stopwatch" }
 
+        if (keepSimMvrs) {
+            // hmm on subsequent rounds, wont you get diffferent simulation on previous cards ?
+            // yes but we skip cards already used using prevSamplesUsed ....
+            val publisher = Publisher(auditdir)
+            writeCardCsvFile(simMvrs , publisher.estMvrsFile(roundIdx, run))
+        }
+
         return contestTrials
     }
 }
+
+private val keepSimMvrs = false
+
 
 // 1 trial, 1 Clca contest
 class ContestClcaTrial(val run: Int,

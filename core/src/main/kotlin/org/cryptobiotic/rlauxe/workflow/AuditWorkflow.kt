@@ -43,6 +43,7 @@ import org.cryptobiotic.rlauxe.util.Stopwatch
 
         // estimate how many samples are needed for each contest, to satisfy the risk function,
         val estimate = EstimateAudit(
+            auditdir = mvrManager.auditdir(),
             config,
             auditRound.roundIdx,
             auditRound.contestRounds,

@@ -14,6 +14,7 @@ interface MvrManager {
     fun batches(): List<CardStyleIF>?
     fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  // Pair(mvr, cvr)
     fun writeMvrsForRound(round: Int): Int
+    fun auditdir() = "none"
 }
 
 // when the MvrManager supplies the audited mvrs, its a test

@@ -83,7 +83,7 @@ class ClcaDistributions {
         val auditRound = AuditRound(1, contestRounds = contestRounds, samplePrns = emptyList())
 
         // just want the sample estimation stuff
-        val optimistic = EstimateAudit(config,  auditRound.roundIdx, auditRound.contestRounds, mvrManager.pools(), mvrManager.batches(), mvrManager.sortedManifest())
+        val optimistic = EstimateAudit("none", config,  auditRound.roundIdx, auditRound.contestRounds, mvrManager.pools(), mvrManager.batches(), mvrManager.sortedManifest())
         return optimistic.run()
 
         /* was

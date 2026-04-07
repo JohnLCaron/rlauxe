@@ -36,7 +36,7 @@ data class Vunder(val contestId: Int, val poolId: Int?, val voteCounts: List<Pai
     }
 
     override fun toString() = buildString {
-        append("id=$contestId, voteForN=$voteForN, votes=${cands()}, nvotes=$nvotes ncards=$ncards, undervotes=$undervotes, missing=$missing")
+        append("Vunder contestId=$contestId, voteForN=$voteForN, votes=${cands()}, nvotes=$nvotes ncards=$ncards, undervotes=$undervotes, missing=$missing")
     }
 
     companion object {

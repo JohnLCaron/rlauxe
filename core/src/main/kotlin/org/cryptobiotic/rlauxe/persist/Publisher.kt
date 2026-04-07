@@ -96,6 +96,12 @@ class Publisher(val auditDir: String) {
         return "$dir/sampleMvrs$round.csv"
     }
 
+    fun estMvrsFile(round: Int, trial: Int): String {
+        val dir = "$auditDir/round$round"
+        validateOutputDir(Path.of(dir), ErrorMessages("sampleMvrsFile"))
+        return "$dir/estMvrs$trial.csv"
+    }
+
     // what round are we on?
     fun currentRound(): Int {
         var roundIdx = 1

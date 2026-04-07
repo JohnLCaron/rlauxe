@@ -41,7 +41,7 @@ class MakeElectionPrecinctOA {
 
     val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05,)
     val round = AuditRoundConfig(
-        SimulationControl(nsimTrials = 22),
+        SimulationControl(nsimTrials = 2),
         ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
         ClcaConfig(fuzzMvrs=.001), null)
 
@@ -203,16 +203,6 @@ class CreateSfprecinctOA(
             // val poolName = cvrExport.poolKey()  // TODO HEY poolKey()
             val pool = if (cvrExport.group != 1) null else poolMap[ precinctName ]
             val poolId = pool?.poolId
-
-            if (cvrExport.id == "26-143-00026_00143_000127") {
-                val wtf = cvrExport.votes.keys.toList().sum()
-                println("${cvrExport.votes.keys} sum = $wtf")
-                val hash = cvrExport.votes.keys.hashCode()
-                println(hash)
-                val pool = cardStyleMap[cvrExport.votes.keys]
-                println(pool)
-                print("")
-            }
 
             val style = if (cvrExport.group != 1) null else cardStyleMap[cvrExport.votes.keys]!!
 

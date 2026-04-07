@@ -9,7 +9,7 @@ class TestOneShot {
 
     @Test
     fun testOneShot() {
-        val auditdir = "$testdataDir/cases/sf2024/oap/audit"
+        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
         val record = AuditRecord.readFrom(auditdir)
         if (record == null) throw RuntimeException("record is null")
         require (record is AuditRecord)
@@ -32,6 +32,7 @@ class TestOneShot {
         val roundIdx = 4
         val auditRound = record.rounds[roundIdx-1]
         val estaudit = EstimateAudit(
+            auditdir,
             record.config,
             roundIdx,
             auditRound.contestRounds,

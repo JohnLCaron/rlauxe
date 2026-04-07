@@ -44,6 +44,7 @@ fun df(d: Double?) = if (d==null) "N/A" else "%6.4f".format(d)
 fun dfn(d: Double?, n: Int) = if (d==null) "N/A" else "%${n+2}.${n}f".format(d)
 fun pfn(d: Double?, n: Int=4) = if (d==null) "N/A" else "%${n+2}.${n}f%%".format(100*d)
 fun nfn(i: Int, n: Int) = "%${n}d".format(i)
+fun nfz(i: Int, n: Int) = i.toString().padStart(n, '0')
 fun sfn(s: String, n: Int) = "%${n}s".format(s)  // right justify in width n
 fun trunc(s: String, n:Int) : String {
     if (s.length > n) return s.substring(0,n)

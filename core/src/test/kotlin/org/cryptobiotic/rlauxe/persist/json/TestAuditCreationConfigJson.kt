@@ -10,56 +10,50 @@ import kotlin.test.assertTrue
 
 import kotlin.test.assertNotNull
 
-/*
 class TestAuditCreationConfigJson {
+// data class AuditCreationConfig(
+//    val auditType: AuditType, // must agree with ElectionInfo
+//    val riskLimit: Double = 0.05,
+//
+//    val seed: Long = secureRandom.nextLong(),
+//    val riskMeasuringSampleLimit: Int? = null, // the number of samples we are willing to audit; this turns the audit into a "risk measuring" audit
+//    val other: Map<String, Any> = emptyMap(),    // soft parameters
+//)
 
     @Test
     fun testRoundtrip() {
-        testRoundtrips(AuditConfig(AuditType.CLCA, seed = 12356667890L))
-        testRoundtrips(AuditConfig(AuditType.POLLING, seed = 12356667890L))
-        testRoundtrips(AuditConfig(AuditType.ONEAUDIT, seed = 12356667890L))
+        testRoundtrips(AuditCreationConfig(AuditType.CLCA, seed = 12356667890L))
+        testRoundtrips(AuditCreationConfig(AuditType.POLLING, seed = 12356667890L))
+        testRoundtrips(AuditCreationConfig(AuditType.ONEAUDIT, seed = 12356667890L))
 
         testRoundtrips(
-            AuditConfig(
-                AuditType.CLCA, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50, simFuzzPct=.111, contestSampleCutoff=10000,  version=2.0,
-                clcaConfig= ClcaConfig(fuzzMvrs = 0.42, apriori = TausRates(mapOf("oth-los" to .001, "oth-win" to .002)), d = 99)
-            )
+            AuditCreationConfig(
+                AuditType.CLCA, seed = 12356667890L, riskLimit=.03, riskMeasuringSampleLimit=42, other=mapOf("who" to "what"))
         )
         testRoundtrips(
-            AuditConfig(
-                AuditType.POLLING, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50, simFuzzPct=.111,
-                contestSampleCutoff=10000,  version=2.0,
-            pollingConfig= PollingConfig(d = 99)
-        )
+            AuditCreationConfig(
+                AuditType.POLLING, seed = 12356667890L, riskLimit=.03, riskMeasuringSampleLimit=4222, other=mapOf("who" to "2.0"))
         )
         testRoundtrips(
-            AuditConfig(
-                AuditType.ONEAUDIT, seed = 12356667890L, riskLimit=.03, nsimEst=42, quantile=.50, simFuzzPct=.111,
-                contestSampleCutoff=10000,  version=2.0,
-            )
+            AuditCreationConfig(
+                AuditType.ONEAUDIT, seed = 12356667890L, riskLimit=.03, riskMeasuringSampleLimit=4222, other=mapOf("who" to "22"))
         )
     }
 
-    fun testRoundtrips(target: AuditConfig) {
+    fun testRoundtrips(target: AuditCreationConfig) {
         testRoundtrip(target)
         testRoundtripIO(target)
     }
 
-    fun testRoundtrip(config: AuditConfig) {
-        val target = AuditCreationConfig.fromAuditConfig(config)
+    fun testRoundtrip(target: AuditCreationConfig) {
         val json = target.publishJson()
         val roundtrip = json.import()
         assertNotNull(roundtrip)
         assertEquals(roundtrip, target)
         assertTrue(roundtrip.equals(target))
-
-        val config2 = AuditConfig.fromCreationConfig(roundtrip)
-        val roundtrip2 = AuditCreationConfig.fromAuditConfig(config2)
-        assertEquals(roundtrip2, target)
     }
 
-    fun testRoundtripIO(config: AuditConfig) {
-        val target = AuditCreationConfig.fromAuditConfig(config)
+    fun testRoundtripIO(target: AuditCreationConfig) {
         val scratchFile = createTempFile().toFile()
         writeAuditCreationConfigJsonFile(target, scratchFile.toString())
 
@@ -71,4 +65,4 @@ class TestAuditCreationConfigJson {
 
         scratchFile.delete()
     }
-} */
+}

@@ -1,9 +1,5 @@
 package org.cryptobiotic.rlauxe.sf
 
-import org.cryptobiotic.rlauxe.testdataDir
-import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
-import kotlin.test.Test
-
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.core.ContestInfo
@@ -23,46 +19,6 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 import kotlin.collections.toList
-
-class MakeElectionPrecinctAndStyle {
-    val sfDir = "$testdataDir/cases/sf2024"
-    val castVoteRecordZip = "$sfDir/CVR_Export_20241202143051.zip"
-    val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
-    val auditdir = "$testdataDir/cases/sf2024/oaps/audit"
-    val contestManifestFilename = "ContestManifest.json"
-    val candidateManifestFile = "CandidateManifest.json"
-
-    val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05,)
-    val round = AuditRoundConfig(
-        SimulationControl(nsimTrials = 22),
-        ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
-        ClcaConfig(fuzzMvrs=.001), null)
-
-    val mvrSource: MvrSource = MvrSource.testPrivateMvrs
-
-    @Test
-    fun makeElectionPrecinctOA() {
-
-        val election = CreatePrecinctAndStyle(
-            castVoteRecordZip,
-            contestManifestFilename,
-            candidateManifestFile,
-            cvrExportCsv,
-            auditType = creation.auditType,
-            poolsHaveOneCardStyle=true,
-            mvrSource = mvrSource
-        )
-
-        createElectionRecord(election, auditDir = auditdir, validate = true)
-
-        val config = Config(election.electionInfo(), creation, round)
-        createAuditRecord(config, election, auditDir = auditdir, validate = true)
-
-        val result = startFirstRound(auditdir)
-        if (result.isErr) logger.error{ result.toString() }
-    }
-}
-
 
 private val logger = KotlinLogging.logger("CreateSfprecinctOA")
 
@@ -139,11 +95,13 @@ class CreatePrecinctAndStyle(
 
         val allCvrTabs = mutableMapOf<Int, ContestTabulation>()
         var cardCount = 0
+        var poolCount = 0
         cvrExportCsvIterator(cvrExportCsv).use { cvrIter ->
             while (cvrIter.hasNext()) {
                 cardCount++
                 val cvrExport: CvrExport = cvrIter.next()
                 if (cvrExport.group == 1) {
+                    poolCount++
                     val cardStyle = cardStyles.getOrPut(cvrExport.votes.keys) { CardStyle.from(cardStyles.size + 1, cvrExport.votes.keys) }
                     val poolName = poolName(cvrExport.precinctPortionId, cardStyle)
                     val pool = precinctPools.getOrPut(poolName) {
@@ -159,6 +117,7 @@ class CreatePrecinctAndStyle(
                 }
             }
         }
+        println("cardCount $cardCount poolCount $poolCount")
 
         return PrecinctData(precinctPools, allCvrTabs, cardStyles, unpool)
     }

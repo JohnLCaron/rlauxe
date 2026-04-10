@@ -9,14 +9,14 @@ class TestOneShot {
 
     @Test
     fun testOneShot() {
-        val auditdir = "$testdataDir/cases/sf2024/oa/audit"
+        val auditdir = "$testdataDir/cases/sf2024oasp/audit20"
         val record = AuditRecord.readFrom(auditdir)
         if (record == null) throw RuntimeException("record is null")
         require (record is AuditRecord)
 
         val writeOneshot = Publisher(auditdir).privateOneshotFile()
         val oneshot = OneShotAudit(auditdir)
-        oneshot.run(listOf(14,15,28), writeOneshot, show=true)
+        oneshot.run(null, writeOneshot, show=true)
 
         val oneshotNmvrs = record.readOneShotMvrs()
         println(oneshotNmvrs)

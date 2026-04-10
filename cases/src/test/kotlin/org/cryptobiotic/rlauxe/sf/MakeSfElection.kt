@@ -1,5 +1,6 @@
 package org.cryptobiotic.rlauxe.sf
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.*
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
@@ -8,8 +9,10 @@ import kotlin.test.Test
 import kotlin.test.fail
 
 class MakeSfElection {
+    private val logger = KotlinLogging.logger("AuditRecord")
+
     val sfDir = "$testdataDir/cases/sf2024"
-    val zipFilename = "$sfDir/CVR_Export_20241202143051.zip"
+    val castVoteRecordZip = "$sfDir/CVR_Export_20241202143051.zip"
     val cvrExportCsv = "$sfDir/$cvrExportCsvFile"
 
     @Test
@@ -20,11 +23,11 @@ class MakeSfElection {
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 22),
             ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
-            ClcaConfig(fuzzMvrs=.001), null)
+            ClcaConfig(), null)
 
         createSfElection(
             auditdir=auditdir,
-            zipFilename,
+            castVoteRecordZip,
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
@@ -54,13 +57,47 @@ class MakeSfElection {
 
         createSfElection(
             auditdir=auditdir,
-            zipFilename,
+            castVoteRecordZip,
             "ContestManifest.json",
             "CandidateManifest.json",
             cvrExportCsv = cvrExportCsv,
             creation,
             round,
         )
+    }
+
+    @Test
+    fun makePrecinctAndStyleOA() {
+        val auditdir = "$testdataDir/cases/sf2024/oaps/audit"
+        val contestManifestFilename = "ContestManifest.json"
+        val candidateManifestFile = "CandidateManifest.json"
+
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05,)
+        val round = AuditRoundConfig(
+            SimulationControl(nsimTrials = 22),
+            ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
+            ClcaConfig(fuzzMvrs=.001), null)
+
+        val mvrSource: MvrSource = MvrSource.testPrivateMvrs
+
+
+        val election = CreatePrecinctAndStyle(
+            castVoteRecordZip,
+            contestManifestFilename,
+            candidateManifestFile,
+            cvrExportCsv,
+            auditType = creation.auditType,
+            poolsHaveOneCardStyle=true,
+            mvrSource = mvrSource
+        )
+
+        createElectionRecord(election, auditDir = auditdir)
+
+        val config = Config(election.electionInfo(), creation, round)
+        createAuditRecord(config, election, auditDir = auditdir)
+
+        val result = startFirstRound(auditdir)
+        if (result.isErr) logger.error{ result.toString() }
     }
 }
 

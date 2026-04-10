@@ -53,6 +53,8 @@ data class Welford(
     override fun sum() = mean * count
     override fun mean() = mean
 
+    fun stddev() = sqrt(variance())
+
     override fun toString(): String {
         return "(count, mean, variance, sampleVariance, stddev) = ${this.count}, ${this.result()}, ${sqrt(variance())}"
     }

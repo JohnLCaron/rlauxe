@@ -103,7 +103,7 @@ class RunRemoveBoulderTask(
             }
             val successes = contestState.values.count { it == TestH0Status.StatRejectNull }
             val result = AuditResult(removeN, (auditRecord as AuditRecord).nmvrs, successes)
-            println("${name()} removeN=$removeN resilt=$result")
+            println("${name()} removeN=$removeN result=$result")
             results.add(result)
         }
         return results

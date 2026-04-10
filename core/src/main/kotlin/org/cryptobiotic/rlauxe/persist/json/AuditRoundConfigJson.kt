@@ -33,6 +33,7 @@ data class AuditRoundConfigJson(
     val sampling: ContestSampleControlJson,
     val clcaConfig: ClcaConfigJson?,
     val pollingConfig: PollingConfigJson?,
+    val other: Map<String, String>?
 )
 
 fun AuditRoundConfig.publishJson() = AuditRoundConfigJson(
@@ -40,6 +41,7 @@ fun AuditRoundConfig.publishJson() = AuditRoundConfigJson(
     this.sampling.publishJson(),
     this.clcaConfig?.publishJson(),
     this.pollingConfig?.publishJson(),
+    other = if (this.other.isEmpty()) null else this.other,
 )
 
 fun AuditRoundConfigJson.import() = AuditRoundConfig(
@@ -47,6 +49,7 @@ fun AuditRoundConfigJson.import() = AuditRoundConfig(
     this.sampling.import(),
     this.clcaConfig?.import(),
     this.pollingConfig?.import(),
+    other = this.other ?: emptyMap()
 )
 
 /*
@@ -95,7 +98,6 @@ data class ContestSampleControl(
     // val removeMaxContests: Int? = null, // remove top n estimated nmvrs contests, for plotting CaseStudiesRemoveNmax
 ) */
 
-
 @Serializable
 data class ContestSampleControlJson(
     val minRecountMargin: Double,
@@ -104,7 +106,7 @@ data class ContestSampleControlJson(
     val maxSamplePct: Double,
     val contestSampleCutoff: Int?,
     val auditSampleCutoff: Int?,
-    // val removeCutoffContests: Boolean,
+    val other: Map<String, String>
 )
 
 fun ContestSampleControl.publishJson() = ContestSampleControlJson(
@@ -113,7 +115,7 @@ fun ContestSampleControl.publishJson() = ContestSampleControlJson(
     this.maxSamplePct,
     this.contestSampleCutoff,
     this.auditSampleCutoff,
-    // this.removeCutoffContests,
+    this.other,
 )
 
 fun ContestSampleControlJson.import() =  ContestSampleControl(
@@ -122,7 +124,7 @@ fun ContestSampleControlJson.import() =  ContestSampleControl(
         this.maxSamplePct,
         this.contestSampleCutoff,
         this.auditSampleCutoff,
-        // this.removeCutoffContests,
+        this.other,
     )
 
 

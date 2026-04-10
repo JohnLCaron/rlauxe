@@ -29,7 +29,7 @@ data class AuditCreationConfig(
     val persistedWorkflowMode: PersistedWorkflowMode =
         if (auditType.isClca()) PersistedWorkflowMode.testClcaSimulated else PersistedWorkflowMode.testPrivateMvrs,
 
-    val other: Map<String, Any> = emptyMap(),    // soft parameters
+    val other: Map<String, String> = emptyMap(),    // soft parameters
 )
 */
 
@@ -40,6 +40,7 @@ data class AuditCreationConfigJson(
     val mvrSource: MvrSource?,
     val seed: String,  // dont trust JSON long parsing, see Issue#253
     val riskMeasuringSampleLimit: Int?,
+    val other: Map<String, String>?,
 )
 
 fun AuditCreationConfig.publishJson() = AuditCreationConfigJson(
@@ -48,6 +49,7 @@ fun AuditCreationConfig.publishJson() = AuditCreationConfigJson(
     null,
     this.seed.toString(radix=16),
     this.riskMeasuringSampleLimit,
+    other = if (this.other.isEmpty()) null else this.other,
 )
 
 fun AuditCreationConfigJson.import() = AuditCreationConfig(
@@ -55,6 +57,7 @@ fun AuditCreationConfigJson.import() = AuditCreationConfig(
     this.riskLimit,
     this.seed.toLong(radix=16),
     this.riskMeasuringSampleLimit,
+    this.other ?: emptyMap(),
 )
 
 /////////////////////////////////////////////////////////////////////////////////

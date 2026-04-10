@@ -143,24 +143,26 @@ For each pool, we know the expected number of loser, winner, and other votes ove
     otherVotes = pool.ncards() - winnerVotes - loserVotes
 ```
 
-The expected rates are the votes divided by Npop. These are also the probabilities of drawing a card from that pool with that 
-assort value.
+The expected rates are the number of votes divided by Npop. These are also the probabilities of drawing a card from that pool with that 
+assort value. These rates are known for each pool, they are not sample dependent.
 
 Then we extend equation 1 with the expected assort values from the pools:
 
 ````
+log T_i = ln(1.0 + lamda * (noerror - mui)) * p0  + Sum { ln(1.0 + lamda * (a_k - mui)) * p_k, k=1..n }   (eq 1)
+
 log T_i = ln(1.0 + lamda * (noerror - mui)) * p0 + Sum { ln(1.0 + lamda * (a_k - mui)) * p_k, k=1..n }
-          + Sum { ln(1.0 + lamda * (a_pk - mui)) * p_pk; over pools and pool types}              (eq 2)
+          + Sum { ln(1.0 + lamda * (a_pk - mui)) * p_pk; over pools and pool types }                      (eq 2)
 
 where 
     p0 is the probability of no error (mvr matches the cvr)
     p_k is the probability of error type k
     a_k is the value of x when error type k occurs
-    p_pk is the probability of getting pool p, type k
+    p_pk is the probability of getting pool p, type k occurs (k = winner, loser, other)
     a_pk is the assort value when pool p, type k occurs (k = winner, loser, other)
 ````
 
-And use this to find the optimal value of lambda.
+And use this to find the optimal value of lambda for OneAudit bets.
 
 The next two plots compare the current OneAudit results to previous OneAudit when there are no errors to see the improvement when using eq 2 to set optimal bets:
 
@@ -173,38 +175,40 @@ The next two plots compare the current OneAudit results to previous OneAudit whe
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots/oneaudit4/AuditsNoErrors4/AuditsNoErrors4LogLinear.html" rel="AuditsNoErrors4">![AuditsNoErrors4](plots/oneaudit4/AuditsNoErrors4/AuditsNoErrors4LogLinear.png)</a>
 
 
-### Estimating samples needed for OneAudit when there are no errors
+### Calculating the payoff and samples needed for OneAudit, for each kind of overstatement value
 
-The a_pk and p_pk values for OneAudit (eq 2 above) are known in advance, and do not need to be updated as we sample. We can estimate the
-number of samples needed for OneAudit when there are no errors in the CVR data, assuming an approximate µ_i = .5 and a constant bet of λc:
+The a_pk and p_pk values for OneAudit (eq 2 above) are known in advance, and do not need to be updated as we sample. We can estimate the payoff and the 
+number of samples needed for OneAudit (when there are no errors in the CVR data so the p_k = 0), assuming an approximate µ_i = .5 and a constant bet of λc:
 
     T_i = Prod (payoff_i, i= 1..i)
 
-over N trials, there will be N * p terms, where p is the probability of that term:   
+over N samples, there will be N * p terms, where p is the probability of that term:   
 ````
     T_n = (1 + λc (noerror − .5)) ^ (N*p0) * Prod { (1 + λc * (a_pk - 0.5)) ^ (N*p_pk) } = (1/alpha)
+
+solve for N:
 
     N * ln(1 + λc (noerror − .5))*p0 + N * Sum( ln(1 + λc (a_pk − .5)*p_pk) = ln(1/alpha)
     N = ln(1/alpha) / (ln(1 + λc (noerror − .5))*p0 + Sum( ln(1 + λc (a_pk − .5)*p_pk))     (eq 3)
 
-    where p0 = 1 - Sum (p_pk), and λc is taken as the optimal value using eq 2 when all error probabilities are 0.
+    where p0 = 1 - Sum (p_pk), and λc is taken as the optimal value when all error probabilities p_k are 0.
 ````
 
-This value of N estimates the mean of a distribution that has a fairly large variance.
-
 Suppose we have a OneAudit with one pool with 5% of the votes, and both the pool margin and the election margin are 2%,
-and there are no errors at all in the CVRs. The terms in equation 2 are:
+and there are no errors at all in the CVRs. The terms in equation 3 are:
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/betting/oapayoff/oapayoff.html" rel="OABettingPayoff">![OABettingPayoff](plots2/betting/oapayoff/oapayoff.png)</a>
 
+The _noerror_ term is from the non-pool samples that have a CVR, which is presumed to agree with the MVR. 
+The loser term here is always larger than the winner term in absolute value. 
 The _sum_ curve here is the payoff as a function of the bet lamda, and the optimal lamda gives the largest payoff. In this example, the optimal lamda is around 1.4. 
 
-As the percent of cards in OneAudit pools increase, the _loser_ teerm get large enough to curve the sum downward,
-and we get an optimal bet less than maxBet, so we need many more samples than CLCA without pools. Errors in the CVRs magnify the downward curve. A combination of small margin, large pool percentage and CVR errors will force the audit to a full hand count.
+As the percent of cards in OneAudit pools increase, the _loser_ term gets large enough to "overpower" the _noerror_ term and curve the sum downward.
+Then we get an optimal bet less than maxBet, so need many more samples than a CLCA without pools. 
+If there are errors in the CVRs, they magnify the downward curve. 
+A combination of small margin, large pool percentage and CVR errors will force the audit to a full hand count.
 
-**TODO**: can we detect when a OneAudit will always go to a full hand count even without CVR errors, based only on the margin and the pool averages? We can see when
-eq 3 goes negetive, which I think means on average the OneAudit will go to a hand count, but the large variance allows the possibility that it will stop
-short of a full count. OTOH we can probably use the calculated variance to estimate the probability of a full count.
+(Note that eq 3 is approximate, and only estimates the mean of a distribution that has a large variance)
 
 ## Choosing MaxLoss
 

@@ -9,7 +9,7 @@ fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCard, AuditableCard>>, e
     mvrCardPairs.forEachIndexed { index, (mvr, card) ->
         val nested = errs.nested("sample $index")
         var hasError = false
-        if (mvr.location != card.location || mvr.prn != card.prn || mvr.index != card.index && countErrs < 10) {
+        if (mvr.id != card.id || mvr.prn != card.prn || mvr.index != card.index && countErrs < 10) {
             hasError = true
             nested.add("*** Mvr location, prn, or index does not match card")
             countErrs++
@@ -37,7 +37,7 @@ fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCard, AuditableCard>>, e
 }
 
 fun AuditableCard.show() = buildString {
-    append("AuditableCard(location='$location', index=$index, sampleNum=$prn, phantom=$phantom")
+    append("AuditableCard(id='$id', index=$index, sampleNum=$prn, phantom=$phantom")
     if (poolId() != null) append(", poolId=${poolId()}")
     append(", styleName='${styleName()}'")
     append(", has possibleContests=${cardStyle.possibleContests().contentToString()}")

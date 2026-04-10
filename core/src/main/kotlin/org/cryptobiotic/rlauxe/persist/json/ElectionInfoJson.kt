@@ -32,7 +32,7 @@ data class ElectionInfo(
     val mvrSource: MvrSource =
         if (auditType.isClca()) MvrSource.testClcaSimulated else MvrSource.testPrivateMvrs,
 
-    val other: Map<String, Any> = emptyMap(),    // soft parameters to ease migration
+    val other: Map<String, String> = emptyMap(),    // soft parameters to ease migration
 ) */
 @Serializable
 data class ElectionInfoJson(
@@ -53,10 +53,9 @@ fun ElectionInfo.publishJson() = ElectionInfoJson(
     ncards = this.totalCardCount,
     ncontests = this.contestCount,
     cvrsContainUndervotes = this.cvrsContainUndervotes,
-    // poolsHaveOneCardStyle = this.poolsHaveOneCardStyle,
     pollingMode = this.pollingMode,
     mvrSource = this.mvrSource,
-    other = if (this.other.isEmpty()) null else this.other.publishJson(),
+    other = if (this.other.isEmpty()) null else this.other,
 )
 
 fun ElectionInfoJson.import() = ElectionInfo(
@@ -68,16 +67,8 @@ fun ElectionInfoJson.import() = ElectionInfo(
     // poolsHaveOneCardStyle = this.poolsHaveOneCardStyle,
     pollingMode = this.pollingMode,
     mvrSource = this.mvrSource ?: if (auditType.isClca()) MvrSource.testClcaSimulated else MvrSource.testPrivateMvrs,
-    other = if (this.other == null) emptyMap() else this.other.import(),
+    other = this.other ?: emptyMap(),
 )
-
-fun Map<String, Any>.publishJson(): Map<String, String> {
-    return this.mapValues { it.value.toString() }
-}
-
-fun Map<String, String>.import(): Map<String, Double> {
-    return this.mapValues { it.value.toDouble() } // TODO type info ??
-}
 
 /////////////////////////////////////////////////////////////////////////////////
 

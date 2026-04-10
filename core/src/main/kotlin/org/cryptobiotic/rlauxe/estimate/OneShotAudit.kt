@@ -2,15 +2,14 @@ package org.cryptobiotic.rlauxe.estimate
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.*
+import org.cryptobiotic.rlauxe.betting.TestH0Status
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
 import org.cryptobiotic.rlauxe.util.Stopwatch
 import org.cryptobiotic.rlauxe.workflow.PersistedMvrManager
 import java.io.FileOutputStream
 import java.io.OutputStreamWriter
-import kotlin.Int
 import kotlin.math.max
-import kotlin.use
 
 // AuditRecord must have privateMvrs; run actual audit to compare to estimation
 class OneShotAudit(
@@ -24,12 +23,23 @@ class OneShotAudit(
     val cardPools = mvrManager.pools()
     val mvrs = mvrManager.readCardsAndMerge(Publisher(auditdir).sortedMvrsFile())
 
-    fun run(skipContests: List<Int>, writeFile: String? = null, show:Boolean = false) {
-        println("OneShotAudit exclude $skipContests on $auditdir")
+    fun run(skipContests: List<Int>? = null, writeFile: String? = null, show: Boolean = false): Int {
 
         val stopwatch = Stopwatch()
         val mvrsIter = mvrs.iterator()
-        val contestsUAs = record.contests.filter { it.id !in skipContests }
+
+        // put last round for each contest
+        val contestStatus = mutableMapOf<Int, Boolean>()
+        for (round in record.rounds) {
+            for (contestRound in round.contestRounds) {
+                contestStatus[contestRound.id] =
+                    contestRound.status == TestH0Status.StatRejectNull || contestRound.status == TestH0Status.SampleSumRejectNull
+            }
+        }
+
+        val useSkipContests: List<Int> = skipContests ?: contestStatus.filter { !it.value }.map { it.key }
+        val contestsUAs = record.contests.filter { it.id !in useSkipContests }
+        println("OneShotAudit exclude $useSkipContests on $auditdir")
 
         val assertionAudits = mutableListOf<AssertionTrialIF>()
         contestsUAs.forEach { contestUA ->
@@ -94,18 +104,20 @@ class OneShotAudit(
 
         val maxAssertions = mutableMapOf<Int, Int>()
         assertionAudits.forEach {
-            println(it)
+            if (show) println(it)
             val maxSamples = maxAssertions.getOrPut(it.id()) { 0 }
             maxAssertions[it.id()] = max( maxSamples, it.nmvrs() )
         }
         println()
-        maxAssertions.toSortedMap().forEach { (id, count) -> println("$id: $count") }
+        if (show) maxAssertions.toSortedMap().forEach { (id, count) -> println("$id: $count") }
 
         if (writeFile != null) {
             val writer: OutputStreamWriter = FileOutputStream(writeFile).writer()
             maxAssertions.toSortedMap().forEach { (id, count) -> writer.write("$id: $count\n") }
+            writer.write("9999: $countCardsIncluded\n")
             writer.close()
         }
+        return countCardsIncluded
     }
 
     companion object {

@@ -155,7 +155,7 @@ data class ElectionInfo(
     val mvrSource: MvrSource =
         if (auditType.isClca()) MvrSource.testClcaSimulated else MvrSource.testPrivateMvrs,
 
-    val other: Map<String, Any> = emptyMap(),    // soft parameters to ease migration
+    val other: Map<String, String> = emptyMap(),    // soft parameters to ease migration
 ) {
     init {
         if (mvrSource == MvrSource.testClcaSimulated && auditType.isPolling()) {
@@ -180,7 +180,7 @@ data class AuditCreationConfig(
 
     val seed: Long = secureRandom.nextLong(),
     val riskMeasuringSampleLimit: Int? = null, // the number of samples we are willing to audit; this turns the audit into a "risk measuring" audit
-    val other: Map<String, Any> = emptyMap(),    // soft parameters
+    val other: Map<String, String> = emptyMap(),    // soft parameters
 ) {
     fun isRiskMeasuringAudit() = riskMeasuringSampleLimit != null
 }

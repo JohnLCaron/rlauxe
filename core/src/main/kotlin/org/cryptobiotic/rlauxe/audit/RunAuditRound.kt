@@ -4,6 +4,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.util.OnlyTask
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.persist.Publisher
@@ -119,6 +120,7 @@ fun runAllRoundsAndVerify(auditdir: String, maxRounds:Int=7, verify:Boolean = tr
         lastRound = runRound(inputDir = auditdir)
         if (lastRound == null) return false
         done = lastRound.auditIsComplete || lastRound.roundIdx > maxRounds
+        GeneralAdaptiveBetting.showCounts("round $lastRound")
     }
 
     if (lastRound != null) {

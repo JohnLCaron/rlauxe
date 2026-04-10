@@ -5,20 +5,27 @@ import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ClcaConfig
+import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ContestSampleControl
+import org.cryptobiotic.rlauxe.audit.MvrSource
 import org.cryptobiotic.rlauxe.audit.PollingConfig
 import org.cryptobiotic.rlauxe.audit.PollingMode
 import org.cryptobiotic.rlauxe.audit.SimulationControl
+import org.cryptobiotic.rlauxe.audit.createAuditRecord
+import org.cryptobiotic.rlauxe.audit.createElectionRecord
+import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.belgium.belgianElectionMap
 import org.cryptobiotic.rlauxe.belgium.createBelgiumElection
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
 import org.cryptobiotic.rlauxe.corla.createColoradoElection
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
+import org.cryptobiotic.rlauxe.sf.CreatePrecinctAndStyle
 import org.cryptobiotic.rlauxe.sf.createSfElection
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.test.Test
+import kotlin.test.fail
 
 class TestGenerateAllUseCases {
     val sfDir = "$testdataDir/cases/sf2024"
@@ -137,6 +144,43 @@ class TestGenerateAllUseCases {
     }
 
     @Test
+    fun makePrecinctAndStyleOA() {
+        val auditdir = "$testdataDir/cases/sf2024/oaps/audit"
+        val contestManifestFilename = "ContestManifest.json"
+        val candidateManifestFile = "CandidateManifest.json"
+
+        val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05,)
+        val round = AuditRoundConfig(
+            SimulationControl(nsimTrials = 22),
+            ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
+            ClcaConfig(), null)
+
+        val mvrSource: MvrSource = MvrSource.testPrivateMvrs
+
+
+        val election = CreatePrecinctAndStyle(
+            sfZipFile,
+            contestManifestFilename,
+            candidateManifestFile,
+            cvrExportCsv = "$sfDir/$cvrExportCsvFile",
+            auditType = creation.auditType,
+            poolsHaveOneCardStyle=true,
+            mvrSource = mvrSource
+        )
+
+        createElectionRecord(election, auditDir = auditdir)
+
+        val config = Config(election.electionInfo(), creation, round)
+        createAuditRecord(config, election, auditDir = auditdir)
+
+        val result = startFirstRound(auditdir)
+        if (result.isErr) {
+            println( result.toString() )
+            fail()
+        }
+    }
+
+    @Test
     fun makeSFElectionOA() {
         val auditdir = "$testdataDir/cases/sf2024/oa/audit"
 
@@ -144,7 +188,7 @@ class TestGenerateAllUseCases {
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 22),
             ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
-            ClcaConfig(fuzzMvrs=.001), null)
+            ClcaConfig(), null)
 
         createSfElection(
             auditdir=auditdir,
@@ -165,7 +209,7 @@ class TestGenerateAllUseCases {
         val round = AuditRoundConfig(
             SimulationControl(nsimTrials = 22),
             ContestSampleControl(contestSampleCutoff = 1000, auditSampleCutoff = 2000),
-            ClcaConfig(fuzzMvrs=.001), null)
+            ClcaConfig(), null)
 
         createSfElection(
             auditdir=auditdir,

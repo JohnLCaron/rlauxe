@@ -46,7 +46,7 @@ class VerifyAuditRoundCommitment(val auditRecordLocation: String) {
 
     fun verify(show: Boolean = false): VerifyResults {
         val result = VerifyResults()
-        result.addMessage("VerifyAuditRecord on $auditRecordLocation ")
+        result.addMessage("VerifyAuditRoundCommitment on $auditRecordLocation ")
         auditRecord.rounds.forEach { verifyRound(it, result) }
 
         verifyMultipleRoundSampling(result)
@@ -136,12 +136,9 @@ class VerifyAuditRoundCommitment(val auditRecordLocation: String) {
             val mycard = mycards.next()
             if (nextcards.hasNext()) {
                 val nextcard = nextcards.next()
-                if (mycard.location == "card9835" && round == 3 && contest.id == 9) {
-                    val wwtf = mycard.equals(nextcard)
-                }
 
-                if (mycard != nextcard) {
-                    result.addError("  failed ${mycard.location()} != ${nextcard.location}")
+                if (mycard.id() != nextcard.id() || mycard.prn() != nextcard.prn()) {
+                    result.addError("  failed on id or prn: ${mycard} != ${nextcard}")
                     return false
                 }
             }

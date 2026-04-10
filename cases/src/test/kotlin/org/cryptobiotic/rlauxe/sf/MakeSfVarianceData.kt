@@ -8,6 +8,7 @@ import org.cryptobiotic.rlauxe.util.ConcurrentTask
 import org.cryptobiotic.rlauxe.util.ConcurrentTaskRunner
 import org.cryptobiotic.rlauxe.persist.AuditRecord
 import org.cryptobiotic.rlauxe.audit.runAllRoundsAndVerify
+import org.cryptobiotic.rlauxe.betting.GeneralAdaptiveBetting
 import org.cryptobiotic.rlauxe.util.Welford
 import kotlin.collections.List
 import kotlin.collections.forEach
@@ -24,18 +25,30 @@ class MakeSfVarianceData {
         val topdir = "$testdataDir/cases/sf2024oa"
 
         val tasks = mutableListOf<ConcurrentTask<Boolean>>()
-        repeat(20) { run ->
-            tasks.add( RunOneAuditVarianceTask(run+1, topdir, AuditType.ONEAUDIT) )
+        repeat(1) { run ->
+            tasks.add( RunOneAuditVarianceTask(run+1, topdir, nsimTrials = 1) )
         }
 
-        val estResults = ConcurrentTaskRunner<Boolean>().run(tasks, nthreads=10) // OOM, reduce threads
+        val estResults = ConcurrentTaskRunner<Boolean>().run(tasks, nthreads=1) // OOM, reduce threads
         println(estResults)
+        //$prefix avoid      other  .0001  .001   .01 .05
+        // final      0    581,840   7901    42  2556   0 // nrun = 1, nsim = 1,  time= 7min 25sec, nthreads=1
+        // final      0 11,610,773  61453     0  5739   0 // nrun = 1, nsim = 20, time= 9min 39sec, nthreads=1 (but the sims are threaded)
+        // final      0 11,469,893  61703   149 13911   0 // nrun = 2, nsim = 10, time= 17min 49sec, nthreads=1
+        // final      0 17,379,813  81536     0 9808    0 // nrun = 2, nsim = 10, time= 33min 20sec, nthreads=1
+
+        // switch to comparing to prevBet, not maxBet
+        //$prefix    avoid      .0001   .001   .01   .05    > .05
+        //    final 592387     448956  92769 36000 11576     3086  // nrun = 1, nsim = 1,  time= 5min 53 sec, nthreads=1; <.001 91%
+        // decimate 603552     502552  72771 18183  7813     2233; 7 min 19 sec = 439 secs
+        // decimate 554191      13451  19250 13318  7361     1955; 2 min 12 sec = 132 secs
+        GeneralAdaptiveBetting.showCounts("final")
     }
 
     inner class RunOneAuditVarianceTask(
         val runIndex: Int,
         val topdir: String,
-        val auditType: AuditType,
+        val nsimTrials: Int,
     ) : ConcurrentTask<Boolean> {
         val auditdir = "$topdir/audit$runIndex"
 
@@ -44,7 +57,7 @@ class MakeSfVarianceData {
         override fun run(): Boolean {
             val creation = AuditCreationConfig(AuditType.ONEAUDIT, riskLimit=.05, )
             val round = AuditRoundConfig(
-                SimulationControl(nsimTrials = 22),
+                SimulationControl(nsimTrials = nsimTrials),
                 ContestSampleControl(minRecountMargin = .005, minMargin=0.0, contestSampleCutoff = 2500, auditSampleCutoff = 5000),
                 ClcaConfig(), null)
 
@@ -57,6 +70,7 @@ class MakeSfVarianceData {
                 creation,
                 round,
             )
+            GeneralAdaptiveBetting.showCounts("after create")
 
             return runAllRoundsAndVerify(auditdir)
         }
@@ -123,7 +137,7 @@ class MakeSfVarianceData {
         val tasks = mutableListOf<ConcurrentTask<List<AuditResult2>>>()
         repeat(8) { removeN ->
             val auditdir = "$testdataDir/cases/sf2024/clcan/audit$removeN"
-            tasks.add(RunRemoveSFtask( removeN+2,1, auditdir, AuditType.CLCA, nsimTrials=1))
+            tasks.add(RunRemoveSFtask( removeN+2,20, auditdir, AuditType.CLCA, nsimTrials=20))
         }
 
         val results: List<AuditResult2> =

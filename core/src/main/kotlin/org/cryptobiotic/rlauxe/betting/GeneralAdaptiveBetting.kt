@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalAtomicApi::class)
+
 package org.cryptobiotic.rlauxe.betting
 
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -10,8 +12,12 @@ import org.apache.commons.math3.optim.univariate.UnivariateObjectiveFunction
 import org.apache.commons.math3.optim.univariate.UnivariatePointValuePair
 import org.cryptobiotic.rlauxe.oneaudit.OneAuditAssortValueRates
 import org.cryptobiotic.rlauxe.util.dfn
+import org.cryptobiotic.rlauxe.util.doubleIsClose
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.math.ln
 import kotlin.math.max
+import kotlin.math.min
 
 // new design
 //  first round: use apriori and nphantoms for initial rate estimate
@@ -32,7 +38,10 @@ data class GeneralAdaptiveBetting(
     val upper = aprioriErrorRates.upper
     val taus = Taus(upper)
     val aprioriRates: Map<Double, Double>  // bassort -> rate
-    // var debug = false
+
+    var prevBet: Double = 0.0
+    var prevRates: Map<Double, Double> = emptyMap()
+    var avoidSeqCount = 0
 
     init {
         aprioriRates = makeAprioriErrorRates(aprioriErrorRates, nphantoms/Npop.toDouble())
@@ -51,7 +60,7 @@ data class GeneralAdaptiveBetting(
             val rate = scaled * shrinkTruncEstimateRate(
                 aprioriRate = aprioriRate,
                 measuredRate = errorRates[bassort] ?: 0.0,
-                sampleNum = trackerErrors.totalSamples,
+                sampleNum = trackerErrors.totalSamples, // TODO total samples increases, which would effect the rate
             )
             Pair(bassort, rate)
         }.toMap()
@@ -60,11 +69,12 @@ data class GeneralAdaptiveBetting(
     }
 
     // ease the first d samples in gradually
-    // For k ∈ {1, 2} we set a value d_k ≥ 0, capturing the degree of shrinkage to the a priori estimate p̃_k ,
-    // and a truncation factor eps_k ≥ 0, enforcing a lower bound on the estimated rate.
-    // Let p̂_ki be the sample rates at time i, e.g., p̂_2i = Sum(1{Xj = 0})/i , j=1..i
-    // Then the shrink-trunc estimate is:
-    //   p_̃ki := (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ epsk  ; COBRA eq (4)
+    // changes from COBRA: 1) use maxBet instead of eps_k; k != 2, its 5 or 7 (see ClcaErrors.md).
+    //  For k ∈ {1, 2} we set a value d_k ≥ 0, capturing the degree of shrinkage to the a priori estimate p̃_k ,
+    //  and a truncation factor eps_k ≥ 0, enforcing a lower bound on the estimated rate.
+    //  Let p̂_ki be the sample rates at time i, e.g., p̂_2i = Sum(1{Xj = 0})/i , j=1..i
+    //  Then the shrink-trunc estimate is:
+    //    p_̃ki := (d_k * p̃_k + i * p̂_k(i−1)) / (d_k + i − 1) ∨ epsk  ; COBRA eq (4)
 
     private fun shrinkTruncEstimateRate(
         aprioriRate: Double,
@@ -85,23 +95,62 @@ data class GeneralAdaptiveBetting(
         val mui = populationMeanIfH0(Npop, withoutReplacement=true, prevSamples)
         val maxBet = maxLoss / mui
 
-        val estRates = estimatedErrorRates(trackerErrors)
 
-        // TODO this is supposed to detect when optimization will always return maxBet; probably can do better
-        val nonzeroRates = estRates.filter { it.value > 0 }
+        allCount.fetchAndAdd(1)
+
+        val errorRates = trackerErrors.errorRates()
+        val nonzeroRates = errorRates.filter { it.value > 0 }
+
+        // detect when optimization will always return maxBet
         if (nonzeroRates.isEmpty() && oaAssortRates == null) return maxBet
+
+        // for OneAudit we have trackerErrors.totalSamples changing. So only avoid for 10 samples at a time
+        if (errorRates == prevRates && avoidSeqCount < 10) {
+            avoidSeqCount++
+            avoidCount.fetchAndAdd(1)
+            return min(prevBet, maxBet) // comment out to run anyway and see how we would do...
+        }
+        avoidSeqCount = 0
+        prevRates = errorRates
 
         val kelly = GeneralOptimalLambda(errorTracker.noerror(), nonzeroRates, oaAssortRates, mui=mui, maxBet=maxBet, debug = debug)
         val bet = kelly.solve()
         if (show && bet > 2.0) {
             println("bet $bet > 2; maxBet = $maxBet mui=$mui, nsamplesLeft=${Npop - prevSamples.numberOfSamples()}")
         }
+
+        if (showAvoid) {
+            // TODO how sensitive is payoff to small changes in the bet ??
+            //   according ClcaErrors.md, to "Only p2o is strongly dependent on the choice of lamda"
+            //   and BettingRiskFunctions "Betting Patoff" plot show that the payoff (sum) curve changes slowly
+            if (doubleIsClose(bet, prevBet, .0001)) count0001.fetchAndAdd(1)
+            else if (doubleIsClose(bet, prevBet, .001)) count001.fetchAndAdd(1)
+            else if (doubleIsClose(bet, prevBet, .01)) count01.fetchAndAdd(1)
+            else if (doubleIsClose(bet, prevBet, .05)) count05.fetchAndAdd(1)
+        }
+
+        prevBet = bet
         return bet
     }
 
     companion object {
         private val logger = KotlinLogging.logger("GeneralAdaptiveBetting")
         private val debug = false
+        private val showAvoid = true
+
+        // not clear we need AtomicInt; objects may be thread confined
+        val avoidCount = AtomicInt(0)
+        val allCount = AtomicInt(0)
+        val count05 = AtomicInt(0)
+        val count01 = AtomicInt(0)
+        val count001 = AtomicInt(0)
+        val count0001 = AtomicInt(0)
+
+        fun showCounts(prefix: String = "") {
+            val avoidPct = avoidCount.load() / allCount.load().toDouble()
+            println("$prefix avoid = $avoidCount ($avoidPct %) betCounts = $count0001 $count001 $count01 $count05 ")
+            logger.info{ "$prefix avoid = $avoidCount ($avoidPct %) betCounts = $count0001 $count001 $count01 $count05 " }
+        }
     }
 }
 

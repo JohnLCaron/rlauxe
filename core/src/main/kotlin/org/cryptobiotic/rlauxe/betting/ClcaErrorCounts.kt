@@ -30,7 +30,7 @@ data class ClcaErrorCounts(val errorCounts: Map<Double, Int>, val totalSamples: 
     val taus = Taus(upper)
 
     // errorCounts divided by totalSamples
-    fun errorRates() = errorCounts.mapValues { if (totalSamples == 0) 0.0 else it.value / totalSamples.toDouble() } // bassortValue -> rate
+    fun errorRates(): Map<Double, Double> = errorCounts.mapValues { if (totalSamples == 0) 0.0 else it.value / totalSamples.toDouble() } // bassortValue -> rate
     fun clcaErrorRates() = ClcaErrorRates(noerror, upper, errorRates())
     fun errorCounts() = errorCounts // bassortValue -> count
 

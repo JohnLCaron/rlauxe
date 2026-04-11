@@ -29,7 +29,7 @@ private val showDetails = false
 
 // "CSD" = hasStyle = true
 // "absent CSD" = hasStyle = false = noStyle
-// "single card" means each ballot has 1 card. on some cards theres only B, and on some cards there are both B and S (hasSingleCardStyle = false)
+// "single card" means each ballot has 1 card. on some cards theres only B, and on some cards there are both B and S (hasExactContests = false)
 // "multi card" mean that each ballot consists of c > 1 cards. Contest B is on all N ballots and on N of the N * c cards.
 //    Contest S is on N*p of the N*c cards. Assume c = 2, and that S is on a different card than B.
 
@@ -161,7 +161,7 @@ class TestHasStyles {
         val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
             Closer( testCards.iterator())) { card:AuditableCard ->
             val contests = card.votes!!.keys.toList().sorted()
-            card.copy(cardStyle = fixBatches[contests]!!)
+            card.copy(style = fixBatches[contests]!!)
         }
         val newBatched = mutableListOf<AuditableCard>()
         while (newBatchedIter.hasNext()) { newBatched.add(newBatchedIter.next()) }
@@ -354,7 +354,7 @@ class TestHasStyles {
         val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
             Closer( testCards.iterator())) { card:AuditableCard ->
             val contests = card.votes!!.keys.toList().sorted()
-            card.copy(cardStyle = card12)
+            card.copy(style = card12)
         }
         val newBatched = mutableListOf<AuditableCard>()
         while (newBatchedIter.hasNext()) { newBatched.add(newBatchedIter.next()) }
@@ -400,7 +400,7 @@ class TestHasStyles {
 
         val newBatchedIter: CloseableIterator<AuditableCard>  = TransformingIterator<AuditableCard, AuditableCard>(
             Closer( testCards.iterator())) { card:AuditableCard ->
-            card.copy(cardStyle = all)
+            card.copy(style = all)
         }
         val newBatched = mutableListOf<AuditableCard>()
         while (newBatchedIter.hasNext()) { newBatched.add(newBatchedIter.next()) }
@@ -417,7 +417,7 @@ class TestHasStyles {
     }
 
     fun createAndRunTestAuditCards(auditType: AuditType, name:String, topdir: String, contests: List<Contest>,
-                                   testCards: List<AuditableCard>, batches:List<CardStyleIF>): Boolean {
+                                   testCards: List<AuditableCard>, batches:List<StyleIF>): Boolean {
 
         // We find sample sizes for a risk limit of 0.05 on the assumption that the rate of one-vote overstatements will be 0.001.
         // val errorRates = PluralityErrorRates(0.0, 0.001, 0.0, 0.0, )

@@ -11,24 +11,24 @@ import org.cryptobiotic.rlauxe.util.ContestTabulation
  * card.possibleContests = list of contests that might be on this card.
  * Batch = "population batch" = a distinct container of cards, from which we can retreive named cards (even if its just by an index into a sorted list).
  * batch.possibleContests = list of contests that are in this batch.
- * batch.hasSingleCardStyle = true if all cards in the batch have a single known CardStyle = "we know exactly what contests are on each card".
+ * batch.hasExactContests = true if all cards in the batch have a single known CardStyle = "we know exactly what contests are on each card".
  */
 
 // multicard ballot
 data class BallotStyle(
     val name: String,
     val id: Int,
-    val hasSingleCardStyle: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
+    val hasExactContests: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
     val cardStyles: List<CardStyle>,      // one for each card; contests are disjoint
     val nballots: Int,                    // does this belong ?? or just for BallotPool
-)  : CardStyleIF {
+)  : StyleIF {
     val contests = mutableSetOf<Int>()
     init {
         cardStyles.forEach { cs -> cs.possibleContests.forEach { contests.add(it) } }
     }
     override fun name() = name
     override fun id() = id
-    override fun hasSingleCardStyle() = hasSingleCardStyle
+    override fun hasExactContests() = hasExactContests
     override fun hasContest(contestId: Int) = contests.contains(contestId)
     override fun possibleContests() = contests.toList().sorted().toIntArray()
     fun ncards() = cardStyles.size
@@ -43,7 +43,7 @@ data class BallotPool(
 ): CardPoolIF {
     override fun name() = ballotStyle.name
     override fun id() = ballotStyle.id
-    override fun hasSingleCardStyle() = ballotStyle.hasSingleCardStyle
+    override fun hasExactContests() = ballotStyle.hasExactContests
     override fun ncards() = nballots * ballotStyle.ncards()
 
     override fun hasContest(contestId: Int) = ballotStyle.hasContest(contestId)
@@ -59,7 +59,7 @@ data class BallotPool(
             val infos = cardStyle.possibleContests.associate { it to infos[it]!! }
             val tabs = cardStyle.possibleContests.associate { it to contestTabs[it]!! }
             CardPool(
-                cardStyle.name, cardStyle.id, cardStyle.hasSingleCardStyle,
+                cardStyle.name, cardStyle.id, cardStyle.hasExactContests,
                 infos, tabs, totalCards = ballotStyle.nballots
             )
         }
@@ -69,7 +69,7 @@ data class BallotPool(
     override fun contestTab(contestId: Int) = contestTabs[contestId]
     override fun votesAndUndervotes(contestId: Int): Vunder {
         val contestTab = contestTabs[contestId]!!
-        return contestTab.votesAndUndervotes(poolId, ncards(), hasSingleCardStyle())
+        return contestTab.votesAndUndervotes(poolId, ncards(), hasExactContests())
     }
 
     // one for each CardPool
@@ -81,7 +81,7 @@ data class BallotPool(
         val vunders = cardPool.possibleContests().associate { contestId ->
             Pair( contestId, cardPool.votesAndUndervotes(contestId))
         }
-        return VunderPool(vunders, cardPool.poolName, cardPool.poolId, cardPool.hasSingleCardStyle)
+        return VunderPool(vunders, cardPool.poolName, cardPool.poolId, cardPool.hasExactContests)
     }
 }
 

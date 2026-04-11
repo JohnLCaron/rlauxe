@@ -12,7 +12,7 @@ class CreateColoradoPolling (
     contestRoundFile: String,
     precinctFile: String,
     auditdir: String,
-    hasSingleCardStyle: Boolean,
+    hasExactContests: Boolean,
     pollingMode: PollingMode,
 ): CreateColoradoElection(
             electionDetailXmlFile,
@@ -20,7 +20,7 @@ class CreateColoradoPolling (
             precinctFile,
             AuditType.POLLING,
             auditdir,
-            hasSingleCardStyle=hasSingleCardStyle,
+            hasExactContests=hasExactContests,
             pollingMode=pollingMode) {
 
     val contestsPolling: List<ContestWithAssertions>
@@ -33,7 +33,7 @@ class CreateColoradoPolling (
 
     override fun contestsUA() = contestsPolling
 
-    override fun cardStyles(): List<CardStyleIF>? {
+    override fun cardStyles(): List<StyleIF>? {
         val allContests = contestsUA().map { it.id }.sorted().toIntArray()
         return when {
             (auditType.isPolling() && pollingMode!!.withoutBatches()) -> listOf(CardStyle("OneBatch", 0, allContests, false))

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.estimate
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.core.ContestWithAssertions
 import org.cryptobiotic.rlauxe.core.Cvr
@@ -18,7 +18,7 @@ class VunderPools(pools: List<CardPool>) {
             val vunders = pool.possibleContests().associate { contestId ->
                 Pair( contestId, pool.votesAndUndervotes(contestId))
             }
-            VunderPool(vunders, pool.poolName, pool.poolId, pool.hasSingleCardStyle)
+            VunderPool(vunders, pool.poolName, pool.poolId, pool.hasExactContests)
         }.associateBy { it.poolId }
     }
 
@@ -31,8 +31,8 @@ class VunderPools(pools: List<CardPool>) {
 
 // for one pool, multiple contests
 // vunders: Contest id -> Vunder
-// set Vunder.missing to 0 for hasSingleCardStyle=true
-class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int, val hasSingleCardStyle: Boolean) {
+// set Vunder.missing to 0 for hasExactContests=true
+class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: Int, val hasExactContests: Boolean) {
     val vunderPickers = vunders.mapValues { VunderPicker(it.value) } // Contest id -> VunderPicker
 
     fun simulatePooledCard(card: AuditableCard): AuditableCard {
@@ -44,7 +44,7 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
             if (vunderPicker == null) {
                 print("") // ignore
             } else if (vunderPicker.isEmpty()) {
-                if (hasSingleCardStyle) cardb.replaceContestVotes(contestId, intArrayOf()) // missing not allowed
+                if (hasExactContests) cardb.replaceContestVotes(contestId, intArrayOf()) // missing not allowed
             } else {
                 val cands = vunderPicker.pickRandomCandidatesAndDecrement()
                 if (cands != null) {
@@ -58,7 +58,7 @@ class VunderPool(vunders: Map<Int, Vunder>, val poolName: String, val poolId: In
     fun simulatePooledCvr(cvb2: CvrBuilder2) {
         vunderPickers.forEach { (contestId, vunderPicker) ->
             if (vunderPicker.isEmpty()) {
-                if (hasSingleCardStyle) cvb2.replaceContestVotes(contestId, intArrayOf()) // cant be missing so add an undervote
+                if (hasExactContests) cvb2.replaceContestVotes(contestId, intArrayOf()) // cant be missing so add an undervote
             } else {
                 val cands = vunderPicker.pickRandomCandidatesAndDecrement()
                 if (cands != null) {
@@ -95,7 +95,7 @@ fun makeCvrsForVunderPool(pool: CardPool, vunderpool: VunderPool): List<Cvr> {
 }
 
 // for multiple batches, multiple contests and one "pool" of subtotaled votes
-class VunderBatches(batches: List<CardStyleIF>, val onePool: VunderPool) {
+class VunderBatches(batches: List<StyleIF>, val onePool: VunderPool) {
     val batchMap = batches.associateBy { it.name() }
 
     // for the given pooled card with no votes, simulate one with votes, staying within the onePool vote totals.
@@ -115,7 +115,7 @@ class VunderBatches(batches: List<CardStyleIF>, val onePool: VunderPool) {
             // only contests still needed to audit are in OnePool
             if (vunderPicker != null) {
                 if (vunderPicker.isEmpty()) {
-                    if (batch.hasSingleCardStyle()) cardb.replaceContestVotes(
+                    if (batch.hasExactContests()) cardb.replaceContestVotes(
                         contestId,
                         intArrayOf()
                     ) // missing not allowed

@@ -13,11 +13,11 @@ import kotlin.sequences.plus
 
 //// Add batch reference when reading in CardNoBatch
 
-fun merge(cards: CloseableIterator<CardWithBatchName>, batches: List<CardStyleIF>?) : CloseableIterator<AuditableCard> {
+fun merge(cards: CloseableIterator<CardWithBatchName>, batches: List<StyleIF>?) : CloseableIterator<AuditableCard> {
     return MergeBatchesIntoCardManifestIterator(cards, batches ?: emptyList())
 }
 
-fun merge(cards: List<CardWithBatchName>, batches: List<CardStyleIF>?) : List<AuditableCard> {
+fun merge(cards: List<CardWithBatchName>, batches: List<StyleIF>?) : List<AuditableCard> {
     val iter = MergeBatchesIntoCardManifestIterator(Closer(cards.iterator()), batches ?: emptyList())
     val result = mutableListOf<AuditableCard>()
     while (iter.hasNext()) result.add(iter.next())
@@ -27,7 +27,7 @@ fun merge(cards: List<CardWithBatchName>, batches: List<CardStyleIF>?) : List<Au
 // read CardWithBatchName, add batch, output AuditableCard as Iterator
 class MergeBatchesIntoCardManifestIterator(
     val cardsIter: CloseableIterator<CardWithBatchName>,
-    batches: List<CardStyleIF>,
+    batches: List<StyleIF>,
 ): CloseableIterator<AuditableCard> {
     val batchMap = batches.associateBy{ it.name() }
 
@@ -53,7 +53,7 @@ class MergeBatchesIntoCardManifestIterator(
 // read CardWithBatchName, add batch, output AuditableCard as Iterable
 class MergeBatchesIntoCardManifestIterable(
     val cards: CloseableIterable<CardWithBatchName>,
-    val batches: List<CardStyleIF>,
+    val batches: List<StyleIF>,
 ): CloseableIterable<AuditableCard> {
 
     override fun iterator(): CloseableIterator<AuditableCard> = MergeBatchesIterator(cards.iterator(), batches)
@@ -61,7 +61,7 @@ class MergeBatchesIntoCardManifestIterable(
     // TODO use MergeBatchesIntoCardManifestIterator
     private class MergeBatchesIterator(
         val cardsIter: CloseableIterator<CardWithBatchName>,
-        batches: List<CardStyleIF>,
+        batches: List<StyleIF>,
     ): CloseableIterator<AuditableCard> {
         val batchMap = batches.associateBy { it.name() }
 
@@ -93,7 +93,7 @@ class CvrsToCardsWithBatchNameIterator(
     val type: AuditType,
     val cvrs: CloseableIterator<Cvr>,
     val phantomCvrs : List<Cvr>?,
-    batches: List<CardStyleIF>?,  //  either CardPool or CardStyle
+    batches: List<StyleIF>?,  //  either CardPool or CardStyle
 ): CloseableIterator<CardWithBatchName> {
 
     val batchMap = batches?.associateBy{ it.id() } ?: emptyMap()
@@ -149,7 +149,7 @@ class CvrsToCardsWithBatchNameIterator(
 
 class MvrsToCardsWithBatchNameIterator(
     val mvrs: CloseableIterator<Cvr>,
-    batches: List<CardStyleIF>, //  either CardPool or CardStyle
+    batches: List<StyleIF>, //  either CardPool or CardStyle
     phantomCvrs : List<Cvr>? = null,
     seed: Long? = null, // TODO not needed
 ): CloseableIterator<CardWithBatchName> {
@@ -201,7 +201,7 @@ class MvrsToCardsWithBatchNameIterator(
 // This is replacing MvrsToCardsWithBatchNameIterator in ElectionBuilder.createUnsortedMvrsInternal
 fun mvrsToAuditableCardsList(
     mvrs: List<Cvr>,
-    batches: List<CardStyleIF>?,
+    batches: List<StyleIF>?,
 ): List<CardWithBatchName> {
 
     val batchMap = batches?.associateBy{ it.id() } ?: emptyMap()
@@ -234,7 +234,7 @@ fun mvrsToAuditableCardsList(
 fun mvrsToAuditableCardsTest(
     type: AuditType,
     mvrs: List<Cvr>,
-    batches: List<CardStyleIF>?,
+    batches: List<StyleIF>?,
     seed: Long? = null,
 ): List<AuditableCard> {
 
@@ -262,7 +262,7 @@ fun mvrsToAuditableCardsTest(
             phantom = org.phantom,
             votes = votes,
             poolId = org.poolId,
-            cardStyle = useBatch,
+            style = useBatch,
         )
     }
 }

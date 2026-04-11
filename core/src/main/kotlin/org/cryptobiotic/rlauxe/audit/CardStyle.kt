@@ -8,13 +8,13 @@ import kotlin.collections.contains
  * card.possibleContests = list of contests that might be on this card.
  * Batch = "population batch" = a distinct container of cards, from which we can retreive named cards (even if its just by an index into a sorted list).
  * batch.possibleContests = list of contests that are in this batch.
- * batch.hasSingleCardStyle = true if all cards in the batch have a single known CardStyle = "we know exactly what contests are on each card".
+ * batch.hasExactContests = true if all cards in the batch have a single known CardStyle = "we know exactly what contests are on each card".
  */
-interface CardStyleIF {
+interface StyleIF {
     fun name(): String
     fun id(): Int
     fun possibleContests(): IntArray // the set of contests that might be on any card in the batch
-    fun hasSingleCardStyle(): Boolean // aka hasStyle: if all cards have exactly the contests in possibleContests()
+    fun hasExactContests(): Boolean // aka hasStyle: if all cards have exactly the contests in possibleContests()
     fun hasContest(contestId: Int): Boolean // "is in possibleContests()"
     // if you have these, then you're a CardPool
     //   fun ncards(): Int
@@ -25,11 +25,11 @@ data class CardStyle(
     val name: String,
     val id: Int,
     val possibleContests: IntArray,      // the list of possible contests.
-    val hasSingleCardStyle: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
-) : CardStyleIF {
+    val hasExactContests: Boolean,       // aka hasStyle: if all cards have exactly the contests in possibleContests
+) : StyleIF {
     override fun name() = name
     override fun id() = id
-    override fun hasSingleCardStyle() = hasSingleCardStyle
+    override fun hasExactContests() = hasExactContests
     override fun hasContest(contestId: Int) = possibleContests.contains(contestId)
     override fun possibleContests() = possibleContests
 
@@ -38,7 +38,7 @@ data class CardStyle(
         if (other !is CardStyle) return false
 
         if (id != other.id) return false
-        if (hasSingleCardStyle != other.hasSingleCardStyle) return false
+        if (hasExactContests != other.hasExactContests) return false
         if (name != other.name) return false
         if (!possibleContests.contentEquals(other.possibleContests)) return false
 
@@ -47,7 +47,7 @@ data class CardStyle(
 
     override fun hashCode(): Int {
         var result = id
-        result = 31 * result + hasSingleCardStyle.hashCode()
+        result = 31 * result + hasExactContests.hashCode()
         result = 31 * result + name.hashCode()
         result = 31 * result + possibleContests.contentHashCode()
         return result

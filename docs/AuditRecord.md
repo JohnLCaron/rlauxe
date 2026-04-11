@@ -1,33 +1,34 @@
 # The AuditRecord
-_last changed 03/20/2026_
+_last changed 04/11/2026_
 
 An _Audit Record_ may have the following files in it:
 
     $auditdir/
         // election record - output of createElectionRecord
-        batches.json          // BatchesJson: BatchIF -> Batch (optional) 
         cardManifest.csv      // AuditableCardCsv, may be zipped
         cardPools.csv         // CardPoolCsv:    CardPoolIF -> CardPool (optional)
+        cardStyles.json       // CardStylesJson: CardStyleIF -> CardStyle (optional) 
         contests.json         // ContestsUnderAuditJson
         electionInfo.json     // ElectionInfoJson 
 
         // auditRecord - output of createAuditRecord, after the seed has been chosen
         auditCreationConfig.json  // AuditCreationConfigJson 
         auditRoundPrototype.json  // auditRoundConfigJson ; prototype for auditRoundConfigX
-        auditSeed.json        // TODO ?
         sortedCards.csv       // AuditableCardCsv, sorted by prn, may be zipped
 
         roundX/
             auditEstX.json       // AuditRoundJson,  an audit state with estimation, ready for auditing
-            auditRoundConfigX.json  // auditRoundConfigJson, configuration for this round (new way)
+            auditRoundConfigX.json  // auditRoundConfigJson, configuration for this round
             auditStateX.json     // AuditRoundJson,  the results of the audit for this round
             sampleCardsX.csv     // AuditableCardCsv, complete sorted cards used for this round; matches samplePrnsX.csv
             sampleMvrsX.csv      // AuditableCardCsv, complete sorted mvrs used for this round; matches samplePrnsX.csv
             samplePrnsX.json     // SamplePrnsJson, complete sorted sample prns for this round
 
-        private/                  (test only)
+        private/                  (test only - not part of the public record)
             sortedMvrs.csv       // AuditableCardCsv, sorted by prn, matches sortedCards.csv, may be zipped
             unsortedMvrs.csv     // AuditableCardCsv (optional)
+
+Also see _core/src/main/kotlin/org/cryptobiotic/rlauxe/persist/Publisher.kt_. 
 
 ## Commitment Sequence
 
@@ -37,19 +38,19 @@ The election information is contained in the following files. The EA can modify 
 are correct. Before the seed is chosen in step 2, they are digitally signed and published publically (aka _committed to the Audit Record_), 
 and then may not be changed.
 
-        batches.json          // BatchesJson: BatchIF -> Batch (optional) 
         cardManifest.csv      // AuditableCardCsv, may be zipped
         cardPools.csv         // CardPoolCsv:    CardPoolIF -> CardPool (optional)
+        cardStyles.json       // CardStylesJson: CardStyleIF -> CardStyle (optional) 
         contests.json         // ContestsUnderAuditJson
         electionInfo.json     // ElectionInfoJson
 
 2. createAuditRecord : PRNG seed chosen, cards assigned PRNs
 
-The PRNG seed is chosen, and all the cards in the card manifest are assigned a PRN in order.
+The PRNG seed is chosen, and all the cards in the card manifest are assigned a PRN in sequence by the PRNG.
 The cards are then sorted by PRN and written to sortedCards.csv. These are commited to the Audit Record.
 The PRNG seed can only be chosen once and the cards immediately committed.
 
-        auditCreationConfig.json  // AuditCreationConfigJson
+        auditCreationConfig.json  // AuditCreationConfigJson (contains the seed)
         auditRoundPrototype.json  // auditRoundConfigJson ; prototype for auditRoundConfigX
         sortedCards.csv           // AuditableCardCsv, sorted by prn, may be zipped
 
@@ -79,7 +80,7 @@ Before the audit is run, these are committed to the Audit Record:
 
 5. Run Audit Round X
 
-The audit is run for round X, and the following file is committed to the Audit Record.
+The audit is run for round X, and the following file is committed to the Audit Record:
 
         roundX/
             auditStateX.json     // the results of the audit for this round
@@ -104,7 +105,7 @@ CompositeRecord. Run audits independently on the individual components.
 
 ## SingleRoundAudit vs Auditing with rounds
 
-When simulation and testing, its convenient to do the audit in a single round, with all MVRs available, skipping the estimation steps,
+For simulation and testing, its convenient to do the audit in a single round, with all MVRs available, skipping the estimation steps,
 and keeping everything in memory (no persistence).
 
 _AuditWorkflow_ and its subclasses (esp _PersistedWorkflow_) implement auditing with rounds. 
@@ -114,13 +115,4 @@ in the cases module.
 
 ### Auditing with rounds workflow
    
-      val auditdir = "my/audit/dir"
-      val election: CreateElectionIF = CreateYourElection(auditType, ...))
-      createElectionRecord("MyElection", election, auditdir)
-
-      val config = AuditConfig(...)
-      createAuditRecord(config, election, auditdir)
-
-      val result = startFirstRound(auditdir)
-      if (result.isErr) logger.error{ result.toString() }
-      logger.info{"startFirstBoulderRound took $stopwatch"}
+Running an audir round is done through the RunRlaRoundCli, or from the viewer.

@@ -6,7 +6,7 @@ import org.cryptobiotic.rlauxe.audit.CardStyle
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CvrsToCardsWithBatchNameIterator
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.util.ContestTabulation
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.estimate.Vunder
@@ -101,7 +101,7 @@ fun makeOneAuditTest(
             "pool42",
             42, // poolId
             voteTotals = mapOf(1 to ContestTabulation(info1, votesNoCvr, ncards=noCvrSize)),
-            hasSingleCardStyle = false,
+            hasExactContests = false,
             infos = infos,
         )
     pool.adjustCards = poolUnderVotes
@@ -144,7 +144,7 @@ fun makeMvrs(
     if (cvrNcards > 0) {
         val vunderCvrs = Vunder.fromNpop(contest.id, cvrUndervotes, cvrNcards, cvrVotes, info.voteForN)
         val cvrCvrs =
-            makeCvrsForOnePool(mapOf(info.id to vunderCvrs), "regularCvr", poolId = null, pool.hasSingleCardStyle())
+            makeCvrsForOnePool(mapOf(info.id to vunderCvrs), "regularCvr", poolId = null, pool.hasExactContests())
         mvrs.addAll(cvrCvrs) // makes a new, independent set of simulated Cvrs with the contest's votes, undervotes, and phantoms.
     }
 
@@ -155,7 +155,7 @@ fun makeMvrs(
             mapOf(info.id to vunderPool),
             pool.poolName,
             poolId = pool.poolId,
-            pool.hasSingleCardStyle()
+            pool.hasExactContests()
         )
         require(pool.ncards() == poolCvrs.size)
         mvrs.addAll(poolCvrs)
@@ -215,7 +215,7 @@ fun makeCardManifest(mvrs: List<Cvr>, pool: OneAuditPoolFromBallotStyle): List<A
 fun makeOneAuditTestContests(
     infos: Map<Int, ContestInfo>, // all the contests in the pools
     contestsToAudit: List<Contest>, // the contests you want to audit
-    cardStyles: List<CardStyleIF>,
+    cardStyles: List<StyleIF>,
     cardManifest: List<AuditableCard>,
     mvrs: List<Cvr>, // this must be just for tests
 ): Pair<List<ContestWithAssertions>, List<OneAuditPoolFromCvrs>> {
@@ -235,13 +235,13 @@ fun makeOneAuditTestContests(
 
 fun calcOneAuditPoolsFromMvrs(
     infos: Map<Int, ContestInfo>,
-    populations: List<CardStyleIF>,
+    populations: List<StyleIF>,
     mvrs: List<Cvr>,
 ): List<OneAuditPoolFromCvrs> {  // poolId -> CardPoolFromCvrs
 
     // The styles have the name, poolId, and contest list
     val poolsFromCvrs = populations.map { style ->
-        val poolFromCvr = OneAuditPoolFromCvrs(style.name(), style.id(), style.hasSingleCardStyle(), infos)
+        val poolFromCvr = OneAuditPoolFromCvrs(style.name(), style.id(), style.hasExactContests(), infos)
         style.possibleContests().forEach { poolFromCvr.contestTabs[it]  = ContestTabulation( infos[it]!!) }
         poolFromCvr
     }.associateBy { it.poolId }
@@ -259,12 +259,12 @@ class CardPoolTest(
     override val poolName: String,
     override val poolId: Int,
     val possibleContests: IntArray,      // the list of possible contests.
-    val hasSingleCardStyle: Boolean,
+    val hasExactContests: Boolean,
     val totalCards: Int,
-): CardPoolIF, CardStyleIF {
+): CardPoolIF, StyleIF {
     override fun name() = poolName
     override fun id() = poolId
-    override fun hasSingleCardStyle() = hasSingleCardStyle
+    override fun hasExactContests() = hasExactContests
     override fun ncards() = totalCards
     override fun hasContest(contestId: Int) = possibleContests.contains(contestId)
     override fun possibleContests() = possibleContests

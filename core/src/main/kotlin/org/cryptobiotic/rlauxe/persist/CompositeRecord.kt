@@ -5,7 +5,7 @@ import com.github.michaelbull.result.unwrap
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
@@ -25,7 +25,7 @@ data class CompositeRecord(
     val componentRecords: List<AuditRecord>,
 ): AuditRecordIF  {
 
-    override fun readSortedManifest(batches: List<CardStyleIF>?): CardManifest {
+    override fun readSortedManifest(batches: List<StyleIF>?): CardManifest {
         return componentRecords.first().readSortedManifest(batches)
     }
     override fun readSortedManifest(): CardManifest {
@@ -34,8 +34,8 @@ data class CompositeRecord(
 
     override fun readOneShotMvrs() = emptyMap<Int, Int>()
 
-    override fun readCardStyles(): List<CardStyleIF> {
-        val allBatches = mutableListOf<CardStyleIF>()
+    override fun readCardStyles(): List<StyleIF> {
+        val allBatches = mutableListOf<StyleIF>()
         for (component in componentRecords) {
             val cbatches = component.readCardStyles()
             if (cbatches != null) allBatches.addAll(cbatches)

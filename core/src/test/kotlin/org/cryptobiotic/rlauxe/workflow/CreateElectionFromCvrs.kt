@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CvrsToCardsWithBatchNameIterator
@@ -22,7 +22,7 @@ class CreateElectionFromCvrs (
     val cvrs: List<Cvr>, // includes phantoms
     val auditType: AuditType,
     val cardPools: List<CardPool>? = null,
-    val batches: List<CardStyleIF>? = null,
+    val batches: List<StyleIF>? = null,
     val mvrSource: MvrSource,
 ): ElectionBuilder {
 
@@ -54,7 +54,7 @@ class CreateElectionFromCards (
     val contestsUA: List<ContestWithAssertions>,
     val cards: List<AuditableCard>, // includes phantoms
     val cardPools: List<CardPool>? = null,
-    val batches: List<CardStyleIF>? = null,
+    val batches: List<StyleIF>? = null,
     val mvrSource: MvrSource? = null
 ): ElectionBuilder {
 

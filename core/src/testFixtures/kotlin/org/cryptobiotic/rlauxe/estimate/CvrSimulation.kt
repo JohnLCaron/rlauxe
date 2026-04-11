@@ -53,16 +53,16 @@ fun simulateCvrsForContest(contestUA: ContestWithAssertions, config: Config): Li
     return makeVunderCvrs(vunder, nphantoms, "simCvr", limit, null)
 }
 
-/* i think you need to do this by population, which is where you get hasSingleCardStyle
-fun ContestWithAssertions.votesAndUndervotes(hasSingleCardStyle: Boolean): Vunder {
+/* i think you need to do this by population, which is where you get hasExactContests
+fun ContestWithAssertions.votesAndUndervotes(hasExactContests: Boolean): Vunder {
     val contest = this.contest as Contest
 
     val voteCounts = contest.votes.map { Pair(intArrayOf(it.key), it.value) }
     val voteSum = contest.votes.values.sum()
     val voteForN = contest.info.voteForN
 
-    val result = if (hasSingleCardStyle) {
-        // if hasSingleCardStyle, then missing has to be zero
+    val result = if (hasExactContests) {
+        // if hasExactContests, then missing has to be zero
         // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
         // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
         val undervotes = this.Npop * voteForN - voteSum

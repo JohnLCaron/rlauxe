@@ -25,7 +25,7 @@ interface ElectionBuilder {
 
     // In EstimateAudit, we want to use pools to estimate with, if they exist. So the merging needs to merge pools, not the batches.
     // So dont write batches if there are pools. Also its up to the reader to prefer pools.
-    fun cardStyles(): List<CardStyleIF>?
+    fun cardStyles(): List<StyleIF>?
     fun cardPools(): List<CardPoolIF>?
 
     fun createUnsortedMvrsInternal(): List<CardWithBatchName>? // for in-memory case, poolId used also as batch name?

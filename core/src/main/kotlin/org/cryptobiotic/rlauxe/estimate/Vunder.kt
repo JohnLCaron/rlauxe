@@ -206,9 +206,9 @@ class VunderPicker(val vunder: Vunder) {
 }
 
 // multiple contests, one pool
-// set Vunder.missing to 0 for hasSingleCardStyle=true
-fun makeCvrsForOnePool(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, hasSingleCardStyle: Boolean): List<Cvr> {
-    val vunderpool = VunderPool(vunders, poolName, poolId ?: -1, hasSingleCardStyle)
+// set Vunder.missing to 0 for hasExactContests=true
+fun makeCvrsForOnePool(vunders: Map<Int, Vunder>, poolName: String, poolId: Int?, hasExactContests: Boolean): List<Cvr> {
+    val vunderpool = VunderPool(vunders, poolName, poolId ?: -1, hasExactContests)
 
     val rcvrs = mutableListOf<Cvr>()
     var count = 1

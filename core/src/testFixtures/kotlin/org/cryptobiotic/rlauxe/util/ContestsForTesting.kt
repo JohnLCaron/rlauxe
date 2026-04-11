@@ -140,7 +140,7 @@ fun makeContestsWithUndervotesAndPhantoms(
         contestVotes[idx] = Vunder.fromCandVotes(idx, candVotes, undervotes[idx], missing=missing, voteForN = voteForN)
     }
 
-    val cvrs = makeCvrsForOnePool(contestVotes, "ballot", poolId=42, hasSingleCardStyle = false)
+    val cvrs = makeCvrsForOnePool(contestVotes, "ballot", poolId=42, hasExactContests = false)
 
     // make the infos
     val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())

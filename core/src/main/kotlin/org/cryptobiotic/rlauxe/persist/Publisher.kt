@@ -48,9 +48,9 @@ class Publisher(val auditDir: String) {
     fun auditCreationConfigFile() = "$auditDir/auditCreationConfig.json"
     fun auditRoundProtoFile() = "$auditDir/auditRoundConfig.json"
     // fun auditSeedFile() = "$auditDir/auditSeed.json"
-    fun cardStylesFile() = "$auditDir/cardStyles.json"
     fun cardManifestFile() = "$auditDir/cardManifest.csv" // cardManifest
     fun cardPoolsFile() = "$auditDir/cardPools.csv"
+    fun cardStylesFile() = "$auditDir/cardStyles.json"
     fun contestsFile() = "$auditDir/contests.json"
     fun electionInfoFile() = "$auditDir/electionInfo.json"
     fun sortedCardsFile() = "$auditDir/sortedCards.csv" // sorted cardManifest

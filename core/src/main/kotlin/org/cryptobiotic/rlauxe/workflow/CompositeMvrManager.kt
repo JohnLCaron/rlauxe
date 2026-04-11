@@ -24,7 +24,7 @@ open class CompositeMvrManager(
     // override fun sortedManifest() = readCardManifestComposite(publisher)
     override fun sortedManifest() = auditRecord.readSortedManifest()
 
-    override fun batches(): List<CardStyleIF>? {
+    override fun batches(): List<StyleIF>? {
         return readBatchesComposite(publisher)
     }
 
@@ -68,7 +68,7 @@ open class CompositeMvrManager(
         return CardManifest(CloseableIterable { sortedCards.iterator() }, 0, emptyList())
     } */
 
-    private fun readBatchesComposite(publisher: Publisher): List<CardStyleIF>? {
+    private fun readBatchesComposite(publisher: Publisher): List<StyleIF>? {
         return if (!Files.exists(Path(publisher.cardStylesFile()))) null else
             readCardStylesJsonFileUnwrapped(publisher.cardStylesFile())
     }

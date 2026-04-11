@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.audit.AuditRound
 import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
 import org.cryptobiotic.rlauxe.core.*
@@ -35,9 +35,9 @@ interface AuditRecordIF {
     val rounds: List<AuditRoundIF>
 
     fun readSortedManifest(): CardManifest
-    fun readSortedManifest(batches: List<CardStyleIF>?): CardManifest
+    fun readSortedManifest(batches: List<StyleIF>?): CardManifest
     fun readOneShotMvrs(): Map<Int, Int>
-    fun readCardStyles(): List<CardStyleIF>?
+    fun readCardStyles(): List<StyleIF>?
 }
 
 class AuditRecord(
@@ -54,7 +54,7 @@ class AuditRecord(
     override val config = Config(electionInfo, auditCreationConfig, auditRoundConfig)
 
     // for efficiency, batches can be read once and stored by the caller
-    override fun readSortedManifest(batches: List<CardStyleIF>?): CardManifest {
+    override fun readSortedManifest(batches: List<StyleIF>?): CardManifest {
         // merge batch references into the Card
         val mergedCards: CloseableIterable<AuditableCard> =
             MergeBatchesIntoCardManifestIterable(
@@ -76,7 +76,7 @@ class AuditRecord(
         return CardManifest(mergedCards, electionInfo.totalCardCount)
     }
 
-    override fun readCardStyles(): List<CardStyleIF>? {
+    override fun readCardStyles(): List<StyleIF>? {
         return if (!Files.exists(Path(publisher.cardStylesFile()))) null else {
             val batchesResult = readCardStylesJsonFile(publisher.cardStylesFile())
             if (batchesResult.isOk) batchesResult.unwrap() else {

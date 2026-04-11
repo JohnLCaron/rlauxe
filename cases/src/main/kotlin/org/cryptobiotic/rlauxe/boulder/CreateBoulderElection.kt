@@ -146,7 +146,7 @@ class CreateBoulderElection(
 
             val name = cleanCsvString(redacted.ballotType)
             val id = redactedIdx
-            OneAuditPoolFromBallotStyle(name, id, hasSingleCardStyle=true, contestTabs, infoMap)
+            OneAuditPoolFromBallotStyle(name, id, hasExactContests=true, contestTabs, infoMap)
         }
     }
 
@@ -181,7 +181,7 @@ class CreateBoulderElection(
     private fun makeCvrsForOnePool(cardPool: OneAuditPoolFromBallotStyle) : List<Cvr> { // contestId -> candidateId -> nvotes
         val poolVunders = cardPool.possibleContests().map {  Pair(it, cardPool.votesAndUndervotes(it)) }.toMap()
         val cvrs =
-            makeCvrsForOnePool(poolVunders, cardPool.poolName, poolId = cardPool.poolId, cardPool.hasSingleCardStyle)
+            makeCvrsForOnePool(poolVunders, cardPool.poolName, poolId = cardPool.poolId, cardPool.hasExactContests)
         // TODO is it true that the number of cvrs can vary when there are multiple contests ?
         //if (cardPool.ncards() != cvrs.size)
         //    logger.warn{"cardPool.ncards ${cardPool.ncards()} != cvrs.size = ${cvrs.size}"}
@@ -209,7 +209,7 @@ class CreateBoulderElection(
     }
 
     private fun checkVunderEquivilentTab(vunder: Vunder, contestTab: ContestTabulation): Boolean {
-        // if hasSingleCardStyle, then missing has to be zero
+        // if hasExactContests, then missing has to be zero
         // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
         // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
         // val undervotes = npop * voteForN - voteSum

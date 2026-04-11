@@ -144,7 +144,7 @@ class TestGenerateAllUseCases {
     }
 
     @Test
-    fun makePrecinctAndStyleOA() {
+    fun makeSFPrecinctAndStyleOA() {
         val auditdir = "$testdataDir/cases/sf2024/oaps/audit"
         val contestManifestFilename = "ContestManifest.json"
         val candidateManifestFile = "CandidateManifest.json"

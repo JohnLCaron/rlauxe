@@ -4,7 +4,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.BallotPool
 import org.cryptobiotic.rlauxe.audit.BallotStyle
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.util.AuditableCardBuilder
 import org.cryptobiotic.rlauxe.core.*
@@ -137,12 +137,12 @@ data class MultiContestCombinePools(
         val vunders = pool.possibleContests().associate { contestId ->
             Pair( contestId, pool.votesAndUndervotes(contestId))
         }
-        VunderPool(vunders, pool.poolName, pool.poolId, pool.hasSingleCardStyle)
+        VunderPool(vunders, pool.poolName, pool.poolId, pool.hasExactContests)
     }
     val poolMap = pools.associateBy { it.poolId }
 
     // multicontest cards
-    fun makeCardsFromContests(): Pair<List<AuditableCard>, List<CardStyleIF>> {
+    fun makeCardsFromContests(): Pair<List<AuditableCard>, List<StyleIF>> {
         var nextCardId = 0
         val result = mutableListOf<AuditableCard>()
 
@@ -163,7 +163,7 @@ data class MultiContestCombinePools(
         val cvrb2 = CvrBuilder2("card${nextCardId}", false, poolId = pool.id())
         vunderPool.simulatePooledCvr(cvrb2)
         val cvr = cvrb2.build()
-        return AuditableCard("card${nextCardId}", null, nextCardId, 0L, false, null, cvr.votes, cardStyle = pool)
+        return AuditableCard("card${nextCardId}", null, nextCardId, 0L, false, null, cvr.votes, style = pool)
 
     }
 }
@@ -221,13 +221,13 @@ data class MultiContestFromBallotStyles(
         //     //     val name: String,
         //    //    val id: Int,
         //    //    val possibleContests: IntArray,      // the list of possible contests.
-        //    //    val hasSingleCardStyle: Boolean
+        //    //    val hasExactContests: Boolean
         val possibleContests = contests.map { it.id }.sorted().toIntArray()
         noCardStyle = CardStyle("noCardStyle", 0, possibleContests, false)  // aka "all"
     }
 
     // multicontest cards
-    fun makeCardsFromContests(): Pair<List<AuditableCard>, List<CardStyleIF>> {
+    fun makeCardsFromContests(): Pair<List<AuditableCard>, List<StyleIF>> {
         var nextCardIdx = 0
         var nextBallotIdx = 0
         val result = mutableListOf<AuditableCard>()
@@ -263,10 +263,10 @@ data class MultiContestFromBallotStyles(
         return Pair(result, cardStyles)
     }
 
-    private fun makeCard(cardName: String, cardId: Int, vunderPool: VunderPool, cardStyle:CardStyleIF): AuditableCard {
+    private fun makeCard(cardName: String, cardId: Int, vunderPool: VunderPool, cardStyle:StyleIF): AuditableCard {
         val cvrb2 = CvrBuilder2(cardName, false, poolId = cardStyle.id())
         vunderPool.simulatePooledCvr(cvrb2)
         val cvr = cvrb2.build()
-        return AuditableCard(cardName, null, cardId, 0L, false, null, cvr.votes, cardStyle = cardStyle)
+        return AuditableCard(cardName, null, cardId, 0L, false, null, cvr.votes, style = cardStyle)
     }
 }

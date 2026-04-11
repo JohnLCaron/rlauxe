@@ -32,7 +32,7 @@ open class CreateColoradoElection (
     precinctFile: String,
     val auditType: AuditType,
     val auditdir: String,
-    val hasSingleCardStyle: Boolean,
+    val hasExactContests: Boolean,
     val pollingMode: PollingMode?,
 ): ElectionBuilder {
     val roundContests: List<CorlaContestRoundCsv> = readColoradoContestRoundCsv(contestRoundFile)
@@ -44,7 +44,7 @@ open class CreateColoradoElection (
     val cardPools: List<OneAuditPoolFromBallotStyle>
     val ncards: Int
 
-    val batches: List<CardStyleIF>
+    val batches: List<StyleIF>
     val contests: List<ContestIF>
     val contestsUA: List<ContestWithAssertions>
     val publisher = Publisher(auditdir)
@@ -171,7 +171,7 @@ open class CreateColoradoElection (
             }
             OneAuditPoolFromBallotStyle(
                 "${precinct.county}-${precinct.precinct}", idx+1,
-                hasSingleCardStyle = hasSingleCardStyle, contestTabs, infoMap
+                hasExactContests = hasExactContests, contestTabs, infoMap
             )
         }
     }
@@ -287,7 +287,7 @@ open class CreateColoradoElection (
                 poolVunders,
                 cardPool.poolName,
                 poolId = cardPool.poolId,
-                cardPool.hasSingleCardStyle
+                cardPool.hasExactContests
             ).iterator()
         }
 
@@ -350,8 +350,8 @@ fun createColoradoElection(
 
     val election = if (creation.auditType.isClca())
         CreateColoradoElection(electionDetailXmlFile, contestRoundFile, precinctFile, creation.auditType, auditdir,
-                    hasSingleCardStyle=false, pollingMode=null) else
-        CreateColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile, auditdir, hasSingleCardStyle=false, pollingMode!!)
+                    hasExactContests=false, pollingMode=null) else
+        CreateColoradoPolling(electionDetailXmlFile, contestRoundFile, precinctFile, auditdir, hasExactContests=false, pollingMode!!)
 
     createElectionRecord(election, auditDir = auditdir, clear = false)
     val config = Config(election.electionInfo(), creation, round)

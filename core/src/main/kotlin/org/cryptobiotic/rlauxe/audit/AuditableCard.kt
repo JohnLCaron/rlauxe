@@ -14,25 +14,25 @@ data class AuditableCard (
     val phantom: Boolean,
     val poolId: Int?, // must be set if its from a CardPool
     val votes: Map<Int, IntArray>?,   // CVRs and phantoms
-    val cardStyle: CardStyleIF,
+    val style: StyleIF,
 ): CvrIF, CardIF {
 
     init {
-        if (CardStyle.useVotes(cardStyle.name()) && votes == null) {
-            throw RuntimeException("cardStyle '${cardStyle.name()}' must have non-null votes")
+        if (CardStyle.useVotes(style.name()) && votes == null) {
+            throw RuntimeException("cardStyle '${style.name()}' must have non-null votes")
         }
     }
 
-    constructor(card: CardWithBatchName, cardStyle: CardStyleIF): this(card.id, card.location, card.index, card.prn, card.phantom, card.poolId, card.votes, cardStyle)
-    constructor(cvr: Cvr, index: Int, prn: Long): this(cvr.id, null, index, prn, cvr.phantom, cvr.poolId, cvr.votes, cardStyle = CardStyle.fromCvrBatch)
+    constructor(card: CardWithBatchName, cardStyle: StyleIF): this(card.id, card.location, card.index, card.prn, card.phantom, card.poolId, card.votes, cardStyle)
+    constructor(cvr: Cvr, index: Int, prn: Long): this(cvr.id, null, index, prn, cvr.phantom, cvr.poolId, cvr.votes, style = CardStyle.fromCvrBatch)
 
     fun toCvr() = Cvr(id, votes!!, phantom, poolId()) // TODO can we get rid of?
 
     // "may have contest". Cvr hasContest does not allow missing, ie is not the same as "may have contest"
     override fun hasContest(contestId: Int): Boolean {
         return when {
-            CardStyle.useVotes(cardStyle.name()) -> votes!![contestId] != null // assumes cvrsContainUndervotes, use cardStyle if not.
-            else -> cardStyle.hasContest(contestId)
+            CardStyle.useVotes(style.name()) -> votes!![contestId] != null // assumes cvrsContainUndervotes, use cardStyle if not.
+            else -> style.hasContest(contestId)
         }
     }
 
@@ -44,7 +44,7 @@ data class AuditableCard (
     override fun votes() = votes
     override fun votes(contestId: Int): IntArray? = votes?.get(contestId)
     override fun poolId(): Int? = poolId
-    override fun styleName() = cardStyle.name()
+    override fun styleName() = style.name()
 
     override fun hasMarkFor(contestId: Int, candidateId: Int): Int {
         val contestVotes = votes?.get(contestId)
@@ -55,12 +55,12 @@ data class AuditableCard (
     // return sorted
     fun possibleContests() : IntArray {
         return when {
-            CardStyle.useVotes(cardStyle.name()) -> votes!!.keys.toList().sorted().toIntArray() // assumes cvrsContainUndervotes, use cardStyle if not.
-            else -> cardStyle.possibleContests().toList().sorted().toIntArray()
+            CardStyle.useVotes(style.name()) -> votes!!.keys.toList().sorted().toIntArray() // assumes cvrsContainUndervotes, use cardStyle if not.
+            else -> style.possibleContests().toList().sorted().toIntArray()
         }
     }
 
-    fun hasStyle() = cardStyle.hasSingleCardStyle()
+    fun hasStyle() = style.hasExactContests()
 
     //// Kotlin data class doesnt handle IntArray correctly
     override fun equals(other: Any?): Boolean {
@@ -71,7 +71,7 @@ data class AuditableCard (
         if (prn != other.prn) return false
         if (phantom != other.phantom) return false
         if (location != other.location) return false
-        if (cardStyle != other.cardStyle) return false
+        if (style != other.style) return false
 
         if ((votes == null) != (other.votes == null)) return false
         if (votes != null) {
@@ -88,7 +88,7 @@ data class AuditableCard (
         result = 31 * result + prn.hashCode()
         result = 31 * result + phantom.hashCode()
         result = 31 * result + location.hashCode()
-        result = 31 * result + cardStyle.hashCode()
+        result = 31 * result + style.hashCode()
         votes?.forEach { (contestId, candidates) -> result = 31 * result + contestId.hashCode() + candidates.contentHashCode() }
         return result
     }
@@ -98,7 +98,7 @@ data class AuditableCard (
         if (location != null) append("location='$location', ")
         append("index=$index, prn=$prn, phantom=$phantom")
         if (poolId != null) append("poolId=$poolId, ")
-        append(", has cardStyle ${cardStyle.name()} ${cardStyle.id()} possibleContests=${cardStyle.possibleContests().contentToString()} singleStyle=${cardStyle.hasSingleCardStyle()}")
+        append(", has cardStyle ${style.name()} ${style.id()} possibleContests=${style.possibleContests().contentToString()} singleStyle=${style.hasExactContests()}")
         append(")")
         if (votes != null) {
             appendLine()

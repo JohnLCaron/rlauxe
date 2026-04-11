@@ -30,7 +30,7 @@ fun simulateOneAuditRaire(N: Int, contestId: Int, ncands:Int, minMargin: Double,
     //    val name: String,
     //    val id: Int,
     //    val possibleContests: IntArray, // the list of possible contests.
-    //    val hasSingleCardStyle: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
+    //    val hasExactContests: Boolean,     // aka hasStyle: if all cards have exactly the contests in possibleContests
     //)
     val pop = CardStyle("simulateOneAuditRaire", 42, intArrayOf(contestId), true)
     val pools = calcOneAuditPoolsFromMvrs(

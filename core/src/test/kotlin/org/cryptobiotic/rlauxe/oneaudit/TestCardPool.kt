@@ -76,7 +76,7 @@ class TestCardPool {
         }
 
         //  TODO val cvrs2 = makeCvrsFromPopulations(test.populations)
-        val cvrs = makeCvrsForOnePool(contestVotes, "poolName", poolId = 42, test.hasSingleCardStyle)
+        val cvrs = makeCvrsForOnePool(contestVotes, "poolName", poolId = 42, test.hasExactContests)
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
 
         val cardPools = calcOneAuditPoolsFromMvrs(infos, test.cardStyleWithNcards, cvrs)
@@ -109,7 +109,7 @@ class TestCardPool {
         }
 
         // TODO val cvrs2 = makeCvrsFromPopulations(test.populations)
-        val cvrs = makeCvrsForOnePool(contestVotes, "poolName", poolId = 42, hasSingleCardStyle = false)
+        val cvrs = makeCvrsForOnePool(contestVotes, "poolName", poolId = 42, hasExactContests = false)
         val infos = contestsUAs.associate { Pair(it.id, it.contest.info()) }
         val cvrTabs = tabulateCvrs(cvrs.iterator(), infos)
 
@@ -119,7 +119,7 @@ class TestCardPool {
         assertEquals(cardPool, cardPool)
         assertEquals(cardPool.hashCode(), cardPool.hashCode())
 
-        val cardPool2 = cardPool.copy(hasSingleCardStyle = true)
+        val cardPool2 = cardPool.copy(hasExactContests = true)
         assertNotEquals(cardPool2, cardPool)
         assertNotEquals(cardPool2.hashCode(), cardPool.hashCode())
     }

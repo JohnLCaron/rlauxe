@@ -239,7 +239,7 @@ class CardsWithStylesAttack(
         return AuditableCard(org.id, org.location, cardIndex++, 0, phantom=org.phantom,
             org.poolId,
             votes,
-            cardStyle=org.cardStyle,
+            style=org.style,
         )
     }
 

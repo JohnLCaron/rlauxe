@@ -9,7 +9,7 @@ import kotlin.collections.forEach
 
 const val unpooled = "unpooled"
 
-interface CardPoolIF: CardStyleIF {
+interface CardPoolIF: StyleIF {
     val poolName: String
     val poolId: Int
     fun contestTab(contestId: Int): ContestTabulation?
@@ -20,14 +20,14 @@ interface CardPoolIF: CardStyleIF {
 data class CardPool(
     override val poolName: String,
     override val poolId: Int,
-    val hasSingleCardStyle: Boolean,
+    val hasExactContests: Boolean,
     val infos: Map<Int, ContestInfo>, // do we really need this ??
     val contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
     val totalCards: Int,
 ): CardPoolIF {
     override fun name() = poolName
     override fun id() = poolId
-    override fun hasSingleCardStyle() = hasSingleCardStyle
+    override fun hasExactContests() = hasExactContests
     override fun ncards() = totalCards
 
     override fun hasContest(contestId: Int) = contestTabs.contains(contestId)
@@ -37,7 +37,7 @@ data class CardPool(
 
     override fun votesAndUndervotes(contestId: Int): Vunder {
         val contestTab = contestTabs[contestId]!!
-        return contestTab.votesAndUndervotes(poolId, ncards(), hasSingleCardStyle)
+        return contestTab.votesAndUndervotes(poolId, ncards(), hasExactContests)
     }
 
     fun addTo(sumTab: MutableMap<Int, ContestTabulation>) {
@@ -59,7 +59,7 @@ data class CardPool(
         if (other !is CardPool) return false
 
         if (poolId != other.poolId) return false
-        if (hasSingleCardStyle != other.hasSingleCardStyle) return false
+        if (hasExactContests != other.hasExactContests) return false
         if (totalCards != other.totalCards) return false
         if (poolName != other.poolName) return false
         if (infos != other.infos) return false
@@ -70,7 +70,7 @@ data class CardPool(
 
     override fun hashCode(): Int {
         var result = poolId
-        result = 31 * result + hasSingleCardStyle.hashCode()
+        result = 31 * result + hasExactContests.hashCode()
         result = 31 * result + totalCards
         result = 31 * result + poolName.hashCode()
         result = 31 * result + infos.hashCode()

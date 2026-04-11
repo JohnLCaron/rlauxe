@@ -113,7 +113,7 @@ class TestCvrsToCards {
         testOneTarget("oa noStyle pooled", cvrp, target[1], auditType, hasCardStyles, cardPool.name(), expectBatch = cardPool)
     }
 
-    fun testOneTarget(what: String, cvr: Cvr, card: AuditableCard, auditType: AuditType, hasCardStyles: Boolean, expectStyle:String?, expectBatch:CardStyleIF?=null) {
+    fun testOneTarget(what: String, cvr: Cvr, card: AuditableCard, auditType: AuditType, hasCardStyles: Boolean, expectStyle:String?, expectBatch:StyleIF?=null) {
         println("$what [$auditType hasCardStyles:$hasCardStyles]:")
         println("  ${cvr.show()}")
         println("  ${card.show()}")
@@ -123,7 +123,7 @@ class TestCvrsToCards {
             assertEquals(cvr, card.toCvr())
             assertNotNull(card.votes)
             assertEquals(cvr.votes, card.votes)
-            assertEquals(null, card.poolId(), "poolId")
+            assertEquals(null, card.poolId(), "card.poolId() should be null")
 
         } else if (auditType.isPolling()) {
             assertNull(card.votes)

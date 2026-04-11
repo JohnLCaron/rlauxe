@@ -28,7 +28,7 @@ fun estimateSampleSizes(
     auditRound: AuditRoundIF,
     sortedManifest: CardManifest,
     cardPools: List<CardPool>?,
-    batches: List<CardStyleIF>?, // why dont you need batches ?
+    batches: List<StyleIF>?, // why dont you need batches ?
     previousSamples: Set<Long>,
     showTasks: Boolean = false,
     nthreads: Int = 32,

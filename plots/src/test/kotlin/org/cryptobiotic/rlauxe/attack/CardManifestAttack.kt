@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.ElectionBuilder
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
@@ -271,7 +271,7 @@ class CreateElectionForAttack(
     val contestsUA: List<ContestWithAssertions>,
     val cards: List<CardWithBatchName>,
     val mvrs: List<Cvr>,
-    val populations: List<CardStyleIF>?,
+    val populations: List<StyleIF>?,
     val cardPools: List<CardPool>?,
 ): ElectionBuilder {
 
@@ -293,11 +293,11 @@ fun ContestWithAssertions.showSimple() = buildString {
 
 ////////////////////////////////////////////
 // TODO get rid of
-data class OneAuditPoolForAttack(override val poolName: String, override val poolId: Int, val hasSingleCardStyle: Boolean,
+data class OneAuditPoolForAttack(override val poolName: String, override val poolId: Int, val hasExactContests: Boolean,
                         val ncards: Int, val regVotes: Map<Int, ContestVotes>) : CardPoolIF {
     override fun name() = poolName
     override fun id() = poolId
-    override fun hasSingleCardStyle() = hasSingleCardStyle
+    override fun hasExactContests() = hasExactContests
 
     override fun hasContest(contestId: Int) = regVotes[contestId] != null
     override fun ncards() = ncards

@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.workflow
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.core.CvrIF
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.persist.CardManifest
@@ -11,7 +11,7 @@ import org.cryptobiotic.rlauxe.util.CloseableIterator
 interface MvrManager {
     fun sortedManifest(): CardManifest
     fun pools(): List<CardPool>?
-    fun batches(): List<CardStyleIF>?
+    fun batches(): List<StyleIF>?
     fun makeMvrCardPairsForRound(round: Int): List<Pair<CvrIF, AuditableCard>>  // Pair(mvr, cvr)
     fun writeMvrsForRound(round: Int): Int
     fun auditdir() = "none"

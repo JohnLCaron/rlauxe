@@ -1,7 +1,7 @@
 **rlauxe ("r-lux")**
 
 WORK IN PROGRESS
-_last changed: 03/24/2026_
+_last changed: 04/11/2026_
 
 A library for [Risk Limiting Audits](https://en.wikipedia.org/wiki/Risk-limiting_audit) (RLA), based on Philip Stark's SHANGRLA framework and related code.
 The Rlauxe library is an independent implementation of the SHANGRLA framework, based on the
@@ -71,8 +71,8 @@ in a risk-limiting audit with risk limit α:
 | assertion | asserts that the average of the assorter values is > 1/2: "half-average assertion"          |
 | riskFn    | the statistical method used to test if the assertion is true.                               |
 | Nc        | a trusted, independent bound on the number of valid cards cast in the contest c.            |
-| Ncast     | the number of cards validly cast in the contest                                             |
-| Npop      | the number of cards that might contain the contest                                          |
+| Ncast     | the number of cards validly cast in the contest that we have an accounting of.              |
+| Npop      | the number of physical cards that might contain the contest.                                |
 
 
 # Rlauxe Workflow Overview
@@ -202,7 +202,7 @@ population mean](docs/AlphaMart.md#truncated-shrinkage-estimate-of-the-populatio
 # Comparing Sample Sizes by Audit type
 
 Here  we characterize the number of samples needed for each audit type. For clarity of presentaton, we
-assume we have only one contest, and also ignore the need to estimate sizes for each audit round. This is a 
+assume we have only one contest, and ignore the need to estimate sizes for each audit round. This is a 
 _one sample at a time_ audit, which terminates as soon as the risk limit is confirmed or rejected. 
 
 In the section [Estimating Sample Batch sizes](#estimating-sample-batch-sizes) below, we deal with the 
@@ -210,15 +210,15 @@ need to estimate a batch size, and the extra overhead of audit rounds. In the se
 [Multiple Contest Auditing](#multiple-contest-auditing) below, we deal with the complexity of having multiple contests
 on ballots.
 
-In general, samplesNeeded is independent of the population size Npop. Rather, samplesNeeded depends on the _diluted margin_ 
-as well as the random sequence of ballots chosen to be hand audited. (Actually there is a slight dependence on N for 
-_without replacement_ audits that increases as the sample size approaches N.)
+In general, samplesNeeded is independent of the population size Npop, and depends only on the _diluted margin_ 
+and the random sequence of ballots chosen to be hand audited (aka _sampled_). (Actually there is a slight dependence on N for 
+_without replacement_ audits, that gets larger as the sample size approaches N.)
 
 The following plots are simulations, averaging the results over the stated number of runs.
 
 ## Samples needed with no errors
 
-The best case needing the least samples is CLCA when there are no errors in the CVRs, and no phantom ballots. Then 
+The best case using the least samples is CLCA when there are no errors in the CVRs, and no phantom ballots. Then 
 the samplesNeeded depend only on the margin, and is a straight line vs margin on a log-log plot. 
 
 The smallest sample size for CLCA when there are no errors is when you always bet the maximum (1/µ_i, approximately 2). 
@@ -229,7 +229,8 @@ Here is a plot of CLCA no-error audits with the bet limited to 70, 80, 90, and 1
 
 <a href="https://johnlcaron.github.io/rlauxe/docs/plots2/samplesNeeded/clcaNoErrorsMaxRisk/clcaNoErrorsMaxRiskLogLog.html" rel="clcaNoErrorsMaxRiskLogLog">![clcaNoErrorsMaxRiskLogLog](docs/plots2/samplesNeeded/clcaNoErrorsMaxRisk/clcaNoErrorsMaxRiskLogLog.png)</a>
 
-The bet limit is the "maximum risk", expressed as a percent of the maximum bet.
+MaxRisk is the percent of the maximum bet allowed. The maximum bet = 1/µ_i (approximately 2), which varies slightly as the
+sampling proceeds (see populationMeanIfH0 in org.cryptobiotic.rlauxe.betting.Utils).
 At any setting of maximum bet, the CLCA assort value is always the same when there are no errors, and so there is no variance,
 and the plot above shows the exact number of samples needed as a function of margin and maximum risk.
 
@@ -398,7 +399,7 @@ The _consistent sampling_ algorithm reads through the sorted Card Manifest and c
 
 Each round does its own consistent sampling without regard to the previous round's results. Previously audited MVRS are always used again in subsequent rounds, for contests that continue to the next round. The auditors only have to find and hand audit the _new mvrs_ that havent been audited before.
 
-## Estmation extra mvrs and number of rounds
+## Estimating extra mvrs and number of rounds
 
 Using the above algorithm for estimating samples sizes, here are the extra samples and average number of rounds for the three audit types:
 
@@ -559,10 +560,10 @@ See [BettingRiskFunctions](docs/BettingRiskFunctions.md) for more info.
 **OneAudit Betting strategy**
 
 OneAudit uses GeneralizedAdaptiveBetting and includes the OneAudit assort values and their known
-frequencies in computing the optimal betting values. See [Betting with oneaudit pools](docs/BettingRiskFunctions.md#betting-with-oneaudit-pools) 
+frequencies in computing the optimal betting values. See [Betting with OneAudit pools](docs/BettingRiskFunctions.md#betting-with-oneaudit-pools) 
 to see how this improves OneAudit sample sizes.
 
-**MaxLoss for Betting**
+**MaxRisk for Betting**
 
 In order to prevent stalls in BettingMart, the maximum bet is bounded by a "maximum loss" value, which is the maximum
 percent of your "winnings" you are willing to lose on any one bet. The maximum loss can also be thought of as the percent
@@ -577,7 +578,7 @@ scoring. These assorters have an upper bound != 1, so are an important generaliz
 
 Rlauxe adds the option that there may be Card Style Data (CSD) for OneAudit pooled data, in part to investigate the 
 difference between having CSD and not. Specifically, different OneAudit pools may have different values of
-_hasSingleCardStyle_ (aka _hasStyle_).  See [SamplePopulations](docs/SamplePopulations.md).
+_hasExactContests_ (aka _hasStyle_).  See [SamplePopulations](docs/SamplePopulations.md).
 
 **Multicontest audits**
 
@@ -591,14 +592,14 @@ the audit cant use more cards in the sample for that contest.
 
 **Contest is missing in the MVR**
 
-The main use of _hasStyle_, aka _hasSingleCardStyle_ is when deciding the assort value when an MVR is missing a contest.
+The main use of _hasStyle_, aka _hasExactContests_ is when deciding the assort value when an MVR is missing a contest.
 There are unanswered questions about if this allows attacks, and if it should be used for polling audits.
 See [SamplePopulations](docs/SamplePopulations.md#contest-is-missing-in-the-mvr) and
 [Issue 552](https://github.com/JohnLCaron/rlauxe/issues/552).
 
-**Optimal value of MaxLoss**
+**Optimal value of MaxRisk**
 
-How to set MaxLoss in an optimal way?
+How to set MaxRisk in an optimal way?
 
 ## Also See
 * [Getting Started](docs/Developer.md#getting-started)

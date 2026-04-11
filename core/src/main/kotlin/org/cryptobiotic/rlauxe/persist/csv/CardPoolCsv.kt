@@ -12,16 +12,16 @@ private val logger = KotlinLogging.logger("CardPoolCsv")
 // data class CardPool(
 //    override val poolName: String,
 //    override val poolId: Int,
-//    val hasSingleCardStyle: Boolean,
+//    val hasExactContests: Boolean,
 //    val infos: Map<Int, ContestInfo>,
 //    val contestTabs: Map<Int, ContestTabulation>,  // contestId -> ContestTabulation
 //    val totalCards: Int,
 //): CardPoolIF {
 
-val CardPoolHeader = "poolId, poolName, hasSingleCardStyle, totalCards, contestId, voteForN, cands, ncards, novote, undervotes, overvotes, nphantoms, isIrv, votes:count ... \n"
+val CardPoolHeader = "poolId, poolName, hasExactContests, totalCards, contestId, voteForN, cands, ncards, novote, undervotes, overvotes, nphantoms, isIrv, votes:count ... \n"
 
 fun writeCardPoolCsv(pool: CardPoolIF) = buildString {
-    append("${pool.poolId}, ${pool.poolName}, ${pool.hasSingleCardStyle()}, ${pool.ncards()}, ")
+    append("${pool.poolId}, ${pool.poolName}, ${pool.hasExactContests()}, ${pool.ncards()}, ")
     pool.possibleContests().forEachIndexed { index, contestId ->
         if (index > 0) { append("${pool.poolId},,,, ") }
         append(writeContestTabulationCsv(pool.contestTab(contestId)!!))
@@ -47,11 +47,11 @@ fun readCardPoolCsv(line: String, infos: Map<Int, ContestInfo>): OneAuditPoolBui
         var idx = 0
         val poolId = ttokens[idx++].toInt()
         val poolName = ttokens[idx++]
-        val hasSingleCardStyle = ttokens[idx++] == "true"
+        val hasExactContests = ttokens[idx++] == "true"
 
     try {
         val totalCards = ttokens[idx].toInt()
-        return OneAuditPoolBuilder(poolName, poolId, hasSingleCardStyle, infos, totalCards)
+        return OneAuditPoolBuilder(poolName, poolId, hasExactContests, infos, totalCards)
     } catch (e:Throwable) {
         println("whu")
         throw e
@@ -99,12 +99,12 @@ fun readCardPoolCsvFile(filename: String, infos: Map<Int, ContestInfo>): List<Ca
 class OneAuditPoolBuilder(
     val poolName: String,
     val poolId: Int,
-    val hasSingleCardStyle: Boolean,
+    val hasExactContests: Boolean,
     val infos: Map<Int, ContestInfo>,
     val totalCards: Int,
 ) {
     val contestTabs = mutableMapOf<Int, ContestTabulation>()
 
-    fun build() = CardPool(poolName, poolId, hasSingleCardStyle, infos, contestTabs, totalCards)
+    fun build() = CardPool(poolName, poolId, hasExactContests, infos, contestTabs, totalCards)
 }
 

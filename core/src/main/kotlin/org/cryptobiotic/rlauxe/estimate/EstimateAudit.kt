@@ -50,7 +50,7 @@ class EstimateAudit(
     val roundIdx: Int,
     val contests: List<ContestRound>,
     val pools: List<CardPool>?,
-    val batches: List<CardStyleIF>?,
+    val batches: List<StyleIF>?,
     val cardManifest: CardManifest,
 ) {
     val auditType = config.auditType
@@ -155,7 +155,7 @@ class AuditTrialTask(
     val config: Config,
     val contestsToAudit: List<ContestRound>,
     val pools: List<CardPool>?,
-    val batches: List<CardStyleIF>?,
+    val batches: List<StyleIF>?,
     val cardManifest: CardManifest
 ) : ConcurrentTask<List<AssertionTrialIF>> {
 

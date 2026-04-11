@@ -16,7 +16,7 @@ private val logger = KotlinLogging.logger("OneAuditPoolFromCvrs")
 data class OneAuditPoolFromCvrs(
     override val poolName: String,
     override val poolId: Int,
-    val hasSingleCardStyle: Boolean,
+    val hasExactContests: Boolean,
     val infos: Map<Int, ContestInfo>,
 ): CardPoolIF {
 
@@ -25,7 +25,7 @@ data class OneAuditPoolFromCvrs(
 
     override fun name() = poolName
     override fun id() = poolId
-    override fun hasSingleCardStyle() = hasSingleCardStyle
+    override fun hasExactContests() = hasExactContests
 
     override fun hasContest(contestId: Int) = contestTabs.contains(contestId)
     override fun possibleContests() = (contestTabs.map { it.key }).toSortedSet().toIntArray()
@@ -47,7 +47,7 @@ data class OneAuditPoolFromCvrs(
 
     override fun votesAndUndervotes(contestId: Int): Vunder {
         val contestTab = contestTabs[contestId]!!
-        return contestTab.votesAndUndervotes(poolId, ncards(), hasSingleCardStyle) // good reason for cardPool to always have contestTabs
+        return contestTab.votesAndUndervotes(poolId, ncards(), hasExactContests) // good reason for cardPool to always have contestTabs
     }
 
     // every cvr has to have every contest in the pool
@@ -115,7 +115,7 @@ data class OneAuditPoolFromCvrs(
         return CardPool(
             this.poolName,
             this.poolId,
-            this.hasSingleCardStyle,
+            this.hasExactContests,
             this.infos,
             this.contestTabs,
             this.totalCards

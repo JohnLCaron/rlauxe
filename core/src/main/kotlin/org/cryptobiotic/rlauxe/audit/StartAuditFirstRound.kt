@@ -165,7 +165,7 @@ fun writeSortedCardsExternal(topdir: String, outputFile: String, unsortedCards: 
 }
 
 // internal sort of unsortedMvrs, must be in canonical order
-fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<CardWithBatchName>, batches: List<CardStyleIF>?, seed: Long) {
+fun writePrivateMvrsInternal(publisher: Publisher, unsortedMvrs: List<CardWithBatchName>, batches: List<StyleIF>?, seed: Long) {
     validateOutputDirOfFile(publisher.sortedMvrsFile())
 
     // val mvrCardIter = MvrsToCardsWithBatchNameIterator( mvrIter, batches ?: emptyList(), phantomCvrs = null, seed = seed)

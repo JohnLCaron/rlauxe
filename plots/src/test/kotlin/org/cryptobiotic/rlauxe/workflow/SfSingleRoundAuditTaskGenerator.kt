@@ -3,7 +3,7 @@ package org.cryptobiotic.rlauxe.workflow
 import org.cryptobiotic.rlauxe.audit.AssertionRound
 import org.cryptobiotic.rlauxe.audit.Config
 import org.cryptobiotic.rlauxe.audit.AuditableCard
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.ContestRound
 import org.cryptobiotic.rlauxe.audit.merge
 import org.cryptobiotic.rlauxe.betting.ClcaSamplerErrorTracker
@@ -101,7 +101,7 @@ class SfSingleRoundAuditTask(
     }
 }
 
-class AuditableCardCsvReaderSkip(val filename: String, val skip: Int, val batches: List<CardStyleIF>?): CloseableIterable<AuditableCard> {
+class AuditableCardCsvReaderSkip(val filename: String, val skip: Int, val batches: List<StyleIF>?): CloseableIterable<AuditableCard> {
     override fun iterator(): CloseableIterator<AuditableCard> {
         val cardsNoBatchSkipped = readCardsCsvIterator(filename)
         repeat(skip) { if (cardsNoBatchSkipped.hasNext()) (cardsNoBatchSkipped.next()) }

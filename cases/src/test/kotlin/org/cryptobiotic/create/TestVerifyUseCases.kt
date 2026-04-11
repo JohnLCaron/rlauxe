@@ -116,6 +116,24 @@ class TestVerifyUseCases {
         if (results.hasErrors) fail()
     }
 
+    @Test
+    fun testRunVerifySf2024oaps() {
+        val auditdir = "$testdataDir/cases/sf2024/oaps/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, null, show = show)
+        println()
+        print(results)
+        if (results.hasErrors) fail()
+    }
+
+    @Test
+    fun testRunVerifySf2024oapsContest() {
+        val auditdir = "$testdataDir/cases/sf2024/oaps/audit"
+        val results = RunVerifyContests.runVerifyContests(auditdir, 16, show = true)
+        println()
+        print(results)
+        if (results.hasErrors) fail()
+    }
+
     // @Test
     fun testRunVerifySf2024oans() {
         val auditdir = "$testdataDir/cases/sf2024/oans/audit"

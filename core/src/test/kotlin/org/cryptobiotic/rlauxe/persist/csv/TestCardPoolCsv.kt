@@ -63,7 +63,7 @@ class TestCardPoolCsv {
         // data class OneAuditPoolFromCvrs(
         //    override val poolName: String,
         //    override val poolId: Int,
-        //    val hasSingleCardStyle: Boolean,
+        //    val hasExactContests: Boolean,
         //    val infos: Map<Int, ContestInfo>,
         //): OneAuditPoolIF {
         //

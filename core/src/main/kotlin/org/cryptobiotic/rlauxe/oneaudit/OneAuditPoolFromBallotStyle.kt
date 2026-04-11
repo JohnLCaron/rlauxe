@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.oneaudit
 
 import org.cryptobiotic.rlauxe.audit.CardPool
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.core.ContestInfo
 import org.cryptobiotic.rlauxe.estimate.Vunder
 import org.cryptobiotic.rlauxe.util.ContestTabulation
@@ -17,10 +17,10 @@ import kotlin.math.max
 data class OneAuditPoolFromBallotStyle(
     override val poolName: String,
     override val poolId: Int,
-    val hasSingleCardStyle: Boolean,
+    val hasExactContests: Boolean,
     val voteTotals: Map<Int, ContestTabulation>, // contestId -> candidateId -> nvotes; must include contests and candidates with no votes
     val infos: Map<Int, ContestInfo>, // all contests
-): CardPoolIF, CardStyleIF {
+): CardPoolIF, StyleIF {
 
     val minCardsNeeded = mutableMapOf<Int, Int>() // contestId -> minCardsNeeded
     val maxMinCardsNeeded: Int
@@ -39,7 +39,7 @@ data class OneAuditPoolFromBallotStyle(
 
     override fun name() = poolName
     override fun id() = poolId
-    override fun hasSingleCardStyle() = hasSingleCardStyle
+    override fun hasExactContests() = hasExactContests
 
     override fun hasContest(contestId: Int) = voteTotals.contains(contestId)
     override fun possibleContests() = voteTotals.map { it.key }.toSortedSet().toIntArray()
@@ -63,8 +63,8 @@ data class OneAuditPoolFromBallotStyle(
         return undervote.toMap().toSortedMap()
     }
 
-    //        val result = if (hasSingleCardStyle) {
-    //            // if hasSingleCardStyle, then missing has to be zero
+    //        val result = if (hasExactContests) {
+    //            // if hasExactContests, then missing has to be zero
     //            // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
     //            // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
     //            val undervotes = npop * voteForN - voteSum
@@ -93,8 +93,8 @@ data class OneAuditPoolFromBallotStyle(
         val voteCounts = contestTab.votes.map { Pair(intArrayOf(it.key), it.value) }
         val voteSum = contestTab.votes.values.sum()
 
-        return if (hasSingleCardStyle) {
-            // if hasSingleCardStyle, then missing has to be zero
+        return if (hasExactContests) {
+            // if hasExactContests, then missing has to be zero
             // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
             // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
             val undervotes = ncards() * contestTab.voteForN - voteSum
@@ -114,7 +114,7 @@ data class OneAuditPoolFromBallotStyle(
         if (other !is OneAuditPoolFromBallotStyle) return false
 
         if (poolId != other.poolId) return false
-        if (hasSingleCardStyle != other.hasSingleCardStyle) return false
+        if (hasExactContests != other.hasExactContests) return false
         if (maxMinCardsNeeded != other.maxMinCardsNeeded) return false
         if (adjustCards != other.adjustCards) return false
         if (poolName != other.poolName) return false
@@ -126,7 +126,7 @@ data class OneAuditPoolFromBallotStyle(
 
     override fun hashCode(): Int {
         var result = poolId
-        result = 31 * result + hasSingleCardStyle.hashCode()
+        result = 31 * result + hasExactContests.hashCode()
         result = 31 * result + maxMinCardsNeeded
         result = 31 * result + adjustCards
         result = 31 * result + poolName.hashCode()
@@ -136,6 +136,6 @@ data class OneAuditPoolFromBallotStyle(
     }
 
     fun toOneAuditPool(): CardPool {
-        return CardPool(this.poolName, this.poolId, this.hasSingleCardStyle, this.infos, this.voteTotals, this.ncards())
+        return CardPool(this.poolName, this.poolId, this.hasExactContests, this.infos, this.voteTotals, this.ncards())
     }
 }

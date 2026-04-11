@@ -33,7 +33,7 @@ class TestVunder {
         val candVotes1 = mapOf(0 to 71, 1 to 123, 2 to 3)
         contestVotes[1] = Vunder.fromNpop(1, undervotes, candVotes1.values.sum() + undervotes, candVotes1, 1)
 
-        val cvrs = makeCvrsForOnePool(contestVotes, "poolName", poolId = 42, hasSingleCardStyle = false)
+        val cvrs = makeCvrsForOnePool(contestVotes, "poolName", poolId = 42, hasExactContests = false)
 
         // check
         val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())
@@ -61,7 +61,7 @@ class TestVunder {
         val candVotes1 = mapOf(0 to 71, 1 to 123, 2 to 3)
         vunders[1] = Vunder.fromNpop(1, undervotes, candVotes1.values.sum() + undervotes, candVotes1,1)
 
-        val cvrs = makeCvrsForOnePool(vunders, "poolName", poolId = 42, hasSingleCardStyle = false)
+        val cvrs = makeCvrsForOnePool(vunders, "poolName", poolId = 42, hasExactContests = false)
 
         // check
         val voteForNs = vunders.mapValues { it.value.voteForN }
@@ -197,7 +197,7 @@ fun makeContestsWithVunder(
 
    //TODO val cvrs2 = makeCvrsFromPopulations(test.populations)
 
-    val cvrs = makeCvrsForOnePool(contestVotes, "ballot", poolId = 42, hasSingleCardStyle = false)
+    val cvrs = makeCvrsForOnePool(contestVotes, "ballot", poolId = 42, hasExactContests = false)
 
     // make the infos
     val tabVotes: Map<Int, Map<Int, Int>> = tabulateVotesFromCvrs(cvrs.iterator())

@@ -5,7 +5,7 @@ import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterator
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 import org.cryptobiotic.rlauxe.util.makePhantomCvrs
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
@@ -20,7 +20,7 @@ import kotlin.random.Random
 private const val debugAdjust = false
 
 // (mvrs, cards, pools, styles)
-data class MvrCardAndPops(val mvrs: List<Cvr>, val cards: List<AuditableCard>, val pools: List<CardPoolIF>, val batches: List<CardStyleIF>)
+data class MvrCardAndPops(val mvrs: List<Cvr>, val cards: List<AuditableCard>, val pools: List<CardPoolIF>, val batches: List<StyleIF>)
 
 /**
  * Creates a set of contests and populations, with randomly chosen candidates and margins.
@@ -39,7 +39,7 @@ data class MultiContestTestData(
     val ncands: Int? = null,
     // val poolPctForTestData: Double? = null,  // if not null, make a pool with this pct with two ballotStyles
     val seqCands: Boolean = false, // if true, use ncands = 2 .. ncontests + 1
-    val hasSingleCardStyle: Boolean = false, // if true, use ncands = 2 .. ncontests + 1
+    val hasExactContests: Boolean = false, // if true, use ncands = 2 .. ncontests + 1
     val auditType: AuditType = AuditType.CLCA,
 ) {
     // val poolId = if (poolPctForTestData == null) null else 1
@@ -93,7 +93,7 @@ data class MultiContestTestData(
             val contestIds = contestsForThisBs.map { it.info.id }
             val ncards = ballotStylePartition[idx]!!
             countBallots += ncards
-            CardStyleWithNcards("style$idx", idx, contestIds.toIntArray(), hasSingleCardStyle, ncards)
+            CardStyleWithNcards("style$idx", idx, contestIds.toIntArray(), hasExactContests, ncards)
         }
         require(countBallots == totalBallots)
         countCards()
@@ -333,13 +333,13 @@ data class CardStyleWithNcards(
     val name: String,
     val id: Int,
     val contests: IntArray,
-    val hasSingleCardStyle: Boolean,
+    val hasExactContests: Boolean,
     val ncards: Int
-): CardStyleIF {
+): StyleIF {
     override fun name() = name
     override fun id() = id
     override fun possibleContests() = contests
-    override fun hasSingleCardStyle() = hasSingleCardStyle
+    override fun hasExactContests() = hasExactContests
     override fun hasContest(contestId: Int) = contests.contains(contestId)
 }
 

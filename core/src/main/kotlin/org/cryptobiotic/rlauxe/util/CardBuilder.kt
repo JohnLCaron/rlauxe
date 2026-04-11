@@ -2,7 +2,7 @@ package org.cryptobiotic.rlauxe.util
 
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.CardWithBatchName
 
 // builds one AuditableCard
@@ -14,7 +14,7 @@ class AuditableCardBuilder(
     val phantom: Boolean,
     val poolId: Int? = null,
     votesIn: Map<Int, IntArray>? = null,
-    val cardStyle: CardStyleIF
+    val cardStyle: StyleIF
 ) {
     val votes = mutableMapOf<Int, IntArray>()
 
@@ -38,7 +38,7 @@ class AuditableCardBuilder(
             id, location, index, prn, phantom,
             poolId = poolId,
             votes = votes,
-            cardStyle = cardStyle
+            style = cardStyle
         )
     }
 
@@ -51,7 +51,7 @@ class AuditableCardBuilder(
             card.phantom,
             card.poolId,
             card.votes,
-            card.cardStyle
+            card.style
         )
 
     }

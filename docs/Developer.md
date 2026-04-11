@@ -29,7 +29,7 @@ _03/27/2026_
 
 1. A git client that is compatible with GitHub.
 2. **Java 21+**. Install as needed, and make it your default JVM when working with rlauxe.
-3. The correct version of Gradle and kotlin will be installed when you invoke a gradle command.
+3. The correct version of Gradle and Kotlin will be installed when you invoke a gradle command.
 4. You need internet access to download the dependencies.
 
 
@@ -49,7 +49,7 @@ cd <devhome>/rlauxe
 ./gradlew clean assemble
 ```
 
-Normally rlauxe-viewer keeps the current rlauxe library inside its own repo.
+Normally **rlauxe-viewer** keeps the current rlauxe library inside its own repo.
 However, if the library has changed on GitHub and you need to rebuild it:
 
 ````
@@ -101,7 +101,7 @@ We recommend using the IntelliJ IDE if you plan on doing Java/Kotlin coding, or 
 
 * Make sure the prerequisites are satisfied, as above.
 * Download the git repository as above.
-* Install IntelliJ. The community version probably works fine, but an individual license for the Ultimate Edition is well worth it.
+* Install IntelliJ. The (free) community version probably works fine, but an individual license for the Ultimate Edition is well worth it.
 
 Start up IntelliJ, and in the top menu:
 
@@ -117,10 +117,10 @@ To run the core tests, from the left Project Panel source tree, navigate to the 
 directory, right click on the directory name, choose "Run tests in ...". If that menu option isn't shown, check if you're in the 
 main source tree instead of the test source tree.
 
-To run individual tests, go to the test source; IntelliJ will place a clickable green button in the left margin wherever 
-there is a runnable test.
+To run individual tests, go to the test source; IntelliJ will place a clickable green button in the left margin
+(next to _@Test_) wherever there is a runnable test.
 
-There's lots of online help for using IntelliJ.
+There's lots of online help for using IntelliJ. 
 
 
 ## Modules
@@ -138,27 +138,31 @@ The repo contains all the test case data, except for San Francisco. Download
 
   [SF2024 data](https://www.sfelections.org/results/20241105/data/20241203/CVR_Export_20241202143051.zip)
 
-into $testdataDir/cases/sf2024/ (where you chose _$testdataDir_ in the "Set the test data directory" step above)
+into _$testdataDir/cases/sf2024/_ (where you chose _$testdataDir_ in the "Set the test data directory" step above)
 
 Then run _createSf2024CvrExport()_ test in _cases/src/test/kotlin/org/cryptobiotic/rlauxe/sf/CreateSf2024CvrExport.kt_
 to generate _testdataDir/cases/sf2024/crvExport.csv_. This only needs to be done one time.
 
 All the test cases can now be generated from:
 
-_cases/src/test/kotlin/org/cryptobiotic/util/TestGenerateAllUseCases.kt_.
+'cases/src/test/kotlin/org/cryptobiotic/create/TestGenerateAllUseCases.kt'
+
+Run all rounds on all the generated test cases:
+
+'cases/src/test/kotlin/org/cryptobiotic/create/TestRunAllRoundsAllUseCases.kt'
 
 Run the verifier on all the generated test cases:
 
-_cases/src/test/kotlin/org/cryptobiotic/util/TestVerifyUseCases.kt_.
+'cases/src/test/kotlin/org/cryptobiotic/create/TestVerifyUseCases.kt'
 
 
 ## rlauxe viewer
 
 Download the [rlauxe-viewer repo](https://github.com/JohnLCaron/rlauxe-viewer) and follow instructions there to view 
-Audit Records and run audits on them, in particular, on any of the test cases.
+Audit Records and run audits on them, for example on any of the test cases.
 
 **Caveat Emptor**: The serialization formats are undergoing rapid changes, with no backwards compatibility (yet). Expect that
-if you download a new version of the library, you will possibly have to regenerate any audit records (including tests cases), 
+if you download a new version of the library, you may have to regenerate any audit records (including tests cases), 
 before viewing them.
 
 
@@ -203,9 +207,11 @@ last changed: 01/07/2026
 
 ![rlauxe Audit UML](images/auditUML.svg)
 
-you could say there are  two kinds of Contests, Regular (with votes) and Irv (with VoteConsolidator's)
-you could say there are two kinds of Audits, Polling and Clca
-if a Clca has pools, then it's a OneAudit with OneAuditClcaAssorter's
+## Miscellaneous Notes
+
+There are two kinds of Contests, Regular (with votes) and Irv (with VoteConsolidator's).
+There are two kinds of Audits, Polling and Clca.
+If a Clca has pools, then it's a OneAudit with OneAuditClcaAssorter's
 
 | audit   | contest | assorters                               |
 |---------|---------|-----------------------------------------|
@@ -216,40 +222,46 @@ if a Clca has pools, then it's a OneAudit with OneAuditClcaAssorter's
 | clca    | irv     | ClcaAssorter with RaireAssorter         |
 | clca    | irv     | ClcaAssorterOneAudit with RaireAssorter |
 
+````
 ContestIF
-Contest
-DhondtContest
-RaireContest
+    Contest
+    DhondtContest
+    IrvContest
 
-ContestUnderAudit
-hasa ContestIF
-hasa List<PrimitiveAssorter>
-hasa List<ClcaAssorter>, (if Clca): (if ClcaAssorterOneAudit, then its OneAudit)
+ContestWithAssertions
+    hasa ContestIF
+    hasa List<PrimitiveAssorter>
+    (if Clca) hasa List<ClcaAssorter>
+    (if OneAudit) hasa List<ClcaAssorterOneAudit)
 
-->subclass RaireContestUnderAudit
-hasa RaireContest
-hasa List<RaireAssorter>
-hasa List<ClcaAssorter>, (if Clca): (if ClcaAssorterOneAudit, then its OneAudit)
+->subclass RaireContestWithAssertions
+    hasa IrvContest
+    hasa List<RaireAssertion>
+    (if Clca) hasa List<ClcaAssorter>
+    (if OneAudit) hasa List<ClcaAssorterOneAudit)
 
 AssorterIF (aka PrimitiveAssorter)
-PluralityAssorter
-AboveThreshold
-BelowThreshold
-DhondtAssorter
-RaireAssorter
+    PluralityAssorter
+    AboveThreshold
+    BelowThreshold
+    DhondtAssorter
+    RaireAssorter
+        hasa RaireAssertion
 
 ClcaAssorter
-hasa AssorterIF
+    hasa AssorterIF
 
 ->subclass ClcaAssorterOneAudit
 
 Assertion
-hasa AssorterIF
+    hasa AssorterIF
 
 ->subclass ClcaAssertion
-hasa ClcaAssorter
+    hasa ClcaAssorter
+    
+````
 
-## Documents
+### Documents
 
 README
 
@@ -282,7 +294,7 @@ not:
     docs/GeneralizedAdaptiveBetting.md
     docs/RlaOptions.md
 
-## Fuzzing notes
+### Fuzzing notes
 
 Simulation 02/06/2026
 
@@ -377,7 +389,6 @@ simulateRaireTestContest: single raire contest
 
 * include undervotes
 * assertions that look at coalitions of parties. (Vanessa)
-* choose an audit size and measure the risk.
 
 **TODO 12/20/25**
 
@@ -386,9 +397,7 @@ simulateRaireTestContest: single raire contest
 
 **TODO 01/04/26**
 
-* maxRisk does it help? reduce lamda tradeoff
 * 2D plotting
-* betting on the error rate
 * mix_betting_mart: "Finds a simple discrete mixture martingale as a (flat) average of D TSMs each with fixed bet 'lam'".
   review COBRA 3.2, 4.3 (Diversified betting)
 

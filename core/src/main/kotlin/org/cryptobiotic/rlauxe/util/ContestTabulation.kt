@@ -94,14 +94,14 @@ class ContestTabulation(
         this.overvotes += other.overvotes
     }
 
-    fun votesAndUndervotes(poolId: Int, npop: Int, hasSingleCardStyle: Boolean): Vunder {
-        if (isIrv) return votesAndUndervotesIrv(poolId, npop, hasSingleCardStyle)
+    fun votesAndUndervotes(poolId: Int, npop: Int, hasExactContests: Boolean): Vunder {
+        if (isIrv) return votesAndUndervotesIrv(poolId, npop, hasExactContests)
 
         val voteCounts = votes.map { Pair(intArrayOf(it.key), it.value) }
         val voteSum = votes.values.sum()
 
-        val result = if (hasSingleCardStyle) {
-            // if hasSingleCardStyle, then missing has to be zero
+        val result = if (hasExactContests) {
+            // if hasExactContests, then missing has to be zero
             // val missing = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
             // 0 = npop - (undervotes + contestTab.votes.values.sum()) / contestTab.voteForN
             val undervotes = npop * voteForN - voteSum
@@ -114,7 +114,7 @@ class ContestTabulation(
         return result
     }
 
-    fun votesAndUndervotesIrv(poolId: Int, npop: Int, hasSingleCardStyle: Boolean): Vunder {
+    fun votesAndUndervotesIrv(poolId: Int, npop: Int, hasExactContests: Boolean): Vunder {
 
         val voteCounts = this.irvVotes.votes.map { (hIntArray, count) ->
             // convert indices back to ids
@@ -122,8 +122,8 @@ class ContestTabulation(
             Pair(idArray.toIntArray(), count)
         }
 
-        val result = if (hasSingleCardStyle) {
-            // if hasSingleCardStyle, then missing has to be zero
+        val result = if (hasExactContests) {
+            // if hasExactContests, then missing has to be zero
             // val missing = npop - undervotes - irvVotes.nvotes()
             // 0 = npop - undervotes - irvVotes.nvotes()
             val undervotes = npop - irvVotes.nvotes()

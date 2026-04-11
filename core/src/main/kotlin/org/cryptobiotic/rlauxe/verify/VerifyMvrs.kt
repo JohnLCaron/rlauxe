@@ -21,8 +21,8 @@ fun verifyMvrCardPairs(mvrCardPairs: List<Pair<AuditableCard, AuditableCard>>, e
                 nested.add("*** Mvr contains contest ${mvrContestId} not contained in card $card")
             }
         }
-        if (card.cardStyle.hasSingleCardStyle()) {
-            card.cardStyle.possibleContests().forEach { batchContestId ->
+        if (card.style.hasExactContests()) {
+            card.style.possibleContests().forEach { batchContestId ->
                 if (!mvr.votes.contains(batchContestId)) {
                     hasError = true
                     nested.add("*** batch contains contest ${batchContestId} not contained in Mvr")
@@ -40,6 +40,6 @@ fun AuditableCard.show() = buildString {
     append("AuditableCard(id='$id', index=$index, sampleNum=$prn, phantom=$phantom")
     if (poolId() != null) append(", poolId=${poolId()}")
     append(", styleName='${styleName()}'")
-    append(", has possibleContests=${cardStyle.possibleContests().contentToString()}")
+    append(", has possibleContests=${style.possibleContests().contentToString()}")
     if (votes != null) append(" has vote contests=${votes.keys.toList().sorted()})")
 }

@@ -10,7 +10,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
 import org.cryptobiotic.rlauxe.audit.CardStyle
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.util.ErrorMessages
 import java.io.FileOutputStream
 import java.nio.file.Files
@@ -23,7 +23,7 @@ data class CardStylesJson(
     val batches: List<CardStyleJson>,
 )
 
-fun List<CardStyleIF>.publishJson() = CardStylesJson(
+fun List<StyleIF>.publishJson() = CardStylesJson(
     this.map { it.publishJson() },
 )
 
@@ -35,30 +35,28 @@ fun CardStylesJson.import(): List<CardStyle> {
 class CardStyleJson(
     val name: String,
     val id: Int,
-    // val ncards: Int,
     val possibleContests: IntArray,
-    val hasSingleCardStyle: Boolean
+    val hasExactContests: Boolean
 )
 
-fun CardStyleIF.publishJson() = CardStyleJson(
+fun StyleIF.publishJson() = CardStyleJson(
     this.name(),
     this.id(),
-    // this.ncards(),
     this.possibleContests(),
-    this.hasSingleCardStyle()
+    this.hasExactContests()
 )
 
 fun CardStyleJson.import() = CardStyle(
         this.name,
         this.id,
         this.possibleContests,
-        this.hasSingleCardStyle,
-    ) // .setNcards(this.ncards)
+        this.hasExactContests,
+    )
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 @OptIn(ExperimentalSerializationApi::class)
-fun writeCardStylesJsonFile(batches: List<CardStyleIF>, filename: String) {
+fun writeCardStylesJsonFile(batches: List<StyleIF>, filename: String) {
     val json = batches.publishJson()
     val jsonReader = Json { explicitNulls = false; ignoreUnknownKeys = true; prettyPrint = true }
     FileOutputStream(filename).use { out ->

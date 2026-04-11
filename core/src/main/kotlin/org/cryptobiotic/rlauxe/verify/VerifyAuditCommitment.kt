@@ -10,7 +10,7 @@ import org.cryptobiotic.rlauxe.audit.AuditType
 import org.cryptobiotic.rlauxe.audit.AuditableCard
 import org.cryptobiotic.rlauxe.audit.CardPoolIF
 import org.cryptobiotic.rlauxe.audit.CardStyle.Companion.useVotes
-import org.cryptobiotic.rlauxe.audit.CardStyleIF
+import org.cryptobiotic.rlauxe.audit.StyleIF
 import org.cryptobiotic.rlauxe.audit.ElectionInfo
 import org.cryptobiotic.rlauxe.audit.MergeBatchesIntoCardManifestIterable
 import org.cryptobiotic.rlauxe.betting.TestH0Status
@@ -35,7 +35,7 @@ class VerifyAuditCommitment(val auditDir: String, contestId: Int? = null, show: 
     val auditType: AuditType
     val contests: List<ContestWithAssertions>
     val infos: Map<Int, ContestInfo>
-    val batchSet: Set<CardStyleIF>
+    val batchSet: Set<StyleIF>
 
     init {
         val publisher = Publisher(auditDir)
@@ -66,7 +66,7 @@ class VerifyAuditCommitment(val auditDir: String, contestId: Int? = null, show: 
 }
 
 data class AuditCommitment(val electionInfo: ElectionInfo, val auditCreationConfig: AuditCreationConfig,
-                           val contests: List<ContestWithAssertions>, val batches: List<CardStyleIF>?,
+                           val contests: List<ContestWithAssertions>, val batches: List<StyleIF>?,
                            val pools: List<CardPoolIF>?,
                            val sortedManifest: CloseableIterable<AuditableCard> )
 
@@ -121,7 +121,7 @@ fun verifySortedCardManifest(
     contestsUA: List<ContestWithAssertions>,
     cards: CloseableIterable<AuditableCard>,
     infos: Map<Int, ContestInfo>,
-    batchSet: Set<CardStyleIF>,
+    batchSet: Set<StyleIF>,
     seed: Long,
     results: VerifyResults,
 ) {
@@ -165,8 +165,8 @@ fun verifySortedCardManifest(
             indexList.add(Pair(card.index, card.prn))
 
             // check that batch exists
-            if (!useVotes(card.cardStyle.name()) && !batchSet.contains(card.cardStyle)) {
-                results.addError("card $count ${card.id} batch ${card.cardStyle} not in batches")
+            if (!useVotes(card.style.name()) && !batchSet.contains(card.style)) {
+                results.addError("card $count ${card.id} batch ${card.style} not in batches")
             }
 
             infos.forEach { (contestId, info) ->

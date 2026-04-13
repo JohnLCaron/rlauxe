@@ -9,10 +9,9 @@ import org.cryptobiotic.rlauxe.audit.ContestSampleControl
 import org.cryptobiotic.rlauxe.audit.SimulationControl
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.cli.RunVerifyContests
-import org.cryptobiotic.rlauxe.dhondt.ProtoContest
+import org.cryptobiotic.rlauxe.dhondt.DhondtBuilder
 import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
 import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
-import org.cryptobiotic.rlauxe.audit.MvrSource
 import kotlin.test.Test
 import kotlin.test.fail
 
@@ -46,7 +45,7 @@ class TestCreateBelgiumClcaFromSpreadsheet {
 
         // use infoA parties, because they are complete
         val dhondtParties = infoA.parties.map { DhondtCandidate(it.name, it.num, it.total) }
-        val dcontest: ProtoContest = makeProtoContest(infoB.electionName, 1, dhondtParties, infoB.winners.size, 0,.05)
+        val dcontest: DhondtBuilder = makeProtoContest(infoB.electionName, 1, dhondtParties, infoB.winners.size, 0,.05)
         println("Calculated Winners")
         dcontest.winners.sortedBy { it.winningSeat }.forEach {
             println("  ${it}")
@@ -60,7 +59,7 @@ class TestCreateBelgiumClcaFromSpreadsheet {
             ClcaConfig(fuzzMvrs=0.0), null)
 
         val auditdir = "$topdir/audit"
-        createBelgiumClca(auditdir, dcontest.createContest(), creation, round)
+        createBelgiumElection(auditdir, dcontest.createContest(), creation, round)
 
         val results = RunVerifyContests.runVerifyContests(auditdir, null, show = true)
         println()

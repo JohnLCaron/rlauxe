@@ -1,29 +1,16 @@
 package org.cryptobiotic.rlauxe.belgium
 
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.unwrap
-import org.cryptobiotic.rlauxe.audit.AuditCreationConfig
-import org.cryptobiotic.rlauxe.audit.AuditRoundConfig
 import org.cryptobiotic.rlauxe.testdataDir
 import org.cryptobiotic.rlauxe.audit.AuditRoundIF
-import org.cryptobiotic.rlauxe.audit.AuditType
-import org.cryptobiotic.rlauxe.audit.ClcaConfig
-import org.cryptobiotic.rlauxe.audit.ContestSampleControl
-import org.cryptobiotic.rlauxe.audit.SimulationControl
-import org.cryptobiotic.rlauxe.cli.RunVerifyContests
 import org.cryptobiotic.rlauxe.audit.runRound
 import org.cryptobiotic.rlauxe.core.AssorterIF
-import org.cryptobiotic.rlauxe.dhondt.DhondtCandidate
-import org.cryptobiotic.rlauxe.dhondt.makeProtoContest
 import org.cryptobiotic.rlauxe.persist.AuditRecord
-import org.cryptobiotic.rlauxe.util.ErrorMessages
 import org.cryptobiotic.rlauxe.util.dfn
 import org.cryptobiotic.rlauxe.util.roundToClosest
 import org.cryptobiotic.rlauxe.util.sfn
 import org.cryptobiotic.rlauxe.util.trunc
 import kotlin.math.ln
 import kotlin.test.Test
-import kotlin.test.fail
 
 val belgiumData = "src/test/data/belgium2024"
 val belgianElectionMap = mapOf(
@@ -41,10 +28,12 @@ val belgianElectionMap = mapOf(
 )
 val toptopdir = "$testdataDir/cases/belgium/2024"
 
-class CreateBelgiumElection {
+class MakeBelgiumElections {
     @Test
     fun createBelgiumElection() {
-        createBelgiumElection("Liège", 5, showVerify=true)
+        val name = "Anvers"
+        val filename = belgianElectionMap[name]!!
+        createAndRunBelgiumElection(name, filename, toptopdir, contestId=5, showVerify=true)
     }
 
     @Test
@@ -56,7 +45,8 @@ class CreateBelgiumElection {
     fun createAllBelgiumElections() {
         val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
         belgianElectionMap.keys.forEachIndexed { idx, name ->
-            allmvrs[name] =  createBelgiumElection(name, idx+1)
+            val filename = belgianElectionMap[name]!!
+            allmvrs[name] = createAndRunBelgiumElection(name, filename, toptopdir, contestId = idx+1)
         }
         allmvrs.forEach {
             val pct = (100.0 * it.value.second) / it.value.first.toDouble()
@@ -108,6 +98,7 @@ class CreateBelgiumElection {
     }
 }
 
+/*
 fun createBelgiumElection(electionName: String, contestId: Int, stopRound:Int=0, showVerify:Boolean = false): Pair<Int, Int> {
     println("======================================================")
     println("electionName $electionName")
@@ -131,7 +122,7 @@ fun createBelgiumElection(electionName: String, contestId: Int, stopRound:Int=0,
         ContestSampleControl.NONE,
         ClcaConfig(fuzzMvrs=0.0), null)
 
-    createBelgiumClca(topdir=topdir, contestd, creation, round)
+    createBelgiumElection(topdir=topdir, contestd, creation, round)
 
     val auditdir = "$topdir/audit"
     val results = RunVerifyContests.runVerifyContests(auditdir, null, show = showVerify)
@@ -152,9 +143,9 @@ fun createBelgiumElection(electionName: String, contestId: Int, stopRound:Int=0,
         println("$electionName: ${finalRound.show()}")
         Pair(totalVotes, finalRound.nmvrs)
     } else Pair(0, 0)
-}
+} */
 
-fun runBelgiumElection(electionName: String, stopRound:Int=0): Int {
+private fun runBelgiumElection(electionName: String, stopRound:Int=0): Int {
     val topdir = "$toptopdir/$electionName"
     val auditdir = "$topdir/audit"
 
@@ -174,7 +165,7 @@ fun runBelgiumElection(electionName: String, stopRound:Int=0): Int {
 
 
 // Npop, nmvrs, minAssorter
-fun showBelgiumElection(electionName: String): Triple<Int, Int, AssorterIF> {
+private fun showBelgiumElection(electionName: String): Triple<Int, Int, AssorterIF> {
     println("======================================================")
     println("showBelgiumElection $electionName")
     val topdir = "$toptopdir/$electionName"

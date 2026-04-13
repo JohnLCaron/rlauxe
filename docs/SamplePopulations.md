@@ -78,8 +78,7 @@ Each AuditableCard has a **Style**, which has the possibleContests that might be
 
 A **Batch** emphasizes the partitioning of cards into physical containers. 
 
-A **Pool** is a batch with vote subtotals and
-a physical container distinct from other pools. We dont currently need Batches that arent Pools, so we will just use Pool instead of Batch here.
+A **Pool** is a batch with vote subtotals and a physical container distinct from other pools. We dont currently need Batches that arent Pools, so we will just use Pool instead of Batch here.
 
 A Pool is disjoint, a Style can be shared by many cards without implying the cards are stored in seperate containers. 
 

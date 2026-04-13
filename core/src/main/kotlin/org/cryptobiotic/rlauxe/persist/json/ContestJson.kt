@@ -95,7 +95,6 @@ data class ContestIFJson(
     val Ncast: Int,
     val undervotes: Int? = null,
     val irvRoundsPaths: List<IrvRoundsPathJson>? = null,
-    val sortedScores: List<DhondtScoreJson>? = null
 )
 
 fun ContestIF.publishJson() : ContestIFJson {
@@ -107,7 +106,6 @@ fun ContestIF.publishJson() : ContestIFJson {
                 this.winners,
                 this.Nc,
                 this.Ncast,
-                sortedScores = this.sortedScores.map { it.publishJson() }
             )
         is Contest ->
             ContestIFJson(
@@ -161,7 +159,6 @@ fun ContestIFJson.import(info: ContestInfo): ContestIF {
                 this.votes!!,
                 this.Nc,
                 this.Ncast,
-                sortedScores = this.sortedScores!!.map { it.import() }
             )
         }
         else -> throw RuntimeException("unknown class name ${this.className}")

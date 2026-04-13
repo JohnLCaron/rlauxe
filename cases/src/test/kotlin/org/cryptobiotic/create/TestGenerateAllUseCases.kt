@@ -15,7 +15,8 @@ import org.cryptobiotic.rlauxe.audit.createAuditRecord
 import org.cryptobiotic.rlauxe.audit.createElectionRecord
 import org.cryptobiotic.rlauxe.audit.startFirstRound
 import org.cryptobiotic.rlauxe.belgium.belgianElectionMap
-import org.cryptobiotic.rlauxe.belgium.createBelgiumElection
+import org.cryptobiotic.rlauxe.belgium.createAndRunBelgiumElection
+import org.cryptobiotic.rlauxe.belgium.toptopdir
 import org.cryptobiotic.rlauxe.boulder.createBoulderElection
 import org.cryptobiotic.rlauxe.corla.createColoradoElection
 import org.cryptobiotic.rlauxe.dominion.cvrExportCsvFile
@@ -226,7 +227,8 @@ class TestGenerateAllUseCases {
     fun createAllBelgiumElections() {
         val allmvrs = mutableMapOf<String, Pair<Int, Int>>()
         belgianElectionMap.keys.forEachIndexed { idx, name ->
-            allmvrs[name] =  createBelgiumElection(name, idx+1)
+            val filename = belgianElectionMap[name]!!
+            allmvrs[name] = createAndRunBelgiumElection(name, filename, toptopdir, contestId = idx+1)
         }
         allmvrs.forEach {
             val pct = (100.0 * it.value.second) / it.value.first.toDouble()

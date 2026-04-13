@@ -1,7 +1,7 @@
 package org.cryptobiotic.rlauxe.dhondt
 
 import org.cryptobiotic.rlauxe.audit.AssertionRound
-import org.cryptobiotic.rlauxe.audit.AuditRound
+import org.cryptobiotic.rlauxe.audit.AuditRoundIF
 import org.cryptobiotic.rlauxe.audit.AuditRoundResult
 import org.cryptobiotic.rlauxe.core.*
 import org.cryptobiotic.rlauxe.util.*
@@ -251,7 +251,7 @@ class DHondtContest(
 
     data class Dround(val candId: Int, val score: Double, val round: Int, val winningSeat: Int?)
 
-    fun showAssertions(rounds: List<AuditRound>) = buildString {
+    fun showAssertions(rounds: List<AuditRoundIF>) = buildString {
         val lastAssertionRounds = mutableMapOf<String, AssertionRound>()
         rounds.map {
             val contestRound = it.contestRounds.find { cr -> cr.id == id }!!

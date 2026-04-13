@@ -16,6 +16,28 @@ import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.isDirectory
 
+// interface AuditRecordIF {
+//    val location: String
+//    val electionInfo: ElectionInfo
+//    val config: Config
+//    val contests: List<ContestWithAssertions>
+//    val rounds: List<AuditRoundIF>
+//
+//    fun readSortedManifest(): CardManifest
+//    fun readSortedManifest(batches: List<StyleIF>?): CardManifest
+//    fun readOneShotMvrs(): Map<Int, Int>
+//    fun readCardStyles(): List<StyleIF>?
+//}
+// class AuditRecord(
+//    override val location: String,
+//    override val electionInfo: ElectionInfo,
+//    val auditCreationConfig: AuditCreationConfig,
+//    val auditRoundConfig: AuditRoundConfig,
+//    override val contests: List<ContestWithAssertions>,
+//    override val rounds: List<AuditRound>,
+//    val nmvrs: Int // number of mvrs already sampled
+//)
+
 data class CompositeRecord(
     override val location: String,
     override val electionInfo: ElectionInfo,
@@ -123,31 +145,50 @@ fun makeAuditRounds(records: List<AuditRecord>) : List<AuditRoundIF> {
     }
 
     val result = contestsAndRounds.map { (roundIdx, pair) ->
-        CompositeAuditRound(roundIdx, pair.first, pair.second, samplePrns = emptyList())
+        ProxyAuditRound(roundIdx, pair.first, pair.second, samplePrns = emptyList())
     }
     return result
 }
 
-// interface AuditRoundIF {
+//interface AuditRoundIF {
 //    val roundIdx: Int
 //    val contestRounds: List<ContestRound>
 //
-//    val auditWasDone: Boolean
-//    val auditIsComplete: Boolean
-//    val samplePrns: List<Long> // card prns to sample for this round (complete, not just new)
-//    val nmvrs: Int
-//    val newmvrs: Int
-//    val auditorWantNewMvrs: Int
+//    var auditWasDone: Boolean
+//    var auditIsComplete: Boolean
+//    var samplePrns: List<Long> // card prns to sample for just this round (complete, not just new)
+//    var nmvrs: Int      // number of mvrs in round
+//    var newmvrs: Int    // number of new mvrs in round
+//    var mvrsUsed: Int
+//    var mvrsUnused: Int
+//
+//    fun show(): String
+//    fun createNextRound(): AuditRound
 //}
 
-data class CompositeAuditRound(
+// data class AuditRound(
+//    override val roundIdx: Int,
+//    override val contestRounds: List<ContestRound>,
+//
+//    override var auditWasDone: Boolean = false,
+//    override var auditIsComplete: Boolean = false,
+//    override var samplePrns: List<Long>, // card prns to sample for this round (complete, not just new).
+//                                         // duplicates samplePrnsFile, so no need to serialze
+//    override var nmvrs: Int = 0,    // mvrs in the round
+//    override var newmvrs: Int = 0,  // new mvrs in the round
+//    override var mvrsUnused: Int = 0,
+//    override var mvrsUsed: Int = 0,
+//) : AuditRoundIF
+
+data class ProxyAuditRound(
     override val roundIdx: Int,
     override val contestRounds: List<ContestRound>,
     val auditRounds: List<AuditRound>,
 
     override var auditWasDone: Boolean = false,
     override var auditIsComplete: Boolean = false,
-    override var samplePrns: List<Long>, // card prns to sample for this round (complete, not just new)
+
+    override var samplePrns: List<Long> = emptyList(), // card prns to sample for this round (complete, not just new)
     override var nmvrs: Int = 0,
     override var newmvrs: Int = 0,
     override var mvrsUsed: Int = 0,
@@ -163,6 +204,7 @@ data class CompositeAuditRound(
         mvrsUnused = auditRounds.map { it.mvrsUnused }.sum()
     }
 
+    // do it on all the rounds ??
     override fun createNextRound(): AuditRound {
         throw UnsupportedOperationException("CompositeAuditRound.createNextRound()")
     }
